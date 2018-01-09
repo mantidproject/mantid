@@ -1,5 +1,6 @@
 #include "CorrectionsTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QSettings>
 
@@ -36,20 +37,21 @@ void CorrectionsTab::loadTabSettings(const QSettings &settings) {
 void CorrectionsTab::inputChanged() { validate(); }
 
 /**
-* Check that the binning between two workspaces matches.
-*
-* @param left :: left hand workspace for the equality operator
-* @param right :: right hand workspace for the equality operator
-* @return whether the binning matches
-* @throws std::runtime_error if one of the workspaces is an invalid pointer
-*/
+ * Check that the binning between two workspaces matches.
+ *
+ * @param left :: left hand workspace for the equality operator
+ * @param right :: right hand workspace for the equality operator
+ * @return whether the binning matches
+ * @throws std::runtime_error if one of the workspaces is an invalid pointer
+ */
 bool CorrectionsTab::checkWorkspaceBinningMatches(
     MatrixWorkspace_const_sptr left, MatrixWorkspace_const_sptr right) {
   if (left && right) // check the workspaces actually point to something first
   {
     const auto leftX = left->x(0);
     const auto rightX = right->x(0);
-    return std::equal(leftX.begin(), leftX.end(), rightX.begin());
+    return leftX.size() == rightX.size() &&
+           std::equal(leftX.begin(), leftX.end(), rightX.begin());
   } else {
     throw std::runtime_error("CorrectionsTab: One of the operands is an "
                              "invalid MatrixWorkspace pointer");
@@ -98,6 +100,31 @@ std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws,
   m_batchAlgoRunner->addAlgorithm(convertAlg);
 
   return outputName;
+}
+
+/*
+ * Displays and logs an invalid workspace type error, for the workspace
+ * with the specified name.
+ *
+ * @param workspaceName The name of the workspace.
+ * @param log           The logger for sending log messages.
+ */
+void CorrectionsTab::displayInvalidWorkspaceTypeError(
+    const std::string &workspaceName, Mantid::Kernel::Logger &log) {
+  QString errorMessage =
+      "Invalid workspace loaded, ensure a MatrixWorkspace is "
+      "entered into the field.\n";
+
+  if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          workspaceName)) {
+    errorMessage += "Consider loading the WorkspaceGroup first into mantid, "
+                    "and then choose one of its items here.\n";
+    log.error() << "Workspace Groups are currently not allowed.\n";
+  } else {
+    log.error() << "Workspace " << workspaceName
+                << " is not a MatrixWorkspace.\n";
+  }
+  emit showMessageBox(errorMessage);
 }
 
 } // namespace CustomInterfaces

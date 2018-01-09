@@ -10,7 +10,7 @@ from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, 
 class Polaris(AbstractInst):
     def __init__(self, **kwargs):
         self._inst_settings = instrument_settings.InstrumentSettings(
-            param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.variables,
+            param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.get_all_adv_variables(),
             kwargs=kwargs)
 
         super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
@@ -24,17 +24,36 @@ class Polaris(AbstractInst):
     # Public API
 
     def focus(self, **kwargs):
+        self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.do_van_normalisation,
-                           do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+                           do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+                           sample_details=self._sample_details)
 
     def create_vanadium(self, **kwargs):
+        self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
-                                     do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+        vanadium_d = self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
+                                           do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+
+        run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
+        polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d,
+                                             output_path=run_details.unsplined_vanadium_file_path)
+        return vanadium_d
+
+    def create_total_scattering_pdf(self, **kwargs):
+        self._inst_settings.update_attributes(kwargs=kwargs)
+        # Generate pdf
+        run_details = self._get_run_details(self._inst_settings.run_number)
+        focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
+        pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
+                                                  focus_file_path=focus_file_path,
+                                                  merge_banks=self._inst_settings.merge_banks)
+        return pdf_output
 
     def set_sample_details(self, **kwargs):
+        self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         kwarg_name = "sample"
         sample_details_obj = common.dictionary_key_helper(
             dictionary=kwargs, key=kwarg_name,
@@ -83,11 +102,12 @@ class Polaris(AbstractInst):
             # Test if it can be converted to an int or if we need to ask Mantid to do it for us
             if isinstance(run_number, str) and not run_number.isdigit():
                 # Convert using Mantid and take the first element which is most likely to be the lowest digit
-                use_new_name = True if int(common.generate_run_numbers(run_number)[0]) >= first_run_new_name else False
+                use_new_name = int(common.generate_run_numbers(run_number)[0]) >= first_run_new_name
             else:
-                use_new_name = True if int(run_number) >= first_run_new_name else False
+                use_new_name = int(run_number) >= first_run_new_name
 
             prefix = polaris_new_name if use_new_name else polaris_old_name
+
             return prefix + str(run_number)
 
     def _get_input_batching_mode(self):
@@ -116,3 +136,10 @@ class Polaris(AbstractInst):
                                                             spline_number=spline_coeff,
                                                             mask_path=masking_file_path)
         return output
+
+    def _switch_mode_specific_inst_settings(self, mode):
+        if mode is None and hasattr(self._inst_settings, "mode"):
+            mode = self._inst_settings.mode
+
+        self._inst_settings.update_attributes(advanced_config=polaris_advanced_config.get_mode_specific_dict(mode),
+                                              suppress_warnings=True)

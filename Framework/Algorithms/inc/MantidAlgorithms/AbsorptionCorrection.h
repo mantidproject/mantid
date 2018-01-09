@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -13,7 +14,7 @@ class Sample;
 }
 namespace Geometry {
 class IDetector;
-class Object;
+class IObject;
 }
 
 namespace Algorithms {
@@ -113,11 +114,11 @@ protected:
    */
   virtual void initialiseCachedDistances() = 0;
 
-  API::MatrixWorkspace_sptr m_inputWS;    ///< A pointer to the input workspace
-  const Geometry::Object *m_sampleObject; ///< Local cache of sample object.
-  Kernel::V3D m_beamDirection;            ///< The direction of the beam.
-  std::vector<double> m_L1s,              ///< Cached L1 distances
-      m_elementVolumes;                   ///< Cached element volumes
+  API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
+  const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
+  Kernel::V3D m_beamDirection;             ///< The direction of the beam.
+  std::vector<double> m_L1s,               ///< Cached L1 distances
+      m_elementVolumes;                    ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
   size_t m_numVolumeElements; ///< The number of volume elements
   double m_sampleVolume;      ///< The total volume of the sample

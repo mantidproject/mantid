@@ -1,10 +1,11 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H
 
-#include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidGeometry/Instrument_fwd.h"
 #include "DllConfig.h"
 #include "IReflSettingsPresenter.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidGeometry/Instrument_fwd.h"
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -49,11 +50,13 @@ public:
   void setInstrumentName(const std::string &instName) override;
 
   /// Returns values passed for 'Transmission run(s)'
-  std::string getTransmissionRuns(bool loadRuns) const override;
+  std::string getTransmissionRuns() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
 
@@ -61,7 +64,6 @@ private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
-  void wrapWithQuotes(std::string &str) const;
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);

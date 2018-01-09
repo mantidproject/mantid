@@ -137,7 +137,6 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("A", 0.01);
-    alg->setProperty("ChiTarget", 50.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -157,13 +156,13 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 50);
-    TS_ASSERT_DELTA(data->y(0)[25], 0.2774, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[26], 0.4541, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[27], 0.6121, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[25], 0.277, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[26], 0.454, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[27], 0.612, 0.001);
 
     // Test that the algorithm converged
-    TS_ASSERT_EQUALS(chi->y(0).back(), 0);
-    TS_ASSERT_EQUALS(angle->y(0).back(), 0);
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
   }
 
   void test_sine() {
@@ -175,7 +174,6 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("A", 0.01);
-    alg->setProperty("ChiTarget", 50.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -194,12 +192,13 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_DELTA(data->y(0)[25], 0.8936, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[26], 0.8237, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[27], 0.7205, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[25], 0.893, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[26], 0.824, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[27], 0.721, 0.001);
     // Test that the algorithm converged
-    TS_ASSERT_EQUALS(chi->y(0).back(), 0);
-    TS_ASSERT_EQUALS(angle->y(0).back(), 0);
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
+    // seg faults after these tests.....
   }
 
   void test_sine_cosine_neg() {
@@ -214,7 +213,6 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("ComplexData", true);
     alg->setProperty("A", 0.01);
-    alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -226,12 +224,12 @@ public:
     TS_ASSERT(data);
 
     // Test some values
-    TS_ASSERT_DELTA(data->y(0)[35], 0.8315, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[36], 0.6707, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[37], 0.3977, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[35], 0.3246, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[36], 0.6098, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[37], 0.8090, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[35], 0.8284631894, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[36], 0.6667963448, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[37], 0.3918500444, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[35], 0.3302854368, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[36], 0.6146197942, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[37], 0.8119430900, 0.0001);
   }
 
   void test_sine_cosine_pos() {
@@ -239,7 +237,7 @@ public:
     // Positive images
 
     auto ws = createWorkspaceComplex();
-
+    //    TS_ASSERT_EQUALS(ws->getNumberHistograms(),0)
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
@@ -247,7 +245,6 @@ public:
     alg->setProperty("ComplexData", true);
     alg->setProperty("PositiveImage", true);
     alg->setProperty("A", 0.01);
-    alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -259,12 +256,12 @@ public:
     TS_ASSERT(data);
 
     // Test some values
-    TS_ASSERT_DELTA(data->y(0)[35], 0.8295, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[36], 0.6735, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[35], 0.8267522421, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[36], 0.6722233773, 0.0001);
     TS_ASSERT_DELTA(data->y(0)[37], 0.3935, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[35], 0.3266, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[36], 0.6101, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[37], 0.8074, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[35], 0.3248449519, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[36], 0.6079783710, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[37], 0.8078495801, 0.0001);
   }
 
   void test_sine_cosine_real_image() {
@@ -280,7 +277,6 @@ public:
     alg->setProperty("ComplexData", true);
     alg->setProperty("ComplexImage", false);
     alg->setProperty("A", 0.01);
-    alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -293,12 +289,12 @@ public:
 
     // Test some values (should be close to those obtained in the previous two
     // tests)
-    TS_ASSERT_DELTA(data->y(0)[35], 0.8412, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[36], 0.6741, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[37], 0.4062, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[35], 0.3272, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[36], 0.6102, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[37], 0.8098, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[35], 0.8469664801, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[36], 0.6727449347, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[37], 0.4058313316, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[35], 0.3284565988, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[36], 0.6122221939, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[37], 0.8136355126, 0.0001);
   }
 
   void test_resolution_factor() {
@@ -313,7 +309,6 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("A", 0.01);
-    alg->setProperty("ChiTarget", 50.);
     alg->setProperty("ResolutionFactor", "3");
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -337,11 +332,10 @@ public:
     TS_ASSERT_EQUALS(data->readX(0).size(), data->readY(0).size());
 
     // Test some values
-    TS_ASSERT_DELTA(image->y(0)[70], 6.8835, 0.0001);
-    // Fails on RHEL and Ubuntu with delta 0.0001
-    TS_ASSERT_DELTA(image->y(0)[71], 1.3045, 0.001);
-    TS_ASSERT_DELTA(image->y(1)[78], 0.0999, 0.0001);
-    TS_ASSERT_DELTA(image->y(1)[79], 0.4176, 0.0001);
+    TS_ASSERT_DELTA(image->y(0)[70], 6.829, 0.001);
+    TS_ASSERT_DELTA(image->y(0)[71], 1.314, 0.001);
+    TS_ASSERT_DELTA(image->y(1)[78], 0.102, 0.001);
+    TS_ASSERT_DELTA(image->y(1)[79], 0.448, 0.001);
   }
 
   void test_output_label() {
@@ -356,7 +350,6 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("A", 0.1);
-    alg->setProperty("ChiTarget", 50.);
     alg->setProperty("MaxIterations", "1");
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -456,7 +449,6 @@ public:
     alg->setProperty("ComplexData", true);
     alg->setProperty("AutoShift", true);
     alg->setProperty("A", 0.01);
-    alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
@@ -509,7 +501,7 @@ public:
       double value = static_cast<double>(i);
       ws->dataX(0)[i] = value;
       ws->dataY(0)[i] = value;
-      ws->dataE(0)[i] = value;
+      ws->dataE(0)[i] = value + 1.0;
     }
     ws->dataX(0)[size] = static_cast<double>(size);
 
@@ -520,7 +512,6 @@ public:
     alg->setProperty("ComplexData", false);
     alg->setProperty("AutoShift", false);
     alg->setProperty("A", 1.0);
-    alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("MaxIterations", "1");
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -547,7 +538,7 @@ public:
       double value = static_cast<double>(i);
       ws->dataX(0)[i] = value;
       ws->dataY(0)[i] = value;
-      ws->dataE(0)[i] = value;
+      ws->dataE(0)[i] = value + 1.0;
     }
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
@@ -557,7 +548,6 @@ public:
     alg->setProperty("ComplexData", false);
     alg->setProperty("AutoShift", false);
     alg->setProperty("A", 1.0);
-    alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("MaxIterations", "1");
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");

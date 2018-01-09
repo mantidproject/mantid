@@ -2,7 +2,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 
 #include <boost/algorithm/string.hpp>
@@ -11,7 +13,6 @@
 #include <fstream>
 #include <memory>
 #include <sstream>
-#include <iostream>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -38,28 +39,25 @@ Constructor
 @param preprocessMap : a map indicating which columns were pre-processed and the
 corresponding pre-processing algorithms
 @param processor : the reduction algorithm
-@param postprocessor : the post-processing algorithm
-@param preprocessingOptionsMap : options to pre-processing algorithms
-specified via hinting line edits in the view
+@param postprocessingStep : the post-processing algorithm and options for the
+post-processing algorithms specified via hinting line edits in the view
+@param preprocessingOptionsMap : options passed to the preprocessing algorithm.
 @param processingOptions : options to the reduction algorithm specified via
 the corresponding hinting line edit in the view
-@param postprocessingOptions : options to the post-processing algorithm
-specified via the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
 GenerateNotebook::GenerateNotebook(
-    QString name, const QString instrument, const WhiteList &whitelist,
-    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const ProcessingAlgorithm &processor,
-    const PostprocessingAlgorithm &postprocessor,
-    const std::map<QString, QString> preprocessingOptionsMap,
-    const QString processingOptions, const QString postprocessingOptions)
-    : m_wsName(name), m_instrument(instrument), m_whitelist(whitelist),
-      m_preprocessMap(preprocessMap), m_processor(processor),
-      m_postprocessor(postprocessor),
-      m_preprocessingOptionsMap(preprocessingOptionsMap),
-      m_processingOptions(processingOptions),
-      m_postprocessingOptions(postprocessingOptions) {
+    QString name, QString instrument, WhiteList whitelist,
+    std::map<QString, PreprocessingAlgorithm> preprocessMap,
+    ProcessingAlgorithm processor, PostprocessingStep postprocessingStep,
+    OptionsMap preprocessingOptionsMap, OptionsMap processingOptions)
+    : m_wsName(std::move(name)), m_instrument(std::move(instrument)),
+      m_whitelist(std::move(whitelist)),
+      m_preprocessMap(std::move(preprocessMap)),
+      m_processor(std::move(processor)),
+      m_postprocessingStep(std::move(postprocessingStep)),
+      m_preprocessingOptionsMap(std::move(preprocessingOptionsMap)),
+      m_processingOptions(std::move(processingOptions)) {
 
   if (m_whitelist.size() < 2)
     throw std::invalid_argument(
@@ -76,7 +74,6 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
   auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 
   notebook->markdownCell(titleString(m_wsName).toStdString());
-
   notebook->markdownCell(tableString(data, m_whitelist).toStdString());
 
   for (const auto &item : data) {
@@ -85,7 +82,6 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
     const auto rowMap = item.second;
 
     /** Announce the stitch group in the notebook **/
-
     QString groupTitle = "Group " + QString::number(groupId);
     notebook->markdownCell(groupTitle.toStdString());
 
@@ -116,9 +112,8 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
     boost::tuple<QString, QString> postProcessString;
     if (rowMap.size() > 1) {
       // If there was only one run selected, it could not be post-processed
-      postProcessString =
-          postprocessGroupString(rowMap, m_whitelist, m_processor,
-                                 m_postprocessor, m_postprocessingOptions);
+      postProcessString = postprocessGroupString(
+          rowMap, m_whitelist, m_processor, m_postprocessingStep);
     }
     notebook->codeCell(boost::get<0>(postProcessString).toStdString());
 
@@ -239,10 +234,10 @@ QString tableString(const TreeData &treeData, const WhiteList &whitelist) {
 
   tableString += "Group | ";
   for (int i = 0; i < ncols - 1; i++) {
-    tableString += whitelist.colNameFromColIndex(i);
+    tableString += whitelist.name(i);
     tableString += " | ";
   }
-  tableString += whitelist.colNameFromColIndex(ncols - 1);
+  tableString += whitelist.name(ncols - 1);
   tableString += "\n";
   for (int i = 0; i < ncols - 1; i++) {
     tableString += "---";
@@ -278,17 +273,15 @@ QString tableString(const TreeData &treeData, const WhiteList &whitelist) {
   containing the data
   @param whitelist : the whitelist
   @param processor : the reduction algorithm
-  @param postprocessor : the algorithm responsible for post-processing
-  groups
-  @param postprocessingOptions : options specified for post-processing via
-  HintingLineEdit
+  @param postprocessingStep : the algorithm responsible for post-processing
+  groups and the options specified for post-processing via HintingLineEdit.
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<QString, QString>
 postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
                        const ProcessingAlgorithm &processor,
-                       const PostprocessingAlgorithm &postprocessor,
-                       const QString &postprocessingOptions) {
+                       const PostprocessingStep &postprocessingStep) {
+
   QString stitchString;
 
   stitchString += "#Post-process workspaces\n";
@@ -309,18 +302,21 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
     outputName.append(suffix);
   }
 
-  QString outputWSName = postprocessor.prefix() + outputName.join("_");
+  auto &postprocessingAlgorithm = postprocessingStep.m_algorithm;
+
+  auto outputWSName = postprocessingAlgorithm.prefix() + outputName.join("_");
   stitchString += outputWSName;
   stitchString += completeOutputProperties(
-      postprocessor.name(), postprocessor.numberOfOutputProperties());
+      postprocessingAlgorithm.name(),
+      postprocessingAlgorithm.numberOfOutputProperties());
   stitchString += " = ";
-  stitchString += postprocessor.name() + "(";
-  stitchString += postprocessor.inputProperty() + " = '";
+  stitchString += postprocessingAlgorithm.name() + "(";
+  stitchString += postprocessingAlgorithm.inputProperty() + " = '";
   stitchString += inputNames.join(", ");
   stitchString += "'";
-  if (!postprocessingOptions.isEmpty()) {
+  if (!postprocessingStep.m_options.isEmpty()) {
     stitchString += ", ";
-    stitchString += postprocessingOptions;
+    stitchString += postprocessingStep.m_options;
     stitchString += ")";
   }
 
@@ -340,39 +336,6 @@ QString plot1DString(const QStringList &ws_names) {
   plotString += ws_names.join("', '");
   plotString += "'], legendLocation=[1, 1, 4])\n";
   return plotString;
-}
-
-/**
- Constructs the name for the reduced workspace
- @param data : vector containing the data used in the reduction
- @param whitelist : the whitelist
- @param prefix : wheter to return the name with the prefix or not
- @return : the workspace name
-*/
-QString getReducedWorkspaceName(const RowData &data, const WhiteList &whitelist,
-                                const QString &prefix) {
-
-  int ncols = static_cast<int>(whitelist.size());
-  if (data.size() != ncols)
-    throw std::invalid_argument(
-        "Can't write output workspace name to notebook");
-
-  auto names = QStringList();
-
-  for (int col = 0; col < ncols - 1; col++) {
-    // Do we want to use this column to generate the name of the output ws?
-    if (whitelist.showValue(col)) {
-      // Get what's in the column
-      const QString &valueStr = data.at(col);
-      if (!valueStr.isEmpty()) {
-        // But we may have things like '1+2' which we want to replace with '1_2'
-        auto value = valueStr.split(QRegExp("[+,]"), QString::SkipEmptyParts);
-        names.append(whitelist.prefix(col) + value.join("_"));
-      }
-    }
-  } // Columns
-
-  return prefix + names.join("_");
 }
 
 template <typename Map>
@@ -403,8 +366,8 @@ reduceRowString(const RowData &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
-                const std::map<QString, QString> &preprocessingOptionsMap,
-                const QString &processingOptions) {
+                const OptionsMap &preprocessingOptionsMap,
+                const OptionsMap &processingOptions) {
 
   if (static_cast<int>(whitelist.size()) != data.size()) {
     throw std::invalid_argument("Can't generate notebook");
@@ -424,9 +387,9 @@ reduceRowString(const RowData &data, const QString &instrument,
   // Run through columns, excluding 'Options'
   for (int col = 0; col < ncols - 2; col++) {
     // The column's name
-    const QString colName = whitelist.colNameFromColIndex(col);
+    const QString colName = whitelist.name(col);
     // The algorithm property linked to this column
-    const QString algProp = whitelist.algPropFromColIndex(col);
+    const QString algProp = whitelist.algorithmProperty(col);
 
     if (preprocessMap.count(colName)) {
       // This column was pre-processed, we need to print pre-processing
@@ -467,7 +430,7 @@ reduceRowString(const RowData &data, const QString &instrument,
     }
   }
 
-  auto options = parseKeyValueString(processingOptions.toStdString());
+  auto options = processingOptions;
 
   const auto &hiddenOptionsStr = data.back();
   // Parse and set any user-specified options
@@ -480,7 +443,8 @@ reduceRowString(const RowData &data, const QString &instrument,
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(optionsStr.toStdString());
   // Options specified via 'Options' column will be preferred
-  optionsMap.insert(options.begin(), options.end());
+  for (auto &kvp : options)
+    optionsMap[kvp.first.toStdString()] = kvp.second.toStdString();
   addProperties(algProperties, optionsMap);
 
   /* Now construct the names of the reduced workspaces*/
@@ -532,7 +496,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
                     const PreprocessingAlgorithm &preprocessor,
                     const QString &options) {
 
-  auto runs = runStr.split(QRegExp("[+,]"));
+  auto runs = preprocessingStringToList(runStr);
 
   QString loadStrings;
 
@@ -542,7 +506,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
   }
 
   const QString prefix = preprocessor.prefix();
-  const QString outputName = prefix + runs.join("_");
+  const QString outputName = preprocessingListToString(runs, prefix);
 
   boost::tuple<QString, QString> loadString;
 

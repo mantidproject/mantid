@@ -7,7 +7,7 @@
 #include "EnggDiffFittingViewQtWidget.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
-#include "MantidQtWidgets/Common/PeakPicker.h"
+#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
@@ -64,9 +64,6 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionViewQtGUI
 public:
   /// Default Constructor
   EnggDiffractionViewQtGUI(QWidget *parent = nullptr);
-  /// Destructor
-  ~EnggDiffractionViewQtGUI() override;
-
   /// Interface name
   static std::string name() { return "Engineering Diffraction"; }
   /// This interface's categories.
@@ -123,8 +120,6 @@ public:
 
   void enableTabs(bool enable) override;
 
-  void highlightRbNumber(bool isValid) override;
-
   void enableCalibrateFocusFitUserActions(bool enable) override;
 
   std::string focusingDir() const override;
@@ -166,6 +161,8 @@ public:
   void plotCalibOutput(const std::string &pyCode) override;
 
   bool saveFocusedOutputFiles() const override;
+
+  void showInvalidRBNumber(const bool rbNumberIsValid) override;
 
   int currentPlotType() const override { return g_currentType; }
 

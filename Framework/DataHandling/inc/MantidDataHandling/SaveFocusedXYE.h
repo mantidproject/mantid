@@ -96,11 +96,16 @@ private:
   /// Write spectra header
   void writeSpectraHeader(std::ostream &os, size_t index1, size_t index2,
                           double flightPath, double tth,
-                          const std::string &caption);
+                          const std::string &caption,
+                          const std::string &spectraAxisCaption,
+                          const std::string &spectraAxisLabel,
+                          double observable);
   /// Write spectra XYE header
-  void writeXYESpectraHeader(std::ostream &os, size_t index1, size_t index2,
-                             double flightPath, double tth,
-                             const std::string &caption);
+  void writeXYESpectraHeader(std::ostream &os, size_t index1,
+                             const std::string &caption,
+                             const std::string &spectrumAxisCaption,
+                             const std::string &spectraAxisLabel,
+                             double observable);
   /// Write spectra MAUD header
   void writeMAUDSpectraHeader(std::ostream &os, size_t index1, size_t index2,
                               double flightPath, double tth,

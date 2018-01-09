@@ -54,6 +54,10 @@ public:
         "workspace5", "", Direction::Input, PropertyMode::Optional);
     wsp6 = new WorkspaceProperty<Workspace>("InvalidNameTest", "",
                                             Direction::Output);
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester1>(
+        "WorkspacePropertyTest");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester2>(
+        "WorkspacePropertyTest2");
   }
 
   ~WorkspacePropertyTest() override {
@@ -74,6 +78,19 @@ public:
     TS_ASSERT_EQUALS(wsp1->value(), "ws1")
     TS_ASSERT_EQUALS(wsp2->value(), "")
     TS_ASSERT_EQUALS(wsp3->value(), "ws3")
+  }
+
+  void testIsValueSerializable() {
+    WorkspaceProperty<Workspace> p("PropertyName", "", Direction::InOut);
+    TS_ASSERT(p.isValueSerializable());
+    p.setValue("WorkspaceName");
+    TS_ASSERT(p.isValueSerializable());
+    p.setValue("");
+    MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    p.setDataItem(ws);
+    TS_ASSERT(!p.isDefault())
+    TS_ASSERT(!p.isValueSerializable());
   }
 
   void testSetValue() {
@@ -123,11 +140,6 @@ public:
     TS_ASSERT_EQUALS(wsp6->isValid(), error);
     AnalysisDataService::Instance().setIllegalCharacterList("");
 
-    WorkspaceFactory::Instance().subscribe<WorkspaceTester1>(
-        "WorkspacePropertyTest");
-    WorkspaceFactory::Instance().subscribe<WorkspaceTester2>(
-        "WorkspacePropertyTest2");
-
     // The other three need the input workspace to exist in the ADS
     Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create(
@@ -174,6 +186,25 @@ public:
     wsp2->setValue("");
     TS_ASSERT(wsp2->isDefault())
     TS_ASSERT_EQUALS(wsp2->getDefault(), "")
+  }
+
+  void testIsDefaultWorksOnUnnamedWorkspaces() {
+    std::string defaultWSName{""};
+    WorkspaceProperty<Workspace> p("PropertyName", defaultWSName,
+                                   Direction::InOut);
+    TS_ASSERT(p.isDefault())
+    MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    p.setDataItem(ws);
+    TS_ASSERT(!p.isDefault())
+    TS_ASSERT_EQUALS(p.value(), defaultWSName)
+    defaultWSName = "default";
+    WorkspaceProperty<Workspace> p2("PropertyName", defaultWSName,
+                                    Direction::Input);
+    TS_ASSERT(p2.isDefault())
+    p2.setDataItem(ws);
+    TS_ASSERT(!p2.isDefault())
+    TS_ASSERT_EQUALS(p2.value(), "")
   }
 
   void testAllowedValues() {

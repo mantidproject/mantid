@@ -3,7 +3,7 @@
 
 #include "../PlotCurve.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtWidgets/Common/MantidQwtWorkspaceData.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 class Graph;

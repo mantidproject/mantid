@@ -79,7 +79,7 @@
 #include "Folder.h"
 #include "FindDialog.h"
 #include "ScaleDraw.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
 #include "ScriptFileInterpreter.h"
@@ -199,6 +199,7 @@
 #include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidQtWidgets/Common/CatalogSearch.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 #include "MantidQtWidgets/Common/MessageDisplay.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/TrackedAction.h"
@@ -363,10 +364,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   addDockWidget(Qt::TopDockWidgetArea, logWindow);
 
   using MantidQt::MantidWidgets::MessageDisplay;
-  using MantidQt::API::Message;
+  using MantidQt::MantidWidgets::Message;
   qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
-  resultsLog =
-      new MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
+  resultsLog = new MessageDisplay(logWindow);
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow,
           SLOT(show()));
@@ -376,21 +376,13 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   // splash screen after the 3D visualization dialog has closed
   qApp->processEvents();
 
-  auto &config = ConfigService::Instance(); // Starts logging
-  resultsLog->attachLoggingChannel();       // Must be done after logging starts
+  ConfigService::Instance();          // Starts logging
+  resultsLog->attachLoggingChannel(); // Must be done after logging starts
+  // Read settings early so that the log level is set before the framework
+  // starts
+  resultsLog->readSettings(settings);
   // Load Mantid core libraries by starting the framework
   FrameworkManager::Instance();
-  // Load Paraview plugin libraries if possible
-  if (config.pvPluginsAvailable()) {
-    // load paraview plugins
-    if (g_log.getLevel() == Logger::Priority::PRIO_DEBUG) {
-      g_log.debug("Loading libraries from \"" + config.getPVPluginsPath() +
-                  "\"");
-    }
-    LibraryManager::Instance().OpenAllLibraries(config.getPVPluginsPath(),
-                                                false);
-  }
-
 #ifdef MAKE_VATES
   if (!vtkPVDisplayInformation::SupportsOpenGLLocally())
     g_log.error("The OpenGL configuration does not support the VSI.");
@@ -4715,7 +4707,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
     return true;
 
   if (m_bad_script_envs.contains(lang)) {
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     writeToLogWindow(
         Message("Previous initialization of " + lang + " failed, cannot retry.",
                 Message::Priority::PRIO_ERROR));
@@ -4830,12 +4822,6 @@ void ApplicationWindow::readSettings() {
   changeAppStyle(settings.value("/Style", appStyle).toString());
   autoSave = settings.value("/AutoSave", false).toBool();
   autoSaveTime = settings.value("/AutoSaveTime", 15).toInt();
-  // set logging level to the last saved level
-  int lastLoggingLevel =
-      settings.value("/LastLoggingLevel",
-                     Mantid::Kernel::Logger::Priority::PRIO_NOTICE).toInt();
-  Mantid::Kernel::Logger::setLevelForAll(lastLoggingLevel);
-
   d_backup_files = settings.value("/BackupProjects", true).toBool();
   d_init_window_type =
       (WindowType)settings.value("/InitWindow", NoWindow).toInt();
@@ -5357,9 +5343,11 @@ void ApplicationWindow::saveSettings() {
                       //"ProIndependent", "MantidPlot");
 #endif
 
-  /* ---------------- group General --------------- */
-  settings.beginGroup("/General");
+  // Root level is named "General" by Qt
+  resultsLog->writeSettings(&settings);
 
+  // Our named group General, displayed as %General in the file
+  settings.beginGroup("/General");
   settings.beginGroup("/ApplicationGeometry");
   d_app_rect = QRect(this->pos(), this->size());
   if (this->isMaximized())
@@ -5379,9 +5367,6 @@ void ApplicationWindow::saveSettings() {
   settings.setValue("/Style", appStyle);
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
-  // save current logger level from the root logger ""
-  int lastLoggingLevel = Mantid::Kernel::Logger("").getLevel();
-  settings.setValue("/LastLoggingLevel", lastLoggingLevel);
 
   settings.setValue("/BackupProjects", d_backup_files);
   settings.setValue("/InitWindow", static_cast<int>(d_init_window_type));
@@ -7557,7 +7542,7 @@ void ApplicationWindow::zoomIn() {
   QList<Graph *> layers = plot->layersList();
   foreach (Graph *g, layers) {
     if (!g->isPiePlot())
-      g->zoom(true);
+      g->zoomMode(true);
   }
 }
 
@@ -7987,7 +7972,7 @@ void ApplicationWindow::showResults(bool ok) {
       text = currentFolder()->logInfo();
     else
       text = "Sorry, there are no results to display!";
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     resultsLog->replace(Message(text, Message::Priority::PRIO_INFORMATION));
   }
   logWindow->setVisible(ok);
@@ -7997,7 +7982,7 @@ void ApplicationWindow::showResults(const QString &s, bool ok) {
   currentFolder()->appendLogInfo(s);
   QString logInfo = currentFolder()->logInfo();
   if (!logInfo.isEmpty()) {
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     resultsLog->replace(Message(logInfo, Message::Priority::PRIO_INFORMATION));
   }
   showResults(ok);
@@ -9854,6 +9839,9 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
 
   ce->accept();
   qApp->closeAllWindows();
+
+  // Delete the file finding thread pool if it still exists.
+  MantidQt::API::FindFilesThreadPoolManager::destroyThreadPool();
 }
 
 void ApplicationWindow::customEvent(QEvent *e) {
@@ -13827,7 +13815,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") || (str == "-h" || str == "--help")) {
       g_log.warning()
-          << str.toLatin1().constData()
+          << qPrintable(str)
           << ": This command line option must be used without other arguments!";
     } else if ((str == "-d" || str == "--default-settings")) {
       default_settings = true;
@@ -13845,8 +13833,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     else if (m_cmdline_filename.isEmpty() &&
              (str.startsWith("-") || str.startsWith("--"))) {
       g_log.warning()
-          << "'" << str.toLatin1().constData()
-          << "' unknown command line option!\n"
+          << "'" << qPrintable(str) << "' unknown command line option!\n"
           << "Type 'MantidPlot -h'' to see the list of the valid options.";
       unknown_opt_found = true;
       break;
@@ -16064,7 +16051,8 @@ void ApplicationWindow::setGeometry(MdiSubWindow *usr_win,
  * @param message :: A string containing the message
  * @param error :: A boolean indicating if this is an error
  */
-void ApplicationWindow::writeToLogWindow(const MantidQt::API::Message &msg) {
+void ApplicationWindow::writeToLogWindow(
+    const MantidQt::MantidWidgets::Message &msg) {
   resultsLog->append(msg);
 }
 

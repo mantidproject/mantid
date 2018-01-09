@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include <vector>
 
 #include <Poco/DOM/DOMParser.h>
@@ -33,7 +33,7 @@ public:
     xmlShape += "</cuboid> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 0.00001)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 0.001)));
@@ -149,7 +149,7 @@ public:
     std::string expectedXML =
         "<type name=\"userShape\"> " + xmlShape + " </type>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TSM_ASSERT("Empty shape xml given.", !shape_sptr->getShapeXML().empty());
     TSM_ASSERT_EQUALS("Shape xml not relayed through to shape object.",
                       expectedXML, shape_sptr->getShapeXML());
@@ -168,7 +168,7 @@ public:
     xmlShape += "</hexahedron> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 0.0)));
     TS_ASSERT(!shape_sptr->isValid(V3D(1.1, 0.0, 0.0)));
@@ -198,7 +198,7 @@ public:
     xmlShape += "</hexahedron> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0001, 0.0, 0.0)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0055, 0.0, 0.0)));
@@ -215,7 +215,7 @@ public:
     xmlShape += "</tapered-guide>";
     xmlShape += "<algebra val=\"shape\"/>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     // Vertices.
     TS_ASSERT(shape_sptr->isValid(V3D(2.0, -2.0, 2.0)));
@@ -250,7 +250,7 @@ public:
     xmlShape += "</tapered-guide>";
     xmlShape += "<algebra val=\"shape\"/>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     // Vertices.
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, -1.0, 0.0)));
@@ -283,7 +283,7 @@ public:
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(4.1, 2.1, 8.1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(47.1, 2.1, 8.1)));
@@ -304,7 +304,7 @@ public:
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"shape1 : shape2\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(4.1, 2.1, 8.1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(47.1, 2.1, 8.1)));
@@ -326,7 +326,7 @@ public:
     xmlShape += "<radius val=\"3.2\" /> ";
     xmlShape += "</sphere>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(4.1, 2.1, 8.1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(47.1, 2.1, 8.1)));
@@ -343,7 +343,7 @@ public:
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(1.0, 0.0, 0.0)));
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 1.0, 0.0)));
@@ -370,7 +370,7 @@ public:
     xmlShape += "</cylinder>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 10)));
@@ -388,7 +388,7 @@ public:
     xmlShape += "<height val=\"3\" /> ";
     xmlShape += "</cylinder>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 10)));
@@ -408,7 +408,7 @@ public:
     xmlShape += "<algebra val=\"shape\" /> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 10)));
@@ -427,7 +427,7 @@ public:
         " <height val=\"0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(shape_sptr->hasValidShape());
     // centre is not valid
@@ -453,7 +453,7 @@ public:
         " <height val=\"0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(!shape_sptr->hasValidShape());
   }
@@ -468,7 +468,7 @@ public:
         " <height val=\"-0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(!shape_sptr->hasValidShape());
   }
@@ -483,7 +483,7 @@ public:
         " <height val=\"-0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(!shape_sptr->hasValidShape());
   }
@@ -498,7 +498,7 @@ public:
         " <height val=\"-0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(!shape_sptr->hasValidShape());
   }
@@ -512,7 +512,7 @@ public:
     xmlShape += "</infinite-cylinder>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 10)));
@@ -531,7 +531,7 @@ public:
     xmlShape += "</cone>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, -1)));
@@ -551,7 +551,7 @@ public:
     xmlShape += "<algebra val=\"shape\" /> ";
 
     ShapeFactory sFactory;
-    boost::shared_ptr<Object> shape_sptr = sFactory.createShape(xmlShape);
+    auto shape_sptr = sFactory.createShape(xmlShape);
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, -1)));
@@ -573,7 +573,7 @@ public:
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"some-sphere # stick\" />";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 0.0)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, -0.04)));
@@ -596,8 +596,7 @@ public:
     xmlShape += "</c5one>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr =
-        getObject(xmlShape); // should return empty object
+    auto shape_sptr = getObject(xmlShape); // should return empty object
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }
@@ -612,8 +611,7 @@ public:
     xmlShape += "</cone>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr =
-        getObject(xmlShape); // should return empty object
+    auto shape_sptr = getObject(xmlShape); // should return empty object
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }
@@ -628,13 +626,12 @@ public:
     xmlShape += "</cone>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr =
-        getObject(xmlShape); // should return empty object
+    auto shape_sptr = getObject(xmlShape); // should return empty object
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }
 
-  boost::shared_ptr<Object> getObject(std::string xmlShape) {
+  IObject_sptr getObject(std::string xmlShape) {
     std::string shapeXML = "<type name=\"userShape\"> " + xmlShape + " </type>";
 
     // Set up the DOM parser and parse xml string
@@ -646,7 +643,7 @@ public:
 
     // convert into a Geometry object
     ShapeFactory sFactory;
-    boost::shared_ptr<Object> shape_sptr = sFactory.createShape(pRootElem);
+    auto shape_sptr = sFactory.createShape(pRootElem);
     return shape_sptr;
   }
 

@@ -22,8 +22,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Add this class to the list of specialised dialogs in this namespace
-// Temporarily disabled to prevent freezing when opening the file dialog.
-// DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
+DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 
@@ -61,8 +60,6 @@ const std::string EnggDiffractionViewQtGUI::g_settingsGroup =
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_fittingWidget(nullptr),
       m_currentInst("ENGINX"), m_splashMsg(nullptr), m_presenter(nullptr) {}
-
-EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
 
 void EnggDiffractionViewQtGUI::initLayout() {
   // setup container ui
@@ -275,6 +272,7 @@ void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
 void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(g_settingsGroup));
+  auto fname = qs.fileName();
 
   m_ui.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
@@ -664,14 +662,6 @@ void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   }
 }
 
-void EnggDiffractionViewQtGUI::highlightRbNumber(bool isValid) {
-  if (!isValid) {
-    m_ui.label_RBNumber->setStyleSheet("background-color: red; color : white;");
-  } else {
-    m_ui.label_RBNumber->setStyleSheet("background-color: white");
-  }
-}
-
 std::vector<std::string> EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
   return qListToVector(
       m_uiTabPreproc.MWRunFiles_preproc_run_num->getFilenames(),
@@ -992,6 +982,11 @@ bool EnggDiffractionViewQtGUI::plotCalibWorkspace() const {
 
 bool EnggDiffractionViewQtGUI::saveFocusedOutputFiles() const {
   return m_uiTabFocus.checkBox_save_output_files->checkState();
+}
+
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::showInvalidRBNumber(
+    const bool rbNumberIsValid) {
+  m_ui.label_invalidRBNumber->setVisible(!rbNumberIsValid);
 }
 
 void EnggDiffractionViewQtGUI::plotFocusStatus() {

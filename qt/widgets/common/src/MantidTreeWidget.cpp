@@ -1,5 +1,5 @@
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
-#include <MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h>
+#include <MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -7,9 +7,11 @@
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
 
 #include <QApplication>
+#include <QDrag>
 #include <QDragMoveEvent>
 #include <QFileInfo>
 #include <QList>
+#include <QMimeData>
 #include <QUrl>
 
 using namespace Mantid::API;
@@ -21,9 +23,8 @@ Mantid::Kernel::Logger treelog("MantidTreeWidget");
 namespace MantidQt {
 namespace MantidWidgets {
 
-MantidTreeWidget::MantidTreeWidget(QWorkspaceDockView *w,
-                                   MantidDisplayBase *mui)
-    : QTreeWidget(w), m_dockWidget(w), m_mantidUI(mui),
+MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
+    : QTreeWidget(parent), m_mantidUI(mui),
       m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);

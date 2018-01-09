@@ -9,7 +9,7 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/InputController.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"

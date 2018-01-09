@@ -8,7 +8,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
 using namespace Mantid;

@@ -102,6 +102,12 @@ size_t DetectorInfo::scanSize() const {
   return m_positions->size();
 }
 
+/**
+ * Returns true if all of the detectors all have the same scan interval. Will
+ * return false if DetectorInfo is not scanning.
+ */
+bool DetectorInfo::isSyncScan() const { return isScanning() && m_isSyncScan; }
+
 /// Returns true if the detector with given detector index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   // No check for time dependence since monitor flags are not time dependent.
@@ -187,6 +193,8 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
  * scans. */
 void DetectorInfo::setScanInterval(
     const size_t index, const std::pair<int64_t, int64_t> &interval) {
+  // Time intervals must be set up before adding time sensitive
+  // positions/rotations hence check below.
   checkNoTimeDependence();
   checkScanInterval(interval);
   if (!m_scanIntervals)
@@ -210,7 +218,8 @@ void DetectorInfo::setScanInterval(
     m_scanIntervals =
         Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
             1, std::pair<int64_t, int64_t>{0, 1});
-  } else if (!m_isSyncScan) {
+  }
+  if (!m_isSyncScan) {
     throw std::runtime_error(
         "DetectorInfo has been initialized with a "
         "asynchonous scan, cannot set synchronous scan interval.");
@@ -301,6 +310,7 @@ bool DetectorInfo::hasComponentInfo() const {
 }
 
 double DetectorInfo::l1() const {
+  // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error(
         "DetectorInfo has no valid ComponentInfo thus cannot determine l1");
@@ -309,6 +319,7 @@ double DetectorInfo::l1() const {
 }
 
 Eigen::Vector3d DetectorInfo::sourcePosition() const {
+  // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
                              "cannot determine sourcePosition");
@@ -317,6 +328,7 @@ Eigen::Vector3d DetectorInfo::sourcePosition() const {
 }
 
 Eigen::Vector3d DetectorInfo::samplePosition() const {
+  // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
                              "cannot determine samplePosition");

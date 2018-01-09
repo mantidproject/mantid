@@ -3,6 +3,8 @@
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
+#include <numeric>
+#include <stdexcept>
 
 namespace {
 std::tuple<bool, size_t, std::string> isARGUSDateTime(const std::string &date) {
@@ -32,18 +34,6 @@ Logger g_log("DateAndTime");
  */
 Types::Core::DateAndTime createFromSanitizedISO8601(const std::string &date) {
   return Types::Core::DateAndTime(verifyAndSanitizeISO8601(date));
-}
-
-/** Check if a string is iso8601 format.
- *
- * @param date :: string to check
- * @return true if the string conforms to ISO 860I, false otherwise.
- */
-bool stringIsISO8601(const std::string &date) {
-  Poco::DateTime dt;
-  int tz_diff;
-  return Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FORMAT,
-                                        date, dt, tz_diff);
 }
 
 /** Verifies whether or not a string conforms to ISO8601. Corrects the string
@@ -83,6 +73,26 @@ std::string verifyAndSanitizeISO8601(const std::string &date,
   }
 
   return date;
+}
+
+/**
+ * @brief averageSorted Assuming that the vector is sorted, find the average
+ * time
+ */
+Types::Core::DateAndTime
+averageSorted(const std::vector<Types::Core::DateAndTime> &times) {
+  if (times.empty())
+    throw std::invalid_argument("Cannot find average of empty vector");
+
+  // to avoid overflow subtract the first time off from everything
+  // and find the average in between
+  const int64_t first = times.begin()->totalNanoseconds();
+  int64_t total = 0;
+  for (const auto &it : times)
+    total += (it.totalNanoseconds() - first);
+  double avg = static_cast<double>(total) / static_cast<double>(times.size());
+
+  return times.front() + static_cast<int64_t>(avg);
 }
 
 } // namespace DateAndTimeHelpers

@@ -1,5 +1,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/PluginLibraries.h"
 
 #include "pqPVApplicationCore.h"
 #include "pqInterfaceTracker.h"
@@ -33,12 +34,10 @@ namespace SimpleGui {
 VatesParaViewApplication::VatesParaViewApplication()
     : m_logger("VatesParaViewApplication"), m_behaviorsSetup(false) {
   // Get the plugin path that we set in the ConfigService.
-  auto &configSvc = Kernel::ConfigService::Instance();
-  // This currently points at the top pvplugins directory and not the
-  // subdirectory.
-  // Needs tidying up!!
-  std::string pvPluginPathTop = configSvc.getPVPluginsPath();
-  if (pvPluginPathTop.empty()) {
+  const auto &configSvc = Kernel::ConfigService::Instance();
+  const auto pvPluginsPath =
+      MantidQt::API::qtPluginPathFromCfg("pvplugins.directory");
+  if (pvPluginsPath.empty()) {
     throw std::runtime_error(
         "pvplugins.directory key not setup.\nVates plugins will not be "
         "available.\n"
@@ -58,9 +57,8 @@ VatesParaViewApplication::VatesParaViewApplication()
   m_logger.debug("Intialize pqApplicationCore with " + exePath + "\n");
   // We need to manually set the PV_PLUGIN_PATH because it's
   // not going to be picked up from the paraview/vtk side otherwise.
-  Poco::Path pluginsDir(pvPluginPathTop, "pvplugins");
-  m_logger.debug("Setting PV_PLUGIN_PATH=" + pluginsDir.toString() + "\n");
-  vtksys::SystemTools::PutEnv("PV_PLUGIN_PATH=" + pluginsDir.toString());
+  m_logger.debug("Setting PV_PLUGIN_PATH=" + pvPluginsPath + "\n");
+  vtksys::SystemTools::PutEnv("PV_PLUGIN_PATH=" + pvPluginsPath);
   new pqPVApplicationCore(argc, argv);
 }
 

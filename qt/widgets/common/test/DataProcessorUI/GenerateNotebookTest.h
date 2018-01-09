@@ -12,6 +12,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -73,19 +74,15 @@ private:
 
   // Creates reflectometry data
   TreeData reflData() {
-
     TreeData treeData;
-    RowData rowData;
-
-    rowData = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
-    treeData[0][0] = rowData;
-    rowData = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
-    treeData[0][1] = rowData;
-    rowData = {"24681", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
-    treeData[1][0] = rowData;
-    rowData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
-    treeData[1][1] = rowData;
-
+    treeData[0][0] =
+        QStringList({"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
+    treeData[0][1] =
+        QStringList({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+    treeData[1][0] =
+        QStringList({"24681", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
+    treeData[1][1] =
+        QStringList({"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
     return treeData;
   }
 
@@ -109,7 +106,7 @@ public:
     auto lines = splitIntoLines(book);
     auto i = 0u;
     for (auto const &line : lines) {
-      TS_ASSERT_EQUALS(expectedLines[i], line);
+      TS_ASSERT_EQUALS(expectedLines[i].toStdString(), line.toStdString());
       i++;
     }
   }
@@ -120,7 +117,7 @@ public:
     auto lines = splitIntoLines(book);
     auto i = 0u;
     for (auto const &line : lines) {
-      TS_ASSERT_EQUALS(expectedLines[i], line);
+      TS_ASSERT_EQUALS(expectedLines[i].toStdString(), line.toStdString());
       i++;
     }
   }
@@ -138,7 +135,9 @@ public:
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
         std::map<QString, PreprocessingAlgorithm>(), reflProcessor(),
-        reflPostprocessor(), std::map<QString, QString>(), "", "");
+        PostprocessingStep("", reflPostprocessor(),
+                           std::map<QString, QString>()),
+        std::map<QString, QString>(), std::map<QString, QString>());
 
     auto generatedNotebook = notebook->generateNotebook(TreeData());
 
@@ -261,20 +260,20 @@ public:
     auto outputLines = splitIntoLines(boost::get<0>(output));
 
     // The python code that does the loading
-    const QString result[] = {
-        "RUN1 = Load(Filename = 'INST_RUN1')", "RUN1_RUN2_RUN3 = RUN1",
+    const std::string result[] = {
+        "RUN1 = Load(Filename = 'INST_RUN1')", "RUN1+RUN2+RUN3 = RUN1",
         "RUN2 = Load(Filename = 'INST_RUN2')",
-        "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
+        "RUN1+RUN2+RUN3 = WeightedMean(InputWorkspace1 = 'RUN1+RUN2+RUN3', "
         "InputWorkspace2 = 'RUN2', Property1 = 1, Property2 = 2)",
         "RUN3 = Load(Filename = 'INST_RUN3')",
-        "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
+        "RUN1+RUN2+RUN3 = WeightedMean(InputWorkspace1 = 'RUN1+RUN2+RUN3', "
         "InputWorkspace2 = 'RUN3', Property1 = 1, Property2 = 2)"};
     for (int i = 0; i < 6; i++) {
-      TS_ASSERT_EQUALS(outputLines[i], result[i]);
+      TS_ASSERT_EQUALS(outputLines[i].toStdString(), result[i]);
     }
 
     // The loaded workspace
-    TS_ASSERT_EQUALS(boost::get<1>(output), "RUN1_RUN2_RUN3");
+    TS_ASSERT_EQUALS(boost::get<1>(output).toStdString(), "RUN1+RUN2+RUN3");
   }
 
   void testReduceRowStringWrongData() {
@@ -284,7 +283,8 @@ public:
 
     TS_ASSERT_THROWS_ANYTHING(reduceRowString(
         rowData, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
-        reflProcessor(), std::map<QString, QString>(), ""));
+        reflProcessor(), std::map<QString, QString>(),
+        std::map<QString, QString>()));
   }
 
   void testReduceRowString() {
@@ -297,9 +297,10 @@ public:
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
 
-    auto output = reduceRowString(data, m_instrument, reflWhitelist(),
-                                  reflPreprocessMap("TOF_"), reflProcessor(),
-                                  userPreProcessingOptions, "");
+    auto output =
+        reduceRowString(data, m_instrument, reflWhitelist(),
+                        reflPreprocessMap("TOF_"), reflProcessor(),
+                        userPreProcessingOptions, std::map<QString, QString>());
 
     const QString result[] = {
         "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
@@ -338,25 +339,26 @@ public:
 
     auto output =
         reduceRowString(data, "INST", whitelist, preprocessMap, reflProcessor(),
-                        userPreProcessingOptions, "");
+                        userPreProcessingOptions, std::map<QString, QString>());
 
     const QString result[] = {
-        "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000_1001 = RUN_1000",
+        "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000+1001 = RUN_1000",
         "RUN_1001 = Load(Filename = 'INST1001')",
-        "RUN_1000_1001 = Plus(LHSWorkspace = 'RUN_1000_1001', RHSWorkspace = "
+        "RUN_1000+1001 = Plus(LHSWorkspace = 'RUN_1000+1001', RHSWorkspace = "
         "'RUN_1001', Property=prop)",
-        "IvsQ_binned_1000_1001_angle_0.5, IvsQ_1000_1001_angle_0.5, "
-        "IvsLam_1000_1001_angle_0.5 = "
-        "ReflectometryReductionOneAuto(InputWorkspace = 'RUN_1000_1001', "
+        "IvsQ_binned_1000+1001_angle_0.5, IvsQ_1000+1001_angle_0.5, "
+        "IvsLam_1000+1001_angle_0.5 = "
+        "ReflectometryReductionOneAuto(InputWorkspace = 'RUN_1000+1001', "
         "ThetaIn = 0.5)",
         ""};
 
     std::cout << boost::get<1>(output).toStdString() << std::endl;
 
     // Check the names of the reduced workspaces
-    TS_ASSERT_EQUALS(boost::get<1>(output), "IvsQ_binned_1000_1001_angle_0.5, "
-                                            "IvsQ_1000_1001_angle_0.5, "
-                                            "IvsLam_1000_1001_angle_0.5");
+    TS_ASSERT_EQUALS(boost::get<1>(output).toStdString(),
+                     "IvsQ_binned_1000+1001_angle_0.5, "
+                     "IvsQ_1000+1001_angle_0.5, "
+                     "IvsLam_1000+1001_angle_0.5");
 
     // Check the python code
     assertContainsMatchingLines(result, boost::get<0>(output));
@@ -374,7 +376,8 @@ public:
 
     auto output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
-                        reflProcessor(), emptyPreProcessingOptions, "");
+                        reflProcessor(), emptyPreProcessingOptions,
+                        std::map<QString, QString>());
 
     const QString result[] = {
         "IvsQ_binned_TOF_12346, IvsQ_TOF_12346, IvsLam_TOF_12346 = "
@@ -398,7 +401,6 @@ public:
     // Create some data
     const RowData data = {"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
                           "0.04",      "1",   "",          ""};
-
     TS_ASSERT_THROWS_ANYTHING(
         getReducedWorkspaceName(data, whitelist, "IvsQ_"));
   }
@@ -422,7 +424,7 @@ public:
                           "0.04",      "1",   "",          ""};
 
     auto name = getReducedWorkspaceName(data, whitelist, "IvsQ_");
-    TS_ASSERT_EQUALS(name, "IvsQ_run_1000_1001")
+    TS_ASSERT_EQUALS(name.toStdString(), "IvsQ_run_1000+1001")
   }
 
   void testReducedWorkspaceNameRunAndTrans() {
@@ -444,7 +446,7 @@ public:
                           "0.04",      "1",   "",          ""};
 
     auto name = getReducedWorkspaceName(data, whitelist, "Prefix_");
-    TS_ASSERT_EQUALS(name, "Prefix_run_1000_1001_trans_2000_2001")
+    TS_ASSERT_EQUALS(name.toStdString(), "Prefix_run_1000+1001_trans_2000+2001")
   }
 
   void testReducedWorkspaceNameTransNoPrefix() {
@@ -465,7 +467,7 @@ public:
                           "0.04",      "1",   "",          ""};
 
     auto name = getReducedWorkspaceName(data, whitelist, "Prefix_");
-    TS_ASSERT_EQUALS(name, "Prefix_2000_2001")
+    TS_ASSERT_EQUALS(name.toStdString(), "Prefix_2000+2001")
   }
 
   void testPostprocessGroupString() {
@@ -476,9 +478,10 @@ public:
     RowData rowData1 = {"12346", "", "", "", "", "", "", "", ""};
     GroupData groupData = {{0, rowData0}, {1, rowData1}};
 
-    auto output =
-        postprocessGroupString(groupData, reflWhitelist(), reflProcessor(),
-                               reflPostprocessor(), userOptions);
+    auto output = postprocessGroupString(
+        groupData, reflWhitelist(), reflProcessor(),
+        PostprocessingStep(userOptions, reflPostprocessor(),
+                           std::map<QString, QString>()));
 
     std::vector<QString> result = {
         "#Post-process workspaces",
@@ -492,11 +495,13 @@ public:
     assertContainsMatchingLines(result, boost::get<0>(output));
     // All rows in second group
 
-    rowData0 = {"24681", "", "", "", "", "", "", "", ""};
-    rowData1 = {"24682", "", "", "", "", "", "", "", ""};
+    rowData0 = QStringList({"24681", "", "", "", "", "", "", "", ""});
+    rowData1 = QStringList({"24682", "", "", "", "", "", "", "", ""});
     groupData = {{0, rowData0}, {1, rowData1}};
-    output = postprocessGroupString(groupData, reflWhitelist(), reflProcessor(),
-                                    reflPostprocessor(), userOptions);
+    output = postprocessGroupString(
+        groupData, reflWhitelist(), reflProcessor(),
+        PostprocessingStep(userOptions, reflPostprocessor(),
+                           std::map<QString, QString>()));
 
     result = {"#Post-process workspaces",
               "IvsQ_TOF_24681_TOF_24682, _ = "
@@ -617,13 +622,15 @@ public:
     auto preprocessingOptions =
         std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
                                    {"Transmission Run(s)", "Property=Value"}};
-    auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
+    auto processingOptions =
+        std::map<QString, QString>{{"AnalysisMode", "MultiDetectorAnalysis"}};
     auto postprocessingOptions = "Params=0.04";
+    auto postprocessingStep = PostprocessingStep(
+        postprocessingOptions, postProcessor, std::map<QString, QString>());
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
-        postProcessor, preprocessingOptions, processingOptions,
-        postprocessingOptions);
+        postprocessingStep, preprocessingOptions, processingOptions);
 
     auto generatedNotebook = notebook->generateNotebook(reflData());
 
@@ -714,13 +721,15 @@ public:
     auto preprocessingOptions =
         std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
                                    {"Transmission Run(s)", "Property=Value"}};
-    auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
+    auto processingOptions =
+        std::map<QString, QString>{{"AnalysisMode", "MultiDetectorAnalysis"}};
     auto postprocessingOptions = "Params=0.04";
+    auto postprocessingStep = PostprocessingStep(
+        postprocessingOptions, postProcessor, std::map<QString, QString>());
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
-        postProcessor, preprocessingOptions, processingOptions,
-        postprocessingOptions);
+        postprocessingStep, preprocessingOptions, processingOptions);
 
     RowData rowData0 = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
     RowData rowData1 = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};

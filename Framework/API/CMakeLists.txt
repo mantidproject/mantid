@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
 	src/DetectorSearcher.cpp
+	src/DistributedAlgorithm.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/EqualBinSizesValidator.cpp
@@ -109,6 +110,7 @@ set ( SRC_FILES
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/NumericAxisValidator.cpp
+	src/ParallelAlgorithm.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
@@ -128,6 +130,8 @@ set ( SRC_FILES
 	src/ScriptBuilder.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
+	src/SerialAlgorithm.cpp
+	src/SingleCountValidator.cpp
 	src/SpectraAxis.cpp
 	src/SpectraAxisValidator.cpp
 	src/SpectrumDetectorMapping.cpp
@@ -190,6 +194,7 @@ set ( INC_FILES
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
 	inc/MantidAPI/DetectorSearcher.h
+	inc/MantidAPI/DistributedAlgorithm.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
@@ -303,6 +308,7 @@ set ( INC_FILES
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NumericAxisValidator.h
+	inc/MantidAPI/ParallelAlgorithm.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
@@ -321,6 +327,8 @@ set ( INC_FILES
 	inc/MantidAPI/ScriptBuilder.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
+	inc/MantidAPI/SerialAlgorithm.h
+	inc/MantidAPI/SingleCountValidator.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
 	inc/MantidAPI/SpectraAxis.h
@@ -352,10 +360,10 @@ set ( TEST_FILES
 	AlgorithmFactoryTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
+	AlgorithmMPITest.h
 	AlgorithmManagerTest.h
 	AlgorithmPropertyTest.h
 	AlgorithmProxyTest.h
-	AlgorithmMPITest.h
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
 	AsynchronousTest.h
@@ -394,6 +402,7 @@ set ( TEST_FILES
 	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
+	IFunctionTest.h
 	ILatticeFunctionTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
@@ -438,6 +447,7 @@ set ( TEST_FILES
 	SampleValidatorTest.h
 	ScopedWorkspaceTest.h
 	ScriptBuilderTest.h
+	SingleCountValidatorTest.h
 	SpectraAxisTest.h
 	SpectraAxisValidatorTest.h
 	SpectrumDetectorMappingTest.h

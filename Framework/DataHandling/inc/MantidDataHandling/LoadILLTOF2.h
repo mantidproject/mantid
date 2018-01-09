@@ -46,7 +46,9 @@ public:
   /// Algorithm's version
   int version() const override { return 2; }
   /// Algorithm's category for identification
-  const std::string category() const override { return "DataHandling\\Nexus"; }
+  const std::string category() const override {
+    return "DataHandling\\Nexus;ILL\\Direct";
+  }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;

@@ -503,7 +503,7 @@ public:
     CompAssembly *bank3 = new CompAssembly("bank 111", detectors);
 
     // add some rectangular detectors
-    boost::shared_ptr<Object> cuboidShape =
+    boost::shared_ptr<IObject> cuboidShape =
         ComponentCreationHelper::createCuboid(0.5);
 
     for (size_t i = 0; i < 15; i++) {
