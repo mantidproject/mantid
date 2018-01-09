@@ -158,18 +158,16 @@ public:
   std::string getShapeXML() const override;
 
 private:
-  /// Calculate bounding box using object's vertices
-  void calcBoundingBoxByVertices();
-
-  /// Calculate bounding box using object's geometric data
-  void calcBoundingBoxByGeometry();
+  /// Get triangle
+  bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3);
 
   /// Contents
   std::vector<int> m_triangles;
   std::vector < Kernel::V3D > m_vertices;
 
-  /// Object's bounding box
-  BoundingBox m_boundingBox;
+  /// Cache for object's bounding box
+  mutable BoundingBox m_boundingBox;
+
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> m_handler;
 

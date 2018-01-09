@@ -111,6 +111,19 @@ void MeshObject::initialize(const std::vector<int> &faces, const std::vector<V3D
   }
 }
 
+/*
+ * Get a triangle - useful for iterating over triangles
+ */
+bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2, V3D &vertex3) {
+  bool triangleExists = index < sizeof(m_triangles) / 3;
+  if (triangleExists) {
+    vertex1 = m_vertices[3 * index];
+    vertex2 = m_vertices[3 * index + 1];
+    vertex3 = m_vertices[3 * index + 2];
+  }
+  return triangleExists;
+}
+
 /**
  * @param material The new Material that the object is composed from
  */
@@ -205,6 +218,14 @@ int MeshObject::calcValidType(const Kernel::V3D &Pt,
 */
 void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
   double &xmin, double &ymin, double &zmin) const {
+  BoundingBox bb = getBoundingBox();
+  xmin = bb.xMin();
+  xmax = bb.xMax();
+  ymin = bb.yMin();
+  ymax = bb.yMax();
+  zmin = bb.zMin();
+  zmax = bb.zMax();
+
   return;
 }
 
@@ -246,65 +267,35 @@ double MeshObject::volume() const {
 */
 const BoundingBox &MeshObject::getBoundingBox() const {
 
-  // All options failed; give up
-  // Set to a large box so that a) we don't keep trying to calculate a box
-  // every time this is called and b) to serve as a visual indicator that
-  // something went wrong.
+  if(m_boundingBox.isNull())
+    // As MeshObject is immutable, we need only calculate 
+    // bounding box, if the cached bounding box is null.
+    if (sizeof(m_vertices) > 0) {
+      // Initial extents to be overwritten by loop
+      constexpr double huge = 1e10;
+      double minX, maxX, minY, maxY, minZ, maxZ;
+      minX = minY = minZ = huge;
+      maxX = maxY = maxZ = -huge;
+
+      // Loop over all vertices and determine minima and maxima on each axis
+      for (int i = 0; i < sizeof(m_vertices); ++i) {
+        auto vx = m_vertices[i].X();
+        auto vy = m_vertices[i].Y();
+        auto vz = m_vertices[i].Z();
+
+        minX = std::min(minX, vx);
+        maxX = std::max(maxX, vx);
+        minY = std::min(minY, vy);
+        maxY = std::max(maxY, vy);
+        minZ = std::min(minZ, vz);
+        maxZ = std::max(maxZ, vz);
+      }
+      // Cache bounding box, so we do not need to repeat calculation
+      m_boundingBox = BoundingBox(minX, maxX, minY, maxY, minZ, maxZ);
+    }
 
   return m_boundingBox;
 }
-
-
-/**
- * Attempts to calculate bounding box using vertex array.
- *
- * Stores result in bounding box cache if successful.
- *
- */
-void MeshObject::calcBoundingBoxByVertices() {
-  // Grab vertex information
-  auto vertCount = this->numberOfVertices();
-  auto vertArray = this->getVertices();
-
-  if (vertCount && vertArray) {
-    // Unreasonable extents to be overwritten by loop
-    constexpr double huge = 1e10;
-    double minX, maxX, minY, maxY, minZ, maxZ;
-    minX = minY = minZ = huge;
-    maxX = maxY = maxZ = -huge;
-
-    // Loop over all vertices and determine minima and maxima on each axis
-    for (int i = 0; i < vertCount; ++i) {
-      auto vx = vertArray[3 * i + 0];
-      auto vy = vertArray[3 * i + 1];
-      auto vz = vertArray[3 * i + 2];
-
-      minX = std::min(minX, vx);
-      maxX = std::max(maxX, vx);
-      minY = std::min(minY, vy);
-      maxY = std::max(maxY, vy);
-      minZ = std::min(minZ, vz);
-      maxZ = std::max(maxZ, vz);
-    }
-
-  }
-}
-
-/**
- * Attempts to calculate bounding box using object geometry.
- *
- * Stores result in bounding box cache if successful. Will only work for basic
- * shapes that are handled by GluGeometryHandler.
- */
-void MeshObject::calcBoundingBoxByGeometry() {
-
-  return;
-}
-
-/**
-* Set the bounding box to a null box
-*/
-void MeshObject::setNullBoundingBox() { m_boundingBox = BoundingBox(); }
 
 /**
 Try to find a point that lies within (or on) the object
@@ -437,7 +428,7 @@ void MeshObject::setVtkGeometryCacheReader(
 * We hide the actual implementation of Mesh Object here
 */
 int MeshObject::numberOfTriangles() const {
-    return 0;
+    return sizeof(m_triangles)/3;
 }
 
 /**
@@ -452,7 +443,7 @@ int *MeshObject::getTriangles() const {
 * get number of points
 */
 int MeshObject::numberOfVertices() const {
-  return 0;
+  return sizeof(m_vertices);
 }
 
 /**
