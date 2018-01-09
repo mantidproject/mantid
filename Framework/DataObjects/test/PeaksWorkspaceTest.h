@@ -1,27 +1,27 @@
 #ifndef MANTID_DATAOBJECTS_PEAKSWORKSPACETEST_H_
 #define MANTID_DATAOBJECTS_PEAKSWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidAPI/FileProperty.h"
-#include <fstream>
-#include <stdio.h>
-#include <cmath>
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
+#include <stdio.h>
 
 #include <Poco/File.h>
 
@@ -606,8 +606,9 @@ private:
                                     // simplified relationship between qLab and
                                     // hkl.
 
-    return PeakParameters{minimalInstrument, goniometer, orientedLattice, hkl,
-                          qLab, qSample, detectorPos};
+    return PeakParameters{
+        minimalInstrument, goniometer, orientedLattice, hkl, qLab,
+        qSample,           detectorPos};
   }
 
   PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {
