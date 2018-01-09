@@ -108,13 +108,12 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         with self._suppress_stdout():
             gsas_proj = self._initialise_GSAS()
 
-            rwp, gof, lattice_params = \
+            residuals, lattice_params = \
                 self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj,
                                                      do_pawley=refinement_method == self.REFINEMENT_METHODS[0])
 
-            self._set_output_properties(lattice_params=lattice_params,
-                                        fitted_peaks_ws=self._generate_fitted_peaks_ws(gsas_proj),
-                                        residuals=self._generate_residuals_table(rwp=rwp, gof=gof))
+            self._set_output_properties(lattice_params=lattice_params, residuals=residuals,
+                                        fitted_peaks_ws=self._generate_fitted_peaks_ws(gsas_proj))
 
     def _build_output_lattice_table(self, lattice_params):
         table_name = self.getPropertyValue(self.PROP_OUT_LATTICE_PARAMS)
@@ -218,9 +217,11 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         residuals = gsas_proj.values()[2]["data"]["Rvals"]
         lattice_params = gsas_proj.phases()[0].get_cell()
-        lattice_param_table = self._build_output_lattice_table(lattice_params)
+        lattice_params_table = self._build_output_lattice_table(lattice_params)
 
-        return residuals["Rwp"], residuals["GOF"], lattice_param_table
+        residuals_table = self._generate_residuals_table(rwp=residuals["Rwp"], gof=residuals["GOF"])
+
+        return residuals_table, lattice_params_table
 
     def _save_temporary_fxye(self, spectrum):
         """
