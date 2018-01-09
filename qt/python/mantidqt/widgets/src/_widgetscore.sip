@@ -113,7 +113,6 @@ class WorkspaceTreeWidget : QWidget {
 public:
   WorkspaceTreeWidget(MantidDisplayBase *mdb,
                       QWidget *parent /TransferThis/ = nullptr);
-  void init();
 };
 
 class MantidTreeModel : MantidDisplayBase {

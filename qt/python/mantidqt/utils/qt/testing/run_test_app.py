@@ -77,7 +77,6 @@ def open_in_window(widget_name, script):
     setup_library_paths()
     app = QApplication([""])
     w = create_widget(widget_name)
-    w.init()
     w.setWindowTitle(widget_name)
     w.show()
 
