@@ -758,7 +758,7 @@ void InstrumentActor::doDraw(bool picking) const {
           glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
         
-        componentInfo.shape(i)->draw();
+        componentInfo.shape(i).draw();
         glPopMatrix();
       }
     }

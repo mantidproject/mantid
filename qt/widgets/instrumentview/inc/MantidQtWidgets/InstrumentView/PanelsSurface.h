@@ -12,8 +12,6 @@ class PanelsSurface;
 
 struct FlatBankInfo {
   explicit FlatBankInfo(PanelsSurface *s);
-  /// Component id of the bank
-  Mantid::Geometry::ComponentID id;
   /// Bank's rotation
   Mantid::Kernel::Quat rotation;
   /// Starting index of bank's detectors in m_unwrappedDetectors vector
@@ -69,8 +67,7 @@ protected:
   // Setup the projection axes
   void setupAxes();
   // Add a flat bank
-  void addFlatBankOfDetectors(Mantid::Geometry::ComponentID bankId,
-                              const Mantid::Kernel::V3D &normal,
+  void addFlatBankOfDetectors(const Mantid::Kernel::V3D &normal,
                               const std::vector<size_t> &detectors);
   void constructFromComponentInfo();
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos,
@@ -99,7 +96,7 @@ protected:
   /// Keep info of the flat banks
   QList<FlatBankInfo *> m_flatBanks;
   /// Maps detector ids to indices of FlatBankInfos in m_flatBanks
-  QMap<Mantid::detid_t, int> m_detector2bankMap;
+  QMap<size_t, int> m_detector2bankMap;
 
   friend struct FlatBankInfo;
 };

@@ -86,32 +86,20 @@ void RotationSurface::init() {
                           if (!exceptionThrown)
                             try {
                               size_t i = size_t(ii);
-
-                              auto id = m_instrActor->getDetID(i);
                               try {
-                                if (detectorInfo.isMonitor(
-                                        detectorInfo.indexOf(id)) ||
-                                    (id < 0)) {
-                                  // Not a detector or a monitor
-                                  // Make some blank, empty thing that won't
-                                  // draw
+                                if (detectorInfo.isMonitor(i)) {
                                   m_unwrappedDetectors[i] = UnwrappedDetector();
                                 } else {
                                   // A real detector.
                                   // Position, relative to origin
-                                  // Mantid::Kernel::V3D pos = det->getPos() -
-                                  // m_pos;
-                                  Mantid::Kernel::V3D rpos =
-                                      m_instrActor->getDetPos(i) - m_pos;
+                                  auto rpos = detectorInfo.position(i) - m_pos;
 
                                   auto pos = detectorInfo.position(i);
                                   auto rot = detectorInfo.rotation(i);
                                   auto scaleFactor = componentInfo.scaleFactor(i);
-                                  auto shape = componentInfo.shape(i);
                                   // Create the unwrapped shape
                                   UnwrappedDetector udet(
-                                      m_instrActor->getColor(i), id, i, pos,
-                                      rot, scaleFactor, shape);
+                                      m_instrActor->getColor(i), i);
                                   // Calculate its position/size in UV
                                   // coordinates
                                   this->calcUV(udet, rpos);
@@ -203,7 +191,7 @@ void RotationSurface::findUVBounds() {
   m_v_max = -DBL_MAX;
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (!udet.isValid())
+    if (!m_instrActor->getComponentInfo().hasShape(udet.detIndex))
       continue;
     if (udet.u < m_u_min)
       m_u_min = udet.u;
@@ -233,12 +221,10 @@ void RotationSurface::findAndCorrectUGap() {
     return;
   }
 
-  std::vector<UnwrappedDetector>::const_iterator ud =
-      m_unwrappedDetectors.begin();
-  for (; ud != m_unwrappedDetectors.end(); ++ud) {
-    if (!ud->isValid())
+  for (const auto &udet: m_unwrappedDetectors) {
+    if (!m_instrActor->getComponentInfo().hasShape(udet.detIndex))
       continue;
-    double u = ud->u;
+    double u = udet.u;
     int i = int((u - m_u_min) / bin_width);
     ubins[i] = true;
   }
@@ -272,11 +258,10 @@ void RotationSurface::findAndCorrectUGap() {
       m_u_max += period;
     }
 
-    std::vector<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
-    for (; ud != m_unwrappedDetectors.end(); ++ud) {
-      if (!ud->isValid())
+    for (auto &udet: m_unwrappedDetectors) {
+      if (!m_instrActor->getComponentInfo().hasShape(udet.detIndex))
         continue;
-      double &u = ud->u;
+      double &u = udet.u;
       u = applyUCorrection(u);
     }
   }

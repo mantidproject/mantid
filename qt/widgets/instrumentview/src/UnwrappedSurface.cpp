@@ -25,10 +25,23 @@ using namespace Mantid::Geometry;
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace {
+
+QRectF getArea(const UnwrappedDetector &udet, double maxWidth,
+               double maxHeight) {
+  auto w = udet.width;
+  if (w > maxWidth)
+    w = maxWidth;
+  auto h = udet.height;
+  if (h > maxHeight)
+    h = maxHeight;
+  return QRectF(udet.u - w, udet.v - h, w * 2, h * 2);
+}
+} // namespace
 /**
-* Constructor.
-* @param rootActor :: The instrument actor.
-*/
+ * Constructor.
+ * @param rootActor :: The instrument actor.
+ */
 UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
     : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX),
       m_v_min(DBL_MAX), m_v_max(-DBL_MAX), m_height_max(0), m_width_max(0),
@@ -126,10 +139,9 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
     glShadeModel(GL_FLAT);
   }
 
-  for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
-    const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-
-    if (!udet.isValid())
+  const auto &componentInfo = m_instrActor->getComponentInfo();
+  for (const auto &udet: m_unwrappedDetectors) {
+    if (!componentInfo.hasShape(udet.detIndex))
       continue;
 
     int iw = int(udet.width / dw);
@@ -143,7 +155,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
       continue;
 
     // apply the detector's colour
-    setColor(int(i), picking);
+    setColor(udet.detIndex, picking);
 
     // if the detector is too small to see its shape draw a rectangle
     if (iw < 6 || ih < 6) {
@@ -167,10 +179,11 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
       rot.getAngleAxis(deg, ax0, ax1, ax2);
       glRotated(deg, ax0, ax1, ax2);
 
-      Mantid::Kernel::V3D scaleFactor = udet.scaleFactor;
+      Mantid::Kernel::V3D scaleFactor =
+          componentInfo.scaleFactor(udet.detIndex);
       glScaled(scaleFactor[0], scaleFactor[1], scaleFactor[2]);
 
-      udet.shape->draw();
+      m_instrActor->getComponentInfo().shape(udet.detIndex).draw();
 
       glPopMatrix();
     }
@@ -191,7 +204,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
 * @param picking :: True if detector is being drawn in the picking mode.
 *   In this case index is transformed into color
 */
-void UnwrappedSurface::setColor(int index, bool picking) const {
+void UnwrappedSurface::setColor(size_t index, bool picking) const {
   if (picking) {
     auto c = InstrumentActor::makePickColor(index);
     unsigned char r, g, b;
@@ -224,28 +237,16 @@ bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,
 */
 void UnwrappedSurface::componentSelected(size_t componentIndex) {
   const auto &componentInfo = m_instrActor->getComponentInfo();
-  const auto &detectorInfo = m_instrActor->getDetectorInfo();
   if (componentInfo.isDetector(componentIndex)) {
-    int detID = detectorInfo.detectorIDs()[componentIndex];
-    for (auto it = m_unwrappedDetectors.cbegin();
-         it != m_unwrappedDetectors.cend(); ++it) {
-      const auto &udet = *it;
-      if (udet.detID == detID) {
-        auto w = udet.width;
-        if (w > m_width_max)
-          w = m_width_max;
-        auto h = udet.height;
-        if (h > m_height_max)
-          h = m_height_max;
-        QRectF area(udet.u - w, udet.v - h, w * 2, h * 2);
-        zoom(area);
-        break;
-      }
-    }
+    const auto &udet = m_unwrappedDetectors[componentIndex];
+    zoom(getArea(udet, m_width_max, m_height_max));
+  } else {
+    auto detectors = componentInfo.detectorsInSubtree(componentIndex);
+    QRectF area;
+    for (auto det : detectors)
+      area |= getArea(m_unwrappedDetectors[det], m_width_max, m_height_max);
+    zoom(area);
   }
-
-  if (componentInfo.detectorsInSubtree(componentIndex).size() > 0)
-    zoom(componentInfo.boundingBox(componentIndex));
 }
 
 void UnwrappedSurface::getSelectedDetectors(QList<int> &dets) {
@@ -302,12 +303,13 @@ void UnwrappedSurface::getSelectedDetectors(QList<int> &dets) {
       break;
   }
 
+  const auto &detectorInfo = m_instrActor->getDetectorInfo();
   // select detectors with u,v within the allowed boundaries
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     UnwrappedDetector &udet = m_unwrappedDetectors[i];
     if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom &&
         udet.v <= vtop) {
-      dets.push_back(udet.detID);
+      dets.push_back(detectorInfo.detectorIDs()[udet.detIndex]);
     }
   }
 }
@@ -316,10 +318,11 @@ void UnwrappedSurface::getMaskedDetectors(QList<int> &dets) const {
   dets.clear();
   if (m_maskShapes.isEmpty())
     return;
+  const auto &detectorInfo = m_instrActor->getDetectorInfo();
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
     if (m_maskShapes.isMasked(udet.u, udet.v)) {
-      dets.append(udet.detID);
+      dets.append(detectorInfo.detectorIDs()[udet.detIndex]);
     }
   }
 }
@@ -477,19 +480,6 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
 * Zooms to the specified area. The previous zoom stack is cleared.
 */
 void UnwrappedSurface::zoom(const QRectF &area) {
-  doZoom(area);
-}
-
-void UnwrappedSurface::zoom(const Mantid::Geometry::BoundingBox &area) {
-  double left = area.xMin();
-  double top = area.yMin();
-  double width = abs(area.xMax() - area.xMin());
-  double height = abs(area.yMax() - area.yMin());
-
-  doZoom(QRectF(left, top, width, height));
-}
-
-void UnwrappedSurface::doZoom(const QRectF &area) {
   if (!m_zoomStack.isEmpty()) {
     m_viewRect = m_zoomStack.first();
     m_zoomStack.clear();
@@ -600,8 +590,9 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
   Mantid::Kernel::Quat R;
   this->rotate(udet, R);
 
-  Mantid::Geometry::BoundingBox bbox = udet.shape->getBoundingBox();
-  Mantid::Kernel::V3D scale = udet.scaleFactor;
+  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &bbox = componentInfo.shape(udet.detIndex).getBoundingBox();
+  auto scale = componentInfo.scaleFactor(udet.detIndex);
 
   // sizes of the detector along each 3D axis
   Mantid::Kernel::V3D size = bbox.maxPoint() - bbox.minPoint();

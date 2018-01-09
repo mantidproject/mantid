@@ -231,9 +231,8 @@ void ComponentInfo::setRotation(const size_t componentIndex,
                                Kernel::toQuaterniond(newRotation));
 }
 
-boost::shared_ptr<const IObject>
-ComponentInfo::shape(const size_t componentIndex) const {
-  return (*m_shapes)[componentIndex];
+const IObject &ComponentInfo::shape(const size_t componentIndex) const {
+  return *(*m_shapes)[componentIndex];
 }
 
 Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
@@ -260,11 +259,11 @@ double ComponentInfo::solidAngle(const size_t componentIndex,
       toShapeFrame(observer, *m_componentInfo, componentIndex);
   const Kernel::V3D scaleFactor = this->scaleFactor(componentIndex);
   if ((scaleFactor - Kernel::V3D(1.0, 1.0, 1.0)).norm() < 1e-12)
-    return shape(componentIndex)->solidAngle(relativeObserver);
+    return shape(componentIndex).solidAngle(relativeObserver);
   else {
     // This function will scale the object shape when calculating the solid
     // angle.
-    return shape(componentIndex)->solidAngle(relativeObserver, scaleFactor);
+    return shape(componentIndex).solidAngle(relativeObserver, scaleFactor);
   }
 }
 
@@ -400,7 +399,7 @@ ComponentInfo::componentBoundingBox(const size_t index,
     return BoundingBox(); // Return null bounding box
   }
   const auto &s = this->shape(index);
-  BoundingBox absoluteBB = s->getBoundingBox();
+  BoundingBox absoluteBB = s.getBoundingBox();
 
   // modify in place for speed
   const Eigen::Vector3d scaleFactor = m_componentInfo->scaleFactor(index);
