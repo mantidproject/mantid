@@ -132,9 +132,6 @@ protected:
 
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm();
 
-  void plotGuess(MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                 Mantid::API::IFunction_const_sptr function);
-
   Mantid::API::MatrixWorkspace_sptr
   createGuessWorkspace(Mantid::API::IFunction_const_sptr func, size_t wsIndex);
 
@@ -173,12 +170,13 @@ protected slots:
 
   virtual void updatePreviewPlots() = 0;
 
+  virtual void plotGuess() = 0;
+
 private:
   /// Overidden by child class.
   void setup() override = 0;
   void run() override = 0;
   void loadSettings(const QSettings &settings) override = 0;
-  virtual void plotGuess() = 0;
   virtual void disablePlotGuess() = 0;
   virtual void enablePlotGuess() = 0;
   QSet<QString> parameterNames();

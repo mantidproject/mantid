@@ -114,9 +114,13 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           this, SLOT(plotGuess()));
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
           SLOT(rangeChanged(double, double)));
+  connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
+          SLOT(plotGuess()));
 
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(fitFunctionChanged()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(plotGuess()));
 }
 
 void IndirectFitAnalysisTab::addPropertyBrowserToUI(UIForm form) {
@@ -404,6 +408,8 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
       wsName.toStdString());
   m_fitPropertyBrowser->setWorkspaceName(wsName);
   setInputWorkspace(inputWs);
+  if (m_guessWorkspace)
+    m_guessWorkspace.reset();
   m_defaultPropertyValues = createDefaultValues();
   m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
   setPreviewPlotWorkspace(inputWs);
@@ -547,7 +553,7 @@ void IndirectFitAnalysisTab::executeSequentialFit() {
 }
 
 IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
-  return m_fitPropertyBrowser->getFittingFunction();
+  return m_fitPropertyBrowser->compositeFunction();
 }
 
 MatrixWorkspace_sptr IndirectFitAnalysisTab::fitWorkspace() const {
@@ -593,44 +599,40 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
 }
 
 /*
-* Plots a guess of the fit for the specified function, in the
-* specified preview plot widget.
-*
-* @param previewPlot The preview plot widget in which to plot
-*                    the guess.
-* @param function    The function to fit.
-*/
+ * Plots a guess of the fit for the specified function, in the
+ * specified preview plot widget.
+ *
+ * @param previewPlot The preview plot widget in which to plot
+ *                    the guess.
+ */
 void IndirectFitAnalysisTab::plotGuess(
-  MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-  IFunction_const_sptr function) {
+    MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
   previewPlot->removeSpectrum("Guess");
 
   if (inputWorkspace()) {
-
-    if (!m_guessWorkspace || selectedSpectrum() != m_guessSpectrum) {
-      m_guessWorkspace = createGuessWorkspace(function, selectedSpectrum());
-      m_guessSpectrum = selectedSpectrum();
-    }
+    m_guessWorkspace = createGuessWorkspace(fitFunction(), selectedSpectrum());
+    m_guessSpectrum = selectedSpectrum();
 
     // Check whether the guess workspace has enough data points
     // to plot
-    if (m_guessWorkspace->x(0).size() >= 2) {
+    if (m_guessWorkspace->x(0).size() >= 2)
       previewPlot->addSpectrum("Guess", m_guessWorkspace, 0, Qt::green);
-    }
+    else
+      m_guessWorkspace.reset();
   }
 }
 
 /*
-* Creates a guess workspace, for approximating a fit with the specified
-* function on the input workspace.
-*
-* @param func    The function to fit.
-* @param wsIndex The index of the input workspace to create a guess for.
-* @return        A guess workspace containing the guess data for the fit.
-*/
+ * Creates a guess workspace, for approximating a fit with the specified
+ * function on the input workspace.
+ *
+ * @param func    The function to fit.
+ * @param wsIndex The index of the input workspace to create a guess for.
+ * @return        A guess workspace containing the guess data for the fit.
+ */
 MatrixWorkspace_sptr
 IndirectFitAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
-  size_t wsIndex) {
+                                             size_t wsIndex) {
   const auto inputWS = inputWorkspace();
   const auto binIndexLow = inputWS->binIndexOf(startX());
   const auto binIndexHigh = inputWS->binIndexOf(endX());
@@ -640,30 +642,30 @@ IndirectFitAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
 
   std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
-    dataX.begin());
+            dataX.begin());
   const auto dataY = computeOutput(func, dataX);
 
   if (dataY.empty())
     return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
   IAlgorithm_sptr createWsAlg =
-    createWorkspaceAlgorithm("__GuessAnon", 1, dataX, dataY);
+      createWorkspaceAlgorithm("__GuessAnon", 1, dataX, dataY);
   createWsAlg->execute();
   return createWsAlg->getProperty("OutputWorkspace");
 }
 
 /*
-* Computes the output vector of applying the specified function to
-* the specified input vector.
-*
-* @param func    The function to apply.
-* @param dataX   Vector of input data.
-* @return        Vector containing values calculated from applying
-*                the specified function to the input data.
-*/
+ * Computes the output vector of applying the specified function to
+ * the specified input vector.
+ *
+ * @param func    The function to apply.
+ * @param dataX   Vector of input data.
+ * @return        Vector containing values calculated from applying
+ *                the specified function to the input data.
+ */
 std::vector<double>
 IndirectFitAnalysisTab::computeOutput(IFunction_const_sptr func,
-  const std::vector<double> &dataX) {
+                                      const std::vector<double> &dataX) {
   if (dataX.empty())
     return std::vector<double>();
 
@@ -679,21 +681,21 @@ IndirectFitAnalysisTab::computeOutput(IFunction_const_sptr func,
 }
 
 /*
-* Generates and returns an algorithm for creating a workspace, with
-* the specified name, number of spectra and containing the specified
-* x data and y data.
-*
-* @param workspaceName The name of the workspace to create.
-* @param numSpec       The number of spectra in the workspace to create.
-* @param dataX         The x data to add to the created workspace.
-* @param dataY         The y data to add to the created workspace.
-* @return              An algorithm for creating the workspace.
-*/
+ * Generates and returns an algorithm for creating a workspace, with
+ * the specified name, number of spectra and containing the specified
+ * x data and y data.
+ *
+ * @param workspaceName The name of the workspace to create.
+ * @param numSpec       The number of spectra in the workspace to create.
+ * @param dataX         The x data to add to the created workspace.
+ * @param dataY         The y data to add to the created workspace.
+ * @return              An algorithm for creating the workspace.
+ */
 IAlgorithm_sptr IndirectFitAnalysisTab::createWorkspaceAlgorithm(
-  const std::string &workspaceName, int numSpec,
-  const std::vector<double> &dataX, const std::vector<double> &dataY) {
+    const std::string &workspaceName, int numSpec,
+    const std::vector<double> &dataX, const std::vector<double> &dataY) {
   IAlgorithm_sptr createWsAlg =
-    AlgorithmManager::Instance().create("CreateWorkspace");
+      AlgorithmManager::Instance().create("CreateWorkspace");
   createWsAlg->initialize();
   createWsAlg->setChild(true);
   createWsAlg->setLogging(false);
