@@ -191,10 +191,16 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
 void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
   std::vector<Kernel::V3D> &intersectionPoints, std::vector<int> &entryExitFlags) const {
 
-  V3D vertex1, vertex2, vertex3;
+  V3D vertex1, vertex2, vertex3, intersection;
+  int entryExit;
   for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); i++) {
-
+    if (rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3, 
+      intersection, entryExit )) {
+      intersectionPoints.push_back(intersection);
+      entryExitFlags.push_back(entryExit);
+    }
   }
+  // still need to deal with edge cases
 
 }
 
@@ -206,10 +212,11 @@ void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &d
 * @param v2 :: Second vertex of triangle
 * @param v3 :: Third vertex of triangle
 * @param intersection :: Intersection point
+* @param entryExit :: 1 if intersection is entry, -1 if exit
 * @returns true if there is an intersection
 */
 bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction,
-  const V3D &v1, const V3D &v2, const V3D &v3, V3D &intersection) const {
+  const V3D &v1, const V3D &v2, const V3D &v3, V3D &intersection, int &entryExit) const {
   // Implements Möller–Trumbore intersection algorithm
   V3D edge1, edge2, h, s, q;
   double a, f, u, v;
@@ -236,6 +243,15 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
   if (t > EPSILON) // ray intersection
   {
     intersection = start + direction * t;
+
+    // determine entry exit assuming anticlockwise trinagle view from outside
+    V3D normalDirection = edge2.cross_prod(edge1);
+    if (normalDirection.scalar_prod(direction) > 0.0) {
+      entryExit = -1; //exit
+    }
+    else {
+      entryExit = 1; //entry
+    }
     return true;
   }
   else // This means that intersection occurs on the line of the ray behind the ray.
