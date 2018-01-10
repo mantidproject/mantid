@@ -796,9 +796,8 @@ double Peak::getSigmaIntensity() const { return m_sigmaIntensity; }
 
 /** Return the peak intensity divided by the error in the intensity */
 double Peak::getIntensityOverSigma() const {
-  if (m_sigmaIntensity == 0)
-    return 0;
-  return m_intensity / m_sigmaIntensity;
+  const auto result = m_intensity / m_sigmaIntensity;
+  return (std::isinf(result)) ? 0.0 : result;
 }
 
 /** Set the integrated peak intensity

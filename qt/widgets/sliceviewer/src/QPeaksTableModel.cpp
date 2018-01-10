@@ -174,27 +174,28 @@ QPeaksTableModel::QPeaksTableModel(
       },
       [](const IPeak &peak) { return QVariant(peak.getRow()); },
       [](const IPeak &peak) { return QVariant(peak.getCol()); },
-      [&v3dAsString](const IPeak &peak) {
-        return v3dAsString(peak.getQLabFrame());
+      [](const IPeak &peak) {
+        return QVariant(peak.getQLabFrame().norm());
       },
-      [&v3dAsString](const IPeak &peak) {
-        return v3dAsString(peak.getQSampleFrame());
+      [](const IPeak &peak) {
+        return QVariant(peak.getQSampleFrame().norm());
       },
   };
 
+  const auto hklPrec = m_hklPrec;
   // Mapping member functions of the Peak object to a column index with
   // formatting for displaying data to the user
   m_formattedValueLookup = {
       [](const IPeak &peak) { return QString::number(peak.getRunNumber()); },
       [](const IPeak &peak) { return QString::number(peak.getDetectorID()); },
-      [this](const IPeak &peak) {
-        return QString::number(peak.getH(), 'f', m_hklPrec);
+      [&hklPrec](const IPeak &peak) {
+        return QString::number(peak.getH(), 'f', hklPrec);
       },
-      [this](const IPeak &peak) {
-        return QString::number(peak.getK(), 'f', m_hklPrec);
+      [&hklPrec](const IPeak &peak) {
+        return QString::number(peak.getK(), 'f', hklPrec);
       },
-      [this](const IPeak &peak) {
-        return QString::number(peak.getL(), 'f', m_hklPrec);
+      [&hklPrec](const IPeak &peak) {
+        return QString::number(peak.getL(), 'f', hklPrec);
       },
       [](const IPeak &peak) {
         return QString::number(peak.getWavelength(), 'f', 4);
