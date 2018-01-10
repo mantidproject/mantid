@@ -1,5 +1,5 @@
-#ifndef MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H
-#define MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H
+#ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
+#define MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
 
@@ -72,15 +72,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class EXPORT_OPT_MANTIDQT_COMMON QWorkspaceDockView
-    : public QDockWidget,
+class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
+    : public QWidget,
       public IWorkspaceDockView,
-      public boost::enable_shared_from_this<QWorkspaceDockView> {
+      public boost::enable_shared_from_this<WorkspaceTreeWidget> {
   Q_OBJECT
 public:
-  explicit QWorkspaceDockView(MantidQt::MantidWidgets::MantidDisplayBase *mui,
-                              QMainWindow *parent);
-  ~QWorkspaceDockView();
+  explicit WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
+                               QWidget *parent = nullptr);
+  ~WorkspaceTreeWidget();
   void dropEvent(QDropEvent *de) override;
   void init() override;
   MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
@@ -237,7 +237,7 @@ private:
   QString selectedWsName;
   QPoint m_menuPosition;
   QString m_programName;
-  MantidDisplayBase *const m_mantidUI;
+  MantidDisplayBase *const m_mantidDisplayModel;
 
   std::string m_filteredText;
   QPushButton *m_loadButton;
@@ -264,7 +264,6 @@ private:
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
   bool m_promptDelete;
-  QMainWindow *m_appParent;
   SaveFileType m_saveFileType;
   SortCriteria m_sortCriteria;
   SortDirection m_sortDirection;
@@ -283,4 +282,4 @@ signals:
 };
 }
 }
-#endif // MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H
+#endif // MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H

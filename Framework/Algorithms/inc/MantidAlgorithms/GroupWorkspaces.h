@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHM_GROUP_H_
 #define MANTID_ALGORITHM_GROUP_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
@@ -41,10 +38,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport GroupWorkspaces : public API::Algorithm {
+class DLLExport GroupWorkspaces : public API::DistributedAlgorithm {
 public:
-  /// Default constructor
-  GroupWorkspaces();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GroupWorkspaces"; }
   /// Summary of algorithms purpose

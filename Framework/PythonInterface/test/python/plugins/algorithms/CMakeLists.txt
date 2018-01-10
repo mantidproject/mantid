@@ -49,6 +49,7 @@ set ( TEST_PY_FILES
   LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
+  LoadLampTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
   LoadNMoldyn3AsciiTest.py

@@ -6,6 +6,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	inc/MantidBeamline/ComponentInfo.h
+        inc/MantidBeamline/ComponentType.h
 	inc/MantidBeamline/DetectorInfo.h
 	inc/MantidBeamline/SpectrumInfo.h
 )
