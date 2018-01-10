@@ -486,99 +486,159 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # List of wavelengths
         waves = np.array(self._waves)
 
-        # Sample cross section (value for each of the wavelengths and for E = Efixed)
-        sample_x_section = (sam_material.totalScatterXSection() +
-                            sam_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._sample_density
-
-        if self._efixed > 0:
-            sample_x_section_efixed = (sam_material.totalScatterXSection() +
-                                       sam_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._sample_density
-        elif self._emode == 'Elastic':
-            sample_x_section_efixed = 0
-
-        # Sample --> Ass
-        if self._emode == 'Efixed':
-            ki_s = sample_x_section_efixed * self._sample_thickness / salpha
-            kf_s = sample_x_section_efixed * self._sample_thickness / stha
-        else:
-            ki_s, kf_s = self._calc_ki_kf(waves, self._sample_thickness, salpha, stha,
-                                          sample_x_section, sample_x_section_efixed)
-
         sst = np.vectorize(self._self_shielding_transmission)
         ssr = np.vectorize(self._self_shielding_reflection)
-        if theta < alpha or theta > (alpha + np.pi):
-            # transmission case
-            ass = sst(ki_s, kf_s)
-        else:
-            # reflection case
-            ass = ssr(ki_s, kf_s)
+
+        # Check sample input
+        sampleIn = self._sample_density and self._sample_thickness and (sam_material.totalScatterXSection() + sam_material.absorbXSection())
+
+        if sampleIn:
+            # Sample cross section (value for each of the wavelengths and for E = Efixed)
+            sample_x_section = (sam_material.totalScatterXSection() +
+                                sam_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._sample_density
+
+            if self._efixed > 0:
+                sample_x_section_efixed = (sam_material.totalScatterXSection() +
+                                           sam_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._sample_density
+            elif self._emode == 'Elastic':
+                sample_x_section_efixed = 0
+
+            # Sample --> Ass
+            if self._emode == 'Efixed':
+                ki_s = sample_x_section_efixed * self._sample_thickness / salpha
+                kf_s = sample_x_section_efixed * self._sample_thickness / stha
+            else:
+                ki_s, kf_s = self._calc_ki_kf(waves, self._sample_thickness, salpha, stha,
+                                              sample_x_section, sample_x_section_efixed)
+
+            if theta < alpha or theta > (alpha + np.pi):
+                # transmission case
+                ass = sst(ki_s, kf_s)
+            else:
+                # reflection case
+                ass = ssr(ki_s, kf_s)
 
         # Container --> Acc, Assc, Acsc
         if self._use_can:
             can_sample = mtd[self._can_ws_name].sample()
             can_material = can_sample.getMaterial()
 
-            # Calculate can cross section (value for each of the wavelengths and for E = Efixed)
-            can_x_section = (can_material.totalScatterXSection() +
-                             can_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._can_density
-
-            if self._efixed > 0:
-                can_x_section_efixed = (can_material.totalScatterXSection() +
-                                        can_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._can_density
-            elif self._emode == 'Elastic':
-                can_x_section_efixed = 0
-
-            # Front container --> Acc1
-            if self._emode == 'Efixed':
-                ki_c1 = can_x_section_efixed * self._can_front_thickness / salpha
-                kf_c1 = can_x_section_efixed * self._can_front_thickness / stha
+            # Check can input
+            if self._can_density and (can_material.totalScatterXSection() + can_material.absorbXSection()):
+                canFrontIn = self._can_front_thickness
+                canBackIn = self._can_back_thickness
             else:
-                ki_c1, kf_c1 = self._calc_ki_kf(waves, self._can_front_thickness, salpha, stha,
-                                                can_x_section, can_x_section_efixed)
+                canFrontIn = False
+                canBackIn = False
 
-            if theta < alpha or theta > (alpha + np.pi):
-                # transmission case
-                acc1 = sst(ki_c1, kf_c1)
-            else:
-                # reflection case
-                acc1 = ssr(ki_c1, kf_c1)
+            if canFrontIn or canBackIn:
+                # Calculate can cross section (value for each of the wavelengths and for E = Efixed)
+                can_x_section = (can_material.totalScatterXSection() +
+                                 can_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._can_density
 
-            # Back container --> Acc2
-            if self._emode == 'Efixed':
-                ki_c2 = can_x_section_efixed * self._can_back_thickness / salpha
-                kf_c2 = can_x_section_efixed * self._can_back_thickness / stha
-            else:
-                ki_c2, kf_c2 = self._calc_ki_kf(waves, self._can_back_thickness, salpha, stha,
-                                                can_x_section, can_x_section_efixed)
+                if self._efixed > 0:
+                    can_x_section_efixed = (can_material.totalScatterXSection() +
+                                            can_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._can_density
+                elif self._emode == 'Elastic':
+                    can_x_section_efixed = 0
 
-            if theta < alpha or theta > (alpha + np.pi):
-                # transmission case
-                acc2 = sst(ki_c2, kf_c2)
-            else:
-                # reflection case
-                acc2 = ssr(ki_c2, kf_c2)
+            if canFrontIn:
+                # Front container --> Acc1
+                if self._emode == 'Efixed':
+                    ki_c1 = can_x_section_efixed * self._can_front_thickness / salpha
+                    kf_c1 = can_x_section_efixed * self._can_front_thickness / stha
+                else:
+                    ki_c1, kf_c1 = self._calc_ki_kf(waves, self._can_front_thickness, salpha, stha,
+                                                    can_x_section, can_x_section_efixed)
+
+                if theta < alpha or theta > (alpha + np.pi):
+                    # transmission case
+                    acc1 = sst(ki_c1, kf_c1)
+                else:
+                    # reflection case
+                    acc1 = ssr(ki_c1, kf_c1)
+
+            if canBackIn:
+                # Back container --> Acc2
+                if self._emode == 'Efixed':
+                    ki_c2 = can_x_section_efixed * self._can_back_thickness / salpha
+                    kf_c2 = can_x_section_efixed * self._can_back_thickness / stha
+                else:
+                    ki_c2, kf_c2 = self._calc_ki_kf(waves, self._can_back_thickness, salpha, stha,
+                                                    can_x_section, can_x_section_efixed)
+
+                if theta < alpha or theta > (alpha + np.pi):
+                    # transmission case
+                    acc2 = sst(ki_c2, kf_c2)
+                else:
+                    # reflection case
+                    acc2 = ssr(ki_c2, kf_c2)
 
             # Attenuation due to passage by other layers (sample or container)
             if theta < alpha or theta > (alpha + np.pi):                  # transmission case
-                acc = self._can_front_thickness * acc1 * np.exp(-kf_c2)
-                acc += self._can_back_thickness * acc2 * np.exp(-ki_c1)
-                acc /= (self._can_front_thickness + self._can_back_thickness)
+                if canFrontIn and canBackIn:
+                    acc = self._can_front_thickness * acc1 * np.exp(-kf_c2)
+                    acc += self._can_back_thickness * acc2 * np.exp(-ki_c1)
+                    acc /= (self._can_front_thickness + self._can_back_thickness)
+                elif canFrontIn:
+                    acc = acc1
+                elif canBackIn:
+                    acc = acc2
 
-                acsc = self._can_front_thickness * acc1 * np.exp(-kf_s-kf_c2)
-                acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1-ki_s)
-                acsc /= (self._can_front_thickness + self._can_back_thickness)
+                if sampleIn:
+                    if canFrontIn and canBackIn:
+                        acsc = self._can_front_thickness * acc1 * np.exp(-kf_s-kf_c2)
+                        acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1-ki_s)
+                        acsc /= (self._can_front_thickness + self._can_back_thickness)
+                    elif canFrontIn:
+                        acsc = acc1 * np.exp(-kf_s)
+                    elif canBackIn:
+                        acsc = acc2 * np.exp(-ki_s)
+                    else:
+                        acsc = 0.5*np.exp(-kf_s) + 0.5*np.exp(-ki_s)
+                else:
+                    acsc = acc
 
-                assc = ass * np.exp(-ki_c1-kf_c2)
+                if canFrontIn and canBackIn:
+                    assc = ass * np.exp(-ki_c1-kf_c2)
+                elif canFrontIn:
+                    assc = ass * np.exp(-ki_c1)
+                elif canBackIn:
+                    assc = ass * np.exp(-kf_c2)
+                else:
+                    assc = ass
             else:                                                          # reflection case
-                acc = self._can_front_thickness * acc1
-                acc += self._can_back_thickness * acc2 * np.exp(-ki_c1-kf_c1)
-                acc /= (self._can_front_thickness + self._can_back_thickness)
+                if canFrontIn and canBackIn:
+                    acc = self._can_front_thickness * acc1
+                    acc += self._can_back_thickness * acc2 * np.exp(-ki_c1-kf_c1)
+                    acc /= (self._can_front_thickness + self._can_back_thickness)
+                elif canFrontIn:
+                    acc = acc1
+                elif canBackIn:
+                    acc = acc2
 
-                acsc = self._can_front_thickness * acc1
-                acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1-ki_s-kf_s-kf_c1)
-                acsc /= (self._can_front_thickness + self._can_back_thickness)
+                if sampleIn:
+                    if canFrontIn and canBackIn:
+                        acsc = self._can_front_thickness * acc1
+                        acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1-ki_s-kf_s-kf_c1)
+                        acsc /= (self._can_front_thickness + self._can_back_thickness)
+                    elif canFrontIn:
+                        acsc = acc1
+                    elif canBackIn:
+                        acsc = acc2 * np.exp(-ki_s-kf_s)
+                    else:
+                        acsc = acsc = 0.5 + 0.5*np.exp(-ki_s-kf_s)
+                else:
+                    acsc = acc
 
-                assc = ass * np.exp(-ki_c1-kf_c1)
+                if canFrontIn and canBackIn:
+                    assc = ass * np.exp(-ki_c1-kf_c1)
+                elif canFrontIn:
+                    assc = ass * np.exp(-ki_c1-kf_c1)
+                elif canBackIn:
+                    assc = ass
+                else:
+                    assc = ass
 
         return ass, assc, acsc, acc
 
