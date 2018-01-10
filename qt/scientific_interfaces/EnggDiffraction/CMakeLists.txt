@@ -16,6 +16,7 @@ set ( INC_FILES
 	EnggDiffFittingPresenter.h
 	EnggDiffFittingViewQtWidget.h
 	EnggDiffGSASFittingPresenter.h
+	EnggDiffGSASRefinementMethod.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
