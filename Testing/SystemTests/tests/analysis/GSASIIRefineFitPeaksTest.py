@@ -21,7 +21,8 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
     _LATTICE_PARAM_TBL_NAME = "LatticeParameters"
     _RESIDUALS_TBL_NAME = "Residuals"
     _INPUT_WORKSPACE_FILENAME = "focused_bank1_ENGINX00256663.nxs"
-    _PHASE_FILENAME = "FE_ALPHA.cif"
+    _PHASE_FILENAME_1 = "Fe-gamma.cif"
+    _PHASE_FILENAME_2 = "Fe-alpha.cif"
     _INST_PARAM_FILENAME = "template_ENGINX_241391_236516_North_bank.prm"
     _TEMP_DIR = tempfile.gettempdir()
     _path_to_gsas = None
@@ -83,7 +84,7 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
         self.fitted_peaks_ws, self.residuals_table, self.lattice_params_table = \
             GSASIIRefineFitPeaks(RefinementMethod=self._get_refinement_method(),
                                  InputWorkspace=self.input_ws,
-                                 PhaseInfoFile=self.phase_file_path(),
+                                 PhaseInfoFiles=self.phase_file_paths(),
                                  InstrumentFile=self.inst_param_file_path(),
                                  PathToGSASII=gsas_path,
                                  SaveGSASIIProjectFile=self._get_gsas_proj_filename(),
