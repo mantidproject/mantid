@@ -30,7 +30,7 @@ using namespace Mantid::PythonInterface::Registry;
 using namespace Mantid::Indexing;
 using namespace boost::python;
 
-GET_POINTER_SPECIALIZATION(Workspace2D);
+GET_POINTER_SPECIALIZATION(Workspace2D)
 
 class Workspace2DPickleSuite : public boost::python::pickle_suite {
 public:
@@ -112,12 +112,13 @@ public:
 
     for (size_t i = 0; i < static_cast<size_t>(len(spectraList)); ++i) {
       std::vector<double> spectraData =
-          NDArrayToVector<double>(spectraList[i])();
-      std::vector<double> errorData = NDArrayToVector<double>(errorList[i])();
+          NDArrayToVector<double>(boost::python::object(spectraList[i]))();
+      std::vector<double> errorData =
+          NDArrayToVector<double>(boost::python::object(errorList[i]))();
       std::vector<double> binEdgeData =
-          NDArrayToVector<double>(binEdgeList[i])();
+          NDArrayToVector<double>(boost::python::object(binEdgeList[i]))();
       std::vector<size_t> detectorIndices =
-          NDArrayToVector<size_t>(detectorList[i])();
+          NDArrayToVector<size_t>(boost::python::object(detectorList[i]))();
       SpectrumNumber specNum =
           static_cast<SpectrumNumber>(extract<int32_t>(specNumList[i]));
 
