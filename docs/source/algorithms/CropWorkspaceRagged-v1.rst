@@ -17,7 +17,7 @@ workspace.
 The minimum and maximum values that are specified are interpreted as follows:
 
 * One value per spectrum. If there is only one value overall, it is used for all of the spectra.
-* ``numpy.nan`` or ``math.nan`` is interpreted to mean use the data's minimum or maximum x-value.
+* ``numpy.nan``, ``math.nan``, and ``np.inf`` are interpreted to mean use the data's minimum or maximum x-value.
 
 Usage
 -----
