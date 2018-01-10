@@ -23,12 +23,6 @@ public:
   MockWorkspaceDockView() {}
   ~MockWorkspaceDockView() override {}
 
-  void init() override {
-    auto presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
-    m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
-    presenter->init();
-  }
-
   MOCK_CONST_METHOD2(askUserYesNo, bool(const std::string &caption,
                                         const std::string &message));
   MOCK_CONST_METHOD2(showCriticalUserMessage, void(const std::string &caption,

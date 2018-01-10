@@ -77,13 +77,13 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
   setupConnections();
 
   m_tree->setDragEnabled(true);
-}
 
-WorkspaceTreeWidget::~WorkspaceTreeWidget() {
   auto presenter = boost::make_shared<WorkspacePresenter>(*this);
   m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
   presenter->init();
 }
+
+WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
 
 /**
 * Accept a drag drop event and process the data appropriately
