@@ -164,6 +164,48 @@ public:
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
   }
+
+    void test_selectValidRunPlotFitResults() {
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
+    auto mockModel_ptr = mockModel.get();
+
+    auto mockView = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffGSASFittingView>>();
+    auto mockView_ptr = mockView.get();
+
+    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
+                                      std::move(mockView));
+
+    const std::pair<int, size_t> selectedRunLabel = std::make_pair(123, 1);
+    EXPECT_CALL(*mockView_ptr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(selectedRunLabel));
+
+    const auto sampleWorkspace =
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100);
+    EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(123, 1))
+        .Times(1)
+        .WillOnce(Return(sampleWorkspace));
+    EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(123, 1))
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*mockModel_ptr, getFittedPeaks(123, 1))
+        .WillOnce(Return(sampleWorkspace));
+
+    EXPECT_CALL(*mockView_ptr, resetCanvas()).Times(1);
+    EXPECT_CALL(*mockView_ptr, plotCurve(testing::_)).Times(2);
+    EXPECT_CALL(*mockView_ptr, userWarning(testing::_)).Times(0);
+
+    pres.notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
+               "not satisfied",
+               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
+    TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
+               "not satisfied",
+               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+  }
+
 };
 
 #endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFGSASFITTINGPRESENTERTEST_H_

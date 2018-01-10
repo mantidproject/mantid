@@ -31,13 +31,14 @@ public:
    Plot a Qwt curve in the canvas
    @param curve The curve to plot
    */
-  virtual void plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) = 0;
+  virtual void
+  plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) = 0;
 
   /**
    Reset canvas to avoid multiple plotting
    */
   virtual void resetCanvas() = 0;
-  
+
   /**
    Update the run list with labels of all runs loaded into the model
    @param runLabels Vector of run labels (as pairs)
