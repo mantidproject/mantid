@@ -77,18 +77,11 @@ private:
       std::map<size_t, size_t> &mutableDetExclusions,
       IteratorT &mutableIterator) const;
   template <typename IteratorT>
-  void
-  growBoundingBoxAsBankOfTubes(size_t index,
-                               const Geometry::BoundingBox *reference,
-                               Geometry::BoundingBox &mutableBB,
-                               std::map<size_t, size_t> &mutableDetExclusions,
-                               IteratorT &mutableIterator) const;
-  template <typename IteratorT>
-  void growBoundingBoxAsTube(size_t index,
-                             const Geometry::BoundingBox *reference,
-                             Geometry::BoundingBox &mutableBB,
-                             std::map<size_t, size_t> &mutableDetExclusions,
-                             IteratorT &mutableIterator) const;
+  void growBoundingBoxAsOutline(size_t index,
+                                const Geometry::BoundingBox *reference,
+                                Geometry::BoundingBox &mutableBB,
+                                std::map<size_t, size_t> &mutableDetExclusions,
+                                IteratorT &mutableIterator) const;
   void growBoundingBoxByDetectors(
       size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
       const std::map<size_t, size_t> &detectorExclusions) const;
