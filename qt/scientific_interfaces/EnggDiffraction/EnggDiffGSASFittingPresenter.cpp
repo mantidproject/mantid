@@ -70,6 +70,12 @@ void EnggDiffGSASFittingPresenter::processSelectRun() {
 
   m_view->resetCanvas();
   m_view->plotCurve(plottableCurve);
+
+  if (m_model->hasFittedPeaksForRun(runNumber, bank)) {
+    const auto fittedPeaks = m_model->getFittedPeaks(runNumber, bank);
+    const auto plottablePeaks = API::QwtHelper::curveDataFromWs(fittedPeaks);
+    m_view->plotCurve(plottablePeaks);
+  }
 }
 
 void EnggDiffGSASFittingPresenter::processStart() {}
