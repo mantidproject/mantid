@@ -14,18 +14,20 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import absolute_import
+from __future__ import (absolute_import, unicode_literals)
 
+# 3rdparty imports
 from mantidqt.widgets.messagedisplay import MessageDisplay
 from qtpy.QtWidgets import QHBoxLayout
 
+# local imports
 from workbench.plugins.base import PluginWidget
 
 
 class LogMessageDisplay(PluginWidget):
 
     def __init__(self, parent):
-        PluginWidget.__init__(self, parent)
+        super(LogMessageDisplay, self).__init__(parent)
 
         # layout
         self.display = MessageDisplay(parent)

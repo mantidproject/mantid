@@ -1,6 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H
 
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 

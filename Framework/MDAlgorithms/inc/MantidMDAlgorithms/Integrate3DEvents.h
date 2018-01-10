@@ -109,7 +109,7 @@ public:
 
 private:
   /// Get a list of events for a given Q
-  boost::optional<const std::vector<std::pair<double, Mantid::Kernel::V3D>> &>
+  const std::vector<std::pair<double, Mantid::Kernel::V3D>> *
   getEvents(const Mantid::Kernel::V3D &peak_q);
 
   bool correctForDetectorEdges(std::tuple<double, double, double> &radii,
