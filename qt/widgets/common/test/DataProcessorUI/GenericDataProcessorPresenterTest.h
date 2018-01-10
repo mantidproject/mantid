@@ -1,6 +1,5 @@
 #ifndef MANTID_MANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERTEST_H
 #define MANTID_MANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERTEST_H
-
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -606,9 +605,8 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
 
-    // We don't the view we will handle yet, so none of the methods below should
-    // be
-    // called
+    // We don't the view we will handle yet, so none of the methods below
+    // should be called
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(0);
     // Constructor
@@ -617,8 +615,8 @@ public:
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
 
-    // Check that the presenter updates the whitelist adding columns 'Group' and
-    // 'Options'
+    // Check that the presenter updates the whitelist adding columns 'Group'
+    // and 'Options'
     auto whitelist = presenter->getWhiteList();
     TS_ASSERT_EQUALS(whitelist.size(), 9);
     TS_ASSERT_EQUALS(whitelist.name(0), "Run(s)");
@@ -823,8 +821,8 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
-    // The user hits "append row" once, with the second, third, and fourth row
-    // selected.
+    // The user hits "append row" once, with the second, third, and fourth
+    // row selected.
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), rowlist);
     presenter->notify(DataProcessorPresenter::AppendRowFlag);
@@ -1166,6 +1164,7 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
     auto presenter = makeDefaultPresenterNoThread();
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -1183,7 +1182,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
@@ -1200,6 +1198,8 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+
     auto presenter = makeDefaultPresenterNoThread();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -1216,7 +1216,6 @@ public:
     // The user hits the "process" button
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(0));
-    expectGetOptions(mockMainPresenter, Exactly(0), "Params = \"0.1\"");
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
@@ -1232,6 +1231,8 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+
     auto presenter = makeDefaultPresenterNoThread();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -1252,7 +1253,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1276,6 +1276,8 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+
     auto presenter = makeDefaultPresenterNoThread();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -1298,7 +1300,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1324,8 +1325,10 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+
     auto presenter = makeDefaultPresenterNoThread();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     presenter->accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
@@ -1346,7 +1349,6 @@ public:
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), rowlist);
     expectAskUserYesNo(mockDataProcessorView, Exactly(0));
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -1358,10 +1360,11 @@ public:
   }
 
   void testProcessWithNotebook() {
-
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+
     auto presenter = makeDefaultPresenterNoThread();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -1379,7 +1382,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     expectNotebookIsEnabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1456,15 +1458,17 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
-  /*
-  * Test processing workspaces with non-standard names, with
-  * and without run_number information in the sample log.
-  */
+  ///*
+  //* Test processing workspaces with non-standard names, with
+  //* and without run_number information in the sample log.
+  //*/
   void testProcessCustomNames() {
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+
     auto presenter = makeDefaultPresenterNoThread();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -1503,7 +1507,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
@@ -2916,6 +2919,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
 
     // We don't know the view we will handle yet, so none of the methods below
     // should be called
@@ -2962,7 +2966,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -3073,6 +3076,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params='-0.10'");
 
     std::map<QString, QString> postprocesssMap = {{"dQ/Q", "Params"}};
     GenericDataProcessorPresenterNoThread presenter(
@@ -3096,7 +3100,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params='-0.10'");
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspace was stitched with params = '-0.04'

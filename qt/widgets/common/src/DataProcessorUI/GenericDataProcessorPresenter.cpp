@@ -267,9 +267,8 @@ Returns the name of the reduced workspace for a given row
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
-QString
-GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
-                                                       const QString &prefix) const {
+QString GenericDataProcessorPresenter::getReducedWorkspaceName(
+    const QStringList &data, const QString &prefix) const {
   return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
       data, m_whitelist, prefix);
 }
@@ -280,11 +279,11 @@ void GenericDataProcessorPresenter::settingsChanged() {
   m_processingOptions =
       convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
 
-  m_manager->invalidateAllProcessed();
-
   if (hasPostprocessing())
     m_postprocessing->m_options =
         m_mainPresenter->getPostprocessingOptionsAsString();
+
+  m_manager->invalidateAllProcessed();
 }
 
 bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
@@ -559,6 +558,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 bool GenericDataProcessorPresenter::hasPostprocessing() const {
   return bool(m_postprocessing);
 }
+
 /**
 Post-processes the workspaces created by the given rows together.
 @param groupData : the data in a given group as received from the tree manager
@@ -1585,6 +1585,8 @@ void GenericDataProcessorPresenter::accept(
   m_mainPresenter = mainPresenter;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
+  settingsChanged();
+
   m_mainPresenter->notifyADSChanged(m_workspaceList);
   // Presenter should initially be in the paused state
   m_mainPresenter->pause();

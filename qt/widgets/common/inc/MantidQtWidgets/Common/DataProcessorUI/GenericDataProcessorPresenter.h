@@ -175,13 +175,6 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
-  void setPreprocessingOptions(OptionsMap const &options) {
-    m_preprocessing.m_options = options;
-  }
-
-  void setPostprocessingOptions(QString const &options) {
-    m_postprocessing->m_options = options;
-  }
 
   boost::optional<PostprocessingStep> m_postprocessing;
 
