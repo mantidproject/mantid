@@ -51,6 +51,7 @@ if ( ENABLE_WORKBENCH )
 
   # ctest targets
   set ( PYTHON_TEST_FILES
+    mantidqt/test/test_algorithm_observer.py
     mantidqt/test/test_import.py
     mantidqt/utils/test/test_qt_utils.py
     mantidqt/utils/test/test_modal_tester.py
