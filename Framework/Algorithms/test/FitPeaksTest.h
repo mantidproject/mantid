@@ -55,7 +55,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  void test_multiPeaksMultiSpectra() {
+  void Pass_test_multiPeaksMultiSpectra() {
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -125,12 +125,12 @@ public:
     // spectrum 2
     double ws1peak0_height = param_ws->cell<double>(2, 2);
     double ws1peak0_width = param_ws->cell<double>(2, 4);
-    TS_ASSERT_DELTA(ws1peak0_height, 2., 1E-6);
+    TS_ASSERT_DELTA(ws1peak0_height, 4., 1E-6);
     TS_ASSERT_DELTA(ws1peak0_width, 0.17, 1E-6);
 
     double ws1peak1_height = param_ws->cell<double>(3, 2);
     double ws1peak1_width = param_ws->cell<double>(3, 4);
-    TS_ASSERT_DELTA(ws1peak1_height, 4., 1E-6);
+    TS_ASSERT_DELTA(ws1peak1_height, 2., 1E-6);
     TS_ASSERT_DELTA(ws1peak1_width, 0.12, 1E-6);
 
     // check the fitted peak workspace
@@ -144,6 +144,9 @@ public:
                     data_ws->histogram(0).x().front(), 1E-10);
     TS_ASSERT_DELTA(plot_ws->histogram(0).x().back(),
                     data_ws->histogram(0).x().back(), 1E-10);
+
+    // clean up
+    // TODO ...
   }
 
   //----------------------------------------------------------------------------------------------
@@ -363,13 +366,19 @@ public:
     TS_ASSERT(fit_peaks_alg.isExecuted());
     if (!fit_peaks_alg.isExecuted())
       return;
+
+    // get result: TODO FIXME - check all output workspaces size
+    // ... ...
+
+    // clean up
+    // ... ...
   }
 
   //----------------------------------------------------------------------------------------------
   /** Test fit Gaussian peaks with high background
    * @brief Later_test_HighBackgroundPeaks
    */
-  void Next_test_HighBackgroundPeaks() {
+  void test_HighBackgroundPeaks() {
     // load file to workspace
     std::string input_ws_name("PG3_733");
 

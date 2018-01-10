@@ -165,7 +165,7 @@ private:
       std::vector<double> *peak_chi2_vec);
 
   /// calculate peak+background for fitted
-  void calculateFittedPeaks();
+  void CalculateFittedPeaks();
 
   /// Get index of value X in a spectrum's X histogram
   size_t GetXIndex(size_t wi, double x);
