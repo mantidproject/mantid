@@ -109,6 +109,11 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "If true, all NaN values in the output workspace are "
                       "replaced using the ReplaceSpecialValues algorithm.",
                       Direction::Input);
+  alg.declareProperty(
+      make_unique<ArrayProperty<double>>(
+          "EAxisBinning", boost::make_shared<RebinParamsValidator>(true)),
+      "The bin parameters to use for the E axis (optional, in the format "
+      "used by the :ref:`algm-Rebin` algorithm).");
 }
 
 void SofQW::exec() {
@@ -146,10 +151,18 @@ void SofQW::exec() {
 API::MatrixWorkspace_sptr
 SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
                             const std::vector<double> &binParams,
-                            std::vector<double> &newAxis) {
+                            std::vector<double> &newAxis,
+                            const std::vector<double> &ebinParams) {
   // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(inputWorkspace->refX(0));
-  const int xLength = static_cast<int>(xAxis.size());
+  HistogramData::BinEdges xAxis(0);
+  int xLength;
+  if (ebinParams.empty()) {
+    xAxis = inputWorkspace->refX(0);
+    xLength = static_cast<int>(xAxis.size());
+  } else {
+    xLength = static_cast<int>(VectorHelper::createAxisFromRebinParams(
+        ebinParams, xAxis.mutableRawData()));
+  }
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(

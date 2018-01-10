@@ -73,7 +73,8 @@ void SofQWNormalisedPolygon::exec() {
   }
 
   RebinnedOutput_sptr outputWS =
-      this->setUpOutputWorkspace(*inputWS, getProperty("QAxisBinning"), m_Qout);
+      this->setUpOutputWorkspace(*inputWS, getProperty("QAxisBinning"), m_Qout,
+                                 getProperty("EAxisBinning"));
   g_log.debug() << "Workspace type: " << outputWS->id() << '\n';
   setProperty("OutputWorkspace", outputWS);
   const size_t nEnergyBins = inputWS->blocksize();
@@ -405,15 +406,27 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
  */
 RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
     const API::MatrixWorkspace &inputWorkspace,
-    const std::vector<double> &binParams, std::vector<double> &newAxis) {
+    const std::vector<double> &binParams, std::vector<double> &newAxis,
+    const std::vector<double> &ebinParams) {
+  using Kernel::VectorHelper::createAxisFromRebinParams;
+
+  HistogramData::BinEdges xAxis(0);
+  // Create vector to hold the new X axis values
+  if (ebinParams.empty()) {
+    xAxis = inputWorkspace.binEdges(0);
+  } else {
+    static_cast<void>(
+        createAxisFromRebinParams(ebinParams, xAxis.mutableRawData()));
+  }
+
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(
       VectorHelper::createAxisFromRebinParams(binParams, newAxis));
 
   // Create output workspace, bin edges are same as in inputWorkspace index 0
-  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1,
-                                                inputWorkspace.binEdges(0));
+  auto outputWorkspace =
+      create<RebinnedOutput>(inputWorkspace, yLength - 1, xAxis);
 
   // Create a binned numeric axis to replace the default vertical one
   Axis *const verticalAxis = new BinEdgeAxis(newAxis);
