@@ -110,7 +110,7 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   pPtsDataArray->setAttribute("format", "ascii");
   buf.str("");
   // get the triangles info
-  const auto &points = handle->getTriangleVertices().get();
+  const auto &points = handle->getTriangleVertices();
   size_t i;
   for (i = 0; i < points.size(); i++) {
     buf << points[i] << " ";
@@ -127,7 +127,7 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   pTrisDataArray->setAttribute("format", "ascii");
 
   buf.str("");
-  const auto &faces = handle->getTriangleFaces().get();
+  const auto &faces = handle->getTriangleFaces();
   for (i = 0; i < faces.size(); i++) {
     buf << faces[i] << " ";
   }
