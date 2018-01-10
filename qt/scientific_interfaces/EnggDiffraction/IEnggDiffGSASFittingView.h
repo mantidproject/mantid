@@ -1,6 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEW_H_
 
+#include "EnggDiffGSASRefinementMethod.h"
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -20,6 +22,46 @@ public:
    @return Filename to load
    */
   virtual std::string getFocusedFileName() const = 0;
+
+  /**
+   Get the path to export the created GSAS-II project file to
+   @return GSAS-II project path
+   */
+  virtual std::string getGSASIIProjectPath() const = 0;
+
+  /**
+   Get path to the instrument parameter file selected by the user for refinement
+   @return Instrument file path
+   */
+  virtual std::string getInstrumentFileName() const = 0;
+
+  /**
+   Get path to the directory containing the GSAS-II API
+   @return Path to GSAS-II installation directory
+   */
+  virtual std::string getPathToGSASII() const = 0;
+
+  /**
+   @return The minimum d-spacing to use in Pawley refinement
+   */
+  virtual double getPawleyDMin() const = 0;
+
+  /**
+   @return The weight for penalty function applied during Pawley refinement
+   */
+  virtual double getPawleyNegativeWeight() const = 0;
+
+  /**
+   Get paths to all phase files selected for refinement
+   @return Phase file paths
+   */
+  virtual std::vector<std::string> getPhaseFileNames() const = 0;
+
+  /**
+   Get the selected refinement method (Pawley or Rietveld)
+   @return Refinement method
+   */
+  virtual GSASRefinementMethod getRefinementMethod() const = 0;
 
   /**
    Get the run label (run number and bank id) currently selected in the list

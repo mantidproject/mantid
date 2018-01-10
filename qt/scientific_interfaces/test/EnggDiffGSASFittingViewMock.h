@@ -14,7 +14,22 @@ class MockEnggDiffGSASFittingView
 public:
   MOCK_CONST_METHOD0(getFocusedFileName, std::string());
 
+  MOCK_CONST_METHOD0(getGSASIIProjectPath, std::string());
+
+  MOCK_CONST_METHOD0(getInstrumentFileName, std::string());
+
+  MOCK_CONST_METHOD0(getPathToGSASII, std::string());
+
+  MOCK_CONST_METHOD0(getPhaseFileNames, std::vector<std::string>());
+
   MOCK_CONST_METHOD0(getSelectedRunLabel, std::pair<int, size_t>());
+
+  MOCK_CONST_METHOD0(getRefinementMethod,
+                     MantidQt::CustomInterfaces::GSASRefinementMethod());
+
+  MOCK_CONST_METHOD0(getPawleyDMin, double());
+
+  MOCK_CONST_METHOD0(getPawleyNegativeWeight, double());
 
   MOCK_METHOD1(plotCurve,
                void(const std::vector<boost::shared_ptr<QwtData>> &curve));
