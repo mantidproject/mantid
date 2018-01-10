@@ -83,7 +83,7 @@ public:
   bool hasShapeInfo() const { return !(m_shapeInfo == nullptr); }
   const detail::ShapeInfo &shapeInfo() const { return *m_shapeInfo; }
   /// Extract the vertices of the triangles
-  const std::vector<double> & getTriangleVertices();
+  const std::vector<double> &getTriangleVertices();
   /// Extract the Faces of the triangles
   const std::vector<int> &getTriangleFaces();
   /// Sets the geometry cache using the triangulation information provided
