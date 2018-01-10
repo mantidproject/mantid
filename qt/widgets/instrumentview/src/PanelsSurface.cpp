@@ -284,13 +284,16 @@ PanelsSurface::findFlatPanels(size_t rootIndex,
                               std::vector<bool> &visited) {
   const auto &componentInfo = m_instrActor->getComponentInfo();
   auto parentIndex = componentInfo.parent(rootIndex);
-
-  if (componentInfo.isStructuredBank(parentIndex)) {
+  auto componentType = componentInfo.componentType(parentIndex);
+  if (componentType == Mantid::Beamline::ComponentType::Rectangular ||
+      componentType == Mantid::Beamline::ComponentType::Structured) {
     /* Do nothing until the root index of the structured bank. */
     return boost::none;
   }
 
-  if (componentInfo.isStructuredBank(rootIndex)) {
+  componentType = componentInfo.componentType(rootIndex);
+  if (componentType == Mantid::Beamline::ComponentType::Rectangular ||
+      componentType == Mantid::Beamline::ComponentType::Structured) {
     processStructured(children, rootIndex);
     for (auto child : children)
       visited[child] = true;

@@ -157,7 +157,6 @@ public:
   BoundingBox boundingBox(const size_t componentIndex,
                           const BoundingBox *reference = nullptr) const;
   Beamline::ComponentType componentType(const size_t componentIndex) const;
-  bool isRectangularBank(const size_t componentIndex) const;
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   void merge(const ComponentInfo &other);
   size_t scanSize() const;

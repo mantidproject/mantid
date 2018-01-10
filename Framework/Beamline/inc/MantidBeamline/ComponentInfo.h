@@ -101,7 +101,8 @@ public:
       boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
       boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
       boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-      boost::shared_ptr<std::vector<ComponentType>> componentType,      boost::shared_ptr<const std::vector<std::string>> names,
+      boost::shared_ptr<std::vector<ComponentType>> componentType,
+      boost::shared_ptr<const std::vector<std::string>> names,
       int64_t sourceIndex, int64_t sampleIndex);
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;

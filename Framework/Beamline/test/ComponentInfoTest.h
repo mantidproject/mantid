@@ -422,20 +422,21 @@ public:
     auto componentRanges =
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
         std::vector<std::pair<size_t, size_t>>{ {0, 0}});
-    auto isRectangularBank = boost::make_shared<std::vector<bool>>(1, false);
+    auto componentTypes =
+        boost::make_shared<std::vector<Mantid::Beamline::ComponentType>>(
+            1, Mantid::Beamline::ComponentType::Generic);
     auto instrumentTree = boost::make_shared<std::vector<std::vector<size_t>>>(
         1, std::vector<size_t>{1, 2}); // invalid
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
       componentsInSubtree, componentRanges,
       parentIndices, instrumentTree, positions,
-      rotations, scaleFactors, isRectangularBank,
+      rotations, scaleFactors, componentTypes,
       names, -1, -1),
       std::invalid_argument &);
   }
 
   void test_read_positions_rotations() {
-
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
     // Resulting ComponentInfo
