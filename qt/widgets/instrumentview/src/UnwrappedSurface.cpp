@@ -38,10 +38,10 @@ QRectF getArea(const UnwrappedDetector &udet, double maxWidth,
   return QRectF(udet.u - w, udet.v - h, w * 2, h * 2);
 }
 } // namespace
-/**
- * Constructor.
- * @param rootActor :: The instrument actor.
- */
+  /**
+   * Constructor.
+   * @param rootActor :: The instrument actor.
+   */
 UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
     : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX),
       m_v_min(DBL_MAX), m_v_max(-DBL_MAX), m_height_max(0), m_width_max(0),
@@ -140,7 +140,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
   }
 
   const auto &componentInfo = m_instrActor->getComponentInfo();
-  for (const auto &udet: m_unwrappedDetectors) {
+  for (const auto &udet : m_unwrappedDetectors) {
     if (!componentInfo.hasShape(udet.detIndex))
       continue;
 

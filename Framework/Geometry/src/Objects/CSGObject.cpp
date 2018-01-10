@@ -1034,8 +1034,8 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
     {
       return rayTraceSolidAngle(observer);
     } else { // Compute a generic shape that has been triangulated
-      const auto &vertices = this->getTriangleVertices().get();
-      const auto &faces = this->getTriangleFaces().get();
+      const auto &vertices = this->getTriangleVertices();
+      const auto &faces = this->getTriangleFaces();
       double sangle(0.0), sneg(0.0);
       for (size_t i = 0; i < nTri; i++) {
         int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
@@ -1115,8 +1115,8 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
     //
     return rayTraceSolidAngle(observer); // so is this
   }
-  const auto &vertices = this->getTriangleVertices().get();
-  const auto &faces = this->getTriangleFaces().get();
+  const auto &vertices = this->getTriangleVertices();
+  const auto &faces = this->getTriangleFaces();
   double sangle(0.0), sneg(0.0);
   for (size_t i = 0; i < nTri; i++) {
     int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
@@ -1711,7 +1711,7 @@ void CSGObject::calcBoundingBoxByVertices() {
   auto vertCount = this->numberOfVertices();
 
   if (vertCount > 0) {
-    const auto &vertArray = this->getTriangleVertices().get();
+    const auto &vertArray = this->getTriangleVertices();
     // Unreasonable extents to be overwritten by loop
     constexpr double huge = 1e10;
     double minX, maxX, minY, maxY, minZ, maxZ;
@@ -2145,18 +2145,14 @@ size_t CSGObject::numberOfVertices() const {
 /**
 * get vertices
 */
-boost::optional<const std::vector<double> &> CSGObject::getTriangleVertices() const {
-  if (m_handler == nullptr)
-    return boost::none;
+const std::vector<double> &CSGObject::getTriangleVertices() const {
   return m_handler->getTriangleVertices();
 }
 
 /**
-* get faces
-*/
-boost::optional<const std::vector<int> &> CSGObject::getTriangleFaces() const {
-  if (m_handler == nullptr)
-    return boost::none;
+ * get faces
+ */
+const std::vector<int> &CSGObject::getTriangleFaces() const {
   return m_handler->getTriangleFaces();
 }
 
@@ -2164,8 +2160,8 @@ boost::optional<const std::vector<int> &> CSGObject::getTriangleFaces() const {
 * get info on standard shapes
 */
 void CSGObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                           std::vector<Kernel::V3D> &vectors, double &myradius,
-                           double &myheight) const {
+                              std::vector<Kernel::V3D> &vectors,
+                              double &myradius, double &myheight) const {
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;

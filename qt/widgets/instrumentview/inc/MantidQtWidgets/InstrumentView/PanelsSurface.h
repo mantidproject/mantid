@@ -54,7 +54,7 @@ public:
 protected:
   boost::optional<std::pair<std::vector<size_t>, Mantid::Kernel::V3D>>
   findFlatPanels(size_t rootIndex, const std::vector<size_t> &children,
-                   std::vector<bool> &visited);
+                 std::vector<bool> &visited);
 
   void processStructured(const std::vector<size_t> &children, size_t rootIndex);
 

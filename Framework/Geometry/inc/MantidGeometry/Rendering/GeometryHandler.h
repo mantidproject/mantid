@@ -60,10 +60,10 @@ protected:
   RectangularDetector *m_rectDet = nullptr;
   StructuredDetector *m_structDet = nullptr;
   IObjComponent *m_objComp =
-      nullptr;             ///< ObjComponent that uses this geometry handler
+      nullptr;                ///< ObjComponent that uses this geometry handler
   CSGObject *m_obj = nullptr; ///< Object that uses this geometry handler
 public:
-  GeometryHandler(IObjComponent *comp);           ///< Constructor
+  GeometryHandler(IObjComponent *comp);              ///< Constructor
   GeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
   GeometryHandler(CSGObject *obj);                   ///< Constructor
   GeometryHandler(RectangularDetector *comp);
@@ -83,9 +83,9 @@ public:
   bool hasShapeInfo() const { return !(m_shapeInfo == nullptr); }
   const detail::ShapeInfo &shapeInfo() const { return *m_shapeInfo; }
   /// Extract the vertices of the triangles
-  boost::optional<const std::vector<double> &> getTriangleVertices();
+  const std::vector<double> & getTriangleVertices();
   /// Extract the Faces of the triangles
-  boost::optional<const std::vector<int> &> getTriangleFaces();
+  const std::vector<int> &getTriangleFaces();
   /// Sets the geometry cache using the triangulation information provided
   void setGeometryCache(size_t nPts, size_t nFaces, std::vector<double> &&pts,
                         std::vector<int> &&faces);

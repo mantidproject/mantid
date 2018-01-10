@@ -79,17 +79,18 @@ size_t GeometryHandler::numberOfPoints() {
   return 0;
 }
 
-boost::optional<const std::vector<double> &>
-GeometryHandler::getTriangleVertices() {
+const std::vector<double> &GeometryHandler::getTriangleVertices() {
+  static std::vector<double> empty;
   if (canTriangulate())
     return m_triangulator->getTriangleVertices();
-  return boost::none;
+  return empty;
 }
 
-boost::optional<const std::vector<int> &> GeometryHandler::getTriangleFaces() {
+const std::vector<int> &GeometryHandler::getTriangleFaces() {
+  static std::vector<int> empty;
   if (canTriangulate())
     return m_triangulator->getTriangleFaces();
-  return boost::none;
+  return empty;
 }
 
 void GeometryHandler::setGeometryCache(size_t nPts, size_t nFaces,

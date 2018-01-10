@@ -96,7 +96,8 @@ void RotationSurface::init() {
 
                                   auto pos = detectorInfo.position(i);
                                   auto rot = detectorInfo.rotation(i);
-                                  auto scaleFactor = componentInfo.scaleFactor(i);
+                                  auto scaleFactor =
+                                      componentInfo.scaleFactor(i);
                                   // Create the unwrapped shape
                                   UnwrappedDetector udet(
                                       m_instrActor->getColor(i), i);
@@ -221,7 +222,7 @@ void RotationSurface::findAndCorrectUGap() {
     return;
   }
 
-  for (const auto &udet: m_unwrappedDetectors) {
+  for (const auto &udet : m_unwrappedDetectors) {
     if (!m_instrActor->getComponentInfo().hasShape(udet.detIndex))
       continue;
     double u = udet.u;
@@ -258,7 +259,7 @@ void RotationSurface::findAndCorrectUGap() {
       m_u_max += period;
     }
 
-    for (auto &udet: m_unwrappedDetectors) {
+    for (auto &udet : m_unwrappedDetectors) {
       if (!m_instrActor->getComponentInfo().hasShape(udet.detIndex))
         continue;
       double &u = udet.u;

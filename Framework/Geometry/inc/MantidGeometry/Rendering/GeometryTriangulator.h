@@ -43,7 +43,7 @@ private:
   size_t m_nPoints;
   std::vector<double> m_points; ///< double array or points
   std::vector<int> m_faces;     ///< Integer array of faces
-  const CSGObject *m_obj;          ///< Input Object
+  const CSGObject *m_obj;       ///< Input Object
   void checkTriangulated();
 
 public:

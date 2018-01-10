@@ -260,8 +260,8 @@ private:
   size_t numberOfTriangles() const;
   size_t numberOfVertices() const;
   /// for solid angle from triangulation
-  boost::optional<const std::vector<int> &> getTriangleFaces() const;
-  boost::optional<const std::vector<double> &> getTriangleVertices() const;
+  const std::vector<int> &getTriangleFaces() const;
+  const std::vector<double> &getTriangleVertices() const;
   /// original shape xml used to generate this object.
   std::string m_shapeXML;
   /// Optional string identifier

@@ -76,9 +76,8 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(
-          boost::make_shared<
-              std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_componentIdToIndexMap(boost::make_shared<
+          std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
@@ -337,8 +336,8 @@ InstrumentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_instrumentTree, m_positions, m_rotations, m_scaleFactors,
-      m_componentType, m_names, m_sourceIndex, m_sampleIndex);
+      m_parentComponentIndices, m_instrumentTree, m_positions, m_rotations,
+      m_scaleFactors, m_componentType, m_names, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
