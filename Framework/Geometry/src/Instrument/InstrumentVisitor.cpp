@@ -70,8 +70,9 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(boost::make_shared<
-          std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_componentIdToIndexMap(
+          boost::make_shared<
+              std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
@@ -123,6 +124,24 @@ void InstrumentVisitor::walkInstrument() {
     m_instrument->registerContents(*this);
 }
 
+size_t InstrumentVisitor::commonRegistration(const IComponent &component) {
+  const size_t componentIndex = m_componentIds->size();
+  const ComponentID componentId = component.getComponentID();
+  markAsSourceOrSample(componentId, componentIndex);
+  // Record the ID -> index mapping
+  (*m_componentIdToIndexMap)[componentId] = componentIndex;
+  // For any non-detector we extend the m_componentIds from the back
+  m_componentIds->emplace_back(componentId);
+  m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
+  m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
+  m_shapes->emplace_back(m_nullShape);
+  m_componentType->push_back(Beamline::ComponentType::Generic);
+  m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
+  m_names->emplace_back(component.getName());
+  clearLegacyParameters(m_pmap, component);
+  return componentIndex;
+}
+
 size_t
 InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
 
@@ -137,7 +156,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
     children[i] = assemblyChildren[i]->registerContents(*this);
   }
   const size_t detectorStop = m_assemblySortedDetectorIndices->size();
-  const size_t componentIndex = m_componentIds->size();
+  const size_t componentIndex = commonRegistration(assembly);
   m_assemblySortedComponentIndices->push_back(componentIndex);
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
@@ -148,23 +167,11 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_componentRanges->emplace_back(
       std::make_pair(componentStart, componentStop));
 
-  // Record the ID -> index mapping
-  (*m_componentIdToIndexMap)[assembly.getComponentID()] = componentIndex;
-  // For any non-detector we extend the m_componentIds from the back
-  m_componentIds->emplace_back(assembly.getComponentID());
-  m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
-  m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
   // Now that we know what the index of the parent is we can apply it to the
   // children
   for (const auto &child : children) {
     (*m_parentComponentIndices)[child] = componentIndex;
   }
-  markAsSourceOrSample(assembly.getComponentID(), componentIndex);
-  m_shapes->emplace_back(m_nullShape);
-  m_componentType->push_back(Beamline::ComponentType::Generic);
-  m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
-  m_names->emplace_back(assembly.getName());
-  clearLegacyParameters(m_pmap, assembly);
   return componentIndex;
 }
 
@@ -182,11 +189,8 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_detectorRanges->emplace_back(
       std::make_pair(0, 0)); // Represents an empty range
   // Record the ID -> index mapping
-  const size_t componentIndex = m_componentIds->size();
-  (*m_componentIdToIndexMap)[component.getComponentID()] = componentIndex;
-  m_componentIds->emplace_back(component.getComponentID());
-  m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
-  m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
+  const size_t componentIndex = commonRegistration(component);
+
   const size_t componentStart = m_assemblySortedComponentIndices->size();
   m_componentRanges->emplace_back(
       std::make_pair(componentStart, componentStart + 1));
@@ -194,12 +198,6 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
-  markAsSourceOrSample(component.getComponentID(), componentIndex);
-  m_shapes->emplace_back(m_nullShape);
-  m_componentType->push_back(Beamline::ComponentType::Generic);
-  m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
-  m_names->emplace_back(component.getName());
-  clearLegacyParameters(m_pmap, component);
   return componentIndex;
 }
 

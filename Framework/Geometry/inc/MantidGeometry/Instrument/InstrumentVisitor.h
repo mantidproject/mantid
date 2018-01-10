@@ -130,7 +130,8 @@ private:
 
   /// Shapes stored in fly-weight fashion
   boost::shared_ptr<
-      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>> m_shapes;
+      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>>
+      m_shapes;
 
   /// Scale factors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
@@ -146,6 +147,9 @@ private:
 
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers() const;
+
+  /// Extract the common aspects relevant to all component types
+  size_t commonRegistration(const Mantid::Geometry::IComponent &component);
 
 public:
   InstrumentVisitor(boost::shared_ptr<const Instrument> instrument);
