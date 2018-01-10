@@ -1,6 +1,5 @@
 #include "MantidKernel/ConfigObserver.h"
 #include "MantidKernel/ConfigService.h"
-#include <iostream>
 
 namespace Mantid {
 namespace Kernel {

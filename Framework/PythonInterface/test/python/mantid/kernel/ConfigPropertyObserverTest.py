@@ -2,10 +2,10 @@ import unittest
 import sys
 from mantid.kernel import ConfigService, ConfigPropertyObserver
 
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
+if sys.version_info.major == 2:
     import mock
+else:
+    from unittest import mock
 
 
 class ConfigObserverTest(unittest.TestCase):
