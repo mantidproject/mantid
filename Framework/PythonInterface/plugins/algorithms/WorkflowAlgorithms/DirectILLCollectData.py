@@ -399,13 +399,13 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  common.ELASTIC_CHANNEL_SAMPLE_LOG,
                                  common.ELASTIC_CHANNEL_FIT]),
                              direction=Direction.Input,
-                             doc='How to acquire the elastic channel.')
+                             doc='How to acquire the nominal elastic channel.')
         self.declareProperty(MatrixWorkspaceProperty(
                              name=common.PROP_ELASTIC_CHANNEL_WS,
                              defaultValue='',
                              direction=Direction.Input,
                              optional=PropertyMode.Optional),
-                             doc='A single value workspace containing the elastic channel index. Overrides '
+                             doc='A single value workspace containing the nominal elastic channel index. Overrides '
                                  + common.PROP_ELASTIC_CHANNEL_MODE + '.')
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
@@ -426,7 +426,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='A single-valued workspace holding the calibrated ' +
+            doc='A single-valued workspace holding the a previously determined ' +
                 'incident energy.')
         self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_WS, PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(name=common.PROP_FLAT_BKG,

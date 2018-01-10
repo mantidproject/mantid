@@ -99,8 +99,8 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Experimental temperature (Vanadium ' +
-                                 'reduction type only) for the Debye-Waller correction, in Kelvins.')
+                             doc='Vanadium temperature in Kelvin for Debye-Waller correction, ' +
+                                 'overrides the default value from the sample logs.')
         self.setPropertySettings(common.PROP_TEMPERATURE, EnabledWhenProperty(common.PROP_DWF_CORRECTION,
                                                                               PropertyCriterion.IsDefault))
 
