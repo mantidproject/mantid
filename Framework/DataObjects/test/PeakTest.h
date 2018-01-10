@@ -579,8 +579,8 @@ public:
     p.setIntensity(intensity);
     p.setSigmaIntensity(sigma);
 
-    const double expectedResult {0.0};
-    const double tolerance {1e-10};
+    const double expectedResult{0.0};
+    const double tolerance{1e-10};
     TS_ASSERT_DELTA(p.getIntensityOverSigma(), expectedResult, tolerance);
   }
 

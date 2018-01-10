@@ -174,12 +174,8 @@ QPeaksTableModel::QPeaksTableModel(
       },
       [](const IPeak &peak) { return QVariant(peak.getRow()); },
       [](const IPeak &peak) { return QVariant(peak.getCol()); },
-      [](const IPeak &peak) {
-        return QVariant(peak.getQLabFrame().norm());
-      },
-      [](const IPeak &peak) {
-        return QVariant(peak.getQSampleFrame().norm());
-      },
+      [](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
+      [](const IPeak &peak) { return QVariant(peak.getQSampleFrame().norm()); },
   };
 
   const auto hklPrec = m_hklPrec;
