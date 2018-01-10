@@ -111,19 +111,6 @@ void MeshObject::initialize(const std::vector<int> &faces, const std::vector<V3D
   }
 }
 
-/*
- * Get a triangle - useful for iterating over triangles
- */
-bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2, V3D &vertex3) {
-  bool triangleExists = index < sizeof(m_triangles) / 3;
-  if (triangleExists) {
-    vertex1 = m_vertices[3 * index];
-    vertex2 = m_vertices[3 * index + 1];
-    vertex3 = m_vertices[3 * index + 2];
-  }
-  return triangleExists;
-}
-
 /**
  * @param material The new Material that the object is composed from
  */
@@ -204,6 +191,73 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
 void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
   std::vector<Kernel::V3D> &intersectionPoints, std::vector<int> &entryExitFlags) const {
 
+  V3D vertex1, vertex2, vertex3;
+  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); i++) {
+
+  }
+
+}
+
+/**
+* Get intersection points and their in out directions on the given ray
+* @param start :: Start point of ray
+* @param direction :: Direction of ray
+* @param v1 :: First vertex of triangle
+* @param v2 :: Second vertex of triangle
+* @param v3 :: Third vertex of triangle
+* @param intersection :: Intersection point
+* @returns true if there is an intersection
+*/
+bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction,
+  const V3D &v1, const V3D &v2, const V3D &v3, V3D &intersection) const {
+  // Implements Möller–Trumbore intersection algorithm
+  const double EPSILON = 0.0000001;
+  V3D edge1, edge2, h, s, q;
+  double a, f, u, v;
+  edge1 = v2 - v1;
+  edge2 = v3 - v1;
+  h = direction.cross_prod(edge2);
+  a = edge1.scalar_prod(h);
+  if (a > -EPSILON && a < EPSILON)
+    return false;  // Ray in or parallel to plane of triangle
+  f = 1 / a;
+  s = start - v1;
+  u = f * (s.scalar_prod(h));
+  if (u < 0.0 || u > 1.0)
+    return false; // Intesection with plane outside triangle
+  q = s.cross_prod(edge1);
+  v = f * direction.scalar_prod(q);
+  if (v < 0.0 || u + v > 1.0)
+    return false; // Intesection with plane outside triangle
+
+  // At this stage we can compute t to find out where the intersection point is on the line.
+  double t = f * edge2.scalar_prod(q);
+  if (t > EPSILON) // ray intersection
+  {
+    intersection = start + direction * t;
+    return true;
+  }
+  else // This means that intersection occurs on the line of the ray behind the ray.
+    return false;
+
+}
+
+/*
+* Get a triangle - useful for iterating over triangles
+* @param index :: Index of triangle in MeshObject
+* @param v1 :: First vertex of triangle
+* @param v2 :: Second vertex of triangle
+* @param v3 :: Third vertex of triangle
+* @returns true if the specified triangle exists
+*/
+bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2, V3D &vertex3) const {
+  bool triangleExists = index < sizeof(m_triangles) / 3;
+  if (triangleExists) {
+    vertex1 = m_vertices[3 * index];
+    vertex2 = m_vertices[3 * index + 1];
+    vertex3 = m_vertices[3 * index + 2];
+  }
+  return triangleExists;
 }
 
 /**

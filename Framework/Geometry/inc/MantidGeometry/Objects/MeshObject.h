@@ -158,11 +158,14 @@ public:
   std::string getShapeXML() const override;
 
 private:
-  /// Get triangle
-  bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3);
   /// Get intersections
   void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction, 
     std::vector<Kernel::V3D> &intersectionPoints, std::vector<int> &entryExitFlags) const;
+  /// Determine intersection between ray and an one triangle
+  bool rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction, 
+    const Kernel::V3D &v1, const Kernel::V3D &v2, const Kernel::V3D &v3, Kernel::V3D &intersection) const;
+  /// Get triangle
+  bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3) const;
 
   /// Contents
   std::vector<int> m_triangles;
