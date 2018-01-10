@@ -22,15 +22,15 @@ class CropWorkspaceRagged(PythonAlgorithm):
                                                direction=Direction.Input), 'input workspace')
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output), 'output workspace')
-        self.declareProperty(FloatArrayProperty('Xmin'), 'minimum x values with NaN meaning no minimum')
-        self.declareProperty(FloatArrayProperty('Xmax'), 'maximum x values with NaN meaning no maximum')
+        self.declareProperty(FloatArrayProperty('XMin'), 'minimum x values with NaN meaning no minimum')
+        self.declareProperty(FloatArrayProperty('XMax'), 'maximum x values with NaN meaning no maximum')
 
     def validateInputs(self):
-        inputWS = self.getProperty('InputWorkspace').valueAsStr
+        inputWS = self.getProperty('InputWorkspace').value
         xmins = self.getProperty('XMin').value
         xmaxs = self.getProperty('XMax').value
 
-        numSpec = mtd[inputWS].getNumberHistograms()
+        numSpec = inputWS.getNumberHistograms()
         numMin = len(xmins)
         numMax = len(xmaxs)
 
@@ -55,8 +55,12 @@ class CropWorkspaceRagged(PythonAlgorithm):
         xmaxs = self.getProperty('XMax').value
 
         if len(xmins) == 1 and len(xmaxs) == 1:
-            CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=outputWS,
-                          XMin=xmins[0], XMax=xmaxs[0])
+            name = '__{}_cropped_'.format(outputWS)
+            CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=name, XMin=xmins[0], XMax=xmaxs[0])
+            outputWS = mtd[name]
+            mtd.remove(name)
+            #CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=outputWS,
+            #              XMin=xmins[0], XMax=xmaxs[0])
         else:
             numSpec = inputWS.getNumberHistograms()
 
@@ -72,9 +76,9 @@ class CropWorkspaceRagged(PythonAlgorithm):
                 xmaxs = np.array([xmaxs[0]]*numSpec)
 
             # replace nan with EMPTY_DBL in xmin/xmax
-            indices = np.where(np.isnan(xmins))
+            indices = np.where(np.invert(np.isfinite(xmins)))
             xmins[indices] = Property.EMPTY_DBL
-            indices = np.where(np.isnan(xmaxs))
+            indices = np.where(np.invert(np.isfinite(xmaxs)))
             xmaxs[indices] = Property.EMPTY_DBL
 
             self.log().information('MIN: ' + str(xmins))
@@ -100,7 +104,7 @@ class CropWorkspaceRagged(PythonAlgorithm):
 
                 # extract the range of the spectrum requested
                 CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=name,
-                              StartWorkspaceIndex=i, EndWorkspaceIndex=i, Xmin=xmin, XMax=xmax,
+                              StartWorkspaceIndex=i, EndWorkspaceIndex=i, XMin=xmin, XMax=xmax,
                               startProgress=progStart, endProgress=(progStart + progStep),
                               EnableLogging=False)
 
@@ -116,7 +120,8 @@ class CropWorkspaceRagged(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=accumulationWS, OutputWorkspace=outputWS, EnableLogging=False)
 
         # set the output property
-        self.setProperty('OutputWorkspace', mtd[outputWS])
+        #self.setProperty('OutputWorkspace', mtd[outputWS])
+        self.setProperty('OutputWorkspace', outputWS)
 
 
 AlgorithmFactory.subscribe(CropWorkspaceRagged)
