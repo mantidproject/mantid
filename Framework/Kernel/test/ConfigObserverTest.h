@@ -16,7 +16,7 @@ public:
 protected:
   void onValueChanged(const std::string &name, const std::string &newValue,
                       const std::string &prevValue) override {
-    m_callback(name, newValue, prevValue, static_cast<ConfigObserver*>(this));
+    m_callback(name, newValue, prevValue, static_cast<ConfigObserver *>(this));
   }
 
 private:
@@ -49,33 +49,36 @@ public:
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 2;
     auto observer = makeMockObserver(
         [&callCount](const std::string &name, const std::string &newValue,
-                      const std::string &prevValue, ConfigObserver* self) -> void {
-          UNUSED_ARG(name);
-          UNUSED_ARG(newValue);
-          UNUSED_ARG(prevValue);
-          UNUSED_ARG(self);
-          callCount++;
-        });
+                     const std::string &prevValue, ConfigObserver *self)
+            -> void {
+              UNUSED_ARG(name);
+              UNUSED_ARG(newValue);
+              UNUSED_ARG(prevValue);
+              UNUSED_ARG(self);
+              callCount++;
+            });
     ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, callCount);
   }
 
   void testCreatesNewObserverOnCopyConstruction() {
-    ConfigObserver* lastCaller = nullptr;
+    ConfigObserver *lastCaller = nullptr;
     auto callCount = 0;
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 1;
-    auto observer = makeMockObserver(
-        [&callCount, &lastCaller](const std::string &name, const std::string &newValue,
-                      const std::string &prevValue, ConfigObserver* self) -> void {
-          UNUSED_ARG(name);
-          UNUSED_ARG(newValue);
-          UNUSED_ARG(prevValue);
-          callCount++;
-          if (lastCaller == nullptr)
-            lastCaller = self;
-          else
-            TSM_ASSERT("The same observer was notified twice", lastCaller != self);
-        });
+    auto observer = makeMockObserver([&callCount, &lastCaller](
+                                         const std::string &name,
+                                         const std::string &newValue,
+                                         const std::string &prevValue,
+                                         ConfigObserver *self) -> void {
+      UNUSED_ARG(name);
+      UNUSED_ARG(newValue);
+      UNUSED_ARG(prevValue);
+      callCount++;
+      if (lastCaller == nullptr)
+        lastCaller = self;
+      else
+        TSM_ASSERT("The same observer was notified twice", lastCaller != self);
+    });
     auto copyOfObserver = observer;
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED * 2, callCount);
