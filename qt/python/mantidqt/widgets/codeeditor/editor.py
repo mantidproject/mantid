@@ -17,6 +17,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # 3rd party imports
+from qtpy.QtCore import QObject, Signal
 from qtpy.QtWidgets import QStatusBar, QTabWidget, QVBoxLayout, QWidget
 
 # local imports
@@ -48,11 +49,11 @@ class ExecutableCodeEditor(QWidget):
         super(ExecutableCodeEditor, self).__init__(parent)
 
         # layout
-        self.editor = CodeEditor(language, self)
-        self.status = QStatusBar(self)
+        self._editor = CodeEditor(language, self)
+        self._status = QStatusBar(self)
         layout = QVBoxLayout()
-        layout.addWidget(self.editor)
-        layout.addWidget(self.status)
+        layout.addWidget(self._editor)
+        layout.addWidget(self._status)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -61,21 +62,33 @@ class ExecutableCodeEditor(QWidget):
     def execute_all_async(self):
         self.presenter.req_execute_all_async()
 
+    def set_editor_readonly(self, ro):
+        self._editor.setReadOnly(ro)
 
-class ExecutableCodeEditorPresenter(object):
+    def set_status_message(self, msg):
+        self._status.showMessage(msg)
+
+
+class ExecutableCodeEditorPresenter(QObject):
     """Presenter part of MVP to control actions on the editor"""
 
-    def __init__(self, view, model=None):
+    def __init__(self, view):
+        super(ExecutableCodeEditorPresenter, self).__init__()
         self.view = view
-        self.model = model if model is not None else PythonCodeExecution()
-        self.view.status.showMessage(IDLE_STATUS_MSG)
+        self.model = PythonCodeExecution(success_cb=self._on_exec_success)
+
+        self.view.set_status_message(IDLE_STATUS_MSG)
 
     def req_execute_all_async(self):
         text = self.view.text()
         if not text:
             return
-        self.view.status.showMessage(RUNNING_STATUS_MSG)
+        self.view.set_editor_read_only()
+        self.view.set_status_message(RUNNING_STATUS_MSG)
         self.model.execute_async(text)
+
+    def _on_exec_success(self):
+        self.view.set_status_message(IDLE_STATUS_MSG)
 
 
 class MultiFileCodeEditor(QWidget):

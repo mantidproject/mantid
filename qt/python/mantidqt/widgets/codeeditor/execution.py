@@ -42,9 +42,9 @@ class PythonCodeExecution(object):
             def success_cb_wrap(_): success_cb()
         else:
             def success_cb_wrap(_): pass
-        self.on_success = success_cb_wrap
-        self.on_error = error_cb
-        self.on_progress_update = progress_cb
+        self._on_success = success_cb_wrap
+        self._on_error = error_cb
+        self._on_progress_update = progress_cb
 
         self._globals_ns, self._locals_ns = None, None
         self.reset_context()
@@ -75,7 +75,7 @@ class PythonCodeExecution(object):
         # as these are not useful in this context
         t = AsyncTask(self.execute, args=(code_str,),
                       stack_chop=3,
-                      success_cb=self.on_success, error_cb=self.on_error)
+                      success_cb=self._on_success, error_cb=self._on_error)
         t.start()
         return t
 
@@ -89,7 +89,7 @@ class PythonCodeExecution(object):
         :raises: Any error that the code generates
         """
         # execute whole string if no reporting is required
-        if self.on_progress_update is None:
+        if self._on_progress_update is None:
             self._do_exec(code_str)
         else:
             self._execute_as_blocks(code_str)
@@ -100,7 +100,7 @@ class PythonCodeExecution(object):
         # will raise a SyntaxError if any of the code is invalid
         compile(code_str, "<string>", mode='exec')
 
-        progress_cb = self.on_progress_update
+        progress_cb = self._on_progress_update
         for block in code_blocks(code_str):
             progress_cb(block.lineno)
             self._do_exec(block.code_obj)

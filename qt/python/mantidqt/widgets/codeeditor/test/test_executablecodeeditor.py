@@ -37,35 +37,35 @@ class ExecutableCodeEditorPresenterTest(unittest.TestCase):
 
     def setUp(self):
         self.view = mock.create_autospec(ExecutableCodeEditor)
-        self.view.status = mock.create_autospec(QStatusBar)
-        self.view.status.showMessage = mock.MagicMock()
-        self.model = mock.create_autospec(PythonCodeExecution)
+        self.view.set_status_message = mock.MagicMock()
+        self.view.set_editor_readonly = mock.MagicMock()
+
+        self.presenter = ExecutableCodeEditorPresenter(self.view)
+        self.view.set_status_message.reset_mock()
 
     def test_construction_sets_idle_status(self):
-        ExecutableCodeEditorPresenter(self.view, self.model)
-        self.view.status.showMessage.assert_called_once_with("Status: Idle")
+        ExecutableCodeEditorPresenter(self.view)
+        self.view.set_status_message.assert_called_once_with("Status: Idle")
 
     def test_execute_all_async_with_empty_code_does_nothing(self):
         self.view.text = mock.MagicMock(return_value="")
-        self.model.execute_async = mock.MagicMock()
+        self.presenter.model.execute_async = mock.MagicMock()
 
-        presenter = ExecutableCodeEditorPresenter(self.view, self.model)
-        self.view.status.showMessage.reset_mock()
-        presenter.req_execute_all_async()
+        self.presenter.req_execute_all_async()
         self.view.text.assert_called_once_with()
-        self.view.status.showMessage.assert_not_called()
-        self.model.execute_async.assert_not_called()
+        self.view.set_editor_readonly.assert_not_called()
+        self.view.set_status_message.assert_not_called()
+        self.presenter.model.execute_async.assert_not_called()
 
     def test_execute_all_async_with_successful_code(self):
         code_str = "x = 1 + 2"
         self.view.text = mock.MagicMock(return_value=code_str)
         self.model.execute_async = mock.MagicMock()
 
-        presenter = ExecutableCodeEditorPresenter(self.view, self.model)
-        self.view.status.showMessage.reset_mock()
-        presenter.req_execute_all_async()
+        self.presenter.req_execute_all_async()
         self.view.text.assert_called_once_with()
-        self.view.status.showMessage.assert_called_once_with("Status: Running")
+        self.view.set_editor_readonly.assert_called_once_with(True)
+        self.view.set_status_message.assert_called_once_with("Status: Running")
         self.model.execute_async.assert_called_once_with(code_str)
 
 
