@@ -17,6 +17,7 @@
 from __future__ import (absolute_import, division, print_function)
 import sip
 sip.setapi('QString', 2)
+sip.setapi('QVariant', 2)
 import numpy
 import mantid.kernel
 import mantid.api

@@ -23,6 +23,7 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 from __future__ import (absolute_import, division, print_function)
 import sip
 sip.setapi('QString', 2)
+sip.setapi('QVariant', 2)
 import mantid.plots.functions
 from mantid.dataobjects import EventWorkspace,Workspace2D,MDHistoWorkspace
 import matplotlib.pyplot as plt
