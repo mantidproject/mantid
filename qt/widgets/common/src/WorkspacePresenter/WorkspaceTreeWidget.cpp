@@ -78,7 +78,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
 
   m_tree->setDragEnabled(true);
 
-  auto presenter = boost::make_shared<WorkspacePresenter>(*this);
+  auto presenter = boost::make_shared<WorkspacePresenter>(this);
   m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
   presenter->init();
 }
