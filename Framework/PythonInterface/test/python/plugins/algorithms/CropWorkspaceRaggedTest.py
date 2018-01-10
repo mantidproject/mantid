@@ -47,13 +47,22 @@ class CropWorkspaceRaggedTest(unittest.TestCase):
         AnalysisDataService.remove('NOM_91796_banks')
 
     def test_sample_workspace(self):
-        xmins = np.full(200, 2500.)
+        # numpy 1.7 (on rhel7) doesn't have np.full
+        xmins = np.array([2500.]*200)
         xmins[11] = 3100.
-        xmaxs = np.full(200, 5500.)
+        xmaxs = np.array([5500.]*200)
         xmaxs[12] = 4700.
         ws = api.CreateSampleWorkspace()
         cropped = api.CropWorkspaceRagged(ws, XMin=xmins, XMax=xmaxs)
-        print(cropped.getNumberHistograms())
+
+        self.assertEqual(cropped.getNumberHistograms(), 200)
+        for i in range(cropped.getNumberHistograms()):
+            if i == 11:
+                self.assertEqual(cropped.readX(i).size, 12)
+            elif i == 12:
+                self.assertEqual(cropped.readX(i).size, 11)
+            else:
+                self.assertEqual(cropped.readX(i).size, 15)
 
 if __name__ == '__main__':
     unittest.main()
