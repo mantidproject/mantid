@@ -191,7 +191,7 @@ private:
   DataObjects::EventWorkspace_const_sptr m_inputEventWS; // cast from m_inputWS
   /// output workspace for peak positions
   API::MatrixWorkspace_sptr
-      output_peak_position_workspaces_; // output workspace for peak positions
+      output_peak_position_workspace_; // output workspace for peak positions
   /// matrix workspace contains number of events of each spectrum
   API::MatrixWorkspace_const_sptr m_eventNumberWS;
   /// optional output analysis workspaces

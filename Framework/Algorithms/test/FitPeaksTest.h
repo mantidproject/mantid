@@ -91,6 +91,12 @@ public:
       return;
 
     // get fitted peak data
+    API::MatrixWorkspace_sptr main_out_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
+    TS_ASSERT(main_out_ws);
+    TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
+
     API::MatrixWorkspace_sptr plot_ws =
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
@@ -103,8 +109,41 @@ public:
     TS_ASSERT(param_ws);
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
 
-    // TODO ASAP : check values
-    // .... check height, position and width!
+    // check values: fitted peak positions
+    // spectrum 1
+    auto fitted_positions_0 = main_out_ws->histogram(0).y();
+    TS_ASSERT_EQUALS(fitted_positions_0.size(), 2); // with 2 peaks to fit
+    TS_ASSERT_DELTA(fitted_positions_0[0], 5.0, 1.E-6);
+    TS_ASSERT_DELTA(fitted_positions_0[1], 10.0, 1.E-6);
+    // spectrum 3
+    auto fitted_positions_2 = main_out_ws->histogram(2).y();
+    TS_ASSERT_EQUALS(fitted_positions_2.size(), 2); // with 2 peaks to fit
+    TS_ASSERT_DELTA(fitted_positions_2[0], 5.03, 1.E-6);
+    TS_ASSERT_DELTA(fitted_positions_2[1], 10.02, 1.E-6);
+
+    // check other fitted parameters including height and width
+    // spectrum 2
+    double ws1peak0_height = param_ws->cell<double>(2, 2);
+    double ws1peak0_width = param_ws->cell<double>(2, 4);
+    TS_ASSERT_DELTA(ws1peak0_height, 2., 1E-6);
+    TS_ASSERT_DELTA(ws1peak0_width, 0.17, 1E-6);
+
+    double ws1peak1_height = param_ws->cell<double>(3, 2);
+    double ws1peak1_width = param_ws->cell<double>(3, 4);
+    TS_ASSERT_DELTA(ws1peak1_height, 4., 1E-6);
+    TS_ASSERT_DELTA(ws1peak1_width, 0.12, 1E-6);
+
+    // check the fitted peak workspace
+    API::MatrixWorkspace_sptr data_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            API::AnalysisDataService::Instance().retrieve(
+                m_inputWorkspaceName));
+    TS_ASSERT_EQUALS(plot_ws->histogram(0).x().size(),
+                     data_ws->histogram(0).x().size());
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().front(),
+                    data_ws->histogram(0).x().front(), 1E-10);
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().back(),
+                    data_ws->histogram(0).x().back(), 1E-10);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -265,17 +304,72 @@ public:
     return;
   }
 
-  /// workspace PG3_733
+  //----------------------------------------------------------------------------------------------
+  /** Test a subset of spectra that do not have any count
+   * Thus, 2 main features of algorithm FitPeaks will be examed here
+   * 1. partial spectra
+   * 2. no signal with event count workspace
+   * @brief test_NoSignaleWorkspace2D
+   */
   void test_NoSignaleWorkspace2D() {
-    // TODO ASAP - Implement  wsindex = 3
-    // blabla
+    // load file to workspace
+    std::string input_ws_name("PG3_733");
+
+    // Start by loading our NXS file
+    IAlgorithm *loader =
+        Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
+    loader->setPropertyValue("Filename", "PG3_733.nxs");
+    loader->setPropertyValue("OutputWorkspace", input_ws_name);
+    loader->execute();
+    TS_ASSERT(loader->isExecuted());
+
+    // create an EventNumberWorkspace
+    std::string event_number_ws_name("PG3_733_EventNumbers");
+    createEventNumberWorkspace(event_number_ws_name, 4, 3);
+
+    // Initialize FitPeak
+    FitPeaks fit_peaks_alg;
+
+    fit_peaks_alg.initialize();
+    TS_ASSERT(fit_peaks_alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
+
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
+        "PeakCenters", "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
+                       "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,"
+                       "1.5133,2.1401"));
+    TS_ASSERT_THROWS_NOTHING(
+        fit_peaks_alg.setProperty("StartWorkspaceIndex", 3));
+    TS_ASSERT_THROWS_NOTHING(
+        fit_peaks_alg.setProperty("StopWorkspaceIndex", 3));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("FitFromRight", false));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
+        "PeakWidthPercent", 0.016)); // typical powgen's
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("EventNumberWorkspace",
+                                                       event_number_ws_name));
+
+    std::string output_ws_name("PG3_733_stripped");
+    std::string peak_pos_ws_name("PG3_733_peak_positions");
+    std::string peak_param_ws_name("PG3_733_peak_params");
+    fit_peaks_alg.setProperty("OutputWorkspace", peak_pos_ws_name);
+    fit_peaks_alg.setProperty("OutputPeakParametersWorkspace",
+                              peak_param_ws_name);
+    fit_peaks_alg.setProperty("FittedPeaksWorkspace", output_ws_name);
+
+    fit_peaks_alg.execute();
+    TS_ASSERT(fit_peaks_alg.isExecuted());
+    if (!fit_peaks_alg.isExecuted())
+      return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Test fit Gaussian peaks with high background
    * @brief Later_test_HighBackgroundPeaks
    */
-  void test_HighBackgroundPeaks() {
+  void Next_test_HighBackgroundPeaks() {
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -417,6 +511,33 @@ public:
     return;
   }
 
+  //--------------------------------------------------------------------------------------------------------------
+  /** create a multiple spectra workspace containing counts
+   * @brief createEventNumberWorkspace
+   * @param event_number_ws_name
+   * @param num_spec
+   * @param empty_ws_index
+   */
+  void createEventNumberWorkspace(const std::string &event_number_ws_name,
+                                  size_t num_spec, size_t empty_ws_index) {
+    // create a MatrixWorkspace
+    MatrixWorkspace_sptr matrix_ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            static_cast<int>(num_spec), 1);
+
+    // set spectrum without counts
+    matrix_ws->dataY(empty_ws_index)[0] = 0;
+
+    // add to ADS
+    AnalysisDataService::Instance().addOrReplace(event_number_ws_name,
+                                                 matrix_ws);
+  }
+
+  //--------------------------------------------------------------------------------------------------------------
+  /** create basic testing data set containing some Gaussian peaks
+   * @brief createTestData
+   * @param workspacename
+   */
   void createTestData(const std::string &workspacename) {
     // ---- Create the simple workspace -------
     size_t num_spec = 3;
@@ -431,12 +552,16 @@ public:
     for (size_t i = 0; i < num_spec; ++i)
       WS->mutableX(i) *= 0.05;
 
+    // spectrum 1 (ws=0)
     auto xvals = WS->points(0);
     std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
                    [](const double x) {
                      return exp(-0.5 * pow((x - 10) / 0.1, 2)) +
-                            2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2));
+                            2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2)) + 1.E-10;
                    });
+    auto yvals = WS->histogram(0).y();
+    std::transform(yvals.cbegin(), yvals.cend(), WS->mutableE(0).begin(),
+                   [](const double y) { return sqrt(y); });
 
     if (num_spec > 1) {
       auto xvals1 = WS->points(1);
@@ -445,6 +570,9 @@ public:
                        return 2. * exp(-0.5 * pow((x - 9.98) / 0.12, 2)) +
                               4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2));
                      });
+      auto yvals1 = WS->histogram(1).y();
+      std::transform(yvals1.cbegin(), yvals1.cend(), WS->mutableE(1).begin(),
+                     [](const double y) { return sqrt(y); });
     }
 
     if (num_spec > 2) {
@@ -454,13 +582,10 @@ public:
                        return 10 * exp(-0.5 * pow((x - 10.02) / 0.14, 2)) +
                               3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2));
                      });
+      auto yvals2 = WS->histogram(2).y();
+      std::transform(yvals2.cbegin(), yvals2.cend(), WS->mutableE(2).begin(),
+                     [](const double y) { return sqrt(y); });
     }
-
-    auto &E = WS->mutableE(0);
-    E.assign(E.size(), 0.001);
-
-    // TODO FIXME ASAP : set the error bar to E
-    // ... ...
 
     AnalysisDataService::Instance().addOrReplace(workspacename, WS);
 

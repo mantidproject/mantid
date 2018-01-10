@@ -669,7 +669,6 @@ void FitPeaks::ConvertParametersNameToIndex() {
  * @brief FitPeaks::fitPeaks
  */
 void FitPeaks::fitPeaks() {
-
   g_log.notice() << "[DB] Start WS Index = " << m_startWorkspaceIndex
                  << "; (inclusive) Stop WS Index = " << m_stopWorkspaceIndex
                  << "\n";
@@ -713,6 +712,12 @@ void FitPeaks::fitPeaks() {
                        fitted_parameters, &peak_chi2_vec);
     }
 
+    stringstream msgss;
+    msgss << "[DB...FindABug] Final Fitted peak position: ";
+    for (size_t ipk = 0; ipk < fitted_peak_centers.size(); ++ipk)
+      msgss << "peak(" << ipk << ") x = " << fitted_peak_centers[ipk] << " | ";
+    g_log.notice(msgss.str());
+
     PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
       writeFitResult(wi, expected_peak_centers, fitted_peak_centers,
                      fitted_parameters, peak_chi2_vec, noevents);
@@ -727,7 +732,7 @@ void FitPeaks::fitPeaks() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Fit peaks across one single spectrum
+/**
  * @brief FitPeaks::fitSpectrumPeaks
  * @param wi
  * @param peak_pos : fitted peak positions
@@ -735,6 +740,14 @@ void FitPeaks::fitPeaks() {
  * @param peak_chi2_vec : fitted chi squiares
  * @param fitted_functions : ???
  * @param fitted_peak_windows : ???
+ */
+/** Fit peaks across one single spectrum
+ * @brief FitPeaks::fitSpectrumPeaks
+ * @param wi
+ * @param expected_peak_centers
+ * @param fitted_peak_centers
+ * @param fitted_function_parameters
+ * @param peak_chi2_vec
  */
 void FitPeaks::fitSpectrumPeaks(
     size_t wi, const std::vector<double> &expected_peak_centers,
@@ -800,6 +813,12 @@ void FitPeaks::fitSpectrumPeaks(
     ProcessSinglePeakFitResult(
         wi, peak_index, expected_peak_centers, peakfunction, bkgdfunction, cost,
         fitted_peak_centers, fitted_function_parameters, peak_chi2_vec);
+
+    stringstream msgss;
+    msgss << "[DB...FindABug] Fitted peak position: ";
+    for (size_t ipk = 0; ipk < fitted_peak_centers.size(); ++ipk)
+      msgss << "peak(" << ipk << ") x = " << fitted_peak_centers[ipk] << " | ";
+    g_log.notice(msgss.str());
   }
 
   return;
@@ -975,6 +994,8 @@ void FitPeaks::ProcessSinglePeakFitResult(
   }
 
   // set peak position
+  g_log.notice() << "[DB......BAT] Fitted peak " << peakindex
+                 << ": position = " << peak_positon << "\n";
   fitted_peak_positions[peakindex] = peak_positon;
 
   // transfer from peak function to vector
@@ -1434,9 +1455,10 @@ double FitPeaks::FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
  * with estimating peak parameters
  * This is the core fitting algorithm to deal with the simplest situation
  * @exception :: Fit.isExecuted is false (cannot be executed)
- * @brief FitPeaks::fitFunctionSD
+ * @brief FitPeaks::FitFunctionSD
  * @param fit
- * @param fitfunc
+ * @param peak_function :: in/out
+ * @param bkgd_function :: in/out
  * @param dataws
  * @param wsindex
  * @param xmin
@@ -1680,7 +1702,7 @@ void FitPeaks::GenerateOutputPeakPositionWS() {
   // create output workspace for peak positions: can be partial spectra to input
   // workspace
   size_t num_hist = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
-  output_peak_position_workspaces_ = WorkspaceFactory::Instance().create(
+  output_peak_position_workspace_ = WorkspaceFactory::Instance().create(
       "Workspace2D", num_hist, m_numPeaksToFit, m_numPeaksToFit);
   // set default
   for (size_t wi = 0; wi < num_hist; ++wi) {
@@ -1690,16 +1712,16 @@ void FitPeaks::GenerateOutputPeakPositionWS() {
     size_t inp_wi = wi + m_startWorkspaceIndex;
     std::vector<double> expected_position = GetExpectedPeakPositions(inp_wi);
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-      output_peak_position_workspaces_->dataX(wi)[ipeak] =
+      output_peak_position_workspace_->dataX(wi)[ipeak] =
           expected_position[ipeak];
     }
   }
   g_log.notice() << "[DB] Main output workspace: num histogram = "
-                 << output_peak_position_workspaces_->getNumberHistograms()
+                 << output_peak_position_workspace_->getNumberHistograms()
                  << ", size (x) and (y) are "
-                 << output_peak_position_workspaces_->histogram(0).x().size()
+                 << output_peak_position_workspace_->histogram(0).x().size()
                  << ", "
-                 << output_peak_position_workspaces_->histogram(0).y().size()
+                 << output_peak_position_workspace_->histogram(0).y().size()
                  << "\n";
 }
 
@@ -1780,7 +1802,10 @@ void FitPeaks::GenerateCalculatedPeaksWS() {
  * @brief FitPeaks::setOutputProperties
  */
 void FitPeaks::ProcessOutputs() {
-  setProperty("OutputWorkspace", output_peak_position_workspaces_);
+  g_log.notice() << "[DB...BAT...FindABug] "
+                 << output_peak_position_workspace_->readY(0)[0] << ", "
+                 << output_peak_position_workspace_->readY(2)[1] << "\n";
+  setProperty("OutputWorkspace", output_peak_position_workspace_);
 
   // optional
   if (m_fittedParamTable)
@@ -2330,21 +2355,24 @@ void FitPeaks::writeFitResult(size_t wi,
                              "of expected and fitted peak positions "
                              "are not equal.");
 
-  if (noevents) {
-    // TODO - Find out something to do with this no-events case
-    ;
+  // Fill the output peak position workspace
+  for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
+    double exp_peak_pos(expected_positions[ipeak]);
+    double fitted_peak_pos(-1); // default for no event or no signal
+    double peak_chi2(-1E20);    // use negative number for NO fit
+    if (!noevents) {
+      fitted_peak_pos = fitted_positions[ipeak];
+      peak_chi2 = peak_chi2_vec[ipeak];
+    }
+
+    output_peak_position_workspace_->mutableX(wi)[ipeak] = exp_peak_pos;
+    output_peak_position_workspace_->mutableY(wi)[ipeak] = fitted_peak_pos;
+    output_peak_position_workspace_->mutableE(wi)[ipeak] = peak_chi2;
   }
 
-  // Fill the output peak position workspace
-  auto vecx = output_peak_position_workspaces_->mutableX(wi);
-  auto vecy = output_peak_position_workspaces_->mutableY(wi);
-  auto vece = output_peak_position_workspaces_->mutableE(wi);
-  // TODO? DO I NEED TO REVERSE THE ORDER?
-  for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-    vecx[ipeak] = expected_positions[ipeak];
-    vecy[ipeak] = fitted_positions[ipeak];
-    vece[ipeak] = peak_chi2_vec[ipeak];
-  }
+  g_log.notice() << "[DB...BAT...FindABug] "
+                 << output_peak_position_workspace_->readY(0)[0] << ", "
+                 << output_peak_position_workspace_->readY(2)[1] << "\n";
 
   // return if it is not asked to write fitted peak parameters
   if (!m_fittedParamTable)
@@ -2360,7 +2388,6 @@ void FitPeaks::writeFitResult(size_t wi,
     // get row number
     size_t row_index = wi * m_numPeaksToFit + ipeak;
     // check again with the column size versus peak parameter values
-    // TODO - BROKEN HERE NOW FIXME
     if (peak_parameters[ipeak].size() !=
         m_fittedParamTable->columnCount() - 3) {
       g_log.error() << "Peak " << ipeak << " has "
@@ -2373,21 +2400,28 @@ void FitPeaks::writeFitResult(size_t wi,
           "table workspace");
     }
 
-    for (size_t iparam = 0; iparam < peak_parameters[ipeak].size(); ++iparam) {
-      size_t col_index = iparam + 2;
-      if (col_index >= m_fittedParamTable->columnCount()) {
-        stringstream err_ss;
-        err_ss << "Try to access FittedParamTable's " << col_index
-               << "-th column, which is out of range [0, "
-               << m_fittedParamTable->columnCount() << ")";
-        const std::vector<std::string> &col_names =
-            m_fittedParamTable->getColumnNames();
-        for (auto iter = col_names.begin(); iter != col_names.end(); ++iter)
-          err_ss << *iter << "  ";
-        throw std::runtime_error(err_ss.str());
+    if (noevents) {
+      // no signals: just pass
+      ;
+    } else {
+      // case for fit peak with signals
+      for (size_t iparam = 0; iparam < peak_parameters[ipeak].size();
+           ++iparam) {
+        size_t col_index = iparam + 2;
+        if (col_index >= m_fittedParamTable->columnCount()) {
+          stringstream err_ss;
+          err_ss << "Try to access FittedParamTable's " << col_index
+                 << "-th column, which is out of range [0, "
+                 << m_fittedParamTable->columnCount() << ")";
+          const std::vector<std::string> &col_names =
+              m_fittedParamTable->getColumnNames();
+          for (auto iter = col_names.begin(); iter != col_names.end(); ++iter)
+            err_ss << *iter << "  ";
+          throw std::runtime_error(err_ss.str());
+        }
+        m_fittedParamTable->cell<double>(row_index, col_index) =
+            peak_parameters[ipeak][iparam];
       }
-      m_fittedParamTable->cell<double>(row_index, col_index) =
-          peak_parameters[ipeak][iparam];
     }
   }
 
