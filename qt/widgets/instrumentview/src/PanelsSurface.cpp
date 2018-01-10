@@ -357,7 +357,6 @@ void PanelsSurface::addDetector(size_t detIndex,
                                 const Mantid::Kernel::V3D &refPos, int index,
                                 Mantid::Kernel::Quat &rotation) {
   const auto &detectorInfo = m_instrActor->getDetectorInfo();
-  const auto &componentInfo = m_instrActor->getComponentInfo();
 
   Mantid::Kernel::V3D pos = detectorInfo.position(detIndex);
   m_detector2bankMap[detIndex] = index;
