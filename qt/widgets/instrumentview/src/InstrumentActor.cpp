@@ -98,9 +98,8 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
 
   // If the instrument is empty, maybe only having the sample and source
   auto nelements = componentInfo.size();
-  if ((nelements == 0) ||
-      (nelements == 1 &&
-       (componentInfo.hasSource() || componentInfo.hasSample())) ||
+  if ((nelements == 0) || (nelements == 1 && (componentInfo.hasSource() ||
+                                              componentInfo.hasSample())) ||
       (nelements == 2 && componentInfo.hasSource() &&
        componentInfo.hasSample())) {
     QMessageBox::warning(nullptr, "MantidPlot - Warning",
@@ -122,8 +121,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
 /**
  * Destructor
  */
-InstrumentActor::~InstrumentActor()
-{
+InstrumentActor::~InstrumentActor() {
   for (size_t i = 0; i < 2; ++i) {
     if (m_displayListId[i] != 0) {
       glDeleteLists(m_displayListId[i], 1);
@@ -685,8 +683,7 @@ void InstrumentActor::updateColors() {
 /**
  * @param on :: True or false for on or off.
  */
-void InstrumentActor::showGuides(bool on)
-{
+void InstrumentActor::showGuides(bool on) {
   m_showGuides = on;
   invalidateDisplayLists();
 }
@@ -735,12 +732,12 @@ void InstrumentActor::doDraw(bool picking) const {
         else
           m_colors[i].paint();
         glPushMatrix();
-        //Translate
+        // Translate
         auto pos = componentInfo.position(i);
-        if(!pos.nullVector())
+        if (!pos.nullVector())
           glTranslated(pos[0], pos[1], pos[2]);
-        
-        //Rotate
+
+        // Rotate
         auto rot = componentInfo.rotation(i);
         if (!rot.isNull()) {
           double deg, ax0, ax1, ax2;
@@ -748,16 +745,16 @@ void InstrumentActor::doDraw(bool picking) const {
           glRotated(deg, ax0, ax1, ax2);
         }
 
-        //Scale
+        // Scale
         auto scale = componentInfo.scaleFactor(i);
-        if(scale != Kernel::V3D(1, 1, 1))
+        if (scale != Kernel::V3D(1, 1, 1))
           glScaled(scale[0], scale[1], scale[2]);
-        
+
         if (m_volumeRender) {
           glEnable(GL_BLEND);
           glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
-        
+
         componentInfo.shape(i).draw();
         glPopMatrix();
       }
@@ -801,8 +798,7 @@ const Mantid::Kernel::V3D InstrumentActor::getDetPos(size_t pickID) const {
   return m_defaultPos;
 }
 
-const std::vector<Mantid::detid_t> &InstrumentActor::getAllDetIDs() const
-{
+const std::vector<Mantid::detid_t> &InstrumentActor::getAllDetIDs() const {
   const auto &detInfo = getDetectorInfo();
   return detInfo.detectorIDs();
 }
@@ -1254,8 +1250,8 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
     auto id = paramComp->getComponentID();
     auto &compParamNames = mapCmptToNameVector[id];
     if (compParamNames.size() > 0) {
-      text += QString::fromStdString(
-          "\nParameters from: " + paramComp->getName() + "\n");
+      text += QString::fromStdString("\nParameters from: " +
+                                     paramComp->getName() + "\n");
       std::sort(compParamNames.begin(), compParamNames.end(),
                 Mantid::Kernel::CaseInsensitiveStringComparator());
       for (auto itParamName = compParamNames.begin();

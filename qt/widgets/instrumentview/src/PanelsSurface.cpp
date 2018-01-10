@@ -72,8 +72,8 @@ namespace MantidWidgets {
 * @param s The surface of the panel
 */
 FlatBankInfo::FlatBankInfo(PanelsSurface *s)
-    : rotation(), startDetectorIndex(0), endDetectorIndex(0),
-      polygon(), surface(s) {}
+    : rotation(), startDetectorIndex(0), endDetectorIndex(0), polygon(),
+      surface(s) {}
 
 /**
 * Translate the bank by a vector.
@@ -163,7 +163,7 @@ void PanelsSurface::setupAxes() {
 * Add a flat bank from an assembly of detectors.
 * @param bankId :: Component ID of the bank.
 * @param normal :: Normal vector to the bank's plane.
-* @param detectors :: List of detectorIndices. 
+* @param detectors :: List of detectorIndices.
 */
 void PanelsSurface::addFlatBankOfDetectors(
     const Mantid::Kernel::V3D &normal, const std::vector<size_t> &detectors) {
@@ -307,9 +307,9 @@ void PanelsSurface::constructFromComponentInfo() {
   const auto &componentInfo = m_instrActor->getComponentInfo();
   std::vector<bool> visited(componentInfo.size(), false);
 
-  for (size_t i = 0; i < componentInfo.size()-1; ++i) {
+  for (size_t i = 0; i < componentInfo.size() - 1; ++i) {
     auto children = componentInfo.detectorsInSubtree(i);
-    
+
     if (children.size() > 1) {
       auto res = findFlatPanels(i, children, visited);
       if (res != boost::none) {

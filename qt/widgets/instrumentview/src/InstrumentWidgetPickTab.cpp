@@ -1341,7 +1341,7 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
     err->resize(x.size(), 0);
 
   const auto &detectorInfo = actor.getDetectorInfo();
-  for (auto det: ass) {
+  for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
       try {
         size_t index = actor.getWorkspaceIndex(detectorInfo.detectorIDs()[det]);
@@ -1441,7 +1441,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   auto normal = componentInfo.position(ass[1]) - componentInfo.position(ass[0]);
   normal.normalize();
   const auto &detectorInfo = actor.getDetectorInfo();
-  for (auto det: ass) {
+  for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
       try {
         auto id = detectorInfo.detectorIDs()[det];
@@ -1449,8 +1449,8 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         double xvalue = 0;
         switch (m_tubeXUnits) {
         case LENGTH:
-          xvalue = detectorInfo.position(det).distance(
-              detectorInfo.position(ass[0]));
+          xvalue = detectorInfo.position(det)
+                       .distance(detectorInfo.position(ass[0]));
           break;
         case PHI:
           xvalue = bOffsetPsi ? detectorInfo.getPhiOffset(det, M_PI)

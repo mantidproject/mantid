@@ -44,7 +44,7 @@ interface for picked ObjComponent and other
 operation for selective rendering of the instrument
 
 */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor: public QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public QObject {
   Q_OBJECT
 public:
   /// Constructor
@@ -130,7 +130,7 @@ public:
   bool wholeRange() const;
 
   /// Get the number of detectors in the instrument.
-  size_t ndetectors() const;// { return m_detIDs.size(); }
+  size_t ndetectors() const; // { return m_detIDs.size(); }
   /// Get a detector index by a detector ID.
   size_t getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
@@ -282,14 +282,14 @@ private:
   /// Colour of a "failed" detector
   GLColor m_failedColor;
   /// The collection of actors for the instrument components
-  //GLActorCollection m_scene;
+  // GLActorCollection m_scene;
 
   static double m_tolerance;
-  
+
   std::vector<GLColor> m_pickColors;
   std::vector<bool> m_isCompVisible;
 
-  //Two display lists for normal rendering and picking
+  // Two display lists for normal rendering and picking
   mutable GLuint m_displayListId[2];
   mutable bool m_useDisplayList[2];
 };

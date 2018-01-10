@@ -144,7 +144,8 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   m_volumeRender = new QAction("VolumeRender", this);
   m_volumeRender->setCheckable(true);
   m_volumeRender->setChecked(false);
-  connect(m_volumeRender, SIGNAL(toggled(bool)), this, SLOT(showVolumeRender(bool)));
+  connect(m_volumeRender, SIGNAL(toggled(bool)), this,
+          SLOT(showVolumeRender(bool)));
   m_displayDetectorsOnly = new QAction("Display Detectors Only", this);
   m_displayDetectorsOnly->setCheckable(true);
   m_displayDetectorsOnly->setChecked(true);
@@ -448,8 +449,7 @@ void InstrumentWidgetRenderTab::showAxes(bool on) {
   m_displayAxes->blockSignals(false);
 }
 
-void InstrumentWidgetRenderTab::showVolumeRender(bool on)
-{
+void InstrumentWidgetRenderTab::showVolumeRender(bool on) {
   m_instrWidget->getInstrumentActor().showVolumeRender(on);
   m_volumeRender->blockSignals(true);
   m_volumeRender->setChecked(on);

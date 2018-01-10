@@ -441,8 +441,7 @@ public:
     TS_ASSERT_EQUALS(instrScaling, compInfo->scaleFactor(compInfo->root()));
   }
 
-  void test_instrumentTreeWithMinimalInstrument()
-  {
+  void test_instrumentTreeWithMinimalInstrument() {
     /** This should produce the following instrument tree
      *   3
      * / | \
@@ -462,8 +461,7 @@ public:
     TS_ASSERT_EQUALS(componentInfo->children(root).size(), 3);
   }
 
-  void test_instrumentTreeWithComplexInstrument()
-  {
+  void test_instrumentTreeWithComplexInstrument() {
     /** This should produce the following instrument tree
      *               16
      *   /      /      \                \
