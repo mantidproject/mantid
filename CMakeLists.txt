@@ -153,11 +153,12 @@ include_directories ( Framework/Kernel/inc )
 include_directories ( Framework/HistogramData/inc )
 include_directories ( Framework/Indexing/inc )
 include_directories ( Framework/Parallel/inc )
+include_directories ( Framework/Beamline/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
 include_directories ( Framework/Types/inc )
 
-set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
+set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types )
 
 if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
