@@ -33,8 +33,9 @@ namespace {
 */
 boost::shared_ptr<
     const std::unordered_map<Mantid::Geometry::ComponentID, size_t>>
-makeComponentIDMap(const boost::shared_ptr<
-    const std::vector<Mantid::Geometry::ComponentID>> &componentIds) {
+makeComponentIDMap(
+    const boost::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>>
+        &componentIds) {
   auto idMap = boost::make_shared<
       std::unordered_map<Mantid::Geometry::ComponentID, size_t>>();
 
@@ -203,7 +204,7 @@ public:
     TS_ASSERT(!b->hasDetectorInfo());
   }
 
-  void test_has_shape() {
+  void test_hasValidShape() {
     auto internalInfo = makeSingleBeamlineComponentInfo();
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
@@ -218,10 +219,10 @@ public:
     ComponentInfo compInfo(std::move(internalInfo), componentIds,
                            makeComponentIDMap(componentIds), shapes);
 
-    TS_ASSERT(compInfo.hasShape(0));
+    TS_ASSERT(compInfo.hasValidShape(0));
     // Nullify the shape of the component
     shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
-    TS_ASSERT(!compInfo.hasShape(0));
+    TS_ASSERT(!compInfo.hasValidShape(0));
     TS_ASSERT_THROWS(compInfo.solidAngle(0, V3D{1, 1, 1}),
                      Mantid::Kernel::Exception::NullPointerException &);
   }
@@ -308,10 +309,12 @@ public:
 
     TS_ASSERT((boundingBox.minPoint() -
                (Kernel::V3D{position[0] - radius, position[1] - radius,
-                            position[2] - radius})).norm() < 1e-9);
+                            position[2] - radius}))
+                  .norm() < 1e-9);
     TS_ASSERT((boundingBox.maxPoint() -
                (Kernel::V3D{position[0] + radius, position[1] + radius,
-                            position[2] + radius})).norm() < 1e-9);
+                            position[2] + radius}))
+                  .norm() < 1e-9);
     // Nullify shape and retest BoundingBox
     shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
     boundingBox = componentInfo.boundingBox(0);
@@ -337,10 +340,12 @@ public:
     auto boundingBox = componentInfo->boundingBox(0 /*detector index*/);
     TS_ASSERT((boundingBox.minPoint() -
                (Kernel::V3D{detectorPos[0] - radius, detectorPos[1] - radius,
-                            detectorPos[2] - radius})).norm() < 1e-9);
+                            detectorPos[2] - radius}))
+                  .norm() < 1e-9);
     TS_ASSERT((boundingBox.maxPoint() -
                (Kernel::V3D{detectorPos[0] + radius, detectorPos[1] + radius,
-                            detectorPos[2] + radius})).norm() < 1e-9);
+                            detectorPos[2] + radius}))
+                  .norm() < 1e-9);
 
     // Check bounding box of root (instrument)
     boundingBox = componentInfo->boundingBox(componentInfo->root() /*Root*/);
@@ -349,11 +354,13 @@ public:
     // instrument 2.0).
     TS_ASSERT((boundingBox.minPoint() -
                (Kernel::V3D{samplePos[0] - radius, samplePos[1] - radius,
-                            samplePos[2] - radius})).norm() < 1e-9);
+                            samplePos[2] - radius}))
+                  .norm() < 1e-9);
     // max is the detector
     TS_ASSERT((boundingBox.maxPoint() -
                (Kernel::V3D{detectorPos[0] + radius, detectorPos[1] + radius,
-                            detectorPos[2] + radius})).norm() < 1e-9);
+                            detectorPos[2] + radius}))
+                  .norm() < 1e-9);
   }
 
   void test_boundingBox_around_rectangular_bank() {
@@ -370,7 +377,7 @@ public:
     // Check bounding box of root (instrument)
     auto boundingBoxRoot =
         componentInfo->boundingBox(componentInfo->root() /*Root*/
-                                   );
+        );
     // min Z in the sample
     auto boundingBoxSample =
         componentInfo->boundingBox(componentInfo->sample());
@@ -494,7 +501,7 @@ public:
 
     size_t bankOfTubesIndex = componentInfo->root() - 3;
     TS_ASSERT_EQUALS(componentInfo->componentType(bankOfTubesIndex),
-                     Beamline::ComponentType::BankOfTube); // Sanity check
+                     Beamline::ComponentType::Unstructured); // Sanity check
 
     auto boundingBox = componentInfo->boundingBox(bankOfTubesIndex);
     TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter, 1e-5);
@@ -535,7 +542,7 @@ public:
 
     size_t bankOfTubesIndex = componentInfo->root() - 3;
     TS_ASSERT_EQUALS(componentInfo->componentType(bankOfTubesIndex),
-                     Beamline::ComponentType::BankOfTube); // Sanity check
+                     Beamline::ComponentType::Unstructured); // Sanity check
 
     auto boundingBox = componentInfo->boundingBox(bankOfTubesIndex);
     TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter + offsets[3],
@@ -573,10 +580,10 @@ public:
 
     size_t tube1Index = componentInfo->root() - 5;
     TS_ASSERT_EQUALS(componentInfo->componentType(tube1Index),
-                     Beamline::ComponentType::Tube); // Sanity check
+                     Beamline::ComponentType::OutlineComposite); // Sanity check
     size_t tube2Index = componentInfo->root() - 4;
     TS_ASSERT_EQUALS(componentInfo->componentType(tube2Index),
-                     Beamline::ComponentType::Tube); // Sanity check
+                     Beamline::ComponentType::OutlineComposite); // Sanity check
 
     auto boundingBox = componentInfo->boundingBox(tube1Index);
     TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter + offsets[0],

@@ -48,6 +48,11 @@ void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {
   pmap->clearParametersByName(ParameterMap::rotz(), &comp);
   pmap->clearParametersByName(ParameterMap::scale(), &comp);
 }
+
+bool hasValidShape(const ObjCompAssembly &obj) {
+  const auto *shape = obj.shape().get();
+  return shape != nullptr && shape->hasValidShape();
+}
 } // namespace
 
 /**
@@ -135,7 +140,6 @@ size_t InstrumentVisitor::commonRegistration(const IComponent &component) {
   m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
   m_shapes->emplace_back(m_nullShape);
-  m_componentType->push_back(Beamline::ComponentType::Generic);
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   m_names->emplace_back(component.getName());
   clearLegacyParameters(m_pmap, component);
@@ -157,6 +161,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   }
   const size_t detectorStop = m_assemblySortedDetectorIndices->size();
   const size_t componentIndex = commonRegistration(assembly);
+  m_componentType->push_back(Beamline::ComponentType::Unstructured);
   m_assemblySortedComponentIndices->push_back(componentIndex);
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
@@ -190,6 +195,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
       std::make_pair(0, 0)); // Represents an empty range
   // Record the ID -> index mapping
   const size_t componentIndex = commonRegistration(component);
+  m_componentType->push_back(Beamline::ComponentType::Generic);
 
   const size_t componentStart = m_assemblySortedComponentIndices->size();
   m_componentRanges->emplace_back(
@@ -225,38 +231,14 @@ size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
   return index;
 }
 
-/**
- * Register a bank of tubes
- * @param bank : bank of tubes
- * @return index assigned
- */
-size_t InstrumentVisitor::registerBankOfTubes(const ICompAssembly &bank) {
-  auto index = registerComponentAssembly(bank);
-  size_t rangesIndex = index - m_orderedDetectorIds->size();
-  (*m_componentType)[rangesIndex] = Beamline::ComponentType::BankOfTube;
-  return index;
-}
-
-/**
- * Register a Tube as an IComponent Assembly.
- * @param tube : Individual tube component assembly
- * @return index assigned
- */
-size_t InstrumentVisitor::registerTube(const ICompAssembly &tube) {
-  auto index = registerComponentAssembly(tube);
-  size_t rangesIndex = index - m_orderedDetectorIds->size();
-  (*m_componentType)[rangesIndex] = Beamline::ComponentType::Tube;
-  return index;
-}
-
-/**
- * Register a Tube as an Object Component Assembly. Has shape.
- * @param objTube : Individual tube component assembly
- * @return index assigned
- */
-size_t InstrumentVisitor::registerTubeObj(const ObjCompAssembly &objTube) {
-  auto index = registerTube(objTube);
-  (*m_shapes)[index] = objTube.shape();
+size_t
+InstrumentVisitor::registerObjComponentAssembly(const ObjCompAssembly &obj) {
+  auto index = registerComponentAssembly(obj);
+  (*m_shapes)[index] = obj.shape();
+  if (hasValidShape(obj)) {
+    size_t rangesIndex = index - m_orderedDetectorIds->size();
+    (*m_componentType)[rangesIndex] = Beamline::ComponentType::OutlineComposite;
+  }
   return index;
 }
 

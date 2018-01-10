@@ -121,6 +121,11 @@ bool ComponentInfo::isDetector(const size_t componentIndex) const {
   return m_componentInfo->isDetector(componentIndex);
 }
 
+bool ComponentInfo::hasValidShape(const size_t componentIndex) const {
+  const auto *shape = (*m_shapes)[componentIndex].get();
+  return shape != nullptr && shape->hasValidShape();
+}
+
 Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo->position(componentIndex));
 }
@@ -168,11 +173,6 @@ bool ComponentInfo::hasParent(const size_t componentIndex) const {
 
 bool ComponentInfo::hasDetectorInfo() const {
   return m_componentInfo->hasDetectorInfo();
-}
-
-bool ComponentInfo::hasShape(const size_t componentIndex) const {
-  const auto *shape = (*m_shapes)[componentIndex].get();
-  return shape != nullptr && shape->hasValidShape();
 }
 
 Kernel::V3D ComponentInfo::sourcePosition() const {
@@ -226,7 +226,7 @@ void ComponentInfo::setScaleFactor(const size_t componentIndex,
 
 double ComponentInfo::solidAngle(const size_t componentIndex,
                                  const Kernel::V3D &observer) const {
-  if (!hasShape(componentIndex))
+  if (!hasValidShape(componentIndex))
     throw Kernel::Exception::NullPointerException("ComponentInfo::solidAngle",
                                                   "shape");
   // This is the observer position in the shape's coordinate system.
@@ -331,7 +331,7 @@ void ComponentInfo::growBoundingBoxAsBankOfTubes(
   size_t bottomIndex = *innerRangeDet.begin();
   size_t lastIndex = *(innerRangeDet.end() - 1);
   for (const auto tubeIndex : innerRangeComp) {
-    if (hasShape(tubeIndex)) {
+    if (hasValidShape(tubeIndex)) {
       mutableBB.grow(componentBoundingBox(tubeIndex, reference));
     } else if (bottomIndex < lastIndex) {
       auto topIndex = bottomIndex + (nY - 1);
@@ -373,8 +373,7 @@ void ComponentInfo::growBoundingBoxAsTube(
   if (!rangeDet.empty()) {
     auto startIndex = *rangeDet.begin();
     auto endIndex = *(rangeDet.end() - 1);
-    mutableBB.grow(componentBoundingBox(startIndex, reference));
-    mutableBB.grow(componentBoundingBox(endIndex, reference));
+    mutableBB.grow(componentBoundingBox(index, reference));
     mutableDetExclusions.insert(std::make_pair(startIndex, endIndex));
   }
   // No sub components (non detectors) in tube, so just increment iterator
@@ -429,7 +428,7 @@ BoundingBox
 ComponentInfo::componentBoundingBox(const size_t index,
                                     const BoundingBox *reference) const {
   // Check that we have a valid shape here
-  if (!hasShape(index)) {
+  if (!hasValidShape(index)) {
     return BoundingBox(); // Return null bounding box
   }
   const auto &s = this->shape(index);
@@ -497,10 +496,7 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
     } else if (compFlag == Beamline::ComponentType::Rectangular) {
       growBoundingBoxAsRectuangularBank(index, reference, absoluteBB,
                                         detExclusions, compIterator);
-    } else if (compFlag == Beamline::ComponentType::BankOfTube) {
-      growBoundingBoxAsBankOfTubes(index, reference, absoluteBB, detExclusions,
-                                   compIterator);
-    } else if (compFlag == Beamline::ComponentType::Tube) {
+    } else if (compFlag == Beamline::ComponentType::OutlineComposite) {
       growBoundingBoxAsTube(index, reference, absoluteBB, detExclusions,
                             compIterator);
     } else {

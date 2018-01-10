@@ -98,8 +98,9 @@ public:
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
-      boost::shared_ptr<const std::unordered_map<Geometry::IComponent *,
-                                                 size_t>> componentIdToIndexMap,
+      boost::shared_ptr<
+          const std::unordered_map<Geometry::IComponent *, size_t>>
+          componentIdToIndexMap,
       boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
           shapes);
   ~ComponentInfo();
@@ -143,7 +144,7 @@ public:
   const IComponent *componentID(const size_t componentIndex) const {
     return m_componentIds->operator[](componentIndex);
   }
-  bool hasShape(const size_t componentIndex) const;
+  bool hasValidShape(const size_t componentIndex) const;
   const Geometry::IObject &shape(const size_t componentIndex) const;
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;
