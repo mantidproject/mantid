@@ -9,7 +9,7 @@ using namespace Mantid;
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspacePresenter::WorkspacePresenter(IWorkspaceDockView* view)
+WorkspacePresenter::WorkspacePresenter(IWorkspaceDockView *view)
     : m_view(std::move(view)), m_adapter(Kernel::make_unique<ADSAdapter>()) {}
 
 WorkspacePresenter::~WorkspacePresenter() {}
@@ -170,14 +170,14 @@ void WorkspacePresenter::groupWorkspaces() {
   // get selected workspaces
   if (selected.size() < 2) {
     m_view->showCriticalUserMessage("Cannot Group Workspaces",
-                                   "Select at least two workspaces to group ");
+                                    "Select at least two workspaces to group ");
     return;
   }
 
   if (m_adapter->doesWorkspaceExist(groupName)) {
-    if (!m_view->askUserYesNo("",
-                             "Workspace " + groupName +
-                                 " already exists. Do you want to replace it?"))
+    if (!m_view->askUserYesNo(
+            "", "Workspace " + groupName +
+                    " already exists. Do you want to replace it?"))
       return;
   }
 
@@ -192,11 +192,11 @@ void WorkspacePresenter::groupWorkspaces() {
     bool bStatus = alg->execute();
     if (!bStatus) {
       m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
-                                     " Error in GroupWorkspaces algorithm");
+                                      " Error in GroupWorkspaces algorithm");
     }
   } catch (...) {
     m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
-                                   " Error in GroupWorkspaces algorithm");
+                                    " Error in GroupWorkspaces algorithm");
   }
 }
 
@@ -205,7 +205,7 @@ void WorkspacePresenter::ungroupWorkspaces() {
 
   if (selected.size() == 0) {
     m_view->showCriticalUserMessage("Error Ungrouping Workspaces",
-                                   "Select a group workspace to Ungroup.");
+                                    "Select a group workspace to Ungroup.");
     return;
   }
 
@@ -223,11 +223,11 @@ void WorkspacePresenter::ungroupWorkspaces() {
     bool bStatus = alg->execute();
     if (!bStatus) {
       m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
-                                     " Error in UnGroupWorkspace algorithm");
+                                      " Error in UnGroupWorkspace algorithm");
     }
   } catch (...) {
     m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
-                                   " Error in UnGroupWorkspace algorithm");
+                                    " Error in UnGroupWorkspace algorithm");
   }
 }
 
@@ -347,7 +347,7 @@ void WorkspacePresenter::workspaceLoaded() { updateView(); }
 
 void WorkspacePresenter::workspaceRenamed() {
   m_view->recordWorkspaceRename(m_adapter->getOldName(),
-                               m_adapter->getNewName());
+                                m_adapter->getNewName());
   m_view->updateTree(m_adapter->topLevelItems());
 }
 
