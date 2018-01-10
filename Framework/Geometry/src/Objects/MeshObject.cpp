@@ -211,13 +211,14 @@ void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &d
 bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction,
   const V3D &v1, const V3D &v2, const V3D &v3, V3D &intersection) const {
   // Implements Möller–Trumbore intersection algorithm
-  const double EPSILON = 0.0000001;
   V3D edge1, edge2, h, s, q;
   double a, f, u, v;
   edge1 = v2 - v1;
   edge2 = v3 - v1;
   h = direction.cross_prod(edge2);
   a = edge1.scalar_prod(h);
+
+  const double EPSILON = 0.0000001*edge1.norm();
   if (a > -EPSILON && a < EPSILON)
     return false;  // Ray in or parallel to plane of triangle
   f = 1 / a;
