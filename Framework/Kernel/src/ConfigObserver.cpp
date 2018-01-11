@@ -50,7 +50,7 @@ ConfigObserver::~ConfigObserver() noexcept {
  *
  * @param name The name of the property which changed.
  * @param newValue The new value of the property.
- * @param prevValue The old value of the property.
+ * @param oldValue The old value of the property.
  */
 void ConfigObserver::notifyValueChanged(const std::string &name,
                                         const std::string &newValue,

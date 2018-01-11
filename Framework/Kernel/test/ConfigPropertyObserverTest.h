@@ -50,33 +50,33 @@ public:
   }
 
   void testRecievesCallbackForSearchDirectoryChange() {
-    auto call_count = 0;
+    auto callCount = 0;
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 1;
     auto observer =
         makeMockObserver("datasearch.directories",
-                         [&call_count](const std::string &newValue,
-                                       const std::string &prevValue) -> void {
+                         [&callCount](const std::string &newValue,
+                                      const std::string &prevValue) -> void {
                            UNUSED_ARG(newValue);
                            UNUSED_ARG(prevValue);
-                           call_count++;
+                           callCount++;
                          });
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
-    TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, call_count);
+    TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, callCount);
   }
 
   void testRecievesCallbackForOutputDirectoryChangeOnly() {
-    auto call_count = 0;
+    auto callCount = 0;
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 1;
     auto observer =
         makeMockObserver("datasearch.directories",
-                         [&call_count](const std::string &newValue,
-                                       const std::string &prevValue) -> void {
+                         [&callCount](const std::string &newValue,
+                                      const std::string &prevValue) -> void {
                            UNUSED_ARG(newValue);
                            UNUSED_ARG(prevValue);
-                           call_count++;
+                           callCount++;
                          });
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
-    TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, call_count);
+    TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, callCount);
   }
 
   void testMultipleObserversForDifferentProperties() {
