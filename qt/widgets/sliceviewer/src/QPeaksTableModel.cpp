@@ -28,7 +28,7 @@ static QString v3dAsString(const Mantid::Kernel::V3D &v3d) {
   return QString::number(v3d.X(), 'f', 4) + COMMA +
          QString::number(v3d.Y(), 'f', 4) + COMMA +
          QString::number(v3d.Z(), 'f', 4);
-};
+}
 
 /** Get the precision to display HKL values as
  *
