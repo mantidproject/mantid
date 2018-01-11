@@ -184,13 +184,13 @@ QPeaksTableModel::QPeaksTableModel(
   m_formattedValueLookup = {
       [](const IPeak &peak) { return QString::number(peak.getRunNumber()); },
       [](const IPeak &peak) { return QString::number(peak.getDetectorID()); },
-      [&hklPrec](const IPeak &peak) {
+      [hklPrec](const IPeak &peak) {
         return QString::number(peak.getH(), 'f', hklPrec);
       },
-      [&hklPrec](const IPeak &peak) {
+      [hklPrec](const IPeak &peak) {
         return QString::number(peak.getK(), 'f', hklPrec);
       },
-      [&hklPrec](const IPeak &peak) {
+      [hklPrec](const IPeak &peak) {
         return QString::number(peak.getL(), 'f', hklPrec);
       },
       [](const IPeak &peak) {
