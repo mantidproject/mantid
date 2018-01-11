@@ -336,6 +336,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
         maskWSName = wsNames.withSuffix('combined_mask')
         maskWS = _createMaskWS(mainWS, maskWSName, subalgLogging)
+        wsCleanup.cleanupLater(maskWS)
 
         reportWS = None
         if not self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).isDefault:
