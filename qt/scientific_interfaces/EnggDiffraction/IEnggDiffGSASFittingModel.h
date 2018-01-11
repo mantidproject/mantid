@@ -22,10 +22,14 @@ public:
    Perform a Pawley refinement on a run
    @param runNumber The run number of the run
    @param bank The bank ID of the run
+   @param instParamFile The instrument parameter file name (.prm) to use for
+   refinement
    @param phaseFiles Vector of file paths to phases to use in refinement
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
+   @param dMin The minimum d-spacing to use for refinement
+   @param negativeWeight The weight of the penalty function
    @return Whether the refinement was successful
    */
   virtual bool doPawleyRefinement(const int runNumber, const size_t bank,
@@ -39,6 +43,8 @@ public:
    Perform a Rietveld refinement on a run
    @param runNumber The run number of the run
    @param bank The bank ID of the run
+   @param instParamFile The instrument parameter file name (.prm) to use for
+   refinement
    @param phaseFiles Vector of file paths to phases to use in refinement
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)

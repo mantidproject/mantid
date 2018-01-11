@@ -27,7 +27,7 @@ public:
 
   /**
    Display Rwp value to the user
-   @param Rwp for the run to display
+   @param rwp for the run to display
   */
   virtual void displayRwp(const double rwp) const = 0;
 
