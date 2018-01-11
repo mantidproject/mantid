@@ -6,7 +6,7 @@ import mantid
 import site
 import stresstesting
 import tempfile
-from mantid.simpleapi import GSASIIRefineFitPeaks, Load, SaveNexus
+from mantid.simpleapi import GSASIIRefineFitPeaks, Load
 
 
 class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
