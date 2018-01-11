@@ -92,9 +92,6 @@ public:
     EXPECT_CALL(mockView, getEndOverlap())
         .Times(Exactly(1))
         .WillOnce(Return("12"));
-    EXPECT_CALL(mockView, getTransmissionRuns())
-        .Times(Exactly(0))
-        .WillOnce(Return("INTER00013463,INTER00013464"));
 
     auto options = presenter.getTransmissionOptions();
     TS_ASSERT_EQUALS(options.size(), 11);
