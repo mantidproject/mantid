@@ -195,9 +195,9 @@ class JanaFormat(object):
 
         f_handle.write(column_format.format(*column_names))
         for row in workspace:
-            self.write_peak(f_handle, row)
+            self.write_peak(f_handle, row, workspace)
 
-    def write_peak(self, f_handle, peak):
+    def write_peak(self, f_handle, peak, workspace):
         """Write a single Peak from the peaks workspace to file.
 
         :param f_handle: handle to the file to write to.

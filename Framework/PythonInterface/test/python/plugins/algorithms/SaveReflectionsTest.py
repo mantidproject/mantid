@@ -1,12 +1,11 @@
 import unittest
 import tempfile
-import filecmp
 import os
 import shutil
 import numpy as np
 
 from mantid.api import FileFinder
-from mantid.simpleapi import SaveReflections, DeleteWorkspace, LoadEmptyInstrument, CreatePeaksWorkspace, SetUB
+from mantid.simpleapi import SaveReflections, DeleteWorkspace, LoadEmptyInstrument, CreatePeaksWorkspace, SetUB, CreateEmptyTableWorkspace
 
 
 class SaveReflectionsTest(unittest.TestCase):
@@ -49,6 +48,46 @@ class SaveReflectionsTest(unittest.TestCase):
 
         return ws
 
+    def _create_modulated_peak_table(self):
+        return self._create_indexed_workspace(self._workspace, 5, np.ones((self._workspace.rowCount(), 2)))
+
+    def _create_indexed_workspace(self, fractional_peaks, ndim, hklm):
+        # Create table with the number of columns we need
+        types = ['int', 'long64', 'double', 'double', 'double', 'double',  'double', 'double',
+                 'double', 'double', 'double', 'float', 'str', 'float', 'float', 'V3D', 'V3D']
+        indexed = CreateEmptyTableWorkspace()
+        names = fractional_peaks.getColumnNames()
+
+        # Insert the extra columns for the addtional indicies
+        for i in range(ndim - 3):
+            names.insert(5 + i, 'm{}'.format(i + 1))
+            types.insert(5 + i, 'double')
+
+        names = np.array(names)
+        types = np.array(types)
+
+        # Create columns in the table workspace
+        for name, column_type in zip(names, types):
+            indexed.addColumn(column_type, name)
+
+        # Copy all columns from original workspace, ignoring HKLs
+        column_data = []
+        idx = np.arange(0, names.size)
+        hkl_mask = (idx < 5) | (idx > 4 + (ndim - 3))
+        for name in names[hkl_mask]:
+            column_data.append(fractional_peaks.column(name))
+
+        # Insert the addtional HKL columns into the data
+        for i, col in enumerate(hklm.T.tolist()):
+            column_data.insert(i + 2, col)
+
+        # Insert the columns into the table workspace
+        for i in range(fractional_peaks.rowCount()):
+            row = [column_data[j][i] for j in range(indexed.columnCount())]
+            indexed.addRow(row)
+
+        return indexed
+
     def _get_reference_result(self, name):
         path = FileFinder.getFullPath(name)
         if path is None or path == "":
@@ -63,6 +102,19 @@ class SaveReflectionsTest(unittest.TestCase):
 
         # Act
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
+
+        # Assert
+        self.assertTrue(compare_file(reference_result, file_name))
+
+    def test_save_fullprof_format_modulated(self):
+        # Arrange
+        workspace = self._create_modulated_peak_table()
+        reference_result = self._get_reference_result("fullprof_format_modulated.hkl")
+        file_name = os.path.join(self._test_dir, "test_fullprof_modulated.hkl")
+        output_format = "Fullprof"
+
+        # Act
+        SaveReflections(InputWorkspace=workspace, Filename=file_name, Format=output_format)
 
         # Assert
         self.assertTrue(compare_file(reference_result, file_name))
