@@ -22,7 +22,7 @@ Instrument definitions
 Algorithms
 ##########
 
-
+- Fixed a bug in :ref:`algm-DirectILLApplySelfShielding` which could cause confusion among workspaces when the algorithm was run without both self shielding correction and empty container workspaces.
 
 Crystal Field
 #############
