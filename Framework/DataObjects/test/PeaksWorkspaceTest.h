@@ -391,7 +391,7 @@ public:
     const auto params = makePeakParameters();
     const auto ws = makeWorkspace(params);
 
-    const auto peak = ws->createPeak(params.hkl, HKL);
+    const auto peak = ws->createPeak(params.hkl, Mantid::Kernel::HKL);
 
     TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl,
                       peak->getHKL());
@@ -405,7 +405,7 @@ public:
     const auto params = makePeakParameters();
     const auto ws = makeWorkspace(params);
 
-    const auto peak = ws->createPeak(params.qSample, QSample);
+    const auto peak = ws->createPeak(params.qSample, Mantid::Kernel::QSample);
 
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak->getQLabFrame());
@@ -417,7 +417,7 @@ public:
     const auto params = makePeakParameters();
     const auto ws = makeWorkspace(params);
 
-    const auto peak = ws->createPeak(params.qLab, QLab);
+    const auto peak = ws->createPeak(params.qLab, Mantid::Kernel::QLab);
 
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak->getQLabFrame());
@@ -426,12 +426,10 @@ public:
   }
 
   void test_add_peak_with_position_hkl() {
-    using Mantid::Kernel::SpecialCoordinateSystem;
-
     const auto params = makePeakParameters();
     const auto ws = makeWorkspace(params);
 
-    ws->addPeak(params.hkl, HKL);
+    ws->addPeak(params.hkl, Mantid::Kernel::HKL);
     const auto &peak = ws->getPeak(0);
 
     TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl,
@@ -443,12 +441,10 @@ public:
   }
 
   void test_add_peak_with_position_qlab() {
-    using Mantid::Kernel::SpecialCoordinateSystem;
-
     const auto params = makePeakParameters();
     const auto ws = makeWorkspace(params);
 
-    ws->addPeak(params.qLab, QLab);
+    ws->addPeak(params.qLab, Mantid::Kernel::QLab);
     const auto &peak = ws->getPeak(0);
 
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
@@ -458,12 +454,10 @@ public:
   }
 
   void test_add_peak_with_position_qsample() {
-    using Mantid::Kernel::SpecialCoordinateSystem;
+    const auto params = makePeakParameters();
+    const auto ws = makeWorkspace(params);
 
-    auto params = makePeakParameters();
-    auto ws = makeWorkspace(params);
-
-    ws->addPeak(params.qSample, QSample);
+    ws->addPeak(params.qSample, Mantid::Kernel::QSample);
     const auto &peak = ws->getPeak(0);
 
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
