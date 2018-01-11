@@ -36,6 +36,8 @@ private:
    Perform a Pawley refinement on a run
    @param runNumber The run number of the run
    @param bank The bank ID of the run
+   @param instParamFile The instrument parameter file name (.prm) to use for
+   refinement
    @param phaseFiles Vector of file paths to phases to use in refinement
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
@@ -52,6 +54,8 @@ private:
    Perform a Rietveld refinement on a run
    @param runNumber The run number of the run
    @param bank The bank ID of the run
+   @param instParamFile The instrument parameter file name (.prm) to use for
+   refinement
    @param phaseFiles Vector of file paths to phases to use in refinement
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
