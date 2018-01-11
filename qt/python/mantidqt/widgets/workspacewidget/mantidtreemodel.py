@@ -20,3 +20,4 @@ from mantidqt.utils.qt import import_qtlib
 
 
 MantidTreeModel = import_qtlib('_widgetscore', 'mantidqt.widgets', 'MantidTreeModel')
+
