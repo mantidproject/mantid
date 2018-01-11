@@ -937,6 +937,7 @@ set ( TEST_FILES
 	SmoothDataTest.h
 	SmoothNeighboursTest.h
 	SofQWCentreTest.h
+	SofQWCutTest.h
 	SofQWNormalisedPolygonTest.h
 	SofQWPolygonTest.h
 	SofQWTest.h
