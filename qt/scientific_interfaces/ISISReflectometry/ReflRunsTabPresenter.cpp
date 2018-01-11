@@ -59,15 +59,9 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     std::vector<DataProcessorPresenter *> tablePresenters,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_tablePresenters(tablePresenters), m_mainPresenter(),
+      m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
       m_searcher(searcher), m_instrumentChanged(false) {
   assert(m_view != nullptr);
-
-  // Register this presenter as the workspace receiver
-  // When doing so, the inner presenters will notify this
-  // presenter with the list of commands
-  for (const auto &presenter : m_tablePresenters)
-    presenter->accept(this);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
@@ -114,8 +108,16 @@ ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
 */
 void ReflRunsTabPresenter::acceptMainPresenter(
     IReflMainWindowPresenter *mainPresenter) {
-
   m_mainPresenter = mainPresenter;
+  // Register this presenter as the workspace receiver
+  // When doing so, the inner presenters will notify this
+  // presenter with the list of commands
+
+  for (const auto &presenter : m_tablePresenters)
+    presenter->accept(this);
+  // Note this must be done here since notifying the gdpp of its view
+  // will cause it to request settings only accessible via the main
+  // presenter.
 }
 
 void ReflRunsTabPresenter::settingsChanged(int group) {
@@ -420,6 +422,8 @@ void ReflRunsTabPresenter::notifyADSChanged(
   */
 ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
   ColumnOptionsQMap result;
+  assert(m_mainPresenter != nullptr &&
+         "The main presenter must be set with acceptMainPresenter.");
 
   // Note that there are no options for the Run(s) column so just add
   // Transmission Run(s)
