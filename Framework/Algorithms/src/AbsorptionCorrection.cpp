@@ -16,6 +16,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/NeutronAtom.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -249,8 +250,12 @@ void AbsorptionCorrection::retrieveBaseProperties() {
     shape->setMaterial(Material("SetInAbsorptionCorrection", neutron, rho));
     m_inputWS->mutableSample().setShape(shape);
   }
-  rho *= 100; // Needed to get the units right
-  m_refAtten = -sigma_atten * rho / 1.798;
+  rho *= 100; // Will give right units in going from
+              // mu in cm^-1 to m^-1 for mu*total flight path( in m )
+    
+              // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1 
+              // will cancel for mu to give units: cm^-1
+  m_refAtten = -sigma_atten * rho / ReferenceLambda;
   m_scattering = -sigma_s * rho;
 
   n_lambda = getProperty("NumberOfWavelengthPoints");
