@@ -15,7 +15,8 @@ if [ -f UsageData.zip ]; then
 fi
 
 # create the symbolic link so the zip decompresses into the familiar name
-cd ExternalData/Testing/Data || exit -1
+echo $(pwd)
+cd $BUILD_DIR/ExternalData/Testing/Data || exit -1
 if [ -d UsageData ]; then
     echo "symbolic link already exists"
 else
