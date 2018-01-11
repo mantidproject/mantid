@@ -200,16 +200,8 @@ public:
         .WillOnce(Return("DivergentBeam"));
 
     auto options = presenter.getReductionOptions();
-<<<<<<< HEAD
     TS_ASSERT_EQUALS(options.size(), 23);
-    TS_ASSERT_EQUALS(options["AnalysisMode"].toStdString(),
-||||||| merged common ancestors
-    TS_ASSERT_EQUALS(options.size(), 21);
-    TS_ASSERT_EQUALS(options["AnalysisMode"].toStdString(),
-=======
-    TS_ASSERT_EQUALS(options.size(), 21);
     TS_ASSERT_EQUALS(variantToString(options["AnalysisMode"]),
->>>>>>> master
                      "MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(variantToString(options["CRho"]), "2.5,0.4,1.1");
     TS_ASSERT_EQUALS(variantToString(options["CAlpha"]), "0.6,0.9,1.2");
@@ -238,8 +230,9 @@ public:
     TS_ASSERT_EQUALS(variantToString(options["ProcessingInstructions"]), "3,4");
     TS_ASSERT_EQUALS(variantToString(options["DetectorCorrectionType"]),
                      "VerticalShift");
-    TS_ASSERT_EQUALS(options["SummationType"].toStdString(), "SumInQ");
-    TS_ASSERT_EQUALS(options["ReductionType"].toStdString(), "DivergentBeam");
+    TS_ASSERT_EQUALS(variantToString(options["SummationType"]), "SumInQ");
+    TS_ASSERT_EQUALS(variantToString(options["ReductionType"]),
+                     "DivergentBeam");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
