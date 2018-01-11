@@ -659,7 +659,7 @@ public:
 
     // find structured panel
     size_t structuredIndex = 0;
-    for (size_t i = componentInfo->root(); i >= 0; --i) {
+    for (size_t i = componentInfo->root(); i > 0; --i) {
       if (componentInfo->componentType(i) ==
               Mantid::Beamline::ComponentType::Structured ||
           componentInfo->componentType(i) ==

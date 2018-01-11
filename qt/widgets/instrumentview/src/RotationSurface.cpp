@@ -93,11 +93,6 @@ void RotationSurface::init() {
                                   // A real detector.
                                   // Position, relative to origin
                                   auto rpos = detectorInfo.position(i) - m_pos;
-
-                                  auto pos = detectorInfo.position(i);
-                                  auto rot = detectorInfo.rotation(i);
-                                  auto scaleFactor =
-                                      componentInfo.scaleFactor(i);
                                   // Create the unwrapped shape
                                   UnwrappedDetector udet(
                                       m_instrActor->getColor(i), i);
