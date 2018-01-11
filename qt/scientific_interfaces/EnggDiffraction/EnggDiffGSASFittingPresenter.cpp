@@ -1,4 +1,5 @@
 #include "EnggDiffGSASFittingPresenter.h"
+#include "EnggDiffGSASRefinementMethod.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
 namespace MantidQt {
@@ -21,6 +22,10 @@ void EnggDiffGSASFittingPresenter::notify(
 
   switch (notif) {
 
+  case IEnggDiffGSASFittingPresenter::DoRefinement:
+    processDoRefinement();
+    break;
+
   case IEnggDiffGSASFittingPresenter::LoadRun:
     processLoadRun();
     break;
@@ -36,6 +41,65 @@ void EnggDiffGSASFittingPresenter::notify(
   case IEnggDiffGSASFittingPresenter::ShutDown:
     processShutDown();
     break;
+  }
+}
+
+bool doPawleyRefinement(const int runNumber, const size_t bank,
+                        const std::string &instParamFile,
+                        const std::vector<std::string> &phaseFiles,
+                        const std::string &pathToGSASII,
+                        const std::string &GSASIIProjectFile) {
+  const auto dMin = m_view->getPawleyDMin();
+  const auto negativeWeight = m_view->getPawleyNegativeWeight();
+
+  return m_model->doPawleyRefinement(runNumber, bank, instParamFile, phaseFiles,
+                                     pathToGSASII, GSASIIProjectFile, dMin,
+                                     negativeWeight);
+}
+
+bool doRietveldRefinement(const int runNumber, const size_t bank,
+                          const std::string &instParamFile,
+                          const std::vector<std::string> &phaseFiles,
+                          const std::string &pathToGSASII,
+                          const std::string &GSASIIProjectFile) {
+  return m_model->doRietveldRefinement(runNumber, bank, instParamFile,
+                                       phaseFiles, pathToGSASII,
+                                       GSASIIProjectFile);
+}
+
+void processDoRefinement() {
+  const auto runLabel = m_view->getSelectedRunLabel();
+  const auto runNumber = runLabel.first;
+  const auto bank = runLabel.second;
+
+  const auto refinementMethod = m_view->getRefinementMethod();
+
+  const auto instParamFile = m_view->getInstrumentFileName();
+  const auto phaseFiles = m_view->getPhaseFileNames();
+  const auto pathToGSASII = m_view->getPathToGSASII();
+  const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
+
+  bool refinementSuccessful = false;
+
+  switch (refinementMethod) {
+
+  case GSASRefinementMethod::PAWLEY:
+    refinementSuccessful =
+        doPawleyRefinement(runNumber, bank, instParamFile, phaseFiles,
+                           pathToGSASII, GSASIIProjectFile);
+    break;
+
+  case GSASRefinementMethod::RIETVELD:
+    refinementSucessful =
+        doRietveldRefinement(runNumber, bank, instParamFile, phaseFiles,
+                             pathToGSASII, GSASIIProjectFile);
+    break;
+  }
+
+  if (refinementSuccessful) {
+    showRefinementResults(runNumber, bank);
+  } else {
+    m_view->userWarning("Refinement failed, see the log for more details");
   }
 }
 

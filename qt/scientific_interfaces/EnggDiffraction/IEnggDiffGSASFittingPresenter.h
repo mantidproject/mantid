@@ -12,10 +12,11 @@ public:
   // User actions, triggered by the (passive) view,
   // which need handling in implementation
   enum Notification {
-    LoadRun,   ///< Load a focused run
-    SelectRun, ///< Select a run from the list
-    ShutDown,  ///< Shut down the interface
-    Start,     ///< Start and setup the interface
+    DoRefinement, ///< Perform a GSAS refinement on a run
+    LoadRun,      ///< Load a focused run
+    SelectRun,    ///< Select a run from the list
+    ShutDown,     ///< Shut down the interface
+    Start,        ///< Start and setup the interface
   };
 
   /**

@@ -16,6 +16,38 @@ public:
   virtual ~IEnggDiffGSASFittingModel() = default;
 
   /**
+   Perform a Pawley refinement on a run
+   @param runNumber The run number of the run
+   @param bank The bank ID of the run
+   @param phaseFiles Vector of file paths to phases to use in refinement
+   @param pathToGSASII Location of the directory containing GSASIIscriptable.py
+   (and GSAS-II executables)
+   @param GSASIIProjectFile Location to save the .gpx project to
+   @return Whether the refinement was successful
+   */
+  bool doPawleyRefinement(const int runNumber, const size_t bank,
+                          const std::string &instParamFile,
+                          const std::vector<std::string> &phaseFiles,
+                          const std::string &pathToGSASII,
+                          const std::string &GSASIIProjectFile,
+                          const double dMin, const double negativeWeight);
+  /**
+   Perform a Rietveld refinement on a run
+   @param runNumber The run number of the run
+   @param bank The bank ID of the run
+   @param phaseFiles Vector of file paths to phases to use in refinement
+   @param pathToGSASII Location of the directory containing GSASIIscriptable.py
+   (and GSAS-II executables)
+   @param GSASIIProjectFile Location to save the .gpx project to
+   @return Whether the refinement was successful
+   */
+  bool doRietveldRefinement(const int runNumber, const size_t bank,
+                            const std::string &instParamFile,
+                            const std::vector<std::string> &phaseFiles,
+                            const std::string &pathToGSASII,
+                            const std::string &GSASIIProjectFile);
+
+  /**
    Get the fit results for a given run
    @param runNumber The run number of the run
    @param bank The bank ID of the run
