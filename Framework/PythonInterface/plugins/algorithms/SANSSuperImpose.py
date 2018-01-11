@@ -2,13 +2,8 @@
 
 from __future__ import absolute_import, division, print_function
 
-import glob
-import os.path
-import sys
 from collections import OrderedDict
 from itertools import cycle
-from operator import itemgetter
-from pprint import pformat, pprint
 
 import numpy as np
 import scipy.optimize as optimize
@@ -426,9 +421,8 @@ class SANSSuperImpose(PythonAlgorithm):
 
     def _create_averaged_ws(self):
         '''
-        This goes through all the X and Y values 
+        This goes through all the X and Y values
         (non negative and without the ends) and calculates de average in Y
-        Note that all 
         '''
         x = np.array([])
         for _, v in self.data.items():
