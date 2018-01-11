@@ -34,6 +34,21 @@ function ( add_python_package pkg_name )
   )
 endfunction ()
 
+# Resource compiler
+if ( NOT PYRCC5_CMD )
+  # Newer versions of PyQt5 have a pyrcc_main python module, whereas older
+  # versions have a pyrcc5 executable. We prefer calling the python module.
+  execute_process ( COMMAND  ${PYTHON_EXECUTABLE} -c "import PyQt5.pyrcc_main" RESULT_VARIABLE _status)
+  if ( _status EQUAL 0 )
+    set ( PYRCC5_CMD ${PYTHON_EXECUTABLE} -m PyQt5.pyrcc_main CACHE string "Command line to use to run the PyQt5 resource compiler" )
+  else ()
+    find_file ( PYRCC5_CMD "pyrcc5" )
+    if ( NOT PYRCC5_CMD )
+      message ( FATAL_ERROR "Unable to find PyQt5 resource compiler. Tried PyQt5.pyrcc_main & pyrcc5" )
+    endif()
+  endif ()
+endif()
+
 ###########################################################################
 # Qt-based targets
 ###########################################################################
