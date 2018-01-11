@@ -12,10 +12,10 @@ from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from fake_signal import FakeSignal
 from assert_called import assert_called
 
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
+if sys.version_info.major == 2:
     import mock
+else:
+    from unittest import mock
 
 
 class AddRunsPagePresenterTestCase(unittest.TestCase):
@@ -200,7 +200,6 @@ class SummationConfigurationTest(SelectionMockingTestCase):
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self.summation_settings_presenter)
 
-
     def test_passes_correct_config_when_summation_requested(self):
         run_summation = mock.Mock()
         self.presenter = self._make_presenter(
@@ -210,7 +209,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
 
         fake_run_selection = self._make_mock_run_selection_from_paths(['3'])
         self.run_selector_presenter.run_selection.return_value = fake_run_selection
-        summation_settings_model = SummationSettings(BinningType.SaveAsEventData)
+        summation_settings_model = self._summation_settings_with_save_directory('/dev/null')
         self.summation_settings_presenter.settings.return_value = summation_settings_model
         self._on_model_updated(fake_run_selection)
         self.view.sum.emit()

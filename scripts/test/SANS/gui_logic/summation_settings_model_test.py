@@ -1,8 +1,8 @@
-import mantid
 import unittest
 import sys
 from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
+
 
 class SummationSettingsTestCase(unittest.TestCase):
     def setUpWithInitialType(self, initial_type):
@@ -10,6 +10,7 @@ class SummationSettingsTestCase(unittest.TestCase):
 
     def setUp(self):
         self.setUpWithInitialType(BinningType.Custom)
+
 
 class SummationSettingsOverlayEventWorkspaceTestCase(unittest.TestCase):
     def assertHasOverlayEventWorkspaces(self):
@@ -23,6 +24,7 @@ class SummationSettingsOverlayEventWorkspaceTestCase(unittest.TestCase):
 
     def assertOverlayEventWorkspacesEnabled(self):
         self.assertTrue(self.summation_settings.is_overlay_event_workspaces_enabled())
+
 
 class SummationSettingsBinSettingsTest(SummationSettingsTestCase):
     def assertHasBinSettings(self):
@@ -47,6 +49,7 @@ class SummationSettingsBinSettingsTest(SummationSettingsTestCase):
     def test_from_monitors_does_not_have_bin_settings(self):
         self.setUpWithInitialType(BinningType.FromMonitors)
         self.assertDoesNotHaveBinSettings()
+
 
 class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase, \
                                                 SummationSettingsOverlayEventWorkspaceTestCase):
@@ -91,6 +94,7 @@ class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase, \
         self.summation_settings.set_histogram_binning_type(BinningType.SaveAsEventData)
         self.assertEqual(additional_time_shifts, self.summation_settings.additional_time_shifts)
 
+
 class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase, \
                                              SummationSettingsOverlayEventWorkspaceTestCase):
     def test_custom_binning_does_not_have_overlay_event_workspaces(self):
@@ -110,12 +114,12 @@ class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase, \
         self.summation_settings.set_histogram_binning_type(BinningType.SaveAsEventData)
         self.assertHasOverlayEventWorkspaces()
 
-    def test_can_set_overlay_event_workspaces_when_available(self):
+    def test_can_enable_overlay_event_workspaces_when_available(self):
         self.setUpWithInitialType(BinningType.SaveAsEventData)
         self.summation_settings.enable_overlay_event_workspaces()
         self.assertOverlayEventWorkspacesEnabled()
 
-    def test_can_set_overlay_event_workspaces_when_available(self):
+    def test_can_disable_overlay_event_workspaces_when_available(self):
         self.setUpWithInitialType(BinningType.SaveAsEventData)
         self.summation_settings.enable_overlay_event_workspaces()
         self.summation_settings.disable_overlay_event_workspaces()

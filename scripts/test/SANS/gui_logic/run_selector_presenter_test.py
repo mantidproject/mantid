@@ -8,10 +8,10 @@ from ui.sans_isis.run_selector_widget import RunSelectorWidget
 from fake_signal import FakeSignal
 
 from assert_called import assert_called
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
+if sys.version_info.major == 2:
     import mock
+else:
+    from unittest import mock
 
 
 class RunSelectorPresenterTest(unittest.TestCase):
