@@ -26,7 +26,7 @@ public:
                     const std::vector<std::string> &phaseFiles,
                     const std::string &pathToGSASII,
                     const std::string &GSASIIProjectFile));
-  
+
   MOCK_CONST_METHOD2(getFittedPeaks,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
                          const int runNumber, const size_t bank));
