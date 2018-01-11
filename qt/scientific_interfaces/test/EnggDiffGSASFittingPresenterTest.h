@@ -222,6 +222,127 @@ public:
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
   }
+
+  void test_doRietveldRefinement() {
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
+    auto mockModel_ptr = mockModel.get();
+
+    auto mockView = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffGSASFittingView>>();
+    auto mockView_ptr = mockView.get();
+
+    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
+                                      std::move(mockView));
+
+    const int runNumber = 123;
+    const size_t bank = 1;
+    const auto runLabel = std::make_pair(runNumber, bank);
+    const auto refinementMethod = GSASRefinementMethod::RIETVELD;
+    const auto instParams = "Instrument file";
+    const std::vector<std::string> phaseFiles({"phase1", "phase2"});
+    const auto pathToGSASII = "GSASHOME";
+    const auto GSASIIProjectFile = "GPX.gpx";
+
+    EXPECT_CALL(*mockView_ptr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+    EXPECT_CALL(*mockView_ptr, getRefinementMethod())
+        .Times(1)
+        .WillOnce(Return(refinementMethod));
+    EXPECT_CALL(*mockView_ptr, getInstrumentFileName())
+        .Times(1)
+        .WillOnce(Return(instParams));
+    EXPECT_CALL(*mockView_ptr, getPhaseFileNames())
+        .Times(1)
+        .WillOnce(Return(phaseFiles));
+    EXPECT_CALL(*mockView_ptr, getPathToGSASII())
+        .Times(1)
+        .WillOnce(Return(pathToGSASII));
+    EXPECT_CALL(*mockView_ptr, getGSASIIProjectPath())
+        .Times(1)
+        .WillOnce(Return(GSASIIProjectFile));
+
+    EXPECT_CALL(*mockModel_ptr,
+                doRietveldRefinement(runNumber, bank, instParams, phaseFiles,
+                                     pathToGSASII, GSASIIProjectFile))
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*mockView_ptr,
+                userWarning("Refinement failed, see the log for more details"));
+
+    pres.notify(IEnggDiffGSASFittingPresenter::DoRefinement);
+    TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
+               "not satisfied",
+               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
+    TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
+               "not satisfied",
+               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+  }
+
+  void test_doPawleyRefinement() {
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
+    auto mockModel_ptr = mockModel.get();
+
+    auto mockView = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffGSASFittingView>>();
+    auto mockView_ptr = mockView.get();
+
+    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
+                                      std::move(mockView));
+
+    const int runNumber = 123;
+    const size_t bank = 1;
+    const auto runLabel = std::make_pair(runNumber, bank);
+    const auto refinementMethod = GSASRefinementMethod::PAWLEY;
+    const auto instParams = "Instrument file";
+    const std::vector<std::string> phaseFiles({"phase1", "phase2"});
+    const auto pathToGSASII = "GSASHOME";
+    const auto GSASIIProjectFile = "GPX.gpx";
+    const auto dmin = 1.0;
+    const auto negativeWeight = 2.0;
+
+    EXPECT_CALL(*mockView_ptr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+    EXPECT_CALL(*mockView_ptr, getRefinementMethod())
+        .Times(1)
+        .WillOnce(Return(refinementMethod));
+    EXPECT_CALL(*mockView_ptr, getInstrumentFileName())
+        .Times(1)
+        .WillOnce(Return(instParams));
+    EXPECT_CALL(*mockView_ptr, getPhaseFileNames())
+        .Times(1)
+        .WillOnce(Return(phaseFiles));
+    EXPECT_CALL(*mockView_ptr, getPathToGSASII())
+        .Times(1)
+        .WillOnce(Return(pathToGSASII));
+    EXPECT_CALL(*mockView_ptr, getGSASIIProjectPath())
+        .Times(1)
+        .WillOnce(Return(GSASIIProjectFile));
+    EXPECT_CALL(*mockView_ptr, getPawleyDMin()).Times(1).WillOnce(Return(dmin));
+    EXPECT_CALL(*mockView_ptr, getPawleyNegativeWeight())
+        .Times(1)
+        .WillOnce(Return(negativeWeight));
+
+    EXPECT_CALL(*mockModel_ptr,
+                doPawleyRefinement(runNumber, bank, instParams, phaseFiles,
+                                   pathToGSASII, GSASIIProjectFile, dmin,
+                                   negativeWeight))
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*mockView_ptr,
+                userWarning("Refinement failed, see the log for more details"));
+
+    pres.notify(IEnggDiffGSASFittingPresenter::DoRefinement);
+    TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
+               "not satisfied",
+               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
+    TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
+               "not satisfied",
+               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+  }
 };
 
 #endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFGSASFITTINGPRESENTERTEST_H_
