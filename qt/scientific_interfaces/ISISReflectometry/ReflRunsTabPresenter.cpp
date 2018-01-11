@@ -1,4 +1,6 @@
 #include "ReflRunsTabPresenter.h"
+#include "IReflMainWindowPresenter.h"
+#include "IReflRunsTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,17 +9,16 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "IReflMainWindowPresenter.h"
-#include "IReflRunsTabView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflCatalogSearcher.h"
+#include "ReflFromStdStringMap.h"
 #include "ReflLegacyTransferStrategy.h"
 #include "ReflMeasureTransferStrategy.h"
 #include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
-#include "ReflFromStdStringMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/ProgressPresenter.h"
 
 #include <QStringList>
 #include <boost/regex.hpp>
@@ -407,13 +408,24 @@ void ReflRunsTabPresenter::notifyADSChanged(
       m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
-/** Requests global pre-processing options as a string. Options are supplied by
+/** Requests global pre-processing options. Options are supplied by
+  * the main presenter and there can be multiple sets of options for different
+  * columns that need to be preprocessed.
+  * @return :: A map of the column name to the global pre-processing options
+  * for that column
   * the main presenter.
   * @return :: Global pre-processing options
   */
-OptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+  ColumnOptionsQMap result;
 
-  return m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
+  // Note that there are no options for the Run(s) column so just add
+  // Transmission Run(s)
+  auto transmissionOptions = OptionsQMap(
+      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
+  result["Transmission Run(s)"] = transmissionOptions;
+
+  return result;
 }
 
 /** Requests global processing options. Options are supplied by the main
