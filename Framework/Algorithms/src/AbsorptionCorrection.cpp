@@ -252,10 +252,10 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   }
   rho *= 100; // Will give right units in going from
               // mu in cm^-1 to m^-1 for mu*total flight path( in m )
-    
-              // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1 
-              // will cancel for mu to give units: cm^-1
-  m_refAtten = -sigma_atten * rho / ReferenceLambda;
+
+  // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
+  // will cancel for mu to give units: cm^-1
+  m_refAtten = -sigma_atten * rho / NeutronAtom::ReferenceLambda;
   m_scattering = -sigma_s * rho;
 
   n_lambda = getProperty("NumberOfWavelengthPoints");
