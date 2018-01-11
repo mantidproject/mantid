@@ -19,6 +19,11 @@ void observeError(AlgorithmObserver &self, boost::python::object alg) {
   self.observeError(calg);
 }
 
+void observeProgress(AlgorithmObserver &self, boost::python::object alg) {
+  IAlgorithm_sptr& calg = boost::python::extract<IAlgorithm_sptr&>(alg);
+  self.observeProgress(calg);
+}
+
 GET_POINTER_SPECIALIZATION(AlgorithmObserver)
 
 void export_algorithm_observer() {
@@ -34,5 +39,7 @@ void export_algorithm_observer() {
            (arg("self"), arg("alg")), "Observe algorithm for its finish notification.")
       .def("observeError", &observeError,
            (arg("self"), arg("alg")), "Observe algorithm for its error notification.")
+      .def("observeProgress", &observeProgress,
+           (arg("self"), arg("alg")), "Observe algorithm for its progress notification.")
       ;
 }
