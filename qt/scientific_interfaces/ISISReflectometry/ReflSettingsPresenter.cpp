@@ -255,7 +255,7 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
     auto correctDetectors =
         asAlgorithmPropertyBool(m_view->detectorCorrectionEnabled());
-    options.push_back("CorrectDetectors=" + correctDetectors);
+    options["CorrectDetectors"] = correctDetectors;
 
     // Add correction type
     auto correctionType = m_view->getDetectorCorrectionType();
