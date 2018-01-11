@@ -105,7 +105,7 @@ QModelIndex InstrumentTreeModel::index(int row, int column,
   const auto &children = componentInfo.children(index);
 
   if (index == componentInfo.source() || index == componentInfo.sample() ||
-      children.size() <= row)
+      static_cast<int>(children.size()) <= row)
     return QModelIndex();
 
   return createIndex(row, column, &m_componentIndices[children[row]]);
