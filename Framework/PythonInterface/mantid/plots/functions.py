@@ -146,7 +146,7 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
 
 def _commonX(arr):
     '''
-    Helper functionto check if all rows in a 2d :class:`numpy.ndarray` are identical
+    Helper function to check if all rows in a 2d :class:`numpy.ndarray` are identical
     '''
     return numpy.all(arr==arr[0,:],axis=(1,0))
 
@@ -205,10 +205,10 @@ def _getDataUnevenFlag(workspace,**kwargs):
     to plot rectangles parallel to the axes even if the data is not
     on a regular grid.
     :param workspace: a workspace2d
-    if AxisAligned keyword is available and True or if the workspace does
+    if axisaligned keyword is available and True or if the workspace does
     not have a constant number of bins, it will return true, otherwise false
     '''
-    aligned = kwargs.pop('AxisAligned', False)
+    aligned = kwargs.pop('axisaligned', False)
     try:
         _=workspace.blocksize()
     except RuntimeError:
@@ -579,6 +579,8 @@ def pcolor(axes, workspace, *args, **kwargs):
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
+    :param axisaligned: ``False`` (default). If ``True``, or if the workspace has a variable
+                        number of bins, the polygons will be aligned with the axes
     '''
     _setLabels2D(axes, workspace)
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
@@ -607,6 +609,8 @@ def pcolorfast(axes, workspace, *args, **kwargs):
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
+    :param axisaligned: ``False`` (default). If ``True``, or if the workspace has a variable
+                        number of bins, the polygons will be aligned with the axes
     '''
     _setLabels2D(axes, workspace)
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
@@ -636,6 +640,8 @@ def pcolormesh(axes, workspace, *args, **kwargs):
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
+    :param axisaligned: ``False`` (default). If ``True``, or if the workspace has a variable
+                        number of bins, the polygons will be aligned with the axes
     '''
     _setLabels2D(axes, workspace)
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):

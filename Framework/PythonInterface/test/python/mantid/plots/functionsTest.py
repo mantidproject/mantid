@@ -118,13 +118,13 @@ class PlotsFunctionsTest(unittest.TestCase):
         self.assertEqual(axs,('Intensity', 'Dim1 ($\\AA^{-1}$)', 'Dim2 (EnergyTransfer)'))
 
     def test_getDataUnevenFlag(self):
-        flag,kwargs=funcs._getDataUnevenFlag(self.ws2d_histo_rag, AxisAligned=True, other_kwarg=1)
+        flag,kwargs=funcs._getDataUnevenFlag(self.ws2d_histo_rag, axisaligned=True, other_kwarg=1)
         self.assertTrue(flag)
         self.assertEquals(kwargs,{'other_kwarg':1})
         flag,kwargs=funcs._getDataUnevenFlag(self.ws2d_histo_rag, other_kwarg=2)
         self.assertFalse(flag)
         self.assertEquals(kwargs,{'other_kwarg':2})
-        flag,kwargs=funcs._getDataUnevenFlag(self.ws2d_histo_uneven, AxisAligned=False, other_kwarg=3)
+        flag,kwargs=funcs._getDataUnevenFlag(self.ws2d_histo_uneven, axisaligned=False, other_kwarg=3)
         self.assertTrue(flag)
         self.assertEquals(kwargs,{'other_kwarg':3})
 

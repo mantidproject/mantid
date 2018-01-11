@@ -5,11 +5,11 @@
 The functions in this module are intended to be used with matplotlib's
 object oriented abstract program interface (API). matplotlib's
 (stateful) functional interface is discouraged by matplotlib. 
-The OO API allow for customization as well. 
+The object oriented API allow for customization as well.
 
 The plotting of a :class:`mantid.api.MatrixWorkspace` or a
 :class:`mantid.api.IMDHistoWorkspace` can happen in two different ways.
-The use of a **mantid** projection allows most matplotlib-like
+The use of a ``mantid`` projection allows most matplotlib-like
 experience:
 
 .. code-block:: python
@@ -24,7 +24,7 @@ experience:
     ax.errorbar(x,y,yerr,'bo')            #for arrays
     fig.show()
 
-If the **mantid** projection is not used, the plotting functions take a
+If the ``mantid`` projection is not used, the plotting functions take a
 :class:`matplotlib.axes.Axes` and a :class:`mantid.api.MatrixWorkspace` or
 :class:`mantid.api.IMDHistoWorkspace`, with some keywords that are
 specific to Mantid an the type or workspace used. While there are defaults for the
@@ -60,7 +60,7 @@ axes as properly escaped for use directly in
 
    ('Counts', 'd-Spacing ($\\AA$)', 'Spectrum')
 
-To generate a 1D plots of some spectra with **mantid** projection:
+To generate a 1D plots of some spectra with ``mantid`` projection:
 
 .. code-block:: python
 
@@ -96,6 +96,10 @@ Two common ways to look at 2D plots are :func:`~mantid.plots.MantidAxes.contourf
 :func:`~mantid.plots.MantidAxes.contourf` calculates smooth lines of constant
 value, where the :func:`~mantid.plots.MantidAxes.pcolormesh` is the actual data
 values.
+:func:`~mantid.plots.MantidAxes.pcolormesh` is similar to :func:`~mantid.plots.MantidAxes.pcolor`,
+but uses a different mechanism and returns a different object; pcolor returns a PolyCollection
+but pcolormesh returns a QuadMesh.
+It is much faster, so it is almost always preferred for large arrays.
 
 .. code-block:: python
 
@@ -135,10 +139,10 @@ and :func:`~mantid.plots.MantidAxes.pcolorfast`:
 * If the :class:`mantid.api.MatrixWorkspace` has unequal bins, 
   the polygons/meshes will have sides not aligned
   with the axes. One can override this behavior by using the 
-  **AxisAligned** keyword, and setting it to True
+  **axisaligned** keyword, and setting it to True
 * If the :class:`mantid.api.MatrixWorkspace` has different numbers
   of bins the above functions will automatically use the
-  **AxisAligned** behavior (cannot be overriden). :func:`~mantid.plots.MantidAxes.contour`
+  **axisaligned** behavior (cannot be overriden). :func:`~mantid.plots.MantidAxes.contour`
   and the like cannot plot these type of workspaces.
 
 
@@ -155,16 +159,13 @@ Types of functions
 * :func:`~mantid.plots.MantidAxes.errorbar` - Plot valuse with errorbars
 * :func:`~mantid.plots.MantidAxes.scatter` - Make a scatter plot
 
-**2D Plotting - uniform grid**
+**2D Plotting**
 
 * :func:`~mantid.plots.MantidAxes.contour` - Draw contours at specified levels
 * :func:`~mantid.plots.MantidAxes.contourf` - Draw contours at calculated levels
 * :func:`~mantid.plots.MantidAxes.pcolor` - Draw a pseudocolor plot of a 2-D array
 * :func:`~mantid.plots.MantidAxes.pcolorfast` - Draw a pseudocolor plot of a 2-D array
 * :func:`~mantid.plots.MantidAxes.pcolormesh` - Draw a quadrilateral mesh
-
-**2D Plotting - nonuniform grid**
-
 * :func:`~mantid.plots.MantidAxes.tripcolor` - Draw a pseudocolor plot of an unstructured triangular grid
 * :func:`~mantid.plots.MantidAxes.tricontour` - Draw contours at specified levels on an unstructured triangular grid
 * :func:`~mantid.plots.MantidAxes.tricontourf` - Draw contours at calculated levels on an unstructured triangular grid
@@ -176,8 +177,8 @@ grids well in `this example
 Available Functions
 ===================
 
-Directly on the :class:`matplotlib.axes.Axes` objects, when using **mantid** projection
----------------------------------------------------------------------------------------
+When using ``mantid`` projection
+--------------------------------
  
 .. autoclass:: mantid.plots.MantidAxes
    :members: plot, errorbar, scatter, contour,
