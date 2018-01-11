@@ -145,7 +145,34 @@ bool MeshObject::hasValidShape() const {
 * @returns 1 if true and 0 if false
 */
 bool MeshObject::isValid(const Kernel::V3D &Pt) const {
-  return false;
+
+  V3D direction(0.0, 0.0, 1.0); // direction to look for intersections
+  std::vector<V3D> intesectionPoints;
+  std::vector<int> entryExitFlags;
+
+  getIntersections(Pt, direction, intesectionPoints, entryExitFlags);
+
+  if (sizeof(intesectionPoints) == 0) {
+    return false;
+  }
+
+  // True if point is on surface
+  for (size_t i=0; i < sizeof(intesectionPoints); ++i) {
+    if (Pt.distance(intesectionPoints[i]) < M_TOLERANCE) {
+      return true;
+    }
+  }
+
+  // Look for nearest point then check its entry-exit flag
+  double nearestPointDistance = Pt.distance(intesectionPoints[0]);
+  size_t nearestPointIndex = 0;
+  for (size_t i=1; i < sizeof(intesectionPoints); ++i) {
+    if (Pt.distance(intesectionPoints[i]) < nearestPointDistance) {
+      nearestPointDistance = Pt.distance(intesectionPoints[i]);
+      nearestPointIndex = i;
+    }
+  }
+  return (entryExitFlags[nearestPointIndex] == -1);
 }
 
 /**
@@ -155,7 +182,21 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
 */
 bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
 
-  // Ok everthing failed return 0;
+  V3D direction(0.0, 0.0, 1.0); // direction to look for intersections
+  std::vector<V3D> intesectionPoints;
+  std::vector<int> entryExitFlags;
+
+  getIntersections(Pt, direction, intesectionPoints, entryExitFlags);
+
+  if (sizeof(intesectionPoints) == 0) {
+    return false;
+  }
+
+  for (size_t i=0; i < sizeof(intesectionPoints); ++i) {
+    if (Pt.distance(intesectionPoints[i]) < M_TOLERANCE) {
+      return true;
+    }
+  }
   return false;
 }
 
@@ -185,7 +226,7 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
  * Get intersection points and their in out directions on the given ray
  * @param start :: Start point of ray
  * @param direction :: Direction of ray
- * @param intersectionPoints :: Intersection points
+ * @param intersectionPoints :: Intersection points not sorted
  * @param EntryExitFlags :: +1 ray enters -1 ray exits at corresponding point
 */
 void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
@@ -240,7 +281,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
 
   // At this stage we can compute t to find out where the intersection point is on the line.
   double t = f * edge2.scalar_prod(q);
-  if (t > EPSILON) // ray intersection
+  if (t >= 0.0) // ray intersection
   {
     intersection = start + direction * t;
 
