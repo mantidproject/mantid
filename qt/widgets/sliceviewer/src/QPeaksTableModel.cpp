@@ -7,7 +7,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include <boost/lexical_cast.hpp>
-#include <functional>
+#include <QString>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -17,6 +17,31 @@ using Mantid::Geometry::IPeak;
 
 namespace MantidQt {
 namespace SliceViewer {
+
+/** Convert a V3D to a comma seperated QString
+ *
+ * @param v3d :: the vector to convert to a QString
+ * @returns :: a string representing the V3D
+ */
+static QString v3dAsString(const Mantid::Kernel::V3D &v3d) {
+  const QString COMMA(",");
+  return QString::number(v3d.X(), 'f', 4) + COMMA +
+         QString::number(v3d.Y(), 'f', 4) + COMMA +
+         QString::number(v3d.Z(), 'f', 4);
+};
+
+/** Get the precision to display HKL values as
+ *
+ * @returns :: number of decimals to round displayed HKL values to.
+ */
+static int getHKLPrecision() {
+  int hklPrec = 0;
+  if (!Mantid::Kernel::ConfigService::Instance().getValue("PeakColumn.hklPrec",
+                                                          hklPrec))
+    hklPrec = 2;
+  return hklPrec;
+}
+
 const QString QPeaksTableModel::RUNNUMBER = "Run";
 const QString QPeaksTableModel::DETID = "DetID";
 const QString QPeaksTableModel::H = "h";
@@ -138,98 +163,89 @@ QPeaksTableModel::QPeaksTableModel(
                      {17, COL},
                      {18, QLAB},
                      {19, QSAMPLE}};
-
-  if (!Mantid::Kernel::ConfigService::Instance().getValue("PeakColumn.hklPrec",
-                                                          m_hklPrec))
-    m_hklPrec = 2;
+    
+  m_hklPrec = getHKLPrecision();
 
   // Utility function to convert a V3D type to a QString by combining the
   // elements with a comma
-  auto v3dAsString = [](const Mantid::Kernel::V3D &v3d) {
-    const QString COMMA(",");
-    return QString::number(v3d.X(), 'f', 4) + COMMA +
-           QString::number(v3d.Y(), 'f', 4) + COMMA +
-           QString::number(v3d.Z(), 'f', 4);
-  };
 
   // Mapping member functions of the Peak object to a column index
   m_dataLookup = {
-      [](const IPeak &peak) { return QVariant(peak.getRunNumber()); },
-      [](const IPeak &peak) { return QVariant(peak.getDetectorID()); },
-      [](const IPeak &peak) { return QVariant(peak.getH()); },
-      [](const IPeak &peak) { return QVariant(peak.getK()); },
-      [](const IPeak &peak) { return QVariant(peak.getL()); },
-      [](const IPeak &peak) { return QVariant(peak.getWavelength()); },
-      [](const IPeak &peak) { return QVariant(peak.getInitialEnergy()); },
-      [](const IPeak &peak) { return QVariant(peak.getFinalEnergy()); },
-      [](const IPeak &peak) { return QVariant(peak.getEnergy()); },
-      [](const IPeak &peak) { return QVariant(peak.getTOF()); },
-      [](const IPeak &peak) { return QVariant(peak.getDSpacing()); },
-      [](const IPeak &peak) { return QVariant(peak.getIntensity()); },
-      [](const IPeak &peak) { return QVariant(peak.getSigmaIntensity()); },
-      [](const IPeak &peak) { return QVariant(peak.getIntensityOverSigma()); },
-      [](const IPeak &peak) { return QVariant(peak.getBinCount()); },
-      [](const IPeak &peak) {
-        return QString::fromStdString(peak.getBankName());
+      *[](const IPeak &peak) { return QVariant(peak.getRunNumber()); },
+      *[](const IPeak &peak) { return QVariant(peak.getDetectorID()); },
+      *[](const IPeak &peak) { return QVariant(peak.getH()); },
+      *[](const IPeak &peak) { return QVariant(peak.getK()); },
+      *[](const IPeak &peak) { return QVariant(peak.getL()); },
+      *[](const IPeak &peak) { return QVariant(peak.getWavelength()); },
+      *[](const IPeak &peak) { return QVariant(peak.getInitialEnergy()); },
+      *[](const IPeak &peak) { return QVariant(peak.getFinalEnergy()); },
+      *[](const IPeak &peak) { return QVariant(peak.getEnergy()); },
+      *[](const IPeak &peak) { return QVariant(peak.getTOF()); },
+      *[](const IPeak &peak) { return QVariant(peak.getDSpacing()); },
+      *[](const IPeak &peak) { return QVariant(peak.getIntensity()); },
+      *[](const IPeak &peak) { return QVariant(peak.getSigmaIntensity()); },
+      *[](const IPeak &peak) { return QVariant(peak.getIntensityOverSigma()); },
+      *[](const IPeak &peak) { return QVariant(peak.getBinCount()); },
+      *[](const IPeak &peak) {
+        return QVariant(QString::fromStdString(peak.getBankName()));
       },
-      [](const IPeak &peak) { return QVariant(peak.getRow()); },
-      [](const IPeak &peak) { return QVariant(peak.getCol()); },
-      [](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
-      [](const IPeak &peak) { return QVariant(peak.getQSampleFrame().norm()); },
+      *[](const IPeak &peak) { return QVariant(peak.getRow()); },
+      *[](const IPeak &peak) { return QVariant(peak.getCol()); },
+      *[](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
+      *[](const IPeak &peak) { return QVariant(peak.getQSampleFrame().norm()); },
   };
 
-  const auto hklPrec = m_hklPrec;
   // Mapping member functions of the Peak object to a column index with
   // formatting for displaying data to the user
   m_formattedValueLookup = {
-      [](const IPeak &peak) { return QString::number(peak.getRunNumber()); },
-      [](const IPeak &peak) { return QString::number(peak.getDetectorID()); },
-      [hklPrec](const IPeak &peak) {
-        return QString::number(peak.getH(), 'f', hklPrec);
+      *[](const IPeak &peak) { return QString::number(peak.getRunNumber()); },
+      *[](const IPeak &peak) { return QString::number(peak.getDetectorID()); },
+      *[](const IPeak &peak) {
+        return QString::number(peak.getH(), 'f', getHKLPrecision());
       },
-      [hklPrec](const IPeak &peak) {
-        return QString::number(peak.getK(), 'f', hklPrec);
+      *[](const IPeak &peak) {
+        return QString::number(peak.getK(), 'f', getHKLPrecision());
       },
-      [hklPrec](const IPeak &peak) {
-        return QString::number(peak.getL(), 'f', hklPrec);
+      *[](const IPeak &peak) {
+        return QString::number(peak.getL(), 'f', getHKLPrecision());
       },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return QString::number(peak.getWavelength(), 'f', 4);
       },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return QString::number(peak.getInitialEnergy(), 'f', 4);
       },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return QString::number(peak.getFinalEnergy(), 'f', 4);
       },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return QString::number(peak.getEnergy(), 'f', 4);
       },
-      [](const IPeak &peak) { return QString::number(peak.getTOF(), 'f', 1); },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) { return QString::number(peak.getTOF(), 'f', 1); },
+      *[](const IPeak &peak) {
         return QString::number(peak.getDSpacing(), 'f', 4);
       },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return QString::number(peak.getIntensity(), 'f', 1);
       },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return QString::number(peak.getSigmaIntensity(), 'f', 1);
       },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return QString::number(peak.getIntensityOverSigma(), 'f', 2);
       },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return QString::number(peak.getBinCount(), 'g', 2);
       },
-      [](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return QString::fromStdString(peak.getBankName());
       },
-      [](const IPeak &peak) { return QString::number(peak.getRow()); },
-      [](const IPeak &peak) { return QString::number(peak.getCol()); },
-      [&v3dAsString](const IPeak &peak) {
+      *[](const IPeak &peak) { return QString::number(peak.getRow()); },
+      *[](const IPeak &peak) { return QString::number(peak.getCol()); },
+      *[](const IPeak &peak) {
         return v3dAsString(peak.getQLabFrame());
       },
-      [&v3dAsString](const IPeak &peak) {
+      *[](const IPeak &peak) {
         return v3dAsString(peak.getQSampleFrame());
       },
   };
@@ -370,5 +386,5 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
 
 /// Destructor
 QPeaksTableModel::~QPeaksTableModel() {}
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
