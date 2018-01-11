@@ -39,6 +39,7 @@ from qtpy.QtWidgets import QApplication
 from mantidqt.utils.qt.plugins import setup_library_paths
 
 
+
 def split_qualified_name(qualified_name):
     parts = qualified_name.split('.')
     if len(parts) < 2:
@@ -58,14 +59,7 @@ def create_widget(widget_path):
     module_name, widget_name = split_qualified_name(widget_path)
     m = __import__(module_name, fromlist=[widget_name])
     widget_generator = getattr(m, widget_name)
-    param = get_sip_wrapper('mantidqt.widgets.mantidtreemodel.MantidTreeModel')
-    return widget_generator(param)
-
-
-def get_sip_wrapper(class_path):
-    module_name, class_name = split_qualified_name(class_path)
-    m = __import__(module_name, fromlist=[class_name])
-    return getattr(m, class_name)()
+    return widget_generator()
 
 
 def open_in_window(widget_name, script):
