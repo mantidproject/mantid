@@ -8,7 +8,6 @@
 
 #include "EnggDiffFittingModelMock.h"
 #include "EnggDiffFittingViewMock.h"
-
 #include <cxxtest/TestSuite.h>
 #include <vector>
 

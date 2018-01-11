@@ -77,7 +77,6 @@ private:
    available and the user has selected to show them
    @param runNumber Run number of the run
    @param bank Bank ID of the run
-   refinement results
   */
   void updatePlot(const int runNumber, const size_t bank);
 
