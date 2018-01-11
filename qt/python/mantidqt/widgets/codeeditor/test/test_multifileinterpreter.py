@@ -22,17 +22,17 @@ import unittest
 # third-party library imports
 
 # local imports
-from mantidqt.widgets.codeeditor.editor import MultiFileCodeEditor
 from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 
 @requires_qapp
-class MultiFileCodeEditorTest(unittest.TestCase):
+class MultiPythonFileInterpreterTest(unittest.TestCase):
 
     # Success tests
 
     def test_default_contains_single_tab(self):
-        widget = MultiFileCodeEditor()
+        widget = MultiPythonFileInterpreter()
         self.assertEqual(1, widget.editor_count)
 
 

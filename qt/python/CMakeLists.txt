@@ -42,10 +42,10 @@ if ( ENABLE_WORKBENCH )
 
     mantidqt/utils/test/test_qt_utils.py
 
-    mantidqt/widgets/codeeditor/test_codeeditor.py
-    mantidqt/widgets/codeeditor/test_executablecodeeditor.py
-    mantidqt/widgets/codeeditor/test_execution.py
-    mantidqt/widgets/codeeditor/test_multifileeditor.py
+    mantidqt/widgets/codeeditor/test/test_codeeditor.py
+    mantidqt/widgets/codeeditor/test/test_interpreter.py
+    mantidqt/widgets/codeeditor/test/test_execution.py
+    mantidqt/widgets/codeeditor/test/test_multifileeditor.py
 
     mantidqt/widgets/test/test_algorithmselector.py
     mantidqt/widgets/test/test_jupyterconsole.py

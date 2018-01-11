@@ -23,7 +23,7 @@ import unittest
 import six
 
 # local imports
-from mantidqt.widgets.codeeditor.editor import ExecutableCodeEditor
+from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 from mantidqt.utils.qt.testing import requires_qapp
 
 if six.PY2:
@@ -33,14 +33,14 @@ else:
 
 
 @requires_qapp
-class ExecutableCodeEditorTest(unittest.TestCase):
+class PythonFileInterpreterTest(unittest.TestCase):
 
     def test_construction(self):
-        w = ExecutableCodeEditor()
+        w = PythonFileInterpreter()
         self.assertTrue("Status: Idle", w.status.currentMessage())
 
     def test_empty_code_does_nothing_on_exec(self):
-        w = ExecutableCodeEditor()
+        w = PythonFileInterpreter()
         w._presenter.model.execute_async = mock.MagicMock()
 
         w.execute_all_async()
@@ -49,7 +49,7 @@ class ExecutableCodeEditorTest(unittest.TestCase):
         self.assertTrue("Status: Idle", w.status.currentMessage())
 
     def test_successful_execution(self):
-        w = ExecutableCodeEditor()
+        w = PythonFileInterpreter()
         w.editor.setText("x = 1 + 2")
         w.execute_all_async()
         self.assertTrue("Status: Idle", w.status.currentMessage())
