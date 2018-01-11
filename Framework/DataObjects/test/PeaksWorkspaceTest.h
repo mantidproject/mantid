@@ -600,8 +600,9 @@ private:
                                     // simplified relationship between qLab and
                                     // hkl.
 
-    return PeakParameters{minimalInstrument, goniometer, orientedLattice, hkl,
-                          qLab, qSample, detectorPos};
+    return PeakParameters{
+        minimalInstrument, goniometer, orientedLattice, hkl, qLab,
+        qSample,           detectorPos};
   }
 
   PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {
