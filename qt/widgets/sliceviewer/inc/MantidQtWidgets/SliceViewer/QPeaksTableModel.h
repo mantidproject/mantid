@@ -164,10 +164,9 @@ private:
   /// The number of digits past the decimal to display in the table
   int m_hklPrec;
   /// Map from column index to raw peak data
-  std::vector<QVariant(*)(const Mantid::Geometry::IPeak &)>
-      m_dataLookup;
+  std::vector<QVariant (*)(const Mantid::Geometry::IPeak &)> m_dataLookup;
   /// Map from column index to formatted peak data
-  std::vector<QString(*)(const Mantid::Geometry::IPeak &)>
+  std::vector<QString (*)(const Mantid::Geometry::IPeak &)>
       m_formattedValueLookup;
   /// Collection of data for viewing.
   boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;

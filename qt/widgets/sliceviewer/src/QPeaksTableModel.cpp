@@ -6,8 +6,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
-#include <boost/lexical_cast.hpp>
 #include <QString>
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -163,7 +163,7 @@ QPeaksTableModel::QPeaksTableModel(
                      {17, COL},
                      {18, QLAB},
                      {19, QSAMPLE}};
-    
+
   m_hklPrec = getHKLPrecision();
 
   // Utility function to convert a V3D type to a QString by combining the
@@ -192,7 +192,9 @@ QPeaksTableModel::QPeaksTableModel(
       *[](const IPeak &peak) { return QVariant(peak.getRow()); },
       *[](const IPeak &peak) { return QVariant(peak.getCol()); },
       *[](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
-      *[](const IPeak &peak) { return QVariant(peak.getQSampleFrame().norm()); },
+      *[](const IPeak &peak) {
+        return QVariant(peak.getQSampleFrame().norm());
+      },
   };
 
   // Mapping member functions of the Peak object to a column index with
@@ -242,12 +244,8 @@ QPeaksTableModel::QPeaksTableModel(
       },
       *[](const IPeak &peak) { return QString::number(peak.getRow()); },
       *[](const IPeak &peak) { return QString::number(peak.getCol()); },
-      *[](const IPeak &peak) {
-        return v3dAsString(peak.getQLabFrame());
-      },
-      *[](const IPeak &peak) {
-        return v3dAsString(peak.getQSampleFrame());
-      },
+      *[](const IPeak &peak) { return v3dAsString(peak.getQLabFrame()); },
+      *[](const IPeak &peak) { return v3dAsString(peak.getQSampleFrame()); },
   };
 }
 
