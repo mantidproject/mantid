@@ -26,10 +26,50 @@ public:
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
 
 private:
+  void processDoRefinement();
   void processLoadRun();
   void processSelectRun();
   void processShutDown();
   void processStart();
+
+  /**
+   Perform a Pawley refinement on a run
+   @param runNumber The run number of the run
+   @param bank The bank ID of the run
+   @param phaseFiles Vector of file paths to phases to use in refinement
+   @param pathToGSASII Location of the directory containing GSASIIscriptable.py
+   (and GSAS-II executables)
+   @param GSASIIProjectFile Location to save the .gpx project to
+   @return Whether the refinement was successful
+   */
+  bool doPawleyRefinement(const int runNumber, const size_t bank,
+                          const std::string &instParamFile,
+                          const std::vector<std::string> &phaseFiles,
+                          const std::string &pathToGSASII,
+                          const std::string &GSASIIProjectFile);
+
+  /**
+   Perform a Rietveld refinement on a run
+   @param runNumber The run number of the run
+   @param bank The bank ID of the run
+   @param phaseFiles Vector of file paths to phases to use in refinement
+   @param pathToGSASII Location of the directory containing GSASIIscriptable.py
+   (and GSAS-II executables)
+   @param GSASIIProjectFile Location to save the .gpx project to
+   @return Whether the refinement was successful
+   */
+  bool doRietveldRefinement(const int runNumber, const size_t bank,
+                            const std::string &instParamFile,
+                            const std::vector<std::string> &phaseFiles,
+                            const std::string &pathToGSASII,
+                            const std::string &GSASIIProjectFile);
+
+  /**
+   Get refinement results for a run from the model and display them in the view
+   @param runNumber Run number of the run
+   @param bank Bank ID of the run
+  */
+  void showRefinementResults(const int runNumber, const size_t bank);
 
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 
