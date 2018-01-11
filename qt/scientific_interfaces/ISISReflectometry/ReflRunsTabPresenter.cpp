@@ -119,7 +119,7 @@ void ReflRunsTabPresenter::acceptMainPresenter(
 }
 
 void ReflRunsTabPresenter::settingsChanged(int group) {
-  assert(group < m_tablePresenters.size());
+  assert(static_cast<std::size_t>(group) < m_tablePresenters.size());
   m_tablePresenters[group]->settingsChanged();
 }
 

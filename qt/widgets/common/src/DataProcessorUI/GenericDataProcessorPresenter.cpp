@@ -273,7 +273,7 @@ QString GenericDataProcessorPresenter::getReducedWorkspaceName(
 
 void GenericDataProcessorPresenter::settingsChanged() {
   m_preprocessing.m_options =
-      convertOptionsFromQMap(m_mainPresenter->getPreprocessingOptions());
+      convertColumnOptionsFromQMap(m_mainPresenter->getPreprocessingOptions());
   m_processingOptions =
       convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
 
