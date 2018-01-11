@@ -24,12 +24,14 @@ Improvements
 - Removed the 'DirectBeam' box from the settings tab of the ISIS Reflectometry interface because this is not used.
 - Properties on the Runs tab now take precedence over properties on the Settings tab.
 - Output workspace names have been improved. Names now use '+' to indicate preprocessed (i.e. summed) workspaces, rather than '_', which is used to indicate postprocessed (i.e. stitched) workspaces.
+- The Python code generated when you tick `Output Notebook` has been improved to support special characters (e.g. `+`) in workspace names. Output workspaces are now set using the output properties of the algorithm rather than by variable assignment. This avoids the possibility of invalid characters being used in Python variable names.
 
   
 Bug fixes
 #########
 
 - Fixed some bugs where transmission runs entered on the Settings tab were not being found, whether entered as a run number to load or as the name of an existing workspace in the ADS.
+- The Python code generated when you tick `Output Notebook` has been changed so that all algorithm property values are enclosed in quotes. Unquoted values were causing failures in some algorithms. A bug has also been fixed in setting the legend location for the 4th (stitched) plot, which is shown when post-processing is performed.
 
 
 Algorithms

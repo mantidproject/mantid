@@ -72,7 +72,17 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
   m_view->setPolarisationOptionsEnabled(enable);
 }
 
-/** Returns global options for 'CreateTransmissionWorkspaceAuto'
+/** Returns global options for 'CreateTransmissionWorkspaceAuto'. Note that
+ * this must include all applicable options, even if they are empty, because
+ * the GenericDataProcessorPresenter has no other way of knowing which options
+ * are applicable to the preprocessing algorithm (e.g. for options that might
+ * be specified on the Runs tab instead). We get around this by providing the
+ * full list here and overriding them if they also exist on the Runs tab.
+ * @todo This is not idea and really we should just be passing through the
+ * non-preprocessed transmission runs to ReflectometryReductionOneAuto, which
+ * would then run CreateTransmissionWorkspaceAuto as a child algorithm and do
+ * all of this for us. However, the transmission runs would need to be loaded
+ * prior to running the processing algorithm, which is not currently possible.
  * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
  */
 OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
@@ -83,7 +93,6 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
     addIfNotEmpty(options, "AnalysisMode", m_view->getAnalysisMode());
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
-    addIfNotEmpty(options, "FirstTransmissionRun", this->getTransmissionRuns());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
