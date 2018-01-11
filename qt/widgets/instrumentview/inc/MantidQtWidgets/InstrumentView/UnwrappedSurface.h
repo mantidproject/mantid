@@ -6,6 +6,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
+#include "UnwrappedDetector.h"
 #include <boost/shared_ptr.hpp>
 
 #include <QImage>
@@ -30,8 +31,6 @@ class GL3DWidget;
 
 namespace MantidQt {
 namespace MantidWidgets {
-class UnwrappedDetector;
-
 /**
 * @class UnwrappedSurface
 * @brief Performs projection of an instrument onto a 2D surface and unwrapping
