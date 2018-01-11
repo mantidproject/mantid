@@ -171,28 +171,28 @@ QPeaksTableModel::QPeaksTableModel(
 
   // Mapping member functions of the Peak object to a column index
   m_dataLookup = {
-      *[](const IPeak &peak) { return QVariant(peak.getRunNumber()); },
-      *[](const IPeak &peak) { return QVariant(peak.getDetectorID()); },
-      *[](const IPeak &peak) { return QVariant(peak.getH()); },
-      *[](const IPeak &peak) { return QVariant(peak.getK()); },
-      *[](const IPeak &peak) { return QVariant(peak.getL()); },
-      *[](const IPeak &peak) { return QVariant(peak.getWavelength()); },
-      *[](const IPeak &peak) { return QVariant(peak.getInitialEnergy()); },
-      *[](const IPeak &peak) { return QVariant(peak.getFinalEnergy()); },
-      *[](const IPeak &peak) { return QVariant(peak.getEnergy()); },
-      *[](const IPeak &peak) { return QVariant(peak.getTOF()); },
-      *[](const IPeak &peak) { return QVariant(peak.getDSpacing()); },
-      *[](const IPeak &peak) { return QVariant(peak.getIntensity()); },
-      *[](const IPeak &peak) { return QVariant(peak.getSigmaIntensity()); },
-      *[](const IPeak &peak) { return QVariant(peak.getIntensityOverSigma()); },
-      *[](const IPeak &peak) { return QVariant(peak.getBinCount()); },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) { return QVariant(peak.getRunNumber()); },
+      [](const IPeak &peak) { return QVariant(peak.getDetectorID()); },
+      [](const IPeak &peak) { return QVariant(peak.getH()); },
+      [](const IPeak &peak) { return QVariant(peak.getK()); },
+      [](const IPeak &peak) { return QVariant(peak.getL()); },
+      [](const IPeak &peak) { return QVariant(peak.getWavelength()); },
+      [](const IPeak &peak) { return QVariant(peak.getInitialEnergy()); },
+      [](const IPeak &peak) { return QVariant(peak.getFinalEnergy()); },
+      [](const IPeak &peak) { return QVariant(peak.getEnergy()); },
+      [](const IPeak &peak) { return QVariant(peak.getTOF()); },
+      [](const IPeak &peak) { return QVariant(peak.getDSpacing()); },
+      [](const IPeak &peak) { return QVariant(peak.getIntensity()); },
+      [](const IPeak &peak) { return QVariant(peak.getSigmaIntensity()); },
+      [](const IPeak &peak) { return QVariant(peak.getIntensityOverSigma()); },
+      [](const IPeak &peak) { return QVariant(peak.getBinCount()); },
+      [](const IPeak &peak) {
         return QVariant(QString::fromStdString(peak.getBankName()));
       },
-      *[](const IPeak &peak) { return QVariant(peak.getRow()); },
-      *[](const IPeak &peak) { return QVariant(peak.getCol()); },
-      *[](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) { return QVariant(peak.getRow()); },
+      [](const IPeak &peak) { return QVariant(peak.getCol()); },
+      [](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
+      [](const IPeak &peak) {
         return QVariant(peak.getQSampleFrame().norm());
       },
   };
@@ -200,52 +200,52 @@ QPeaksTableModel::QPeaksTableModel(
   // Mapping member functions of the Peak object to a column index with
   // formatting for displaying data to the user
   m_formattedValueLookup = {
-      *[](const IPeak &peak) { return QString::number(peak.getRunNumber()); },
-      *[](const IPeak &peak) { return QString::number(peak.getDetectorID()); },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) { return QString::number(peak.getRunNumber()); },
+      [](const IPeak &peak) { return QString::number(peak.getDetectorID()); },
+      [](const IPeak &peak) {
         return QString::number(peak.getH(), 'f', getHKLPrecision());
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getK(), 'f', getHKLPrecision());
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getL(), 'f', getHKLPrecision());
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getWavelength(), 'f', 4);
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getInitialEnergy(), 'f', 4);
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getFinalEnergy(), 'f', 4);
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getEnergy(), 'f', 4);
       },
-      *[](const IPeak &peak) { return QString::number(peak.getTOF(), 'f', 1); },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) { return QString::number(peak.getTOF(), 'f', 1); },
+      [](const IPeak &peak) {
         return QString::number(peak.getDSpacing(), 'f', 4);
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getIntensity(), 'f', 1);
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getSigmaIntensity(), 'f', 1);
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getIntensityOverSigma(), 'f', 2);
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::number(peak.getBinCount(), 'g', 2);
       },
-      *[](const IPeak &peak) {
+      [](const IPeak &peak) {
         return QString::fromStdString(peak.getBankName());
       },
-      *[](const IPeak &peak) { return QString::number(peak.getRow()); },
-      *[](const IPeak &peak) { return QString::number(peak.getCol()); },
-      *[](const IPeak &peak) { return v3dAsString(peak.getQLabFrame()); },
-      *[](const IPeak &peak) { return v3dAsString(peak.getQSampleFrame()); },
+      [](const IPeak &peak) { return QString::number(peak.getRow()); },
+      [](const IPeak &peak) { return QString::number(peak.getCol()); },
+      [](const IPeak &peak) { return v3dAsString(peak.getQLabFrame()); },
+      [](const IPeak &peak) { return v3dAsString(peak.getQSampleFrame()); },
   };
 }
 
