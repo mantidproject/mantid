@@ -131,7 +131,7 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
   return options;
 }
 
-std::string ReflSettingsPresenter::asAlgorithmPropertyBool(bool value) {
+QString ReflSettingsPresenter::asAlgorithmPropertyBool(bool value) {
   return value ? "1" : "0";
 }
 

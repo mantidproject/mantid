@@ -64,7 +64,7 @@ private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
-  static std::string asAlgorithmPropertyBool(bool value);
+  static QString asAlgorithmPropertyBool(bool value);
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
