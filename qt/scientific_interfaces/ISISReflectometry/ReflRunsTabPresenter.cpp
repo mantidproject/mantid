@@ -61,6 +61,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(),
       m_searcher(searcher), m_instrumentChanged(false) {
+  assert(m_view != nullptr);
 
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenters will notify this
@@ -118,6 +119,7 @@ void ReflRunsTabPresenter::acceptMainPresenter(
 }
 
 void ReflRunsTabPresenter::settingsChanged(int group) {
+  assert(group < m_tablePresenters.size());
   m_tablePresenters[group]->settingsChanged();
 }
 
@@ -433,6 +435,8 @@ ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
 * @return :: Global processing options
 */
 OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
+  assert(m_mainPresenter != nullptr &&
+         "The main presenter must be set with acceptMainPresenter.");
   return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 
