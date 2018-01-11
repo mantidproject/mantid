@@ -603,8 +603,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             ki = can_x_section_efixed * can_thickness / salpha
             kf = can_x_section_efixed * can_thickness / stha
         else:
-            ki, kf = self._calc_ki_kf(wavelengths, self._can_front_thickness, salpha, stha,
-                                      can_x_section, can_x_section_efixed)
+            ki, kf = self._calc_ki_kf(wavelengths, can_thickness, salpha, stha, can_x_section, can_x_section_efixed)
 
         if theta < alpha or theta > (alpha + np.pi):
             # transmission case
