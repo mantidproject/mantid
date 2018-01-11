@@ -47,8 +47,8 @@ class SaveReflections(PythonAlgorithm):
         """Initilize the algorithms properties"""
 
         self.declareProperty(FileProperty("Filename", "",
-                             action=FileAction.Save,
-                             direction=Direction.Input),
+                                          action=FileAction.Save,
+                                          direction=Direction.Input),
                              doc="File with the data from a phonon calculation.")
 
         self.declareProperty(ITableWorkspaceProperty("InputWorkspace", '', Direction.Input),
@@ -130,13 +130,13 @@ class FullprofFormat(object):
         for i, peak in enumerate(workspace):
             data = [peak['h'],peak['k'],peak['l']]
             data.extend([peak[name] for name in get_additional_index_names(workspace)])
-            
+
             hkls = "".join(["{:>4.0f}".format(item) for item in data])
-            
+
             data = (peak['Intens'],peak['SigInt'],i+1,peak['Wavelength'])
             line = "{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
             line = "".join([hkls, line])
-            
+
             f_handle.write(line)
 
 # ------------------------------------------------------------------------------------------------------
@@ -188,7 +188,7 @@ class JanaFormat(object):
         column_names = ["h", "k", "l"]
         column_names.extend(get_additional_index_names(workspace))
         column_names.extend(["Fsqr", "s(Fsqr)", "Cod", "Lambda", "Twotheta", "Transm.", "Tbar", "TDS"])
-        
+
         column_format = "#{:>4}{:>4}{:>4}"
         column_format += "".join(["{:>4}" for _ in range(num_additional_indicies(workspace))])
         column_format += "{:>12}{:>12}{:>5}{:>10}{:>10}{:>10}{:>10}{:>10}\n"
