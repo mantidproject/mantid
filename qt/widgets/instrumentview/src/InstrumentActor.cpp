@@ -656,8 +656,6 @@ void InstrumentActor::resetColors() {
 
       if (mask)
         masked = mask->isMasked(detectorIDs[detIndex]);
-      else
-        masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
 
       if (detectorInfo.isMasked(detIndex) || masked) {
         m_colors[detIndex] = m_maskedColor;
@@ -1149,7 +1147,14 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
   auto workspace = getWorkspace();
   calculateIntegratedSpectra(*workspace);
-  auto monitorIndices = getMonitors();
+  auto monitors = getMonitors();
+  const auto &detectorIDs = getDetectorInfo().detectorIDs();
+  std::vector<detid_t> monitorIDs;
+  monitorIDs.reserve(monitors.size());
+  for (auto mon : monitors)
+    monitorIDs.push_back(detectorIDs[mon]);
+
+  auto monitorIndices = workspace->getIndicesFromDetectorIDs(monitorIDs);
 
   // check that there is at least 1 non-monitor spectrum
   if (monitorIndices.size() == m_specIntegrs.size()) {

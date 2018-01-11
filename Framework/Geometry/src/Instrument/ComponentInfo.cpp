@@ -99,7 +99,7 @@ ComponentInfo::~ComponentInfo() = default;
 
 std::vector<size_t>
 ComponentInfo::detectorsInSubtree(size_t componentIndex) const {
-  return m_componentInfo->detectorsInSubtree(componentIndex);
+  return m_componentInfo->detectorsInFullSubtree(componentIndex);
 }
 
 std::vector<size_t>
@@ -293,27 +293,18 @@ void ComponentInfo::growBoundingBoxAsRectuangularBank(
     Geometry::BoundingBox &mutableBB,
     std::map<size_t, size_t> &mutableDetExclusions,
     IteratorT &mutableIterator) const {
-  const auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
-  const auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
-  // subtract 1 because component ranges includes self
-  auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
-  auto nSubDetectors =
-      std::distance(innerRangeDet.begin(), innerRangeDet.end());
-  auto nY = nSubDetectors / nSubComponents;
-  size_t bottomLeft = *innerRangeDet.begin();
-  size_t topRight = bottomLeft + nSubDetectors - 1;
-  size_t topLeft = bottomLeft + (nY - 1);
-  size_t bottomRight = topRight - (nY - 1);
-
-  mutableBB.grow(componentBoundingBox(bottomLeft, reference));
-  mutableBB.grow(componentBoundingBox(topRight, reference));
-  mutableBB.grow(componentBoundingBox(topLeft, reference));
-  mutableBB.grow(componentBoundingBox(bottomRight, reference));
+  
+  auto panel = structuredPanel(index);
+  mutableBB.grow(componentBoundingBox(panel.bottomLeft, reference));
+  mutableBB.grow(componentBoundingBox(panel.topRight, reference));
+  mutableBB.grow(componentBoundingBox(panel.topLeft, reference));
+  mutableBB.grow(componentBoundingBox(panel.bottomRight, reference));
 
   // Get bounding box for rectangular bank.
   // Record detector ranges to skip
-  mutableDetExclusions.insert(std::make_pair(bottomLeft, topRight));
+  mutableDetExclusions.insert(std::make_pair(panel.bottomLeft, panel.topRight));
   // Skip all sub components.
+  const auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
   mutableIterator = innerRangeComp.rend();
 }
 

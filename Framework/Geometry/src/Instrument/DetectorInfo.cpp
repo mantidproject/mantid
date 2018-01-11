@@ -231,18 +231,6 @@ DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
   return angle;
 }
 
-double DetectorInfo::getPhi(const size_t index) const {
-  const Kernel::V3D pos = position(index);
-  return std::atan2(pos[1], pos[0]);
-}
-
-/// Calculate the phi angle between detector and beam, and then offset.
-double DetectorInfo::getPhiOffset(const size_t index,
-                                  const double offset) const {
-  double avgPos = getPhi(index);
-  return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
-}
-
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
   return Kernel::toV3D(m_detectorInfo->position(index));
