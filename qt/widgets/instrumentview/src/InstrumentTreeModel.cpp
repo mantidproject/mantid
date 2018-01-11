@@ -39,18 +39,15 @@ InstrumentTreeModel::~InstrumentTreeModel() {}
 *  Returns 0 for the ObjComponent = I'm an end point.
 */
 int InstrumentTreeModel::columnCount(const QModelIndex &parent) const {
-  try {
-    if (parent.isValid()) {
-      const auto &componentInfo =
-          m_instrWidget->getInstrumentActor().getComponentInfo();
-      auto index = extractIndex(parent);
-      if (componentInfo.children(index).size() > 0)
-        return 1;
-    } else
-      return 1;
-  } catch (...) {
-    // do nothing
-  }
+  if (!parent.isValid())
+    return 1;
+
+  const auto &componentInfo =
+      m_instrWidget->getInstrumentActor().getComponentInfo();
+  auto index = extractIndex(parent);
+  if (componentInfo.children(index).size() > 0)
+    return 1;
+
   return 0;
 }
 
@@ -59,23 +56,17 @@ int InstrumentTreeModel::columnCount(const QModelIndex &parent) const {
 * string will be instrument name
 */
 QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const {
-  try {
-    if (role != Qt::DisplayRole)
-      return QVariant();
+  if (role != Qt::DisplayRole)
+    return QVariant();
 
-    const auto &componentInfo =
-        m_instrWidget->getInstrumentActor().getComponentInfo();
+  const auto &componentInfo =
+      m_instrWidget->getInstrumentActor().getComponentInfo();
 
-    if (!index.isValid()) // not valid has to return the root node
-      return QString::fromStdString(componentInfo.name(componentInfo.root()));
+  if (!index.isValid()) // not valid has to return the root node
+    return QString::fromStdString(componentInfo.name(componentInfo.root()));
 
-    auto compIndex = extractIndex(index);
-    return QString::fromStdString(componentInfo.name(compIndex));
-  } catch (...) {
-    // Ignore Exceptions
-  }
-
-  return 0;
+  auto compIndex = extractIndex(index);
+  return QString::fromStdString(componentInfo.name(compIndex));
 }
 
 /**
@@ -104,70 +95,52 @@ QVariant InstrumentTreeModel::headerData(int section,
 */
 QModelIndex InstrumentTreeModel::index(int row, int column,
                                        const QModelIndex &parent) const {
-  try {
-    const auto &componentInfo =
-        m_instrWidget->getInstrumentActor().getComponentInfo();
-    if (!parent.isValid()) { // invalid parent, has to be the root node i.e
-                             // instrument
-      return createIndex(row, column,
-                         &m_componentIndices[componentInfo.root()]);
-    }
-    auto index = extractIndex(parent);
-    const auto &children = componentInfo.children(index);
-
-    if (index == componentInfo.source() || index == componentInfo.sample()) {
-      return QModelIndex();
-    }
-    // If component assembly pick the Component at the row index. if row index
-    // is higher than number
-    // of components in assembly return empty model index
-    if (children.size() <= row) {
-      return QModelIndex();
-    } else {
-      return createIndex(row, column, &m_componentIndices[children[row]]);
-    }
-  } catch (...) {
-    std::cout << "InstrumentTreeModel::index(" << row << "," << column
-              << ") threw an exception.\n";
+  const auto &componentInfo =
+      m_instrWidget->getInstrumentActor().getComponentInfo();
+  if (!parent.isValid()) { // invalid parent, has to be the root node i.e
+                           // instrument
+    return createIndex(row, column, &m_componentIndices[componentInfo.root()]);
   }
-  return QModelIndex();
+  auto index = extractIndex(parent);
+  const auto &children = componentInfo.children(index);
+
+  if (index == componentInfo.source() || index == componentInfo.sample() ||
+      children.size() <= row)
+    return QModelIndex();
+
+  return createIndex(row, column, &m_componentIndices[children[row]]);
 }
 
 /**
 * Returns the parent model index.
 */
 QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const {
-  try {
-    if (!index.isValid()) // the index corresponds to root so there is no parent
-                          // for root return empty.
-      return QModelIndex();
+  if (!index.isValid()) // the index corresponds to root so there is no parent
+                        // for root return empty.
+    return QModelIndex();
 
-    const auto &componentInfo =
-        m_instrWidget->getInstrumentActor().getComponentInfo();
-    auto compIndex = extractIndex(index);
+  const auto &componentInfo =
+      m_instrWidget->getInstrumentActor().getComponentInfo();
+  auto compIndex = extractIndex(index);
 
-    if (compIndex == componentInfo.root())
-      return QModelIndex();
+  if (compIndex == componentInfo.root())
+    return QModelIndex();
 
-    auto parent = componentInfo.parent(compIndex);
-    if (parent == componentInfo.root())
-      return createIndex(0, 0, &m_componentIndices[componentInfo.root()]);
+  auto parent = componentInfo.parent(compIndex);
+  if (parent == componentInfo.root())
+    return createIndex(0, 0, &m_componentIndices[componentInfo.root()]);
 
-    auto grandParent = componentInfo.parent(parent);
-    const auto &grandParentElems = componentInfo.children(grandParent);
+  auto grandParent = componentInfo.parent(parent);
+  const auto &grandParentElems = componentInfo.children(grandParent);
 
-    int row = 0;
-    for (auto child : grandParentElems) {
-      if (child == parent)
-        break;
-      row++;
-    }
-
-    return createIndex(row, 0, &m_componentIndices[parent]);
-  } catch (...) {
-    // do nothing
+  int row = 0;
+  for (auto child : grandParentElems) {
+    if (child == parent)
+      break;
+    row++;
   }
-  return QModelIndex();
+
+  return createIndex(row, 0, &m_componentIndices[parent]);
 }
 
 /**
@@ -175,21 +148,16 @@ QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const {
 * ObjComponent row count will be 0.
 */
 int InstrumentTreeModel::rowCount(const QModelIndex &parent) const {
-  try {
-    if (!parent.isValid()) // Root node row count is one.
-    {
-      return 1;
-    } else {
-      const auto &componentInfo =
-          m_instrWidget->getInstrumentActor().getComponentInfo();
-      auto index = extractIndex(parent);
-      const auto &children = componentInfo.children(index);
-      if (children.size() > 1)
-        return static_cast<int>(children.size());
-    }
-  } catch (...) {
-    // do nothing
-  }
+  if (!parent.isValid()) // Root node row count is one.
+    return 1;
+
+  const auto &componentInfo =
+      m_instrWidget->getInstrumentActor().getComponentInfo();
+  auto index = extractIndex(parent);
+  const auto &children = componentInfo.children(index);
+  if (children.size() > 1)
+    return static_cast<int>(children.size());
+
   return 0;
 }
 

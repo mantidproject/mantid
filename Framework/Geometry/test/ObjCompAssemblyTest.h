@@ -364,7 +364,7 @@ public:
     double radius, height;
     shape->GetObjectGeom(otype, vectors, radius, height);
 
-    TS_ASSERT_EQUALS(otype, detail::ShapeInfo::GeometryShape::CONE);
+    TS_ASSERT_EQUALS(otype, detail::ShapeInfo::GeometryShape::CYLINDER);
     TS_ASSERT_EQUALS(radius, 0.1);
     TS_ASSERT_EQUALS(height, 0.6);
   }

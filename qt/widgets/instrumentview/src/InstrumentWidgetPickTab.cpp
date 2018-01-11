@@ -53,10 +53,22 @@ namespace MantidWidgets {
 
 using namespace boost::math;
 
-/// to be used in std::transform
+namespace {
+double getPhi(const Mantid::Kernel::V3D &pos) {
+  return std::atan2(pos[1], pos[0]);
+}
+
+double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
+  double avgPos = getPhi(pos);
+  return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
+}
+} // namespace
+
+  /// to be used in std::transform
 struct Sqrt {
   double operator()(double x) { return sqrt(x); }
-};
+  };
+
 
 /**
 * Constructor.
@@ -1447,17 +1459,15 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         auto id = detectorInfo.detectorIDs()[det];
         // get the x-value for detector idet
         double xvalue = 0;
+        auto pos = detectorInfo.position(det);
         switch (m_tubeXUnits) {
         case LENGTH:
-          xvalue = detectorInfo.position(det)
-                       .distance(detectorInfo.position(ass[0]));
+          xvalue = pos.distance(detectorInfo.position(ass[0]));
           break;
         case PHI:
-          xvalue = bOffsetPsi ? detectorInfo.getPhiOffset(det, M_PI)
-                              : detectorInfo.getPhi(det);
+          xvalue = bOffsetPsi ? getPhiOffset(pos, M_PI) : getPhi(pos);
           break;
         case OUT_OF_PLANE_ANGLE: {
-          auto pos = detectorInfo.position(det);
           xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
           break;
         }

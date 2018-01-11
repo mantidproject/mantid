@@ -71,13 +71,15 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<size_t>>()),
       m_parentComponentIndices(boost::make_shared<std::vector<size_t>>(
           m_orderedDetectorIds->size(), 0)),
-      m_instrumentTree(boost::make_shared<std::vector<std::vector<size_t>>>()),
+      m_assemblyImmediateChildren(
+          boost::make_shared<std::vector<std::vector<size_t>>>()),
       m_detectorRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(boost::make_shared<
-          std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_componentIdToIndexMap(
+          boost::make_shared<
+              std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
@@ -177,7 +179,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   for (const auto &child : children) {
     (*m_parentComponentIndices)[child] = componentIndex;
   }
-  m_instrumentTree->emplace_back(std::move(children));
+  m_assemblyImmediateChildren->emplace_back(std::move(children));
   return componentIndex;
 }
 
@@ -205,7 +207,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
-  m_instrumentTree->emplace_back(std::vector<size_t>());
+  m_assemblyImmediateChildren->emplace_back(std::vector<size_t>());
   return componentIndex;
 }
 
@@ -336,8 +338,9 @@ InstrumentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_instrumentTree, m_positions, m_rotations,
-      m_scaleFactors, m_componentType, m_names, m_sourceIndex, m_sampleIndex);
+      m_parentComponentIndices, m_assemblyImmediateChildren, m_positions,
+      m_rotations, m_scaleFactors, m_componentType, m_names, m_sourceIndex,
+      m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>

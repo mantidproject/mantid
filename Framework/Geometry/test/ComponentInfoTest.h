@@ -108,11 +108,12 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
   using Mantid::Beamline::ComponentType;
   auto isStructuredBank =
       boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
-  auto instrumentTree = boost::make_shared<std::vector<std::vector<size_t>>>(1);
+  auto assemblyImmediateChildren =
+      boost::make_shared<std::vector<std::vector<size_t>>>(1);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
-      parentIndices, instrumentTree, positions, rotations, scaleFactors,
-      isStructuredBank, names, -1, -1);
+      parentIndices, assemblyImmediateChildren, positions, rotations,
+      scaleFactors, isStructuredBank, names, -1, -1);
 }
 } // namespace
 
@@ -155,12 +156,13 @@ public:
     using Mantid::Beamline::ComponentType;
     auto isRectBank = boost::make_shared<std::vector<ComponentType>>(
         2, ComponentType::Generic);
-    auto instrumentTree = boost::make_shared<std::vector<std::vector<size_t>>>(
-        1, std::vector<size_t>(1));
+    auto assemblyImmediateChildren =
+        boost::make_shared<std::vector<std::vector<size_t>>>(
+            1, std::vector<size_t>(1));
     auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, instrumentTree, positions, rotations, scaleFactors,
-        isRectBank, names, -1, -1);
+        parentIndices, assemblyImmediateChildren, positions, rotations,
+        scaleFactors, isRectBank, names, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
@@ -647,6 +649,33 @@ public:
                      V3D(0, 0, 0));
     TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 1}),
                      detectorPos);
+  }
+
+  void test_StructuredPanel_for_single_rectangular_bank() {
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    // find structured panel
+    size_t structuredIndex = 0;
+    for (size_t i = componentInfo->root(); i >= 0; --i) {
+      if (componentInfo->componentType(i) ==
+              Mantid::Beamline::ComponentType::Structured ||
+          componentInfo->componentType(i) ==
+              Mantid::Beamline::ComponentType::Rectangular) {
+        structuredIndex = i;
+        break;
+      }
+    }
+
+    auto panel = componentInfo->structuredPanel(structuredIndex);
+    TS_ASSERT_EQUALS(panel.nX, 4);
+    TS_ASSERT_EQUALS(panel.nY, 4);
+    TS_ASSERT_EQUALS(panel.bottomLeft, 0);
+    TS_ASSERT_EQUALS(panel.bottomRight, 12);
+    TS_ASSERT_EQUALS(panel.topLeft, 3);
+    TS_ASSERT_EQUALS(panel.topRight, 15);
   }
 };
 

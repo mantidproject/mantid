@@ -39,7 +39,8 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         componentRanges,
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
-    boost::shared_ptr<std::vector<std::vector<size_t>>> instrumentTree,
+    boost::shared_ptr<std::vector<std::vector<size_t>>>
+        assemblyImmediateChildren,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
@@ -52,7 +53,7 @@ ComponentInfo::ComponentInfo(
       m_detectorRanges(std::move(detectorRanges)),
       m_componentRanges(std::move(componentRanges)),
       m_parentIndices(std::move(parentIndices)),
-      m_instrumentTree(std::move(instrumentTree)),
+      m_assemblyImmediateChildren(std::move(assemblyImmediateChildren)),
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
       m_scaleFactors(std::move(scaleFactors)),
       m_componentType(std::move(componentType)), m_names(std::move(names)),
@@ -94,11 +95,11 @@ ComponentInfo::ComponentInfo(
                                 "of names as number of components");
   }
 
-  size_t treeSize = 1; // initialize with root
-  for (const auto &assem : *m_instrumentTree)
-    treeSize += assem.size();
+  size_t assemTotalSize = 1; // initialize with root
+  for (const auto &assem : *m_assemblyImmediateChildren)
+    assemTotalSize += assem.size();
 
-  if (treeSize != m_size) {
+  if (assemTotalSize != m_size) {
     throw std::invalid_argument("ComponentInfo should be provided an "
                                 "instrument tree which contains same number "
                                 "components");
@@ -112,7 +113,7 @@ std::unique_ptr<ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo() const {
 }
 
 std::vector<size_t>
-ComponentInfo::detectorsInSubtree(const size_t componentIndex) const {
+ComponentInfo::detectorsInFullSubtree(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
     /* This is a single detector. Just return the corresponding index.
      * detectorIndex == componentIndex
@@ -154,12 +155,13 @@ ComponentInfo::componentsInSubtree(const size_t componentIndex) const {
 const std::vector<size_t> &
 ComponentInfo::children(const size_t componentIndex) const {
   static std::vector<size_t> emptyVec;
-  auto dets = detectorRangeInSubtree(root());
-  auto numDets = static_cast<size_t>(std::distance(dets.begin(), dets.end()));
-  auto index = componentIndex - numDets;
 
-  if (index < m_instrumentTree->size())
-    return (*m_instrumentTree)[index];
+  if (!isDetector(componentIndex)) {
+    auto numDets = m_assemblySortedDetectorIndices->size();
+    auto index = componentIndex - numDets;
+
+    return (*m_assemblyImmediateChildren)[index];
+  }
 
   return emptyVec;
 }
@@ -327,7 +329,7 @@ void ComponentInfo::setPosition(const size_t componentIndex,
   if (isDetector(componentIndex))
     return m_detectorInfo->setPosition(componentIndex, newPosition);
 
-  // Optimization: Not using detectorsInSubtree and componentsInSubtree to avoid
+  // Optimization: Not using detectorsInFullSubtree and componentsInSubtree to avoid
   // memory allocations.
   // Optimization: Split loop over detectors and other components.
   const auto detectorRange = detectorRangeInSubtree(componentIndex);
