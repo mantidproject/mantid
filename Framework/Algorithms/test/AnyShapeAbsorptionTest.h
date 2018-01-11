@@ -152,7 +152,7 @@ public:
     // Check a few actual numbers as well
     TS_ASSERT_DELTA(y0.front(), 0.7300, 0.0001);
     TS_ASSERT_DELTA(y0.back(), 0.2238, 0.0001);
-    TS_ASSERT_DELTA(y0[5], 0.3748, 0.0001);
+    TS_ASSERT_DELTA(y0[5], 0.3749, 0.0001);
 
     // Now test with a gauge volume used.
     // Create a small cylinder to be the gauge volume
