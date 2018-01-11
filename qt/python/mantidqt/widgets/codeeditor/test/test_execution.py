@@ -19,31 +19,39 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 import unittest
 
+# 3rdparty imports
+from qtpy.QtCore import QCoreApplication, QObject
+
 # local imports
+from mantidqt.utils.qt.testing import requires_qapp
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 
+class Receiver(QObject):
+    success_cb_called, error_cb_called = False, False
+    task_exc, error_stack = None, None
+
+    def on_success(self):
+        self.success_cb_called = True
+
+    def on_error(self, task_result):
+        self.error_cb_called = True
+        self.task_exc = task_result.exception
+        self.error_stack = task_result.stack_entries
+
+
+class ReceiverWithProgress(Receiver):
+
+    def __init__(self):
+        super(ReceiverWithProgress, self).__init__()
+        self.lines_received = []
+
+    def on_progess_update(self, lineno):
+        self.lines_received.append(lineno)
+
+
+@requires_qapp
 class PythonCodeExecutionTest(unittest.TestCase):
-
-    class Receiver(object):
-        success_cb_called, error_cb_called = False, False
-        task_exc, error_stack = None, None
-
-        def on_success(self):
-            self.success_cb_called = True
-
-        def on_error(self, task_result):
-            self.error_cb_called = True
-            self.task_exc = task_result.exception
-            self.error_stack = task_result.stack_entries
-
-    class ReceiverWithProgress(Receiver):
-
-        def __init__(self):
-            self.lines_received = []
-
-        def on_progess_update(self, lineno):
-            self.lines_received.append(lineno)
 
     def test_default_construction_yields_empty_context(self):
         executor = PythonCodeExecution()
@@ -71,12 +79,11 @@ class PythonCodeExecutionTest(unittest.TestCase):
         self.assertEquals(100, user_locals['_local'])
         self.assertTrue('_local' not in user_globals)
 
-    def test_execute_async_calls_success_cb_on_completion(self):
-        code = "if:"
-        recv = PythonCodeExecutionTest.Receiver()
-        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
-        task = executor.execute_async(code)
-        task.join()
+    def test_execute_async_calls_success_signal_on_completion(self):
+        code = "x=1+2"
+        executor, recv = self._run_async_code(code)
+        self.assertTrue(recv.success_cb_called)
+        self.assertFalse(recv.error_cb_called)
 
     # ---------------------------------------------------------------------------
     # Error execution tests
@@ -87,10 +94,8 @@ class PythonCodeExecutionTest(unittest.TestCase):
 
     def test_execute_async_calls_error_cb_on_syntax_error(self):
         code = "if:"
-        recv = PythonCodeExecutionTest.Receiver()
-        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
-        task = executor.execute_async(code)
-        task.join()
+        executor, recv = self._run_async_code(code)
+
         self.assertTrue(recv.error_cb_called)
         self.assertFalse(recv.success_cb_called)
         self.assertTrue(isinstance(recv.task_exc, SyntaxError),
@@ -103,7 +108,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
         self._verify_failed_serial_execute(NameError, code)
 
     def test_execute_async_returns_failure_on_runtime_error_and_captures_expected_stack(self):
-        code = """x = + 1
+        code = """
 def foo():
     def bar():
         # raises a NameError
@@ -112,12 +117,9 @@ def foo():
     bar()
 foo()
 """
-        recv = PythonCodeExecutionTest.Receiver()
-        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
-        task = executor.execute_async(code)
-        task.join()
-        self.assertTrue(recv.error_cb_called)
+        executor, recv = self._run_async_code(code, with_progress=True)
         self.assertFalse(recv.success_cb_called)
+        self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, NameError),
                         msg="Unexpected exception found. "
                             "NameError expected, found {}".format(recv.task_exc.__class__.__name__))
@@ -133,33 +135,22 @@ foo()
     # ---------------------------------------------------------------------------
     def test_progress_cb_is_not_called_for_empty_string(self):
         code = ""
-        recv = PythonCodeExecutionTest.ReceiverWithProgress()
-        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
-                                       progress_cb=recv.on_progess_update)
-        task = executor.execute_async(code)
-        task.join()
+        executor, recv = self._run_async_code(code, with_progress=True)
         self.assertEqual(0, len(recv.lines_received))
 
     def test_progress_cb_is_not_called_for_code_with_syntax_errors(self):
         code = """x = 1
 y =
 """
-        recv = PythonCodeExecutionTest.ReceiverWithProgress()
-        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
-                                       progress_cb=recv.on_progess_update)
-        task = executor.execute_async(code)
-        task.join()
+        executor, recv = self._run_async_code(code, with_progress=True)
+        self.assertEqual(0, len(recv.lines_received))
         self.assertFalse(recv.success_cb_called)
         self.assertTrue(recv.error_cb_called)
         self.assertEqual(0, len(recv.lines_received))
 
     def test_progress_cb_is_called_for_single_line(self):
         code = "x = 1"
-        recv = PythonCodeExecutionTest.ReceiverWithProgress()
-        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
-                                       progress_cb=recv.on_progess_update)
-        task = executor.execute_async(code)
-        task.join()
+        executor, recv = self._run_async_code(code, with_progress=True)
         if not recv.success_cb_called:
             self.assertTrue(recv.error_cb_called)
             self.fail("Execution failed with error:\n" + str(recv.task_exc))
@@ -170,11 +161,7 @@ y =
         code = """x = 1
 y = 2
 """
-        recv = PythonCodeExecutionTest.ReceiverWithProgress()
-        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
-                                       progress_cb=recv.on_progess_update)
-        task = executor.execute_async(code)
-        task.join()
+        executor, recv = self._run_async_code(code, with_progress=True)
         if not recv.success_cb_called:
             self.assertTrue(recv.error_cb_called)
             self.fail("Execution failed with error:\n" + str(recv.task_exc))
@@ -192,20 +179,18 @@ for i in range(10):
 
 squared = sum*sum
 """
-        recv = PythonCodeExecutionTest.ReceiverWithProgress()
-        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
-                                       progress_cb=recv.on_progess_update)
-        task = executor.execute_async(code)
-        task.join()
+        executor, recv = self._run_async_code(code, with_progress=True)
         if not recv.success_cb_called:
-            self.assertTrue(recv.error_cb_called)
-            self.fail("Execution failed with error:\n" + str(recv.task_exc))
+            if recv.error_cb_called:
+                self.fail("Unexpected error found: " + str(recv.task_exc))
+            else:
+                self.fail("No callback was called!")
 
         context = executor.locals_ns
         self.assertEqual(20, context['sum'])
         self.assertEqual(20*20, context['squared'])
         self.assertEqual(1, context['x'])
-        self.assertEqual([1, 2, 3, 4, 5, 8, 9], recv.lines_received)
+        self.assertEqual([1, 2, 4, 5, 9], recv.lines_received)
 
     # -------------------------------------------------------------------------
     # Helpers
@@ -224,6 +209,21 @@ squared = sum*sum
     def _verify_failed_serial_execute(self, expected_exc_type, code):
         executor = PythonCodeExecution()
         self.assertRaises(expected_exc_type, executor.execute, code)
+
+    def _run_async_code(self, code, with_progress=False):
+        executor = PythonCodeExecution()
+        if with_progress:
+            recv = ReceiverWithProgress()
+            executor.sig_exec_progress.connect(recv.on_progess_update)
+        else:
+            recv = Receiver()
+        executor.sig_exec_success.connect(recv.on_success)
+        executor.sig_exec_error.connect(recv.on_error)
+        task = executor.execute_async(code)
+        task.join()
+        QCoreApplication.processEvents()
+
+        return executor, recv
 
 
 if __name__ == "__main__":

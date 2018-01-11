@@ -18,33 +18,26 @@ from __future__ import (absolute_import, unicode_literals)
 
 # std imports
 
+# 3rdparty imports
+from IPython.core.inputsplitter import InputSplitter
+from qtpy.QtCore import QObject, Signal
+
 # local imports
 from mantidqt.utils.async import AsyncTask
 
 
-class PythonCodeExecution(object):
+class PythonCodeExecution(QObject):
     """Provides the ability to execute arbitrary
     strings of Python code. It supports
     reporting progress updates in asynchronous execution
     """
-    def __init__(self,success_cb=None, error_cb=None,
-                 progress_cb=None):
-        """
-        Initialize the object
+    sig_exec_success = Signal()
+    sig_exec_error = Signal(object)
+    sig_exec_progress = Signal(int)
 
-        :param success_cb: A callback of the form f() called on success
-        :param error_cb: A callback of the form f(exc) called on error,
-        providing an AsyncTaskFailure object
-        :param progress_cb: A callback for progress updates as the code executes
-        """
-        # AsyncTask's callbacks have a slightly different form
-        if success_cb:
-            def success_cb_wrap(_): success_cb()
-        else:
-            def success_cb_wrap(_): pass
-        self._on_success = success_cb_wrap
-        self._on_error = error_cb
-        self._on_progress_update = progress_cb
+    def __init__(self):
+        """Initialize the object"""
+        super(PythonCodeExecution, self).__init__()
 
         self._globals_ns, self._locals_ns = None, None
         self.reset_context()
@@ -74,7 +67,7 @@ class PythonCodeExecution(object):
         # Stack is chopped on error to avoid the  AsyncTask.run->_do_exec->exec calls appearing
         # as these are not useful in this context
         t = AsyncTask(self.execute, args=(code_str,),
-                      stack_chop=3,
+                      stack_chop=2,
                       success_cb=self._on_success, error_cb=self._on_error)
         t.start()
         return t
@@ -84,29 +77,26 @@ class PythonCodeExecution(object):
         within the provided context.
 
         :param code_str: A string containing code to execute
-        :param user_globals: A mutable mapping type to store global variables
-        :param user_locals: A mutable mapping type to store local variables
         :raises: Any error that the code generates
         """
-        # execute whole string if no reporting is required
-        if self._on_progress_update is None:
-            self._do_exec(code_str)
-        else:
-            self._execute_as_blocks(code_str)
-
-    def _execute_as_blocks(self, code_str):
-        """Execute the code in the supplied context and report the progress
-        using the supplied callback"""
-        # will raise a SyntaxError if any of the code is invalid
         compile(code_str, "<string>", mode='exec')
 
-        progress_cb = self._on_progress_update
+        sig_progress = self.sig_exec_progress
         for block in code_blocks(code_str):
-            progress_cb(block.lineno)
-            self._do_exec(block.code_obj)
+            sig_progress.emit(block.lineno)
+            exec(block.code_obj, self.globals_ns, self.locals_ns)
 
-    def _do_exec(self, code):
-        exec (code, self.globals_ns, self.locals_ns)
+    # ---------------------------------------------------------------
+    # Callbacks
+    # ---------------------------------------------------------------
+    def _on_success(self, _):
+        self.sig_exec_success.emit()
+
+    def _on_error(self, task_error):
+        self.sig_exec_error.emit(task_error)
+
+    def _on_progress_updated(self, lineno):
+        self.sig_exec_progress(lineno)
 
 
 class CodeBlock(object):
@@ -122,17 +112,27 @@ def code_blocks(code_str):
     """Generator to produce blocks of executable code
     from the given code string.
     """
-    lineno = 1
+    block_start_lineno, cur_lineno = 1, 0
     lines = code_str.splitlines()
-    cur_block = []
+    nlines = len(lines)
+    isp = InputSplitter()
     for line in lines:
-        cur_block.append(line)
-        code_block = "\n".join(cur_block)
-        try:
-            code_obj = compile(code_block, "<string>", mode='exec')
-            yield CodeBlock(code_obj, lineno)
-            lineno += len(cur_block)
-            cur_block = []
-        except (SyntaxError, TypeError):
-            # assume we don't have a full block yet
+        cur_lineno += 1
+        isp.push(line)
+        # If we need more input to form a complete statement
+        # or we are not at the end of the code then keep
+        # going
+        if isp.push_accepts_more() and cur_lineno != nlines:
             continue
+        else:
+            # Now we have a complete set of executable statements
+            # throw them back
+            code = isp.code
+            isp.reset()
+            yield CodeBlock(code, block_start_lineno)
+            # In order to keep the line numbering in error stack traces
+            # consistent each executed block needs to have the statements
+            # on the same line as they are in the real code so we prepend
+            # blank lines to make this so
+            isp.push('\n'*cur_lineno)
+            block_start_lineno = cur_lineno + 1
