@@ -36,18 +36,6 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         def on_det1_time_clicked(self):
             pass
 
-        @abstractmethod
-        def on_det2_horizontal_clicked(self):
-            pass
-
-        @abstractmethod
-        def on_det2_vertical_clicked(self):
-            pass
-
-        @abstractmethod
-        def on_det2_time_clicked(self):
-            pass
-
     def __init__(self, parent=None):
         super(DiagnosticsPage, self).__init__(parent)
         self.setupUi(self)
@@ -93,9 +81,6 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         self.detector_1_horizontal_button.clicked.connect(self.on_det1_horizontal_clicked)
         self.detector_1_vertical_button.clicked.connect(self.on_det1_vertical_clicked)
         self.detector_1_time_button.clicked.connect(self.on_det1_time_clicked)
-        self.detector_2_horizontal_button.clicked.connect(self.on_det2_horizontal_clicked)
-        self.detector_2_vertical_button.clicked.connect(self.on_det2_vertical_clicked)
-        self.detector_2_time_button.clicked.connect(self.on_det2_time_clicked)
 
     def on_det1_horizontal_clicked(self):
         self._call_diagnostics_page_listeners(lambda listener: listener.on_det1_horizontal_clicked())
@@ -105,15 +90,6 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
 
     def on_det1_time_clicked(self):
         self._call_diagnostics_page_listeners(lambda listener: listener.on_det1_time_clicked())
-
-    def on_det2_horizontal_clicked(self):
-        self._call_diagnostics_page_listeners(lambda listener: listener.on_det2_horizontal_clicked())
-
-    def on_det2_vertical_clicked(self):
-        self._call_diagnostics_page_listeners(lambda listener: listener.on_det2_vertical_clicked())
-
-    def on_det2_time_clicked(self):
-        self._call_diagnostics_page_listeners(lambda listener: listener.on_det2_time_clicked())
 
     def _on_browse_clicked(self):
         """
@@ -128,6 +104,14 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
 
     def get_file_path(self):
         return str(self.run_input_line_edit.text())
+
+    def set_detectors(self, detector_list):
+        current_index = self.detector_combo_box.currentIndex()
+        self.detector_combo_box.clear()
+        for element in detector_list:
+            self.detector_combo_box.addItem(element)
+        if current_index != -1:
+            self.detector_combo_box.setCurrentIndex(current_index)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties
@@ -173,30 +157,6 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         self.update_simple_line_edit_field(line_edit="det1_time_range_line_edit", value=value)
 
     @property
-    def det2_horizontal_range(self):
-        return self.get_simple_line_edit_field(line_edit="det2_horizontal_range_line_edit", expected_type=str)
-
-    @det2_horizontal_range.setter
-    def det2_horizontal_range(self, value):
-        self.update_simple_line_edit_field(line_edit="det2_horizontal_range_line_edit", value=value)
-
-    @property
-    def det2_vertical_range(self):
-        return self.get_simple_line_edit_field(line_edit="det2_vertical_range_line_edit", expected_type=str)
-
-    @det2_vertical_range.setter
-    def det2_vertical_range(self, value):
-        self.update_simple_line_edit_field(line_edit="det2_vertical_range_line_edit", value=value)
-
-    @property
-    def det2_time_range(self):
-        return self.get_simple_line_edit_field(line_edit="det2_time_range_line_edit", expected_type=str)
-
-    @det2_time_range.setter
-    def det2_time_range(self, value):
-        self.update_simple_line_edit_field(line_edit="det2_time_range_line_edit", value=value)
-
-    @property
     def det1_horizontal_mask(self):
         return self.det1_horizontal_mask_check_box.isChecked()
 
@@ -219,30 +179,4 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
     @det1_time_mask.setter
     def det1_time_mask(self, value):
         self.det1_time_mask_checkbox.setChecked(value)
-
-    @property
-    def det2_horizontal_mask(self):
-        return self.det2_horizontal_mask_check_box.isChecked()
-
-    @det2_horizontal_mask.setter
-    def det2_horizontal_mask(self, value):
-        self.det2_horizontal_mask_check_box.setChecked(value)
-
-    @property
-    def det2_vertical_mask(self):
-        return self.det2_vertical_mask_check_box.isChecked()
-
-    @det2_vertical_mask.setter
-    def det2_vertical_mask(self, value):
-        self.det2_vertical_mask_check_box.setChecked(value)
-
-    @property
-    def det2_time_mask(self):
-        return self.det2_time_mask_checkbox.isChecked()
-
-    @det2_time_mask.setter
-    def det2_time_mask(self, value):
-        self.det2_time_mask_checkbox.setChecked(value)
-
-
 

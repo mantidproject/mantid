@@ -51,6 +51,17 @@ GENERIC_SETTINGS = "Mantid/ISISSANS"
 
 JSON_SUFFIX = ".json"
 
+def get_detector_strings_for_gui(instrument=None):
+    if instrument is SANSInstrument.SANS2D:
+        return [SANS2D_LAB, SANS2D_HAB]
+    elif instrument is SANSInstrument.LOQ:
+        return [LOQ_LAB, LOQ_HAB]
+    elif instrument is SANSInstrument.LARMOR:
+        return [LARMOR_LAB]
+    elif instrument is SANSInstrument.ZOOM:
+        return [ZOOM_LAB]
+    else:
+        return [DEFAULT_LAB, DEFAULT_HAB]
 
 def get_reduction_mode_strings_for_gui(instrument=None):
     if instrument is SANSInstrument.SANS2D:

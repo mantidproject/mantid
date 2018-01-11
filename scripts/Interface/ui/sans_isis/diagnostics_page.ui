@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>695</width>
-    <height>321</height>
+    <height>212</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,40 +19,57 @@
      <property name="title">
       <string>Run</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>File/Run</string>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QLineEdit" name="run_input_line_edit"/>
-      </item>
-      <item>
-       <widget class="QPushButton" name="browse_button">
-        <property name="text">
-         <string>Browse</string>
-        </property>
-       </widget>
-      </item>
-      <item>
+      <item row="0" column="4">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Period:</string>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QLineEdit" name="period_line_edit"/>
+      <item row="0" column="5">
+       <widget class="QLineEdit" name="period_line_edit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
-      <item>
+      <item row="0" column="6">
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>/n</string>
         </property>
        </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="browse_button">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="run_input_line_edit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QComboBox" name="detector_combo_box"/>
       </item>
      </layout>
     </widget>
@@ -66,30 +83,33 @@
       <item row="0" column="3">
        <widget class="QCheckBox" name="det1_horizontal_mask_check_box">
         <property name="text">
-         <string>Apply Time Channel Mask</string>
+         <string>Apply Mask</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="detector_1_vertical_button">
-        <property name="text">
-         <string>Vertical Integral</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="label_4">
+      <item row="2" column="1">
+       <widget class="QLabel" name="label_6">
         <property name="text">
          <string>Range:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="label_5">
+      <item row="2" column="3">
+       <widget class="QCheckBox" name="det1_time_mask_checkbox">
         <property name="text">
-         <string>Range:</string>
+         <string>Apply Mask</string>
         </property>
        </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="detector_1_time_button">
+        <property name="text">
+         <string>Time Integral</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="det1_time_range_line_edit"/>
       </item>
       <item row="1" column="2">
        <widget class="QLineEdit" name="det1_vertical_range_line_edit"/>
@@ -101,120 +121,75 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <widget class="QCheckBox" name="det1_vertical_mask_check_box">
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>Apply Time Channel Mask</string>
+         <string>Range:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="detector_1_vertical_button">
+        <property name="text">
+         <string>Vertical Integral</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Range:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
        <widget class="QLineEdit" name="det1_horizontal_range_line_edit"/>
       </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="detector_1_time_button">
-        <property name="text">
-         <string>Time Integral</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Range:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLineEdit" name="det1_time_range_line_edit"/>
-      </item>
-      <item row="2" column="3">
-       <widget class="QCheckBox" name="det1_time_mask_checkbox">
-        <property name="text">
-         <string>Apply Pixel Mask</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Detector2</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="3">
-       <widget class="QCheckBox" name="det2_time_mask_checkbox">
-        <property name="text">
-         <string>Apply Pixel Mask</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="3">
-       <widget class="QCheckBox" name="det2_vertical_mask_check_box">
+       <widget class="QCheckBox" name="det1_vertical_mask_check_box">
         <property name="text">
-         <string>Apply Time Channel Mask</string>
+         <string>Apply Mask</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>Range:</string>
+      <item row="0" column="4">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>Range:</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-       </widget>
+       </spacer>
       </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="detector_2_time_button">
-        <property name="text">
-         <string>Time Integral</string>
+      <item row="1" column="4">
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>Range:</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-       </widget>
+       </spacer>
       </item>
-      <item row="0" column="3">
-       <widget class="QCheckBox" name="det2_horizontal_mask_check_box">
-        <property name="text">
-         <string>Apply Time Channel Mask</string>
+      <item row="2" column="4">
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLineEdit" name="det2_vertical_range_line_edit"/>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="det2_horizontal_range_line_edit"/>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLineEdit" name="det2_time_range_line_edit"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="detector_2_vertical_button">
-        <property name="text">
-         <string>Vertical Integral</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QPushButton" name="detector_2_horizontal_button">
-        <property name="text">
-         <string>Horizontal Integral</string>
-        </property>
-       </widget>
+       </spacer>
       </item>
      </layout>
     </widget>

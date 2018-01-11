@@ -72,6 +72,9 @@ class RunTabPresenter(object):
         def on_manage_directories(self):
             self._presenter.on_manage_directories()
 
+        def on_instrument_changed(self):
+            self._presenter.on_instrument_changed()
+
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
         self._facility = facility
@@ -260,6 +263,11 @@ class RunTabPresenter(object):
         self._masking_table_presenter.on_update_rows()
         self._settings_diagnostic_tab_presenter.on_update_rows()
         self._beam_centre_presenter.on_update_rows()
+
+    def on_instrument_changed(self):
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+        self._setup_instrument_specific_settings(self._view._instrument)
 
     def on_processed_clicked(self):
         """
@@ -1015,7 +1023,7 @@ class RunTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Settings
     # ------------------------------------------------------------------------------------------------------------------
-    def _setup_instrument_specific_settings(self):
+    def _setup_instrument_specific_settings(self, selected_instrument=None):
         # Get the first run number of the scatter data for the first table
         sample_scatter = self._view.get_cell(row=0, column=0, convert_to=str)
 
@@ -1036,6 +1044,7 @@ class RunTabPresenter(object):
             # Set the instrument on the table
             instrument = self._file_information.get_instrument()
             self._view.set_instrument_settings(instrument)
+            self._settings_diagnostic_tab_presenter.set_instrument_settings(instrument)
 
             # Set the reduction mode
             reduction_mode_list = get_reduction_mode_strings_for_gui(instrument=instrument)
@@ -1043,6 +1052,10 @@ class RunTabPresenter(object):
         else:
             self._view.set_instrument_settings(SANSInstrument.NoInstrument)
             reduction_mode_list = get_reduction_mode_strings_for_gui()
+            self._view.set_reduction_modes(reduction_mode_list)
+
+            # Set the reduction mode
+            reduction_mode_list = get_reduction_mode_strings_for_gui(instrument=selected_instrument)
             self._view.set_reduction_modes(reduction_mode_list)
 
     # ------------------------------------------------------------------------------------------------------------------

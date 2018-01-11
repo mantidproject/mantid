@@ -24,7 +24,8 @@ from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
-                                       get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file)
+                                       get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file,
+                                       get_detector_strings_for_gui)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -69,6 +70,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         @abstractmethod
         def on_manage_directories(self):
+            pass
+
+        @abstractmethod
+        def on_instrument_changed(self):
             pass
 
     def __init__(self, main_presenter):
@@ -284,10 +289,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self._call_settings_listeners(lambda listener: listener.on_processing_finished())
 
     def _data_changed(self):
-        """
-        Clean up
-        """
         self._call_settings_listeners(lambda listener: listener.on_data_changed())
+
+    def _instrument_changed(self):
+        self._call_settings_listeners(lambda listener: listener.on_instrument_changed())
 
     def _on_user_file_load(self):
         """
@@ -323,12 +328,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Set instrument as the default instrument
         instrument_string = str(self.data_processor_table.getCurrentInstrument())
         self._set_mantid_instrument(instrument_string)
-
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         # Set the reduction mode
         if instrument_string:
             self._instrument = SANSInstrument.from_string(instrument_string)
             reduction_mode_list = get_reduction_mode_strings_for_gui(self._instrument)
             self.set_reduction_modes(reduction_mode_list)
+            self._instrument_changed()
 
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())
