@@ -186,6 +186,33 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         num_angles = len(self._angles)
         workflow_prog = Progress(self, start=0.2, end=0.8, nreports=num_angles * 2)
 
+        # Check sample input
+        sam_material = mtd[self._sample_ws_name].sample().getMaterial()
+        self._has_sample_in = \
+            bool(self._sample_density and self._sample_thickness and (sam_material.totalScatterXSection() + sam_material.absorbXSection()))
+        if not self._has_sample_in:
+            logger.warning("The sample has not been given, or the information is incomplete. Continuing but no absorption for sample will "
+                           "be computed.")
+
+        # Check can input
+        can_material = mtd[self._can_ws_name].sample().getMaterial()
+        if self._can_density and (can_material.totalScatterXSection() + can_material.absorbXSection()):
+            self._has_can_front_in = bool(self._can_front_thickness)
+            self._has_can_back_in = bool(self._can_back_thickness)
+        else:
+            logger.warning(
+                "A can workspace was given but the can information is incomplete. Continuing but no absorption for the can will "
+                "be computed.")
+
+        if not self._has_can_front_in:
+            logger.warning(
+                "A can workspace was given but the can front thickness was not given. Continuing but no absorption for can front"
+                " will be computed.")
+        if not self._has_can_back_in:
+            logger.warning(
+                "A can workspace was given but the can back thickness was not given. Continuing but no absorption for can back"
+                " will be computed.")
+
         for angle_idx in range(num_angles):
             workflow_prog.report('Running flat correction for angle %s' % angle_idx)
             angle = self._angles[angle_idx]
@@ -493,10 +520,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         sst = np.vectorize(self._self_shielding_transmission)
         ssr = np.vectorize(self._self_shielding_reflection)
 
-        # Check sample input
-        self._has_sample_in = \
-            bool(self._sample_density and self._sample_thickness and (sam_material.totalScatterXSection() + sam_material.absorbXSection()))
-
         ki_s, kf_s = 0, 0
         if self._has_sample_in:
             ki_s, kf_s, ass = self._sample_cross_section_calc(sam_material, waveslengths, theta, alpha, stha, salpha, sst, ssr)
@@ -542,11 +565,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def _can_cross_section_calc(self, wavelengths, theta, alpha, stha, salpha, ki_s, kf_s, ass, acc, sst, ssr):
         can_sample = mtd[self._can_ws_name].sample()
         can_material = can_sample.getMaterial()
-
-        # Check can input
-        if self._can_density and (can_material.totalScatterXSection() + can_material.absorbXSection()):
-            self._has_can_front_in = self._can_front_thickness
-            self._has_can_back_in = self._can_back_thickness
 
         if self._has_can_front_in or self._has_can_back_in:
             # Calculate can cross section (value for each of the wavelengths and for E = Efixed)
