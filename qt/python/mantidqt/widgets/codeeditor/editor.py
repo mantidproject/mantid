@@ -17,7 +17,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # 3rd party imports
-from qtpy.QtCore import QObject, Signal
+from qtpy.QtCore import QObject
 from qtpy.QtWidgets import QStatusBar, QTabWidget, QVBoxLayout, QWidget
 
 # local imports
@@ -49,45 +49,54 @@ class ExecutableCodeEditor(QWidget):
         super(ExecutableCodeEditor, self).__init__(parent)
 
         # layout
-        self._editor = CodeEditor(language, self)
-        self._status = QStatusBar(self)
+        self.editor = CodeEditor(language, self)
+        self.status = QStatusBar(self)
         layout = QVBoxLayout()
-        layout.addWidget(self._editor)
-        layout.addWidget(self._status)
+        layout.addWidget(self.editor)
+        layout.addWidget(self.status)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.presenter = ExecutableCodeEditorPresenter(self)
+        # presenter
+        self._presenter = ExecutableCodeEditorPresenter(self, PythonCodeExecution())
 
     def execute_all_async(self):
-        self.presenter.req_execute_all_async()
+        self._presenter.req_execute_all_async()
 
     def set_editor_readonly(self, ro):
-        self._editor.setReadOnly(ro)
+        self.editor.setReadOnly(ro)
 
     def set_status_message(self, msg):
-        self._status.showMessage(msg)
+        self.status.showMessage(msg)
 
 
 class ExecutableCodeEditorPresenter(QObject):
     """Presenter part of MVP to control actions on the editor"""
 
-    def __init__(self, view):
+    def __init__(self, view, model):
         super(ExecutableCodeEditorPresenter, self).__init__()
         self.view = view
-        self.model = PythonCodeExecution(success_cb=self._on_exec_success)
+        self.model = model
 
+        # connect signals
+        self.model.sig_exec_success.connect(self.on_exec_success)
+        self.model.sig_exec_error.connect(self.on_exec_error)
+
+        # starts idle
         self.view.set_status_message(IDLE_STATUS_MSG)
 
     def req_execute_all_async(self):
-        text = self.view.text()
+        text = self.view.editor.text()
         if not text:
             return
-        self.view.set_editor_read_only()
+        self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
-        self.model.execute_async(text)
+        return self.model.execute_async(text)
 
-    def _on_exec_success(self):
+    def on_exec_success(self):
+        self.view.set_status_message(IDLE_STATUS_MSG)
+
+    def on_exec_error(self):
         self.view.set_status_message(IDLE_STATUS_MSG)
 
 

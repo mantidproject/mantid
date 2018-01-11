@@ -20,12 +20,11 @@ from __future__ import (absolute_import, unicode_literals)
 import unittest
 
 # 3rd party imports
-from qtpy.QtWidgets import QStatusBar
 import six
 
 # local imports
-from mantidqt.widgets.codeeditor.editor import ExecutableCodeEditor, ExecutableCodeEditorPresenter
-from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+from mantidqt.widgets.codeeditor.editor import ExecutableCodeEditor
+from mantidqt.utils.qt.testing import requires_qapp
 
 if six.PY2:
     import mock
@@ -33,40 +32,27 @@ else:
     from unittest import mock
 
 
-class ExecutableCodeEditorPresenterTest(unittest.TestCase):
+@requires_qapp
+class ExecutableCodeEditorTest(unittest.TestCase):
 
-    def setUp(self):
-        self.view = mock.create_autospec(ExecutableCodeEditor)
-        self.view.set_status_message = mock.MagicMock()
-        self.view.set_editor_readonly = mock.MagicMock()
+    def test_construction(self):
+        w = ExecutableCodeEditor()
+        self.assertTrue("Status: Idle", w.status.currentMessage())
 
-        self.presenter = ExecutableCodeEditorPresenter(self.view)
-        self.view.set_status_message.reset_mock()
+    def test_empty_code_does_nothing_on_exec(self):
+        w = ExecutableCodeEditor()
+        w._presenter.model.execute_async = mock.MagicMock()
 
-    def test_construction_sets_idle_status(self):
-        ExecutableCodeEditorPresenter(self.view)
-        self.view.set_status_message.assert_called_once_with("Status: Idle")
+        w.execute_all_async()
 
-    def test_execute_all_async_with_empty_code_does_nothing(self):
-        self.view.text = mock.MagicMock(return_value="")
-        self.presenter.model.execute_async = mock.MagicMock()
+        w._presenter.model.execute_async.assert_not_called()
+        self.assertTrue("Status: Idle", w.status.currentMessage())
 
-        self.presenter.req_execute_all_async()
-        self.view.text.assert_called_once_with()
-        self.view.set_editor_readonly.assert_not_called()
-        self.view.set_status_message.assert_not_called()
-        self.presenter.model.execute_async.assert_not_called()
-
-    def test_execute_all_async_with_successful_code(self):
-        code_str = "x = 1 + 2"
-        self.view.text = mock.MagicMock(return_value=code_str)
-        self.model.execute_async = mock.MagicMock()
-
-        self.presenter.req_execute_all_async()
-        self.view.text.assert_called_once_with()
-        self.view.set_editor_readonly.assert_called_once_with(True)
-        self.view.set_status_message.assert_called_once_with("Status: Running")
-        self.model.execute_async.assert_called_once_with(code_str)
+    def test_successful_execution(self):
+        w = ExecutableCodeEditor()
+        w.editor.setText("x = 1 + 2")
+        w.execute_all_async()
+        self.assertTrue("Status: Idle", w.status.currentMessage())
 
 
 if __name__ == '__main__':
