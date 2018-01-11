@@ -63,31 +63,36 @@ void SumRowColumn_V2::exec() {
   MatrixWorkspace_const_sptr integratedWS = integrateWorkspace();
 
   const size_t numSpec = integratedWS->getNumberHistograms();
-
+  
+  g_log.notice() << "Numpspec is equal to " << numSpec << "\n";
+ 
   int x_dim = getProperty("XDim");
   int y_dim = getProperty("YDim");
   int unit_cell_grouping = numSpec/(x_dim*y_dim);
   int dimension_scale = sqrt(unit_cell_grouping);
+
+   g_log.notice() << "Here 0 " << unit_cell_grouping <<" hopefully a number\n";
   // Check number of spectra is 128*128 or 192*192. Print warning if not.
-  if (unit_cell_grouping%4 != 0) {
+  if (unit_cell_grouping%4 != 0 && unit_cell_grouping != 1) {
     g_log.warning()
         << "The input workspace has " << numSpec << " spectra."
-        << "This is not a multiple of 4 of the expected number - did you make a mistake?\n";
+        << "This is not a multiple of 4 of the expected number " << x_dim*y_dim << " - did you make a mistake?\n";
   }
-
-  // This is the dimension if all rows/columns are included
+  g_log.notice() << "Here 1\n";
+  // // This is the dimension if all rows/columns are included
   if (dimension_scale%1 != 0){
       g_log.error()
         << "The dimension scale is not an integer.";
   }
+  g_log.notice() << "Here 2\n";
   int x_dim_actual = x_dim / dimension_scale;
   int y_dim_actual = y_dim / dimension_scale;
-
+  g_log.notice() << "Here 3\n";
   // Get the orientation
   const std::string orientation = getProperty("Orientation");
   const bool horizontal = (orientation == "D_H" ? 1 : 0);
   
-
+  g_log.notice() << "Past get orientation\n";
   // Check the column range properties
   int start = getProperty("HOverVMin");
   int end = getProperty("HOverVMax");
@@ -104,13 +109,14 @@ void SumRowColumn_V2::exec() {
   }
 
   if (start > end) {
-      g_log.error("H/V_Min must be less than H/V_Max");
+      g_log.error("H/V_Min must be less than H/V_Max\n");
       throw std::out_of_range("H/V_Min must be less than H/V_Max");
     }
-  
-
+  int vector_size = horizontal ? y_dim_actual : x_dim_actual;
+  g_log.notice() << "Before create workspace "<< vector_size << " \n";
   MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create(integratedWS, 1, x_dim_actual, y_dim_actual);
+      WorkspaceFactory::Instance().create(integratedWS, 1, vector_size, vector_size);
+  g_log.notice() << "After remove units\n";
   // Remove the unit
   outputWS->getAxis(0)->unit().reset(new Mantid::Kernel::Units::Empty);
 
@@ -120,17 +126,20 @@ void SumRowColumn_V2::exec() {
 
   
 
-  
-  int vector_size = horizontal ? y_dim_actual : x_dim_actual;
-  Progress progress(this, 0.0, 1.0, vector_size);
+  g_log.notice() << "Horizontal=" << horizontal << "\n";
+  g_log.notice() << "end=" << end << " x_dim_actual=" << x_dim_actual << "vector_size=" << vector_size << "ydim=" << y_dim_actual << "\n";
 
+  int index_max = (horizontal ? (vector_size - 1 + end * y_dim_actual) : ((vector_size - 1) * x_dim_actual + end));
+  g_log.notice() << "index_max=" << index_max << "\n";
+  Progress progress(this, 0.0, 1.0, vector_size);
+  g_log.notice() << "Here 5\n";
   for (int i = 0; i < vector_size; ++i) {
     // Copy X values
     X[i] = i;
-
+    g_log.notice() << "i=" << i << "\n";
     // Now loop over calculating Y's
     for (int j = start; j <= end; ++j) {
-      const int index = (horizontal ? (i + j * x_dim_actual) : (i * y_dim_actual + j));
+      const int index = (horizontal ? (i + j * y_dim_actual) : (i * y_dim_actual + j));
       Y[i] += integratedWS->y(index)[0];
     }
   }

@@ -4,12 +4,14 @@ from sans.common.enums import (SANSFacility, SANSInstrument, SANSDataType, Detec
 from sans.common.file_information import (SANSFileInformationFactory, FileType, get_extension_for_file_type,
                                           find_full_file_path)
 from sans.state.data import (StateData)
-from mantid.simpleapi import SumRowColumn, SumSpectra
+from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
 from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag, create_managed_non_child_algorithm)
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import IntegralEnum, DetectorType
 from mantid.api import AlgorithmPropertyWithValue
 from sans.algorithm_detail.batch_execution import set_output_workspaces_on_load_algorithm, get_workspace_from_algorithm
+from sans.common.file_information import get_instrument_paths_for_sans_file
+from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 try:
     import mantidplot
@@ -26,7 +28,24 @@ def run_integral(range, mask, integral, detector, state):
     if mask:
         input_workspace = apply_mask(state, input_workspace, DetectorType.to_string(detector))
 
-    output_workspaces = run_algorithm(input_workspace, ranges, integral, mask, detector, input_workspace_name)
+    import pydevd
+    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+
+    instrument_file = get_instrument_paths_for_sans_file(state.data.sample_scatter)
+
+    if detector == DetectorType.HAB:
+        x_dim = get_named_elements_from_ipf_file(instrument_file[1], "high-angle-detector-num-columns",
+                                                 float)['high-angle-detector-num-columns']
+        y_dim = get_named_elements_from_ipf_file(instrument_file[1], "high-angle-detector-num-rows",
+                                                 float)['high-angle-detector-num-rows']
+    else:
+        x_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-columns", float)[
+            'low-angle-detector-num-columns']
+        y_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-rows", float)[
+            'low-angle-detector-num-rows']
+
+    output_workspaces = run_algorithm(input_workspace, ranges, integral, mask, detector, input_workspace_name,
+                                      x_dim, y_dim)
     output_graph = plot_graph(output_workspaces)
 
 
@@ -34,7 +53,7 @@ def parse_range(range):
     if range:
         return parse_diagnostic_settings(range)
     else:
-        return [[AlgorithmPropertyWithValue.EMPTY_INT, AlgorithmPropertyWithValue.EMPTY_INT]]
+        return [[0, AlgorithmPropertyWithValue.EMPTY_INT]]
 
 def load_workspace(state):
     use_optimizations = True
@@ -63,7 +82,7 @@ def crop_workspace(component, workspace):
     crop_alg.execute()
     return crop_alg.getProperty("OutputWorkspace").value
 
-def run_algorithm(input_workspace, ranges, integral, mask, detector, input_workspace_name):
+def run_algorithm(input_workspace, ranges, integral, mask, detector, input_workspace_name, x_dim, y_dim):
     output_workspaces = []
     for range in ranges:
         output_workspace = generate_output_workspace_name(range, integral, mask, detector, input_workspace_name)
@@ -73,13 +92,17 @@ def run_algorithm(input_workspace, ranges, integral, mask, detector, input_works
         hv_max = range[1]
 
         if integral == IntegralEnum.Horizontal:
-            SumRowColumn(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, Orientation='D_H',
-                         HOverVMin=hv_min, HOverVMax=hv_max)
+            ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='x',
+                                  HorizontalAxis='y', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
+            SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min, EndWorkspaceIndex=hv_max)
         elif integral == IntegralEnum.Vertical:
-            SumRowColumn(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, Orientation='D_V',
-                         HOverVMin=hv_min, HOverVMax=hv_max)
+            ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='y',
+                                  HorizontalAxis='x', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
+            SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
+                       EndWorkspaceIndex=hv_max)
         elif integral == IntegralEnum.Time:
-            SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace)
+            SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace,
+                       StartWorkspaceIndex=hv_min, EndWorkspaceIndex=hv_max)
 
     return output_workspaces
 
