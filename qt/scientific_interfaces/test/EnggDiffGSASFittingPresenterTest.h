@@ -5,6 +5,7 @@
 #include "EnggDiffGSASFittingModelMock.h"
 #include "EnggDiffGSASFittingViewMock.h"
 
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -110,8 +111,9 @@ public:
         .Times(1)
         .WillOnce(Return(selectedRunLabel));
 
-    const auto sampleWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100);
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+
     EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(123, 1))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
@@ -147,7 +149,7 @@ public:
 
     EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(123, 1))
         .Times(1)
-        .WillOnce(Throw(std::runtime_error("Invalid run")));
+        .WillOnce(Return(boost::none));
 
     EXPECT_CALL(
         *mockView_ptr,
@@ -165,7 +167,7 @@ public:
                testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
   }
 
-    void test_selectValidRunPlotFitResults() {
+  void test_selectValidRunPlotFitResults() {
     auto mockModel = Mantid::Kernel::make_unique<
         testing::NiceMock<MockEnggDiffGSASFittingModel>>();
     auto mockModel_ptr = mockModel.get();
@@ -182,16 +184,31 @@ public:
         .Times(1)
         .WillOnce(Return(selectedRunLabel));
 
-    const auto sampleWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100);
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
     EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(123, 1))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
+    EXPECT_CALL(*mockView_ptr, showRefinementResultsSelected())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(123, 1))
         .Times(1)
         .WillOnce(Return(true));
+
     EXPECT_CALL(*mockModel_ptr, getFittedPeaks(123, 1))
+        .Times(1)
         .WillOnce(Return(sampleWorkspace));
+
+    const boost::optional<Mantid::API::ITableWorkspace_sptr> emptyTableWS(
+        Mantid::API::WorkspaceFactory::Instance().createTable());
+
+    EXPECT_CALL(*mockModel_ptr, getLatticeParams(123, 1))
+        .Times(1)
+        .WillOnce(Return(emptyTableWS));
+
+    const boost::optional<double> rwp = 50.0;
+    EXPECT_CALL(*mockModel_ptr, getRwp(123, 1)).Times(1).WillOnce(Return(rwp));
 
     EXPECT_CALL(*mockView_ptr, resetCanvas()).Times(1);
     EXPECT_CALL(*mockView_ptr, plotCurve(testing::_)).Times(2);
@@ -205,7 +222,6 @@ public:
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
   }
-
 };
 
 #endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFGSASFITTINGPRESENTERTEST_H_

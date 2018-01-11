@@ -12,6 +12,11 @@ class MockEnggDiffGSASFittingView
     : public MantidQt::CustomInterfaces::IEnggDiffGSASFittingView {
 
 public:
+  MOCK_CONST_METHOD1(displayLatticeParams,
+                     void(const Mantid::API::ITableWorkspace_sptr));
+
+  MOCK_CONST_METHOD1(displayRwp, void(const double rwp));
+
   MOCK_CONST_METHOD0(getFocusedFileName, std::string());
 
   MOCK_CONST_METHOD0(getGSASIIProjectPath, std::string());
@@ -24,6 +29,9 @@ public:
 
   MOCK_CONST_METHOD0(getSelectedRunLabel, std::pair<int, size_t>());
 
+  MOCK_CONST_METHOD0(getSelectedRunMethod,
+                     MantidQt::CustomInterfaces::GSASRefinementMethod());
+
   MOCK_CONST_METHOD0(getRefinementMethod,
                      MantidQt::CustomInterfaces::GSASRefinementMethod());
 
@@ -35,6 +43,8 @@ public:
                void(const std::vector<boost::shared_ptr<QwtData>> &curve));
 
   MOCK_METHOD0(resetCanvas, void());
+
+  MOCK_METHOD0(showRefinementResultsSelected, bool());
 
   MOCK_METHOD1(updateRunList,
                void(const std::vector<std::pair<int, size_t>> &runLabels));

@@ -44,11 +44,32 @@ void EnggDiffGSASFittingPresenter::notify(
   }
 }
 
-bool doPawleyRefinement(const int runNumber, const size_t bank,
-                        const std::string &instParamFile,
-                        const std::vector<std::string> &phaseFiles,
-                        const std::string &pathToGSASII,
-                        const std::string &GSASIIProjectFile) {
+void EnggDiffGSASFittingPresenter::displayFitResults(const int runNumber,
+                                                     const size_t bank) {
+  const auto fittedPeaks = m_model->getFittedPeaks(runNumber, bank);
+  const auto latticeParams = m_model->getLatticeParams(runNumber, bank);
+  const auto rwp = m_model->getRwp(runNumber, bank);
+
+  if (!fittedPeaks || !latticeParams || !rwp) {
+    m_view->userWarning("Unexpectedly tried to plot fit results for invalid "
+                        "run, run number = " +
+                        std::to_string(runNumber) + ", bank ID = " +
+                        std::to_string(bank) +
+                        ". Please contact the development team");
+    return;
+  }
+
+  const auto plottablePeaks = API::QwtHelper::curveDataFromWs(*fittedPeaks);
+  m_view->plotCurve(plottablePeaks);
+
+  m_view->displayLatticeParams(*latticeParams);
+  m_view->displayRwp(*rwp);
+}
+
+bool EnggDiffGSASFittingPresenter::doPawleyRefinement(
+    const int runNumber, const size_t bank, const std::string &instParamFile,
+    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
+    const std::string &GSASIIProjectFile) {
   const auto dMin = m_view->getPawleyDMin();
   const auto negativeWeight = m_view->getPawleyNegativeWeight();
 
@@ -57,17 +78,16 @@ bool doPawleyRefinement(const int runNumber, const size_t bank,
                                      negativeWeight);
 }
 
-bool doRietveldRefinement(const int runNumber, const size_t bank,
-                          const std::string &instParamFile,
-                          const std::vector<std::string> &phaseFiles,
-                          const std::string &pathToGSASII,
-                          const std::string &GSASIIProjectFile) {
+bool EnggDiffGSASFittingPresenter::doRietveldRefinement(
+    const int runNumber, const size_t bank, const std::string &instParamFile,
+    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
+    const std::string &GSASIIProjectFile) {
   return m_model->doRietveldRefinement(runNumber, bank, instParamFile,
                                        phaseFiles, pathToGSASII,
                                        GSASIIProjectFile);
 }
 
-void processDoRefinement() {
+void EnggDiffGSASFittingPresenter::processDoRefinement() {
   const auto runLabel = m_view->getSelectedRunLabel();
   const auto runNumber = runLabel.first;
   const auto bank = runLabel.second;
@@ -90,14 +110,14 @@ void processDoRefinement() {
     break;
 
   case GSASRefinementMethod::RIETVELD:
-    refinementSucessful =
+    refinementSuccessful =
         doRietveldRefinement(runNumber, bank, instParamFile, phaseFiles,
                              pathToGSASII, GSASIIProjectFile);
     break;
   }
 
   if (refinementSuccessful) {
-    showRefinementResults(runNumber, bank);
+    updatePlot(runNumber, bank);
   } else {
     m_view->userWarning("Refinement failed, see the log for more details");
   }
@@ -120,31 +140,35 @@ void EnggDiffGSASFittingPresenter::processSelectRun() {
   const auto runNumber = runLabel.first;
   const auto bank = runLabel.second;
 
-  Mantid::API::MatrixWorkspace_sptr focusedWorkspace;
-  try {
-    focusedWorkspace = m_model->getFocusedWorkspace(runNumber, bank);
-  } catch (const std::runtime_error e) {
-    m_view->userWarning("Tried to access invalid run, runNumber " +
-                        std::to_string(runNumber) + " and bank ID " +
-                        std::to_string(bank));
-    return;
-  }
-
-  const auto plottableCurve = API::QwtHelper::curveDataFromWs(focusedWorkspace);
-
-  m_view->resetCanvas();
-  m_view->plotCurve(plottableCurve);
-
-  if (m_model->hasFittedPeaksForRun(runNumber, bank)) {
-    const auto fittedPeaks = m_model->getFittedPeaks(runNumber, bank);
-    const auto plottablePeaks = API::QwtHelper::curveDataFromWs(fittedPeaks);
-    m_view->plotCurve(plottablePeaks);
-  }
+  updatePlot(runNumber, bank);
 }
 
 void EnggDiffGSASFittingPresenter::processStart() {}
 
 void EnggDiffGSASFittingPresenter::processShutDown() { m_viewHasClosed = true; }
+
+void EnggDiffGSASFittingPresenter::updatePlot(const int runNumber,
+                                              const size_t bank) {
+  const auto focusedWSOptional = m_model->getFocusedWorkspace(runNumber, bank);
+  if (!focusedWSOptional) {
+    m_view->userWarning("Tried to access invalid run, runNumber " +
+                        std::to_string(runNumber) + " and bank ID " +
+                        std::to_string(bank));
+    return;
+  }
+  const auto focusedWS = *focusedWSOptional;
+
+  const auto plottableCurve = API::QwtHelper::curveDataFromWs(focusedWS);
+
+  m_view->resetCanvas();
+  m_view->plotCurve(plottableCurve);
+
+  const auto showRefinementResults = m_view->showRefinementResultsSelected();
+
+  if (showRefinementResults && m_model->hasFittedPeaksForRun(runNumber, bank)) {
+    displayFitResults(runNumber, bank);
+  }
+}
 
 } // MantidQt
 } // CustomInterfaces

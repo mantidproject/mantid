@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEW_H_
 
 #include "EnggDiffGSASRefinementMethod.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include <string>
 #include <utility>
@@ -16,6 +17,19 @@ class IEnggDiffGSASFittingView {
 
 public:
   virtual ~IEnggDiffGSASFittingView() = default;
+
+  /**
+   Display lattice parameters to the user
+   @param latticeParams TableWorkspace of lattice parameters
+  */
+  virtual void displayLatticeParams(
+      const Mantid::API::ITableWorkspace_sptr latticeParams) const = 0;
+
+  /**
+   Display Rwp value to the user
+   @param Rwp for the run to display
+  */
+  virtual void displayRwp(const double rwp) const = 0;
 
   /**
    Get the name of the focused run file the user has requested to load
@@ -80,6 +94,12 @@ public:
    Reset canvas to avoid multiple plotting
    */
   virtual void resetCanvas() = 0;
+
+  /**
+   @return Whether the user has selected to show the refinement results for
+   the current run
+  */
+  virtual bool showRefinementResultsSelected() = 0;
 
   /**
    Update the run list with labels of all runs loaded into the model

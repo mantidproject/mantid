@@ -65,11 +65,21 @@ private:
                             const std::string &GSASIIProjectFile);
 
   /**
-   Get refinement results for a run from the model and display them in the view
+   Overplot fitted peaks for a run, and display lattice parameters and Rwp in
+   the view
+   @param runNumber The run number of the run
+   @param bank The bank ID of the run
+  */
+  void displayFitResults(const int runNumber, const size_t bank);
+
+  /**
+   Update the view with the data from a run, and refinement results if they are
+   available and the user has selected to show them
    @param runNumber Run number of the run
    @param bank Bank ID of the run
+   refinement results
   */
-  void showRefinementResults(const int runNumber, const size_t bank);
+  void updatePlot(const int runNumber, const size_t bank);
 
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 
