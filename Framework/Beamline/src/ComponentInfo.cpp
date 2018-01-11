@@ -329,7 +329,8 @@ void ComponentInfo::setPosition(const size_t componentIndex,
   if (isDetector(componentIndex))
     return m_detectorInfo->setPosition(componentIndex, newPosition);
 
-  // Optimization: Not using detectorsInFullSubtree and componentsInSubtree to avoid
+  // Optimization: Not using detectorsInFullSubtree and componentsInSubtree to
+  // avoid
   // memory allocations.
   // Optimization: Split loop over detectors and other components.
   const auto detectorRange = detectorRangeInSubtree(componentIndex);

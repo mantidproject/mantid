@@ -293,7 +293,7 @@ void ComponentInfo::growBoundingBoxAsRectuangularBank(
     Geometry::BoundingBox &mutableBB,
     std::map<size_t, size_t> &mutableDetExclusions,
     IteratorT &mutableIterator) const {
-  
+
   auto panel = structuredPanel(index);
   mutableBB.grow(componentBoundingBox(panel.bottomLeft, reference));
   mutableBB.grow(componentBoundingBox(panel.topRight, reference));

@@ -389,9 +389,9 @@ public:
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    componentsInSubtree, componentRanges,
-                                   parentIndices, assemblyImmediateChildren, positions,
-                                   rotations, scaleFactors, isRectangularBank,
-                                   names, -1, -1),
+                                   parentIndices, assemblyImmediateChildren,
+                                   positions, rotations, scaleFactors,
+                                   isRectangularBank, names, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -631,13 +631,17 @@ public:
     /*
     Note that detectors are always the first n component indexes!
     */
-    TS_ASSERT_EQUALS(compInfo.detectorsInFullSubtree(0), std::vector<size_t>{0});
-    TS_ASSERT_EQUALS(compInfo.detectorsInFullSubtree(1), std::vector<size_t>{1});
-    TS_ASSERT_EQUALS(compInfo.detectorsInFullSubtree(2), std::vector<size_t>{2});
+    TS_ASSERT_EQUALS(compInfo.detectorsInFullSubtree(0),
+                     std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(compInfo.detectorsInFullSubtree(1),
+                     std::vector<size_t>{1});
+    TS_ASSERT_EQUALS(compInfo.detectorsInFullSubtree(2),
+                     std::vector<size_t>{2});
 
     // Now we have non-detector components
-    TS_ASSERT_EQUALS(compInfo.detectorsInFullSubtree(4 /*component index of root*/),
-                     std::vector<size_t>({0, 2, 1}));
+    TS_ASSERT_EQUALS(
+        compInfo.detectorsInFullSubtree(4 /*component index of root*/),
+        std::vector<size_t>({0, 2, 1}));
     TS_ASSERT_EQUALS(
         compInfo.detectorsInFullSubtree(3 /*component index of sub-assembly*/),
         std::vector<size_t>({0, 2}));

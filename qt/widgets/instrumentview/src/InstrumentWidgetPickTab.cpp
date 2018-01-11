@@ -64,11 +64,10 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
 }
 } // namespace
 
-  /// to be used in std::transform
+/// to be used in std::transform
 struct Sqrt {
   double operator()(double x) { return sqrt(x); }
-  };
-
+};
 
 /**
 * Constructor.
