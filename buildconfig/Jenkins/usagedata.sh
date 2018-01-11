@@ -12,8 +12,22 @@ if [ -f UsageData.zip ]; then
     rm UsageData.zip
 fi
 
+# we use cmake3 on rhel because cmake is too old
+if [ $(command -v cmake3) ]; then
+    CMAKE_EXE=cmake3
+    CPACK_EXE=cpack3
+    CTEST_EXE=ctest3
+else
+    CMAKE_EXE=cmake
+    CPACK_EXE=cpack
+    CTEST_EXE=ctest
+fi
+$CMAKE_EXE --version
+${CMAKE_EXE} --build . --target StandardTestData
+
 # create the symbolic link so the zip decompresses into the familiar name
-cd ExternalData/Testing/Data
+pwd
+cd ExternalData/Testing/Data || exit -1
 if [ -d UsageData ]; then
     echo "symbolic link already exists"
 else
