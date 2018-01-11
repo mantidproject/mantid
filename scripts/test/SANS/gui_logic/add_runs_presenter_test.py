@@ -1,5 +1,6 @@
 import unittest
 import sys
+import mantid
 from ui.sans_isis.add_runs_page import AddRunsPage
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.models.run_summation import RunSummation
@@ -201,7 +202,10 @@ class SummationConfigurationTest(SelectionMockingTestCase):
         return self._just_use(self.summation_settings_presenter)
 
     def test_passes_correct_config_when_summation_requested(self):
+        summation_settings_model = self._summation_settings_with_save_directory('/dev/null')
+        self.summation_settings_presenter.settings.return_value = summation_settings_model
         run_summation = mock.Mock()
+
         self.presenter = self._make_presenter(
             run_summation,
             self._capture_on_change_callback(self.run_selector_presenter),
@@ -209,8 +213,6 @@ class SummationConfigurationTest(SelectionMockingTestCase):
 
         fake_run_selection = self._make_mock_run_selection_from_paths(['3'])
         self.run_selector_presenter.run_selection.return_value = fake_run_selection
-        summation_settings_model = self._summation_settings_with_save_directory('/dev/null')
-        self.summation_settings_presenter.settings.return_value = summation_settings_model
         self._on_model_updated(fake_run_selection)
         self.view.sum.emit()
         run_summation.assert_called_with(fake_run_selection,
@@ -220,7 +222,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
     def _summation_settings_with_save_directory(self, directory):
         mock_summation_settings = \
             mock.create_autospec(SummationSettings, spec_set=True)
-        mock_summation_settings.save_directory.return_value = ''
+        mock_summation_settings.save_directory.return_value = directory
         return mock_summation_settings
 
     def test_shows_error_when_empty_default_directory(self):
