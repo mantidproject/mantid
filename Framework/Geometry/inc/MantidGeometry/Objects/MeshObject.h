@@ -167,6 +167,8 @@ private:
     Kernel::V3D &intersection, int &entryExit) const;
   /// Get triangle
   bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3) const;
+  /// Search object for valid point
+  bool searchForObject(Kernel::V3D &point) const;
 
   /// Contents
   std::vector<int> m_triangles;
@@ -199,7 +201,7 @@ private:
   // String from which object may be defined
   std::string m_string;
 
-  /// Read access to mesh object contents
+  /// Read access to mesh object for rendering
   int numberOfVertices() const;
   double *getVertices() const;
   int numberOfTriangles() const;

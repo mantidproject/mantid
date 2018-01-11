@@ -80,6 +80,11 @@ MeshObject::~MeshObject() = default;
 
 /*
  * Initialise in CacheGeogmetryRenderer format
+ * @param nPts :: number of vertices
+ * @param nFaces :: number of faces
+ * @param points :: vertex coordinates
+ * @param faces :: Triangles specified by vertex index in anticlockwise order
+ * as seen from outside.
  */
 void MeshObject::initialize(const int nPts, const int nFaces, const double *points,
   int *faces) {
@@ -99,7 +104,10 @@ void MeshObject::initialize(const int nPts, const int nFaces, const double *poin
 }
 
 /*
- * Initialise with vectors
+ * Initialise with vectors.
+ * @param faces :: Triangles specified by vertex index in anticlockwise order
+ * as seen from outside.
+ * @param vertices :: Vertex positions
  */
 void MeshObject::initialize(const std::vector<int> &faces, const std::vector<V3D> &vertices){
   if (m_vertices.size() == 0) {
@@ -134,7 +142,9 @@ const Kernel::Material MeshObject::material() const {
 * one or more volumes.
 */
 bool MeshObject::hasValidShape() const {
-  return false;
+  // May enclose volume if there are at
+  // at least 4 triangles and 4 vertices
+  return (numberOfTriangles() >= 4 && numberOfVertices() >= 4);
 }
 
 
@@ -309,7 +319,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
 * @returns true if the specified triangle exists
 */
 bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2, V3D &vertex3) const {
-  bool triangleExists = index < sizeof(m_triangles) / 3;
+  bool triangleExists = index < numberOfTriangles();
   if (triangleExists) {
     vertex1 = m_vertices[3 * index];
     vertex2 = m_vertices[3 * index + 1];
@@ -442,7 +452,12 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
  * @return The volume.
  */
 double MeshObject::volume() const {
-  return 0;
+  // Currently returns volume of bounding box
+  BoundingBox bb = getBoundingBox();
+  double dimX = bb.xMax() - bb.xMin();
+  double dimY = bb.yMax() - bb.yMin();
+  double dimZ = bb.zMax() - bb.zMin();
+  return dimX*dimY*dimZ;
 }
 
 /**
@@ -454,7 +469,7 @@ const BoundingBox &MeshObject::getBoundingBox() const {
   if(m_boundingBox.isNull())
     // As MeshObject is immutable, we need only calculate 
     // bounding box, if the cached bounding box is null.
-    if (sizeof(m_vertices) > 0) {
+    if (numberOfVertices() > 0) {
       // Initial extents to be overwritten by loop
       constexpr double huge = 1e10;
       double minX, maxX, minY, maxY, minZ, maxZ;
@@ -487,6 +502,24 @@ Try to find a point that lies within (or on) the object
 @return 1 if point found, 0 otherwise
 */
 int MeshObject::getPointInObject(Kernel::V3D &point) const {
+  //
+  // Simple method - check if origin in object, if not search directions along
+  // axes. If that fails, try centre of boundingBox, and paths about there
+  //
+  Kernel::V3D testPt(0, 0, 0);
+  if (searchForObject(testPt)) {
+    point = testPt;
+    return 1;
+  }
+  // Try centre of bounding box as initial guess, if we have one.
+  const BoundingBox &boundingBox = getBoundingBox();
+  if (boundingBox.isNonNull()) {
+    testPt = boundingBox.centrePoint();
+    if (searchForObject(testPt)) {
+      point = testPt;
+      return 1;
+    }
+  }
 
   return 0;
 }
@@ -537,6 +570,31 @@ V3D MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
   throw std::runtime_error("Object::generatePointInObject() - Unable to "
                            "generate point in object after " +
                            std::to_string(maxAttempts) + " attempts");
+}
+
+/**
+* Try to find a point that lies within (or on) the object, given a seed point
+* @param point :: on entry the seed point, on exit point in object, if found
+* @return true if point found
+*/
+bool MeshObject::searchForObject(Kernel::V3D &point) const {
+  //
+  // Method - check if point in object, if not search directions along
+  // principle axes using interceptSurface
+  //
+  Kernel::V3D testPt;
+  if (isValid(point))
+    return true;
+  for (const auto &dir :
+  { V3D(1., 0., 0.), V3D(-1., 0., 0.), V3D(0., 1., 0.), V3D(0., -1., 0.),
+    V3D(0., 0., 1.), V3D(0., 0., -1.) }) {
+    Geometry::Track tr(point, dir);
+    if (this->interceptSurface(tr) > 0) {
+      point = tr.cbegin()->entryPoint;
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
