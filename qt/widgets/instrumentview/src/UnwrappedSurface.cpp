@@ -1,5 +1,4 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
