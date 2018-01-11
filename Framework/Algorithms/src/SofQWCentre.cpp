@@ -66,6 +66,7 @@ void SofQWCentre::exec() {
       SofQW::setUpOutputWorkspace(inputWorkspace, getProperty("QAxisBinning"),
                                   verticalAxis, getProperty("EAxisBinning"));
   setProperty("OutputWorkspace", outputWorkspace);
+  const auto &xAxis = outputWorkspace->binEdges(0).rawData();
 
   // Holds the spectrum-detector mapping
   std::vector<specnum_t> specNumberMapping;
@@ -119,6 +120,9 @@ void SofQWCentre::exec() {
             (detectorInfo.position(idet) - detectorInfo.samplePosition());
         scatterDir.normalize();
         for (size_t j = 0; j < numBins; ++j) {
+          if (X[j] < xAxis.front() || X[j+1] > xAxis.back())
+            continue;
+
           const double deltaE = 0.5 * (X[j] + X[j + 1]);
           // Compute ki and kf wave vectors and therefore q = ki - kf
           double ei(0.0), ef(0.0);
@@ -165,6 +169,10 @@ void SofQWCentre::exec() {
           const MantidVec::difference_type qIndex =
               std::upper_bound(verticalAxis.begin(), verticalAxis.end(), q) -
               verticalAxis.begin() - 1;
+          // Find which e bin this point lies in
+          const MantidVec::difference_type eIndex =
+              std::upper_bound(xAxis.begin(), xAxis.end(), deltaE) -
+              xAxis.begin() - 1;
 
           // Add this spectra-detector pair to the mapping
           specNumberMapping.push_back(
@@ -173,10 +181,10 @@ void SofQWCentre::exec() {
 
           // And add the data and it's error to that bin, taking into account
           // the number of detectors contributing to this bin
-          outputWorkspace->mutableY(qIndex)[j] += Y[j] / numDets_d;
+          outputWorkspace->mutableY(qIndex)[eIndex] += Y[j] / numDets_d;
           // Standard error on the average
-          outputWorkspace->mutableE(qIndex)[j] =
-              sqrt((pow(outputWorkspace->e(qIndex)[j], 2) + pow(E[j], 2)) /
+          outputWorkspace->mutableE(qIndex)[eIndex] =
+              sqrt((pow(outputWorkspace->e(qIndex)[eIndex], 2) + pow(E[j], 2)) /
                    numDets_d);
         }
       } catch (std::out_of_range &) {
