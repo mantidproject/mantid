@@ -38,7 +38,7 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
-        numpy.testing.assert_almost_equal(ys, (1.0 - ecFactor) *originalYs)
+        numpy.testing.assert_almost_equal(ys, (1.0 - ecFactor) * originalYs)
 
     def testEmptyContainerSubtractionWithScaling(self):
         ws = self._cloneTestWorkspace()
@@ -61,7 +61,70 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
-        numpy.testing.assert_almost_equal(ys, (1.0 - ecScaling * ecFactor) *originalYs)
+        numpy.testing.assert_almost_equal(ys, (1.0 - ecScaling * ecFactor) * originalYs)
+
+    def testSelfShieldingCorrections(self):
+        ws = self._cloneTestWorkspace()
+        corrFactor = 0.789
+        corrWS = self._cloneTestWorkspace('correctionWS')
+        for i in range(corrWS.getNumberHistograms()):
+            ys = corrWS.dataY(i)
+            ys.fill(corrFactor)
+            es = corrWS.dataE(i)
+            es.fill(0)
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'SelfShieldingCorrectionWorkspace': corrWS,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLApplySelfShielding', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        outWS = mtd[outWSName]
+        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
+        ys = outWS.extractY()
+        originalYs = ws.extractY()
+        numpy.testing.assert_almost_equal(ys, originalYs / corrFactor)
+        es = outWS.extractE()
+        originalEs = ws.extractE()
+        numpy.testing.assert_almost_equal(es, originalEs / corrFactor)
+
+    def testNoOperationClonesInputWorkspace(self):
+        ws = self._cloneTestWorkspace()
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLApplySelfShielding', **algProperties)
+        # If the previous run didn't clone the input workspace, the two later
+        # calls will be triggered to use 'outWS' as the input.
+        self.assertTrue(mtd.doesExist(outWSName))
+        corrFactor = 0.43
+        corrWS = self._cloneTestWorkspace('correctionWS')
+        for i in range(corrWS.getNumberHistograms()):
+            ys = corrWS.dataY(i)
+            ys.fill(corrFactor)
+            es = corrWS.dataE(i)
+            es.fill(0)
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'SelfShieldingCorrectionWorkspace': corrWS,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLApplySelfShielding', **algProperties)
+        run_algorithm('DirectILLApplySelfShielding', **algProperties)
+        outWS = mtd[outWSName]
+        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
+        ys = outWS.extractY()
+        originalYs = ws.extractY()
+        numpy.testing.assert_almost_equal(ys, originalYs / corrFactor)
+        es = outWS.extractE()
+        originalEs = ws.extractE()
+        numpy.testing.assert_almost_equal(es, originalEs / corrFactor)
 
     def _cloneTestWorkspace(self, wsName=None):
         if not wsName:
