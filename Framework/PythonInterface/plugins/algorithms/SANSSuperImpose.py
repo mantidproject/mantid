@@ -147,7 +147,7 @@ class SANSSuperImpose(PythonAlgorithm):
         of interest
         '''
         d = OrderedDict()
-        for ws in self.input_wss:
+        for idx, ws in enumerate(self.input_wss):
             name = ws.name()
             logger.debug("Putthing WS %s in a dictionary..."%(name))
             x_bins = ws.readX(0)
@@ -162,7 +162,11 @@ class SANSSuperImpose(PythonAlgorithm):
                 'y': y,
                 'e': e,
                 'f': interpolate.interp1d(x, y, kind='quadratic'),
+                'wl_min': ws.getRun().getProperty("wavelength_min").value,
+                'wl_max': ws.getRun().getProperty("wavelength_max").value,
             }
+        # global wl_max. We going to use this later
+        self.wl_max = ws.getRun().getProperty("wavelength_max").value
         return d
 
 
@@ -202,23 +206,31 @@ class SANSSuperImpose(PythonAlgorithm):
             x = v['x']
             y = v['y']
             e = v['e']
+            
+            wl_min = v['wl_min']
+            wl_max = v['wl_max']
+                
             #
             # Getting rid of values where y <= 0
             x_trimmed = x[y>0]
             e_trimmed = e[y>0]
             y_trimmed = y[y>0]
-
+            
+            start_pos = int(round(
+                self.discard_begin_global * ( self.wl_max / wl_max)
+            )) 
+            
             # discard aditional points
             if self.discard_end_global > 0:
-                x_trimmed = x_trimmed[self.discard_begin_global:-self.discard_end_global]
-                y_trimmed = y_trimmed[self.discard_begin_global:-self.discard_end_global]
-                e_trimmed = e_trimmed[self.discard_begin_global:-self.discard_end_global]
+                x_trimmed = x_trimmed[start_pos:-self.discard_end_global]
+                y_trimmed = y_trimmed[start_pos:-self.discard_end_global]
+                e_trimmed = e_trimmed[start_pos:-self.discard_end_global]
             else:
-                x_trimmed = x_trimmed[self.discard_begin_global:]
-                y_trimmed = y_trimmed[self.discard_begin_global:]
-                e_trimmed = e_trimmed[self.discard_begin_global:]
+                x_trimmed = x_trimmed[start_pos:]
+                y_trimmed = y_trimmed[start_pos:]
+                e_trimmed = e_trimmed[start_pos:]
             #    
-            # Trimming of the q range
+            # Trimming off the q range
             e_qrange = e[(x>=q_min)&(x<=q_max)]
             y_qrange = y[(x>=q_min)&(x<=q_max)]
             x_qrange = x[(x>=q_min)&(x<=q_max)]
