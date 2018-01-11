@@ -14,12 +14,10 @@ import numpy as np
 import scipy.optimize as optimize
 from scipy import interpolate
 
-from mantid.kernel import Direction
-from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-
-
+from mantid.kernel import Direction
+from mantid.simpleapi import *
 '''
 
 
@@ -27,8 +25,6 @@ from mantid.kernel import *
 
 
 class SANSSuperImpose(PythonAlgorithm):
-
-
     def category(self):
         return 'SANS'
 
@@ -47,30 +43,41 @@ class SANSSuperImpose(PythonAlgorithm):
 
         self.declareProperty(
             WorkspaceProperty(
-                'InputWorkspaceReference', '', direction=Direction.Input,
+                'InputWorkspaceReference',
+                '',
+                direction=Direction.Input,
                 optional=PropertyMode.Optional,
             ),
             doc='Reference Workspace from the InputWorkspaceGroup. \
             If empty uses the first position from the InputWorkspaceGroup')
 
         self.declareProperty(
-            name='Qmin', defaultValue=Property.EMPTY_DBL,
+            name='Qmin',
+            defaultValue=Property.EMPTY_DBL,
             doc='Start of the fitting range')
 
         self.declareProperty(
-            name='Qmax', defaultValue=Property.EMPTY_DBL,
+            name='Qmax',
+            defaultValue=Property.EMPTY_DBL,
             doc='End of the fitting range')
-        
-        self.declareProperty(
-            name='DiscardBeginGlobal', defaultValue=0,
-            doc='Discard n points from the beginning of every dataset for the global I(q)')
 
         self.declareProperty(
-            name='DiscardEndGlobal', defaultValue=0,
-            doc='Discard n points from the end of every dataset for the global I(q).')
+            name='DiscardBeginGlobal',
+            defaultValue=0,
+            doc=
+            'Discard n points from the beginning of every dataset for the global I(q)'
+        )
 
         self.declareProperty(
-            name='K', defaultValue=Property.EMPTY_DBL,
+            name='DiscardEndGlobal',
+            defaultValue=0,
+            doc=
+            'Discard n points from the end of every dataset for the global I(q).'
+        )
+
+        self.declareProperty(
+            name='K',
+            defaultValue=Property.EMPTY_DBL,
             doc=r'Default K value for I_{scaled}(Q) = K*I(Q)+b.')
 
         self.declareProperty(
@@ -79,7 +86,8 @@ class SANSSuperImpose(PythonAlgorithm):
             r"Default b value for I_{scaled}(Q) = K*I(Q)+b.")
 
         self.declareProperty(
-            name='B', defaultValue=Property.EMPTY_DBL,
+            name='B',
+            defaultValue=Property.EMPTY_DBL,
             doc=r'Default b value for I_{scaled}(Q) = K*I(Q)+b.')
 
         self.declareProperty(
@@ -91,12 +99,15 @@ class SANSSuperImpose(PythonAlgorithm):
             name="OutputWorkspacePrefix",
             defaultValue="out_ws",
             direction=Direction.Input,
-            doc="Optional Prefix for the output I(q, wavelength) scaled workspaces")
-        
+            doc=
+            "Optional Prefix for the output I(q, wavelength) scaled workspaces"
+        )
+
         # Out
         self.declareProperty(
             ITableWorkspaceProperty(
-                'OutputWorkspaceTable', 'out_table',
+                'OutputWorkspaceTable',
+                'out_table',
                 optional=PropertyMode.Optional,
                 direction=Direction.Output),
             doc='Table workspace of fit parameters')
@@ -110,17 +121,28 @@ class SANSSuperImpose(PythonAlgorithm):
         self.input_ws_reference = self.getProperty(
             'InputWorkspaceReference').value
 
-        self.q_min = None if self.getProperty('Qmin').value == Property.EMPTY_DBL else self.getProperty('Qmin').value
-        self.q_max = None if self.getProperty('Qmax').value == Property.EMPTY_DBL else self.getProperty('Qmax').value
+        self.q_min = None if self.getProperty(
+            'Qmin').value == Property.EMPTY_DBL else self.getProperty(
+                'Qmin').value
+        self.q_max = None if self.getProperty(
+            'Qmax').value == Property.EMPTY_DBL else self.getProperty(
+                'Qmax').value
 
-        self.discard_begin_global = self.getProperty('DiscardBeginGlobal').value
+        self.discard_begin_global = self.getProperty(
+            'DiscardBeginGlobal').value
         self.discard_end_global = self.getProperty('DiscardEndGlobal').value
 
-        self._k = None if self.getProperty('K').value == Property.EMPTY_DBL else self.getProperty('K').value
-        self.k_list = None if len(self.getProperty('KList').value) ==0 else cycle(self.getProperty('KList').value)
+        self._k = None if self.getProperty(
+            'K').value == Property.EMPTY_DBL else self.getProperty('K').value
+        self.k_list = None if len(
+            self.getProperty('KList').value) == 0 else cycle(
+                self.getProperty('KList').value)
 
-        self._b = None if self.getProperty('B').value == Property.EMPTY_DBL else self.getProperty('B').value
-        self.b_list = None if len(self.getProperty('BList').value) ==0 else cycle(self.getProperty('BList').value)
+        self._b = None if self.getProperty(
+            'B').value == Property.EMPTY_DBL else self.getProperty('B').value
+        self.b_list = None if len(
+            self.getProperty('BList').value) == 0 else cycle(
+                self.getProperty('BList').value)
 
         self.out_ws_table_name = self.getPropertyValue("OutputWorkspaceTable")
 
@@ -130,16 +152,19 @@ class SANSSuperImpose(PythonAlgorithm):
         '''
         issues = dict()
 
-        if len(self.getProperty('BList').value) > 0 and len(self.getProperty('BList').value) != len(self.getProperty('InputWorkspaces').value)-1:
+        if len(self.getProperty('BList').value) > 0 and len(
+                self.getProperty('BList').value) != len(
+                    self.getProperty('InputWorkspaces').value) - 1:
             message = "The length of B List Parameters must be equal to the length of the input workspaces - 1"
             issues['BList'] = message
-        
-        if len(self.getProperty('KList').value) > 0 and len(self.getProperty('KList').value) != len(self.getProperty('InputWorkspaces').value)-1:
+
+        if len(self.getProperty('KList').value) > 0 and len(
+                self.getProperty('KList').value) != len(
+                    self.getProperty('InputWorkspaces').value) - 1:
             message = "The length of K List Parameters must be equal to the length of the input workspaces - 1"
             issues['KList'] = message
 
         return issues
-
 
     def _ws_to_dict(self):
         '''
@@ -149,9 +174,12 @@ class SANSSuperImpose(PythonAlgorithm):
         d = OrderedDict()
         for idx, ws in enumerate(self.input_wss):
             name = ws.name()
-            logger.debug("Putthing WS %s in a dictionary..."%(name))
+            logger.debug("Putthing WS %s in a dictionary..." % (name))
             x_bins = ws.readX(0)
-            x = [x_bins[i] + (abs(x_bins[i]-x_bins[i+1])/2.0) for i in range(len(x_bins)-1)]
+            x = [
+                x_bins[i] + (abs(x_bins[i] - x_bins[i + 1]) / 2.0)
+                for i in range(len(x_bins) - 1)
+            ]
             # Values to np arrays
             x = np.array(x)
             y = ws.readY(0)
@@ -169,7 +197,6 @@ class SANSSuperImpose(PythonAlgorithm):
         self.wl_max = ws.getRun().getProperty("wavelength_max").value
         return d
 
-
     def _find_q_space(self):
         '''
         Loop over all WS, find mins and maxs
@@ -179,14 +206,14 @@ class SANSSuperImpose(PythonAlgorithm):
         @return: Q range [min,max]
         '''
 
-        mins =[]
+        mins = []
         maxs = []
         for _, v in self.data.items():
             # X minimum when Y > 0
             x = v['x']
             y = v['y']
-            mins.append(x[y>0].min())
-            maxs.append(x[y>0].max())
+            mins.append(x[y > 0].min())
+            maxs.append(x[y > 0].max())
         x_min = np.max(mins)
         x_max = np.min(maxs)
         if self.q_min and self.q_min > x_min:
@@ -195,31 +222,29 @@ class SANSSuperImpose(PythonAlgorithm):
             x_max = self.q_max
         return x_min, x_max
 
-
     def _trim_data(self, q_min, q_max):
         '''
         trimmed is the original minus the points ti cut off
         qrange is the q range defined
         '''
-        
+
         for _, v in self.data.items():
             x = v['x']
             y = v['y']
             e = v['e']
-            
+
             wl_min = v['wl_min']
             wl_max = v['wl_max']
-                
+
             #
             # Getting rid of values where y <= 0
-            x_trimmed = x[y>0]
-            e_trimmed = e[y>0]
-            y_trimmed = y[y>0]
-            
-            start_pos = int(round(
-                self.discard_begin_global * ( self.wl_max / wl_max)
-            )) 
-            
+            x_trimmed = x[y > 0]
+            e_trimmed = e[y > 0]
+            y_trimmed = y[y > 0]
+
+            start_pos = int(
+                round(self.discard_begin_global * (self.wl_max / wl_max)))
+
             # discard aditional points
             if self.discard_end_global > 0:
                 x_trimmed = x_trimmed[start_pos:-self.discard_end_global]
@@ -229,11 +254,11 @@ class SANSSuperImpose(PythonAlgorithm):
                 x_trimmed = x_trimmed[start_pos:]
                 y_trimmed = y_trimmed[start_pos:]
                 e_trimmed = e_trimmed[start_pos:]
-            #    
+            #
             # Trimming off the q range
-            e_qrange = e[(x>=q_min)&(x<=q_max)]
-            y_qrange = y[(x>=q_min)&(x<=q_max)]
-            x_qrange = x[(x>=q_min)&(x<=q_max)]
+            e_qrange = e[(x >= q_min) & (x <= q_max)]
+            y_qrange = y[(x >= q_min) & (x <= q_max)]
+            x_qrange = x[(x >= q_min) & (x <= q_max)]
 
             v.update({
                 'x_qrange': x_qrange,
@@ -244,27 +269,27 @@ class SANSSuperImpose(PythonAlgorithm):
                 'e_trimmed': e_trimmed,
             })
 
-
     @staticmethod
     def _residuals(p, x, sigma, f_target, f_to_optimise, k=None, b=None):
         """
         k and p are mutually exclusive (they cannot be both None)
         """
-#         logger.debug('_residuals with p = %s (K=%s, B=%s, X=[%s,%s])' % (p, k, b, x.min(), x.max()))
-        
+        #         logger.debug('_residuals with p = %s (K=%s, B=%s, X=[%s,%s])' % (p, k, b, x.min(), x.max()))
+
         if k is not None:
             b = p[0]
         elif b is not None:
             k = p[0]
         else:
             k, b = p
-        
+
         residual = f_target(x) - (k * f_to_optimise(x) - b)
-        
+
         # with error
         # residual = 1.0 / sigma * ( f_target(x) - (k * f_to_optimise(x) - b) )
-        
-        logger.debug('_residuals with K=%s, B=%s, residual=%s' % (k, b, np.average(residual)))
+
+        logger.debug('_residuals with K=%s, B=%s, residual=%s' %
+                     (k, b, np.average(residual)))
 
         return residual
 
@@ -292,7 +317,7 @@ class SANSSuperImpose(PythonAlgorithm):
             return next(self.b_list)
         else:
             return None
-    
+
     @property
     def k(self):
         if self._k:
@@ -303,59 +328,75 @@ class SANSSuperImpose(PythonAlgorithm):
             return None
 
     def _fitting(self, input_ws_reference_name):
-        
-        progress = Progress(self, start=0.0, end=1.0, nreports=len(self.data.items()))
+
+        progress = Progress(
+            self, start=0.0, end=1.0, nreports=len(self.data.items()))
         for ws_name, ws_values in self.data.items():
-            logger.notice("Fiting WS %s against %s." %(ws_name, input_ws_reference_name))
+            logger.notice("Fiting WS %s against %s." %
+                          (ws_name, input_ws_reference_name))
             progress.report('Running Fitting for workspace: %s' % ws_name)
             if ws_name != input_ws_reference_name:
-                k=self.k
-                b=self.b
-                
-                logger.debug('Running Fitting for workspace %s with initial %s (K=%s, B=%s)' %
-                    (ws_name, input_ws_reference_name, k, b))
+                k = self.k
+                b = self.b
+
+                logger.debug(
+                    'Running Fitting for workspace %s with initial %s (K=%s, B=%s)'
+                    % (ws_name, input_ws_reference_name, k, b))
 
                 plsq, cov, infodict, mesg, ier = optimize.leastsq(
                     self._residuals,
-                    ([0.1,0.1] if k is None and b is None else [0.1]), # guess
+                    ([0.1, 0.1]
+                     if k is None and b is None else [0.1]),  # guess
                     args=(
-                        # _residuals(p, x, sigma, f_target, f_to_optimise, k=None, b=None):
+                        # _residuals(p, x, sigma, f_target, f_to_optimise,
+                        # k=None, b=None):
                         ws_values['x_qrange'],
                         ws_values['e_qrange'],
-                        self.data[input_ws_reference_name]['f'], # reference interpolation function
+                        # reference interpolation function
+                        self.data[input_ws_reference_name]['f'],
                         ws_values['f'],
-                        k, b),
+                        k,
+                        b),
                     full_output=True,
                 )
-                
-                y_qrange_fit = self._peval(ws_values['x_qrange'], ws_values['f'], plsq, k=k, b=b)
-                # Goodness of Fit Estimator
-                ss_err = (infodict['fvec']**2).sum() # infodict['fvec'] is the array of residuals:
-                ss_tot = ((y_qrange_fit-y_qrange_fit.mean())**2).sum()
-                r_squared = 1 - (ss_err/ss_tot)
-                logger.debug("r_squared=%s"%r_squared)
 
-                y_trimmed_fit = self._peval(ws_values['x_trimmed'], ws_values['f'], plsq, k=k, b=b)
-                y_fit = self._peval(ws_values['x'], ws_values['f'], plsq, k=k, b=b)
+                y_qrange_fit = self._peval(
+                    ws_values['x_qrange'], ws_values['f'], plsq, k=k, b=b)
+                # Goodness of Fit Estimator
+                # infodict['fvec'] is the array of residuals:
+                ss_err = (infodict['fvec']**2).sum()
+                ss_tot = ((y_qrange_fit - y_qrange_fit.mean())**2).sum()
+                r_squared = 1 - (ss_err / ss_tot)
+                logger.debug("r_squared=%s" % r_squared)
+
+                y_trimmed_fit = self._peval(
+                    ws_values['x_trimmed'], ws_values['f'], plsq, k=k, b=b)
+                y_fit = self._peval(
+                    ws_values['x'], ws_values['f'], plsq, k=k, b=b)
                 ws_values.update({
                     'y_qrange_fit': y_qrange_fit,
                     'y_trimmed_fit': y_trimmed_fit,
                     'y_fit': y_fit,
                     'plsq': plsq,
-                    'cov' : cov,
+                    'cov': cov,
                     'r_squared': r_squared,
                 })
             else:
                 ws_values.update({
-                    'y_qrange_fit': ws_values['f'](ws_values['x_qrange']),
-                    'y_trimmed_fit': ws_values['f'](ws_values['x_trimmed']),
-                    'y_fit': ws_values['f'](ws_values['x']),
-                    'plsq': None,
-                    'cov' : None,
-                    'r_squared': 0,
+                    'y_qrange_fit':
+                    ws_values['f'](ws_values['x_qrange']),
+                    'y_trimmed_fit':
+                    ws_values['f'](ws_values['x_trimmed']),
+                    'y_fit':
+                    ws_values['f'](ws_values['x']),
+                    'plsq':
+                    None,
+                    'cov':
+                    None,
+                    'r_squared':
+                    0,
                 })
-    
-    
+
     def _create_grouped_ws(self, suffix=""):
         '''
         @suffix = e.g. '_qrange'
@@ -365,12 +406,14 @@ class SANSSuperImpose(PythonAlgorithm):
             ws_name = k + suffix + "_fit"
             CreateWorkspace(
                 OutputWorkspace=ws_name,
-                DataX=list(v['x' + suffix]), DataY=list(v['y' + suffix + '_fit']),
+                DataX=list(v['x' + suffix]),
+                DataY=list(v['y' + suffix + '_fit']),
                 UnitX="Q")
             out_ws_list.append(ws_name)
         prefix = self.getProperty("OutputWorkspacePrefix").value
-        GroupWorkspaces(InputWorkspaces=out_ws_list, OutputWorkspace=prefix + suffix + '_fit')
-    
+        GroupWorkspaces(
+            InputWorkspaces=out_ws_list,
+            OutputWorkspace=prefix + suffix + '_fit')
 
     def _create_grouped_wss(self):
         '''
@@ -380,7 +423,6 @@ class SANSSuperImpose(PythonAlgorithm):
         self._create_grouped_ws('_qrange')
         self._create_grouped_ws('_trimmed')
         self._create_grouped_ws('')
-
 
     def _create_averaged_ws(self):
         '''
@@ -401,10 +443,11 @@ class SANSSuperImpose(PythonAlgorithm):
             y = np.append(y, np.average(yi))
 
         CreateWorkspace(
-                OutputWorkspace=self.getProperty("OutputWorkspacePrefix").value \
-                + "_trimmed_fit_averaged",
-                DataX=list(x), DataY=list(y),
-                UnitX="Q")
+            OutputWorkspace=self.getProperty("OutputWorkspacePrefix").value +
+            "_trimmed_fit_averaged",
+            DataX=list(x),
+            DataY=list(y),
+            UnitX="Q")
 
     def _create_table_ws(self):
         '''
@@ -440,9 +483,9 @@ class SANSSuperImpose(PythonAlgorithm):
                     # both k and b fitted
                     row = {
                         "IQCurve": name,
-                        "K":  v['plsq'][0],
+                        "K": v['plsq'][0],
                         "KError": errors[0],
-                        "B":  v['plsq'][1],
+                        "B": v['plsq'][1],
                         "BError": errors[1],
                         "GoodnessOfFit": v['r_squared'],
                     }
@@ -466,7 +509,7 @@ class SANSSuperImpose(PythonAlgorithm):
                         "BError": 0,
                         "GoodnessOfFit": v['r_squared'],
                     }
-            logger.debug("%s"%row)
+            logger.debug("%s" % row)
             outws.addRow(row)
         self.setProperty("OutputWorkspaceTable", outws)
 
@@ -480,14 +523,16 @@ class SANSSuperImpose(PythonAlgorithm):
 
         logger.debug("Finding common Q space for all datasets")
         q_min, q_max = self._find_q_space()
-        logger.debug("q_min = %s, q_max = %s." %(q_min, q_max ))
+        logger.debug("q_min = %s, q_max = %s." % (q_min, q_max))
 
         self._trim_data(q_min, q_max)
-        
+
         if self.input_ws_reference:
             input_ws_reference_name = self.input_ws_reference.name()
         else:
-            logger.information("Reference WS empty. Using the first WS in the group as reference.")
+            logger.information(
+                "Reference WS empty. Using the first WS in the group as reference."
+            )
             input_ws_reference_name = self.input_wss[0].name()
         logger.debug("Reference WS: %s" % input_ws_reference_name)
 
@@ -503,6 +548,5 @@ class SANSSuperImpose(PythonAlgorithm):
 
 
 ##########################################################################
-
 
 AlgorithmFactory.subscribe(SANSSuperImpose)
