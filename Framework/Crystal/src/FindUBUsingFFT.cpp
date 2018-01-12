@@ -40,6 +40,11 @@ void FindUBUsingFFT::init() {
                         "Upper Bound on Lattice Parameters a, b, c");
   this->declareProperty("Tolerance", 0.15, mustBePositive,
                         "Indexing Tolerance (0.15)");
+  this->declareProperty("Iterations", 4, "Iterations to refine UB (4)");
+  this->declareProperty("DegreesPerStep", 1.5,
+                        "The resolution of the search through possible "
+                        "orientations is specified by this parameter.  One to "
+                        "two degrees per step is usually adequate.");
 }
 
 /** Execute the algorithm.
@@ -48,8 +53,9 @@ void FindUBUsingFFT::exec() {
   double min_d = this->getProperty("MinD");
   double max_d = this->getProperty("MaxD");
   double tolerance = this->getProperty("Tolerance");
+  int iterations = this->getProperty("Iterations");
 
-  double degrees_per_step = 1.5;
+  double degrees_per_step = this->getProperty("DegreesPerStep");
 
   PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
 
@@ -63,7 +69,7 @@ void FindUBUsingFFT::exec() {
 
   Matrix<double> UB(3, 3, false);
   double error = IndexingUtils::Find_UB(UB, q_vectors, min_d, max_d, tolerance,
-                                        degrees_per_step);
+                                        degrees_per_step, iterations);
 
   g_log.notice() << "Error = " << error << '\n';
   g_log.notice() << "UB = " << UB << '\n';

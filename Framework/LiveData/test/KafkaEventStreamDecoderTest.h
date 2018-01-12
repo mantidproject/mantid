@@ -1,5 +1,5 @@
-#ifndef MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTEST_H_
-#define MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTEST_H_
+#ifndef MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODERTEST_H_
+#define MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -60,10 +60,10 @@ public:
     using namespace Mantid::LiveData;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TSM_ASSERT("Decoder should not have create data buffers yet",
@@ -99,10 +99,10 @@ public:
     using namespace Mantid::LiveData;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(2)))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(2)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(2)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     // Need 2 full loops to get both periods
@@ -132,15 +132,125 @@ public:
     }
   }
 
+  void test_End_Of_Run_Reported_After_Run_Stop_Reached() {
+    using namespace ::testing;
+    using namespace ISISKafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::DataObjects::EventWorkspace;
+    using namespace Mantid::LiveData;
+
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
+        .Times(Exactly(3))
+        .WillOnce(Return(new FakeDataStreamSubscriber(1)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    TSM_ASSERT("Decoder should not have create data buffers yet",
+               !decoder->hasData());
+    // 3 iterations to get first run, consisting of a run start message, an
+    // event message and a run stop message
+    startCapturing(*decoder, 3);
+    Workspace_sptr workspace;
+    // Extract data should only get data from the first run
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT(decoder->hasReachedEndOfRun());
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isCapturing());
+
+    // -- Workspace checks --
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
+    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TSM_ASSERT(
+        "Expected an EventWorkspace from extractData(). Found something else",
+        eventWksp);
+
+    TSM_ASSERT_EQUALS("Expected exactly 6 events from message in first run", 6,
+                      eventWksp->getNumberEvents());
+  }
+
+  void
+  test_Get_All_Run_Events_When_Run_Stop_Message_Received_Before_Last_Event_Message() {
+    using namespace ::testing;
+    using namespace ISISKafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::DataObjects::EventWorkspace;
+    using namespace Mantid::LiveData;
+
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
+        .Times(Exactly(3))
+        .WillOnce(Return(new FakeDataStreamSubscriber(3)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    TSM_ASSERT("Decoder should not have create data buffers yet",
+               !decoder->hasData());
+    // 4 iterations to get first run, consisting of a run start message, an
+    // event message, a run stop message, lastly another event message
+    startCapturing(*decoder, 4);
+    Workspace_sptr workspace;
+    // Extract data should only get data from the first run
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT(decoder->hasReachedEndOfRun());
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isCapturing());
+
+    // -- Workspace checks --
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
+    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TSM_ASSERT(
+        "Expected an EventWorkspace from extractData(). Found something else",
+        eventWksp);
+
+    TSM_ASSERT_EQUALS("Expected exactly 12 events from messages in first run",
+                      12, eventWksp->getNumberEvents());
+  }
+
+  void test_Sample_Log_From_Event_Stream() {
+    using namespace ::testing;
+    using namespace ISISKafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::DataObjects::EventWorkspace;
+    using namespace Mantid::LiveData;
+
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
+        .Times(Exactly(3))
+        .WillOnce(Return(new FakeSampleEnvironmentSubscriber))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    TSM_ASSERT("Decoder should not have create data buffers yet",
+               !decoder->hasData());
+    startCapturing(*decoder, 1);
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isCapturing());
+
+    // -- Workspace checks --
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
+    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TSM_ASSERT(
+        "Expected an EventWorkspace from extractData(). Found something else",
+        eventWksp);
+
+    checkWorkspaceLogData(*eventWksp);
+  }
+
   void test_Empty_Event_Stream_Waits() {
     using namespace ::testing;
     using namespace ISISKafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
@@ -158,7 +268,7 @@ public:
     using namespace ISISKafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
@@ -176,10 +286,10 @@ public:
     using namespace ISISKafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
@@ -194,7 +304,7 @@ public:
     using namespace ISISKafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
@@ -237,7 +347,7 @@ private:
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
     return Mantid::Kernel::make_unique<KafkaEventStreamDecoder>(broker, "", "",
-                                                                "");
+                                                                "", "");
   }
 
   void
@@ -256,16 +366,27 @@ private:
       const auto &sid = spec.getDetectorIDs();
       TS_ASSERT_EQUALS(ids[i], *(sid.begin()));
     }
-    TS_ASSERT(eventWksp.run().hasProperty("SampleLog1"));
-    TS_ASSERT_DELTA(eventWksp.run().getLogAsSingleValue("SampleLog1"), 42.0,
-                    0.01);
   }
 
   void checkWorkspaceEventData(
       const Mantid::DataObjects::EventWorkspace &eventWksp) {
     // A timer-based test and each message contains 6 events so the total should
-    // be divisible by 6
+    // be divisible by 6, but not be 0
     TS_ASSERT(eventWksp.getNumberEvents() % 6 == 0);
+    TS_ASSERT(eventWksp.getNumberEvents() != 0);
+  }
+
+  void checkWorkspaceLogData(Mantid::DataObjects::EventWorkspace &eventWksp) {
+    Mantid::Kernel::TimeSeriesProperty<int32_t> *log = nullptr;
+    auto run = eventWksp.mutableRun();
+    // We should find a sample log with this name
+    TS_ASSERT_THROWS_NOTHING(
+        log = run.getTimeSeriesProperty<int32_t>("fake source"));
+    if (log) {
+      TS_ASSERT_EQUALS(log->firstTime().toISO8601String(),
+                       "2017-05-24T09:29:48")
+      TS_ASSERT_EQUALS(log->firstValue(), 42)
+    }
   }
 
 private:
@@ -274,4 +395,4 @@ private:
   uint8_t m_niterations = 0;
 };
 
-#endif /* MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTEST_H_ */
+#endif /* MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODERTEST_H_ */

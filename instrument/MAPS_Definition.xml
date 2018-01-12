@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="MAPS" valid-from   ="1900-01-31 23:59:59"
+ name="MAPS" valid-from   ="2017-06-03 00:00:00"
                         valid-to     ="2100-01-31 23:59:59"
-                        last-modified="2015-03-01 13:30:00">
+                        last-modified="2017-12-19 09:45:00">
 
   <defaults>
     <length unit="meter"/>
@@ -43,7 +43,7 @@
 
 <!-- Chopper position -->
  <component type="chopper-position">
-    <location z="-1.895"/>
+    <location z="-1.857"/>
     <!--description is="The component provides sample-choper distance, used
     to estimate chopper delay time and Tobyfit resolution calculations."/-->
     <parameter name="initial_phase">    
@@ -80,10 +80,10 @@
   
   <type name="monitors">
     <component type="monitor" >
-      <location z="-3.045" />
-      <location z="-1.695" />
+      <location z="-4.067" />
+      <location z="-2.673" />
+      <location z="-1.674" />
       <location z="8.350" />
-      <location z="6.000" />
     </component>
   </type>  
   

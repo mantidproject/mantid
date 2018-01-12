@@ -36,6 +36,9 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
+# Set Qt5 dir according to homebrew location
+set ( Qt5_DIR /usr/local/opt/qt/lib/cmake/Qt5 )
+
 ###########################################################################
 # Use python libraries associated with PYTHON_EXECUTABLE
 # If unspecified, use first python executable in the PATH.
@@ -172,19 +175,19 @@ install ( PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
           RENAME mantidpython )
 # Add launcher application for a Mantid IPython console
 install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
-          DESTINATION MantidPython\ \(optional\).app/Contents/MacOS/ 
+          DESTINATION MantidPython\ \(optional\).app/Contents/MacOS/
           RENAME MantidPython )
 install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_Info.plist
-          DESTINATION MantidPython\ \(optional\).app/Contents/ 
+          DESTINATION MantidPython\ \(optional\).app/Contents/
           RENAME Info.plist )
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPython.icns
           DESTINATION MantidPython\ \(optional\).app/Contents/Resources/ )
 # Add launcher application for Mantid IPython notebooks
 install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidNotebook_osx_launcher
-          DESTINATION MantidNotebook\ \(optional\).app/Contents/MacOS/ 
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/MacOS/
           RENAME MantidNotebook )
 install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
-          DESTINATION MantidNotebook\ \(optional\).app/Contents/ 
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/
           RENAME Info.plist )
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
           DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )

@@ -4,7 +4,7 @@
 #include "MantidQtWidgets/Common/Message.h"
 
 namespace MantidQt {
-namespace API {
+namespace MantidWidgets {
 //-----------------------------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------------------------

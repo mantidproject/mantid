@@ -55,6 +55,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/AbstractTreeModel.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/OneLevelTreeManager.cpp
+        src/DataProcessorUI/OptionsMap.cpp
 	src/DataProcessorUI/PostprocessingAlgorithm.cpp
 	src/DataProcessorUI/PreprocessingAlgorithm.cpp
 	src/DataProcessorUI/PreprocessMap.cpp
@@ -62,6 +63,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
 	src/DataProcessorUI/TwoLevelTreeManager.cpp
 	src/DataProcessorUI/WhiteList.cpp
+        src/DataProcessorUI/WorkspaceNameUtils.cpp
     src/DataProcessorUI/PostprocessingStep.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
     src/DataProcessorUI/Column.cpp
@@ -77,6 +79,8 @@ set ( SRC_FILES
 	src/DiagResults.cpp
 	src/DoubleSpinBox.cpp
 	src/FindDialog.cpp
+        src/FindFilesThreadPoolManager.cpp
+        src/FindFilesWorker.cpp
 	src/FindReplaceDialog.cpp
 	src/FitOptionsBrowser.cpp
 	src/FitPropertyBrowser.cpp
@@ -113,7 +117,7 @@ set ( SRC_FILES
 	src/TrackedAction.cpp
 	src/UserFunctionDialog.cpp
 	src/WorkspacePresenter/ADSAdapter.cpp
-	src/WorkspacePresenter/QWorkspaceDockView.cpp
+	src/WorkspacePresenter/WorkspaceTreeWidget.cpp
 	src/WorkspacePresenter/WorkspacePresenter.cpp
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
@@ -218,7 +222,11 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/LogValueSelector.h
-  inc/MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
+  inc/MantidQtWidgets/Common/FindFilesWorker.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
+
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
@@ -244,8 +252,9 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
 	inc/MantidQtWidgets/Common/AlgorithmRunner.h
 	inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
+  inc/MantidQtWidgets/Common/Configurable.h
 	inc/MantidQtWidgets/Common/DllOption.h
-        inc/MantidQtWidgets/Common/DropEventHelper.h
+	inc/MantidQtWidgets/Common/DropEventHelper.h
   inc/MantidQtWidgets/Common/FileDialogHandler.h
 	inc/MantidQtWidgets/Common/FlowLayout.h
 	inc/MantidQtWidgets/Common/GraphOptions.h
@@ -266,6 +275,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/PythonSystemHeader.h
 	inc/MantidQtWidgets/Common/PythonThreading.h
 	inc/MantidQtWidgets/Common/QScienceSpinBox.h
+	inc/MantidQtWidgets/Common/QStringUtils.h
 	inc/MantidQtWidgets/Common/ScriptRepositoryView.h
 	inc/MantidQtWidgets/Common/SelectionNotificationService.h
 	inc/MantidQtWidgets/Common/SignalBlocker.h
@@ -296,6 +306,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h
@@ -317,6 +329,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WhiteList.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/ParseKeyValueString.h
 	inc/MantidQtWidgets/Common/ParseNumerics.h
@@ -361,7 +374,9 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
-
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
+  inc/MantidQtWidgets/Common/FindFilesWorker.h
 )
 
 set ( UI_FILES
@@ -414,6 +429,7 @@ set ( TARGET_LIBRARIES
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
+
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list ( APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
@@ -484,6 +500,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
 set( TEST_FILES
   test/BatchAlgorithmRunnerTest.h
   test/FileDialogHandlerTest.h
+  test/FindFilesThreadPoolManagerTest.h
+  test/FindFilesWorkerTest.h
   test/InterfaceManagerTest.h
   test/NonOrthogonalTest.h
   test/PlotAxisTest.h

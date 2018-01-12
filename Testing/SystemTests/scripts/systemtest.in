@@ -61,8 +61,13 @@ fi
 
 # Update test data targets
 echo "Updating testing data..."
-cmake --build . $CMAKE_TARGET_ARG -- StandardTestData
-cmake --build . $CMAKE_TARGET_ARG -- SystemTestData
+if [ $(command -v cmake3) ]; then
+    CMAKE_EXE=cmake3
+else
+    CMAKE_EXE=cmake
+fi
+$CMAKE_EXE --build . $CMAKE_TARGET_ARG -- StandardTestData
+$CMAKE_EXE --build . $CMAKE_TARGET_ARG -- SystemTestData
 
 # Execute
 echo

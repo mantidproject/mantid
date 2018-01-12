@@ -23,7 +23,6 @@
 #include <numeric>
 
 using namespace boost::posix_time;
-using Mantid::API::ISpectrum;
 using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {

@@ -16,7 +16,7 @@
 //----------------------------------------------------------
 
 namespace MantidQt {
-namespace API {
+namespace MantidWidgets {
 /** @class Message
  * Provides a simple binding of a text message with a priority
  */
@@ -54,6 +54,6 @@ private:
 }
 
 /// Required to operate in signals/slots
-Q_DECLARE_METATYPE(MantidQt::API::Message)
+Q_DECLARE_METATYPE(MantidQt::MantidWidgets::Message)
 
 #endif // MESSAGE_H_

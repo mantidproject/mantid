@@ -1,11 +1,8 @@
-/***************************************************************************/
-/**
- This file is a SIP file for binding C++ methods of the
- MantidQt widgets (SliceViewer in particular)
- to Python.
-
-*/
-/***************************************************************************/
+/**************************************************************************/
+/** This file is a SIP file for binding C++ methods of the MantidQt widgets
+ *  to Python.
+ */
+/**************************************************************************/
 
 %Include qwttypes.sip
 
@@ -141,6 +138,16 @@ class UserSubWindow : QMainWindow
 %End
 private:
   UserSubWindow();
+};
+
+class ManageUserDirectories : QDialog
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+%End
+public:
+    ManageUserDirectories();
+    static void openUserDirsDialog(QWidget *parent);
 };
 
 class InterfaceManager
@@ -1429,6 +1436,8 @@ MantidQt::RefDetectorViewer::RefIVConnections* RefMatrixWSImageView::getConnecti
 }; // end namespace
 }; // end namespace
 
+
+
 namespace MantidQt
 {
 namespace MantidWidgets
@@ -1436,7 +1445,22 @@ namespace MantidWidgets
 
 //*WIKI* == Classes ==
 //*WIKI* Here follows a list of the classes exposed to python and the methods you can execute on them.
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
+class MessageDisplay : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MessageDisplay.h"
+%End
+
+public:
+	MessageDisplay(QWidget *parent = nullptr);
+	void setSource(const QString &source);
+	void attachLoggingChannel();
+
+};
 /***************************************************************************/
 /***************************************************************************/
 /***************************************************************************/
@@ -1472,7 +1496,6 @@ public:
 
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
-
 
 namespace MantidQt
 {
@@ -1571,9 +1594,9 @@ class DataProcessorMainPresenter
 public:
 DataProcessorMainPresenter();
 
-virtual QString getPreprocessingOptionsAsString() const;
-virtual QString getProcessingOptions() const;
-virtual QString getPostprocessingOptions() const;
+virtual QVariantMap getPreprocessingOptions() const;
+virtual QVariantMap getProcessingOptions() const;
+virtual QString getPostprocessingOptionsAsString() const;
 
 virtual void notifyADSChanged(const QSet<QString> &);
 };

@@ -40,10 +40,10 @@ public:
   MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
 
   // virtual std::string fittingRunNo() const;
-  MOCK_CONST_METHOD0(getFittingRunNo, std::string());
+  MOCK_CONST_METHOD0(getFocusedFileNames, std::string());
 
-  // virtual std::string fittingPeaksData() const;
-  MOCK_CONST_METHOD0(fittingPeaksData, std::string());
+  // virtual std::string getExpectedPeaksInput() const;
+  MOCK_CONST_METHOD0(getExpectedPeaksInput, std::string());
 
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
@@ -96,11 +96,15 @@ public:
   // return idx of current selected row of list widget
   MOCK_CONST_METHOD0(getFittingListWidgetCurrentRow, int());
 
+  // gets whether the list widget has a selected row
+  MOCK_CONST_METHOD0(listWidgetHasSelectedRow, bool());
+
   // sets the current row of the fitting list widget
   MOCK_CONST_METHOD1(setFittingListWidgetCurrentRow, void(int idx));
 
   // gets current value of the fitting list widget
-  MOCK_CONST_METHOD0(getFittingListWidgetCurrentValue, std::string());
+  MOCK_CONST_METHOD0(getFittingListWidgetCurrentValue,
+                     boost::optional<std::string>());
 
   // sets the peak list according to the QString given
   MOCK_CONST_METHOD1(setPeakList, void(const std::string &peakList));
@@ -115,7 +119,7 @@ public:
   MOCK_METHOD1(setFittingRunNumVec, void(std::vector<std::string> assignVec));
 
   // sets the fitting run number according to path
-  MOCK_METHOD1(setFittingRunNo, void(const std::string &path));
+  MOCK_METHOD1(setFocusedFileNames, void(const std::string &path));
 
   // To determine whether the current loop is multi-run or single to avoid
   // regenerating the list - view widget when not required
@@ -140,9 +144,9 @@ public:
   MOCK_CONST_METHOD0(saveSettings, void());
 
   // virtual void setDataVector
-  MOCK_METHOD3(setDataVector,
+  MOCK_METHOD4(setDataVector,
                void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
-                    bool plotSinglePeaks));
+                    bool plotSinglePeaks, const std::string &xAxisLabel));
 
   // virtual void resetCanvas
   MOCK_METHOD0(resetCanvas, void());
@@ -152,6 +156,13 @@ public:
 
   // virtual void setCurrentInstrument(const std::string &newInstrument) = 0;
   MOCK_METHOD1(setCurrentInstrument, void(const std::string &newInstrument));
+
+  MOCK_CONST_METHOD0(plotFittedPeaksEnabled, bool());
+
+  // virtual void updateFittingListWidget(const std::vector<std::string> &rows)
+  // = 0;
+  MOCK_METHOD1(updateFittingListWidget,
+               void(const std::vector<std::string> &rows));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

@@ -14,18 +14,50 @@ if ( ENABLE_WORKBENCH )
   # Configure utils.qt.plugins file for build. It is placed in the source
   # directory and added to the .gitignore for simplicity.
   if ( WIN32 )
-  set ( QT_PLUGINS_PATH "${THIRD_PARTY_DIR}/lib/qt%V/plugins" )
+    set ( QT_PLUGINS_PATH "${THIRD_PARTY_DIR}/lib/qt%V/plugins" )
   endif ()
-  configure_file ( mantidqt/utils/qt/plugins.py.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
+    configure_file ( mantidqt/utils/qt/plugins.py.in
+      ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
   )
 
   # Create egg link to binary output directory for mantidqt
   add_python_package ( mantidqt )
 
+  # Configure resources data in place for ease of development. The output
+  # file is added to the toplevel gitignore
+  set ( _qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc )
+  set ( _output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py )
+  configure_file ( create_resources.cmake.in create_resources.cmake @ONLY)
+  add_custom_command ( OUTPUT ${_output_res_py}
+    COMMAND ${CMAKE_COMMAND} -P create_resources.cmake
+    COMMENT "Generating mantidqt resources module"
+    DEPENDS ${_qrc_file}
+  )
+  add_custom_target ( mantidqt_resources ALL DEPENDS ${_output_res_py} )
+
+  # Now add any compiled sip targets
+  add_subdirectory ( mantidqt/widgets )
+
+  # Setup dependency chain
+  add_dependencies ( mantidqt
+    mantidqt_widgetscoreqt5
+    mantidqt_widgetscoreqt4
+    mantidqt_resources
+  )
+
+  ##########################################################################
+  # Testing
+  ##########################################################################
+
   # ctest targets
   set ( PYTHON_TEST_FILES
-    mantidqt/test/import_test.py
+    mantidqt/test/test_import.py
+    mantidqt/utils/test/test_qt_utils.py
+    mantidqt/utils/test/test_modal_tester.py
+    mantidqt/widgets/test/test_algorithm_dialog.py
+    mantidqt/widgets/test/test_algorithmselector.py
+    mantidqt/widgets/test/test_jupyterconsole.py
+    mantidqt/widgets/test/test_messagedisplay.py
   )
 
   # Tests
