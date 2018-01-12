@@ -282,8 +282,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         """
         Clean up
         """
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         self._call_settings_listeners(lambda listener: listener.on_processing_finished())
 
     def _data_changed(self):
