@@ -7,28 +7,29 @@ from scipy.spatial import KDTree
 from scipy.cluster.vq import kmeans2
 import scipy.cluster.hierarchy as hcluster
 
+
 class RefineSatellitePeaks(PythonAlgorithm):
-    
+
     def PyInit(self):
-        self.declareProperty(IPeaksWorkspaceProperty(name="MainPeaks", 
-                                       defaultValue="", 
-                                       direction=Direction.Input), 
-                                       doc="Main integer HKL peaks")
+        self.declareProperty(IPeaksWorkspaceProperty(name="MainPeaks",
+                                                     defaultValue="",
+                                                     direction=Direction.Input),
+                             doc="Main integer HKL peaks")
 
-        self.declareProperty(IPeaksWorkspaceProperty(name="SatellitePeaks", 
-                                       defaultValue="", 
-                                       direction=Direction.Input), 
-                                       doc="Positions of seeded satellite peaks")
+        self.declareProperty(IPeaksWorkspaceProperty(name="SatellitePeaks",
+                                                     defaultValue="",
+                                                     direction=Direction.Input),
+                             doc="Positions of seeded satellite peaks")
 
-        self.declareProperty(WorkspaceProperty(name="MDWorkspace", 
-                                   defaultValue="", 
-                                   direction=Direction.Input), 
-                                   doc="Workspace to integrate predicted satellite peaks in")
-                                   
-        self.declareProperty(IPeaksWorkspaceProperty(name="OutputWorkspace", 
-                                       defaultValue="", 
-                                       direction=Direction.Output), 
-                                       doc="All found satellite peaks")
+        self.declareProperty(WorkspaceProperty(name="MDWorkspace",
+                                               defaultValue="",
+                                               direction=Direction.Input),
+                             doc="Workspace to integrate predicted satellite peaks in")
+
+        self.declareProperty(IPeaksWorkspaceProperty(name="OutputWorkspace",
+                                                     defaultValue="",
+                                                     direction=Direction.Output),
+                             doc="All found satellite peaks")
 
         self.declareProperty('NumOfQs', -1, direction=Direction.Input)
         self.declareProperty('ClusterThreshold', 1.5, direction=Direction.Input)
@@ -43,7 +44,7 @@ class RefineSatellitePeaks(PythonAlgorithm):
         background_radii = (self.getProperty("BackgroundInnerRadius").value, self.getProperty("BackgroundOuterRadius").value)
         I_over_sigma = self.getProperty("I/sigma").value
         cluster_threshold = self.getProperty("ClusterThreshold").value
-        
+
         # if user did not specify the number of qs then
         # set the k value to None
         if k == -1:
@@ -62,19 +63,21 @@ class RefineSatellitePeaks(PythonAlgorithm):
         predicted_satellites = self.create_fractional_peaks_workspace(qs, nuclear)
 
         centroid_satellites = CentroidPeaksMD(md, predicted_satellites, PeakRadius=peak_radius)
-        satellites_int_spherical = IntegratePeaksMD(md, centroid_satellites, PeakRadius=peak_radius, BackgroundInnerRadius=background_radii[0], BackgroundOuterRadius=background_radii[1], IntegrateIfOnEdge=True)
+        satellites_int_spherical = IntegratePeaksMD(md, centroid_satellites, PeakRadius=peak_radius,
+                                                    BackgroundInnerRadius=background_radii[0], BackgroundOuterRadius=background_radii[1], IntegrateIfOnEdge=True)
         satellites_int_spherical = FilterPeaks(satellites_int_spherical, FilterVariable="Intensity", FilterValue=0, Operator=">")
-        satellites_int_spherical = FilterPeaks(satellites_int_spherical, FilterVariable="Signal/Noise", FilterValue=I_over_sigma, Operator=">")
+        satellites_int_spherical = FilterPeaks(satellites_int_spherical, FilterVariable="Signal/Noise",
+                                               FilterValue=I_over_sigma, Operator=">")
 
         DeleteWorkspace(predicted_satellites)
         DeleteWorkspace(centroid_satellites)
 
         name = self.getPropertyValue("OutputWorkspace")
         RenameWorkspace(satellites_int_spherical, name)
-        
+
         self.log().notice("Q vectors are: \n{}".format(qs))
         self.setProperty("OutputWorkspace", satellites_int_spherical)
-        
+
     def get_hkls(self, peaks_workspace):
         return np.array([np.array([peak['h'], peak['k'], peak['l']]) for peak in peaks_workspace])
 
@@ -90,7 +93,7 @@ class RefineSatellitePeaks(PythonAlgorithm):
         for cluster_index in set(clusters):
             averaged_qs.append(np.median(qs[clusters==cluster_index], axis=0))
         return np.array(averaged_qs)
-    
+
     def find_q_vectors(self, nuclear_hkls, sats_hkls):
         peak_map = KDTree(nuclear_hkls)
         qs = []
@@ -111,8 +114,9 @@ class RefineSatellitePeaks(PythonAlgorithm):
         for q in qs:
             predicted_q = PredictFractionalPeaks(nuclear, HOffset=q[0], KOffset=q[1], LOffset=q[2])
             predicted_satellites = CombinePeaksWorkspaces(predicted_satellites, predicted_q)
-         
+
         DeleteWorkspace(predicted_q)
         return predicted_satellites
-        
+
+
 AlgorithmFactory.subscribe(RefineSatellitePeaks)
