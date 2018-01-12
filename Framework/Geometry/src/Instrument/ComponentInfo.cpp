@@ -19,8 +19,7 @@ namespace {
 /**
  * Rotate point by inverse of rotation held at componentIndex
  */
-const Eigen::Vector3d undoRotation(const Eigen::Vector3d &point,
-                                   const Beamline::ComponentInfo &compInfo,
+const Eigen::Vector3d undoRotation(const Eigen::Vector3d &point,                                   const Beamline::ComponentInfo &compInfo,
                                    const size_t componentIndex) {
   auto unRotateTransform =
       Eigen::Affine3d(compInfo.rotation(componentIndex).inverse());
