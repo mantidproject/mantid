@@ -1,7 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
-from mantid.simpleapi import ConjoinWorkspaces, CropWorkspace, RenameWorkspace
+from mantid.simpleapi import ConjoinWorkspaces, CropWorkspace, DeleteWorkspace, RenameWorkspace
 from mantid.kernel import *
 import numpy as np
 
@@ -57,10 +57,8 @@ class CropWorkspaceRagged(PythonAlgorithm):
         if len(xmins) == 1 and len(xmaxs) == 1:
             name = '__{}_cropped_'.format(outputWS)
             CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=name, XMin=xmins[0], XMax=xmaxs[0])
-            outputWS = mtd[name]
-            mtd.remove(name)
-            #CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=outputWS,
-            #              XMin=xmins[0], XMax=xmaxs[0])
+            self.setProperty('OutputWorkspace', mtd[name])
+            DeleteWorkspace(name)
         else:
             numSpec = inputWS.getNumberHistograms()
 
@@ -116,12 +114,8 @@ class CropWorkspaceRagged(PythonAlgorithm):
                                       InputWorkspace2=name,
                                       startProgress=(progStart + progStep), endProgress=(progStart + 2 * progStep),
                                       EnableLogging=False)
-
-            RenameWorkspace(InputWorkspace=accumulationWS, OutputWorkspace=outputWS, EnableLogging=False)
-
-        # set the output property
-        #self.setProperty('OutputWorkspace', mtd[outputWS])
-        self.setProperty('OutputWorkspace', outputWS)
+            self.setProperty('OutputWorkspace', mtd[accumulationWS])
+            DeleteWorkspace(accumulationWS)
 
 
 AlgorithmFactory.subscribe(CropWorkspaceRagged)
