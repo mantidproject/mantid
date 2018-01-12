@@ -1,7 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
-from mantid.simpleapi import ConjoinWorkspaces, CropWorkspace, DeleteWorkspace, RenameWorkspace
+from mantid.simpleapi import ConjoinWorkspaces, CropWorkspace, DeleteWorkspace
 from mantid.kernel import *
 import numpy as np
 
