@@ -13,7 +13,8 @@ Description
 
    This algorithm requires GSAS-II to be installed on your computer. A
    version of GSAS-II containing the module GSASIIscriptable (added in
-   April 2017) is required.
+   April 2017) is required. See Installing_GSASII__
+   for how to get the correct version of GSAS-II.
 
 Uses `GSAS-II <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_
 [TobyVonDreele2013]_ as external software to fit peaks to a powder /
@@ -68,6 +69,24 @@ parameters and extensive additional information in an output file with
 the same name as the output GSAS-II project file but with extension
 ".lst". This is noted in a log message that specifies where the file
 has been written (next to the output project file).
+
+.. _Installing_GSASII:
+
+Installing GSAS-II
+------------------
+
+On Windows, run either :code:`scripts\GSAS-II\install_gsas_latest.bat`
+or :code:`scripts\GSAS-II\install_gsas_vetted.bat`. Use the former for
+the latest version of GSAS-II and the latter for the most recent
+version to have been manually verified to work with
+GSASIIRefineFitPeaks.  This will install GSAS-II to your current
+working drive (usually C) in a directory called :code:`g2conda`.
+
+On Linux, from :code:`scripts\GSAS-II` run :code:`python install_gsas_proxy.py`.
+Optionally, you can supply a desired revision number with the
+:code:`-v` flag and a directory to install GSAS-II to with the
+:code:`-d` flag.
+
 
 *References*:
 
