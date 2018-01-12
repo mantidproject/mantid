@@ -23,7 +23,7 @@ from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, generate_table_index, OPTIONS_SEPARATOR,
-                                       OPTIONS_EQUAL)
+                                       OPTIONS_EQUAL, get_instrument_strings_for_gui)
 from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RangeStepType, SampleShape, FitType)
 from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
@@ -125,6 +125,10 @@ class RunTabPresenter(object):
         reduction_mode_list = get_reduction_mode_strings_for_gui()
         self._view.set_reduction_modes(reduction_mode_list)
 
+        # Set the possible instruments
+        instrument_list = get_instrument_strings_for_gui()
+        self._view.set_instruments(instrument_list)
+
         # Set the step type options for wavelength
         range_step_types = [RangeStepType.to_string(RangeStepType.Lin),
                             RangeStepType.to_string(RangeStepType.Log)]
@@ -179,7 +183,7 @@ class RunTabPresenter(object):
             self._beam_centre_presenter.set_view(self._view.beam_centre)
 
             # Set the appropriate view for the diagnostic page
-            self.workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view._instrument)
+            self.workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
 
     def on_user_file_load(self):
         """
@@ -265,9 +269,7 @@ class RunTabPresenter(object):
         self._beam_centre_presenter.on_update_rows()
 
     def on_instrument_changed(self):
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
-        self._setup_instrument_specific_settings(self._view._instrument)
+        self._setup_instrument_specific_settings(self._view.instrument)
 
     def on_processed_clicked(self):
         """
@@ -280,6 +282,7 @@ class RunTabPresenter(object):
         """
 
         try:
+            self._view.disable_buttons()
             self.sans_logger.information("Starting processing of batch table.")
             # 0. Validate rows
             self._create_dummy_input_workspace()
@@ -311,6 +314,7 @@ class RunTabPresenter(object):
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
+        self._view.enable_buttons()
 
     def on_multi_period_selection(self):
         multi_period = self._view.is_multi_period_view()

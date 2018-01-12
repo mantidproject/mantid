@@ -28,9 +28,6 @@ def run_integral(range, mask, integral, detector, state):
     if mask:
         input_workspace = apply_mask(state, input_workspace, DetectorType.to_string(detector))
 
-    import pydevd
-    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
-
     instrument_file = get_instrument_paths_for_sans_file(state.data.sample_scatter)
 
     if detector == DetectorType.HAB:

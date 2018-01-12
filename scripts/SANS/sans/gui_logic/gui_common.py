@@ -26,6 +26,7 @@ def generate_table_index(multi_period):
     table_index.update({'HIDDEN_OPTIONS_INDEX': 15 if multi_period else 9})
     return table_index
 
+
 OPTIONS_SEPARATOR = ","
 OPTIONS_EQUAL = "="
 
@@ -76,6 +77,10 @@ def get_reduction_mode_strings_for_gui(instrument=None):
         return [DEFAULT_LAB, DEFAULT_HAB, MERGED, ALL]
 
 
+def get_instrument_strings_for_gui():
+        return ['SANS2D', 'LOQ', 'LARMOR', 'ZOOM']
+
+
 def get_reduction_selection(instrument):
     selection = {ISISReductionMode.Merged: MERGED,
                  ISISReductionMode.All: ALL}
@@ -103,6 +108,15 @@ def get_string_for_gui_from_reduction_mode(reduction_mode, instrument):
         return None
 
 
+def get_string_for_gui_from_instrument(instrument):
+    instrument_selection = {SANSInstrument.SANS2D: 'SANS2D', SANSInstrument.LOQ: 'LOQ', SANSInstrument.LARMOR: 'LARMOR'
+                            , SANSInstrument.ZOOM: 'ZOOM'}
+    if instrument in list(instrument_selection.keys()):
+        return instrument_selection[instrument]
+    else:
+        return None
+
+
 def get_reduction_mode_from_gui_selection(gui_selection):
     if gui_selection == MERGED:
         return ISISReductionMode.Merged
@@ -114,6 +128,19 @@ def get_reduction_mode_from_gui_selection(gui_selection):
         return ISISReductionMode.HAB
     else:
         raise RuntimeError("Reduction mode selection is not valid.")
+
+
+def get_instrument_from_gui_selection(gui_selection):
+    if gui_selection == 'LOQ':
+        return SANSInstrument.LOQ
+    elif gui_selection == 'LARMOR':
+        return SANSInstrument.LARMOR
+    elif gui_selection == 'SANS2D':
+        return SANSInstrument.SANS2D
+    elif gui_selection == 'ZOOM':
+        return SANSInstrument.ZOOM
+    else:
+        raise RuntimeError("Instrument selection is not valid.")
 
 
 def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):
