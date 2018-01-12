@@ -27,6 +27,7 @@ from HFIR_4Circle_Reduction import message_dialog
 from HFIR_4Circle_Reduction import PreprocessWindow
 from HFIR_4Circle_Reduction.downloaddialog import DataDownloadDialog
 import HFIR_4Circle_Reduction.refineubfftsetup as refineubfftsetup
+import HFIR_4Circle_Reduction.PeaksIntegrationReport as PeaksIntegrationReport
 
 
 # import line for the UI python class
@@ -441,6 +442,10 @@ class MainWindow(QtGui.QMainWindow):
         # about pre-processed data
         self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
 
+        # hide and disable some push buttons for future implemetation
+        self.ui.pushButton_viewScan3D.hide()
+        self.ui.pushButton_plotSelectedData.hide()
+
         return
 
     def _build_peak_info_list(self, zero_hkl, is_spice=True):
@@ -520,6 +525,17 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def _show_message(self, message):
+        """
+        show message in the message bar while clearing previous information
+        :param message:
+        :return:
+        """
+        if message is not None:
+            self.ui.lineEdit_message.setText(message)
+
+        return
+
     def action_save_project(self):
         """
         Save project
@@ -532,11 +548,12 @@ class MainWindow(QtGui.QMainWindow):
             yes = gutil.show_message(self, 'Project file %s does exist. This is supposed to be '
                                            'an incremental save.' % project_file_name)
             if yes:
-                print('[INFO] Save project in incremental way.')
+                message = 'Save project to {0} in incremental way.'.format(project_file_name)
             else:
-                print('[INFO] Saving activity is cancelled.')
+                message = 'Saving activity is cancelled.'
         else:
-            print('[INFO] Saving current project to %s.' % project_file_name)
+            message = 'Saving current project to {0}'.format(project_file_name)
+        self._show_message(message)
 
         # gather some useful information
         ui_dict = dict()
@@ -569,13 +586,14 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.label_last1Path.setText(project_file_name)
         # END-IF
 
-        self._myControl.save_project(project_file_name, ui_dict)
+        err_msg = self._myControl.save_project(project_file_name, ui_dict)
+        if err_msg is not None:
+            self.pop_one_button_dialog(err_msg)
 
         # show user the message that the saving process is over
         information = 'Project has been saved to {0}\n'.format(project_file_name)
         information += 'Including dictionary keys: {0}'.format(ui_dict)
         self.pop_one_button_dialog(information)
-        # print('[INFO]\n{0}'.format(information))
 
         return
 
@@ -609,21 +627,9 @@ class MainWindow(QtGui.QMainWindow):
         project_file_name = str(self.ui.label_last1Path.text())
         if os.path.exists(project_file_name) is False:
             self.pop_one_button_dialog('Last saved project %s cannot be located.' % project_file_name)
+            return
         else:
-            ui_dict = self._myControl.load_project(project_file_name)
-
-            # set the UI parameters to GUI
-            try:
-                self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
-                self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
-                self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
-                self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
-
-                # now try to call some actions
-                self.do_apply_setup()
-                self.do_set_experiment()
-            except KeyError:
-                print('[Error] Some field cannot be found.')
+            self.load_project(project_file_name)
 
         return
 
@@ -873,7 +879,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
         except AssertionError as ass_err:
-            print('[ERROR] Unable to set ROI due to {0}.'.format(ass_err))
+            self.pop_one_button_dialog('[ERROR] Unable to set ROI due to {0}.'.format(ass_err))
 
         return
 
@@ -1215,10 +1221,8 @@ class MainWindow(QtGui.QMainWindow):
             scan_number_list.append(tup[0])
         scan_number_list.sort()
 
-        info_str = '# Selected scans: \n'
-        info_str += '{0}'.format(scan_number_list)
-
-        print('[TEMP] Selected scans:\n{0}'.format(info_str))
+        info_str = '{0}'.format(scan_number_list)
+        self._show_message('Selected scans: {0}'.format(info_str))
 
         return
 
@@ -1394,7 +1398,6 @@ class MainWindow(QtGui.QMainWindow):
         # plot calculated motor position (or Pt.) - integrated intensity per Pts.
         motor_pos_vec = int_peak_dict['motor positions']
         pt_intensity_vec = int_peak_dict['pt intensities']
-        # print('[DB...BAT] motor position vector: {0} of type {1}'.format(motor_pos_vec, type(motor_pos_vec)))
         motor_std = motor_pos_vec.std()
         if motor_std > 0.005:
             self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
@@ -1439,7 +1442,7 @@ class MainWindow(QtGui.QMainWindow):
             raise RuntimeError('Peak integration result dictionary has keys {0}. Error is caused by {1}.'
                                ''.format(int_peak_dict.keys(), key_err))
         except ValueError as value_err:
-            print('[ERROR] Unable to fit by Gaussian due to {0}.'.format(value_err))
+            self._show_message('[ERROR] Unable to fit by Gaussian due to {0}.'.format(value_err))
         else:
             self.plot_model_data(motor_pos_vec, fit_gauss_dict)
 
@@ -1593,7 +1596,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get UB matrix
         ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix()
-        print('[Info] Get UB matrix from table ', ub_matrix)
+        self._show_message('[Info] Get UB matrix from table: {0}'.format(ub_matrix))
 
         # Index all peaks
         num_peaks = self.ui.tableWidget_peaksCalUB.rowCount()
@@ -2083,7 +2086,7 @@ class MainWindow(QtGui.QMainWindow):
         assert os.path.exists(project_file_name), 'Project file "%s" cannot be found.' % project_file_name
 
         # load project
-        ui_dict = self._myControl.load_project(project_file_name)
+        ui_dict, err_msg = self._myControl.load_project(project_file_name)
 
         # get experiment number and IPTS number
         exp_number = int(ui_dict['exp number'])
@@ -2103,7 +2106,7 @@ class MainWindow(QtGui.QMainWindow):
             self.do_set_experiment()
 
         except KeyError:
-            print('[Error] Some field cannot be found.')
+            self._show_message('[Error] Some field cannot be found from project file {0}'.format(project_file_name))
 
         # set experiment configurations
         # set sample distance
@@ -2127,9 +2130,11 @@ class MainWindow(QtGui.QMainWindow):
             self._myControl.set_detector_center(exp_number, center_row, center_col)
 
         # pop out a dialog to notify the completion
+        if err_msg is not None:
+            self.pop_one_button_dialog('Encountered these errors from loading:\n{0}'.format(err_msg))
+
         message = 'Project from file {0} is loaded.'.format(project_file_name)
         self.pop_one_button_dialog(message)
-        print('[INFO] {0}'.format(message))
 
         return
 
@@ -2159,10 +2164,10 @@ class MainWindow(QtGui.QMainWindow):
         # get the UB matrix value
         ub_src_tab = self._refineConfigWindow.get_ub_source()
         if ub_src_tab == 3:
-            print('[INFO] UB matrix comes from tab "Calculate UB".')
+            self._show_message('UB matrix comes from tab "Calculate UB".')
             ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix_str()
         elif ub_src_tab == 4:
-            print('[INFO] UB matrix comes from tab "UB Matrix".')
+            self._show_message('UB matrix comes from tab "UB Matrix".')
             ub_matrix = self.ui.tableWidget_ubInUse.get_matrix_str()
         else:
             self.pop_one_button_dialog('UB source tab %s is not supported.' % str(ub_src_tab))
@@ -2607,6 +2612,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             integrate_type = 'simple'
 
+        err_msg = ''
         for i_row in range(self.ui.tableWidget_mergeScans.rowCount()):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
             peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
@@ -2615,9 +2621,11 @@ class MainWindow(QtGui.QMainWindow):
                 intensity2, error2 = peak_info_obj.get_intensity(integrate_type, True)
                 self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity1, intensity2, error2, integrate_type)
             except RuntimeError as run_err:
-                print('[ERROR] Unable to get peak intensity of scan'
-                      ' {0} due to {1}.'.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err))
+                err_msg += '{0} due to {1};'.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err)
         # END-FOR
+
+        if len(err_msg) > 0:
+            self._show_message('Unable to get peak intensity of scan: {0}'.format(err_msg))
 
         return
 
@@ -2670,7 +2678,6 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 except KeyError as key_err:
-                    print('[Error] unable to get UB matrix: %s' % str(key_err))
                     self.pop_one_button_dialog('Unable to get UB matrix.\nCheck whether UB matrix is set.')
                     return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
@@ -2837,8 +2844,6 @@ class MainWindow(QtGui.QMainWindow):
         show the details (in table) about the integration of scans
         :return:
         """
-        import PeaksIntegrationReport
-
         # check whether the integration information table
         if self._peakIntegrationInfoWindow is None:
             self._peakIntegrationInfoWindow = PeaksIntegrationReport.PeaksIntegrationReportDialog(self)
@@ -3090,15 +3095,19 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # get experiment and scan number
-        scan_number = self.ui.tableWidget_peaksCalUB.get_selected_scans()
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_scanNumber])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
         if status:
             exp_number = ret_obj[0]
-            scan_number = ret_obj[1]
         else:
             self.pop_one_button_dialog(ret_obj)
             return
+        scan_number_list = self.ui.tableWidget_peaksCalUB.get_selected_scans()
+        if len(scan_number_list) != 1:
+            self.pop_one_button_dialog('To view scan data in 3D, one and only one scan can be selected.'
+                                       'Now there are {0} scans that are selected.'.format(len(scan_number_list)))
+            return
+        else:
+            scan_number = scan_number_list[0]
 
         # Check
         if self._myControl.has_merged_data(exp_number, scan_number) is False:
@@ -3114,7 +3123,7 @@ class MainWindow(QtGui.QMainWindow):
         if self._my3DWindow is None:
             self._my3DWindow = plot3dwindow.Plot3DWindow(self)
 
-        print('[INFO] Write file to %s' % md_file_name)
+        # print('[INFO] Write file to %s' % md_file_name)
         self._my3DWindow.add_plot_by_file(md_file_name)
         self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
         self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
@@ -3249,13 +3258,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # collection all the information
         report_dict = dict()
-        print('[DB] Selected rows: {0}'.format(row_number_list))
         for row_number in row_number_list:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             peak_info = self._myControl.get_peak_info(exp_number, scan_number)
             peak_integrate_dict = peak_info.generate_integration_report()
             report_dict[scan_number] = peak_integrate_dict
-            print('[DB] Report Scan {0}. Keys: {1}'.format(scan_number, peak_integrate_dict.keys()))
         # END-FOR
 
         return report_dict
@@ -3330,7 +3337,7 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
         self._myControl.set_server_url(str(self.ui.lineEdit_url.text()))
 
-        print('[INFO] Session {0} has been loaded.'.format(filename))
+        self._show_message('Session {0} has been loaded.'.format(filename))
 
         return
 
@@ -3734,7 +3741,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             error_msg = roi
             # self.pop_one_button_dialog(error_msg)
-            print('[Error] %s' % error_msg)
+            self._show_message('[Error] %s' % error_msg)
         # END-IF
 
         # Information

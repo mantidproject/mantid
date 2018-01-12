@@ -2520,15 +2520,16 @@ class CWSCDReductionControl(object):
             file_name = '%s.csv' % file_name
 
         # Write file
-        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L', 'Q']
-        with open(file_name, 'w') as csvfile:
-            csv_writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L', 'Q', 'Sample T']
+        with open(file_name, 'w') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow(titles)
 
-            for scan_summary in self._scanSummaryList:
+            for sum_index, scan_summary in enumerate(self._scanSummaryList):
                 # check type
-                assert isinstance(scan_summary, list)
-                assert len(scan_summary) == len(titles)
+                assert isinstance(scan_summary, list), 'TODO'
+                assert len(scan_summary) == len(titles), '{0}-th scan summary {1} must have same items as title {2}' \
+                                                         ''.format(sum_index, scan_summary, titles)
                 # write to csv
                 csv_writer.writerow(scan_summary)
             # END-FOR
@@ -2892,9 +2893,11 @@ class CWSCDReductionControl(object):
         project.set('data dir', self._dataDir)
         project.set('gui parameters', ui_dict)
 
-        project.export(overwrite=False)
+        err_msg = project.save_to_disk(overwrite=False)
+        if len(err_msg) == 0:
+            err_msg = None
 
-        return
+        return err_msg
 
     def load_project(self, project_file_name):
         """
@@ -2910,7 +2913,9 @@ class CWSCDReductionControl(object):
 
         # instantiate a project manager instance and load the project
         saved_project = project_manager.ProjectManager(mode='import', project_file_path=project_file_name)
-        saved_project.load()
+        err_msg = saved_project.load_from_disk()
+        if len(err_msg) == 0:
+            err_msg = None
 
         # set current value
         try:
@@ -2923,7 +2928,7 @@ class CWSCDReductionControl(object):
         except KeyError:
             ui_dict = dict()
 
-        return ui_dict
+        return ui_dict, err_msg
 
 
 def convert_spice_ub_to_mantid(spice_ub):
