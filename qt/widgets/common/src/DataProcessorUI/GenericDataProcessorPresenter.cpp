@@ -296,7 +296,7 @@ void GenericDataProcessorPresenter::process() {
   m_selectedData = m_manager->selectedData(m_promptUser);
 
   // Don't continue if there are no items selected
-  if (m_selectedData.size() == 0){
+  if (m_selectedData.size() == 0) {
     m_mainPresenter->confirmReductionPaused();
     return;
   }
