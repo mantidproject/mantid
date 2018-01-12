@@ -147,6 +147,11 @@ class MainWindow(QMainWindow):
         self.ipythonconsole = JupyterConsole(self)
         self.ipythonconsole.register_plugin()
 
+        self.set_splash("Loading Workspace Widget")
+        from workbench.plugins.workspacewidget import WorkspaceWidget
+        self.workspacewidget = WorkspaceWidget(self)
+        self.workspacewidget.register_plugin()
+
         self.setup_layout()
 
     def set_splash(self, msg=None):
@@ -269,17 +274,18 @@ class MainWindow(QMainWindow):
         # layout definition
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
+        workspacewidget = self.workspacewidget
         default_layout = {
             'widgets': [
                 # column 0
                 [[ipython]],
                 # column 1
-                [[logmessages]]
+                [[logmessages], [workspacewidget]]
             ],
             'width-fraction': [0.75,    # column 0 width
                                0.25],   # column 1 width
             'height-fraction': [[1.0],  # column 0 row heights
-                                [1.0]]  # column 0 row heights
+                                [0.5, 0.5]]  # column 1 row heights
         }
 
         with widget_updates_disabled(self):
