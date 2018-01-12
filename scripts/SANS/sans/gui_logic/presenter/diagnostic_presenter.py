@@ -92,8 +92,6 @@ class DiagnosticsPagePresenter(object):
                                    DetectorType.LAB, state)
 
     def create_state(self, file, period):
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         table_row = TableIndexModel(0, file, period, '', '', '', '', '', '', '', '', '', '')
         table = TableModel()
         table.add_table_entry(0, table_row)

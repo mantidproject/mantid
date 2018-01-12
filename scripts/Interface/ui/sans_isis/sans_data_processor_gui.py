@@ -179,7 +179,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.multi_period_check_box.stateChanged.connect(self._on_multi_period_selection)
 
-        self.instrument_combo_box.currentIndexChanged.connect(self._on_instrument_selection_has_changed)
+        self.instrument_combo_box.currentIndexChanged.connect(self._instrument_changed)
 
         self.process_button.clicked.connect(self._on_python_process)
 
@@ -331,23 +331,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _handle_instrument_change(self):
         instrument_string = str(self.data_processor_table.getCurrentInstrument())
-
-        if instrument_string:
-            instrument = get_instrument_from_gui_selection(instrument_string)
-            self.instrument = instrument
-
-    def _on_instrument_selection_has_changed(self):
-        # Set instrument as the default instrument
-        self._set_mantid_instrument(SANSInstrument.to_string(self.instrument))
-
-        # Set the reduction mode
-        if self.instrument:
-            reduction_mode_list = get_reduction_mode_strings_for_gui(self.instrument)
-            self.set_reduction_modes(reduction_mode_list)
-            self._instrument_changed()
-
-            if SANSInstrument.to_string(self.instrument) != str(self.data_processor_table.getCurrentInstrument()):
-                self.data_processor_table.on_comboProcessInstrument_currentIndexChanged(self.instrument_combo_box.currentIndex())
+        instrument = get_instrument_from_gui_selection(instrument_string)
+        self.instrument = instrument
 
     def _on_python_process(self):
         self.data_processor_table.processClicked()
@@ -560,8 +545,11 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         if instrument:
             self.instrument = instrument
             instrument_string = SANSInstrument.to_string(instrument)
-            self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_string)
             self._set_mantid_instrument(instrument_string)
+            reduction_mode_list = get_reduction_mode_strings_for_gui(instrument)
+            self.set_reduction_modes(reduction_mode_list)
+
+            self.data_processor_table.on_comboProcessInstrument_currentIndexChanged(self.instrument_combo_box.currentIndex())
 
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are two types of values that can be passed:

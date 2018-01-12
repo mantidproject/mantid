@@ -248,7 +248,7 @@ class RunTabPresenter(object):
                 self._populate_row_in_table(row)
 
             # 5. Populate the selected instrument and the correct detector selection
-            self._setup_instrument_specific_settings()
+            #self._setup_instrument_specific_settings()
 
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
@@ -260,8 +260,8 @@ class RunTabPresenter(object):
                                    " to the Mantid search directories! See here for more details: {}".format(str(e)))
 
     def on_data_changed(self):
-        # 1. Populate the selected instrument and the correct detector selection
-        self._setup_instrument_specific_settings()
+        # # 1. Populate the selected instrument and the correct detector selection
+        # self._setup_instrument_specific_settings()
 
         # 2. Perform calls on child presenters
         self._masking_table_presenter.on_update_rows()
@@ -269,7 +269,7 @@ class RunTabPresenter(object):
         self._beam_centre_presenter.on_update_rows()
 
     def on_instrument_changed(self):
-        self._setup_instrument_specific_settings(self._view.instrument)
+        self._setup_instrument_specific_settings()
 
     def on_processed_clicked(self):
         """
@@ -1027,40 +1027,12 @@ class RunTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Settings
     # ------------------------------------------------------------------------------------------------------------------
-    def _setup_instrument_specific_settings(self, selected_instrument=None):
-        # Get the first run number of the scatter data for the first table
-        sample_scatter = self._view.get_cell(row=0, column=0, convert_to=str)
+    def _setup_instrument_specific_settings(self, instrument=None):
+        if not instrument:
+            instrument = self._view.instrument
 
-        # Check if it exists at all
-        if not sample_scatter:
-            return
-
-        # Get the file information from
-        file_information_factory = SANSFileInformationFactory()
-        try:
-            self._file_information = file_information_factory.create_sans_file_information(sample_scatter)
-        except NotImplementedError:
-            self.sans_logger.warning("Could not get file information from {}.".format(sample_scatter))
-            self._file_information = None
-
-        # Provide the instrument specific settings
-        if self._file_information:
-            # Set the instrument on the table
-            instrument = self._file_information.get_instrument()
-            self._view.set_instrument_settings(instrument)
-            self._settings_diagnostic_tab_presenter.set_instrument_settings(instrument)
-
-            # Set the reduction mode
-            reduction_mode_list = get_reduction_mode_strings_for_gui(instrument=instrument)
-            self._view.set_reduction_modes(reduction_mode_list)
-        else:
-            self._view.set_instrument_settings(SANSInstrument.NoInstrument)
-            reduction_mode_list = get_reduction_mode_strings_for_gui()
-            self._view.set_reduction_modes(reduction_mode_list)
-
-            # Set the reduction mode
-            reduction_mode_list = get_reduction_mode_strings_for_gui(instrument=selected_instrument)
-            self._view.set_reduction_modes(reduction_mode_list)
+        self._view.set_instrument_settings(instrument)
+        self._beam_centre_presenter.on_update_instrument(instrument)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Setting workaround for state in DataProcessorWidget
