@@ -1,22 +1,24 @@
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/MantidTreeModel.h"
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include <Poco/ActiveResult.h>
 #include <qcoreapplication.h>
+#include <QMessageBox>
 
 using namespace std;
 using namespace MantidQt;
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-namespace {
-	Mantid::Kernel::Logger g_log("MantidUI");
+MantidTreeModel::MantidTreeModel() {
 }
 
 // Data display and saving methods
-void MantidTreeModel::updateRecentFilesList(const QString &fname){ throw runtime_error("Not implemented"); }
-void MantidTreeModel::enableSaveNexus(const QString &wsName){ throw runtime_error("Not implemented"); }
-void MantidTreeModel::disableSaveNexus(){ throw runtime_error("Not implemented"); }
+void MantidTreeModel::updateRecentFilesList(const QString &fname){ /*Not require until tool bar is created*/ }
+void MantidTreeModel::enableSaveNexus(const QString &wsName) { /*handled by widget*/ }
+void MantidTreeModel::disableSaveNexus(){ /* handled by widget*/ }
 void MantidTreeModel::deleteWorkspaces(const QStringList &wsNames){ throw runtime_error("Not implemented"); }
 void MantidTreeModel::importWorkspace(){ throw runtime_error("Not implemented"); }
 MantidMatrix *
@@ -43,9 +45,34 @@ void MantidTreeModel::importTransposed(){ throw runtime_error("Not implemented")
 // Algorithm Display and Execution Methods
 Mantid::API::IAlgorithm_sptr MantidTreeModel::createAlgorithm(const QString &algName,
                                                     int version){
-	throw runtime_error("Not implemented");
+	Mantid::API::IAlgorithm_sptr alg;
+	try {
+		alg = Mantid::API::AlgorithmManager::Instance().create(
+			algName.toStdString(), version);
+	}
+	catch (...) {
+		QString message = "Cannot create algorithm \"" + algName + "\"";
+		if (version != -1) {
+			message += " version " + QString::number(version);
+		}
+		QMessageBox::warning(nullptr, "MantidPlot", message);
+		alg = Mantid::API::IAlgorithm_sptr();
+	}
+	return alg;
 }
-void MantidTreeModel::showAlgorithmDialog(const QString &algName, int version){ throw runtime_error("Not implemented"); }
+void MantidTreeModel::showAlgorithmDialog(const QString &algName, int version){
+	// Check if Alg is valid
+	Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
+	if (!alg)
+		return;
+	MantidQt::API::InterfaceManager interfaceManager;
+	MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(
+		alg, nullptr, false);
+	dlg->show();
+	dlg->raise();
+	dlg->activateWindow();
+}
+
 void
 	MantidTreeModel::showAlgorithmDialog(const QString &algName, QHash<QString, QString> paramList,
                     Mantid::API::AlgorithmObserver *obs,
@@ -58,29 +85,7 @@ void MantidTreeModel::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
 }
 
 bool MantidTreeModel::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
-                                    const bool wait){
-	if (wait) {
-		Poco::ActiveResult<bool> result(alg->executeAsync());
-		while (!result.available()) {
-			QCoreApplication::processEvents();
-		}
-		result.wait();
-		try {
-			return result.data();
-		} catch (Poco::NullPointerException &) {
-			return false;
-		}
-	} else {
-		try {
-			alg->executeAsync();
-		} catch (Poco::NoThreadAvailableException &) {
-			g_log.error() << "No thread was available to run the " << alg->name()
-				<< " algorithm in the background.\n";
-			return false;
-		}
-		return true;
-	}
-}
+                                    const bool wait) {throw runtime_error("Not implemented");}
 
 Workspace_const_sptr
 	MantidTreeModel::getWorkspace(const QString &workspaceName){
@@ -136,5 +141,5 @@ MantidQt::MantidWidgets::MantidWSIndexDialog *
                             bool showWaterfall, bool showPlotAll,
                             bool showTiledOpt, bool isAdvanced){ throw runtime_error("Not implemented");}
 
-void MantidTreeModel::updateProject(){ throw runtime_error("Not implemented"); }
+void MantidTreeModel::updateProject() { /*Currently unrequired in Workbench*/ }
 void MantidTreeModel::showCritical(const QString &) { throw runtime_error("Not implemented"); }
