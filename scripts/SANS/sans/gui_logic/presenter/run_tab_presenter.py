@@ -179,7 +179,7 @@ class RunTabPresenter(object):
             self._beam_centre_presenter.set_view(self._view.beam_centre)
 
             # Set the appropriate view for the diagnostic page
-            self.workspace_diagnostic_presenter.set_view(self._view.diagnostic_page)
+            self.workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view._instrument)
 
     def on_user_file_load(self):
         """

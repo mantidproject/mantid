@@ -46,7 +46,7 @@ class DiagnosticsPagePresenter(object):
         self.run_integral = run_integral
         self._logger = Logger("SANS")
 
-    def set_view(self, view):
+    def set_view(self, view, instrument):
         if view:
             self._view = view
 
@@ -55,7 +55,7 @@ class DiagnosticsPagePresenter(object):
             self._view.add_listener(listener)
 
             # Set up combo box
-            self.set_instrument_settings(self._view._instrument)
+            self.set_instrument_settings(instrument)
 
     def set_instrument_settings(self, instrument=None):
         detector_list = get_detector_strings_for_gui(instrument)
