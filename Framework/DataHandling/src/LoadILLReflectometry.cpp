@@ -22,9 +22,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_roots.h>
-
 namespace {
 /// Component coordinates for Figaro, in meter.
 namespace Figaro {
@@ -265,10 +262,10 @@ void LoadILLReflectometry::exec() {
   // open the root node
   NeXus::NXRoot root(getPropertyValue("Filename"));
   NXEntry firstEntry{root.openFirstEntry()};
-  // load Monitor details: n. monitors x monitor contents
-  std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
   // set instrument specific names of Nexus file entries
   initNames(firstEntry);
+  // load Monitor details: n. monitors x monitor contents
+  std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
   // load Data details (number of tubes, channels, etc)
   loadDataDetails(firstEntry);
   // initialise workspace
@@ -332,7 +329,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_instrument = Supported::Figaro;
   } else {
     std::ostringstream str;
-    str << "Unsupported instrument in NeXus: " << instrumentName << '.';
+    str << "Unsupported instrument: " << instrumentName << '.';
     throw std::runtime_error(str.str());
   }
   g_log.debug() << "Instrument name: " << instrumentName << '\n';
