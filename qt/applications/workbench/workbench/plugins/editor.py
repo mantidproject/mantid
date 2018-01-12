@@ -19,7 +19,8 @@ from __future__ import (absolute_import, unicode_literals)
 # system imports
 
 # third-party library imports
-from mantidqt.widgets.codeeditor import MultiFileCodeEditor
+from mantidqt.utils.qt import add_actions, create_action
+from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
@@ -33,16 +34,27 @@ class MultiFileEditor(PluginWidget):
         super(MultiFileEditor, self).__init__(parent)
 
         # layout
-        self.editors = MultiFileCodeEditor(self)
+        self.editors = MultiPythonFileInterpreter(self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
-# ----------------- Plugin API --------------------
+        # attributes
+        self.run_action = create_action(self, "Run",
+                                        on_triggered=self.execute_current)
+        self.editor_actions = [self.run_action]
 
-    def register_plugin(self):
+    # ----------- Plugin API --------------------
+
+    def register_plugin(self, menu=None):
         self.main.add_dockwidget(self)
+        add_actions(menu, self.editor_actions)
 
     def get_plugin_title(self):
         return "Editor"
+
+    # ----------- Plugin behaviour --------------
+
+    def execute_current(self):
+        self.editors.execute_current()

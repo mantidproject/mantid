@@ -37,7 +37,11 @@ class PluginWidget(QWidget):
 
 # ----------------- Plugin API --------------------
 
-    def register_plugin(self):
+    def register_plugin(self, menu=None):
+        """Called by the parent widget/window and should
+        perform any setup required to use the plugin.
+        Supply an optional menu to fill with actions
+        """
         raise NotImplementedError()
 
     def get_plugin_title(self):

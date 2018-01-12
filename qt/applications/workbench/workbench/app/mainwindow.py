@@ -43,7 +43,7 @@ requirements.check_qt()
 from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
                          QPoint, QSize, Qt)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow,
+from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow, QMenu,
                             QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
@@ -103,7 +103,7 @@ from workbench.external.mantid import prepare_mantid_env  # noqa
 
 class MainWindow(QMainWindow):
 
-    DOCKOPTIONS = QMainWindow.AllowTabbedDocks|QMainWindow.AllowNestedDocks
+    DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -125,6 +125,10 @@ class MainWindow(QMainWindow):
         # Menus
         self.file_menu = None
         self.file_menu_actions = None
+        self.editors_menu = None
+        self.editors_menu_actions = None
+        self.editors_execute_menu = None
+        self.editors_execute_menu_actions = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -149,9 +153,9 @@ class MainWindow(QMainWindow):
         self.ipythonconsole.register_plugin()
 
         self.set_splash("Loading code editing widget")
-        from workbench.plugins.codeeditor import MultiFileEditor
+        from workbench.plugins.editor import MultiFileEditor
         self.editor = MultiFileEditor(self)
-        self.editor.register_plugin()
+        self.editor.register_plugin(self.editors_menu)
 
         self.setup_layout()
 
@@ -165,12 +169,16 @@ class MainWindow(QMainWindow):
 
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")
+        self.editors_menu = self.menuBar().addMenu("&Editors")
 
     def create_actions(self):
+        # --- general application menu options --
+        # file menu
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
         self.file_menu_actions = [action_quit]
+
 
     def populate_menus(self):
         # Link to menus

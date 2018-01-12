@@ -40,7 +40,7 @@ class JupyterConsole(PluginWidget):
 
 # ----------------- Plugin API --------------------
 
-    def register_plugin(self):
+    def register_plugin(self, menu=None):
         self.main.add_dockwidget(self)
 
     def get_plugin_title(self):
