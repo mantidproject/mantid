@@ -28,7 +28,7 @@ This loader will update the detector position from what is defined in the instru
 
 The rotation angle can be one of the following:
 
-* The detector angle in the sample logs. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`DirectBeamPosition` is given. For Figaro, the value of :literal:`CollAngle.actual_coll_angle` is added to the angle to normalize the z-axis as the direct beam axis.
+* The detector angle in the sample logs. For Figaro this will be calculated from the motor positions. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`DirectBeamPosition` is given.
 
 * The detector angle calibrated by the direct beam measurement. This behavior is triggered when :literal:`DirectBeamPosition` is given.
 
@@ -74,11 +74,6 @@ To calculate the angle between the detector centre and the beam, the reflectomet
 where :math:`i_{centre}` is the workspace index of the detector centre (127.5 for D17 and Figaro), :math:`i_{fit}` the fitted peak position, :math:`d_{pix}` the physical pixel width and :math:`l_{2}` the sample to detector centre distance.
 
 The value of :math:`i_{fit}` can be overridden by the :literal:`BeamCentre` property. This effectively disables the fitting procedure.
-
-Sample position
----------------
-
-In the case of Figaro, the loader will move the sample component along the z-axis by the amount specified by the :literal:`Theta.sampleHorizontalOffset` entry in sample logs.
 
 Source position
 ---------------
