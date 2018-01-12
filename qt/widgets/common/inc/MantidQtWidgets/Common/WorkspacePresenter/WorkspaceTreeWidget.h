@@ -74,8 +74,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
     : public QWidget,
-      public IWorkspaceDockView,
-      public boost::enable_shared_from_this<WorkspaceTreeWidget> {
+      public IWorkspaceDockView {
   Q_OBJECT
 public:
   explicit WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
