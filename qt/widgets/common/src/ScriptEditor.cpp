@@ -3,6 +3,7 @@
 //-----------------------------------------------
 #include "MantidQtWidgets/Common/ScriptEditor.h"
 #include "MantidQtWidgets/Common/FindReplaceDialog.h"
+#include "MantidQtWidgets/Common/AlternateCSPythonLexer.h"
 
 // Qt
 #include <QApplication>
@@ -24,26 +25,29 @@
 #include <QMimeData>
 
 // Qscintilla
-#include <Qsci/qscilexer.h>
 #include <Qsci/qsciapis.h>
-#include <Qsci/qscilexerpython.h>
 
 // std
 #include <cmath>
 #include <stdexcept>
 
 namespace {
+
 /**
  * Return a new instance of a lexer based on the given language
- * @param language A string defining the language. Currently hardcoded to
+ * @param lexerName A string defining the language. Currently hardcoded to
  * Python.
  * @return A new QsciLexer instance
  */
-QsciLexer *createLexerFromLanguage(const QString &language) {
-  if (language != "Python")
+QsciLexer *createLexerFromName(const QString &lexerName) {
+  if (lexerName == "Python") {
+    return new QsciLexerPython;
+  } else if (lexerName == "AlternateCSPythonLexer") {
+    return new AlternateCSPythonLexer;
+  } else {
     throw std::invalid_argument("createLexerFromLanguage: Unsupported "
-                                "language. Supported languages=Python");
-  return new QsciLexerPython;
+                                "name. Supported names=Python, ");
+  }
 }
 }
 
@@ -58,11 +62,11 @@ QColor ScriptEditor::g_error_colour = QColor("red");
 /**
  * Construction based on a string defining the langauge used
  * for syntax highlighting
- * @param language A string choosing the language for the lexer
+ * @param lexerName A string choosing the name of a lexer
  * @param parent Parent widget
  */
-ScriptEditor::ScriptEditor(const QString &language, QWidget *parent)
-    : ScriptEditor(parent, createLexerFromLanguage(language)) {}
+ScriptEditor::ScriptEditor(const QString &lexerName, QWidget *parent)
+    : ScriptEditor(parent, createLexerFromName(lexerName)) {}
 
 /**
  * Constructor

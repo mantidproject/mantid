@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/AlgorithmInputHistory.cpp
 	src/AlgorithmPropertiesWidget.cpp
 	src/AlgorithmRunner.cpp
+	src/AlternateCSPythonLexer.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
 	src/DropEventHelper.cpp
@@ -249,6 +250,7 @@ set ( INC_FILES
 	${MOC_FILES}
 	inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
 	inc/MantidQtWidgets/Common/AlgorithmRunner.h
+	inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
 	inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/Configurable.h
 	inc/MantidQtWidgets/Common/DllOption.h
