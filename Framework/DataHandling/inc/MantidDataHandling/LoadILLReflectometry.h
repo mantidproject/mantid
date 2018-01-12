@@ -107,7 +107,7 @@ private:
   std::string m_chopper2Name;
   double m_detectorAngle{0.0};
   double m_detectorDistance{0.0};
-  double m_pixelCentre{0.0};
+  const static double PIXEL_CENTER;
   double m_pixelWidth{0.0};
   double m_sampleZOffset{0.0};
   Mantid::DataHandling::LoadHelper m_loader;

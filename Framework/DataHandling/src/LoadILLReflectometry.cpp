@@ -194,6 +194,8 @@ using namespace NeXus;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
+const double LoadILLReflectometry::PIXEL_CENTER = 127.5;
+
 /**
  * Return the confidence with this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -310,7 +312,7 @@ void LoadILLReflectometry::loadInstrument() {
 }
 
 /**
-  * Init names of member variables based on instrument specific NeXus file
+  * Init names of sample logs based on instrument specific NeXus file
   * entries
   *
   * @param entry :: the NeXus file entry
@@ -338,7 +340,6 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_sampleAngleName = "san.value";
     m_offsetFrom = "VirtualChopper";
     m_offsetName = "open_offset";
-    m_pixelCentre = 127.5;
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
   } else if (m_instrument == Supported::Figaro) {
@@ -349,7 +350,6 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     m_offsetName = "openOffset";
-    m_pixelCentre = 127.5;
     // Figaro: find out which of the four choppers are used
     NXFloat firstChopper =
         entry.openNXFloat("instrument/ChopperSetting/firstChopper");
@@ -734,7 +734,7 @@ double LoadILLReflectometry::detectorRotation() {
   }
   const double userAngle = getProperty("BraggAngle");
   const double offset =
-      offsetAngle(peakCentre, m_pixelCentre, m_detectorDistance);
+      offsetAngle(peakCentre, PIXEL_CENTER, m_detectorDistance);
   m_log.debug() << "Beam offset angle: " << offset << '\n';
   if (userAngle != EMPTY_DBL()) {
     if (posTable) {
@@ -752,7 +752,7 @@ double LoadILLReflectometry::detectorRotation() {
   }
   const auto dbPeak = parseBeamPositionTable(*posTable);
   const double dbOffset =
-      offsetAngle(dbPeak.peakCentre, m_pixelCentre, dbPeak.detectorDistance);
+      offsetAngle(dbPeak.peakCentre, PIXEL_CENTER, dbPeak.detectorDistance);
   m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
   const double detectorAngle =
       m_detectorAngle - dbPeak.detectorAngle - dbOffset;
