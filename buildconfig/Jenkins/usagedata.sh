@@ -1,6 +1,6 @@
 #!/bin/sh
 # make testing easier - BUILD_DIR should be root of build tree
-if [ -z "$WORKSPACEDIR" ]; then
+if [ -z "$WORKSPACE" ]; then
     BUILD_DIR=`pwd`
     echo "setting BUILD_DIR to $BUILD_DIR"
 else
