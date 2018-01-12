@@ -2,7 +2,6 @@ import argparse
 import os
 import pip
 import subprocess
-import sys
 import urllib2
 import zipfile
 
@@ -36,7 +35,7 @@ def download_bootstrap(revision_number, target_location):
     response = urllib2.urlopen(url)
     bootstrap_file = response.read()
     response.close()
-    
+
     with open(target_location, "w") as out_file:
         out_file.write(bootstrap_file)
 
@@ -44,7 +43,7 @@ def download_bootstrap(revision_number, target_location):
 def gsas_install_directory():
     root_dir = os.path.abspath(os.sep)
     return root_dir
-        
+
 
 def package_is_installed(package_name):
     try:
@@ -88,9 +87,9 @@ if __name__ == "__main__":
                         default=gsas_install_directory(),
                         type=str,
                         dest="install_dir",
-                        help="Directory to install GSAS-II in " \
+                        help="Directory to install GSAS-II in "
                              "(leave blank for Mantid default plugins directory (recommended)")
-    
+
     parser.add_argument("-v", "--version",
                         default=0,
                         type=int,
@@ -101,4 +100,3 @@ if __name__ == "__main__":
     print("RUNNING")
     install_gsasii(install_directory=args.install_dir,
                    revision_number=args.version)
-    
