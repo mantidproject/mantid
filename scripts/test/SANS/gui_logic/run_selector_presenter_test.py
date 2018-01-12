@@ -45,7 +45,7 @@ class RunSelectorPresenterTest(unittest.TestCase):
         self.view.run_list.return_value = run_query
         self.run_finder.find_all_from_query.return_value = no_runs
         self.view.addRuns.emit()
-        self.run_finder.find_all_from_query.assert_called_with(run_query)
+        self.run_finder.find_all_from_query.assert_called_with(str.encode(run_query))
 
     def _make_fake_run_model(self, run_name):
         return SummableRunFile('/home/{}'.format(run_name), run_name, is_event_mode=True)

@@ -146,11 +146,13 @@ class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
 
     def _make_fake_event_run(self):
         run = mock.create_autospec(SummableRunFile, spec_set=True)
+        run.display_name.return_value = '14'
         run.is_event_data.return_value = True
         return run
 
     def _make_fake_histogram_run(self):
         run = mock.create_autospec(SummableRunFile, spec_set=True)
+        run.display_name.return_value = '10'
         run.is_event_data.return_value = False
         return run
 

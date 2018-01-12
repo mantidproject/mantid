@@ -40,7 +40,8 @@ class RunSelectorPresenter(object):
         self._refresh()
 
     def _parse_runs_from_input(self, input):
-        return self._run_finder.find_all_from_query(input.encode('utf-8').replace(':', '-'))
+        input_as_bytes = str.encode(input.replace(':', '-'))
+        return self._run_finder.find_all_from_query(input_as_bytes)
 
     def _handle_add_items(self):
         input = self.view.run_list()
@@ -68,6 +69,6 @@ class RunSelectorPresenter(object):
         search_directories = ConfigService.Instance().getDataSearchDirs()
         file_paths = self.view.show_file_picker(RunSelectorPresenter.file_extensions,
                                                 search_directories)
-        self._add_runs(self._run_finder.find_from_file_path(file_path.encode('utf-8'))
+        self._add_runs(self._run_finder.find_from_file_path(file_path)
                        for file_path in file_paths)
         self._refresh()

@@ -32,7 +32,7 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         chosen_files = QtGui.QFileDialog.getOpenFileNames(self, "Select files", directory, file_filter)
         if chosen_files:
             self._store_previous_directory(previous_directories, chosen_files[0])
-        return chosen_files
+        return [chosen_file.encode('ascii', 'replace') for chosen_file in chosen_files]
 
     def _previous_directory_settings(self):
         previous_directories = QtCore.QSettings()
@@ -60,7 +60,7 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         QtGui.QMessageBox.warning(self, "Invalid Run Query!", message)
 
     def run_list(self):
-        return self.runLineEdit.text()
+        return self.runLineEdit.text().encode('ascii', 'replace')
 
     def selected_runs(self):
         selected = [runModel.row() for runModel in

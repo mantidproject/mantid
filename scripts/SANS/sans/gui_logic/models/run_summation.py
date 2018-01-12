@@ -14,7 +14,7 @@ class RunSummation(object):
 
         SANSadd2.add_runs(
             run_selection,
-            settings.instrument,
+            settings.instrument(),
             lowMem=True,
             binning=binning,
             isOverlay=overlay_event_workspaces,
