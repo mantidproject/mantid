@@ -228,11 +228,14 @@ public:
         run.getPropertyValueAsType<double>(
             "ChopperSetting.chopperpair_sample_distance") *
         1e-3;
-    const auto incomingDeflectionAngle = run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle");
+    const auto incomingDeflectionAngle =
+        run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle");
     const auto sampleZOffset =
         run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
         1e-3;
-    const auto sourceSample = chopperCentre + sampleZOffset / std::cos(incomingDeflectionAngle / 180. * M_PI);
+    const auto sourceSample =
+        chopperCentre +
+        sampleZOffset / std::cos(incomingDeflectionAngle / 180. * M_PI);
     const auto &spectrumInfo = output->spectrumInfo();
     const auto l1 = spectrumInfo.l1();
     TS_ASSERT_DELTA(sourceSample, l1, 1e-12)
@@ -292,12 +295,16 @@ public:
     const auto beamY = detectorY + pixelOffset * std::cos(detAngle);
     const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
     const auto sht1 = run.getPropertyValueAsType<double>("SHT1.value") * 1e-3;
-    const auto sampleZOffset = run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") * 1e-3;
+    const auto sampleZOffset =
+        run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
+        1e-3;
     const auto collimationAngle =
-            run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
-            180. * M_PI;
-    const auto detDist = std::hypot(beamY - sht1, beamZ) - sampleZOffset / std::cos(collimationAngle);
-    const auto sampleAngle = run.getPropertyValueAsType<double>("Theta.actual_theta") / 180. * M_PI;
+        run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
+        180. * M_PI;
+    const auto detDist = std::hypot(beamY - sht1, beamZ) -
+                         sampleZOffset / std::cos(collimationAngle);
+    const auto sampleAngle =
+        run.getPropertyValueAsType<double>("Theta.actual_theta") / 180. * M_PI;
     for (size_t i = 0; i < spectrumInfo.size(); ++i) {
       if (spectrumInfo.isMonitor(i)) {
         continue;
@@ -305,8 +312,8 @@ public:
       const auto p = spectrumInfo.position(i);
       TS_ASSERT_EQUALS(p.X(), 0)
       const auto pixOffset = (static_cast<double>(i) - 127.5) * pixWidth;
-      const auto pixAngle =
-          detAngle + collimationAngle + sampleAngle + std::atan2(pixOffset, detDist);
+      const auto pixAngle = detAngle + collimationAngle + sampleAngle +
+                            std::atan2(pixOffset, detDist);
       const auto pixDist = std::hypot(pixOffset, detDist);
       const auto idealY = pixDist * std::sin(pixAngle);
       const auto idealZ = pixDist * std::cos(pixAngle);

@@ -54,10 +54,7 @@ public:
 
 private:
   /// ID tags for supported instruments.
-  enum class Supported {
-    D17,
-    Figaro
-  };
+  enum class Supported { D17, Figaro };
 
   void init() override;
   void exec() override;

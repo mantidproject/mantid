@@ -298,7 +298,8 @@ void LoadILLReflectometry::loadInstrument() {
   g_log.debug("Loading instrument definition...");
   try {
     IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-    const std::string instrumentName = m_instrument == Supported::D17 ? "D17" : "Figaro";
+    const std::string instrumentName =
+        m_instrument == Supported::D17 ? "D17" : "Figaro";
     loadInst->setPropertyValue("InstrumentName", instrumentName);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
@@ -319,7 +320,8 @@ void LoadILLReflectometry::loadInstrument() {
   */
 void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
-  std::string instrumentName = entry.getString(instrumentNamePath.append("/name"));
+  std::string instrumentName =
+      entry.getString(instrumentNamePath.append("/name"));
   if (instrumentName.empty())
     throw std::runtime_error(
         "Cannot set the instrument name from the Nexus file!");
@@ -524,8 +526,8 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       const double POFF = doubleFromRun(m_offsetFrom + ".poff");
       const double openOffset =
           doubleFromRun(m_offsetFrom + "." + m_offsetName);
-      if (m_instrument == Supported::D17 && chop1Speed != 0.0 && chop2Speed != 0.0 &&
-          chop2Phase != 0.0) {
+      if (m_instrument == Supported::D17 && chop1Speed != 0.0 &&
+          chop2Speed != 0.0 && chop2Phase != 0.0) {
         // virtual chopper entries are valid
         chopper = "Virtual chopper";
       } else {
@@ -768,20 +770,28 @@ void LoadILLReflectometry::initPixelWidth() {
   if (detectorPanels.size() != 1) {
     throw std::runtime_error("IDF should have a single 'detector' component.");
   }
-  auto detector = boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(detectorPanels.front());
+  auto detector =
+      boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
+          detectorPanels.front());
   double widthInLogs;
   if (m_instrument != Supported::Figaro) {
     m_pixelWidth = std::abs(detector->xstep());
-    widthInLogs = inMeter(m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
+    widthInLogs = inMeter(
+        m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
     if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
-      m_log.warning() << "NeXus pixel width (mppx) " << widthInLogs << " differs from the IDF. Using the IDF value " << m_pixelWidth << '\n';
+      m_log.warning() << "NeXus pixel width (mppx) " << widthInLogs
+                      << " differs from the IDF. Using the IDF value "
+                      << m_pixelWidth << '\n';
     }
   } else {
     m_pixelWidth = std::abs(detector->ystep());
-    widthInLogs = inMeter(m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppy"));
+    widthInLogs = inMeter(
+        m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppy"));
   }
   if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
-    m_log.warning() << "NeXus pixel width (mppy) " << widthInLogs << " differs from the IDF. Using the IDF value " << m_pixelWidth << '\n';
+    m_log.warning() << "NeXus pixel width (mppy) " << widthInLogs
+                    << " differs from the IDF. Using the IDF value "
+                    << m_pixelWidth << '\n';
   }
 }
 
@@ -859,13 +869,13 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   if (m_instrument != Supported::Figaro) {
     return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   }
-  const double restZ = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+  const double restZ =
+      inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   // Motor DH1 vertical coordinate.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double detAngle = detectorAngle();
-  const double detectorY =
-      std::sin(inRad(detAngle)) * (restZ - Figaro::DH1Z) + DH1Y -
-      Figaro::detectorRestY;
+  const double detectorY = std::sin(inRad(detAngle)) * (restZ - Figaro::DH1Z) +
+                           DH1Y - Figaro::detectorRestY;
   const double detectorZ =
       std::cos(inRad(detAngle)) * (restZ - Figaro::DH1Z) + Figaro::DH1Z;
   const double pixelOffset = Figaro::detectorRestY - 0.5 * m_pixelWidth;
@@ -873,7 +883,8 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   const double sht1 = inMeter(doubleFromRun("SHT1.value"));
   const double beamZ = detectorZ - pixelOffset * std::sin(inRad(detAngle));
   const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
-  return std::hypot(beamY - sht1, beamZ) - m_sampleZOffset / std::cos(inRad(deflectionAngle));
+  return std::hypot(beamY - sht1, beamZ) -
+         m_sampleZOffset / std::cos(inRad(deflectionAngle));
 }
 
 /// Return the horizontal offset along the z axis.
@@ -894,7 +905,8 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
     return pairCentre - 0.5 * pairSeparation;
   } else {
-    const double chopperDist = inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+    const double chopperDist =
+        inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
     const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
     return chopperDist + m_sampleZOffset / std::cos(inRad(deflectionAngle));
   }
