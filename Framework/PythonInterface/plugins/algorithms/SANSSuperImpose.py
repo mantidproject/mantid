@@ -179,17 +179,20 @@ class SANSSuperImpose(PythonAlgorithm):
             x = np.array(x)
             y = ws.readY(0)
             e = ws.readE(0)
+            
+            wl_min = ws.getRun().getProperty("wavelength_min").value
+            wl_max = ws.getRun().getProperty("wavelength_max").value
 
             d[name] = {
                 'x': x,
                 'y': y,
                 'e': e,
                 'f': interpolate.interp1d(x, y, kind='quadratic'),
-                'wl_min': ws.getRun().getProperty("wavelength_min").value,
-                'wl_max': ws.getRun().getProperty("wavelength_max").value,
+                'wl_min': wl_min,
+                'wl_max': wl_max,
             }
         # global wl_max. We going to use this later
-        self.wl_max = ws.getRun().getProperty("wavelength_max").value
+        self.wl_max = wl_max
         return d
 
     def _find_q_space(self):
@@ -228,9 +231,6 @@ class SANSSuperImpose(PythonAlgorithm):
             y = v['y']
             e = v['e']
 
-            wl_min = v['wl_min']
-            wl_max = v['wl_max']
-
             #
             # Getting rid of values where y <= 0
             x_trimmed = x[y > 0]
@@ -238,7 +238,7 @@ class SANSSuperImpose(PythonAlgorithm):
             y_trimmed = y[y > 0]
 
             start_pos = int(
-                round(self.discard_begin_global * (self.wl_max / wl_max)))
+                round(self.discard_begin_global * (self.wl_max / v['wl_max'])))
 
             # discard aditional points
             if self.discard_end_global > 0:
@@ -449,7 +449,8 @@ class SANSSuperImpose(PythonAlgorithm):
         # Workspace Table
         outws = CreateEmptyTableWorkspace(
             OutputWorkspace=self.out_ws_table_name)
-        columns = ["IQCurve", "K", "KError", "B", "BError", "GoodnessOfFit"]
+        columns = ["IQCurve", "K", "KError", "B", "BError", "GoodnessOfFit",
+                   "WavelengthMin", "WavelengthMax", "WavelengthAverage"]
 
         outws.addColumn(type="str", name=columns[0])
         for col in columns[1:]:
@@ -481,7 +482,6 @@ class SANSSuperImpose(PythonAlgorithm):
                         "KError": errors[0],
                         "B": v['plsq'][1],
                         "BError": errors[1],
-                        "GoodnessOfFit": v['r_squared'],
                     }
                 elif b is None:
                     # b was fitted
@@ -491,7 +491,6 @@ class SANSSuperImpose(PythonAlgorithm):
                         "KError": 0,
                         "B": v['plsq'][0],
                         "BError": errors[0],
-                        "GoodnessOfFit": v['r_squared'],
                     }
                 elif k is None:
                     # k was fitted
@@ -501,8 +500,14 @@ class SANSSuperImpose(PythonAlgorithm):
                         "KError": errors[0],
                         "B": b,
                         "BError": 0,
-                        "GoodnessOfFit": v['r_squared'],
+                        
                     }
+                row.update({"GoodnessOfFit": v['r_squared'],})
+            row.update({
+                "WavelengthMin": v['wl_min'],
+                "WavelengthMax": v['wl_max'],
+                "WavelengthAverage": (v['wl_max'] + v['wl_min']) / 2.0, 
+            })
             logger.debug("%s" % row)
             outws.addRow(row)
         self.setProperty("OutputWorkspaceTable", outws)
