@@ -43,9 +43,6 @@ def download_bootstrap(revision_number, target_location):
 
 def gsas_install_directory():
     root_dir = os.path.abspath(os.sep)
-    if root_dir == "/":
-        # Use home dir instead of / for linux
-        return os.path.expanduser("~")
     return root_dir
         
 

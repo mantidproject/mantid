@@ -83,9 +83,9 @@ GSASIIRefineFitPeaks.  This will install GSAS-II to your current
 working drive (usually C) in a directory called :code:`g2conda`.
 
 On Linux, from :code:`scripts\GSAS-II` run :code:`python install_gsas_proxy.py`.
-Optionally, you can supply a desired revision number with the
-:code:`-v` flag and a directory to install GSAS-II to with the
-:code:`-d` flag.
+Optionally, you can supply a desired revision number (defaults to the
+latest) with the :code:`-v` flag and a directory (defaults to
+:code:`/`) to install GSAS-II to with the :code:`-d` flag.
 
 
 *References*:
