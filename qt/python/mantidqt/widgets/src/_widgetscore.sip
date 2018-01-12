@@ -65,7 +65,16 @@ public:
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
 
   QString fileName() const;
+  SIP_PYTUPLE getSelection() const;
+%MethodCode
+  int lineFrom(-1), indexFrom(-1), lineTo(-1), indexTo(-1);
+  sipCpp->getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
+  sipRes = sipBuildResult(nullptr, "(iiii)", lineFrom, indexFrom,
+                          lineTo, indexTo);
+%End
+  bool hasSelectedText() const;
   bool isReadOnly() const;
+  QString selectedText() const;
   QString text() const;
 
   void setCaretLineBackgroundColor (const QColor & col);
@@ -74,6 +83,7 @@ public:
   void setFont(const QFont &f);
   void setMarginWidth(int margin, int width);
   void setReadOnly(bool ro);
+  void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setText(const QString &text);
 
 public slots:

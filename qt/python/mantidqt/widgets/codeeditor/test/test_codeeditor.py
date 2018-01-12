@@ -60,6 +60,23 @@ class CodeEditorTest(unittest.TestCase):
         widget.setReadOnly(True)
         self.assertTrue(widget.isReadOnly())
 
+    def test_get_selection_for_empty_selection(self):
+        widget = CodeEditor(TEST_LANG)
+        res = widget.getSelection()
+        self.assertEqual((-1, -1, -1, -1), res)
+
+    def test_get_selection_for_non_empty_selection(self):
+        widget = CodeEditor(TEST_LANG)
+        widget.setText("""first line
+        second line
+        third line
+        fourth line
+        """)
+        selected = (0, 2, 3, 4)
+        widget.setSelection(*selected)
+        res = widget.getSelection()
+        self.assertEqual(selected, res)
+
     # ---------------------------------------------------------------
     # Failure tests
     # ---------------------------------------------------------------

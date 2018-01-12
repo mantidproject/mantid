@@ -51,7 +51,9 @@ class MultiPythonFileInterpreter(QWidget):
         return self._editors.currentWidget()
 
     def execute_current(self):
-        self.current_editor().execute_all_async()
+        """Execute content of the current file. If a selection is active
+        then only this portion of code is executed"""
+        self.current_editor().execute_async()
 
     def append_new_editor(self):
         title = "New"

@@ -53,8 +53,8 @@ class PythonFileInterpreter(QWidget):
         # presenter
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution())
 
-    def execute_all_async(self):
-        self._presenter.req_execute_all_async()
+    def execute_async(self):
+        self._presenter.req_execute_async()
 
     def set_editor_readonly(self, ro):
         self.editor.setReadOnly(ro)
@@ -88,30 +88,41 @@ class PythonFileInterpreterPresenter(QObject):
 
     def __init__(self, view, model):
         super(PythonFileInterpreterPresenter, self).__init__()
+        # attributes
         self.view = view
         self.model = model
+        # offset of executing code from start of the file
+        self._code_start_offset = 0
 
         # connect signals
-        self.model.sig_exec_success.connect(self.on_exec_success)
-        self.model.sig_exec_error.connect(self.on_exec_error)
-        self.model.sig_exec_progress.connect(self.view.editor.updateProgressMarker)
+        self.model.sig_exec_success.connect(self._on_exec_success)
+        self.model.sig_exec_error.connect(self._on_exec_error)
+        self.model.sig_exec_progress.connect(self._on_progress_update)
 
         # starts idle
         self.view.set_status_message(IDLE_STATUS_MSG)
 
-    def req_execute_all_async(self):
-        text = self.view.editor.text()
-        if not text:
-            return
+    def req_execute_async(self):
+        code_str, self._code_start_offset = self._get_code_for_execution()
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
-        return self.model.execute_async(text)
+        return self.model.execute_async(code_str)
 
-    def on_exec_success(self):
+    def _get_code_for_execution(self):
+        editor = self.view.editor
+        if editor.hasSelectedText():
+            code_str = editor.selectedText()
+            line_from, _, _, _ = editor.getSelection()
+        else:
+            code_str = editor.text()
+            line_from = 0
+        return code_str, line_from
+
+    def _on_exec_success(self):
         self.view.set_editor_readonly(False)
         self.view.set_status_message(IDLE_STATUS_MSG)
 
-    def on_exec_error(self, task_error):
+    def _on_exec_error(self, task_error):
         if isinstance(task_error.exception, SyntaxError):
             lineno = task_error.exception.lineno
         else:
@@ -119,3 +130,9 @@ class PythonFileInterpreterPresenter(QObject):
         self.view.editor.updateProgressMarker(lineno, True)
         self.view.set_editor_readonly(False)
         self.view.set_status_message(IDLE_STATUS_MSG)
+
+    def _on_progress_update(self, lineno):
+        """Update progress on the view taking into account if a selection of code is
+        running"""
+        self.view.editor.updateProgressMarker(lineno + self._code_start_offset,
+                                              False)
