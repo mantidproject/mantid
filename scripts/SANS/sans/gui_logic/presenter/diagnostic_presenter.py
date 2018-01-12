@@ -8,7 +8,7 @@ from ui.sans_isis.work_handler import WorkHandler
 from sans.common.enums import IntegralEnum, DetectorType
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
-from sans.gui_logic.gui_common import get_detector_strings_for_gui
+from sans.gui_logic.gui_common import get_detector_strings_for_diagnostic_page, get_detector_from_gui_selection
 
 class DiagnosticsPagePresenter(object):
     class ConcreteDiagnosticsPageListener(DiagnosticsPage.DiagnosticsPageListener):
@@ -18,14 +18,14 @@ class DiagnosticsPagePresenter(object):
         def on_browse_clicked(self):
             pass
 
-        def on_det1_horizontal_clicked(self):
-            self._presenter.on_det1_horizontal_clicked()
+        def on_horizontal_clicked(self):
+            self._presenter.on_horizontal_clicked()
 
-        def on_det1_vertical_clicked(self):
-            self._presenter.on_det1_vertical_clicked()
+        def on_vertical_clicked(self):
+            self._presenter.on_vertical_clicked()
 
-        def on_det1_time_clicked(self):
-            self._presenter.on_det1_time_clicked()
+        def on_time_clicked(self):
+            self._presenter.on_time_clicked()
 
     class IntegralListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
@@ -58,38 +58,44 @@ class DiagnosticsPagePresenter(object):
             self.set_instrument_settings(instrument)
 
     def set_instrument_settings(self, instrument=None):
-        detector_list = get_detector_strings_for_gui(instrument)
+        detector_list = get_detector_strings_for_diagnostic_page(instrument)
         self._view.set_detectors(detector_list)
 
-    def on_det1_horizontal_clicked(self):
+    def on_user_file_load(self, user_file):
+        self._view.user_file_name = user_file
+
+    def on_horizontal_clicked(self):
         file = self._view.run_input
         period = self._view.period
         state = self.create_state(file, period)
-        mask = self._view.det1_horizontal_mask
-        range = self._view.det1_horizontal_range
+        mask = self._view.horizontal_mask
+        range = self._view.horizontal_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
+        detector = get_detector_from_gui_selection(self._view.detector)
         self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Horizontal,
-                                   DetectorType.LAB, state)
+                                   detector, state)
 
-    def on_det1_vertical_clicked(self):
+    def on_vertical_clicked(self):
         file = self._view.run_input
         period = self._view.period
         state = self.create_state(file, period)
-        mask = self._view.det1_vertical_mask
-        range = self._view.det1_vertical_range
+        mask = self._view.vertical_mask
+        range = self._view.vertical_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
+        detector = get_detector_from_gui_selection(self._view.detector)
         self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Vertical,
-                                   DetectorType.LAB, state)
+                                   detector, state)
 
-    def on_det1_time_clicked(self):
+    def on_time_clicked(self):
         file = self._view.run_input
         period = self._view.period
         state = self.create_state(file, period)
-        mask = self._view.det1_time_mask
-        range = self._view.det1_time_range
+        mask = self._view.time_mask
+        range = self._view.time_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
+        detector = get_detector_from_gui_selection(self._view.detector)
         self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Time,
-                                   DetectorType.LAB, state)
+                                   detector, state)
 
     def create_state(self, file, period):
         table_row = TableIndexModel(0, file, period, '', '', '', '', '', '', '', '', '', '')

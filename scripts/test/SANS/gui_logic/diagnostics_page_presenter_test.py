@@ -22,7 +22,7 @@ class DiagnosticsPagePresenterTest(unittest.TestCase):
         self.presenter.set_view(self.view)
 
     def test_that_calls_run_integral_with_correct_parameters(self):
-        self.presenter.on_det1_horizontal_clicked()
+        self.presenter.on_horizontal_clicked()
 
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
         self.assertEqual(self.presenter._work_handler.process.call_args[0][1], self.run_integral)

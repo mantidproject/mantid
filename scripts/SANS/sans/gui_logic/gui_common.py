@@ -1,4 +1,4 @@
-from sans.common.enums import SANSInstrument, ISISReductionMode
+from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
 from PyQt4 import QtGui, QtCore
 import os
 
@@ -57,6 +57,18 @@ def get_detector_strings_for_gui(instrument=None):
         return [SANS2D_LAB, SANS2D_HAB]
     elif instrument is SANSInstrument.LOQ:
         return [LOQ_LAB, LOQ_HAB]
+    elif instrument is SANSInstrument.LARMOR:
+        return [LARMOR_LAB]
+    elif instrument is SANSInstrument.ZOOM:
+        return [ZOOM_LAB]
+    else:
+        return [DEFAULT_LAB, DEFAULT_HAB]
+
+def get_detector_strings_for_diagnostic_page(instrument=None):
+    if instrument is SANSInstrument.SANS2D:
+        return [SANS2D_LAB, SANS2D_HAB]
+    elif instrument is SANSInstrument.LOQ:
+        return [LOQ_LAB]
     elif instrument is SANSInstrument.LARMOR:
         return [LARMOR_LAB]
     elif instrument is SANSInstrument.ZOOM:
@@ -128,6 +140,13 @@ def get_reduction_mode_from_gui_selection(gui_selection):
         return ISISReductionMode.HAB
     else:
         raise RuntimeError("Reduction mode selection is not valid.")
+
+
+def get_detector_from_gui_selection(gui_selection):
+    if gui_selection == LOQ_HAB or gui_selection == SANS2D_HAB:
+        return DetectorType.HAB
+    else:
+        return DetectorType.LAB
 
 
 def get_instrument_from_gui_selection(gui_selection):

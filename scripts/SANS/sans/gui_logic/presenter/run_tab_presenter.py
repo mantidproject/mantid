@@ -112,7 +112,7 @@ class RunTabPresenter(object):
         self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel)
 
         # Workspace Diagnostic page presenter
-        self.workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral)
+        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral)
 
     def __del__(self):
         self._delete_dummy_input_workspace()
@@ -183,7 +183,7 @@ class RunTabPresenter(object):
             self._beam_centre_presenter.set_view(self._view.beam_centre)
 
             # Set the appropriate view for the diagnostic page
-            self.workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
+            self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
 
     def on_user_file_load(self):
         """
@@ -217,6 +217,7 @@ class RunTabPresenter(object):
             self._masking_table_presenter.on_update_rows()
             self._settings_diagnostic_tab_presenter.on_update_rows()
             self._beam_centre_presenter.on_update_rows()
+            self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
         except Exception as e:
             self.sans_logger.error("Loading of the user file failed. Ensure that the path to your files has been added "
@@ -1033,6 +1034,7 @@ class RunTabPresenter(object):
 
         self._view.set_instrument_settings(instrument)
         self._beam_centre_presenter.on_update_instrument(instrument)
+        self._workspace_diagnostic_presenter.set_instrument_settings(instrument)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Setting workaround for state in DataProcessorWidget

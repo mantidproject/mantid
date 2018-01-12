@@ -25,15 +25,15 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
             pass
 
         @abstractmethod
-        def on_det1_horizontal_clicked(self):
+        def on_horizontal_clicked(self):
             pass
 
         @abstractmethod
-        def on_det1_vertical_clicked(self):
+        def on_vertical_clicked(self):
             pass
 
         @abstractmethod
-        def on_det1_time_clicked(self):
+        def on_time_clicked(self):
             pass
 
     def __init__(self, parent=None):
@@ -78,24 +78,20 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
 
     def connect_signals(self):
         self.browse_button.clicked.connect(self._on_browse_clicked)
-        self.detector_1_horizontal_button.clicked.connect(self.on_det1_horizontal_clicked)
-        self.detector_1_vertical_button.clicked.connect(self.on_det1_vertical_clicked)
-        self.detector_1_time_button.clicked.connect(self.on_det1_time_clicked)
+        self.horizontal_button.clicked.connect(self.on_horizontal_clicked)
+        self.vertical_button.clicked.connect(self.on_vertical_clicked)
+        self.time_button.clicked.connect(self.on_time_clicked)
 
-    def on_det1_horizontal_clicked(self):
-        self._call_diagnostics_page_listeners(lambda listener: listener.on_det1_horizontal_clicked())
+    def on_horizontal_clicked(self):
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_horizontal_clicked())
 
-    def on_det1_vertical_clicked(self):
-        self._call_diagnostics_page_listeners(lambda listener: listener.on_det1_vertical_clicked())
+    def on_vertical_clicked(self):
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_vertical_clicked())
 
-    def on_det1_time_clicked(self):
-        self._call_diagnostics_page_listeners(lambda listener: listener.on_det1_time_clicked())
+    def on_time_clicked(self):
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_time_clicked())
 
     def _on_browse_clicked(self):
-        """
-        Load the user file
-        """
-        # Load the user file
         load_file(self.run_input_line_edit, "*.*", self.__generic_settings, self.__path_key,
                   self.get_file_path)
 
@@ -110,8 +106,6 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         self.detector_combo_box.clear()
         for element in detector_list:
             self.detector_combo_box.addItem(element)
-        if current_index != -1:
-            self.detector_combo_box.setCurrentIndex(current_index)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties
@@ -133,50 +127,66 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         self.update_simple_line_edit_field(line_edit="period_line_edit", value=value)
 
     @property
-    def det1_horizontal_range(self):
-        return self.get_simple_line_edit_field(line_edit="det1_horizontal_range_line_edit", expected_type=str)
+    def horizontal_range(self):
+        return self.get_simple_line_edit_field(line_edit="horizontal_range_line_edit", expected_type=str)
 
-    @det1_horizontal_range.setter
-    def det1_horizontal_range(self, value):
-        self.update_simple_line_edit_field(line_edit="det1_horizontal_range_line_edit", value=value)
-
-    @property
-    def det1_vertical_range(self):
-        return self.get_simple_line_edit_field(line_edit="det1_vertical_range_line_edit", expected_type=str)
-
-    @det1_vertical_range.setter
-    def det1_vertical_range(self, value):
-        self.update_simple_line_edit_field(line_edit="det1_vertical_range_line_edit", value=value)
+    @horizontal_range.setter
+    def horizontal_range(self, value):
+        self.update_simple_line_edit_field(line_edit="horizontal_range_line_edit", value=value)
 
     @property
-    def det1_time_range(self):
-        return self.get_simple_line_edit_field(line_edit="det1_time_range_line_edit", expected_type=str)
+    def vertical_range(self):
+        return self.get_simple_line_edit_field(line_edit="vertical_range_line_edit", expected_type=str)
 
-    @det1_time_range.setter
-    def det1_time_range(self, value):
-        self.update_simple_line_edit_field(line_edit="det1_time_range_line_edit", value=value)
-
-    @property
-    def det1_horizontal_mask(self):
-        return self.det1_horizontal_mask_check_box.isChecked()
-
-    @det1_horizontal_mask.setter
-    def det1_horizontal_mask(self, value):
-        self.det1_horizontal_mask_check_box.setChecked(value)
+    @vertical_range.setter
+    def vertical_range(self, value):
+        self.update_simple_line_edit_field(line_edit="vertical_range_line_edit", value=value)
 
     @property
-    def det1_vertical_mask(self):
-        return self.det1_vertical_mask_check_box.isChecked()
+    def time_range(self):
+        return self.get_simple_line_edit_field(line_edit="time_range_line_edit", expected_type=str)
 
-    @det1_vertical_mask.setter
-    def det1_vertical_mask(self, value):
-        self.det1_vertical_mask_check_box.setChecked(value)
+    @time_range.setter
+    def time_range(self, value):
+        self.update_simple_line_edit_field(line_edit="time_range_line_edit", value=value)
 
     @property
-    def det1_time_mask(self):
-        return self.det1_time_mask_checkbox.isChecked()
+    def horizontal_mask(self):
+        return self.horizontal_mask_check_box.isChecked()
 
-    @det1_time_mask.setter
-    def det1_time_mask(self, value):
-        self.det1_time_mask_checkbox.setChecked(value)
+    @horizontal_mask.setter
+    def horizontal_mask(self, value):
+        self.horizontal_mask_check_box.setChecked(value)
+
+    @property
+    def vertical_mask(self):
+        return self.vertical_mask_check_box.isChecked()
+
+    @vertical_mask.setter
+    def vertical_mask(self, value):
+        self.vertical_mask_check_box.setChecked(value)
+
+    @property
+    def time_mask(self):
+        return self.time_mask_checkbox.isChecked()
+
+    @time_mask.setter
+    def time_mask(self, value):
+        self.time_mask_checkbox.setChecked(value)
+
+    @property
+    def user_file_name(self):
+        return self.user_file_name_label.text()
+
+    @user_file_name.setter
+    def user_file_name(self, value):
+        self.user_file_name_label.setText(value)
+
+    @property
+    def detector(self):
+        return self.detector_combo_box.currentText()
+
+    @detector.setter
+    def detector(self, value):
+        self.detector_combo_box.currentText(value)
 
