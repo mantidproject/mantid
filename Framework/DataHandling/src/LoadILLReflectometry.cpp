@@ -10,6 +10,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -278,6 +280,7 @@ void LoadILLReflectometry::exec() {
   loadData(firstEntry, monitorsData, getXValues());
   root.close();
   firstEntry.close();
+  initPixelWidth();
   // Move components as if the sample was at the origin (it usually is).
   m_sampleZOffset = sampleHorizontalOffset();
   placeSource();
@@ -436,16 +439,6 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   nChannels.load();
   m_numberOfHistograms = nChannels[0];
 
-  std::string widthName;
-  if (m_instrumentName == "D17")
-    widthName = "mppx";
-  else if (m_instrumentName == "Figaro")
-    widthName = "mppy";
-
-  NXFloat pixelWidth = entry.openNXFloat("instrument/PSD/" + widthName);
-  pixelWidth.load();
-  m_pixelWidth = inMeter(static_cast<double>(pixelWidth[0]));
-
   g_log.debug()
       << "Please note that ILL reflectometry instruments have "
          "several tubes, after integration one "
@@ -455,7 +448,6 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   g_log.debug() << "Number of time channels: " << m_numberOfChannels << '\n';
   g_log.debug() << "Channel width: " << m_channelWidth << " 1e-6 sec\n";
   g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
-  g_log.debug() << "Pixel width: " << m_pixelWidth << '\n';
 }
 
 double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
@@ -762,6 +754,29 @@ double LoadILLReflectometry::detectorRotation() {
   m_log.debug() << "Direct beam calibrated detector angle: " << detectorAngle
                 << '\n';
   return detectorAngle;
+}
+
+void LoadILLReflectometry::initPixelWidth() {
+  auto instrument = m_localWorkspace->getInstrument();
+  auto detectorPanels = instrument->getAllComponentsWithName("detector");
+  if (detectorPanels.size() != 1) {
+    throw std::runtime_error("IDF should have a single 'detector' component.");
+  }
+  auto detector = boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(detectorPanels.front());
+  double widthInLogs;
+  if (m_instrumentName != "Figaro") {
+    m_pixelWidth = std::abs(detector->xstep());
+    widthInLogs = inMeter(m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
+    if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
+      m_log.warning() << "NeXus pixel width (mppx) " << widthInLogs << " differs from the IDF. Using the IDF value " << m_pixelWidth << '\n';
+    }
+  } else {
+    m_pixelWidth = std::abs(detector->ystep());
+    widthInLogs = inMeter(m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppy"));
+  }
+  if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
+    m_log.warning() << "NeXus pixel width (mppy) " << widthInLogs << " differs from the IDF. Using the IDF value " << m_pixelWidth << '\n';
+  }
 }
 
 /// Update detector position according to data file

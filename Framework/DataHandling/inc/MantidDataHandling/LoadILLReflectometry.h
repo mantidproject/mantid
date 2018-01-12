@@ -58,6 +58,7 @@ private:
 
   void initWorkspace(const std::vector<std::vector<int>> &monitorsData);
   void initNames(NeXus::NXEntry &entry);
+  void initPixelWidth();
   void loadDataDetails(NeXus::NXEntry &entry);
   double doubleFromRun(const std::string &entryName) const;
   std::vector<double> getXValues();
