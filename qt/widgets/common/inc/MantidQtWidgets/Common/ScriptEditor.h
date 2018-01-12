@@ -127,7 +127,7 @@ public slots:
   /// Set the marker state
   void setMarkerState(bool enabled);
   /// Update the progress marker
-  void updateProgressMarker(int lineno, bool error);
+  void updateProgressMarker(int lineno, bool error=false);
   /// Mark the progress arrow as an error
   void markExecutingLineAsError();
   /// Refresh the autocomplete information base on a new set of keywords

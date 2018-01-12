@@ -70,6 +70,7 @@ class PythonFileInterpreterPresenter(QObject):
         # connect signals
         self.model.sig_exec_success.connect(self.on_exec_success)
         self.model.sig_exec_error.connect(self.on_exec_error)
+        self.model.sig_exec_progress.connect(self.view.editor.updateProgressMarker)
 
         # starts idle
         self.view.set_status_message(IDLE_STATUS_MSG)
@@ -83,7 +84,14 @@ class PythonFileInterpreterPresenter(QObject):
         return self.model.execute_async(text)
 
     def on_exec_success(self):
+        self.view.set_editor_readonly(False)
         self.view.set_status_message(IDLE_STATUS_MSG)
 
-    def on_exec_error(self):
+    def on_exec_error(self, task_error):
+        if isinstance(task_error.exception, SyntaxError):
+            lineno = task_error.exception.lineno
+        else:
+            lineno = task_error.stack_entries[-1][1]
+        self.view.editor.updateProgressMarker(lineno, True)
+        self.view.set_editor_readonly(False)
         self.view.set_status_message(IDLE_STATUS_MSG)

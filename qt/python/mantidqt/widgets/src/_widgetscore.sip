@@ -72,6 +72,9 @@ public:
   void setReadOnly(bool ro);
   void setText(const QString &text);
 
+public slots:
+  void updateProgressMarker(int lineno, bool error);
+
 private:
   ScriptEditor(const ScriptEditor&);
 };

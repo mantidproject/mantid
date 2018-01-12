@@ -30,10 +30,10 @@ class MultiPythonFileInterpreter(QWidget):
         super(MultiPythonFileInterpreter, self).__init__(parent)
 
         # layout
-        self.editors = QTabWidget(self)
-        self.editors.setMovable(True)
+        self._editors = QTabWidget(self)
+        self._editors.setMovable(True)
         layout = QVBoxLayout()
-        layout.addWidget(self.editors)
+        layout.addWidget(self._editors)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -42,8 +42,16 @@ class MultiPythonFileInterpreter(QWidget):
 
     @property
     def editor_count(self):
-        return self.editors.count()
+        return self._editors.count()
+
+    def current_editor(self):
+        return self._editors.currentWidget()
+
+    def execute_current(self):
+        self.current_editor().execute_all_async()
 
     def append_new_editor(self):
         title = "New"
-        self.editors.addTab(PythonFileInterpreter(self.editors), title)
+        self._editors.addTab(PythonFileInterpreter(self._editors),
+                             title)
+

@@ -29,11 +29,15 @@ from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInte
 @requires_qapp
 class MultiPythonFileInterpreterTest(unittest.TestCase):
 
-    # Success tests
-
-    def test_default_contains_single_tab(self):
+    def test_default_contains_single_editor(self):
         widget = MultiPythonFileInterpreter()
         self.assertEqual(1, widget.editor_count)
+
+    def test_add_editor(self):
+        widget = MultiPythonFileInterpreter()
+        self.assertEqual(1, widget.editor_count)
+        widget.append_new_editor()
+        self.assertEqual(2, widget.editor_count)
 
 
 if __name__ == '__main__':
