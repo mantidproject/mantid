@@ -297,7 +297,8 @@ void LoadILLReflectometry::loadInstrument() {
   g_log.debug("Loading instrument definition...");
   try {
     IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-    loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+    const std::string instrumentName = m_instrument == Supported::D17 ? "D17" : "Figaro";
+    loadInst->setPropertyValue("InstrumentName", instrumentName);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
@@ -317,17 +318,22 @@ void LoadILLReflectometry::loadInstrument() {
   */
 void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
-  m_instrumentName = entry.getString(instrumentNamePath.append("/name"));
-  if (m_instrumentName.empty())
+  std::string instrumentName = entry.getString(instrumentNamePath.append("/name"));
+  if (instrumentName.empty())
     throw std::runtime_error(
         "Cannot set the instrument name from the Nexus file!");
-  // In NeXus files names are: D17 and figaro. The instrument
-  // definition is independent and names start with a capital letter. This
-  // loader follows its convention.
-  boost::to_lower(m_instrumentName);
-  m_instrumentName[0] = char((std::toupper(m_instrumentName[0])));
-  g_log.debug() << "Instrument name: " << m_instrumentName << '\n';
-  if (m_instrumentName == "D17") {
+  boost::to_lower(instrumentName);
+  if (instrumentName == "d17") {
+    m_instrument = Supported::D17;
+  } else if (instrumentName == "figaro") {
+    m_instrument = Supported::Figaro;
+  } else {
+    std::ostringstream str;
+    str << "Unsupported instrument in NeXus: " << instrumentName << '.';
+    throw std::runtime_error(str.str());
+  }
+  g_log.debug() << "Instrument name: " << instrumentName << '\n';
+  if (m_instrument == Supported::D17) {
     m_detectorDistanceName = "det";
     m_detectorAngleName = "dan.value";
     m_sampleAngleName = "san.value";
@@ -336,7 +342,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_pixelCentre = 127.5;
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
-  } else if (m_instrumentName == "Figaro") {
+  } else if (m_instrument == Supported::Figaro) {
     // For Figaro, the DTR field contains the sample-to-detector distance
     // when the detector is at the horizontal position (angle = 0).
     m_detectorDistanceName = "DTR";
@@ -426,7 +432,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
     m_channelWidth = static_cast<double>(timeOfFlight[0]);
     m_numberOfChannels = size_t(timeOfFlight[1]);
     m_tofDelay = timeOfFlight[2];
-    if (m_instrumentName == "Figaro") {
+    if (m_instrument == Supported::Figaro) {
       NXFloat eDelay = entry.openNXFloat("instrument/Theta/edelay_delay");
       eDelay.load();
       m_tofDelay += static_cast<double>(eDelay[0]);
@@ -500,7 +506,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
     if (m_acqMode) {
       std::string chopper{"Chopper"};
       double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
-      if (m_instrumentName == "D17") {
+      if (m_instrument == Supported::D17) {
         chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
         chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
         chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
@@ -510,7 +516,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
           // chopper 1 phase and chopper 2 speed swapped.
           std::swap(chop1Phase, chop2Speed);
         }
-      } else if (m_instrumentName == "Figaro") {
+      } else if (m_instrument == Supported::Figaro) {
         chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
         // Chopper 1 phase on Figaro is set to an arbitrary value (999.9)
         if (chop1Phase > 360.0)
@@ -519,7 +525,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       const double POFF = doubleFromRun(m_offsetFrom + ".poff");
       const double openOffset =
           doubleFromRun(m_offsetFrom + "." + m_offsetName);
-      if (m_instrumentName == "D17" && chop1Speed != 0.0 && chop2Speed != 0.0 &&
+      if (m_instrument == Supported::D17 && chop1Speed != 0.0 && chop2Speed != 0.0 &&
           chop2Phase != 0.0) {
         // virtual chopper entries are valid
         chopper = "Virtual chopper";
@@ -764,7 +770,7 @@ void LoadILLReflectometry::initPixelWidth() {
   }
   auto detector = boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(detectorPanels.front());
   double widthInLogs;
-  if (m_instrumentName != "Figaro") {
+  if (m_instrument != Supported::Figaro) {
     m_pixelWidth = std::abs(detector->xstep());
     widthInLogs = inMeter(m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
     if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
@@ -788,12 +794,10 @@ void LoadILLReflectometry::placeDetector() {
   const auto detectorRotationAngle = detectorRotation();
   const std::string componentName = "detector";
   const RotationPlane rotPlane = [this]() {
-    if (m_instrumentName == "D17")
+    if (m_instrument != Supported::Figaro)
       return RotationPlane::horizontal;
-    else if (m_instrumentName == "Figaro")
-      return RotationPlane::vertical;
     else
-      return RotationPlane::horizontal;
+      return RotationPlane::vertical;
   }();
   const auto newpos =
       detectorPosition(rotPlane, m_detectorDistance, detectorRotationAngle);
@@ -814,7 +818,7 @@ void LoadILLReflectometry::placeSource() {
 
 /// Return the incident neutron deflection angle.
 double LoadILLReflectometry::collimationAngle() const {
-  if (m_instrumentName != "Figaro") {
+  if (m_instrument != Supported::Figaro) {
     return 0;
   }
   const auto collimationAngle = doubleFromRun("CollAngle.actual_coll_angle");
@@ -823,7 +827,7 @@ double LoadILLReflectometry::collimationAngle() const {
 }
 
 double LoadILLReflectometry::detectorAngle() const {
-  if (m_instrumentName != "Figaro") {
+  if (m_instrument != Supported::Figaro) {
     return doubleFromRun(m_detectorAngleName);
   }
   // Take the bent beam into account.
@@ -843,7 +847,7 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
                                          const double detectorDistance) const {
   // Sign depends on the definition of detector angle and which way
   // spectrum numbers increase.
-  const auto sign = m_instrumentName == "D17" ? 1. : -1.;
+  const auto sign = m_instrument == Supported::D17 ? 1. : -1.;
   const double offsetWidth = (detectorCentre - peakCentre) * m_pixelWidth;
   return sign * inDeg(std::atan2(offsetWidth, detectorDistance));
 }
@@ -852,7 +856,7 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
  *  @return the distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
-  if (m_instrumentName != "Figaro") {
+  if (m_instrument != Supported::Figaro) {
     return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   }
   const double restZ = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
@@ -874,7 +878,7 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
 
 /// Return the horizontal offset along the z axis.
 double LoadILLReflectometry::sampleHorizontalOffset() const {
-  if (m_instrumentName != "Figaro") {
+  if (m_instrument != Supported::Figaro) {
     return 0.;
   }
   return inMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
@@ -884,19 +888,16 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
  *  @return the source to sample distance in meters
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
-  if (m_instrumentName == "D17") {
+  if (m_instrument != Supported::Figaro) {
     const double pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
     // Chopper pair separation is in cm in sample logs.
     const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
     return pairCentre - 0.5 * pairSeparation;
-  } else if (m_instrumentName == "Figaro") {
+  } else {
     const double chopperDist = inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
     const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
     return chopperDist + m_sampleZOffset / std::cos(inRad(deflectionAngle));
   }
-  std::ostringstream out;
-  out << "sourceSampleDistance: unknown instrument " << m_instrumentName;
-  throw std::runtime_error(out.str());
 }
 
 } // namespace DataHandling

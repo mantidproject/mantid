@@ -53,6 +53,11 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
+  enum class Supported {
+    D17,
+    Figaro
+  };
+
   void init() override;
   void exec() override;
 
@@ -87,7 +92,7 @@ private:
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   /* Values parsed from the nexus file */
-  std::string m_instrumentName; ///< Name of the instrument
+  Supported m_instrument{Supported::D17}; ///< Name of the instrument
   size_t m_acqMode{1}; ///< Acquisition mode (1 TOF (default), 0 monochromatic)
   size_t m_numberOfChannels{0};
   double m_tofDelay{0.0};
