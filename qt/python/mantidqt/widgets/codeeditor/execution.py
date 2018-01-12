@@ -112,27 +112,26 @@ def code_blocks(code_str):
     """Generator to produce blocks of executable code
     from the given code string.
     """
-    block_start_lineno, cur_lineno = 1, 0
+    lineno_cur = 0
     lines = code_str.splitlines()
-    nlines = len(lines)
+    line_count = len(lines)
     isp = InputSplitter()
     for line in lines:
-        cur_lineno += 1
+        lineno_cur += 1
         isp.push(line)
         # If we need more input to form a complete statement
         # or we are not at the end of the code then keep
         # going
-        if isp.push_accepts_more() and cur_lineno != nlines:
+        if isp.push_accepts_more() and lineno_cur != line_count:
             continue
         else:
             # Now we have a complete set of executable statements
             # throw them back
-            code = isp.code
+            code = isp.source
             isp.reset()
-            yield CodeBlock(code, block_start_lineno)
+            yield CodeBlock(code, lineno_cur)
             # In order to keep the line numbering in error stack traces
             # consistent each executed block needs to have the statements
             # on the same line as they are in the real code so we prepend
             # blank lines to make this so
-            isp.push('\n'*cur_lineno)
-            block_start_lineno = cur_lineno + 1
+            isp.push('\n'*lineno_cur)
