@@ -69,15 +69,20 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct PreprocessingAttributes {
-  PreprocessingAttributes(const OptionsMap &options) : m_options(options) {}
-  PreprocessingAttributes(const OptionsMap &options,
+  PreprocessingAttributes(const ColumnOptionsMap &options)
+      : m_options(options) {}
+  PreprocessingAttributes(const ColumnOptionsMap &options,
                           std::map<QString, PreprocessingAlgorithm> map)
       : m_options(options), m_map(map) {}
-  OptionsMap m_options;
+  ColumnOptionsMap m_options;
   std::map<QString, PreprocessingAlgorithm> m_map;
 
   bool hasPreprocessing(const QString &columnName) const {
     return m_map.count(columnName) > 0;
+  }
+
+  bool hasOptions(const QString &columnName) const {
+    return m_options.count(columnName) > 0;
   }
 
   // IAlgorithm_sptr createAlgorithmFor(const QString& columnName) const {
@@ -173,7 +178,7 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
-  void setPreprocessingOptions(OptionsMap const &options) {
+  void setPreprocessingOptions(ColumnOptionsMap const &options) {
     m_preprocessing.m_options = options;
   }
 
@@ -191,22 +196,13 @@ protected:
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Preprocess the given column value if applicable
-  void preprocessColumnValue(const QString &columnName, QString &columnValue);
+  void preprocessColumnValue(const QString &columnName, QString &columnValue,
+                             RowData *data);
   // Preprocess all option values where applicable
-  void preprocessOptionValues(OptionsMap &options);
+  void preprocessOptionValues(OptionsMap &options, RowData *data);
   // Update the model with results from the algorithm
   void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
                                 RowData *data);
-  // Get options from the individual columns
-  void addRowOptions(OptionsMap &options, RowData *data);
-  // Get options from the Options column
-  void addUserOptions(OptionsMap &options, RowData *data);
-  // Get options from the Hidden Options column
-  void addHiddenOptions(OptionsMap &options, RowData *data);
-  // Get global options
-  void addGlobalOptions(OptionsMap &options);
-  // Get output options
-  void addOutputOptions(OptionsMap &options, RowData *data);
   // Create and execute the algorithm with the given properties
   Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
@@ -278,7 +274,7 @@ private:
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const QString &run, const PreprocessingAlgorithm &alg,
-                      const std::map<std::string, std::string> &optionsMap);
+                      const OptionsMap &optionsMap);
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model
