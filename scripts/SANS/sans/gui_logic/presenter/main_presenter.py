@@ -74,6 +74,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
 
     def confirmReductionPaused(self):
         self._presenters[PresenterEnum.RunTabPresenter].on_processing_finished()
+
     # ------------------------------------------------------------------------------------------------------------------
     # Inherited methods
     # ------------------------------------------------------------------------------------------------------------------
