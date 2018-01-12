@@ -68,7 +68,11 @@ public:
   bool isReadOnly() const;
   QString text() const;
 
+  void setCaretLineBackgroundColor (const QColor & col);
+  void setCaretLineVisible(bool enable);
   void setFileName(const QString &filename);
+  void setFont(const QFont &f);
+  void setMarginWidth(int margin, int width);
   void setReadOnly(bool ro);
   void setText(const QString &text);
 

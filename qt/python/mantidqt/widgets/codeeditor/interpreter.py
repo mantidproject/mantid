@@ -18,6 +18,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 # 3rd party imports
 from qtpy.QtCore import QObject
+from qtpy.QtGui import QColor, QFont, QFontMetrics
 from qtpy.QtWidgets import QStatusBar, QVBoxLayout, QWidget
 
 # local imports
@@ -25,8 +26,10 @@ from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 IDLE_STATUS_MSG = "Status: Idle"
-
 RUNNING_STATUS_MSG = "Status: Running"
+
+# Editor colors
+CURRENTLINE_BKGD = QColor(247, 236, 248)
 
 
 class PythonFileInterpreter(QWidget):
@@ -38,13 +41,15 @@ class PythonFileInterpreter(QWidget):
         super(PythonFileInterpreter, self).__init__(parent)
 
         # layout
-        self.editor = CodeEditor("Python", self)
+        self.editor = CodeEditor("AlternateCSPythonLexer", self)
         self.status = QStatusBar(self)
         layout = QVBoxLayout()
         layout.addWidget(self.editor)
         layout.addWidget(self.status)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
+
+        self._setup_editor()
 
         # presenter
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution())
@@ -57,6 +62,22 @@ class PythonFileInterpreter(QWidget):
 
     def set_status_message(self, msg):
         self.status.showMessage(msg)
+
+    def _setup_editor(self):
+        editor = self.editor
+        # use fixed with font
+        font = QFont("Courier New")
+        font.setPointSize(10)
+        editor.setFont(font)
+
+        # show current editing line but in a softer color
+        editor.setCaretLineBackgroundColor(CURRENTLINE_BKGD)
+        editor.setCaretLineVisible(True)
+
+        # set a margin large enough for sensible file sizes < 1000 lines
+        # and the progress marker
+        font_metrics = QFontMetrics(font)
+        editor.setMarginWidth(1, font_metrics.averageCharWidth()*3 + 12)
 
 
 class PythonFileInterpreterPresenter(QObject):

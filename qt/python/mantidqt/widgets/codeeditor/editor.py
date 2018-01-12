@@ -17,12 +17,9 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # 3rd party imports
-from qtpy.QtCore import QObject
-from qtpy.QtWidgets import QStatusBar, QTabWidget, QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.utils.qt import import_qtlib
-from .execution import PythonCodeExecution
 
 # Import single-file editor from C++ wrapping
 CodeEditor = import_qtlib('_widgetscore', 'mantidqt.widgets', 'ScriptEditor')
