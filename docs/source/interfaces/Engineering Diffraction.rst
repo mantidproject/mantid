@@ -335,9 +335,10 @@ Fitting
 .. warning:: The input workspace must be converted into a focused file
 			 first. The steps to complete this are found here: :ref:`focus-Engineering_Diffraction-ref`
 
-The Fitting tab provides a graphical interface which fits and
-visualises an expected diffraction pattern. The pattern is specified
-by providing a list of dSpacing values where Bragg peaks are expected.
+The Fitting tab provides a graphical interface which fits an expected
+diffraction pattern and visualises them. The pattern is specified by
+providing a list of peak centre values where Bragg peaks are expected.
+These values can have units of either TOF of dSpacing but **not** both.
 The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` is used to
 background fit peaks in those areas using a peak fitting function.
 
@@ -423,6 +424,11 @@ focused workspace with listed expected peaks on the data plot, the *Select
 Peak* button should also be enabled. If the user choose to load the focus
 workspace or if fitting fails with the given peaks then the focused
 workspace will be plotted so that the user can select the peaks manually.
+
+If you've run a fit but you can't see the reconstructed peaks, make sure
+the checkbox **Plot fitted peaks** is checked - if the fit was successful,
+then clicking this should show the results. Equally, if you want to hide
+fitted peaks, just uncheck this box and they will disappear.
 
 By clicking Select Peak button the peak picker tool can be activated.
 To select a peak simply hold *Shift* key and left-click on the graph

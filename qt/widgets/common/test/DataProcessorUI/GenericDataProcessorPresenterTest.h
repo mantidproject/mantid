@@ -25,6 +25,41 @@ using namespace testing;
 // Functional tests
 //=====================================================================================
 
+// Use this if you need the Test class to be a friend of the data processor
+// presenter
+class GenericDataProcessorPresenterFriend
+    : public GenericDataProcessorPresenter {
+  friend class GenericDataProcessorPresenterTest;
+
+public:
+  // Standard constructor
+  GenericDataProcessorPresenterFriend(
+      const WhiteList &whitelist,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessingStep,
+      const ProcessingAlgorithm &processor,
+      const PostprocessingAlgorithm &postprocessor,
+      const std::map<QString, QString> &postprocessMap =
+          std::map<QString, QString>(),
+      const QString &loader = "Load")
+      : GenericDataProcessorPresenter(whitelist, std::move(preprocessingStep),
+                                      processor, postprocessor, postprocessMap,
+                                      loader) {}
+
+  // Delegating constructor (no pre-processing required)
+  GenericDataProcessorPresenterFriend(
+      const WhiteList &whitelist, const ProcessingAlgorithm &processor,
+      const PostprocessingAlgorithm &postprocessor)
+      : GenericDataProcessorPresenter(whitelist, processor, postprocessor) {}
+
+  // Delegating constructor (no pre- or post-processing required)
+  GenericDataProcessorPresenterFriend(const WhiteList &whitelist,
+                                      const ProcessingAlgorithm &processor)
+      : GenericDataProcessorPresenter(whitelist, processor) {}
+
+  // Destructor
+  ~GenericDataProcessorPresenterFriend() override {}
+};
+
 // Use this mocked presenter for tests that will start the reducing row/group
 // workers/threads. This overrides the async methods to be non-async, allowing
 // them to be tested.
@@ -366,8 +401,8 @@ private:
     return ws;
   }
 
-  std::unique_ptr<GenericDataProcessorPresenter> makeDefaultPresenter() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+  std::unique_ptr<GenericDataProcessorPresenterFriend> makeDefaultPresenter() {
+    return Mantid::Kernel::make_unique<GenericDataProcessorPresenterFriend>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
   }
@@ -415,46 +450,54 @@ private:
                           Cardinality numTimes, RowList rowlist = RowList(),
                           GroupList grouplist = GroupList()) {
 
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(numTimes)
-        .WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(numTimes)
-        .WillRepeatedly(Return(grouplist));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(numTimes);
+      EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+          .Times(numTimes)
+          .WillRepeatedly(Return(rowlist));
+      EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+          .Times(numTimes)
+          .WillRepeatedly(Return(grouplist));
+    }
   }
 
   void expectGetOptions(MockMainPresenter &mockMainPresenter,
                         Cardinality numTimes,
                         std::string postprocessingOptions = "") {
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(numTimes)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(numTimes)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-        .Times(numTimes)
-        .WillOnce(Return(QString::fromStdString(postprocessingOptions)));
-  }
-
-  void expectGetProperties(MockMainPresenter &mockMainPresenter,
-                           Cardinality numTimes) {
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(numTimes)
-        .WillRepeatedly(Return(QString()));
-  }
-
-  void expectCallResume(MockMainPresenter &mockMainPresenter,
-                        Cardinality numTimes) {
-    EXPECT_CALL(mockMainPresenter, resume()).Times(numTimes);
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+          .Times(numTimes);
+    } else {
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+          .Times(numTimes)
+          .WillOnce(Return(ColumnOptionsQMap()));
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+          .Times(numTimes)
+          .WillOnce(Return(OptionsQMap()));
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+          .Times(numTimes)
+          .WillOnce(Return(QString::fromStdString(postprocessingOptions)));
+    }
   }
 
   void expectNotebookIsDisabled(MockDataProcessorView &mockDataProcessorView,
                                 Cardinality numTimes) {
     // Call to check whether the notebook is enabled
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-        .Times(numTimes)
-        .WillRepeatedly(Return(false));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+          .Times(numTimes)
+          .WillRepeatedly(Return(false));
+    }
+
     // Result is false, so never request the path
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(Exactly(0));
   }
@@ -462,35 +505,57 @@ private:
   void expectNotebookIsEnabled(MockDataProcessorView &mockDataProcessorView,
                                Cardinality numTimes) {
     // Call to check whether the notebook is enabled
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-        .Times(numTimes)
-        .WillRepeatedly(Return(true));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+          .Times(numTimes)
+          .WillRepeatedly(Return(true));
+    }
+
     // Result is false, so never request the path
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(numTimes);
   }
 
   void expectGetWorkspace(MockDataProcessorView &mockDataProcessorView,
                           Cardinality numTimes, const char *workspaceName) {
-    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-        .Times(numTimes)
-        .WillRepeatedly(Return(workspaceName));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen()).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+          .Times(numTimes)
+          .WillRepeatedly(Return(workspaceName));
+    }
   }
 
   void expectAskUserWorkspaceName(MockDataProcessorView &mockDataProcessorView,
                                   Cardinality numTimes,
                                   const char *workspaceName = "") {
-    EXPECT_CALL(mockDataProcessorView,
-                askUserString(_, _, QString("Workspace")))
-        .Times(numTimes)
-        .WillOnce(Return(workspaceName));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView,
+                  askUserString(_, _, QString("Workspace"))).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView,
+                  askUserString(_, _, QString("Workspace")))
+          .Times(numTimes)
+          .WillOnce(Return(workspaceName));
+    }
   }
 
   void expectAskUserYesNo(MockDataProcessorView &mockDataProcessorView,
                           Cardinality numTimes, const bool answer = false) {
 
-    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
-        .Times(numTimes)
-        .WillOnce(Return(answer));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
+          .Times(numTimes)
+          .WillOnce(Return(answer));
+    }
   }
 
   void expectNoWarningsOrErrors(MockDataProcessorView &mockDataProcessorView) {
@@ -1119,9 +1184,7 @@ public:
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(2));
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
-    expectCallResume(mockMainPresenter, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1154,9 +1217,7 @@ public:
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(0));
     expectGetOptions(mockMainPresenter, Exactly(0), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(0));
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
-    expectCallResume(mockMainPresenter, Exactly(0));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -2747,17 +2808,8 @@ public:
   void testWorkspaceNamesNoTrans() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-
     auto presenter = makeDefaultPresenter();
-
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
-
-    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
 
     QStringList row0 = {"12345", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
     QStringList row1 = {"12346", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
@@ -2771,11 +2823,9 @@ public:
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0), "TOF_12345");
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1), "TOF_12346");
     // Test the names of the post-processed ws
-    // TS_ASSERT_EQUALS(
-    //    presenter->getPostprocessedWorkspaceName(group, "new_prefix_"),
-    //    "new_prefix_TOF_12345_TOF_12346");
-    // TS_ASSERT_EQUALS(presenter->getPostprocessedWorkspaceName(group),
-    //                 "TOF_12345_TOF_12346");
+    TS_ASSERT_EQUALS(
+        presenter->getPostprocessedWorkspaceName(group).toStdString(),
+        "IvsQ_TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -2787,14 +2837,6 @@ public:
     auto presenter = makeDefaultPresenter();
 
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
-
-    createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
-                                      presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
 
     QStringList row0 = {"12345", "0.5", "11115", "0.1", "0.3",
                         "0.04",  "1",   "",      ""};
@@ -2812,11 +2854,39 @@ public:
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1),
                      "TOF_12346_TRANS_11116");
     // Test the names of the post-processed ws
-    // TS_ASSERT_EQUALS(
-    //     presenter->getPostprocessedWorkspaceName(group, "new_prefix_"),
-    //     "new_prefix_TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
-    // TS_ASSERT_EQUALS(presenter->getPostprocessedWorkspaceName(group),
-    //                 "TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
+    TS_ASSERT_EQUALS(
+        presenter->getPostprocessedWorkspaceName(group).toStdString(),
+        "IvsQ_TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
+
+  void testWorkspaceNamesWithMultipleTrans() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    auto presenter = makeDefaultPresenter();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+
+    // Test transmission run list separated by both comma and plus symbol
+    QStringList row0 = {"12345", "0.5", "11115,11116", "0.1", "0.3", "0.04",
+                        "1", "", ""};
+    QStringList row1 = {"12346", "0.5", "11115+11116", "0.1", "0.3", "0.04",
+                        "1", "", ""};
+    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+
+    // Test the names of the reduced workspaces
+    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
+                     "prefix_1_TOF_12345_TRANS_11115+11116");
+    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1, "prefix_2_"),
+                     "prefix_2_TOF_12346_TRANS_11115+11116");
+    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0),
+                     "TOF_12345_TRANS_11115+11116");
+    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1),
+                     "TOF_12346_TRANS_11115+11116");
+    // Test the names of the post-processed ws
+    TS_ASSERT_EQUALS(
+        presenter->getPostprocessedWorkspaceName(group).toStdString(),
+        "IvsQ_TOF_12345_TRANS_11115+11116_TOF_12346_TRANS_11115+11116");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -2829,21 +2899,13 @@ public:
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
-    createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
-                                      presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-
     QStringList row0 = {"12345", "0.5"};
     QStringList row1 = {"12346", "0.5"};
     std::map<int, QStringList> group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_THROWS_ANYTHING(presenter->getReducedWorkspaceName(row0));
-    // TS_ASSERT_THROWS_ANYTHING(presenter->getPostprocessedWorkspaceName(group));
+    TS_ASSERT_THROWS_ANYTHING(presenter->getPostprocessedWorkspaceName(group));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -2988,8 +3050,8 @@ public:
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
-                                            createReflectometryProcessor());
+    GenericDataProcessorPresenterFriend presenter(
+        createReflectometryWhiteList(), createReflectometryProcessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
     // Calls that should throw
@@ -3003,8 +3065,8 @@ public:
         presenter.notify(DataProcessorPresenter::ExpandSelectionFlag));
     TS_ASSERT_THROWS_ANYTHING(
         presenter.notify(DataProcessorPresenter::PlotGroupFlag));
-    // TS_ASSERT(presenter.getPostprocessedWorkspaceName(
-    //              std::map<int, QStringList>()) == "");
+    TS_ASSERT_THROWS_ANYTHING(
+        presenter.getPostprocessedWorkspaceName(std::map<int, QStringList>()));
   }
 
   void testPostprocessMap() {

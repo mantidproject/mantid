@@ -17,3 +17,4 @@
 
 # flake8: noqa
 from .widget import AlgorithmSelectorWidget
+from mantidqt import resources

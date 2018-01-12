@@ -36,8 +36,8 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
-# Add default location of Qt5 from homebrew to prefix path so that find_package works
-list ( APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt" )
+# Set Qt5 dir according to homebrew location
+set ( Qt5_DIR /usr/local/opt/qt/lib/cmake/Qt5 )
 
 ###########################################################################
 # Use python libraries associated with PYTHON_EXECUTABLE

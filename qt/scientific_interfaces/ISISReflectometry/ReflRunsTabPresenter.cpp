@@ -1,4 +1,6 @@
 #include "ReflRunsTabPresenter.h"
+#include "IReflMainWindowPresenter.h"
+#include "IReflRunsTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,17 +9,16 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "IReflMainWindowPresenter.h"
-#include "IReflRunsTabView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflCatalogSearcher.h"
+#include "ReflFromStdStringMap.h"
 #include "ReflLegacyTransferStrategy.h"
 #include "ReflMeasureTransferStrategy.h"
 #include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
-#include "ReflFromStdStringMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/ProgressPresenter.h"
 
 #include <QStringList>
 #include <boost/regex.hpp>
@@ -31,6 +32,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -402,44 +404,40 @@ void ReflRunsTabPresenter::notifyADSChanged(
       m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
-/** Requests property names associated with pre-processing values.
-* @return :: Pre-processing property names.
-*/
-QString ReflRunsTabPresenter::getPreprocessingProperties() const {
-
-  auto properties =
-      QString("Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
-  return properties;
-}
-
-/** Requests global pre-processing options as a string. Options are supplied by
+/** Requests global pre-processing options. Options are supplied by
+  * the main presenter and there can be multiple sets of options for different
+  * columns that need to be preprocessed.
+  * @return :: A map of the column name to the global pre-processing options
+  * for that column
   * the main presenter.
   * @return :: Global pre-processing options
   */
-QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
+ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+  ColumnOptionsQMap result;
 
-  auto optionsStr = QString("Transmission Run(s),") +
-                    QString::fromStdString(m_mainPresenter->getTransmissionRuns(
-                        m_view->getSelectedGroup()));
+  // Note that there are no options for the Run(s) column so just add
+  // Transmission Run(s)
+  auto transmissionOptions = OptionsQMap(
+      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
+  result["Transmission Run(s)"] = transmissionOptions;
 
-  return optionsStr;
+  return result;
 }
 
 /** Requests global processing options. Options are supplied by the main
 * presenter
 * @return :: Global processing options
 */
-QString ReflRunsTabPresenter::getProcessingOptions() const {
-
-  return QString::fromStdString(
-      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
+OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
+  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 
-/** Requests global post-processing options. Options are supplied by the main
+/** Requests global post-processing options as a string. Options are supplied by
+* the main
 * presenter
-* @return :: Global post-processing options
+* @return :: Global post-processing options as a string
 */
-QString ReflRunsTabPresenter::getPostprocessingOptions() const {
+QString ReflRunsTabPresenter::getPostprocessingOptionsAsString() const {
 
   return QString::fromStdString(
       m_mainPresenter->getStitchOptions(m_view->getSelectedGroup()));

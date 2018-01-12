@@ -4,12 +4,13 @@ import unittest
 import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
+
 from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
                         ExperimentInfo, AnalysisDataService, WorkspaceFactory)
 from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
-
 import numpy as np
+from six.moves import range
 
 class MatrixWorkspaceTest(unittest.TestCase):
 
@@ -140,18 +141,6 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertRaises(ValueError, test_ws.setY, 0, values)
         self.assertRaises(ValueError, test_ws.setE, 0, values)
 
-    def test_setting_spectra_from_array_of_incorrect_shape_raises_error(self):
-        nvectors = 2
-        xlength = 11
-        ylength = 10
-        test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
-
-        values = np.linspace(0,1,num=xlength-1)
-        values = values.reshape(5,2)
-        self.assertRaises(ValueError, test_ws.setX, 0, values)
-        self.assertRaises(ValueError, test_ws.setY, 0, values)
-        self.assertRaises(ValueError, test_ws.setE, 0, values)
-
     def test_setting_spectra_from_array_using_incorrect_index_raises_error(self):
         nvectors = 2
         xlength = 11
@@ -183,6 +172,39 @@ class MatrixWorkspaceTest(unittest.TestCase):
         test_ws.setE(ws_index, values)
         ws_values = test_ws.readE(ws_index)
         self.assertTrue(np.array_equal(values, ws_values))
+
+    def test_setxy_data_coerced_correctly_to_float64(self):
+        nbins = 10
+        nspec = 2
+        xdata = np.arange(nbins+1)
+        ydata = np.arange(nbins)
+        ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins+1, YLength=nbins)
+        for i in range(nspec):
+            ws.setX(i, xdata)
+            ws.setY(i, ydata)
+
+        # Verify
+        x_expected, y_expected = np.vstack((xdata, xdata)), np.vstack((ydata, ydata))
+        x_extracted, y_extracted = ws.extractX(), ws.extractY()
+        self.assertTrue(np.array_equal(x_expected, x_extracted))
+        self.assertTrue(np.array_equal(y_expected, y_extracted))
+
+    def test_setxy_accepts_python_list(self):
+        nbins = 10
+        nspec = 2
+        xdata = list(range(nbins+1))
+        ydata = list(range(nbins))
+        ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins+1, YLength=nbins)
+        for i in range(nspec):
+            ws.setX(i, xdata)
+            ws.setY(i, ydata)
+
+        # Verify
+        xdata, ydata = np.array(xdata), np.array(ydata)
+        x_expected, y_expected = np.vstack((xdata, xdata)), np.vstack((ydata, ydata))
+        x_extracted, y_extracted = ws.extractX(), ws.extractY()
+        self.assertTrue(np.array_equal(x_expected, x_extracted))
+        self.assertTrue(np.array_equal(y_expected, y_extracted))
 
     def test_data_can_be_extracted_to_numpy_successfully(self):
         x = self._test_ws.extractX()

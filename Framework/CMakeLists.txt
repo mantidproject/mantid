@@ -145,7 +145,7 @@ add_subdirectory (ScriptRepository)
 
 set ( FRAMEWORK_LIBS Kernel HistogramData Indexing Beamline Geometry API DataObjects
                      PythonKernelModule PythonGeometryModule PythonAPIModule
-                     PythonDataObjectsModule
+                     PythonDataObjectsModule PythonCurveFittingModule
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData RemoteAlgorithms RemoteJobManagers

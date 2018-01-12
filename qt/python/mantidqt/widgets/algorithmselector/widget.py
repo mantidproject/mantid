@@ -2,11 +2,12 @@ from __future__ import absolute_import, print_function
 
 import re
 
-from qtpy.QtCore import QModelIndex, Signal
+from qtpy.QtCore import QModelIndex
 from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout,
                             QHBoxLayout, QCompleter, QTreeWidgetItem)
 
 from mantidqt.utils.qt import block_signals
+from mantidqt.widgets.interfacemanager import InterfaceManager
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
 
@@ -31,8 +32,6 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
     """
     An algorithm selector view implemented with qtpy.
     """
-    execute_selected_algorithm = Signal(str, int)
-
     def __init__(self, parent=None, include_hidden=False):
         """
         Initialise a new instance of AlgorithmSelectorWidget
@@ -198,4 +197,6 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         """
         algorithm = self.get_selected_algorithm()
         if algorithm is not None:
-            self.execute_selected_algorithm.emit(algorithm.name, algorithm.version)
+            manager = InterfaceManager()
+            dialog = manager.createDialogFromName(algorithm.name, algorithm.version)
+            dialog.show()
