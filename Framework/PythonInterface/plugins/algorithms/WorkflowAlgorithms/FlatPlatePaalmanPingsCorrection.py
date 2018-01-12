@@ -195,14 +195,15 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                            "be computed.")
 
         # Check can input
-        can_material = mtd[self._can_ws_name].sample().getMaterial()
-        if self._can_density and (can_material.totalScatterXSection() + can_material.absorbXSection()):
-            self._has_can_front_in = bool(self._can_front_thickness)
-            self._has_can_back_in = bool(self._can_back_thickness)
-        else:
-            logger.warning(
-                "A can workspace was given but the can information is incomplete. Continuing but no absorption for the can will "
-                "be computed.")
+        if self._use_can:
+            can_material = mtd[self._can_ws_name].sample().getMaterial()
+            if self._can_density and (can_material.totalScatterXSection() + can_material.absorbXSection()):
+                self._has_can_front_in = bool(self._can_front_thickness)
+                self._has_can_back_in = bool(self._can_back_thickness)
+            else:
+                logger.warning(
+                    "A can workspace was given but the can information is incomplete. Continuing but no absorption for the can will "
+                    "be computed.")
 
         if not self._has_can_front_in:
             logger.warning(
