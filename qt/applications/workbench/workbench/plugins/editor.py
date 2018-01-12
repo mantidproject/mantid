@@ -21,10 +21,21 @@ from __future__ import (absolute_import, unicode_literals)
 # third-party library imports
 from mantidqt.utils.qt import add_actions, create_action
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
+
+
+# Initial content
+DEFAULT_CONTENT = """# The following line helps with future compatibility with Python 3
+# print must now be used as a function, e.g print('Hello','World')
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+
+# Import all mantid algorithms
+from mantid.simpleapi import *
+"""
 
 
 class MultiFileEditor(PluginWidget):
@@ -34,7 +45,8 @@ class MultiFileEditor(PluginWidget):
         super(MultiFileEditor, self).__init__(parent)
 
         # layout
-        self.editors = MultiPythonFileInterpreter(self)
+        self.editors = MultiPythonFileInterpreter(default_content=DEFAULT_CONTENT,
+                                                  parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -42,7 +54,9 @@ class MultiFileEditor(PluginWidget):
 
         # attributes
         self.run_action = create_action(self, "Run",
-                                        on_triggered=self.execute_current)
+                                        on_triggered=self.execute_current,
+                                        shortcut="Ctrl+Return",
+                                        shortcut_context=Qt.ApplicationShortcut)
         self.editor_actions = [self.run_action]
 
     # ----------- Plugin API --------------------

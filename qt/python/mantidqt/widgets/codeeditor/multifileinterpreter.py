@@ -26,8 +26,11 @@ from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 class MultiPythonFileInterpreter(QWidget):
     """Provides a tabbed widget for editing multiple files"""
 
-    def __init__(self, parent=None):
+    def __init__(self, default_content=None, parent=None):
         super(MultiPythonFileInterpreter, self).__init__(parent)
+
+        # attributes
+        self.default_content = default_content
 
         # layout
         self._editors = QTabWidget(self)
@@ -52,6 +55,7 @@ class MultiPythonFileInterpreter(QWidget):
 
     def append_new_editor(self):
         title = "New"
-        self._editors.addTab(PythonFileInterpreter(self._editors),
+        self._editors.addTab(PythonFileInterpreter(self.default_content,
+                                                   parent=None),
                              title)
 

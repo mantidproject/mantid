@@ -179,7 +179,6 @@ class MainWindow(QMainWindow):
                                     shortcut_context=Qt.ApplicationShortcut)
         self.file_menu_actions = [action_quit]
 
-
     def populate_menus(self):
         # Link to menus
         add_actions(self.file_menu, self.file_menu_actions)

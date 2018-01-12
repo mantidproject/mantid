@@ -31,10 +31,9 @@ RUNNING_STATUS_MSG = "Status: Running"
 # Editor colors
 CURRENTLINE_BKGD = QColor(247, 236, 248)
 
-
 class PythonFileInterpreter(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, default_content=None, parent=None):
         """
         :param parent: A parent QWidget
         """
@@ -49,7 +48,7 @@ class PythonFileInterpreter(QWidget):
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self._setup_editor()
+        self._setup_editor(default_content)
 
         # presenter
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution())
@@ -63,7 +62,7 @@ class PythonFileInterpreter(QWidget):
     def set_status_message(self, msg):
         self.status.showMessage(msg)
 
-    def _setup_editor(self):
+    def _setup_editor(self, default_content):
         editor = self.editor
         # use fixed with font
         font = QFont("Courier New")
@@ -78,6 +77,10 @@ class PythonFileInterpreter(QWidget):
         # and the progress marker
         font_metrics = QFontMetrics(font)
         editor.setMarginWidth(1, font_metrics.averageCharWidth()*3 + 12)
+
+        # fill with content if supplied
+        if default_content is not None:
+            editor.setText(default_content)
 
 
 class PythonFileInterpreterPresenter(QObject):
