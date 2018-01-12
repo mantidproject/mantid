@@ -19,7 +19,7 @@ Please take a look at the gravity correction for ILL reflectometers with the red
 Counts of neutrons that do not hit the detector after correction will not be considered in the :literal:`OutputWorkspace`, an information will be logged.
 Please note, that the output workspace likely has varying bins and consider a subsequent rebinning step (:ref:`algm-Rebin`).
 The instrument definition may only contain the position in beam direction and the height of the slits will be computed internally.
-The potential output workspace adds " cancelled gravitation " to its title.
+The potential output workspace adds " cancelled gravitation " to its title (sample log information).
 
 Requirements
 ------------
@@ -29,7 +29,7 @@ Requirements
 - The x-axis of the :literal:`InputWorkspace` must be in :red:`time-of-flight`.
 - Those time-of-flight values, :math:`t_{\mbox{tof}}`, are valid for a neutron travel distance from source to detector and do not take gravitation into account.
 - The instrument must consist of a :red:`source`, :red:`sample`, :red:`detector` and a collimeter with its :red:`slits` or two other known locations of the neutron flight path between source and sample position.
-  Please note that the slit position in beam direction is sufficiant, the horizontal position is supposed to be zero and the up position will be computed.
+  Please note that the slit position in beam direction is sufficiant, the horizontal position is zero and the up position will be computed.
 - The instrument must be defined in :red:`units metre`.
 - The beam direction must be the axis direction of :literal:`X, Y` or :literal:`Z`, which is usually the case.
 - The algorithm did not already execute for the given :literal:`InputWorkspace`.
@@ -160,6 +160,8 @@ Example - GravityCorrection
                                    PixelSpacing = 0.008,
                                    BankDistanceFromSample = 5,
                                    SourceDistanceFromSample = 10)
+
+        # Add slits, check final theta angles
 
         # Perform correction due to gravitation effects
         wsCorrected = GravityCorrection(ws, "slit1", "slit2")

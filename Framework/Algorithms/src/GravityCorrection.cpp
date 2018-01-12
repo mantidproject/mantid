@@ -362,7 +362,7 @@ void GravityCorrection::virtualInstrument() {
     const V3D &nullVec = V3D(0., 0., 0.);
 
     // check if the instrument is rotated: then the up direction and horizontal
-    // directions are zero:
+    // directions are not zero:
     bool rotated = false;
     const string sourceName{instrument->getSource()->getName()};
     double sourceX =
@@ -396,35 +396,73 @@ void GravityCorrection::virtualInstrument() {
         for (size_t i = 0; i < detectorInfo.size(); ++i)
           detectorInfo.setPosition(i, detectorInfo.position(i) - samplePos);
       }
+
       // rotate instrument (update positions)
       if (rotated) {
-        // calculate rotation angle:
-        double angle =
-            sourceY / this->coordinate(sourceName, m_beamDirection, instrument);
-        for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
-          const auto compID2 = (*compit)->getComponentID();
-          // up and horizontal direction will be set to zero!
-          V3D position = (*compit)->getPos();
-          this->setCoordinate(position, m_upDirection, 0.);
-          this->setCoordinate(position, m_horizontalDirection, 0.);
-          double coordUp =
-              this->coordinate((*compit)->getName(), m_upDirection, instrument);
-          this->setCoordinate(position, m_beamDirection, tan(angle) * coordUp);
-          componentInfo.setPosition(componentInfo.indexOf(compID2), position);
+        double tanAngle{0.}; // will hold tan(rotation angle)
+        // update: is the instrument rotated? Source up still zero?
+        sourceY = this->coordinate(sourceName, m_upDirection, instrument);
+        if (sourceY != 0.) {
+          // calculate first rotation angle:
+          tanAngle = sourceY /
+                     this->coordinate(sourceName, m_beamDirection, instrument);
+          for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
+            const auto compID2 = (*compit)->getComponentID();
+            // up direction must now be zero
+            V3D position = (*compit)->getPos();
+            this->setCoordinate(position, m_upDirection, 0.);
+            double coordUp = this->coordinate((*compit)->getName(),
+                                              m_upDirection, instrument);
+            this->setCoordinate(position, m_beamDirection, tanAngle * coordUp);
+            componentInfo.setPosition(componentInfo.indexOf(compID2), position);
+          }
+          for (size_t i = 0; i < detectorInfo.size(); ++i) {
+            // up direction must now be zero
+            V3D position = detectorInfo.position(i);
+            this->setCoordinate(position, m_upDirection, 0.);
+            this->setCoordinate(
+                position, m_beamDirection,
+                tanAngle * this->coordinate(detectorInfo, i, m_upDirection));
+            detectorInfo.setPosition(i, position);
+            // rotate detectors
+            const V3D &vector =
+                instrument->getReferenceFrame()->vecPointingUp();
+            const Quat &rot = Quat(atan(tanAngle), vector);
+            detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
+          }
         }
-        for (size_t i = 0; i < detectorInfo.size(); ++i) {
-          // up and horizontal direction will be set to zero!
-          V3D position = detectorInfo.position(i);
-          this->setCoordinate(position, m_upDirection, 0.);
-          this->setCoordinate(position, m_horizontalDirection, 0.);
-          this->setCoordinate(
-              position, m_beamDirection,
-              tan(angle) * this->coordinate(detectorInfo, i, m_upDirection));
-          detectorInfo.setPosition(i, position);
-          // rotate detectors
-          const V3D &vector = instrument->getReferenceFrame()->vecPointingUp();
-          const Quat &rot = Quat(angle, vector);
-          detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
+        // update: is the instrument rotated? Source horizontal still zero?
+        sourceX =
+            this->coordinate(sourceName, m_horizontalDirection, instrument);
+        if (sourceX != 0.) {
+          // calculate second rotation angle:
+          tanAngle = sourceX /
+                     this->coordinate(sourceName, m_beamDirection, instrument);
+          for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
+            const auto compID2 = (*compit)->getComponentID();
+            // horizontal direction will be set to zero
+            V3D position = (*compit)->getPos();
+            this->setCoordinate(position, m_horizontalDirection, 0.);
+            double coordUp = this->coordinate(
+                (*compit)->getName(), m_horizontalDirection, instrument);
+            this->setCoordinate(position, m_beamDirection, tanAngle * coordUp);
+            componentInfo.setPosition(componentInfo.indexOf(compID2), position);
+          }
+          for (size_t i = 0; i < detectorInfo.size(); ++i) {
+            // horizontal direction will be set to zero
+            V3D position = detectorInfo.position(i);
+            this->setCoordinate(position, m_horizontalDirection, 0.);
+            this->setCoordinate(
+                position, m_beamDirection,
+                tanAngle *
+                    this->coordinate(detectorInfo, i, m_horizontalDirection));
+            detectorInfo.setPosition(i, position);
+            // rotate detectors
+            const V3D &vector =
+                instrument->getReferenceFrame()->vecPointingUp();
+            const Quat &rot = Quat(atan(tanAngle), vector);
+            detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
+          }
         }
       }
     }

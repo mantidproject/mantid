@@ -8,8 +8,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Quat.h"
@@ -44,13 +44,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(gc2.initialize());
     gc2.setRethrows(true);
     TS_ASSERT(gc2.isInitialized());
-  }
-
-  void testInput() {
-    GravityCorrection gc3;
-    gc3.initialize();
-    TS_ASSERT_THROWS_NOTHING(gc3.initialize());
-    gc3.setRethrows(true);
   }
 
   void testInvalidSlitName() {
