@@ -72,9 +72,6 @@ In `mantid.simpleapi`, a keyword has been implemented for function-like algorith
 
 - The standard Python operators, e.g. ``+``, ``+=``, etc., now work also with workspaces not in the ADS.
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
-<<<<<<< HEAD
-<<<<<<< HEAD
-- The previously mentioned ``ConfigObserver`` and ``ConfigPropertyObserver`` classes are also exposed to python.
 - The previously mentioned ``ConfigObserver`` and ``ConfigPropertyObserver`` classes are also exposed to python.
 - ``mantid.kernel.V3D`` vectors now support negation through the usual ``-`` operator.
 

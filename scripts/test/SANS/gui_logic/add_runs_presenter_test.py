@@ -1,6 +1,5 @@
 import unittest
 import sys
-import mantid
 from ui.sans_isis.add_runs_page import AddRunsPage
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.models.run_summation import RunSummation
@@ -27,7 +26,7 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         return mock_view
 
     def setUpMockChildPresenters(self):
-        self.summation_settings_presenter = \
+        self._summation_settings_presenter = \
             self._make_mock_summation_settings_presenter()
         self.run_selector_presenter = \
             self._make_mock_run_selector_presenter()
@@ -38,8 +37,8 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
 
     def setUpMockChildPresentersWithDefaultSummationSettings(self):
         self.setUpMockChildPresenters()
-        self.summation_settings_presenter.settings.return_value = \
-            SummationSettings(BinningType.SaveAsEventData)
+        self._summation_settings = self._summation_settings_with_save_directory('/dev/null')
+        self._summation_settings_presenter.settings.return_value = self._summation_settings
 
     def _just_use(self, presenter):
         return lambda *args: presenter
@@ -54,7 +53,7 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         return self._just_use(self.run_selector_presenter)
 
     def _just_use_summation_settings_presenter(self):
-        return self._just_use(self.summation_settings_presenter)
+        return self._just_use(self._summation_settings_presenter)
 
     def _make_mock_run_selection(self, iterable):
         mock_runs = mock.create_autospec(RunSelection, spec_set=True)
@@ -72,6 +71,11 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
 
     def _make_fake_event_run(self, path):
         return self._make_fake_run(path, path, True)
+
+    def _summation_settings_with_save_directory(self, directory):
+        mock_summation_settings = mock.create_autospec(SummationSettings, spec_set=True)
+        mock_summation_settings.save_directory.return_value = directory
+        return mock_summation_settings
 
 
 class InitializationTest(AddRunsPagePresenterTestCase):
@@ -107,7 +111,7 @@ class InitializationTest(AddRunsPagePresenterTestCase):
         self.view.summation_settings_view.return_value = \
             self.fake_summation_settings_view
         make_summation_settings_presenter = \
-            mock.Mock(return_value=self.summation_settings_presenter)
+            mock.Mock(return_value=self._summation_settings_presenter)
 
         self.presenter = self._make_presenter_with_child_presenters(
                                  self._just_use_run_selector_presenter(),
@@ -157,7 +161,7 @@ class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
         return run
 
     def _just_use_summation_settings_presenter(self):
-        return self._just_use(self.summation_settings_presenter)
+        return self._just_use(self._summation_settings_presenter)
 
     def _make_presenter(self):
         return AddRunsPagePresenter(mock.Mock(),
@@ -187,7 +191,7 @@ class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
 
 class SummationConfigurationTest(SelectionMockingTestCase):
     def setUp(self):
-        self.setUpMockChildPresenters()
+        self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.view = self._make_mock_view()
 
     def _make_presenter(self,
@@ -201,11 +205,9 @@ class SummationConfigurationTest(SelectionMockingTestCase):
                                     None)
 
     def _just_use_summation_settings_presenter(self):
-        return self._just_use(self.summation_settings_presenter)
+        return self._just_use(self._summation_settings_presenter)
 
     def test_passes_correct_config_when_summation_requested(self):
-        summation_settings_model = self._summation_settings_with_save_directory('/dev/null')
-        self.summation_settings_presenter.settings.return_value = summation_settings_model
         run_summation = mock.Mock()
 
         self.presenter = self._make_presenter(
@@ -218,18 +220,12 @@ class SummationConfigurationTest(SelectionMockingTestCase):
         self._on_model_updated(fake_run_selection)
         self.view.sum.emit()
         run_summation.assert_called_with(fake_run_selection,
-                                         summation_settings_model,
+                                         self._summation_settings,
                                          '3-add')
-
-    def _summation_settings_with_save_directory(self, directory):
-        mock_summation_settings = \
-            mock.create_autospec(SummationSettings, spec_set=True)
-        mock_summation_settings.save_directory.return_value = directory
-        return mock_summation_settings
 
     def test_shows_error_when_empty_default_directory(self):
         summation_settings_model = self._summation_settings_with_save_directory('')
-        self.summation_settings_presenter.settings.return_value = summation_settings_model
+        self._summation_settings_presenter.settings.return_value = summation_settings_model
         self.presenter = self._make_presenter(
             mock.Mock(),
             self._just_use_run_selector_presenter(),
@@ -254,7 +250,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
             None)
 
     def _just_use_summation_settings_presenter(self):
-        return self._just_use(self.summation_settings_presenter)
+        return self._just_use(self._summation_settings_presenter)
 
     def _update_selection_model(self, new_selection):
         self.run_selector_presenter.run_selection.return_value = new_selection
