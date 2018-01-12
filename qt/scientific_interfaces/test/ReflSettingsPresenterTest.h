@@ -27,6 +27,11 @@ public:
     return !in_q && c == ',';
   }
 };
+
+// Get a std::string from a QVariant which represents a QString
+std::string variantToString(const QVariant &variant) {
+  return variant.value<QString>().toStdString();
+}
 }
 
 //=====================================================================================
@@ -87,22 +92,28 @@ public:
     EXPECT_CALL(mockView, getEndOverlap())
         .Times(Exactly(1))
         .WillOnce(Return("12"));
-    auto options = presenter.getTransmissionOptions();
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(Exactly(0))
+        .WillOnce(Return("INTER00013463,INTER00013464"));
 
-    std::vector<std::string> optionsVec;
-    boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 11);
-    TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(optionsVec[1], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[2], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[3], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[4], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[5], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[6], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[7], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[8], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[9], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[10], "ProcessingInstructions=\"3,4\"");
+    auto options = presenter.getTransmissionOptions();
+    TS_ASSERT_EQUALS(options.size(), 11);
+    TS_ASSERT_EQUALS(variantToString(options["AnalysisMode"]),
+                     "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(variantToString(options["StartOverlap"]), "10");
+    TS_ASSERT_EQUALS(variantToString(options["EndOverlap"]), "12");
+    TS_ASSERT_EQUALS(
+        variantToString(options["MonitorIntegrationWavelengthMin"]), "4");
+    TS_ASSERT_EQUALS(
+        variantToString(options["MonitorIntegrationWavelengthMax"]), "10");
+    TS_ASSERT_EQUALS(variantToString(options["MonitorBackgroundWavelengthMin"]),
+                     "12");
+    TS_ASSERT_EQUALS(variantToString(options["MonitorBackgroundWavelengthMax"]),
+                     "17");
+    TS_ASSERT_EQUALS(variantToString(options["WavelengthMin"]), "1");
+    TS_ASSERT_EQUALS(variantToString(options["WavelengthMax"]), "15");
+    TS_ASSERT_EQUALS(variantToString(options["I0MonitorIndex"]), "2");
+    TS_ASSERT_EQUALS(variantToString(options["ProcessingInstructions"]), "3,4");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -180,37 +191,38 @@ public:
     EXPECT_CALL(mockView, getEndOverlap())
         .Times(Exactly(1))
         .WillOnce(Return("12"));
+
     auto options = presenter.getReductionOptions();
-
-    std::vector<std::string> optionsVec;
-    boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 22);
-    TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(optionsVec[1], "CRho=\"2.5,0.4,1.1\"");
-    TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=\"0.6,0.9,1.2\"");
-    TS_ASSERT_EQUALS(optionsVec[3], "CAp=\"100.0,17.0,44.0\"");
-    TS_ASSERT_EQUALS(optionsVec[4], "CPp=\"0.54,0.33,1.81\"");
-    TS_ASSERT_EQUALS(optionsVec[5], "PolarizationAnalysis=PNR");
-    TS_ASSERT_EQUALS(optionsVec[6], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[7], "MomentumTransferStep=-0.02");
-    TS_ASSERT_EQUALS(optionsVec[8], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[9], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[10], "FirstTransmissionRun=INTER00013463");
-    TS_ASSERT_EQUALS(optionsVec[11], "SecondTransmissionRun=INTER00013464");
-    TS_ASSERT_EQUALS(optionsVec[12], "NormalizeByIntegratedMonitors=True");
-    TS_ASSERT_EQUALS(optionsVec[13], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[14], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[15], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[16], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[17], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[18], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[19], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[20], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[21], "DetectorCorrectionType=VerticalShift");
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
-    AnalysisDataService::Instance().clear();
+    TS_ASSERT_EQUALS(options.size(), 21);
+    TS_ASSERT_EQUALS(variantToString(options["AnalysisMode"]),
+                     "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(variantToString(options["CRho"]), "2.5,0.4,1.1");
+    TS_ASSERT_EQUALS(variantToString(options["CAlpha"]), "0.6,0.9,1.2");
+    TS_ASSERT_EQUALS(variantToString(options["CAp"]), "100.0,17.0,44.0");
+    TS_ASSERT_EQUALS(variantToString(options["CPp"]), "0.54,0.33,1.81");
+    TS_ASSERT_EQUALS(variantToString(options["PolarizationAnalysis"]), "PNR");
+    TS_ASSERT_EQUALS(variantToString(options["ScaleFactor"]), "2");
+    TS_ASSERT_EQUALS(variantToString(options["MomentumTransferStep"]), "-0.02");
+    TS_ASSERT_EQUALS(variantToString(options["StartOverlap"]), "10");
+    TS_ASSERT_EQUALS(variantToString(options["EndOverlap"]), "12");
+    TS_ASSERT_EQUALS(variantToString(options["FirstTransmissionRun"]),
+                     "INTER00013463,INTER00013464");
+    TS_ASSERT_EQUALS(variantToString(options["NormalizeByIntegratedMonitors"]),
+                     "True");
+    TS_ASSERT_EQUALS(
+        variantToString(options["MonitorIntegrationWavelengthMin"]), "4");
+    TS_ASSERT_EQUALS(
+        variantToString(options["MonitorIntegrationWavelengthMax"]), "10");
+    TS_ASSERT_EQUALS(variantToString(options["MonitorBackgroundWavelengthMin"]),
+                     "12");
+    TS_ASSERT_EQUALS(variantToString(options["MonitorBackgroundWavelengthMax"]),
+                     "17");
+    TS_ASSERT_EQUALS(variantToString(options["WavelengthMin"]), "1");
+    TS_ASSERT_EQUALS(variantToString(options["WavelengthMax"]), "15");
+    TS_ASSERT_EQUALS(variantToString(options["I0MonitorIndex"]), "2");
+    TS_ASSERT_EQUALS(variantToString(options["ProcessingInstructions"]), "3,4");
+    TS_ASSERT_EQUALS(variantToString(options["DetectorCorrectionType"]),
+                     "VerticalShift");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

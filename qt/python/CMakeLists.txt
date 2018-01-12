@@ -23,6 +23,18 @@ if ( ENABLE_WORKBENCH )
   # Create egg link to binary output directory for mantidqt
   add_python_package ( mantidqt )
 
+  # Configure resources data in place for ease of development. The output
+  # file is added to the toplevel gitignore
+  set ( _qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc )
+  set ( _output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py )
+  configure_file ( create_resources.cmake.in create_resources.cmake @ONLY)
+  add_custom_command ( OUTPUT ${_output_res_py}
+    COMMAND ${CMAKE_COMMAND} -P create_resources.cmake
+    COMMENT "Generating mantidqt resources module"
+    DEPENDS ${_qrc_file}
+  )
+  add_custom_target ( mantidqt_resources ALL DEPENDS ${_output_res_py} )
+
   # Now add any compiled sip targets
   add_subdirectory ( mantidqt/widgets )
 
@@ -30,6 +42,7 @@ if ( ENABLE_WORKBENCH )
   add_dependencies ( mantidqt
     mantidqt_widgetscoreqt5
     mantidqt_widgetscoreqt4
+    mantidqt_resources
   )
 
   ##########################################################################
@@ -40,6 +53,8 @@ if ( ENABLE_WORKBENCH )
   set ( PYTHON_TEST_FILES
     mantidqt/test/test_import.py
     mantidqt/utils/test/test_qt_utils.py
+    mantidqt/utils/test/test_modal_tester.py
+    mantidqt/widgets/test/test_algorithm_dialog.py
     mantidqt/widgets/test/test_algorithmselector.py
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
