@@ -53,6 +53,7 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
+  /// ID tags for supported instruments.
   enum class Supported {
     D17,
     Figaro
@@ -91,12 +92,10 @@ private:
   double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
-  /* Values parsed from the nexus file */
   Supported m_instrument{Supported::D17}; ///< Name of the instrument
   size_t m_acqMode{1}; ///< Acquisition mode (1 TOF (default), 0 monochromatic)
   size_t m_numberOfChannels{0};
   double m_tofDelay{0.0};
-  // number of tubes (always 1) times number of pixels per tube
   size_t m_numberOfHistograms{0};
   double m_channelWidth{0.0};
   std::string m_detectorDistanceName;

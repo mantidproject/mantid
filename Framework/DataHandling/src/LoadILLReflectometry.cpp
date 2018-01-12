@@ -28,7 +28,6 @@
 namespace {
 /// Component coordinates for Figaro, in meter.
 namespace Figaro {
-// TODO: Consider moving these to the IPF.
 constexpr double detectorRestY{0.509};
 constexpr double DH1Z{1.135}; // Motor DH1 horizontal position
 constexpr double DH2Z{2.077}; // Motor DH2 horizontal position
@@ -762,6 +761,7 @@ double LoadILLReflectometry::detectorRotation() {
   return detectorAngle;
 }
 
+/// Initialize m_pixelWidth from the IDF and check for NeXus consistency.
 void LoadILLReflectometry::initPixelWidth() {
   auto instrument = m_localWorkspace->getInstrument();
   auto detectorPanels = instrument->getAllComponentsWithName("detector");
@@ -826,11 +826,11 @@ double LoadILLReflectometry::collimationAngle() const {
   return collimationAngle + sampleAngle;
 }
 
+/// Return the detector center angle.
 double LoadILLReflectometry::detectorAngle() const {
   if (m_instrument != Supported::Figaro) {
     return doubleFromRun(m_detectorAngleName);
   }
-  // Take the bent beam into account.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double DH2Y = inMeter(doubleFromRun("DH2.value"));
   return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2Z - Figaro::DH1Z));
