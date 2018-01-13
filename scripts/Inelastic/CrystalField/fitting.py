@@ -606,7 +606,10 @@ class CrystalField(object):
             self.function.setAttributeValue('PhysicalProperties', [0]*len(tt)+ppids)
             for attribs in [pp.getAttributes(i+len(tt)) for i, pp in enumerate(vlist)]:
                 for item in attribs.items():
-                    self.function.setAttributeValue(item[0], item[1])
+                    if 'Lambda' in item[0]:
+                        self.function.setParameter(item[0], item[1])
+                    else:
+                        self.function.setAttributeValue(item[0], item[1])
 
     @property
     def isPhysicalPropertyOnly(self):

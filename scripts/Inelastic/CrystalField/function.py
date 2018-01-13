@@ -650,5 +650,5 @@ class PhysicalProperties(object):
                 if self._typeid==3:
                     out['Hmag%s' % (dataset)] = self._hmag
                 if self._typeid == 2 and self._lambda != 0:
-                    out['Lambda%s=' % (dataset)] = self._lambda
+                    out['Lambda%s' % (dataset)] = self._lambda
         return out
