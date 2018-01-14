@@ -122,6 +122,7 @@ class MainWindow(QMainWindow):
         self.messagedisplay = None
         self.ipythonconsole = None
         self.editor = None
+        self.widgets = []
 
         # Menus
         self.file_menu = None
@@ -145,18 +146,22 @@ class MainWindow(QMainWindow):
         self.messagedisplay = LogMessageDisplay(self)
         # this takes over stdout/stderr
         self.messagedisplay.register_plugin()
+        self.widgets.append(self.messagedisplay)
 
         self.set_splash("Loading IPython console")
         from workbench.plugins.jupyterconsole import JupyterConsole
         self.ipythonconsole = JupyterConsole(self)
         self.ipythonconsole.register_plugin()
+        self.widgets.append(self.ipythonconsole)
 
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
         self.editor = MultiFileEditor(self)
         self.editor.register_plugin(self.editors_menu)
+        self.widgets.append(self.editor)
 
         self.setup_layout()
+        self.read_user_settings()
 
     def set_splash(self, msg=None):
         if not self.splash:
@@ -338,6 +343,10 @@ class MainWindow(QMainWindow):
         qba = self.saveState()
         CONF.set(section, prefix + 'state', qbytearray_to_str(qba))
 
+    def read_user_settings(self):
+        for widget in self.widgets:
+            widget.read_user_settings(CONF.qsettings)
+
 
 def initialize():
     """Perform an initialization of the application instance. Most notably
@@ -367,7 +376,7 @@ def start_workbench(app):
     preloaded_packages = ('mantid', 'matplotlib')
     for name in preloaded_packages:
         main_window.set_splash('Preloading ' + name)
-        importlib.import_module('mantid')
+        importlib.import_module(name)
 
     main_window.show()
     if main_window.splash:

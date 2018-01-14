@@ -61,12 +61,15 @@ class MultiFileEditor(PluginWidget):
 
     # ----------- Plugin API --------------------
 
+    def get_plugin_title(self):
+        return "Editor"
+
+    def read_user_settings(self, _):
+        pass
+
     def register_plugin(self, menu=None):
         self.main.add_dockwidget(self)
         add_actions(menu, self.editor_actions)
-
-    def get_plugin_title(self):
-        return "Editor"
 
     # ----------- Plugin behaviour --------------
 

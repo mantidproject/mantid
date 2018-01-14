@@ -37,14 +37,19 @@ class PluginWidget(QWidget):
 
 # ----------------- Plugin API --------------------
 
+    def get_plugin_title(self):
+        raise NotImplementedError()
+
+    def read_user_settings(self, qsettings):
+        """Called by the main window to ask the plugin to
+        load user configuration"""
+        raise NotImplementedError()
+
     def register_plugin(self, menu=None):
         """Called by the parent widget/window and should
         perform any setup required to use the plugin.
         Supply an optional menu to fill with actions
         """
-        raise NotImplementedError()
-
-    def get_plugin_title(self):
         raise NotImplementedError()
 
 # ----------------- Plugin behaviour ------------------

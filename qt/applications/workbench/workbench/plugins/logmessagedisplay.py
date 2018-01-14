@@ -45,8 +45,12 @@ class LogMessageDisplay(PluginWidget):
         stdout_capture.sig_write_received.connect(self.display.appendNotice)
         stderr_capture.sig_write_received.connect(self.display.appendError)
         self.stdout, self.stderr = stdout_capture, stderr_capture
+
     def get_plugin_title(self):
         return "Messages"
+
+    def read_user_settings(self, qsettings):
+        self.display.readSettings(qsettings)
 
     def register_plugin(self, menu=None):
         self.display.attachLoggingChannel()
