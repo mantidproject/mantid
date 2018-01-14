@@ -14,7 +14,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import absolute_import
+from __future__ import (absolute_import, unicode_literals)
 
 # system imports
 import sys
@@ -93,25 +93,37 @@ class AsyncTask(threading.Thread):
         self.finished_cb = finished_cb if finished_cb is not None else lambda: None
 
     def run(self):
+        def elapsed(start):
+            return time.time() - start
         try:
+            time_start = time.time()
             out = self.target(*self.args, **self.kwargs)
         except SyntaxError as exc:
             # treat SyntaxErrors as special as the traceback makes no sense
             # and the lineno is part of the exception instance
-            self.error_cb(AsyncTaskFailure(SyntaxError, exc, None))
+            self.error_cb(AsyncTaskFailure(elapsed(time_start), SyntaxError, exc, None))
         except:  # noqa
-            self.error_cb(AsyncTaskFailure.from_excinfo(self.stack_chop))
+            self.error_cb(AsyncTaskFailure.from_excinfo(elapsed(time_start), self.stack_chop))
         else:
-            self.success_cb(AsyncTaskSuccess(out))
+            self.success_cb(AsyncTaskSuccess(elapsed(time_start), out))
 
         self.finished_cb()
 
 
-class AsyncTaskSuccess(object):
+class AsyncTaskResult(object):
+    """Object describing the execution of an asynchronous task
+    """
+
+    def __init__(self, elapsed_time):
+        self.elapsed_time = elapsed_time
+
+
+class AsyncTaskSuccess(AsyncTaskResult):
     """Object describing the successful execution of an asynchronous task
     """
 
-    def __init__(self, output):
+    def __init__(self, elapsed_time, output):
+        super(AsyncTaskSuccess, self).__init__(elapsed_time)
         self.output = output
 
     @property
@@ -119,23 +131,26 @@ class AsyncTaskSuccess(object):
         return True
 
 
-class AsyncTaskFailure(object):
+class AsyncTaskFailure(AsyncTaskResult):
     """Object describing the failed execution of an asynchronous task
     """
 
     @staticmethod
-    def from_excinfo(chop=0):
+    def from_excinfo(elapsed_time, chop=0):
         """
         Create an AsyncTaskFailure from the current exception info
 
+        :param elapsed_time Time take for task
         :param chop: Trim this number of entries from
         the top of the stack listing
         :return: A new AsyncTaskFailure object
         """
         exc_type, exc_value, exc_tb = sys.exc_info()
-        return AsyncTaskFailure(exc_type, exc_value, traceback.extract_tb(exc_tb)[chop:])
+        return AsyncTaskFailure(elapsed_time, exc_type, exc_value,
+                                traceback.extract_tb(exc_tb)[chop:])
 
-    def __init__(self, exc_type, exc_value, stack):
+    def __init__(self, elapsed_time, exc_type, exc_value, stack):
+        super(AsyncTaskFailure, self).__init__(elapsed_time)
         self.exc_type = exc_type
         self.exc_value = exc_value
         self.stack = stack

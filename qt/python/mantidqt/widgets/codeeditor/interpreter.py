@@ -30,7 +30,8 @@ from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 # Status messages
-IDLE_STATUS_MSG = "Status: Idle"
+IDLE_STATUS_MSG = "Status: Idle."
+LAST_JOB_MSG_TEMPLATE = "Last job completed {} in {:.3f}s"
 RUNNING_STATUS_MSG = "Status: Running"
 
 # Editor
@@ -128,9 +129,10 @@ class PythonFileInterpreterPresenter(QObject):
             line_from = 0
         return code_str, line_from
 
-    def _on_exec_success(self):
+    def _on_exec_success(self, task_result):
         self.view.set_editor_readonly(False)
-        self.view.set_status_message(IDLE_STATUS_MSG)
+        self.view.set_status_message(self._create_status_msg('successfully',
+                                                             task_result.elapsed_time))
 
     def _on_exec_error(self, task_error):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
@@ -139,11 +141,16 @@ class PythonFileInterpreterPresenter(QObject):
             lineno = exc_value.lineno
         else:
             lineno = exc_stack[-1][1]
-
-        self.view.editor.updateProgressMarker(lineno, True)
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')
+        self.view.editor.updateProgressMarker(lineno, True)
         self.view.set_editor_readonly(False)
-        self.view.set_status_message(IDLE_STATUS_MSG)
+        self.view.set_status_message(self._create_status_msg('with errors',
+                                                             task_error.elapsed_time))
+
+    def _create_status_msg(self, status, elapsed_time):
+        return IDLE_STATUS_MSG + ' ' + \
+               LAST_JOB_MSG_TEMPLATE.format(status,
+                                            elapsed_time)
 
     def _on_progress_update(self, lineno):
         """Update progress on the view taking into account if a selection of code is

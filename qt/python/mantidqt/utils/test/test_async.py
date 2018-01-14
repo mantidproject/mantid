@@ -97,6 +97,7 @@ class AsyncTaskTest(unittest.TestCase):
     def test_unsuccessful_no_arg_operation_calls_error_and_finished_callback(self):
         def foo():
             # this is a bad operation
+            # that should appear in the stack trace
             raise RuntimeError("Bad operation")
 
         recv = AsyncTaskTest.Receiver()
@@ -112,9 +113,9 @@ class AsyncTaskTest(unittest.TestCase):
                         msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
         self.assertEqual(2, len(recv.task_exc_stack))
         # line number of self.target in async.py
-        self.assertEqual(97, recv.task_exc_stack[0][1])
+        self.assertEqual(100, recv.task_exc_stack[0][1])
         # line number of raise statement above
-        self.assertEqual(100, recv.task_exc_stack[1][1])
+        self.assertEqual(101, recv.task_exc_stack[1][1])
 
     def test_unsuccessful_args_and_kwargs_operation_calls_error_and_finished_callback(self):
         def foo(scale, shift):
@@ -147,8 +148,8 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError))
         self.assertEqual(2, len(recv.task_exc_stack))
-        self.assertEqual(139, recv.task_exc_stack[0][1])
-        self.assertEqual(138, recv.task_exc_stack[1][1])
+        self.assertEqual(140, recv.task_exc_stack[0][1])
+        self.assertEqual(139, recv.task_exc_stack[1][1])
 
     # ---------------------------------------------------------------
     # Failure cases

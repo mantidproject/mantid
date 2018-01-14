@@ -31,7 +31,7 @@ class PythonCodeExecution(QObject):
     strings of Python code. It supports
     reporting progress updates in asynchronous execution
     """
-    sig_exec_success = Signal()
+    sig_exec_success = Signal(object)
     sig_exec_error = Signal(object)
     sig_exec_progress = Signal(int)
 
@@ -89,8 +89,8 @@ class PythonCodeExecution(QObject):
     # ---------------------------------------------------------------
     # Callbacks
     # ---------------------------------------------------------------
-    def _on_success(self, _):
-        self.sig_exec_success.emit()
+    def _on_success(self, task_result):
+        self.sig_exec_success.emit(task_result)
 
     def _on_error(self, task_error):
         self.sig_exec_error.emit(task_error)
