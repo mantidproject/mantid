@@ -33,8 +33,9 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 IDLE_STATUS_MSG = "Status: Idle"
 RUNNING_STATUS_MSG = "Status: Running"
 
-# Editor colors
+# Editor
 CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
+TAB_WIDTH = 4
 
 
 class PythonFileInterpreter(QWidget):
@@ -70,6 +71,10 @@ class PythonFileInterpreter(QWidget):
 
     def _setup_editor(self, default_content):
         editor = self.editor
+
+        # use tabs not spaces for indentation
+        editor.setIndentationsUseTabs(False)
+        editor.setTabWidth(TAB_WIDTH)
 
         # show current editing line but in a softer color
         editor.setCaretLineBackgroundColor(CURRENTLINE_BKGD_COLOR)

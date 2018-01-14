@@ -86,10 +86,12 @@ public:
 
   void setCaretLineBackgroundColor (const QColor & col);
   void setCaretLineVisible(bool enable);
+  void setIndentationsUseTabs(bool tabs);
   void setFileName(const QString &filename);
   void setMarginWidth(int margin, int width);
   void setReadOnly(bool ro);
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
+  void setTabWidth(int width);
   void setText(const QString &text);
 
 public slots:
