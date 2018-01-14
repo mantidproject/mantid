@@ -21,7 +21,7 @@ import sys
 
 # 3rd party imports
 from qtpy.QtCore import QObject
-from qtpy.QtGui import QColor, QFont, QFontMetrics
+from qtpy.QtGui import QColor, QFontMetrics
 from qtpy.QtWidgets import QStatusBar, QVBoxLayout, QWidget
 
 # local imports
@@ -70,10 +70,6 @@ class PythonFileInterpreter(QWidget):
 
     def _setup_editor(self, default_content):
         editor = self.editor
-        # use fixed with font
-        font = QFont("Courier New")
-        font.setPointSize(10)
-        editor.setFont(font)
 
         # show current editing line but in a softer color
         editor.setCaretLineBackgroundColor(CURRENTLINE_BKGD_COLOR)
@@ -81,7 +77,7 @@ class PythonFileInterpreter(QWidget):
 
         # set a margin large enough for sensible file sizes < 1000 lines
         # and the progress marker
-        font_metrics = QFontMetrics(font)
+        font_metrics = QFontMetrics(self.font())
         editor.setMarginWidth(1, font_metrics.averageCharWidth()*3 + 12)
 
         # fill with content if supplied

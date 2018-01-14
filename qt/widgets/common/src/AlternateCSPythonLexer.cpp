@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/Common/AlternateCSPythonLexer.h"
+#include <QApplication>
 
 /**
  * Returns the foreground colour of the text for a style.
@@ -59,42 +60,6 @@ QColor AlternateCSPythonLexer::defaultColor(int style) const {
  * @return A QFont for this element type
  */
 QFont AlternateCSPythonLexer::defaultFont(int style) const {
-  return QsciLexer::defaultFont(style);
-
-  //  switch (style) {
-  //  case Comment:
-  //#if defined(Q_OS_WIN)
-  //    f = QFont("Comic Sans MS", 9);
-  //#elif defined(Q_OS_MAC)
-  //    f = QFont("Comic Sans MS", 12);
-  //#else
-  //    f = QFont("Bitstream Vera Serif", 9);
-  //#endif
-  //    break;
-
-  //  case DoubleQuotedString:
-  //  case SingleQuotedString:
-  //  case UnclosedString:
-  //#if defined(Q_OS_WIN)
-  //    f = QFont("Courier New", 10);
-  //#elif defined(Q_OS_MAC)
-  //    f = QFont("Courier", 12);
-  //#else
-  //    f = QFont("Bitstream Vera Sans Mono", 9);
-  //#endif
-  //    break;
-
-  //  case Keyword:
-  //  case ClassName:
-  //  case FunctionMethodName:
-  //  case Operator:
-  //    f = QsciLexer::defaultFont(style);
-  //    f.setBold(true);
-  //    break;
-
-  //  default:
-  //    f = QsciLexer::defaultFont(style);
-  //  }
-
-  //  return f;
+  Q_UNUSED(style);
+  return QApplication::font();
 }
