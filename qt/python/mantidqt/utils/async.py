@@ -40,13 +40,13 @@ def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
     blocking_cb = blocking_cb if blocking_cb is not None else lambda: None
 
     class Receiver(object):
-        output, exception = None, None
+        output, exc_value = None, None
 
         def on_success(self, result):
             self.output = result.output
 
         def on_error(self, result):
-            self.exception = result.exception
+            self.exc_value = result.exc_value
 
     recv = Receiver()
     task = AsyncTask(target, args, kwargs, success_cb=recv.on_success,
@@ -56,8 +56,8 @@ def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
         time.sleep(period_secs)
         blocking_cb()
 
-    if recv.exception is not None:
-        raise recv.exception
+    if recv.exc_value is not None:
+        raise recv.exc_value
     else:
         return recv.output
 
@@ -98,7 +98,7 @@ class AsyncTask(threading.Thread):
         except SyntaxError as exc:
             # treat SyntaxErrors as special as the traceback makes no sense
             # and the lineno is part of the exception instance
-            self.error_cb(AsyncTaskFailure(exc, None))
+            self.error_cb(AsyncTaskFailure(SyntaxError, exc, None))
         except:  # noqa
             self.error_cb(AsyncTaskFailure.from_excinfo(self.stack_chop))
         else:
@@ -132,12 +132,13 @@ class AsyncTaskFailure(object):
         the top of the stack listing
         :return: A new AsyncTaskFailure object
         """
-        _, exc_value, exc_tb = sys.exc_info()
-        return AsyncTaskFailure(exc_value, traceback.extract_tb(exc_tb)[chop:])
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        return AsyncTaskFailure(exc_type, exc_value, traceback.extract_tb(exc_tb)[chop:])
 
-    def __init__(self, exception, stack_entries):
-        self.exception = exception
-        self.stack_entries = stack_entries
+    def __init__(self, exc_type, exc_value, stack):
+        self.exc_type = exc_type
+        self.exc_value = exc_value
+        self.stack = stack
 
     @property
     def success(self):

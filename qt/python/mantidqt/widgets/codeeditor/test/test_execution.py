@@ -36,8 +36,8 @@ class Receiver(QObject):
 
     def on_error(self, task_result):
         self.error_cb_called = True
-        self.task_exc = task_result.exception
-        self.error_stack = task_result.stack_entries
+        self.task_exc = task_result.exc_value
+        self.error_stack = task_result.stack
 
 
 class ReceiverWithProgress(Receiver):

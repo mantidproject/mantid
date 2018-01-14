@@ -60,4 +60,3 @@ class MultiPythonFileInterpreter(QWidget):
         self._editors.addTab(PythonFileInterpreter(self.default_content,
                                                    parent=None),
                              title)
-

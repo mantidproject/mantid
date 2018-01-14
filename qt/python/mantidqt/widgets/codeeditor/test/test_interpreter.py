@@ -43,7 +43,7 @@ class PythonFileInterpreterTest(unittest.TestCase):
         w = PythonFileInterpreter()
         w._presenter.model.execute_async = mock.MagicMock()
 
-        w.execute_all_async()
+        w.execute_async()
 
         w._presenter.model.execute_async.assert_not_called()
         self.assertTrue("Status: Idle", w.status.currentMessage())
@@ -51,7 +51,7 @@ class PythonFileInterpreterTest(unittest.TestCase):
     def test_successful_execution(self):
         w = PythonFileInterpreter()
         w.editor.setText("x = 1 + 2")
-        w.execute_all_async()
+        w.execute_async()
         self.assertTrue("Status: Idle", w.status.currentMessage())
 
 

@@ -28,7 +28,8 @@ import sys
 # Constants
 # -----------------------------------------------------------------------------
 ORIGINAL_SYS_EXIT = sys.exit
-STDERR = sys.stderr
+ORIGINAL_STDOUT = sys.stdout
+ORIGINAL_STDERR = sys.stderr
 
 # -----------------------------------------------------------------------------
 # Requirements
@@ -43,7 +44,7 @@ requirements.check_qt()
 from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
                          QPoint, QSize, Qt)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow, QMenu,
+from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow,
                             QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
@@ -126,9 +127,6 @@ class MainWindow(QMainWindow):
         self.file_menu = None
         self.file_menu_actions = None
         self.editors_menu = None
-        self.editors_menu_actions = None
-        self.editors_execute_menu = None
-        self.editors_execute_menu_actions = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -145,6 +143,7 @@ class MainWindow(QMainWindow):
         self.set_splash("Loading message display")
         from workbench.plugins.logmessagedisplay import LogMessageDisplay
         self.messagedisplay = LogMessageDisplay(self)
+        # this takes over stdout/stderr
         self.messagedisplay.register_plugin()
 
         self.set_splash("Loading IPython console")
@@ -384,7 +383,7 @@ def main():
     # Prepare for mantid import
     prepare_mantid_env()
 
-    # TODO: parse command arguments
+    # todo: parse command arguments
 
     # general initialization
     app = initialize()
@@ -397,7 +396,7 @@ def main():
         # This is type of thing we want to capture and have reports
         # about. Prints to stderr as we can't really count on anything
         # else
-        traceback.print_exc(file=STDERR)
+        traceback.print_exc(file=ORIGINAL_STDERR)
 
     if main_window is None:
         # An exception occurred don't exit here

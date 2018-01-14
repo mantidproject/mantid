@@ -16,6 +16,9 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
+# std imports
+import sys
+
 # 3rd party imports
 from qtpy.QtCore import QObject
 from qtpy.QtGui import QColor, QFont, QFontMetrics
@@ -23,13 +26,16 @@ from qtpy.QtWidgets import QStatusBar, QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
+from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
+# Status messages
 IDLE_STATUS_MSG = "Status: Idle"
 RUNNING_STATUS_MSG = "Status: Running"
 
 # Editor colors
-CURRENTLINE_BKGD = QColor(247, 236, 248)
+CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
+
 
 class PythonFileInterpreter(QWidget):
 
@@ -70,7 +76,7 @@ class PythonFileInterpreter(QWidget):
         editor.setFont(font)
 
         # show current editing line but in a softer color
-        editor.setCaretLineBackgroundColor(CURRENTLINE_BKGD)
+        editor.setCaretLineBackgroundColor(CURRENTLINE_BKGD_COLOR)
         editor.setCaretLineVisible(True)
 
         # set a margin large enough for sensible file sizes < 1000 lines
@@ -93,6 +99,7 @@ class PythonFileInterpreterPresenter(QObject):
         self.model = model
         # offset of executing code from start of the file
         self._code_start_offset = 0
+        self._error_formatter = ErrorFormatter()
 
         # connect signals
         self.model.sig_exec_success.connect(self._on_exec_success)
@@ -104,6 +111,8 @@ class PythonFileInterpreterPresenter(QObject):
 
     def req_execute_async(self):
         code_str, self._code_start_offset = self._get_code_for_execution()
+        if not code_str:
+            return
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
         return self.model.execute_async(code_str)
@@ -123,11 +132,15 @@ class PythonFileInterpreterPresenter(QObject):
         self.view.set_status_message(IDLE_STATUS_MSG)
 
     def _on_exec_error(self, task_error):
-        if isinstance(task_error.exception, SyntaxError):
-            lineno = task_error.exception.lineno
+        exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
+                                         task_error.stack
+        if isinstance(exc_value, SyntaxError):
+            lineno = exc_value.lineno
         else:
-            lineno = task_error.stack_entries[-1][1]
+            lineno = exc_stack[-1][1]
+
         self.view.editor.updateProgressMarker(lineno, True)
+        sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')
         self.view.set_editor_readonly(False)
         self.view.set_status_message(IDLE_STATUS_MSG)
 

@@ -53,6 +53,13 @@ class MessageDisplay : QWidget, Configurable {
 public:
   MessageDisplay(QWidget *parent = 0);
   void attachLoggingChannel();
+
+  void appendFatal(const QString &text);
+  void appendError(const QString &text);
+  void appendWarning(const QString &text);
+  void appendNotice(const QString &text);
+  void appendInformation(const QString &text);
+  void appendDebug(const QString &text);
 };
 
 class ScriptEditor : QWidget {
