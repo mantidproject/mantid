@@ -17,11 +17,11 @@ class _GSASFinder(object):
         """
         Perform a depth-limited depth-first search to try and find a directory with a given name
         """
-        if level == max_level:
-            return None
-
         if cur_dir_name == name_to_find:
             return cur_dir_path
+
+        if level == max_level:
+            return None
 
         list_dir = os.listdir(cur_dir_path)
         for child in list_dir:
@@ -40,12 +40,12 @@ class _GSASFinder(object):
     @staticmethod
     def _path_to_g2conda():
         """
-        Find the g2conda directory (where GSAS-II normally sits), as long as it exists less than 2 levels away from
+        Find the g2conda directory (where GSAS-II normally sits), as long as it exists less than 3 levels away from
         the root directory
         """
         root_directory = os.path.abspath(os.sep)
         return _GSASFinder._find_directory_by_name(cur_dir_path=root_directory, cur_dir_name=root_directory, level=0,
-                                                   name_to_find="g2conda", max_level=2)
+                                                   name_to_find="g2conda", max_level=3)
 
     @staticmethod
     def GSASIIscriptable_location():
@@ -53,12 +53,15 @@ class _GSASFinder(object):
         Find the path to GSASIIscriptable.py, if it exists and is less than 2 levels away from the root directory
         """
         path_to_g2conda = _GSASFinder._path_to_g2conda()
+        print(path_to_g2conda)
         if path_to_g2conda is None:
             return None
 
-        path_to_gsasii_scriptable = os.path.join(path_to_g2conda, "GSASII")
-        if os.path.isfile(os.path.join(path_to_gsasii_scriptable, "GSASIIscriptable.py")):
-            return path_to_gsasii_scriptable
+        if os.path.isfile(os.path.join(path_to_g2conda, "GSASIIscriptable.py")):
+            return path_to_g2conda
+
+        if os.path.isfile(os.path.join(path_to_g2conda, "GSASII", "GSASIIscriptable.py")):
+            return os.path.join(path_to_g2conda, "GSASII")
 
         return None
 
