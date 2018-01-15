@@ -97,6 +97,9 @@ public:
 public slots:
   void updateProgressMarker(int lineno, bool error);
 
+signals:
+  void modificationChanged(bool m);
+
 private:
   ScriptEditor(const ScriptEditor&);
 };

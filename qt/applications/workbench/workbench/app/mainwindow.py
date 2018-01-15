@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
         # Menus
         self.file_menu = None
         self.file_menu_actions = None
-        self.editors_menu = None
+        self.editor_menu = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
         self.editor = MultiFileEditor(self)
-        self.editor.register_plugin(self.editors_menu)
+        self.editor.register_plugin(self.editor_menu)
         self.widgets.append(self.editor)
 
         self.setup_layout()
@@ -173,7 +173,7 @@ class MainWindow(QMainWindow):
 
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")
-        self.editors_menu = self.menuBar().addMenu("&Editors")
+        self.editor_menu = self.menuBar().addMenu("&Editor")
 
     def create_actions(self):
         # --- general application menu options --

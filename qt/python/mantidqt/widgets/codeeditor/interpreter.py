@@ -20,7 +20,7 @@ from __future__ import (absolute_import, unicode_literals)
 import sys
 
 # 3rd party imports
-from qtpy.QtCore import QObject
+from qtpy.QtCore import QObject, Signal
 from qtpy.QtGui import QColor, QFontMetrics
 from qtpy.QtWidgets import QStatusBar, QVBoxLayout, QWidget
 
@@ -41,6 +41,8 @@ TAB_WIDTH = 4
 
 class PythonFileInterpreter(QWidget):
 
+    sig_editor_modified = Signal(bool)
+
     def __init__(self, default_content=None, parent=None):
         """
         :param parent: A parent QWidget
@@ -58,8 +60,9 @@ class PythonFileInterpreter(QWidget):
 
         self._setup_editor(default_content)
 
-        # presenter
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution())
+
+        self.editor.modificationChanged.connect(self.sig_editor_modified)
 
     def execute_async(self):
         self._presenter.req_execute_async()
