@@ -24,7 +24,7 @@ class RunSummation(object):
             outFile_monitors=monitors_file_name)
 
     def _run_selection_as_path_tuple(self, run_selection):
-        return tuple(run.file_path().encode('utf-8') for run in run_selection)
+        return tuple(run.file_path() for run in run_selection)
 
     def _bin_settings_or_monitors(self, settings):
         return settings.bin_settings if settings.has_bin_settings() \

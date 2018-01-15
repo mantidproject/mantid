@@ -40,8 +40,8 @@ class RunSelectorPresenter(object):
         self._refresh()
 
     def _parse_runs_from_input(self, input):
-        input_as_bytes = str.encode(input.replace(':', '-'))
-        return self._run_finder.find_all_from_query(input_as_bytes)
+        sanitized_input = input.replace(':', '-')
+        return self._run_finder.find_all_from_query(sanitized_input)
 
     def _handle_add_items(self):
         input = self.view.run_list()
@@ -65,10 +65,13 @@ class RunSelectorPresenter(object):
     def _handle_manage_directories(self):
         self.view.show_directories_manager()
 
-    def _handle_browse(self):
+    def find_from_file_path(self, file_path):
+        return self._run_finder.find_from_file_path(file_path)
+
+    def _handle_browse(self): # Add Error handling
         search_directories = ConfigService.Instance().getDataSearchDirs()
         file_paths = self.view.show_file_picker(RunSelectorPresenter.file_extensions,
                                                 search_directories)
-        self._add_runs(self._run_finder.find_from_file_path(file_path)
+        self._add_runs(self.find_from_file_path(file_path)
                        for file_path in file_paths)
         self._refresh()

@@ -20,7 +20,7 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
         return self.run_selector
 
     def out_file_name(self):
-        return self.fileNameEdit.text().encode('utf-8')
+        return str(self.fileNameEdit.text())
 
     def set_out_file_directory(self, out_file_directory):
         self.outputDirectoryLabel.setText("Output Directory: {}".format(out_file_directory))

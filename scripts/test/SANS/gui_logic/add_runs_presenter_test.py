@@ -5,7 +5,6 @@ from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_selection import RunSelection
-from sans.gui_logic.models.binning_type import BinningType
 from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
