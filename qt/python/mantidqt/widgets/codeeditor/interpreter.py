@@ -101,6 +101,7 @@ class PythonFileInterpreterPresenter(QObject):
         self.model = model
         # offset of executing code from start of the file
         self._code_start_offset = 0
+        self._is_executing = False
         self._error_formatter = ErrorFormatter()
 
         # connect signals
@@ -111,7 +112,18 @@ class PythonFileInterpreterPresenter(QObject):
         # starts idle
         self.view.set_status_message(IDLE_STATUS_MSG)
 
+    @property
+    def is_executing(self):
+        return self._is_executing
+
+    @is_executing.setter
+    def is_executing(self, value):
+        self._is_executing = value
+
     def req_execute_async(self):
+        if self.is_executing:
+            return
+        self.is_executing = True
         code_str, self._code_start_offset = self._get_code_for_execution()
         if not code_str:
             return
@@ -130,9 +142,7 @@ class PythonFileInterpreterPresenter(QObject):
         return code_str, line_from
 
     def _on_exec_success(self, task_result):
-        self.view.set_editor_readonly(False)
-        self.view.set_status_message(self._create_status_msg('successfully',
-                                                             task_result.elapsed_time))
+        self._finish(success=True, elapsed_time=task_result.elapsed_time)
 
     def _on_exec_error(self, task_error):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
@@ -143,9 +153,14 @@ class PythonFileInterpreterPresenter(QObject):
             lineno = exc_stack[-1][1]
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')
         self.view.editor.updateProgressMarker(lineno, True)
+        self._finish(success=False, elapsed_time=task_error.elapsed_time)
+
+    def _finish(self, success, elapsed_time):
+        status = 'successfully' if success else 'with errors'
+        self.view.set_status_message(self._create_status_msg(status,
+                                                             elapsed_time))
         self.view.set_editor_readonly(False)
-        self.view.set_status_message(self._create_status_msg('with errors',
-                                                             task_error.elapsed_time))
+        self.is_executing = False
 
     def _create_status_msg(self, status, elapsed_time):
         return IDLE_STATUS_MSG + ' ' + \

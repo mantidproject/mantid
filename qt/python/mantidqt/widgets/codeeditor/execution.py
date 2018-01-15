@@ -64,8 +64,8 @@ class PythonCodeExecution(QObject):
         :param user_locals: A mutable mapping type to store local variables
         :returns: The created async task
         """
-        # Stack is chopped on error to avoid the  AsyncTask.run->_do_exec->exec calls appearing
-        # as these are not useful in this context
+        # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
+        # as these are not useful for the user in this context
         t = AsyncTask(self.execute, args=(code_str,),
                       stack_chop=2,
                       success_cb=self._on_success, error_cb=self._on_error)
