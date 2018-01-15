@@ -14,29 +14,39 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
         self.declareProperty(IPeaksWorkspaceProperty(name="MainPeaks",
                                                      defaultValue="",
                                                      direction=Direction.Input),
-                             doc="Main integer HKL peaks")
+                             doc="Main integer HKL peaks. Q vectors will be calculated relative to these peaks.")
 
         self.declareProperty(IPeaksWorkspaceProperty(name="SatellitePeaks",
                                                      defaultValue="",
                                                      direction=Direction.Input),
-                             doc="Positions of seeded satellite peaks")
+                             doc="Positions of seed satellite peaks. These will be used to define the q vectors for each satellite.")
 
         self.declareProperty(WorkspaceProperty(name="MDWorkspace",
                                                defaultValue="",
                                                direction=Direction.Input),
-                             doc="Workspace to integrate predicted satellite peaks in")
+                             doc="Workspace to search for satellites peak in.")
 
         self.declareProperty(IPeaksWorkspaceProperty(name="OutputWorkspace",
                                                      defaultValue="",
                                                      direction=Direction.Output),
-                             doc="All found satellite peaks")
+                             doc="All found satellite peaks. These will be given with satellite coordinates.")
 
-        self.declareProperty('NumOfQs', -1, direction=Direction.Input)
-        self.declareProperty('ClusterThreshold', 1.5, direction=Direction.Input)
-        self.declareProperty('PeakRadius', 0.1, direction=Direction.Input)
-        self.declareProperty('BackgroundInnerRadius', 0.1, direction=Direction.Input)
-        self.declareProperty('BackgroundOuterRadius', 0.2, direction=Direction.Input)
-        self.declareProperty('I/sigma', 2, direction=Direction.Input)
+        self.declareProperty('NumOfQs', -1, direction=Direction.Input,
+                             doc="The number of satellite peaks to look for. If this option is not set to the default then all the \
+                             provided satellites will be grouped into exactly this number of q vectors")
+        self.declareProperty('ClusterThreshold', 1.5, direction=Direction.Input,
+                             doc="Threshold for automaticallty deciding on the number of q vectors to use. If NumOfQs found is set then this \
+                             is property is ignored.")
+        self.declareProperty('PeakRadius', 0.1, direction=Direction.Input,
+                             doc="The peak radius used to integrate the satellite peaks. This is passed direclty to IntegratePeaksMD")
+        self.declareProperty('BackgroundInnerRadius', 0.1, direction=Direction.Input,
+                             doc="The inner background radius used to integrate the satellite peaks. This is passed direclty to \
+                             IntegratePeaksMD")
+        self.declareProperty('BackgroundOuterRadius', 0.2, direction=Direction.Input,
+                             doc="The outer background radius used to integrate satellite peaks. This is passed direclty to \
+                             IntegratePeaksMD")
+        self.declareProperty('I/sigma', 2, direction=Direction.Input,
+                             doc="The I/sigma threshold use to identify if peaks exist. This is passed direclty to FilterPeaks")
 
     def PyExec(self):
         k = self.getProperty("NumOfQs").value
