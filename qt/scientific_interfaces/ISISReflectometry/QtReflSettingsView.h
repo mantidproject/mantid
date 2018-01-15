@@ -91,9 +91,9 @@ public:
   /// Set the status of whether polarisation corrections should be enabled
   void setIsPolCorrEnabled(bool enable) const override;
   /// Set default values for experiment and instrument settings
-  void setExpDefaults(const std::vector<std::string> &) const override;
+  void setExpDefaults(const std::vector<std::string> &) override;
   void setInstDefaults(const std::vector<double> &,
-                       const std::vector<std::string> &) const override;
+                       const std::vector<std::string> &) override;
   /// Check if experiment settings are enabled
   bool experimentSettingsEnabled() const override;
   /// Check if instrument settings are enabled
@@ -112,6 +112,10 @@ public slots:
 private:
   /// Initialise the interface
   void initLayout();
+  QLineEdit& stitchOptionsLineEdit() const;
+  void setSelected(QComboBox &box, std::string const &str);
+  void setText(QLineEdit &lineEdit, double value);
+  void setText(QLineEdit &lineEdit, std::string const& value);
 
   /// The widget
   Ui::ReflSettingsWidget m_ui;

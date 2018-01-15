@@ -331,6 +331,10 @@ void ReflSettingsPresenter::getExpDefaults() {
   m_view->setExpDefaults(defaults);
 }
 
+void ReflSettingsPresenter::setToFirstIfNotEmpty(
+    std::vector<double> &defaults, std::size_t index,
+    std::vector<std::string> const &value) {}
+
 /** Fills instrument settings with default values
 */
 void ReflSettingsPresenter::getInstDefaults() {
@@ -339,7 +343,7 @@ void ReflSettingsPresenter::getInstDefaults() {
   auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values
-  std::vector<double> defaults_double(8);
+  std::vector<double> defaults_double(10);
   defaults_double[0] = boost::lexical_cast<double>(
       alg->getPropertyValue("NormalizeByIntegratedMonitors"));
   defaults_double[1] = inst->getNumberParameter("MonitorIntegralMin")[0];
@@ -348,10 +352,17 @@ void ReflSettingsPresenter::getInstDefaults() {
   defaults_double[4] = inst->getNumberParameter("MonitorBackgroundMax")[0];
   defaults_double[5] = inst->getNumberParameter("LambdaMin")[0];
   defaults_double[6] = inst->getNumberParameter("LambdaMax")[0];
+  std::cout << "A" << std::endl;
   defaults_double[7] = inst->getNumberParameter("I0MonitorIndex")[0];
+  defaults_double[8] = inst->getNumberParameter("dQ/Q")[0];
+  defaults_double[9] = inst->getNumberParameter("Scale")[0];
+  std::cout << "B" << std::endl;
 
-  std::vector<std::string> defaults_str(1);
+  std::vector<std::string> defaults_str(2);
   defaults_str[0] = alg->getPropertyValue("DetectorCorrectionType");
+  std::cout << "C" << std::endl;
+  defaults_str[1] = inst->getStringParameter("Params")[0];
+  std::cout << "D" << std::endl;
 
   m_view->setInstDefaults(defaults_double, defaults_str);
 }

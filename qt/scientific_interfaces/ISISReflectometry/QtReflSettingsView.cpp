@@ -72,7 +72,7 @@ void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
 * values.
 */
 void QtReflSettingsView::setExpDefaults(
-    const std::vector<std::string> &defaults) const {
+    const std::vector<std::string> &defaults) {
 
   int amIndex =
       m_ui.analysisModeComboBox->findText(QString::fromStdString(defaults[0]));
@@ -92,29 +92,43 @@ void QtReflSettingsView::setExpDefaults(
   m_ui.endOverlapEdit->setText(QString::fromStdString(defaults[7]));
 }
 
+void QtReflSettingsView::setSelected(QComboBox &box, std::string const &str) {
+  auto const index = box.findText(QString::fromStdString(str));
+  if (index != -1)
+    box.setCurrentIndex(index);
+}
+
+void QtReflSettingsView::setText(QLineEdit &lineEdit, double value) {
+  auto valueAsString = QString::number(value);
+  lineEdit.setText(valueAsString);
+}
+
+void QtReflSettingsView::setText(QLineEdit &lineEdit, std::string const &text) {
+  auto textAsQString = QString::fromStdString(text);
+  lineEdit.setText(textAsQString);
+}
+
 /* Sets default values for all instrument settings given a list of default
 * values.
 */
 void QtReflSettingsView::setInstDefaults(
     const std::vector<double> &defaults_double,
-    const std::vector<std::string> &defaults_str) const {
+    const std::vector<std::string> &defaults_str) {
 
   auto intMonCheckState =
       (defaults_double[0] != 0) ? Qt::Checked : Qt::Unchecked;
   m_ui.intMonCheckBox->setCheckState(intMonCheckState);
 
-  m_ui.monIntMinEdit->setText(QString::number(defaults_double[1]));
-  m_ui.monIntMaxEdit->setText(QString::number(defaults_double[2]));
-  m_ui.monBgMinEdit->setText(QString::number(defaults_double[3]));
-  m_ui.monBgMaxEdit->setText(QString::number(defaults_double[4]));
-  m_ui.lamMinEdit->setText(QString::number(defaults_double[5]));
-  m_ui.lamMaxEdit->setText(QString::number(defaults_double[6]));
-  m_ui.I0MonIndexEdit->setText(QString::number(defaults_double[7]));
+  setText(*m_ui.monIntMinEdit, defaults_double[1]);
+  setText(*m_ui.monIntMaxEdit, defaults_double[2]);
+  setText(*m_ui.monBgMinEdit, defaults_double[3]);
+  setText(*m_ui.monBgMaxEdit, defaults_double[4]);
+  setText(*m_ui.lamMinEdit, defaults_double[5]);
+  setText(*m_ui.lamMaxEdit, defaults_double[6]);
+  setText(*m_ui.I0MonIndexEdit, defaults_double[7]);
 
-  int ctIndex = m_ui.detectorCorrectionTypeComboBox->findText(
-      QString::fromStdString(defaults_str[0]));
-  if (ctIndex != -1)
-    m_ui.detectorCorrectionTypeComboBox->setCurrentIndex(ctIndex);
+  setSelected(*m_ui.detectorCorrectionTypeComboBox, defaults_str[0]);
+  setText(stitchOptionsLineEdit(), defaults_str[1]);
 }
 
 /* Sets the enabled status of polarisation corrections and parameters
@@ -148,9 +162,12 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) const {
 * @return :: Global options for 'Stitch1DMany'
 */
 std::string QtReflSettingsView::getStitchOptions() const {
+  return stitchOptionsLineEdit().text().toStdString();
+}
 
+QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
   auto widget = m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget();
-  return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  return *static_cast<QLineEdit *>(widget);
 }
 
 /** Creates hints for 'Stitch1DMany'
