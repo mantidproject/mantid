@@ -619,35 +619,34 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def _container_transmission_calc(self, acc, acc1, acc2, ki_s, kf_s, ki_c1, kf_c2, ass):
         if self._has_can_front_in and self._has_can_back_in:
-            acc = self._can_front_thickness * acc1 * np.exp(-kf_c2)
-            acc += self._can_back_thickness * acc2 * np.exp(-ki_c1)
-            acc /= (self._can_front_thickness + self._can_back_thickness)
-        elif self._has_can_front_in:
-            acc = acc1
-        elif self._has_can_back_in:
-            acc = acc2
-
-        if self._has_sample_in:
-            if self._has_can_front_in and self._has_can_back_in:
-                acsc = self._can_front_thickness * acc1 * np.exp(-kf_s - kf_c2)
-                acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1 - ki_s)
-                acsc /= (self._can_front_thickness + self._can_back_thickness)
-            elif self._has_can_front_in:
-                acsc = acc1 * np.exp(-kf_s)
-            elif self._has_can_back_in:
-                acsc = acc2 * np.exp(-ki_s)
+            acc = (self._can_front_thickness * acc1 * np.exp(-kf_c2) + self._can_back_thickness * acc2 * np.exp(-ki_c1)) \
+                  / (self._can_front_thickness + self._can_back_thickness)
+            if self._has_sample_in:
+                acsc = (self._can_front_thickness * acc1 * np.exp(-kf_s - kf_c2) +
+                        self._can_back_thickness * acc2 * np.exp(-ki_c1 - ki_s)) / \
+                       (self._can_front_thickness + self._can_back_thickness)
             else:
-                acsc = 0.5 * np.exp(-kf_s) + 0.5 * np.exp(-ki_s)
-        else:
-            acsc = acc
-
-        if self._has_can_front_in and self._has_can_back_in:
+                acsc = acc
             assc = ass * np.exp(-ki_c1 - kf_c2)
         elif self._has_can_front_in:
+            acc = acc1
+            if self._has_sample_in:
+                acsc = acc1 * np.exp(-kf_s)
+            else:
+                acsc = acc
             assc = ass * np.exp(-ki_c1)
         elif self._has_can_back_in:
+            acc = acc2
+            if self._has_sample_in:
+                acsc = acc2 * np.exp(-ki_s)
+            else:
+                acsc = acc
             assc = ass * np.exp(-kf_c2)
         else:
+            if self._has_sample_in:
+                acsc = 0.5 * np.exp(-kf_s) + 0.5 * np.exp(-ki_s)
+            else:
+                acsc = acc
             assc = ass
 
         return assc, acsc, acc
@@ -656,35 +655,33 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def _container_reflection_calc(self, acc, acc1, acc2, ki_s, kf_s, ki_c1, kf_c1, ass):
         if self._has_can_front_in and self._has_can_back_in:
-            acc = self._can_front_thickness * acc1
-            acc += self._can_back_thickness * acc2 * np.exp(-ki_c1 - kf_c1)
-            acc /= (self._can_front_thickness + self._can_back_thickness)
+            acc = (self._can_front_thickness * acc1 + self._can_back_thickness * acc2 * np.exp(-ki_c1 - kf_c1)) \
+                  / (self._can_front_thickness + self._can_back_thickness)
+            if self._has_sample_in:
+                acsc = (self._can_front_thickness * acc1 + self._can_back_thickness * acc2 * np.exp(-ki_c1 - ki_s - kf_s - kf_c1)) \
+                       / (self._can_front_thickness + self._can_back_thickness)
+            else:
+                acsc = acc
+            assc = ass * np.exp(-ki_c1 - kf_c1)
         elif self._has_can_front_in:
             acc = acc1
+            if self._has_sample_in:
+                acsc = acc1
+            else:
+                acsc = acc
+            assc = ass * np.exp(-ki_c1 - kf_c1)
         elif self._has_can_back_in:
             acc = acc2
-
-        if self._has_sample_in:
-            if self._has_can_front_in and self._has_can_back_in:
-                acsc = self._can_front_thickness * acc1
-                acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1 - ki_s - kf_s - kf_c1)
-                acsc /= (self._can_front_thickness + self._can_back_thickness)
-            elif self._has_can_front_in:
-                acsc = acc1
-            elif self._has_can_back_in:
+            if self._has_sample_in:
                 acsc = acc2 * np.exp(-ki_s - kf_s)
             else:
+                acsc = acc
+            assc = ass * np.exp(-ki_c1 - kf_c1)
+        else:
+            if self._has_sample_in:
                 acsc = 0.5 + 0.5 * np.exp(-ki_s - kf_s)
-        else:
-            acsc = acc
-
-        if self._has_can_front_in and self._has_can_back_in:
-            assc = ass * np.exp(-ki_c1 - kf_c1)
-        elif self._has_can_front_in:
-            assc = ass * np.exp(-ki_c1 - kf_c1)
-        elif self._has_can_back_in:
-            assc = ass
-        else:
+            else:
+                acsc = acc
             assc = ass
 
         return assc, acsc, acc
