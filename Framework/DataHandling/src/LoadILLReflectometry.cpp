@@ -784,11 +784,11 @@ void LoadILLReflectometry::initPixelWidth() {
     m_pixelWidth = std::abs(detector->ystep());
     widthInLogs = inMeter(
         m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppy"));
-  }
-  if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
-    m_log.warning() << "NeXus pixel width (mppy) " << widthInLogs
-                    << " differs from the IDF. Using the IDF value "
-                    << m_pixelWidth << '\n';
+    if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
+      m_log.warning() << "NeXus pixel width (mppy) " << widthInLogs
+                      << " differs from the IDF. Using the IDF value "
+                      << m_pixelWidth << '\n';
+    }
   }
 }
 
