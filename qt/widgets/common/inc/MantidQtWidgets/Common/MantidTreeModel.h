@@ -3,6 +3,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
 
@@ -68,6 +69,9 @@ public:
   Mantid::API::Workspace_const_sptr
 	  getWorkspace(const QString &workspaceName) override;
   QWidget *getParent() override;
+
+  MantidQt::API::AlgorithmDialog *
+	  createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
 
   // Plotting Methods
   MultiLayer *
