@@ -2,6 +2,7 @@
 #include <cmath>
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Rendering/CacheGeometryGenerator.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
@@ -14,13 +15,26 @@ namespace Mantid {
 namespace Geometry {
 /**
  * Constructor
- * @param obj :: input object
+ * @param obj :: input CSG object
  */
-CacheGeometryGenerator::CacheGeometryGenerator(CSGObject *obj) : Obj(obj) {
+CacheGeometryGenerator::CacheGeometryGenerator(CSGObject *obj) : csgObj(obj) {
   mNoOfVertices = 0;
   mNoOfTriangles = 0;
   mFaces = nullptr;
   mPoints = nullptr;
+  meshObj = nullptr;
+}
+
+/**
+* Constructor
+* @param obj :: input CSG object
+*/
+CacheGeometryGenerator::CacheGeometryGenerator(MeshObject *obj) : meshObj(obj) {
+  mNoOfVertices = 0;
+  mNoOfTriangles = 0;
+  mFaces = nullptr;
+  mPoints = nullptr;
+  csgObj = nullptr;
 }
 
 /**
@@ -28,16 +42,25 @@ CacheGeometryGenerator::CacheGeometryGenerator(CSGObject *obj) : Obj(obj) {
  * surface triangles.
  */
 void CacheGeometryGenerator::Generate() {
-  if (mNoOfVertices <=
-      0) // There are no triangles defined to use OpenCascade handler
+  if (mNoOfVertices <= 0) 
   {
+    if (csgObj != nullptr) {
+      // There are no triangles defined to use OpenCascade handler to get them
 #ifdef ENABLE_OPENCASCADE
-    OCGeometryHandler h(Obj);
-    mNoOfVertices = h.NumberOfPoints();
-    mNoOfTriangles = h.NumberOfTriangles();
-    mPoints = h.getTriangleVertices();
-    mFaces = h.getTriangleFaces();
+      OCGeometryHandler h(csgObj);
+      mNoOfVertices = h.NumberOfPoints();
+      mNoOfTriangles = h.NumberOfTriangles();
+      mPoints = h.getTriangleVertices();
+      mFaces = h.getTriangleFaces();
 #endif
+    }
+    else if (meshObj != nullptr) {
+      // Get triangles from MeshObject
+      mNoOfVertices = meshObj->numberOfVertices();
+      mNoOfTriangles = meshObj->numberOfTriangles();
+      mPoints = meshObj->getVertices();
+      mFaces = meshObj->getTriangles();
+    }
   }
 }
 

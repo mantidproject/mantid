@@ -13,6 +13,7 @@ namespace Geometry {
 class IObjComponent;
 class ObjComponent;
 class CSGObject;
+class MeshObject;
 
 /**
    \class GeometryHandler
@@ -49,7 +50,8 @@ private:
 
 protected:
   IObjComponent *ObjComp; ///< ObjComponent that uses this geometry handler
-  CSGObject *Obj;         ///< Object that uses this geometry handler
+  CSGObject *csgObj;         ///< CSG Object that uses this geometry handler
+  MeshObject *meshObj;         ///< Mesh Object that uses this geometry handler
   bool boolTriangulated;  ///< state of the geometry triangulation
   bool
       boolIsInitialized; ///< state of the geometry initialization for rendering
@@ -57,6 +59,8 @@ public:
   GeometryHandler(IObjComponent *comp);              ///< Constructor
   GeometryHandler(boost::shared_ptr<CSGObject> obj); ///<Constructor
   GeometryHandler(CSGObject *obj);                   ///<Constructor
+  GeometryHandler(boost::shared_ptr<MeshObject> obj); ///<Constructor
+  GeometryHandler(MeshObject *obj);                   ///<Constructor
   virtual boost::shared_ptr<GeometryHandler>
   clone() const = 0; ///< Virtual copy constructor
   virtual ~GeometryHandler();

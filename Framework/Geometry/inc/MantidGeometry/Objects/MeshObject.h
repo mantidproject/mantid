@@ -157,6 +157,15 @@ public:
   /// Getter for the shape xml
   std::string getShapeXML() const override;
 
+  /// Read access to mesh object for rendering
+  int numberOfVertices() const;
+  double *getVertices() const;
+  int numberOfTriangles() const;
+  int *getTriangles() const;
+
+  void updateGeometryHandler();
+
+
 private:
   /// Get intersections
   void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction, 
@@ -191,8 +200,6 @@ private:
   /// material composition
   std::unique_ptr<Kernel::Material> m_material;
 
-  void updateGeometryHandler();
-
   /// a pointer to a class for reading from the geometry cache
   boost::shared_ptr<vtkGeometryCacheReader> m_vtk_cache_reader;
   /// a pointer to a class for writing to the geometry cache
@@ -200,12 +207,6 @@ private:
 
   // String from which object may be defined
   std::string m_string;
-
-  /// Read access to mesh object for rendering
-  int numberOfVertices() const;
-  double *getVertices() const;
-  int numberOfTriangles() const;
-  int *getTriangles() const;
 };
 
 } // NAMESPACE Geometry

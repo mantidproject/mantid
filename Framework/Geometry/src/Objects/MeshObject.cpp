@@ -667,7 +667,7 @@ void MeshObject::setVtkGeometryCacheReader(
 
 
 /**
-* We hide the actual implementation of Mesh Object here
+* Output functions for rendering, may also be used internally
 */
 int MeshObject::numberOfTriangles() const {
     return sizeof(m_triangles)/3;
