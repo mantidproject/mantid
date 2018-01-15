@@ -20,7 +20,8 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # 3rd party imports
-from qtpy.QtWidgets import QTabWidget, QVBoxLayout, QWidget
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
@@ -30,6 +31,7 @@ MODIFIED_MARKER = '*'
 
 
 def _tab_title_and_toolip(filename):
+    """Create labels for the tab title and tooltip from a filename"""
     if filename is None:
         return NEW_TAB_TITLE, NEW_TAB_TITLE
     else:
@@ -46,23 +48,22 @@ class MultiPythonFileInterpreter(QWidget):
         self.default_content = default_content
 
         # widget setup
-        self._tabs = QTabWidget(self)
-        self._tabs.setMovable(True)
-        self._tabs.setTabsClosable(True)
-        self._tabs.tabCloseRequested.connect(self.close_tab)
+        self._tabs = self.create_tabwidget()
         layout = QVBoxLayout()
         layout.addWidget(self._tabs)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
         # add a single editor by default
-        self.append_new_editor(default_content)
+        self.append_new_editor()
 
     @property
     def editor_count(self):
         return self._tabs.count()
 
     def append_new_editor(self, content=None, filename=None):
+        if content is None:
+            content = self.default_content
         interpreter = PythonFileInterpreter(content, filename=filename,
                                             parent=self._tabs)
         # monitor future modifications
@@ -73,6 +74,7 @@ class MultiPythonFileInterpreter(QWidget):
         tab_idx = self._tabs.addTab(interpreter, tab_title)
         self.mark_tab_modified(tab_idx, (filename is None))
         self._tabs.setTabToolTip(tab_idx, tab_toolip)
+        self._tabs.setCurrentIndex(tab_idx)
         return tab_idx
 
     def close_tab(self, idx):
@@ -87,6 +89,19 @@ class MultiPythonFileInterpreter(QWidget):
         if self.editor_count == 0:
             self.append_new_editor(content=self.default_content)
 
+    def create_tabwidget(self):
+        """Create a new QTabWidget with a button to add new tabs"""
+        tabs = QTabWidget(self)
+        tabs.setMovable(True)
+        tabs.setTabsClosable(True)
+        # create a button to add new tabs
+        plus_btn = QToolButton(tabs)
+        plus_btn.setText('+')
+        plus_btn.clicked.connect(self.plus_button_clicked)
+        tabs.setCornerWidget(plus_btn, Qt.TopLeftCorner)
+        tabs.tabCloseRequested.connect(self.close_tab)
+        return tabs
+
     def current_editor(self):
         return self._tabs.currentWidget()
 
@@ -98,22 +113,6 @@ class MultiPythonFileInterpreter(QWidget):
         """Execute content of the current file. If a selection is active
         then only this portion of code is executed"""
         self.current_editor().execute_async()
-
-    def on_filename_modified(self, filename):
-        title, tooltip = _tab_title_and_toolip(filename)
-        idx_cur = self._tabs.currentIndex()
-        self._tabs.setTabText(idx_cur, title)
-        self._tabs.setTabToolTip(idx_cur, tooltip)
-
-    def open_file_in_new_tab(self, filepath):
-        """Open the existing file in a new tab in the editor
-
-        :param filepath: A path to an existing file
-        """
-        with open(filepath, 'r') as code_file:
-            content = code_file.read()
-        self._tabs.setCurrentIndex(self.append_new_editor(content=content,
-                                                          filename=filepath))
 
     def mark_current_tab_modified(self, modified):
         """Update the current tab title to indicate that the
@@ -135,6 +134,25 @@ class MultiPythonFileInterpreter(QWidget):
             else:
                 title_new = title_cur
         self._tabs.setTabText(idx, title_new)
+
+    def on_filename_modified(self, filename):
+        title, tooltip = _tab_title_and_toolip(filename)
+        idx_cur = self._tabs.currentIndex()
+        self._tabs.setTabText(idx_cur, title)
+        self._tabs.setTabToolTip(idx_cur, tooltip)
+
+    def open_file_in_new_tab(self, filepath):
+        """Open the existing file in a new tab in the editor
+
+        :param filepath: A path to an existing file
+        """
+        with open(filepath, 'r') as code_file:
+            content = code_file.read()
+        self.append_new_editor(content=content, filename=filepath)
+
+    def plus_button_clicked(self, _):
+        """Add a new tab when the plus button is clicked"""
+        self.append_new_editor()
 
     def save_current_file(self):
         """Save the current file"""

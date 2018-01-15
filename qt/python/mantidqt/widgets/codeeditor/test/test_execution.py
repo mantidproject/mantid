@@ -198,9 +198,9 @@ squared = sum*sum
     def test_filename_included_in_traceback_if_supplied(self):
         code = """raise RuntimeError"""
         filename = 'test.py'
-        executor, recv = self._run_async_code(code)
+        executor, recv = self._run_async_code(code, filename)
         self.assertTrue(recv.error_cb_called)
-        self.assertEqual('test.py', recv.error_stack[0][0])
+        self.assertEqual(filename, recv.error_stack[0][0])
 
     # -------------------------------------------------------------------------
     # Helpers
