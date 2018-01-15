@@ -76,12 +76,14 @@ private:
                      const QString &key, const QString &value) const;
   void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
                      const QString &key, const std::string &value) const;
-  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options, const QString &key,
-                             const QString &value) const;
-  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options, const QString &key,
+  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options,
+                             const QString &key, const QString &value) const;
+  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options,
+                             const QString &key,
                              const std::string &value) const;
-  void addTransmissionOptions(MantidWidgets::DataProcessor::OptionsQMap &options,
-                              std::initializer_list<QString> keys) const;
+  void
+  addTransmissionOptions(MantidWidgets::DataProcessor::OptionsQMap &options,
+                         std::initializer_list<QString> keys) const;
 
   /// The view we are managing
   IReflSettingsView *m_view;
