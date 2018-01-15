@@ -4,6 +4,8 @@
 #include "IReflSettingsView.h"
 #include "ui_ReflSettingsWidget.h"
 #include <memory>
+#include "ExperimentOptionDefaults.h"
+#include "InstrumentOptionDefaults.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -91,9 +93,8 @@ public:
   /// Set the status of whether polarisation corrections should be enabled
   void setIsPolCorrEnabled(bool enable) const override;
   /// Set default values for experiment and instrument settings
-  void setExpDefaults(const std::vector<std::string> &) override;
-  void setInstDefaults(const std::vector<double> &,
-                       const std::vector<std::string> &) override;
+  void setExpDefaults(ExperimentOptionDefaults defaults) override;
+  void setInstDefaults(InstrumentOptionDefaults defaults) override;
   /// Check if experiment settings are enabled
   bool experimentSettingsEnabled() const override;
   /// Check if instrument settings are enabled

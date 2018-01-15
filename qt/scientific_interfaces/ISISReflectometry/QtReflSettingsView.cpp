@@ -71,25 +71,24 @@ void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
 /* Sets default values for all experiment settings given a list of default
 * values.
 */
-void QtReflSettingsView::setExpDefaults(
-    const std::vector<std::string> &defaults) {
+void QtReflSettingsView::setExpDefaults(ExperimentOptionDefaults defaults) {
 
   int amIndex =
-      m_ui.analysisModeComboBox->findText(QString::fromStdString(defaults[0]));
+      m_ui.analysisModeComboBox->findText(QString::fromStdString(defaults.AnalysisMode));
   if (amIndex != -1)
     m_ui.analysisModeComboBox->setCurrentIndex(amIndex);
 
   int pcIndex =
-      m_ui.polCorrComboBox->findText(QString::fromStdString(defaults[1]));
+      m_ui.polCorrComboBox->findText(QString::fromStdString(defaults.PolarizationAnalysis));
   if (pcIndex != -1)
     m_ui.polCorrComboBox->setCurrentIndex(pcIndex);
 
-  m_ui.CRhoEdit->setText(QString::fromStdString(defaults[2]));
-  m_ui.CAlphaEdit->setText(QString::fromStdString(defaults[3]));
-  m_ui.CApEdit->setText(QString::fromStdString(defaults[4]));
-  m_ui.CPpEdit->setText(QString::fromStdString(defaults[5]));
-  m_ui.startOverlapEdit->setText(QString::fromStdString(defaults[6]));
-  m_ui.endOverlapEdit->setText(QString::fromStdString(defaults[7]));
+  m_ui.CRhoEdit->setText(QString::fromStdString(defaults.CRho));
+  m_ui.CAlphaEdit->setText(QString::fromStdString(defaults.CAlpha));
+  m_ui.CApEdit->setText(QString::fromStdString(defaults.CAp));
+  m_ui.CPpEdit->setText(QString::fromStdString(defaults.CPp));
+  m_ui.startOverlapEdit->setText(QString::number(defaults.TransRunStartOverlap));
+  m_ui.endOverlapEdit->setText(QString::number(defaults.TransRunEndOverlap));
 }
 
 void QtReflSettingsView::setSelected(QComboBox &box, std::string const &str) {
@@ -111,24 +110,22 @@ void QtReflSettingsView::setText(QLineEdit &lineEdit, std::string const &text) {
 /* Sets default values for all instrument settings given a list of default
 * values.
 */
-void QtReflSettingsView::setInstDefaults(
-    const std::vector<double> &defaults_double,
-    const std::vector<std::string> &defaults_str) {
+void QtReflSettingsView::setInstDefaults(InstrumentOptionDefaults defaults) {
 
   auto intMonCheckState =
-      (defaults_double[0] != 0) ? Qt::Checked : Qt::Unchecked;
+      (defaults.NormalizeByIntegratedMonitors) ? Qt::Checked : Qt::Unchecked;
   m_ui.intMonCheckBox->setCheckState(intMonCheckState);
 
-  setText(*m_ui.monIntMinEdit, defaults_double[1]);
-  setText(*m_ui.monIntMaxEdit, defaults_double[2]);
-  setText(*m_ui.monBgMinEdit, defaults_double[3]);
-  setText(*m_ui.monBgMaxEdit, defaults_double[4]);
-  setText(*m_ui.lamMinEdit, defaults_double[5]);
-  setText(*m_ui.lamMaxEdit, defaults_double[6]);
-  setText(*m_ui.I0MonIndexEdit, defaults_double[7]);
+  setText(*m_ui.monIntMinEdit, defaults.MonitorIntegralMin);
+  setText(*m_ui.monIntMaxEdit, defaults.MonitorIntegralMax);
+  setText(*m_ui.monBgMinEdit, defaults.MonitorBackgroundMin);
+  setText(*m_ui.monBgMaxEdit, defaults.MonitorBackgroundMax);
+  setText(*m_ui.lamMinEdit, defaults.LambdaMin);
+  setText(*m_ui.lamMaxEdit, defaults.LambdaMax);
+  setText(*m_ui.I0MonIndexEdit, std::to_string(defaults.I0MonitorIndex));
 
-  setSelected(*m_ui.detectorCorrectionTypeComboBox, defaults_str[0]);
-  setText(stitchOptionsLineEdit(), defaults_str[1]);
+  setSelected(*m_ui.detectorCorrectionTypeComboBox, defaults.DetectorCorrectionType);
+  setText(stitchOptionsLineEdit(), defaults.ProcessingInstructions);
 }
 
 /* Sets the enabled status of polarisation corrections and parameters
