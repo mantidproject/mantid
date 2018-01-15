@@ -56,6 +56,7 @@ Core Functionality
 - The status of a fit in the fit window is now at the top of the of the dialog instead of the bottom.
 - Condition to check if a property is enabled when serializing.
 - Workspace locking no longer prevents simple read operations required to display the workspace conext menu in Mantidplot.
+- TableWorkspaces can new be converted to a python dictionary by calling the ``table.toDict()`` function.
 
 Performance
 -----------
