@@ -7,7 +7,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
-#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -72,12 +71,25 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
   m_view->setPolarisationOptionsEnabled(enable);
 }
 
+OptionsQMap ReflSettingsPresenter::transmissionOptionsMap() const {
+  OptionsQMap options;
+  addTransmissionOptions(options, {"AnalysisMode", "StartOverlap", "EndOverlap",
+                                   "MonitorIntegrationWavelengthMin",
+                                   "MonitorIntegrationWavelengthMax",
+                                   "MonitorBackgroundWavelengthMin",
+                                   "MonitorBackgroundWavelengthMax",
+                                   "WavelengthMin", "WavelengthMax",
+                                   "I0MonitorIndex", "ProcessingInstructions"});
+  return options;
+}
+
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'. Note that
  * this must include all applicable options, even if they are empty, because
  * the GenericDataProcessorPresenter has no other way of knowing which options
  * are applicable to the preprocessing algorithm (e.g. for options that might
  * be specified on the Runs tab instead). We get around this by providing the
  * full list here and overriding them if they also exist on the Runs tab.
+ *
  * @todo This is not idea and really we should just be passing through the
  * non-preprocessed transmission runs to ReflectometryReductionOneAuto, which
  * would then run CreateTransmissionWorkspaceAuto as a child algorithm and do
@@ -87,45 +99,66 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
  */
 OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
 
-  OptionsQMap options;
+  // This step is necessessary until the issue above is addressed.
+  // Otherwise either group of options may be missed out by
+  // experimentSettingsEnabled or instrumentSettingsEnabled being disabled.
+  OptionsQMap options = transmissionOptionsMap();
 
   if (m_view->experimentSettingsEnabled()) {
-    addIfNotEmpty(options, "AnalysisMode", m_view->getAnalysisMode());
-    addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
-    addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
+    setTransmissionOption(options, "AnalysisMode", m_view->getAnalysisMode());
+    setTransmissionOption(options, "StartOverlap", m_view->getStartOverlap());
+    setTransmissionOption(options, "EndOverlap", m_view->getEndOverlap());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
-    addIfNotEmpty(options, "MonitorIntegrationWavelengthMin",
-                  m_view->getMonitorIntegralMin());
-    addIfNotEmpty(options, "MonitorIntegrationWavelengthMax",
-                  m_view->getMonitorIntegralMax());
-    addIfNotEmpty(options, "MonitorBackgroundWavelengthMin",
-                  m_view->getMonitorBackgroundMin());
-    addIfNotEmpty(options, "MonitorBackgroundWavelengthMax",
-                  m_view->getMonitorBackgroundMax());
-    addIfNotEmpty(options, "WavelengthMin", m_view->getLambdaMin());
-    addIfNotEmpty(options, "WavelengthMax", m_view->getLambdaMax());
-    addIfNotEmpty(options, "I0MonitorIndex", m_view->getI0MonitorIndex());
-    addIfNotEmpty(options, "ProcessingInstructions",
-                  m_view->getProcessingInstructions());
+    setTransmissionOption(options, "MonitorIntegrationWavelengthMin",
+                          m_view->getMonitorIntegralMin());
+    setTransmissionOption(options, "MonitorIntegrationWavelengthMax",
+                          m_view->getMonitorIntegralMax());
+    setTransmissionOption(options, "MonitorBackgroundWavelengthMin",
+                          m_view->getMonitorBackgroundMin());
+    setTransmissionOption(options, "MonitorBackgroundWavelengthMax",
+                          m_view->getMonitorBackgroundMax());
+    setTransmissionOption(options, "WavelengthMin", m_view->getLambdaMin());
+    setTransmissionOption(options, "WavelengthMax", m_view->getLambdaMax());
+    setTransmissionOption(options, "I0MonitorIndex",
+                          m_view->getI0MonitorIndex());
+    setTransmissionOption(options, "ProcessingInstructions",
+                          m_view->getProcessingInstructions());
   }
 
   return options;
+}
+
+void ReflSettingsPresenter::setTransmissionOption(OptionsQMap &options,
+                                                  const QString &key,
+                                                  const QString &value) const {
+  options[key] = value;
+}
+
+void ReflSettingsPresenter::setTransmissionOption(
+    OptionsQMap &options, const QString &key, const std::string &value) const {
+  options[key] = QString::fromStdString(value);
+}
+
+void ReflSettingsPresenter::addTransmissionOptions(
+    OptionsQMap &options, std::initializer_list<QString> keys) const {
+  for (auto &&key : keys)
+    setTransmissionOption(options, key, QString());
 }
 
 void ReflSettingsPresenter::addIfNotEmpty(OptionsQMap &options,
                                           const QString &key,
                                           const QString &value) const {
   if (!value.isEmpty())
-    options[key] = value;
+    setTransmissionOption(options, key, value);
 }
 
 void ReflSettingsPresenter::addIfNotEmpty(OptionsQMap &options,
                                           const QString &key,
                                           const std::string &value) const {
   if (!value.empty())
-    options[key] = QString::fromStdString(value);
+    setTransmissionOption(options, key, value);
 }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
