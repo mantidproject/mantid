@@ -17,7 +17,6 @@
 #include <QMap>
 #include <QMetaType>
 #include <QHash>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
 
@@ -49,7 +48,7 @@ class MantidTreeWidget;
 \class  WorkspaceTreeWidget
 \author Lamar Moore
 \date   24-08-2016
-\version 1.0
+\version 1.1
 
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

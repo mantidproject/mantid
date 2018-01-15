@@ -1,11 +1,7 @@
 %ModuleCode
 #include "MantidQtWidgets/Common/Message.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidQtWidgets/Common/AlgorithmDialog.h"
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
-using namespace MantidQt::API;
-using namespace Mantid::API;
 %End
 
 %InitialisationCode
@@ -47,6 +43,7 @@ class AlgorithmDialog: QDialog {
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include <boost/python/extract.hpp>
+using namespace MantidQt::API;
 %End
 public:
   void setShowKeepOpen(const bool showOption);
@@ -76,6 +73,7 @@ private:
 class GenericDialog: AlgorithmDialog {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/GenericDialog.h"
+using namespace MantidQt::API;
 %End
 public:
   GenericDialog(QWidget *parent = nullptr);
@@ -85,6 +83,7 @@ public:
 class InterfaceManager {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/InterfaceManager.h"
+using namespace MantidQt::API;
 %End
 public:
   InterfaceManager();

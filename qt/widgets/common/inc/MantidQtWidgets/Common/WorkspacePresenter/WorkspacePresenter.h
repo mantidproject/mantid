@@ -48,7 +48,9 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspacePresenter
       public ViewNotifiable {
 
 public:
-  explicit WorkspacePresenter(IWorkspaceDockView& view);
+
+  explicit WorkspacePresenter(IWorkspaceDockView *view);
+
   ~WorkspacePresenter() override;
 
   void init();
@@ -103,7 +105,7 @@ private:
   void updateView();
 
 private:
-  IWorkspaceDockView& m_view;
+  IWorkspaceDockView *m_view;
   ADSAdapter_uptr m_adapter;
 };
 } // namespace MantidWidgets

@@ -9,7 +9,7 @@ set ( HEADER_DEPENDS
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
 )
 
-find_package ( Boost COMPONENTS python REQUIRED )
+find_package ( BoostPython REQUIRED )
 
 list ( APPEND common_link_libs
   ${TCMALLOC_LIBRARIES_LINKTIME}

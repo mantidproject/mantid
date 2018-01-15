@@ -3,9 +3,9 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ParseNumerics.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
@@ -75,7 +75,7 @@ void ReflDataProcessorPresenter::process() {
 
   // Get global settings
   this->setPreprocessingOptions(
-      convertOptionsFromQMap(m_mainPresenter->getPreprocessingOptions()));
+      convertColumnOptionsFromQMap(m_mainPresenter->getPreprocessingOptions()));
   m_processingOptions =
       convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
   this->setPostprocessingOptions(
