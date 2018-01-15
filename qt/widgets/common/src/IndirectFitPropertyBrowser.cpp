@@ -209,7 +209,11 @@ QString IndirectFitPropertyBrowser::selectedFitType() const {
 }
 
 QString IndirectFitPropertyBrowser::backgroundName() const {
-  return enumValue(m_backgroundSelection);
+  auto background = enumValue(m_backgroundSelection);
+  if (background.isEmpty())
+    return "None";
+  else
+    return background;
 }
 
 size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
@@ -572,6 +576,8 @@ void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
 
 QString IndirectFitPropertyBrowser::enumValue(QtProperty *prop) const {
   const auto values = m_enumManager->enumNames(prop);
+  if (values.isEmpty())
+    return "";
   const auto selectedIndex = m_enumManager->value(prop);
   return values[selectedIndex];
 }
