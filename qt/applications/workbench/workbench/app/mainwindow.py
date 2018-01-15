@@ -120,6 +120,7 @@ class MainWindow(QMainWindow):
         # widgets
         self.messagedisplay = None
         self.ipythonconsole = None
+        self.workspacewidget = None
 
         # Menus
         self.file_menu = None
