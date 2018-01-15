@@ -145,6 +145,7 @@ public slots:
   void showLogFileWindow() override;
   void showSampleMaterialWindow() override;
   void showAlgorithmHistory() override;
+  bool doesVatesSupportOpenGL() override;
 
   MantidQt::MantidWidgets::MantidWSIndexDialog *createWorkspaceIndexDialog(
       int flags, const QStringList &wsNames, bool showWaterfall,

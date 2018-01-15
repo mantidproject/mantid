@@ -207,6 +207,7 @@ void MantidTreeModel::importTransposed() {}
 void MantidTreeModel::showLogFileWindow() {}
 void MantidTreeModel::showSampleMaterialWindow() {}
 void MantidTreeModel::importWorkspace() {}
+bool MantidTreeModel::doesVatesSupportOpenGL() { return nullptr; }
 
 MantidMatrix *MantidTreeModel::importMatrixWorkspace(
     const Mantid::API::MatrixWorkspace_sptr workspace, int lower, int upper,
