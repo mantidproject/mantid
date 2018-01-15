@@ -43,9 +43,12 @@ class PythonFileInterpreter(QWidget):
 
     sig_editor_modified = Signal(bool)
 
-    def __init__(self, default_content=None, parent=None):
+    def __init__(self, content=None, filename=None,
+                 parent=None):
         """
-        :param parent: A parent QWidget
+        :param content: An optional string of content to pass to the editor
+        :param filename: The file path where the content was read.
+        :param parent: An optional parent QWidget
         """
         super(PythonFileInterpreter, self).__init__(parent)
 
@@ -57,12 +60,15 @@ class PythonFileInterpreter(QWidget):
         layout.addWidget(self.status)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
+        self._setup_editor(content)
 
-        self._setup_editor(default_content)
-
-        self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution())
+        self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(filename))
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
+
+    @property
+    def filename(self):
+        return self._presenter.model.filename
 
     def execute_async(self):
         self._presenter.req_execute_async()

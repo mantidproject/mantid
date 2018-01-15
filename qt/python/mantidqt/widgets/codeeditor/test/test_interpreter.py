@@ -42,11 +42,17 @@ class PythonFileInterpreterTest(unittest.TestCase):
     def test_empty_code_does_nothing_on_exec(self):
         w = PythonFileInterpreter()
         w._presenter.model.execute_async = mock.MagicMock()
-
         w.execute_async()
-
         w._presenter.model.execute_async.assert_not_called()
         self.assertTrue("Status: Idle", w.status.currentMessage())
+
+    def test_constructor_populates_editor_with_content(self):
+        w = PythonFileInterpreter(content='my funky code')
+        self.assertEqual('my funky code', w.editor.text())
+
+    def test_constructor_respects_filename(self):
+        w = PythonFileInterpreter(filename='test.py')
+        self.assertEqual('test.py', w.filename)
 
     def test_successful_execution(self):
         w = PythonFileInterpreter()

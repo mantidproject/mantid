@@ -193,6 +193,15 @@ squared = sum*sum
         self.assertEqual([1, 3, 4, 8, 9], recv.lines_received)
 
     # -------------------------------------------------------------------------
+    # Filename checks
+    # -------------------------------------------------------------------------
+    def test_filename_included_in_traceback_if_defined(self):
+        code = """raise RuntimeError"""
+        executor, recv = self._run_async_code(code, filename='test.py')
+        self.assertTrue(recv.error_cb_called)
+        self.assertEqual('test.py', recv.error_stack[0][0])
+
+    # -------------------------------------------------------------------------
     # Helpers
     # -------------------------------------------------------------------------
     def _verify_serial_execution_successful(self, code):
@@ -210,8 +219,10 @@ squared = sum*sum
         executor = PythonCodeExecution()
         self.assertRaises(expected_exc_type, executor.execute, code)
 
-    def _run_async_code(self, code, with_progress=False):
+    def _run_async_code(self, code, with_progress=False, filename=None):
         executor = PythonCodeExecution()
+        if filename is not None:
+            executor.filename = filename
         if with_progress:
             recv = ReceiverWithProgress()
             executor.sig_exec_progress.connect(recv.on_progess_update)

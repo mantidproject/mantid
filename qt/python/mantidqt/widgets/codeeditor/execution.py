@@ -35,12 +35,21 @@ class PythonCodeExecution(QObject):
     sig_exec_error = Signal(object)
     sig_exec_progress = Signal(int)
 
-    def __init__(self):
+    def __init__(self, filename=None):
         """Initialize the object"""
         super(PythonCodeExecution, self).__init__()
 
+        self._filename = '<string>' if filename is None else filename
         self._globals_ns, self._locals_ns = None, None
         self.reset_context()
+
+    @property
+    def filename(self):
+        return self._filename
+
+    @filename.setter
+    def filename(self, value):
+        self._filename = value
 
     @property
     def globals_ns(self):
@@ -79,12 +88,14 @@ class PythonCodeExecution(QObject):
         :param code_str: A string containing code to execute
         :raises: Any error that the code generates
         """
-        compile(code_str, "<string>", mode='exec')
+        compile(code_str, self.filename, mode='exec')
 
         sig_progress = self.sig_exec_progress
         for block in code_blocks(code_str):
             sig_progress.emit(block.lineno)
-            exec(block.code_obj, self.globals_ns, self.locals_ns)
+            # compile so we can set the filename
+            code_obj = compile(block.code_str, self.filename, mode='exec')
+            exec(code_obj, self.globals_ns, self.locals_ns)
 
     # ---------------------------------------------------------------
     # Callbacks
@@ -103,8 +114,8 @@ class CodeBlock(object):
     """Holds an executable code object. It also stores the line number
     of the first line within a larger group of code blocks"""
 
-    def __init__(self, code_obj, lineno):
-        self.code_obj = code_obj
+    def __init__(self, code_str, lineno):
+        self.code_str = code_str
         self.lineno = lineno
 
 
@@ -126,7 +137,7 @@ def code_blocks(code_str):
             continue
         else:
             # Now we have a complete set of executable statements
-            # throw them back
+            # throw them at the execution engine
             code = isp.source
             isp.reset()
             yield CodeBlock(code, lineno_cur)
