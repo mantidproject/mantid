@@ -128,9 +128,15 @@ public:
     return AnalysisDataService::Instance().doesExist(name);
   }
 
-  void setUp() override { DefaultValue<QString>::Set(QString()); }
+  void setUp() override {
+    DefaultValue<QString>::Set(QString());
+    DefaultValue<ColumnOptionsQMap>::Set(ColumnOptionsQMap());
+  }
 
-  void tearDown() override { DefaultValue<QString>::Clear(); }
+  void tearDown() override {
+    DefaultValue<QString>::Clear();
+    DefaultValue<ColumnOptionsQMap>::Clear();
+  }
 
   void testProcessEventWorkspacesUniformEvenSlicing() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
