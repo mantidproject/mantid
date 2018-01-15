@@ -26,6 +26,12 @@ public:
 
   int backgroundIndex() const;
 
+  int functionIndex(Mantid::API::IFunction_sptr function) const;
+
+  QString selectedFitType() const;
+
+  QString backgroundName() const;
+
   size_t numberOfCustomFunctions(const std::string &functionName) const;
 
   double parameterValue(const std::string &functionName,
@@ -33,6 +39,8 @@ public:
 
   void setParameterValue(const std::string &functionName,
                          const std::string &parameterName, double value);
+
+  void moveCustomFunctionsToEnd();
 
   void addCheckBoxFunctionGroup(
       const QString &groupName,
@@ -129,7 +137,8 @@ private:
 
   QtProperty *
   createFunctionGroupProperty(const QString &groupName,
-                              QtAbstractPropertyManager *propertyManager);
+                              QtAbstractPropertyManager *propertyManager,
+                              bool atFront = false);
 
   QString enumValue(QtProperty *prop) const;
 
@@ -143,6 +152,7 @@ private:
   QtProperty *m_backgroundSelection;
   PropertyHandler *m_backgroundHandler;
   QHash<QtProperty *, QVector<PropertyHandler *>> m_functionHandlers;
+  QVector<QtProperty *> m_orderedFunctionGroups;
   std::unordered_map<std::string, size_t> m_customFunctionCount;
   QSet<QtProperty *> m_optionProperties;
   QHash<QtProperty *, QtProperty *> m_optionalProperties;

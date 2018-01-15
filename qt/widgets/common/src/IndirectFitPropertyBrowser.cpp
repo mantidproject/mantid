@@ -72,6 +72,8 @@ IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent,
 
 void IndirectFitPropertyBrowser::init() {
   QWidget *w = new QWidget(this);
+  setFeatures(QDockWidget::DockWidgetFloatable |
+              QDockWidget::DockWidgetMovable);
 
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser");
@@ -172,16 +174,11 @@ void IndirectFitPropertyBrowser::init() {
   updateDecimals();
 
   m_browser->addProperty(m_customFunctionGroups);
-  m_browser->addProperty(m_backgroundGroup);
   m_browser->addProperty(fittingRangeGroup);
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   initLayout(w);
-
-  QStringList backgrounds = {"None"};
-  backgrounds.append(registeredBackgrounds());
-  m_enumManager->setEnumNames(m_backgroundSelection, backgrounds);
 }
 
 IFunction_sptr IndirectFitPropertyBrowser::background() const {
@@ -192,11 +189,27 @@ IFunction_sptr IndirectFitPropertyBrowser::background() const {
 }
 
 int IndirectFitPropertyBrowser::backgroundIndex() const {
+  if (m_backgroundHandler != nullptr)
+    return functionIndex(m_backgroundHandler->function());
+  else
+    return -1;
+}
+
+int IndirectFitPropertyBrowser::functionIndex(IFunction_sptr function) const {
   for (size_t i = 0u; i < compositeFunction()->nFunctions(); ++i) {
-    if (compositeFunction()->getFunction(i) == background())
+    if (compositeFunction()->getFunction(i) == function)
       return static_cast<int>(i);
   }
   return -1;
+}
+
+QString IndirectFitPropertyBrowser::selectedFitType() const {
+  const auto index = m_enumManager->value(m_functionsInComboBox);
+  return m_enumManager->enumNames(m_functionsInComboBox)[index];
+}
+
+QString IndirectFitPropertyBrowser::backgroundName() const {
+  return enumValue(m_backgroundSelection);
 }
 
 size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
@@ -229,8 +242,10 @@ void IndirectFitPropertyBrowser::setParameterValue(
   for (size_t i = 0u; i < composite->nFunctions(); ++i) {
     const auto function = composite->getFunction(i);
 
-    if (function->name() == functionName)
+    if (function->name() == functionName) {
       function->setParameter(parameterName, value);
+      emit parameterChanged(function.get());
+    }
   }
   updateParameters();
 }
@@ -247,11 +262,12 @@ void IndirectFitPropertyBrowser::updateParameterValues(
 
   for (const auto &parameterName : parameterValues.keys()) {
     const auto parameter = parameterName.toStdString();
+    const auto &parameterValue = parameterValues[parameterName];
 
     if (parameterName.contains(".") && function->hasParameter(parameter))
-      function->setParameter(parameter, parameterValues[parameterName]);
+      function->setParameter(parameter, parameterValue);
     else if (function->hasParameter("f0." + parameter))
-      function->setParameter("f0." + parameter, parameterValues[parameterName]);
+      function->setParameter("f0." + parameter, parameterValue);
   }
 
   getHandler()->updateParameters();
@@ -260,7 +276,31 @@ void IndirectFitPropertyBrowser::updateParameterValues(
 
 void IndirectFitPropertyBrowser::setBackgroundOptions(
     const QStringList &backgrounds) {
+  const auto currentlyHidden =
+      m_enumManager->enumNames(m_backgroundSelection).isEmpty();
+  const auto doHide = backgrounds.isEmpty();
+
+  if (doHide && !currentlyHidden)
+    m_browser->removeProperty(m_backgroundGroup);
+  else if (!doHide && currentlyHidden)
+    m_browser->insertProperty(m_backgroundGroup, m_customFunctionGroups);
+
   m_enumManager->setEnumNames(m_backgroundSelection, backgrounds);
+}
+
+void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
+  blockSignals(true);
+  for (auto &handlerProperty : m_orderedFunctionGroups) {
+    auto &handlers = m_functionHandlers[handlerProperty];
+
+    for (int i = 0; i < handlers.size(); ++i) {
+      auto &handler = handlers[i];
+      const auto function = handler->function();
+      handler->removeFunction();
+      handler = addFunction(function->asString());
+    }
+  }
+  blockSignals(false);
 }
 
 bool IndirectFitPropertyBrowser::boolSettingValue(
@@ -373,7 +413,7 @@ void IndirectFitPropertyBrowser::addComboBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   if (m_functionsInComboBox == nullptr) {
     m_functionsInComboBox =
-        createFunctionGroupProperty("Fit Type", m_enumManager);
+        createFunctionGroupProperty("Fit Type", m_enumManager, true);
     m_groupToFunctionList["None"] = {};
     m_enumManager->setEnumNames(m_functionsInComboBox, {"None"});
   }
@@ -407,24 +447,46 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
   if (!m_functionHandlers.contains(prop))
     m_functionHandlers.insert(prop, QVector<PropertyHandler *>());
 
+  blockSignals(true);
   for (const auto &function : m_groupToFunctionList[groupName]) {
     m_functionHandlers[prop] << addFunction(function->asString());
     m_customFunctionCount[function->name()] += 1;
   }
+  blockSignals(false);
+
+  emit functionChanged();
 }
 
 void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
+  blockSignals(true);
   for (const auto &functionHandler : m_functionHandlers[prop]) {
-    FitPropertyBrowser::removeFunction(functionHandler);
-    m_customFunctionCount[functionHandler->function()->name()] -= 1;
+    if (functionIndex(functionHandler->function()) >= 0) {
+      FitPropertyBrowser::removeFunction(functionHandler);
+      m_customFunctionCount[functionHandler->function()->name()] -= 1;
+    }
   }
+  blockSignals(false);
   m_functionHandlers[prop].clear();
+
+  emit removePlotSignal(getHandler());
+  emit functionRemoved();
+  emit functionChanged();
 }
 
 QtProperty *IndirectFitPropertyBrowser::createFunctionGroupProperty(
-    const QString &groupName, QtAbstractPropertyManager *propertyManager) {
+    const QString &groupName, QtAbstractPropertyManager *propertyManager,
+    bool atFront) {
   auto functionProperty = propertyManager->addProperty(groupName);
-  m_customFunctionGroups->addSubProperty(functionProperty);
+
+  if (atFront && !m_customFunctionGroups->subProperties().isEmpty()) {
+    auto firstProperty = m_customFunctionGroups->subProperties().first();
+    m_customFunctionGroups->insertSubProperty(functionProperty, firstProperty);
+    m_customFunctionGroups->removeSubProperty(firstProperty);
+    m_customFunctionGroups->insertSubProperty(firstProperty, functionProperty);
+  } else {
+    m_customFunctionGroups->addSubProperty(functionProperty);
+  }
+  m_orderedFunctionGroups.append(functionProperty);
   return functionProperty;
 }
 
@@ -444,7 +506,9 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
         m_boolManager->setValue(prop, false);
     }
   }
-  FitPropertyBrowser::removeFunction(handler);
+
+  if (functionIndex(handler->function()) >= 0)
+    FitPropertyBrowser::removeFunction(handler);
 }
 
 void IndirectFitPropertyBrowser::fit() { emit fitScheduled(); }
@@ -460,7 +524,7 @@ void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
     addCustomFunctions(prop, enumValue(prop));
   } else if (prop == m_backgroundSelection) {
 
-    if (m_backgroundHandler != nullptr)
+    if (m_backgroundHandler != nullptr && backgroundIndex() >= 0)
       FitPropertyBrowser::removeFunction(m_backgroundHandler);
 
     const auto backgroundName = enumValue(prop).toStdString();
