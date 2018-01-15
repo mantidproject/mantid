@@ -393,6 +393,38 @@ def diffraction_calibrator(calibration_file):
                              StoreInADS=False, EnableLogging=False)
     return calibrator
 
+def create_loader(ipf_filename, minimum_spectrum, maximum_spectrum, load_logs, load_opts):
+    """
+    Creates a loader which loads a supplied string containing the runs to load.
+
+    :param ipf_filename:        The name of the instrument parameter file.
+    :param minimum_spectrum:    The minimum spectrum to load.
+    :param maximum_spectrum:    The maximum spectrum to load.
+    :param load_logs:           True if logs are to be loaded, false otherwise.
+    :param load_opts:           The additional load options.
+    :return:                    A loader.
+    """
+
+    def loader(runs):
+        return load_files(runs, ipf_filename, minimum_spectrum, maximum_spectrum,
+                          load_logs=load_logs, load_opts=load_opts)
+    return loader
+
+def create_drange_map_generator(runs_loader, combinator):
+    """
+    Creates a drange map generator, which creates a drange map from a supplied string of runs.
+
+    :param runs_loader: The loader to use in loading the runs.
+    :param combinator:  The combinator used to combine the runs.
+    :return:            A drange map generator.
+    """
+
+    def generator(runs, transform):
+        drange_map = DRangeToWorkspaceMap()
+        workspace_names, _ = runs_loader(runs)
+        drange_map.add_workspaces([transform(workspace_name) for workspace_name in workspace_names], combinator)
+        return drange_map
+    return generator
 
 # pylint: disable=no-init,too-many-instance-attributes
 class OSIRISDiffractionReduction(PythonAlgorithm):
@@ -497,46 +529,25 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Load all sample, vanadium files
         ipf_file_name = 'OSIRIS_diffraction_diffonly_Parameters.xml'
         load_opts = {"DeleteMonitors": True}
+        load_runs = create_loader(ipf_file_name, self._spec_min, self._spec_max,
+                                  self._load_logs, load_opts)
+        drange_map_generator = create_drange_map_generator(load_runs, rebin_and_average)
 
-        sample_ws_names, _ = load_files(self._sample_runs,
-                                        ipf_file_name,
-                                        self._spec_min,
-                                        self._spec_max,
-                                        load_logs=self._load_logs,
-                                        load_opts=load_opts)
-        # Add the sample workspaces to the sample d-range map
-        self._sam_ws_map.add_workspaces([mtd[sample_ws_name] for sample_ws_name in sample_ws_names], rebin_and_average)
-        self._delete_workspaces(sample_ws_names)
+        # Create a sample drange map from the sample runs
+        self._sam_ws_map = drange_map_generator(self._sample_runs, lambda name : mtd[name])
 
-        vanadium_ws_names, _ = load_files(self._vanadium_runs,
-                                          ipf_file_name,
-                                          self._spec_min,
-                                          self._spec_max,
-                                          load_logs=self._load_logs,
-                                          load_opts=load_opts)
-        # Add the vanadium workspaces to the vanadium drange map
-        self._van_ws_map.add_workspaces([mtd[vanadium_ws_name] for vanadium_ws_name in vanadium_ws_names],
-                                        rebin_and_average)
-        self._delete_workspaces(vanadium_ws_names)
+        # Create a vanadium drange map from the sample runs
+        self._van_ws_map = drange_map_generator(self._vanadium_runs, lambda name : mtd[name])
 
         # Load the container run
         if self._container_files:
-            container_ws_names, _ = load_files(self._container_files,
-                                               ipf_file_name,
-                                               self._spec_min,
-                                               self._spec_max,
-                                               load_logs=self._load_logs,
-                                               load_opts=load_opts)
-
             # Scale the container run if required
             if self._container_scale_factor != 1.0:
-                self._con_ws_map.add_workspaces([mtd[container_ws_name] * self._container_scale_factor
-                                                 for container_ws_name in container_ws_names], rebin_and_average)
+                self._con_ws_map = drange_map_generator(self._container_files,
+                                                        lambda name: mtd[name] * self._container_scale_factor)
             else:
-                self._con_ws_map.add_workspaces([mtd[container_ws_name]
-                                                 for container_ws_name in container_ws_names], rebin_and_average)
+                self._con_ws_map = drange_map_generator(self._container_files, lambda name : mtd[name])
 
-            self._delete_workspaces(container_ws_names)
             result_map = self._sam_ws_map.combine(self._con_ws_map, rebin_and_subtract)
         else:
             result_map = self._sam_ws_map
@@ -553,9 +564,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         result_map = result_map.combine(self._van_ws_map, divide_workspace)
 
         if len(result_map) > 1:
-            temp_ws_names = ["__run_" + str(idx) for idx in range(len(result_map))]
             # Workspaces must be added to the ADS, as there does not yet exist
             # a workspace list property (must be passed to merge runs by name).
+            temp_ws_names = ["__run_" + str(idx) for idx in range(len(result_map))]
             for temp_ws_name, sample_ws in zip(temp_ws_names, result_map.values()):
                 mtd.addOrReplace(temp_ws_name, sample_ws)
 
