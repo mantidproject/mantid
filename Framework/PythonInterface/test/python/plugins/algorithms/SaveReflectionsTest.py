@@ -162,7 +162,7 @@ def compare_file(reference_result, file_name):
             ref_lines = ref_file.readlines()
             actual_lines = actual_file.readlines()
             ref_lines = map(lambda x: x.strip(), ref_lines)
-            actual_lines = map(lambda x: x.strip(), ref_lines)
+            actual_lines = map(lambda x: x.strip(), actual_lines)
             for ref_line, actual_line in zip(ref_lines, actual_lines):
                 if ref_line != actual_line:
                     return False
