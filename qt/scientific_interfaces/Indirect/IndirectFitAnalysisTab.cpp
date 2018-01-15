@@ -7,6 +7,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
+#include "MantidQtWidgets/Common/PropertyHandler.h"
+
 #include <QString>
 
 #include <algorithm>
@@ -14,6 +16,21 @@
 using namespace Mantid::API;
 
 namespace {
+
+/**
+ * Checks whether the specified algorithm has a property with the specified
+ * name. If true, sets this property to the specified value, else returns.
+ *
+ * @param algorithm     The algorithm whose property to set.
+ * @param propertyName  The name of the property to set.
+ * @param value         The value to set.
+ */
+template <typename T>
+void setAlgorithmProperty(IAlgorithm_sptr algorithm,
+                          const std::string &propertyName, const T &value) {
+  if (algorithm->existsProperty(propertyName))
+    algorithm->setProperty(propertyName, value);
+}
 
 /**
  * Combines the two maps of parameter values, by adding the values from
@@ -30,7 +47,6 @@ Map combineParameterValues(const Map &parameterValues1,
   auto combinedValues = parameterValues1;
 
   for (const auto &index : parameterValues1.keys()) {
-
     if (parameterValues2.contains(index)) {
       const auto &values1 = parameterValues1[index];
       const auto &values2 = parameterValues2[index];
@@ -43,6 +59,28 @@ Map combineParameterValues(const Map &parameterValues1,
   }
 
   return combinedValues;
+}
+
+/**
+ * Reverts the specified changes made to the specified map of values.
+ *
+ * @param map     The map to apply the reversion to.
+ * @param changes The list of changes (map-like structure), detailing
+ *                the value before and after the change.
+ */
+template <typename Map, typename Changes>
+void revertChanges(Map &map, const Changes &changes) {
+  for (const auto &beforeChange : changes.keys()) {
+    const auto &afterChange = changes[beforeChange];
+
+    for (auto &values : map) {
+      if (values.contains(afterChange)) {
+        const auto value = values[afterChange];
+        values.remove(afterChange);
+        values[beforeChange] = value;
+      }
+    }
+  }
 }
 
 /*
@@ -69,10 +107,7 @@ IFunction_sptr zeroFunction(IFunction_const_sptr function) {
  */
 bool equivalentFunctions(IFunction_const_sptr func1,
                          IFunction_const_sptr func2) {
-  if (!func1)
-    return false;
-
-  if (!func2)
+  if (!func1 || !func2)
     return false;
 
   return zeroFunction(func1)->asString() == zeroFunction(func2)->asString();
@@ -110,8 +145,13 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
   connect(m_fitPropertyBrowser, SIGNAL(sequentialFitScheduled()), this,
           SLOT(executeSequentialFit()));
 
-  connect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
-          this, SLOT(plotGuess()));
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+          SLOT(plotGuess()));
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+          SLOT(parameterUpdated(const Mantid::API::IFunction *)));
+
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
           SLOT(rangeChanged(double, double)));
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
@@ -119,6 +159,8 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
 
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(fitFunctionChanged()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(plotGuess()));
 }
@@ -132,13 +174,21 @@ IFunction_sptr IndirectFitAnalysisTab::background() const {
 }
 
 IFunction_sptr IndirectFitAnalysisTab::model() const {
-  auto model = boost::dynamic_pointer_cast<CompositeFunction>(
-      m_fitPropertyBrowser->getFittingFunction()->clone());
-  auto index = m_fitPropertyBrowser->backgroundIndex();
+  auto model = m_fitPropertyBrowser->compositeFunction()->clone();
+  auto compositeModel = boost::dynamic_pointer_cast<CompositeFunction>(model);
 
-  if (index != -1)
-    model->removeFunction(static_cast<size_t>(index));
+  if (compositeModel) {
+    auto index = m_fitPropertyBrowser->backgroundIndex();
+
+    if (index != -1)
+      compositeModel->removeFunction(static_cast<size_t>(index));
+    return compositeModel;
+  }
   return model;
+}
+
+QString IndirectFitAnalysisTab::selectedFitType() const {
+  return m_fitPropertyBrowser->selectedFitType();
 }
 
 size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
@@ -160,17 +210,23 @@ IndirectFitAnalysisTab::parameterValue(const std::string &functionName,
   return m_fitPropertyBrowser->parameterValue(functionName, parameterName);
 }
 
-bool IndirectFitAnalysisTab::emptyFitFunction() const {
-  return m_fitPropertyBrowser->compositeFunction()->nFunctions() == 0;
+bool IndirectFitAnalysisTab::emptyModel() const {
+  auto modelFunction = model();
+  auto compositeModel =
+      boost::dynamic_pointer_cast<CompositeFunction>(modelFunction);
+
+  if (compositeModel)
+    return compositeModel->nFunctions() == 0;
+  else
+    return modelFunction->asString() != "";
 }
 
-const std::string IndirectFitAnalysisTab::backgroundName() const {
-  const auto background = m_fitPropertyBrowser->background();
+QString IndirectFitAnalysisTab::backgroundName() const {
+  return m_fitPropertyBrowser->backgroundName();
+}
 
-  if (background)
-    return background->name();
-  else
-    return "None";
+void IndirectFitAnalysisTab::moveCustomFunctionsToEnd() {
+  m_fitPropertyBrowser->moveCustomFunctionsToEnd();
 }
 
 void IndirectFitAnalysisTab::setParameterValue(const std::string &functionName,
@@ -267,7 +323,9 @@ void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
   }
 
   IndirectDataAnalysisTab::setSelectedSpectrum(spectrum);
+  blockSignals(true);
   updatePreviewPlots();
+  blockSignals(false);
   enablePlotGuess();
 }
 
@@ -345,12 +403,12 @@ bool IndirectFitAnalysisTab::hasDefaultPropertyValue(
 QSet<QString> IndirectFitAnalysisTab::parameterNames() {
   auto parameterNames = m_fitPropertyBrowser->getParameterNames();
 
-  if (m_fitPropertyBrowser->compositeFunction()->nFunctions() == 1) {
-    for (int i = 0; i < parameterNames.size(); ++i) {
-      if (parameterNames[i].contains("."))
-        parameterNames[i] = parameterNames[i].split(".")[1];
-    }
+  for (int i = 0; i < parameterNames.size(); ++i) {
+    auto &parameter = parameterNames[i];
+    if (m_functionNameChanges.contains(parameter))
+      parameter = m_functionNameChanges[parameter];
   }
+
   return parameterNames.toSet();
 }
 
@@ -365,30 +423,53 @@ QSet<QString> IndirectFitAnalysisTab::parameterNames() {
 void IndirectFitAnalysisTab::fitAlgorithmComplete(
     const std::string &paramWSName) {
 
-  if (AnalysisDataService::Instance().doesExist(paramWSName)) {
-    auto parameterValues = IndirectTab::extractParametersFromTable(
-        paramWSName, parameterNames(), minimumSpectrum(), maximumSpectrum());
-
-    if (m_appendResults)
-      m_parameterValues =
-          combineParameterValues(parameterValues, m_parameterValues);
-    else
-      m_parameterValues = parameterValues;
-
-    m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
-    m_fitPropertyBrowser->updateParameterValues(
-        parameterValues[selectedSpectrum()]);
-  }
+  if (AnalysisDataService::Instance().doesExist(paramWSName))
+    updateParametersFromTable(paramWSName);
 
   connect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
           this, SLOT(plotGuess()));
-  updatePreviewPlots();
 }
 
+void IndirectFitAnalysisTab::updateParametersFromTable(
+    const std::string &paramWSName) {
+  const auto parameters = parameterNames();
+  auto parameterValues = IndirectTab::extractParametersFromTable(
+      paramWSName, parameters, minimumSpectrum(), maximumSpectrum());
+  revertChanges(parameterValues, m_functionNameChanges);
+
+  std::vector<std::string> names;
+  std::vector<double> values;
+
+  for (const auto name : parameterValues[0].keys()) {
+    names.push_back(name.toStdString());
+    values.push_back(parameterValues[0][name]);
+  }
+
+  if (m_appendResults)
+    m_parameterValues =
+        combineParameterValues(parameterValues, m_parameterValues);
+  else
+    m_parameterValues = parameterValues;
+
+  m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
+  m_fitPropertyBrowser->updateParameterValues(
+      parameterValues[selectedSpectrum()]);
+}
+
+/**
+ * Handles the event in which the minimum-X value has been selected.
+ *
+ * @param xMax  The selected minimum-X value.
+ */
 void IndirectFitAnalysisTab::xMinSelected(double xMin) {
   m_fitPropertyBrowser->setStartX(xMin);
 }
 
+/**
+ * Handles the event in which the maximum-X value has been selected.
+ *
+ * @param xMax  The selected maximum-X value.
+ */
 void IndirectFitAnalysisTab::xMaxSelected(double xMax) {
   m_fitPropertyBrowser->setEndX(xMax);
 }
@@ -408,13 +489,13 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
       wsName.toStdString());
   m_fitPropertyBrowser->setWorkspaceName(wsName);
   setInputWorkspace(inputWs);
-  if (m_guessWorkspace)
-    m_guessWorkspace.reset();
   m_defaultPropertyValues = createDefaultValues();
   m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
   setPreviewPlotWorkspace(inputWs);
   m_parameterValues.clear();
+  blockSignals(true);
   updatePreviewPlots();
+  blockSignals(false);
 }
 
 /*
@@ -424,6 +505,10 @@ void IndirectFitAnalysisTab::clearBatchRunnerSlots() {
   m_batchAlgoRunner->disconnect();
 }
 
+/**
+ * Handles the event of a change in the fit function defined in this indirect
+ * fit analysis tab.
+ */
 void IndirectFitAnalysisTab::fitFunctionChanged() {
   const auto spectrum = selectedSpectrum();
 
@@ -486,7 +571,7 @@ void IndirectFitAnalysisTab::plotResult(const std::string &resultName,
           IndirectTab::extractAxisLabels(resultWs, 1);
 
       for (const auto &parameter : m_fitPropertyBrowser->getParameterNames()) {
-        if (parameter == plotType) {
+        if (parameter.contains(plotType)) {
           if (labels.contains(parameter))
             IndirectTab::plotSpectrum(resultWsQName, (int)labels[parameter]);
         }
@@ -533,6 +618,9 @@ void IndirectFitAnalysisTab::updatePlot(
     IndirectDataAnalysisTab::updatePlot("", fitPreviewPlot, diffPreviewPlot);
 }
 
+/**
+ * @return The current single fit algorithm for this indirect fit analysis tab.
+ */
 IAlgorithm_sptr IndirectFitAnalysisTab::singleFitAlgorithm() {
   auto algorithm = AlgorithmManager::Instance().create("Fit");
   algorithm->setProperty("WorkspaceIndex",
@@ -540,22 +628,51 @@ IAlgorithm_sptr IndirectFitAnalysisTab::singleFitAlgorithm() {
   return algorithm;
 }
 
+/**
+ * @return The current sequential fit algorithm for this indirect fit analysis
+ *         tab.
+ */
 IAlgorithm_sptr IndirectFitAnalysisTab::sequentialFitAlgorithm() {
   return singleFitAlgorithm();
 }
 
+/**
+ * Executes the single fit algorithm defined in this indirect fit analysis tab.
+ */
 void IndirectFitAnalysisTab::executeSingleFit() {
   runFitAlgorithm(singleFitAlgorithm());
 }
 
+/**
+ * Executes the sequential fit algorithm defined in this indirect fit analysis
+ * tab.
+ */
 void IndirectFitAnalysisTab::executeSequentialFit() {
   runFitAlgorithm(sequentialFitAlgorithm());
 }
 
+/**
+ * @return  The fit function defined in this indirect fit analysis tab.
+ */
 IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
+  return fitFunction(QHash<QString, QString>());
+}
+
+/**
+ * @param functionNameChanges The map to store the expected change in the name
+ *                            of the fit functions, with respect to the fit
+ *                            property browser.
+ * @return                    The fit function defined in this indirect fit
+ *                            analysis tab.
+ */
+IFunction_sptr IndirectFitAnalysisTab::fitFunction(
+    QHash<QString, QString> &functionNameChanges) const {
   return m_fitPropertyBrowser->compositeFunction();
 }
 
+/**
+ * @return  The workspace containing the data to be fit.
+ */
 MatrixWorkspace_sptr IndirectFitAnalysisTab::fitWorkspace() const {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(
       m_fitPropertyBrowser->getWorkspace());
@@ -572,22 +689,19 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
              this, SLOT(plotGuess()));
 
   fitAlgorithm->setProperty("InputWorkspace", fitWorkspace());
-  fitAlgorithm->setProperty("Function", fitFunction()->asString());
-  fitAlgorithm->setProperty("StartX", m_fitPropertyBrowser->startX());
-  fitAlgorithm->setProperty("EndX", m_fitPropertyBrowser->endX());
-  fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
-  fitAlgorithm->setProperty("MaxIterations",
-                            m_fitPropertyBrowser->maxIterations());
 
-  if (fitAlgorithm->existsProperty("Convolve")) {
-    fitAlgorithm->setProperty("Convolve",
-                              m_fitPropertyBrowser->convolveMembers());
-  }
-
-  if (fitAlgorithm->existsProperty("PeakRadius")) {
-    fitAlgorithm->setProperty("PeakRadius",
-                              m_fitPropertyBrowser->getPeakRadius());
-  }
+  setAlgorithmProperty(fitAlgorithm, "Function",
+                       fitFunction(m_functionNameChanges)->asString());
+  setAlgorithmProperty(fitAlgorithm, "StartX", m_fitPropertyBrowser->startX());
+  setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
+  setAlgorithmProperty(fitAlgorithm, "Minimizer",
+                       m_fitPropertyBrowser->minimizer(true));
+  setAlgorithmProperty(fitAlgorithm, "MaxIterations",
+                       m_fitPropertyBrowser->maxIterations());
+  setAlgorithmProperty(fitAlgorithm, "Convolve",
+                       m_fitPropertyBrowser->convolveMembers());
+  setAlgorithmProperty(fitAlgorithm, "PeakRadius",
+                       m_fitPropertyBrowser->getPeakRadius());
 
   m_fitFunction = m_fitPropertyBrowser->getFittingFunction()->clone();
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
@@ -596,6 +710,33 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(clearBatchRunnerSlots()));
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Updates the specified combo box, with the available plot options.
+ *
+ * @param cbPlotType  The combo box.
+ */
+void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
+  cbPlotType->clear();
+  auto parameters = model()->getParameterNames();
+
+  QSet<QString> plotOptions;
+
+  for (const auto parameter : parameters) {
+    auto plotOption = QString::fromStdString(parameter);
+    auto index = plotOption.lastIndexOf(".");
+    if (index >= 0)
+      plotOption = plotOption.remove(0, index + 1);
+    plotOptions << plotOption;
+  }
+
+  QStringList plotList;
+  if (!parameters.empty())
+    plotList << "All";
+  plotList.append(plotOptions.toList());
+
+  cbPlotType->addItems(plotList);
 }
 
 /*
@@ -608,17 +749,16 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
 void IndirectFitAnalysisTab::plotGuess(
     MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
   previewPlot->removeSpectrum("Guess");
+  auto guessFunction = fitFunction();
 
-  if (inputWorkspace()) {
-    m_guessWorkspace = createGuessWorkspace(fitFunction(), selectedSpectrum());
-    m_guessSpectrum = selectedSpectrum();
+  if (inputWorkspace() && guessFunction) {
+    auto guessWorkspace =
+        createGuessWorkspace(guessFunction, selectedSpectrum());
 
     // Check whether the guess workspace has enough data points
     // to plot
-    if (m_guessWorkspace->x(0).size() >= 2)
-      previewPlot->addSpectrum("Guess", m_guessWorkspace, 0, Qt::green);
-    else
-      m_guessWorkspace.reset();
+    if (guessWorkspace->x(0).size() >= 2)
+      previewPlot->addSpectrum("Guess", guessWorkspace, 0, Qt::green);
   }
 }
 
@@ -639,7 +779,6 @@ IndirectFitAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
   const auto nData = binIndexHigh - binIndexLow;
 
   const auto &xPoints = inputWS->points(wsIndex);
-
   std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
             dataX.begin());

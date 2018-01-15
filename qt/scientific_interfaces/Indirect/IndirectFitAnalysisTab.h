@@ -31,6 +31,8 @@ public:
 
   Mantid::API::IFunction_sptr model() const;
 
+  QString selectedFitType() const;
+
   size_t numberOfCustomFunctions(const std::string &functionName) const;
 
   double startX() const;
@@ -40,9 +42,11 @@ public:
   double parameterValue(const std::string &functionName,
                         const std::string &parameterName);
 
-  bool emptyFitFunction() const;
+  bool emptyModel() const;
 
-  const std::string backgroundName() const;
+  QString backgroundName() const;
+
+  void moveCustomFunctionsToEnd();
 
   void setParameterValue(const std::string &functionName,
                          const std::string &parameterName, double value);
@@ -98,7 +102,10 @@ public:
 
   QHash<QString, double> defaultParameterValues() const;
 
-  virtual Mantid::API::IFunction_sptr fitFunction() const;
+  Mantid::API::IFunction_sptr fitFunction() const;
+
+  virtual Mantid::API::IFunction_sptr
+  fitFunction(QHash<QString, QString> &functionNameChanges) const;
 
   virtual Mantid::API::MatrixWorkspace_sptr fitWorkspace() const;
 
@@ -143,6 +150,8 @@ protected:
                            const std::vector<double> &dataX,
                            const std::vector<double> &dataY);
 
+  void updatePlotOptions(QComboBox *cbPlotType);
+
 protected slots:
   void setSelectedSpectrum(int spectrum) override;
 
@@ -166,11 +175,15 @@ protected slots:
 
   void clearBatchRunnerSlots();
 
-  void fitFunctionChanged();
+  virtual void fitFunctionChanged();
 
   virtual void updatePreviewPlots() = 0;
 
   virtual void plotGuess() = 0;
+
+  virtual void updatePlotOptions() = 0;
+
+  virtual void parameterUpdated(const Mantid::API::IFunction *){};
 
 private:
   /// Overidden by child class.
@@ -180,15 +193,14 @@ private:
   virtual void disablePlotGuess() = 0;
   virtual void enablePlotGuess() = 0;
   QSet<QString> parameterNames();
+  void updateParametersFromTable(const std::string &paramWSName);
 
   Mantid::API::IFunction_sptr m_fitFunction;
   QHash<size_t, QHash<QString, double>> m_parameterValues;
   QHash<QString, double> m_defaultPropertyValues;
+  QHash<QString, QString> m_functionNameChanges;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   bool m_appendResults;
-
-  Mantid::API::MatrixWorkspace_sptr m_guessWorkspace;
-  int m_guessSpectrum;
 };
 
 } // namespace IDA
