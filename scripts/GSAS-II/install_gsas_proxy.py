@@ -97,6 +97,5 @@ if __name__ == "__main__":
                         help="SVN revision number to install (leave blank to use the latest revision")
 
     args = parser.parse_args()
-    print("RUNNING")
     install_gsasii(install_directory=args.install_dir,
                    revision_number=args.version)
