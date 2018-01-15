@@ -148,7 +148,7 @@ public:
   }
 
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
-    auto original_ptr = ComponentCreationHelper::createSphere(1.0);
+    auto original_ptr = createCube(1.0);
     auto &original = dynamic_cast<MeshObject &>(*original_ptr);
     original.setID("sp-1");
     int objType(-1);

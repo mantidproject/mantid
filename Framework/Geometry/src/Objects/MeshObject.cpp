@@ -452,12 +452,28 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
  * @return The volume.
  */
 double MeshObject::volume() const {
-  // Currently returns volume of bounding box
+  // Select centre of bounding box as centre point.
+  // For each triangle calculate the signed volume of 
+  // the tetrahedron formed by the triangle and the
+  // centre point. Then add to total.
+
   BoundingBox bb = getBoundingBox();
-  double dimX = bb.xMax() - bb.xMin();
-  double dimY = bb.yMax() - bb.yMin();
-  double dimZ = bb.zMax() - bb.zMin();
-  return dimX*dimY*dimZ;
+  double cX = 0.5*(bb.xMax() + bb.xMin());
+  double cY = 0.5*(bb.yMax() + bb.yMin());
+  double cZ = 0.5*(bb.zMax() + bb.zMin());
+  V3D centre(cX, cY, cZ);
+
+  double volume(0.0);
+
+  V3D vertex1, vertex2, vertex3;
+  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); i++) {
+    V3D a = vertex1 - centre;
+    V3D b = vertex2 - centre;
+    V3D c = vertex3 - centre;
+    volume += a.scalar_prod(b.cross_prod(c));
+  }
+  
+  return volume;
 }
 
 /**
