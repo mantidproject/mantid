@@ -106,25 +106,25 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
 
 
 def _divide_one_spectrum_by_spline(spectrum, spline):
-    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=spectrum)
+    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=spectrum, StoreInADS=False)
     divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum)
-    common.remove_intermediate_workspace(rebinned_spline)
     return divided
 
 
 def _divide_by_vanadium_splines(spectra_list, spline_file_path):
     vanadium_splines = mantid.LoadNexus(Filename=spline_file_path)
 
+    num_splines = len(vanadium_splines)
+    num_spectra = len(spectra_list)
+
     if hasattr(vanadium_splines, "OutputWorkspace"):  # vanadium_splines is a group
         vanadium_splines = vanadium_splines.OutputWorkspace
-        if len(vanadium_splines) != len(spectra_list):
+        if num_splines != num_spectra
             raise RuntimeError("Mismatch between number of banks in vanadium and number of banks in workspace to focus"
-                               "\nThere are {} banks for vanadium but {} for the run".format(len(vanadium_splines),
-                                                                                             len(spectra_list)))
-        output_list = []
-        for data_ws, van_ws in zip(spectra_list, vanadium_splines):
-            output_ws = _divide_one_spectrum_by_spline(data_ws, van_ws)
-            output_list.append(output_ws)
+                               "\nThere are {} banks for vanadium but {} for the run".format(num_splines, num_spectra))
+
+        output_list = [_divide_one_spectrum_by_spline(data_ws, van_ws)
+                       for data_ws, van_ws in zip(spectra_list, vanadium_splines)]
         return output_list
 
     output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines)]

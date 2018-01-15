@@ -25,7 +25,7 @@ Powder Diffraction
 - New algorithm :ref:`algm-SumOverlappingTubes` combines a detector scan for D2B into a single workspace.
 - ISIS Powder scripts for HRPD now support extra TOF windows 10-50 and 180-280
 - After calling create_vanadium and focus in ISIS Powder scripts on POLARIS, the output workspaces always contain the sample material if it is set using set_sample_material. (To view the sample material, right click the workspace and click 'Sample Material...')
-- Some usability improvements for using non-standard grouping files in ISIS_Powder
+- Using grouping files with only one bank was enabled in ISIS Powder, and related errors to do with mismatched number of parameters were made more readable
 - It is now possible to set beam parameters (height and width) using instrument_object.set_beam_parameters(height=123, width=456).
 
 Engineering Diffraction
