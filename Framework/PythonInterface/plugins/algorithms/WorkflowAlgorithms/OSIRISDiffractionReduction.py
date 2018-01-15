@@ -105,7 +105,7 @@ class DRangeToWorkspaceMap(object):
 
         :param morphism:    The morphism to apply.
         """
-        self._map = {d_range : morphism(d_range, workspace)
+        self._map = {d_range: morphism(d_range, workspace)
                      for d_range, workspace in self._map.items()}
 
     def combine(self, d_range_map, combinator):
@@ -391,7 +391,9 @@ def diffraction_calibrator(calibration_file):
                              XMin=d_range[0], XMax=d_range[1],
                              OutputWorkspace="calibrated_sample",
                              StoreInADS=False, EnableLogging=False)
+
     return calibrator
+
 
 def create_loader(ipf_filename, minimum_spectrum, maximum_spectrum, load_logs, load_opts):
     """
@@ -408,7 +410,9 @@ def create_loader(ipf_filename, minimum_spectrum, maximum_spectrum, load_logs, l
     def loader(runs):
         return load_files(runs, ipf_filename, minimum_spectrum, maximum_spectrum,
                           load_logs=load_logs, load_opts=load_opts)
+
     return loader
+
 
 def create_drange_map_generator(runs_loader, combinator):
     """
@@ -424,7 +428,9 @@ def create_drange_map_generator(runs_loader, combinator):
         workspace_names, _ = runs_loader(runs)
         drange_map.add_workspaces([transform(workspace_name) for workspace_name in workspace_names], combinator)
         return drange_map
+
     return generator
+
 
 # pylint: disable=no-init,too-many-instance-attributes
 class OSIRISDiffractionReduction(PythonAlgorithm):
@@ -530,10 +536,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         drange_map_generator = create_drange_map_generator(load_runs, rebin_and_average)
 
         # Create a sample drange map from the sample runs
-        self._sam_ws_map = drange_map_generator(self._sample_runs, lambda name : mtd[name])
+        self._sam_ws_map = drange_map_generator(self._sample_runs, lambda name: mtd[name])
 
         # Create a vanadium drange map from the sample runs
-        self._van_ws_map = drange_map_generator(self._vanadium_runs, lambda name : mtd[name])
+        self._van_ws_map = drange_map_generator(self._vanadium_runs, lambda name: mtd[name])
 
         # Load the container run
         if self._container_files:
@@ -542,7 +548,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 self._con_ws_map = drange_map_generator(self._container_files,
                                                         lambda name: mtd[name] * self._container_scale_factor)
             else:
-                self._con_ws_map = drange_map_generator(self._container_files, lambda name : mtd[name])
+                self._con_ws_map = drange_map_generator(self._container_files, lambda name: mtd[name])
 
             result_map = self._sam_ws_map.combine(self._con_ws_map, rebin_and_subtract)
         else:
