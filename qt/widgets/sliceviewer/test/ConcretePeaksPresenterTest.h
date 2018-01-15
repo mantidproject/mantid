@@ -29,32 +29,6 @@ using boost::regex;
 typedef boost::shared_ptr<Mantid::API::MDGeometry> MDGeometry_sptr;
 
 class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
-  /**
-   * Helper method.
-   * Determine whether a vector is sorted Ascending
-   * @param potentiallySorted : Vector that might be sorted ascending.
-   * @return False if not sortedAscending
-   */
-  template <typename T>
-  bool isSortedAscending(std::vector<T> potentiallySorted) {
-    return std::adjacent_find(potentiallySorted.begin(),
-                              potentiallySorted.end(),
-                              std::greater<T>()) == potentiallySorted.end();
-  }
-
-  /**
-   * Helper method.
-   * Determine whether a vector is sorted Descending
-   * @param potentiallySorted : Vector that might be sorted descending.
-   * @return False if not sortedAscending
-   */
-  template <typename T>
-  bool isSortedDescending(std::vector<T> potentiallySorted) {
-    return std::adjacent_find(potentiallySorted.begin(),
-                              potentiallySorted.end(),
-                              std::less<T>()) == potentiallySorted.end();
-  }
-
   /// Alias.
   typedef boost::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter>
       ConcretePeaksPresenter_sptr;
@@ -628,63 +602,6 @@ public:
     auto presenter = concreteBuilder.create();
     presenter->getBoundingBox(0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
-  }
-
-  void doTestSorting(const bool sortAscending) {
-    const int expectedNumberOfPeaks = 1;
-    auto concreteBuilder = createStandardBuild(expectedNumberOfPeaks);
-
-    // Create a mock view object/product that will be returned by the mock
-    // factory.
-    auto pMockView = new NiceMock<MockPeakOverlayView>;
-    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
-    EXPECT_CALL(*pMockView, setSlicePoint(_, _))
-        .Times(1); // Expect that the slice point will be re-set upon sorting.
-
-    // Create a widget factory mock
-    auto pMockViewFactory = new NiceMock<MockPeakOverlayFactory>;
-    PeakOverlayViewFactory_sptr mockViewFactory =
-        PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_, _))
-        .WillRepeatedly(Return(mockView));
-    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
-    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
-
-    concreteBuilder.withViewFactory(mockViewFactory);
-
-    auto presenter = concreteBuilder.create();
-    presenter->sortPeaksWorkspace(
-        "h", sortAscending); // Sort the presenter by the h column.
-    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
-
-    // Check that the workspace is sorted.
-    IPeaksWorkspace_const_sptr sortedPeaksWS =
-        *presenter->presentedWorkspaces().begin();
-    std::vector<double> potentiallySortedHValues;
-    for (int i = 0; i < sortedPeaksWS->getNumberPeaks(); ++i) {
-      const IPeak &peak = sortedPeaksWS->getPeak(i);
-      potentiallySortedHValues.push_back(peak.getH());
-    }
-
-    if (sortAscending == true) {
-      TSM_ASSERT("The internal peaks workspace should have been internally "
-                 "sorted ASCENDING by H values",
-                 this->isSortedAscending(potentiallySortedHValues));
-    } else {
-      TSM_ASSERT("The internal peaks workspace shuld have been internally "
-                 "sorted DESCENDING by H values",
-                 this->isSortedDescending(potentiallySortedHValues));
-    }
-  }
-
-  void test_sortPeaksWorkspace_by_H_Ascending() {
-    bool sortAscending = true;
-    doTestSorting(sortAscending);
-  }
-
-  void test_sortPeaksWorkspace_by_H_Descending() {
-    bool sortAscending = false;
-    doTestSorting(sortAscending);
   }
 
   void test_coordinateToString() {
