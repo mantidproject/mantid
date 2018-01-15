@@ -105,22 +105,6 @@ protected:
                        const QString &startRangePropName = "StartX",
                        const QString &endRangePropName = "EndX");
 
-  Mantid::API::IFunction_sptr
-  createPopulatedFunction(const std::string &funcName,
-                          Mantid::API::IFunction_sptr comp, QtProperty *group,
-                          bool tie = false, const std::string &pref = "");
-
-  Mantid::API::IFunction_sptr
-  createPopulatedFunction(const std::string &funcName, QtProperty *group,
-                          bool tie = false, const std::string &pref = "");
-
-  void populateFunction(Mantid::API::IFunction_sptr func, QtProperty *group,
-                        bool tie = false, const std::string &pref = "");
-
-  void populateFunction(Mantid::API::IFunction_sptr func,
-                        Mantid::API::IFunction_sptr comp, QtProperty *group,
-                        bool tie = false, const std::string &pref = "");
-
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
   /// QtCheckBoxFactory
