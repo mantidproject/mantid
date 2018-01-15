@@ -54,7 +54,7 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
         nuclear = self.getProperty("MainPeaks").value
         sats = self.getProperty("SatellitePeaks").value
 
-        nuclear_hkls = self._hkls(nuclear)
+        nuclear_hkls = self.get_hkls(nuclear)
         sats_hkls = self.get_hkls(sats)
 
         qs = self.find_q_vectors(nuclear_hkls, sats_hkls)
