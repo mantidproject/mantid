@@ -279,14 +279,14 @@ class MainWindow(QMainWindow):
         default_layout = {
             'widgets': [
                 # column 0
-                [[ipython]],
+                [[ipython], [workspacewidget]],
                 # column 1
-                [[logmessages], [workspacewidget]]
+                [[logmessages]]
             ],
             'width-fraction': [0.75,    # column 0 width
                                0.25],   # column 1 width
-            'height-fraction': [[1.0],  # column 0 row heights
-                                [0.5, 0.5]]  # column 1 row heights
+            'height-fraction': [[0.5, 0.5],  # column 0 row heights
+                                [1.0]]  # column 1 row heights
         }
 
         with widget_updates_disabled(self):
