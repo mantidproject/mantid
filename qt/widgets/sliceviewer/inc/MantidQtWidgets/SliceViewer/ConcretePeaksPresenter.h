@@ -45,8 +45,6 @@ public:
   std::string getTransformName() const override;
   void setShown(const bool shown) override;
   PeakBoundingBox getBoundingBox(const int) const override;
-  void sortPeaksWorkspace(const std::string &byColumnName,
-                          const bool ascending) override;
   void setPeakSizeOnProjection(const double fraction) override;
   void setPeakSizeIntoProjection(const double fraction) override;
   double getPeakSizeOnProjection() const override;
