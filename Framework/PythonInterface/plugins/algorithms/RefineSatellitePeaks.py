@@ -8,7 +8,7 @@ from scipy.cluster.vq import kmeans2
 import scipy.cluster.hierarchy as hcluster
 
 
-class RefineSatellitePeaks(PythonAlgorithm):
+class RefineSatellitePeaks(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(IPeaksWorkspaceProperty(name="MainPeaks",
