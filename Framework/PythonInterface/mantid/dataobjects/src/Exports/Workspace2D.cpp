@@ -4,6 +4,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/Logger.h"
@@ -47,6 +49,10 @@ public:
     auto spectra = ws.getNumberHistograms();
     const auto &indexInfo = ws.indexInfo();
     const auto &spectrumDefinitions = indexInfo.spectrumDefinitions();
+    const auto &componentInfo = ws.detectorInfo();
+    if (componentInfo.isScanning()) {
+      throw std::invalid_argument("Cannot pickle Scanning Workspace2D");
+    }
 
     for (decltype(spectra) i = 0; i < spectra; ++i) {
       const auto &histo = ws.histogram(i);
