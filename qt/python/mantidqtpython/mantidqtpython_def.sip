@@ -2484,7 +2484,7 @@ public:
         wsName The name of the workspace to be rendered.
 %End
 
-    void selectData(int spectrumNumber, double dataVal) const;
+    void selectData(int spectrumNumber, double dataVal);
 %Docstring
     Programmatically set horizontal and vertical graph data.
 

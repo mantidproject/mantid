@@ -76,7 +76,7 @@ public:
     return m_spectrumDisplay;
   }
 
-  void selectData(int spectrumNumber, double dataVal) const;
+  void selectData(int spectrumNumber, double dataVal);
   bool isTrackingOn() const;
   /// Load the state of the spectrum viewer from a Mantid project file
   static API::IProjectSerialisable *loadFromProject(const std::string &lines,

@@ -262,7 +262,7 @@ void SpectrumView::respondToTabCloseReqest(int tab) {
   }
 }
 
-void SpectrumView::selectData(int spectrumNumber, double dataVal) const {
+void SpectrumView::selectData(int spectrumNumber, double dataVal) {
   auto index = m_ui->imageTabs->currentIndex();
   auto y = static_cast<double>(spectrumNumber - 1);
   auto x = dataVal;
