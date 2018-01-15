@@ -54,7 +54,7 @@ class MultiFileEditor(PluginWidget):
 
         # attributes
         self.run_action = create_action(self, "Run",
-                                        on_triggered=self.execute_current,
+                                        on_triggered=self.editors.execute_current,
                                         shortcut="Ctrl+Return",
                                         shortcut_context=Qt.ApplicationShortcut)
         self.editor_actions = [self.run_action]
@@ -67,11 +67,15 @@ class MultiFileEditor(PluginWidget):
     def read_user_settings(self, _):
         pass
 
-    def register_plugin(self, menu=None):
+    def register_plugin(self):
         self.main.add_dockwidget(self)
-        add_actions(menu, self.editor_actions)
+        # menus
+        add_actions(self.main.editor_menu, self.editor_actions)
 
-    # ----------- Plugin behaviour --------------
+    # ----------- Plugin Behaviour --------------------
 
-    def execute_current(self):
-        self.editors.execute_current()
+    def open_file_in_new_tab(self, filepath):
+        return self.editors.open_file_in_new_tab(filepath)
+
+    def save_current_file(self):
+        self.editors.save_current_file()

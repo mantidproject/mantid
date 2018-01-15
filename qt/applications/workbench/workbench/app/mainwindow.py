@@ -44,7 +44,7 @@ requirements.check_qt()
 from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
                          QPoint, QSize, Qt)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow,
+from qtpy.QtWidgets import (QApplication, QDockWidget, QFileDialog, QMainWindow,
                             QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
@@ -136,6 +136,8 @@ class MainWindow(QMainWindow):
         self.setDockOptions(self.DOCKOPTIONS)
 
     def setup(self):
+        # menus must be done first so they can be filled by the
+        # plugins in register_plugin
         self.create_menus()
         self.create_actions()
         self.populate_menus()
@@ -157,7 +159,7 @@ class MainWindow(QMainWindow):
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
         self.editor = MultiFileEditor(self)
-        self.editor.register_plugin(self.editor_menu)
+        self.editor.register_plugin()
         self.widgets.append(self.editor)
 
         self.setup_layout()
@@ -178,10 +180,19 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         # --- general application menu options --
         # file menu
+        action_open = create_action(self, "Open File",
+                                    on_triggered=self.open_file,
+                                    shortcut="Ctrl+O",
+                                    shortcut_context=Qt.ApplicationShortcut)
+        action_save = create_action(self, "Save File",
+                                    on_triggered=self.save_file,
+                                    shortcut="Ctrl+S",
+                                    shortcut_context=Qt.ApplicationShortcut)
+
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
-        self.file_menu_actions = [action_quit]
+        self.file_menu_actions = [action_open, action_save, None, action_quit]
 
     def populate_menus(self):
         # Link to menus
@@ -191,6 +202,8 @@ class MainWindow(QMainWindow):
         """Create a dockwidget around a plugin and add the dock to window"""
         dockwidget, location = plugin.create_dockwidget()
         self.addDockWidget(location, dockwidget)
+
+    # ----------------------- Layout ---------------------------------
 
     def setup_layout(self):
         window_settings = self.load_window_settings('window/')
@@ -347,6 +360,19 @@ class MainWindow(QMainWindow):
         for widget in self.widgets:
             widget.read_user_settings(CONF.qsettings)
 
+    # ----------------------- Slots ---------------------------------
+    def open_file(self):
+        # todo: when more file types are added this should
+        # live in its own type
+        filepath, _ = QFileDialog.getOpenFileName(self, "Open File...", "", "Python (*.py)")
+        if not filepath:
+            return
+        self.editor.open_file_in_new_tab(filepath)
+
+    def save_file(self):
+        # todo: how should this interact with project saving and workspaces when they are implemented?
+        self.editor.save_current_file()
+
 
 def initialize():
     """Perform an initialization of the application instance. Most notably
@@ -373,7 +399,7 @@ def start_workbench(app):
     main_window = MainWindow()
     main_window.setup()
 
-    preloaded_packages = ('mantid', 'matplotlib')
+    preloaded_packages = ('mantid',)
     for name in preloaded_packages:
         main_window.set_splash('Preloading ' + name)
         importlib.import_module(name)
