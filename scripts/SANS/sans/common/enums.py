@@ -352,6 +352,7 @@ class FindDirectionEnum(object):
     """
     pass
 
+
 # ------------------------------
 # Integrals for diagnostic tab
 # -------------------------------

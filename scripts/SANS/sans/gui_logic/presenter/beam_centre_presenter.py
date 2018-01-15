@@ -46,10 +46,10 @@ class BeamCentrePresenter(object):
 
             # Set the default gui
             self._view.set_options(self._beam_centre_model)
-    
+
     def on_update_instrument(self, instrument):
         self._beam_centre_model.set_scaling(instrument)
-    
+
     def on_update_rows(self):
         self._view.set_options(self._beam_centre_model)
 

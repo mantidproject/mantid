@@ -5,7 +5,6 @@ from abc import ABCMeta, abstractmethod
 from PyQt4 import QtGui, QtCore
 from six import with_metaclass
 import ui_diagnostics_page
-from mantidqtpython import MantidQt
 from sans.gui_logic.gui_common import (load_file, GENERIC_SETTINGS)
 
 try:
@@ -43,7 +42,6 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         # Hook up signal and slots
         self._diagnostics_page_listeners = []
         self.connect_signals()
-
 
         # Attach validators
         self._attach_validators()
@@ -102,7 +100,6 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         return str(self.run_input_line_edit.text())
 
     def set_detectors(self, detector_list):
-        current_index = self.detector_combo_box.currentIndex()
         self.detector_combo_box.clear()
         for element in detector_list:
             self.detector_combo_box.addItem(element)
@@ -189,4 +186,3 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
     @detector.setter
     def detector(self, value):
         self.detector_combo_box.currentText(value)
-

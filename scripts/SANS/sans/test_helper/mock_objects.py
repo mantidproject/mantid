@@ -33,6 +33,7 @@ def create_mock_beam_centre_tab():
     view = mock.create_autospec(BeamCentre, spec_set=False)
     return view
 
+
 def create_mock_diagnostics_tab():
     view = mock.create_autospec(DiagnosticsPage, spec_set=False)
     return view

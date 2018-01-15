@@ -24,8 +24,7 @@ from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_AL
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, generate_table_index, OPTIONS_SEPARATOR,
                                        OPTIONS_EQUAL, get_instrument_strings_for_gui)
-from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RangeStepType, SampleShape, FitType)
-from sans.common.file_information import (SANSFileInformationFactory)
+from sans.common.enums import (BatchReductionEntry, OutputMode, RangeStepType, SampleShape, FitType)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS

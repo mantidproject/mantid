@@ -1,11 +1,6 @@
 from sans.common.general_functions import parse_diagnostic_settings
-from sans.algorithm_detail.load_data import load_isis, get_loader_strategy
-from sans.common.enums import (SANSFacility, SANSInstrument, SANSDataType, DetectorType)
-from sans.common.file_information import (SANSFileInformationFactory, FileType, get_extension_for_file_type,
-                                          find_full_file_path)
-from sans.state.data import (StateData)
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
-from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag, create_managed_non_child_algorithm)
+from sans.common.general_functions import (create_child_algorithm, create_managed_non_child_algorithm)
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import IntegralEnum, DetectorType
 from mantid.api import AlgorithmPropertyWithValue
@@ -43,7 +38,7 @@ def run_integral(range, mask, integral, detector, state):
 
     output_workspaces = run_algorithm(input_workspace, ranges, integral, mask, detector, input_workspace_name,
                                       x_dim, y_dim)
-    output_graph = plot_graph(output_workspaces)
+    plot_graph(output_workspaces)
 
 
 def parse_range(range):
@@ -51,6 +46,7 @@ def parse_range(range):
         return parse_diagnostic_settings(range)
     else:
         return [[0, AlgorithmPropertyWithValue.EMPTY_INT]]
+
 
 def load_workspace(state):
     use_optimizations = True
@@ -70,6 +66,7 @@ def load_workspace(state):
 
     return get_workspace_from_algorithm(load_alg, 'SampleScatterWorkspace')
 
+
 def crop_workspace(component, workspace):
     crop_name = "SANSCrop"
     crop_options = {"InputWorkspace": workspace,
@@ -78,6 +75,7 @@ def crop_workspace(component, workspace):
     crop_alg = create_child_algorithm('', crop_name, **crop_options)
     crop_alg.execute()
     return crop_alg.getProperty("OutputWorkspace").value
+
 
 def run_algorithm(input_workspace, ranges, integral, mask, detector, input_workspace_name, x_dim, y_dim):
     output_workspaces = []
@@ -90,11 +88,12 @@ def run_algorithm(input_workspace, ranges, integral, mask, detector, input_works
 
         if integral == IntegralEnum.Horizontal:
             ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='x',
-                                  HorizontalAxis='y', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
-            SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min, EndWorkspaceIndex=hv_max)
+                                   HorizontalAxis='y', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
+            SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
+                       EndWorkspaceIndex=hv_max)
         elif integral == IntegralEnum.Vertical:
             ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='y',
-                                  HorizontalAxis='x', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
+                                   HorizontalAxis='x', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
             SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
                        EndWorkspaceIndex=hv_max)
         elif integral == IntegralEnum.Time:
@@ -103,16 +102,20 @@ def run_algorithm(input_workspace, ranges, integral, mask, detector, input_works
 
     return output_workspaces
 
+
 def generate_output_workspace_name(range, integral, mask, detector, input_workspace_name):
     integral_string = IntegralEnum.to_string(integral)
     detector_string = DetectorType.to_string(detector)
-    return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range, integral_string, detector_string, mask)
+    return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range, integral_string,
+                                                                         detector_string, mask)
+
 
 def plot_graph(workspace):
     if mantidplot:
         return mantidplot.plotSpectrum(workspace, 0)
     else:
         return None
+
 
 def apply_mask(state, workspace, component):
     state_serialized = state.property_manager
