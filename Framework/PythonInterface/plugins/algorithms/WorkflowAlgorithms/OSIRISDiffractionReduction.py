@@ -487,10 +487,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._cal = None
         self._output_ws_name = None
 
-        self._sam_ws_map = DRangeToWorkspaceMap()
-        self._con_ws_map = DRangeToWorkspaceMap()
-        self._van_ws_map = DRangeToWorkspaceMap()
-
     def _get_properties(self):
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._cal = self.getProperty("CalFile").value
