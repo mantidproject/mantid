@@ -74,7 +74,8 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
 
         centroid_satellites = CentroidPeaksMD(md, predicted_satellites, PeakRadius=peak_radius)
         satellites_int_spherical = IntegratePeaksMD(md, centroid_satellites, PeakRadius=peak_radius,
-                                                    BackgroundInnerRadius=background_radii[0], BackgroundOuterRadius=background_radii[1], IntegrateIfOnEdge=True)
+                                                    BackgroundInnerRadius=background_radii[0], BackgroundOuterRadius=background_radii[1],
+                                                    IntegrateIfOnEdge=True)
         satellites_int_spherical = FilterPeaks(satellites_int_spherical, FilterVariable="Intensity", FilterValue=0, Operator=">")
         satellites_int_spherical = FilterPeaks(satellites_int_spherical, FilterVariable="Signal/Noise",
                                                FilterValue=I_over_sigma, Operator=">")
@@ -100,7 +101,7 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
         """Cluster q vectors into discrete groups.
 
         Classifies each of the q vectors into a number of clusters. The number of clusters used is decided by the parameters passed:
-            * If the k parameter is supplied then the q vectors are grouped into k clusters using kmeans. 
+            * If the k parameter is supplied then the q vectors are grouped into k clusters using kmeans.
             * If the threshold parameter is supplied then the q vectors a split into groups based on cophenetic distance.
 
         :param qs: list of q vectors to cluster. Each element should be a numpy array of length three.
@@ -120,7 +121,7 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
     def average_clusters(self, qs, clusters):
         """Find the centroid of the clusters.
 
-        For each q vector, group them by their designated cluster and then compute 
+        For each q vector, group them by their designated cluster and then compute
         the average of the group.
 
         :param qs: list of q vectors. Each element should be a numpy array.
