@@ -2,20 +2,20 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/NdArray.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
-#include <boost/python/class.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/dict.hpp>
-#include <boost/python/converter/builtin_converters.hpp>
 #include <boost/preprocessor/list/for_each.hpp>
 #include <boost/preprocessor/tuple/to_list.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/converter/builtin_converters.hpp>
+#include <boost/python/dict.hpp>
+#include <boost/python/list.hpp>
 #include <cstring>
 #include <vector>
 
@@ -416,13 +416,13 @@ void getCellLoc(ITableWorkspace &self, const bpl::object &col_or_row,
 }
 
 /**
-  * Returns an appropriate Python object for the value at the given cell
-  * @param self A reference to the TableWorkspace python object that we were
+ * Returns an appropriate Python object for the value at the given cell
+ * @param self A reference to the TableWorkspace python object that we were
  * called on
-  * @param value A python object containing either a row index or a column name
-  * @param row_or_col An integer giving the row if value is a string or the
+ * @param value A python object containing either a row index or a column name
+ * @param row_or_col An integer giving the row if value is a string or the
  * column if value is an index
-  */
+ */
 PyObject *cell(ITableWorkspace &self, const bpl::object &value,
                int row_or_col) {
   // Find the column and row
@@ -448,7 +448,7 @@ void setCell(ITableWorkspace &self, const bpl::object &col_or_row,
   getCellLoc(self, col_or_row, row_or_col, column, row);
   setValue(column, row, value);
 }
-}
+} // namespace
 
 /**
  * Get the contents of the workspace as a python dictionary
@@ -559,9 +559,8 @@ void export_ITableWorkspace() {
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name")
 
-      .def("setCell", &setCell,
-           (arg("self"), arg("row_or_column"), arg("column_or_row"),
-            arg("value")),
+      .def("setCell", &setCell, (arg("self"), arg("row_or_column"), arg("column_or_row"),
+                                 arg("value")),
            "Sets the value of a given cell. If the first argument is a "
            "number then it is interpreted as a row otherwise it is interpreted "
            "as a column name")
