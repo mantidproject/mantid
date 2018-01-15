@@ -10,6 +10,9 @@ import scipy.cluster.hierarchy as hcluster
 
 class RefineSatellitePeaks(DataProcessorAlgorithm):
 
+    def category(self):
+        return 'Crystal\\Peaks'
+
     def PyInit(self):
         self.declareProperty(IPeaksWorkspaceProperty(name="MainPeaks",
                                                      defaultValue="",
