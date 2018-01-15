@@ -389,8 +389,13 @@
       <technique>technique</technique>
    </instrument>
 
-   <instrument name="WAND">
-      <technique>technique</technique>
+   <instrument name="WAND" shortname="HB2C">
+     <technique>Neutron Diffraction</technique>
+     <technique>Powder Diffraction</technique>
+     <technique>Single Crystal Diffraction</technique>
+     <livedata>
+       <connection name="event" address="hb2c-daq1.ornl.gov:31415" listener="SNSLiveEventDataListener" />
+     </livedata>
    </instrument>
 
    <instrument name="HB2D">
