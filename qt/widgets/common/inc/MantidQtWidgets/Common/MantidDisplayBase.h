@@ -13,7 +13,6 @@
 #include <vector>
 #include <QStringList>
 
-
 template <class Key, class T> class QHash;
 template <class Key, class T> class QMultiMap;
 template <class T> class QList;

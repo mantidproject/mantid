@@ -84,8 +84,8 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
 }
 
 WorkspaceTreeWidget::~WorkspaceTreeWidget() {
-	//Ownership is transferred on construction so must delete
-	delete(m_mantidDisplayModel);
+  // Ownership is transferred on construction so must delete
+  delete (m_mantidDisplayModel);
 }
 
 /**
