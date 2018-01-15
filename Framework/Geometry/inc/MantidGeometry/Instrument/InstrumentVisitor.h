@@ -1,21 +1,22 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTVISITOR_H_
 #define MANTID_GEOMETRY_INSTRUMENTVISITOR_H_
 
+#include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include <Eigen/Geometry>
+#include <boost/shared_ptr.hpp>
 #include <cstddef>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include <unordered_map>
-#include <boost/shared_ptr.hpp>
-#include <Eigen/Geometry>
 
 namespace Mantid {
 using detid_t = int32_t;
 namespace Beamline {
 class ComponentInfo;
 class DetectorInfo;
-}
+} // namespace Beamline
 namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
@@ -27,6 +28,7 @@ class Instrument;
 class IObject;
 class ParameterMap;
 class RectangularDetector;
+class ObjCompAssembly;
 
 /** InstrumentVisitor : Visitor for components with access to Info wrapping
   features.
@@ -134,7 +136,7 @@ private:
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
 
   /// Structured bank flag
-  boost::shared_ptr<std::vector<bool>> m_isStructuredBank;
+  boost::shared_ptr<std::vector<Beamline::ComponentType>> m_componentType;
 
   /// Component names
   boost::shared_ptr<std::vector<std::string>> m_names;
@@ -144,6 +146,9 @@ private:
 
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers() const;
+
+  /// Extract the common aspects relevant to all component types
+  size_t commonRegistration(const Mantid::Geometry::IComponent &component);
 
 public:
   InstrumentVisitor(boost::shared_ptr<const Instrument> instrument);
@@ -164,6 +169,9 @@ public:
 
   virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
+
+  virtual size_t
+  registerObjComponentAssembly(const ObjCompAssembly &obj) override;
 
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
   componentIds() const;

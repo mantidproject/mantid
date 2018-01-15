@@ -662,13 +662,14 @@ bool MantidEVWorker::showCells(const std::string &peaks_ws_name,
  *  @param allow_perm        If true, permutations are used to find the
  *                           best fitting cell of any
  *                           particular type.
+ *  @param tolerance       The tolerance on hkl values to use when
  *
  *  @return true if the SelectCellOfType algorithm completes successfully.
  */
 bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name,
                                       const std::string &cell_type,
                                       const std::string &centering,
-                                      bool allow_perm) {
+                                      bool allow_perm, double tolerance) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
@@ -677,7 +678,7 @@ bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name,
   alg->setProperty("CellType", cell_type);
   alg->setProperty("Centering", centering);
   alg->setProperty("Apply", true);
-  alg->setProperty("tolerance", 0.12);
+  alg->setProperty("tolerance", tolerance);
   alg->setProperty("AllowPermutations", allow_perm);
 
   return alg->execute();
@@ -694,11 +695,13 @@ bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name,
  *  @param allow_perm        If true, permutations are used to find the
  *                           best fitting cell of any
  *                           particular type.
+ *  @param tolerance       The tolerance on hkl values to use when
  *
  *  @return true if the SelectCellWithForm algorithm completes successfully.
  */
 bool MantidEVWorker::selectCellWithForm(const std::string &peaks_ws_name,
-                                        size_t form_num, bool allow_perm) {
+                                        size_t form_num, bool allow_perm,
+                                        double tolerance) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
@@ -707,7 +710,7 @@ bool MantidEVWorker::selectCellWithForm(const std::string &peaks_ws_name,
   alg->setProperty("PeaksWorkspace", peaks_ws_name);
   alg->setProperty("FormNumber", (int)form_num);
   alg->setProperty("Apply", true);
-  alg->setProperty("tolerance", 0.12);
+  alg->setProperty("tolerance", tolerance);
   alg->setProperty("AllowPermutations", allow_perm);
 
   return alg->execute();

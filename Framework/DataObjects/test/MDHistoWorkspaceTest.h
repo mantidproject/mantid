@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
@@ -21,7 +22,6 @@
 #include "MantidKernel/Strings.h"
 #include "PropertyManagerHelper.h"
 
-using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;

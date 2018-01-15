@@ -37,8 +37,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport Load : public API::Algorithm {
 public:
-  /// Default constructor
-  Load();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Load"; }
   /// Summary of algorithms purpose
@@ -56,6 +54,11 @@ public:
   /// Override setPropertyValue
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 
 private:
   /// This method returns shared pointer to a load algorithm which got

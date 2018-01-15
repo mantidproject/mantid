@@ -15,6 +15,9 @@ Installation
 Workbench
 ---------
 
+General
+-------
+- Fixed a bug where MantidPlot could freeze when performing a long running search for files.
 - Fixed a bug where MantidPlot would crash if the sample log fields used for run start and end contained non-ISO8601 conforming values.
 - Fixed an issue where updating a workspace changes the number format from decimal to scientific notation if the workspace is being viewed.
 - Added :mod:`mantid.plots` to provide convenience functions for plotting mantid workspaces with matplotlib
@@ -24,6 +27,7 @@ SliceViewer and Vates Simple Interface
 
 - Update SwitchToSliceViewer (shift + click) in MultiSlice view to work with nonorthogonal axes.
 - Pressing alt while clicking an arrow in the MultiSlice view opens a text box where one may precisely enter the slice position.
+- Users can now sort by the I/sigma and energy columns in the SliceViewer when viewing a peaks workspace.
 - Fixed bug which would cause slice viewer to crash when deleting an overlaid peaks workspace.
 - Fixed a bug where overwriting peaks workspaces with overlaid in the slice viewer with peak backgrounds shown cause Mantid to crash.
 

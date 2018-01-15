@@ -1,23 +1,25 @@
 #ifndef MANTID_GEOMETRY_COMPONENTINFO_H_
 #define MANTID_GEOMETRY_COMPONENTINFO_H_
 
+#include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include <boost/shared_ptr.hpp>
+#include <map>
 #include <unordered_map>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 
 namespace Kernel {
 class Quat;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 class IComponent;
 class IObject;
-}
+} // namespace Geometry
 
 namespace Beamline {
 class ComponentInfo;
@@ -31,7 +33,6 @@ class Instrument;
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
-
   This file is part of Mantid.
 
   Mantid is free software; you can redistribute it and/or modify
@@ -69,6 +70,21 @@ private:
 
   /// Private copy constructor. Do not make public.
   ComponentInfo(const ComponentInfo &other);
+  template <typename IteratorT>
+  void growBoundingBoxAsRectuangularBank(
+      size_t index, const Geometry::BoundingBox *reference,
+      Geometry::BoundingBox &mutableBB,
+      std::map<size_t, size_t> &mutableDetExclusions,
+      IteratorT &mutableIterator) const;
+  template <typename IteratorT>
+  void growBoundingBoxAsOutline(size_t index,
+                                const Geometry::BoundingBox *reference,
+                                Geometry::BoundingBox &mutableBB,
+                                std::map<size_t, size_t> &mutableDetExclusions,
+                                IteratorT &mutableIterator) const;
+  void growBoundingBoxByDetectors(
+      size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
+      const std::map<size_t, size_t> &detectorExclusions) const;
 
 public:
   ComponentInfo(
@@ -112,7 +128,7 @@ public:
   size_t sample() const;
   double l1() const;
   Kernel::V3D scaleFactor(const size_t componentIndex) const;
-  std::string name(const size_t componentIndex) const;
+  const std::string &name(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Kernel::V3D &scaleFactor);
   size_t root();
@@ -120,13 +136,13 @@ public:
   const IComponent *componentID(const size_t componentIndex) const {
     return m_componentIds->operator[](componentIndex);
   }
-  bool hasShape(const size_t componentIndex) const;
+  bool hasValidShape(const size_t componentIndex) const;
   const Geometry::IObject &shape(const size_t componentIndex) const;
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;
   BoundingBox boundingBox(const size_t componentIndex,
                           const BoundingBox *reference = nullptr) const;
-  bool isStructuredBank(const size_t componentIndex) const;
+  Beamline::ComponentType componentType(const size_t componentIndex) const;
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   void merge(const ComponentInfo &other);
   size_t scanSize() const;
