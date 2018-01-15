@@ -77,6 +77,10 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
   setupConnections();
 
   m_tree->setDragEnabled(true);
+
+  auto presenter = boost::make_shared<WorkspacePresenter>(this);
+  m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
+  presenter->init();
 }
 
 WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
@@ -171,12 +175,6 @@ void WorkspaceTreeWidget::setTreeUpdating(const bool state) {
 }
 
 void WorkspaceTreeWidget::incrementUpdateCount() { m_updateCount.ref(); }
-
-void WorkspaceTreeWidget::init() {
-  auto presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
-  m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
-  presenter->init();
-}
 
 WorkspacePresenterWN_wptr WorkspaceTreeWidget::getPresenterWeakPtr() {
   return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
