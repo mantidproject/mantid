@@ -13,7 +13,7 @@ Description
 
    This algorithm requires GSAS-II to be installed on your computer. A
    version of GSAS-II containing the module GSASIIscriptable (added in
-   April 2017) is required. See Installing_GSASII__
+   April 2017) is required. See Installing_GSASII_
    for how to get the correct version of GSAS-II.
 
 Uses `GSAS-II <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_
