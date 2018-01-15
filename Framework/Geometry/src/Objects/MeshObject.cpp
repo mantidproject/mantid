@@ -644,7 +644,7 @@ boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() {
 * Updates the geometry handler if needed
 */
 void MeshObject::updateGeometryHandler() {
-
+  return; //Hopefully nothing necessary here
 }
 
 /**
@@ -677,7 +677,15 @@ int MeshObject::numberOfTriangles() const {
 * get faces
 */
 int *MeshObject::getTriangles() const {
-  return nullptr;
+  int *faces = nullptr;
+  int nFaceCorners = sizeof(m_triangles); 
+  if (nFaceCorners > 0) {
+    faces = new int[static_cast<std::size_t>(nFaceCorners)];
+    for (size_t i = 0; i < nFaceCorners; ++i) {
+      faces[i] = m_triangles[i];
+    }
+  }
+  return faces;
 }
 
 
@@ -692,7 +700,18 @@ int MeshObject::numberOfVertices() const {
 * get vertices
 */
 double *MeshObject::getVertices() const {
-  return nullptr;
+  double *points = nullptr;
+  int nPts = sizeof(m_vertices);
+  if (nPts > 0) {
+    points = new double[static_cast<std::size_t>(nPts) * 3];
+    for (size_t i = 0; i < nPts; ++i) {
+      V3D pnt = m_vertices[i];
+      points[i * 3 + 0] = pnt.X();
+      points[i * 3 + 1] = pnt.Y();
+      points[i * 3 + 2] = pnt.Z();
+    }
+  }
+  return points;
 }
 
 /**
