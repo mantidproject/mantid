@@ -66,9 +66,6 @@ public:
   PeakBoundingBox getBoundingBox(const int peakIndex) const override {
     return m_default->getBoundingBox(peakIndex);
   }
-  void sortPeaksWorkspace(const std::string &,
-                          const bool) override { /*Do Nothing*/
-  }
   bool getShowBackground() const override {
     return m_default->getShowBackground();
   }
@@ -134,10 +131,6 @@ public:
   /// zoom in on a peak.
   void zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS,
                   const int peakIndex);
-  /// Sort the peaks workspace.
-  void sortPeaksWorkspace(
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS,
-      const std::string &columnToSortBy, const bool sortedAscending);
   /// Get the named peaks presenter.
   PeaksPresenter *getPeaksPresenter(const QString &name);
   /// Register any owning presenter

@@ -476,7 +476,7 @@ private:
     } else {
       EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
           .Times(numTimes)
-          .WillOnce(Return(OptionsQMap()));
+          .WillOnce(Return(ColumnOptionsQMap()));
       EXPECT_CALL(mockMainPresenter, getProcessingOptions())
           .Times(numTimes)
           .WillOnce(Return(OptionsQMap()));
