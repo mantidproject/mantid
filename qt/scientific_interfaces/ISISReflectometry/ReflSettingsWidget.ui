@@ -230,12 +230,12 @@
          <widget class="QComboBox" name="summationTypeComboBox">
           <item>
            <property name="text">
-            <string>SumInQ</string>
+            <string>SumInLambda</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>SumInLambda</string>
+            <string>SumInQ</string>
            </property>
           </item>
          </widget>
