@@ -508,6 +508,7 @@ CreateSingleValuedWorkspace            Identical               ``OutputWorkspace
 CreateWorkspace                        all
 CropToComponent                        all
 CropWorkspace                          all                     see ``ExtractSpectra`` regarding X cropping
+DeleteWorkspace                        all
 Divide                                 all                     see ``BinaryOperation``
 EstimateFitParameters                  MasterOnly, Identical   see ``IFittingAlgorithm``
 EvaluateFunction                       MasterOnly, Identical   see ``IFittingAlgorithm``
