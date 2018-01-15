@@ -23,7 +23,6 @@ public:
     m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
     presenter->init();
   }
-
   ~MockWorkspaceDockView() override {}
 
   MOCK_CONST_METHOD2(askUserYesNo, bool(const std::string &caption,

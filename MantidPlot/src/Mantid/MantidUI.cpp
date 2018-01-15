@@ -2259,9 +2259,7 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Plot spectrum...", this);
-
   connect(action, SIGNAL(triggered()), m_exploreMantid, SLOT(plotSpectra()));
-
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Plot as waterfall", this);

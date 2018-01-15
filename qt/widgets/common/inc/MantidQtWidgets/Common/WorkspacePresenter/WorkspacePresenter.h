@@ -48,9 +48,7 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspacePresenter
       public ViewNotifiable {
 
 public:
-
   explicit WorkspacePresenter(IWorkspaceDockView *view);
-
   ~WorkspacePresenter() override;
 
   void init();

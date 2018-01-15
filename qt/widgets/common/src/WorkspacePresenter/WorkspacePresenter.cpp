@@ -165,6 +165,7 @@ void WorkspacePresenter::renameWorkspace() {
 
 void WorkspacePresenter::groupWorkspaces() {
   auto selected = m_view->getSelectedWorkspaceNames();
+
   std::string groupName("NewGroup");
   // get selected workspaces
   if (selected.size() < 2) {
@@ -248,6 +249,7 @@ void WorkspacePresenter::deleteWorkspaces() {
         "Unabel to delete workspaces. Invalid workspace names provided.");
     return;
   }
+
   if (m_view->isPromptDelete())
     deleteWs = m_view->deleteConfirmation();
 

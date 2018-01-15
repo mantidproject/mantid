@@ -18,7 +18,7 @@
 
 Usage:
 
-    python run_test_app.py qualified.name.of.SomeWidget [--script qualified.name.of.some_script]_
+    python run_test_app.py qualified.name.of.SomeWidget [--script qualified.name.of.some_script]
 
 The widget (and optional script) should be in the location form where python could import it as in:
 
@@ -35,9 +35,10 @@ from __future__ import absolute_import, print_function
 
 import sys
 import traceback
-from qtpy.QtWidgets import QApplication
-from mantidqt.utils.qt.plugins import setup_library_paths
 
+from qtpy.QtWidgets import QApplication
+
+from mantidqt.utils.qt.plugins import setup_library_paths
 
 
 def split_qualified_name(qualified_name):
@@ -78,7 +79,6 @@ def open_in_window(widget_name, script):
         run_script(script, w)
 
     sys.exit(app.exec_())
-
 
 
 def run_script(script_name, widget):
