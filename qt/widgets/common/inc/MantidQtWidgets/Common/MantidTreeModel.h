@@ -64,8 +64,10 @@ public:
   // Algorithm Display and Execution Methods
   Mantid::API::IAlgorithm_sptr createAlgorithm(const QString &algName,
 	  int version = -1) override;
+
   bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
 	  const bool wait = false) override;
+
   Mantid::API::Workspace_const_sptr
 	  getWorkspace(const QString &workspaceName) override;
   QWidget *getParent() override;
@@ -80,20 +82,20 @@ public:
 		  bool errs = false, MultiLayer *plotWindow = nullptr) override;
 
 
-
 public slots:
   // Data display and saving methods
   void enableSaveNexus(const QString &wsName) override;
   void disableSaveNexus() override;
-
   void importWorkspace() override;
+
   MantidMatrix *
   importMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace,
                         int lower = -1, int upper = -1,
                         bool showDlg = true) override;
+
   void importWorkspace(const QString &wsName, bool showDlg = true,
-                               bool makeVisible = true) override;
-  void renameWorkspace(QStringList = QStringList()) override;
+	  bool makeVisible = true) override;
+
   void showMantidInstrumentSelected() override;
   Table *createDetectorTable(const QString &wsName,
                                      const std::vector<int> &indices,
@@ -101,6 +103,7 @@ public slots:
   void importBoxDataTable() override;
   void showListData() override;
   void importTransposed() override;
+  void renameWorkspace(QStringList = QStringList()) override;
 
   // Algorithm Display and Execution Methods
   void showAlgorithmDialog(const QString &algName,
@@ -113,20 +116,24 @@ public slots:
 
   // Plotting Methods
   MultiLayer *
-  plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
-         MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-         bool errs = false, MultiLayer *plotWindow = nullptr,
-         bool clearWindow = false, bool waterfallPlot = false,
-         const QString &log = "",
-         const std::set<double> &customLogValues = std::set<double>()) override;
+	  plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
+		  MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+		  bool errs = false, MultiLayer *plotWindow = nullptr,
+		  bool clearWindow = false, bool waterfallPlot = false,
+		  const QString &log = "",
+		  const std::set<double> &customLogValues = std::set<double>()) override;
+
   void drawColorFillPlots(
       const QStringList &wsNames,
       GraphOptions::CurveType curveType = GraphOptions::ColorMap);
+
   void showMDPlot() override;
+
   void plotSurface(bool accepted, int plotIndex,
                    const QString &axisName, const QString &logName,
                    const std::set<double> &customLogValues,
                    const QList<QString> &workspaceNames) override;
+
   void plotContour(bool accepted, int plotIndex, const QString &axisName,
 				   const QString &logName,
 				   const std::set<double> &customLogValues,
