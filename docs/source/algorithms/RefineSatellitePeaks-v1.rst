@@ -58,7 +58,7 @@ Usage
 
     satellites_refined = RefineSatellitePeaks(MainPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace, **params)
 
-    print len(satellites_refined)
+    print (len(satellites_refined))
 
 .. testcleanup:: RefineSatellitePeaks
 
