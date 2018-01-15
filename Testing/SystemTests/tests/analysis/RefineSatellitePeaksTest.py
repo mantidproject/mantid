@@ -1,5 +1,5 @@
 from mantid.api import FileFinder
-from mantid.simpleapi import RefineSatellitePeaks, DeleteWorkspace, Load, SaveNexus
+from mantid.simpleapi import RefineSatellitePeaks, Load
 import unittest
 import stresstesting
 
