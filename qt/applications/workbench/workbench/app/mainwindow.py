@@ -27,6 +27,7 @@ import sys
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
+SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
 ORIGINAL_STDERR = sys.stderr
@@ -422,6 +423,9 @@ def main():
 
     # general initialization
     app = initialize()
+    # the default sys check interval leads to long lags
+    # when request scripts to be aborted
+    sys.setcheckinterval(SYSCHECK_INTERVAL)
     main_window = None
     try:
         main_window = start_workbench(app)

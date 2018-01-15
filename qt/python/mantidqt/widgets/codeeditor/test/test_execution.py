@@ -198,7 +198,7 @@ squared = sum*sum
     def test_filename_included_in_traceback_if_supplied(self):
         code = """raise RuntimeError"""
         filename = 'test.py'
-        executor, recv = self._run_async_code(code, filename)
+        executor, recv = self._run_async_code(code, filename=filename)
         self.assertTrue(recv.error_cb_called)
         self.assertEqual(filename, recv.error_stack[0][0])
 
@@ -220,7 +220,7 @@ squared = sum*sum
         executor = PythonCodeExecution()
         self.assertRaises(expected_exc_type, executor.execute, code)
 
-    def _run_async_code(self, code, with_progress=False):
+    def _run_async_code(self, code, with_progress=False, filename=''):
         executor = PythonCodeExecution()
         if with_progress:
             recv = ReceiverWithProgress()
@@ -229,7 +229,7 @@ squared = sum*sum
             recv = Receiver()
         executor.sig_exec_success.connect(recv.on_success)
         executor.sig_exec_error.connect(recv.on_error)
-        task = executor.execute_async(code)
+        task = executor.execute_async(code, filename)
         task.join()
         QCoreApplication.processEvents()
 

@@ -17,6 +17,8 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
+import ctypes
+import time
 
 # 3rdparty imports
 from IPython.core.inputsplitter import InputSplitter
@@ -40,15 +42,9 @@ class PythonCodeExecution(QObject):
         super(PythonCodeExecution, self).__init__()
 
         self._globals_ns, self._locals_ns = None, None
+        self._task = None
+
         self.reset_context()
-
-    @property
-    def filename(self):
-        return self._filename
-
-    @filename.setter
-    def filename(self, value):
-        self._filename = value
 
     @property
     def globals_ns(self):
@@ -58,11 +54,15 @@ class PythonCodeExecution(QObject):
     def locals_ns(self):
         return self._locals_ns
 
-    def reset_context(self):
-        # create new context for execution
-        self._globals_ns, self._locals_ns = {}, {}
+    def abort(self):
+        """Cancel an asynchronous execution"""
+        # Implementation is based on
+        # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self._task.ident),
+                                                   ctypes.py_object(KeyboardInterrupt))
+        time.sleep(0.1)
 
-    def execute_async(self, code_str, filename=None):
+    def execute_async(self, code_str, filename=''):
         """
         Execute the given code string on a separate thread. This function
         returns as soon as the new thread starts
@@ -73,13 +73,14 @@ class PythonCodeExecution(QObject):
         """
         # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
         # as these are not useful for the user in this context
-        t = AsyncTask(self.execute, args=(code_str,filename),
-                      stack_chop=2,
-                      success_cb=self._on_success, error_cb=self._on_error)
-        t.start()
-        return t
+        task = AsyncTask(self.execute, args=(code_str, filename),
+                         stack_chop=2,
+                         success_cb=self._on_success, error_cb=self._on_error)
+        task.start()
+        self._task = task
+        return task
 
-    def execute(self, code_str, filename=None):
+    def execute(self, code_str, filename=''):
         """Execute the given code on the calling thread
         within the provided context.
 
@@ -89,27 +90,34 @@ class PythonCodeExecution(QObject):
         :raises: Any error that the code generates
         """
         filename = '<string>' if filename is None else filename
-        compile(code_str, self.filename, mode='exec')
+        compile(code_str, filename, mode='exec')
 
         sig_progress = self.sig_exec_progress
         for block in code_blocks(code_str):
             sig_progress.emit(block.lineno)
             # compile so we can set the filename
-            code_obj = compile(block.code_str, self.filename, mode='exec')
+            code_obj = compile(block.code_str, filename, mode='exec')
             exec(code_obj, self.globals_ns, self.locals_ns)
 
-    # ---------------------------------------------------------------
-    # Callbacks
-    # ---------------------------------------------------------------
+    def reset_context(self):
+        # create new context for execution
+        self._globals_ns, self._locals_ns = {}, {}
+
+    # --------------------- Callbacks -------------------------------
     def _on_success(self, task_result):
+        self._reset_task()
         self.sig_exec_success.emit(task_result)
 
     def _on_error(self, task_error):
+        self._reset_task()
         self.sig_exec_error.emit(task_error)
 
     def _on_progress_updated(self, lineno):
         self.sig_exec_progress(lineno)
 
+    # --------------------- Private -------------------------------
+    def _reset_task(self):
+        self._task = None
 
 class CodeBlock(object):
     """Holds an executable code object. It also stores the line number

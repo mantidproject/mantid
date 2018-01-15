@@ -102,6 +102,9 @@ class AsyncTask(threading.Thread):
             # treat SyntaxErrors as special as the traceback makes no sense
             # and the lineno is part of the exception instance
             self.error_cb(AsyncTaskFailure(elapsed(time_start), SyntaxError, exc, None))
+        except KeyboardInterrupt as exc:
+            # user cancelled execution - we don't want a stack trace
+            self.error_cb(AsyncTaskFailure(elapsed(time_start), KeyboardInterrupt, exc, None))
         except:  # noqa
             self.error_cb(AsyncTaskFailure.from_excinfo(elapsed(time_start), self.stack_chop))
         else:

@@ -77,6 +77,10 @@ class MultiPythonFileInterpreter(QWidget):
         self._tabs.setCurrentIndex(tab_idx)
         return tab_idx
 
+    def abort_current(self):
+        """Request that that the current execution be cancelled"""
+        self.current_editor().abort()
+
     def close_tab(self, idx):
         """Close the tab at the given index."""
         if idx >= self.editor_count:

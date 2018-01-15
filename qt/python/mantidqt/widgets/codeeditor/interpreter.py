@@ -132,6 +132,9 @@ class PythonFileInterpreter(QWidget):
         """
         return self.save(confirm=True)
 
+    def abort(self):
+        self._presenter.req_abort()
+
     def execute_async(self):
         self._presenter.req_execute_async()
 
@@ -203,6 +206,10 @@ class PythonFileInterpreterPresenter(QObject):
     def is_executing(self, value):
         self._is_executing = value
 
+    def req_abort(self):
+        if self.is_executing:
+            self.model.abort()
+
     def req_execute_async(self):
         if self.is_executing:
             return
@@ -230,10 +237,12 @@ class PythonFileInterpreterPresenter(QObject):
     def _on_exec_error(self, task_error):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
                                          task_error.stack
-        if isinstance(exc_value, SyntaxError):
+        if hasattr(exc_value, 'lineno'):
             lineno = exc_value.lineno
-        else:
+        elif exc_stack is not None:
             lineno = exc_stack[-1][1]
+        else:
+            lineno = -1
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')
         self.view.editor.updateProgressMarker(lineno, True)
         self._finish(success=False, elapsed_time=task_error.elapsed_time)
