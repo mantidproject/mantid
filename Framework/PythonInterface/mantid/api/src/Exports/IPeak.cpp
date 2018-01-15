@@ -1,9 +1,9 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include <boost/optional.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include <boost/optional.hpp>
 
 using Mantid::Geometry::IPeak;
 using namespace boost::python;
@@ -40,7 +40,7 @@ void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame,
 void setGoniometerMatrix(IPeak &self, const object &data) {
   self.setGoniometerMatrix(Converters::PyObjectToMatrix(data)());
 }
-}
+} // namespace
 
 void export_IPeak() {
   register_ptr_to_python<IPeak *>();
@@ -102,9 +102,10 @@ void export_IPeak() {
            "supplied.") // two argument
                         // overload
       .def("setQSampleFrame", setQSampleFrame1,
-           (arg("self"), arg("qsample_frame")), "Set the peak using the peak's "
-                                                "position in reciprocal space, "
-                                                "in the sample frame.")
+           (arg("self"), arg("qsample_frame")),
+           "Set the peak using the peak's "
+           "position in reciprocal space, "
+           "in the sample frame.")
       .def("setQSampleFrame", setQSampleFrame2,
            (arg("self"), arg("qsample_frame"), arg("distance")),
            "Set the peak using the peak's position in reciprocal space, in the "
@@ -128,6 +129,8 @@ void export_IPeak() {
            "Get the initial (incident) neutron energy")
       .def("getFinalEnergy", &IPeak::getFinalEnergy, arg("self"),
            "Get the final neutron energy")
+      .def("getEnergy", &IPeak::getEnergy, arg("self"),
+           "Get the initial neutron energy minus the final neutron energy")
       .def("setInitialEnergy", &IPeak::setInitialEnergy,
            (arg("self"), arg("initial_energy")),
            "Set the initial (incident) neutron energy")
@@ -137,6 +140,9 @@ void export_IPeak() {
            "Return the integrated peak intensity")
       .def("getSigmaIntensity", &IPeak::getSigmaIntensity, arg("self"),
            "Return the error on the integrated peak intensity")
+      .def("getIntensityOverSigma", &IPeak::getIntensityOverSigma, arg("self"),
+           "Return the error on the integrated peak intensity divided by the "
+           "error in intensity")
       .def("setIntensity", &IPeak::setIntensity,
            (arg("self"), arg("intensity")), "Set the integrated peak intensity")
       .def("setSigmaIntensity", &IPeak::setSigmaIntensity,
