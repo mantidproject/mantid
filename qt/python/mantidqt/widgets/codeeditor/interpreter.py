@@ -22,7 +22,7 @@ import sys
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QStatusBar, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
@@ -39,9 +39,61 @@ CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
 TAB_WIDTH = 4
 
 
+class EditorIO(object):
+
+    def __init__(self, editor):
+        self.editor = editor
+
+    def ask_for_filename(self):
+        filename, _ = QFileDialog.getSaveFileName(self.editor, "Choose filename...")
+        return filename
+
+    def save_if_required(self, confirm=True):
+        """Asks the user if the contents should be saved.
+
+        :param confirm: If True then show a confirmation dialog first to check we should save
+        :returns: True if either saving was successful or no save was requested. Returns False if
+        the operation should be cancelled
+        """
+        if confirm:
+            button = QMessageBox.question(self.editor, "",
+                                          "Save changes to document before closing?",
+                                          buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
+                                          defaultButton=QMessageBox.Cancel)
+            if button == QMessageBox.Yes:
+                return self.write()
+            elif button == QMessageBox.No:
+                return True
+            else:
+                # Cancelled
+                return False
+        else:
+            return self.write()
+
+    def write(self):
+        filename = self.editor.fileName()
+        if not filename:
+            filename = self.ask_for_filename()
+            if not filename:
+                return False
+            self.editor.setFileName(filename)
+
+        try:
+            with open(filename, 'w') as f:
+                f.write(self.editor.text())
+            self.editor.setModified(False)
+        except IOError as exc:
+            QMessageBox.warning(self.editor, "",
+                                "Error while saving '{}': {}".format(filename, str(exc)))
+            return False
+        else:
+            return True
+
+
 class PythonFileInterpreter(QWidget):
 
     sig_editor_modified = Signal(bool)
+    sig_filename_modified = Signal(str)
 
     def __init__(self, content=None, filename=None,
                  parent=None):
@@ -60,18 +112,35 @@ class PythonFileInterpreter(QWidget):
         layout.addWidget(self.status)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
-        self._setup_editor(content)
+        self._setup_editor(content, filename)
 
-        self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(filename))
+        self._presenter = PythonFileInterpreterPresenter(self,
+                                                         PythonCodeExecution())
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
+        self.editor.fileNameChanged.connect(self.sig_filename_modified)
 
     @property
     def filename(self):
-        return self._presenter.model.filename
+        return self.editor.fileName()
+
+    def confirm_close(self):
+        """Confirm the widget can be closed. If the editor contents are modified then
+        a user can interject and cancel closing.
+
+        :return: True if closing was considered successful, false otherwise
+        """
+        return self.save(confirm=True)
 
     def execute_async(self):
         self._presenter.req_execute_async()
+
+    def save(self, confirm=False):
+        if self.editor.isModified():
+            io = EditorIO(self.editor)
+            return io.save_if_required(confirm)
+        else:
+            return True
 
     def set_editor_readonly(self, ro):
         self.editor.setReadOnly(ro)
@@ -79,7 +148,7 @@ class PythonFileInterpreter(QWidget):
     def set_status_message(self, msg):
         self.status.showMessage(msg)
 
-    def _setup_editor(self, default_content):
+    def _setup_editor(self, default_content, filename):
         editor = self.editor
 
         # use tabs not spaces for indentation
@@ -95,9 +164,14 @@ class PythonFileInterpreter(QWidget):
         font_metrics = QFontMetrics(self.font())
         editor.setMarginWidth(1, font_metrics.averageCharWidth()*3 + 12)
 
-        # fill with content if supplied
+        # fill with content if supplied and set source filename
         if default_content is not None:
             editor.setText(default_content)
+        if filename is not None:
+            editor.setFileName(filename)
+            editor.setModified(False)
+        else:
+            editor.setModified(True)
 
 
 class PythonFileInterpreterPresenter(QObject):
@@ -138,7 +212,7 @@ class PythonFileInterpreterPresenter(QObject):
             return
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
-        return self.model.execute_async(code_str)
+        return self.model.execute_async(code_str, self.view.filename)
 
     def _get_code_for_execution(self):
         editor = self.view.editor

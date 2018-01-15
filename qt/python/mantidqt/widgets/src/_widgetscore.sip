@@ -80,6 +80,7 @@ public:
                           lineTo, indexTo);
 %End
   bool hasSelectedText() const;
+  bool isModified() const;
   bool isReadOnly() const;
   QString selectedText() const;
   QString text() const;
@@ -89,6 +90,7 @@ public:
   void setIndentationsUseTabs(bool tabs);
   void setFileName(const QString &filename);
   void setMarginWidth(int margin, int width);
+  void setModified(bool m);
   void setReadOnly(bool ro);
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setTabWidth(int width);
@@ -98,6 +100,7 @@ public slots:
   void updateProgressMarker(int lineno, bool error);
 
 signals:
+  void fileNameChanged(const QString &fileName);
   void modificationChanged(bool m);
 
 private:

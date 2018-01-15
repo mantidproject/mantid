@@ -102,11 +102,8 @@ public:
   void keyPressEvent(QKeyEvent *event) override;
   /// The current filename
   inline QString fileName() const { return m_filename; }
-  /**
-   * Set a new file name
-   * @param filename :: The new filename
-   */
-  inline void setFileName(const QString &filename) { m_filename = filename; }
+  /// Set a new file name
+  void setFileName(const QString &filename);
 
   /// Override so that ctrl + mouse wheel will zoom in and out
   void wheelEvent(QWheelEvent *e) override;
@@ -127,7 +124,7 @@ public slots:
   /// Set the marker state
   void setMarkerState(bool enabled);
   /// Update the progress marker
-  void updateProgressMarker(int lineno, bool error=false);
+  void updateProgressMarker(int lineno, bool error = false);
   /// Mark the progress arrow as an error
   void markExecutingLineAsError();
   /// Refresh the autocomplete information base on a new set of keywords
@@ -149,6 +146,8 @@ signals:
   void textZoomedIn();
   /// Emitted when a zoom out is requested
   void textZoomedOut();
+  /// Notify that the filename has been modified
+  void fileNameChanged(const QString &fileName);
 
 protected:
   /// Write to the given device

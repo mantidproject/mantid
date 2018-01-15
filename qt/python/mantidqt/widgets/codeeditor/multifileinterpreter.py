@@ -16,14 +16,24 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
+# std imports
+import os.path as osp
+
 # 3rd party imports
 from qtpy.QtWidgets import QTabWidget, QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 
-NEW_TAB_TITLE = 'temp.py'
+NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
+
+
+def _tab_title_and_toolip(filename):
+    if filename is None:
+        return NEW_TAB_TITLE, NEW_TAB_TITLE
+    else:
+        return osp.basename(filename), filename
 
 
 class MultiPythonFileInterpreter(QWidget):
@@ -35,41 +45,85 @@ class MultiPythonFileInterpreter(QWidget):
         # attributes
         self.default_content = default_content
 
-        # layout
+        # widget setup
         self._tabs = QTabWidget(self)
         self._tabs.setMovable(True)
+        self._tabs.setTabsClosable(True)
+        self._tabs.tabCloseRequested.connect(self.close_tab)
         layout = QVBoxLayout()
         layout.addWidget(self._tabs)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
         # add a single editor by default
-        self.append_new_editor()
+        self.append_new_editor(default_content)
 
     @property
     def editor_count(self):
         return self._tabs.count()
 
-    def append_new_editor(self):
-        interpreter = PythonFileInterpreter(self.default_content,
+    def append_new_editor(self, content=None, filename=None):
+        interpreter = PythonFileInterpreter(content, filename=filename,
                                             parent=self._tabs)
-        interpreter.sig_editor_modified.connect(self.update_tab_title)
-        self._tabs.addTab(interpreter, NEW_TAB_TITLE)
-        self.update_tab_title(modified=True)
+        # monitor future modifications
+        interpreter.sig_editor_modified.connect(self.mark_current_tab_modified)
+        interpreter.sig_filename_modified.connect(self.on_filename_modified)
+
+        tab_title, tab_toolip = _tab_title_and_toolip(filename)
+        tab_idx = self._tabs.addTab(interpreter, tab_title)
+        self.mark_tab_modified(tab_idx, (filename is None))
+        self._tabs.setTabToolTip(tab_idx, tab_toolip)
+        return tab_idx
+
+    def close_tab(self, idx):
+        """Close the tab at the given index."""
+        if idx >= self.editor_count:
+            return
+        editor = self.editor_at(idx)
+        if editor.confirm_close():
+            self._tabs.removeTab(idx)
+
+        # we never want an empty widget
+        if self.editor_count == 0:
+            self.append_new_editor(content=self.default_content)
 
     def current_editor(self):
         return self._tabs.currentWidget()
+
+    def editor_at(self, idx):
+        """Return the editor at the given index. Must be in range"""
+        return self._tabs.widget(idx)
 
     def execute_current(self):
         """Execute content of the current file. If a selection is active
         then only this portion of code is executed"""
         self.current_editor().execute_async()
 
-    def update_tab_title(self, modified):
+    def on_filename_modified(self, filename):
+        title, tooltip = _tab_title_and_toolip(filename)
+        idx_cur = self._tabs.currentIndex()
+        self._tabs.setTabText(idx_cur, title)
+        self._tabs.setTabToolTip(idx_cur, tooltip)
+
+    def open_file_in_new_tab(self, filepath):
+        """Open the existing file in a new tab in the editor
+
+        :param filepath: A path to an existing file
+        """
+        with open(filepath, 'r') as code_file:
+            content = code_file.read()
+        self._tabs.setCurrentIndex(self.append_new_editor(content=content,
+                                                          filename=filepath))
+
+    def mark_current_tab_modified(self, modified):
         """Update the current tab title to indicate that the
         content has been modified"""
-        idx_cur = self._tabs.currentIndex()
-        title_cur = self._tabs.tabText(idx_cur)
+        self.mark_tab_modified(self._tabs.currentIndex(), modified)
+
+    def mark_tab_modified(self, idx, modified):
+        """Update the tab title to indicate that the
+        content has been modified or not"""
+        title_cur = self._tabs.tabText(idx)
         if modified:
             if not title_cur.endswith(MODIFIED_MARKER):
                 title_new = title_cur + MODIFIED_MARKER
@@ -80,4 +134,8 @@ class MultiPythonFileInterpreter(QWidget):
                 title_new = title_cur.rstrip('*')
             else:
                 title_new = title_cur
-        self._tabs.setTabText(idx_cur, title_new)
+        self._tabs.setTabText(idx, title_new)
+
+    def save_current_file(self):
+        """Save the current file"""
+        self.current_editor().save()

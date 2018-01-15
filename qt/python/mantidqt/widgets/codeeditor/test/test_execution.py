@@ -195,9 +195,10 @@ squared = sum*sum
     # -------------------------------------------------------------------------
     # Filename checks
     # -------------------------------------------------------------------------
-    def test_filename_included_in_traceback_if_defined(self):
+    def test_filename_included_in_traceback_if_supplied(self):
         code = """raise RuntimeError"""
-        executor, recv = self._run_async_code(code, filename='test.py')
+        filename = 'test.py'
+        executor, recv = self._run_async_code(code)
         self.assertTrue(recv.error_cb_called)
         self.assertEqual('test.py', recv.error_stack[0][0])
 
@@ -219,10 +220,8 @@ squared = sum*sum
         executor = PythonCodeExecution()
         self.assertRaises(expected_exc_type, executor.execute, code)
 
-    def _run_async_code(self, code, with_progress=False, filename=None):
+    def _run_async_code(self, code, with_progress=False):
         executor = PythonCodeExecution()
-        if filename is not None:
-            executor.filename = filename
         if with_progress:
             recv = ReceiverWithProgress()
             executor.sig_exec_progress.connect(recv.on_progess_update)

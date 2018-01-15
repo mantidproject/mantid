@@ -35,11 +35,10 @@ class PythonCodeExecution(QObject):
     sig_exec_error = Signal(object)
     sig_exec_progress = Signal(int)
 
-    def __init__(self, filename=None):
+    def __init__(self):
         """Initialize the object"""
         super(PythonCodeExecution, self).__init__()
 
-        self._filename = '<string>' if filename is None else filename
         self._globals_ns, self._locals_ns = None, None
         self.reset_context()
 
@@ -63,31 +62,33 @@ class PythonCodeExecution(QObject):
         # create new context for execution
         self._globals_ns, self._locals_ns = {}, {}
 
-    def execute_async(self, code_str):
+    def execute_async(self, code_str, filename=None):
         """
         Execute the given code string on a separate thread. This function
         returns as soon as the new thread starts
 
         :param code_str: A string containing code to execute
-        :param user_globals: A mutable mapping type to store global variables
-        :param user_locals: A mutable mapping type to store local variables
+        :param filename: See PythonCodeExecution.execute()
         :returns: The created async task
         """
         # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
         # as these are not useful for the user in this context
-        t = AsyncTask(self.execute, args=(code_str,),
+        t = AsyncTask(self.execute, args=(code_str,filename),
                       stack_chop=2,
                       success_cb=self._on_success, error_cb=self._on_error)
         t.start()
         return t
 
-    def execute(self, code_str):
+    def execute(self, code_str, filename=None):
         """Execute the given code on the calling thread
         within the provided context.
 
         :param code_str: A string containing code to execute
+        :param filename: An optional identifier specifying the file source of the code. If None then '<string>'
+        is used
         :raises: Any error that the code generates
         """
+        filename = '<string>' if filename is None else filename
         compile(code_str, self.filename, mode='exec')
 
         sig_progress = self.sig_exec_progress

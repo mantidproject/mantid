@@ -205,8 +205,8 @@ QSize ScriptEditor::sizeHint() const { return QSize(600, 500); }
 void ScriptEditor::saveAs() {
   QString selectedFilter;
   QString filter = "Scripts (*.py *.PY);;All Files (*)";
-  QString filename = QFileDialog::getSaveFileName(nullptr, "MantidPlot - Save",
-                                                  "", filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(nullptr, "Save file...", "",
+                                                  filter, &selectedFilter);
 
   if (filename.isEmpty()) {
     throw SaveCancelledException();
@@ -277,6 +277,14 @@ void ScriptEditor::setText(int lineno, const QString &txt, int index) {
 void ScriptEditor::keyPressEvent(QKeyEvent *event) {
   // Avoids a bug in QScintilla
   forwardKeyPressToBase(event);
+}
+
+/*
+ * @param filename The new filename
+ */
+void ScriptEditor::setFileName(const QString &filename) {
+  m_filename = filename;
+  emit fileNameChanged(filename);
 }
 
 /** Ctrl + Rotating the mouse wheel will increase/decrease the font size
