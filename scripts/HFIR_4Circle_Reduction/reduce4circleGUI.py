@@ -2677,7 +2677,8 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 except KeyError as key_err:
-                    self.pop_one_button_dialog('Unable to get UB matrix.\nCheck whether UB matrix is set.')
+                    self.pop_one_button_dialog('Unable to get UB matrix due to {0}.\nCheck whether UB matrix is set.'
+                                               ''.format(key_err))
                     return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
                 if index_status:
@@ -3436,7 +3437,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # generate a mask name
         mask_name = 'User'
-
+        raise NotImplementedError('Loading mask with name {0} has not been implemented.'.format(mask_name))
 
     def menu_quit(self):
         """
