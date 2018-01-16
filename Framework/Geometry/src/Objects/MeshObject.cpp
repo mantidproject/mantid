@@ -315,7 +315,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
 
   // At this stage we can compute t to find out where the intersection point is on the line.
   double t = f * edge2.scalar_prod(q);
-  if (t >= 0.0) // ray intersection
+  if (t >= -EPSILON) // ray intersection
   {
     intersection = start + direction * t;
 

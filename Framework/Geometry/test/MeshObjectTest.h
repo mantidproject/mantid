@@ -208,6 +208,164 @@ public:
     TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
   }
 
+  void testInterceptCubeX() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createCube(4.0);
+    Track track(V3D(-10, 1, 1), V3D(1, 0, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(0, 1, 1), V3D(4, 1, 1), 14.0, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptCubeXY() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createCube(4.0);
+    Track track(V3D(-8, -6, 1), V3D(0.8, 0.6, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(0, 0, 1), V3D(4, 3, 1), 15.0, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptCubeMiss() {
+    std::vector<Link>
+      expectedResults; // left empty as there are no expected results
+    IObject_sptr geom_obj = createCube(4.0);
+    Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
+
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptOctahedronX() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createOctahedron();
+    Track track(V3D(-10, 0.2, 0.2), V3D(1, 0, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(-0.6, 0.2, 0.2), V3D(0.6, 0.2, 0.2), 10.6, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptOctahedronXthroughEdge() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createOctahedron();
+    Track track(V3D(-10, 0.2, 0.0), V3D(1, 0, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 10.8, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptOctahedronXthroughVertex() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createOctahedron();
+    Track track(V3D(-10, 0.0, 0.0), V3D(1, 0, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(-1.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), 11.0, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptLShapeTwoPass() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createLShape();
+    Track track(V3D(0, 2.5, 0.5), V3D(0.707, -0.707, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(0.5, 2, 0.5), V3D(1, 1.5, 0.5), 1.4142135, *geom_obj));
+    expectedResults.push_back(
+      Link(V3D(1.5, 1, 0.5), V3D(2, 0.5, 0.5), 2.828427, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptLShapeMiss() {
+    std::vector<Link>
+      expectedResults; // left empty as there are no expected results
+    IObject_sptr geom_obj = createLShape();
+    // Passes through convex hull of L-Shape
+    Track track(V3D(1.1, 1.1, -1), V3D(0, 0, 1));
+
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testTrackTwoIsolatedCubes()
+    /**
+    Test a track going through two objects
+    */
+  {
+    IObject_sptr object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
+
+    IObject_sptr object2 = createCube(2.0, V3D(5.5, 0.0, 0.0));
+
+    Track TL(Kernel::V3D(-5, 0, 0), Kernel::V3D(1, 0, 0));
+
+    // CARE: This CANNOT be called twice
+    TS_ASSERT(object1->interceptSurface(TL) != 0);
+    TS_ASSERT(object2->interceptSurface(TL) != 0);
+
+    std::vector<Link> expectedResults;
+    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.push_back(
+      Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, *object2));
+    checkTrackIntercept(TL, expectedResults);
+  }
+
+  void testTrackTwoTouchingCubes()
+    /**
+    Test a track going through two objects
+    */
+  {
+    IObject_sptr object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
+
+    IObject_sptr object2 = createCube(4.0, V3D(3.0, 0.0, 0.0));
+
+    Track TL(Kernel::V3D(-5, 0, 0), Kernel::V3D(1, 0, 0));
+
+    // CARE: This CANNOT be called twice
+    TS_ASSERT(object1->interceptSurface(TL) != 0);
+    TS_ASSERT(object2->interceptSurface(TL) != 0);
+
+    std::vector<Link> expectedResults;
+    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.push_back(
+      Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
+    checkTrackIntercept(TL, expectedResults);
+  }
+
+  void checkTrackIntercept(Track &track,
+    const std::vector<Link> &expectedResults) {
+    int index = 0;
+    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
+      ++it) {
+      if (index < expectedResults.size()) {
+        TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
+          1e-6);
+        TS_ASSERT_DELTA(it->distInsideObject,
+          expectedResults[index].distInsideObject, 1e-6);
+        TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
+        TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
+        TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
+      }
+      ++index;
+    }
+    TS_ASSERT_EQUALS(index, static_cast<int>(expectedResults.size()));
+  }
+
+
+  void checkTrackIntercept(IObject_sptr obj, Track &track,
+    const std::vector<Link> &expectedResults) {
+    int unitCount = obj->interceptSurface(track);
+    TS_ASSERT_EQUALS(unitCount, expectedResults.size());
+    checkTrackIntercept(track, expectedResults);
+  }
+
   void testIsOnSideCube() {
     IObject_sptr geom_obj = createCube(1.0);
     // inside
@@ -495,164 +653,6 @@ public:
     // not on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(0.5, 0.5, 0)), -1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(-0.5, 0.5, 0)), 1);
-  }
-
-  void testInterceptCubeX() {
-    std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCube(4.0);
-    Track track(V3D(-10, 1, 1), V3D(1, 0, 0));
-
-    // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
-      Link(V3D(0, 1, 1), V3D(4, 1, 1), 14.0, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
-  }
-
-  void testInterceptCubeXY() {
-    std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCube(4.0);
-    Track track(V3D(-8, -6, 1), V3D(0.8, 0.6, 0));
-
-    // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
-      Link(V3D(0, 0, 1), V3D(4, 3, 1), 15.0, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
-  }
-
-  void testInterceptCubeMiss() {
-    std::vector<Link>
-      expectedResults; // left empty as there are no expected results
-    IObject_sptr geom_obj = createCube(4.0);
-    Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
-
-    checkTrackIntercept(geom_obj, track, expectedResults);
-  }
-
-  void testInterceptOctahedronX() {
-    std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createOctahedron();
-    Track track(V3D(-10, 0.2, 0.2), V3D(1, 0, 0));
-
-    // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
-      Link(V3D(-0.6, 0.2, 0.2), V3D(0.6, 0.2, 0.2), 10.6, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
-  }
-
-  void testInterceptOctahedronXthroughEdge() {
-    std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createOctahedron();
-    Track track(V3D(-10, 0.2, 0.0), V3D(1, 0, 0));
-
-    // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
-      Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 10.8, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
-  }
-
-  void testInterceptOctahedronXthroughVertex() {
-    std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createOctahedron();
-    Track track(V3D(-10, 0.0, 0.0), V3D(1, 0, 0));
-
-    // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
-      Link(V3D(-1.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), 11.0, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
-  }
-
-  void testInterceptLShapeTwoPass() {
-    std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createLShape();
-    Track track(V3D(0, 2.5, 0.5), V3D(0.707, -0.707, 0));
-
-    // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
-      Link(V3D(0.5, 2, 0.5), V3D(1, 1.5, 0.5), 1.414, *geom_obj));
-    expectedResults.push_back(
-      Link(V3D(1.5, 1, 0.5), V3D(2, 0.5, 0.5), 2.828, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
-  }
-
-  void testInterceptLShapeMiss() {
-    std::vector<Link>
-      expectedResults; // left empty as there are no expected results
-    IObject_sptr geom_obj = createLShape();
-    // Passes through convex hull of L-Shape
-    Track track(V3D(1.1, 1.1, -1), V3D(0, 0, 1));
-
-    checkTrackIntercept(geom_obj, track, expectedResults);
-  }
-
-  void testTrackTwoIsolatedCubes()
-    /**
-    Test a track going through two objects
-    */
-  {
-    IObject_sptr object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
-
-    IObject_sptr object2 = createCube(2.0, V3D(5.5, 0.0, 0.0));
-
-    Track TL(Kernel::V3D(-5, 0, 0), Kernel::V3D(1, 0, 0));
-
-    // CARE: This CANNOT be called twice
-    TS_ASSERT(object1->interceptSurface(TL) != 0);
-    TS_ASSERT(object2->interceptSurface(TL) != 0);
-
-    std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
-    expectedResults.push_back(
-      Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, *object2));
-    checkTrackIntercept(TL, expectedResults);
-  }
-
-  void testTrackTwoTouchingCubes()
-    /**
-    Test a track going through two objects
-    */
-  {
-    IObject_sptr object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
-
-    IObject_sptr object2 = createCube(4.0, V3D(3.0, 0.0, 0.0));
-
-    Track TL(Kernel::V3D(-5, 0, 0), Kernel::V3D(1, 0, 0));
-
-    // CARE: This CANNOT be called twice
-    TS_ASSERT(object1->interceptSurface(TL) != 0);
-    TS_ASSERT(object2->interceptSurface(TL) != 0);
-
-    std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
-    expectedResults.push_back(
-      Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
-    checkTrackIntercept(TL, expectedResults);
-  }
-
-  void checkTrackIntercept(Track &track,
-    const std::vector<Link> &expectedResults) {
-    int index = 0;
-    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
-      ++it) {
-      if (index < expectedResults.size()) {
-        TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
-          1e-6);
-        TS_ASSERT_DELTA(it->distInsideObject,
-          expectedResults[index].distInsideObject, 1e-6);
-        TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
-        TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
-        TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
-      }
-      ++index;
-    }
-    TS_ASSERT_EQUALS(index, static_cast<int>(expectedResults.size()));
-  }
-
-
-  void checkTrackIntercept(IObject_sptr obj, Track &track,
-    const std::vector<Link> &expectedResults) {
-    int unitCount = obj->interceptSurface(track);
-    TS_ASSERT_EQUALS(unitCount, expectedResults.size());
-    checkTrackIntercept(track, expectedResults);
   }
 
   void testFindPointInCube()
