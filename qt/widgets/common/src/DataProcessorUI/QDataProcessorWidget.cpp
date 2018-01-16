@@ -168,6 +168,10 @@ void QDataProcessorWidget::processClicked() {
   m_presenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
+void QDataProcessorWidget::settingsChanged() {
+  m_presenter->settingsChanged();
+}
+
 /**
 This slot loads a table workspace model and changes to a LoadedMainView
 presenter

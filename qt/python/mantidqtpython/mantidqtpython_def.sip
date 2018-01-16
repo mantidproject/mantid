@@ -1575,6 +1575,7 @@ QString getCell(int, int, int parentRow = 0, int parentColumn = 0);
 int getNumberOfRows();
 void clearTable();
 void skipProcessing();
+void settingsChanged();
 
 signals:
 void runPythonCode(const QString &);
