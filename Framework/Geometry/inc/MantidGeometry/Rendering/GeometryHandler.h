@@ -76,16 +76,16 @@ public:
   initialize() const; ///< Prepare/Initialize Object/ObjComponent to be rendered
   bool canTriangulate() const { return !(m_triangulator == nullptr); }
   /// get the number of triangles
-  size_t numberOfTriangles();
+  size_t numberOfTriangles() const;
   /// get the number of points or vertices
-  size_t numberOfPoints();
+  size_t numberOfPoints() const;
 
   bool hasShapeInfo() const { return !(m_shapeInfo == nullptr); }
   const detail::ShapeInfo &shapeInfo() const { return *m_shapeInfo; }
   /// Extract the vertices of the triangles
-  const std::vector<double> &getTriangleVertices();
+  const std::vector<double> &getTriangleVertices() const;
   /// Extract the Faces of the triangles
-  const std::vector<int> &getTriangleFaces();
+  const std::vector<int> &getTriangleFaces() const;
   /// Sets the geometry cache using the triangulation information provided
   void setGeometryCache(size_t nPts, size_t nFaces, std::vector<double> &&pts,
                         std::vector<int> &&faces);

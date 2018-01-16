@@ -108,12 +108,11 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
   using Mantid::Beamline::ComponentType;
   auto isStructuredBank =
       boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
-  auto assemblyImmediateChildren =
-      boost::make_shared<std::vector<std::vector<size_t>>>(1);
+  auto children = boost::make_shared<std::vector<std::vector<size_t>>>(1);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
-      parentIndices, assemblyImmediateChildren, positions, rotations,
-      scaleFactors, isStructuredBank, names, -1, -1);
+      parentIndices, children, positions, rotations, scaleFactors,
+      isStructuredBank, names, -1, -1);
 }
 } // namespace
 
@@ -156,13 +155,12 @@ public:
     using Mantid::Beamline::ComponentType;
     auto isRectBank = boost::make_shared<std::vector<ComponentType>>(
         2, ComponentType::Generic);
-    auto assemblyImmediateChildren =
-        boost::make_shared<std::vector<std::vector<size_t>>>(
-            1, std::vector<size_t>(1));
+    auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
+        1, std::vector<size_t>(1));
     auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, assemblyImmediateChildren, positions, rotations,
-        scaleFactors, isRectBank, names, -1, -1);
+        parentIndices, children, positions, rotations, scaleFactors, isRectBank,
+        names, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 

@@ -2179,8 +2179,9 @@ void MantidUI::showMantidInstrumentSelected() {
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;
   g_log.information() << "Show instrument lasted: " << elapsed_seconds.count()
-                      << " seconds." << std::endl;
+    << " seconds." << std::endl;
 }
+
 
 void MantidUI::mantidMenuAboutToShow() {
   mantidMenu->clear();

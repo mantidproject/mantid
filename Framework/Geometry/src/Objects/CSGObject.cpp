@@ -2146,6 +2146,9 @@ size_t CSGObject::numberOfVertices() const {
 * get vertices
 */
 const std::vector<double> &CSGObject::getTriangleVertices() const {
+  static std::vector<double> empty;
+  if (m_handler == nullptr)
+    return empty;
   return m_handler->getTriangleVertices();
 }
 
@@ -2153,6 +2156,9 @@ const std::vector<double> &CSGObject::getTriangleVertices() const {
  * get faces
  */
 const std::vector<int> &CSGObject::getTriangleFaces() const {
+  static std::vector<int> empty;
+  if (m_handler == nullptr)
+    return empty;
   return m_handler->getTriangleFaces();
 }
 

@@ -52,8 +52,7 @@ private:
   boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
       m_componentRanges;
   boost::shared_ptr<const std::vector<size_t>> m_parentIndices;
-  boost::shared_ptr<std::vector<std::vector<size_t>>>
-      m_assemblyImmediateChildren;
+  boost::shared_ptr<std::vector<std::vector<size_t>>> m_children;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
@@ -97,8 +96,7 @@ public:
                 boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
                     componentRanges,
                 boost::shared_ptr<const std::vector<size_t>> parentIndices,
-                boost::shared_ptr<std::vector<std::vector<size_t>>>
-                    assemblyImmediateChildren,
+                boost::shared_ptr<std::vector<std::vector<size_t>>> children,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,

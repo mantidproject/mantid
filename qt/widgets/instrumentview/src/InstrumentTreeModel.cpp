@@ -155,7 +155,7 @@ int InstrumentTreeModel::rowCount(const QModelIndex &parent) const {
       m_instrWidget->getInstrumentActor().getComponentInfo();
   auto index = extractIndex(parent);
   const auto &children = componentInfo.children(index);
-  if (children.size() > 1)
+  if (children.size() > 0)
     return static_cast<int>(children.size());
 
   return 0;

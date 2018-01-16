@@ -67,26 +67,26 @@ void GeometryHandler::initialize() const {
   render();
 }
 
-size_t GeometryHandler::numberOfTriangles() {
+size_t GeometryHandler::numberOfTriangles() const {
   if (canTriangulate())
     return m_triangulator->numTriangleFaces();
   return 0;
 }
 
-size_t GeometryHandler::numberOfPoints() {
+size_t GeometryHandler::numberOfPoints() const {
   if (canTriangulate())
     return m_triangulator->numTriangleVertices();
   return 0;
 }
 
-const std::vector<double> &GeometryHandler::getTriangleVertices() {
+const std::vector<double> &GeometryHandler::getTriangleVertices() const {
   static std::vector<double> empty;
   if (canTriangulate())
     return m_triangulator->getTriangleVertices();
   return empty;
 }
 
-const std::vector<int> &GeometryHandler::getTriangleFaces() {
+const std::vector<int> &GeometryHandler::getTriangleFaces() const {
   static std::vector<int> empty;
   if (canTriangulate())
     return m_triangulator->getTriangleFaces();
