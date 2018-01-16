@@ -1458,10 +1458,10 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
-  ///*
-  //* Test processing workspaces with non-standard names, with
-  //* and without run_number information in the sample log.
-  //*/
+  /*
+   * Test processing workspaces with non-standard names, with
+   * and without run_number information in the sample log.
+   */
   void testProcessCustomNames() {
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;

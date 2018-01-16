@@ -310,10 +310,6 @@ void GenericDataProcessorPresenter::process() {
   if (m_selectedData.size() == 0)
     return;
 
-  // Set the global settings. If any have been changed, set all groups and rows
-  // as unprocessed
-  auto settingsHaveChanged = false;
-
   // Clear the group queue
   m_group_queue = GroupQueue();
 
@@ -325,7 +321,7 @@ void GenericDataProcessorPresenter::process() {
         hasPostprocessing() &&
         !workspaceExists(getPostprocessedWorkspaceName(group.second));
 
-    if (settingsHaveChanged || groupOutputNotFound)
+    if (groupOutputNotFound)
       m_manager->setProcessed(false, group.first);
 
     // Groups that are already processed or cannot be post-processed (only 1
@@ -341,11 +337,8 @@ void GenericDataProcessorPresenter::process() {
       rowQueue.push(row);
 
       // Set group as unprocessed if settings have changed or the expected
-      // output
-      // workspaces cannot be found
-      auto rowOutputFound = rowOutputExists(row);
-
-      if (settingsHaveChanged || !rowOutputFound)
+      // output workspaces cannot be found
+      if (!rowOutputExists(row))
         m_manager->setProcessed(false, row.first, group.first);
 
       // Rows that are already processed do not count in progress

@@ -112,9 +112,10 @@ std::vector<Command_uptr> TwoLevelTreeManager::publishCommands() {
 }
 
 void TwoLevelTreeManager::invalidateAllProcessed() {
-  for (auto i = 0; i < m_model->rowCount(); i++) {
-    setProcessed(false, i);
-  }
+  forEachGroup(*m_model,
+               [this](int group) -> void { setProcessed(false, group); });
+  forEachRow(*m_model, [this](int group, int row)
+                           -> void { setProcessed(false, row, group); });
 }
 
 /**

@@ -68,7 +68,6 @@ private:
   void getExpDefaults();
   void getInstDefaults();
   void handleSettingsChanged();
-  void wrapWithQuotes(std::string &str) const;
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
