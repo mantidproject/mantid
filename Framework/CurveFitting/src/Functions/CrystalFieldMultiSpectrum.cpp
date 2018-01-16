@@ -56,11 +56,15 @@ public:
   std::vector<size_t> m_IntensityScalingIdx;
   std::vector<size_t> m_PPLambdaIdxChild;
   std::vector<size_t> m_PPLambdaIdxSelf;
+  std::vector<size_t> m_PPChi0IdxChild;
+  std::vector<size_t> m_PPChi0IdxSelf;
   /// Declare the intensity scaling parameters: one per spectrum.
   void declareIntensityScaling(size_t nSpec) {
     m_IntensityScalingIdx.clear();
     m_PPLambdaIdxChild.resize(nSpec, -1);
     m_PPLambdaIdxSelf.resize(nSpec, -1);
+    m_PPChi0IdxChild.resize(nSpec, -1);
+    m_PPChi0IdxSelf.resize(nSpec, -1);
     for (size_t i = 0; i < nSpec; ++i) {
       auto si = std::to_string(i);
       try { // If parameter has already been declared, don't declare it.
@@ -76,6 +80,8 @@ public:
     if (m_PPLambdaIdxSelf.size() <= iSpec) {
       m_PPLambdaIdxSelf.resize(iSpec + 1, -1);
       m_PPLambdaIdxChild.resize(iSpec + 1, -1);
+      m_PPChi0IdxSelf.resize(iSpec + 1, -1);
+      m_PPChi0IdxChild.resize(iSpec + 1, -1);
     }
     auto si = std::to_string(iSpec);
     try { // If parameter has already been declared, don't declare it.
@@ -83,7 +89,13 @@ public:
                        "Effective exchange coupling of dataset " + si);
     } catch (std::invalid_argument &) {
     }
+    try { // If parameter has already been declared, don't declare it.
+      declareParameter("Chi0" + si, 0.0,
+                       "Effective exchange coupling of dataset " + si);
+    } catch (std::invalid_argument &) {
+    }
     m_PPLambdaIdxSelf[iSpec] = parameterIndex("Lambda" + si);
+    m_PPChi0IdxSelf[iSpec] = parameterIndex("Chi0" + si);
   }
 };
 }
@@ -343,6 +355,8 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     spectrum.setAttribute("powder", getAttribute("powder" + suffix));
     dynamic_cast<Peaks &>(*m_source).m_PPLambdaIdxChild[iSpec] =
         spectrum.parameterIndex("Lambda");
+    dynamic_cast<Peaks &>(*m_source).m_PPChi0IdxChild[iSpec] =
+        spectrum.parameterIndex("Chi0");
     return retval;
   }
   case Magnetisation: {
@@ -419,6 +433,8 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
     auto &source = dynamic_cast<Peaks &>(*m_source);
     suscept.setParameter(source.m_PPLambdaIdxChild[iSpec],
                          getParameter(source.m_PPLambdaIdxSelf[iSpec]));
+    suscept.setParameter(source.m_PPChi0IdxChild[iSpec],
+                         getParameter(source.m_PPChi0IdxSelf[iSpec]));
     break;
   }
   case Magnetisation: {

@@ -461,19 +461,21 @@ class PhysicalProperties(object):
         :param temperature: the temperature in Kelvin of measurements of M(H)
         :param inverse: a boolean indicating whether susceptibility is chi or 1/chi or M(T) or 1/M(T)
         :param unit: the unit the data was measured in. Either: 'bohr', 'SI' or 'cgs'.
+        :param lambda: (susceptibility only) the value of the exchange constant in inverse susc units
+        :param chi0: (susceptibility only) the value of the residual (background) susceptibility
 
         typeid is required in all cases, and all other parameters may be specified as keyword arguments.
         otherwise the syntax is:
 
         PhysicalProperties('Cp')  # No further parameters required for heat capacity
-        PhysicalProperties('chi', hdir, inverse, unit)
+        PhysicalProperties('chi', hdir, inverse, unit, lambda, chi0)
         PhysicalProperties('chi', unit)
         PhysicalProperties('mag', hdir, temp, unit)
         PhysicalProperties('mag', unit)
         PhysicalProperties('M(T)', hmag, hdir, inverse, unit)
         PhysicalProperties('M(T)', unit)
 
-        Defaults are: hdir=[0, 0, 1]; hmag=1; temp=1; inverse=False; unit='cgs'.
+        Defaults are: hdir=[0, 0, 1]; hmag=1; temp=1; inverse=False; unit='cgs'; lambda=chi0=0.
         """
         self._physpropUnit = 'cgs'
         self._suscInverseFlag = False
@@ -481,6 +483,7 @@ class PhysicalProperties(object):
         self._hmag = 1.
         self._physpropTemperature = 1.
         self._lambda = 0.    # Exchange parameter (for susceptibility only)
+        self._chi0 = 0.      # Residual/background susceptibility (for susceptibility only)
         self._typeid = self._str2id(typeid) if isinstance(typeid, string_types) else int(typeid)
         try:
             initialiser = getattr(self, 'init' + str(self._typeid))
@@ -580,6 +583,15 @@ class PhysicalProperties(object):
         if (self._typeid == 2):
             self._lambda = float(value)
 
+    @property
+    def Chi0(self):
+        return self._chi0 if (self._typeid == 2) else None
+
+    @Chi0.setter
+    def Chi0(self, value):
+        if (self._typeid == 2):
+            self._chi0 = float(value)
+
     def init1(self, *args, **kwargs):
         """ Initialises environment for heat capacity data """
         if len(args) > 0:
@@ -602,7 +614,7 @@ class PhysicalProperties(object):
 
     def init2(self, *args, **kwargs):
         """ Initialises environment for susceptibility data """
-        mapping = ['Hdir', 'Inverse', 'Unit', 'Lambda']
+        mapping = ['Hdir', 'Inverse', 'Unit', 'Lambda', 'Chi0']
         self._parseargs(mapping, *args, **kwargs)
 
     def init3(self, *args, **kwargs):
@@ -633,6 +645,8 @@ class PhysicalProperties(object):
                 out += (',Hmag=%s' % (self._hmag)) if self._typeid==3 else ''
                 if self._typeid == 2 and self._lambda != 0:
                     out += ',Lambda=%s' % (self._lambda)
+                if self._typeid == 2 and self._chi0 != 0:
+                    out += ',Chi0=%s' % (self._chi0)
         return out
 
     def getAttributes(self, dataset=None):
@@ -649,6 +663,7 @@ class PhysicalProperties(object):
                 out['inverse%s' % (dataset)] = 1 if self._suscInverseFlag else 0
                 if self._typeid==3:
                     out['Hmag%s' % (dataset)] = self._hmag
-                if self._typeid == 2 and self._lambda != 0:
+                if self._typeid == 2:
                     out['Lambda%s' % (dataset)] = self._lambda
+                    out['Chi0%s' % (dataset)] = self._chi0
         return out

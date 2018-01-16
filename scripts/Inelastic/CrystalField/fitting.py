@@ -264,6 +264,7 @@ class CrystalField(object):
         """
         if hasattr(i, 'toString'):
             out = i.toString()
+            ppobj = i
         else:
             if self._physprop is None:
                 raise RuntimeError('Physical properties environment not defined.')
@@ -277,6 +278,10 @@ class CrystalField(object):
         if len(fieldParams) > 0:
             out += ',%s' % ','.join(['%s=%s' % item for item in fieldParams.items()])
         ties = self._getFieldTies()
+        if ppobj.TypeID == 2:
+            ties += ',' if ties else ''
+            ties += 'Lambda=0' if ppobj.Lambda == 0. else ''
+            ties += ',Chi0=0' if ppobj.Chi0 == 0. else ''
         if len(ties) > 0:
             out += ',ties=(%s)' % ties
         constraints = self._getFieldConstraints()
@@ -606,8 +611,12 @@ class CrystalField(object):
             self.function.setAttributeValue('PhysicalProperties', [0]*len(tt)+ppids)
             for attribs in [pp.getAttributes(i+len(tt)) for i, pp in enumerate(vlist)]:
                 for item in attribs.items():
-                    if 'Lambda' in item[0]:
+                    if 'Lambda' in item[0] or 'Chi0' in item[0]:
                         self.function.setParameter(item[0], item[1])
+                        if item[1] == 0.:
+                            self.function.tie(item[0], '0.')
+                        else:
+                            self.function.removeTie(item[0])
                     else:
                         self.function.setAttributeValue(item[0], item[1])
 
