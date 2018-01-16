@@ -8,11 +8,22 @@ class ProgressObserver(AlgorithmObserver):
     Observes a single algorithm for its progress and finish notifications
     and updates presenter accordingly.
     """
-    def __init__(self, model):
+    def __init__(self, model, alg):
         super(ProgressObserver, self).__init__()
         self.model = model
+        self.algorithm = alg
         self.message = None
         self.progress = 0.0
+
+    def name(self):
+        return self.algorithm.name()
+
+    def properties(self):
+        """
+        Get algorithm properties.
+        :return: A list of objects with fields: name, value, isDefault.
+        """
+        return self.algorithm.getProperties()
 
     def finishHandle(self):
         self.model.remove_observer(self)
@@ -38,7 +49,7 @@ class AlgorithmProgressModel(AlgorithmObserver):
         self.observeStarting()
 
     def startingHandle(self, alg):
-        progress_observer = ProgressObserver(self)
+        progress_observer = ProgressObserver(self, alg)
         progress_observer.observeProgress(alg)
         progress_observer.observeFinish(alg)
         self.progress_observers.append(progress_observer)
