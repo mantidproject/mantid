@@ -22,18 +22,12 @@ from qtpy.QtWidgets import QApplication
 
 from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
+from mantidqt.utils.qt.testing import requires_qapp
 
-QAPP = None
 
-
+@requires_qapp
 class WorkspaceWidgetTest(unittest.TestCase):
     """Minimal testing as it is exported from C++"""
-
-    @classmethod
-    def setUpClass(cls):
-        global QAPP
-        if QApplication.instance() is None:
-            QAPP = QApplication([''])
 
     def test_widget_creation(self):
         param = MantidTreeModel()
