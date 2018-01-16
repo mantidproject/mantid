@@ -51,7 +51,6 @@ class ApplyPowderDiffILLDetEffCorr(PythonAlgorithm):
         number_time_indexes = y_values.size / efficiency_values.size
 
         full_efficiency_values = np.repeat(efficiency_values, number_time_indexes)
-        e_values = full_efficiency_values
         y_values *= full_efficiency_values
         e_values *= full_efficiency_values
 
