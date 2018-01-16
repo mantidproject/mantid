@@ -2,7 +2,6 @@
 # Utility methods for Fullprof
 from __future__ import (absolute_import, division, print_function)
 import os
-import sys
 import math
 
 
@@ -70,7 +69,7 @@ def load_scd_fullprof_intensity_file(file_name):
 
         if line_index == 0:
             # line 1 as header
-            header = line
+            pass
         elif line.startswith('('):
             # line 2 format line, skip
             continue
