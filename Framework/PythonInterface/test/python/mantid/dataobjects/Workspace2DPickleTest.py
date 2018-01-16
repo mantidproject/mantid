@@ -40,9 +40,10 @@ class Workspace2DPickleTest(unittest.TestCase):
         self.assertTrue(all(self.ws_orig.readE(12) == self.ws_copy.readE(12)))
         self.assertFalse(all(self.ws_orig.readE(12) == self.ws_copy.readE(23)))
 
-    def xtest_pickling_scanning_workspace_forbidden(self):
+    def test_pickling_scanning_workspace_forbidden(self):
         ws = CreateSampleWorkspace(NumBanks=1, NumScanPoints=2)
-        self.assertRaises(ValueError, pickle.dumpts(ws, pickle.HIGHEST_PROTOCOL))
+        with self.assertRaises(ValueError):
+            pickle.dumps(ws, pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == '__main__':
