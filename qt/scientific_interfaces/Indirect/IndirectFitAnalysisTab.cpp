@@ -344,21 +344,23 @@ QHash<QString, double> IndirectFitAnalysisTab::fitParameterValues() const {
 }
 
 QHash<QString, double> IndirectFitAnalysisTab::defaultParameterValues() const {
+  if (m_fitPropertyBrowser->compositeFunction()->nFunctions() == 0)
+    return QHash<QString, double>();
+
   QHash<QString, double> defaultValues;
   QHash<QString, double> fitValues = fitParameterValues();
 
-  const auto function = m_fitPropertyBrowser->theFunction();
+  const auto function = m_fitPropertyBrowser->getFittingFunction();
 
   for (const auto &shortParamName : m_defaultPropertyValues.keys()) {
     if (!fitValues.contains(shortParamName)) {
-      const auto &expectedSuffix = "." + shortParamName;
       const auto &value = m_defaultPropertyValues[shortParamName];
 
       for (const auto &parameter : function->getParameterNames()) {
         const auto parameterName = QString::fromStdString(parameter);
 
         if (!fitValues.contains(parameterName) &&
-            parameterName.endsWith(expectedSuffix))
+            parameterName.endsWith(shortParamName))
           defaultValues[parameterName] = value;
       }
     }
@@ -403,15 +405,19 @@ bool IndirectFitAnalysisTab::hasDefaultPropertyValue(
 }
 
 QSet<QString> IndirectFitAnalysisTab::parameterNames() {
-  auto parameterNames = m_fitPropertyBrowser->getParameterNames();
+  QSet<QString> parameterNames;
+  auto function = m_fitPropertyBrowser->getFittingFunction();
 
-  for (int i = 0; i < parameterNames.size(); ++i) {
-    auto &parameter = parameterNames[i];
+  for (size_t i = 0u; i < function->nParams(); ++i) {
+    const auto &parameter = QString::fromStdString(function->parameterName(i));
+
     if (m_functionNameChanges.contains(parameter))
-      parameter = m_functionNameChanges[parameter];
+      parameterNames.insert(m_functionNameChanges[parameter]);
+    else
+      parameterNames.insert(parameter);
   }
 
-  return parameterNames.toSet();
+  return parameterNames;
 }
 
 /*
@@ -505,7 +511,9 @@ void IndirectFitAnalysisTab::clearBatchRunnerSlots() {
 void IndirectFitAnalysisTab::updateParameterValues() {
   const auto spectrum = static_cast<size_t>(selectedSpectrum());
 
-  if (m_parameterValues.contains(spectrum))
+  if (m_parameterValues.contains(spectrum) &&
+      equivalentFunctions(m_fitFunction,
+                          m_fitPropertyBrowser->compositeFunction()))
     m_fitPropertyBrowser->updateParameterValues(m_parameterValues[spectrum]);
   else
     m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
@@ -657,7 +665,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  */
 IFunction_sptr IndirectFitAnalysisTab::fitFunction(
     QHash<QString, QString> &functionNameChanges) const {
-  return m_fitPropertyBrowser->compositeFunction();
+  return m_fitPropertyBrowser->getFittingFunction();
 }
 
 /**
@@ -666,6 +674,11 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction(
 MatrixWorkspace_sptr IndirectFitAnalysisTab::fitWorkspace() const {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(
       m_fitPropertyBrowser->getWorkspace());
+}
+
+void IndirectFitAnalysisTab::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
+                                              int maxIterations) const {
+  setAlgorithmProperty(fitAlgorithm, "MaxIterations", maxIterations);
 }
 
 /*
@@ -686,8 +699,7 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
   setAlgorithmProperty(fitAlgorithm, "Minimizer",
                        m_fitPropertyBrowser->minimizer(true));
-  setAlgorithmProperty(fitAlgorithm, "MaxIterations",
-                       m_fitPropertyBrowser->maxIterations());
+  setMaxIterations(fitAlgorithm, m_fitPropertyBrowser->maxIterations());
   setAlgorithmProperty(fitAlgorithm, "Convolve",
                        m_fitPropertyBrowser->convolveMembers());
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
@@ -835,11 +847,10 @@ IAlgorithm_sptr IndirectFitAnalysisTab::createWorkspaceAlgorithm(
   return createWsAlg;
 }
 
-void IndirectFitAnalysisTab::emitFunctionChanged() {
-  emit functionChanged();
-}
+void IndirectFitAnalysisTab::emitFunctionChanged() { emit functionChanged(); }
 
-void IndirectFitAnalysisTab::emitParameterChanged(const Mantid::API::IFunction *function) {
+void IndirectFitAnalysisTab::emitParameterChanged(
+    const Mantid::API::IFunction *function) {
   emit parameterChanged(function);
 }
 

@@ -154,6 +154,9 @@ protected:
 
   void updatePlotOptions(QComboBox *cbPlotType);
 
+  virtual void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
+                                int maxIterations) const;
+
 signals:
   void functionChanged();
 
