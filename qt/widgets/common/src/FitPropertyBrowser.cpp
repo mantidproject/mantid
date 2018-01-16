@@ -5,22 +5,22 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/LibraryManager.h"
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
@@ -87,12 +87,7 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
               "curvefitting.autoBackground"))),
       m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
       m_shouldBeNormalised(false) {
-  // Make sure plugins are loaded
-  std::string libpath =
-      Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
-  if (!libpath.empty()) {
-    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-  }
+  Mantid::API::FrameworkManager::Instance().loadPlugins();
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
   // loaded
@@ -467,11 +462,10 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   m_status->hide();
   connect(this, SIGNAL(fitResultsChanged(const QString &)), this,
           SLOT(showFitResultStatus(const QString &)), Qt::QueuedConnection);
-
+  layout->addWidget(m_status);
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
   layout->addWidget(m_browser);
-  layout->addWidget(m_status);
 
   setWidget(w);
 
@@ -1657,6 +1651,7 @@ void FitPropertyBrowser::showFitResultStatus(const QString &status) {
   if (status != "success") {
     color = "red";
   }
+
   m_status->setText(
       QString("Status: <span style='color:%2'>%1</span>").arg(text, color));
   m_status->show();

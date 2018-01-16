@@ -155,6 +155,12 @@ public:
   virtual int getFittingListWidgetCurrentRow() const = 0;
 
   /**
+  * Update the fitting list widget with a list of workspace run and bank numbers
+  */
+  virtual void
+  updateFittingListWidget(const std::vector<std::string> &rows) = 0;
+
+  /**
   * @return The text on the current selected row of the list widget
   */
   virtual boost::optional<std::string>
@@ -265,6 +271,11 @@ public:
    * @param newInstrument the new instrument that is selected
    */
   virtual void setCurrentInstrument(const std::string &newInstrument) = 0;
+
+  /**
+  * Get whether the user has selected to plot reconstructed peaks over the run
+  */
+  virtual bool plotFittedPeaksEnabled() const = 0;
 };
 
 } // namespace CustomInterfaces

@@ -244,15 +244,16 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
             return merge_max
 
     def _apply_user_mask_ranges(self, cF, cR, nR, nF, merge_min, merge_max):
+        if merge_min < min(cF.dataX(0)):
+            merge_min = min(cF.dataX(0))
+        if merge_max > max(cR.dataX(0)):
+            merge_max = max(cR.dataX(0))
         merge_max = self._check_bins(merge_min, merge_max, cF, cR)
 
         mask_name = "MaskBins"
         mask_options = {"InputWorkspace": cF}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-        if merge_min < min(cF.dataX(0)):
-            merge_min = min(cF.dataX(0))
-        if merge_max > max(cR.dataX(0)):
-            merge_max = max(cR.dataX(0))
+
         mask_alg.setProperty("InputWorkspace", cF)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
         mask_alg.setProperty("XMin", min(cF.dataX(0)))
@@ -288,24 +289,20 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
         merge_mask = self.getProperty('MergeMask').value
         merge_min = self.getProperty('MergeMin').value
         merge_max = self.getProperty('MergeMax').value
-        fit_min = self.getProperty('FitMin').value
-        fit_max = self.getProperty('FitMax').value
 
         cF = self.getProperty('HABCountsSample').value
         cR = self.getProperty('LABCountsSample').value
         nF = self.getProperty('HABNormSample').value
         nR = self.getProperty('LABNormSample').value
-        if merge_mask:
-            cR, cF, nR, nF = self._apply_user_mask_ranges(cF, cR, nR, nF, merge_min, merge_max)
+
         q_high_angle = self._divide(cF, nF)
         q_low_angle = self._divide(cR, nR)
+
         if self.getProperty('ProcessCan').value:
             cF_can = self.getProperty('HABCountsCan').value
             cR_can = self.getProperty('LABCountsCan').value
             nF_can = self.getProperty('HABNormCan').value
             nR_can = self.getProperty('LABNormCan').value
-            if merge_mask:
-                cR_can, cF_can, nR_can, nF_can = self._apply_user_mask_ranges(cF_can, cR_can, nR_can, nF_can, merge_min, merge_max)
 
             q_high_angle_can = self._divide(cF_can, nF_can)
             q_low_angle_can = self._divide(cR_can, nR_can)
@@ -335,6 +332,9 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
         nF = self._crop_to_x_range(nF, min_q, max_q)
         nR = self._crop_to_x_range(nR, min_q, max_q)
 
+        if merge_mask:
+            cR, cF, nR, nF = self._apply_user_mask_ranges(cF, cR, nR, nF, merge_min, merge_max)
+
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
         merged_q = self._calculate_merged_q(cF=cF, nF=nF, cR=cR, nR=nR, scale_factor=scale_factor,
                                             shift_factor=shift_factor)
@@ -344,6 +344,10 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
             cR_can = self._crop_to_x_range(cR_can, min_q, max_q)
             nF_can = self._crop_to_x_range(nF_can, min_q, max_q)
             nR_can = self._crop_to_x_range(nR_can, min_q, max_q)
+
+            if merge_mask:
+                cR_can, cF_can, nR_can, nF_can = self._apply_user_mask_ranges(cF_can, cR_can, nR_can, nF_can, merge_min,
+                                                                              merge_max)
 
             # Calculate merged q for the can
             merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,

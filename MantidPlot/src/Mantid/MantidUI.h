@@ -52,12 +52,10 @@ class AlgorithmMonitor;
 class InstrumentWindow;
 
 namespace MantidQt {
-namespace API {
-class Message;
-}
 namespace MantidWidgets {
 class FitPropertyBrowser;
-class QWorkspaceDockView;
+class WorkspaceTreeWidget;
+class Message;
 }
 namespace SliceViewer {
 class SliceViewerWindow;
@@ -649,8 +647,9 @@ private:
   // Private variables
 
   ApplicationWindow *m_appWindow; // QtiPlot main ApplicationWindow
-  boost::shared_ptr<MantidQt::MantidWidgets::QWorkspaceDockView>
-      m_exploreMantid; // Dock window for manipulating workspaces
+  QDockWidget *m_workspaceDockWidget;
+  MantidQt::MantidWidgets::WorkspaceTreeWidget *
+      m_exploreMantid; // Widget for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms; // Dock window for using algorithms
   RemoteClusterDockWidget *
       m_exploreRemoteTasks; // Dock window for using remote tasks

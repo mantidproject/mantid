@@ -38,6 +38,10 @@ APPNAME = 'workbench'
 DEFAULTS = {
     'main': {
       'high_dpi_scaling': True,
+      'window/size': (1260, 740),
+      'window/position': (10, 10),
+      'window/is_maximized': True,
+      'window/is_fullscreen': False,
     }
 }
 

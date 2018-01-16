@@ -100,6 +100,7 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = 
     view.beam_centre = beam_centre
 
     view.halt_process_flag = mock.MagicMock()
+
     # ---------------------
     # Mocking properties
     # ---------------------

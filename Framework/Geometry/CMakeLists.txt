@@ -50,8 +50,8 @@ set ( SRC_FILES
 	src/Instrument/ComponentInfo.cpp
 	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
-	src/Instrument/DetectorInfo.cpp
 	src/Instrument/DetectorGroup.cpp
+	src/Instrument/DetectorInfo.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
 	src/Instrument/IDFObject.cpp
@@ -309,6 +309,7 @@ set ( TEST_FILES
 	BraggScattererFactoryTest.h
 	BraggScattererInCrystalStructureTest.h
 	BraggScattererTest.h
+	CSGObjectTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentInfoTest.h
@@ -321,7 +322,6 @@ set ( TEST_FILES
 	ConventionalCellTest.h
 	ConvexPolygonIteratorTest.h
 	ConvexPolygonTest.h
-	CSGObjectTest.h
 	CrystalStructureTest.h
 	CyclicGroupTest.h
 	CylinderTest.h

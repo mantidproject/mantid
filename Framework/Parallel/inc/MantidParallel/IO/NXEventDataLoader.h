@@ -131,6 +131,7 @@ makeEventDataPartitioner(const H5::Group &group, const int numWorkers) {
     attr.read(attr.getDataType(), offset);
     time_zero_offset = Types::Core::DateAndTime(offset).totalNanoseconds();
   }
+  H5Aclose(attr_id);
   return Kernel::make_unique<
       EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>>(
       numWorkers, PulseTimeGenerator<IndexType, TimeZeroType>{

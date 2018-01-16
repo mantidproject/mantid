@@ -48,6 +48,8 @@ public:
                    "resumed by clicking on the 'Process' button.");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
+  bool modifiesRunningProcesses() override { return true; }
 };
 }
 }

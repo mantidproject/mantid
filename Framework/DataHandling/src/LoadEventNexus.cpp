@@ -78,15 +78,8 @@ void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr &from,
 LoadEventNexus::LoadEventNexus()
     : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0),
       longest_tof(0), shortest_tof(0), bad_tofs(0), discarded_events(0),
-      compressTolerance(0), m_file(nullptr),
-      m_instrument_loaded_correctly(false), loadlogs(false),
-      m_logs_loaded_correctly(false), event_id_is_spec(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor */
-LoadEventNexus::~LoadEventNexus() {
-  if (m_file)
-    delete m_file;
+      compressTolerance(0), m_instrument_loaded_correctly(false),
+      loadlogs(false), m_logs_loaded_correctly(false), event_id_is_spec(false) {
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1656,7 +1649,7 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
  */
 void LoadEventNexus::safeOpenFile(const std::string fname) {
   try {
-    m_file = new ::NeXus::File(m_filename, NXACC_READ);
+    m_file = Kernel::make_unique<::NeXus::File>(m_filename, NXACC_READ);
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Severe failure when trying to open NeXus file: " +
                              std::string(e.what()));
