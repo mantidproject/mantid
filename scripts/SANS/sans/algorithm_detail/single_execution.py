@@ -14,6 +14,7 @@ try:
 except ImportError:
     have_mpi = False
 
+
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
     """
     This function runs a core reduction. This is essentially half a reduction (either smaple or can).
