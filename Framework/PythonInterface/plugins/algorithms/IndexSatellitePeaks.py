@@ -37,7 +37,7 @@ class IndexSatellitePeaks(PythonAlgorithm):
         qs = np.round(hkls) - hkls
 
         clusters, k = indexing.cluster_qs(qs, k=k)
-        
+ 
         qs = indexing.average_clusters(qs, clusters)
         qs = indexing.trunc_decimals(qs, n_trunc_decimals)
         qs = indexing.sort_vectors_by_norm(qs)
@@ -59,6 +59,18 @@ class IndexSatellitePeaks(PythonAlgorithm):
         self.setProperty("OutputWorkspace", indexed)
 
     def create_indexed_workspace(self, fractional_peaks, ndim, hklm):
+        """Create a TableWorkepace that contains indexed peak data.
+
+        This produces a TableWorkepace that looks like a PeaksWorkspace but
+        with the additional index columns included. In future releases support
+        for indexing should be added to the PeaksWorkspace data type itself.
+
+        :param fractional_peaks: the peaks workspace containing peaks with
+            fractional HKL values.
+        :param ndim: the number of additional indexing columns to add.
+        :param hklm: the new higher dimensional miller indicies to add.
+        :returns: a table workspace with the indexed peak data
+        """
         # Create table with the number of columns we need
         types = ['int', 'long64', 'double', 'double', 'double', 'double',  'double', 'double',
                  'double', 'double', 'double', 'float', 'str', 'float', 'float', 'V3D', 'V3D']

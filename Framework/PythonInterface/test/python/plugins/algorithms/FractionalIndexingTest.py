@@ -220,10 +220,10 @@ class FractionIndexingTests(unittest.TestCase):
         result = indexing.trunc_decimals(test_input, 1)
         npt.assert_array_equal(result, reference)
 
-    def test_remove_nonzero(self):
+    def test_remove_noninteger(self):
         test_input = np.array([1, 2, 3, 1.1, 3.4, -10, -1.8])
         reference = np.array([1, 2, 3, 0, 0, -10, 0])
-        result = indexing.remove_nonzero(test_input)
+        result = indexing.remove_noninteger(test_input)
         npt.assert_array_equal(result, reference)
 
     def test_get_hkls(self):
