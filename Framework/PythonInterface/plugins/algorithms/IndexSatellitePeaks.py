@@ -37,7 +37,7 @@ class IndexSatellitePeaks(PythonAlgorithm):
         qs = np.round(hkls) - hkls
 
         clusters, k = indexing.cluster_qs(qs, k=k)
- 
+
         qs = indexing.average_clusters(qs, clusters)
         qs = indexing.trunc_decimals(qs, n_trunc_decimals)
         qs = indexing.sort_vectors_by_norm(qs)

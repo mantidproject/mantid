@@ -6,7 +6,7 @@ import scipy
 
 def find_bases(qs, tolerance):
     """Find a set of bases from the list of qs
- 
+
     This will estimate the number of additional dimensions needed to index the
     fractional peaks. One vector for each dimension will then be chosen and
     used as the basis for the new dimension.
