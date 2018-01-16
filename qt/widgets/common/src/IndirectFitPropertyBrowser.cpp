@@ -254,6 +254,7 @@ void IndirectFitPropertyBrowser::setParameterValue(
     if (function->name() == functionName)
       setParameterValue(function, parameterName, value);
   }
+
   updateParameters();
 }
 
@@ -301,8 +302,7 @@ void IndirectFitPropertyBrowser::updateParameterValues(
       function->setParameter(parameter, parameterValues[parameterName]);
   }
 
-  getHandler()->updateParameters();
-  emit parameterChanged(function.get());
+  updateParameters();
 }
 
 void IndirectFitPropertyBrowser::setBackgroundOptions(
