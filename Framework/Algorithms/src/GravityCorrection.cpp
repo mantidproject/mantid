@@ -305,41 +305,29 @@ void GravityCorrection::slitCheck() {
 }
 
 /**
- * @brief GravityCorrection::parabola
+ * @brief GravityCorrection::finalAngle
  * @param k ::
  * @param i ::
  * @return a pair defining the shift in the beam and the upward pointing
  * direction of the parabola from source to sample via the slits
  */
-pair<double, double> GravityCorrection::parabola(const double k, size_t i) {
+double GravityCorrection::finalAngle(const double k, size_t i) {
+  // calculate parabola
   const double beam1 =
       this->coordinate(this->m_slit1Name, this->m_beamDirection);
   const double beam2 =
       this->coordinate(this->m_slit2Name, this->m_beamDirection);
   // calculate slit pointing up coordinate
-  const double up1 =
-      beam1 * tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
-  const double up2 =
-      beam2 * tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
+  const double tanAngle = tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
+  const double up1 = beam1 * tanAngle;
+  const double up2 = beam2 * tanAngle;
   // potential divide by zero avoided by input validation beam1 != beam2
   double beamShift = (k * (pow(beam1, 2) - pow(beam2, 2)) + (up1 - up2)) /
                      (2 * k * (beam1 - beam2));
   if (up1 == 0.)
     g_log.error("Zero final scattering angle.");
   double upShift = up1 + k * (beam1 - beam2);
-  return pair<double, double>(beamShift, upShift);
-}
-
-/**
- * @brief GravityCorrection::finalAngle computes the update on the final angle
- * taking gravity into account
- * @param k
- * @param i
- * @return a new, corrected final angle
- */
-double GravityCorrection::finalAngle(const double k, size_t i) {
-  double beamShift, upShift;
-  tie(beamShift, upShift) = this->GravityCorrection::parabola(k, i);
+  // calculate final angle
   return atan(2. * k * sqrt(std::abs(upShift / k)));
 }
 
@@ -626,6 +614,11 @@ void GravityCorrection::exec() {
 
       // detector position
       double detZ = this->coordinate(spectrumInfo, i, m_beamDirection);
+
+      //
+      double s1 = this->parabolaArcLength(this->coordinate(this->m_ws->getInstrument()->getSource()->getName(), m_beamDirection));
+      double s2 = this->parabolaArcLength(detZ);
+
       double v{(spectrumInfo.l1() + spectrumInfo.l2(i)) / *tofit};
       double k = g / (2. * pow(v, 2));
       double angle = this->finalAngle(k, i);

@@ -176,16 +176,17 @@ Output:
 .. testcode:: ILL Figaro: workspace with instrument where the z axis is parallel and in direction to the beam.
 
         # Load an ILL Figaro File into a Workspace2D
-        #if (!ws.getRun()->hasProperty("GravityCorrected"))
-        ws = LoadILLReflectometry('ILL/Figaro/xxxx.nxs')
+        ws = LoadILLReflectometry('ILL/Figaro/592724.nxs')
 
-        # Perform correction due to gravitation effects
+        # Perform correction
         wsCorrected = GravityCorrection(ws)
 
 Output:
 
 .. testoutput:: ILL Figaro
     :options: +NORMALIZE_WHITESPACE
+
+        # Plot the workspaces
 
 .. categories::
 

@@ -82,8 +82,8 @@ private:
   std::map<double, size_t> m_finalAngles;
   /// Initialisation code
   void init() override;
-  /// Parabola definition between source and sample
-  std::pair<double, double> parabola(const double k, size_t i);
+  /// Final angle definition between source and sample
+  double finalAngle(const double k, size_t i);
   /// Retrieve the coordinate of an instrument component
   double coordinate(
       const std::string componentName,
@@ -101,8 +101,6 @@ private:
                      double value) const;
   /// Generalise instrument setup (origin, handedness, coordinate system)
   void virtualInstrument();
-  /// Compute final angle
-  double finalAngle(const double k, size_t i);
   /// Ensure slits to exist and be correctly ordered
   void slitCheck();
   /// The corrected spectrum number for the initialSpectrumNumber

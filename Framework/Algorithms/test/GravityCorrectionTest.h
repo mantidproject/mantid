@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/GravityCorrection.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -56,6 +57,25 @@ public:
                               gc6.setProperty("FirstSlitName", "slitt"));
     TS_ASSERT_THROWS_ANYTHING(gc6.execute());
     TS_ASSERT(!gc6.isExecuted());
+  }
+
+  void testInputWorkspace1D() {
+    Mantid::API::IAlgorithm_sptr lAlg;
+    TS_ASSERT_THROWS_NOTHING(
+        lAlg = Mantid::API::AlgorithmManager::Instance().create(
+            "LoadILLReflectometry");
+        lAlg->setChild(true); lAlg->initialize();
+        lAlg->setProperty("Filename", file);
+        lAlg->setProperty("OutputWorkspace", "ws");
+        lAlg->setProperty("XUnit", "TimeOfFlight"); lAlg->execute();)
+    TS_ASSERT(lAlg->isExecuted());
+    Mantid::API::Workspace_sptr ws0;
+    TS_ASSERT_THROWS_NOTHING(ws0 = lAlg->getProperty("OutputWorkspace"));
+    Mantid::API::MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws0));
+    GravityCorrection gc00;
+    this->runGravityCorrection(gc00, ws, "OutputWorkspace", "slit2", "slit3");
   }
 
   void testSlitPosDiffers() {
@@ -269,8 +289,6 @@ public:
         Mantid::API::AnalysisDataService::Instance().clear());
   }
 
-  void testInputWorkspace1D() {}
-
   void testInputWorkspace2D() {}
 
   void testDetectorMask() {}
@@ -388,16 +406,17 @@ public:
   }
 
 private:
+  const std::string file{"ILL/Figaro/592724.nxs"};
   const std::string outWSName{"GravityCorrectionTest_OutputWorkspace"};
   const std::string inWSName{"GravityCorrectionTest_InputWorkspace"};
   const std::string TRUE{"1"};
   const std::string FALSE{"0"};
-  Mantid::Kernel::V3D source = Mantid::Kernel::V3D(0., 0., 0.);
-  Mantid::Kernel::V3D monitor = Mantid::Kernel::V3D(0.5, 0., 0.);
-  Mantid::Kernel::V3D s1 = Mantid::Kernel::V3D(1., 0., 0.);
-  Mantid::Kernel::V3D s2 = Mantid::Kernel::V3D(2., 0., 0.);
-  Mantid::Kernel::V3D sample = Mantid::Kernel::V3D(3., 0., 0.);
-  Mantid::Kernel::V3D detector = Mantid::Kernel::V3D(4., 4., 0.);
+  Mantid::Kernel::V3D source{Mantid::Kernel::V3D(0., 0., 0.)};
+  Mantid::Kernel::V3D monitor{Mantid::Kernel::V3D(0.5, 0., 0.)};
+  Mantid::Kernel::V3D s1{Mantid::Kernel::V3D(1., 0., 0.)};
+  Mantid::Kernel::V3D s2{Mantid::Kernel::V3D(2., 0., 0.)};
+  Mantid::Kernel::V3D sample{Mantid::Kernel::V3D(3., 0., 0.)};
+  Mantid::Kernel::V3D detector{Mantid::Kernel::V3D(4., 4., 0.)};
   Mantid::API::MatrixWorkspace_sptr inWS1{
       WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
           0.0, s1, s2, 0.5, 1.0, source, monitor, sample, detector, 2, 100,
