@@ -117,3 +117,62 @@ signals:
 private:
   ScriptEditor(const ScriptEditor&);
 };
+
+
+class AlgorithmDialog: QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidAPI/AlgorithmObserver.h"
+#include <boost/python/extract.hpp>
+using namespace MantidQt::API;
+%End
+public:
+  void setShowKeepOpen(const bool showOption);
+  bool isShowKeepOpen() const;
+  void initializeLayout();
+  bool isInitialized() const;
+  void setAlgorithm(SIP_PYOBJECT);
+%MethodCode
+  sipCpp->setAlgorithm(boost::python::extract<Mantid::API::IAlgorithm_sptr>(a0));
+%End
+  void setPresetValues(const QHash<QString, QString> &presetValues);
+  void isForScript(bool forScript);
+  void executeOnAccept(bool on);
+  void setOptionalMessage(const QString &message);
+  void addEnabledAndDisableLists(const QStringList &enabled,
+                                 const QStringList &disabled);
+  void addAlgorithmObserver(SIP_PYOBJECT);
+%MethodCode
+  sipCpp->addAlgorithmObserver(boost::python::extract<Mantid::API::AlgorithmObserver*>(a0));
+%End
+private:
+  AlgorithmDialog();
+  AlgorithmDialog(const AlgorithmDialog&);
+};
+
+
+class GenericDialog: AlgorithmDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/GenericDialog.h"
+using namespace MantidQt::API;
+%End
+public:
+  GenericDialog(QWidget *parent = nullptr);
+};
+
+
+class InterfaceManager {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+using namespace MantidQt::API;
+%End
+public:
+  InterfaceManager();
+  AlgorithmDialog *createDialogFromName(
+      const QString &algorithmName, const int version = -1,
+      QWidget *parent = nullptr, bool forScript = false,
+      const QHash<QString, QString> &presetValues = QHash<QString, QString>(),
+      const QString &optionalMsg = QString(),
+      const QStringList &enabled = QStringList(),
+      const QStringList &disabled = QStringList());
+};

@@ -16,6 +16,7 @@
 
 #include <MantidAPI/FileProperty.h>
 #include <MantidAPI/IMDEventWorkspace.h>
+#include <MantidAPI/IMDWorkspace.h>
 #include <MantidAPI/IPeaksWorkspace.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
@@ -76,6 +77,10 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
   setupConnections();
 
   m_tree->setDragEnabled(true);
+
+  auto presenter = boost::make_shared<WorkspacePresenter>(this);
+  m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
+  presenter->init();
 }
 
 WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
@@ -170,12 +175,6 @@ void WorkspaceTreeWidget::setTreeUpdating(const bool state) {
 }
 
 void WorkspaceTreeWidget::incrementUpdateCount() { m_updateCount.ref(); }
-
-void WorkspaceTreeWidget::init() {
-  auto presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
-  m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
-  presenter->init();
-}
 
 WorkspacePresenterWN_wptr WorkspaceTreeWidget::getPresenterWeakPtr() {
   return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
@@ -1047,13 +1046,10 @@ void WorkspaceTreeWidget::addClearMenuItems(QMenu *menu,
 
 bool WorkspaceTreeWidget::hasUBMatrix(const std::string &wsName) {
   bool hasUB = false;
-  auto alg = m_mantidDisplayModel->createAlgorithm("HasUB");
-
-  if (alg) {
-    alg->setLogging(false);
-    alg->setPropertyValue("Workspace", wsName);
-    executeAlgorithmAsync(alg, true);
-    hasUB = alg->getProperty("HasUB");
+  Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
+  IMDWorkspace_sptr wsIMD = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+  if (ws && wsIMD) {
+    hasUB = wsIMD->hasOrientedLattice();
   }
   return hasUB;
 }
@@ -1075,7 +1071,7 @@ void WorkspaceTreeWidget::addSaveMenuOption(QString algorithmString,
   QAction *saveAction = new QAction(menuEntryName, this);
   saveAction->setData(QVariant(algorithmString));
 
-  // Connect the tigger slot to show algorithm dialog
+  // Connect the trigger slot to show algorithm dialog
   connect(saveAction, SIGNAL(triggered()), this,
           SLOT(handleShowSaveAlgorithm()));
 
