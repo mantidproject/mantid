@@ -125,7 +125,7 @@ Save Options
 Run Summation
 -------------
 
-.. image:: ../images/sans_isis_v2_summation_page_whole.png
+.. image:: ../images/sans_isis_v2_add_runs_tab.png
    :align: right
    :width: 800px
 
@@ -135,7 +135,7 @@ The Run Summation tab is used to perform addition of two or more run files, savi
 single file. The user builds a list of multiple histogram or event files (but not mixed) before
 pressing the sum button to produce a single output file in the mantid output directory.
 
-Files To Sum
+Runs To Sum
 ^^^^^^^^^^^^
 
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
@@ -143,7 +143,7 @@ Files To Sum
 |       |                           | more comma separated run numbers and press **Add** or the enter key to search for runs  |
 |       |                           | with a matching number.                                                                 |
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
-| **2** | **Run Summation Table**   | This table contains the files to be summed.                                             |
+| **2** | **Run Summation List**    | This list contains the files to be summed.                                             |
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
 | **3** | **Browse**                | This button is used to select one or more nexus files to be added to the summation      |
 |       |                           | table.                                                                                  |
