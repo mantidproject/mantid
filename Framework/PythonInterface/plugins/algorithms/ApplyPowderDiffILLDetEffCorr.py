@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, RenameWorkspace, Transpose
+from mantid.simpleapi import CreateWorkspace, RenameWorkspace
 from mantid.api import AlgorithmFactory, PropertyMode, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
 import numpy as np
@@ -54,10 +54,10 @@ class ApplyPowderDiffILLDetEffCorr(PythonAlgorithm):
         y_values *= full_efficiency_values
         e_values *= full_efficiency_values
 
-        output_ws = CreateWorkspace(DataX=input_ws.extractX(), DataY=y_values, DataE=e_values, Nspec=y_values.size,
-                                    ParentWorkspace=input_ws)
+        __output_ws = CreateWorkspace(DataX=input_ws.extractX(), DataY=y_values, DataE=e_values, Nspec=y_values.size,
+                                      ParentWorkspace=input_ws)
 
-        RenameWorkspace(output_ws, self.getPropertyValue("OutputWorkspace"))
-        self.setProperty("OutputWorkspace", output_ws)
+        RenameWorkspace(__output_ws, self.getPropertyValue("OutputWorkspace"))
+        self.setProperty("OutputWorkspace", __output_ws)
 
 AlgorithmFactory.subscribe(ApplyPowderDiffILLDetEffCorr)
