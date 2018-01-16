@@ -83,10 +83,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
   presenter->init();
 }
 
-WorkspaceTreeWidget::~WorkspaceTreeWidget() {
-  // Ownership is transferred on construction so must delete
-  delete (m_mantidDisplayModel);
-}
+WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
 
 /**
 * Accept a drag drop event and process the data appropriately
