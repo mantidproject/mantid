@@ -147,6 +147,9 @@ private:
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers() const;
 
+  /// Extract the common aspects relevant to all component types
+  size_t commonRegistration(const Mantid::Geometry::IComponent &component);
+
 public:
   InstrumentVisitor(boost::shared_ptr<const Instrument> instrument);
 
@@ -165,14 +168,10 @@ public:
   registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;
 
   virtual size_t
-  registerBankOfTubes(const Mantid::Geometry::ICompAssembly &bank) override;
-
-  virtual size_t registerTube(const ICompAssembly &tube) override;
-
-  virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
-  virtual size_t registerTubeObj(const ObjCompAssembly &objTube) override;
+  virtual size_t
+  registerObjComponentAssembly(const ObjCompAssembly &obj) override;
 
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
   componentIds() const;
