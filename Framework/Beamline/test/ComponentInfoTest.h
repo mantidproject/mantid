@@ -76,8 +76,8 @@ makeFlatTree(PosVec detPositions, RotVec detRotations) {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, children, positions, rotations,
-      scaleFactors, isRectangularBank, names, -1, -1);
+      parentIndices, children, positions, rotations, scaleFactors,
+      isRectangularBank, names, -1, -1);
 
   componentInfo->setDetectorInfo(detectorInfo.get());
 
@@ -144,9 +144,8 @@ makeTreeExampleAndReturnGeometricArguments() {
   // Rectangular bank flag
   auto isRectangularBank =
       boost::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
-  auto children =
-      boost::make_shared<std::vector<std::vector<size_t>>>(
-          2, std::vector<size_t>(2));
+  auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
+      2, std::vector<size_t>(2));
 
   auto compInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
