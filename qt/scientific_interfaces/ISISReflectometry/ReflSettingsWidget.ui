@@ -242,6 +242,9 @@
         </item>
         <item row="1" column="3">
          <widget class="QComboBox" name="reductionTypeComboBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <item>
            <property name="text">
             <string>Normal</string>
