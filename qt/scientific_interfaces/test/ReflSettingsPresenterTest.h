@@ -203,7 +203,7 @@ public:
     return !options.contains(key);
   }
 
-  void testGetSummationSettingsWhenSummingInLambda() {
+  void testGetQSummationOptionsWhenSummingInLambda() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
     ReflSettingsPresenter presenter(&mockView);
@@ -218,9 +218,10 @@ public:
     auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(variantToString(options["SummationType"]), "SumInLambda");
     TS_ASSERT(keyNotSet("ReductionType", options));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testGetSummationSettingsWhenSummingInQ() {
+  void testGetQSummationOptionsWhenSummingInQ() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
     ReflSettingsPresenter presenter(&mockView);
@@ -236,123 +237,231 @@ public:
     TS_ASSERT_EQUALS(variantToString(options["SummationType"]), "SumInQ");
     TS_ASSERT_EQUALS(variantToString(options["ReductionType"]),
                      "DivergentBeam");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testGetReductionOptions() {
+  void testGetAnalysisMode() {
     MockSettingsView mockView;
     onCallReturnDefaultSettings(mockView);
     ReflSettingsPresenter presenter(&mockView);
 
-    EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(mockView, instrumentSettingsEnabled())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(mockView, getAnalysisMode())
-        .Times(Exactly(1))
+        .Times(AtLeast(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
-    EXPECT_CALL(mockView, getCRho())
-        .Times(Exactly(1))
-        .WillOnce(Return("2.5,0.4,1.1"));
-    EXPECT_CALL(mockView, getCAlpha())
-        .Times(Exactly(1))
-        .WillOnce(Return("0.6,0.9,1.2"));
-    EXPECT_CALL(mockView, getCAp())
-        .Times(Exactly(1))
-        .WillOnce(Return("100.0,17.0,44.0"));
-    EXPECT_CALL(mockView, getCPp())
-        .Times(Exactly(1))
-        .WillOnce(Return("0.54,0.33,1.81"));
-    EXPECT_CALL(mockView, getPolarisationCorrections())
-        .Times(Exactly(1))
-        .WillOnce(Return("PNR"));
-    EXPECT_CALL(mockView, getIntMonCheck())
-        .Times(Exactly(1))
-        .WillOnce(Return("True"));
-    EXPECT_CALL(mockView, getMonitorIntegralMin())
-        .Times(Exactly(1))
-        .WillOnce(Return("4"));
-    EXPECT_CALL(mockView, getMonitorIntegralMax())
-        .Times(Exactly(1))
-        .WillOnce(Return("10"));
-    EXPECT_CALL(mockView, getMonitorBackgroundMin())
-        .Times(Exactly(1))
-        .WillOnce(Return("12"));
-    EXPECT_CALL(mockView, getMonitorBackgroundMax())
-        .Times(Exactly(1))
-        .WillOnce(Return("17"));
-    EXPECT_CALL(mockView, getLambdaMin())
-        .Times(Exactly(1))
-        .WillOnce(Return("1"));
-    EXPECT_CALL(mockView, getLambdaMax())
-        .Times(Exactly(1))
-        .WillOnce(Return("15"));
-    EXPECT_CALL(mockView, getI0MonitorIndex())
-        .Times(Exactly(1))
-        .WillOnce(Return("2"));
-    EXPECT_CALL(mockView, getScaleFactor())
-        .Times(Exactly(1))
-        .WillOnce(Return("2"));
-    EXPECT_CALL(mockView, getMomentumTransferStep())
-        .Times(Exactly(1))
-        .WillOnce(Return("-0.02"));
-    EXPECT_CALL(mockView, getProcessingInstructions())
-        .Times(Exactly(1))
-        .WillOnce(Return("3,4"));
-    EXPECT_CALL(mockView, getDetectorCorrectionType())
-        .Times(Exactly(1))
-        .WillOnce(Return("VerticalShift"));
-    EXPECT_CALL(mockView, getTransmissionRuns())
-        .Times(Exactly(1))
-        .WillOnce(Return("INTER00013463,INTER00013464"));
-    EXPECT_CALL(mockView, getStartOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("10"));
-    EXPECT_CALL(mockView, getEndOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("12"));
-    EXPECT_CALL(mockView, getSummationType())
-        .Times(Exactly(1))
-        .WillOnce(Return("SumInQ"));
-    EXPECT_CALL(mockView, getReductionType())
-        .Times(Exactly(1))
-        .WillOnce(Return("DivergentBeam"));
 
     auto options = presenter.getReductionOptions();
-    TS_ASSERT_EQUALS(options.size(), 23);
     TS_ASSERT_EQUALS(variantToString(options["AnalysisMode"]),
                      "MultiDetectorAnalysis");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetPolarisationCorrectionOptions() {
+    MockSettingsView mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getPolarisationCorrections())
+        .Times(AtLeast(1))
+        .WillOnce(Return("PNR"));
+    EXPECT_CALL(mockView, getCRho())
+        .Times(AtLeast(1))
+        .WillOnce(Return("2.5,0.4,1.1"));
+    EXPECT_CALL(mockView, getCAlpha())
+        .Times(AtLeast(1))
+        .WillOnce(Return("0.6,0.9,1.2"));
+    EXPECT_CALL(mockView, getCAp())
+        .Times(AtLeast(1))
+        .WillOnce(Return("100.0,17.0,44.0"));
+    EXPECT_CALL(mockView, getCPp())
+        .Times(AtLeast(1))
+        .WillOnce(Return("0.54,0.33,1.81"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["PolarizationAnalysis"]), "PNR");
     TS_ASSERT_EQUALS(variantToString(options["CRho"]), "2.5,0.4,1.1");
     TS_ASSERT_EQUALS(variantToString(options["CAlpha"]), "0.6,0.9,1.2");
     TS_ASSERT_EQUALS(variantToString(options["CAp"]), "100.0,17.0,44.0");
     TS_ASSERT_EQUALS(variantToString(options["CPp"]), "0.54,0.33,1.81");
-    TS_ASSERT_EQUALS(variantToString(options["PolarizationAnalysis"]), "PNR");
-    TS_ASSERT_EQUALS(variantToString(options["ScaleFactor"]), "2");
-    TS_ASSERT_EQUALS(variantToString(options["MomentumTransferStep"]), "-0.02");
-    TS_ASSERT_EQUALS(variantToString(options["StartOverlap"]), "10");
-    TS_ASSERT_EQUALS(variantToString(options["EndOverlap"]), "12");
-    TS_ASSERT_EQUALS(variantToString(options["FirstTransmissionRun"]),
-                     "INTER00013463,INTER00013464");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetIntMonCheck() {
+    MockSettingsView mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getIntMonCheck())
+        .Times(AtLeast(1))
+        .WillOnce(Return("True"));
+
+    auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(variantToString(options["NormalizeByIntegratedMonitors"]),
                      "True");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetMonitorIntegralRangeOptions() {
+    MockSettingsView mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getMonitorIntegralMin())
+        .Times(AtLeast(1))
+        .WillOnce(Return("4"));
+    EXPECT_CALL(mockView, getMonitorIntegralMax())
+        .Times(AtLeast(1))
+        .WillOnce(Return("10"));
+
+    auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(
         variantToString(options["MonitorIntegrationWavelengthMin"]), "4");
     TS_ASSERT_EQUALS(
         variantToString(options["MonitorIntegrationWavelengthMax"]), "10");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetMonitorBackgroundRangeOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getMonitorBackgroundMin())
+        .Times(AtLeast(1))
+        .WillOnce(Return("12"));
+    EXPECT_CALL(mockView, getMonitorBackgroundMax())
+        .Times(AtLeast(1))
+        .WillOnce(Return("17"));
+
+    auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(variantToString(options["MonitorBackgroundWavelengthMin"]),
                      "12");
     TS_ASSERT_EQUALS(variantToString(options["MonitorBackgroundWavelengthMax"]),
                      "17");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetLambdaRangeOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getLambdaMin())
+        .Times(AtLeast(1))
+        .WillOnce(Return("1"));
+    EXPECT_CALL(mockView, getLambdaMax())
+        .Times(AtLeast(1))
+        .WillOnce(Return("15"));
+
+    auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(variantToString(options["WavelengthMin"]), "1");
     TS_ASSERT_EQUALS(variantToString(options["WavelengthMax"]), "15");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetI0MonitorIndexOption() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getI0MonitorIndex())
+        .Times(AtLeast(1))
+        .WillOnce(Return("2"));
+
+    auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(variantToString(options["I0MonitorIndex"]), "2");
-    TS_ASSERT_EQUALS(variantToString(options["ProcessingInstructions"]), "3,4");
-    TS_ASSERT_EQUALS(variantToString(options["DetectorCorrectionType"]),
-                     "VerticalShift");
-    TS_ASSERT_EQUALS(variantToString(options["SummationType"]), "SumInQ");
-    TS_ASSERT_EQUALS(variantToString(options["ReductionType"]),
-                     "DivergentBeam");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetScaleFactorOption() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getScaleFactor())
+        .Times(AtLeast(1))
+        .WillOnce(Return("2"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["ScaleFactor"]), "2");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetMomentumTransferStepOption() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getMomentumTransferStep())
+        .Times(AtLeast(1))
+        .WillOnce(Return("-0.02"));
+
+    auto options = presenter.getReductionOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetProcessingInstructionsOption() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getProcessingInstructions())
+        .Times(AtLeast(1))
+        .WillOnce(Return("3,4"));
+
+    auto options = presenter.getReductionOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetDetectorCorrectionTypeOption() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getDetectorCorrectionType())
+        .Times(AtLeast(1))
+        .WillOnce(Return("VerticalShift"));
+
+    auto options = presenter.getReductionOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetTransmissionRunOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(AtLeast(1))
+        .WillOnce(Return("INTER00013463,INTER00013464"));
+
+    auto options = presenter.getReductionOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGetOverlapRangeOptions() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getStartOverlap())
+        .Times(AtLeast(1))
+        .WillOnce(Return("10"));
+    EXPECT_CALL(mockView, getEndOverlap())
+        .Times(AtLeast(1))
+        .WillOnce(Return("12"));
+
+    auto options = presenter.getReductionOptions();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
