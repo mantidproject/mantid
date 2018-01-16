@@ -41,9 +41,6 @@ public:
   PeakBoundingBox getBoundingBox(const int) const override {
     return PeakBoundingBox();
   }
-  void sortPeaksWorkspace(const std::string &,
-                          const bool) override { /*Do Nothing*/
-  }
   void setPeakSizeOnProjection(const double) override { /*Do Nothing*/
   }
   void setPeakSizeIntoProjection(const double) override { /*Do Nothing*/

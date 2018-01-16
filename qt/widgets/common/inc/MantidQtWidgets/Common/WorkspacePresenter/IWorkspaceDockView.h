@@ -51,7 +51,6 @@ public:
 
   virtual ~IWorkspaceDockView(){};
 
-  virtual void init() = 0;
   virtual WorkspacePresenterWN_wptr getPresenterWeakPtr() = 0;
 
   virtual bool askUserYesNo(const std::string &caption,
