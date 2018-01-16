@@ -47,6 +47,7 @@ set ( UI_FILES
    EnggDiffractionQtTabFocus.ui
    EnggDiffractionQtTabPreproc.ui
    EnggDiffractionQtTabFitting.ui
+   EnggDiffractionQtTabGSAS.ui
    EnggDiffractionQtTabSettings.ui
 )
 
