@@ -96,22 +96,18 @@ public:
       const QStringList &disabled = QStringList());
 };
 
+// ---------------------------------
+// WorkspaceWidget and dependencies
+// ---------------------------------
+
+
+
 class MantidDisplayBase /Abstract/ {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
 %End
 private:
   MantidDisplayBase();
-};
-
-
-class WorkspaceTreeWidget : QWidget {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
-%End
-public:
-  WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/,
-                      QWidget *parent /TransferThis/ = nullptr);
 };
 
 class MantidTreeModel : MantidDisplayBase {
@@ -122,4 +118,23 @@ public:
   MantidTreeModel();
 private:
   MantidTreeModel(const MantidTreeModel &);
+};
+
+class WorkspaceTreeWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
+%End
+public:
+  WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/,
+                      QWidget *parent /TransferThis/ = nullptr);
+};
+
+// Implementation to override context menu
+class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
+%End
+public:
+  WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb /Transfer/,
+                            QWidget *parent /TransferThis/ = nullptr);
 };
