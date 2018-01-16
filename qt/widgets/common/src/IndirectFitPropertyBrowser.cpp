@@ -251,13 +251,18 @@ void IndirectFitPropertyBrowser::setParameterValue(
   for (size_t i = 0u; i < composite->nFunctions(); ++i) {
     const auto function = composite->getFunction(i);
 
-    if (function->name() == functionName &&
-        function->hasParameter(parameterName)) {
-      function->setParameter(parameterName, value);
-      emit parameterChanged(function.get());
-    }
+    if (function->name() == functionName)
+      setParameterValue(function, parameterName, value);
   }
   updateParameters();
+}
+
+void IndirectFitPropertyBrowser::setParameterValue(
+    IFunction_sptr function, const std::string &parameterName, double value) {
+  if (function->hasParameter(parameterName)) {
+    function->setParameter(parameterName, value);
+    emit parameterChanged(function.get());
+  }
 }
 
 void IndirectFitPropertyBrowser::setBackground(
@@ -279,20 +284,25 @@ void IndirectFitPropertyBrowser::updateParameterValues(
 void IndirectFitPropertyBrowser::updateParameterValues(
     PropertyHandler *functionHandler,
     const QHash<QString, double> &parameterValues) {
-  const auto &function = functionHandler->function().get();
+  auto function = functionHandler->function();
+  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+
+  if (composite) {
+    if (composite->nFunctions() == 0)
+      return;
+    else if (composite->nFunctions() == 1)
+      function = composite->getFunction(0);
+  }
 
   for (const auto &parameterName : parameterValues.keys()) {
     const auto parameter = parameterName.toStdString();
-    const auto &parameterValue = parameterValues[parameterName];
 
-    if (parameterName.contains(".") && function->hasParameter(parameter))
-      function->setParameter(parameter, parameterValue);
-    else if (function->hasParameter("f0." + parameter))
-      function->setParameter("f0." + parameter, parameterValue);
+    if (function->hasParameter(parameter))
+      function->setParameter(parameter, parameterValues[parameterName]);
   }
 
   getHandler()->updateParameters();
-  emit parameterChanged(function);
+  emit parameterChanged(function.get());
 }
 
 void IndirectFitPropertyBrowser::setBackgroundOptions(

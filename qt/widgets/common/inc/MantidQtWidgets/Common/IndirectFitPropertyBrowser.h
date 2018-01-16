@@ -42,6 +42,9 @@ public:
   void setParameterValue(const std::string &functionName,
                          const std::string &parameterName, double value);
 
+  void setParameterValue(Mantid::API::IFunction_sptr function,
+                         const std::string &parameterName, double value);
+
   void setBackground(const std::string &backgroundName);
 
   void moveCustomFunctionsToEnd();
