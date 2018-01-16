@@ -8,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "../ISISReflectometry/ReflSettingsPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "ReflMockObjects.h"
 #include <boost/algorithm/string.hpp>
 
@@ -93,9 +94,7 @@ public:
     EXPECT_CALL(mockView, getEndOverlap())
         .Times(Exactly(1))
         .WillOnce(Return("12"));
-    EXPECT_CALL(mockView, getTransmissionRuns())
-        .Times(Exactly(0))
-        .WillOnce(Return("INTER00013463,INTER00013464"));
+    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(0));
 
     auto options = presenter.getTransmissionOptions();
     TS_ASSERT_EQUALS(options.size(), 11);
@@ -119,8 +118,129 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void onCallReturnDefaultSettings(MockSettingsView &mockView) {
+    ON_CALL(mockView, instrumentSettingsEnabled()).WillByDefault(Return(true));
+    onCallReturnDefaultInstrumentSettings(mockView);
+    onCallReturnDefaultExperimentSettings(mockView);
+  }
+
+  void onCallReturnDefaultExperimentSettings(MockSettingsView &mockView) {
+    ON_CALL(mockView, experimentSettingsEnabled()).WillByDefault(Return(true));
+    onCallReturnDefaultTransmissionRuns(mockView);
+    onCallReturnDefaultAnalysisMode(mockView);
+    onCallReturnDefaultOverlap(mockView);
+    onCallReturnDefaultPolarisationCorrections(mockView);
+    onCallReturnDefaultSummationSettings(mockView);
+    onCallReturnDefaultMomentumTransferStep(mockView);
+    onCallReturnDefaultScaleFactor(mockView);
+  }
+
+  void onCallReturnDefaultAnalysisMode(MockSettingsView &mockView) {
+    ON_CALL(mockView, getAnalysisMode())
+        .WillByDefault(Return("PointDetectorAnalysis"));
+  }
+
+  void onCallReturnDefaultTransmissionRuns(MockSettingsView &mockView) {
+    ON_CALL(mockView, getTransmissionRuns()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultScaleFactor(MockSettingsView &mockView) {
+    ON_CALL(mockView, getScaleFactor()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultMomentumTransferStep(MockSettingsView &mockView) {
+    ON_CALL(mockView, getMomentumTransferStep()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultOverlap(MockSettingsView &mockView) {
+    ON_CALL(mockView, getStartOverlap()).WillByDefault(Return(""));
+    ON_CALL(mockView, getEndOverlap()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultSummationSettings(MockSettingsView &mockView) {
+    ON_CALL(mockView, getSummationType()).WillByDefault(Return("SumInLambda"));
+    ON_CALL(mockView, getReductionType()).WillByDefault(Return("Normal"));
+  }
+
+  void onCallReturnDefaultPolarisationCorrections(MockSettingsView &mockView) {
+    ON_CALL(mockView, getPolarisationCorrections())
+        .WillByDefault(Return("None"));
+    ON_CALL(mockView, getCRho()).WillByDefault(Return(""));
+    ON_CALL(mockView, getCAlpha()).WillByDefault(Return(""));
+    ON_CALL(mockView, getCAp()).WillByDefault(Return(""));
+    ON_CALL(mockView, getCPp()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultInstrumentSettings(MockSettingsView &mockView) {
+    ON_CALL(mockView, getIntMonCheck()).WillByDefault(Return("False"));
+    onCallReturnDefaultMonitorIntegralRange(mockView);
+    onCallReturnDefaultMonitorBackgroundRange(mockView);
+    onCallReturnDefaultLambdaRange(mockView);
+    ON_CALL(mockView, getI0MonitorIndex()).WillByDefault(Return(""));
+    ON_CALL(mockView, getProcessingInstructions()).WillByDefault(Return(""));
+    ON_CALL(mockView, getDetectorCorrectionType())
+        .WillByDefault(Return("VerticalShift"));
+  }
+
+  void onCallReturnDefaultLambdaRange(MockSettingsView &mockView) {
+    ON_CALL(mockView, getLambdaMin()).WillByDefault(Return(""));
+    ON_CALL(mockView, getLambdaMax()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultMonitorIntegralRange(MockSettingsView &mockView) {
+    ON_CALL(mockView, getMonitorIntegralMin()).WillByDefault(Return(""));
+    ON_CALL(mockView, getMonitorIntegralMax()).WillByDefault(Return(""));
+  }
+
+  void onCallReturnDefaultMonitorBackgroundRange(MockSettingsView &mockView) {
+    ON_CALL(mockView, getMonitorBackgroundMin()).WillByDefault(Return(""));
+    ON_CALL(mockView, getMonitorBackgroundMax()).WillByDefault(Return(""));
+  }
+
+  bool keyNotSet(
+      QString const &key,
+      MantidQt::MantidWidgets::DataProcessor::OptionsQMap const &options) {
+    return !options.contains(key);
+  }
+
+  void testGetSummationSettingsWhenSummingInLambda() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getSummationType())
+        .Times(AtLeast(1))
+        .WillOnce(Return("SumInLambda"));
+    EXPECT_CALL(mockView, getReductionType())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return("NonFlatSample"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["SummationType"]), "SumInLambda");
+    TS_ASSERT(keyNotSet("ReductionType", options));
+  }
+
+  void testGetSummationSettingsWhenSummingInQ() {
+    NiceMock<MockSettingsView> mockView;
+    onCallReturnDefaultSettings(mockView);
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getSummationType())
+        .Times(AtLeast(1))
+        .WillOnce(Return("SumInQ"));
+    EXPECT_CALL(mockView, getReductionType())
+        .Times(AtLeast(1))
+        .WillOnce(Return("DivergentBeam"));
+
+    auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["SummationType"]), "SumInQ");
+    TS_ASSERT_EQUALS(variantToString(options["ReductionType"]),
+                     "DivergentBeam");
+  }
+
   void testGetReductionOptions() {
     MockSettingsView mockView;
+    onCallReturnDefaultSettings(mockView);
     ReflSettingsPresenter presenter(&mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
