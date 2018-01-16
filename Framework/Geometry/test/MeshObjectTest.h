@@ -123,25 +123,18 @@ public:
     auto original_ptr = createCube(1.0);
     auto &original = dynamic_cast<MeshObject &>(*original_ptr);
     original.setID("sp-1");
-    int objType(-1);
-    double radius(-1.0), height(-1.0);
-    std::vector<V3D> pts;
-    original.GetObjectGeom(objType, pts, radius, height);
     TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
       original.getGeometryHandler()));
 
     MeshObject copy(original);
     // The copy should be a primitive object with a CacheGeometryHandler
-    objType = -1;
-    copy.GetObjectGeom(objType, pts, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", copy.id());
     TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
       copy.getGeometryHandler()));
     TS_ASSERT_EQUALS(copy.getName(), original.getName());
-    // Check the string representation is the same
-    //TS_ASSERT_EQUALS(copy.str(), original.str());
-    //TS_ASSERT_EQUALS(copy.getSurfaceIndex(), original.getSurfaceIndex());
+    TS_ASSERT_EQUALS(copy.numberOfVertices(), original.numberOfVertices());
+    TS_ASSERT_EQUALS(copy.numberOfTriangles(), original.numberOfTriangles());
   }
 
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
@@ -171,6 +164,48 @@ public:
     auto geom_obj = createCube(1.0);
     TS_ASSERT(!empty_obj->hasValidShape() );
     TS_ASSERT(geom_obj->hasValidShape());
+  }
+
+  void testGetBoundingBoxForCube() {
+    auto geom_obj = createCube(4.1);
+    const double tolerance(1e-10);
+
+    const BoundingBox &bbox = geom_obj->getBoundingBox();
+
+    TS_ASSERT_DELTA(bbox.xMax(), 4.1, tolerance);
+    TS_ASSERT_DELTA(bbox.yMax(), 4.1, tolerance);
+    TS_ASSERT_DELTA(bbox.zMax(), 4.1, tolerance);
+    TS_ASSERT_DELTA(bbox.xMin(), 0.0, tolerance);
+    TS_ASSERT_DELTA(bbox.yMin(), 0.0, tolerance);
+    TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
+  }
+
+  void testGetBoundingBoxForOctahedron() {
+    auto geom_obj = createOctahedron();
+    const double tolerance(1e-10);
+
+    const BoundingBox &bbox = geom_obj->getBoundingBox();
+
+    TS_ASSERT_DELTA(bbox.xMax(), 1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.yMax(), 1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.zMax(), 1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.xMin(), -1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.yMin(), -1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.zMin(), -1.0, tolerance);
+  }
+
+  void testGetBoundingBoxForLShape() {
+    auto geom_obj = createLShape();
+    const double tolerance(1e-10);
+
+    const BoundingBox &bbox = geom_obj->getBoundingBox();
+
+    TS_ASSERT_DELTA(bbox.xMax(), 2.0, tolerance);
+    TS_ASSERT_DELTA(bbox.yMax(), 2.0, tolerance);
+    TS_ASSERT_DELTA(bbox.zMax(), 1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.xMin(), 0.0, tolerance);
+    TS_ASSERT_DELTA(bbox.yMin(), 0.0, tolerance);
+    TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
   }
 
   void testIsOnSideCube() {
@@ -423,7 +458,7 @@ public:
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(1, 1, 1)), -1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(-1, -1, -1)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.2, -0.3, -0.5), V3D(1, 1, 1)), 1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.2, -0.3, -0.5), V3D(-1, -1, -1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.2, -0.3, -0.5), V3D(-1, -1, -1)),-1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.2, -0.3), V3D(1, 1, -1)), -1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.2, -0.3), V3D(-1, -1, 1)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.5, -0.2, 0.3), V3D(1, 1, -1)), 1);
@@ -460,48 +495,6 @@ public:
     // not on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(0.5, 0.5, 0)), -1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(-0.5, 0.5, 0)), 1);
-  }
-
-  void testGetBoundingBoxForCube() {
-    auto geom_obj = createCube(4.1);
-    const double tolerance(1e-10);
-
-    const BoundingBox &bbox = geom_obj->getBoundingBox();
-
-    TS_ASSERT_DELTA(bbox.xMax(), 4.1, tolerance);
-    TS_ASSERT_DELTA(bbox.yMax(), 4.1, tolerance);
-    TS_ASSERT_DELTA(bbox.zMax(), 4.1, tolerance);
-    TS_ASSERT_DELTA(bbox.xMin(), 0.0, tolerance);
-    TS_ASSERT_DELTA(bbox.yMin(), 0.0, tolerance);
-    TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
-  }
-
-  void testGetBoundingBoxForOctahedron() {
-    auto geom_obj = createLShape();
-    const double tolerance(1e-10);
-
-    const BoundingBox &bbox = geom_obj->getBoundingBox();
-
-    TS_ASSERT_DELTA(bbox.xMax(), 1.0, tolerance);
-    TS_ASSERT_DELTA(bbox.yMax(), 1.0, tolerance);
-    TS_ASSERT_DELTA(bbox.zMax(), 1.0, tolerance);
-    TS_ASSERT_DELTA(bbox.xMin(), -1.0, tolerance);
-    TS_ASSERT_DELTA(bbox.yMin(), -1.0, tolerance);
-    TS_ASSERT_DELTA(bbox.zMin(), -1.0, tolerance);
-  }
-
-  void testGetBoundingBoxForLShape() {
-    auto geom_obj = createLShape();
-    const double tolerance(1e-10);
-
-    const BoundingBox &bbox = geom_obj->getBoundingBox();
-
-    TS_ASSERT_DELTA(bbox.xMax(), 2.0, tolerance);
-    TS_ASSERT_DELTA(bbox.yMax(), 2.0, tolerance);
-    TS_ASSERT_DELTA(bbox.zMax(), 1.0, tolerance);
-    TS_ASSERT_DELTA(bbox.xMin(), 0.0, tolerance);
-    TS_ASSERT_DELTA(bbox.yMin(), 0.0, tolerance);
-    TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
   }
 
   void testInterceptCubeX() {

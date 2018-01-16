@@ -164,6 +164,11 @@ bool MeshObject::hasValidShape() const {
 */
 bool MeshObject::isValid(const Kernel::V3D &Pt) const {
 
+  BoundingBox bb = getBoundingBox();
+  if (!bb.isPointInside(Pt)) {
+    return false;
+  }
+
   V3D direction(0.0, 0.0, 1.0); // direction to look for intersections
   std::vector<V3D> intesectionPoints;
   std::vector<int> entryExitFlags;
@@ -200,6 +205,11 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
 */
 bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
 
+  BoundingBox bb = getBoundingBox();
+  if (!bb.isPointInside(Pt)) {
+    return false;
+  }
+
   V3D direction(0.0, 0.0, 1.0); // direction to look for intersections
   std::vector<V3D> intesectionPoints;
   std::vector<int> entryExitFlags;
@@ -226,6 +236,11 @@ bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
 * @return Number of segments added
 */
 int MeshObject::interceptSurface(Geometry::Track &UT) const {
+
+  BoundingBox bb = getBoundingBox();
+  if (!bb.doesLineIntersect(UT)) {
+    return 0;
+  }
 
   std::vector<V3D> intesectionPoints;
   std::vector<int> entryExitFlags;
@@ -492,7 +507,7 @@ double MeshObject::volume() const {
 const BoundingBox &MeshObject::getBoundingBox() const {
 
   if(m_boundingBox.isNull())
-    // As MeshObject is immutable, we need only calculate 
+    // As the shape of MeshObject is immutable, we need only calculate 
     // bounding box, if the cached bounding box is null.
     if (numberOfVertices() > 0) {
       // Initial extents to be overwritten by loop
