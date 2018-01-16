@@ -69,7 +69,14 @@ MeshObject::MeshObject(const MeshObject &A) : MeshObject() { *this = A; }
 */
 MeshObject &MeshObject::operator=(const MeshObject &A) {
   if (this != &A) {
-
+    m_boundingBox = A.m_boundingBox;
+    m_object_number = A.m_object_number;
+    m_string = A.m_string;
+    m_handler = A.m_handler->clone();
+    m_id = A.m_id;
+    m_material = Kernel::make_unique<Material>(A.material());
+    m_triangles = A.m_triangles;
+    m_vertices = A.m_vertices;
   }
   return *this;
 }
@@ -113,6 +120,7 @@ void MeshObject::initialize(const std::vector<int> &faces, const std::vector<V3D
   if (m_vertices.size() == 0) {
     m_vertices = vertices;
     m_triangles = faces;
+    m_handler = boost::make_shared<CacheGeometryHandler>(this);
   }
   else {
     throw std::runtime_error("MeshObject already initialized");
@@ -297,7 +305,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
     intersection = start + direction * t;
 
     // determine entry exit assuming anticlockwise trinagle view from outside
-    V3D normalDirection = edge2.cross_prod(edge1);
+    V3D normalDirection = edge1.cross_prod(edge2);
     if (normalDirection.scalar_prod(direction) > 0.0) {
       entryExit = -1; //exit
     }

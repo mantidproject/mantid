@@ -5,7 +5,7 @@
 
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
@@ -127,19 +127,16 @@ public:
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original.GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-      original.getGeometryHandler())); // Change to actual geometry handler
-    // when available.
+    TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
+      original.getGeometryHandler()));
 
     MeshObject copy(original);
-    // The copy should be a primitive object with a GluGeometryHandler
+    // The copy should be a primitive object with a CacheGeometryHandler
     objType = -1;
     copy.GetObjectGeom(objType, pts, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", copy.id());
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
+    TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
       copy.getGeometryHandler()));
     TS_ASSERT_EQUALS(copy.getName(), original.getName());
     // Check the string representation is the same
@@ -155,10 +152,8 @@ public:
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original.GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-      original.getGeometryHandler()));  // Change to actual geometry handler
-    // when available.
+    TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
+      original.getGeometryHandler())); 
 
     MeshObject lhs;  // initialize
     lhs = original; // assign
@@ -167,10 +162,8 @@ public:
     lhs.GetObjectGeom(objType, pts, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", lhs.id());
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-      lhs.getGeometryHandler()));  // Change to actual geometry handler
-    // when available.
+    TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
+      lhs.getGeometryHandler())); 
   }
 
   void testHasValidShape() {
