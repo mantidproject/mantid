@@ -392,8 +392,8 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
       const Eigen::Vector2d intensities(ppY[binIndex], mmY[binIndex]);
       const auto PFProduct = P1m * F1m;
       const auto corrected = PFProduct * intensities;
-      ppYOut = corrected[0];
-      mmYOut = corrected[1];
+      ppYOut[binIndex] = corrected[0];
+      mmYOut[binIndex] = corrected[1];
       const auto F1E = efficiencies.F1->e()[binIndex];
       const auto P1E = efficiencies.P1->e()[binIndex];
       const auto elemE1 = -1. / pow<2>(F1) * F1E;

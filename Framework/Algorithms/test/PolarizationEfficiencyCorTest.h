@@ -187,7 +187,7 @@ public:
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     const double yVal = 2.3;
-    Counts counts{yVal, yVal, yVal};
+    Counts counts{yVal, 4.2 * yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr ws11 = ws00->clone();
     WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
@@ -225,9 +225,10 @@ public:
         const auto &es = ws->e(j);
         TS_ASSERT_EQUALS(ys.size(), nBins)
         for (size_t k = 0; k != nBins; ++k) {
+          const double y = counts[k];
           TS_ASSERT_EQUALS(xs[k], edges[k])
-          TS_ASSERT_EQUALS(ys[k], yVal * static_cast<double>(i + 1))
-          TS_ASSERT_EQUALS(es[k], std::sqrt(yVal) * static_cast<double>(i + 1))
+          TS_ASSERT_EQUALS(ys[k], y * static_cast<double>(i + 1))
+          TS_ASSERT_EQUALS(es[k], std::sqrt(y) * static_cast<double>(i + 1))
         }
       }
     }
