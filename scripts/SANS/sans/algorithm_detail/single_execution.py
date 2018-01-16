@@ -7,12 +7,8 @@ from sans.common.enums import (ISISReductionMode, DetectorType, DataType, Output
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
 from sans.algorithm_detail.bundles import (OutputBundle, OutputPartsBundle)
-
-try:
-    import boost.mpi
-    have_mpi = True
-except ImportError:
-    have_mpi = False
+from mantid.kernel import mpisetup
+import sys
 
 
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
@@ -237,10 +233,10 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
     partial_output_require_reload = output_parts and is_invalid_partial_workspaces
 
     must_reload = output_bundle.output_workspace is None or partial_output_require_reload
-    if have_mpi:
+    if 'boost.mpi' in sys.modules:
         # In MPI runs the result is only present on rank 0 (result of Q1D2 integration),
         # so the reload flag must be broadcasted from rank 0.
-        must_reload = boost.mpi.broadcast(boost.mpi.world, must_reload, 0)
+        must_reload = mpisetup.boost.mpi.broadcast(mpisetup.boost.mpi.world, must_reload, 0)
 
     if must_reload:
     #if output_bundle.output_workspace is None or partial_output_require_reload:
