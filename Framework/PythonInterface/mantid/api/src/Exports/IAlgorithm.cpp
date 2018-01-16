@@ -16,6 +16,7 @@
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
 #include <Poco/Thread.h>
+#include <Poco/ActiveResult.h>
 
 #include <boost/python/arg_from_python.hpp>
 #include <boost/python/bases.hpp>
@@ -296,6 +297,15 @@ bool executeProxy(object &self) {
 }
 
 /**
+ * Execute the algorithm asynchronously
+ * @param self :: A reference to the calling object
+ */
+void executeAsync(object &self) {
+  auto &calg = extract<IAlgorithm &>(self)();
+  calg.executeAsync();
+}
+
+/**
  * @param self A reference to the calling object
  * @return An AlgorithmID wrapped in a AlgorithmIDProxy container or None if
  * there is no ID
@@ -442,6 +452,8 @@ void export_ialgorithm() {
            "Cross-check all inputs and return any errors as a dictionary")
       .def("execute", &executeProxy, arg("self"),
            "Runs the algorithm and returns whether it has been successful")
+      .def("executeAsync", &executeAsync, arg("self"),
+           "Starts the algorithm in a separate thread and returns immediately")
       // 'Private' static methods
       .def("_algorithmInThread", &_algorithmInThread, arg("thread_id"))
       .staticmethod("_algorithmInThread")

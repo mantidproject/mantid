@@ -35,9 +35,10 @@ class AlgorithmProgressModel(AlgorithmObserver):
         super(AlgorithmProgressModel, self).__init__()
         self.presenter = presenter
         self.progress_observers = []
+        self.observeStarting()
 
     def startingHandle(self, alg):
-        progress_observer = ProgressObserver(self.presenter)
+        progress_observer = ProgressObserver(self)
         progress_observer.observeProgress(alg)
         progress_observer.observeFinish(alg)
         self.progress_observers.append(progress_observer)
@@ -47,11 +48,13 @@ class AlgorithmProgressModel(AlgorithmObserver):
         Update the progress bar in the view.
         :param progress_observer: A observer reporting a progress.
         """
-        pass
+        self.presenter.update_progress_bar(progress_observer.progress, progress_observer.message)
 
     def remove_observer(self, progress_observer):
         """
         Remove the progress observer when it's finished
         :param progress_observer: A ProgressObserver that needs removing
         """
-        pass
+        index = self.progress_observers.index(progress_observer)
+        if index >= 0:
+            del self.progress_observers[index]
