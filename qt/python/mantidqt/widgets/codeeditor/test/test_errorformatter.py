@@ -62,8 +62,10 @@ foo()
 
         # stacktrace will contain file names that are not portable so don't do equality check
         error_lines = error.splitlines()
+        # python 3 has a slightly different format of the exception error so just check it looks
+        # approximate correct
         expected_lines = [
-            "NameError: global name '_local' is not defined",
+            "NameError:.*'_local'.*",
             '  File ".*test_errorformatter.py", line 56, in test_standard_exception',
             '    exec(.*)',
             '  File "<string>", line 8, in <module>',
