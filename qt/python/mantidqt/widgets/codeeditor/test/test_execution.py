@@ -190,7 +190,7 @@ squared = sum*sum
         self.assertEqual(20, context['sum'])
         self.assertEqual(20*20, context['squared'])
         self.assertEqual(1, context['x'])
-        self.assertEqual([1, 3, 4, 8, 9], recv.lines_received)
+        self.assertEqual([1, 2, 3, 4, 9], recv.lines_received)
 
     # -------------------------------------------------------------------------
     # Filename checks

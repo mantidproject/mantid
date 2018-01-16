@@ -21,10 +21,10 @@ import ctypes
 import time
 
 # 3rdparty imports
-from IPython.core.inputsplitter import InputSplitter
 from qtpy.QtCore import QObject, Signal
 
 # local imports
+from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 from mantidqt.utils.async import AsyncTask
 
 
@@ -118,6 +118,7 @@ class PythonCodeExecution(QObject):
     # --------------------- Private -------------------------------
     def _reset_task(self):
         self._task = None
+
 
 class CodeBlock(object):
     """Holds an executable code object. It also stores the line number
