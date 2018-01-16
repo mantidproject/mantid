@@ -645,15 +645,17 @@ public:
   void checkTrackIntercept(Track &track,
     const std::vector<Link> &expectedResults) {
     int index = 0;
-    for (Track::LType::const_iterator it = track.cbegin(); 
-      it != track.cend() && index < expectedResults.size(); ++it) {
-      TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
-        1e-6);
-      TS_ASSERT_DELTA(it->distInsideObject,
-        expectedResults[index].distInsideObject, 1e-6);
-      TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
-      TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
-      TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
+    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
+      ++it) {
+      if (index < expectedResults.size()) {
+        TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
+          1e-6);
+        TS_ASSERT_DELTA(it->distInsideObject,
+          expectedResults[index].distInsideObject, 1e-6);
+        TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
+        TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
+        TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
+      }
       ++index;
     }
     TS_ASSERT_EQUALS(index, static_cast<int>(expectedResults.size()));
