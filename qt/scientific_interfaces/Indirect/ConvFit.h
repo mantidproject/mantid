@@ -83,12 +83,10 @@ private:
   addFunctionNameChanges(Mantid::API::IFunction_sptr model,
                          const QString &modelPrefix, const QString &newPrefix,
                          QHash<QString, QString> &functionNameChanges) const;
-  void
-  addFunctionNameChanges(Mantid::API::CompositeFunction_sptr model,
-                         const QString &prefixPrefix,
-                         const QString &prefixSuffix, int fromIndex,
-                         int toIndex, int firstFunctionIndex,
-                         QHash<QString, QString> &functionNameChanges) const;
+  void addFunctionNameChanges(
+      Mantid::API::CompositeFunction_sptr model, const QString &prefixPrefix,
+      const QString &prefixSuffix, int fromIndex, int toIndex, int offset,
+      QHash<QString, QString> &functionNameChanges) const;
 
   QString fitTypeString() const;
   QString backgroundString(const QString &backgroundType) const;

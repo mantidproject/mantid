@@ -192,7 +192,7 @@ ConvFit::fitFunction(QHash<QString, QString> &functionNameChanges) const {
   auto backgroundFunction = background();
   if (backgroundFunction) {
     comp->addFunction(backgroundFunction);
-    addFunctionNameChanges(backgroundFunction, backgroundPrefix(), "f0.",
+    addFunctionNameChanges(backgroundFunction, backgroundPrefix() + ".", "f0.",
                            functionNameChanges);
     prefixPrefix += "f1.";
     backgroundIndex = backgroundPrefix().right(1).toInt();
@@ -214,12 +214,11 @@ ConvFit::fitFunction(QHash<QString, QString> &functionNameChanges) const {
   if (compositeModel) {
     addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix, 0,
                            backgroundIndex, 0, functionNameChanges);
-    addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix,
-                           backgroundIndex + 1,
-                           static_cast<int>(compositeModel->nFunctions()),
-                           backgroundIndex + 1, functionNameChanges);
+    addFunctionNameChanges(
+        compositeModel, prefixPrefix, prefixSuffix, backgroundIndex,
+        static_cast<int>(compositeModel->nFunctions()), 1, functionNameChanges);
   } else
-    addFunctionNameChanges(modelFunction, "f0.", prefixPrefix + prefixSuffix,
+    addFunctionNameChanges(modelFunction, "", prefixPrefix + prefixSuffix,
                            functionNameChanges);
 
   if (m_usedTemperature) {
@@ -247,29 +246,20 @@ void ConvFit::addFunctionNameChanges(
 
 void ConvFit::addFunctionNameChanges(
     CompositeFunction_sptr model, const QString &prefixPrefix,
-    const QString &prefixSuffix, int fromIndex, int toIndex,
-    int firstFunctionIndex,
+    const QString &prefixSuffix, int fromIndex, int toIndex, int offset,
     QHash<QString, QString> &functionNameChanges) const {
 
   for (int i = fromIndex; i < toIndex; ++i) {
-    const auto &functionPrefix =
-        "f" + QString::number(i + firstFunctionIndex) + ".";
+    const auto &functionPrefix = "f" + QString::number(i) + ".";
+    const auto &offsetPrefix = "f" + QString::number(i + offset) + ".";
     const auto &function = model->getFunction(static_cast<size_t>(i));
+    QString prefix = prefixPrefix + functionPrefix;
 
-    if (function->name() != "DeltaFunction") {
-      for (const auto &parameter : function->getParameterNames()) {
-        const auto parameterName = QString::fromStdString(parameter);
-        const auto prefix = prefixPrefix + functionPrefix + prefixSuffix;
-        functionNameChanges[functionPrefix + parameterName] =
-            prefix + parameterName;
-      }
-    } else {
-      for (const auto &parameter : function->getParameterNames()) {
-        const auto parameterName = QString::fromStdString(parameter);
-        functionNameChanges[functionPrefix + parameterName] =
-            prefixPrefix + functionPrefix + parameterName;
-      }
-    }
+    if (function->name() != "DeltaFunction")
+      prefix += prefixSuffix;
+
+    addFunctionNameChanges(function, offsetPrefix, prefix,
+                           functionNameChanges);
   }
 }
 
@@ -467,9 +457,6 @@ void ConvFit::addSampleLogsToWorkspace(const std::string &workspaceName,
 bool ConvFit::validate() {
   UserInputValidator uiv;
 
-  if (fitTypeString() == "")
-    uiv.addErrorMessage("No fit type has been selected");
-
   uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSampleInput);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm->dsResInput);
 
@@ -485,6 +472,8 @@ bool ConvFit::validate() {
            compositeModel->getFunction(0)->name() == "DeltaFunction")
     uiv.addErrorMessage(
         "Fit function is invalid; only a Delta Function has been supplied");
+  else if (fitTypeString() == "")
+    uiv.addErrorMessage("No fit type has been selected");
 
   const auto error = uiv.generateErrorMessage();
   showMessageBox(error);
