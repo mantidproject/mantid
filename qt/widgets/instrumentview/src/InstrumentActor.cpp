@@ -720,10 +720,12 @@ void InstrumentActor::draw(bool picking) const {
 void InstrumentActor::doDraw(bool picking) const {
   const auto &componentInfo = getComponentInfo();
   for (size_t i = 0; i < componentInfo.size(); ++i) {
-    if (!componentInfo.isDetector(i) && !m_showGuides)
+    if ((!componentInfo.isDetector(i) && !m_showGuides) ||
+        componentInfo.componentType(i) ==
+            Beamline::ComponentType::OutlineComposite)
       continue;
 
-    if (componentInfo.hasShape(i)) {
+    if (componentInfo.hasValidShape(i)) {
       if (m_isCompVisible[i]) {
         if (picking)
           m_pickColors[i].paint();
@@ -758,7 +760,6 @@ void InstrumentActor::doDraw(bool picking) const {
       }
     }
   }
-  // m_scene.draw(picking);
 }
 /**
  * @param fname :: A color map file name.

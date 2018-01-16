@@ -140,7 +140,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
 
   const auto &componentInfo = m_instrActor->getComponentInfo();
   for (const auto &udet : m_unwrappedDetectors) {
-    if (!componentInfo.hasShape(udet.detIndex))
+    if (!componentInfo.hasValidShape(udet.detIndex))
       continue;
 
     int iw = int(udet.width / dw);
@@ -242,8 +242,15 @@ void UnwrappedSurface::componentSelected(size_t componentIndex) {
   } else {
     auto detectors = componentInfo.detectorsInSubtree(componentIndex);
     QRectF area;
-    for (auto det : detectors)
-      area |= getArea(m_unwrappedDetectors[det], m_width_max, m_height_max);
+    for (auto det : detectors) {
+      QRectF detRect;
+      const auto &udet = m_unwrappedDetectors[det];
+      detRect.setLeft(udet.u - udet.width);
+      detRect.setRight(udet.u + udet.width);
+      detRect.setBottom(udet.v - udet.height);
+      detRect.setTop(udet.v + udet.height);
+      area |= detRect;
+    }
     zoom(area);
   }
 }

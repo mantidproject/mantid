@@ -87,14 +87,14 @@ private:
       const std::map<size_t, size_t> &detectorExclusions) const;
 
 public:
-  typedef struct {
+  struct StructuredPanel {
     size_t topLeft;
     size_t bottomLeft;
     size_t bottomRight;
     size_t topRight;
     size_t nX;
     size_t nY;
-  } StructuredPanel;
+  };
 
   ComponentInfo(
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,

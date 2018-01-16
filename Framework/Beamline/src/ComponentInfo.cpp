@@ -38,8 +38,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         componentRanges,
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
-    boost::shared_ptr<std::vector<std::vector<size_t>>>
-        assemblyImmediateChildren,
+    boost::shared_ptr<std::vector<std::vector<size_t>>> children,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond,
                                   Eigen::aligned_allocator<Eigen::Quaterniond>>>
@@ -54,8 +53,8 @@ ComponentInfo::ComponentInfo(
       m_detectorRanges(std::move(detectorRanges)),
       m_componentRanges(std::move(componentRanges)),
       m_parentIndices(std::move(parentIndices)),
-      m_assemblyImmediateChildren(std::move(assemblyImmediateChildren)),
-      m_positions(std::move(positions)), m_rotations(std::move(rotations)),
+      m_children(std::move(children)), m_positions(std::move(positions)),
+      m_rotations(std::move(rotations)),
       m_scaleFactors(std::move(scaleFactors)),
       m_componentType(std::move(componentType)), m_names(std::move(names)),
       m_size(m_assemblySortedDetectorIndices->size() +
@@ -97,7 +96,7 @@ ComponentInfo::ComponentInfo(
   }
 
   size_t assemTotalSize = 1; // initialize with root
-  for (const auto &assem : *m_assemblyImmediateChildren)
+  for (const auto &assem : *m_children)
     assemTotalSize += assem.size();
 
   if (assemTotalSize != m_size) {
@@ -161,7 +160,7 @@ ComponentInfo::children(const size_t componentIndex) const {
     auto numDets = m_assemblySortedDetectorIndices->size();
     auto index = componentIndex - numDets;
 
-    return (*m_assemblyImmediateChildren)[index];
+    return (*m_children)[index];
   }
 
   return emptyVec;
