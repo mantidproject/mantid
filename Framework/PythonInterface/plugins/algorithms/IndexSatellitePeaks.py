@@ -12,15 +12,20 @@ class IndexSatellitePeaks(PythonAlgorithm):
         self.declareProperty(IPeaksWorkspaceProperty(name="SatellitePeaks",
                                                      defaultValue="",
                                                      direction=Direction.Input),
-                             doc="Positions of satellite peaks")
+                             doc="Positions of satellite peaks with fractional \
+                             HKL coordinates")
 
         self.declareProperty(ITableWorkspaceProperty(name="OutputWorkspace",
                                                      defaultValue="",
                                                      direction=Direction.Output),
-                             doc="Indexed satellite peaks")
+                             doc="The indexed satellite peaks. This will be a  \
+                             table workspace with miller indicies h, k, l, m1, \
+                             m2, ..., mn.")
 
-        self.declareProperty('Tolerance', 0.3, direction=Direction.Input)
-        self.declareProperty('NumOfQs', 1, direction=Direction.Input)
+        self.declareProperty('Tolerance', 0.3, direction=Direction.Input,
+                             doc="Tolerance on the noise of the q vectors")
+        self.declareProperty('NumOfQs', 1, direction=Direction.Input,
+                             doc="Number of independant q vectors")
 
     def PyExec(self):
         tolerance = self.getProperty("Tolerance").value
