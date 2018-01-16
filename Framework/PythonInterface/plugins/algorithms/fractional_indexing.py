@@ -4,10 +4,6 @@ from scipy.cluster.vq import kmeans2
 import scipy
 
 
-def norm_along_axis(vecs):
-    return np.sum(vecs**2, axis=-1)**(1./2)
-
-
 def find_bases(qs, tolerance):
     offsets = np.empty((0, 3))
     for q in qs:
@@ -87,11 +83,15 @@ def index_q_vectors(qs, tolerance=.03):
 
 
 def cluster_qs(qs, k=None, threshold=1.5):
-    if k is not None:
-        centroid, clusters = kmeans2(qs, k)
-    else:
-        clusters = hcluster.fclusterdata(qs, threshold, criterion="distance")
-    return clusters, len(set(clusters))
+        if k is not None:
+            _, clusters = kmeans2(qs, k, iter=30)
+            if len(set(clusters)) != k:
+                raise ValueError("Could not group the satellite reflections "
+                                 "into {} clusters. Please check that you have "
+                                 "at least {} satellites.".format(k,k))
+        else:
+            clusters = hcluster.fclusterdata(qs, threshold, criterion="distance")
+        return clusters, len(set(clusters))
 
 
 def average_clusters(qs, clusters):
@@ -120,5 +120,15 @@ def safe_divide(a, b):
     return np.divide(a, b, out=np.zeros_like(b), where=b != 0)
 
 
-def round_nearest(x, a):
-    return np.round(np.divide(x, a, out=np.zeros_like(a), where=a != 0)) * a
+def round_nearest(vec, reference):
+    return np.round(safe_divide(vec, reference)) * reference
+
+
+def sort_vectors_by_norm(vecs):
+    idx = np.argsort(norm_along_axis(np.abs(vecs)))
+    vecs = vecs[idx]
+    return vecs
+
+
+def norm_along_axis(vecs):
+    return np.sum(vecs**2, axis=-1)**(1./2)

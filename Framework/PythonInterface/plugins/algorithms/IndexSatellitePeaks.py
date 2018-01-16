@@ -32,14 +32,12 @@ class IndexSatellitePeaks(PythonAlgorithm):
         qs = np.round(hkls) - hkls
 
         clusters, k = indexing.cluster_qs(qs, k=k)
+        
         qs = indexing.average_clusters(qs, clusters)
         qs = indexing.trunc_decimals(qs, n_trunc_decimals)
+        qs = indexing.sort_vectors_by_norm(qs)
 
         self.log().notice("Q vectors are: \n{}".format(qs))
-
-        # sort by length of vector
-        idx = np.argsort(indexing.norm_along_axis(np.abs(qs)))
-        qs = qs[idx]
 
         indicies = indexing.index_q_vectors(qs, tolerance)
         ndim = indicies.shape[1] + 3
