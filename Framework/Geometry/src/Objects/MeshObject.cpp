@@ -230,7 +230,7 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
   }
   UT.buildLink();
 
-  return intesectionPoints.size();
+  return static_cast<int>(intesectionPoints.size());
 }
 
 /**
@@ -687,7 +687,7 @@ void MeshObject::setVtkGeometryCacheReader(
 * Output functions for rendering, may also be used internally
 */
 int MeshObject::numberOfTriangles() const {
-    return m_triangles.size()/3;
+    return static_cast<int>(m_triangles.size()/3);
 }
 
 /**
@@ -710,7 +710,7 @@ int *MeshObject::getTriangles() const {
 * get number of points
 */
 int MeshObject::numberOfVertices() const {
-  return m_vertices.size();
+  return static_cast<int>(m_vertices.size());
 }
 
 /**
