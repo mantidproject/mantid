@@ -51,11 +51,11 @@ class _GSASFinder(object):
     def GSASIIscriptable_location():
         """
         Find the path to GSASIIscriptable.py, if it exists and is less than 2 levels away from the root directory
+        :return Path to GSAS-II directory if found, and empty string if not
         """
         path_to_g2conda = _GSASFinder._path_to_g2conda()
-        print(path_to_g2conda)
         if path_to_g2conda is None:
-            return None
+            return ""
 
         if os.path.isfile(os.path.join(path_to_g2conda, "GSASIIscriptable.py")):
             return path_to_g2conda
@@ -63,7 +63,7 @@ class _GSASFinder(object):
         if os.path.isfile(os.path.join(path_to_g2conda, "GSASII", "GSASIIscriptable.py")):
             return os.path.join(path_to_g2conda, "GSASII")
 
-        return None
+        return ""
 
 
 class _GSASIIRefineFitPeaksTestHelper(object):
@@ -73,9 +73,12 @@ class _GSASIIRefineFitPeaksTestHelper(object):
     _PHASE_FILENAME = "FE_ALPHA.cif"
     _INST_PARAM_FILENAME = "template_ENGINX_241391_236516_North_bank.prm"
     _TEMP_DIR = tempfile.gettempdir()
+    _path_to_gsas = None
 
     def path_to_gsas(self):
-        return _GSASFinder.GSASIIscriptable_location()
+        if self._path_to_gsas is None:
+            self._path_to_gsas = _GSASFinder.GSASIIscriptable_location()
+        return self._path_to_gsas
 
     def input_ws_path(self):
         return mantid.FileFinder.getFullPath(self._INPUT_WORKSPACE_FILENAME)
@@ -120,6 +123,9 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRe
                                                      MuteGSASII=True,
                                                      LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
 
+    def skipTests(self):
+        return not self.path_to_gsas()
+
     def validate(self):
         self.assertAlmostEqual(self.gof, 3.57776, delta=1e-6)
         self.assertAlmostEqual(self.rwp, 77.754994, delta=1e-6)
@@ -157,6 +163,9 @@ class GSASIIRefineFitPeaksPawleyTest(stresstesting.MantidStressTest, _GSASIIRefi
                                                      SaveGSASIIProjectFile=self.gsas_proj_path,
                                                      MuteGSASII=True,
                                                      LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
+
+    def skipTests(self):
+        return not self.path_to_gsas()
 
     def validate(self):
         self.assertAlmostEquals(self.gof, 3.57847, delta=1e-6)
