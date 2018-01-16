@@ -1090,8 +1090,8 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
   auto &FWHMs = m_control.FWHMs();
   for (size_t iSpec = 0; iSpec < temperatures.size(); ++iSpec) {
     updateSpectrum(*fun.getFunction(iSpec), nre, energies, waveFunctions,
-                   temperatures[iSpec], FWHMs.size() > iSpec ? FWHMs[iSpec] : 0.,
-                   iSpec, iFirst);
+                   temperatures[iSpec], 
+                   FWHMs.size() > iSpec ? FWHMs[iSpec] : 0., iSpec, iFirst);
   }
 
   for (auto &prop : m_mapPrefixes2PhysProps) {
@@ -1148,8 +1148,8 @@ void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
       auto &ionSpectrum =
           dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
       updateSpectrum(ionSpectrum, nre, energies, waveFunctions,
-                     temperatures[iSpec], FWHMs.size() > iSpec ? FWHMs[iSpec] : 0.,
-                     iSpec, iFirst);
+                     temperatures[iSpec], 
+                     FWHMs.size() > iSpec ? FWHMs[iSpec] : 0., iSpec, iFirst);
     }
 
     std::string prefix("ion");

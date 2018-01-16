@@ -193,6 +193,7 @@ void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
 
 CrystalFieldSusceptibilityCalculation::CrystalFieldSusceptibilityCalculation() {
   declareParameter("Lambda", 0.0, "Effective exchange interaction");
+  declareParameter("Chi0", 0.0, "Background or remnant susceptibility");
 }
 
 // Sets the eigenvectors / values directly

@@ -148,6 +148,12 @@ class CrystalField(object):
 
         free_parameters = {key: kwargs[key] for key in kwargs if key in CrystalField.field_parameter_names}
 
+        if 'ResolutionModel' in kwargs and 'FWHM' in kwargs:
+            msg = 'Both ''ResolutionModel'' and ''FWHM'' specified but can only accept one width option.'
+            msg += ' Prefering to use ResolutionModel, and ignoring FWHM.'
+            kwargs.pop('FWHM')
+            warnings.warn(msg, SyntaxWarning)
+
         for key in kwargs:
             if key == 'ToleranceEnergy':
                 self.ToleranceEnergy = kwargs[key]
