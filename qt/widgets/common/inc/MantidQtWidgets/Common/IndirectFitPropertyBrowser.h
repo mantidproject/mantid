@@ -32,6 +32,8 @@ public:
 
   QString backgroundName() const;
 
+  QString backgroundPrefix() const;
+
   size_t numberOfCustomFunctions(const std::string &functionName) const;
 
   double parameterValue(const std::string &functionName,
@@ -39,6 +41,8 @@ public:
 
   void setParameterValue(const std::string &functionName,
                          const std::string &parameterName, double value);
+
+  void setBackground(const std::string &backgroundName);
 
   void moveCustomFunctionsToEnd();
 
