@@ -162,12 +162,12 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
 
   getIntersections(Pt, direction, intesectionPoints, entryExitFlags);
 
-  if (sizeof(intesectionPoints) == 0) {
+  if (intesectionPoints.size() == 0) {
     return false;
   }
 
   // True if point is on surface
-  for (size_t i=0; i < sizeof(intesectionPoints); ++i) {
+  for (size_t i=0; i < intesectionPoints.size(); ++i) {
     if (Pt.distance(intesectionPoints[i]) < M_TOLERANCE) {
       return true;
     }
@@ -176,7 +176,7 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
   // Look for nearest point then check its entry-exit flag
   double nearestPointDistance = Pt.distance(intesectionPoints[0]);
   size_t nearestPointIndex = 0;
-  for (size_t i=1; i < sizeof(intesectionPoints); ++i) {
+  for (size_t i=1; i < intesectionPoints.size(); ++i) {
     if (Pt.distance(intesectionPoints[i]) < nearestPointDistance) {
       nearestPointDistance = Pt.distance(intesectionPoints[i]);
       nearestPointIndex = i;
@@ -198,11 +198,12 @@ bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
 
   getIntersections(Pt, direction, intesectionPoints, entryExitFlags);
 
-  if (sizeof(intesectionPoints) == 0) {
+  if (intesectionPoints.size() == 0) {
     return false;
   }
 
-  for (size_t i=0; i < sizeof(intesectionPoints); ++i) {
+  size_t k = intesectionPoints.size();
+  for (size_t i=0; i < k; ++i) {
     if (Pt.distance(intesectionPoints[i]) < M_TOLERANCE) {
       return true;
     }
@@ -222,14 +223,14 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
   std::vector<int> entryExitFlags;
 
   getIntersections(UT.startPoint(), UT.direction(), intesectionPoints, entryExitFlags);
-  if (sizeof(intesectionPoints) == 0) return 0; // Quit if no intersections found
+  if (intesectionPoints.size() == 0) return 0; // Quit if no intersections found
 
-  for (size_t i = 0; i < sizeof(intesectionPoints); ++i) {
+  for (size_t i = 0; i < intesectionPoints.size(); ++i) {
       UT.addPoint(entryExitFlags[i], intesectionPoints[i], *this);
   }
   UT.buildLink();
 
-  return sizeof(intesectionPoints);
+  return intesectionPoints.size();
 }
 
 /**
@@ -244,7 +245,7 @@ void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &d
 
   V3D vertex1, vertex2, vertex3, intersection;
   int entryExit;
-  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); i++) {
+  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
     if (rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3, 
       intersection, entryExit )) {
       intersectionPoints.push_back(intersection);
@@ -416,7 +417,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer) const {
 
   double solidAngleSum(0), solidAngleNegativeSum(0);
   V3D vertex1, vertex2, vertex3;
-  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); i++) {
+  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
     double sa = getTriangleSolidAngle(vertex1, vertex2, vertex3, observer);
     if (sa > 0.0) {
       solidAngleSum += sa;
@@ -440,7 +441,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
 {
   MeshObject scaledObject;
   std::vector<V3D> scaledVertices;
-  for (size_t i = 0; i < sizeof(m_vertices); ++i) {
+  for (size_t i = 0; i < m_vertices.size(); ++i) {
     scaledVertices.push_back(V3D(scaleFactor.X()*m_vertices[i].X(), scaleFactor.Y()*m_vertices[i].Y(), scaleFactor.Z()*m_vertices[i].Z()));
   }
   scaledObject.initialize(m_triangles, scaledVertices);
@@ -466,7 +467,7 @@ double MeshObject::volume() const {
   double volume(0.0);
 
   V3D vertex1, vertex2, vertex3;
-  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); i++) {
+  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
     V3D a = vertex1 - centre;
     V3D b = vertex2 - centre;
     V3D c = vertex3 - centre;
@@ -493,7 +494,7 @@ const BoundingBox &MeshObject::getBoundingBox() const {
       maxX = maxY = maxZ = -huge;
 
       // Loop over all vertices and determine minima and maxima on each axis
-      for (int i = 0; i < sizeof(m_vertices); ++i) {
+      for (int i = 0; i < m_vertices.size(); ++i) {
         auto vx = m_vertices[i].X();
         auto vy = m_vertices[i].Y();
         auto vz = m_vertices[i].Z();
@@ -506,7 +507,7 @@ const BoundingBox &MeshObject::getBoundingBox() const {
         maxZ = std::max(maxZ, vz);
       }
       // Cache bounding box, so we do not need to repeat calculation
-      m_boundingBox = BoundingBox(minX, maxX, minY, maxY, minZ, maxZ);
+      m_boundingBox = BoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
     }
 
   return m_boundingBox;
@@ -686,7 +687,7 @@ void MeshObject::setVtkGeometryCacheReader(
 * Output functions for rendering, may also be used internally
 */
 int MeshObject::numberOfTriangles() const {
-    return sizeof(m_triangles)/3;
+    return m_triangles.size()/3;
 }
 
 /**
@@ -694,7 +695,7 @@ int MeshObject::numberOfTriangles() const {
 */
 int *MeshObject::getTriangles() const {
   int *faces = nullptr;
-  int nFaceCorners = sizeof(m_triangles); 
+  size_t nFaceCorners = m_triangles.size(); 
   if (nFaceCorners > 0) {
     faces = new int[static_cast<std::size_t>(nFaceCorners)];
     for (size_t i = 0; i < nFaceCorners; ++i) {
@@ -709,7 +710,7 @@ int *MeshObject::getTriangles() const {
 * get number of points
 */
 int MeshObject::numberOfVertices() const {
-  return sizeof(m_vertices);
+  return m_vertices.size();
 }
 
 /**
@@ -717,7 +718,7 @@ int MeshObject::numberOfVertices() const {
 */
 double *MeshObject::getVertices() const {
   double *points = nullptr;
-  int nPts = sizeof(m_vertices);
+  size_t nPts = m_vertices.size();
   if (nPts > 0) {
     points = new double[static_cast<std::size_t>(nPts) * 3];
     for (size_t i = 0; i < nPts; ++i) {
