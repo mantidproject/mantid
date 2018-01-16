@@ -10,6 +10,14 @@ namespace CustomInterfaces {
 template <size_t NumBanks, typename T> class RunMap {
 
 public:
+  void add(const int runNumber, const size_t bank, const T itemToAdd) {
+    if (bank < 1 || bank > NumBanks) {
+      throw std::invalid_argument("Tried to access invalid bank: " +
+                                  std::to_string(bank));
+    }
+    m_map[bank - 1][runNumber] = itemToAdd;
+  }
+
   bool contains(const int runNumber, const size_t bank) const {
     return bank > 0 && bank <= NumBanks &&
            m_map[bank - 1].find(runNumber) != m_map[bank - 1].end();
@@ -26,14 +34,6 @@ public:
                                   std::to_string(bank));
     }
     return m_map[bank - 1].at(runNumber);
-  }
-
-  void add(const int runNumber, const size_t bank, const T itemToAdd) {
-    if (bank < 1 || bank > NumBanks) {
-      throw std::invalid_argument("Tried to access invalid bank: " +
-                                  std::to_string(bank));
-    }
-    m_map[bank - 1][runNumber] = itemToAdd;
   }
 
 private:
