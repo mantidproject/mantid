@@ -271,8 +271,8 @@ class SANSFunctionsTest(unittest.TestCase):
         self.assertTrue(get_facility(SANSInstrument.NoInstrument) is SANSFacility.NoFacility)
 
     def test_that_diagnostic_parser_produces_correct_list(self):
-        string_to_parse = '8 + 1-7:2, 12:15, 19-21'
-        expected_result = [[8, 1, 3, 5, 7], 12, 13, 14, 15, [19, 20, 21]]
+        string_to_parse = '8-11, 12:15, 5, 7:9'
+        expected_result = [[8, 11], [12, 12], [13, 13], [14, 14], [15, 15], [5, 5], [7,7], [8,8], [9,9]]
 
         result = parse_diagnostic_settings(string_to_parse)
 

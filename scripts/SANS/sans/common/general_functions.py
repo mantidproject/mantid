@@ -403,28 +403,27 @@ def parse_diagnostic_settings(string_to_parse):
     simple_range_with_step_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*" + r':' + "\\s*")
 
     slice_settings = string_to_parse.split(',')
+
     all_ranges = []
     for slice_setting in slice_settings:
+        slice_setting = slice_setting.replace(' ', '')
         if _does_match(multiple_entry_pattern, slice_setting):
             all_ranges += _extract_multiple_entry(slice_setting)
         else:
             integral = []
-            slice_additions = slice_setting.split('+')
-            for slice_addition in slice_additions:
-                slice_addition = slice_addition.replace(' ', '')
-                # We can have three scenarios
-                # 1. Simple Slice:     X-Y
-                # 2. Slice range :     X:Y:Z
-                # 3. Slice full range: >X or <X
-                if _does_match(simple_range_with_step_pattern, slice_addition):
-                    integral += _extract_simple_range_with_step_pattern(slice_addition)
-                elif _does_match(simple_range_pattern, slice_addition):
-                    integral += _extract_simple_range(slice_addition)
-                elif _does_match(single_number_pattern, slice_addition):
-                    integral += _extract_number(slice_addition)
-                else:
-                    raise ValueError("The provided event slice configuration {0} cannot be parsed because "
-                                     "of {1}".format(slice_settings, slice_setting))
+            # We can have three scenarios
+            # 1. Simple Slice:     X-Y
+            # 2. Slice range :     X:Y:Z
+            # 3. Slice full range: >X or <X
+            if _does_match(simple_range_with_step_pattern, slice_setting):
+                integral += _extract_simple_range_with_step_pattern(slice_setting)
+            elif _does_match(simple_range_pattern, slice_setting):
+                integral += _extract_simple_range(slice_setting)
+            elif _does_match(single_number_pattern, slice_setting):
+                integral += _extract_number(slice_setting)
+            else:
+                raise ValueError("The provided event slice configuration {0} cannot be parsed because "
+                                 "of {1}".format(slice_settings, slice_setting))
             all_ranges.append(integral)
     return all_ranges
 

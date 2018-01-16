@@ -6,7 +6,7 @@ from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.masking_table import MaskingTable
 from ui.sans_isis.beam_centre import BeamCentre
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (RangeStepType, OutputMode)
+from sans.common.enums import (RangeStepType, OutputMode, SANSFacility)
 from sans.test_helper.test_director import TestDirector
 from functools import (partial)
 
@@ -104,6 +104,10 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = 
     # Add the beam centre view
     beam_centre = create_mock_beam_centre_tab()
     view.beam_centre = beam_centre
+
+    # Add the data diagnostic tab
+    diagnostic_page = create_mock_diagnostics_tab()
+    view.diagnostic_page = diagnostic_page
 
     view.halt_process_flag = mock.MagicMock()
 
@@ -233,6 +237,7 @@ def get_state_for_row_mock_with_real_state(row_index):
 def create_run_tab_presenter_mock(use_fake_state=True):
     presenter = mock.create_autospec(RunTabPresenter, spec_set=False)
     presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 3])
+    presenter._facility = SANSFacility.ISIS
     if use_fake_state:
         presenter.get_state_for_row = mock.MagicMock(side_effect=get_state_for_row_mock)
     else:

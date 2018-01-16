@@ -37,13 +37,14 @@ class DiagnosticsPagePresenter(object):
         def on_processing_error(self, error):
             self._presenter.on_processing_error_integral(error)
 
-    def __init__(self, parent_presenter, WorkHandler, run_integral):
+    def __init__(self, parent_presenter, WorkHandler, run_integral, GuiStateDirector):
         super(DiagnosticsPagePresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
         self._work_handler = WorkHandler()
         self.run_integral = run_integral
         self._logger = Logger("SANS")
+        self._GuiStateDirector = GuiStateDirector
 
     def set_view(self, view, instrument):
         if view:
@@ -66,7 +67,7 @@ class DiagnosticsPagePresenter(object):
     def on_horizontal_clicked(self):
         file = self._view.run_input
         period = self._view.period
-        state = self.create_state(file, period)
+        state = self._create_state(file, period)
         mask = self._view.horizontal_mask
         range = self._view.horizontal_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
@@ -77,7 +78,7 @@ class DiagnosticsPagePresenter(object):
     def on_vertical_clicked(self):
         file = self._view.run_input
         period = self._view.period
-        state = self.create_state(file, period)
+        state = self._create_state(file, period)
         mask = self._view.vertical_mask
         range = self._view.vertical_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
@@ -88,7 +89,7 @@ class DiagnosticsPagePresenter(object):
     def on_time_clicked(self):
         file = self._view.run_input
         period = self._view.period
-        state = self.create_state(file, period)
+        state = self._create_state(file, period)
         mask = self._view.time_mask
         range = self._view.time_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
@@ -96,13 +97,13 @@ class DiagnosticsPagePresenter(object):
         self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Time,
                                    detector, state)
 
-    def create_state(self, file, period):
+    def _create_state(self, file, period):
         table_row = TableIndexModel(0, file, period, '', '', '', '', '', '', '', '', '', '')
         table = TableModel()
         table.add_table_entry(0, table_row)
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
 
-        gui_state_director = GuiStateDirector(table, state_model_with_view_update, self._parent_presenter._facility)
+        gui_state_director = self._GuiStateDirector(table, state_model_with_view_update, self._parent_presenter._facility)
 
         state = gui_state_director.create_state(0)
 

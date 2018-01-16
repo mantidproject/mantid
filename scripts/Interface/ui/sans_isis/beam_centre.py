@@ -59,8 +59,6 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
             target(listener)
 
     def on_run_clicked(self):
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         self._call_beam_centre_tab_listeners(lambda listener: listener.on_run_clicked())
 
     def _attach_validators(self):

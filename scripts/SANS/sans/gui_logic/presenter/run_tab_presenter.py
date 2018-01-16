@@ -111,7 +111,7 @@ class RunTabPresenter(object):
         self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel)
 
         # Workspace Diagnostic page presenter
-        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral)
+        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, GuiStateDirector)
 
     def __del__(self):
         self._delete_dummy_input_workspace()
