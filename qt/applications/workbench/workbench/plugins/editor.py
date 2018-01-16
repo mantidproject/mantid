@@ -58,7 +58,7 @@ class MultiFileEditor(PluginWidget):
                                         shortcut="Ctrl+Return",
                                         shortcut_context=Qt.ApplicationShortcut)
         self.abort_action = create_action(self, "Abort",
-                                        on_triggered=self.editors.abort_current)
+                                          on_triggered=self.editors.abort_current)
 
         self.editor_actions = [self.run_action, self.abort_action]
 

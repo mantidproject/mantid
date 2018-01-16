@@ -177,10 +177,10 @@ void ScriptEditor::setAutoMarginResize() {
 /**
  * Enable the auto complete
  */
-void ScriptEditor::enableAutoCompletion() {
-  setAutoCompletionSource(QsciScintilla::AcsAPIs);
-  setCallTipsVisible(QsciScintilla::CallTipsNoAutoCompletionContext);
+void ScriptEditor::enableAutoCompletion(AutoCompletionSource source) {
+  setAutoCompletionSource(source);
   setAutoCompletionThreshold(2);
+  setCallTipsStyle(QsciScintilla::CallTipsNoAutoCompletionContext);
   setCallTipsVisible(0); // This actually makes all of them visible
 }
 
@@ -189,7 +189,6 @@ void ScriptEditor::enableAutoCompletion() {
  * */
 void ScriptEditor::disableAutoCompletion() {
   setAutoCompletionSource(QsciScintilla::AcsNone);
-  setCallTipsVisible(QsciScintilla::CallTipsNone);
   setAutoCompletionThreshold(-1);
   setCallTipsVisible(-1);
 }

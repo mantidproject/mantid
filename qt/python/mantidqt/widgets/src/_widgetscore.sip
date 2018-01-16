@@ -68,6 +68,14 @@ class ScriptEditor : QWidget {
 %End
 
 public:
+  enum AutoCompletionSource {
+      AcsNone,
+      AcsAll,
+      AcsDocument,
+      AcsAPIs
+  };
+
+public:
   ScriptEditor(const QString & language,
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
 
@@ -85,6 +93,8 @@ public:
   QString selectedText() const;
   QString text() const;
 
+  void enableAutoCompletion(AutoCompletionSource source);
+  void disableAutoCompletion();
   void setCaretLineBackgroundColor (const QColor & col);
   void setCaretLineVisible(bool enable);
   void setIndentationsUseTabs(bool tabs);
@@ -95,6 +105,7 @@ public:
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setTabWidth(int width);
   void setText(const QString &text);
+  void updateCompletionAPI(const QStringList & completions);
 
 public slots:
   void updateProgressMarker(int lineno, bool error);

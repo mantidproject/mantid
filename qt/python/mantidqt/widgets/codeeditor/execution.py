@@ -18,14 +18,84 @@ from __future__ import (absolute_import, unicode_literals)
 
 # std imports
 import ctypes
+import inspect
 import time
 
 # 3rdparty imports
 from qtpy.QtCore import QObject, Signal
+from six import PY2, iteritems
 
 # local imports
 from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 from mantidqt.utils.async import AsyncTask
+
+if PY2:
+    from inspect import getargspec as getfullargspec
+else:
+    from inspect import getfullargspec
+
+
+def get_function_spec(func):
+    """Get the python function signature for the given function object. First
+    the args are inspected followed by varargs, which are set by some modules,
+    e.g. mantid.simpleapi algorithm functions
+
+    :param func: A Python function object
+    :returns: A string containing the function specification
+    :
+    """
+    try:
+        argspec = getfullargspec(func)
+    except TypeError:
+        return ''
+    # mantid algorithm functions have varargs set not args
+    args = argspec[0]
+    if args:
+        # For methods strip the self argument
+        if hasattr(func, 'im_func'):
+            args = args[1:]
+        defs = argspec[3]
+    elif argspec[1] is not None:
+        # Get from varargs/keywords
+        arg_str = argspec[1].strip().lstrip('\b')
+        defs = []
+        # Keyword args
+        kwargs = argspec[2]
+        if kwargs is not None:
+            kwargs = kwargs.strip().lstrip('\b\b')
+            if kwargs == 'kwargs':
+                kwargs = '**' + kwargs + '=None'
+            arg_str += ',%s' % kwargs
+        # Any default argument appears in the string
+        # on the rhs of an equal
+        for arg in arg_str.split(','):
+            arg = arg.strip()
+            if '=' in arg:
+                arg_token = arg.split('=')
+                args.append(arg_token[0])
+                defs.append(arg_token[1])
+            else:
+                args.append(arg)
+        if len(defs) == 0:
+            defs = None
+    else:
+        return ''
+
+    if defs is None:
+        calltip = ','.join(args)
+        calltip = '(' + calltip + ')'
+    else:
+        # The defaults list contains the default values for the last n arguments
+        diff = len(args) - len(defs)
+        calltip = ''
+        for index in range(len(args) - 1, -1, -1):
+            def_index = index - diff
+            if def_index >= 0:
+                calltip = '[' + args[index] + '],' + calltip
+            else:
+                calltip = args[index] + "," + calltip
+        calltip = '(' + calltip.rstrip(',') + ')'
+    return calltip
 
 
 class PythonCodeExecution(QObject):
@@ -41,7 +111,7 @@ class PythonCodeExecution(QObject):
         """Initialize the object"""
         super(PythonCodeExecution, self).__init__()
 
-        self._globals_ns, self._locals_ns = None, None
+        self._globals_ns = None
         self._task = None
 
         self.reset_context()
@@ -49,10 +119,6 @@ class PythonCodeExecution(QObject):
     @property
     def globals_ns(self):
         return self._globals_ns
-
-    @property
-    def locals_ns(self):
-        return self._locals_ns
 
     def abort(self):
         """Cancel an asynchronous execution"""
@@ -97,11 +163,25 @@ class PythonCodeExecution(QObject):
             sig_progress.emit(block.lineno)
             # compile so we can set the filename
             code_obj = compile(block.code_str, filename, mode='exec')
-            exec(code_obj, self.globals_ns, self.locals_ns)
+            exec(code_obj, self.globals_ns, self.globals_ns)
+
+    def generate_calltips(self):
+        """
+        Return a list of calltips for the current global scope. This is currently
+        very basic and only inspects the available functions and builtins at the current scope.
+
+        :return: A list of strings giving calltips for each global callable
+        """
+        calltips = []
+        for name, attr in iteritems(self._globals_ns):
+            if inspect.isfunction(attr) or inspect.isbuiltin(attr):
+                calltips.append(name + get_function_spec(attr))
+
+        return calltips
 
     def reset_context(self):
         # create new context for execution
-        self._globals_ns, self._locals_ns = {}, {}
+        self._globals_ns, self._namespace = {}, {}
 
     # --------------------- Callbacks -------------------------------
     def _on_success(self, task_result):

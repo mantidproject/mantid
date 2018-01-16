@@ -176,6 +176,8 @@ class PythonFileInterpreter(QWidget):
         else:
             editor.setModified(True)
 
+        editor.enableAutoCompletion(CodeEditor.AcsAll)
+
 
 class PythonFileInterpreterPresenter(QObject):
     """Presenter part of MVP to control actions on the editor"""
@@ -232,6 +234,7 @@ class PythonFileInterpreterPresenter(QObject):
         return code_str, line_from
 
     def _on_exec_success(self, task_result):
+        self.view.editor.updateCompletionAPI(self.model.generate_calltips())
         self._finish(success=True, elapsed_time=task_result.elapsed_time)
 
     def _on_exec_error(self, task_error):

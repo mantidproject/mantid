@@ -56,28 +56,24 @@ class PythonCodeExecutionTest(unittest.TestCase):
     def test_default_construction_yields_empty_context(self):
         executor = PythonCodeExecution()
         self.assertEqual(0, len(executor.globals_ns))
-        self.assertEqual(0, len(executor.locals_ns))
 
-    def test_reset_context_clears_globals_and_locals(self):
+    def test_reset_context_clears_context(self):
         executor = PythonCodeExecution()
+        globals_len = len(executor.globals_ns)
         executor.execute("x = 1")
-        self.assertEqual(1, len(executor.globals_ns))
-        self.assertEqual(1, len(executor.locals_ns))
+        self.assertTrue(globals_len + 1, len(executor.globals_ns))
         executor.reset_context()
         self.assertEqual(0, len(executor.globals_ns))
-        self.assertEqual(0, len(executor.locals_ns))
 
     # ---------------------------------------------------------------------------
     # Successful execution tests
     # ---------------------------------------------------------------------------
-    def test_execute_places_output_in_locals_mapping_if_different_to_globals(self):
+    def test_execute_places_output_in_globals(self):
         code = "_local=100"
-        user_globals, user_locals = self._verify_serial_execution_successful(code)
-        self.assertEquals(100, user_locals['_local'])
-        self.assertTrue('_local' not in user_globals)
-        user_globals, user_locals = self._verify_async_execution_successful(code)
-        self.assertEquals(100, user_locals['_local'])
-        self.assertTrue('_local' not in user_globals)
+        user_globals = self._verify_serial_execution_successful(code)
+        self.assertEquals(100, user_globals['_local'])
+        user_globals = self._verify_async_execution_successful(code)
+        self.assertEquals(100, user_globals['_local'])
 
     def test_execute_async_calls_success_signal_on_completion(self):
         code = "x=1+2"
@@ -186,7 +182,7 @@ squared = sum*sum
             else:
                 self.fail("No callback was called!")
 
-        context = executor.locals_ns
+        context = executor.globals_ns
         self.assertEqual(20, context['sum'])
         self.assertEqual(20*20, context['squared'])
         self.assertEqual(1, context['x'])
@@ -208,13 +204,13 @@ squared = sum*sum
     def _verify_serial_execution_successful(self, code):
         executor = PythonCodeExecution()
         executor.execute(code)
-        return executor.globals_ns, executor.locals_ns
+        return executor.globals_ns
 
     def _verify_async_execution_successful(self, code):
         executor = PythonCodeExecution()
         task = executor.execute_async(code)
         task.join()
-        return executor.globals_ns, executor.locals_ns
+        return executor.globals_ns
 
     def _verify_failed_serial_execute(self, expected_exc_type, code):
         executor = PythonCodeExecution()

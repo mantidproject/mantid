@@ -87,8 +87,10 @@ public:
   void setLexer(QsciLexer *) override;
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
-  /// Enable the auto complete
-  void enableAutoCompletion();
+  /// Enable the auto complete. Default is for backwards compatability
+  /// with existing code
+  void
+  enableAutoCompletion(AutoCompletionSource source = QsciScintilla::AcsAPIs);
   /// Disable the auto complete
   void disableAutoCompletion();
 

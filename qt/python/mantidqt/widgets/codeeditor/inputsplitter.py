@@ -115,4 +115,3 @@ class InputSplitter(IPyInputSplitter):
 
         # General fallback - accept more code
         return True
-
