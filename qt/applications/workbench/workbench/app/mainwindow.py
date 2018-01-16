@@ -27,6 +27,7 @@ import sys
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
+MPL_BACKEND = 'module://mantidqt.utils.matplotlib.backend_qt_async'
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
@@ -397,13 +398,23 @@ def start_workbench(app):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
     """
+    # The ordering here is very delicate. Test thoroughly when
+    # changing anything!
     main_window = MainWindow()
-    main_window.setup()
 
-    preloaded_packages = ('mantid',)
-    for name in preloaded_packages:
-        main_window.set_splash('Preloading ' + name)
-        importlib.import_module(name)
+    # Load matplotlib as early as possible to setup backend
+    main_window.set_splash('Preloading matplotlib')
+    mpl = importlib.import_module('matplotlib')
+    # Set up out custom matplotlib backend early. It must be done on
+    # the main thread
+    mpl.use(MPL_BACKEND)
+
+    # Setup widget layouts etc. mantid cannot be imported before this
+    # or the log messages don't get through
+    main_window.setup()
+    # start mantid
+    main_window.set_splash('Preloading mantid')
+    importlib.import_module('mantid')
 
     main_window.show()
     if main_window.splash:
