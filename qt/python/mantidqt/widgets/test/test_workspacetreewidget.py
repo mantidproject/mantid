@@ -18,8 +18,6 @@ from __future__ import absolute_import, print_function
 
 import unittest
 
-from qtpy.QtWidgets import QApplication
-
 from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from mantidqt.utils.qt.testing import requires_qapp
