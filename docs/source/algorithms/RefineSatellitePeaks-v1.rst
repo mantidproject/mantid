@@ -9,7 +9,7 @@
 Description
 -----------
 
-RefineSatellitePeaks cane be used to refine the locations of "satellite" peaks
+RefineSatellitePeaks can be used to refine the locations of "satellite" peaks
 occurring at fractional HKL locations in reciprocal space. RefineSatellitePeaks
 takes a MDWorkspace of experimental data, a PeaksWorkspace containing the
 locations of peaks with integer HKL, and another PeaksWorkspace containing a
