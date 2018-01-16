@@ -3,6 +3,7 @@
 
 #include <array>
 #include <unordered_map>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,6 +35,14 @@ public:
                                   std::to_string(bank));
     }
     return m_map[bank - 1].at(runNumber);
+  }
+
+  void remove(const int runNumber, const size_t bank){
+    m_map[bank - 1].erase(runNumber);
+  }
+
+  std::vector<std::pair<int, size_t>> getRunNumbersAndBankIDs(){
+    throw std::runtime_error("Not yet implemented");
   }
 
 private:

@@ -41,17 +41,20 @@ public:
   }
 
   void test_getRunNumbersAndBankIDs() {
+    RunMap<3, std::string> runMap;
+
     runMap.add(111, 1, "Polly");
     runMap.add(222, 2, "Morphism");
     runMap.add(333, 3, "Al");
     runMap.add(444, 1, "Gorithm");
 
-    const auto runBankPairs = runMap.getRunNumbersAndBankIDs();
+    std::vector<std::pair<int, size_t>> runBankPairs;
+    TS_ASSERT_THROWS_NOTHING(runBankPairs = runMap.getRunNumbersAndBankIDs());
 
     TS_ASSERT_EQUALS(runBankPairs.size(), 4);
     for (int i = 0; i < 4; ++i) {
       TS_ASSERT_EQUALS(runBankPairs[i],
-                       std::make_pair((i + 1) * 111, (i + 1) % 3));
+                       std::make_pair((i + 1) * 111, size_t((i + 1) % 3)));
     }
   }
 };
