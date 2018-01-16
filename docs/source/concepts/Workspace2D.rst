@@ -57,6 +57,7 @@ A Workspace2D may be `pickled <https://docs.python.org/2/library/pickle.html/>` 
 
 - Only Workspace2D objects can be pickled and de-pickled. Other :ref:`MatrixWorkspace <MatrixWorkspace>` subtypes cannot be pickled
 - Meta-data such as sample logs are not pickled
+- Masking flags are not pickled
 - Scanning Workspace2D objects are not permitted for pickling 
 - Workspace2D objects are always converted into :ref:`histograms <HistogramData>` formed as bin edges and counts as part of the pickling process.
 
