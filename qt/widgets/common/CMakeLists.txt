@@ -120,6 +120,7 @@ set ( SRC_FILES
 	src/WorkspacePresenter/ADSAdapter.cpp
 	src/WorkspacePresenter/WorkspacePresenter.cpp
     src/WorkspacePresenter/WorkspaceTreeWidget.cpp
+	src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
@@ -228,6 +229,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
