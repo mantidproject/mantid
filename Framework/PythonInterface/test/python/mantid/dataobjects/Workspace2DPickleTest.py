@@ -8,12 +8,13 @@ try:
 except ImportError:
     import pickle
 
-from mantid.simpleapi import Load
+from mantid.simpleapi import Load, CreateSampleWorkspace
 
 
 class Workspace2DPickleTest(unittest.TestCase):
     def setUp(self):
-        self.ws_orig = Load(Filename='emu00006473.nxs', OutputWorkspace='ws_orig')
+        group = Load(Filename='POLREF00004699.nxs', OutputWorkspace='ws_orig')
+        self.ws_orig = group[0]
         pickled = pickle.dumps(self.ws_orig, pickle.HIGHEST_PROTOCOL)
         self.ws_copy = pickle.loads(pickled)
 
@@ -38,6 +39,10 @@ class Workspace2DPickleTest(unittest.TestCase):
         self.assertFalse(all(self.ws_orig.readY(12) == self.ws_copy.readY(23)))
         self.assertTrue(all(self.ws_orig.readE(12) == self.ws_copy.readE(12)))
         self.assertFalse(all(self.ws_orig.readE(12) == self.ws_copy.readE(23)))
+
+    def xtest_pickling_scanning_workspace_forbidden(self):
+        ws = CreateSampleWorkspace(NumBanks=1, NumScanPoints=2)
+        self.assertRaises(ValueError, pickle.dumpts(ws, pickle.HIGHEST_PROTOCOL))
 
 
 if __name__ == '__main__':
