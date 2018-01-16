@@ -157,7 +157,6 @@ public slots:
   bool doesVatesSupportOpenGL() override;
 #endif
 
-
 private:
   // overide copy operations
   MantidTreeModel(const MantidTreeModel &);
