@@ -2,10 +2,12 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.simpleapi import CreateWorkspace,DeleteWorkspace,CreateMDHistoWorkspace, ConjoinWorkspaces
-import mantid.plots.functions as funcs
 import mantid.api
 import numpy as np
 from mantid.kernel import config
+import matplotlib
+matplotlib.use('AGG')
+import mantid.plots.functions as funcs
 import matplotlib.pyplot as plt
 
 
