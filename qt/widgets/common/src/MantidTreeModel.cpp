@@ -64,7 +64,7 @@ MantidTreeModel::createAlgorithm(const QString &algName, int version) {
     if (version != -1) {
       message += " version " + QString::number(version);
     }
-    QMessageBox::warning(nullptr, "MantidPlot", message);
+    QMessageBox::warning(nullptr, "", message);
     alg = Mantid::API::IAlgorithm_sptr();
   }
   return alg;
