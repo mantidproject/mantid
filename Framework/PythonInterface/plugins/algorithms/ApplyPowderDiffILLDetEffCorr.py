@@ -37,6 +37,8 @@ class ApplyPowderDiffILLDetEffCorr(PythonAlgorithm):
 
         y_values = input_ws.extractY()
         y_values = y_values.reshape(y_values.size)
+        e_values = input_ws.extractE()
+        e_values = e_values.reshape(e_values.size)
 
         efficiency_values = efficiency_workspace.extractY()
         efficiency_values = efficiency_values.reshape(efficiency_values.size)
@@ -49,14 +51,14 @@ class ApplyPowderDiffILLDetEffCorr(PythonAlgorithm):
         number_time_indexes = y_values.size / efficiency_values.size
 
         full_efficiency_values = np.repeat(efficiency_values, number_time_indexes)
+        e_values = full_efficiency_values
+        y_values *= full_efficiency_values
+        e_values *= full_efficiency_values
 
-        __temp_ws = CreateWorkspace(input_ws.extractX(), full_efficiency_values)
-        __temp_ws = Transpose(__temp_ws)
-        output_ws = input_ws * __temp_ws
+        output_ws = CreateWorkspace(DataX=input_ws.extractX(), DataY=y_values, DataE=e_values, Nspec=y_values.size,
+                                    ParentWorkspace=input_ws)
 
         RenameWorkspace(output_ws, self.getPropertyValue("OutputWorkspace"))
         self.setProperty("OutputWorkspace", output_ws)
-
-        DeleteWorkspace(__temp_ws)
 
 AlgorithmFactory.subscribe(ApplyPowderDiffILLDetEffCorr)
