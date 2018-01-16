@@ -43,7 +43,10 @@ class ApplyPowderDiffILLDetEffCorr(PythonAlgorithm):
         efficiency_values = efficiency_workspace.extractY()
         efficiency_values = efficiency_values.reshape(efficiency_values.size)
 
-        efficiency_values = np.insert(efficiency_values, 0, 1) # add the monitor efficiency
+        spectrum_info = input_ws.spectrumInfo()
+        for i in range(input_ws.getNumberHistograms()):
+            if spectrum_info.isMonitor(i):
+                efficiency_values = np.insert(efficiency_values, 0, 1) # add the monitor efficiency
 
         if (y_values.size % efficiency_values.size) is not 0:
             raise ValueError('Number of entries in input workspace is not a multiple of number of efficiencies in detector efficiency '

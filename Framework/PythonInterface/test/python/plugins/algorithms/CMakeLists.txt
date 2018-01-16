@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   AlignComponentsTest.py
   AngularAutoCorrelationsSingleAxisTest.py
   AngularAutoCorrelationsTwoAxesTest.py
+  ApplyPowderDiffILLDetEffCorrTest.py
   BinWidthAtXTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
