@@ -46,6 +46,8 @@ public:
 
   QString backgroundName() const;
 
+  QString backgroundPrefix() const;
+
   void moveCustomFunctionsToEnd();
 
   void setParameterValue(const std::string &functionName,
@@ -152,6 +154,11 @@ protected:
 
   void updatePlotOptions(QComboBox *cbPlotType);
 
+signals:
+  void functionChanged();
+
+  void parameterChanged(const Mantid::API::IFunction *);
+
 protected slots:
   void setSelectedSpectrum(int spectrum) override;
 
@@ -175,7 +182,7 @@ protected slots:
 
   void clearBatchRunnerSlots();
 
-  virtual void fitFunctionChanged();
+  void updateParameterValues();
 
   virtual void updatePreviewPlots() = 0;
 
@@ -183,7 +190,9 @@ protected slots:
 
   virtual void updatePlotOptions() = 0;
 
-  virtual void parameterUpdated(const Mantid::API::IFunction *){};
+  void emitFunctionChanged();
+
+  void emitParameterChanged(const Mantid::API::IFunction *);
 
 private:
   /// Overidden by child class.

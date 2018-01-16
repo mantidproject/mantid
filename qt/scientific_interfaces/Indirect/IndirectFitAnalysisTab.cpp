@@ -147,10 +147,13 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
 
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-          SLOT(plotGuess()));
+          SLOT(parameterUpdated(const Mantid::API::IFunction *)));
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-          SLOT(parameterUpdated(const Mantid::API::IFunction *)));
+          SLOT(emitParameterChanged(const Mantid::API::IFunction *)));
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+          SLOT(plotGuess()));
 
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
           SLOT(rangeChanged(double, double)));
@@ -158,7 +161,11 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SLOT(plotGuess()));
 
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(fitFunctionChanged()));
+          SLOT(updateParameterValues()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(emitFunctionChanged()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updatePreviewPlots()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
@@ -218,11 +225,15 @@ bool IndirectFitAnalysisTab::emptyModel() const {
   if (compositeModel)
     return compositeModel->nFunctions() == 0;
   else
-    return modelFunction->asString() != "";
+    return modelFunction->asString() == "";
 }
 
 QString IndirectFitAnalysisTab::backgroundName() const {
   return m_fitPropertyBrowser->backgroundName();
+}
+
+QString IndirectFitAnalysisTab::backgroundPrefix() const {
+  return m_fitPropertyBrowser->backgroundPrefix();
 }
 
 void IndirectFitAnalysisTab::moveCustomFunctionsToEnd() {
@@ -314,18 +325,9 @@ void IndirectFitAnalysisTab::addOptionalDoubleSetting(
 
 void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
   disablePlotGuess();
-  size_t specNo = static_cast<size_t>(spectrum);
-
-  if (m_parameterValues.contains(specNo)) {
-    m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
-    m_fitPropertyBrowser->updateParameterValues(
-        m_parameterValues[selectedSpectrum()]);
-  }
-
   IndirectDataAnalysisTab::setSelectedSpectrum(spectrum);
-  blockSignals(true);
+  updateParameterValues();
   updatePreviewPlots();
-  blockSignals(false);
   enablePlotGuess();
 }
 
@@ -426,6 +428,8 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(
   if (AnalysisDataService::Instance().doesExist(paramWSName))
     updateParametersFromTable(paramWSName);
 
+  updatePreviewPlots();
+
   connect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
           this, SLOT(plotGuess()));
 }
@@ -437,23 +441,13 @@ void IndirectFitAnalysisTab::updateParametersFromTable(
       paramWSName, parameters, minimumSpectrum(), maximumSpectrum());
   revertChanges(parameterValues, m_functionNameChanges);
 
-  std::vector<std::string> names;
-  std::vector<double> values;
-
-  for (const auto name : parameterValues[0].keys()) {
-    names.push_back(name.toStdString());
-    values.push_back(parameterValues[0][name]);
-  }
-
   if (m_appendResults)
     m_parameterValues =
         combineParameterValues(parameterValues, m_parameterValues);
   else
     m_parameterValues = parameterValues;
 
-  m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
-  m_fitPropertyBrowser->updateParameterValues(
-      parameterValues[selectedSpectrum()]);
+  updateParameterValues();
 }
 
 /**
@@ -506,19 +500,15 @@ void IndirectFitAnalysisTab::clearBatchRunnerSlots() {
 }
 
 /**
- * Handles the event of a change in the fit function defined in this indirect
- * fit analysis tab.
+ * Updates the parameter values in the fit property browser.
  */
-void IndirectFitAnalysisTab::fitFunctionChanged() {
-  const auto spectrum = selectedSpectrum();
+void IndirectFitAnalysisTab::updateParameterValues() {
+  const auto spectrum = static_cast<size_t>(selectedSpectrum());
 
-  if (m_parameterValues.contains(spectrum)) {
+  if (m_parameterValues.contains(spectrum))
+    m_fitPropertyBrowser->updateParameterValues(m_parameterValues[spectrum]);
+  else
     m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
-    m_fitPropertyBrowser->updateParameterValues(
-        m_parameterValues[selectedSpectrum()]);
-  } else
-    m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
-  updatePreviewPlots();
 }
 
 /*
@@ -530,7 +520,7 @@ void IndirectFitAnalysisTab::fitFunctionChanged() {
 void IndirectFitAnalysisTab::saveResult(const std::string &resultName) {
   // check workspace exists
   const auto wsFound = checkADSForPlotSaveWorkspace(resultName, false);
-  // process workspace after check
+  // process workspace after checkf
   if (wsFound) {
     QString saveDir = QString::fromStdString(
         Mantid::Kernel::ConfigService::Instance().getString(
@@ -843,6 +833,14 @@ IAlgorithm_sptr IndirectFitAnalysisTab::createWorkspaceAlgorithm(
   createWsAlg->setProperty("DataX", dataX);
   createWsAlg->setProperty("DataY", dataY);
   return createWsAlg;
+}
+
+void IndirectFitAnalysisTab::emitFunctionChanged() {
+  emit functionChanged();
+}
+
+void IndirectFitAnalysisTab::emitParameterChanged(const Mantid::API::IFunction *function) {
+  emit parameterChanged(function);
 }
 
 } // namespace IDA
