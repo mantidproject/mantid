@@ -595,9 +595,15 @@ public:
     delete suite;
   }
 
-  void setUp() override { DefaultValue<QString>::Set(QString()); }
+  void setUp() override {
+    DefaultValue<QString>::Set(QString());
+    DefaultValue<ColumnOptionsQMap>::Set(ColumnOptionsQMap());
+  }
 
-  void tearDown() override { DefaultValue<QString>::Clear(); }
+  void tearDown() override {
+    DefaultValue<QString>::Clear();
+    DefaultValue<ColumnOptionsQMap>::Clear();
+  }
 
   GenericDataProcessorPresenterTest() { FrameworkManager::Instance(); }
 
