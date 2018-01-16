@@ -692,8 +692,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def add_scans_ub_table(self, scan_list):
-        """
-
+        """ add scans to UB matrix construction table
         :param scan_list:
         :return:
         """

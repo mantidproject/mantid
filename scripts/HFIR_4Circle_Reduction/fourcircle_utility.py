@@ -129,24 +129,17 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
     else:
         start_row = mpl_start_row
         start_col = mpl_start_col
-        end_row =   mpl_end_row
-        end_col =   mpl_end_col
+        end_row = mpl_end_row
+        end_col = mpl_end_col
 
     assert start_col < end_col, 'Start column {0} cannot be smaller than end column {1}.'.format(start_col, end_col)
 
     det_sub_xml = ''
-    if False:
-        for col_number in range(start_col, end_col+1):
-            start_det_id = 1 + col_number * NUM_DET_ROW + start_row
-            end_det_id = 1 + col_number * NUM_DET_ROW + end_row
-            det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
-    else:
-        # print('[DB...BAT] Row numbers from {0} to {1}'.format(start_row, end_row))
-        # print('[DB...BAT] Col numbers from {0} to {1}'.format(start_col, end_col))
-        for row_number in range(start_row, end_row+1):
-            start_det_id = 1 + row_number * num_det_row + start_col
-            end_det_id = 1 + row_number * num_det_row + end_col
-            det_sub_xml += '{0}-{1},'.format(start_det_id, end_det_id)
+    # the plot out data is in row major (while the raw data is in column major, which is rotated 90 later)
+    for row_number in range(start_row, end_row + 1):
+        start_det_id = 1 + row_number * num_det_row + start_col
+        end_det_id = 1 + row_number * num_det_row + end_col
+        det_sub_xml += '{0}-{1},'.format(start_det_id, end_det_id)
     # END-FOR
 
     # remove last ','

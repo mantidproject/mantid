@@ -71,7 +71,6 @@ def load_scd_fullprof_intensity_file(file_name):
         if line_index == 0:
             # line 1 as header
             header = line
-            print('[INFO] Header:', header)
         elif line.startswith('('):
             # line 2 format line, skip
             continue
@@ -270,39 +269,3 @@ def nearest_int(number):
         answer = int(number - 0.5)
 
     return answer
-
-
-def main(argv):
-    """
-    main to calculate difference
-    :param argv:
-    :return:
-    """
-    # get input
-    if len(argv) < 4:
-        print('Calculate the difference of two measurements:\n')
-        print('> %s [intensity file 1]  [intensity file 2]  [output intensity file]' % argv[0])
-        return
-    else:
-        int_file_1 = argv[1]
-        int_file_2 = argv[2]
-        out_file_name = argv[3]
-
-    intensity_dict1, wave_length1, error_message1 = load_scd_fullprof_intensity_file(int_file_1)
-    intensity_dict2, wave_length2, error_message2 = load_scd_fullprof_intensity_file(int_file_2)
-
-    if len(error_message1) == 0:
-        print('[Error] %s: %s' % (int_file_1, error_message1))
-    if len(error_message2) == 0:
-        print('[Error] %s: %s' % (int_file_2, error_message2))
-
-    diff_dict = calculate_intensity_difference(intensity_dict1, intensity_dict2)
-    diff_peak_list = convert_to_peak_dict_list(diff_dict)
-    write_scd_fullprof_kvector('difference', wave_length=wave_length1, k_vector_dict=dict(), peak_dict_list=diff_peak_list,
-                               fp_file_name=out_file_name, with_absorption=False)
-
-    return
-
-
-if __name__ == '__main__':
-    main(sys.argv)

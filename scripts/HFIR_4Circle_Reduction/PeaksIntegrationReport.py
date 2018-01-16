@@ -74,33 +74,34 @@ class PeaksIntegrationReportDialog(QtGui.QDialog):
 
         scan_number_list = sorted(peak_integration_summary.keys())
         for scan_number in scan_number_list:
-            print('[DB...BAT] Scan {0} Peak integration report '
-                  'keys: {1}'.format(scan_number, peak_integration_summary[scan_number].keys()))
+            try:
+                spice_hkl = peak_integration_summary[scan_number]['SPICE HKL']
+                calculated_hkl = peak_integration_summary[scan_number]['Mantid HKL']
+                mask_name = peak_integration_summary[scan_number]['Mask']
+                intensity1 = peak_integration_summary[scan_number]['Raw Intensity']
+                error1 = peak_integration_summary[scan_number]['Raw Intensity Error']
+                intensity2 = peak_integration_summary[scan_number]['Intensity 2']
+                error2 = peak_integration_summary[scan_number]['Intensity 2 Error']
+                intensity3 = peak_integration_summary[scan_number]['Gauss Intensity']
+                error3 = peak_integration_summary[scan_number]['Gauss Error']
+                lorentz_factor = peak_integration_summary[scan_number]['Lorentz']
+                estimated_bkgd = peak_integration_summary[scan_number]['Estimated Background']
+                gauss_bkgd = peak_integration_summary[scan_number]['Fitted Background']
+                gauss_a = peak_integration_summary[scan_number]['Fitted A']
+                gauss_sigma = peak_integration_summary[scan_number]['Fitted Sigma']
+                motor_name = peak_integration_summary[scan_number]['Motor']
+                motor_step = peak_integration_summary[scan_number]['Motor Step']
+                k_shift = peak_integration_summary[scan_number]['K-vector']
+                absorption_correction = peak_integration_summary[scan_number]['Absorption Correction']
 
-            spice_hkl = peak_integration_summary[scan_number]['SPICE HKL']
-            calculated_hkl = peak_integration_summary[scan_number]['Mantid HKL']
-            mask_name = peak_integration_summary[scan_number]['Mask']
-            intensity1 = peak_integration_summary[scan_number]['Raw Intensity']
-            error1 = peak_integration_summary[scan_number]['Raw Intensity Error']
-            intensity2 = peak_integration_summary[scan_number]['Intensity 2']
-            error2 = peak_integration_summary[scan_number]['Intensity 2 Error']
-            intensity3 = peak_integration_summary[scan_number]['Gauss Intensity']
-            error3 = peak_integration_summary[scan_number]['Gauss Error']
-            lorentz_factor = peak_integration_summary[scan_number]['Lorentz']
-            estimated_bkgd = peak_integration_summary[scan_number]['Estimated Background']
-            gauss_bkgd = peak_integration_summary[scan_number]['Fitted Background']
-            gauss_a = peak_integration_summary[scan_number]['Fitted A']
-            gauss_sigma = peak_integration_summary[scan_number]['Fitted Sigma']
-            motor_name = peak_integration_summary[scan_number]['Motor']
-            motor_step = peak_integration_summary[scan_number]['Motor Step']
-            k_shift = peak_integration_summary[scan_number]['K-vector']
-            absorption_correction = peak_integration_summary[scan_number]['Absorption Correction']
+                self.ui.tableWidget_spreadsheet.add_scan_information(scan_number, spice_hkl, calculated_hkl,
+                                                                     mask_name, intensity1, error1, intensity2, error2,
+                                                                     intensity3, error3, lorentz_factor, estimated_bkgd,
+                                                                     gauss_bkgd, gauss_sigma, gauss_a, motor_name,
+                                                                     motor_step, k_shift, absorption_correction)
+            except KeyError as key_err:
+                print ('ERROR: Unable to add scan {0} to report due to {1}'.format(scan_number, key_err))
 
-            self.ui.tableWidget_spreadsheet.add_scan_information(scan_number, spice_hkl, calculated_hkl,
-                                                                 mask_name, intensity1, error1, intensity2, error2,
-                                                                 intensity3, error3, lorentz_factor, estimated_bkgd,
-                                                                 gauss_bkgd, gauss_sigma, gauss_a, motor_name,
-                                                                 motor_step, k_shift, absorption_correction)
         # END-FOR
 
         return
