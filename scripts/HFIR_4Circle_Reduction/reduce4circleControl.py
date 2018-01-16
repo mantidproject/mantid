@@ -131,7 +131,10 @@ class CWSCDReductionControl(object):
         self._refWorkspaceForMask = None
 
         # register startup
-        mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
+        mantid.UsageService.registerFeatureUsage("Interface", "4-Circle Reduction", False)
+
+        # debug mode
+        self._debugPrintMode = True
 
         return
 
@@ -743,8 +746,9 @@ class CWSCDReductionControl(object):
 
                 if intensity < std_dev:
                     # error is huge, very likely bad gaussian fit
-                    print('[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} '
-                          'Excluded from exporting.'.format(algorithm_type, scan_number, intensity, std_dev))
+                    if self._debugPrintMode:
+                        print('[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} '
+                              'Excluded from exporting.'.format(algorithm_type, scan_number, intensity, std_dev))
                     continue
                 # END-IF
 
@@ -1656,11 +1660,8 @@ class CWSCDReductionControl(object):
         """
         # no record is found. it should not happen!
         if self._preprocessedInfoDict is None:
-            print ('[DB...BAT] There is NO pre-processed data.')
             return False
         if scan_number not in self._preprocessedInfoDict:
-            print ('[DB...BAT] Scan {0} is not in pre-processed scan information dictionary. keys are '
-                   '{1}'.format(scan_number, self._preprocessedInfoDict.keys()))
             return False
 
         # check others
@@ -1688,17 +1689,19 @@ class CWSCDReductionControl(object):
             unmatch_score += 400
 
         if unmatch_score > 0:
-            print('[INFO] Exp {0} Scan {1} has a unmatched calibrated record from pre-processed data. ID = {2}'
-                  ''.format(exp_number, scan_number, unmatch_score))
+            if self._debugPrintMode:
+                print('[INFO] Exp {0} Scan {1} has a unmatched calibrated record from pre-processed data. ID = {2}'
+                      ''.format(exp_number, scan_number, unmatch_score))
             return False
 
-        print('[INFO] Exp {0} Scan {1} has a matched calibrated record from pre-processed data.')
+        if self._debugPrintMode:
+            print('[INFO] Exp {0} Scan {1} has a matched calibrated record from pre-processed data.')
 
         return True
 
     def load_preprocessed_scan(self, exp_number, scan_number, md_dir, output_ws_name):
         """ load preprocessed scan from hard disk
-        :return:
+        :return: (bool, str): loaded, message
         """
         # check inputs
         assert isinstance(exp_number, int), 'Experiment number {0} ({1}) must be an integer' \
@@ -1724,8 +1727,8 @@ class CWSCDReductionControl(object):
 
         # check
         if os.path.exists(md_file_path) is False:
-            print ('[WARNING] MD file {0} does not exist.'.format(md_file_path))
-            return False
+            message = 'Pre-processed MD file {0} does not exist.'.format(md_file_path)
+            return False, message
 
         # load and check
         status = False
@@ -1734,16 +1737,15 @@ class CWSCDReductionControl(object):
             mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=output_ws_name)
             # check
             status = AnalysisDataService.doesExist(output_ws_name)
-            print ('[INFO] {0} is loaded from {1} with status {2}'
-                   ''.format(output_ws_name, md_file_path, status))
+            message = '{0} is loaded from {1} with status {2}'.format(output_ws_name, md_file_path, status)
         except RuntimeError as run_err:
-            print('[DB] Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err))
+            message = 'Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err)
         except OSError as run_err:
-            print('[DB] Unable to load file {0} due to OSError {1}.'.format(md_file_path, run_err))
+            message = 'Unable to load file {0} due to OSError {1}.'.format(md_file_path, run_err)
         except IOError as run_err:
-            print('[DB] Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err))
+            message = 'Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err)
 
-        return status
+        return status, message
 
     def _process_pt_list(self, exp_no, scan_no, pt_num_list):
         """
@@ -1807,51 +1809,22 @@ class CWSCDReductionControl(object):
             error_msg = ret_obj
             return False, error_msg
         pt_num_list, pt_list_str = ret_obj
-        # if len(pt_num_list) > 0:
-        #     # user specified
-        #     pt_num_list = pt_num_list
-        # else:
-        #     # default: all Pt. of scan
-        #     status, pt_num_list = self.get_pt_numbers(exp_no, scan_no)
-        #     if status is False:
-        #         err_msg = pt_num_list
-        #         return False, err_msg
-        # # END-IF-ELSE
-        #
-        # # construct a list of Pt as the input of CollectHB3AExperimentInfo
-        # pt_list_str = '-1'  # header
-        # err_msg = ''
-        # for pt in pt_num_list:
-        #     # Download file
-        #     try:
-        #         self.download_spice_xml_file(scan_no, pt, exp_no=exp_no, overwrite=False)
-        #     except RuntimeError as e:
-        #         err_msg += 'Unable to download xml file for pt %d due to %s\n' % (pt, str(e))
-        #         continue
-        #     pt_list_str += ',%d' % pt
-        # # END-FOR (pt)
-        # if pt_list_str == '-1':
-        #     return False, err_msg
 
         # create output workspace's name
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
 
         # find out the cases that rewriting is True
-        print ('[DB...BAT] Rewrite = {0}'.format(rewrite))
-
         if not rewrite:
-            print ('[DB...BAT] pre-processed dir: {0}'.format(preprocessed_dir))
-
             if AnalysisDataService.doesExist(out_q_name):
                 # not re-write, target workspace exists
                 pass
             elif preprocessed_dir is not None:
                 # not re-write, target workspace does not exist, attempt to load from preprocessed
                 if self.is_calibration_match(exp_no, scan_no):
-                    data_loaded = self.load_preprocessed_scan(exp_number=exp_no,
-                                                              scan_number=scan_no,
-                                                              md_dir=preprocessed_dir,
-                                                              output_ws_name=out_q_name)
+                    data_loaded, message = self.load_preprocessed_scan(exp_number=exp_no,
+                                                                       scan_number=scan_no,
+                                                                       md_dir=preprocessed_dir,
+                                                                       output_ws_name=out_q_name)
                     rewrite = not data_loaded
                 else:
                     rewrite = True
@@ -2643,12 +2616,13 @@ class CWSCDReductionControl(object):
         # check whether there is a redundant creation of PeakProcessRecord for the same (exp, scan) combination
         if (exp_number, scan_number) in self._myPeakInfoDict:
             peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
-            print('[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not '
-                  'be created twice!'.format(exp_number, scan_number))
-            print('[CONTINUE] New PeaksWorkspace = {0} vs Existing '
-                  'PeaksWorkspace = {1}.'.format(peak_ws_name, peak_info.peaks_workspace))
-            print('[CONTINUE] New MDEventWorkspace = {0} vs Existing '
-                  'MDEventWorkspace = {1}.'.format(md_ws_name, peak_info.md_workspace))
+            if self._debugPrintMode:
+                print('[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not '
+                      'be created twice!'.format(exp_number, scan_number))
+                print('[CONTINUE] New PeaksWorkspace = {0} vs Existing '
+                      'PeaksWorkspace = {1}.'.format(peak_ws_name, peak_info.peaks_workspace))
+                print('[CONTINUE] New MDEventWorkspace = {0} vs Existing '
+                      'MDEventWorkspace = {1}.'.format(md_ws_name, peak_info.md_workspace))
             return False, peak_info
         # END-IF
 
@@ -2658,7 +2632,9 @@ class CWSCDReductionControl(object):
 
         # set the other information
         peak_info.set_data_ws_name(md_ws_name)
-        peak_info.calculate_peak_center()
+        err_msg = peak_info.calculate_peak_center()
+        if self._debugPrintMode and len(err_msg) > 0:
+            print ('[Error] during calculating peak center:{0}'.format(err_msg))
 
         return True, peak_info
 
