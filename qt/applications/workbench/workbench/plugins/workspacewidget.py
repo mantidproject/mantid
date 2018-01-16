@@ -28,7 +28,7 @@ from workbench.plugins.base import PluginWidget
 
 
 class WorkspaceWidget(PluginWidget):
-    """Provides an in-process Jupyter Qt-based console"""
+    """Provides a Workspace Widget for workspace manipulation"""
 
     def __init__(self, parent):
         super(WorkspaceWidget, self).__init__(parent)
