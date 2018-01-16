@@ -19,4 +19,4 @@ from __future__ import (absolute_import)
 from mantidqt.utils.qt import import_qtlib
 
 
-MantidTreeModel = import_qtlib('_widgetscore', 'mantidqt.widgets', 'MantidTreeModel')
+MantidTreeModel = import_qtlib('_widgetscore', 'mantidqt.widgets.workspacewidgets', 'MantidTreeModel')
