@@ -123,10 +123,6 @@ void Q1D2::exec() {
   MatrixWorkspace_const_sptr pixelAdj = getProperty("PixelAdj");
   MatrixWorkspace_const_sptr wavePixelAdj = getProperty("WavePixelAdj");
   MatrixWorkspace_const_sptr qResolution = getProperty("QResolution");
-  if (communicator().size() != 1 && (pixelAdj || wavePixelAdj || qResolution))
-    throw std::runtime_error(
-        "Using in PixelAdj, WavePixelAdj, or QResolution in an MPI run of " +
-        name() + " is currently not supported.");
 
   const bool doGravity = getProperty("AccountForGravity");
   m_doSolidAngle = getProperty("SolidAngleWeighting");
@@ -325,29 +321,25 @@ void Q1D2::exec() {
   }
 
   bool doOutputParts = getProperty("OutputParts");
-  if (doOutputParts) {
-    MatrixWorkspace_sptr ws_sumOfCounts;
-    MatrixWorkspace_sptr ws_sumOfNormFactors;
-    if (communicator().rank() == 0) {
-      ws_sumOfCounts = WorkspaceFactory::Instance().create(outputWS);
-      ws_sumOfCounts->setSharedX(0, outputWS->sharedX(0));
-      // Copy now as YOut is modified in normalize
-      ws_sumOfCounts->mutableY(0) = YOut;
-      ws_sumOfCounts->setSharedDx(0, outputWS->sharedDx(0));
-      ws_sumOfCounts->setFrequencyVariances(0, outputWS->e(0));
+  if (doOutputParts && communicator().rank() == 0) {
+    MatrixWorkspace_sptr ws_sumOfCounts =
+        WorkspaceFactory::Instance().create(outputWS);
+    ws_sumOfCounts->setSharedX(0, outputWS->sharedX(0));
+    // Copy now as YOut is modified in normalize
+    ws_sumOfCounts->mutableY(0) = YOut;
+    ws_sumOfCounts->setSharedDx(0, outputWS->sharedDx(0));
+    ws_sumOfCounts->setFrequencyVariances(0, outputWS->e(0));
 
-      ws_sumOfNormFactors = WorkspaceFactory::Instance().create(outputWS);
-      ws_sumOfNormFactors->setSharedX(0, outputWS->sharedX(0));
-      ws_sumOfNormFactors->mutableY(0) = normSum;
-      ws_sumOfNormFactors->setSharedDx(0, outputWS->sharedDx(0));
-      ws_sumOfNormFactors->setFrequencyVariances(0, normError2);
-    } else {
-      ws_sumOfCounts =
-          Kernel::make_unique<Workspace2D>(Parallel::StorageMode::MasterOnly);
-      ws_sumOfNormFactors =
-          Kernel::make_unique<Workspace2D>(Parallel::StorageMode::MasterOnly);
-    }
+    MatrixWorkspace_sptr ws_sumOfNormFactors =
+        WorkspaceFactory::Instance().create(outputWS);
+    ws_sumOfNormFactors->setSharedX(0, outputWS->sharedX(0));
+    ws_sumOfNormFactors->mutableY(0) = normSum;
+    ws_sumOfNormFactors->setSharedDx(0, outputWS->sharedDx(0));
+    ws_sumOfNormFactors->setFrequencyVariances(0, normError2);
+
     helper.outputParts(this, ws_sumOfCounts, ws_sumOfNormFactors);
+  } else if (doOutputParts) {
+    helper.outputParts(this, nullptr, nullptr);
   }
 
   progress.report("Normalizing I(Q)");
@@ -731,11 +723,12 @@ void checkStorageMode(
 
 Parallel::ExecutionMode Q1D2::getParallelExecutionMode(
     const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  checkStorageMode(storageModes, "PixelAdj");
+  if (storageModes.count("PixelAdj") || storageModes.count("WavePixelAdj") ||
+      storageModes.count("QResolution"))
+    throw std::runtime_error(
+        "Using in PixelAdj, WavePixelAdj, or QResolution in an MPI run of " +
+        name() + " is currently not supported.");
   checkStorageMode(storageModes, "WavelengthAdj");
-  checkStorageMode(storageModes, "WavePixelAdj");
-  checkStorageMode(storageModes, "QResolution");
-
   return Parallel::getCorrespondingExecutionMode(
       storageModes.at("DetBankWorkspace"));
 }

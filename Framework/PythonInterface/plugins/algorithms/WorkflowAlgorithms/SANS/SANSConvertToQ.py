@@ -81,7 +81,8 @@ class SANSConvertToQ(DistributedDataProcessorAlgorithm):
         # Set the output
         append_to_sans_file_tag(output_workspace, "_convertq")
         self.setProperty("OutputWorkspace", output_workspace)
-        if sum_of_counts_workspace and sum_of_norms_workspace:
+        output_parts = self.getProperty("OutputParts").value
+        if output_parts:
             self._set_partial_workspaces(sum_of_counts_workspace, sum_of_norms_workspace)
 
     def _run_q_1d(self, state):
