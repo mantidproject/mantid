@@ -184,10 +184,12 @@ MantidTreeModel::getWorkspace(const QString &workspaceName) {
 // In the case of functions that return, they return nullptr
 
 void MantidTreeModel::updateRecentFilesList(
-    const QString &fname) { /*Not require until tool bar is created*/
+	const QString &fname) { /*Not require until tool bar is created*/
+	Q_UNUSED(fname);
 }
 void MantidTreeModel::enableSaveNexus(
     const QString &wsName) { /*handled by widget*/
+	Q_UNUSED(wsName);
 }
 void MantidTreeModel::disableSaveNexus() { /* handled by widget*/
 }
@@ -197,9 +199,11 @@ void MantidTreeModel::showSpectrumViewer() {}
 void MantidTreeModel::showSliceViewer() {}
 void MantidTreeModel::showAlgorithmHistory() {}
 void MantidTreeModel::showMDPlot() {}
-QWidget *MantidTreeModel::getParent() { return nullptr; }
+QWidget *MantidTreeModel::getParent() { return new QWidget(nullptr); }
 void MantidTreeModel::updateProject() {}
-void MantidTreeModel::showCritical(const QString &) {}
+void MantidTreeModel::showCritical(const QString &msg) {
+	Q_UNUSED(msg);
+}
 void MantidTreeModel::showMantidInstrumentSelected() {}
 void MantidTreeModel::importBoxDataTable() {}
 void MantidTreeModel::showListData() {}
@@ -207,21 +211,34 @@ void MantidTreeModel::importTransposed() {}
 void MantidTreeModel::showLogFileWindow() {}
 void MantidTreeModel::showSampleMaterialWindow() {}
 void MantidTreeModel::importWorkspace() {}
-bool MantidTreeModel::doesVatesSupportOpenGL() { return nullptr; }
+#ifdef MAKE_VATES
+bool MantidTreeModel::doesVatesSupportOpenGL() { return false; }
+#endif
 
 MantidMatrix *MantidTreeModel::importMatrixWorkspace(
     const Mantid::API::MatrixWorkspace_sptr workspace, int lower, int upper,
     bool showDlg) {
-  return nullptr;
+	Q_UNUSED(workspace);
+	Q_UNUSED(lower);
+	Q_UNUSED(upper);
+	Q_UNUSED(showDlg);
+	return nullptr;
 }
 
 void MantidTreeModel::importWorkspace(const QString &wsName, bool showDlg,
-                                      bool makeVisible) {}
+                                      bool makeVisible) {
+	Q_UNUSED(wsName);
+	Q_UNUSED(showDlg);
+	Q_UNUSED(makeVisible);
+}
 
 Table *MantidTreeModel::createDetectorTable(const QString &wsName,
                                             const std::vector<int> &indices,
                                             bool include_data) {
-  return nullptr;
+	Q_UNUSED(wsName);
+	Q_UNUSED(indices);
+	Q_UNUSED(include_data);
+    return nullptr;
 }
 
 MultiLayer *
@@ -230,16 +247,33 @@ MantidTreeModel::plot1D(const QMultiMap<QString, std::set<int>> &toPlot,
                         bool errs, MultiLayer *plotWindow, bool clearWindow,
                         bool waterfallPlot, const QString &log,
                         const std::set<double> &customLogValues) {
+	Q_UNUSED(toPlot);
+	Q_UNUSED(spectrumPlot);
+	Q_UNUSED(distr);
+	Q_UNUSED(errs);
+	Q_UNUSED(plotWindow);
+	Q_UNUSED(clearWindow);
+	Q_UNUSED(waterfallPlot);
+	Q_UNUSED(log);
+	Q_UNUSED(customLogValues);
   return nullptr;
 }
 
 void MantidTreeModel::drawColorFillPlots(const QStringList &wsNames,
-                                         GraphOptions::CurveType curveType) {}
+                                         GraphOptions::CurveType curveType) {
+	Q_UNUSED(wsNames);
+	Q_UNUSED(curveType);
+}
 
 MultiLayer *
 MantidTreeModel::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
                               MantidQt::DistributionFlag distr, bool errs,
                               MultiLayer *plotWindow) {
+	Q_UNUSED(toPlot);
+	Q_UNUSED(distr);
+	Q_UNUSED(errs);
+	Q_UNUSED(plotWindow);
+
   return nullptr;
 }
 
@@ -247,13 +281,27 @@ void MantidTreeModel::plotSurface(bool accepted, int plotIndex,
                                   const QString &axisName,
                                   const QString &logName,
                                   const std::set<double> &customLogValues,
-                                  const QList<QString> &workspaceNames) {}
+                                  const QList<QString> &workspaceNames) {
+	Q_UNUSED(accepted);
+	Q_UNUSED(plotIndex);
+	Q_UNUSED(axisName);
+	Q_UNUSED(logName);
+	Q_UNUSED(customLogValues);
+	Q_UNUSED(workspaceNames);
+}
 
 void MantidTreeModel::plotContour(bool accepted, int plotIndex,
                                   const QString &axisName,
                                   const QString &logName,
                                   const std::set<double> &customLogValues,
-                                  const QList<QString> &workspaceNames) {}
+                                  const QList<QString> &workspaceNames) {
+	Q_UNUSED(accepted);
+	Q_UNUSED(plotIndex);
+	Q_UNUSED(axisName);
+	Q_UNUSED(logName);
+	Q_UNUSED(customLogValues);
+	Q_UNUSED(workspaceNames);
+}
 
 MantidQt::MantidWidgets::MantidWSIndexDialog *
 MantidTreeModel::createWorkspaceIndexDialog(int flags,
@@ -261,5 +309,12 @@ MantidTreeModel::createWorkspaceIndexDialog(int flags,
                                             bool showWaterfall,
                                             bool showPlotAll, bool showTiledOpt,
                                             bool isAdvanced) {
-  return nullptr;
+	Q_UNUSED(flags);
+	Q_UNUSED(wsNames);
+	Q_UNUSED(showWaterfall);
+	Q_UNUSED(showPlotAll);
+	Q_UNUSED(showTiledOpt);
+	Q_UNUSED(isAdvanced);
+	// Return empty MantidWSIndexDialog
+  return new MantidWSIndexDialog(nullptr, Qt::WindowFlags(), QList<QString>());
 }

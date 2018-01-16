@@ -145,7 +145,6 @@ public slots:
   void showLogFileWindow() override;
   void showSampleMaterialWindow() override;
   void showAlgorithmHistory() override;
-  bool doesVatesSupportOpenGL() override;
 
   MantidQt::MantidWidgets::MantidWSIndexDialog *createWorkspaceIndexDialog(
       int flags, const QStringList &wsNames, bool showWaterfall,
@@ -153,6 +152,11 @@ public slots:
 
   void updateProject() override;
   void showCritical(const QString &) override;
+
+#ifdef MAKE_VATES
+  bool doesVatesSupportOpenGL() override;
+#endif
+
 
 private:
   // overide copy operations
