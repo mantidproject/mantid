@@ -45,7 +45,7 @@ public:
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     const double yVal = 2.3;
-    Counts counts{yVal, yVal, yVal};
+    Counts counts{yVal, 4.2 * yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr ws01 = ws00->clone();
     MatrixWorkspace_sptr ws10 = ws00->clone();
@@ -88,9 +88,10 @@ public:
         const auto &es = ws->e(j);
         TS_ASSERT_EQUALS(ys.size(), nBins)
         for (size_t k = 0; k != nBins; ++k) {
+          const double y = counts[k];
           TS_ASSERT_EQUALS(xs[k], edges[k])
-          TS_ASSERT_EQUALS(ys[k], yVal * static_cast<double>(i + 1))
-          TS_ASSERT_EQUALS(es[k], std::sqrt(yVal) * static_cast<double>(i + 1))
+          TS_ASSERT_EQUALS(ys[k], y * static_cast<double>(i + 1))
+          TS_ASSERT_EQUALS(es[k], std::sqrt(y) * static_cast<double>(i + 1))
         }
       }
     }
@@ -113,7 +114,7 @@ public:
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     const double yVal = 2.3;
-    Counts counts{yVal, yVal, yVal};
+    Counts counts{yVal, 4.2 * yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr ws11 = ws00->clone();
     WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
@@ -145,24 +146,6 @@ public:
       const std::string wsName = m_outputWSName + std::string("_") + dir;
       MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
-      const double expected = [yVal, &dir]() {
-        if (dir == "++") {
-          return yVal;
-        } else if (dir == "--") {
-          return 2. * yVal;
-        } else {
-          return 0.;
-        }
-      }();
-      const double expectedError = [yVal, &dir]() {
-        if (dir == "++") {
-          return std::sqrt(yVal);
-        } else if (dir == "--") {
-          return 2. * std::sqrt(yVal);
-        } else {
-            return 0.;
-        }
-      }();
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
       for (size_t j = 0; j != nHist; ++j) {
         const auto &xs = ws->x(j);
@@ -170,6 +153,25 @@ public:
         const auto &es = ws->e(j);
         TS_ASSERT_EQUALS(ys.size(), nBins)
         for (size_t k = 0; k != nBins; ++k) {
+          const double y = counts[k];
+          const double expected = [y, &dir]() {
+            if (dir == "++") {
+              return y;
+            } else if (dir == "--") {
+              return 2. * y;
+            } else {
+              return 0.;
+            }
+          }();
+          const double expectedError = [y, &dir]() {
+            if (dir == "++") {
+              return std::sqrt(y);
+            } else if (dir == "--") {
+              return 2. * std::sqrt(y);
+            } else {
+                return 0.;
+            }
+          }();
           TS_ASSERT_EQUALS(xs[k], edges[k])
           TS_ASSERT_EQUALS(ys[k], expected)
           TS_ASSERT_EQUALS(es[k], expectedError)
@@ -243,7 +245,7 @@ public:
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     const double yVal = 2.3;
-    Counts counts{yVal, yVal, yVal};
+    Counts counts{yVal, 4.2 * yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
     inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
@@ -271,9 +273,10 @@ public:
       const auto &es = ws->e(i);
       TS_ASSERT_EQUALS(ys.size(), nBins)
       for (size_t j = 0; j != nBins; ++j) {
+        const double y = counts[j];
         TS_ASSERT_EQUALS(xs[j], edges[j])
-        TS_ASSERT_EQUALS(ys[j], yVal)
-        TS_ASSERT_EQUALS(es[j], std::sqrt(yVal))
+        TS_ASSERT_EQUALS(ys[j], y)
+        TS_ASSERT_EQUALS(es[j], std::sqrt(y))
       }
     }
   }
@@ -737,7 +740,7 @@ private:
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     const double yVal = 2.3;
-    Counts counts{yVal, yVal, yVal};
+    Counts counts{yVal, 4.2 * yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr wsXX = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
@@ -776,29 +779,6 @@ private:
       const std::string wsName = OUTWS_NAME + std::string("_") + dir;
       MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
-      const double expected = [yVal, &dir]() {
-        if (dir == "++") {
-          return yVal;
-        } else if (dir == "--") {
-          return 3. * yVal;
-        } else {
-          return 2. * yVal;
-        }
-      }();
-      const double expectedError = [yVal, &dir, &missingFlipperConf]() {
-        if (dir == "++") {
-          return std::sqrt(yVal);
-        } else if (dir == "--") {
-          return 3. * std::sqrt(yVal);
-        } else {
-          std::string conf = std::string(dir.front() == '+' ? "0" : "1") + std::string(dir.back() == '+' ? "0" : "1");
-          if (conf != missingFlipperConf) {
-            return 2. * std::sqrt(yVal);
-          } else {
-            return 0.;
-          }
-        }
-      }();
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
       for (size_t j = 0; j != nHist; ++j) {
         const auto &xs = ws->x(j);
@@ -806,6 +786,30 @@ private:
         const auto &es = ws->e(j);
         TS_ASSERT_EQUALS(ys.size(), nBins)
         for (size_t k = 0; k != nBins; ++k) {
+          const double y = counts[k];
+          const double expected = [y, &dir]() {
+            if (dir == "++") {
+              return y;
+            } else if (dir == "--") {
+              return 3. * y;
+            } else {
+              return 2. * y;
+            }
+          }();
+          const double expectedError = [y, &dir, &missingFlipperConf]() {
+            if (dir == "++") {
+              return std::sqrt(y);
+            } else if (dir == "--") {
+              return 3. * std::sqrt(y);
+            } else {
+              std::string conf = std::string(dir.front() == '+' ? "0" : "1") + std::string(dir.back() == '+' ? "0" : "1");
+              if (conf != missingFlipperConf) {
+                return 2. * std::sqrt(y);
+              } else {
+                return 0.;
+              }
+            }
+          }();
           TS_ASSERT_EQUALS(xs[k], edges[k])
           TS_ASSERT_EQUALS(ys[k], expected)
           TS_ASSERT_EQUALS(es[k], expectedError)
