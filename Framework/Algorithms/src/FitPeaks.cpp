@@ -900,15 +900,15 @@ void FitPeaks::ProcessSinglePeakFitResult(
   } else {
     // user explicitly specified
     if (peakindex >= m_peakPosTolerances.size())
-        throw std::runtime_error("Peak tolerance out of index");
+      throw std::runtime_error("Peak tolerance out of index");
     postol = m_peakPosTolerances[peakindex];
   }
 
   // get peak position and analyze the fitting is good or not by various
   // criteria
   double peak_pos = peakfunction->centre();
-  g_log.notice() << "[DB...Report] Fitted Peak function: , height = " << peakfunction->height()
-                 << " position = " << peak_pos
+  g_log.notice() << "[DB...Report] Fitted Peak function: , height = "
+                 << peakfunction->height() << " position = " << peak_pos
                  << " of position tolerance case234 = " << m_peakPosTolCase234
                  << ", tolerance case23 = " << case23 << "\n";
   bool good_fit(false);
@@ -928,8 +928,10 @@ void FitPeaks::ProcessSinglePeakFitResult(
       if (peak_pos < fitwindow.first || peak_pos > fitwindow.second) {
         // peak is out of fit window
         peak_pos = -2;
-        g_log.notice() << "[DB...INFO] Peak position " << peak_pos << " is out of fit "
-                       << "window boundary " << fitwindow.first << ", " << fitwindow.second << "\n";
+        g_log.notice() << "[DB...INFO] Peak position " << peak_pos
+                       << " is out of fit "
+                       << "window boundary " << fitwindow.first << ", "
+                       << fitwindow.second << "\n";
       } else
         good_fit = true;
     } else {
@@ -958,7 +960,9 @@ void FitPeaks::ProcessSinglePeakFitResult(
              postol) {
     // peak center is not within tolerance
     peak_pos = -5;
-    g_log.notice() << "[DB...INFO] position difference " << fabs(peakfunction->centre() - expected_peak_positions[peakindex])
+    g_log.notice() << "[DB...INFO] position difference "
+                   << fabs(peakfunction->centre() -
+                           expected_peak_positions[peakindex])
                    << " is out of tolerance: " << postol << "\n";
   } else {
     // all criteria are passed
@@ -1923,7 +1927,8 @@ std::pair<double, double> FitPeaks::GetPeakFitWindow(size_t wi, size_t ipeak) {
     left = peak_pos - estimate_peak_width * MAGIC;
     right = peak_pos + estimate_peak_width * MAGIC;
 
-    g_log.notice() << "[DB] Expected = " << peak_pos << ": estimated peak window = " << left << ", " << right
+    g_log.notice() << "[DB] Expected = " << peak_pos
+                   << ": estimated peak window = " << left << ", " << right
                    << " with estimated peak width " << estimate_peak_width
                    << "\n";
   } else if (m_uniformPeakWindows) {
@@ -2107,12 +2112,14 @@ void FitPeaks::ReduceBackground(const std::vector<double> &vec_x,
     if (min_area > DBL_MAX - 1)
       throw std::runtime_error("It is impossible not to find any background");
 
-    // FIXME TODO ASAP : give apparent wront values to min_bkgd_a/b and check here!
+    // FIXME TODO ASAP : give apparent wront values to min_bkgd_a/b and check
+    // here!
     *a1 = min_bkgd_a;
     *a0 = min_bkgd_b;
   }
 
-  g_log.notice() << "[DB...Reduce Background] a0 = " << *a0 << ", a1 = " << *a1 << "\n";
+  g_log.notice() << "[DB...Reduce Background] a0 = " << *a0 << ", a1 = " << *a1
+                 << "\n";
 
   // Reduce the background from the calculated background
   for (size_t i = 0; i < vec_y->size(); ++i) {
@@ -2396,16 +2403,19 @@ void FitPeaks::writeFitResult(size_t wi,
 
   // convert to
   size_t out_wi = wi - m_startWorkspaceIndex;
-  if (out_wi >= output_peak_position_workspace_->getNumberHistograms())
-  {
-    g_log.error() << "workspace index " << wi << " is out of output peak position workspace "
-                  << "range of spectra, which contains " << output_peak_position_workspace_->getNumberHistograms()
-                  << " spectra" << "\n";
-    throw std::runtime_error("Out of boundary to set output peak position workspace");
+  if (out_wi >= output_peak_position_workspace_->getNumberHistograms()) {
+    g_log.error() << "workspace index " << wi
+                  << " is out of output peak position workspace "
+                  << "range of spectra, which contains "
+                  << output_peak_position_workspace_->getNumberHistograms()
+                  << " spectra"
+                  << "\n";
+    throw std::runtime_error(
+        "Out of boundary to set output peak position workspace");
   }
 
   // Fill the output peak position workspace
-  for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {  
+  for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
     double exp_peak_pos(expected_positions[ipeak]);
     double fitted_peak_pos(-1); // default for no event or no signal
     double peak_chi2(-1E20);    // use negative number for NO fit
