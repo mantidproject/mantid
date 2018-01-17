@@ -46,13 +46,14 @@ public:
   bool loadFocusedRun(const std::string &filename) override;
 
 protected:
-  /**
-   Get whether a focused run has been loaded with a given runNumber and bank ID.
-   Used for testing - exposed by the dummy class in EnggDiffGSASFittingModelTest
-   @param runNumber The run number to check for
-   @param bank The bank to check for
-   @return Whether the model contains a focused run with these parameters
-   */
+  // Test helpers, exposed via dummy class in EnggDiffGSASFittingModelTest
+
+  /// Add a workspace to the focused workspace map
+  void addFocusedRun(const int runNumber, const size_t bank,
+                     Mantid::API::MatrixWorkspace_sptr ws);
+
+  /// Get whether a focused run has been loaded with a given runNumber and bank
+  /// ID.
   bool hasFocusedRun(const int runNumber, const size_t bank) const;
 
 private:

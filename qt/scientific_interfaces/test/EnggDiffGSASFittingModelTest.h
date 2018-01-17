@@ -4,9 +4,11 @@
 #include "../EnggDiffraction/EnggDiffGSASFittingModel.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <cxxtest/TestSuite.h>
 
+using namespace Mantid;
 using namespace MantidQt::CustomInterfaces;
 
 namespace { // Helpers
@@ -15,11 +17,20 @@ namespace { // Helpers
 class TestEnggDiffGSASFittingModel : public EnggDiffGSASFittingModel {
 public:
   bool containsFocusedRun(const int runNumber, const size_t bank) const;
+
+  void addFocusedWorkspace(const int runNumber, const size_t bank,
+                           Mantid::API::MatrixWorkspace_sptr);
 };
 
-bool TestEnggDiffGSASFittingModel::containsFocusedRun(const int runNumber,
-                                                      const size_t bank) const {
+inline bool
+TestEnggDiffGSASFittingModel::containsFocusedRun(const int runNumber,
+                                                 const size_t bank) const {
   return hasFocusedRun(runNumber, bank);
+}
+
+inline void TestEnggDiffGSASFittingModel::addFocusedWorkspace(
+    const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
+  addFocusedRun(runNumber, bank, ws);
 }
 
 } // Anonymous namespace
@@ -35,7 +46,7 @@ public:
     delete suite;
   }
 
-  EnggDiffGSASFittingModelTest() { Mantid::API::FrameworkManager::Instance(); }
+  EnggDiffGSASFittingModelTest() { API::FrameworkManager::Instance(); }
 
   void test_validLoadRun() {
     const static std::string inputFilename = "ENGINX_277208_focused_bank_2.nxs";
@@ -46,6 +57,29 @@ public:
     TS_ASSERT(success);
 
     TS_ASSERT(model.containsFocusedRun(277208, 2));
+  }
+
+  void test_invalidLoadRun() {
+    const static std::string inputFilename = "ENGINX_277209_focused_bank_2.nxs";
+    TestEnggDiffGSASFittingModel model;
+
+    bool success = false;
+    TS_ASSERT_THROWS_NOTHING(success = model.loadFocusedRun(inputFilename));
+    TS_ASSERT(!success);
+  }
+
+  void test_getFocusedRun() {
+    TestEnggDiffGSASFittingModel model;
+
+    API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+
+    model.addFocusedWorkspace(123, 1, ws);
+
+    boost::optional<API::MatrixWorkspace_sptr> retrievedWS;
+    TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFocusedWorkspace(123, 1));
+    TS_ASSERT(retrievedWS);
+    TS_ASSERT_EQUALS(ws, *retrievedWS);
   }
 };
 

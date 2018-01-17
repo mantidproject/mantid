@@ -33,6 +33,12 @@ size_t getBankID(API::MatrixWorkspace_const_sptr ws) {
 namespace MantidQt {
 namespace CustomInterfaces {
 
+void EnggDiffGSASFittingModel::addFocusedRun(
+    const int runNumber, const size_t bank,
+    Mantid::API::MatrixWorkspace_sptr ws) {
+  m_focusedWorkspaceMap.add(runNumber, bank, ws);
+}
+
 bool EnggDiffGSASFittingModel::doPawleyRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
@@ -57,7 +63,10 @@ EnggDiffGSASFittingModel::getFittedPeaks(const int runNumber,
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
 EnggDiffGSASFittingModel::getFocusedWorkspace(const int runNumber,
                                               const size_t bank) const {
-  throw std::runtime_error("Not yet implemented");
+  if (m_focusedWorkspaceMap.contains(runNumber, bank)) {
+    return m_focusedWorkspaceMap.get(runNumber, bank);
+  }
+  return boost::none;
 }
 
 boost::optional<Mantid::API::ITableWorkspace_sptr>
