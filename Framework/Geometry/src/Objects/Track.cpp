@@ -202,14 +202,14 @@ void Track::buildLink() {
       }
       workPt = bc->endPoint;
 
-      // ADDING to ac twice: since processing pairs
+      // incrementing ac twice: since processing pairs
       ++ac;
       ++ac;
       ++bc; // can I do this past the end ?
       if (bc != m_surfPoints.end()) {
         ++bc;
       }
-    } else // Test for glacing point / or void edges
+    } else // Test for glancing point / or void edges
     {      // These all can be skipped
       ++ac;
       ++bc;
