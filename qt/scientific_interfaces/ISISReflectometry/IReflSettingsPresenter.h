@@ -50,9 +50,15 @@ public:
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
 
+<<<<<<< HEAD
   virtual void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) = 0;
 
   enum Flag { ExpDefaultsFlag, InstDefaultsFlag, SettingsChangedFlag };
+||||||| merged common ancestors
+  enum Flag { ExpDefaultsFlag, InstDefaultsFlag };
+=======
+  enum Flag { ExpDefaultsFlag, InstDefaultsFlag, SummationTypeChanged };
+>>>>>>> 21353_expose_the_q_summation_functionality_on_the_settings_tab
 
   /// Tell the presenter something happened
   virtual void notify(IReflSettingsPresenter::Flag flag) = 0;

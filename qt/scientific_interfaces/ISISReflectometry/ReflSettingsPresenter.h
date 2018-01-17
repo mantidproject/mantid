@@ -6,7 +6,9 @@
 #include "IReflSettingsTabPresenter.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include <vector>
+#include <initializer_list>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -68,10 +70,25 @@ private:
   void getExpDefaults();
   void getInstDefaults();
   void handleSettingsChanged();
+  bool hasReductionTypes(const std::string &reductionType) const;
+  void handleSummationTypeChange();
   static QString asAlgorithmPropertyBool(bool value);
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
+  MantidWidgets::DataProcessor::OptionsQMap transmissionOptionsMap() const;
+  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
+                     const QString &key, const QString &value) const;
+  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
+                     const QString &key, const std::string &value) const;
+  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options,
+                             const QString &key, const QString &value) const;
+  void setTransmissionOption(MantidWidgets::DataProcessor::OptionsQMap &options,
+                             const QString &key,
+                             const std::string &value) const;
+  void
+  addTransmissionOptions(MantidWidgets::DataProcessor::OptionsQMap &options,
+                         std::initializer_list<QString> keys) const;
 
   /// The view we are managing
   IReflSettingsView *m_view;

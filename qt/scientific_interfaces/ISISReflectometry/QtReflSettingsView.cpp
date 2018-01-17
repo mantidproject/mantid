@@ -1,6 +1,7 @@
 #include "QtReflSettingsView.h"
 #include "ReflSettingsPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include "MantidKernel/System.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -38,6 +39,8 @@ void QtReflSettingsView::initLayout() {
           SLOT(requestInstDefaults()));
   connect(m_ui.expSettingsGroup, SIGNAL(clicked(bool)), this,
           SLOT(setPolarisationOptionsEnabled(bool)));
+  connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(summationTypeChanged(int)));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
 
@@ -80,6 +83,8 @@ void QtReflSettingsView::connectInstrumentSettingsChangeListeners() {
   connectSettingsChange(m_ui.procInstEdit);
   connectSettingsChange(m_ui.detectorCorrectionTypeComboBox);
   connectSettingsChange(m_ui.correctDetectorsCheckBox);
+  connectSettingsChange(m_ui.reductionTypeComboBox);
+  connectSettingsChange(m_ui.summationTypeComboBox);
 }
 
 void QtReflSettingsView::connectExperimentSettingsChangeListeners() {
@@ -99,6 +104,15 @@ void QtReflSettingsView::connectExperimentSettingsChangeListeners() {
 
 void QtReflSettingsView::notifySettingsChanged() {
   m_presenter->notify(IReflSettingsPresenter::SettingsChangedFlag);
+}
+
+void QtReflSettingsView::summationTypeChanged(int reductionTypeIndex) {
+  UNUSED_ARG(reductionTypeIndex);
+  m_presenter->notify(IReflSettingsPresenter::Flag::SummationTypeChanged);
+}
+
+void QtReflSettingsView::setReductionTypeEnabled(bool enable) {
+  m_ui.reductionTypeComboBox->setEnabled(enable);
 }
 
 /** Returns the presenter managing this view
@@ -164,7 +178,6 @@ void QtReflSettingsView::setInstDefaults(
   auto intMonCheckState =
       (defaults_double[0] != 0) ? Qt::Checked : Qt::Unchecked;
   m_ui.intMonCheckBox->setCheckState(intMonCheckState);
-
   m_ui.monIntMinEdit->setText(QString::number(defaults_double[1]));
   m_ui.monIntMaxEdit->setText(QString::number(defaults_double[2]));
   m_ui.monBgMinEdit->setText(QString::number(defaults_double[3]));
@@ -387,6 +400,14 @@ std::string QtReflSettingsView::getI0MonitorIndex() const {
 std::string QtReflSettingsView::getProcessingInstructions() const {
 
   return m_ui.procInstEdit->text().toStdString();
+}
+
+std::string QtReflSettingsView::getReductionType() const {
+  return m_ui.reductionTypeComboBox->currentText().toStdString();
+}
+
+std::string QtReflSettingsView::getSummationType() const {
+  return m_ui.summationTypeComboBox->currentText().toStdString();
 }
 
 /** Return selected correction type
