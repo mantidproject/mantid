@@ -55,12 +55,82 @@ void EnggDiffGSASFittingModel::addRwp(const int runNumber, const size_t bank,
   m_rwpMap.add(runNumber, bank, rwp);
 }
 
+namespace {
+
+std::string generateFittedPeaksWSName(const int runNumber, const size_t bank) {
+  return std::to_string(runNumber) + "_" + std::to_string(bank) +
+         "_gsasii_fitted_peaks";
+}
+
+std::string generateLatticeParamsName(const int runNumber, const size_t bank) {
+  return std::to_string(runNumber) + "_" + std::to_string(bank) +
+         "_lattice_params";
+}
+}
+
 bool EnggDiffGSASFittingModel::doPawleyRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile, const double dMin,
     const double negativeWeight) {
-  throw std::runtime_error("Not yet implemented");
+  const auto inputWS = getFocusedWorkspace(runNumber, bank);
+  if (!inputWS) {
+    return false;
+  }
+  const auto outputWSName = generateFittedPeaksWSName(runNumber, bank);
+  const auto latticeParamsName = generateLatticeParamsName(runNumber, bank);
+
+  const auto rwp = doGSASRefinementAlgorithm(
+      *inputWS, outputWSName, latticeParamsName, "Pawley refinement",
+      instParamFile, phaseFiles, pathToGSASII, GSASIIProjectFile, dMin,
+      negativeWeight);
+
+  if (!rwp) {
+    return false;
+  }
+
+  addRwp(runNumber, bank, *rwp);
+
+  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
+  const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
+  addFittedPeaks(runNumber, bank, fittedPeaks);
+
+  const auto latticeParams =
+      ADS.retrieveWS<API::ITableWorkspace>(latticeParamsName);
+  addLatticeParams(runNumber, bank, latticeParams);
+
+  return true;
+}
+
+boost::optional<double> EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
+    API::MatrixWorkspace_sptr inputWorkspace,
+    const std::string &outputWorkspaceName,
+    const std::string &latticeParamsName, const std::string &refinementMethod,
+    const std::string &instParamFile,
+    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
+    const std::string &GSASIIProjectFile, const double dMin,
+    const double negativeWeight) {
+  double rwp = -1;
+  try {
+    auto gsasAlg =
+        API::AlgorithmManager::Instance().create("GSASIIRefineFitPeaks");
+    gsasAlg->setProperty("RefinementMethod", refinementMethod);
+    gsasAlg->setProperty("InputWorkspace", inputWorkspace);
+    gsasAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+    gsasAlg->setProperty("LatticeParameters", latticeParamsName);
+    gsasAlg->setProperty("InstrumentFile", instParamFile);
+    gsasAlg->setProperty("PhaseInfoFiles", phaseFiles);
+    gsasAlg->setProperty("PathToGSASII", pathToGSASII);
+    gsasAlg->setProperty("SaveGSASIIProjectFile", GSASIIProjectFile);
+    gsasAlg->setProperty("PawleyDMin", dMin);
+    gsasAlg->setProperty("PawleyNegativeWeight", negativeWeight);
+    gsasAlg->execute();
+
+    rwp = gsasAlg->getProperty("Rwp");
+  } catch (const std::exception &e) {
+    return boost::none;
+  }
+  return rwp;
 }
 
 bool EnggDiffGSASFittingModel::doRietveldRefinement(

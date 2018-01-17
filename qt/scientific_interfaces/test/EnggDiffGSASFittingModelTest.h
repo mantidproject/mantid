@@ -3,9 +3,11 @@
 
 #include "../EnggDiffraction/EnggDiffGSASFittingModel.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -46,6 +48,16 @@ public:
                             API::ITableWorkspace_sptr table);
 
   void addRwpValue(const int runNumber, const size_t bank, const double rwp);
+
+private:
+inline boost::optional<double> doGSASRefinementAlgorithm(
+      API::MatrixWorkspace_sptr inputWorkspace,
+      const std::string &outputWorkspaceName,
+      const std::string &latticeParamsName, const std::string &refinementMethod,
+      const std::string &instParamFile,
+      const std::vector<std::string> &phaseFiles,
+      const std::string &pathToGSASII, const std::string &GSASIIProjectFile,
+      const double dMin, const double negativeWeight) override;
 };
 
 inline void TestEnggDiffGSASFittingModel::addFittedPeaksWS(
@@ -73,6 +85,32 @@ inline bool
 TestEnggDiffGSASFittingModel::containsFocusedRun(const int runNumber,
                                                  const size_t bank) const {
   return hasFocusedRun(runNumber, bank);
+}
+
+inline boost::optional<double>
+TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
+    API::MatrixWorkspace_sptr inputWorkspace,
+    const std::string &outputWorkspaceName,
+    const std::string &latticeParamsName, const std::string &refinementMethod,
+    const std::string &instParamFile,
+    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
+    const std::string &GSASIIProjectFile, const double dMin,
+    const double negativeWeight) {
+  // Mock method - just create some dummy output and ignore all the parameters
+  const static std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
+  const static std::array<std::array<double, 3>, 1> targetTableValues = {
+      {{1, 2, 3}}};
+  const auto latticeParams =
+      createDummyTable(columnHeadings, targetTableValues);
+
+  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
+  ADS.add(latticeParamsName, latticeParams);
+
+  API::MatrixWorkspace_sptr ws =
+      WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
+  ADS.add(outputWorkspaceName, ws);
+
+  return 75;
 }
 
 } // Anonymous namespace
@@ -219,6 +257,32 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(retrievedTable = model.getLatticeParams(456, 2));
     TS_ASSERT_EQUALS(retrievedTable, boost::none);
+  }
+
+  void test_pawleyRefinement() {
+    // Note: due to the reliance on GSAS-II, this cannot test that the algorithm
+    // is used properly. It tests that, given that the algorithm is used
+    // properly, results are added to the appropriate maps in the model
+    TestEnggDiffGSASFittingModel model;
+
+    API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+    model.addFocusedWorkspace(123, 1, ws);
+
+    bool success = false;
+    TS_ASSERT_THROWS_NOTHING(
+        success = model.doPawleyRefinement(
+            123, 1, "", std::vector<std::string>({}), "", "", 0, 0));
+    TS_ASSERT(success);
+
+    const auto rwp = model.getRwp(123, 1);
+    TS_ASSERT(rwp);
+
+    const auto fittedPeaks = model.getFittedPeaks(123, 1);
+    TS_ASSERT(fittedPeaks);
+
+    const auto latticeParams = model.getLatticeParams(123, 1);
+    TS_ASSERT(latticeParams);
   }
 };
 
