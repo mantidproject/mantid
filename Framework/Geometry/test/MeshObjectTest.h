@@ -738,7 +738,7 @@ public:
 
   void testVolumeOfOctahedron() {
     auto geom_obj = createOctahedron();
-    TS_ASSERT_DELTA(geom_obj->volume(), 4.0/3.0, 1e-6)
+    TS_ASSERT_DELTA(geom_obj->volume(), 4.0/3.0, 1e-3)
   }
 
   void testVolumeOfLShape() {
@@ -852,13 +852,16 @@ private:
     /**
     * Create octahedron with vertices on the axes at -1 & +1.
     */
+    // The octahedron is made slightly bigger than this to
+    // ensure interior points are not rounded to be outside
+    double u = 1.0000000001;
     std::vector<V3D> vertices;
-    vertices.push_back(V3D(1, 0, 0));
-    vertices.push_back(V3D(0, 1, 0));
-    vertices.push_back(V3D(0, 0, 1));
-    vertices.push_back(V3D(-1, 0, 0));
-    vertices.push_back(V3D(0, -1, 0));
-    vertices.push_back(V3D(0, 0, -1));
+    vertices.push_back(V3D(u, 0, 0));
+    vertices.push_back(V3D(0, u, 0));
+    vertices.push_back(V3D(0, 0, u));
+    vertices.push_back(V3D(-u, 0, 0));
+    vertices.push_back(V3D(0, -u, 0));
+    vertices.push_back(V3D(0, 0, -u));
 
     std::vector<int> triangles;
     // +++ face
