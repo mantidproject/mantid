@@ -801,9 +801,10 @@ void FitPeaks::fitSpectrumPeaks(
         DecideToEstimatePeakWidth(peak_index, peakfunction);
 
     // do fitting with peak and background function (no analysis at this point)
-    double cost = FitIndividualPeak(wi, peak_fitter, bkgd_fitter, expected_peak_centers[peak_index], peak_window_i,
-                                    m_highBackground, observe_peak_width,
-                                    peakfunction, bkgdfunction);
+    double cost = FitIndividualPeak(
+        wi, peak_fitter, bkgd_fitter, expected_peak_centers[peak_index],
+        peak_window_i, m_highBackground, observe_peak_width, peakfunction,
+        bkgdfunction);
 
     // process fitting result
     ProcessSinglePeakFitResult(
@@ -1482,9 +1483,9 @@ double FitPeaks::FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
 
   if (high) {
     // fit peak with high background!
-    cost =
-        FitFunctionHighBackground(fitter, bkgd_fitter, fitwindow, wi, expected_peak_center,
-                                  peakfunction, bkgdfunc, observe_peak_width);
+    cost = FitFunctionHighBackground(fitter, bkgd_fitter, fitwindow, wi,
+                                     expected_peak_center, peakfunction,
+                                     bkgdfunc, observe_peak_width);
   } else {
     // fit peak and background
     cost = FitFunctionSD(fitter, peakfunction, bkgdfunc, m_inputMatrixWS, wi,
@@ -1668,11 +1669,11 @@ double FitPeaks::FitFunctionMD(
 double FitPeaks::FitFunctionHighBackground(
     IAlgorithm_sptr fit, API::IAlgorithm_sptr bkgd_fitter,
     const std::pair<double, double> &fit_window, const size_t &ws_index,
-    const double &expected_peak_center,
-    API::IPeakFunction_sptr peakfunction,
+    const double &expected_peak_center, API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunc, bool observe_peak_width) {
   // Fit the background first if there is enough data points
-  FitBackground(bkgd_fitter, ws_index, fit_window, expected_peak_center, bkgdfunc);
+  FitBackground(bkgd_fitter, ws_index, fit_window, expected_peak_center,
+                bkgdfunc);
 
   // Get partial of the data
   std::vector<double> vec_x, vec_y, vec_e;
