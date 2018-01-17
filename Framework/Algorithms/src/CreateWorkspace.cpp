@@ -286,13 +286,5 @@ Parallel::ExecutionMode CreateWorkspace::getParallelExecutionMode(
   return Parallel::getCorrespondingExecutionMode(storageMode);
 }
 
-void CreateWorkspace::execNonMaster() {
-  MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
-  if (parentWS)
-    return Algorithm::execNonMaster();
-  setProperty("OutputWorkspace", Kernel::make_unique<Workspace2D>(
-                                     Parallel::StorageMode::MasterOnly));
-}
-
 } // Algorithms
 } // Mantid

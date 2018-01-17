@@ -1717,55 +1717,14 @@ void Algorithm::execDistributed() { exec(); }
 /** Runs the algorithm in `master-only` execution mode.
  *
  * The default implementation runs the normal exec() method on rank 0 and
- * execNonMaster() on all other ranks. Classes inheriting from Algorithm can
- * re-implement this if they support execution with multiple MPI ranks and
- * require a special implementation for master-only execution. */
+ * nothing on all other ranks. As a consequence all output properties will have
+ * their default values, such as a nullptr for output workspaces. Classes
+ * inheriting from Algorithm can re-implement this if they support execution
+ * with multiple MPI ranks and require a special implementation for master-only
+ * execution. */
 void Algorithm::execMasterOnly() {
   if (communicator().rank() == 0)
     exec();
-  else
-    execNonMaster();
-}
-
-/** By default execMasterOnly() runs this in `master-only` execution mode on all
- * but rank 0.
- *
- * The default implementation creates dummy workspaces for all pure output
- * workspaces. Classes inheriting from Algorithm can re-implement this if they
- * support execution with multiple MPI ranks and require a special behavior on
- * non-master ranks in master-only execution. */
-void Algorithm::execNonMaster() {
-  // If there is no output we can simply do nothing.
-  if (m_pureOutputWorkspaceProps.empty())
-    return;
-  // Does Algorithm have exactly one input and one output workspace property?
-  if (m_inputWorkspaceProps.size() == 1 &&
-      m_pureOutputWorkspaceProps.size() == 1) {
-    // Does the input workspace property point to an actual workspace?
-    if (const auto &ws = m_inputWorkspaceProps.front()->getWorkspace()) {
-      if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
-        const auto &wsProp = m_pureOutputWorkspaceProps.front();
-        // This is the reverse cast of what is done in
-        // cacheWorkspaceProperties(), so it should never fail.
-        const Property &prop = dynamic_cast<Property &>(*wsProp);
-        auto clone = ws->cloneEmpty();
-        // Currently we have not implemented a proper cloneEmpty() for all
-        // workspace types, in particular the abundance of Workspace2D subtypes,
-        // so we do a safety check here.
-        if (ws->storageMode() != clone->storageMode())
-          throw std::runtime_error(clone->id() +
-                                   "::cloneEmpty() did not return a workspace "
-                                   "with the correct storage mode. Make sure "
-                                   "cloneEmpty() sets the storage mode.");
-        setProperty(prop.name(), std::move(clone));
-        return;
-      }
-    }
-  }
-  throw std::runtime_error(
-      "Attempt to run algorithm with " +
-      Parallel::toString(Parallel::ExecutionMode::MasterOnly) +
-      ": Execution in this mode not implemented.");
 }
 
 /** Get a (valid) execution mode for this algorithm.
@@ -1809,6 +1768,8 @@ Algorithm::getInputWorkspaceStorageModes() const {
     // Check if we actually have that input workspace
     if (wsProp->getWorkspace())
       map.emplace(prop.name(), wsProp->getWorkspace()->storageMode());
+    else if (!wsProp->isOptional())
+      map.emplace(prop.name(), Parallel::StorageMode::MasterOnly);
   }
   return map;
 }
