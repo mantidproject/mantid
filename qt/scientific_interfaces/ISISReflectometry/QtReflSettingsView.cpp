@@ -36,6 +36,10 @@ void QtReflSettingsView::initLayout() {
           SLOT(requestInstDefaults()));
   connect(m_ui.expSettingsGroup, SIGNAL(clicked(bool)), this,
           SLOT(setPolarisationOptionsEnabled(bool)));
+  connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
+          SLOT(setDetectorCorrectionEnabled(bool)));
+
+  setDetectorCorrectionEnabled(true);
 }
 
 /** Returns the presenter managing this view
@@ -117,10 +121,14 @@ void QtReflSettingsView::setInstDefaults(
     m_ui.detectorCorrectionTypeComboBox->setCurrentIndex(ctIndex);
 }
 
+void QtReflSettingsView::setDetectorCorrectionEnabled(bool enabled) {
+  m_ui.detectorCorrectionTypeComboBox->setEnabled(enabled);
+}
+
 /* Sets the enabled status of polarisation corrections and parameters
 * @param enable :: [input] bool to enable options or not
 */
-void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) const {
+void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
 
   if (enable && (!m_isPolCorrEnabled || !experimentSettingsEnabled()))
     return;
@@ -331,11 +339,14 @@ std::string QtReflSettingsView::getDetectorCorrectionType() const {
   return m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
 }
 
+bool QtReflSettingsView::detectorCorrectionEnabled() const {
+  return m_ui.correctDetectorsCheckBox->isChecked();
+}
+
 /** Returns the status of experiment settings group
 * @return :: the status of the checkable group
 */
 bool QtReflSettingsView::experimentSettingsEnabled() const {
-
   return m_ui.expSettingsGroup->isChecked();
 }
 
@@ -343,7 +354,6 @@ bool QtReflSettingsView::experimentSettingsEnabled() const {
 * @return :: the status of the checkable group
 */
 bool QtReflSettingsView::instrumentSettingsEnabled() const {
-
   return m_ui.instSettingsGroup->isChecked();
 }
 

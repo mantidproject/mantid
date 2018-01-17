@@ -9,7 +9,7 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-    
+
 ISIS Reflectometry Interface
 ----------------------------
 
@@ -26,7 +26,7 @@ Improvements
 - Output workspace names have been improved. Names now use '+' to indicate preprocessed (i.e. summed) workspaces, rather than '_', which is used to indicate postprocessed (i.e. stitched) workspaces.
 - The Python code generated when you tick `Output Notebook` has been improved to support special characters (e.g. `+`) in workspace names. Output workspaces are now set using the output properties of the algorithm rather than by variable assignment. This avoids the possibility of invalid characters being used in Python variable names.
 
-  
+
 Bug fixes
 #########
 
@@ -36,20 +36,21 @@ Bug fixes
 
 Algorithms
 ----------
-    
+
 New features
 ############
 
 - The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
 - The new algorithm :ref:`algm-MRInspectData` takes in raw event data and determines reduction parameters.
+- The ISIS Reflectometry interface now has a checkbox 'CorrectDetectors' which maps to the corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
 
-  
+
 Improvements
 ############
 
 - Removed the ``RegionOfDirectBeam`` property from :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` because this is not used.
 
-  
+
 Bug fixes
 #########
 
