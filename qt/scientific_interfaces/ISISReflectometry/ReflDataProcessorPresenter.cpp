@@ -73,14 +73,6 @@ void ReflDataProcessorPresenter::process() {
   if (!proceedIfWSTypeInADS(m_selectedData, false))
     return;
 
-  // Get global settings
-  this->setPreprocessingOptions(
-      convertColumnOptionsFromQMap(m_mainPresenter->getPreprocessingOptions()));
-  m_processingOptions =
-      convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
-  this->setPostprocessingOptions(
-      m_mainPresenter->getPostprocessingOptionsAsString());
-
   // Get time slicing type
   auto timeSlicingType = m_mainPresenter->getTimeSlicingType();
 

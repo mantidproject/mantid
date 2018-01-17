@@ -47,6 +47,10 @@ public:
   ~ReflSettingsTabPresenter() override;
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) override;
+  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  void settingsChanged(int group) override;
+  void
+  passSelfToChildren(std::vector<IReflSettingsPresenter *> const &children);
 
   /// Returns values passed for 'Transmission run(s)'
   std::string getTransmissionRuns(int group) const override;
@@ -62,6 +66,7 @@ public:
 private:
   /// The presenters for each group as a vector
   std::vector<IReflSettingsPresenter *> m_settingsPresenters;
+  IReflMainWindowPresenter *m_mainPresenter;
 };
 }
 }

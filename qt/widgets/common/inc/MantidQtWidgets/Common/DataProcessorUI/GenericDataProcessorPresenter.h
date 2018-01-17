@@ -147,12 +147,14 @@ public:
   void setModel(QString const &name) override;
   bool hasPostprocessing() const;
 
+  void settingsChanged() override;
+
   // The following methods are public only for testing purposes
   // Get the whitelist
   WhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
   QString getReducedWorkspaceName(const QStringList &data,
-                                  const QString &prefix = "");
+                                  const QString &prefix = "") const;
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
@@ -178,13 +180,6 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
-  void setPreprocessingOptions(ColumnOptionsMap const &options) {
-    m_preprocessing.m_options = options;
-  }
-
-  void setPostprocessingOptions(QString const &options) {
-    m_postprocessing->m_options = options;
-  }
 
   boost::optional<PostprocessingStep> m_postprocessing;
 
@@ -221,6 +216,7 @@ protected:
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData);
+  bool rowOutputExists(RowItem const &row) const;
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);
@@ -228,7 +224,6 @@ protected slots:
                             QSet<QString> const &missingWorkspaces);
 
 private:
-  bool areOptionsUpdated();
   void applyDefaultOptions(std::map<QString, QVariant> &options);
   void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
                                        const std::string &hiddenOptions,

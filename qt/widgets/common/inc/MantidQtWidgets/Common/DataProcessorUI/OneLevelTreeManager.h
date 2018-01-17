@@ -98,6 +98,7 @@ public:
   /// Set the 'processed' status of a data item
   void setProcessed(bool processed, int position) override;
   void setProcessed(bool processed, int position, int parent) override;
+  void invalidateAllProcessed() override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,

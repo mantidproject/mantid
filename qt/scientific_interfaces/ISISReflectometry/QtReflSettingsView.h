@@ -39,7 +39,7 @@ class QtReflSettingsView : public QWidget, public IReflSettingsView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit QtReflSettingsView(QWidget *parent = nullptr);
+  explicit QtReflSettingsView(int group, QWidget *parent = nullptr);
   /// Destructor
   ~QtReflSettingsView() override;
   /// Returns the presenter managing this view
@@ -88,6 +88,10 @@ public:
   std::string getProcessingInstructions() const override;
   /// Return selected detector correction type
   std::string getDetectorCorrectionType() const override;
+  /// Return selected summation type
+  std::string getSummationType() const override;
+  /// Return selected reduction type
+  std::string getReductionType() const override;
   /// Set the status of whether polarisation corrections should be enabled
   void setIsPolCorrEnabled(bool enable) const override;
   /// Set default values for experiment and instrument settings
@@ -108,13 +112,23 @@ public slots:
   /// Request presenter to obtain default values for settings
   void requestExpDefaults() const;
   void requestInstDefaults() const;
+  void summationTypeChanged(int reductionTypeIndex);
   /// Sets enabled status for polarisation corrections and parameters
+  void setReductionTypeEnabled(bool enable) override;
   void setPolarisationOptionsEnabled(bool enable) override;
   void setDetectorCorrectionEnabled(bool enable) override;
+  void notifySettingsChanged();
 
 private:
   /// Initialise the interface
   void initLayout();
+  void connectChangeListeners();
+  void connectExperimentSettingsChangeListeners();
+  void connectInstrumentSettingsChangeListeners();
+  void connectSettingsChange(QLineEdit *edit);
+  void connectSettingsChange(QComboBox *edit);
+  void connectSettingsChange(QCheckBox *edit);
+  void connectSettingsChange(QGroupBox *edit);
 
   /// The widget
   Ui::ReflSettingsWidget m_ui;
