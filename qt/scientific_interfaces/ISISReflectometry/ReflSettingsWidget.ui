@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>565</width>
-    <height>603</height>
+    <width>938</width>
+    <height>654</height>
    </rect>
   </property>
   <property name="font">
@@ -302,33 +302,6 @@
           </property>
          </widget>
         </item>
-        <item row="8" column="1">
-         <widget class="QComboBox" name="detectorCorrectionTypeComboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <item>
-           <property name="text">
-            <string>VerticalShift</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>RotateAroundSample</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="8" column="0">
-         <widget class="QLabel" name="detectorCorrectionTypeLabel">
-          <property name="text">
-           <string>DetectorCorrectionType</string>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="3">
          <widget class="QLineEdit" name="monBgMaxEdit"/>
         </item>
@@ -406,6 +379,47 @@
             <horstretch>0</horstretch>
             <verstretch>2</verstretch>
            </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="3">
+         <widget class="QComboBox" name="detectorCorrectionTypeComboBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <item>
+           <property name="text">
+            <string>VerticalShift</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>RotateAroundSample</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="8" column="2">
+         <widget class="QLabel" name="detectorCorrectionTypeLabel">
+          <property name="text">
+           <string>DetectorCorrectionType</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QLabel" name="correctDetectorsLabel">
+          <property name="text">
+           <string>CorrectDetectors</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1">
+         <widget class="QCheckBox" name="correctDetectorsCheckBox">
+          <property name="text">
+           <string/>
           </property>
          </widget>
         </item>

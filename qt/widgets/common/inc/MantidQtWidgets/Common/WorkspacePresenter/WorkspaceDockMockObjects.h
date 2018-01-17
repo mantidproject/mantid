@@ -16,18 +16,14 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockMantidDisplayBase;
 
-class MockWorkspaceDockView
-    : public IWorkspaceDockView,
-      public boost::enable_shared_from_this<MockWorkspaceDockView> {
+class MockWorkspaceDockView : public IWorkspaceDockView {
 public:
-  MockWorkspaceDockView() {}
-  ~MockWorkspaceDockView() override {}
-
-  void init() override {
-    auto presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
+  MockWorkspaceDockView() {
+    auto presenter = boost::make_shared<WorkspacePresenter>(this);
     m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
     presenter->init();
   }
+  ~MockWorkspaceDockView() override {}
 
   MOCK_CONST_METHOD2(askUserYesNo, bool(const std::string &caption,
                                         const std::string &message));

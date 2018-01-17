@@ -1,0 +1,6 @@
+execute_process(
+    COMMAND @PYRCC5_CMD@  @_qrc_file@
+    OUTPUT_VARIABLE _res_py_content
+)
+string(REPLACE "PyQt5" "qtpy" _res_py_content ${_res_py_content})
+file(WRITE @_output_res_py@ ${_res_py_content})

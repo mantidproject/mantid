@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/IEventWorkspace.h"
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
@@ -62,6 +63,10 @@ private:
   // used as part of given useful names to workspaces added to output
   // groupworkspace
   size_t m_countNumWorkspaceAdded{1};
+
+  // Holds the single and multiple scattering event data to be added at
+  // end of the groupworkspace
+  std::vector<API::IEventWorkspace_sptr> m_scaterringWS = {};
 };
 
 } // namespace DataHandling

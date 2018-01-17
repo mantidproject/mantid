@@ -55,6 +55,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/AbstractTreeModel.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/OneLevelTreeManager.cpp
+        src/DataProcessorUI/OptionsMap.cpp
 	src/DataProcessorUI/PostprocessingAlgorithm.cpp
 	src/DataProcessorUI/PreprocessingAlgorithm.cpp
 	src/DataProcessorUI/PreprocessMap.cpp
@@ -62,6 +63,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
 	src/DataProcessorUI/TwoLevelTreeManager.cpp
 	src/DataProcessorUI/WhiteList.cpp
+        src/DataProcessorUI/WorkspaceNameUtils.cpp
     src/DataProcessorUI/PostprocessingStep.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
     src/DataProcessorUI/Column.cpp
@@ -304,6 +306,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h
@@ -325,6 +329,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WhiteList.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/ParseKeyValueString.h
 	inc/MantidQtWidgets/Common/ParseNumerics.h
