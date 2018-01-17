@@ -191,8 +191,8 @@ workspace but rather a group workspace, which contains two child event workspace
 added event data and one for the added monitor data.
 
 With **'Overlay Event Workspaces' Disabled** the event data from the files is added using the event
-data of the different files is added using the :doc:`Plus Algorithm <../algorithms/Plus-v1>`.
-Timestamps of the events and of the logs are not changed as indicated in the image below.
+the :doc:`Plus Algorithm <../algorithms/Plus-v1>`. Timestamps of the events and of the logs are not
+changed as indicated in the image below.
 
 .. figure:: ../images/sans_isis_v2_add_tabs_no_overlay.png
    :align: center
