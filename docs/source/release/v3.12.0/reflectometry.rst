@@ -42,6 +42,7 @@ New features
 
 - The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
 - The new algorithm :ref:`algm-MRInspectData` takes in raw event data and determines reduction parameters.
+- Two new boxes have been added to the settings tab of the ISIS Reflectometry interface, 'ReductionType' and 'SummationType' which are passed to the corresponding parameters of :ref:`algm-ReflectometryReductionOneAuto`.
 - The ISIS Reflectometry interface now has a checkbox 'CorrectDetectors' which maps to the corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
 
 

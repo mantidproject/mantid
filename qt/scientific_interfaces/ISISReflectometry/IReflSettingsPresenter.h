@@ -49,7 +49,7 @@ public:
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
 
-  enum Flag { ExpDefaultsFlag, InstDefaultsFlag };
+  enum Flag { ExpDefaultsFlag, InstDefaultsFlag, SummationTypeChanged };
 
   /// Tell the presenter something happened
   virtual void notify(IReflSettingsPresenter::Flag flag) = 0;
