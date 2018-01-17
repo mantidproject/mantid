@@ -428,11 +428,12 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test on init and setup
+  /** Test on VULCAN's data including 2 different starting value of peak
+   * profiles
     */
-  void Redo_test_highAngle4Peaks() {
+  void test_multiple_peak_profiles() {
     // Generate input workspace
-    // std::string input_ws_name = loadVulcanHighAngleData();
+    std::string input_ws_name = loadVulcanHighAngleData();
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
@@ -627,21 +628,20 @@ public:
   /** Generate a workspace contains PG3_4866 5-th peak
     */
   std::string loadVulcanHighAngleData() {
-
     DataHandling::LoadNexusProcessed loader;
     loader.initialize();
 
-    loader.setProperty("Filename", "/home/wzz/Mantid/VULCAN_150178_2Peaks.nxs");
-    loader.setProperty("OutputWorkspace", "Diamond2Peaks");
+    loader.setProperty("Filename", "vulcan_diamond.nxs");
+    loader.setProperty("OutputWorkspace", "diamond_3peaks");
 
     loader.execute();
 
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("Diamond2Peaks"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("diamond_3peaks"));
 
     API::MatrixWorkspace_sptr ws =
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("Diamond2Peaks"));
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 24900);
+            AnalysisDataService::Instance().retrieve("diamond_3peaks"));
+    TS_ASSERT(ws);
 
     return "Diamond2Peaks";
   }

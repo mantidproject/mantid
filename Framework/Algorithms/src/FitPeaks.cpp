@@ -742,10 +742,8 @@ void FitPeaks::fitSpectrumPeaks(
 
   // Set up sub algorithm Fit for peak and background
   IAlgorithm_sptr peak_fitter; // both peak and background (combo)
-  IAlgorithm_sptr bkgd_fitter;
   try {
     peak_fitter = createChildAlgorithm("Fit", -1, -1, false);
-    bkgd_fitter = createChildAlgorithm("Fit", -1, -1, false);
   } catch (Exception::NotFoundError &) {
     std::stringstream errss;
     errss << "The FitPeak algorithm requires the CurveFitting library";
@@ -768,8 +766,21 @@ void FitPeaks::fitSpectrumPeaks(
   peak_fitter->setProperty("CostFunction", m_costFunction);
   peak_fitter->setProperty("CalcErrors", true);
 
-  bkgd_fitter->setProperty("Minimizer", m_minimizer);
-  bkgd_fitter->setProperty("CostFunction", "Least squares");
+  // background fitter
+  IAlgorithm_sptr bkgd_fitter;
+  if (m_highBackground) {
+    try {
+      bkgd_fitter = createChildAlgorithm("Fit", -1, -1, false);
+    } catch (Exception::NotFoundError &) {
+      std::stringstream errss;
+      errss << "The FitPeak algorithm requires the CurveFitting library";
+      throw std::runtime_error(errss.str());
+    }
+    // set up background fit instance
+    bkgd_fitter->setProperty("Minimizer", m_minimizer);
+    bkgd_fitter->setProperty("CostFunction", m_costFunction);
+    bkgd_fitter->setProperty("CalcErrors", true);
+  }
 
   for (size_t fit_index = 0; fit_index < m_numPeaksToFit; ++fit_index) {
 
@@ -790,9 +801,9 @@ void FitPeaks::fitSpectrumPeaks(
         DecideToEstimatePeakWidth(peak_index, peakfunction);
 
     // do fitting with peak and background function (no analysis at this point)
-    double cost =
-        FitIndividualPeak(wi, peak_fitter, peak_window_i, m_highBackground,
-                          observe_peak_width, peakfunction, bkgdfunction);
+    double cost = FitIndividualPeak(wi, peak_fitter, bkgd_fitter, peak_window_i,
+                                    m_highBackground, observe_peak_width,
+                                    peakfunction, bkgdfunction);
 
     // process fitting result
     ProcessSinglePeakFitResult(
@@ -1392,10 +1403,62 @@ double FitPeaks::ObservePeakWidth(HistogramData::HistogramX &vector_x,
 }
 
 //----------------------------------------------------------------------------------------------
+bool FitPeaks::FitBackground(API::IAlgorithm_sptr md_fitter,
+                             const size_t &ws_index,
+                             const std::pair<double, double> &fit_window,
+                             const double &expected_peak_pos,
+                             API::IBackgroundFunction_sptr bkgd_func) {
+
+  // find out how to fit background
+  size_t start_index =
+      findXIndex(m_inputMatrixWS->histogram(ws_index).x(), fit_window.first);
+  size_t stop_index =
+      findXIndex(m_inputMatrixWS->histogram(ws_index).x(), fit_window.second);
+  size_t expected_peak_index =
+      findXIndex(m_inputMatrixWS->histogram(ws_index).x(), expected_peak_pos);
+
+  // treat 5 as a magic number
+  if (expected_peak_index - start_index > 10 &&
+      stop_index - expected_peak_index - stop_index > 10) {
+    // enough data points left for multi-domain fitting
+    // set a smaller fit window
+    std::vector<double> vec_min(2);
+    std::vector<double> vec_max(2);
+
+    vec_min[0] = fit_window.first;
+    vec_max[0] =
+        m_inputMatrixWS->histogram(ws_index).x()[expected_peak_index - 5];
+
+    vec_min[1] =
+        m_inputMatrixWS->histogram(ws_index).x()[expected_peak_index + 5];
+    vec_max[1] = fit_window.second;
+
+    double chi2 = FitFunctionMD(md_fitter, bkgd_func, m_inputMatrixWS, ws_index,
+                                vec_min, vec_max);
+
+    // process
+    bool good_fit(false);
+    if (chi2 < DBL_MAX - 1) {
+      good_fit = true;
+    }
+
+    return good_fit;
+
+  } else {
+    // fit as a single domain function.  check whether the result is good or bad
+
+    // TODO FROM HERE!
+  }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------------------------
 /**  Fit a specific peak with estimated peak and background parameters
  * @brief FitPeaks::fitIndividualPeak
  * @param wi
  * @param fitter
+ * @param bkgd_fitter :: child algorithm 'Fit' to fit pure background
  * @param exppeakcenter
  * @param fitwindow
  * @param high
@@ -1407,6 +1470,7 @@ double FitPeaks::ObservePeakWidth(HistogramData::HistogramX &vector_x,
  * @return
  */
 double FitPeaks::FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
+                                   API::IAlgorithm_sptr bkgd_fitter,
                                    const std::pair<double, double> &fitwindow,
                                    const bool &high,
                                    const bool &observe_peak_width,
@@ -1417,8 +1481,9 @@ double FitPeaks::FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
 
   if (high) {
     // fit peak with high background!
-    cost = FitFunctionHighBackground(fitter, fitwindow, wi, peakfunction,
-                                     bkgdfunc, observe_peak_width);
+    cost =
+        FitFunctionHighBackground(fitter, bkgd_fitter, fitwindow, wi,
+                                  peakfunction, bkgdfunc, observe_peak_width);
   } else {
     // fit peak and background
     cost = FitFunctionSD(fitter, peakfunction, bkgdfunc, m_inputMatrixWS, wi,
@@ -1515,54 +1580,44 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Fit function in multi-domain (mostly applied to fitting background without
- * peak)
-  * @param mdfunction :: function to fit
-  * @param dataws :: matrix workspace to fit with
-  * @param wsindex :: workspace index of the spectrum in matrix workspace
-  * @param vec_xmin :: minimin values of domains
-  * @param vec_xmax :: maximim values of domains
-  */
-double
-FitPeaks::fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
-                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                        std::vector<double> &vec_xmin,
-                        std::vector<double> &vec_xmax) {
+/**
+ * @brief FitPeaks::FitFunctionMD
+ * @param fit
+ * @param fit_function :: function to fit
+ * @param dataws :: matrix workspace to fit with
+ * @param wsindex ::  workspace index of the spectrum in matrix workspace
+ * @param vec_xmin :: minimin values of domains
+ * @param vec_xmax :: maximim values of domains
+ * @return
+ */
+double FitPeaks::FitFunctionMD(
+    API::IAlgorithm_sptr fit,
+    // boost::shared_ptr<API::MultiDomainFunction> mdfunction,
+    API::IFunction_sptr fit_function, API::MatrixWorkspace_sptr dataws,
+    size_t wsindex, std::vector<double> &vec_xmin,
+    std::vector<double> &vec_xmax) {
   // Validate
   if (vec_xmin.size() != vec_xmax.size())
     throw runtime_error("Sizes of xmin and xmax (vectors) are not equal. ");
 
-  // Set up sub algorithm fit
-  IAlgorithm_sptr fit;
-  try {
-    fit = createChildAlgorithm("Fit", -1, -1, true);
-  } catch (Exception::NotFoundError &) {
-    std::stringstream errss;
-    errss << "The FitPeak algorithm requires the CurveFitting library";
-    g_log.error(errss.str());
-    throw std::runtime_error(errss.str());
-  }
-
-  // This use multi-domain; but does not know how to set up
-  //   IFunction_sptr fitfunc,
-  //  boost::shared_ptr<MultiDomainFunction> funcmd =
-  //      boost::make_shared<MultiDomainFunction>();
+  // This use multi-domain; but does not know how to set up IFunction_sptr
+  // fitfunc,
+  boost::shared_ptr<MultiDomainFunction> md_function =
+      boost::make_shared<MultiDomainFunction>();
 
   // Set function first
-  //  funcmd->addFunction(fitfunc);
+  md_function->addFunction(fit_function);
 
-  // set domain for function with index 0 covering both sides
-  //  funcmd->clearDomainIndices();
-  mdfunction->clearDomainIndices();
-
+  //  set domain for function with index 0 covering both sides
+  md_function->clearDomainIndices();
   std::vector<size_t> ii(2);
   ii[0] = 0;
   ii[1] = 1;
-  mdfunction->setDomainIndices(0, ii);
+  md_function->setDomainIndices(0, ii);
 
   // Set the properties
   fit->setProperty("Function",
-                   boost::dynamic_pointer_cast<IFunction>(mdfunction));
+                   boost::dynamic_pointer_cast<IFunction>(md_function));
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
   fit->setProperty("StartX", vec_xmin[0]);
@@ -1572,13 +1627,11 @@ FitPeaks::fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
   fit->setProperty("StartX_1", vec_xmin[1]);
   fit->setProperty("EndX_1", vec_xmax[1]);
   fit->setProperty("MaxIterations", 50);
-  //  fit->setProperty("Minimizer", m_minimizer);
-  //  fit->setProperty("CostFunction", "Least squares");
 
-  m_sstream << "FitMultiDomain: Funcion " << mdfunction->name() << ": "
+  m_sstream << "FitMultiDomain: Funcion " << md_function->name() << ": "
             << "Range: (" << vec_xmin[0] << ", " << vec_xmax[0] << ") and ("
             << vec_xmin[1] << ", " << vec_xmax[1] << "); "
-            << mdfunction->asString() << "\n";
+            << md_function->asString() << "\n";
 
   // Execute
   fit->execute();
@@ -1594,7 +1647,7 @@ FitPeaks::fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
   if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
     m_sstream << "FitMultidomain: Successfully-Fitted Function "
-              << mdfunction->asString() << ", Chi^2 = " << chi2 << "\n";
+              << md_function->asString() << ", Chi^2 = " << chi2 << "\n";
   }
 
   return chi2;
@@ -1612,9 +1665,12 @@ FitPeaks::fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
  * @param bkgdfunc
  */
 double FitPeaks::FitFunctionHighBackground(
-    IAlgorithm_sptr fit, const std::pair<double, double> &fit_window,
-    const size_t &ws_index, API::IPeakFunction_sptr peakfunction,
+    IAlgorithm_sptr fit, API::IAlgorithm_sptr bkgd_fitter,
+    const std::pair<double, double> &fit_window, const size_t &ws_index,
+    API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunc, bool observe_peak_width) {
+  // Fit the background first if there is enough data points
+  FitBackground(bkgd_fitter, ws_index, fit_window, bkgdfunc);
 
   // Get partial of the data
   std::vector<double> vec_x, vec_y, vec_e;
@@ -1630,7 +1686,7 @@ double FitPeaks::FitFunctionHighBackground(
 
   // Fit background first
   // TODO ASAP - Implement this with full debug output
-  double cost = FitBackgroundMD(fit_bkgd, bkgdfunc, more);
+  // double cost = FitBackgroundMD(fit_bkgd, bkgdfunc, more);
 
   // Fit peak with background
   double cost = FitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0,
