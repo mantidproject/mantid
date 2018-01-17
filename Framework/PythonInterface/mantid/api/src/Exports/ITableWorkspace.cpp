@@ -462,16 +462,8 @@ bpl::dict toDict(ITableWorkspace &self) {
   bpl::dict result;
 
   for (const auto &name : self.getColumnNames()) {
-    const auto column = self.getColumn(name);
-    const auto &typeID = column->get_type_info();
-
-    bpl::list values;
-    for (size_t i = 0; i < self.rowCount(); ++i) {
-      bpl::handle<> handle(getValue(column, typeID, static_cast<int>(i)));
-      bpl::object obj(handle);
-      values.append(obj);
-    }
-
+    bpl::handle<> handle(column(self, bpl::object(name)));
+    bpl::object values(handle);
     result[name] = values;
   }
 
