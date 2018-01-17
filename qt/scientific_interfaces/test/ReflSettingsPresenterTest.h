@@ -92,9 +92,6 @@ public:
     EXPECT_CALL(mockView, getEndOverlap())
         .Times(Exactly(1))
         .WillOnce(Return("12"));
-    EXPECT_CALL(mockView, getTransmissionRuns())
-        .Times(Exactly(0))
-        .WillOnce(Return("INTER00013463,INTER00013464"));
 
     auto options = presenter.getTransmissionOptions();
     TS_ASSERT_EQUALS(options.size(), 11);
@@ -179,6 +176,9 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("3,4"));
+    EXPECT_CALL(mockView, detectorCorrectionEnabled())
+        .Times(Exactly(1))
+        .WillOnce(Return(true));
     EXPECT_CALL(mockView, getDetectorCorrectionType())
         .Times(Exactly(1))
         .WillOnce(Return("VerticalShift"));
@@ -193,7 +193,7 @@ public:
         .WillOnce(Return("12"));
 
     auto options = presenter.getReductionOptions();
-    TS_ASSERT_EQUALS(options.size(), 21);
+    TS_ASSERT_EQUALS(options.size(), 22);
     TS_ASSERT_EQUALS(variantToString(options["AnalysisMode"]),
                      "MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(variantToString(options["CRho"]), "2.5,0.4,1.1");
@@ -223,6 +223,7 @@ public:
     TS_ASSERT_EQUALS(variantToString(options["ProcessingInstructions"]), "3,4");
     TS_ASSERT_EQUALS(variantToString(options["DetectorCorrectionType"]),
                      "VerticalShift");
+    TS_ASSERT_EQUALS(variantToString(options["CorrectDetectors"]), "1");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -358,6 +359,7 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(0));
     EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(0));
     EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(0));
+    EXPECT_CALL(mockView, detectorCorrectionEnabled()).Times(Exactly(0));
 
     // Experiment settings should be called
     EXPECT_CALL(mockView, getAnalysisMode()).Times(Exactly(2));

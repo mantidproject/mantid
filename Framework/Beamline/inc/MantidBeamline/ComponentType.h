@@ -8,9 +8,9 @@ enum class ComponentType {
   Generic,
   Rectangular,
   Structured,
-  BankOfTube,
-  Tube,
-  Detector
+  Unstructured,
+  Detector,
+  OutlineComposite
 };
 }
 } // namespace Mantid
