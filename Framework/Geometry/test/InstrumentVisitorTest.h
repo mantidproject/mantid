@@ -307,12 +307,18 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
                       visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
 
+    using Mantid::Beamline::ComponentType;
+
     const size_t bankIndex = compInfo->indexOfAny("bank1");
-    TS_ASSERT(compInfo->isStructuredBank(bankIndex)); // Bank is rectangular
-    TS_ASSERT(!compInfo->isStructuredBank(
-        compInfo->source())); // Source is not a rectangular bank
-    TS_ASSERT(!compInfo->isStructuredBank(
-        0)); //  A detector is never a bank, let alone a detector
+    TS_ASSERT_EQUALS(compInfo->componentType(bankIndex),
+                     ComponentType::Rectangular); // Bank is rectangular
+    TS_ASSERT_DIFFERS(
+        compInfo->componentType(compInfo->source()),
+        ComponentType::Rectangular); // Source is not a rectangular bank
+    TS_ASSERT_DIFFERS(compInfo->componentType(0),
+                      ComponentType::Rectangular); //  A detector is never a
+                                                   //  bank, let alone a
+                                                   //  detector
   }
 
   void test_visitation_of_non_rectangular_detectors() {
