@@ -369,18 +369,18 @@ public:
 
     // get result
     bool peak_pos_ws_exist, peak_param_ws_exist;
-    API::MatrixWorkspace_sptr peak_pos_ws = CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
-    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(peak_param_ws_name, &peak_param_ws_exist);
+    API::MatrixWorkspace_sptr peak_pos_ws =
+        CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
+    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(
+        peak_param_ws_name, &peak_param_ws_exist);
 
-    if (peak_pos_ws_exist)
-    {
+    if (peak_pos_ws_exist) {
       HistogramData::HistogramY hist_y = peak_pos_ws->histogram(0).y();
       TS_ASSERT_EQUALS(hist_y.size(), 15);
       TS_ASSERT_DELTA(hist_y[0], 0., 1.E-12);
     }
 
-    if (peak_param_ws_exist)
-    {
+    if (peak_param_ws_exist) {
       TS_ASSERT_EQUALS(peak_param_ws->rowCount(), 15);
     }
 
@@ -445,15 +445,16 @@ public:
 
     // Check result
     bool peak_pos_ws_exist, peak_param_ws_exist, fitted_peak_ws_exist;
-    API::MatrixWorkspace_sptr peak_pos_ws = CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
-    API::MatrixWorkspace_sptr fitted_peak_ws = CheckAndRetrieveMatrixWorkspace(output_ws_name, &fitted_peak_ws_exist);
-    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(peak_param_ws_name, &peak_param_ws_exist);
+    API::MatrixWorkspace_sptr peak_pos_ws =
+        CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
+    API::MatrixWorkspace_sptr fitted_peak_ws =
+        CheckAndRetrieveMatrixWorkspace(output_ws_name, &fitted_peak_ws_exist);
+    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(
+        peak_param_ws_name, &peak_param_ws_exist);
 
-    if (peak_pos_ws_exist)
-    {
+    if (peak_pos_ws_exist) {
       ;
     }
-
 
     // Clean up
     AnalysisDataService::Instance().remove(input_ws_name);
@@ -713,25 +714,26 @@ public:
    * @param correct
    * @return
    */
-  API::MatrixWorkspace_sptr CheckAndRetrieveMatrixWorkspace(const std::string &ws_name, bool *correct)
-  {
+  API::MatrixWorkspace_sptr
+  CheckAndRetrieveMatrixWorkspace(const std::string &ws_name, bool *correct) {
     // retrieve workspace
     API::MatrixWorkspace_sptr workspace;
     bool exist = AnalysisDataService::Instance().doesExist(ws_name);
     TS_ASSERT(exist);
-    if (!exist)
-    {
-      std::cout << "Workspace " << ws_name << " does not exist in ADS." << "\n";
+    if (!exist) {
+      std::cout << "Workspace " << ws_name << " does not exist in ADS."
+                << "\n";
       *correct = false;
       return workspace;
     }
 
     // check workspace type
-    workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws_name));
+    workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(ws_name));
     TS_ASSERT(workspace);
-    if (!workspace)
-    {
-      std::cout << "Workspace " << ws_name << " is not a MatrixWorkspace." << "\n";
+    if (!workspace) {
+      std::cout << "Workspace " << ws_name << " is not a MatrixWorkspace."
+                << "\n";
       *correct = false;
       return workspace;
     }
@@ -747,25 +749,26 @@ public:
    * @param correct
    * @return
    */
-  API::ITableWorkspace_sptr CheckAndRetrieveTableWorkspace(const std::string &ws_name, bool *correct)
-  {
+  API::ITableWorkspace_sptr
+  CheckAndRetrieveTableWorkspace(const std::string &ws_name, bool *correct) {
     // retrieve workspace
     API::ITableWorkspace_sptr workspace;
     bool exist = AnalysisDataService::Instance().doesExist(ws_name);
     TS_ASSERT(exist);
-    if (!exist)
-    {
-      std::cout << "Workspace " << ws_name << " does not exist in ADS." << "\n";
+    if (!exist) {
+      std::cout << "Workspace " << ws_name << " does not exist in ADS."
+                << "\n";
       *correct = false;
       return workspace;
     }
 
     // check workspace type
-    workspace = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(ws_name));
+    workspace = boost::dynamic_pointer_cast<ITableWorkspace>(
+        AnalysisDataService::Instance().retrieve(ws_name));
     TS_ASSERT(workspace);
-    if (!workspace)
-    {
-      std::cout << "Workspace " << ws_name << " is not a TableWorkspace." << "\n";
+    if (!workspace) {
+      std::cout << "Workspace " << ws_name << " is not a TableWorkspace."
+                << "\n";
       *correct = false;
       return workspace;
     }
@@ -773,7 +776,6 @@ public:
     *correct = true;
     return workspace;
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_FITPEAKSTEST_H_ */
