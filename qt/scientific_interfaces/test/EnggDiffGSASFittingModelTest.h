@@ -96,7 +96,7 @@ public:
 
     TS_ASSERT_EQUALS(runLabels.size(), 4);
     for (int i = 1; i < 5; i++) {
-      TS_ASSERT_EQUALS(runLabels[i], std::make_pair(i * 111, size_t(i % 2 + 1)));
+      TS_ASSERT_EQUALS(runLabels[i - 1], std::make_pair(i * 111, size_t(i % 2 + 1)));
     }
   }
 };
