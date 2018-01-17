@@ -91,7 +91,7 @@ public:
   MOCK_CONST_METHOD0(getTOF, double());
   MOCK_CONST_METHOD0(getInitialEnergy, double());
   MOCK_CONST_METHOD0(getFinalEnergy, double());
-  MOCK_CONST_METHOD0(getEnergy, double());
+  MOCK_CONST_METHOD0(getEnergyTransfer, double());
   MOCK_METHOD1(setInitialEnergy, void(double m_InitialEnergy));
   MOCK_METHOD1(setFinalEnergy, void(double m_FinalEnergy));
   MOCK_CONST_METHOD0(getIntensity, double());
