@@ -624,7 +624,7 @@ void WorkspaceTreeWidget::createWorkspaceMenuActions() {
   m_showHist = new QAction(tr("Show History"), this);
   connect(m_showHist, SIGNAL(triggered()), this, SLOT(onClickShowAlgHistory()));
 
-  m_saveNexus = new QAction(tr("Save Nexus"), this);
+  m_saveNexus = new QAction(tr("Save NeXus"), this);
   connect(m_saveNexus, SIGNAL(triggered()), this,
           SLOT(onClickSaveNexusWorkspace()));
 

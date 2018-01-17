@@ -58,12 +58,15 @@ public:
   // Context Menu Handlers
   void popupContextMenu() override;
 
+signals:
+  void plot1DClicked(const QString &workspaceName);
+
+private slots:
+  void onPlot1DClicked();
+
+
 private:
-  void addMatrixWorkspaceMenuItems(
-      QMenu *menu,
-      const Mantid::API::MatrixWorkspace_const_sptr &matrixWS) const;
-  void addWorkspaceGroupMenuItems(QMenu *menu) const;
-  void addTableWorkspaceMenuItems(QMenu *menu) const;
+  QAction *m_plot1D;
 };
 }
 }
