@@ -438,7 +438,8 @@ public:
     auto options = presenter.getReductionOptions();
 
     TS_ASSERT_EQUALS(variantToString(options["CorrectDetectors"]), "1");
-    TS_ASSERT_EQUALS(variantToString(options["DetectorCorrectionType"]), "VerticalShift");
+    TS_ASSERT_EQUALS(variantToString(options["DetectorCorrectionType"]),
+                     "VerticalShift");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
@@ -453,7 +454,8 @@ public:
 
     auto options = presenter.getReductionOptions();
 
-    TS_ASSERT_EQUALS(variantToString(options["TransmissionRuns"]), "INTER00013463,INTER00013464");
+    TS_ASSERT_EQUALS(variantToString(options["TransmissionRuns"]),
+                     "INTER00013463,INTER00013464");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
