@@ -67,7 +67,8 @@ void export_UnitCell() {
       .export_values();
 
   /// return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::MatrixRefToNumpy<Converters::WrapReadOnly>>
+  typedef return_value_policy<
+      Policies::MatrixRefToNumpy<Converters::WrapReadOnly>>
       return_readonly_numpy;
 
   class_<UnitCell>(

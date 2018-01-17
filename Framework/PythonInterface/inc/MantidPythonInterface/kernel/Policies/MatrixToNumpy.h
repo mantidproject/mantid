@@ -22,11 +22,11 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
-#include "MantidKernel/Matrix.h"
 
 #include <type_traits>
 
@@ -95,7 +95,8 @@ template <typename ConversionPolicy> struct MatrixRefToNumpy {
         boost::mpl::and_<std::is_reference<T>,
                          is_matrix<non_const_type>>::value,
         MatrixRefToNumpyImpl<non_const_type, ConversionPolicy>,
-        MatrixRefToNumpy_Requires_Reference_To_Matrix_Return_Type<T>>::type type;
+        MatrixRefToNumpy_Requires_Reference_To_Matrix_Return_Type<T>>::type
+        type;
   };
 };
 
@@ -118,9 +119,8 @@ template <typename MatrixType> struct MatrixToNumpyImpl {
   }
 };
 
-template <typename T>
-struct MatrixToNumpy_Requires_Matrix_Return_By_Value {};
-}
+template <typename T> struct MatrixToNumpy_Requires_Matrix_Return_By_Value {};
+} // namespace
 
 /**
  * Implements a return value policy that

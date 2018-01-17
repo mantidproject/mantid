@@ -714,7 +714,9 @@ double Peak::getFinalEnergy() const { return m_finalEnergy; }
 double Peak::getInitialEnergy() const { return m_initialEnergy; }
 
 /** Get the difference between the initial and final neutron energy */
-double Peak::getEnergyTransfer() const { return getInitialEnergy() - getFinalEnergy(); }
+double Peak::getEnergyTransfer() const {
+  return getInitialEnergy() - getFinalEnergy();
+}
 
 //----------------------------------------------------------------------------------------------
 /** Get the H index of the peak */
