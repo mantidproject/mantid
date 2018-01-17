@@ -65,6 +65,8 @@ public:
     const auto ws = maskInstrument(in, {1, 3});
     TS_ASSERT_DIFFERS(in, ws);
     const auto &detInfo = ws->detectorInfo();
+    // Note that detector IDs in workspace start at 1, so there is an offset of
+    // 1 compared to the detector indices checked here.
     TS_ASSERT_EQUALS(detInfo.isMasked(0), true);
     TS_ASSERT_EQUALS(detInfo.isMasked(1), false);
     TS_ASSERT_EQUALS(detInfo.isMasked(2), true);
