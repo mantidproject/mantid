@@ -80,8 +80,15 @@ private:
                    std::vector<std::vector<double>> &fitted_function_parameters,
                    std::vector<double> *peak_chi2_vec);
 
+  /// fit background
+  bool FitBackground(API::IAlgorithm_sptr md_fitter, const size_t &ws_index,
+                     const std::pair<double, double> &fit_window,
+                     const double &expected_peak_pos,
+                     API::IBackgroundFunction_sptr bkgd_func);
+
   // Peak fitting suite
   double FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
+                           API::IAlgorithm_sptr bkgd_fitter,
                            const std::pair<double, double> &fitwindow,
                            const bool &high, const bool &observe_peak_width,
                            API::IPeakFunction_sptr peakfunction,
@@ -94,13 +101,15 @@ private:
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
                        double xmin, double xmax, bool observe_peak_width);
 
-  double fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
+  double FitFunctionMD(API::IAlgorithm_sptr fit,
+                       API::IFunction_sptr fit_function,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
                        std::vector<double> &vec_xmin,
                        std::vector<double> &vec_xmax);
 
   /// fit a single peak with high background
   double FitFunctionHighBackground(API::IAlgorithm_sptr fit,
+                                   API::IAlgorithm_sptr bkgd_fitter,
                                    const std::pair<double, double> &fit_window,
                                    const size_t &ws_index,
                                    API::IPeakFunction_sptr peakfunction,

@@ -242,6 +242,10 @@ With the background reduced in step 1, it will be more reliable to estimate the 
 
 Step 3
 ======
+Fit peak... ...........
+
+Step 3
+======
 
 Get the peak range (by *estimate-peak-range*) and fit the background with *FitMultiDomain* to fit background.
 
