@@ -199,7 +199,8 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
                   m_view->getMomentumTransferStep());
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
-    addIfNotEmpty(options, "FirstTransmissionRun", this->getTransmissionRuns());
+    addIfNotEmpty(options, "FirstTransmissionRun",
+                  m_view->getTransmissionRuns());
 
     auto summationType = m_view->getSummationType();
     addIfNotEmpty(options, "SummationType", summationType);
@@ -234,12 +235,11 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
   return options;
 }
 
-/** Gets the user-specified transmission runs from the view
-*
-* @return :: the transmission runs string
-*/
 std::string ReflSettingsPresenter::getTransmissionRuns() const {
-  return m_view->getTransmissionRuns();
+  if (m_view->experimentSettingsEnabled())
+    return m_view->getTransmissionRuns();
+  else
+    return "";
 }
 
 /** Returns global options for 'Stitch1DMany'
@@ -249,8 +249,8 @@ std::string ReflSettingsPresenter::getStitchOptions() const {
 
   if (m_view->experimentSettingsEnabled())
     return m_view->getStitchOptions();
-
-  return std::string();
+  else
+    return "";
 }
 
 /** Creates hints for 'Stitch1DMany'

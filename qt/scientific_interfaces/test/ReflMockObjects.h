@@ -83,6 +83,7 @@ public:
   MOCK_CONST_METHOD0(getEndOverlap, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
+  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
   MOCK_CONST_METHOD0(getDirectBeam, std::string());
   MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
@@ -101,7 +102,6 @@ public:
   MOCK_CONST_METHOD0(getLambdaMax, std::string());
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
   MOCK_CONST_METHOD0(getProcessingInstructions, std::string());
-  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
   MOCK_CONST_METHOD0(getSummationType, std::string());
   MOCK_CONST_METHOD0(getReductionType, std::string());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));

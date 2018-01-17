@@ -52,8 +52,6 @@ public:
   void notify(IReflSettingsPresenter::Flag flag) override;
   void setInstrumentName(const std::string &instName) override;
 
-  /// Returns values passed for 'Transmission run(s)'
-  std::string getTransmissionRuns() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const override;
@@ -62,6 +60,7 @@ public:
   getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
+  std::string getTransmissionRuns() const override;
 
   void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) override;
 

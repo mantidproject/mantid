@@ -39,13 +39,13 @@ std::string variantToString(const QVariant &variant) {
 // Functional tests
 //=====================================================================================
 class ReflSettingsPresenterTest : public CxxTest::TestSuite {
-
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ReflSettingsPresenterTest *createSuite() {
     return new ReflSettingsPresenterTest();
   }
+
   static void destroySuite(ReflSettingsPresenterTest *suite) { delete suite; }
 
   ReflSettingsPresenterTest() { FrameworkManager::Instance(); }
@@ -135,10 +135,14 @@ public:
     return !options.contains(key);
   }
 
+  ReflSettingsPresenter makeReflSettingsPresenter(IReflSettingsView *view) {
+    return ReflSettingsPresenter(view, 1);
+  }
+
   void testGetQSummationOptionsWhenSummingInLambda() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getSummationType())
         .Times(AtLeast(1))
@@ -156,7 +160,7 @@ public:
   void testGetQSummationOptionsWhenSummingInQ() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getSummationType())
         .Times(AtLeast(1))
@@ -173,9 +177,9 @@ public:
   }
 
   void testGetAnalysisMode() {
-    MockSettingsView mockView;
+    NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(AtLeast(1))
@@ -188,9 +192,9 @@ public:
   }
 
   void testGetPolarisationCorrectionOptions() {
-    MockSettingsView mockView;
+    NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getPolarisationCorrections())
         .Times(AtLeast(1))
@@ -221,7 +225,7 @@ public:
   void testGetIntMonCheck() {
     MockSettingsView mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getIntMonCheck())
         .Times(AtLeast(1))
@@ -235,9 +239,9 @@ public:
   }
 
   void testGetMonitorIntegralRangeOptions() {
-    MockSettingsView mockView;
+    NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getMonitorIntegralMin())
         .Times(AtLeast(1))
@@ -258,7 +262,7 @@ public:
   void testGetMonitorBackgroundRangeOptions() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getMonitorBackgroundMin())
         .Times(AtLeast(1))
@@ -279,7 +283,7 @@ public:
   void testGetLambdaRangeOptions() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getLambdaMin())
         .Times(AtLeast(1))
@@ -298,7 +302,7 @@ public:
   void testGetI0MonitorIndexOption() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getI0MonitorIndex())
         .Times(AtLeast(1))
@@ -313,7 +317,7 @@ public:
   void testGetScaleFactorOption() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getScaleFactor())
         .Times(AtLeast(1))
@@ -328,7 +332,7 @@ public:
   void testGetMomentumTransferStepOption() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getMomentumTransferStep())
         .Times(AtLeast(1))
@@ -343,7 +347,7 @@ public:
   void testGetProcessingInstructionsOption() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(AtLeast(1))
@@ -358,7 +362,7 @@ public:
   void testGetDetectorCorrectionTypeOptions() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, detectorCorrectionEnabled())
         .Times(Exactly(1))
@@ -378,7 +382,7 @@ public:
   void testGetTransmissionRunOptions() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(AtLeast(1))
@@ -386,7 +390,7 @@ public:
 
     auto options = presenter.getReductionOptions();
 
-    TS_ASSERT_EQUALS(variantToString(options["TransmissionRuns"]),
+    TS_ASSERT_EQUALS(variantToString(options["FirstTransmissionRun"]),
                      "INTER00013463,INTER00013464");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -394,7 +398,7 @@ public:
   void testGetOverlapRangeOptions() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, getStartOverlap())
         .Times(AtLeast(1))
@@ -411,8 +415,8 @@ public:
   }
 
   void testStitchOptions() {
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView, 1);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(1)
@@ -424,8 +428,8 @@ public:
   }
 
   void testPolarisationOptionsEnabled() {
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView, 1);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
@@ -438,8 +442,8 @@ public:
   }
 
   void testExperimentDefaults() {
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView, 1);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
     MockMainWindowPresenter mainPresenter;
 
     // Set instrument to 'POLREF'
@@ -461,9 +465,9 @@ public:
   }
 
   void testInstrumentDefaults() {
-    MockSettingsView mockView;
+    NiceMock<MockSettingsView> mockView;
     MockMainWindowPresenter mainPresenter;
-    ReflSettingsPresenter presenter(&mockView, 1);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     // Set instrument to 'INTER'
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
@@ -482,9 +486,8 @@ public:
   }
 
   void testExperimentSettingsDisabled() {
-
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView, 1);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(3)
@@ -519,9 +522,8 @@ public:
   }
 
   void testInstrumentSettingsDisabled() {
-
-    MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView, 1);
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(3)
