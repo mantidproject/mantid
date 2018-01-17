@@ -68,19 +68,13 @@ bool EnggDiffGSASFittingModel::doRietveldRefinement(
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
 EnggDiffGSASFittingModel::getFittedPeaks(const int runNumber,
                                          const size_t bank) const {
-  if (m_fittedPeaksMap.contains(runNumber, bank)) {
-    return m_fittedPeaksMap.get(runNumber, bank);
-  }
-  return boost::none;
+    return getFromRunMapOptional(m_fittedPeaksMap, runNumber, bank);
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
 EnggDiffGSASFittingModel::getFocusedWorkspace(const int runNumber,
                                               const size_t bank) const {
-  if (m_focusedWorkspaceMap.contains(runNumber, bank)) {
-    return m_focusedWorkspaceMap.get(runNumber, bank);
-  }
-  return boost::none;
+  return getFromRunMapOptional(m_focusedWorkspaceMap, runNumber, bank);
 }
 
 boost::optional<Mantid::API::ITableWorkspace_sptr>
@@ -96,10 +90,7 @@ EnggDiffGSASFittingModel::getRunLabels() const {
 
 boost::optional<double>
 EnggDiffGSASFittingModel::getRwp(const int runNumber, const size_t bank) const {
-  if (m_rwpMap.contains(runNumber, bank)) {
-    return m_rwpMap.get(runNumber, bank);
-  }
-  return boost::none;
+  return getFromRunMapOptional(m_rwpMap, runNumber, bank);
 }
 
 bool EnggDiffGSASFittingModel::hasFittedPeaksForRun(const int runNumber,

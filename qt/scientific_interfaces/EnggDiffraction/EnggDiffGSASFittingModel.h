@@ -69,6 +69,16 @@ private:
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedWorkspaceMap;
   RunMap<MAX_BANKS, double> m_rwpMap;
+
+  template <typename T>
+  boost::optional<T> getFromRunMapOptional(const RunMap<MAX_BANKS, T> &map,
+                                           const int runNumber,
+                                           const size_t bank) const {
+    if (map.contains(runNumber, bank)) {
+      return map.get(runNumber, bank);
+    }
+    return boost::none;
+  }
 };
 
 } // CustomInterfaces
