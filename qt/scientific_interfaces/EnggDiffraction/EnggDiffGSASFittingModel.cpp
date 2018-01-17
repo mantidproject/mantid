@@ -32,6 +32,21 @@ size_t getBankID(API::MatrixWorkspace_const_sptr ws) {
 
 namespace MantidQt {
 namespace CustomInterfaces {
+void EnggDiffGSASFittingModel::addFitResultsToMaps(
+    const int runNumber, const size_t bank, const double rwp,
+    const std::string &fittedPeaksWSName,
+    const std::string &latticeParamsTableName) {
+  addRwp(runNumber, bank, rwp);
+
+  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
+  const auto fittedPeaks =
+      ADS.retrieveWS<API::MatrixWorkspace>(fittedPeaksWSName);
+  addFittedPeaks(runNumber, bank, fittedPeaks);
+
+  const auto latticeParams =
+      ADS.retrieveWS<API::ITableWorkspace>(latticeParamsTableName);
+  addLatticeParams(runNumber, bank, latticeParams);
+}
 
 void EnggDiffGSASFittingModel::addFittedPeaks(const int runNumber,
                                               const size_t bank,
@@ -89,15 +104,7 @@ bool EnggDiffGSASFittingModel::doPawleyRefinement(
     return false;
   }
 
-  addRwp(runNumber, bank, *rwp);
-
-  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
-  addFittedPeaks(runNumber, bank, fittedPeaks);
-
-  const auto latticeParams =
-      ADS.retrieveWS<API::ITableWorkspace>(latticeParamsName);
-  addLatticeParams(runNumber, bank, latticeParams);
+  addFitResultsToMaps(runNumber, bank, *rwp, outputWSName, latticeParamsName);
 
   return true;
 }
@@ -137,7 +144,25 @@ bool EnggDiffGSASFittingModel::doRietveldRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
-  throw std::runtime_error("Not yet implemented");
+  const auto inputWS = getFocusedWorkspace(runNumber, bank);
+  if (!inputWS) {
+    return false;
+  }
+  const auto outputWSName = generateFittedPeaksWSName(runNumber, bank);
+  const auto latticeParamsName = generateLatticeParamsName(runNumber, bank);
+
+  const auto rwp = doGSASRefinementAlgorithm(
+      *inputWS, outputWSName, latticeParamsName, "Rietveld refinement",
+      instParamFile, phaseFiles, pathToGSASII, GSASIIProjectFile,
+      DEFAULT_PAWLEY_DMIN, DEFAULT_PAWLEY_NEGATIVE_WEIGHT);
+
+  if (!rwp) {
+    return false;
+  }
+
+  addFitResultsToMaps(runNumber, bank, *rwp, outputWSName, latticeParamsName);
+
+  return true;
 }
 
 boost::optional<API::MatrixWorkspace_sptr>

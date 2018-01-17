@@ -50,7 +50,7 @@ public:
   void addRwpValue(const int runNumber, const size_t bank, const double rwp);
 
 private:
-inline boost::optional<double> doGSASRefinementAlgorithm(
+  inline boost::optional<double> doGSASRefinementAlgorithm(
       API::MatrixWorkspace_sptr inputWorkspace,
       const std::string &outputWorkspaceName,
       const std::string &latticeParamsName, const std::string &refinementMethod,
@@ -283,6 +283,36 @@ public:
 
     const auto latticeParams = model.getLatticeParams(123, 1);
     TS_ASSERT(latticeParams);
+
+    API::AnalysisDataService::Instance().clear();
+  }
+
+  void test_RietveldRefinement() {
+    // Note: due to the reliance on GSAS-II, this cannot test that the algorithm
+    // is used properly. It tests that, given that the algorithm is used
+    // properly, results are added to the appropriate maps in the model
+    TestEnggDiffGSASFittingModel model;
+
+    API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+    model.addFocusedWorkspace(123, 1, ws);
+
+    bool success = false;
+    TS_ASSERT_THROWS_NOTHING(
+        success = model.doRietveldRefinement(
+            123, 1, "", std::vector<std::string>({}), "", ""));
+    TS_ASSERT(success);
+
+    const auto rwp = model.getRwp(123, 1);
+    TS_ASSERT(rwp);
+
+    const auto fittedPeaks = model.getFittedPeaks(123, 1);
+    TS_ASSERT(fittedPeaks);
+
+    const auto latticeParams = model.getLatticeParams(123, 1);
+    TS_ASSERT(latticeParams);
+
+    API::AnalysisDataService::Instance().clear();
   }
 };
 

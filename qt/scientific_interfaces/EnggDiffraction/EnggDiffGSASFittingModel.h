@@ -69,12 +69,21 @@ protected:
   bool hasFocusedRun(const int runNumber, const size_t bank) const;
 
 private:
+  static constexpr double DEFAULT_PAWLEY_DMIN = 1;
+  static constexpr double DEFAULT_PAWLEY_NEGATIVE_WEIGHT = 0;
   static const size_t MAX_BANKS = 2;
 
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedWorkspaceMap;
   RunMap<MAX_BANKS, Mantid::API::ITableWorkspace_sptr> m_latticeParamsMap;
   RunMap<MAX_BANKS, double> m_rwpMap;
+
+  /// Add Rwp, fitted peaks workspace and lattice params table to their
+  /// respective RunMaps
+  void addFitResultsToMaps(const int runNumber, const size_t bank,
+                           const double rwp,
+                           const std::string &fittedPeaksWSName,
+                           const std::string &latticeParamsTableName);
 
   template <typename T>
   boost::optional<T> getFromRunMapOptional(const RunMap<MAX_BANKS, T> &map,
