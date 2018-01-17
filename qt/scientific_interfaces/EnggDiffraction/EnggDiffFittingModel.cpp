@@ -499,8 +499,7 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
                    std::back_inserter(workspaceNames),
                    [&](const std::pair<int, size_t> &runBankPair) {
                      return getFocusedWorkspace(runBankPair.first,
-                                                runBankPair.second)
-                         ->getName();
+                                                runBankPair.second)->getName();
                    });
     groupWorkspaces(workspaceNames, FOCUSED_WS_NAME);
   }
