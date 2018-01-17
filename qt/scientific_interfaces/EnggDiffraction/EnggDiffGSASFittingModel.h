@@ -3,13 +3,20 @@
 
 #include "DllConfig.h"
 #include "IEnggDiffGSASFittingModel.h"
+<<<<<<< HEAD
 #include "RunMap.h"
+=======
+>>>>>>> a419371eb64ee32bf4de09a7f85d26c2c7cdbe68
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
+<<<<<<< HEAD
     : public IEnggDiffGSASFittingModel {
+=======
+    : public IEnggDiffFittingModel {
+>>>>>>> a419371eb64ee32bf4de09a7f85d26c2c7cdbe68
 
 public:
   bool doPawleyRefinement(const int runNumber, const size_t bank,
