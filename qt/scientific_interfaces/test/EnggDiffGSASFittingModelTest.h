@@ -128,6 +128,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFittedPeaks(456, 2));
     TS_ASSERT_EQUALS(retrievedWS, boost::none);
   }
+
+  void test_hasFittedPeaksForRun() {
+    TestEnggDiffGSASFittingModel model;
+
+    API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+
+    model.addFittedPeaksWS(123, 1, ws);
+    TS_ASSERT(model.hasFittedPeaksForRun(123, 1));
+    TS_ASSERT(!model.hasFittedPeaksForRun(456, 1));
+  }
 };
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFGSASFITTINGMODELTEST_H_

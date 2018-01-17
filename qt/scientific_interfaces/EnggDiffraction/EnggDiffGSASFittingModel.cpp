@@ -96,7 +96,7 @@ EnggDiffGSASFittingModel::getRwp(const int runNumber, const size_t bank) const {
 
 bool EnggDiffGSASFittingModel::hasFittedPeaksForRun(const int runNumber,
                                                     const size_t bank) const {
-  throw std::runtime_error("Not yet implemented");
+  return m_fittedPeaksMap.contains(runNumber, bank);
 }
 
 bool EnggDiffGSASFittingModel::hasFocusedRun(const int runNumber,
