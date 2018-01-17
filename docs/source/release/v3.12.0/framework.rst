@@ -75,7 +75,7 @@ In `mantid.simpleapi`, a keyword has been implemented for function-like algorith
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
 - The previously mentioned ``ConfigObserver`` and ``ConfigPropertyObserver`` classes are also exposed to python.
 - ``mantid.kernel.V3D`` vectors now support negation through the usual ``-`` operator.
-- ``mantid.api.IPeak`` has two new functions ``getEnergy`` which returns the difference between the initial and final energy and ``getIntensityOverSigma`` which gets the peak intensity divided by the error in intensity.
+- ``mantid.api.IPeak`` has two new functions ``getEnergyTransfer`` which returns the difference between the initial and final energy and ``getIntensityOverSigma`` which gets the peak intensity divided by the error in intensity.
 
 Support for unicode property names has been added to python. This means that one can run the following in python2 or python3.
 
