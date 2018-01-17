@@ -76,14 +76,15 @@ public:
         .Times(1)
         .WillOnce(Return(filename));
 
-    const auto warning = "File not found";
     EXPECT_CALL(*mockModel_ptr, loadFocusedRun(filename))
         .Times(1)
-        .WillOnce(Return(warning));
+        .WillOnce(Return(false));
 
     EXPECT_CALL(*mockModel_ptr, getRunLabels()).Times(0);
 
-    EXPECT_CALL(*mockView_ptr, userWarning(warning)).Times(1);
+    EXPECT_CALL(*mockView_ptr,
+                userWarning("Load failed, see the log for more details"))
+        .Times(1);
 
     pres.notify(IEnggDiffGSASFittingPresenter::LoadRun);
     TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
