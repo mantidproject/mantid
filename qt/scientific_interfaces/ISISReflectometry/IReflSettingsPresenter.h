@@ -49,8 +49,13 @@ public:
   getReductionOptions() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
-  
-  enum Flag { ExpDefaultsFlag, InstDefaultsFlag, SettingsChangedFlag, SummationTypeChanged };
+
+  enum Flag {
+    ExpDefaultsFlag,
+    InstDefaultsFlag,
+    SettingsChangedFlag,
+    SummationTypeChanged
+  };
 
   /// Tell the presenter something happened
   virtual void notify(IReflSettingsPresenter::Flag flag) = 0;
