@@ -74,15 +74,14 @@ void run_parallel(const Parallel::Communicator &comm,
                      create<Workspace2D>(indexInfo, HistogramData::Points(1)));
     alg->setProperty("RHSWorkspace",
                      create<Workspace2D>(indexInfo, HistogramData::Points(1)));
-  } else {
-    alg->setProperty("LHSWorkspace",
-                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
-    alg->setProperty("RHSWorkspace",
-                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
   }
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+  if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+  } else {
+    TS_ASSERT_EQUALS(out, nullptr);
+  }
 }
 
 void run_parallel_mismatch_fail(const Parallel::Communicator &comm,
@@ -94,17 +93,11 @@ void run_parallel_mismatch_fail(const Parallel::Communicator &comm,
     Indexing::IndexInfo indexInfo(100, storageModeA, comm);
     alg->setProperty("LHSWorkspace",
                      create<Workspace2D>(indexInfo, HistogramData::Points(1)));
-  } else {
-    alg->setProperty("LHSWorkspace",
-                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
   }
   if (comm.rank() == 0 || storageModeB != StorageMode::MasterOnly) {
     Indexing::IndexInfo indexInfo(100, storageModeB, comm);
     alg->setProperty("RHSWorkspace",
                      create<Workspace2D>(indexInfo, HistogramData::Points(1)));
-  } else {
-    alg->setProperty("RHSWorkspace",
-                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
   }
   if (comm.size() > 1) {
     TS_ASSERT_THROWS_EQUALS(
@@ -129,21 +122,19 @@ void run_parallel_single_value(const Parallel::Communicator &comm,
     Indexing::IndexInfo indexInfo(100, storageModeA, comm);
     alg->setProperty("LHSWorkspace",
                      create<Workspace2D>(indexInfo, HistogramData::Points(1)));
-  } else {
-    alg->setProperty("LHSWorkspace",
-                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
   }
   if (comm.rank() == 0 || storageModeB != StorageMode::MasterOnly) {
     Indexing::IndexInfo indexInfo(1, storageModeB, comm);
     alg->setProperty("RHSWorkspace", create<WorkspaceSingleValue>(
                                          indexInfo, HistogramData::Points(1)));
-  } else {
-    alg->setProperty("RHSWorkspace", Kernel::make_unique<WorkspaceSingleValue>(
-                                         0.0, 0.0, StorageMode::MasterOnly));
   }
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(out->storageMode(), storageModeA);
+  if (comm.rank() == 0 || storageModeA != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(out->storageMode(), storageModeA);
+  } else {
+    TS_ASSERT_EQUALS(out, nullptr);
+  }
 }
 
 void run_parallel_AllowDifferentNumberSpectra_fail(
