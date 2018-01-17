@@ -124,6 +124,7 @@ class MainWindow(QMainWindow):
         self.messagedisplay = None
         self.ipythonconsole = None
         self.editor = None
+        self.workspacewidget = None
         self.widgets = []
 
         # Menus
@@ -163,6 +164,11 @@ class MainWindow(QMainWindow):
         self.editor = MultiFileEditor(self)
         self.editor.register_plugin()
         self.widgets.append(self.editor)
+
+        self.set_splash("Loading Workspace Widget")
+        from workbench.plugins.workspacewidget import WorkspaceWidget
+        self.workspacewidget = WorkspaceWidget(self)
+        self.workspacewidget.register_plugin()
 
         self.setup_layout()
         self.read_user_settings()
@@ -302,17 +308,20 @@ class MainWindow(QMainWindow):
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
         editor = self.editor
+        workspacewidget = self.workspacewidget
         default_layout = {
             'widgets': [
                 # column 0
-                [[editor, ipython]],
+                [[workspacewidget]],
                 # column 1
+                [[editor, ipython]],
+                # column 2
                 [[logmessages]]
             ],
             'width-fraction': [0.75,    # column 0 width
                                0.25],   # column 1 width
-            'height-fraction': [[1.0],  # column 0 row heights
-                                [1.0]]  # column 0 row heights
+            'height-fraction': [[0.5, 0.5],  # column 0 row heights
+                                [1.0]]  # column 1 row heights
         }
 
         with widget_updates_disabled(self):
