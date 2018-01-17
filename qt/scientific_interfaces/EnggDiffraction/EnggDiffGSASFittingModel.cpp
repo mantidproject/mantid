@@ -77,7 +77,7 @@ EnggDiffGSASFittingModel::getLatticeParams(const int runNumber,
 
 std::vector<std::pair<int, size_t>>
 EnggDiffGSASFittingModel::getRunLabels() const {
-  throw std::runtime_error("Not yet implemented");
+  return m_focusedWorkspaceMap.getRunNumbersAndBankIDs();
 }
 
 boost::optional<double>

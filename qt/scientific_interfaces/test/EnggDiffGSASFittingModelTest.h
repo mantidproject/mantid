@@ -81,6 +81,24 @@ public:
     TS_ASSERT(retrievedWS);
     TS_ASSERT_EQUALS(ws, *retrievedWS);
   }
+
+  void test_getRunLabels() {
+    TestEnggDiffGSASFittingModel model;
+
+    for (int i = 1; i < 5; i++) {
+      API::MatrixWorkspace_sptr ws =
+          API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+      model.addFocusedWorkspace(i * 111, i % 2 + 1, ws);
+    }
+    
+    std::vector<std::pair<int, size_t>> runLabels;
+    TS_ASSERT_THROWS_NOTHING(runLabels = model.getRunLabels());
+
+    TS_ASSERT_EQUALS(runLabels.size(), 4);
+    for (int i = 1; i < 5; i++) {
+      TS_ASSERT_EQUALS(runLabels[i], std::make_pair(i * 111, size_t(i % 2 + 1)));
+    }
+  }
 };
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFGSASFITTINGMODELTEST_H_
