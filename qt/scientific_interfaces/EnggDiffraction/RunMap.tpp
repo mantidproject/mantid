@@ -67,7 +67,7 @@ template <size_t NumBanks, typename T>
 std::vector<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
   std::vector<int> runNumbers;
 
-  for (const auto &bank: m_map) {
+  for (const auto &bank : m_map) {
     for (const auto &runBankPair : bank) {
       const auto runNumber = runBankPair.first;
       if (std::find(runNumbers.begin(), runNumbers.end(), runNumber) ==
@@ -78,6 +78,16 @@ std::vector<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
   }
 
   return runNumbers;
+}
+
+template <size_t NumBanks, typename T>
+size_t RunMap<NumBanks, T>::size() const {
+  size_t numElements = 0;
+
+  for (const auto &bank : m_map) {
+    numElements += bank.size();
+  }
+  return numElements;
 }
 
 } // CustomInterfaces

@@ -57,6 +57,19 @@ public:
                        std::make_pair((i + 1) * 111, size_t(i % 3 + 1)));
     }
   }
+
+  void test_size() {
+    RunMap<3, std::string> runMap;
+    TS_ASSERT_EQUALS(runMap.size(), 0);
+
+    runMap.add(111, 1, "Polly");
+    runMap.add(222, 2, "Morphism");
+    TS_ASSERT_EQUALS(runMap.size(), 2);
+
+    runMap.add(333, 3, "Al");
+    runMap.add(444, 1, "Gorithm");
+    TS_ASSERT_EQUALS(runMap.size(), 4);
+  }
 };
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_RUNMAPTEST_H_

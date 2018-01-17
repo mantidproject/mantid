@@ -21,6 +21,8 @@ public:
 
   std::vector<std::pair<int, size_t>> getRunNumbersAndBankIDs() const;
 
+  size_t size() const;
+
 private:
   std::vector<int> getAllRunNumbers() const;
 
