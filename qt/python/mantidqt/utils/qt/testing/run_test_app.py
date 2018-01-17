@@ -68,9 +68,9 @@ def open_in_window(widget_name, script):
     Displays a widget in a window.
     :param widget_name:  A qualified name of a widget, ie mantidqt.mywidget.MyWidget
     """
+    raw_input('Please attach the Debugger now if required. Press any key to continue')
     setup_library_paths()
     app = QApplication([""])
-
     w = create_widget(widget_name)
     w.setWindowTitle(widget_name)
     w.show()

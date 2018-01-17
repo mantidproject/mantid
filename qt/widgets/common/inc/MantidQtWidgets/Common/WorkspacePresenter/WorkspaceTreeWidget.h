@@ -230,33 +230,34 @@ private:
 
 protected:
   MantidTreeWidget *m_tree;
+  QPoint m_menuPosition;
+  QString selectedWsName;
+  QMenu *m_loadMenu, *m_saveToProgram;
+  QSignalMapper *m_programMapper;
+  QAction *m_program, *m_saveNexus, *m_rename, *m_delete;
 
 private:
-  QString selectedWsName;
-  QPoint m_menuPosition;
   QString m_programName;
   MantidDisplayBase *const m_mantidDisplayModel;
 
   std::string m_filteredText;
   QPushButton *m_loadButton;
   QPushButton *m_saveButton;
-  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu, *m_saveMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
   QLineEdit *m_workspaceFilter;
-  QSignalMapper *m_programMapper;
   QActionGroup *m_sortChoiceGroup;
   QFileDialog *m_saveFolderDialog;
 
+  QMenu *m_sortMenu, *m_saveMenu;
   // Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
       *m_plotAdvanced, *m_showDetectors, *m_showBoxData, *m_showVatesGui,
       *m_showSpectrumViewer, *m_showSliceViewer, *m_colorFill, *m_showLogs,
       *m_showSampleMaterial, *m_showHist, *m_showMDPlot, *m_showListData,
-      *m_saveNexus, *m_rename, *m_delete, *m_program, *m_ascendingSortAction,
-      *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice,
-      *m_showTransposed, *m_convertToMatrixWorkspace,
+      *m_ascendingSortAction, *m_descendingSortAction, *m_byNameChoice,
+      *m_byLastModifiedChoice, *m_showTransposed, *m_convertToMatrixWorkspace,
       *m_convertMDHistoToMatrixWorkspace, *m_clearUB;
 
   QAtomicInt m_updateCount;
