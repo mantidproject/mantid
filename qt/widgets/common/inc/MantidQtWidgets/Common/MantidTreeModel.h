@@ -110,7 +110,7 @@ public slots:
                            QHash<QString, QString> paramList,
                            Mantid::API::AlgorithmObserver *obs = nullptr,
                            int version = -1) override;
-  void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) override;
 
   // Plotting Methods
   MultiLayer *
@@ -123,7 +123,7 @@ public slots:
 
   void drawColorFillPlots(
       const QStringList &wsNames,
-      GraphOptions::CurveType curveType = GraphOptions::ColorMap);
+      GraphOptions::CurveType curveType = GraphOptions::ColorMap) override;
 
   void showMDPlot() override;
 
