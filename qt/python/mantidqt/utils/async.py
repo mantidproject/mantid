@@ -14,12 +14,13 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import absolute_import
+from __future__ import (absolute_import, unicode_literals)
 
 # system imports
 import sys
 import threading
 import time
+import traceback
 
 
 def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
@@ -39,13 +40,13 @@ def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
     blocking_cb = blocking_cb if blocking_cb is not None else lambda: None
 
     class Receiver(object):
-        output, exception = None, None
+        output, exc_value = None, None
 
         def on_success(self, result):
             self.output = result.output
 
         def on_error(self, result):
-            self.exception = result.exception
+            self.exc_value = result.exc_value
 
     recv = Receiver()
     task = AsyncTask(target, args, kwargs, success_cb=recv.on_success,
@@ -55,8 +56,8 @@ def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
         time.sleep(period_secs)
         blocking_cb()
 
-    if recv.exception is not None:
-        raise recv.exception
+    if recv.exc_value is not None:
+        raise recv.exc_value
     else:
         return recv.output
 
@@ -64,12 +65,15 @@ def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
 class AsyncTask(threading.Thread):
 
     def __init__(self, target, args=(), kwargs=None,
+                 stack_chop=0,
                  success_cb=None, error_cb=None,
                  finished_cb=None):
         """
 
         :param target: A Python callable object
         :param args: Arguments to pass to the callable
+        :param stack_chop: If an error is raised then chop this many entries
+        from the top of traceback stack.
         :param kwargs: Keyword arguments to pass to the callable
         :param success_cb: Optional callback called when operation was successful
         :param error_cb: Optional callback called when operation was not successful
@@ -82,27 +86,47 @@ class AsyncTask(threading.Thread):
         self.target = target
         self.args = args
         self.kwargs = kwargs if kwargs is not None else {}
+        self.stack_chop = stack_chop
 
         self.success_cb = success_cb if success_cb is not None else lambda x: None
         self.error_cb = error_cb if error_cb is not None else lambda x: None
         self.finished_cb = finished_cb if finished_cb is not None else lambda: None
 
     def run(self):
+        def elapsed(start):
+            return time.time() - start
         try:
+            time_start = time.time()
             out = self.target(*self.args, **self.kwargs)
+        except SyntaxError as exc:
+            # treat SyntaxErrors as special as the traceback makes no sense
+            # and the lineno is part of the exception instance
+            self.error_cb(AsyncTaskFailure(elapsed(time_start), SyntaxError, exc, None))
+        except KeyboardInterrupt as exc:
+            # user cancelled execution - we don't want a stack trace
+            self.error_cb(AsyncTaskFailure(elapsed(time_start), KeyboardInterrupt, exc, None))
         except:  # noqa
-            self.error_cb(AsyncTaskFailure(sys.exc_info()[1]))
+            self.error_cb(AsyncTaskFailure.from_excinfo(elapsed(time_start), self.stack_chop))
         else:
-            self.success_cb(AsyncTaskSuccess(out))
+            self.success_cb(AsyncTaskSuccess(elapsed(time_start), out))
 
         self.finished_cb()
 
 
-class AsyncTaskSuccess(object):
+class AsyncTaskResult(object):
+    """Object describing the execution of an asynchronous task
+    """
+
+    def __init__(self, elapsed_time):
+        self.elapsed_time = elapsed_time
+
+
+class AsyncTaskSuccess(AsyncTaskResult):
     """Object describing the successful execution of an asynchronous task
     """
 
-    def __init__(self, output):
+    def __init__(self, elapsed_time, output):
+        super(AsyncTaskSuccess, self).__init__(elapsed_time)
         self.output = output
 
     @property
@@ -110,12 +134,29 @@ class AsyncTaskSuccess(object):
         return True
 
 
-class AsyncTaskFailure(object):
+class AsyncTaskFailure(AsyncTaskResult):
     """Object describing the failed execution of an asynchronous task
     """
 
-    def __init__(self, exception):
-        self.exception = exception
+    @staticmethod
+    def from_excinfo(elapsed_time, chop=0):
+        """
+        Create an AsyncTaskFailure from the current exception info
+
+        :param elapsed_time Time take for task
+        :param chop: Trim this number of entries from
+        the top of the stack listing
+        :return: A new AsyncTaskFailure object
+        """
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        return AsyncTaskFailure(elapsed_time, exc_type, exc_value,
+                                traceback.extract_tb(exc_tb)[chop:])
+
+    def __init__(self, elapsed_time, exc_type, exc_value, stack):
+        super(AsyncTaskFailure, self).__init__(elapsed_time)
+        self.exc_type = exc_type
+        self.exc_value = exc_value
+        self.stack = stack
 
     @property
     def success(self):
