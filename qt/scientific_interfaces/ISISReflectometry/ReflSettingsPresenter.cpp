@@ -161,6 +161,10 @@ void ReflSettingsPresenter::addIfNotEmpty(OptionsQMap &options,
     setTransmissionOption(options, key, value);
 }
 
+QString ReflSettingsPresenter::asAlgorithmPropertyBool(bool value) {
+  return value ? "1" : "0";
+}
+
 /** Returns global options for 'ReflectometryReductionOneAuto'
  * @return :: Global options for 'ReflectometryReductionOneAuto'
  */
@@ -208,6 +212,9 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
                   m_view->getProcessingInstructions());
     addIfNotEmpty(options, "DetectorCorrectionType",
                   m_view->getDetectorCorrectionType());
+    auto const correctDetectors =
+        asAlgorithmPropertyBool(m_view->detectorCorrectionEnabled());
+    options["CorrectDetectors"] = correctDetectors;
   }
 
   return options;

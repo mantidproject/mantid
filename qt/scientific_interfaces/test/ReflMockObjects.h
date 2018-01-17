@@ -106,13 +106,15 @@ public:
   MOCK_CONST_METHOD0(getReductionType, std::string());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
   MOCK_METHOD1(setReductionTypeEnabled, void(bool));
-  MOCK_CONST_METHOD1(setPolarisationOptionsEnabled, void(bool));
+  MOCK_METHOD1(setPolarisationOptionsEnabled, void(bool));
+  MOCK_METHOD1(setDetectorCorrectionEnabled, void(bool));
   MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD2(setInstDefaults, void(const std::vector<double> &,
                                            const std::vector<std::string> &));
   MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
   MOCK_CONST_METHOD0(experimentSettingsEnabled, bool());
   MOCK_CONST_METHOD0(instrumentSettingsEnabled, bool());
+  MOCK_CONST_METHOD0(detectorCorrectionEnabled, bool());
   // Calls we don't care about
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override {

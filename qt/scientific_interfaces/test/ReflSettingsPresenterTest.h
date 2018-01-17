@@ -403,6 +403,7 @@ public:
         .WillOnce(Return("-0.02"));
 
     auto options = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(variantToString(options["MomentumTransferStep"]), "-0.02");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -418,20 +419,26 @@ public:
 
     auto options = presenter.getReductionOptions();
 
+    TS_ASSERT_EQUALS(variantToString(options["ProcessingInstructions"]), "3,4");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testGetDetectorCorrectionTypeOption() {
+  void testGetDetectorCorrectionTypeOptions() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
     ReflSettingsPresenter presenter(&mockView);
 
+    EXPECT_CALL(mockView, detectorCorrectionEnabled())
+        .Times(Exactly(1))
+        .WillOnce(Return(true));
     EXPECT_CALL(mockView, getDetectorCorrectionType())
         .Times(AtLeast(1))
         .WillOnce(Return("VerticalShift"));
 
     auto options = presenter.getReductionOptions();
 
+    TS_ASSERT_EQUALS(variantToString(options["CorrectDetectors"]), "1");
+    TS_ASSERT_EQUALS(variantToString(options["DetectorCorrectionType"]), "VerticalShift");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
@@ -446,6 +453,7 @@ public:
 
     auto options = presenter.getReductionOptions();
 
+    TS_ASSERT_EQUALS(variantToString(options["TransmissionRuns"]), "INTER00013463,INTER00013464");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
@@ -463,6 +471,8 @@ public:
 
     auto options = presenter.getReductionOptions();
 
+    TS_ASSERT_EQUALS(variantToString(options["StartOverlap"]), "10");
+    TS_ASSERT_EQUALS(variantToString(options["EndOverlap"]), "12");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
@@ -597,6 +607,7 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(0));
     EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(0));
     EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(0));
+    EXPECT_CALL(mockView, detectorCorrectionEnabled()).Times(Exactly(0));
 
     // Experiment settings should be called
     EXPECT_CALL(mockView, getAnalysisMode()).Times(Exactly(2));

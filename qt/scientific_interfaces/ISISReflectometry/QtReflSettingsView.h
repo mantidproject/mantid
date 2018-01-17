@@ -102,6 +102,8 @@ public:
   bool experimentSettingsEnabled() const override;
   /// Check if instrument settings are enabled
   bool instrumentSettingsEnabled() const override;
+  /// Check if detector correction is enabled
+  bool detectorCorrectionEnabled() const override;
   /// Creates hints for 'Stitch1DMany'
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
@@ -112,9 +114,9 @@ public slots:
   void requestInstDefaults() const;
   void summationTypeChanged(int reductionTypeIndex);
   /// Sets enabled status for polarisation corrections and parameters
-  void setPolarisationOptionsEnabled(bool enable) const override;
   void setReductionTypeEnabled(bool enable) override;
-
+  void setPolarisationOptionsEnabled(bool enable) override;
+  void setDetectorCorrectionEnabled(bool enable) override;
 private:
   /// Initialise the interface
   void initLayout();
@@ -126,7 +128,6 @@ private:
   /// Whether or not polarisation corrections should be enabled
   mutable bool m_isPolCorrEnabled;
 };
-
 } // namespace Mantid
 } // namespace CustomInterfaces
 

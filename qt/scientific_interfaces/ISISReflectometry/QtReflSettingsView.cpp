@@ -39,6 +39,9 @@ void QtReflSettingsView::initLayout() {
           SLOT(setPolarisationOptionsEnabled(bool)));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(summationTypeChanged(int)));
+  connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
+          SLOT(setDetectorCorrectionEnabled(bool)));
+  setDetectorCorrectionEnabled(true);
 }
 
 void QtReflSettingsView::summationTypeChanged(int reductionTypeIndex) {
@@ -54,7 +57,6 @@ void QtReflSettingsView::setReductionTypeEnabled(bool enable) {
 * @return :: A pointer to the presenter
 */
 IReflSettingsPresenter *QtReflSettingsView::getPresenter() const {
-
   return m_presenter.get();
 }
 
@@ -114,7 +116,6 @@ void QtReflSettingsView::setInstDefaults(
   auto intMonCheckState =
       (defaults_double[0] != 0) ? Qt::Checked : Qt::Unchecked;
   m_ui.intMonCheckBox->setCheckState(intMonCheckState);
-
   m_ui.monIntMinEdit->setText(QString::number(defaults_double[1]));
   m_ui.monIntMaxEdit->setText(QString::number(defaults_double[2]));
   m_ui.monBgMinEdit->setText(QString::number(defaults_double[3]));
@@ -129,10 +130,14 @@ void QtReflSettingsView::setInstDefaults(
     m_ui.detectorCorrectionTypeComboBox->setCurrentIndex(ctIndex);
 }
 
+void QtReflSettingsView::setDetectorCorrectionEnabled(bool enabled) {
+  m_ui.detectorCorrectionTypeComboBox->setEnabled(enabled);
+}
+
 /* Sets the enabled status of polarisation corrections and parameters
 * @param enable :: [input] bool to enable options or not
 */
-void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) const {
+void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
 
   if (enable && (!m_isPolCorrEnabled || !experimentSettingsEnabled()))
     return;
@@ -351,11 +356,14 @@ std::string QtReflSettingsView::getDetectorCorrectionType() const {
   return m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
 }
 
+bool QtReflSettingsView::detectorCorrectionEnabled() const {
+  return m_ui.correctDetectorsCheckBox->isChecked();
+}
+
 /** Returns the status of experiment settings group
 * @return :: the status of the checkable group
 */
 bool QtReflSettingsView::experimentSettingsEnabled() const {
-
   return m_ui.expSettingsGroup->isChecked();
 }
 
@@ -363,7 +371,6 @@ bool QtReflSettingsView::experimentSettingsEnabled() const {
 * @return :: the status of the checkable group
 */
 bool QtReflSettingsView::instrumentSettingsEnabled() const {
-
   return m_ui.instSettingsGroup->isChecked();
 }
 
