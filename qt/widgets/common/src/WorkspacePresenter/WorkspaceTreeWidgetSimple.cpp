@@ -21,7 +21,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb,
                                                      QWidget *parent)
     : WorkspaceTreeWidget(mdb, parent) {}
 
-WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple(){}
+WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
 
 void WorkspaceTreeWidgetSimple::popupContextMenu() {
   QTreeWidgetItem *treeItem = m_tree->itemAt(m_menuPosition);
