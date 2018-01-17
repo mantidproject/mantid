@@ -63,7 +63,7 @@ public:
 
   virtual double getInitialEnergy() const = 0;
   virtual double getFinalEnergy() const = 0;
-  virtual double getEnergy() const = 0;
+  virtual double getEnergyTransfer() const = 0;
   virtual void setInitialEnergy(double m_InitialEnergy) = 0;
   virtual void setFinalEnergy(double m_FinalEnergy) = 0;
 

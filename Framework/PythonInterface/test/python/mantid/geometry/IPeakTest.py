@@ -98,7 +98,7 @@ class IPeakTest(unittest.TestCase):
         det_id = 101
         expected_scattering_angle = 2.878973314094696
         self._peak.setDetectorID(det_id)
-        self.assertEqual(self._peak.getScattering(), expected_scattering_angle)
+        self.assertAlmostEqual(self._peak.getScattering(), expected_scattering_angle)
 
     def test_get_tof(self):
         det_id = 101
@@ -131,7 +131,7 @@ class IPeakTest(unittest.TestCase):
         final_energy = 10.0
         self._peak.setFinalEnergy(final_energy)
         self._peak.setInitialEnergy(initial_energy)
-        self.assertAlmostEqual(self._peak.getEnergy(), initial_energy - final_energy)
+        self.assertAlmostEqual(self._peak.getEnergyTransfer(), initial_energy - final_energy)
 
     def test_set_intensity(self):
         intensity = 10.0
@@ -166,7 +166,7 @@ class IPeakTest(unittest.TestCase):
         det_id = 101
         expected_det_pos = np.array([0.061999,  0.0135, -0.236032])
         self._peak.setDetectorID(det_id)
-        npt.assert_almost_equal(self._peak.getDetPos(), expected_det_pos, self._tolerance)
+        npt.assert_allclose(self._peak.getDetPos(), expected_det_pos, atol=self._tolerance)
 
     def test_get_l1(self):
         det_id = 101

@@ -126,7 +126,7 @@ public:
 
   double getInitialEnergy() const override;
   double getFinalEnergy() const override;
-  double getEnergy() const override;
+  double getEnergyTransfer() const override;
   void setInitialEnergy(double m_initialEnergy) override;
   void setFinalEnergy(double m_finalEnergy) override;
 
