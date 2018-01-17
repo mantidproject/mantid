@@ -31,7 +31,7 @@ from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from ui.sans_isis.work_handler import WorkHandler
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
-from sans.gui_logic.models.diagnostics_page_model import run_integral
+from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 
 try:
     import mantidplot
@@ -111,7 +111,7 @@ class RunTabPresenter(object):
         self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel)
 
         # Workspace Diagnostic page presenter
-        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, GuiStateDirector)
+        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, create_state, self._facility)
 
     def __del__(self):
         self._delete_dummy_input_workspace()

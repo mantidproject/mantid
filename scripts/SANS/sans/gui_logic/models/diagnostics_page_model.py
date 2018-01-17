@@ -7,6 +7,8 @@ from mantid.api import AlgorithmPropertyWithValue
 from sans.algorithm_detail.batch_execution import set_output_workspaces_on_load_algorithm, get_workspace_from_algorithm
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from sans.gui_logic.models.table_model import TableModel, TableIndexModel
+from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 
 try:
     import mantidplot
@@ -17,28 +19,22 @@ except (Exception, Warning):
 def run_integral(range, mask, integral, detector, state):
     ranges = parse_range(range)
     input_workspace = load_workspace(state)
-    input_workspace_name = input_workspace.name()
     input_workspace = crop_workspace(DetectorType.to_string(detector), input_workspace)
 
     if mask:
         input_workspace = apply_mask(state, input_workspace, DetectorType.to_string(detector))
 
-    instrument_file = get_instrument_paths_for_sans_file(state.data.sample_scatter)
+    x_dim, y_dim = get_detector_size_from_sans_file(state, detector)
 
-    if detector == DetectorType.HAB:
-        x_dim = get_named_elements_from_ipf_file(instrument_file[1], "high-angle-detector-num-columns",
-                                                 float)['high-angle-detector-num-columns']
-        y_dim = get_named_elements_from_ipf_file(instrument_file[1], "high-angle-detector-num-rows",
-                                                 float)['high-angle-detector-num-rows']
-    else:
-        x_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-columns", float)[
-            'low-angle-detector-num-columns']
-        y_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-rows", float)[
-            'low-angle-detector-num-rows']
+    output_workspaces = []
+    for range in ranges:
+        output_workspace = generate_output_workspace_name(range, integral, mask, detector, input_workspace.name())
+        output_workspace = run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_dim)
+        output_workspaces.append(output_workspace)
 
-    output_workspaces = run_algorithm(input_workspace, ranges, integral, mask, detector, input_workspace_name,
-                                      x_dim, y_dim)
     plot_graph(output_workspaces)
+
+    return output_workspaces
 
 
 def parse_range(range):
@@ -77,30 +73,25 @@ def crop_workspace(component, workspace):
     return crop_alg.getProperty("OutputWorkspace").value
 
 
-def run_algorithm(input_workspace, ranges, integral, mask, detector, input_workspace_name, x_dim, y_dim):
-    output_workspaces = []
-    for range in ranges:
-        output_workspace = generate_output_workspace_name(range, integral, mask, detector, input_workspace_name)
-        output_workspaces.append(output_workspace)
+def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_dim):
+    hv_min = range[0]
+    hv_max = range[1]
 
-        hv_min = range[0]
-        hv_max = range[1]
+    if integral == IntegralEnum.Horizontal:
+        ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='x',
+                               HorizontalAxis='y', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
+        SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
+                   EndWorkspaceIndex=hv_max)
+    elif integral == IntegralEnum.Vertical:
+        ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='y',
+                               HorizontalAxis='x', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
+        SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
+                   EndWorkspaceIndex=hv_max)
+    elif integral == IntegralEnum.Time:
+        SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace,
+                   StartWorkspaceIndex=hv_min, EndWorkspaceIndex=hv_max)
 
-        if integral == IntegralEnum.Horizontal:
-            ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='x',
-                                   HorizontalAxis='y', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
-            SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
-                       EndWorkspaceIndex=hv_max)
-        elif integral == IntegralEnum.Vertical:
-            ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='y',
-                                   HorizontalAxis='x', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
-            SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
-                       EndWorkspaceIndex=hv_max)
-        elif integral == IntegralEnum.Time:
-            SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace,
-                       StartWorkspaceIndex=hv_min, EndWorkspaceIndex=hv_max)
-
-    return output_workspaces
+    return output_workspace
 
 
 def generate_output_workspace_name(range, integral, mask, detector, input_workspace_name):
@@ -126,3 +117,32 @@ def apply_mask(state, workspace, component):
     mask_alg = create_child_algorithm('', mask_name, **mask_options)
     mask_alg.execute()
     return mask_alg.getProperty("Workspace").value
+
+
+def get_detector_size_from_sans_file(state, detector):
+    instrument_file = get_instrument_paths_for_sans_file(state.data.sample_scatter)
+
+    if detector == DetectorType.HAB:
+        x_dim = get_named_elements_from_ipf_file(instrument_file[1], "high-angle-detector-num-columns",
+                                                 float)['high-angle-detector-num-columns']
+        y_dim = get_named_elements_from_ipf_file(instrument_file[1], "high-angle-detector-num-rows",
+                                                 float)['high-angle-detector-num-rows']
+    else:
+        x_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-columns", float)[
+            'low-angle-detector-num-columns']
+        y_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-rows", float)[
+            'low-angle-detector-num-rows']
+
+    return x_dim, y_dim
+
+
+def create_state(state_model_with_view_update, file, period, facility):
+    table_row = TableIndexModel(0, file, period, '', '', '', '', '', '', '', '', '', '')
+    table = TableModel()
+    table.add_table_entry(0, table_row)
+
+    gui_state_director = GuiStateDirector(table, state_model_with_view_update, facility)
+
+    state = gui_state_director.create_state(0)
+
+    return state
