@@ -48,14 +48,14 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
         self.declareProperty('BackgroundOuterRadius', 0.2, direction=Direction.Input,
                              doc="The outer background radius used to integrate satellite peaks. This is passed direclty to \
                              IntegratePeaksMD")
-        self.declareProperty('I/sigma', 2, direction=Direction.Input,
+        self.declareProperty('IOverSigma', 2, direction=Direction.Input,
                              doc="The I/sigma threshold use to identify if peaks exist. This is passed direclty to FilterPeaks")
 
     def PyExec(self):
         k = self.getProperty("NumOfQs").value
         peak_radius = self.getProperty("PeakRadius").value
         background_radii = (self.getProperty("BackgroundInnerRadius").value, self.getProperty("BackgroundOuterRadius").value)
-        I_over_sigma = self.getProperty("I/sigma").value
+        I_over_sigma = self.getProperty("IOverSigma").value
         cluster_threshold = self.getProperty("ClusterThreshold").value
 
         # if user did not specify the number of qs then
