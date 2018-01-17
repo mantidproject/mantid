@@ -4,12 +4,10 @@
 #include "DllConfig.h"
 #include "IEnggDiffFittingModel.h"
 #include "IEnggDiffractionCalibration.h"
+#include "RunMap.h"
 
 #include <array>
 #include <unordered_map>
-
-template <size_t S, typename T>
-using RunMap = std::array<std::unordered_map<int, T>, S>;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -85,8 +83,6 @@ private:
   RunMap<MAX_BANKS, Mantid::API::ITableWorkspace_sptr> m_fitParamsMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_alignedWorkspaceMap;
-
-  std::vector<int> getAllRunNumbers() const;
 
   std::string createFunctionString(
       const Mantid::API::ITableWorkspace_sptr fitFunctionParams,
