@@ -6,7 +6,6 @@
 #include "MantidAlgorithms/ClearMaskedSpectra.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -27,23 +26,20 @@ MatrixWorkspace_sptr makeWorkspace() {
 
 MatrixWorkspace_sptr run(const MatrixWorkspace_sptr &ws) {
   ClearMaskedSpectra alg;
-  alg.setRethrows(true);
+  alg.setChild(true);
   alg.initialize();
   alg.setProperty("InputWorkspace", ws);
-  alg.setPropertyValue("OutputWorkspace", "out");
+  alg.setPropertyValue("OutputWorkspace", "dummy");
   alg.execute();
-  auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
-  AnalysisDataService::Instance().remove("out");
-  return out;
+  return alg.getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr runInplace(const MatrixWorkspace_sptr &ws) {
   ClearMaskedSpectra alg;
-  alg.setRethrows(true);
+  alg.setChild(true);
   alg.initialize();
   alg.setProperty("InputWorkspace", ws);
-  TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("OutputWorkspace", "_dummy_for_inplace"));
+  alg.setPropertyValue("OutputWorkspace", "dummy");
   alg.setProperty("OutputWorkspace", ws);
   alg.execute();
   return ws;
