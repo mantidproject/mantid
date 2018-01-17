@@ -164,7 +164,7 @@ if MPL_POST12:
         """
         Create a new figure manager instance for the given figure.
         """
-        canvas = FigureCanvasQTAgg(figure)
+        canvas = FigureCanvas(figure)
         manager = FigureManager(canvas, num)
         return manager
 
@@ -176,7 +176,7 @@ else:
         """
         figure_class = kwargs.pop('FigureClass', Figure)
         this_fig = figure_class(*args, **kwargs)
-        canvas = FigureCanvasQTAgg(this_fig)
+        canvas = FigureCanvas(this_fig)
         return FigureManager(canvas, num)
 # endif
 

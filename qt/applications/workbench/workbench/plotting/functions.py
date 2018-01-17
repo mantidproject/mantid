@@ -54,6 +54,3 @@ def new_figure_manager():
     next_num = max(allfigs) + 1 if allfigs else 1
     figure = Figure(next_num)
     return LinePlotFigureManagerQT(figure, next_num)
-
-
-
