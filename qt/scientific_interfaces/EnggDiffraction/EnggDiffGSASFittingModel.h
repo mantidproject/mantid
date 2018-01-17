@@ -3,12 +3,13 @@
 
 #include "DllConfig.h"
 #include "IEnggDiffGSASFittingModel.h"
+#include "RunMap.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
-    : public IEnggDiffFittingModel {
+    : public IEnggDiffGSASFittingModel {
 
 public:
   bool doPawleyRefinement(const int runNumber, const size_t bank,
@@ -42,7 +43,22 @@ public:
   bool hasFittedPeaksForRun(const int runNumber,
                             const size_t bank) const override;
 
-  std::string loadFocusedRun(const std::string &filename) override;
+  bool loadFocusedRun(const std::string &filename) override;
+
+protected:
+  /**
+   Get whether a focused run has been loaded with a given runNumber and bank ID.
+   Used for testing - exposed by the dummy class in EnggDiffGSASFittingModelTest
+   @param runNumber The run number to check for
+   @param bank The bank to check for
+   @return Whether the model contains a focused run with these parameters
+   */
+  bool hasFocusedRun(const int runNumber, const size_t bank) const;
+
+private:
+  static const size_t MAX_BANKS = 2;
+
+  RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedWorkspaceMap;
 };
 
 } // CustomInterfaces
