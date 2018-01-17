@@ -846,7 +846,7 @@ void Peak::setGoniometerMatrix(
   m_InverseGoniometerMatrix = m_GoniometerMatrix;
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
-        "Peak::setGoniometerMatrix(): Goniometer matrix must non-singular.");
+        "Peak::setGoniometerMatrix(): Goniometer matrix must be non-singular.");
 }
 
 // -------------------------------------------------------------------------------------
