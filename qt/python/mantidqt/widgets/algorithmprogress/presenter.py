@@ -9,7 +9,8 @@ class AlgorithmProgressPresenter(object):
     """
     def __init__(self, view):
         self.view = view
-        self.model = AlgorithmProgressModel(self)
+        self.model = AlgorithmProgressModel()
+        self.model.add_presenter(self)
 
     def update_progress_bar(self, progress, message):
         """

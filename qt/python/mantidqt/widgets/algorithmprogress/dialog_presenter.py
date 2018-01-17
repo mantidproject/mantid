@@ -1,38 +1,28 @@
 from __future__ import absolute_import, print_function
 
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QProgressBar, QPushButton, QTreeWidgetItem
-
-from .model import AlgorithmProgressModel
+from qtpy.QtCore import QObject, Qt, Signal
 
 
-class AlgorithmProgressDialogPresenter(object):
+class AlgorithmProgressDialogPresenter(QObject):
     """
     Presents progress reports on algorithms.
     """
+    need_update = Signal()
+
     def __init__(self, view, model):
+        super(AlgorithmProgressDialogPresenter, self).__init__()
+        view.close_button.clicked.connect(self.close)
         self.view = view
         self.model = model
+        self.model.add_presenter(self)
+        self.need_update.connect(self.update, Qt.QueuedConnection)
 
     def update(self):
         """
         Update the gui elements.
         """
-        tree = self.view.tree
-        tree.clear()
-        for observer in self.model.progress_observers:
-            item = QTreeWidgetItem([observer.name()])
-            tree.addTopLevelItem(item)
-            progress_bar = QProgressBar()
-            progress_bar.setAlignment(Qt.AlignHCenter)
-            cancel_button = QPushButton("Cancel")
-            tree.setItemWidget(item, 1, progress_bar)
-            tree.setItemWidget(item, 2, cancel_button)
-            for prop in observer.properties():
-                lstr = [prop.name, str(prop.value)]
-                if prop.isDefault:
-                    lstr.append('Default')
-                item.addChild(QTreeWidgetItem(lstr))
+        algorithm_data = self.model.get_running_algorithm_data()
+        self.view.update(algorithm_data)
 
     def update_progress_bar(self, progress, message):
         """
@@ -46,4 +36,8 @@ class AlgorithmProgressDialogPresenter(object):
         """
         Close (remove) the progress bar when algorithm finishes.
         """
-        pass
+        self.need_update.emit()
+
+    def close(self):
+        self.model.remove_presenter(self)
+        self.view.close()

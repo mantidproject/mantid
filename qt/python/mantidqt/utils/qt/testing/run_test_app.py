@@ -36,6 +36,7 @@ from __future__ import absolute_import, print_function
 import sys
 import traceback
 
+from qtpy.QtCore import QTimer
 from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils.qt.plugins import setup_library_paths
@@ -67,6 +68,17 @@ def open_in_window(widget_name, script):
     """
     Displays a widget in a window.
     :param widget_name:  A qualified name of a widget, ie mantidqt.mywidget.MyWidget
+    :param script: A qualified name of a test function that can be run after the
+        widget is created. The test function must have the signature:
+
+            def test(widget):
+                ...
+
+        where argument widget is an instance of the tested widget.
+        The test function can yield from time to time after which the widget can update itself.
+        This will make the test non-blocking and changes can be viewed as the script runs.
+        If the test yields an integer it is interpreted as the number of milliseconds to wait
+        until the next step.
     """
     setup_library_paths()
     app = QApplication([""])
@@ -76,7 +88,31 @@ def open_in_window(widget_name, script):
     w.show()
 
     if script is not None:
-        run_script(script, w)
+        try:
+            # If script is a generator script_iter allows non-blocking
+            # test execution
+            script_iter = iter(run_script(script, w))
+            pause_timer = QTimer()
+            pause_timer.setSingleShot(True)
+
+            def idle():
+                if not pause_timer.isActive():
+                    try:
+                        # Run test script until the next 'yield'
+                        pause_msec = script_iter.next()
+                        if pause_msec is not None:
+                            # Start non-blocking pause in milliseconds
+                            pause_timer.start(pause_msec)
+                    except StopIteration:
+                        pass
+                    except:
+                        traceback.print_exc()
+            timer = QTimer()
+            # Zero-timeout timer runs idle() between Qt events
+            timer.timeout.connect(idle)
+            timer.start()
+        except:
+            pass
 
     sys.exit(app.exec_())
 
@@ -86,7 +122,7 @@ def run_script(script_name, widget):
     m = __import__(module_name, fromlist=[fun_name])
     fun = getattr(m, fun_name)
     try:
-        fun(widget)
+        return fun(widget)
     except:
         traceback.print_exc()
 

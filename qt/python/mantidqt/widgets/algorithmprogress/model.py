@@ -42,24 +42,35 @@ class AlgorithmProgressModel(AlgorithmObserver):
     Observes AlgorithmManager for new algorithms and starts
     ProgressObservers.
     """
-    def __init__(self, presenter):
+    def __init__(self):
         super(AlgorithmProgressModel, self).__init__()
-        self.presenter = presenter
+        self.presenters = []
         self.progress_observers = []
         self.observeStarting()
+
+    def add_presenter(self, presenter):
+        self.presenters.append(presenter)
+
+    def remove_presenter(self, presenter):
+        index = self.presenters.index(presenter)
+        if index >= 0:
+            del self.presenters[index]
 
     def startingHandle(self, alg):
         progress_observer = ProgressObserver(self, alg)
         progress_observer.observeProgress(alg)
         progress_observer.observeFinish(alg)
         self.progress_observers.append(progress_observer)
+        for presenter in self.presenters:
+            presenter.close_progress_bar()
 
     def update_progress(self, progress_observer):
         """
         Update the progress bar in the view.
         :param progress_observer: A observer reporting a progress.
         """
-        self.presenter.update_progress_bar(progress_observer.progress, progress_observer.message)
+        # self.presenter.update_progress_bar(progress_observer.progress, progress_observer.message)
+        pass
 
     def remove_observer(self, progress_observer):
         """
@@ -69,3 +80,20 @@ class AlgorithmProgressModel(AlgorithmObserver):
         index = self.progress_observers.index(progress_observer)
         if index >= 0:
             del self.progress_observers[index]
+            for presenter in self.presenters:
+                presenter.close_progress_bar()
+
+    def get_running_algorithm_data(self):
+        """
+        Create data describing running algorithms.
+        :return: A list of tuples of two elements: first one is the algorithm's name
+            and the second is a list of algorithm property descriptors - 3-element lists of the form:
+                [prop_name, prop_value_as_str, 'Default' or '']
+        """
+        algorithm_data = []
+        for observer in self.progress_observers:
+            properties = []
+            for prop in observer.properties():
+                properties.append([prop.name, str(prop.value), 'Default' if prop.isDefault else ''])
+            algorithm_data.append((observer.name(), properties))
+        return algorithm_data
