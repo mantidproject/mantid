@@ -1,11 +1,14 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/optional.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Geometry::IPeak;
+using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IPeak)
@@ -40,9 +43,14 @@ void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame,
 void setGoniometerMatrix(IPeak &self, const object &data) {
   self.setGoniometerMatrix(Converters::PyObjectToMatrix(data)());
 }
+
 } // namespace
 
 void export_IPeak() {
+  // return_value_policy for read-only numpy array
+  typedef return_value_policy<Policies::MatrixToNumpy>
+      return_copy_to_numpy;
+  
   register_ptr_to_python<IPeak *>();
 
   class_<IPeak, boost::noncopyable>("IPeak", no_init)
@@ -152,9 +160,13 @@ void export_IPeak() {
            "Return the # of counts in the bin at its peak")
       .def("setBinCount", &IPeak::setBinCount, (arg("self"), arg("bin_count")),
            "Set the # of counts in the bin at its peak")
+      .def("getGoniometerMatrix", &IPeak::getGoniometerMatrix,
+           arg("self"), return_copy_to_numpy(),
+           "Get the :class:`~mantid.geometry.Goniometer` rotation matrix of this peak."
+           "\n\n.. versionadded:: 3.12.0")
       .def("setGoniometerMatrix", &setGoniometerMatrix,
            (arg("self"), arg("goniometerMatrix")),
-           "Set the :class:`~mantid.geometry.Goniometer` of the peak")
+           "Set the :class:`~mantid.geometry.Goniometer` rotation matrix of this peak.")
       .def("getRow", &IPeak::getRow, arg("self"),
            "For :class:`~mantid.geometry.RectangularDetector` s only, returns "
            "the row (y) of the pixel of the "
