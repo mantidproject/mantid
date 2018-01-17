@@ -143,7 +143,7 @@ Runs To Sum
 |       |                           | more comma separated run numbers and press **Add** or the enter key to search for runs  |
 |       |                           | with a matching number.                                                                 |
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
-| **2** | **Run Summation List**    | This list contains the files to be summed.                                             |
+| **2** | **Run Summation List**    | This list contains the files to be summed.                                              |
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
 | **3** | **Browse**                | This button is used to select one or more nexus files to be added to the summation      |
 |       |                           | table.                                                                                  |
