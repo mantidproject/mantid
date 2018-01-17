@@ -660,19 +660,19 @@ public:
     auto geom_obj = createCube(1.0);
     Kernel::V3D pt;
     TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
-    TS_ASSERT_LESS_THAN(0.0, pt.X());
-    TS_ASSERT_LESS_THAN(pt.X(),1.0);
-    TS_ASSERT_LESS_THAN(0.0, pt.Y());
-    TS_ASSERT_LESS_THAN(pt.Y(), 1.0);    
-    TS_ASSERT_LESS_THAN(0.0, pt.Z());
-    TS_ASSERT_LESS_THAN(pt.Z(), 1.0);
+    TS_ASSERT_LESS_THAN_EQUALS(0.0, pt.X());
+    TS_ASSERT_LESS_THAN_EQUALS(pt.X(),1.0);
+    TS_ASSERT_LESS_THAN_EQUALS(0.0, pt.Y());
+    TS_ASSERT_LESS_THAN_EQUALS(pt.Y(), 1.0);    
+    TS_ASSERT_LESS_THAN_EQUALS(0.0, pt.Z());
+    TS_ASSERT_LESS_THAN_EQUALS(pt.Z(), 1.0);
   }
 
   void testFindPointInOctahedron()
   {
     auto geom_obj = createOctahedron();
     Kernel::V3D pt;
-    TS_ASSERT_LESS_THAN(abs(pt.X()) + abs(pt.Y()) + abs(pt.Z()), 1.0)
+    TS_ASSERT_LESS_THAN_EQUALS(abs(pt.X()) + abs(pt.Y()) + abs(pt.Z()), 1.0)
   }
 
   void testFindPointInLShape()
@@ -680,13 +680,13 @@ public:
     auto geom_obj = createLShape();
     Kernel::V3D pt;
     TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
-    TS_ASSERT_LESS_THAN(0.0, pt.X());
-    TS_ASSERT_LESS_THAN(pt.X(), 2.0);
-    TS_ASSERT_LESS_THAN(0.0, pt.Y());
-    TS_ASSERT_LESS_THAN(pt.Y(), 2.0);
-    TS_ASSERT_LESS_THAN(0.0, pt.Z());
-    TS_ASSERT_LESS_THAN(pt.Z(), 1.0);
-    TS_ASSERT(pt.X() < 1.0 || pt.Y() < 1.0)
+    TS_ASSERT_LESS_THAN_EQUALS(0.0, pt.X());
+    TS_ASSERT_LESS_THAN_EQUALS(pt.X(), 2.0);
+    TS_ASSERT_LESS_THAN_EQUALS(0.0, pt.Y());
+    TS_ASSERT_LESS_THAN_EQUALS(pt.Y(), 2.0);
+    TS_ASSERT_LESS_THAN_EQUALS(0.0, pt.Z());
+    TS_ASSERT_LESS_THAN_EQUALS(pt.Z(), 1.0);
+    TS_ASSERT(pt.X() <= 1.0 || pt.Y() <= 1.0)
   }
 
   void testGeneratePointInside() {
@@ -699,7 +699,7 @@ public:
     EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.55));
     EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.65));
 
-    //  Random sequence set up so as to give point (0.90, 1.10, 0.75)
+    //  Random sequence set up so as to give point (0.90, 1.10, 0.65)
     auto geom_obj = createLShape();
     size_t maxAttempts(1);
     V3D point;
@@ -709,7 +709,7 @@ public:
     const double tolerance(1e-10);
     TS_ASSERT_DELTA(0.90, point.X(), tolerance);
     TS_ASSERT_DELTA(1.10, point.Y(), tolerance);
-    TS_ASSERT_DELTA(0.70, point.Z(), tolerance);
+    TS_ASSERT_DELTA(0.65, point.Z(), tolerance);
   }
 
   void testGeneratePointInsideRespectsMaxAttempts() {
@@ -924,14 +924,14 @@ private:
     std::vector<int> triangles;
     // z min
     triangles.push_back(0);
-    triangles.push_back(1);
     triangles.push_back(5);
-    triangles.push_back(5);
-    triangles.push_back(3);
-    triangles.push_back(4);
-    triangles.push_back(3);
     triangles.push_back(1);
+    triangles.push_back(1);
+    triangles.push_back(3);
     triangles.push_back(2);
+    triangles.push_back(3);
+    triangles.push_back(5);
+    triangles.push_back(4);
     // z max
     triangles.push_back(6);
     triangles.push_back(7);

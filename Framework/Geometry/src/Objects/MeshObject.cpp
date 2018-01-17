@@ -210,20 +210,27 @@ bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
     return false;
   }
 
-  V3D direction(0.0, 0.0, 1.0); // direction to look for intersections
-  std::vector<V3D> intesectionPoints;
-  std::vector<int> entryExitFlags;
+  std::vector<V3D> directions; // directions to look for intersections
+  directions.push_back(V3D(0, 0, 1));
+  directions.push_back(V3D(0, 1, 0));
+  directions.push_back(V3D(1, 0, 0));
+  // We have to look in several directions in case point is on a face
+  // or edge parallel to first direction (or also second direction).
+  for (size_t i = 0; i < directions.size(); ++i) {
+    std::vector<V3D> intesectionPoints;
+    std::vector<int> entryExitFlags;
 
-  getIntersections(Pt, direction, intesectionPoints, entryExitFlags);
+    getIntersections(Pt, directions[i], intesectionPoints, entryExitFlags);
 
-  if (intesectionPoints.size() == 0) {
-    return false;
-  }
+    if (intesectionPoints.size() == 0) {
+      return false;
+    }
 
-  size_t k = intesectionPoints.size();
-  for (size_t i=0; i < k; ++i) {
-    if (Pt.distance(intesectionPoints[i]) < M_TOLERANCE) {
-      return true;
+    size_t k = intesectionPoints.size();
+    for (size_t i = 0; i < k; ++i) {
+      if (Pt.distance(intesectionPoints[i]) < M_TOLERANCE) {
+        return true;
+      }
     }
   }
   return false;
@@ -488,17 +495,17 @@ double MeshObject::volume() const {
   double cZ = 0.5*(bb.zMax() + bb.zMin());
   V3D centre(cX, cY, cZ);
 
-  double volume(0.0);
+  double volumeTimesSix(0.0);
 
   V3D vertex1, vertex2, vertex3;
   for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
     V3D a = vertex1 - centre;
     V3D b = vertex2 - centre;
     V3D c = vertex3 - centre;
-    volume += a.scalar_prod(b.cross_prod(c));
+    volumeTimesSix += a.scalar_prod(b.cross_prod(c));
   }
   
-  return volume;
+  return volumeTimesSix/6.0;
 }
 
 /**
@@ -543,15 +550,8 @@ Try to find a point that lies within (or on) the object
 @return 1 if point found, 0 otherwise
 */
 int MeshObject::getPointInObject(Kernel::V3D &point) const {
-  //
-  // Simple method - check if origin in object, if not search directions along
-  // axes. If that fails, try centre of boundingBox, and paths about there
-  //
+
   Kernel::V3D testPt(0, 0, 0);
-  if (searchForObject(testPt)) {
-    point = testPt;
-    return 1;
-  }
   // Try centre of bounding box as initial guess, if we have one.
   const BoundingBox &boundingBox = getBoundingBox();
   if (boundingBox.isNonNull()) {
