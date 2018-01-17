@@ -18,19 +18,27 @@ class TestEnggDiffGSASFittingModel : public EnggDiffGSASFittingModel {
 public:
   bool containsFocusedRun(const int runNumber, const size_t bank) const;
 
+  void addFittedPeaksWS(const int runNumber, const size_t bank,
+                        API::MatrixWorkspace_sptr ws);
+
   void addFocusedWorkspace(const int runNumber, const size_t bank,
-                           Mantid::API::MatrixWorkspace_sptr);
+                           API::MatrixWorkspace_sptr ws);
 };
 
-inline bool
-TestEnggDiffGSASFittingModel::containsFocusedRun(const int runNumber,
-                                                 const size_t bank) const {
-  return hasFocusedRun(runNumber, bank);
+inline void TestEnggDiffGSASFittingModel::addFittedPeaksWS(
+    const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
+  addFittedPeaks(runNumber, bank, ws);
 }
 
 inline void TestEnggDiffGSASFittingModel::addFocusedWorkspace(
     const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
   addFocusedRun(runNumber, bank, ws);
+}
+
+inline bool
+TestEnggDiffGSASFittingModel::containsFocusedRun(const int runNumber,
+                                                 const size_t bank) const {
+  return hasFocusedRun(runNumber, bank);
 }
 
 } // Anonymous namespace
@@ -80,6 +88,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFocusedWorkspace(123, 1));
     TS_ASSERT(retrievedWS);
     TS_ASSERT_EQUALS(ws, *retrievedWS);
+
+    TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFocusedWorkspace(456, 2));
+    TS_ASSERT_EQUALS(retrievedWS, boost::none);
   }
 
   void test_getRunLabels() {
@@ -90,14 +101,32 @@ public:
           API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
       model.addFocusedWorkspace(i * 111, i % 2 + 1, ws);
     }
-    
+
     std::vector<std::pair<int, size_t>> runLabels;
     TS_ASSERT_THROWS_NOTHING(runLabels = model.getRunLabels());
 
     TS_ASSERT_EQUALS(runLabels.size(), 4);
     for (int i = 1; i < 5; i++) {
-      TS_ASSERT_EQUALS(runLabels[i - 1], std::make_pair(i * 111, size_t(i % 2 + 1)));
+      TS_ASSERT_EQUALS(runLabels[i - 1],
+                       std::make_pair(i * 111, size_t(i % 2 + 1)));
     }
+  }
+
+  void test_getFittedPeaks() {
+    TestEnggDiffGSASFittingModel model;
+
+    API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+
+    model.addFittedPeaksWS(123, 1, ws);
+
+    boost::optional<API::MatrixWorkspace_sptr> retrievedWS;
+    TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFittedPeaks(123, 1));
+    TS_ASSERT(retrievedWS);
+    TS_ASSERT_EQUALS(ws, *retrievedWS);
+
+    TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFittedPeaks(456, 2));
+    TS_ASSERT_EQUALS(retrievedWS, boost::none);
   }
 };
 

@@ -46,7 +46,11 @@ public:
   bool loadFocusedRun(const std::string &filename) override;
 
 protected:
-  // Test helpers, exposed via dummy class in EnggDiffGSASFittingModelTest
+  /// The following methods are marked as protected so that they can be exposed
+  /// by a helper class in the tests
+
+  void addFittedPeaks(const int runNumber, const size_t bank,
+                      Mantid::API::MatrixWorkspace_sptr ws);
 
   /// Add a workspace to the focused workspace map
   void addFocusedRun(const int runNumber, const size_t bank,
@@ -59,6 +63,7 @@ protected:
 private:
   static const size_t MAX_BANKS = 2;
 
+  RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedWorkspaceMap;
 };
 

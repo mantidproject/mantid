@@ -33,6 +33,12 @@ size_t getBankID(API::MatrixWorkspace_const_sptr ws) {
 namespace MantidQt {
 namespace CustomInterfaces {
 
+void EnggDiffGSASFittingModel::addFittedPeaks(
+    const int runNumber, const size_t bank,
+    Mantid::API::MatrixWorkspace_sptr ws) {
+  m_fittedPeaksMap.add(runNumber, bank, ws);
+}
+
 void EnggDiffGSASFittingModel::addFocusedRun(
     const int runNumber, const size_t bank,
     Mantid::API::MatrixWorkspace_sptr ws) {
@@ -57,7 +63,10 @@ bool EnggDiffGSASFittingModel::doRietveldRefinement(
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
 EnggDiffGSASFittingModel::getFittedPeaks(const int runNumber,
                                          const size_t bank) const {
-  throw std::runtime_error("Not yet implemented");
+  if (m_fittedPeaksMap.contains(runNumber, bank)) {
+    return m_fittedPeaksMap.get(runNumber, bank);
+  }
+  return boost::none;
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
