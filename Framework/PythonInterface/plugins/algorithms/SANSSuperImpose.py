@@ -71,23 +71,15 @@ class SANSSuperImpose(PythonAlgorithm):
         )
 
         self.declareProperty(
-            name='K',
-            defaultValue=Property.EMPTY_DBL,
-            doc=r'Default K value for I_{scaled}(Q) = K*I(Q)+b.')
-
-        self.declareProperty(
             FloatArrayProperty("KList", [], direction=Direction.Input),
-            "List of K values. Must be the same length has data -1" +
+            "List of K values (or single value). Must be the same length has data -1" +
             r"Default b value for I_{scaled}(Q) = K*I(Q)+b.")
 
-        self.declareProperty(
-            name='B',
-            defaultValue=Property.EMPTY_DBL,
-            doc=r'Default b value for I_{scaled}(Q) = K*I(Q)+b.')
+
 
         self.declareProperty(
             FloatArrayProperty("BList", [], direction=Direction.Input),
-            " List of B values. Must be the same length has data -1" +
+            " List of B values (or single value). Must be the same length has data -1" +
             r"Default b value for I_{scaled}(Q) = K*I(Q)+b.")
 
         self.declareProperty(
@@ -127,14 +119,10 @@ class SANSSuperImpose(PythonAlgorithm):
             'DiscardBeginGlobal').value
         self.discard_end_global = self.getProperty('DiscardEndGlobal').value
 
-        self._k = None if self.getProperty(
-            'K').value == Property.EMPTY_DBL else self.getProperty('K').value
         self.k_list = None if len(
             self.getProperty('KList').value) == 0 else cycle(
                 self.getProperty('KList').value)
 
-        self._b = None if self.getProperty(
-            'B').value == Property.EMPTY_DBL else self.getProperty('B').value
         self.b_list = None if len(
             self.getProperty('BList').value) == 0 else cycle(
                 self.getProperty('BList').value)
@@ -147,16 +135,16 @@ class SANSSuperImpose(PythonAlgorithm):
         '''
         issues = dict()
 
-        if len(self.getProperty('BList').value) > 0 and len(
+        if len(self.getProperty('BList').value) > 1 and len(
                 self.getProperty('BList').value) != len(
                     self.getProperty('InputWorkspaces').value) - 1:
-            message = "The length of B List Parameters must be equal to the length of the input workspaces - 1"
+            message = "The length of B List Parameters must be 1 or equal to the length of the input workspaces - 1"
             issues['BList'] = message
 
-        if len(self.getProperty('KList').value) > 0 and len(
+        if len(self.getProperty('KList').value) > 1 and len(
                 self.getProperty('KList').value) != len(
                     self.getProperty('InputWorkspaces').value) - 1:
-            message = "The length of K List Parameters must be equal to the length of the input workspaces - 1"
+            message = "The length of K List Parameters must be 1 or equal to the length of the input workspaces - 1"
             issues['KList'] = message
 
         return issues
@@ -306,18 +294,14 @@ class SANSSuperImpose(PythonAlgorithm):
         if the b_list exists get the next element from b_list
         otherwise returns None
         '''
-        if self._b:
-            return self._b
-        elif self.b_list:
+        if self.b_list:
             return next(self.b_list)
         else:
             return None
 
     @property
     def k(self):
-        if self._k:
-            return self._k
-        elif self.k_list:
+        if self.k_list:
             return next(self.k_list)
         else:
             return None
