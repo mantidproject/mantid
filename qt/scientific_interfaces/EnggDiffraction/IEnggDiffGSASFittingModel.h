@@ -116,9 +116,9 @@ public:
   /**
    Load a focused run from a file to the model
    @param filename The name of the file to load
-   @return String describing why the load was a failure (empty if success)
+   @return Whether the load was a success
    */
-  virtual std::string loadFocusedRun(const std::string &filename) = 0;
+  virtual bool loadFocusedRun(const std::string &filename) = 0;
 };
 
 } // namespace MantidQt
