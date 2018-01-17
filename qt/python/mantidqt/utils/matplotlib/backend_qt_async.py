@@ -51,7 +51,7 @@ else:
 
 try:
     FigureManagerQT = getattr(mpl_qtagg_backend, 'FigureManagerQT')
-    FigureCanvasQTAgg = getattr(mpl_qtagg_backend, 'FigureCanvasQTAgg')
+    FigureCanvas = getattr(mpl_qtagg_backend, 'FigureCanvasQTAgg')
 except KeyError:
     raise ImportError("Unknown form of matplotlib Qt backend.")
 
