@@ -54,7 +54,7 @@ public:
     TS_ASSERT_EQUALS(runBankPairs.size(), 4);
     for (int i = 0; i < 4; ++i) {
       TS_ASSERT_EQUALS(runBankPairs[i],
-                       std::make_pair((i + 1) * 111, size_t((i + 1) % 3)));
+                       std::make_pair((i + 1) * 111, size_t(i % 3 + 1)));
     }
   }
 };
