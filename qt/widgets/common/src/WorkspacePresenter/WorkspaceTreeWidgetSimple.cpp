@@ -21,7 +21,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb,
                                                      QWidget *parent)
     : WorkspaceTreeWidget(mdb, parent) {}
 
-WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple(){};
+WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple(){}
 
 void WorkspaceTreeWidgetSimple::popupContextMenu() {
   QTreeWidgetItem *treeItem = m_tree->itemAt(m_menuPosition);
@@ -132,6 +132,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
 void WorkspaceTreeWidgetSimple::addMatrixWorkspaceMenuItems(
     QMenu *menu,
     const Mantid::API::MatrixWorkspace_const_sptr &matrixWS) const {
+  Q_UNUSED(matrixWS);
   menu->addAction(m_saveNexus);
 }
 
