@@ -56,6 +56,9 @@ protected:
   void addFocusedRun(const int runNumber, const size_t bank,
                      Mantid::API::MatrixWorkspace_sptr ws);
 
+  /// Add an rwp value to the rwp map
+  void addRwp(const int runNumber, const size_t bank, const double rwp);
+
   /// Get whether a focused run has been loaded with a given runNumber and bank
   /// ID.
   bool hasFocusedRun(const int runNumber, const size_t bank) const;
@@ -65,6 +68,7 @@ private:
 
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedWorkspaceMap;
+  RunMap<MAX_BANKS, double> m_rwpMap;
 };
 
 } // CustomInterfaces

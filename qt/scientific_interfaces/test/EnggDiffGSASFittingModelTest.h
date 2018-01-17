@@ -23,6 +23,8 @@ public:
 
   void addFocusedWorkspace(const int runNumber, const size_t bank,
                            API::MatrixWorkspace_sptr ws);
+
+  void addRwpValue(const int runNumber, const size_t bank, const double rwp);
 };
 
 inline void TestEnggDiffGSASFittingModel::addFittedPeaksWS(
@@ -33,6 +35,12 @@ inline void TestEnggDiffGSASFittingModel::addFittedPeaksWS(
 inline void TestEnggDiffGSASFittingModel::addFocusedWorkspace(
     const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
   addFocusedRun(runNumber, bank, ws);
+}
+
+inline void TestEnggDiffGSASFittingModel::addRwpValue(const int runNumber,
+                                                      const size_t bank,
+                                                      const double rwp) {
+  addRwp(runNumber, bank, rwp);
 }
 
 inline bool
@@ -138,6 +146,21 @@ public:
     model.addFittedPeaksWS(123, 1, ws);
     TS_ASSERT(model.hasFittedPeaksForRun(123, 1));
     TS_ASSERT(!model.hasFittedPeaksForRun(456, 1));
+  }
+
+  void test_getRwp() {
+    TestEnggDiffGSASFittingModel model;
+
+    const double rwp = 75.5;
+    model.addRwpValue(123, 1, rwp);
+
+    boost::optional<double> retrievedRwp;
+    TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(123, 1));
+    TS_ASSERT(retrievedRwp);
+    TS_ASSERT_EQUALS(rwp, *retrievedRwp);
+
+    TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(456, 2));
+    TS_ASSERT_EQUALS(retrievedRwp, boost::none);
   }
 };
 

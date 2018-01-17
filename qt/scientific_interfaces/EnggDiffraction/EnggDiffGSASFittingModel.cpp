@@ -45,6 +45,11 @@ void EnggDiffGSASFittingModel::addFocusedRun(
   m_focusedWorkspaceMap.add(runNumber, bank, ws);
 }
 
+void EnggDiffGSASFittingModel::addRwp(const int runNumber, const size_t bank,
+                                      const double rwp) {
+  m_rwpMap.add(runNumber, bank, rwp);
+}
+
 bool EnggDiffGSASFittingModel::doPawleyRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
@@ -91,7 +96,10 @@ EnggDiffGSASFittingModel::getRunLabels() const {
 
 boost::optional<double>
 EnggDiffGSASFittingModel::getRwp(const int runNumber, const size_t bank) const {
-  throw std::runtime_error("Not yet implemented");
+  if (m_rwpMap.contains(runNumber, bank)) {
+    return m_rwpMap.get(runNumber, bank);
+  }
+  return boost::none;
 }
 
 bool EnggDiffGSASFittingModel::hasFittedPeaksForRun(const int runNumber,
