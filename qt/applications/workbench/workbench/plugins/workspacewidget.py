@@ -19,6 +19,7 @@ from __future__ import (absolute_import, unicode_literals)
 # system imports
 
 # third-party library imports
+from mantid.api import AnalysisDataService
 from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
 from mantidqt.widgets.workspacewidget.workspacetreewidget import PlotSelectionDialog, WorkspaceTreeWidget
 from qtpy.QtWidgets import QVBoxLayout
@@ -53,6 +54,7 @@ class WorkspaceWidget(PluginWidget):
 
     # ----------------- Behaviour --------------------
 
-    def _do_plot1d(self):
-        selection_dlg = PlotSelectionDialog([], parent=self)
+    def _do_plot1d(self, selected_ws):
+        workspaces = [AnalysisDataService.Instance()[selected_ws.encode('utf-8')]]
+        selection_dlg = PlotSelectionDialog(workspaces, parent=self)
         selection_dlg.exec_()

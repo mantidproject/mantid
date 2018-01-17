@@ -16,8 +16,10 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import)
 
+# std imports
+
 # 3rd party imports
-from qtpy.QtWidgets import QDialog, QVBoxLayout
+from qtpy.QtWidgets import QDialogButtonBox
 
 # local imports
 from mantidqt.utils.qt import import_qtlib, load_ui
@@ -32,9 +34,35 @@ PlotSelectionDialogUI, PlotSelectionDialogUIBase = load_ui(__file__, 'plotselect
 class PlotSelectionDialog(PlotSelectionDialogUIBase):
 
     def __init__(self, workspaces,
-               parent=None):
+                 parent=None):
         super(PlotSelectionDialog, self).__init__(parent)
+        # attributes
+        self._workspaces = workspaces
 
+        # layout
         ui = PlotSelectionDialogUI()
         ui.setupUi(self)
-        self.ui = ui
+        self._ui = ui
+        # overwrite the "Yes to All" button text
+        ui.buttonBox.button(QDialogButtonBox.YesToAll).setText('Plot All')
+
+        # populate details
+        self._fill_workspace_details()
+
+    # ------------------- Private -------------------------
+    def _fill_workspace_details(self):
+        """Sets placeholder text to indicate the ranges possible"""
+        workspaces = self._workspaces
+        # workspace index range
+        wi_max = min([ws.getNumberHistograms() - 1 for ws in workspaces])
+        self._ui.wkspIndices.setPlaceholderText("{}-{}".format(0, wi_max))
+
+        # spectra range
+        ws_spectra = [{ws.getSpectrum(i).getSpectrumNo() for i in range(ws.getNumberHistograms())} for ws in workspaces]
+        plottable =  ws_spectra[0]
+        if len(ws_spectra) > 1:
+            for sp_set in ws_spectra[1:]:
+                plottable = plottable.intersection(sp_set)
+        plottable = sorted(plottable)
+        spec_min, spec_max = min(plottable), max(plottable)
+        self._ui.specNums.setPlaceholderText("{}-{}".format(spec_min, spec_max))
