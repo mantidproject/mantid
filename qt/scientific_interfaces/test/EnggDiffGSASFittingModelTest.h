@@ -4,6 +4,7 @@
 #include "../EnggDiffraction/EnggDiffGSASFittingModel.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <cxxtest/TestSuite.h>
@@ -12,6 +13,23 @@ using namespace Mantid;
 using namespace MantidQt::CustomInterfaces;
 
 namespace { // Helpers
+
+template <size_t numColumns, size_t numRows>
+API::ITableWorkspace_sptr createDummyTable(
+    const std::array<std::string, numColumns> &columnHeadings,
+    const std::array<std::array<double, numColumns>, numRows> tableContents) {
+  auto table = API::WorkspaceFactory::Instance().createTable();
+  for (const auto &header : columnHeadings) {
+    table->addColumn("double", header);
+  }
+  for (const auto &row : tableContents) {
+    API::TableRow newRow = table->appendRow();
+    for (const auto value : row) {
+      newRow << value;
+    }
+  }
+  return table;
+}
 
 // Helper class with some protected methods exposed
 class TestEnggDiffGSASFittingModel : public EnggDiffGSASFittingModel {
@@ -24,6 +42,9 @@ public:
   void addFocusedWorkspace(const int runNumber, const size_t bank,
                            API::MatrixWorkspace_sptr ws);
 
+  void addLatticeParamTable(const int runNumber, const size_t bank,
+                            API::ITableWorkspace_sptr table);
+
   void addRwpValue(const int runNumber, const size_t bank, const double rwp);
 };
 
@@ -35,6 +56,11 @@ inline void TestEnggDiffGSASFittingModel::addFittedPeaksWS(
 inline void TestEnggDiffGSASFittingModel::addFocusedWorkspace(
     const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
   addFocusedRun(runNumber, bank, ws);
+}
+
+inline void TestEnggDiffGSASFittingModel::addLatticeParamTable(
+    const int runNumber, const size_t bank, API::ITableWorkspace_sptr table) {
+  addLatticeParams(runNumber, bank, table);
 }
 
 inline void TestEnggDiffGSASFittingModel::addRwpValue(const int runNumber,
@@ -161,6 +187,38 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(456, 2));
     TS_ASSERT_EQUALS(retrievedRwp, boost::none);
+  }
+
+  void test_getLatticeParams() {
+    const std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
+    const std::array<std::array<double, 3>, 1> targetTableValues = {
+        {{1, 2, 3}}};
+    const auto table = createDummyTable(columnHeadings, targetTableValues);
+
+    TestEnggDiffGSASFittingModel model;
+
+    TS_ASSERT_THROWS_NOTHING(model.addLatticeParamTable(123, 1, table));
+
+    // auto retrievedTable = model.getLatticeParams(123, 1);
+    boost::optional<API::ITableWorkspace_sptr> retrievedTable;
+    TS_ASSERT_THROWS_NOTHING(retrievedTable = model.getLatticeParams(123, 1));
+    TS_ASSERT(retrievedTable);
+
+    API::TableRow row = (*retrievedTable)->getRow(0);
+    const double expectedA = 1;
+    const double expectedB = 2;
+    const double expectedC = 3;
+    auto a = expectedA + 1;
+    auto b = expectedB + 1;
+    auto c = expectedC + 1;
+
+    TS_ASSERT_THROWS_NOTHING(row >> a >> b >> c);
+    TS_ASSERT_EQUALS(a, expectedA);
+    TS_ASSERT_EQUALS(b, expectedB);
+    TS_ASSERT_EQUALS(c, expectedC);
+
+    TS_ASSERT_THROWS_NOTHING(retrievedTable = model.getLatticeParams(456, 2));
+    TS_ASSERT_EQUALS(retrievedTable, boost::none);
   }
 };
 

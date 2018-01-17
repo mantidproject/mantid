@@ -49,12 +49,17 @@ protected:
   /// The following methods are marked as protected so that they can be exposed
   /// by a helper class in the tests
 
+  // Add a workspace to the fitted peaks map
   void addFittedPeaks(const int runNumber, const size_t bank,
                       Mantid::API::MatrixWorkspace_sptr ws);
 
   /// Add a workspace to the focused workspace map
   void addFocusedRun(const int runNumber, const size_t bank,
                      Mantid::API::MatrixWorkspace_sptr ws);
+
+  /// Add a lattice parameter table to the map
+  void addLatticeParams(const int runNumber, const size_t bank,
+                        Mantid::API::ITableWorkspace_sptr table);
 
   /// Add an rwp value to the rwp map
   void addRwp(const int runNumber, const size_t bank, const double rwp);
@@ -68,6 +73,7 @@ private:
 
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedWorkspaceMap;
+  RunMap<MAX_BANKS, Mantid::API::ITableWorkspace_sptr> m_latticeParamsMap;
   RunMap<MAX_BANKS, double> m_rwpMap;
 
   template <typename T>

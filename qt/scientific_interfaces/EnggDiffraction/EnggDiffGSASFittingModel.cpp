@@ -33,16 +33,21 @@ size_t getBankID(API::MatrixWorkspace_const_sptr ws) {
 namespace MantidQt {
 namespace CustomInterfaces {
 
-void EnggDiffGSASFittingModel::addFittedPeaks(
-    const int runNumber, const size_t bank,
-    Mantid::API::MatrixWorkspace_sptr ws) {
+void EnggDiffGSASFittingModel::addFittedPeaks(const int runNumber,
+                                              const size_t bank,
+                                              API::MatrixWorkspace_sptr ws) {
   m_fittedPeaksMap.add(runNumber, bank, ws);
 }
 
-void EnggDiffGSASFittingModel::addFocusedRun(
-    const int runNumber, const size_t bank,
-    Mantid::API::MatrixWorkspace_sptr ws) {
+void EnggDiffGSASFittingModel::addFocusedRun(const int runNumber,
+                                             const size_t bank,
+                                             API::MatrixWorkspace_sptr ws) {
   m_focusedWorkspaceMap.add(runNumber, bank, ws);
+}
+
+void EnggDiffGSASFittingModel::addLatticeParams(
+    const int runNumber, const size_t bank, API::ITableWorkspace_sptr table) {
+  m_latticeParamsMap.add(runNumber, bank, table);
 }
 
 void EnggDiffGSASFittingModel::addRwp(const int runNumber, const size_t bank,
@@ -65,22 +70,22 @@ bool EnggDiffGSASFittingModel::doRietveldRefinement(
   throw std::runtime_error("Not yet implemented");
 }
 
-boost::optional<Mantid::API::MatrixWorkspace_sptr>
+boost::optional<API::MatrixWorkspace_sptr>
 EnggDiffGSASFittingModel::getFittedPeaks(const int runNumber,
                                          const size_t bank) const {
-    return getFromRunMapOptional(m_fittedPeaksMap, runNumber, bank);
+  return getFromRunMapOptional(m_fittedPeaksMap, runNumber, bank);
 }
 
-boost::optional<Mantid::API::MatrixWorkspace_sptr>
+boost::optional<API::MatrixWorkspace_sptr>
 EnggDiffGSASFittingModel::getFocusedWorkspace(const int runNumber,
                                               const size_t bank) const {
   return getFromRunMapOptional(m_focusedWorkspaceMap, runNumber, bank);
 }
 
-boost::optional<Mantid::API::ITableWorkspace_sptr>
+boost::optional<API::ITableWorkspace_sptr>
 EnggDiffGSASFittingModel::getLatticeParams(const int runNumber,
                                            const size_t bank) const {
-  throw std::runtime_error("Not yet implemented");
+  return getFromRunMapOptional(m_latticeParamsMap, runNumber, bank);
 }
 
 std::vector<std::pair<int, size_t>>
