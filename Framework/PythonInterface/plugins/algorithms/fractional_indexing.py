@@ -56,7 +56,21 @@ def generate_grid(vecs, upper_bound):
     search_range = np.arange(-upper_bound, upper_bound)
     vs = np.array([v*i for v in vecs for i in search_range])
     vs = np.array([v+w for v in vs for w in vs if np.dot(v, w) == 0])
-    return np.unique(vs, axis=0)
+    return unique_rows(vs)
+
+
+def unique_rows(a):
+    """Return the unique rows of a numpy array
+
+    In numpy >= 1.13 np.unique(x, axis=0) can be user instead. But for versions of
+    numpy before 1.13 this function can be used to achieve the same result.
+
+    :param a: the array to find unique rows for.
+    :returns: the unique rows of a
+    """
+    a = np.ascontiguousarray(a)
+    unique_a = np.unique(a.view([('', a.dtype)] * a.shape[1]))
+    return unique_a.view(a.dtype).reshape((unique_a.shape[0], a.shape[1]))
 
 
 def round_to_nearest_reflection(qs, reflections, tolerance):
