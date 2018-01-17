@@ -16,7 +16,25 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import)
 
-from mantidqt.utils.qt import import_qtlib
+# 3rd party imports
+from qtpy.QtWidgets import QDialog, QVBoxLayout
+
+# local imports
+from mantidqt.utils.qt import import_qtlib, load_ui
 
 
-WorkspaceTreeWidget = import_qtlib('_widgetscore', 'mantidqt.widgets.workspacewidget', 'WorkspaceTreeWidgetSimple')
+WorkspaceTreeWidget = import_qtlib('_widgetscore', 'mantidqt.widgets.workspacewidget',
+                                   'WorkspaceTreeWidgetSimple')
+
+PlotSelectionDialogUI, PlotSelectionDialogUIBase = load_ui(__file__, 'plotselectiondialog.ui')
+
+
+class PlotSelectionDialog(PlotSelectionDialogUIBase):
+
+    def __init__(self, workspaces,
+               parent=None):
+        super(PlotSelectionDialog, self).__init__(parent)
+
+        ui = PlotSelectionDialogUI()
+        ui.setupUi(self)
+        self.ui = ui

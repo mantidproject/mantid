@@ -19,8 +19,8 @@ from __future__ import (absolute_import, unicode_literals)
 # system imports
 
 # third-party library imports
-from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
+from mantidqt.widgets.workspacewidget.workspacetreewidget import PlotSelectionDialog, WorkspaceTreeWidget
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
@@ -34,15 +34,25 @@ class WorkspaceWidget(PluginWidget):
         super(WorkspaceWidget, self).__init__(parent)
 
         # layout
-        self.workspacewidget = WorkspaceTreeWidget(MantidTreeModel())
+        workspacewidget = WorkspaceTreeWidget(MantidTreeModel())
+        self.workspacewidget = workspacewidget
         layout = QVBoxLayout()
         layout.addWidget(self.workspacewidget)
         self.setLayout(layout)
 
-# ----------------- Plugin API --------------------
+        # behaviour
+        workspacewidget.plot1DClicked.connect(self._do_plot1d)
+
+    # ----------------- Plugin API --------------------
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
 
     def get_plugin_title(self):
         return "Workspaces"
+
+    # ----------------- Behaviour --------------------
+
+    def _do_plot1d(self):
+        selection_dlg = PlotSelectionDialog([], parent=self)
+        selection_dlg.exec_()
