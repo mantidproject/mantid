@@ -88,7 +88,7 @@ private:
 
   // Peak fitting suite
   double FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
-                           API::IAlgorithm_sptr bkgd_fitter,
+                           API::IAlgorithm_sptr bkgd_fitter, const double &expected_peak_center,
                            const std::pair<double, double> &fitwindow,
                            const bool &high, const bool &observe_peak_width,
                            API::IPeakFunction_sptr peakfunction,
@@ -111,7 +111,7 @@ private:
   double FitFunctionHighBackground(API::IAlgorithm_sptr fit,
                                    API::IAlgorithm_sptr bkgd_fitter,
                                    const std::pair<double, double> &fit_window,
-                                   const size_t &ws_index,
+                                   const size_t &ws_index, const double &expected_peak_center,
                                    API::IPeakFunction_sptr peakfunction,
                                    API::IBackgroundFunction_sptr bkgdfunc,
                                    bool observe_peak_width);
