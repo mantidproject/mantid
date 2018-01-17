@@ -5,7 +5,6 @@ from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.work_handler import WorkHandler
 from sans.common.enums import IntegralEnum
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 from sans.gui_logic.gui_common import get_detector_strings_for_diagnostic_page, get_detector_from_gui_selection
 
 
