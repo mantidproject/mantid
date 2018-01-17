@@ -133,11 +133,7 @@ def mask_with_mask_files(mask_info, workspace):
             # Could use MaskDetectors directly with masking_workspace but it does not
             # support MPI. Use a three step approach via a, b, and c instead.
             # a) Extract detectors to mask from MaskWorkspace
-            det_ids = []
-            for i in range(masking_workspace.getNumberHistograms()):
-                if masking_workspace.readY(i)[0] > 0.5:
-                    for det_id in masking_workspace.getSpectrum(i).getDetectorIDs():
-                        det_ids.append(det_id)
+            det_ids = masking_workspace.getMaskedDetectors()
             # b) Mask the detector ids on the instrument
             mask_alg.setProperty("InputWorkspace", workspace)
             mask_alg.setProperty("OutputWorkspace", workspace)
