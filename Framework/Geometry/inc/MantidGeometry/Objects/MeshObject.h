@@ -204,7 +204,6 @@ private:
   /// Contents
   std::vector<int> m_triangles;
   std::vector<Kernel::V3D> m_vertices;
-
 };
 
 } // NAMESPACE Geometry

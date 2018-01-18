@@ -324,7 +324,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
 */
 bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2,
                              V3D &vertex3) const {
-  bool triangleExists = index < m_triangles.size()/3;
+  bool triangleExists = index < m_triangles.size() / 3;
   if (triangleExists) {
     vertex1 = m_vertices[m_triangles[3 * index]];
     vertex2 = m_vertices[m_triangles[3 * index + 1]];
