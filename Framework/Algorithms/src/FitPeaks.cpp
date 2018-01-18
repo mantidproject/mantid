@@ -1441,6 +1441,8 @@ bool FitPeaks::FitBackground(API::IAlgorithm_sptr md_fitter,
     double chi2 = FitFunctionMD(md_fitter, bkgd_func, m_inputMatrixWS, ws_index,
                                 vec_min, vec_max);
 
+    // TODO ASAP - Check the result by output
+
     // process
     bool good_fit(false);
     if (chi2 < DBL_MAX - 1) {
