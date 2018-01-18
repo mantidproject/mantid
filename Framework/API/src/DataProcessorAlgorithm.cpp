@@ -578,11 +578,18 @@ GenericDataProcessorAlgorithm<Base>::createWorkspaceSingleValue(
   return retVal;
 }
 
-template class MANTID_API_DLL GenericDataProcessorAlgorithm<Algorithm>;
+template <typename T>
+void GenericDataProcessorAlgorithm<T>::visualStudioC4661Workaround() {}
+
+template class GenericDataProcessorAlgorithm<Algorithm>;
 template class MANTID_API_DLL GenericDataProcessorAlgorithm<SerialAlgorithm>;
 template class MANTID_API_DLL GenericDataProcessorAlgorithm<ParallelAlgorithm>;
 template class MANTID_API_DLL
     GenericDataProcessorAlgorithm<DistributedAlgorithm>;
+
+template <>
+MANTID_API_DLL void
+GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround() {}
 
 } // namespace Mantid
 } // namespace API

@@ -42,7 +42,8 @@ namespace API {
    File change history is stored at: <https://github.com/mantidproject/mantid>
    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-template <class Base> class GenericDataProcessorAlgorithm : public Base {
+template <class Base>
+class DLLExport GenericDataProcessorAlgorithm : public Base {
 public:
   GenericDataProcessorAlgorithm();
   std::string getPropertyValue(const std::string &name) const override;
