@@ -19,7 +19,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingPresenter
 
 public:
   EnggDiffGSASFittingPresenter(std::unique_ptr<IEnggDiffGSASFittingModel> model,
-                               std::unique_ptr<IEnggDiffGSASFittingView> view);
+                               IEnggDiffGSASFittingView* view);
 
   EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other);
 
@@ -90,7 +90,7 @@ private:
 
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 
-  std::unique_ptr<IEnggDiffGSASFittingView> m_view;
+  IEnggDiffGSASFittingView* m_view;
 
   bool m_viewHasClosed;
 };

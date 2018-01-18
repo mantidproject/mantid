@@ -253,17 +253,18 @@ private:
         testing::NiceMock<MockEnggDiffGSASFittingModel>>();
     m_mockModelPtr = mockModel.get();
 
-    auto mockView = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingView>>();
-    m_mockViewPtr = mockView.get();
+    m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();
 
     std::unique_ptr<EnggDiffGSASFittingPresenter> pres_uptr(
         new EnggDiffGSASFittingPresenter(std::move(mockModel),
-                                         std::move(mockView)));
+                                         m_mockViewPtr));
     return pres_uptr;
   }
 
   void assertMocksUsedCorrectly() {
+    if (m_mockViewPtr) {
+      delete m_mockViewPtr;
+    }
     TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(m_mockModelPtr));

@@ -1,3 +1,5 @@
+#include "EnggDiffGSASFittingModel.h"
+#include "EnggDiffGSASFittingPresenter.h"
 #include "EnggDiffGSASFittingViewQtWidget.h"
 
 namespace MantidQt {
@@ -5,6 +7,9 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
   m_ui.setupUi(this);
+  
+  auto model = std::make_unique<EnggDiffGSASFittingModel>();
+  m_presenter.reset(new EnggDiffGSASFittingPresenter(std::move(model), this));
 }
 
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(

@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEWQTWIDGET_H_
 
 #include "DllConfig.h"
+#include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
 
 #include "ui_EnggDiffractionQtTabGSAS.h"
@@ -54,6 +55,8 @@ public:
   void userWarning(const std::string &warningDescription) const override;
 
  private:
+  std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
+
   Ui::EnggDiffractionQtTabGSAS m_ui;
 };
 
