@@ -12,9 +12,12 @@ class ISpectrum;
 
 namespace Algorithms {
 
-/** PolarizationEfficiencyCor : TODO: DESCRIPTION
+/** PolarizationEfficiencyCor : This algorithm corrects for non-ideal
+  component efficiencies in polarized neutron analysis. It is based on
+  [A. R. Wildes (2006) Neutron News, 17:2, 17-25,
+  DOI: 10.1080/10448630600668738]
 
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
