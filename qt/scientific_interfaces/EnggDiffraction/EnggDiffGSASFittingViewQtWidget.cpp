@@ -1,10 +1,17 @@
 #include "EnggDiffGSASFittingViewQtWidget.h"
 
+#include <QFileDialog>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
-  m_ui.setupUi(this);
+  setupUI();
+}
+
+void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
+  QString path(QFileDialog::getOpenFileName(this, tr("Find focused run file")));
+  setFocusedRunFileName(path);
 }
 
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
@@ -87,6 +94,17 @@ void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
   m_ui.lineEdit_pawleyNegativeWeight->setEnabled(enabled);
 
   m_ui.checkBox_showRefinementResults->setEnabled(enabled);
+}
+
+void EnggDiffGSASFittingViewQtWidget::setFocusedRunFileName(
+    const QString &filename) {
+  m_ui.lineEdit_runFile->setText(filename);
+}
+
+void EnggDiffGSASFittingViewQtWidget::setupUI() {
+  m_ui.setupUi(this);
+  connect(m_ui.pushButton_browseRunFile, SIGNAL(clicked()), this,
+          SLOT(browseFocusedRun()));
 }
 
 bool EnggDiffGSASFittingViewQtWidget::showRefinementResultsSelected() const {

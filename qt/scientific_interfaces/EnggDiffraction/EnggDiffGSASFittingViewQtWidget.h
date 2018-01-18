@@ -14,14 +14,14 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
       public IEnggDiffGSASFittingView {
   Q_OBJECT
 
-public:  
+public:
   EnggDiffGSASFittingViewQtWidget();
 
   void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 
   void displayRwp(const double rwp) const override;
-  
+
   std::string getFocusedFileName() const override;
 
   std::string getGSASIIProjectPath() const override;
@@ -53,8 +53,15 @@ public:
 
   void userWarning(const std::string &warningDescription) const override;
 
- private:
+private slots:
+  void browseFocusedRun();
+
+private:
   Ui::EnggDiffractionQtTabGSAS m_ui;
+
+  void setFocusedRunFileName(const QString &filename);
+
+  void setupUI();
 };
 
 } // MantidQt
