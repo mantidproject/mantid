@@ -27,7 +27,7 @@ import sys
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
-MPL_BACKEND = 'module://mantidqt.utils.matplotlib.backend_qt_async'
+MPL_BACKEND = 'module://workbench.plotting.backend_workbench'
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout

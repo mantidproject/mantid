@@ -18,20 +18,236 @@
 
 # std imports
 import importlib
+import sys
 
 # 3rdparty imports
+import matplotlib
+from matplotlib.backend_bases import FigureManagerBase
 from qtpy import QT_VERSION
-mpl_qtagg_backend = importlib.import_module('matplotlib.backends.backend_qt{}agg'.format(QT_VERSION[0]))
+from qtpy.QtCore import Qt, QMetaObject, QThread, Signal
+from qtpy.QtWidgets import qApp, QApplication, QLabel, QMainWindow
+from six import reraise, text_type
 
 # local imports
-from workbench.plotting.toolbars.lineplot_toolbar import LinePlotNavigationToolbar
+from workbench.plotting.currentfigure import CurrentFigure
+from workbench.plotting.toolbar import WorkbenchNavigationToolbar
+
+# Import the *real* matplotlib backend for the canvas
+mpl_qtagg_backend = importlib.import_module('matplotlib.backends.backend_qt{}agg'.format(QT_VERSION[0]))
+try:
+    FigureCanvas = getattr(mpl_qtagg_backend, 'FigureCanvasQTAgg')
+except KeyError:
+    raise ImportError("Unknown form of matplotlib Qt backend.")
 
 
-class LinePlotFigureManagerQT(mpl_qtagg_backend.FigureManagerQT):
+class MainWindow(QMainWindow):
+    closing = Signal()
 
-    def __init__(self, figure, num):
-        canvas = mpl_qtagg_backend.FigureCanvasQT(figure)
-        super(LinePlotFigureManagerQT, self).__init__(canvas, num)
+    def closeEvent(self, event):
+        self.closing.emit()
+        QMainWindow.closeEvent(self, event)
+
+
+class FigureManagerWorkbench(FigureManagerBase):
+    """
+    Attributes
+    ----------
+    canvas : `FigureCanvas`
+        The FigureCanvas instance
+    num : int or str
+        The Figure number
+    toolbar : qt.QToolBar
+        The qt.QToolBar
+    window : qt.QMainWindow
+        The qt.QMainWindow
+
+    """
+
+    def __init__(self, canvas, num):
+        FigureManagerBase.__init__(self, canvas, num)
+        self._destroy_exc = None
+        self.canvas = canvas
+        self.window = MainWindow()
+        self.window.closing.connect(canvas.close_event)
+        self.window.closing.connect(self._widgetclosed)
+
+        self.window.setWindowTitle("Figure %d" % num)
+
+        # Give the keyboard focus to the figure instead of the
+        # manager; StrongFocus accepts both tab and click to focus and
+        # will enable the canvas to process event w/o clicking.
+        # ClickFocus only takes the focus is the window has been
+        # clicked
+        # on. http://qt-project.org/doc/qt-4.8/qt.html#FocusPolicy-enum or
+        # http://doc.qt.digia.com/qt/qt.html#FocusPolicy-enum
+        self.canvas.setFocusPolicy(Qt.StrongFocus)
+        self.canvas.setFocus()
+
+        self.window._destroying = False
+
+        # add text label to status bar
+        self.statusbar_label = QLabel()
+        self.window.statusBar().addWidget(self.statusbar_label)
+
+        self.toolbar = self._get_toolbar(self.canvas, self.window)
+        if self.toolbar is not None:
+            self.window.addToolBar(self.toolbar)
+            self.toolbar.message.connect(self.statusbar_label.setText)
+            tbs_height = self.toolbar.sizeHint().height()
+        else:
+            tbs_height = 0
+
+        # resize the main window so it will display the canvas with the
+        # requested size:
+        cs = canvas.sizeHint()
+        sbs = self.window.statusBar().sizeHint()
+        self._status_and_tool_height = tbs_height + sbs.height()
+        height = cs.height() + self._status_and_tool_height
+        self.window.resize(cs.width(), height)
+
+        self.window.setCentralWidget(self.canvas)
+
+        if matplotlib.is_interactive():
+            self.window.show()
+            self.canvas.draw_idle()
+
+        def notify_axes_change(fig):
+            # This will be called whenever the current axes is changed
+            if self.toolbar is not None:
+                self.toolbar.update()
+        self.canvas.figure.add_axobserver(notify_axes_change)
+        self.window.raise_()
+
+    def full_screen_toggle(self):
+        if self.window.isFullScreen():
+            self.window.showNormal()
+        else:
+            self.window.showFullScreen()
+
+    def _widgetclosed(self):
+        if self.window._destroying:
+            return
+        self.window._destroying = True
+        try:
+            CurrentFigure.destroy(self.num)
+        except AttributeError:
+            pass
+            # It seems that when the python session is killed,
+            # CurrentFigure can get destroyed before the CurrentFigure.destroy
+            # line is run, leading to a useless AttributeError.
 
     def _get_toolbar(self, canvas, parent):
-        return LinePlotNavigationToolbar(canvas, parent, False)
+            return WorkbenchNavigationToolbar(canvas, parent, False)
+
+    def resize(self, width, height):
+        'set the canvas size in pixels'
+        self.window.resize(width, height + self._status_and_tool_height)
+
+    def show(self):
+        self.window.show()
+        self.window.activateWindow()
+        self.window.raise_()
+
+    def destroy(self, *args):
+        # check for qApp first, as PySide deletes it in its atexit handler
+        if QApplication.instance() is None:
+            return
+        if self.window._destroying:
+            return
+        if QThread.currentThread() == qApp.thread():
+            # direct call
+            self._destroy_impl()
+        else:
+            # dispatch through event loop to we end up on the main thread
+            QMetaObject.invokeMethod(self, "_destroy_impl",
+                                    Qt.BlockingQueuedConnection)
+            if self._destroy_exc is not None:
+                exc_info = self._destroy_exc
+                self._destroy_exc = None
+                reraise(*exc_info)
+
+    def _destroy_impl(self):
+        self.window._destroying = True
+        self.window.destroyed.connect(self._widgetclosed)
+        try:
+            if self.toolbar:
+                self.toolbar.destroy()
+            self.window.close()
+        except BaseException:  # noqa
+            self._destroy_exc = sys.exc_info()
+
+    def get_window_title(self):
+        return text_type(self.window.windowTitle())
+
+    def set_window_title(self, title):
+        self.window.setWindowTitle(title)
+
+
+class Show(object):
+    """
+
+    """
+    def __call__(self, block=None):
+        """
+        Show all figures.
+
+        block is ignored as calling mainloop does nothing anyway
+        since the event loop is already running
+        """
+        managers = CurrentFigure.get_all_fig_managers()
+        if not managers:
+            return
+
+        for manager in managers:
+            manager.show()
+
+        # I'm not sure if we need to do this...
+
+        # # Hack: determine at runtime whether we are
+        # # inside ipython in pylab mode.
+        # from matplotlib import pyplot
+        # try:
+        #     ipython_pylab = not pyplot.show._needmain
+        #     # IPython versions >= 0.10 tack the _needmain
+        #     # attribute onto pyplot.show, and always set
+        #     # it to False, when in %pylab mode.
+        #     ipython_pylab = ipython_pylab and get_backend() != 'WebAgg'
+        #     # TODO: The above is a hack to get the WebAgg backend
+        #     # working with ipython's `%pylab` mode until proper
+        #     # integration is implemented.
+        # except AttributeError:
+        #     ipython_pylab = False
+        #
+        # # Leave the following as a separate step in case we
+        # # want to control this behavior with an rcParam.
+        # if ipython_pylab:
+        #     return
+
+    def mainloop(self):
+        # we have already started the event loop
+        pass
+
+
+# -----------------------------------------------------------------------------
+# Figure control
+# -----------------------------------------------------------------------------
+
+def new_figure_manager(num, *args, **kwargs):
+    """
+    Create a new figure manager instance
+    """
+    from matplotlib.figure import Figure  # noqa
+    figure_class = kwargs.pop('FigureClass', Figure)
+    this_fig = figure_class(*args, **kwargs)
+    return new_figure_manager_given_figure(num, this_fig)
+
+
+def new_figure_manager_given_figure(num, figure):
+    """
+    Create a new figure manager instance for the given figure.
+    """
+    canvas = FigureCanvas(figure)
+    manager = FigureManagerWorkbench(canvas, num)
+    return manager
+
+show = Show()

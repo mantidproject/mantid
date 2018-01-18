@@ -153,5 +153,5 @@ class CurrentFigure(object):
             if force or f_mgr.canvas.figure.stale:
                 f_mgr.canvas.draw_idle()
 
-atexit.register(Gcf.destroy_all)
+atexit.register(CurrentFigure.destroy_all)
 

@@ -21,11 +21,10 @@ our custom window.
 # std imports
 
 # 3rd party imports
-from matplotlib.figure import Figure
 
 # local imports
 from workbench.plotting.currentfigure import CurrentFigure
-from workbench.plotting.figuremanager import LinePlotFigureManagerQT
+from workbench.plotting.figuremanager import new_figure_manager
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -36,21 +35,27 @@ PROJECTION = 'mantid'
 # -----------------------------------------------------------------------------
 # Functions
 # -----------------------------------------------------------------------------
-def plot_spectrum(workspace, spectrum_nums=None, indices=None):
+def plot_spectrum(workspaces, spectrum_nums=None, wksp_indices=None):
+    # check inputs
+    if spectrum_nums is not None and wksp_indices is not None:
+        raise ValueError("plot_spectrum: Both spectrum_nums and wksp_indices supplied. "
+                         "Please supply only 1")
+
     # window/figure creation
-    figure_mgr = CurrentFigure.get_fig_manager()
+    figure_mgr = CurrentFigure.get_active()
     if figure_mgr is None:
-        figure_mgr = new_figure_manager()
+        figure_mgr = new_figure_manager(1)
     CurrentFigure.set_active(figure_mgr)
     fig = figure_mgr.canvas.figure
 
     # do plotting
     ax = fig.add_subplot(111, projection=PROJECTION)
-    return ax.plot(workspace, specNum=spectrum_nums, wkspIndex=indices)
-
-
-def new_figure_manager():
-    allfigs = CurrentFigure.figs()
-    next_num = max(allfigs) + 1 if allfigs else 1
-    figure = Figure(next_num)
-    return LinePlotFigureManagerQT(figure, next_num)
+    if spectrum_nums is not None:
+        kw, rows = 'specNum', spectrum_nums
+    else:
+        kw, rows = 'wkspIndex', wksp_indices
+    for ws in workspaces:
+        for row in rows:
+            ax.plot(ws, **{kw: row})
+    fig.show()
+    return fig
