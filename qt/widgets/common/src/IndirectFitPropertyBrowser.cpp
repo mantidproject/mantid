@@ -129,6 +129,8 @@ void IndirectFitPropertyBrowser::init() {
   m_intManager->setValue(m_maxIterations,
                          settings.value("Max Iterations", 500).toInt());
 
+  m_workspaceIndex = m_intManager->addProperty("Workspace Index");
+
   m_peakRadius = m_intManager->addProperty("Peak Radius");
   m_intManager->setValue(m_peakRadius,
                          settings.value("Peak Radius", 0).toInt());
@@ -179,7 +181,7 @@ void IndirectFitPropertyBrowser::init() {
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
-  connect(this, SIGNAL(functionCleared()), this, SLOT(clearCustomFunctions()));
+  connect(this, SIGNAL(functionChanged()), this, SLOT(updatePlotGuess()));
 
   initLayout(w);
 }
@@ -393,6 +395,10 @@ void IndirectFitPropertyBrowser::setBackgroundOptions(
  */
 void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
   blockSignals(true);
+
+  if (compositeFunction()->nFunctions() == 0)
+    return;
+
   for (auto &handlerProperty : m_orderedFunctionGroups) {
     auto &handlers = m_functionHandlers[handlerProperty];
 
@@ -693,9 +699,17 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
 }
 
 /**
+ * Clears the functions in this indirect fit property browser.
+ */
+void IndirectFitPropertyBrowser::clear() {
+  clearAllCustomFunctions();
+  FitPropertyBrowser::clear();
+}
+
+/**
  * Clears all custom functions in this fit property browser.
  */
-void IndirectFitPropertyBrowser::clearCustomFunctions() {
+void IndirectFitPropertyBrowser::clearAllCustomFunctions() {
   for (const auto &prop : m_functionHandlers.keys()) {
     if (m_functionsAsCheckBox.contains(prop))
       m_boolManager->setValue(prop, false);
@@ -707,6 +721,17 @@ void IndirectFitPropertyBrowser::clearCustomFunctions() {
   setBackground("None");
   m_enumManager->setValue(m_backgroundSelection, 0);
   m_enumManager->setValue(m_functionsInComboBox, 0);
+}
+
+/**
+ * Updates the plot guess feature in this indirect fit property browser.
+ */
+void IndirectFitPropertyBrowser::updatePlotGuess() {
+
+  if (getWorkspace() && compositeFunction()->nFunctions() > 0)
+    setPeakToolOn(true);
+  else
+    setPeakToolOn(false);
 }
 
 /**
@@ -848,10 +873,10 @@ void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
 }
 
 /**
-* Called when an integer value changes in this indirect fit property browser.
-*
-* @param prop  The property containing the integer value which was changed.
-*/
+ * Called when an integer value changes in this indirect fit property browser.
+ *
+ * @param prop  The property containing the integer value which was changed.
+ */
 void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
 
   if (m_functionsAsSpinner.contains(prop)) {
