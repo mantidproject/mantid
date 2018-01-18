@@ -24,8 +24,6 @@ import atexit
 import importlib
 import sys
 
-from Tkinter import Tk
-
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
@@ -47,8 +45,8 @@ requirements.check_qt()
 from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
                          QPoint, QSize, Qt, QTimer)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDockWidget, QFileDialog, QMainWindow,
-                            QSplashScreen)  # noqa
+from qtpy.QtWidgets import (QApplication, QDesktopWidget, QDockWidget, QFileDialog,
+                            QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
 # Pre-application setup
@@ -322,11 +320,10 @@ class MainWindow(QMainWindow):
                 self.maximized_flag = is_maximized
             elif is_maximized:
                 self.setWindowState(Qt.WindowMaximized)
-                # Use Tkinter to find full screen size if maximized
+                # Use QDesktopWidget to find full screen size if maximized
                 # This is required as self.size before initial show returns the size of the splash screen
-                tk = Tk()
-                self.window_size = QSize(tk.winfo_screenwidth(), tk.winfo_screenheight())
-                tk.destroy()
+                desktop = QDesktopWidget()
+                self.window_size = desktop.screenGeometry().size()
 
     def setup_default_layouts(self, window_settings=False):
         """Set or reset the layouts of the child widgets"""
