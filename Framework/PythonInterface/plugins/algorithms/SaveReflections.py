@@ -46,13 +46,13 @@ class SaveReflections(PythonAlgorithm):
     def PyInit(self):
         """Initilize the algorithms properties"""
 
+        self.declareProperty(ITableWorkspaceProperty("InputWorkspace", '', Direction.Input),
+                             doc="The name of the peaks worksapce to save")
+
         self.declareProperty(FileProperty("Filename", "",
                                           action=FileAction.Save,
                                           direction=Direction.Input),
                              doc="File with the data from a phonon calculation.")
-
-        self.declareProperty(ITableWorkspaceProperty("InputWorkspace", '', Direction.Input),
-                             doc="The name of the peaks worksapce to save")
 
         self.declareProperty(name="Format",
                              direction=Direction.Input,
