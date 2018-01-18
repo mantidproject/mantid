@@ -124,6 +124,7 @@ class MainWindow(QMainWindow):
         self.ipythonconsole = None
         self.workspacewidget = None
         self.editor = None
+        self.algorithm_selector = None
         self.widgets = []
 
         # Menus
@@ -168,6 +169,13 @@ class MainWindow(QMainWindow):
         from workbench.plugins.workspacewidget import WorkspaceWidget
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
+        self.widgets.append(self.workspacewidget)
+
+        self.set_splash("Loading Algorithm Selector")
+        from workbench.plugins.algorithmselectorwidget import AlgorithmSelector
+        self.algorithm_selector = AlgorithmSelector(self)
+        self.algorithm_selector.register_plugin()
+        self.widgets.append(self.algorithm_selector)
 
         self.setup_layout()
         self.read_user_settings()
@@ -308,21 +316,22 @@ class MainWindow(QMainWindow):
         ipython = self.ipythonconsole
         workspacewidget = self.workspacewidget
         editor = self.editor
+        algorithm_selector = self.algorithm_selector
         default_layout = {
             'widgets': [
                 # column 0
-                [[workspacewidget]],
+                [[workspacewidget], [algorithm_selector]],
                 # column 1
                 [[editor, ipython]],
                 # column 2
                 [[logmessages]]
             ],
-            'width-fraction': [0.25,    # column 0 width
-                               0.50,    # column 1 width
-                               0.25],   # column 2 width
-            'height-fraction': [[1.0],  # column 0 row heights
-                                [1.0],  # column 1 row heights
-                                [1.0]]  # column 2 row heights
+            'width-fraction': [0.25,            # column 0 width
+                               0.50,            # column 1 width
+                               0.25],           # column 2 width
+            'height-fraction': [[0.5, 0.5],     # column 0 row heights
+                                [1.0],          # column 1 row heights
+                                [1.0]]          # column 2 row heights
         }
 
         with widget_updates_disabled(self):
