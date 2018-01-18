@@ -131,35 +131,33 @@ public:
   double cohScatterLengthReal(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  /// Get the coherent scattering length for a given wavelength in fm
+  double cohScatterLengthImg(
+      const double lambda =
+          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
   /// Get the incoherent length for a given wavelength in fm
   double incohScatterLengthReal(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-
-  /// Get the real part of the coherent scattering length squared, <b^2>, for a
-  /// given wavelength in fm^2.
-  double cohScatterLengthRealSqrd(
+  /// Get the incoherent length for a given wavelength in fm
+  double incohScatterLengthImg(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the real part of the incoherent length squared, <b^2>, for a given
-  /// wavelength in fm^2.
-  double incohScatterLengthRealSqrd(
-      const double lambda =
-          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-
-  /// Get the coherent scattering length squared, <b^2>, for a given wavelength
+  /// Get the coherent scattering length squared, <b><b*>, for a given
+  /// wavelength
   /// in fm^2.
   double cohScatterLengthSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the incoherent length squared, <b^2>, for a given wavelength in fm^2.
+  /// Get the incoherent length squared, <b><b*>, for a given wavelength in
+  /// fm^2.
   double incohScatterLengthSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Return the total scattering length squared, <b^2>, for a given wavelength
+  /// Return the total scattering length squared, <b>^2, for a given wavelength
   /// in fm^2.
   double totalScatterLengthSqrd(
       const double lambda =
