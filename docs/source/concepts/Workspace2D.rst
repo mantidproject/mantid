@@ -50,6 +50,22 @@ Output:
 
 .. include:: WorkspaceNavigation.txt
 
+Pickling Workspaces
+###################
 
+A Workspace2D may be `pickled <https://docs.python.org/2/library/pickle.html/>` and de-pickled in python. The current pickling process has the following limitations to beware.
+
+- Only Workspace2D objects can be pickled and de-pickled. Other :ref:`MatrixWorkspace <MatrixWorkspace>` subtypes cannot be pickled
+- Meta-data such as sample logs are not pickled
+- Masking flags are not pickled
+- Scanning Workspace2D objects are not permitted for pickling 
+- Workspace2D objects are always converted into :ref:`histograms <HistogramData>` formed as bin edges and counts as part of the pickling process.
+
+In addition, users should prefer using cPickle over pickle, and make sure that the protocol option is set to the HIGHEST_PROTOCOL to ensure that the serialization/deserialization process is as fast as possible.
+
+.. code-block:: python   
+
+  import cPickle as pickle
+  pickled = pickle.dumps(ws2d, pickle.HIGHEST_PROTOCOL)
 
 .. categories:: Concepts
