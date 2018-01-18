@@ -19,11 +19,26 @@ namespace CustomInterfaces {
 */
 ReflSettingsTabPresenter::ReflSettingsTabPresenter(
     std::vector<IReflSettingsPresenter *> presenters)
-    : m_settingsPresenters(presenters) {}
+    : m_settingsPresenters(presenters) {
+  passSelfToChildren(presenters);
+}
 
-/** Destructor
-*
-*/
+void ReflSettingsTabPresenter::passSelfToChildren(
+    std::vector<IReflSettingsPresenter *> const &children) {
+  for (auto *presenter : children)
+    presenter->acceptTabPresenter(this);
+}
+
+void ReflSettingsTabPresenter::acceptMainPresenter(
+    IReflMainWindowPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
+
+void ReflSettingsTabPresenter::settingsChanged(int group) {
+  m_mainPresenter->settingsChanged(group);
+}
+
+/// Destructor
 ReflSettingsTabPresenter::~ReflSettingsTabPresenter() {}
 
 /** Sets the current instrument name and changes accessibility status of

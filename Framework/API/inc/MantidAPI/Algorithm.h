@@ -325,7 +325,6 @@ protected:
   void exec(Parallel::ExecutionMode executionMode);
   virtual void execDistributed();
   virtual void execMasterOnly();
-  virtual void execNonMaster();
 
   virtual Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes) const;

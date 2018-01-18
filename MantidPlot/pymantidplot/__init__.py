@@ -726,6 +726,7 @@ InstrumentWidgetRenderTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidg
 InstrumentWidgetPickTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetPickTab
 InstrumentWidgetMaskTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetMaskTab
 InstrumentWidgetTreeTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetTreeTab
+SpectrumView = mantidqtpython.MantidQt.SpectrumView.SpectrumView
 
 
 def getInstrumentView(name, tab=InstrumentWidget.RENDER):
