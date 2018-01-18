@@ -41,8 +41,7 @@ GeometryHandler::GeometryHandler(CSGObject *obj) : csgObj(obj) {
 *  @param[in] obj
 *  This geometry handler will be Object's geometry handler
 */
-GeometryHandler::GeometryHandler(boost::shared_ptr<MeshObject> obj)
-  : csgObj() {
+GeometryHandler::GeometryHandler(boost::shared_ptr<MeshObject> obj) : csgObj() {
   ObjComp = nullptr;
   meshObj = obj.get();
   boolTriangulated = false;
@@ -61,6 +60,9 @@ GeometryHandler::GeometryHandler(MeshObject *obj) : csgObj() {
 }
 
 /// Destructor
-GeometryHandler::~GeometryHandler() { ObjComp = nullptr; meshObj = nullptr; }
+GeometryHandler::~GeometryHandler() {
+  ObjComp = nullptr;
+  meshObj = nullptr;
+}
 }
 }

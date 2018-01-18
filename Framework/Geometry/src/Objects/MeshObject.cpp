@@ -49,12 +49,8 @@ using Kernel::Quat;
 MeshObject::MeshObject() : MeshObject("") {}
 
 MeshObject::MeshObject(const std::string &string)
-  : m_boundingBox(), m_object_number(0), m_handler(),
-  m_string(string), m_id(), m_material(),
-  m_triangles(), m_vertices()
-{
-}
-
+    : m_boundingBox(), m_object_number(0), m_handler(), m_string(string),
+      m_id(), m_material(), m_triangles(), m_vertices() {}
 
 /**
 * Copy constructor
@@ -84,7 +80,6 @@ MeshObject &MeshObject::operator=(const MeshObject &A) {
 /// Destructor in .cpp so we can forward declare Rule class.
 MeshObject::~MeshObject() = default;
 
-
 /*
  * Initialise in CacheGeogmetryRenderer format
  * @param nPts :: number of vertices
@@ -93,21 +88,21 @@ MeshObject::~MeshObject() = default;
  * @param faces :: Triangles specified by vertex index in anticlockwise order
  * as seen from outside.
  */
-void MeshObject::initialize(const int nPts, const int nFaces, const double *points,
-  int *faces) {
+void MeshObject::initialize(const int nPts, const int nFaces,
+                            const double *points, int *faces) {
 
   std::vector<V3D> vertices;
-  for (int i=0; i<nPts; ++i) {
-    vertices.push_back(V3D(nPts+(3 * i), nPts+(3 * i + 1), nPts+(3 * i + 2)));
+  for (int i = 0; i < nPts; ++i) {
+    vertices.push_back(
+        V3D(nPts + (3 * i), nPts + (3 * i + 1), nPts + (3 * i + 2)));
   }
 
   std::vector<int> triangles;
-  for (int i = 0; i < 3*nFaces; ++i) {
+  for (int i = 0; i < 3 * nFaces; ++i) {
     triangles.push_back(nFaces + i);
   }
 
   initialize(triangles, vertices);
-
 }
 
 /*
@@ -116,13 +111,13 @@ void MeshObject::initialize(const int nPts, const int nFaces, const double *poin
  * as seen from outside.
  * @param vertices :: Vertex positions
  */
-void MeshObject::initialize(const std::vector<int> &faces, const std::vector<V3D> &vertices){
+void MeshObject::initialize(const std::vector<int> &faces,
+                            const std::vector<V3D> &vertices) {
   if (m_vertices.size() == 0) {
     m_vertices = vertices;
     m_triangles = faces;
     m_handler = boost::make_shared<CacheGeometryHandler>(this);
-  }
-  else {
+  } else {
     throw std::runtime_error("MeshObject already initialized");
   }
 }
@@ -155,8 +150,6 @@ bool MeshObject::hasValidShape() const {
   return (numberOfTriangles() >= 4 && numberOfVertices() >= 4);
 }
 
-
-
 /**
 * Determines whether Pt is within the object or on the surface
 * @param Pt :: Point to be tested
@@ -180,7 +173,7 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
   }
 
   // True if point is on surface
-  for (size_t i=0; i < intesectionPoints.size(); ++i) {
+  for (size_t i = 0; i < intesectionPoints.size(); ++i) {
     if (Pt.distance(intesectionPoints[i]) < M_TOLERANCE) {
       return true;
     }
@@ -189,7 +182,7 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
   // Look for nearest point then check its entry-exit flag
   double nearestPointDistance = Pt.distance(intesectionPoints[0]);
   size_t nearestPointIndex = 0;
-  for (size_t i=1; i < intesectionPoints.size(); ++i) {
+  for (size_t i = 1; i < intesectionPoints.size(); ++i) {
     if (Pt.distance(intesectionPoints[i]) < nearestPointDistance) {
       nearestPointDistance = Pt.distance(intesectionPoints[i]);
       nearestPointIndex = i;
@@ -236,7 +229,6 @@ bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
   return false;
 }
 
-
 /**
 * Given a track, fill the track with valid section
 * @param UT :: Initial track
@@ -253,11 +245,13 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
   std::vector<V3D> intesectionPoints;
   std::vector<int> entryExitFlags;
 
-  getIntersections(UT.startPoint(), UT.direction(), intesectionPoints, entryExitFlags);
-  if (intesectionPoints.size() == 0) return 0; // Quit if no intersections found
+  getIntersections(UT.startPoint(), UT.direction(), intesectionPoints,
+                   entryExitFlags);
+  if (intesectionPoints.size() == 0)
+    return 0; // Quit if no intersections found
 
   for (size_t i = 0; i < intesectionPoints.size(); ++i) {
-      UT.addPoint(entryExitFlags[i], intesectionPoints[i], *this);
+    UT.addPoint(entryExitFlags[i], intesectionPoints[i], *this);
   }
   UT.buildLink();
 
@@ -271,20 +265,21 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
  * @param intersectionPoints :: Intersection points (not sorted)
  * @param EntryExitFlags :: +1 ray enters -1 ray exits at corresponding point
 */
-void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
-  std::vector<Kernel::V3D> &intersectionPoints, std::vector<int> &entryExitFlags) const {
+void MeshObject::getIntersections(const Kernel::V3D &start,
+                                  const Kernel::V3D &direction,
+                                  std::vector<Kernel::V3D> &intersectionPoints,
+                                  std::vector<int> &entryExitFlags) const {
 
   V3D vertex1, vertex2, vertex3, intersection;
   int entryExit;
   for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
-    if (rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3, 
-      intersection, entryExit )) {
+    if (rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3,
+                              intersection, entryExit)) {
       intersectionPoints.push_back(intersection);
       entryExitFlags.push_back(entryExit);
     }
   }
   // still need to deal with edge cases
-
 }
 
 /**
@@ -298,8 +293,11 @@ void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &d
 * @param entryExit :: 1 if intersection is entry, -1 if exit
 * @returns true if there is an intersection
 */
-bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction,
-  const V3D &v1, const V3D &v2, const V3D &v3, V3D &intersection, int &entryExit) const {
+bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
+                                       const Kernel::V3D &direction,
+                                       const V3D &v1, const V3D &v2,
+                                       const V3D &v3, V3D &intersection,
+                                       int &entryExit) const {
   // Implements Möller–Trumbore intersection algorithm
   V3D edge1, edge2, h, s, q;
   double a, f, u, v;
@@ -308,9 +306,9 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
   h = direction.cross_prod(edge2);
   a = edge1.scalar_prod(h);
 
-  const double EPSILON = 0.0000001*edge1.norm();
+  const double EPSILON = 0.0000001 * edge1.norm();
   if (a > -EPSILON && a < EPSILON)
-    return false;  // Ray in or parallel to plane of triangle
+    return false; // Ray in or parallel to plane of triangle
   f = 1 / a;
   s = start - v1;
   u = f * (s.scalar_prod(h));
@@ -321,7 +319,8 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
   if (v < 0.0 || u + v > 1.0)
     return false; // Intesection with plane outside triangle
 
-  // At this stage we can compute t to find out where the intersection point is on the line.
+  // At this stage we can compute t to find out where the intersection point is
+  // on the line.
   double t = f * edge2.scalar_prod(q);
   if (t >= -EPSILON) // ray intersection
   {
@@ -330,16 +329,14 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
     // determine entry exit assuming anticlockwise triangle view from outside
     V3D normalDirection = edge1.cross_prod(edge2);
     if (normalDirection.scalar_prod(direction) > 0.0) {
-      entryExit = -1; //exit
-    }
-    else {
-      entryExit = 1; //entry
+      entryExit = -1; // exit
+    } else {
+      entryExit = 1; // entry
     }
     return true;
   }
   // Here the intersection occurs on the line of the ray behind the ray.
   return false;
-
 }
 
 /*
@@ -350,7 +347,8 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
 * @param v3 :: Third vertex of triangle
 * @returns true if the specified triangle exists
 */
-bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2, V3D &vertex3) const {
+bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2,
+                             V3D &vertex3) const {
   bool triangleExists = index < numberOfTriangles();
   if (triangleExists) {
     vertex1 = m_vertices[m_triangles[3 * index]];
@@ -376,7 +374,7 @@ bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2, V3D
 * To aid this, this function has been defined as a non-member.
 */
 double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
-  const V3D &observer) {
+                             const V3D &observer) {
   const V3D ao = a - observer;
   const V3D bo = b - observer;
   const V3D co = c - observer;
@@ -388,7 +386,7 @@ double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
   const double boco = bo.scalar_prod(co);
   const double scalTripProd = ao.scalar_prod(bo.cross_prod(co));
   const double denom =
-    modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
+      modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
   if (denom != 0.0)
     return 2.0 * atan2(scalTripProd, denom);
   else
@@ -404,7 +402,7 @@ double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
 * @retval -1 :: Exit Point
 */
 int MeshObject::calcValidType(const Kernel::V3D &Pt,
-                             const Kernel::V3D &uVec) const {
+                              const Kernel::V3D &uVec) const {
   const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
   const Kernel::V3D testA(Pt - shift);
   const Kernel::V3D testB(Pt + shift);
@@ -428,7 +426,8 @@ int MeshObject::calcValidType(const Kernel::V3D &Pt,
 * @param zmin :: Minimum value for the bounding box in z direction
 */
 void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
-  double &xmin, double &ymin, double &zmin) const {
+                                double &xmin, double &ymin,
+                                double &zmin) const {
   BoundingBox bb = getBoundingBox();
   xmin = bb.xMin();
   xmax = bb.xMax();
@@ -441,9 +440,9 @@ void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
 }
 
 /**
-* Find solid angle of object wrt the observer. 
+* Find solid angle of object wrt the observer.
 * @param observer :: point to measure solid angle from
-* @return :: estimate of solid angle of object. 
+* @return :: estimate of solid angle of object.
 */
 double MeshObject::solidAngle(const Kernel::V3D &observer) const {
 
@@ -453,12 +452,11 @@ double MeshObject::solidAngle(const Kernel::V3D &observer) const {
     double sa = getTriangleSolidAngle(vertex1, vertex2, vertex3, observer);
     if (sa > 0.0) {
       solidAngleSum += sa;
-    }
-    else {
+    } else {
       solidAngleNegativeSum += sa;
     }
   }
-  return 0.5*(solidAngleSum - solidAngleNegativeSum);
+  return 0.5 * (solidAngleSum - solidAngleNegativeSum);
 }
 
 /**
@@ -468,32 +466,34 @@ double MeshObject::solidAngle(const Kernel::V3D &observer) const {
 * @return :: estimate of solid angle of object.
 */
 double MeshObject::solidAngle(const Kernel::V3D &observer,
-                             const Kernel::V3D &scaleFactor) const
+                              const Kernel::V3D &scaleFactor) const
 
 {
   MeshObject scaledObject;
   std::vector<V3D> scaledVertices;
   for (size_t i = 0; i < m_vertices.size(); ++i) {
-    scaledVertices.push_back(V3D(scaleFactor.X()*m_vertices[i].X(), scaleFactor.Y()*m_vertices[i].Y(), scaleFactor.Z()*m_vertices[i].Z()));
+    scaledVertices.push_back(V3D(scaleFactor.X() * m_vertices[i].X(),
+                                 scaleFactor.Y() * m_vertices[i].Y(),
+                                 scaleFactor.Z() * m_vertices[i].Z()));
   }
   scaledObject.initialize(m_triangles, scaledVertices);
   return scaledObject.solidAngle(observer);
 }
 
 /**
- * Calculate volume. 
+ * Calculate volume.
  * @return The volume.
  */
 double MeshObject::volume() const {
   // Select centre of bounding box as centre point.
-  // For each triangle calculate the signed volume of 
+  // For each triangle calculate the signed volume of
   // the tetrahedron formed by the triangle and the
   // centre point. Then add to total.
 
   BoundingBox bb = getBoundingBox();
-  double cX = 0.5*(bb.xMax() + bb.xMin());
-  double cY = 0.5*(bb.yMax() + bb.yMin());
-  double cZ = 0.5*(bb.zMax() + bb.zMin());
+  double cX = 0.5 * (bb.xMax() + bb.xMin());
+  double cY = 0.5 * (bb.yMax() + bb.yMin());
+  double cZ = 0.5 * (bb.zMax() + bb.zMin());
   V3D centre(cX, cY, cZ);
 
   double volumeTimesSix(0.0);
@@ -505,8 +505,8 @@ double MeshObject::volume() const {
     V3D c = vertex3 - centre;
     volumeTimesSix += a.scalar_prod(b.cross_prod(c));
   }
-  
-  return volumeTimesSix/6.0;
+
+  return volumeTimesSix / 6.0;
 }
 
 /**
@@ -515,8 +515,8 @@ double MeshObject::volume() const {
 */
 const BoundingBox &MeshObject::getBoundingBox() const {
 
-  if(m_boundingBox.isNull())
-    // As the shape of MeshObject is immutable, we need only calculate 
+  if (m_boundingBox.isNull())
+    // As the shape of MeshObject is immutable, we need only calculate
     // bounding box, if the cached bounding box is null.
     if (numberOfVertices() > 0) {
       // Initial extents to be overwritten by loop
@@ -576,7 +576,7 @@ int MeshObject::getPointInObject(Kernel::V3D &point) const {
  * @return The generated point
  */
 V3D MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                     const size_t maxAttempts) const {
+                                      const size_t maxAttempts) const {
   const auto &bbox = getBoundingBox();
   if (bbox.isNull()) {
     throw std::runtime_error("Object::generatePointInObject() - Invalid "
@@ -596,8 +596,8 @@ V3D MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
  * @return The newly generated point
  */
 V3D MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                     const BoundingBox &activeRegion,
-                                     const size_t maxAttempts) const {
+                                      const BoundingBox &activeRegion,
+                                      const size_t maxAttempts) const {
   size_t attempts(0);
   while (attempts < maxAttempts) {
     const double r1 = rng.nextValue();
@@ -628,8 +628,8 @@ bool MeshObject::searchForObject(Kernel::V3D &point) const {
   if (isValid(point))
     return true;
   for (const auto &dir :
-  { V3D(1., 0., 0.), V3D(-1., 0., 0.), V3D(0., 1., 0.), V3D(0., -1., 0.),
-    V3D(0., 0., 1.), V3D(0., 0., -1.) }) {
+       {V3D(1., 0., 0.), V3D(-1., 0., 0.), V3D(0., 1., 0.), V3D(0., -1., 0.),
+        V3D(0., 0., 1.), V3D(0., 0., -1.)}) {
     Geometry::Track tr(point, dir);
     if (this->interceptSurface(tr) > 0) {
       point = tr.cbegin()->entryPoint;
@@ -686,14 +686,14 @@ boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() {
 * Updates the geometry handler if needed
 */
 void MeshObject::updateGeometryHandler() {
-  return; //Hopefully nothing necessary here
+  return; // Hopefully nothing necessary here
 }
 
 /**
 * set vtkGeometryCache writer
 */
 void MeshObject::setVtkGeometryCacheWriter(
-  boost::shared_ptr<vtkGeometryCacheWriter> writer) {
+    boost::shared_ptr<vtkGeometryCacheWriter> writer) {
   m_vtk_cache_writer = writer;
   updateGeometryHandler();
 }
@@ -702,17 +702,16 @@ void MeshObject::setVtkGeometryCacheWriter(
 * set vtkGeometryCache reader
 */
 void MeshObject::setVtkGeometryCacheReader(
-  boost::shared_ptr<vtkGeometryCacheReader> reader) {
+    boost::shared_ptr<vtkGeometryCacheReader> reader) {
   m_vtk_cache_reader = reader;
   updateGeometryHandler();
 }
-
 
 /**
 * Output functions for rendering, may also be used internally
 */
 int MeshObject::numberOfTriangles() const {
-    return static_cast<int>(m_triangles.size()/3);
+  return static_cast<int>(m_triangles.size() / 3);
 }
 
 /**
@@ -720,7 +719,7 @@ int MeshObject::numberOfTriangles() const {
 */
 int *MeshObject::getTriangles() const {
   int *faces = nullptr;
-  size_t nFaceCorners = m_triangles.size(); 
+  size_t nFaceCorners = m_triangles.size();
   if (nFaceCorners > 0) {
     faces = new int[static_cast<std::size_t>(nFaceCorners)];
     for (size_t i = 0; i < nFaceCorners; ++i) {
@@ -729,7 +728,6 @@ int *MeshObject::getTriangles() const {
   }
   return faces;
 }
-
 
 /**
 * get number of points
@@ -760,7 +758,7 @@ double *MeshObject::getVertices() const {
 * get info on standard shapes
 */
 void MeshObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                              double &myradius, double &myheight) const {
+                               double &myradius, double &myheight) const {
   type = 0;
   if (m_handler == nullptr)
     return;

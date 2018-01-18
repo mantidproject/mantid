@@ -29,7 +29,6 @@ class Track;
 class vtkGeometryCacheReader;
 class vtkGeometryCacheWriter;
 
-
 /**
 \class MeshObject
 \brief Triangular Mesh Object
@@ -73,18 +72,19 @@ public:
   /// Destructor
   virtual ~MeshObject();
   /// Clone
-  IObject *clone() const override { 
-    if(size(m_vertices) > 0)
-      return new MeshObject(*this); 
+  IObject *clone() const override {
+    if (size(m_vertices) > 0)
+      return new MeshObject(*this);
     else {
-      throw ("Unintialised MeshObject cannot be copied");
+      throw("Unintialised MeshObject cannot be copied");
     }
   }
 
   void initialize(const int nPts, const int nFaces, const double *points,
-    int *faces);
+                  int *faces);
 
-  void initialize(const std::vector<int> &faces, const std::vector<Mantid::Kernel::V3D> &vertices);
+  void initialize(const std::vector<int> &faces,
+                  const std::vector<Mantid::Kernel::V3D> &vertices);
 
   void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
@@ -103,7 +103,6 @@ public:
   bool isOnSide(const Kernel::V3D &) const override;
   int calcValidType(const Kernel::V3D &Pt,
                     const Kernel::V3D &uVec) const override;
-
 
   // INTERSECTION
   int interceptSurface(Geometry::Track &) const override;
@@ -165,23 +164,26 @@ public:
 
   void updateGeometryHandler();
 
-
 private:
   /// Get intersections
-  void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction, 
-    std::vector<Kernel::V3D> &intersectionPoints, std::vector<int> &entryExitFlags) const;
+  void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
+                        std::vector<Kernel::V3D> &intersectionPoints,
+                        std::vector<int> &entryExitFlags) const;
   /// Determine intersection between ray and an one triangle
-  bool rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction, 
-    const Kernel::V3D &v1, const Kernel::V3D &v2, const Kernel::V3D &v3, 
-    Kernel::V3D &intersection, int &entryExit) const;
+  bool rayIntersectsTriangle(const Kernel::V3D &start,
+                             const Kernel::V3D &direction,
+                             const Kernel::V3D &v1, const Kernel::V3D &v2,
+                             const Kernel::V3D &v3, Kernel::V3D &intersection,
+                             int &entryExit) const;
   /// Get triangle
-  bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3) const;
+  bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2,
+                   Kernel::V3D &v3) const;
   /// Search object for valid point
   bool searchForObject(Kernel::V3D &point) const;
 
   /// Contents
   std::vector<int> m_triangles;
-  std::vector < Kernel::V3D > m_vertices;
+  std::vector<Kernel::V3D> m_vertices;
 
   /// Cache for object's bounding box
   mutable BoundingBox m_boundingBox;

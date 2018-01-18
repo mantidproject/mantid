@@ -31,13 +31,13 @@ CacheGeometryHandler::CacheGeometryHandler(CSGObject *obj)
 }
 
 CacheGeometryHandler::CacheGeometryHandler(boost::shared_ptr<MeshObject> obj)
-  : GeometryHandler(obj) {
+    : GeometryHandler(obj) {
   Triangulator = new CacheGeometryGenerator(obj.get());
   Renderer = new CacheGeometryRenderer();
 }
 
 CacheGeometryHandler::CacheGeometryHandler(MeshObject *obj)
-  : GeometryHandler(obj) {
+    : GeometryHandler(obj) {
   Triangulator = new CacheGeometryGenerator(obj);
   Renderer = new CacheGeometryRenderer();
 }
@@ -48,8 +48,7 @@ boost::shared_ptr<GeometryHandler> CacheGeometryHandler::clone() const {
   if (this->Triangulator)
     if (meshObj != nullptr) {
       clone->Triangulator = new CacheGeometryGenerator(this->meshObj);
-    }
-    else {
+    } else {
       clone->Triangulator = new CacheGeometryGenerator(this->csgObj);
     }
   else
@@ -158,8 +157,7 @@ int *CacheGeometryHandler::getTriangleFaces() {
 void CacheGeometryHandler::updateGeometryHandler() {
   if (meshObj != nullptr) {
     meshObj->updateGeometryHandler();
-  }
-  else {
+  } else {
     csgObj->updateGeometryHandler();
   }
 }

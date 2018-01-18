@@ -44,12 +44,12 @@ class MeshObject;
 
 class MANTID_GEOMETRY_DLL CacheGeometryGenerator {
 private:
-  CSGObject *csgObj;     ///< Input CSGObject
-  MeshObject *meshObj;    ///< Input MeshObject
-  int mNoOfVertices;  ///< number of vertices
-  int mNoOfTriangles; ///< number of triangles
-  double *mPoints;    ///<double array or points
-  int *mFaces;        ///< Integer array of faces
+  CSGObject *csgObj;   ///< Input CSGObject
+  MeshObject *meshObj; ///< Input MeshObject
+  int mNoOfVertices;   ///< number of vertices
+  int mNoOfTriangles;  ///< number of triangles
+  double *mPoints;     ///<double array or points
+  int *mFaces;         ///< Integer array of faces
 public:
   CacheGeometryGenerator(CSGObject *obj);
   CacheGeometryGenerator(MeshObject *obj);

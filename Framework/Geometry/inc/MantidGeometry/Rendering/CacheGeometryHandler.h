@@ -55,12 +55,12 @@ private:
   /// rendering Object/ObjComponent
   CacheGeometryGenerator *
       Triangulator; ///< Geometry generator to triangulate Object
-  void updateGeometryHandler(); 
+  void updateGeometryHandler();
 
 public:
-  CacheGeometryHandler(IObjComponent *comp);              ///< Constructor
-  CacheGeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
-  CacheGeometryHandler(CSGObject *obj);                   ///< Constructor
+  CacheGeometryHandler(IObjComponent *comp);               ///< Constructor
+  CacheGeometryHandler(boost::shared_ptr<CSGObject> obj);  ///< Constructor
+  CacheGeometryHandler(CSGObject *obj);                    ///< Constructor
   CacheGeometryHandler(boost::shared_ptr<MeshObject> obj); ///< Constructor
   CacheGeometryHandler(MeshObject *obj);                   ///< Constructor
   boost::shared_ptr<GeometryHandler> clone() const override;

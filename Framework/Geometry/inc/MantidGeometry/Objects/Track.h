@@ -131,7 +131,7 @@ struct IntersectionPoint {
   int directionFlag;       ///< Directional flag
   Kernel::V3D endPoint;    ///< Point
   double distFromStart;    ///< Total distance from track begin
-  const IObject *object; ///< The object that was intersected
+  const IObject *object;   ///< The object that was intersected
   ComponentID componentID; ///< Unique component ID
                            //@}
 };

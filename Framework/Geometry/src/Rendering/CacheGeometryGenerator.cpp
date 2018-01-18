@@ -42,10 +42,9 @@ CacheGeometryGenerator::CacheGeometryGenerator(MeshObject *obj) : meshObj(obj) {
  * surface triangles.
  */
 void CacheGeometryGenerator::Generate() {
-  if (mNoOfVertices <= 0) 
-  {
+  if (mNoOfVertices <= 0) {
     if (csgObj != nullptr) {
-      // There are no triangles defined to use OpenCascade handler to get them
+// There are no triangles defined to use OpenCascade handler to get them
 #ifdef ENABLE_OPENCASCADE
       OCGeometryHandler h(csgObj);
       mNoOfVertices = h.NumberOfPoints();
@@ -53,8 +52,7 @@ void CacheGeometryGenerator::Generate() {
       mPoints = h.getTriangleVertices();
       mFaces = h.getTriangleFaces();
 #endif
-    }
-    else if (meshObj != nullptr) {
+    } else if (meshObj != nullptr) {
       // Get triangles from MeshObject
       mNoOfVertices = meshObj->numberOfVertices();
       mNoOfTriangles = meshObj->numberOfTriangles();
