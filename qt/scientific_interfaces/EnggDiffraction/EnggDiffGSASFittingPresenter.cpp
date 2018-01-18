@@ -11,6 +11,18 @@ EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     : m_model(std::move(model)), m_view(std::move(view)),
       m_viewHasClosed(false) {}
 
+EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
+    EnggDiffGSASFittingPresenter &&other)
+    : m_model(std::move(other.m_model)), m_view(std::move(other.m_view)),
+      m_viewHasClosed(other.m_viewHasClosed) {}
+
+EnggDiffGSASFittingPresenter &EnggDiffGSASFittingPresenter::
+operator=(EnggDiffGSASFittingPresenter &&other) {
+  m_model = std::move(other.m_model);
+  m_view = std::move(other.m_view);
+  return *this;
+}
+
 EnggDiffGSASFittingPresenter::~EnggDiffGSASFittingPresenter() {}
 
 void EnggDiffGSASFittingPresenter::notify(

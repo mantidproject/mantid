@@ -21,6 +21,10 @@ public:
   EnggDiffGSASFittingPresenter(std::unique_ptr<IEnggDiffGSASFittingModel> model,
                                std::unique_ptr<IEnggDiffGSASFittingView> view);
 
+  EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other);
+
+  EnggDiffGSASFittingPresenter &operator=(EnggDiffGSASFittingPresenter &&other);
+
   ~EnggDiffGSASFittingPresenter() override;
 
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
