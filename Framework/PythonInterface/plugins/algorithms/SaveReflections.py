@@ -38,7 +38,7 @@ def get_additional_index_names(workspace):
 class SaveReflections(PythonAlgorithm):
 
     def category(self):
-        return "DataHandling"
+        return "DataHandling\\Text;Crystal\\DataHandling"
 
     def summary(self):
         return "Saves single crystal reflections to a variety of formats"
