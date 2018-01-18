@@ -131,6 +131,15 @@ class SaveReflectionsTest(unittest.TestCase):
         # Assert
         self.assertTrue(compare_file(reference_result, file_name))
 
+    def test_save_jana_format_modulated(self):
+        # Arrange
+        workspace = self._create_modulated_peak_table()
+        file_name = os.path.join(self._test_dir, "test_jana_modulated.hkl")
+        output_format = "Jana"
+
+        # Act
+        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
+
     def test_save_GSAS_format(self):
         # Arrange
         reference_result = self._get_reference_result("gsas_format.hkl")
@@ -143,6 +152,15 @@ class SaveReflectionsTest(unittest.TestCase):
         # Assert
         self.assertTrue(compare_file(reference_result, file_name))
 
+    def test_save_GSAS_format_modulated(self):
+        # Arrange
+        workspace = self._create_modulated_peak_table()
+        file_name = os.path.join(self._test_dir, "test_GSAS_modulated.hkl")
+        output_format = "GSAS"
+
+        # Act
+        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
+
     def test_save_SHELX_format(self):
         # Arrange
         reference_result = self._get_reference_result("shelx_format.hkl")
@@ -154,6 +172,15 @@ class SaveReflectionsTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(compare_file(reference_result, file_name))
+
+    def test_save_SHELX_format_modulated(self):
+        # Arrange
+        workspace = self._create_modulated_peak_table()
+        file_name = os.path.join(self._test_dir, "test_SHELX_modulated.hkl")
+        output_format = "SHELX"
+
+        # Act
+        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
 
 
 def compare_file(reference_result, file_name):
