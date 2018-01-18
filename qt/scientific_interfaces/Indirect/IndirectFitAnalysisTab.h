@@ -20,7 +20,7 @@ namespace IDA {
 
 class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
-  using UIForm =
+  using FitTab =
       boost::variant<Ui::IqtFit *, Ui::ConvFit *, Ui::MSDFit *, Ui::JumpFit *>;
 
 public:
@@ -30,6 +30,8 @@ public:
   Mantid::API::IFunction_sptr background() const;
 
   Mantid::API::IFunction_sptr model() const;
+
+  int backgroundIndex() const;
 
   QString selectedFitType() const;
 
@@ -46,7 +48,7 @@ public:
 
   QString backgroundName() const;
 
-  QString backgroundPrefix() const;
+  bool previousFitModelSelected() const;
 
   void moveCustomFunctionsToEnd();
 
@@ -104,15 +106,19 @@ public:
 
   QHash<QString, double> defaultParameterValues() const;
 
-  Mantid::API::IFunction_sptr fitFunction() const;
+  QHash<QString, double> parameterValues() const;
 
-  virtual Mantid::API::IFunction_sptr
-  fitFunction(QHash<QString, QString> &functionNameChanges) const;
+  virtual Mantid::API::IFunction_sptr fitFunction() const;
+
+  virtual QHash<QString, QString>
+  functionNameChanges(Mantid::API::IFunction_sptr function) const;
 
   virtual Mantid::API::MatrixWorkspace_sptr fitWorkspace() const;
 
+  void updatePlotGuess();
+
 protected:
-  void addPropertyBrowserToUI(UIForm form);
+  void addPropertyBrowserToUI(FitTab tab);
 
   void setDefaultPropertyValue(const QString &propertyName,
                                const double &propertyValue);
@@ -213,6 +219,7 @@ private:
   QHash<QString, QString> m_functionNameChanges;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   bool m_appendResults;
+  bool m_guessEnabled;
 };
 
 } // namespace IDA

@@ -169,17 +169,32 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updatePlotGuess()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(plotGuess()));
 }
 
-void IndirectFitAnalysisTab::addPropertyBrowserToUI(UIForm form) {
-  boost::apply_visitor(WidgetAdder(m_fitPropertyBrowser), form);
+/**
+ * Adds a fit property browser to the specified Indirect Fit Analysis Tab.
+ *
+ * @param tab The indirect fit analysis tab to add the fit property browser to.
+ */
+void IndirectFitAnalysisTab::addPropertyBrowserToUI(FitTab tab) {
+  boost::apply_visitor(WidgetAdder(m_fitPropertyBrowser), tab);
 }
 
+/**
+ * @return  The selected background function in this indirect fit analysis tab.
+ */
 IFunction_sptr IndirectFitAnalysisTab::background() const {
   return m_fitPropertyBrowser->background();
 }
 
+/**
+ * @return  The selected model function in this indirect fit analysis tab.
+ *          The model is specified to be the complete composite function, with
+ *          the background removed.
+ */
 IFunction_sptr IndirectFitAnalysisTab::model() const {
   auto model = m_fitPropertyBrowser->compositeFunction()->clone();
   auto compositeModel = boost::dynamic_pointer_cast<CompositeFunction>(model);
@@ -194,29 +209,60 @@ IFunction_sptr IndirectFitAnalysisTab::model() const {
   return model;
 }
 
+/**
+ * @return  The function index of the selected background.
+ */
+int IndirectFitAnalysisTab::backgroundIndex() const {
+  return m_fitPropertyBrowser->backgroundIndex();
+}
+
+/**
+ * @return  The fit type selected in the custom functions combo box, in the fit
+ *          property browser.
+ */
 QString IndirectFitAnalysisTab::selectedFitType() const {
   return m_fitPropertyBrowser->selectedFitType();
 }
 
+/**
+ * @param functionName  The name of the function.
+ * @return              The number of custom functions, with the specified name,
+ *                      included in the selected model.
+ */
 size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
     const std::string &functionName) const {
   return m_fitPropertyBrowser->numberOfCustomFunctions(functionName);
 }
 
+/**
+ * @return  The selected Start-X value in the indirect fit analysis tab.
+ */
 double IndirectFitAnalysisTab::startX() const {
   return m_fitPropertyBrowser->startX();
 }
 
+/**
+ * @return  The selected End-X value in the indirect fit analysis tab.
+ */
 double IndirectFitAnalysisTab::endX() const {
   return m_fitPropertyBrowser->endX();
 }
 
+/**
+ * @param functionName  The name of the function containing the parameter.
+ * @param parameterName The name of the parameter whose value to retrieve.
+ * @return              The value of the parameter with the specified name, in
+ *                      the function with the specified name.
+ */
 double
 IndirectFitAnalysisTab::parameterValue(const std::string &functionName,
                                        const std::string &parameterName) {
   return m_fitPropertyBrowser->parameterValue(functionName, parameterName);
 }
 
+/**
+ * @return  True if the selected model is empty, false otherwise.
+ */
 bool IndirectFitAnalysisTab::emptyModel() const {
   auto modelFunction = model();
   auto compositeModel =
@@ -228,24 +274,53 @@ bool IndirectFitAnalysisTab::emptyModel() const {
     return modelFunction->asString() == "";
 }
 
+/**
+ * @return  The name of the selected background.
+ */
 QString IndirectFitAnalysisTab::backgroundName() const {
   return m_fitPropertyBrowser->backgroundName();
 }
 
-QString IndirectFitAnalysisTab::backgroundPrefix() const {
-  return m_fitPropertyBrowser->backgroundPrefix();
+/**
+ * @return  True if the current model is the same as the model which was most
+ *          recently fit, false otherwise.
+ */
+bool IndirectFitAnalysisTab::previousFitModelSelected() const {
+  return equivalentFunctions(m_fitFunction,
+                             m_fitPropertyBrowser->compositeFunction());
 }
 
+/**
+ * Moves the functions attached to a custom function group, to the end of the
+ * model.
+ */
 void IndirectFitAnalysisTab::moveCustomFunctionsToEnd() {
   m_fitPropertyBrowser->moveCustomFunctionsToEnd();
 }
 
+/**
+ * Sets the value of the parameter with the specified name, in the function with
+ * the specified name.
+ *
+ * @param functionName  The name of the function containing the parameter.
+ * @param parameterName The name of the parameter to set.
+ * @param value         The value to set.
+ */
 void IndirectFitAnalysisTab::setParameterValue(const std::string &functionName,
                                                const std::string &parameterName,
                                                double value) {
   m_fitPropertyBrowser->setParameterValue(functionName, parameterName, value);
 }
 
+/**
+ * Adds a check-box with the specified name, to the fit property browser, which
+ * when checked adds the specified functions to the mode and when unchecked,
+ * removes them.
+ *
+ * @param groupName     The name/label of the check-box to add.
+ * @param functions     The functions to be added when the check-box is checked.
+ * @param defaultValue  The default value of the check-box.
+ */
 void IndirectFitAnalysisTab::addCheckBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions,
     bool defaultValue) {
@@ -253,6 +328,17 @@ void IndirectFitAnalysisTab::addCheckBoxFunctionGroup(
                                                  defaultValue);
 }
 
+/**
+ * Adds a number spinner with the specified name, to the fit property browser,
+ * which specifies how many multiples of the specified functions should be added
+ * to the model.
+ *
+ * @param groupName     The name/label of the spinner to add.
+ * @param functions     The functions to be added.
+ * @param minimum       The minimum value of the spinner.
+ * @param maximum       The maximum value of the spinner.
+ * @param defaultValue  The default value of the spinner.
+ */
 void IndirectFitAnalysisTab::addSpinnerFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions,
     int minimum, int maximum, int defaultValue) {
@@ -260,34 +346,70 @@ void IndirectFitAnalysisTab::addSpinnerFunctionGroup(
                                                 maximum, defaultValue);
 }
 
+/**
+ * Adds an option with the specified name, to the fit type combo-box in the fit
+ * property browser, which adds the specified functions to the model.
+ *
+ * @param groupName The name of the option to be added to the fit type
+ *                  combo-box.
+ * @param functions The functions added by the option.
+ */
 void IndirectFitAnalysisTab::addComboBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   m_fitPropertyBrowser->addComboBoxFunctionGroup(groupName, functions);
 }
 
+/**
+ * Sets the available background options in this fit analysis tab.
+ *
+ * @param backgrounds A list of the available backgrounds.
+ */
 void IndirectFitAnalysisTab::setBackgroundOptions(
     const QStringList &backgrounds) {
   m_fitPropertyBrowser->setBackgroundOptions(backgrounds);
 }
 
+/**
+ * @param settingKey  The key of the boolean setting whose value to retrieve.
+ * @return            The value of the boolean setting with the specified key.
+ */
 bool IndirectFitAnalysisTab::boolSettingValue(const QString &settingKey) const {
   return m_fitPropertyBrowser->boolSettingValue(settingKey);
 }
 
+/**
+ * @param settingKey  The key of the integer setting whose value to retrieve.
+ * @return            The value of the integer setting with the specified key.
+ */
 int IndirectFitAnalysisTab::intSettingValue(const QString &settingKey) const {
   return m_fitPropertyBrowser->intSettingValue(settingKey);
 }
 
+/**
+ * @param settingKey  The key of the double setting whose value to retrieve.
+ * @return            The value of the double setting with the specified key.
+ */
 double
 IndirectFitAnalysisTab::doubleSettingValue(const QString &settingKey) const {
   return m_fitPropertyBrowser->doubleSettingValue(settingKey);
 }
 
+/**
+ * @param settingKey  The key of the enum setting whose value to retrieve.
+ * @return            The value of the enum setting with the specified key.
+ */
 QString
 IndirectFitAnalysisTab::enumSettingValue(const QString &settingKey) const {
   return m_fitPropertyBrowser->enumSettingValue(settingKey);
 }
 
+/**
+ * Adds a boolean custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the boolean setting to add.
+ * @param settingName   The display name of the boolean setting to add.
+ * @param defaultValue  The default value of the boolean setting.
+ */
 void IndirectFitAnalysisTab::addBoolCustomSetting(const QString &settingKey,
                                                   const QString &settingName,
                                                   bool defaultValue) {
@@ -295,6 +417,13 @@ void IndirectFitAnalysisTab::addBoolCustomSetting(const QString &settingKey,
                                              defaultValue);
 }
 
+/**
+ * Adds a double custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the double setting to add.
+ * @param settingName   The display name of the double setting to add.
+ * @param defaultValue  The default value of the double setting.
+ */
 void IndirectFitAnalysisTab::addDoubleCustomSetting(const QString &settingKey,
                                                     const QString &settingName,
                                                     double defaultValue) {
@@ -302,6 +431,13 @@ void IndirectFitAnalysisTab::addDoubleCustomSetting(const QString &settingKey,
                                                defaultValue);
 }
 
+/**
+ * Adds an integer custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the integer setting to add.
+ * @param settingName   The display name of the integer setting to add.
+ * @param defaultValue  The default value of the integer setting.
+ */
 void IndirectFitAnalysisTab::addIntCustomSetting(const QString &settingKey,
                                                  const QString &settingName,
                                                  int defaultValue) {
@@ -309,12 +445,31 @@ void IndirectFitAnalysisTab::addIntCustomSetting(const QString &settingKey,
                                             defaultValue);
 }
 
+/**
+ * Adds an enum custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the enum setting to add.
+ * @param settingName   The display name of the enum setting to add.
+ * @param defaultValue  The default value of the enum setting.
+ */
 void IndirectFitAnalysisTab::addEnumCustomSetting(const QString &settingKey,
                                                   const QString &settingName,
                                                   const QStringList &options) {
   m_fitPropertyBrowser->addEnumCustomSetting(settingKey, settingName, options);
 }
 
+/**
+ * Adds an optional double custom setting, with the specified key and display
+ * name.
+ *
+ * @param settingKey    The key of the optional double setting to add.
+ * @param settingName   The display name of the optional double setting to add.
+ * @param optionKey     The key of the setting specifying whether to use this
+ *                      this optional setting.
+ * @param optionName    The display name of the setting specifying whether to
+ *                      use this optional setting.
+ * @param defaultValue  The default value of the optional double setting.
+ */
 void IndirectFitAnalysisTab::addOptionalDoubleSetting(
     const QString &settingKey, const QString &settingName,
     const QString &optionKey, const QString &optionName, bool enabled,
@@ -323,6 +478,9 @@ void IndirectFitAnalysisTab::addOptionalDoubleSetting(
       settingKey, settingName, optionKey, optionName, enabled, defaultValue);
 }
 
+/**
+ * Sets the selected spectrum for this indirect fit analysis tab.
+ */
 void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
   disablePlotGuess();
   IndirectDataAnalysisTab::setSelectedSpectrum(spectrum);
@@ -331,10 +489,17 @@ void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
   enablePlotGuess();
 }
 
+/**
+ * @return  The default parameter values to be used in this indirect fit
+ *          analysis tab.
+ */
 QHash<QString, double> IndirectFitAnalysisTab::createDefaultValues() const {
   return QHash<QString, double>();
 }
 
+/**
+ * @return  The parameter values found in the most recent fit.
+ */
 QHash<QString, double> IndirectFitAnalysisTab::fitParameterValues() const {
   const auto spectrum = selectedSpectrum();
   if (m_parameterValues.contains(spectrum))
@@ -343,29 +508,41 @@ QHash<QString, double> IndirectFitAnalysisTab::fitParameterValues() const {
     return QHash<QString, double>();
 }
 
+/**
+ * @return  The default parameter values as applied to the model.
+ */
 QHash<QString, double> IndirectFitAnalysisTab::defaultParameterValues() const {
-  if (m_fitPropertyBrowser->compositeFunction()->nFunctions() == 0)
+  if (emptyModel())
     return QHash<QString, double>();
 
   QHash<QString, double> defaultValues;
-  QHash<QString, double> fitValues = fitParameterValues();
 
   const auto function = m_fitPropertyBrowser->getFittingFunction();
 
   for (const auto &shortParamName : m_defaultPropertyValues.keys()) {
-    if (!fitValues.contains(shortParamName)) {
-      const auto &value = m_defaultPropertyValues[shortParamName];
+    const auto &value = m_defaultPropertyValues[shortParamName];
 
-      for (const auto &parameter : function->getParameterNames()) {
-        const auto parameterName = QString::fromStdString(parameter);
+    for (const auto &parameter : function->getParameterNames()) {
+      const auto parameterName = QString::fromStdString(parameter);
 
-        if (!fitValues.contains(parameterName) &&
-            parameterName.endsWith(shortParamName))
-          defaultValues[parameterName] = value;
-      }
+      if (parameterName.endsWith(shortParamName))
+        defaultValues[parameterName] = value;
     }
   }
   return defaultValues;
+}
+
+/**
+ * @return  The values of the parameters in the selected model.
+ */
+QHash<QString, double> IndirectFitAnalysisTab::parameterValues() const {
+  auto values = defaultParameterValues();
+  const auto fitValues = fitParameterValues();
+
+  for (const auto &parameter : fitValues.keys())
+    values[parameter] = fitValues[parameter];
+
+  return values;
 }
 
 /*
@@ -404,6 +581,9 @@ bool IndirectFitAnalysisTab::hasDefaultPropertyValue(
   return m_defaultPropertyValues.contains(propertyName);
 }
 
+/**
+ * @return  The names of the parameters in the selected model.
+ */
 QSet<QString> IndirectFitAnalysisTab::parameterNames() {
   QSet<QString> parameterNames;
   auto function = m_fitPropertyBrowser->getFittingFunction();
@@ -438,8 +618,17 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(
 
   connect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
           this, SLOT(plotGuess()));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(clearBatchRunnerSlots()));
 }
 
+/**
+ * Updates the values of the parameters in the model, from the table workspace
+ * with the specified name.
+ *
+ * @param paramWSName The name of the table containing the updated parameter
+ *                    values.
+ */
 void IndirectFitAnalysisTab::updateParametersFromTable(
     const std::string &paramWSName) {
   const auto parameters = parameterNames();
@@ -493,6 +682,7 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
   setPreviewPlotWorkspace(inputWs);
   m_parameterValues.clear();
+  m_fitFunction.reset();
   blockSignals(true);
   updatePreviewPlots();
   blockSignals(false);
@@ -511,10 +701,11 @@ void IndirectFitAnalysisTab::clearBatchRunnerSlots() {
 void IndirectFitAnalysisTab::updateParameterValues() {
   const auto spectrum = static_cast<size_t>(selectedSpectrum());
 
-  if (m_parameterValues.contains(spectrum) &&
-      equivalentFunctions(m_fitFunction,
-                          m_fitPropertyBrowser->compositeFunction()))
-    m_fitPropertyBrowser->updateParameterValues(m_parameterValues[spectrum]);
+  if (m_parameterValues.contains(spectrum))
+    if (previousFitModelSelected())
+      m_fitPropertyBrowser->updateParameterValues(m_parameterValues[spectrum]);
+    else
+      m_fitPropertyBrowser->updateParameterValues(parameterValues());
   else
     m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
 }
@@ -608,8 +799,7 @@ void IndirectFitAnalysisTab::updatePlot(
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
 
-  if (equivalentFunctions(m_fitFunction,
-                          m_fitPropertyBrowser->compositeFunction()))
+  if (previousFitModelSelected())
     IndirectDataAnalysisTab::updatePlot(workspaceName, fitPreviewPlot,
                                         diffPreviewPlot);
   else
@@ -653,19 +843,20 @@ void IndirectFitAnalysisTab::executeSequentialFit() {
  * @return  The fit function defined in this indirect fit analysis tab.
  */
 IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
-  return fitFunction(QHash<QString, QString>());
+  if (emptyModel())
+    return m_fitPropertyBrowser->getFittingFunction();
+  else
+    return nullptr;
 }
 
 /**
- * @param functionNameChanges The map to store the expected change in the name
- *                            of the fit functions, with respect to the fit
- *                            property browser.
- * @return                    The fit function defined in this indirect fit
- *                            analysis tab.
+ * @param function  The function in the fit property browser.
+ * @return          A map from the name of a function in the fit property
+ *                  browser, to the name of a function in the selected model.
  */
-IFunction_sptr IndirectFitAnalysisTab::fitFunction(
-    QHash<QString, QString> &functionNameChanges) const {
-  return m_fitPropertyBrowser->getFittingFunction();
+QHash<QString, QString>
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr function) const {
+  return QHash<QString, QString>();
 }
 
 /**
@@ -676,6 +867,13 @@ MatrixWorkspace_sptr IndirectFitAnalysisTab::fitWorkspace() const {
       m_fitPropertyBrowser->getWorkspace());
 }
 
+/**
+ * Sets the MaxIterations property of the specified algorithm, to the specified
+ * integer value.
+ *
+ * @param fitAlgorithm  The fit algorithm whose MaxIterations property to set.
+ * @param maxIterations The value to set.
+ */
 void IndirectFitAnalysisTab::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
                                               int maxIterations) const {
   setAlgorithmProperty(fitAlgorithm, "MaxIterations", maxIterations);
@@ -693,8 +891,7 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
 
   fitAlgorithm->setProperty("InputWorkspace", fitWorkspace());
 
-  setAlgorithmProperty(fitAlgorithm, "Function",
-                       fitFunction(m_functionNameChanges)->asString());
+  setAlgorithmProperty(fitAlgorithm, "Function", fitFunction()->asString());
   setAlgorithmProperty(fitAlgorithm, "StartX", m_fitPropertyBrowser->startX());
   setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
   setAlgorithmProperty(fitAlgorithm, "Minimizer",
@@ -705,6 +902,7 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
 
+  m_functionNameChanges = functionNameChanges(model());
   m_fitFunction = m_fitPropertyBrowser->getFittingFunction()->clone();
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -762,6 +960,19 @@ void IndirectFitAnalysisTab::plotGuess(
     if (guessWorkspace->x(0).size() >= 2)
       previewPlot->addSpectrum("Guess", guessWorkspace, 0, Qt::green);
   }
+}
+
+/**
+ * Enables or disables the plot guess feature in this indirect fit analysis
+ * tab, depending on whether the selected model is empty.
+ */
+void IndirectFitAnalysisTab::updatePlotGuess() {
+  bool modelIsEmpty = emptyModel();
+
+  if (modelIsEmpty && m_guessEnabled)
+    disablePlotGuess();
+  else if (!modelIsEmpty && !m_guessEnabled)
+    enablePlotGuess();
 }
 
 /*
