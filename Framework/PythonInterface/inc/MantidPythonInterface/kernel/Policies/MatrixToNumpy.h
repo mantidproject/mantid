@@ -38,7 +38,7 @@ namespace PythonInterface {
 namespace Policies {
 
 namespace // anonymous
-{
+    {
 //-----------------------------------------------------------------------
 // MPL helper structs
 //-----------------------------------------------------------------------
