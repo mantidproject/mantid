@@ -45,8 +45,6 @@ size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
   index += b - 1;
   return index;
 }
-
-GLColor defaultDetectorColor() { return GLColor(200, 200, 200); }
 } // namespace
 
 double InstrumentActor::m_tolerance = 0.00001;
@@ -142,6 +140,7 @@ InstrumentActor::~InstrumentActor() {
 void InstrumentActor::setUpWorkspace(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
     double scaleMin, double scaleMax) {
+
   const size_t nHist = sharedWorkspace->getNumberHistograms();
   m_WkspBinMinValue = DBL_MAX;
   m_WkspBinMaxValue = -DBL_MAX;
@@ -168,6 +167,14 @@ void InstrumentActor::setUpWorkspace(
     }
   }
 
+  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
+  m_detIndex2WsIndex.resize(sharedWorkspace->componentInfo().size());
+  for (size_t wi = 0; wi < spectrumInfo.size(); wi++) {
+	  const auto &specDef = spectrumInfo.spectrumDefinition(wi);
+	  for (auto info : specDef) 
+		  m_detIndex2WsIndex[info.first] = wi;
+  }
+
   // set some values as the variables will be used
   m_DataPositiveMinValue = DBL_MAX;
   m_DataMinValue = -DBL_MAX;
@@ -182,9 +189,6 @@ void InstrumentActor::setUpWorkspace(
   // set the ragged flag using a workspace validator
   auto wsValidator = Mantid::API::CommonBinsValidator();
   m_ragged = !wsValidator.isValid(sharedWorkspace).empty();
-
-  /// Keep the pointer to the detid2index map
-  m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
 }
 
 void InstrumentActor::setComponentVisible(size_t componentIndex) {
@@ -394,6 +398,14 @@ Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
   return -1;
 }
 
+QList<Mantid::detid_t>
+InstrumentActor::getDetIDs(const std::vector<size_t> &dets) const {
+  QList<Mantid::detid_t> detIDs;
+  for (auto det : dets)
+    detIDs.append(getDetID(det));
+  return detIDs;
+}
+
 /**
  * Get a component id of a picked component.
  */
@@ -412,13 +424,8 @@ InstrumentActor::getComponentID(size_t pickID) const {
  *  @throws Exception::NotFoundError If the detector is not represented in the
  * workspace
  */
-size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const {
-  auto mapEntry = m_detid2index_map.find(id);
-  if (mapEntry == m_detid2index_map.end()) {
-    throw Kernel::Exception::NotFoundError("Detector ID not in workspace", id);
-  }
-
-  return mapEntry->second;
+size_t InstrumentActor::getWorkspaceIndex(size_t index) const {
+  return m_detIndex2WsIndex[index];
 }
 
 /**
@@ -436,18 +443,12 @@ void InstrumentActor::setIntegrationRange(const double &xmin,
 }
 
 /** Gives the total signal in the spectrum relating to the given detector
- *  @param id The detector id
- *  @return The signal, or -1 if the detector is not represented in the
- * workspace
+ *  @param index The detector index
+ *  @return The signal
  */
-double InstrumentActor::getIntegratedCounts(Mantid::detid_t id) const {
-  try {
-    size_t i = getWorkspaceIndex(id);
+double InstrumentActor::getIntegratedCounts(size_t index) const {
+    size_t i = getWorkspaceIndex(index);
     return m_specIntegrs.at(i);
-  } catch (NotFoundError &) {
-    // If the detector is not represented in the workspace
-    return -1.0;
-  }
 }
 
 /**
@@ -457,14 +458,14 @@ double InstrumentActor::getIntegratedCounts(Mantid::detid_t id) const {
  * appropriate summation
  * method.
  *
- * @param dets :: A list of detector IDs to sum.
+ * @param dets :: A list of detector Indices to sum.
  * @param x :: (output) Time of flight values (or whatever values the x axis
  * has) to plot against.
  * @param y :: (output) The sums of the counts for each bin.
  * @param size :: (optional input) Size of the output vectors. If not given it
  * will be determined automatically.
  */
-void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x,
+void InstrumentActor::sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   if (size > ws->blocksize() || size == 0) {
@@ -485,26 +486,16 @@ void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x,
  * the x-axis.
  * Assumes that all spectra share the x vector.
  *
- * @param dets :: A list of detector IDs to sum.
+ * @param dets :: A list of detector Indices to sum.
  * @param x :: (output) Time of flight values (or whatever values the x axis
  * has) to plot against.
  * @param y :: (output) The sums of the counts for each bin.
  */
-void InstrumentActor::sumDetectorsUniform(QList<int> &dets,
+void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
                                           std::vector<double> &x,
                                           std::vector<double> &y) const {
 
-  size_t wi;
-  bool isDataEmpty = dets.isEmpty();
-
-  if (!isDataEmpty) {
-    try {
-      wi = getWorkspaceIndex(dets[0]);
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      isDataEmpty =
-          true; // Detector doesn't have a workspace index relating to it
-    }
-  }
+  bool isDataEmpty = dets.empty();
 
   if (isDataEmpty) {
     x.clear();
@@ -514,6 +505,7 @@ void InstrumentActor::sumDetectorsUniform(QList<int> &dets,
 
   // find the bins inside the integration range
   size_t imin, imax;
+  auto wi = getWorkspaceIndex(dets[0]);
   getBinMinMaxIndex(wi, imin, imax);
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
@@ -521,15 +513,11 @@ void InstrumentActor::sumDetectorsUniform(QList<int> &dets,
   x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
   y.resize(x.size(), 0);
   // sum the spectra
-  foreach (int id, dets) {
-    try {
-      size_t index = getWorkspaceIndex(id);
-      const auto &Y = ws->y(index);
-      std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
-                     std::plus<double>());
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      continue; // Detector doesn't have a workspace index relating to it
-    }
+  for (auto det : dets) {
+    auto index = getWorkspaceIndex(det);
+    const auto &Y = ws->y(index);
+    std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
+                   std::plus<double>());
   }
 }
 
@@ -544,11 +532,11 @@ void InstrumentActor::sumDetectorsUniform(QList<int> &dets,
  * @param y :: (output) The sums of the counts for each bin.
  * @param size :: (input) Size of the output vectors.
  */
-void InstrumentActor::sumDetectorsRagged(QList<int> &dets,
+void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
                                          std::vector<double> &x,
                                          std::vector<double> &y,
                                          size_t size) const {
-  if (dets.isEmpty() || size == 0) {
+  if (dets.empty() || size == 0) {
     x.clear();
     y.clear();
     return;
@@ -565,9 +553,9 @@ void InstrumentActor::sumDetectorsRagged(QList<int> &dets,
 
   size_t nSpec = 0; // number of actual spectra to add
   // fill in the temp workspace with the data from the detectors
-  foreach (int id, dets) {
+  for(auto det: dets) {
     try {
-      size_t index = getWorkspaceIndex(id);
+      size_t index = getWorkspaceIndex(det);
       dws->setHistogram(nSpec, ws->histogram(index));
       double xmin = dws->x(nSpec).front();
       double xmax = dws->x(nSpec).back();
@@ -1149,13 +1137,11 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
   auto workspace = getWorkspace();
   calculateIntegratedSpectra(*workspace);
   auto monitors = getMonitors();
-  const auto &detectorIDs = getDetectorInfo().detectorIDs();
-  std::vector<detid_t> monitorIDs;
-  monitorIDs.reserve(monitors.size());
-  for (auto mon : monitors)
-    monitorIDs.push_back(detectorIDs[mon]);
+  std::vector<size_t> monitorIndices;
 
-  auto monitorIndices = workspace->getIndicesFromDetectorIDs(monitorIDs);
+  monitorIndices.reserve(monitors.size());
+  for (auto monitor : monitors)
+	  monitorIndices.push_back(getWorkspaceIndex(monitor));
 
   // check that there is at least 1 non-monitor spectrum
   if (monitorIndices.size() == m_specIntegrs.size()) {
@@ -1187,7 +1173,6 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
             "or NaN).\n"
             "Please run ReplaceSpecialValues algorithm for correction.");
       }
-      // integrated_values[i] = sum;
       if (sum < m_DataMinValue) {
         m_DataMinValue = sum;
       }
@@ -1207,14 +1192,13 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 }
 
 /// Add a range of bins for masking
-void InstrumentActor::addMaskBinsData(const QList<int> &detIDs) {
-  QList<int> indices;
-  foreach (int id, detIDs) {
-    auto index = m_detid2index_map[id];
-    indices.append(static_cast<int>(index));
-  }
-  if (!indices.isEmpty()) {
-    m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, indices);
+void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
+  std::vector<size_t> wsIndices;
+  wsIndices.reserve(indices.size());
+  for (auto det: indices) 
+    wsIndices.push_back(getWorkspaceIndex(det));
+  if (!indices.empty()) {
+    m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, wsIndices);
     auto workspace = getWorkspace();
     calculateIntegratedSpectra(*workspace);
     resetColors();

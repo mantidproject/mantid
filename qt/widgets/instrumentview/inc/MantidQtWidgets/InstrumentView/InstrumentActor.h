@@ -82,7 +82,7 @@ public:
   /// Apply the mask in the attached mask workspace to the data.
   void applyMaskWorkspace();
   /// Add a range of bins for masking
-  void addMaskBinsData(const QList<int> &detIDs);
+  void addMaskBinsData(const std::vector<size_t> &indices);
   /// Remove the attached mask workspace without applying the mask.
   /// Remove the bin masking data.
   void clearMasks();
@@ -135,6 +135,7 @@ public:
   size_t getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID) const;
+  QList<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
   /// Get a component ID for a non-detector.
   Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
   /// Get position of a detector by a pick ID converted form a color in the pick
@@ -144,12 +145,12 @@ public:
   const std::vector<Mantid::detid_t> &getAllDetIDs() const;
   /// Get displayed color of a detector by its index.
   GLColor getColor(size_t index) const;
-  /// Get the workspace index of a detector by its detector ID.
-  size_t getWorkspaceIndex(Mantid::detid_t id) const;
-  /// Get the integrated counts of a detector by its detector ID.
-  double getIntegratedCounts(Mantid::detid_t id) const;
+  /// Get the workspace index of a detector by its detector Index.
+  size_t getWorkspaceIndex(size_t index) const;
+  /// Get the integrated counts of a detector by its detector Index.
+  double getIntegratedCounts(size_t index) const;
   /// Sum the counts in detectors
-  void sumDetectors(QList<int> &dets, std::vector<double> &x,
+  void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x,
                     std::vector<double> &y, size_t size = 0) const;
   /// Calc indexes for min and max bin values
   void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const;
@@ -214,10 +215,10 @@ private:
   calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace);
   /// Sum the counts in detectors if the workspace has equal bins for all
   /// spectra
-  void sumDetectorsUniform(QList<int> &dets, std::vector<double> &x,
+  void sumDetectorsUniform(const std::vector<size_t> &dets, std::vector<double> &x,
                            std::vector<double> &y) const;
   /// Sum the counts in detectors if the workspace is ragged
-  void sumDetectorsRagged(QList<int> &dets, std::vector<double> &x,
+  void sumDetectorsRagged(const std::vector<size_t> &dets, std::vector<double> &x,
                           std::vector<double> &y, size_t size) const;
 
   void setupPickColors();
@@ -257,10 +258,6 @@ private:
   bool m_volumeRender;
   /// Color map scale type: linear or log
   GraphOptions::ScaleType m_scaleType;
-
-  /// The workspace's detector ID to workspace index map
-  Mantid::detid2index_map m_detid2index_map;
-
   /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor
   /// constructors
   mutable std::vector<Mantid::detid_t> m_detIDs;
@@ -281,14 +278,12 @@ private:
   GLColor m_maskedColor;
   /// Colour of a "failed" detector
   GLColor m_failedColor;
-  /// The collection of actors for the instrument components
-  // GLActorCollection m_scene;
 
   static double m_tolerance;
 
   std::vector<GLColor> m_pickColors;
   std::vector<bool> m_isCompVisible;
-
+  std::vector<size_t> m_detIndex2WsIndex;
   // Two display lists for normal rendering and picking
   mutable GLuint m_displayListId[2];
   mutable bool m_useDisplayList[2];
