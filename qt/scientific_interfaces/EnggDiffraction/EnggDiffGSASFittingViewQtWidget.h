@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEWQTWIDGET_H_
 
 #include "DllConfig.h"
+#include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
 
 #include "ui_EnggDiffractionQtTabGSAS.h"
@@ -57,6 +58,8 @@ private slots:
   void browseFocusedRun();
 
 private:
+  std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
+
   Ui::EnggDiffractionQtTabGSAS m_ui;
 
   void setFocusedRunFileName(const QString &filename);

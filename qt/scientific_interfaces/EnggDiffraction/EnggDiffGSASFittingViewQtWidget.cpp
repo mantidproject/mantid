@@ -1,3 +1,5 @@
+#include "EnggDiffGSASFittingModel.h"
+#include "EnggDiffGSASFittingPresenter.h"
 #include "EnggDiffGSASFittingViewQtWidget.h"
 
 #include <QFileDialog>
@@ -6,7 +8,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
-  setupUI();
+  m_ui.setupUi(this);
+  
+  auto model = std::make_unique<EnggDiffGSASFittingModel>();
+  m_presenter.reset(new EnggDiffGSASFittingPresenter(std::move(model), this));
 }
 
 void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
