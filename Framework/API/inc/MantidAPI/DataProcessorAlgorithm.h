@@ -143,13 +143,13 @@ private:
   std::map<std::string, std::string> m_nameToPMName;
 };
 
-typedef GenericDataProcessorAlgorithm<Algorithm> DataProcessorAlgorithm;
-typedef GenericDataProcessorAlgorithm<SerialAlgorithm>
-    SerialDataProcessorAlgorithm;
-typedef GenericDataProcessorAlgorithm<ParallelAlgorithm>
-    ParallelDataProcessorAlgorithm;
-typedef GenericDataProcessorAlgorithm<DistributedAlgorithm>
-    DistributedDataProcessorAlgorithm;
+using DataProcessorAlgorithm = GenericDataProcessorAlgorithm<Algorithm>;
+using SerialDataProcessorAlgorithm =
+    GenericDataProcessorAlgorithm<SerialAlgorithm>;
+using ParallelDataProcessorAlgorithm =
+    GenericDataProcessorAlgorithm<ParallelAlgorithm>;
+using DistributedDataProcessorAlgorithm =
+    GenericDataProcessorAlgorithm<DistributedAlgorithm>;
 
 } // namespace API
 } // namespace Mantid
