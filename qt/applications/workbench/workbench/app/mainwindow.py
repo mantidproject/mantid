@@ -43,7 +43,7 @@ requirements.check_qt()
 # Qt
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
-                         QPoint, QSize, Qt)  # noqa
+                         QPoint, QSize, Qt, QTimer)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDockWidget, QFileDialog, QMainWindow,
                             QSplashScreen)  # noqa
@@ -121,9 +121,9 @@ class MainWindow(QMainWindow):
         self.maximized_flag = None
         # widgets
         self.messagedisplay = None
-        self.ipythonconsole = None
+        #self.ipythonconsole = None
         self.workspacewidget = None
-        self.editor = None
+        #self.editor = None
         self.widgets = []
 
         # Menus
@@ -152,17 +152,17 @@ class MainWindow(QMainWindow):
         self.messagedisplay.register_plugin()
         self.widgets.append(self.messagedisplay)
 
-        self.set_splash("Loading IPython console")
-        from workbench.plugins.jupyterconsole import JupyterConsole
-        self.ipythonconsole = JupyterConsole(self)
-        self.ipythonconsole.register_plugin()
-        self.widgets.append(self.ipythonconsole)
+        #self.set_splash("Loading IPython console")
+        #from workbench.plugins.jupyterconsole import JupyterConsole
+        #self.ipythonconsole = JupyterConsole(self)
+        #self.ipythonconsole.register_plugin()
+        #self.widgets.append(self.ipythonconsole)
 
-        self.set_splash("Loading code editing widget")
-        from workbench.plugins.editor import MultiFileEditor
-        self.editor = MultiFileEditor(self)
-        self.editor.register_plugin()
-        self.widgets.append(self.editor)
+        #self.set_splash("Loading code editing widget")
+        #from workbench.plugins.editor import MultiFileEditor
+        #self.editor = MultiFileEditor(self)
+        #self.editor.register_plugin()
+        #self.widgets.append(self.editor)
 
         self.set_splash("Loading Workspace Widget")
         from workbench.plugins.workspacewidget import WorkspaceWidget
@@ -305,18 +305,18 @@ class MainWindow(QMainWindow):
 
         # layout definition
         logmessages = self.messagedisplay
-        ipython = self.ipythonconsole
+        #ipython = self.ipythonconsole
         workspacewidget = self.workspacewidget
-        editor = self.editor
+        #editor = self.editor
         default_layout = {
             'widgets': [
                 # column 0
-                [[editor, ipython], [workspacewidget]],
+                [[workspacewidget]],
                 # column 1
                 [[logmessages]]
             ],
-            'width-fraction': [0.75,    # column 0 width
-                               0.25],   # column 1 width
+            'width-fraction': [0.25,    # column 0 width
+                               0.75],   # column 1 width
             'height-fraction': [[0.5, 0.5],  # column 0 row heights
                                 [1.0]]  # column 1 row heights
         }
@@ -349,6 +349,60 @@ class MainWindow(QMainWindow):
                     # Raise front widget per row
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
+
+            # set the width and height
+            self._layout_widget_info = []
+            width, height = self.window_size.width(), self.window_size.height()
+
+            # fix column width
+            for c in range(len(widgets_layout)):
+                widget = widgets_layout[c][0][0].dockwidget
+                min_width, max_width = widget.minimumWidth(), widget.maximumWidth()
+                info = {'widget': widget,
+                        'dock min width': min_width,
+                        'dock max width': max_width}
+                self._layout_widget_info.append(info)
+                new_width = int(default_layout['width-fraction'][c] * width)
+                widget.setMinimumWidth(new_width)
+                widget.setMaximumWidth(new_width)
+                widget.updateGeometry()
+
+            # fix column height
+            for c, column in enumerate(widgets_layout):
+                for r in range(len(column) - 1):
+                    widget = column[r][0]
+                    dockwidget = widget.dockwidget
+                    dock_min_h = dockwidget.minimumHeight()
+                    dock_max_h = dockwidget.maximumHeight()
+                    info = {'widget': widget,
+                            'dock min height': dock_min_h,
+                            'dock max height': dock_max_h}
+                    self._layout_widget_info.append(info)
+                    # The 0.95 factor is to adjust height based on usefull
+                    # estimated area in the window
+                    new_height = int(default_layout['height-fraction'][c][r] * height)
+                    dockwidget.setMinimumHeight(new_height)
+                    dockwidget.setMaximumHeight(new_height)
+                    dockwidget.updateGeometry()
+
+            self._custom_layout_timer = QTimer(self)
+            self._custom_layout_timer.timeout.connect(self.layout_fix_timer)
+            self._custom_layout_timer.setSingleShot(True)
+            self._custom_layout_timer.start(500)
+
+    def layout_fix_timer(self):
+        """Fixes the height of docks after a new layout is set."""
+        info = self._layout_widget_info
+        for i in info:
+            dockwidget = i['widget']
+            if 'dock min width' in i:
+                dockwidget.setMinimumWidth(i['dock min width'])
+                dockwidget.setMaximumWidth(i['dock max width'])
+            if 'dock min height' in i:
+                dockwidget.setMinimumHeight(i['dock min height'])
+                dockwidget.setMaximumHeight(i['dock max height'])
+
+        self.setUpdatesEnabled(True)
 
     def save_current_window_settings(self, prefix, section='main'):
         """Save current window settings with *prefix* in
