@@ -106,7 +106,7 @@ def index_q_vectors(qs, tolerance=.03):
     """
     # choose the bases to represent each new axis
     idxs, ndim, pools = find_bases(qs, tolerance=tolerance)
-    bases = np.row_stack(pools.itervalues())
+    bases = np.row_stack(pools.values())
 
     # generate all possible reflections from bases up to a given number
     MAX_REFLECTIONS = 10
