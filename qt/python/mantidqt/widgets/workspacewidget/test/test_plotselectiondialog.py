@@ -57,6 +57,19 @@ class PlotSelectionDialogTest(unittest.TestCase):
         self.assertEqual("valid range: 51-100", dlg._ui.specNums.placeholderText())
         self.assertEqual("valid range: 0-49", dlg._ui.wkspIndices.placeholderText())
 
+    def test_valid_text_in_boxes_activates_ok(self):
+        workspaces = [CreateSampleWorkspace(OutputWorkspace='ws', StoreInADS=False)]
+        dlg = PlotSelectionDialog(workspaces)
+
+        def do_test(input_box):
+            input_box.setText("1")
+            self.assertTrue(dlg._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
+            input_box.clear()
+            self.assertFalse(dlg._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
+
+        do_test(dlg._ui.wkspIndices)
+        do_test(dlg._ui.specNums)
+
     def test_plot_all_gives_only_workspaces_indices(self):
         ws = CreateSampleWorkspace(OutputWorkspace='ws', StoreInADS=False)
         dlg = PlotSelectionDialog([ws])
