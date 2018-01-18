@@ -474,7 +474,7 @@ The mechanism of execution modes and storage modes allows for "guided" porting o
 1. Run Python script such as a system test with two (or more) MPI ranks.
 2. At some point an algorithm without any MPI support or inadequate MPI support may be encountered, resulting in an error message similar to this:
 
-  .. code-block::
+  .. code-block:: none
 
     MyAlg-[Error] Error in execution of algorithm MyAlg:
     MyAlg-[Error] Algorithm does not support execution with input workspaces of the following storage types:
