@@ -1,17 +1,7 @@
-#ifndef MANTID_GEOMETRY_COMPONENTVISITORHELPER_H_
-#define MANTID_GEOMETRY_COMPONENTVISITORHELPER_H_
-
-#include "MantidGeometry/DllConfig.h"
-#include <string>
-
-namespace Mantid {
-namespace Geometry {
-
-/** ComponentVisitorHelper namespace : Helper functions for Component Visitors.
-  These mainly relate to helping with common code for IDF compatibility
-  problems.
-
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+#ifndef MANTIDQT_WIDGETS_ALTERNATECSPYTHONLEXER_H
+#define MANTIDQT_WIDGETS_ALTERNATECSPYTHONLEXER_H
+/*
+  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -32,14 +22,15 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-namespace ComponentVisitorHelper {
+#include <Qsci/qscilexerpython.h>
 
-bool MANTID_GEOMETRY_DLL matchesPackOfTubes(const std::string &nameHint);
+/**
+ * Defines a Pytho lexer with a different colour scheme
+ */
+class AlternateCSPythonLexer : public QsciLexerPython {
+public:
+  QColor defaultColor(int style) const override;
+  QFont defaultFont(int style) const override;
+};
 
-bool MANTID_GEOMETRY_DLL matchesPSDTube(const std::string &nameHint);
-
-} // namespace ComponentVisitorHelper
-} // namespace Geometry
-} // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_COMPONENTVISITORHELPER_H_ */
+#endif // MANTIDQT_WIDGETS_ALTERNATECSPYTHONLEXER_H

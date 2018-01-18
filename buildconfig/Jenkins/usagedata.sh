@@ -1,8 +1,10 @@
 #!/bin/sh
 # make testing easier - BUILD_DIR should be root of build tree
-if [ -z "$BUILD_DIR" ]; then
+if [ -z "$WORKSPACE" ]; then
     BUILD_DIR=`pwd`
     echo "setting BUILD_DIR to $BUILD_DIR"
+else
+    BUILD_DIR=$WORKSPACE/build
 fi
 
 # remove old copy
@@ -13,7 +15,8 @@ if [ -f UsageData.zip ]; then
 fi
 
 # create the symbolic link so the zip decompresses into the familiar name
-cd ExternalData/Testing/Data
+echo $(pwd)
+cd $BUILD_DIR/ExternalData/Testing/Data || exit -1
 if [ -d UsageData ]; then
     echo "symbolic link already exists"
 else

@@ -126,11 +126,13 @@ public:
 
   double getInitialEnergy() const override;
   double getFinalEnergy() const override;
+  double getEnergy() const override;
   void setInitialEnergy(double m_initialEnergy) override;
   void setFinalEnergy(double m_finalEnergy) override;
 
   double getIntensity() const override;
   double getSigmaIntensity() const override;
+  double getIntensityOverSigma() const override;
 
   void setIntensity(double m_intensity) override;
   void setSigmaIntensity(double m_sigmaIntensity) override;
