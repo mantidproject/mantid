@@ -16,10 +16,10 @@
 namespace {
 /// Property names.
 namespace Prop {
-constexpr char *FLIPPERS{"Flippers"};
-constexpr char *EFFICIENCIES{"Efficiencies"};
-constexpr char *INPUT_WS{"InputWorkspaces"};
-constexpr char *OUTPUT_WS{"OutputWorkspace"};
+static const std::string FLIPPERS{"Flippers"};
+static const std::string EFFICIENCIES{"Efficiencies"};
+static const std::string INPUT_WS{"InputWorkspaces"};
+static const std::string OUTPUT_WS{"OutputWorkspace"};
 }
 
 /// Flipper configurations.
