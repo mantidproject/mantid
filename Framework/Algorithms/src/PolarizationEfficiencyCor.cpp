@@ -94,7 +94,7 @@ void PolarizationEfficiencyCor::init() {
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<std::string>>(Prop::INPUT_WS, "", boost::make_shared<API::ADSValidator>(),
                                                              Kernel::Direction::Input),
-      "A list of workspaces corresponding to the flipper configurations to be corrected.");
+      "A list of workspaces to be corrected corresponding to the flipper configurations.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "",
                                                              Kernel::Direction::Output),
