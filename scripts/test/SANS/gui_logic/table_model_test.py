@@ -66,7 +66,7 @@ class TableModelTest(unittest.TestCase):
         self.assertFalse(has_raised)
 
         # Test raises for non-existent file path
-        self.assertRaises(ValueError, func, "/home/test")
+        self.assertRaises(ValueError, func, "/home/testSDFHSNDFG")
 
         # Test that can be set to valid value
         setattr(table_model, prop, __file__)
