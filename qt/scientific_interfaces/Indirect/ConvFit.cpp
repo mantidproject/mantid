@@ -176,8 +176,7 @@ void ConvFit::addFunctionGroupToComboBox(
   addComboBoxFunctionGroup(groupName, functions);
 }
 
-IFunction_sptr
-ConvFit::fitFunction(QHash<QString, QString> &functionNameChanges) const {
+IFunction_sptr ConvFit::fitFunction() const {
   CompositeFunction_sptr comp(new CompositeFunction);
   auto modelFunction = model();
   modelFunction->applyTies();
@@ -186,17 +185,11 @@ ConvFit::fitFunction(QHash<QString, QString> &functionNameChanges) const {
         AnalysisDataService::Instance().doesExist("__ConvFit_Resolution")))
     return CompositeFunction_sptr(new CompositeFunction);
 
-  QString prefixPrefix = "f1.";
-  int backgroundIndex = -1;
+  int backIndex = backgroundIndex();
 
   auto backgroundFunction = background();
-  if (backgroundFunction) {
+  if (backgroundFunction)
     comp->addFunction(backgroundFunction);
-    addFunctionNameChanges(backgroundFunction, backgroundPrefix() + ".", "f0.",
-                           functionNameChanges);
-    prefixPrefix += "f1.";
-    backgroundIndex = backgroundPrefix().right(1).toInt();
-  }
 
   auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createFunction("Convolution"));
@@ -204,22 +197,6 @@ ConvFit::fitFunction(QHash<QString, QString> &functionNameChanges) const {
 
   auto compositeModel =
       boost::dynamic_pointer_cast<CompositeFunction>(modelFunction);
-
-  const auto parameterNames = modelFunction->getParameterNames();
-  QString prefixSuffix = "";
-
-  if (m_usedTemperature)
-    prefixSuffix = "f1.";
-
-  if (compositeModel) {
-    addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix, 0,
-                           backgroundIndex, 0, functionNameChanges);
-    addFunctionNameChanges(
-        compositeModel, prefixPrefix, prefixSuffix, backgroundIndex,
-        static_cast<int>(compositeModel->nFunctions()), 1, functionNameChanges);
-  } else
-    addFunctionNameChanges(modelFunction, "", prefixPrefix + prefixSuffix,
-                           functionNameChanges);
 
   if (m_usedTemperature) {
     if (compositeModel)
@@ -231,6 +208,33 @@ ConvFit::fitFunction(QHash<QString, QString> &functionNameChanges) const {
   conv->addFunction(modelFunction);
   comp->addFunction(conv);
   return comp;
+}
+
+QHash<QString, QString>
+ConvFit::functionNameChanges(IFunction_sptr model) const {
+  QHash<QString, QString> changes;
+  auto compositeModel = boost::dynamic_pointer_cast<CompositeFunction>(model);
+
+  QString prefixPrefix = "f1.";
+  int backIndex = backgroundIndex();
+
+  if (backIndex > 0)
+    prefixPrefix += "f1.";
+
+  QString prefixSuffix = "";
+
+  if (m_usedTemperature)
+    prefixSuffix = "f1.";
+
+  if (compositeModel) {
+    addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix, 0,
+                           backIndex, 0, changes);
+    addFunctionNameChanges(
+        compositeModel, prefixPrefix, prefixSuffix, backIndex,
+        static_cast<int>(compositeModel->nFunctions()), 1, changes);
+  } else
+    addFunctionNameChanges(model, "", prefixPrefix + prefixSuffix, changes);
+  return changes;
 }
 
 void ConvFit::addFunctionNameChanges(
@@ -249,7 +253,7 @@ void ConvFit::addFunctionNameChanges(
     const QString &prefixSuffix, int fromIndex, int toIndex, int offset,
     QHash<QString, QString> &functionNameChanges) const {
 
-  for (int i = fromIndex; i < toIndex; ++i) {
+  for (int i = fromIndex > 0 ? 0 : fromIndex; i < toIndex; ++i) {
     const auto &functionPrefix = "f" + QString::number(i) + ".";
     const auto &offsetPrefix = "f" + QString::number(i + offset) + ".";
     const auto &function = model->getFunction(static_cast<size_t>(i));
@@ -258,8 +262,7 @@ void ConvFit::addFunctionNameChanges(
     if (function->name() != "DeltaFunction")
       prefix += prefixSuffix;
 
-    addFunctionNameChanges(function, offsetPrefix, prefix,
-                           functionNameChanges);
+    addFunctionNameChanges(function, offsetPrefix, prefix, functionNameChanges);
   }
 }
 
@@ -526,9 +529,8 @@ void ConvFit::fitFunctionChanged() {
   auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
   auto backRangeSelector =
       m_uiForm->ppPlotTop->getRangeSelector("ConvFitBackRange");
-  const auto fitType = selectedFitType();
 
-  if (fitType.contains("Lorentzian"))
+  if (selectedFitType().contains("Lorentzian"))
     hwhmRangeSelector->setVisible(true);
   else
     hwhmRangeSelector->setVisible(false);
@@ -555,8 +557,8 @@ void ConvFit::parameterUpdated(const Mantid::API::IFunction *function) {
     rangeSelector->blockSignals(false);
   } else if (function->hasParameter("FWHM")) {
     auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
-    auto peakCentre = function->getParameter("PeakCentre");
-    auto hwhm = function->getParameter("FWHM") / 2.0;
+    auto peakCentre = parameterValue(function->name(), "PeakCentre");
+    auto hwhm = parameterValue(function->name(), "FWHM") / 2.0;
     rangeSelector->blockSignals(true);
     rangeSelector->setMaximum(peakCentre + hwhm);
     rangeSelector->setMinimum(peakCentre - hwhm);
@@ -572,7 +574,8 @@ void ConvFit::parameterUpdated(const Mantid::API::IFunction *function) {
  * they need to have the WorkspaceIndex attribute set.
  */
 void ConvFit::extendResolutionWorkspace() {
-  auto inputWs = inputWorkspace();
+  const auto inputWs = inputWorkspace();
+  const auto resName = "__ConvFit_Resolution";
 
   if (inputWs && m_uiForm->dsResInput->isValid()) {
     const std::string resWsName =
@@ -588,17 +591,14 @@ void ConvFit::extendResolutionWorkspace() {
       throw std::runtime_error(msg);
     }
     // Clone resolution workspace
-    auto cloneAlg = cloneAlgorithm(resolutionInputWS, "__ConvFit_Resolution");
-    cloneAlg->execute();
+    cloneAlgorithm(resolutionInputWS, resName)->execute();
     auto resolutionWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "__ConvFit_Resolution");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resName);
 
     // Append to cloned workspace if necessary
     if (resolutionNumHist == 1 && numHist > 1) {
       auto appendAlg = appendAlgorithm(resolutionWS, resolutionInputWS,
-                                       static_cast<int>(numHist - 1),
-                                       "__ConvFit_Resolution");
+                                       static_cast<int>(numHist - 1), resName);
       appendAlg->execute();
     }
   }
@@ -705,15 +705,11 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
                 ->getNumberParameter("resolution")
                 .size() == 0) {
       std::string reflection = inst->getStringParameter("reflection")[0];
+      std::string paramFile = idfDirectory + inst->getName() + "_" + analyser +
+                              "_" + reflection + "_Parameters.xml";
 
       IAlgorithm_sptr loadParamFile =
-          AlgorithmManager::Instance().create("LoadParameterFile");
-      loadParamFile->setChild(true);
-      loadParamFile->initialize();
-      loadParamFile->setProperty("Workspace", workspace);
-      loadParamFile->setProperty(
-          "Filename", idfDirectory + inst->getName() + "_" + analyser + "_" +
-                          reflection + "_Parameters.xml");
+          loadParameterFileAlgorithm(workspace, paramFile);
       loadParamFile->execute();
 
       if (!loadParamFile->isExecuted()) {
@@ -738,6 +734,18 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
   }
 
   return resolution;
+}
+
+IAlgorithm_sptr
+ConvFit::loadParameterFileAlgorithm(MatrixWorkspace_sptr workspace,
+                                    const std::string &filename) const {
+  IAlgorithm_sptr loadParamFile =
+      AlgorithmManager::Instance().create("LoadParameterFile");
+  loadParamFile->setChild(true);
+  loadParamFile->initialize();
+  loadParamFile->setProperty("Workspace", workspace);
+  loadParamFile->setProperty("Filename", filename);
+  return loadParamFile;
 }
 
 /**
@@ -777,6 +785,17 @@ QString ConvFit::backgroundString(const QString &backgroundType) const {
     return "FitL_s";
   else
     return "";
+}
+
+void ConvFit::setSelectedSpectrum(int spectrum) {
+  auto fitRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitRange");
+  auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
+
+  disconnect(fitRangeSelector, SIGNAL(rangeChanged(double, double)),
+             hwhmRangeSelector, SLOT(setRange(double, double)));
+  IndirectFitAnalysisTab::setSelectedSpectrum(spectrum);
+  connect(fitRangeSelector, SIGNAL(rangeChanged(double, double)),
+          hwhmRangeSelector, SLOT(setRange(double, double)));
 }
 
 /**
@@ -908,7 +927,7 @@ void ConvFit::updateHWHMFromResolution() {
 
   if (resolution > 0 && selectedFitType().contains("Lorentzian")) {
     auto peakCentre = parameterValue("Lorentzian", "PeakCentre");
-    hwhmMaxChanged(peakCentre + resolution);
+    hwhmMaxChanged(resolution / 2.0);
   }
 }
 

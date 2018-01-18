@@ -15,14 +15,15 @@ class DLLExport ConvFit : public IndirectFitAnalysisTab {
 public:
   ConvFit(QWidget *parent = nullptr);
 
-  Mantid::API::IFunction_sptr
-  fitFunction(QHash<QString, QString> &functionNameChanges) const override;
+  Mantid::API::IFunction_sptr fitFunction() const override;
 
 protected:
   // Used in auto generating defaults for parameters
   QHash<QString, double> createDefaultValues() const override;
   Mantid::API::IAlgorithm_sptr singleFitAlgorithm() override;
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() override;
+  QHash<QString, QString> ConvFit::functionNameChanges(
+      Mantid::API::IFunction_sptr model) const override;
 
 private:
   void setup() override;
@@ -31,6 +32,7 @@ private:
   void loadSettings(const QSettings &settings) override;
 
 protected slots:
+  void setSelectedSpectrum(int spectrum) override;
   void algorithmComplete(bool error) override;
   void newDataLoaded(const QString &wsName);
   void extendResolutionWorkspace();
@@ -78,6 +80,9 @@ private:
   appendAlgorithm(Mantid::API::MatrixWorkspace_sptr leftWS,
                   Mantid::API::MatrixWorkspace_sptr rightWS, int numHistograms,
                   const std::string &outputWSName) const;
+  Mantid::API::IAlgorithm_sptr ConvFit::loadParameterFileAlgorithm(
+      Mantid::API::MatrixWorkspace_sptr workspace,
+      const std::string &filename) const;
 
   void
   addFunctionNameChanges(Mantid::API::IFunction_sptr model,
