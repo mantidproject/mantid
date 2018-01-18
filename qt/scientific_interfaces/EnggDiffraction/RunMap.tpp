@@ -1,22 +1,12 @@
 #include <algorithm>
 
-namespace {
-
-template <typename T> void insertInOrder(const T &item, std::vector<T> &vec) {
-  vec.insert(std::upper_bound(vec.begin(), vec.end(), item), item);
-}
-}
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
 template <size_t NumBanks, typename T>
 void RunMap<NumBanks, T>::add(const int runNumber, const size_t bank,
-                              const T itemToAdd) {
-  if (bank < 1 || bank > NumBanks) {
-    throw std::invalid_argument("Tried to access invalid bank: " +
-                                std::to_string(bank));
-  }
+                              const T &itemToAdd) {
+  validateBankID(bank);
   m_map[bank - 1][runNumber] = itemToAdd;
 }
 
@@ -30,10 +20,7 @@ bool RunMap<NumBanks, T>::contains(const int runNumber,
 template <size_t NumBanks, typename T>
 const T &RunMap<NumBanks, T>::get(const int runNumber,
                                   const size_t bank) const {
-  if (bank < 1 || bank > NumBanks) {
-    throw std::invalid_argument("Tried to access invalid bank: " +
-                                std::to_string(bank));
-  }
+  validateBankID(bank);
   if (!contains(runNumber, bank)) {
     throw std::invalid_argument("Tried to access invalid run number " +
                                 std::to_string(runNumber) + " for bank " +
@@ -44,6 +31,7 @@ const T &RunMap<NumBanks, T>::get(const int runNumber,
 
 template <size_t NumBanks, typename T>
 void RunMap<NumBanks, T>::remove(const int runNumber, const size_t bank) {
+  validateBankID(bank);
   m_map[bank - 1].erase(runNumber);
 }
 
@@ -64,16 +52,13 @@ RunMap<NumBanks, T>::getRunNumbersAndBankIDs() const {
 }
 
 template <size_t NumBanks, typename T>
-std::vector<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
-  std::vector<int> runNumbers;
+std::set<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
+  std::set<int> runNumbers;
 
   for (const auto &bank : m_map) {
     for (const auto &runBankPair : bank) {
       const auto runNumber = runBankPair.first;
-      if (std::find(runNumbers.begin(), runNumbers.end(), runNumber) ==
-          runNumbers.end()) {
-        insertInOrder(runNumber, runNumbers);
-      }
+      runNumbers.insert(runNumber);
     }
   }
 
@@ -88,6 +73,14 @@ size_t RunMap<NumBanks, T>::size() const {
     numElements += bank.size();
   }
   return numElements;
+}
+
+template <size_t NumBanks, typename T>
+void RunMap<NumBanks, T>::validateBankID(const size_t bank) const {
+  if (bank < 1 || bank > NumBanks) {
+    throw std::invalid_argument("Tried to access invalid bank: " +
+                                std::to_string(bank));
+  }
 }
 
 } // CustomInterfaces

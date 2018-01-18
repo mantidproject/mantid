@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_RUNMAP_H_
 
 #include <array>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -21,7 +22,7 @@ public:
    @param bank The bank ID associated with the item
    @param itemToAdd The item to add
    */
-  void add(const int runNumber, const size_t bank, const T itemToAdd);
+  void add(const int runNumber, const size_t bank, const T &itemToAdd);
 
   /// Check whether the map contains an entry for this run number and bank ID
   bool contains(const int runNumber, const size_t bank) const;
@@ -39,7 +40,9 @@ public:
   size_t size() const;
 
 private:
-  std::vector<int> getAllRunNumbers() const;
+  std::set<int> getAllRunNumbers() const;
+
+  void validateBankID(const size_t bank) const;
 
   std::array<std::unordered_map<int, T>, NumBanks> m_map;
 };

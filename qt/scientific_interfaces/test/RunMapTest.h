@@ -38,6 +38,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(runMap.remove(123, 1));
     TS_ASSERT(!runMap.contains(123, 1));
+
+    TS_ASSERT_THROWS(runMap.remove(123, 4), std::invalid_argument);
   }
 
   void test_getRunNumbersAndBankIDs() {
