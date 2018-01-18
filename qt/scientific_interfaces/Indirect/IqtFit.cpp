@@ -34,7 +34,7 @@ void IqtFit::setup() {
   setMaximumSpectrum(0);
 
   m_uiForm->ckPlotGuess->setChecked(false);
-  enablePlotGuess();
+  disablePlotGuess();
 
   // Create custom function groups
   const auto exponential =
@@ -384,12 +384,11 @@ void IqtFit::disablePlotGuess() {
 void IqtFit::enablePlotGuess() {
   m_uiForm->ckPlotGuess->setEnabled(true);
   m_uiForm->ckPlotGuess->blockSignals(false);
-  plotGuess();
 }
 
 void IqtFit::plotGuess() {
 
-  if (m_uiForm->ckPlotGuess->isChecked())
+  if (m_uiForm->ckPlotGuess->isEnabled() && m_uiForm->ckPlotGuess->isChecked())
     IndirectFitAnalysisTab::plotGuess(m_uiForm->ppPlotTop);
   else {
     m_uiForm->ppPlotTop->removeSpectrum("Guess");
