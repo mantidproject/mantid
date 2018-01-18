@@ -118,7 +118,7 @@ void FitPeaks::init() {
       FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty("PeakFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peakNames));
-  vector<string> bkgdtypes{"Flat", "Linear", "Quadratic"};
+  vector<string> bkgdtypes{"Flat", "Linear", "Quadratic", "Polynomial"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");

@@ -152,52 +152,6 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test on single peak and 1 spectrum among many
-    */
-  void Ntest_singlePeakSpectrum() {
-    // Generate input workspace
-    // std::string input_ws_name = loadVulcanHighAngleData();
-
-    // Generate peak and background parameters
-    std::vector<string> peakparnames;
-    std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
-
-    // Initialize FitPeak
-    FitPeaks fitpeaks;
-
-    fitpeaks.initialize();
-    TS_ASSERT(fitpeaks.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("StartWorkspaceIndex", 19014));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 19015));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
-
-    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");
-    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
-    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS");
-
-    fitpeaks.execute();
-
-    //  MatrixWorkspace_const_sptr outws3 =
-    //  fitpeaks.getProperety("FittedPeaksWS");
-    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS"));
-
-    // clean
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Test on single peak on partial spectra
     */
   void Ntest_singlePeakMultiSpectra() {
@@ -421,6 +375,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
 
+    TS_ASSERT_THROWS_NOTHING(
+        fit_peaks_alg.setProperty("BackgroundType", "Polynomial"));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
         "PeakCenters", "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
                        "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,"
@@ -472,6 +428,9 @@ public:
   void test_multiple_peak_profiles() {
     // Generate input workspace
     std::string input_ws_name = loadVulcanHighAngleData();
+    API::MatrixWorkspace_sptr input_ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(input_ws_name));
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
@@ -485,11 +444,15 @@ public:
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 6468));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 24900));
+        fitpeaks.setProperty("InputWorkspace", input_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 5));
     // 0.728299, 0.89198, 1.07577, 1.26145
     // 0.6307, 0.6867, 0.728299, 0.89198, 1.07577, 1.26145
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("BackgroundFunction", "Linear"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
         "PeakCenters", "1.0758, 0.89198, 0.728299, 0.6867"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowLeftBoundary",
@@ -508,24 +471,39 @@ public:
     fitpeaks.execute();
     TS_ASSERT(fitpeaks.isExecuted());
 
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS2"));
+    // Check outputs
+    bool peak_pos_ws_exist, peak_param_ws_exist, fitted_ws_exist;
+    API::MatrixWorkspace_sptr peak_pos_ws =
+        CheckAndRetrieveMatrixWorkspace("PeakPositionsWS2", &peak_pos_ws_exist);
+    API::MatrixWorkspace_sptr fitted_ws =
+        CheckAndRetrieveMatrixWorkspace("FittedPeaksWS2", &fitted_ws_exist);
+    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(
+        "PeakParametersWS2", &peak_param_ws_exist);
 
-    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS2"));
-    API::MatrixWorkspace_sptr fitted_data_ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-            API::AnalysisDataService::Instance().retrieve("FittedPeaksWS2"));
-    TS_ASSERT(fitted_data_ws);
+    if (peak_pos_ws_exist) {
+      TS_ASSERT_EQUALS(peak_pos_ws->getNumberHistograms(), 6);
+    }
 
-    // API::MatrixWorkspace_const_sptr fitted_data_ws =
-    // fitpeaks.getProperty("FittedPeaksWS2");
-    TS_ASSERT_EQUALS(fitted_data_ws->getNumberHistograms(), 24900);
+    if (fitted_ws_exist) {
+      TS_ASSERT_EQUALS(fitted_ws->getNumberHistograms(),
+                       input_ws->getNumberHistograms());
+    }
+
+    if (peak_param_ws_exist) {
+    }
+
+    // clean
+    AnalysisDataService::Instance().remove(input_ws_name);
+    AnalysisDataService::Instance().remove("PeakPositionsWS2");
+    AnalysisDataService::Instance().remove("FittedPeaksWS2");
+    AnalysisDataService::Instance().remove("PeakParametersWS2");
 
     return;
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Generate a workspace contains PG3_4866 5-th peak
+  /** Generate peak parameters for Back-to-back exponential convoluted by
+   * Gaussian
    * FitPeak(InputWorkspace='diamond_high_res_d', OutputWorkspace='peak0_19999',
    * ParameterTableWorkspace='peak0_19999_Param', WorkspaceIndex=19999,
    * PeakFunctionType='BackToBackExponential', PeakParameterNames='I,A,B,X0,S',
@@ -663,7 +641,9 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Generate a workspace contains PG3_4866 5-th peak
+  /** Generate a workspace contains peaks with profile as back to back
+   * exponenential convoluted
+   * by Gaussian
     */
   std::string loadVulcanHighAngleData() {
     DataHandling::LoadNexusProcessed loader;
@@ -680,29 +660,6 @@ public:
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("diamond_3peaks"));
     TS_ASSERT(ws);
-
-    return "Diamond2Peaks";
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Generate a workspace contains PG3_4866 5-th peak
-    */
-  std::string loadVulcanHighAngleDataFull() {
-
-    DataHandling::LoadNexusProcessed loader;
-    loader.initialize();
-
-    loader.setProperty("Filename", "/home/wzz/Mantid/VULCAN_150178_2Peaks.nxs");
-    loader.setProperty("OutputWorkspace", "Diamond2Peaks");
-
-    loader.execute();
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("Diamond2Peaks"));
-
-    API::MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("Diamond2Peaks"));
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 24900);
 
     return "Diamond2Peaks";
   }
