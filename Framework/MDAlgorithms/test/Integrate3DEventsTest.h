@@ -132,7 +132,9 @@ public:
     // synthesize two peaks
     V3D peak_1(20, 0, 0);
     V3D peak_2(0, 20, 0);
-    std::vector<std::pair<double, V3D>> peak_q_list{{1., peak_1}, {1., peak_2}};
+    V3D peak_3(0, 0, 20);
+    std::vector<std::pair<double, V3D>> peak_q_list{
+        {1., peak_1}, {1., peak_2}, {1., peak_3}};
 
     // synthesize a UB-inverse to map
     DblMatrix UBinv(3, 3, false); // Q to h,k,l
@@ -145,6 +147,7 @@ public:
     const int numWeakEvents = 100;
     generatePeak(event_Qs, peak_1, 0.1, numStrongEvents, 1); // strong peak
     generatePeak(event_Qs, peak_2, 0.1, numWeakEvents, 1);   // weak peak
+    generatePeak(event_Qs, peak_2, 0.1, 0, 1); // non-existant peak
 
     IntegrationParameters params;
     params.peakRadius = 1.0;
@@ -184,6 +187,18 @@ public:
     // strong peak
     TS_ASSERT_DELTA(weak_inti, 83.6960, 0.5);
     TS_ASSERT_DELTA(weak_sigi, 8.37, 0.1);
+
+    weak_inti = 0;
+    weak_sigi = 0;
+    integrator.integrateWeakPeak(params, shape, result.second, peak_3,
+                                 weak_inti, weak_sigi);
+
+    // Check the integrated intensity for a weak peak is exactly what we set it
+    // to be weighted by the fraction of strong peak contained in a standard
+    // core. This is not exactly the same because of the weighting from the
+    // strong peak
+    TS_ASSERT_DELTA(weak_inti, 0, 0.5);
+    TS_ASSERT_DELTA(weak_sigi, 0, 0.1);
   }
 
   void test_integrateWeakPeakWithBackground() {

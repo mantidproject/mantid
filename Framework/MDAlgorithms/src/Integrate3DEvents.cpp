@@ -147,11 +147,6 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   inti = peak - ratio * backgrd;
   sigi = sqrt(peak + ratio * ratio * backgrd);
 
-  if (inti < 0) {
-    inti = 0;
-    sigi = 0;
-  }
-
   // compute the fraction of peak within the standard core
   const auto total = (core + peak) - ratio * backgrd;
   const auto frac = std::min(1.0, std::abs(inti / total));
@@ -223,11 +218,6 @@ Integrate3DEvents::integrateWeakPeak(
   inti = inti * frac;
   sigi = sqrt(sigi) * inti;
 
-  if (inti < 0) {
-    inti = 0;
-    sigi = 0;
-  }
-
   return shape;
 }
 
@@ -278,8 +268,9 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
 
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
   double inti = peak_w_back - ratio * backgrd;
+  auto sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
 
-  return inti / std::max(1.0, (ratio * backgrd));
+  return inti / sigi;
 }
 
 const std::vector<std::pair<double, V3D>> *
