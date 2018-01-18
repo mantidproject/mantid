@@ -742,7 +742,7 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
     return;
   ProjectionSurface &surface = *getSurface();
   if (surface.hasMasks()) {
-    QList<int> dets;
+    std::vector<size_t> dets;
     surface.getMaskedDetectors(dets);
     m_plotController->setPlotData(dets);
   } else {
@@ -830,10 +830,10 @@ void ComponentInfoController::displayInfo(size_t pickID) {
   }
 
   const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.getComponentInfo();
   QString text = "";
-  int detid = actor.getDetID(pickID);
-  if (detid >= 0) {
-    text += displayDetectorInfo(detid);
+  if (componentInfo.isDetector(pickID)) {
+    text += displayDetectorInfo(pickID);
   } else if (auto componentID = actor.getComponentID(pickID)) {
     text += displayNonDetectorInfo(componentID);
   } else {
@@ -851,56 +851,51 @@ void ComponentInfoController::displayInfo(size_t pickID) {
 
 /**
 * Return string with info on a detector.
-* @param detid :: A detector ID.
+* @param index :: A detector Index.
 */
-QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
+QString ComponentInfoController::displayDetectorInfo(size_t index) {
   if (m_instrWidgetBlocked) {
     clear();
     return "";
   }
 
   QString text;
-  if (detid >= 0) {
+  
     // collect info about selected detector and add it to text
     const auto &actor = m_instrWidget->getInstrumentActor();
     const auto &componentInfo = actor.getComponentInfo();
-    auto det = actor.getDetectorByDetID(detid);
+    auto detid = actor.getDetID(index);
 
     text = "Selected detector: " +
-           QString::fromStdString(componentInfo.name(det)) + "\n";
+           QString::fromStdString(componentInfo.name(index)) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     QString wsIndex;
-    try {
-      wsIndex = QString::number(actor.getWorkspaceIndex(detid));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      // Detector doesn't have a workspace index relating to it
-      wsIndex = "None";
-    }
+    wsIndex = QString::number(actor.getWorkspaceIndex(index));
     text += "Workspace index: " + wsIndex + '\n';
-    Mantid::Kernel::V3D pos = componentInfo.position(det);
+    Mantid::Kernel::V3D pos = componentInfo.position(index);
     text += "xyz: " + QString::number(pos.X()) + "," +
             QString::number(pos.Y()) + "," + QString::number(pos.Z()) + '\n';
     double r, t, p;
     pos.getSpherical(r, t, p);
     text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
             QString::number(p) + '\n';
-    if (componentInfo.hasParent(det)) {
+    if (componentInfo.hasParent(index)) {
       QString textpath;
-      auto parent = det;
+      auto parent = index;
       while (componentInfo.hasParent(parent)) {
         parent = componentInfo.parent(parent);
         textpath =
             "/" + QString::fromStdString(componentInfo.name(parent)) + textpath;
       }
       text += "Component path:" + textpath + "/" +
-              QString::fromStdString(componentInfo.name(det)) + '\n';
-    }
-    const double integrated = actor.getIntegratedCounts(detid);
+              QString::fromStdString(componentInfo.name(index)) + '\n';
+    
+    const double integrated = actor.getIntegratedCounts(index);
     const QString counts =
         integrated == -1.0 ? "N/A" : QString::number(integrated);
     text += "Counts: " + counts + '\n';
     // display info about peak overlays
-    text += actor.getParameterInfo(det);
+    text += actor.getParameterInfo(index);
   }
   return text;
 }
@@ -1099,19 +1094,19 @@ void DetectorPlotController::setPlotData(size_t pickID) {
     m_plotType = Single;
   }
 
-  const int detid = m_instrWidget->getInstrumentActor().getDetID(pickID);
-
   if (!m_enabled) {
     m_plot->clearCurve();
     return;
   }
 
-  if (detid >= 0) {
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.getComponentInfo();
+  if (componentInfo.isDetector(pickID)) {
     if (m_plotType == Single) {
-      m_currentDetID = detid;
-      plotSingle(detid);
+      m_currentDetID = actor.getDetID(pickID);
+      plotSingle(pickID);
     } else if (m_plotType == TubeSum || m_plotType == TubeIntegral) {
-      plotTube(detid);
+      plotTube(pickID);
     } else {
       throw std::logic_error("setPlotData: Unexpected plot type.");
     }
@@ -1122,15 +1117,16 @@ void DetectorPlotController::setPlotData(size_t pickID) {
 
 /**
 * Set curev data from multiple detectors: sum their spectra.
-* @param detIDs :: A list of detector IDs.
+* @param detIndices :: A list of detector Indices.
 */
-void DetectorPlotController::setPlotData(QList<int> detIDs) {
+void DetectorPlotController::setPlotData(
+    const std::vector<size_t> &detIndices) {
   setPlotType(DetectorSum);
   clear();
   std::vector<double> x, y;
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   const auto &actor = m_instrWidget->getInstrumentActor();
-  actor.sumDetectors(detIDs, x, y, static_cast<size_t>(m_plot->width()));
+  actor.sumDetectors(detIndices, x, y, static_cast<size_t>(m_plot->width()));
   QApplication::restoreOverrideCursor();
   if (!x.empty()) {
     m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
@@ -1157,23 +1153,20 @@ void DetectorPlotController::clear() {
 
 /**
 * Plot data for a detector.
-* @param detid :: ID of the detector to be plotted.
+* @param detindex :: Index of the detector to be plotted.
 */
-void DetectorPlotController::plotSingle(int detid) {
-
+void DetectorPlotController::plotSingle(size_t detindex) {
   clear();
   std::vector<double> x, y;
-  prepareDataForSinglePlot(detid, x, y);
+  prepareDataForSinglePlot(detindex, x, y);
   if (x.empty() || y.empty())
     return;
 
+  const auto &actor = m_instrWidget->getInstrumentActor();
   // set the data
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  m_instrWidget->getInstrumentActor()
-                      .getWorkspace()
-                      ->getAxis(0)
-                      ->unit()
-                      ->unitID());
+                  actor.getWorkspace()->getAxis(0)->unit()->unitID());
+  auto detid = actor.getDetID(detindex);
   m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
@@ -1196,25 +1189,24 @@ void DetectorPlotController::plotSingle(int detid) {
 *   LENGTH
 *   PHI
 * The units can be set with setTubeXUnits(...) method.
-* @param detid :: A detector id. The miniplot will display data for a component
+* @param detindex :: A detector index. The miniplot will display data for a component
 * containing the detector
 *   with this id.
 */
-void DetectorPlotController::plotTube(int detid) {
+void DetectorPlotController::plotTube(size_t detindex) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   const auto &componentInfo = actor.getComponentInfo();
-  auto det = actor.getDetectorByDetID(detid);
 
-  if (componentInfo.hasParent(det) &&
-      componentInfo.detectorsInSubtree(det).size() > 0) {
+  if (componentInfo.hasParent(detindex) &&
+      componentInfo.detectorsInSubtree(detindex).size() > 0) {
     if (m_plotType == TubeSum) // plot sums over detectors vs time bins
     {
-      plotTubeSums(detid);
+      plotTubeSums(detindex);
     } else // plot detector integrals vs detID or a function of detector
            // position in the tube
     {
       assert(m_plotType == TubeIntegral);
-      plotTubeIntegrals(detid);
+      plotTubeIntegrals(detindex);
     }
   } else {
     m_plot->clearCurve();
@@ -1223,21 +1215,21 @@ void DetectorPlotController::plotTube(int detid) {
 
 /**
 * Plot the accumulated data in a tube against time of flight.
-* @param detid :: A detector id. The miniplot will display data for a component
+* @param detindex :: A detector id. The miniplot will display data for a component
 * containing the detector
 *   with this id.
 */
-void DetectorPlotController::plotTubeSums(int detid) {
+void DetectorPlotController::plotTubeSums(size_t detindex) {
   std::vector<double> x, y;
-  prepareDataForSumsPlot(detid, x, y);
+  prepareDataForSumsPlot(detindex, x, y);
   if (x.empty() || y.empty()) {
     clear();
     return;
   }
   const auto &actor = m_instrWidget->getInstrumentActor();
   const auto &componentInfo = actor.getComponentInfo();
-  auto det = actor.getDetectorByDetID(detid);
-  auto parent = componentInfo.parent(det);
+  auto parent = componentInfo.parent(detindex);
+  auto detid = actor.getDetID(detindex);
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
                   QString::number(detid) + ") Sum";
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
@@ -1253,16 +1245,15 @@ void DetectorPlotController::plotTubeSums(int detid) {
 *   LENGTH
 *   PHI
 * The units can be set with setTubeXUnits(...) method.
-* @param detid :: A detector id. The miniplot will display data for a component
+* @param detindex :: A detector index. The miniplot will display data for a component
 * containing the detector
 *   with this id.
 */
-void DetectorPlotController::plotTubeIntegrals(int detid) {
-  auto det = m_instrWidget->getInstrumentActor().getDetectorByDetID(detid);
-  const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().getComponentInfo();
+void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo =actor.getComponentInfo();
   std::vector<double> x, y;
-  prepareDataForIntegralsPlot(detid, x, y);
+  prepareDataForIntegralsPlot(detindex, x, y);
   if (x.empty() || y.empty()) {
     clear();
     return;
@@ -1274,32 +1265,28 @@ void DetectorPlotController::plotTubeIntegrals(int detid) {
   }
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
                   xAxisCaption.toStdString());
-  auto parent = componentInfo.parent(det);
+  auto parent = componentInfo.parent(detindex);
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
-                  QString::number(detid) + ") Integrals/" + getTubeXUnitsName();
+                  QString::number(actor.getDetID(detindex)) + ") Integrals/" +
+                  getTubeXUnitsName();
   m_plot->setLabel(label);
 }
 
 /**
 * Prepare data for plotting a spectrum of a single detector.
-* @param detid :: ID of the detector to be plotted.
+* @param detindex :: Index of the detector to be plotted.
 * @param x :: Vector of x coordinates (output)
 * @param y :: Vector of y coordinates (output)
 * @param err :: Optional pointer to a vector of errors (output)
 */
 void DetectorPlotController::prepareDataForSinglePlot(
-    int detid, std::vector<double> &x, std::vector<double> &y,
+    size_t detindex, std::vector<double> &x, std::vector<double> &y,
     std::vector<double> *err) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
-  size_t wi;
-  try {
-    wi = actor.getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    return; // Detector doesn't have a workspace index relating to it
-  }
+  auto wi = actor.getWorkspaceIndex(detindex);
   // get the data
   const auto &XPoints = ws->points(wi);
   const auto &Y = ws->y(wi);
@@ -1318,30 +1305,24 @@ void DetectorPlotController::prepareDataForSinglePlot(
 
 /**
 * Prepare data for plotting accumulated data in a tube against time of flight.
-* @param detid :: A detector id. The miniplot will display data for a component
-* containing the detector
-*   with this id.
+* @param detindex :: A detector index. The miniplot will display data for a component
+* containing the detector with this index.
 * @param x :: Vector of x coordinates (output)
 * @param y :: Vector of y coordinates (output)
 * @param err :: Optional pointer to a vector of errors (output)
 */
-void DetectorPlotController::prepareDataForSumsPlot(int detid,
+void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
                                                     std::vector<double> &x,
                                                     std::vector<double> &y,
                                                     std::vector<double> *err) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto ws = actor.getWorkspace();
   const auto &componentInfo = actor.getComponentInfo();
-  auto detector = actor.getDetectorByDetID(detid);
-  auto parent = componentInfo.parent(detector);
+  auto detid = actor.getDetID(detindex);
+  auto parent = componentInfo.parent(detindex);
   auto ass = componentInfo.detectorsInSubtree(parent);
 
-  size_t wi;
-  try {
-    wi = actor.getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    return; // Detector doesn't have a workspace index relating to it
-  }
+  auto wi = actor.getWorkspaceIndex(detindex);
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
 
@@ -1354,22 +1335,18 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
   const auto &detectorInfo = actor.getDetectorInfo();
   for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
-      try {
-        size_t index = actor.getWorkspaceIndex(detectorInfo.detectorIDs()[det]);
-        const auto &Y = ws->y(index);
-        std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
+      auto index = actor.getWorkspaceIndex(det);
+      const auto &Y = ws->y(index);
+      std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
+                     std::plus<double>());
+      if (err) {
+        const auto &E = ws->e(index);
+        std::vector<double> tmp;
+        tmp.assign(E.begin() + imin, E.begin() + imax);
+        std::transform(tmp.begin(), tmp.end(), tmp.begin(), tmp.begin(),
+                       std::multiplies<double>());
+        std::transform(err->begin(), err->end(), tmp.begin(), err->begin(),
                        std::plus<double>());
-        if (err) {
-          const auto &E = ws->e(index);
-          std::vector<double> tmp;
-          tmp.assign(E.begin() + imin, E.begin() + imax);
-          std::transform(tmp.begin(), tmp.end(), tmp.begin(), tmp.begin(),
-                         std::multiplies<double>());
-          std::transform(err->begin(), err->end(), tmp.begin(), err->begin(),
-                         std::plus<double>());
-        }
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        continue; // Detector doesn't have a workspace index relating to it
       }
     }
   }
@@ -1389,14 +1366,13 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
 *   OUT_OF_PLANE_ANGLE
 * The units can be set with setTubeXUnits(...) method.
 * @param detid :: A detector id. The miniplot will display data for a component
-* containing the detector
-*   with this id.
+* containing the detector with this index.
 * @param x :: Vector of x coordinates (output)
 * @param y :: Vector of y coordinates (output)
 * @param err :: Optional pointer to a vector of errors (output)
 */
 void DetectorPlotController::prepareDataForIntegralsPlot(
-    int detid, std::vector<double> &x, std::vector<double> &y,
+    size_t detindex, std::vector<double> &x, std::vector<double> &y,
     std::vector<double> *err) {
 
 #define PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED                              \
@@ -1415,16 +1391,9 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   const bool bOffsetPsi = (!parameters.empty()) &&
                           std::find(parameters.begin(), parameters.end(),
                                     "Always") != parameters.end();
-
-  auto det = actor.getDetectorByDetID(detid);
-  auto parent = componentInfo.parent(det);
+  auto parent = componentInfo.parent(detindex);
   auto ass = componentInfo.detectorsInSubtree(parent);
-  size_t wi;
-  try {
-    wi = actor.getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    return; // Detector doesn't have a workspace index relating to it
-  }
+  auto wi = actor.getWorkspaceIndex(detindex);
   // imin and imax give the bin integration range
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
@@ -1473,7 +1442,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         default:
           xvalue = static_cast<double>(id);
         }
-        size_t index = actor.getWorkspaceIndex(id);
+        auto index = actor.getWorkspaceIndex(det);
         // get the y-value for detector idet
         const auto &Y = ws->y(index);
         double sum = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
@@ -1546,7 +1515,7 @@ void DetectorPlotController::savePlotToWorkspace() {
       if (X.empty()) {
         // label doesn't have any info on how to reproduce the curve:
         // only the current curve can be saved
-        QList<int> dets;
+        std::vector<size_t> dets;
         m_tab->getSurface()->getMaskedDetectors(dets);
         actor.sumDetectors(dets, x, y);
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();

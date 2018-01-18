@@ -255,7 +255,7 @@ void UnwrappedSurface::componentSelected(size_t componentIndex) {
   }
 }
 
-void UnwrappedSurface::getSelectedDetectors(QList<int> &dets) {
+void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &dets) {
   if (m_selectRect.isNull()) {
     return;
   }
@@ -309,26 +309,24 @@ void UnwrappedSurface::getSelectedDetectors(QList<int> &dets) {
       break;
   }
 
-  const auto &detectorInfo = m_instrActor->getDetectorInfo();
   // select detectors with u,v within the allowed boundaries
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     UnwrappedDetector &udet = m_unwrappedDetectors[i];
     if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom &&
         udet.v <= vtop) {
-      dets.push_back(detectorInfo.detectorIDs()[udet.detIndex]);
+      dets.push_back(udet.detIndex);
     }
   }
 }
 
-void UnwrappedSurface::getMaskedDetectors(QList<int> &dets) const {
+void UnwrappedSurface::getMaskedDetectors(std::vector<size_t> &dets) const {
   dets.clear();
   if (m_maskShapes.isEmpty())
     return;
-  const auto &detectorInfo = m_instrActor->getDetectorInfo();
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
     if (m_maskShapes.isMasked(udet.u, udet.v)) {
-      dets.append(detectorInfo.detectorIDs()[udet.detIndex]);
+      dets.push_back(udet.detIndex);
     }
   }
 }

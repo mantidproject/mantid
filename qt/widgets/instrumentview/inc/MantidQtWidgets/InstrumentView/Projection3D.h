@@ -40,8 +40,8 @@ public:
   void setWireframe(bool on);
 
   void componentSelected(size_t componentIndex) override;
-  void getSelectedDetectors(QList<int> &dets) override;
-  void getMaskedDetectors(QList<int> &dets) const override;
+  void getSelectedDetectors(std::vector<size_t> &dets) override;
+  void getMaskedDetectors(std::vector<size_t> &dets) const override;
   void resize(int, int) override;
   QString getInfoText() const override;
   /// Load settings for the 3D projection from a project file

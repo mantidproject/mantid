@@ -60,8 +60,8 @@ public:
   /** @name Implemented public virtual methods */
   //@{
   void componentSelected(size_t componentIndex) override;
-  void getSelectedDetectors(QList<int> &dets) override;
-  void getMaskedDetectors(QList<int> &dets) const override;
+  void getSelectedDetectors(std::vector<size_t> &dets) override;
+  void getMaskedDetectors(std::vector<size_t> &dets) const override;
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   QString getInfoText() const override;
   RectF getSurfaceBounds() const override;
