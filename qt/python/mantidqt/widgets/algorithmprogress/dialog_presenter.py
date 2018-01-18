@@ -1,21 +1,18 @@
 from __future__ import absolute_import, print_function
 
-from qtpy.QtCore import QObject, Qt, Signal
+from .presenter_base import AlgorithmProgressPresenterBase
 
 
-class AlgorithmProgressDialogPresenter(QObject):
+class AlgorithmProgressDialogPresenter(AlgorithmProgressPresenterBase):
     """
     Presents progress reports on algorithms.
     """
-    need_update = Signal()
-
     def __init__(self, view, model):
         super(AlgorithmProgressDialogPresenter, self).__init__()
         view.close_button.clicked.connect(self.close)
         self.view = view
         self.model = model
         self.model.add_presenter(self)
-        self.need_update.connect(self.update_gui, Qt.QueuedConnection)
         self.progress_bars = {}
 
     def update_gui(self):
@@ -42,11 +39,7 @@ class AlgorithmProgressDialogPresenter(QObject):
         """
         progress_bar = self.progress_bars.get(algorithm_id, None)
         if progress_bar is not None:
-            progress_bar.setValue(progress * 100)
-            if message is None:
-                progress_bar.setFormat('%p%')
-            else:
-                progress_bar.setFormat(message + ' %p%')
+            self.set_progress_bar(progress_bar, progress, message)
 
     def update(self, algorithms):
         """
@@ -57,9 +50,12 @@ class AlgorithmProgressDialogPresenter(QObject):
         for alg in stored_algorithms:
             if alg not in algorithms:
                 del self.progress_bars[alg]
-        self.need_update.emit()
+        self.need_update_gui.emit()
 
     def close(self):
+        """
+        Close the dialog.
+        """
         self.model.remove_presenter(self)
         self.progress_bars.clear()
         self.view.close()

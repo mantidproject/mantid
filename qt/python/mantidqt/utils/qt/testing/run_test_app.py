@@ -77,7 +77,7 @@ def open_in_window(widget_name, script):
         where argument widget is an instance of the tested widget.
         The test function can yield from time to time after which the widget can update itself.
         This will make the test non-blocking and changes can be viewed as the script runs.
-        If the test yields an integer it is interpreted as the number of milliseconds to wait
+        If the test yields an integer it is interpreted as the number of seconds to wait
         until the next step.
     """
     setup_library_paths()
@@ -99,10 +99,10 @@ def open_in_window(widget_name, script):
                 if not pause_timer.isActive():
                     try:
                         # Run test script until the next 'yield'
-                        pause_msec = script_iter.next()
-                        if pause_msec is not None:
-                            # Start non-blocking pause in milliseconds
-                            pause_timer.start(pause_msec)
+                        pause_sec = script_iter.next()
+                        if pause_sec is not None:
+                            # Start non-blocking pause in seconds
+                            pause_timer.start(int(pause_sec * 1000))
                     except StopIteration:
                         pass
                     except:
