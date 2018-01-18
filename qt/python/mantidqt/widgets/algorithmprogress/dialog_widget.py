@@ -67,14 +67,16 @@ class AlgorithmMonitorDialog(QDialog):
         :param data: Data in format of AlgorithmProgressModel.get_running_algorithm_data()
         """
         self.tree.clear()
-        for alg in data:
-            item = QTreeWidgetItem([alg[0]])
+        for alg_data in data:
+            name, id, properties = alg_data
+            item = QTreeWidgetItem([name])
             self.tree.addTopLevelItem(item)
             progress_bar = QProgressBar()
             progress_bar.setAlignment(Qt.AlignHCenter)
-            cancel_button = CancelButton(self.presenter, alg[1])
+            self.presenter.add_progress_bar(id, progress_bar)
+            cancel_button = CancelButton(self.presenter, id)
             self.tree.setItemWidget(item, 1, progress_bar)
             self.tree.setItemWidget(item, 2, cancel_button)
-            for prop in alg[2]:
+            for prop in properties:
                 item.addChild(QTreeWidgetItem(prop))
 

@@ -74,16 +74,22 @@ class AlgorithmProgressModel(AlgorithmObserver):
         progress_observer.observeFinish(alg)
         progress_observer.observeError(alg)
         self.progress_observers.append(progress_observer)
+        self.update_presenter()
+
+    def update_presenter(self):
+        algorithms = [obs.algorithm for obs in self.progress_observers]
         for presenter in self.presenters:
-            presenter.update()
+            presenter.update(algorithms)
 
     def update_progress(self, progress_observer):
         """
         Update the progress bar in the view.
         :param progress_observer: A observer reporting a progress.
         """
-        # self.presenter.update_progress_bar(progress_observer.progress, progress_observer.message)
-        pass
+        for presenter in self.presenters:
+            presenter.update_progress_bar(progress_observer.algorithm,
+                                          progress_observer.progress,
+                                          progress_observer.message)
 
     def remove_observer(self, progress_observer):
         """
@@ -93,8 +99,7 @@ class AlgorithmProgressModel(AlgorithmObserver):
         index = self.progress_observers.index(progress_observer)
         if index >= 0:
             del self.progress_observers[index]
-            for presenter in self.presenters:
-                presenter.update()
+            self.update_presenter()
 
     def get_running_algorithm_data(self):
         """

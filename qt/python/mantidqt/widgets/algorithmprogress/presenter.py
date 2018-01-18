@@ -12,16 +12,18 @@ class AlgorithmProgressPresenter(object):
         self.model = AlgorithmProgressModel()
         self.model.add_presenter(self)
 
-    def update_progress_bar(self, progress, message):
+    def update_progress_bar(self, algorithm, progress, message):
         """
         Update the progress bar in the view.
+        :param algorithm: The progressed algorithm.
         :param progress: Progress value to update the progress bar with.
         :param message: A message that may come from the algorithm.
         """
         pass
 
-    def update(self):
+    def update(self, algorithms):
         """
         Close (remove) the progress bar when algorithm finishes.
+        :param algorithms: A list of running algorithms
         """
         pass
