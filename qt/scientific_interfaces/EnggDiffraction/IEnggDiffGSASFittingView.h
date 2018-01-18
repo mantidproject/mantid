@@ -99,7 +99,7 @@ public:
    @return Whether the user has selected to show the refinement results for
    the current run
   */
-  virtual bool showRefinementResultsSelected() = 0;
+  virtual bool showRefinementResultsSelected() const = 0;
 
   /**
    Update the run list with labels of all runs loaded into the model

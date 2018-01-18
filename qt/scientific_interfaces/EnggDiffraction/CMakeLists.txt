@@ -4,6 +4,7 @@ set ( SRC_FILES
 	EnggDiffFittingViewQtWidget.cpp
 	EnggDiffGSASFittingModel.cpp
 	EnggDiffGSASFittingPresenter.cpp
+	EnggDiffGSASFittingViewQtWidget.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
 )
@@ -18,6 +19,7 @@ set ( INC_FILES
 	EnggDiffFittingViewQtWidget.h
 	EnggDiffGSASFittingModel.h
 	EnggDiffGSASFittingPresenter.h
+	EnggDiffGSASFittingViewQtWidget.h
 	EnggDiffGSASRefinementMethod.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
