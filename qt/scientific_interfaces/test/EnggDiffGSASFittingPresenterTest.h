@@ -19,222 +19,138 @@ class EnggDiffGSASFittingPresenterTest : public CxxTest::TestSuite {
 
 public:
   void test_loadValidFile() {
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
-    auto mockModel_ptr = mockModel.get();
-
-    auto mockView = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingView>>();
-    auto mockView_ptr = mockView.get();
-
-    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
-                                      std::move(mockView));
-
+    auto presenter = setUpPresenter();
     const auto filename = "Valid filename";
 
-    EXPECT_CALL(*mockView_ptr, getFocusedFileName())
+    EXPECT_CALL(*m_mockViewPtr, getFocusedFileName())
         .Times(1)
         .WillOnce(Return(filename));
-    EXPECT_CALL(*mockModel_ptr, loadFocusedRun(filename))
+    EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
         .WillOnce(Return(""));
 
     const std::vector<std::pair<int, size_t>> runLabels(
         {std::make_pair(123, 1)});
 
-    EXPECT_CALL(*mockModel_ptr, getRunLabels())
+    EXPECT_CALL(*m_mockModelPtr, getRunLabels())
         .Times(1)
         .WillOnce(Return(runLabels));
-    EXPECT_CALL(*mockView_ptr, updateRunList(runLabels)).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, updateRunList(runLabels)).Times(1);
 
-    EXPECT_CALL(*mockView_ptr, userWarning(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_)).Times(0);
 
-    pres.notify(IEnggDiffGSASFittingPresenter::LoadRun);
-    TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
-    TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+    presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
+    assertMocksUsedCorrectly();
   }
 
   void test_loadInvalidFile() {
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
-    auto mockModel_ptr = mockModel.get();
-
-    auto mockView = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingView>>();
-    auto mockView_ptr = mockView.get();
-
-    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
-                                      std::move(mockView));
-
+    auto presenter = setUpPresenter();
     const auto filename = "Invalid filename";
 
-    EXPECT_CALL(*mockView_ptr, getFocusedFileName())
+    EXPECT_CALL(*m_mockViewPtr, getFocusedFileName())
         .Times(1)
         .WillOnce(Return(filename));
 
-    EXPECT_CALL(*mockModel_ptr, loadFocusedRun(filename))
+    EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
         .WillOnce(Return(false));
 
-    EXPECT_CALL(*mockModel_ptr, getRunLabels()).Times(0);
+    EXPECT_CALL(*m_mockModelPtr, getRunLabels()).Times(0);
 
-    EXPECT_CALL(*mockView_ptr,
+    EXPECT_CALL(*m_mockViewPtr,
                 userWarning("Load failed, see the log for more details"))
         .Times(1);
 
-    pres.notify(IEnggDiffGSASFittingPresenter::LoadRun);
-    TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
-    TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+    presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
+    assertMocksUsedCorrectly();
   }
 
   void test_selectValidRun() {
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
-    auto mockModel_ptr = mockModel.get();
-
-    auto mockView = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingView>>();
-    auto mockView_ptr = mockView.get();
-
-    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
-                                      std::move(mockView));
-
+    auto presenter = setUpPresenter();
     const std::pair<int, size_t> selectedRunLabel = std::make_pair(123, 1);
-    EXPECT_CALL(*mockView_ptr, getSelectedRunLabel())
+    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(selectedRunLabel));
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
 
-    EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(123, 1))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
 
-    EXPECT_CALL(*mockView_ptr, resetCanvas()).Times(1);
-    EXPECT_CALL(*mockView_ptr, userWarning(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_)).Times(0);
 
-    pres.notify(IEnggDiffGSASFittingPresenter::SelectRun);
-    TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
-    TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    assertMocksUsedCorrectly();
   }
 
   void test_selectInvalidRun() {
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
-    auto mockModel_ptr = mockModel.get();
-
-    auto mockView = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingView>>();
-    auto mockView_ptr = mockView.get();
-
-    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
-                                      std::move(mockView));
-
+    auto presenter = setUpPresenter();
     const std::pair<int, size_t> selectedRunLabel = std::make_pair(123, 1);
-    EXPECT_CALL(*mockView_ptr, getSelectedRunLabel())
+    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(selectedRunLabel));
 
-    EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(123, 1))
         .Times(1)
         .WillOnce(Return(boost::none));
 
     EXPECT_CALL(
-        *mockView_ptr,
+        *m_mockViewPtr,
         userWarning(
             "Tried to access invalid run, runNumber 123 and bank ID 1"));
 
-    EXPECT_CALL(*mockView_ptr, resetCanvas()).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(0);
 
-    pres.notify(IEnggDiffGSASFittingPresenter::SelectRun);
-    TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
-    TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    assertMocksUsedCorrectly();
   }
 
   void test_selectValidRunPlotFitResults() {
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
-    auto mockModel_ptr = mockModel.get();
-
-    auto mockView = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingView>>();
-    auto mockView_ptr = mockView.get();
-
-    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
-                                      std::move(mockView));
-
+    auto presenter = setUpPresenter();
     const std::pair<int, size_t> selectedRunLabel = std::make_pair(123, 1);
-    EXPECT_CALL(*mockView_ptr, getSelectedRunLabel())
+    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(selectedRunLabel));
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(123, 1))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
-    EXPECT_CALL(*mockView_ptr, showRefinementResultsSelected())
+    EXPECT_CALL(*m_mockViewPtr, showRefinementResultsSelected())
         .Times(1)
         .WillOnce(Return(true));
-    EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, hasFittedPeaksForRun(123, 1))
         .Times(1)
         .WillOnce(Return(true));
 
-    EXPECT_CALL(*mockModel_ptr, getFittedPeaks(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
 
     const boost::optional<Mantid::API::ITableWorkspace_sptr> emptyTableWS(
         Mantid::API::WorkspaceFactory::Instance().createTable());
 
-    EXPECT_CALL(*mockModel_ptr, getLatticeParams(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(123, 1))
         .Times(1)
         .WillOnce(Return(emptyTableWS));
 
     const boost::optional<double> rwp = 50.0;
-    EXPECT_CALL(*mockModel_ptr, getRwp(123, 1)).Times(1).WillOnce(Return(rwp));
+    EXPECT_CALL(*m_mockModelPtr, getRwp(123, 1)).Times(1).WillOnce(Return(rwp));
 
-    EXPECT_CALL(*mockView_ptr, resetCanvas()).Times(1);
-    EXPECT_CALL(*mockView_ptr, plotCurve(testing::_)).Times(2);
-    EXPECT_CALL(*mockView_ptr, userWarning(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, plotCurve(testing::_)).Times(2);
+    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_)).Times(0);
 
-    pres.notify(IEnggDiffGSASFittingPresenter::SelectRun);
-    TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
-    TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    assertMocksUsedCorrectly();
   }
 
   void test_doRietveldRefinement() {
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
-    auto mockModel_ptr = mockModel.get();
-
-    auto mockView = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingView>>();
-    auto mockView_ptr = mockView.get();
-
-    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
-                                      std::move(mockView));
+    auto presenter = setUpPresenter();
 
     const int runNumber = 123;
     const size_t bank = 1;
@@ -245,53 +161,39 @@ public:
     const auto pathToGSASII = "GSASHOME";
     const auto GSASIIProjectFile = "GPX.gpx";
 
-    EXPECT_CALL(*mockView_ptr, getSelectedRunLabel())
+    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
-    EXPECT_CALL(*mockView_ptr, getRefinementMethod())
+    EXPECT_CALL(*m_mockViewPtr, getRefinementMethod())
         .Times(1)
         .WillOnce(Return(refinementMethod));
-    EXPECT_CALL(*mockView_ptr, getInstrumentFileName())
+    EXPECT_CALL(*m_mockViewPtr, getInstrumentFileName())
         .Times(1)
         .WillOnce(Return(instParams));
-    EXPECT_CALL(*mockView_ptr, getPhaseFileNames())
+    EXPECT_CALL(*m_mockViewPtr, getPhaseFileNames())
         .Times(1)
         .WillOnce(Return(phaseFiles));
-    EXPECT_CALL(*mockView_ptr, getPathToGSASII())
+    EXPECT_CALL(*m_mockViewPtr, getPathToGSASII())
         .Times(1)
         .WillOnce(Return(pathToGSASII));
-    EXPECT_CALL(*mockView_ptr, getGSASIIProjectPath())
+    EXPECT_CALL(*m_mockViewPtr, getGSASIIProjectPath())
         .Times(1)
         .WillOnce(Return(GSASIIProjectFile));
 
-    EXPECT_CALL(*mockModel_ptr,
+    EXPECT_CALL(*m_mockModelPtr,
                 doRietveldRefinement(runNumber, bank, instParams, phaseFiles,
                                      pathToGSASII, GSASIIProjectFile))
         .Times(1)
         .WillOnce(Return(false));
-    EXPECT_CALL(*mockView_ptr,
+    EXPECT_CALL(*m_mockViewPtr,
                 userWarning("Refinement failed, see the log for more details"));
 
-    pres.notify(IEnggDiffGSASFittingPresenter::DoRefinement);
-    TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
-    TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
-               "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+    presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
+    assertMocksUsedCorrectly();
   }
 
   void test_doPawleyRefinement() {
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
-    auto mockModel_ptr = mockModel.get();
-
-    auto mockView = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingView>>();
-    auto mockView_ptr = mockView.get();
-
-    EnggDiffGSASFittingPresenter pres(std::move(mockModel),
-                                      std::move(mockView));
+    auto presenter = setUpPresenter();
 
     const int runNumber = 123;
     const size_t bank = 1;
@@ -304,45 +206,70 @@ public:
     const auto dmin = 1.0;
     const auto negativeWeight = 2.0;
 
-    EXPECT_CALL(*mockView_ptr, getSelectedRunLabel())
+    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
-    EXPECT_CALL(*mockView_ptr, getRefinementMethod())
+    EXPECT_CALL(*m_mockViewPtr, getRefinementMethod())
         .Times(1)
         .WillOnce(Return(refinementMethod));
-    EXPECT_CALL(*mockView_ptr, getInstrumentFileName())
+    EXPECT_CALL(*m_mockViewPtr, getInstrumentFileName())
         .Times(1)
         .WillOnce(Return(instParams));
-    EXPECT_CALL(*mockView_ptr, getPhaseFileNames())
+    EXPECT_CALL(*m_mockViewPtr, getPhaseFileNames())
         .Times(1)
         .WillOnce(Return(phaseFiles));
-    EXPECT_CALL(*mockView_ptr, getPathToGSASII())
+    EXPECT_CALL(*m_mockViewPtr, getPathToGSASII())
         .Times(1)
         .WillOnce(Return(pathToGSASII));
-    EXPECT_CALL(*mockView_ptr, getGSASIIProjectPath())
+    EXPECT_CALL(*m_mockViewPtr, getGSASIIProjectPath())
         .Times(1)
         .WillOnce(Return(GSASIIProjectFile));
-    EXPECT_CALL(*mockView_ptr, getPawleyDMin()).Times(1).WillOnce(Return(dmin));
-    EXPECT_CALL(*mockView_ptr, getPawleyNegativeWeight())
+    EXPECT_CALL(*m_mockViewPtr, getPawleyDMin())
+        .Times(1)
+        .WillOnce(Return(dmin));
+    EXPECT_CALL(*m_mockViewPtr, getPawleyNegativeWeight())
         .Times(1)
         .WillOnce(Return(negativeWeight));
 
-    EXPECT_CALL(*mockModel_ptr,
+    EXPECT_CALL(*m_mockModelPtr,
                 doPawleyRefinement(runNumber, bank, instParams, phaseFiles,
                                    pathToGSASII, GSASIIProjectFile, dmin,
                                    negativeWeight))
         .Times(1)
         .WillOnce(Return(false));
-    EXPECT_CALL(*mockView_ptr,
+    EXPECT_CALL(*m_mockViewPtr,
                 userWarning("Refinement failed, see the log for more details"));
 
-    pres.notify(IEnggDiffGSASFittingPresenter::DoRefinement);
+    presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
+    assertMocksUsedCorrectly();
+  }
+
+private:
+  MockEnggDiffGSASFittingModel *m_mockModelPtr;
+  MockEnggDiffGSASFittingView *m_mockViewPtr;
+
+  std::unique_ptr<EnggDiffGSASFittingPresenter> setUpPresenter() {
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
+    m_mockModelPtr = mockModel.get();
+
+    auto mockView = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffGSASFittingView>>();
+    m_mockViewPtr = mockView.get();
+
+    std::unique_ptr<EnggDiffGSASFittingPresenter> pres_uptr(
+        new EnggDiffGSASFittingPresenter(std::move(mockModel),
+                                         std::move(mockView)));
+    return pres_uptr;
+  }
+
+  void assertMocksUsedCorrectly() {
     TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockView_ptr));
+               testing::Mock::VerifyAndClearExpectations(m_mockModelPtr));
     TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
+               testing::Mock::VerifyAndClearExpectations(m_mockViewPtr));
   }
 };
 
