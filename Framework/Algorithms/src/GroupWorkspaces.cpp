@@ -32,6 +32,8 @@ void GroupWorkspaces::exec() {
   const std::vector<std::string> inputWorkspaces =
       getProperty("InputWorkspaces");
 
+  // Clear WorkspaceGroup in case algorithm instance is reused.
+  m_group = nullptr;
   addToGroup(inputWorkspaces);
 
   setProperty("OutputWorkspace", m_group);
