@@ -43,6 +43,7 @@ Algorithms
 - In :ref:`MaxEnt <algm-MaxEnt>` the ``EvolChi`` and  ``EvolAngle`` workspaces only contain data up until the result has converged.
 - New algorithm :ref:`CropWorkspaceRagged <algm-CropWorkspaceRagged>` will crop each spectrum with a different x-range
 - :ref:`LoadLamp <algm-LoadLamp>` is a new algorithm to load processed HDF5 files produced by LAMP program at ILL.
+- :ref:`SaveNexus <algm-SaveNexus>` will no longer crash when passed a ``PeaksWorkspace`` with integrated peaks that have missing radius information. 
 
 Fitting
 -------
