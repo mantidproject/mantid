@@ -860,36 +860,36 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
   }
 
   QString text;
-  
-    // collect info about selected detector and add it to text
-    const auto &actor = m_instrWidget->getInstrumentActor();
-    const auto &componentInfo = actor.getComponentInfo();
-    auto detid = actor.getDetID(index);
 
-    text = "Selected detector: " +
-           QString::fromStdString(componentInfo.name(index)) + "\n";
-    text += "Detector ID: " + QString::number(detid) + '\n';
-    QString wsIndex;
-    wsIndex = QString::number(actor.getWorkspaceIndex(index));
-    text += "Workspace index: " + wsIndex + '\n';
-    Mantid::Kernel::V3D pos = componentInfo.position(index);
-    text += "xyz: " + QString::number(pos.X()) + "," +
-            QString::number(pos.Y()) + "," + QString::number(pos.Z()) + '\n';
-    double r, t, p;
-    pos.getSpherical(r, t, p);
-    text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
-            QString::number(p) + '\n';
-    if (componentInfo.hasParent(index)) {
-      QString textpath;
-      auto parent = index;
-      while (componentInfo.hasParent(parent)) {
-        parent = componentInfo.parent(parent);
-        textpath =
-            "/" + QString::fromStdString(componentInfo.name(parent)) + textpath;
-      }
-      text += "Component path:" + textpath + "/" +
-              QString::fromStdString(componentInfo.name(index)) + '\n';
-    
+  // collect info about selected detector and add it to text
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.getComponentInfo();
+  auto detid = actor.getDetID(index);
+
+  text = "Selected detector: " +
+         QString::fromStdString(componentInfo.name(index)) + "\n";
+  text += "Detector ID: " + QString::number(detid) + '\n';
+  QString wsIndex;
+  wsIndex = QString::number(actor.getWorkspaceIndex(index));
+  text += "Workspace index: " + wsIndex + '\n';
+  Mantid::Kernel::V3D pos = componentInfo.position(index);
+  text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
+          "," + QString::number(pos.Z()) + '\n';
+  double r, t, p;
+  pos.getSpherical(r, t, p);
+  text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
+          QString::number(p) + '\n';
+  if (componentInfo.hasParent(index)) {
+    QString textpath;
+    auto parent = index;
+    while (componentInfo.hasParent(parent)) {
+      parent = componentInfo.parent(parent);
+      textpath =
+          "/" + QString::fromStdString(componentInfo.name(parent)) + textpath;
+    }
+    text += "Component path:" + textpath + "/" +
+            QString::fromStdString(componentInfo.name(index)) + '\n';
+
     const double integrated = actor.getIntegratedCounts(index);
     const QString counts =
         integrated == -1.0 ? "N/A" : QString::number(integrated);
@@ -1189,7 +1189,8 @@ void DetectorPlotController::plotSingle(size_t detindex) {
 *   LENGTH
 *   PHI
 * The units can be set with setTubeXUnits(...) method.
-* @param detindex :: A detector index. The miniplot will display data for a component
+* @param detindex :: A detector index. The miniplot will display data for a
+* component
 * containing the detector
 *   with this id.
 */
@@ -1215,7 +1216,8 @@ void DetectorPlotController::plotTube(size_t detindex) {
 
 /**
 * Plot the accumulated data in a tube against time of flight.
-* @param detindex :: A detector id. The miniplot will display data for a component
+* @param detindex :: A detector id. The miniplot will display data for a
+* component
 * containing the detector
 *   with this id.
 */
@@ -1245,13 +1247,14 @@ void DetectorPlotController::plotTubeSums(size_t detindex) {
 *   LENGTH
 *   PHI
 * The units can be set with setTubeXUnits(...) method.
-* @param detindex :: A detector index. The miniplot will display data for a component
+* @param detindex :: A detector index. The miniplot will display data for a
+* component
 * containing the detector
 *   with this id.
 */
 void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
   const auto &actor = m_instrWidget->getInstrumentActor();
-  const auto &componentInfo =actor.getComponentInfo();
+  const auto &componentInfo = actor.getComponentInfo();
   std::vector<double> x, y;
   prepareDataForIntegralsPlot(detindex, x, y);
   if (x.empty() || y.empty()) {
@@ -1305,7 +1308,8 @@ void DetectorPlotController::prepareDataForSinglePlot(
 
 /**
 * Prepare data for plotting accumulated data in a tube against time of flight.
-* @param detindex :: A detector index. The miniplot will display data for a component
+* @param detindex :: A detector index. The miniplot will display data for a
+* component
 * containing the detector with this index.
 * @param x :: Vector of x coordinates (output)
 * @param y :: Vector of y coordinates (output)

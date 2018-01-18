@@ -1130,12 +1130,12 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
         actor.invertMaskWorkspace();
       }
     }
-    for (auto det : dets) 
+    for (auto det : dets)
       detList.insert(actor.getDetID(det));
 
     if (!detList.empty()) {
       // try to mask each detector separately and ignore any failure
-      for (auto det: detList) {
+      for (auto det : detList) {
         try {
           if (isROI && wsFresh) {
             if (wsMask->isMasked(det))
