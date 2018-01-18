@@ -49,7 +49,7 @@ from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDockWidget, QFileDialog, QMainWindow,
                             QSplashScreen)  # noqa
-from mantidqt.utils.qt import plugins, widget_updates_disabled, block_signals  # noqa
+from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
