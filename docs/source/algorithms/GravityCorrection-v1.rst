@@ -20,6 +20,7 @@ Counts of neutrons that do not hit the detector after correction will not be con
 Please note, that the output workspace likely has varying bins and consider a subsequent rebinning step (:ref:`algm-Rebin`).
 The instrument definition may only contain the position in beam direction and the height of the slits will be computed internally.
 The potential output workspace adds " cancelled gravitation " to its title (sample log information).
+Negative time-of-flight values present in the :literal:`InputWorkspace` are not prohibited.
 
 Requirements
 ------------

@@ -79,7 +79,13 @@ private:
   std::string m_slit2Name;
   Mantid::API::MatrixWorkspace_sptr m_ws;
   Mantid::Geometry::Instrument_const_sptr m_virtualInstrument;
+
+  int m_numberOfMonitors{0};
+
   std::map<double, size_t> m_finalAngles;
+  std::map<double, size_t>::key_compare m_smallerThan =
+      Mantid::Algorithms::GravityCorrection::m_finalAngles.key_comp();
+
   /// Initialisation code
   void init() override;
   /// Final angle definition between source and sample
@@ -113,6 +119,8 @@ private:
   /// Execution code
   void exec() override;
 };
+
+
 
 } // namespace Algorithms
 } // namespace Mantid

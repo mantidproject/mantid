@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/GravityCorrection.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -60,20 +61,17 @@ public:
   }
 
   void testInputWorkspace1D() {
-    Mantid::API::IAlgorithm_sptr lAlg;
+    Mantid::API::IAlgorithm *lAlg;
     TS_ASSERT_THROWS_NOTHING(
-        lAlg = Mantid::API::AlgorithmManager::Instance().create(
+        lAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
             "LoadILLReflectometry");
-        lAlg->setChild(true); lAlg->initialize();
+        lAlg->setRethrows(true); lAlg->setChild(true); lAlg->initialize();
         lAlg->setProperty("Filename", file);
         lAlg->setProperty("OutputWorkspace", "ws");
         lAlg->setProperty("XUnit", "TimeOfFlight"); lAlg->execute();)
     TS_ASSERT(lAlg->isExecuted());
-    Mantid::API::Workspace_sptr ws0;
-    TS_ASSERT_THROWS_NOTHING(ws0 = lAlg->getProperty("OutputWorkspace"));
     Mantid::API::MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws0));
+    TS_ASSERT_THROWS_NOTHING(ws = lAlg->getProperty("OutputWorkspace"));
     GravityCorrection gc00;
     this->runGravityCorrection(gc00, ws, "OutputWorkspace", "slit2", "slit3");
   }

@@ -6,7 +6,6 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -74,16 +73,12 @@ using boost::const_pointer_cast;
 using boost::make_shared;
 
 using std::find_if;
-using std::invalid_argument;
-using std::logic_error;
 using std::map;
 using std::pair;
 using std::pow;
-using std::vector;
 using std::runtime_error;
 using std::string;
-using std::stringstream;
-using std::tie;
+using std::vector;
 
 namespace Mantid {
 namespace Algorithms {
@@ -318,17 +313,21 @@ double GravityCorrection::finalAngle(const double k, size_t i) {
   const double beam2 =
       this->coordinate(this->m_slit2Name, this->m_beamDirection);
   // calculate slit pointing up coordinate
-  const double tanAngle = tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
+  const double tanAngle =
+      tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
   const double up1 = beam1 * tanAngle;
-  const double up2 = beam2 * tanAngle;
+  // const double up2 = beam2 * tanAngle;
   // potential divide by zero avoided by input validation beam1 != beam2
-  double beamShift = (k * (pow(beam1, 2) - pow(beam2, 2)) + (up1 - up2)) /
-                     (2 * k * (beam1 - beam2));
+  // double beamShift = (k * (pow(beam1, 2) - pow(beam2, 2)) + (up1 - up2)) /
+  //                   (2 * k * (beam1 - beam2));
   if (up1 == 0.)
     g_log.error("Zero final scattering angle.");
   double upShift = up1 + k * (beam1 - beam2);
+  int sign{1};
+  if (tanAngle < 0.)
+    sign = -1;
   // calculate final angle
-  return atan(2. * k * sqrt(std::abs(upShift / k)));
+  return sign * atan(2. * k * sqrt(std::abs(upShift / k)));
 }
 
 /**
@@ -342,7 +341,7 @@ void GravityCorrection::virtualInstrument() {
   const auto instrument = this->m_ws->getInstrument();
 
   if (instrument->isParametrized()) {
-
+    this->g_log.debug("Create virtual instrument ...");
     auto ws = create<Workspace2D>(
         instrument, this->m_ws->indexInfo().globalSize(), Points(1));
 
@@ -360,7 +359,6 @@ void GravityCorrection::virtualInstrument() {
       rotated = true;
 
     if (samplePos.distance(nullVec) || rotated) {
-
       auto &componentInfo = ws->mutableComponentInfo();
       auto &detectorInfo = ws->mutableDetectorInfo();
 
@@ -374,6 +372,7 @@ void GravityCorrection::virtualInstrument() {
 
       // translate instrument
       if (samplePos.distance(nullVec) > 1e-10) {
+        this->g_log.debug("Virtual instrument: translate components ...");
         // move instrument to ensure sample at position x = y = z = 0 m,
         for (vector<IComponent_const_sptr>::iterator compit = comps.begin();
              compit != comps.end(); ++compit) {
@@ -387,6 +386,7 @@ void GravityCorrection::virtualInstrument() {
 
       // rotate instrument (update positions)
       if (rotated) {
+        this->g_log.debug("Virtual instrument: rotate components ...");
         double tanAngle{0.}; // will hold tan(rotation angle)
         // update: is the instrument rotated? Source up still zero?
         sourceY = this->coordinate(sourceName, m_upDirection, instrument);
@@ -491,43 +491,21 @@ bool GravityCorrection::spectrumCheck(SpectrumInfo &spectrumInfo, size_t i) {
  */
 size_t GravityCorrection::spectrumNumber(const double angle,
                                          SpectrumInfo &spectrumInfo, size_t i) {
-  if (!(this->spectrumCheck(spectrumInfo, i))) {
-    size_t n = 0;
-    if (m_finalAngles.empty())
-      this->g_log.error(
-          "Map of initial final angles and its corresponding spectrum "
-          "number does not exist.");
+  size_t n = i;
+  // counts are dropping down due to gravitation -> move counts
+  // up and n cannot be smaller than 0, only larger than
+  // m_ws->getNumberHistograms()
+  if (this->spectrumCheck(spectrumInfo, i)) {
     double currentAngle = spectrumInfo.signedTwoTheta(i) / 2.;
-    // a starting, lower bound iterator for an effective search that should
-    // exist
-    auto start_i = this->m_finalAngles.find(currentAngle);
-    if (start_i == m_finalAngles.end())
-      this->g_log.debug("Cannot find final angle for this spectrum.");
-    // search first for the spectrum with closest smaller final angle
-    while (start_i != m_finalAngles.end()) {
-      ++start_i;
-      if (start_i->first < angle) {
-        n = start_i->second;
-        continue;
-      } else
-        break;
+    if (currentAngle < angle) {
+      // a starting index for an effective search that exists
+      auto it = this->m_finalAngles.find(currentAngle);
+      while (this->m_smallerThan((*it++).first, angle) &&
+             (it != this->m_finalAngles.end()))
+        n = (*it).second;
     }
-    // compare if the final angle is closer to the closest smaller final
-    // angle or the next final angle
-    if ((spectrumInfo.signedTwoTheta(n) / 2. - angle) >
-        (spectrumInfo.signedTwoTheta(n + 1) / 2. - angle))
-      n += 1;
-    // what if corrected hit exactly between two detectors? -> not taken into
-    // account, happens unlikely.
-
-    // counts are dropping down due to gravitation, thus needed to move counts
-    // up and n cannot be smaller than 0, only larger than
-    // m_ws->getNumberHistograms()
-    if (n > this->m_ws->indexInfo().globalSize())
-      this->g_log.information("Move counts out of spectrum range!");
-    return n;
-  } else
-    return i;
+  }
+  return n;
 }
 
 /**
@@ -548,7 +526,7 @@ double GravityCorrection::parabolaArcLength(const double arg,
 void GravityCorrection::exec() {
 
   this->m_progress =
-      make_unique<Progress>(this, 0.0, 1.0, 3 + this->m_ws->size());
+      make_unique<Progress>(this, 0.0, 1.0, 10 + this->m_ws->size());
 
   this->m_progress->report("Create virtual instrument ...");
   this->virtualInstrument();
@@ -564,6 +542,9 @@ void GravityCorrection::exec() {
   outWS->setTitle(this->m_ws->getTitle() + " cancelled gravitation ");
 
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    // count monitor spectra
+    if (spectrumInfo.isMonitor(i))
+      m_numberOfMonitors++;
     if (!(this->spectrumCheck(spectrumInfo, i)))
       continue;
 
@@ -581,7 +562,7 @@ void GravityCorrection::exec() {
     // setup map of initial final angles (y axis, spectra)
     // this map is sorted internally by its finalAngleValue's
     double finalAngleValue = spectrumInfo.signedTwoTheta(i) / 2.;
-    this->m_finalAngles[finalAngleValue] = i;
+    this->m_finalAngles.insert({finalAngleValue, i});
 
     // unmask bins of OutputWorkspace
     if (outWS->hasMaskedBins(i)) {
@@ -593,7 +574,12 @@ void GravityCorrection::exec() {
     }
     this->m_progress->report();
   }
+  if (this->m_finalAngles.empty())
+    this->g_log.error(
+        "Map of initial final angles and its corresponding spectrum "
+        "number does not exist.");
 
+  this->m_progress->report("Perform gravity correction ...");
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (!(this->spectrumCheck(spectrumInfo, i)))
       continue;
@@ -616,11 +602,14 @@ void GravityCorrection::exec() {
       double detZ = this->coordinate(spectrumInfo, i, m_beamDirection);
 
       //
-      double s1 = this->parabolaArcLength(this->coordinate(this->m_ws->getInstrument()->getSource()->getName(), m_beamDirection));
+      double s1 = this->parabolaArcLength(
+          this->coordinate(this->m_ws->getInstrument()->getSource()->getName(),
+                           m_beamDirection));
       double s2 = this->parabolaArcLength(detZ);
 
       double v{(spectrumInfo.l1() + spectrumInfo.l2(i)) / *tofit};
       double k = g / (2. * pow(v, 2));
+      //k = g/1000.;//factor smaller than 1000
       double angle = this->finalAngle(k, i);
       if (cos(angle) == 0.) {
         this->g_log.error("Cannot divide by zero for calculating new tof "
@@ -631,8 +620,8 @@ void GravityCorrection::exec() {
 
       // get new spectrum number for new final angle
       auto j = this->spectrumNumber(angle, spectrumInfo, i);
-      if (j > spectrumInfo.size())
-        continue; // counts and corresponding errors will be lost
+      if (j >= (spectrumInfo.size() - 1 - this->m_numberOfMonitors) && i != j)
+        continue;
       // need to set the counts to spectrum according to finalAngle & *tofit
       outWS->mutableX(j)[i_tofit] = *tofit;
       outWS->mutableY(j)[i_tofit] += this->m_ws->y(i)[i_tofit];
@@ -641,6 +630,7 @@ void GravityCorrection::exec() {
       this->m_progress->report();
     }
 
+    this->m_progress->report("Mask bins consideration ...");
     if (this->m_ws->hasMaskedBins(i)) {
       // store mask of InputWorkspace
       HistogramX &tof2 = outWS->mutableX(i);
