@@ -151,7 +151,7 @@ public:
   void emitProcessingFinished() override { emit processingFinished(); }
 
   void skipProcessing() override;
-
+  void settingsChanged();
 signals:
   void processButtonClicked();
   void processingFinished();

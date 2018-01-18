@@ -43,5 +43,10 @@ class LoadLampTest(unittest.TestCase):
     def test_3D_fail(self):
         self.assertRaises(RuntimeError, LoadLamp, Filename='530333_LAMP.hdf', OutputWorkspace='ws')
 
+    def test_no_param(self):
+        ws = LoadLamp('no_parameters.hdf')
+        self.assertTrue(ws)
+        self.assertEquals(ws.blocksize(), 310)
+
 if __name__ == '__main__':
     unittest.main()

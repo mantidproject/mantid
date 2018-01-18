@@ -128,14 +128,31 @@ public:
     return AnalysisDataService::Instance().doesExist(name);
   }
 
-  void setUp() override { DefaultValue<QString>::Set(QString()); }
+  void setUp() override {
+    DefaultValue<QString>::Set(QString());
+    DefaultValue<ColumnOptionsQMap>::Set(ColumnOptionsQMap());
+  }
 
-  void tearDown() override { DefaultValue<QString>::Clear(); }
+  void tearDown() override {
+    DefaultValue<QString>::Clear();
+    DefaultValue<ColumnOptionsQMap>::Clear();
+  }
 
   void testProcessEventWorkspacesUniformEvenSlicing() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+        .Times(1)
+        .WillOnce(Return(""));
+
     auto presenter = presenterFactory.create();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -166,15 +183,6 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("UniformEven"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
-        .Times(1)
-        .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillOnce(Return(false));
@@ -220,6 +228,16 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+        .Times(1)
+        .WillOnce(Return(""));
+
     auto presenter = presenterFactory.create();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -250,15 +268,6 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Uniform"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
-        .Times(1)
-        .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillOnce(Return(false));
@@ -315,6 +324,16 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+        .Times(1)
+        .WillOnce(Return(""));
+
     auto presenter = presenterFactory.create();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -345,15 +364,6 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
-        .Times(1)
-        .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillOnce(Return(false));
@@ -399,6 +409,15 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+        .Times(1)
+        .WillOnce(Return(""));
     auto presenter = presenterFactory.create();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -429,15 +448,6 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("LogValue"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
-        .Times(1)
-        .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillOnce(Return(false));
@@ -483,6 +493,22 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+        .Times(1)
+        .WillOnce(Return(QString()));
+    EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+        .Times(2)
+        .WillRepeatedly(Return("INTER"));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillOnce(Return(true));
+
     auto presenter = presenterFactory.create();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -513,21 +539,6 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
-        .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
-        .Times(2)
-        .WillRepeatedly(Return("INTER"));
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
     TS_ASSERT_THROWS_NOTHING(
@@ -544,6 +555,16 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+        .Times(1)
+        .WillOnce(Return(""));
+
     auto presenter = presenterFactory.create();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -574,15 +595,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(1)
-        .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
-        .Times(1)
-        .WillOnce(Return(""));
+
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
         .Times(8)
         .WillRepeatedly(Return("INTER"));

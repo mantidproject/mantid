@@ -67,6 +67,8 @@ public:
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check
   virtual bool checkIfProcessing() const = 0;
+
+  virtual void settingsChanged(int group) = 0;
 };
 }
 }

@@ -27,6 +27,7 @@ SliceViewer and Vates Simple Interface
 
 - Update SwitchToSliceViewer (shift + click) in MultiSlice view to work with nonorthogonal axes.
 - Pressing alt while clicking an arrow in the MultiSlice view opens a text box where one may precisely enter the slice position.
+- Users can now sort by the I/sigma and energy columns in the SliceViewer when viewing a peaks workspace.
 - Fixed bug which would cause slice viewer to crash when deleting an overlaid peaks workspace.
 - Fixed a bug where overwriting peaks workspaces with overlaid in the slice viewer with peak backgrounds shown cause Mantid to crash.
 
@@ -39,5 +40,28 @@ MultiDataset Fitting Interface
 
 - After a simultaneous fit the parameters are saved in a TableWorkspace made to simplify plotting their values against the datasets.
   The parameters are organised into columns and each row corresponds to a dataset.
+
+SpectrumView
+------------
+
+- The SpectrumView is now available as a standalone widget in mantidpython. Below is a simple example of how the widget can be used in python.
+
+.. code-block:: python
+   :emphasize-lines: 11,12
+
+   import PyQt4
+   import mantid.simpleapi as simpleapi
+   import mantidqtpython as mpy
+   import sys
+
+   SpectrumView = mpy.MantidQt.SpectrumView.SpectrumView
+   app = PyQt4.QtGui.QApplication(sys.argv)
+
+   wsOut = simpleapi.Load("/Path/to/multispectrum/dataset")
+
+   sv = SpectrumView()
+   sv.renderWorkspace("wsOut")
+   sv.show()
+   app.exec_()
 
 :ref:`Release 3.12.0 <v3.12.0>`

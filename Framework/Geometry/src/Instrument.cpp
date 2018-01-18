@@ -33,7 +33,7 @@ void raiseDuplicateDetectorError(const size_t detectorId) {
   std::stringstream sstream;
   sstream << "Instrument Definition corrupt. Detector with ID " << detectorId
           << " already exists.";
-  throw std::runtime_error(sstream.str());
+  throw Exception::InstrumentDefinitionError(sstream.str());
 }
 }
 

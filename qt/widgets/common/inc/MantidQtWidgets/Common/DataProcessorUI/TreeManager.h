@@ -97,6 +97,7 @@ public:
   /// Set the 'processed' status of a data item
   virtual void setProcessed(bool processed, int position) = 0;
   virtual void setProcessed(bool processed, int position, int parent) = 0;
+  virtual void invalidateAllProcessed() = 0;
   /// Access cells
   virtual void setCell(int row, int column, int parentRow, int parentColumn,
                        const std::string &value) = 0;

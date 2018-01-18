@@ -74,7 +74,6 @@ protected:
   Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes)
       const override;
-  void execNonMaster() override;
 
   // Overridden Algorithm methods
   void exec() override;

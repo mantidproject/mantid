@@ -66,6 +66,7 @@ public:
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<QString, QVariant> &));
+  MOCK_METHOD0(settingsChanged, void());
 
   // Processing options
   MOCK_METHOD1(setForcedReProcessing, void(bool));
@@ -109,7 +110,7 @@ public:
   MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
 
   // Global options
-  MOCK_CONST_METHOD0(getPreprocessingOptions, OptionsQMap());
+  MOCK_CONST_METHOD0(getPreprocessingOptions, ColumnOptionsQMap());
   MOCK_CONST_METHOD0(getProcessingOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getPostprocessingOptionsAsString, QString());
   MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
@@ -146,6 +147,7 @@ public:
   MOCK_METHOD0(publishCommandsMocked, void());
   MOCK_METHOD0(skipProcessing, void());
   MOCK_METHOD1(setForcedReProcessing, void(bool));
+  MOCK_METHOD0(settingsChanged, void());
 
 private:
   // Calls we don't care about

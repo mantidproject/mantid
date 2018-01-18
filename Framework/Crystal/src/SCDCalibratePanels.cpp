@@ -57,7 +57,7 @@ void SCDCalibratePanels::exec() {
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
   if (edge > 0) {
     std::vector<Peak> &peaks = peaksWs->getPeaks();
-    auto it = std::remove_if(peaks.begin(), peaks.end(), [&peaksWs, edge, inst](
+    auto it = std::remove_if(peaks.begin(), peaks.end(), [edge, inst](
                                                              const Peak &pk) {
       return edgePixel(inst, pk.getBankName(), pk.getCol(), pk.getRow(), edge);
     });

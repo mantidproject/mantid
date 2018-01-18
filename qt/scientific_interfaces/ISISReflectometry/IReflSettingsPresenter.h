@@ -1,6 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H
 
+#include "IReflSettingsTabPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 
 #include <string>
@@ -40,7 +41,6 @@ class IReflSettingsPresenter {
 public:
   virtual ~IReflSettingsPresenter(){};
   /// Pre-processing
-  virtual std::string getTransmissionRuns() const = 0;
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const = 0;
   /// Processing
@@ -48,8 +48,15 @@ public:
   getReductionOptions() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
+  virtual std::string getTransmissionRuns() const = 0;
+  virtual void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) = 0;
 
-  enum Flag { ExpDefaultsFlag, InstDefaultsFlag };
+  enum Flag {
+    ExpDefaultsFlag,
+    InstDefaultsFlag,
+    SettingsChangedFlag,
+    SummationTypeChanged
+  };
 
   /// Tell the presenter something happened
   virtual void notify(IReflSettingsPresenter::Flag flag) = 0;

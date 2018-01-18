@@ -36,8 +36,9 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 
-#include <boost/tuple/tuple.hpp>
 #include <QStringList>
+#include <boost/optional.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <map>
 #include <set>
 #include <sstream>
@@ -61,30 +62,34 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
                        const ProcessingAlgorithm &processor,
                        const PostprocessingStep &postprocessingStep);
 
-QString DLLExport plotsString(const QStringList &output_ws,
-                              const QString &stitched_wsStr,
-                              const ProcessingAlgorithm &processor);
+QString DLLExport
+plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
+            const QString &stitched_wsStr,
+            const ProcessingAlgorithm &processor);
 
-boost::tuple<QString, QString> DLLExport
+QString DLLExport
 reduceRowString(const RowData &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
-                const OptionsMap &preprocessOptionsMap,
-                const OptionsMap &processingOptions);
+                const ColumnOptionsMap &globalPreprocessingOptionsMap,
+                const OptionsMap &globalProcessingOptions,
+                std::vector<OptionsMap> &processingOptionsPerRow);
 
 boost::tuple<QString, QString> DLLExport
 loadWorkspaceString(const QString &runStr, const QString &instrument,
                     const PreprocessingAlgorithm &preprocessor,
                     const QString &options);
 
-QString DLLExport
-plusString(const QString &input_name, const QString &output_name,
-           const PreprocessingAlgorithm &preprocessor, const QString &options);
+QString DLLExport preprocessString(const QString &input_name1,
+                                   const QString &input_name2,
+                                   const QString &output_name,
+                                   const PreprocessingAlgorithm &preprocessor,
+                                   const QString &options);
 
 boost::tuple<QString, QString> DLLExport
 loadRunString(const QString &run, const QString &instrument,
-              const QString &prefix);
+              const QString &prefix, const QString &outputName = QString());
 
 QString DLLExport
 completeOutputProperties(const QString &algName, size_t currentProperties);
@@ -95,14 +100,16 @@ public:
   GenerateNotebook(QString name, QString instrument, WhiteList whitelist,
                    std::map<QString, PreprocessingAlgorithm> preprocessMap,
                    ProcessingAlgorithm processor,
-                   PostprocessingStep postprocessingStep,
-                   OptionsMap preprocessingInstructionsMap,
+                   boost::optional<PostprocessingStep> postprocessingStep,
+                   ColumnOptionsMap preprocessingInstructionsMap,
                    OptionsMap processingInstructions);
   virtual ~GenerateNotebook() = default;
 
   QString generateNotebook(const TreeData &data);
 
 private:
+  bool hasPostprocessing() const;
+
   // The table ws name
   const QString m_wsName;
   // The instrument
@@ -116,10 +123,10 @@ private:
   // The processing (reduction) algorithm
   ProcessingAlgorithm m_processor;
   // The post-processing algorithm
-  PostprocessingStep m_postprocessingStep;
+  boost::optional<PostprocessingStep> m_postprocessingStep;
   // A map containing pre-processing instructions displayed in the view via
   // hinting line edits
-  OptionsMap m_preprocessingOptionsMap;
+  ColumnOptionsMap m_preprocessingOptionsMap;
   // Options to reduction algorithm specified in the view via hinting line edit
   OptionsMap m_processingOptions;
   // Options to post-processing algorithm specified in the view via hinting line
