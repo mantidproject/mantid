@@ -50,17 +50,14 @@ public:
     MatrixWorkspace_sptr ws01 = ws00->clone();
     MatrixWorkspace_sptr ws10 = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws01));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws10));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    const std::vector<std::string> wsNames{{"ws00", "ws01", "ws10", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 4> wsList{{ws00, ws01, ws10, ws11}};
     for (size_t i = 0; i != 4; ++i) {
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
       for (size_t j = 0; j != nHist; ++j) {
-        ws->mutableY(j) *= static_cast<double>(i + 1);
-        ws->mutableE(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
       }
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = idealEfficiencies(edges);
     PolarizationEfficiencyCor alg;
@@ -68,7 +65,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -117,21 +114,21 @@ public:
     Counts counts{yVal, 4.2 * yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    const std::vector<std::string> wsNames{std::initializer_list<std::string>{"ws00", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 2> wsList{{ws00, ws11}};
     for (size_t i = 0; i != nHist; ++i) {
       ws11->mutableY(i) *= 2.;
       ws11->mutableE(i) *= 2.;
     }
-
+    AnalysisDataService::Instance().addOrReplace(wsNames.front(), wsList.front());
+    AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
     auto effWS = idealEfficiencies(edges);
     PolarizationEfficiencyCor alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00, 11"))
@@ -192,20 +189,21 @@ public:
     Counts counts{yVal, 4.2 * yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    const std::vector<std::string> wsNames{std::initializer_list<std::string>{"ws00", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 2> wsList{{ws00, ws11}};
     for (size_t i = 0; i != nHist; ++i) {
       ws11->mutableY(i) *= 2.;
       ws11->mutableE(i) *= 2.;
     }
+    AnalysisDataService::Instance().addOrReplace(wsNames.front(), wsList.front());
+    AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
     auto effWS = idealEfficiencies(edges);
     PolarizationEfficiencyCor alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0, 1"))
@@ -247,15 +245,15 @@ public:
     const double yVal = 2.3;
     Counts counts{yVal, 4.2 * yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    const std::vector<std::string> wsNames{{"ws00"}};
+    AnalysisDataService::Instance().addOrReplace(wsNames.front(), ws00);
     auto effWS = idealEfficiencies(edges);
     PolarizationEfficiencyCor alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
@@ -294,17 +292,14 @@ public:
     MatrixWorkspace_sptr ws01 = ws00->clone();
     MatrixWorkspace_sptr ws10 = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws01));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws10));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    const std::vector<std::string> wsNames{{"ws00", "ws01", "ws10", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 4> wsList{{ws00, ws01, ws10, ws11}};
     for (size_t i = 0; i != 4; ++i) {
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
       for (size_t j = 0; j != nHist; ++j) {
-        ws->mutableY(j) *= static_cast<double>(i + 1);
-        ws->mutableE(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
       }
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
     PolarizationEfficiencyCor alg;
@@ -312,7 +307,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -345,15 +340,14 @@ public:
     MatrixWorkspace_sptr ws01 = nullptr;
     MatrixWorkspace_sptr ws10 = nullptr;
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    const std::vector<std::string> wsNames{std::initializer_list<std::string>{"ws00", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 2> wsList{{ws00, ws11}};
     for (size_t i = 0; i != 2; ++i) {
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
       for (size_t j = 0; j != nHist; ++j) {
-        ws->mutableY(j) *= static_cast<double>(i + 1);
-        ws->mutableE(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
       }
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
     PolarizationEfficiencyCor alg;
@@ -361,7 +355,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", "00, 11"))
@@ -451,15 +445,14 @@ public:
     Counts counts{yVal, yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    const std::vector<std::string> wsNames{std::initializer_list<std::string>{"ws00", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 2> wsList{{ws00, ws11}};
     for (size_t i = 0; i != 2; ++i) {
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
       for (size_t j = 0; j != nHist; ++j) {
-        ws->mutableY(j) *= static_cast<double>(i + 1);
-        ws->mutableE(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
       }
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
     PolarizationEfficiencyCor alg;
@@ -467,7 +460,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", "0, 1"))
@@ -521,15 +514,15 @@ public:
     const double yVal = 2.3;
     Counts counts{yVal, yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    const std::string wsName{"ws00"};
+    AnalysisDataService::Instance().addOrReplace(wsName, ws00);
     auto effWS = efficiencies(edges);
     PolarizationEfficiencyCor alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", wsName))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", "0"))
@@ -574,8 +567,8 @@ public:
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     Counts counts{0., 0., 0.};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(1, Histogram(edges, counts));
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    const std::string wsName{"ws00"};
+    AnalysisDataService::Instance().addOrReplace(wsName, ws00);
     auto effWS = idealEfficiencies(edges);
     // Rename F1 to something else.
     auto axis = make_unique<TextAxis>(4);
@@ -589,7 +582,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", wsName))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
@@ -605,8 +598,8 @@ public:
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     Counts counts{0., 0., 0.};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(1, Histogram(edges, counts));
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    const std::string wsName{"ws00"};
+    AnalysisDataService::Instance().addOrReplace(wsName, ws00);
     auto effWS = idealEfficiencies(edges);
     // Change a bin edge of one of the histograms.
     auto &xs = effWS->mutableX(0);
@@ -616,7 +609,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", wsName))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
@@ -636,18 +629,18 @@ public:
     MatrixWorkspace_sptr ws01 = ws00->clone();
     MatrixWorkspace_sptr ws10 = create<Workspace2D>(nHist + 1, Histogram(edges, counts));
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws01));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws10));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    const std::vector<std::string> wsNames{{"ws00", "ws01", "ws10", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 4> wsList{{ws00, ws01, ws10, ws11}};
+    for (size_t i = 0; i != 4; ++i) {
+        AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
+    }
     auto effWS = idealEfficiencies(edges);
     PolarizationEfficiencyCor alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
@@ -665,25 +658,19 @@ public:
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr ws01 = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws01));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
-    auto effWS = idealEfficiencies(edges);
+    AnalysisDataService::Instance().addOrReplace("ws00", ws00);
+    AnalysisDataService::Instance().addOrReplace("ws01", ws01);
+    AnalysisDataService::Instance().addOrReplace("ws11", ws11);
     PolarizationEfficiencyCor alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
-    TS_ASSERT(!alg.isExecuted())
+    TS_ASSERT_THROWS(alg.setPropertyValue("InputWorkspaces", "ws00, ws01, ws10, ws11"), std::invalid_argument)
   }
 
 private:
-  std::string m_outputWSName{"output"};
+  const std::string m_outputWSName{"output"};
 
   Mantid::API::MatrixWorkspace_sptr efficiencies(const Mantid::HistogramData::BinEdges &edges) {
     using namespace Mantid::API;
@@ -744,16 +731,14 @@ private:
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
     MatrixWorkspace_sptr wsXX = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(wsXX));
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    const std::vector<std::string> wsNames{{"ws00", "wsXX", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 3> wsList{{ws00, wsXX, ws11}};
     for (size_t i = 0; i != 3; ++i) {
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
       for (size_t j = 0; j != nHist; ++j) {
-        ws->mutableY(j) *= static_cast<double>(i + 1);
-        ws->mutableE(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
       }
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = idealEfficiencies(edges);
     constexpr char *OUTWS_NAME{"output"};
@@ -762,7 +747,7 @@ private:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     const std::string presentFlipperConf = missingFlipperConf == "01" ? "10" : "01";
@@ -831,20 +816,14 @@ private:
     MatrixWorkspace_sptr ws01 = missingFlipperConf == "01" ? nullptr : ws00->clone();
     MatrixWorkspace_sptr ws10 = missingFlipperConf == "10" ? nullptr : ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
-    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
-    if (ws01) {
-      inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws01));
-    } else {
-      inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws10));
-    }
-    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    const std::vector<std::string> wsNames{{"ws00", "wsXX", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 3> wsList{{ws00, ws01 != nullptr ? ws01 : ws10, ws11}};
     for (size_t i = 0; i != 3; ++i) {
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
       for (size_t j = 0; j != nHist; ++j) {
-        ws->mutableY(j) *= static_cast<double>(i + 1);
-        ws->mutableE(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
       }
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
     PolarizationEfficiencyCor alg;
@@ -852,7 +831,7 @@ private:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     const std::string presentFlipperConf = missingFlipperConf == "01" ? "10" : "01";

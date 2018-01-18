@@ -1,10 +1,12 @@
 #include "MantidAlgorithms/PolarizationEfficiencyCor.h"
 
+#include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
@@ -16,7 +18,7 @@ namespace {
 namespace Prop {
 constexpr char *FLIPPERS{"Flippers"};
 constexpr char *EFFICIENCIES{"Efficiencies"};
-constexpr char *INPUT_WS{"InputWorkspace"};
+constexpr char *INPUT_WS{"InputWorkspaces"};
 constexpr char *OUTPUT_WS{"OutputWorkspace"};
 }
 
@@ -90,9 +92,13 @@ size_t PolarizationEfficiencyCor::WorkspaceMap::size() const noexcept {
  */
 void PolarizationEfficiencyCor::init() {
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::INPUT_WS, "",
+      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(Prop::INPUT_WS, "", boost::make_shared<API::ADSValidator>(),
                                                              Kernel::Direction::Input),
-      "A group of workspaces to be corrected.");
+      "A list of workspaces corresponding to the flipper configurations to be corrected.");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "",
+                                                             Kernel::Direction::Output),
+      "A group of polarization efficiency corrected workspaces.");
   const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
   const std::string missing01 = Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
   const std::string missing10 = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
@@ -102,10 +108,6 @@ void PolarizationEfficiencyCor::init() {
   const std::vector<std::string> setups{{full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
   declareProperty(Prop::FLIPPERS, full, boost::make_shared<Kernel::ListValidator<std::string>>(setups),
         "Flipper configurations of the input workspaces.");
-  declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "",
-                                                             Kernel::Direction::Output),
-      "A group of polarization efficiency corrected workspaces.");
   declareProperty(
         Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
         "A workspace containing the efficiency factors P1, P2, F1 and F2 as histograms");
@@ -171,10 +173,10 @@ std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
       issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() + " is missing from the workspace.";
     }
   }
-  API::WorkspaceGroup_const_sptr inGroup = getProperty(Prop::INPUT_WS);
+  const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
   const auto flippers = parseFlipperSetup(flipperProperty);
-  if (static_cast<size_t>(inGroup->getNumberOfEntries()) != flippers.size()) {
+  if (inputs.size() != flippers.size()) {
     issues[Prop::FLIPPERS] = "The number of flipper configurations does not match the number of input workspaces";
   }
   return issues;
@@ -707,10 +709,10 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
  * @return a set of workspaces to correct
  */
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDirections(const std::vector<std::string> &flippers) {
-  API::WorkspaceGroup_const_sptr inGroup = getProperty(Prop::INPUT_WS);
+  const std::vector<std::string> inputNames = getProperty(Prop::INPUT_WS);
   WorkspaceMap inputs;
   for (size_t i = 0; i < flippers.size(); ++i) {
-    auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(inGroup->getItem(i));
+    auto ws = (API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(inputNames[i]));
     if (!ws) {
       throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");
     }
