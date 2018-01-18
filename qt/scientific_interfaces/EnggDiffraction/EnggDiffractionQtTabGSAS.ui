@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>EnggDiffractionQtTabGSAS</class>
+ <widget class="QWidget" name="EnggDiffractionQtTabGSAS">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>661</width>
+    <height>621</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -246,27 +254,18 @@
      <rect>
       <x>160</x>
       <y>170</y>
-      <width>131</width>
-      <height>22</height>
+      <width>151</width>
+      <height>27</height>
      </rect>
-    </property>
-    <property name="editable">
-     <bool>false</bool>
-    </property>
-    <property name="currentText">
-     <string>Pawley Refinement</string>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
     </property>
     <item>
      <property name="text">
-      <string>Pawley Refinement</string>
+      <string>Pawley</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>Rietveld Refinement</string>
+      <string>Rietveld</string>
      </property>
     </item>
    </widget>
