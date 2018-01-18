@@ -48,9 +48,11 @@ std::vector<std::string> parseFlipperSetup(const std::string &setupString) {
  * @param ws a workspace to check
  * @param tag a flipper configuration for the error message
  */
-void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &tag) {
+void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws,
+                      const std::string &tag) {
   if (!ws) {
-    throw std::runtime_error("A workspace designated as " + tag + " is missing in inputs.");
+    throw std::runtime_error("A workspace designated as " + tag +
+                             " is missing in inputs.");
   }
 }
 }
@@ -64,7 +66,9 @@ DECLARE_ALGORITHM(PolarizationEfficiencyCor)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string PolarizationEfficiencyCor::name() const { return "PolarizationEfficiencyCor"; }
+const std::string PolarizationEfficiencyCor::name() const {
+  return "PolarizationEfficiencyCor";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int PolarizationEfficiencyCor::version() const { return 1; }
@@ -76,7 +80,8 @@ const std::string PolarizationEfficiencyCor::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PolarizationEfficiencyCor::summary() const {
-  return "Corrects a group of polarization analysis workspaces for polarizer and analyzer efficiencies.";
+  return "Corrects a group of polarization analysis workspaces for polarizer "
+         "and analyzer efficiencies.";
 }
 
 /**
@@ -91,26 +96,36 @@ size_t PolarizationEfficiencyCor::WorkspaceMap::size() const noexcept {
 /** Initialize the algorithm's properties.
  */
 void PolarizationEfficiencyCor::init() {
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+                      Prop::INPUT_WS, "",
+                      boost::make_shared<API::ADSValidator>(),
+                      Kernel::Direction::Input),
+                  "A list of workspaces to be corrected corresponding to the "
+                  "flipper configurations.");
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(Prop::INPUT_WS, "", boost::make_shared<API::ADSValidator>(),
-                                                             Kernel::Direction::Input),
-      "A list of workspaces to be corrected corresponding to the flipper configurations.");
-  declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "",
-                                                             Kernel::Direction::Output),
+      Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
+          Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A group of polarization efficiency corrected workspaces.");
-  const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing01 = Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing10 = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
+  const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " +
+                           Flippers::OnOff + ", " + Flippers::OnOn;
+  const std::string missing01 =
+      Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
+  const std::string missing10 =
+      Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
   const std::string missing0110 = Flippers::OffOff + ", " + Flippers::OnOn;
   const std::string noAnalyzer = Flippers::Off + ", " + Flippers::On;
   const std::string directBeam = Flippers::Off;
-  const std::vector<std::string> setups{{full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
-  declareProperty(Prop::FLIPPERS, full, boost::make_shared<Kernel::ListValidator<std::string>>(setups),
-        "Flipper configurations of the input workspaces.");
+  const std::vector<std::string> setups{
+      {full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
   declareProperty(
-        Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
-        "A workspace containing the efficiency factors P1, P2, F1 and F2 as histograms");
+      Prop::FLIPPERS, full,
+      boost::make_shared<Kernel::ListValidator<std::string>>(setups),
+      "Flipper configurations of the input workspaces.");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          Prop::EFFICIENCIES, "", Kernel::Direction::Input),
+      "A workspace containing the efficiency factors P1, P2, F1 and F2 as "
+      "histograms");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -156,9 +171,11 @@ std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
   if (!factorAxis) {
     issues[Prop::EFFICIENCIES] = "The workspace is missing a vertical axis.";
   } else if (!factorAxis->isText()) {
-    issues[Prop::EFFICIENCIES] = "The vertical axis in the workspace is not text axis.";
+    issues[Prop::EFFICIENCIES] =
+        "The vertical axis in the workspace is not text axis.";
   } else if (factorWS->getNumberHistograms() < 4) {
-    issues[Prop::EFFICIENCIES] = "The workspace should contain at least 4 histograms.";
+    issues[Prop::EFFICIENCIES] =
+        "The workspace should contain at least 4 histograms.";
   } else {
     std::vector<std::string> tags{{"P1", "P2", "F1", "F2"}};
     for (size_t i = 0; i != factorAxis->length(); ++i) {
@@ -170,14 +187,16 @@ std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
       }
     }
     if (!tags.empty()) {
-      issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() + " is missing from the workspace.";
+      issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() +
+                                   " is missing from the workspace.";
     }
   }
   const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
   const auto flippers = parseFlipperSetup(flipperProperty);
   if (inputs.size() != flippers.size()) {
-    issues[Prop::FLIPPERS] = "The number of flipper configurations does not match the number of input workspaces";
+    issues[Prop::FLIPPERS] = "The number of flipper configurations does not "
+                             "match the number of input workspaces";
   }
   return issues;
 }
@@ -186,11 +205,13 @@ std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
  * Check that all workspaces in inputs have the same number of histograms.
  * @param inputs a set of workspaces to check
  */
-void PolarizationEfficiencyCor::checkConsistentNumberHistograms(const WorkspaceMap &inputs) {
+void PolarizationEfficiencyCor::checkConsistentNumberHistograms(
+    const WorkspaceMap &inputs) {
   size_t nHist{0};
   bool nHistValid{false};
   // A local helper function to check the number of histograms.
-  auto checkNHist = [&nHist, &nHistValid](const API::MatrixWorkspace_sptr &ws, const std::string &tag) {
+  auto checkNHist = [&nHist, &nHistValid](const API::MatrixWorkspace_sptr &ws,
+                                          const std::string &tag) {
     if (nHistValid) {
       if (nHist != ws->getNumberHistograms()) {
         throw std::runtime_error("Number of histograms mismatch in " + tag);
@@ -219,20 +240,24 @@ void PolarizationEfficiencyCor::checkConsistentNumberHistograms(const WorkspaceM
  * @param inputs a set of workspaces to check
  * @param efficiencies efficiencies to check
  */
-void PolarizationEfficiencyCor::checkConsistentX(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+void PolarizationEfficiencyCor::checkConsistentX(
+    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   // Compare everything to F1 efficiency.
   const auto &F1x = efficiencies.F1->x();
   // A local helper function to check a HistogramX against F1.
-  auto checkX = [&F1x](const HistogramData::HistogramX &x, const std::string &tag) {
-    if (x.size() != F1x.size()) {
-      throw std::runtime_error("Mismatch of histogram lengths between F1 and " + tag + '.');
-    }
-    for (size_t i = 0; i != x.size(); ++i) {
-      if (x[i] != F1x[i]) {
-        throw std::runtime_error("Mismatch of X data between F1 and " + tag + '.');
-      }
-    }
-  };
+  auto checkX =
+      [&F1x](const HistogramData::HistogramX &x, const std::string &tag) {
+        if (x.size() != F1x.size()) {
+          throw std::runtime_error(
+              "Mismatch of histogram lengths between F1 and " + tag + '.');
+        }
+        for (size_t i = 0; i != x.size(); ++i) {
+          if (x[i] != F1x[i]) {
+            throw std::runtime_error("Mismatch of X data between F1 and " +
+                                     tag + '.');
+          }
+        }
+      };
   const auto &F2x = efficiencies.F2->x();
   checkX(F2x, "F2");
   const auto &P1x = efficiencies.P1->x();
@@ -240,7 +265,8 @@ void PolarizationEfficiencyCor::checkConsistentX(const WorkspaceMap &inputs, con
   const auto &P2x = efficiencies.P2->x();
   checkX(P2x, "P2");
   // A local helper function to check an input workspace against F1.
-  auto checkWS = [&F1x, &checkX](const API::MatrixWorkspace_sptr &ws, const std::string &tag) {
+  auto checkWS = [&F1x, &checkX](const API::MatrixWorkspace_sptr &ws,
+                                 const std::string &tag) {
     const auto nHist = ws->getNumberHistograms();
     for (size_t i = 0; i != nHist; ++i) {
       checkX(ws->x(i), tag);
@@ -267,24 +293,29 @@ void PolarizationEfficiencyCor::checkConsistentX(const WorkspaceMap &inputs, con
  * @param outputs a set of workspaces to group
  * @return a group workspace
  */
-API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(const WorkspaceMap &outputs) {
+API::WorkspaceGroup_sptr
+PolarizationEfficiencyCor::groupOutput(const WorkspaceMap &outputs) {
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
   std::vector<std::string> names;
   if (outputs.mmWS) {
     names.emplace_back(outWSName + "_--");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mmWS);
+    API::AnalysisDataService::Instance().addOrReplace(names.back(),
+                                                      outputs.mmWS);
   }
   if (outputs.mpWS) {
     names.emplace_back(outWSName + "_-+");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mpWS);
+    API::AnalysisDataService::Instance().addOrReplace(names.back(),
+                                                      outputs.mpWS);
   }
   if (outputs.pmWS) {
     names.emplace_back(outWSName + "_+-");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.pmWS);
+    API::AnalysisDataService::Instance().addOrReplace(names.back(),
+                                                      outputs.pmWS);
   }
   if (outputs.ppWS) {
     names.emplace_back(outWSName + "_++");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.ppWS);
+    API::AnalysisDataService::Instance().addOrReplace(names.back(),
+                                                      outputs.ppWS);
   }
   auto group = createChildAlgorithm("GroupWorkspaces");
   group->initialize();
@@ -299,7 +330,8 @@ API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(const WorkspaceM
  * Make a convenience access object to the efficiency factors.
  * @return an EfficiencyMap object
  */
-PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFactors() {
+PolarizationEfficiencyCor::EfficiencyMap
+PolarizationEfficiencyCor::efficiencyFactors() {
   EfficiencyMap e;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
   const auto &vertAxis = factorWS->getAxis(1);
@@ -326,7 +358,9 @@ PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFa
  * @param efficiencies a set of efficiency factors
  * @return set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationEfficiencyCor::WorkspaceMap
+PolarizationEfficiencyCor::directBeamCorrections(
+    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.ppWS, Flippers::Off);
   WorkspaceMap outputs;
@@ -362,7 +396,9 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCor
  * @param efficiencies a set of efficiency factors
  * @return a set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationEfficiencyCor::WorkspaceMap
+PolarizationEfficiencyCor::analyzerlessCorrections(
+    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::On);
   checkInputExists(inputs.ppWS, Flippers::Off);
@@ -383,14 +419,12 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
       const auto F1 = efficiencies.F1->y()[binIndex];
       const auto P1 = efficiencies.P1->y()[binIndex];
       Eigen::Matrix2d F1m;
-      F1m <<             1.,      0.,
-             (F1 - 1.) / F1, 1. / F1;
+      F1m << 1., 0., (F1 - 1.) / F1, 1. / F1;
       const double divisor = (2. * P1 - 1.);
       const double diag = (P1 - 1.) / divisor;
       const double off = P1 / divisor;
       Eigen::Matrix2d P1m;
-      P1m << diag,  off,
-              off, diag;
+      P1m << diag, off, off, diag;
       const Eigen::Vector2d intensities(ppY[binIndex], mmY[binIndex]);
       const auto PFProduct = P1m * F1m;
       const auto corrected = PFProduct * intensities;
@@ -400,12 +434,10 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
       const auto P1E = efficiencies.P1->e()[binIndex];
       const auto elemE1 = -1. / pow<2>(F1) * F1E;
       Eigen::Matrix2d F1Em;
-      F1Em <<      0.,     0.,
-              -elemE1, elemE1;
+      F1Em << 0., 0., -elemE1, elemE1;
       const auto elemE2 = 1. / pow<2>(divisor) * P1E;
       Eigen::Matrix2d P1Em;
-      P1Em <<  elemE2, -elemE2,
-              -elemE2,  elemE2;
+      P1Em << elemE2, -elemE2, -elemE2, elemE2;
       const Eigen::Vector2d errors(ppE[binIndex], mmE[binIndex]);
       const auto e1 = (P1Em * F1m * intensities).array();
       const auto e2 = (P1m * F1Em * intensities).array();
@@ -429,7 +461,9 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
  * @param efficiencies a set of efficiency factors
  * @return a set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationEfficiencyCor::WorkspaceMap
+PolarizationEfficiencyCor::twoInputCorrections(
+    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
   checkInputExists(inputs.ppWS, Flippers::OffOff);
@@ -467,84 +501,174 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorre
       const auto d = -1. + p2;
       // Case: 01
       const auto divisor = f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c);
-      I01[binIndex] = (f2 * i11 * p1 * a - f1 * i00 * b * (-f2 * pow<2>(c) + pow<2>(f2 * c) + d * p2)) / divisor;
+      I01[binIndex] =
+          (f2 * i11 * p1 * a -
+           f1 * i00 * b * (-f2 * pow<2>(c) + pow<2>(f2 * c) + d * p2)) /
+          divisor;
       // Error estimates.
       // Derivatives of the above with respect to i00, i11, f1, etc.
-      const auto pmdi00 = -((f1 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) /
-                            (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2.* p2))));
-      const auto pmdi11 = (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
-          (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
-      const auto pmdf1 = -(((-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) * (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) - f1 * i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
-                           pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) - (i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) /
-          (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
-      const auto pmdf2 = -(((f1 * (-1. + 2. * p1) * (-1. + p1 + p2) * (-1 + 2 * p2) + p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) * (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) - f1 * i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
-                           pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) + (-f1 * i00 * (-1. + 2. * p1) * (-pow<2>(1. - 2. * p2) + 2 * f2 * pow<2>(1. - 2. * p2)) +
-                         i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
-          (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
-      const auto pmdp1 = -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
-                             f1 * i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) +
-                                pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) * (f2 * p1 * (1. - 2. * p2) +
-                             f1 * f2 * (-1. + 2. * p1) * (-1. + 2. * p2) +
-                             f2 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-                             2. * f1 * ((1. - p2) * p2 +
-                                f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) / pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-                           f1 * (-1. + 2. * p1) * ((1. - p2) * p2 +
-                              f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) + (f2 * i11 * p1 * (1. - 2. * p2) +
-                         f2 * i11 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
-                         2. * f1 * i00 * (-f2 * pow<2>(1. - 2. * p2) +
-                            pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) / (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-                         f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
-      const auto pmdp2 = -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
-                             f1 * i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) +
-                                pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) * (f2 * (2. - 2. * p1) * p1 +
-                             f1 * (-1. + 2. * p1) * (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
-                                f2 * (-1. + 2. * p2)))) / pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-                           f1 * (-1. + 2. * p1) * ((1. - p2) * p2 +
-                              f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) + (f2 * i11 * (2. - 2. * p1) * p1 -
-                         f1 * i00 * (-1. + 2. * p1) * (-1. + 4. * f2 * (1. - 2. * p2) - 4. * pow<2>(f2) * (1. - 2. * p2) +
-                            2. * p2)) / (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-                         f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto pmdi00 =
+          -((f1 * (-1. + 2. * p1) *
+             (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
+              (-1. + p2) * p2)) /
+            (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+             f1 * (-1. + 2. * p1) *
+                 ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2))));
+      const auto pmdi11 =
+          (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
+          (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+           f1 * (-1. + 2. * p1) *
+               ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto pmdf1 =
+          -(((-1. + 2. * p1) *
+             ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) *
+             (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
+              f1 * i00 * (-1. + 2. * p1) *
+                  (-f2 * pow<2>(1. - 2. * p2) +
+                   pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
+            pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                   f1 * (-1. + 2. * p1) *
+                       ((1. - p2) * p2 +
+                        f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) -
+          (i00 * (-1. + 2. * p1) *
+           (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
+            (-1. + p2) * p2)) /
+              (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+               f1 * (-1. + 2. * p1) *
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto pmdf2 =
+          -(((f1 * (-1. + 2. * p1) * (-1. + p1 + p2) * (-1 + 2 * p2) +
+              p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) *
+             (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
+              f1 * i00 * (-1. + 2. * p1) *
+                  (-f2 * pow<2>(1. - 2. * p2) +
+                   pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
+            pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                   f1 * (-1. + 2. * p1) *
+                       ((1. - p2) * p2 +
+                        f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+          (-f1 * i00 * (-1. + 2. * p1) *
+               (-pow<2>(1. - 2. * p2) + 2 * f2 * pow<2>(1. - 2. * p2)) +
+           i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
+              (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+               f1 * (-1. + 2. * p1) *
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto pmdp1 =
+          -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
+              f1 * i00 * (-1. + 2. * p1) *
+                  (-f2 * pow<2>(1. - 2. * p2) +
+                   pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) *
+             (f2 * p1 * (1. - 2. * p2) +
+              f1 * f2 * (-1. + 2. * p1) * (-1. + 2. * p2) +
+              f2 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+              2. * f1 *
+                  ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) /
+            pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                   f1 * (-1. + 2. * p1) *
+                       ((1. - p2) * p2 +
+                        f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+          (f2 * i11 * p1 * (1. - 2. * p2) +
+           f2 * i11 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
+           2. * f1 * i00 *
+               (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
+                (-1. + p2) * p2)) /
+              (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+               f1 * (-1. + 2. * p1) *
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto pmdp2 =
+          -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
+              f1 * i00 * (-1. + 2. * p1) *
+                  (-f2 * pow<2>(1. - 2. * p2) +
+                   pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) *
+             (f2 * (2. - 2. * p1) * p1 +
+              f1 * (-1. + 2. * p1) * (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
+                                      f2 * (-1. + 2. * p2)))) /
+            pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                   f1 * (-1. + 2. * p1) *
+                       ((1. - p2) * p2 +
+                        f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+          (f2 * i11 * (2. - 2. * p1) * p1 -
+           f1 * i00 * (-1. + 2. * p1) *
+               (-1. + 4. * f2 * (1. - 2. * p2) -
+                4. * pow<2>(f2) * (1. - 2. * p2) + 2. * p2)) /
+              (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+               f1 * (-1. + 2. * p1) *
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
       const auto e01_I00 = pow<2>(pmdi00 * E00[binIndex]);
       const auto e01_I11 = pow<2>(pmdi11 * E11[binIndex]);
       const auto e01_F1 = pow<2>(pmdf1 * F1E[binIndex]);
       const auto e01_F2 = pow<2>(pmdf2 * F2E[binIndex]);
       const auto e01_P1 = pow<2>(pmdp1 * P1E[binIndex]);
       const auto e01_P2 = pow<2>(pmdp2 * P2E[binIndex]);
-      E01[binIndex] = std::sqrt(e01_I00 + e01_I11 + e01_F1 + e01_F2 + e01_P1 + e01_P2);
+      E01[binIndex] =
+          std::sqrt(e01_I00 + e01_I11 + e01_F1 + e01_F2 + e01_P1 + e01_P2);
       // Case: 10
-      I10[binIndex] = (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) / divisor;
+      I10[binIndex] =
+          (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
+           f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) /
+          divisor;
       // Derivatives of the above with respect to i00, i11, f1, etc.
-      const auto mpdi00 = (-pow<2>(f1) * f2 * pow<2>(b) * c + f1 * f2 * pow<2>(b) * c + f2 * p1 * a) / (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
-      const auto mpdi11 = -((f1 * b * d * p2) / (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c)));
-      const auto mpdf1 = -(((-1. + 2. * p1) * ((1. - p2) * p2 +
-                                         f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) * (-pow<2>(f1) * f2 * i00 * pow<2>(1. - 2. * p1) * (-1. + 2. * p2) +
-                                         f2 * i00 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-                                         f1 * (-1. + 2. * p1) * (-i11 * (-1. + p2) * p2 +
-                                            f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2)))) / pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 -
-                                          2. * p1 * p2) +
-                                       f1 * (-1. + 2. * p1) * ((1. - p2) * p2 +
-                                          f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) + (-2. * f1 * f2 * i00 * pow<2>(1. - 2. * p1) * (-1. + 2. * p2) + (-1. + 2. * p1) * (-i11 * (-1. + p2) * p2 +
-                                        f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2))) / (f2 * p1 * (-1. + p1 + 2. * p2 -
-                                        2. * p1 * p2) +
-                                     f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
-      const auto mpdf2 = -(((f1 * b * (p1 + d) * c + p1 * a) * (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
-                         pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
-          (-pow<2>(f1) * i00 * pow<2>(b) * c + f1 * i00 * pow<2>(b) * c + i00 * p1 * a) /
+      const auto mpdi00 =
+          (-pow<2>(f1) * f2 * pow<2>(b) * c + f1 * f2 * pow<2>(b) * c +
+           f2 * p1 * a) /
           (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
-      const auto mpdp1 = -(((-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) * (f2 * p1 * -c + f1 * f2 * b * c + f2 * a + 2. * f1 * (-d * p2 + f2 * (p1 + d) * c))) /
-                         pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
-          (f2 * i00 * p1 * -c + 4. * pow<2>(f1) * f2 * i00 * -b * c + 2. * f1 * f2 * i00 * b * c + f2 * i00 * a + 2. * f1 * (-i11 * d * p2 + f2 * i00 * b * c)) /
-          (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
-      const auto mpdp2 = -(((f2 * (2. - 2. * p1) * p1 + f1 * b * (1. - 2. * p2 + 2. * f2 * (p1 + d) + f2 * c)) * (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b *(-i11 * d * p2 + f2 * i00 * b * c))) / pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
-          (-2. * pow<2>(f1) * f2 * i00 * pow<2>(b) + f2 * i00 * (2. - 2. * p1) * p1 + f1 * b * (2. * f2 * i00 * b - i11 * d - i11 * p2)) /
-          (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+      const auto mpdi11 =
+          -((f1 * b * d * p2) /
+            (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c)));
+      const auto mpdf1 =
+          -(((-1. + 2. * p1) *
+             ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) *
+             (-pow<2>(f1) * f2 * i00 * pow<2>(1. - 2. * p1) * (-1. + 2. * p2) +
+              f2 * i00 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+              f1 * (-1. + 2. * p1) *
+                  (-i11 * (-1. + p2) * p2 +
+                   f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2)))) /
+            pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                   f1 * (-1. + 2. * p1) *
+                       ((1. - p2) * p2 +
+                        f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+          (-2. * f1 * f2 * i00 * pow<2>(1. - 2. * p1) * (-1. + 2. * p2) +
+           (-1. + 2. * p1) * (-i11 * (-1. + p2) * p2 +
+                              f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2))) /
+              (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+               f1 * (-1. + 2. * p1) *
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto mpdf2 =
+          -(((f1 * b * (p1 + d) * c + p1 * a) *
+             (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
+              f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
+            pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
+          (-pow<2>(f1) * i00 * pow<2>(b) * c + f1 * i00 * pow<2>(b) * c +
+           i00 * p1 * a) /
+              (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+      const auto mpdp1 =
+          -(((-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
+              f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) *
+             (f2 * p1 * -c + f1 * f2 * b * c + f2 * a +
+              2. * f1 * (-d * p2 + f2 * (p1 + d) * c))) /
+            pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
+          (f2 * i00 * p1 * -c + 4. * pow<2>(f1) * f2 * i00 * -b * c +
+           2. * f1 * f2 * i00 * b * c + f2 * i00 * a +
+           2. * f1 * (-i11 * d * p2 + f2 * i00 * b * c)) /
+              (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+      const auto mpdp2 =
+          -(((f2 * (2. - 2. * p1) * p1 +
+              f1 * b * (1. - 2. * p2 + 2. * f2 * (p1 + d) + f2 * c)) *
+             (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
+              f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
+            pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
+          (-2. * pow<2>(f1) * f2 * i00 * pow<2>(b) +
+           f2 * i00 * (2. - 2. * p1) * p1 +
+           f1 * b * (2. * f2 * i00 * b - i11 * d - i11 * p2)) /
+              (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
       const auto e10_I00 = pow<2>(mpdi00 * E00[binIndex]);
       const auto e10_I11 = pow<2>(mpdi11 * E11[binIndex]);
       const auto e10_F1 = pow<2>(mpdf1 * F1E[binIndex]);
       const auto e10_F2 = pow<2>(mpdf2 * F2E[binIndex]);
       const auto e10_P1 = pow<2>(mpdp1 * P1E[binIndex]);
       const auto e10_P2 = pow<2>(mpdp2 * P2E[binIndex]);
-      E10[binIndex] = std::sqrt(e10_I00 + e10_I11 + e10_F1 + e10_F2 + e10_P1 + e10_P2);
+      E10[binIndex] =
+          std::sqrt(e10_I00 + e10_I11 + e10_F1 + e10_F2 + e10_P1 + e10_P2);
     }
   }
   return fullCorrections(fullInputs, efficiencies);
@@ -559,7 +683,9 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorre
  * @param efficiencies a set of efficiency factors
  * @return a set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationEfficiencyCor::WorkspaceMap
+PolarizationEfficiencyCor::threeInputCorrections(
+    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   WorkspaceMap fullInputs = inputs;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
   checkInputExists(inputs.ppWS, Flippers::OffOff);
@@ -581,7 +707,9 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCor
  * @param efficiencies a set of efficiency factors
  * @return a set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationEfficiencyCor::WorkspaceMap
+PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs,
+                                           const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
   checkInputExists(inputs.mpWS, Flippers::OnOff);
@@ -621,32 +749,25 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
       const auto diag1 = 1. / F1;
       const auto off1 = (F1 - 1.) / F1;
       Eigen::Matrix4d F1m;
-      F1m <<   1.,   0.,    0.,    0.,
-               0.,   1.,    0.,    0.,
-             off1,   0., diag1,    0.,
-               0., off1,    0., diag1;
+      F1m << 1., 0., 0., 0., 0., 1., 0., 0., off1, 0., diag1, 0., 0., off1, 0.,
+          diag1;
       const auto diag2 = 1. / F2;
       const auto off2 = (F2 - 1.) / F2;
       Eigen::Matrix4d F2m;
-      F2m <<   1.,    0.,   0.,    0.,
-             off2, diag2,   0.,    0.,
-               0.,    0.,   1.,    0.,
-               0.,    0., off2, diag2;
+      F2m << 1., 0., 0., 0., off2, diag2, 0., 0., 0., 0., 1., 0., 0., 0., off2,
+          diag2;
       const auto diag3 = (P1 - 1.) / (2. * P1 - 1.);
       const auto off3 = P1 / (2. * P1 - 1);
       Eigen::Matrix4d P1m;
-      P1m << diag3,     0,  off3,     0,
-                 0, diag3,     0,  off3,
-              off3,     0, diag3,     0,
-                 0,  off3,     0, diag3;
+      P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3,
+          0, diag3;
       const auto diag4 = (P2 - 1.) / (2. * P2 - 1.);
       const auto off4 = P2 / (2. * P2 - 1.);
       Eigen::Matrix4d P2m;
-      P2m << diag4,  off4,    0.,    0.,
-              off4, diag4,    0.,    0.,
-                0.,    0., diag4,  off4,
-                0.,    0.,  off4, diag4;
-      const Eigen::Vector4d intensities(ppY[binIndex], pmY[binIndex], mpY[binIndex], mmY[binIndex]);
+      P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0.,
+          0., off4, diag4;
+      const Eigen::Vector4d intensities(ppY[binIndex], pmY[binIndex],
+                                        mpY[binIndex], mmY[binIndex]);
       const auto FProduct = F2m * F1m;
       const auto PProduct = P2m * P1m;
       const auto PFProduct = PProduct * FProduct;
@@ -661,38 +782,31 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
       const auto P2E = efficiencies.P2->e()[binIndex];
       // The error matrices here are element-wise algebraic derivatives of
       // the matrices above, multiplied by the error.
-      const auto elemE1 = - 1. / pow<2>(F1) * F1E;
+      const auto elemE1 = -1. / pow<2>(F1) * F1E;
       Eigen::Matrix4d F1Em;
-      F1Em <<      0.,      0.,     0.,     0.,
-                   0.,      0.,     0.,     0.,
-              -elemE1,      0., elemE1,     0.,
-                   0., -elemE1,     0., elemE1;
-      const auto elemE2 = - 1. / pow<2>(F2) * F2E;
+      F1Em << 0., 0., 0., 0., 0., 0., 0., 0., -elemE1, 0., elemE1, 0., 0.,
+          -elemE1, 0., elemE1;
+      const auto elemE2 = -1. / pow<2>(F2) * F2E;
       Eigen::Matrix4d F2Em;
-      F2Em <<      0.,     0.,      0.,     0.,
-              -elemE2, elemE2,      0.,     0.,
-                   0.,     0.,      0.,     0.,
-                   0.,     0., -elemE2, elemE2;
+      F2Em << 0., 0., 0., 0., -elemE2, elemE2, 0., 0., 0., 0., 0., 0., 0., 0.,
+          -elemE2, elemE2;
       const auto elemE3 = 1. / pow<2>(2. * P1 - 1.) * P1E;
       Eigen::Matrix4d P1Em;
-      P1Em <<  elemE3,      0., -elemE3,      0.,
-                   0.,  elemE3,      0., -elemE3,
-              -elemE3,      0.,  elemE3,      0.,
-                   0., -elemE3,      0.,  elemE3;
+      P1Em << elemE3, 0., -elemE3, 0., 0., elemE3, 0., -elemE3, -elemE3, 0.,
+          elemE3, 0., 0., -elemE3, 0., elemE3;
       const auto elemE4 = 1. / pow<2>(2. * P2 - 1.) * P2E;
       Eigen::Matrix4d P2Em;
-      P2Em <<  elemE4, -elemE4,      0.,      0.,
-              -elemE4,  elemE4,      0.,      0.,
-                   0.,      0.,  elemE4, -elemE4,
-                   0.,      0., -elemE4,  elemE4;
-      const Eigen::Vector4d errors(ppE[binIndex], pmE[binIndex], mpE[binIndex], mmE[binIndex]);
+      P2Em << elemE4, -elemE4, 0., 0., -elemE4, elemE4, 0., 0., 0., 0., elemE4,
+          -elemE4, 0., 0., -elemE4, elemE4;
+      const Eigen::Vector4d errors(ppE[binIndex], pmE[binIndex], mpE[binIndex],
+                                   mmE[binIndex]);
       const auto e1 = (P2Em * P1m * FProduct * intensities).array();
       const auto e2 = (P2m * P1Em * FProduct * intensities).array();
       const auto e3 = (PProduct * F2Em * F1m * intensities).array();
       const auto e4 = (PProduct * F2m * F1Em * intensities).array();
       const auto sqPFProduct = (PFProduct.array() * PFProduct.array()).matrix();
       const auto sqErrors = (errors.array() * errors.array()).matrix();
-      const auto e5 =  (sqPFProduct * sqErrors).array();
+      const auto e5 = (sqPFProduct * sqErrors).array();
       const auto errorSum = (e1 * e1 + e2 * e2 + e3 * e3 + e4 * e4 + e5).sqrt();
       ppEOut[binIndex] = errorSum[0];
       pmEOut[binIndex] = errorSum[1];
@@ -708,13 +822,18 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
  * @param flippers a vector of flipper configurations
  * @return a set of workspaces to correct
  */
-PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDirections(const std::vector<std::string> &flippers) {
+PolarizationEfficiencyCor::WorkspaceMap
+PolarizationEfficiencyCor::mapInputsToDirections(
+    const std::vector<std::string> &flippers) {
   const std::vector<std::string> inputNames = getProperty(Prop::INPUT_WS);
   WorkspaceMap inputs;
   for (size_t i = 0; i < flippers.size(); ++i) {
-    auto ws = (API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(inputNames[i]));
+    auto ws =
+        (API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+            inputNames[i]));
     if (!ws) {
-      throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");
+      throw std::runtime_error(
+          "One of the input workspaces doesn't seem to be a MatrixWorkspace.");
     }
     const auto &f = flippers[i];
     if (f == Flippers::OnOn || f == Flippers::On) {
@@ -726,7 +845,8 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDi
     } else if (f == Flippers::OffOff || f == Flippers::Off) {
       inputs.ppWS = ws;
     } else {
-      throw std::runtime_error(std::string{"Unknown entry in "} + Prop::FLIPPERS);
+      throw std::runtime_error(std::string{"Unknown entry in "} +
+                               Prop::FLIPPERS);
     }
   }
   return inputs;
@@ -738,7 +858,8 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDi
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs,
+                                        const EfficiencyMap &efficiencies) {
   using namespace Mantid::DataObjects;
   inputs.pmWS = create<Workspace2D>(*inputs.mpWS);
   const auto &F1 = efficiencies.F1->y();
@@ -759,8 +880,10 @@ void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMa
       const auto i00 = I00[binIndex];
       const auto i10 = I10[binIndex];
       const auto i11 = I11[binIndex];
-      I01[binIndex] = (f1 * i00 * (-1. + 2. * p1) - (i00 - i10 + i11) * (p1 - p2) -
-                       f2 * (i00 - i10) * (-1. + 2. * p2)) / (-p1 + f1 * (-1. + 2. * p1) + p2);
+      I01[binIndex] =
+          (f1 * i00 * (-1. + 2. * p1) - (i00 - i10 + i11) * (p1 - p2) -
+           f2 * (i00 - i10) * (-1. + 2. * p2)) /
+          (-p1 + f1 * (-1. + 2. * p1) + p2);
       // The errors are left to zero.
     }
   }
@@ -772,7 +895,8 @@ void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMa
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationEfficiencyCor::solve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+void PolarizationEfficiencyCor::solve10(WorkspaceMap &inputs,
+                                        const EfficiencyMap &efficiencies) {
   inputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
   const auto &F1 = efficiencies.F1->y();
   const auto &F2 = efficiencies.F2->y();
@@ -792,8 +916,10 @@ void PolarizationEfficiencyCor::solve10(WorkspaceMap &inputs, const EfficiencyMa
       const auto i00 = I00[binIndex];
       const auto i01 = I01[binIndex];
       const auto i11 = I11[binIndex];
-      I10[binIndex] = (-f1 * (i00 - i01) * (-1. + 2. * p1) + (i00 - i01 + i11) * (p1 - p2) +
-                       f2 * i00 * (-1. + 2. * p2)) / (p1 - p2 + f2 * (-1. + 2. * p2));
+      I10[binIndex] =
+          (-f1 * (i00 - i01) * (-1. + 2. * p1) + (i00 - i01 + i11) * (p1 - p2) +
+           f2 * i00 * (-1. + 2. * p2)) /
+          (p1 - p2 + f2 * (-1. + 2. * p2));
       // The errors are left to zero.
     }
   }

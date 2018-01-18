@@ -64,13 +64,19 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   void checkConsistentNumberHistograms(const WorkspaceMap &inputs);
-  void checkConsistentX(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  void checkConsistentX(const WorkspaceMap &inputs,
+                        const EfficiencyMap &efficiencies);
   EfficiencyMap efficiencyFactors();
-  WorkspaceMap directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
-  WorkspaceMap analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
-  WorkspaceMap twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
-  WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
-  WorkspaceMap fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  WorkspaceMap directBeamCorrections(const WorkspaceMap &inputs,
+                                     const EfficiencyMap &efficiencies);
+  WorkspaceMap analyzerlessCorrections(const WorkspaceMap &inputs,
+                                       const EfficiencyMap &efficiencies);
+  WorkspaceMap twoInputCorrections(const WorkspaceMap &inputs,
+                                   const EfficiencyMap &efficiencies);
+  WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs,
+                                     const EfficiencyMap &efficiencies);
+  WorkspaceMap fullCorrections(const WorkspaceMap &inputs,
+                               const EfficiencyMap &efficiencies);
   API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs);
   WorkspaceMap mapInputsToDirections(const std::vector<std::string> &flippers);
   void solve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
