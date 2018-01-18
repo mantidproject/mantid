@@ -54,8 +54,8 @@ public:
 
   void addSpinnerFunctionGroup(
       const QString &groupName,
-      const std::vector<Mantid::API::IFunction_sptr> &functions,
-      int minimum = 0, int maximum = 10, int defaultValue = 0);
+      const std::vector<Mantid::API::IFunction_sptr> &functions, int minimum = 0,
+      int maximum = 10, int defaultValue = 0);
 
   void addComboBoxFunctionGroup(
       const QString &groupName,
@@ -117,7 +117,11 @@ protected slots:
 
   void intChanged(QtProperty *prop) override;
 
-  void clearCustomFunctions();
+  void clear() override;
+
+  void clearAllCustomFunctions();
+
+  void updatePlotGuess();
 
 signals:
   void customBoolChanged(const QString &settingName, bool value);
@@ -130,10 +134,13 @@ signals:
 
   void sequentialFitScheduled();
 
+protected:
+  void addWorkspaceIndexToBrowser() override {}
+
 private:
   void addCustomFunctionGroup(
       const QString &groupName,
-      const std::vector<Mantid::API::IFunction_sptr> &functionNames);
+      const std::vector<Mantid::API::IFunction_sptr> &functions);
 
   void addCustomFunctions(QtProperty *prop, const QString &groupName);
 
@@ -165,8 +172,7 @@ private:
   QHash<QtProperty *, QtProperty *> m_optionalProperties;
 
   std::string selectedBackground;
-  QHash<QString, std::vector<Mantid::API::IFunction_sptr>>
-      m_groupToFunctionList;
+  QHash<QString, std::vector<Mantid::API::IFunction_sptr>> m_groupToFunctionList;
 };
 
 } // namespace MantidWidgets
