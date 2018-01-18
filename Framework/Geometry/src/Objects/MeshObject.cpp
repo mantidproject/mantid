@@ -214,8 +214,8 @@ bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
   directions.push_back(V3D(0, 0, 1));
   directions.push_back(V3D(0, 1, 0));
   directions.push_back(V3D(1, 0, 0));
-  // We have to look in several directions in case point is on a face
-  // or edge parallel to first direction (or also second direction).
+  // We have to look in several directions in case a point is on a face
+  // or edge parallel to the first direction or also the second direction.
   for (size_t i = 0; i < directions.size(); ++i) {
     std::vector<V3D> intesectionPoints;
     std::vector<int> entryExitFlags;
@@ -268,7 +268,7 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
  * Get intersection points and their in out directions on the given ray
  * @param start :: Start point of ray
  * @param direction :: Direction of ray
- * @param intersectionPoints :: Intersection points not sorted
+ * @param intersectionPoints :: Intersection points (not sorted)
  * @param EntryExitFlags :: +1 ray enters -1 ray exits at corresponding point
 */
 void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
@@ -327,7 +327,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
   {
     intersection = start + direction * t;
 
-    // determine entry exit assuming anticlockwise trinagle view from outside
+    // determine entry exit assuming anticlockwise triangle view from outside
     V3D normalDirection = edge1.cross_prod(edge2);
     if (normalDirection.scalar_prod(direction) > 0.0) {
       entryExit = -1; //exit
@@ -337,8 +337,8 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V
     }
     return true;
   }
-  else // This means that intersection occurs on the line of the ray behind the ray.
-    return false;
+  // Here the intersection occurs on the line of the ray behind the ray.
+  return false;
 
 }
 
@@ -373,6 +373,7 @@ bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2, V3D
 * @return :: solid angle of triangle in Steradians.
 *
 * This duplicates code in CSGOjbect both need a place to be merged.
+* To aid this, this function has been defined as a non-member.
 */
 double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
   const V3D &observer) {
@@ -480,7 +481,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
 }
 
 /**
- * Calculate volume. May be approximate for a complicated shape.
+ * Calculate volume. 
  * @return The volume.
  */
 double MeshObject::volume() const {
