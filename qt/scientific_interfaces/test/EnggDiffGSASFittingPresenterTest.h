@@ -27,7 +27,7 @@ public:
         .WillOnce(Return(filename));
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(Return(true));
 
     const std::vector<std::pair<int, size_t>> runLabels(
         {std::make_pair(123, 1)});
