@@ -16,7 +16,10 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
+# 3rd party imports
+
+# local imports
 from mantidqt.utils.qt import import_qtlib
 
-
-MessageDisplay = import_qtlib('_widgetscore', 'mantidqt.widgets', 'MessageDisplay')
+# Import single-file editor from C++ wrapping
+CodeEditor = import_qtlib('_widgetscore', 'mantidqt.widgets', 'ScriptEditor')

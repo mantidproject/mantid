@@ -17,34 +17,28 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
+import unittest
 
 # third-party library imports
-from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
-from qtpy.QtWidgets import QVBoxLayout
 
-# local package imports
-from workbench.plugins.base import PluginWidget
+# local imports
+from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 
-class JupyterConsole(PluginWidget):
-    """Provides an in-process Jupyter Qt-based console"""
+@requires_qapp
+class MultiPythonFileInterpreterTest(unittest.TestCase):
 
-    def __init__(self, parent):
-        super(JupyterConsole, self).__init__(parent)
+    def test_default_contains_single_editor(self):
+        widget = MultiPythonFileInterpreter()
+        self.assertEqual(1, widget.editor_count)
 
-        # layout
-        self.console = InProcessJupyterConsole(self)
-        layout = QVBoxLayout()
-        layout.addWidget(self.console)
-        self.setLayout(layout)
+    def test_add_editor(self):
+        widget = MultiPythonFileInterpreter()
+        self.assertEqual(1, widget.editor_count)
+        widget.append_new_editor()
+        self.assertEqual(2, widget.editor_count)
 
-# ----------------- Plugin API --------------------
 
-    def get_plugin_title(self):
-        return "IPython"
-
-    def read_user_settings(self, _):
-        pass
-
-    def register_plugin(self, menu=None):
-        self.main.add_dockwidget(self)
+if __name__ == '__main__':
+    unittest.main()

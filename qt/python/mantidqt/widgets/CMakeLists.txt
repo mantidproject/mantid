@@ -30,11 +30,16 @@ mtd_add_sip_module (
     MantidQtWidgetsCommonQt4
     Qt4::QtCore
     Qt4::QtGui
+    Qt4::Qscintilla
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     API
   FOLDER Qt4
 )
+
+if ( ENABLE_WORKBENCH )
+  find_package ( QScintillaQt5 REQUIRED )
+endif()
 
 # Wrapper module linked against Qt5
 mtd_add_sip_module (
@@ -50,6 +55,7 @@ mtd_add_sip_module (
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
+    Qt5::Qscintilla
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     API

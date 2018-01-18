@@ -45,6 +45,18 @@ if ( ENABLE_WORKBENCH )
     mantidqt_resources
   )
 
+  if ( MSVC )
+    # Debug builds need libraries that are linked with MSVC debug runtime
+    add_custom_command (
+      TARGET mantidqt
+      POST_BUILD
+      COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND}
+        -E copy_directory ${PYTHON_DIR}/msvc-site-packages/debug/PyQt5 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt5
+      COMMENT "Copying debug PyQt5 to bin/Debug"
+    )
+endif ()
+
+
   ##########################################################################
   # Testing
   ##########################################################################
@@ -52,9 +64,20 @@ if ( ENABLE_WORKBENCH )
   # ctest targets
   set ( PYTHON_TEST_FILES
     mantidqt/test/test_import.py
-    mantidqt/utils/test/test_qt_utils.py
+
+    mantidqt/utils/test/test_async.py
     mantidqt/utils/test/test_modal_tester.py
+    mantidqt/utils/test/test_qt_utils.py
+    mantidqt/utils/test/test_writetosignal.py
+
     mantidqt/widgets/test/test_algorithm_dialog.py
+
+    mantidqt/widgets/codeeditor/test/test_codeeditor.py
+    mantidqt/widgets/codeeditor/test/test_errorformatter.py
+    mantidqt/widgets/codeeditor/test/test_execution.py
+    mantidqt/widgets/codeeditor/test/test_interpreter.py
+    mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
+
     mantidqt/widgets/test/test_algorithmselector.py
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py

@@ -16,7 +16,25 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.utils.qt import import_qtlib
+# std imports
+import traceback
 
 
-MessageDisplay = import_qtlib('_widgetscore', 'mantidqt.widgets', 'MessageDisplay')
+class ErrorFormatter(object):
+    """Formats errors to strings"""
+
+    def format(self, exc_type, exc_value, stack):
+        """
+        Produce a formatted error message for the given
+        error information.
+
+        :param exc_type: The type of exception
+        :param exc_value: An exception object of type exc_type
+        :param stack: An optional stack trace (assumed to be part or
+        all return by traceback.extract_tb
+        :return: A formatted string.
+        """
+        lines = traceback.format_exception(exc_type, exc_value, None)
+        if stack is not None:
+            lines.extend(traceback.format_list(stack))
+        return ''.join(lines)

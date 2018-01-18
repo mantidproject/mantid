@@ -135,7 +135,9 @@ def add_actions(target, actions):
     :raises ValueError: If one of the actions is not an instance of QMenu/QAction
     """
     for action in actions:
-        if isinstance(action, QMenu):
+        if action is None:
+            target.addSeparator()
+        elif isinstance(action, QMenu):
             target.addMenu(action)
         elif isinstance(action, QAction):
             target.addAction(action)
