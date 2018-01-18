@@ -170,8 +170,6 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updatePlotGuess()));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(plotGuess()));
 }
 
 /**
@@ -860,7 +858,7 @@ void IndirectFitAnalysisTab::executeSequentialFit() {
  * @return  The fit function defined in this indirect fit analysis tab.
  */
 IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
-  if (emptyModel())
+  if (!emptyModel())
     return m_fitPropertyBrowser->getFittingFunction();
   else
     return nullptr;
@@ -965,7 +963,6 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
  */
 void IndirectFitAnalysisTab::plotGuess(
     MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
-  previewPlot->removeSpectrum("Guess");
   auto guessFunction = fitFunction();
 
   if (inputWorkspace() && guessFunction) {
