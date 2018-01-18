@@ -182,6 +182,14 @@ class SaveReflectionsTest(unittest.TestCase):
         # Act
         self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
 
+    def test_save_invalid_format(self):
+        # Arrange
+        file_name = os.path.join(self._test_dir, "test_SHELX_modulated.hkl")
+        output_format = "InvalidFormatName"
+
+        # Act
+        self.assertRaises(ValueError, SaveReflections, InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
+
 
 def compare_file(reference_result, file_name):
     with open(reference_result, 'r') as ref_file:

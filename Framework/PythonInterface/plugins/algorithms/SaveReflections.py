@@ -84,8 +84,8 @@ class SaveReflections(PythonAlgorithm):
         elif output_format == "GSAS" or output_format == "SHELX":
             return SaveHKLFormat()
         else:
-            raise RuntimeError("Unexpected file format {}. Format should be one of {}."
-                               .format(output_format, ", ".join(SUPPORTED_FORMATS)))
+            raise ValueError("Unexpected file format {}. Format should be one of {}."
+                             .format(output_format, ", ".join(SUPPORTED_FORMATS)))
 
 # ------------------------------------------------------------------------------------------------------
 
@@ -160,7 +160,7 @@ class JanaFormat(object):
         :param workspace: the PeaksWorkspace to write to file.
         """
         if has_modulated_indexing(workspace):
-            raise RuntimeError("Cannot currently save modulated structures to Jana format")
+            raise NotImplementedError("Cannot currently save modulated structures to Jana format")
         self._cache_instrument_params(workspace)
         with open(file_name, 'w') as f_handle:
             self.write_header(f_handle, workspace)
@@ -252,7 +252,7 @@ class SaveHKLFormat(object):
         :param workspace: the PeaksWorkspace to write to file.
         """
         if has_modulated_indexing(workspace):
-            raise RuntimeError("Cannot currently save modulated structures to GSAS or SHELX formats")
+            raise NotImplementedError("Cannot currently save modulated structures to GSAS or SHELX formats")
         SaveHKL(Filename=file_name, InputWorkspace=workspace, OutputWorkspace=workspace.name())
 
 
