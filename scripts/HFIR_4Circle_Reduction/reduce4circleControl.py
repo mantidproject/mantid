@@ -30,6 +30,7 @@ from HFIR_4Circle_Reduction import fputility
 from HFIR_4Circle_Reduction import project_manager
 from HFIR_4Circle_Reduction import peak_integration_utility
 from HFIR_4Circle_Reduction import absorption
+from HFIR_4Circle_Reduction import process_mask
 
 import mantid
 import mantid.simpleapi as mantidsimple
@@ -110,8 +111,6 @@ class CWSCDReductionControl(object):
 
         # Record for merged scans
         self._mergedWSManager = list()
-        # Region of interest: key = (experiment, scan), value = 2-tuple of 2-tuple: ( (lx, ly), (ux, uy))
-        self._roiDict = dict()
 
         # About K-shift for output of integrated peak
         self._kVectorIndex = 1
@@ -129,6 +128,10 @@ class CWSCDReductionControl(object):
 
         # reference workspace for LoadMask
         self._refWorkspaceForMask = None
+        self._currMaskWSName = None   # current mask work space's name
+        self._maskWorkspaceDict = dict()
+        # Region of interest: key = (experiment, scan), value = 2-tuple of 2-tuple: ( (lx, ly), (ux, uy))
+        self._roiDict = dict()
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface", "4-Circle Reduction", False)
@@ -217,7 +220,7 @@ class CWSCDReductionControl(object):
     @staticmethod
     def apply_mask(exp_number, scan_number, pt_number):
         """
-        Apply mask on a Pt./run.
+        Apply mask on a Pt./run. by using a standard non-tag-based mask workspace's name
         Requirements:
         1. exp number, scan number, and pt number are integers
         2. mask workspace for this can must exist!
@@ -229,11 +232,14 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int)
+        assert isinstance(exp_number, int), 'Exp number {0} must be an integer but not a {1}' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(pt_number, int), 'Pt number {0} must be an integer but not a {1}' \
+                                           ''.format(pt_number, type(pt_number))
 
-        # get workspaces' names
+        # get workspaces' names by standard naming scheme
         raw_pt_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
         mask_ws_name = get_mask_ws_name(exp_number, scan_number)
 
@@ -501,17 +507,13 @@ class CWSCDReductionControl(object):
         A MaskWorkspace's name is exactly the same as the tag of the mask specified by user in
         reduction GUI.
 
-        :param exp_number:
-        :param scan_number:
+        :param exp_number: must be integer if not retrieve mask workspace
+        :param scan_number: must be integer if not retrieve mask workspace
         :param mask_tag: string as the tag of the mask.
         :param check_throw
         :return:
         """
         # Check
-        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
-                                            ''.format(exp_number, type(exp_number))
-        assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
-                                             ''.format(scan_number, type(scan_number))
         assert isinstance(mask_tag, str), 'Mask tag {0} ({1}) must be a string.'.format(mask_tag, type(mask_tag))
 
         # MaskWorkspace's name is same as mask's tag
@@ -519,15 +521,25 @@ class CWSCDReductionControl(object):
 
         if AnalysisDataService.doesExist(mask_ws_name) is False:
             # if the workspace does not exist, create a new mask workspace
-            assert mask_tag in self._roiDict, 'Mask tag |%s| does not exist in ROI dictionary!' % mask_tag
+            if exp_number is None:
+                raise RuntimeError('Experiment number is not given with assumption that mask tag {0} shall '
+                                   'be a workspace.'.format(mask_tag))
+
+            # check for experiment and scan number
+            assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                                ''.format(exp_number, type(exp_number))
+            assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
+                                                 ''.format(scan_number, type(scan_number))
+            if mask_tag not in self._roiDict:
+                raise RuntimeError('Mask tag |{0}| does not exist in ROI dictionary.'.format(mask_tag))
+
             region_of_interest = self._roiDict[mask_tag]
             ll = region_of_interest[0]
             ur = region_of_interest[1]
             self.generate_mask_workspace(exp_number, scan_number, ll, ur, mask_ws_name)
 
         if check_throw:
-            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
-                                                                 '' % mask_ws_name
+            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace {0} does not exist.'.format(mask_ws_name)
 
         return mask_ws_name
 
@@ -693,7 +705,7 @@ class CWSCDReductionControl(object):
         :param user_header:
         :param export_absorption:
         :param fullprof_file_name:
-        :return: 2-tuples. status and return object (file content or error message)
+        :return: 2-tuples. status and return object ((mixed) file content or error message)
         """
         # check
         assert isinstance(exp_number, int), 'Experiment number must be an integer.'
@@ -731,6 +743,7 @@ class CWSCDReductionControl(object):
         # get ub matrix
         ub_matrix = self.get_ub_matrix(exp_number)
 
+        mixed_content = None
         for algorithm_type in ['simple', 'mixed', 'gauss']:
             # set list of peaks for exporting
             peaks = list()
@@ -779,6 +792,8 @@ class CWSCDReductionControl(object):
                     user_header=user_header, wave_length=exp_wave_length,
                     k_vector_dict=k_shift_dict, peak_dict_list=peaks,
                     fp_file_name=this_file_name, with_absorption=export_absorption)
+                if algorithm_type == 'mixed':
+                    mixed_content = file_content
             except AssertionError as error:
                 return False, 'AssertionError: %s.' % str(error)
             except RuntimeError as error:
@@ -787,7 +802,7 @@ class CWSCDReductionControl(object):
             continue
         # END-FOR
 
-        return True, file_content
+        return True, mixed_content
 
     def export_md_data(self, exp_number, scan_number, base_file_name):
         """
@@ -1075,6 +1090,9 @@ class CWSCDReductionControl(object):
             # use given name
             mask_ws_name = str(mask_tag)
 
+        # record it
+        self._currMaskWSName = mask_ws_name
+
         if self._refWorkspaceForMask is None:
             return False, 'There is no reference workspace. Plot a Pt. first!'
         elif AnalysisDataService.doesExist(self._refWorkspaceForMask) is False:
@@ -1087,6 +1105,13 @@ class CWSCDReductionControl(object):
                                 OutputWorkspace=mask_ws_name)
 
         return True, mask_ws_name
+
+    def get_working_directory(self):
+        """
+        get working directory
+        :return:
+        """
+        return self._workDir
 
     def group_workspaces(self, exp_number, group_name):
         """
@@ -1698,6 +1723,35 @@ class CWSCDReductionControl(object):
             print('[INFO] Exp {0} Scan {1} has a matched calibrated record from pre-processed data.')
 
         return True
+
+    def load_mask_file(self, mask_file_name, mask_tag):
+        """
+        load an XML mask file to a workspace and parse to ROI that can be mapped pixels in 2D notion
+        :param mask_file_name:
+        :param mask_tag
+        :return: 2-tuple (lower left corner (size = 2), upper right corner (size = 2))
+                both of them are in order of row and column number (y and x respectively)
+        """
+        # load mask file
+        assert isinstance(mask_file_name, str), 'Mask file {0} shall be a string but not a {1}.' \
+                                                ''.format(mask_file_name, type(mask_file_name))
+        assert isinstance(mask_tag, str), 'Mask tag {0} shall be a string but not a {1}.' \
+                                          ''.format(mask_tag, type(mask_tag))
+        if os.path.exists(mask_file_name) is False:
+            raise RuntimeError('Mask file name {0} cannot be found.'.format(mask_tag))
+
+        # load
+        mantidsimple.LoadMask(Instrument='HB3A',
+                              InputFile=mask_file_name,
+                              OutputWorkspace=mask_tag)
+        # record
+        self._currMaskWSName = mask_tag
+        self._maskWorkspaceDict[mask_tag] = mask_tag
+
+        # find out the range of the ROI in (Low left, upper right) mode
+        roi_range = process_mask.get_region_of_interest(mask_tag)
+
+        return roi_range
 
     def load_preprocessed_scan(self, exp_number, scan_number, md_dir, output_ws_name):
         """ load preprocessed scan from hard disk
@@ -2526,6 +2580,41 @@ class CWSCDReductionControl(object):
         # example:  ret_value = self._roiDict[exp_number]
         self._roiDict[tag] = region_of_interest
 
+        # save another value
+        self._maskWorkspaceDict[tag] = self._currMaskWSName
+        print ('[DB...BAT] Line MASK/ROI workspace {0} to tag {1}'.format(self._currMaskWSName, tag))
+
+        return
+
+    def save_roi_to_file(self, exp_number, scan_number, tag, file_name):
+        """
+        save ROI to file
+        Notice: the saved file is a mask file which masks the detectors out of ROI
+        :param exp_number:
+        :param scan_number:
+        :param tag:
+        :param file_name:
+        :return:
+        """
+        # check input
+        # assert isinstance(exp_number, int), 'Experiment number {0} shall be an integer but not a {1}' \
+        #                                     ''.format(exp_number, type(exp_number))
+        # assert isinstance(scan_number, int), 'Scan number {0} shall be an integer but not a {1}' \
+        #                                      ''.format(scan_number, type(scan_number))
+        assert isinstance(tag, str), 'Tag {0} shall be a string but not a {1}'.format(tag, type(tag))
+        assert isinstance(file_name, str), 'File name {0} shall be a string but not a {1}' \
+                                           ''.format(file_name, type(file_name))
+
+        # get mask workspace name
+        if tag in self._maskWorkspaceDict:
+            mask_ws_name = self._maskWorkspaceDict[tag]
+        else:
+            mask_ws_name = self.check_generate_mask_workspace(exp_number=exp_number, scan_number=scan_number,
+                                                              mask_tag=tag, check_throw=True)
+
+        # save
+        mantidsimple.SaveMask(InputWorkspace=mask_ws_name, OutputFile=file_name)
+
         return
 
     def set_exp_number(self, exp_number):
@@ -2769,9 +2858,9 @@ class CWSCDReductionControl(object):
                 try:
                     mantidsimple.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
                 except RuntimeError as download_error:
-                    print('[ERROR] Unable to download scan %d from %s due to %s.' % (scan_number,spice_file_url,
-                                                                                     str(download_error)))
-                    break
+                    error_message += 'Unable to access/download scan {0} from {1} due to {2}.\n' \
+                                     ''.format(scan_number, spice_file_url, download_error)
+                    continue
             else:
                 spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
                 spice_file_name = os.path.join(self._dataDir, spice_file_name)
@@ -2830,7 +2919,7 @@ class CWSCDReductionControl(object):
                 wavelength = get_hb3a_wavelength(m1)
                 if wavelength is None:
                     q_range = 0.
-                    print('[ERROR] Scan number {0} has invalid m1 for wavelength.'.format(scan_number))
+                    error_message += 'Scan number {0} has invalid m1 for wavelength.\n'.format(scan_number)
                 else:
                     q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
 
