@@ -252,7 +252,7 @@ public slots:
   virtual void fit();
   virtual void sequentialFit();
   void undoFit();
-  void clear();
+  virtual void clear();
   void clearBrowser();
   void setPeakToolOn(bool on);
   void findPeaks();
@@ -393,6 +393,8 @@ protected:
   void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
+  /// Adds the workspace index property to the browser.
+  virtual void addWorkspaceIndexToBrowser();
 
   /// Create a double property and set some settings
   QtProperty *

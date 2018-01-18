@@ -254,7 +254,7 @@ void FitPropertyBrowser::init() {
 
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
-
+  
   initLayout(w);
 }
 
@@ -2900,13 +2900,7 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   // if it is a MatrixWorkspace insert WorkspaceIndex
   auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
   if (mws) {
-    if (m_browser->isItemVisible(m_settingsGroup)) {
-      if (!m_settingsGroup->property()->subProperties().contains(
-              m_workspaceIndex)) {
-        m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
-                                                       m_workspace);
-      }
-    }
+    addWorkspaceIndexToBrowser();
     auto isHistogram = mws->isHistogramData();
     m_evaluationType->setEnabled(isHistogram);
     if (isHistogram) {
@@ -2972,6 +2966,16 @@ void FitPropertyBrowser::setWorkspaceProperties() {
       m_columnManager->setValue(m_errColumn, columns.indexOf(errName));
     }
     return;
+  }
+}
+
+void FitPropertyBrowser::addWorkspaceIndexToBrowser() {
+  if (m_browser->isItemVisible(m_settingsGroup)) {
+    if (!m_settingsGroup->property()->subProperties().contains(
+      m_workspaceIndex)) {
+      m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
+        m_workspace);
+    }
   }
 }
 
