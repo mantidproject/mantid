@@ -391,36 +391,54 @@ public:
     TS_ASSERT_EQUALS(neutronicInst.get(),
                      ws->getInstrument()->baseInstrument().get());
     // Check the neutronic positions
-    const auto &detectorInfo = ws->detectorInfo();
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1000)),
-                     V3D(2, 2, 0));
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1001)),
-                     V3D(2, 3, 0));
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1002)),
-                     V3D(3, 2, 0));
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1003)),
-                     V3D(3, 3, 0));
+    const auto &neutronicDetectorInfo = ws->detectorInfo();
+    const auto &physicalDetectorInfo = ws->detectorInfoPhysical();
+    TS_ASSERT_EQUALS(
+        neutronicDetectorInfo.position(neutronicDetectorInfo.indexOf(1000)),
+        V3D(2, 2, 0));
+    TS_ASSERT_EQUALS(
+        neutronicDetectorInfo.position(neutronicDetectorInfo.indexOf(1001)),
+        V3D(2, 3, 0));
+    TS_ASSERT_EQUALS(
+        neutronicDetectorInfo.position(neutronicDetectorInfo.indexOf(1002)),
+        V3D(3, 2, 0));
+    TS_ASSERT_EQUALS(
+        neutronicDetectorInfo.position(neutronicDetectorInfo.indexOf(1003)),
+        V3D(3, 3, 0));
     // Note that one of the physical pixels doesn't exist in the neutronic
     // space
-    TS_ASSERT_THROWS(detectorInfo.indexOf(1004), std::out_of_range);
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1005)),
-                     V3D(4, 3, 0));
+    TS_ASSERT_THROWS(neutronicDetectorInfo.indexOf(1004), std::out_of_range);
+    // But it is in the physical space.
+    TS_ASSERT_THROWS_NOTHING(physicalDetectorInfo.indexOf(1004));
+    TS_ASSERT_EQUALS(
+        neutronicDetectorInfo.position(neutronicDetectorInfo.indexOf(1005)),
+        V3D(4, 3, 0));
 
     // Check that the first 2 detectors share the same shape in the physical
     // instrument...
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
-                     physicalInst->getDetector(1001)->shape())
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo.detector(physicalDetectorInfo.indexOf(1000))
+            .shape(),
+        physicalDetectorInfo.detector(physicalDetectorInfo.indexOf(1001))
+            .shape())
     // ...but not in the neutronic instrument
-    TS_ASSERT_DIFFERS(detectorInfo.detector(detectorInfo.indexOf(1000)).shape(),
-                      neutronicInst->getDetector(1001)->shape())
+    TS_ASSERT_DIFFERS(
+        neutronicDetectorInfo.detector(neutronicDetectorInfo.indexOf(1000))
+            .shape(),
+        neutronicDetectorInfo.detector(neutronicDetectorInfo.indexOf(1001))
+            .shape())
     // Also, the same shape is shared between the corresponding '1000'
     // detectors
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
-                     detectorInfo.detector(detectorInfo.indexOf(1000)).shape())
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo.detector(physicalDetectorInfo.indexOf(1000))
+            .shape(),
+        neutronicDetectorInfo.detector(neutronicDetectorInfo.indexOf(1000))
+            .shape())
 
     // Check the monitor is in the same place in each instrument
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1)->getPos(),
-                     detectorInfo.position(detectorInfo.indexOf(1)));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1)),
+        neutronicDetectorInfo.position(neutronicDetectorInfo.indexOf(1)));
     // ...but is not the same object
     TS_ASSERT_DIFFERS(physicalInst->getDetector(1).get(),
                       neutronicInst->getDetector(1).get());
@@ -429,8 +447,9 @@ public:
     // positions from DetectorInfo.
     auto physInstFromWS = ws->getInstrument()->getPhysicalInstrument();
     TS_ASSERT(physInstFromWS->isParametrized());
-    TS_ASSERT_DIFFERS(physInstFromWS->getDetector(1003)->getPos(),
-                      detectorInfo.position(detectorInfo.indexOf(1003)));
+    TS_ASSERT_DIFFERS(
+        physInstFromWS->getDetector(1003)->getPos(),
+        neutronicDetectorInfo.position(neutronicDetectorInfo.indexOf(1003)));
     TS_ASSERT_EQUALS(physInstFromWS->getDetector(1000)->getPos(), V3D(0, 0, 0));
     TS_ASSERT_EQUALS(physInstFromWS->getDetector(1001)->getPos(), V3D(0, 1, 0));
     TS_ASSERT_EQUALS(physInstFromWS->getDetector(1002)->getPos(), V3D(1, 0, 0));
