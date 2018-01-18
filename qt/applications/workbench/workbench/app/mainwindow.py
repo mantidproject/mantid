@@ -121,9 +121,9 @@ class MainWindow(QMainWindow):
         self.maximized_flag = None
         # widgets
         self.messagedisplay = None
-        #self.ipythonconsole = None
+        self.ipythonconsole = None
         self.workspacewidget = None
-        #self.editor = None
+        self.editor = None
         self.widgets = []
 
         # Menus
@@ -152,17 +152,17 @@ class MainWindow(QMainWindow):
         self.messagedisplay.register_plugin()
         self.widgets.append(self.messagedisplay)
 
-        #self.set_splash("Loading IPython console")
-        #from workbench.plugins.jupyterconsole import JupyterConsole
-        #self.ipythonconsole = JupyterConsole(self)
-        #self.ipythonconsole.register_plugin()
-        #self.widgets.append(self.ipythonconsole)
+        self.set_splash("Loading IPython console")
+        from workbench.plugins.jupyterconsole import JupyterConsole
+        self.ipythonconsole = JupyterConsole(self)
+        self.ipythonconsole.register_plugin()
+        self.widgets.append(self.ipythonconsole)
 
-        #self.set_splash("Loading code editing widget")
-        #from workbench.plugins.editor import MultiFileEditor
-        #self.editor = MultiFileEditor(self)
-        #self.editor.register_plugin()
-        #self.widgets.append(self.editor)
+        self.set_splash("Loading code editing widget")
+        from workbench.plugins.editor import MultiFileEditor
+        self.editor = MultiFileEditor(self)
+        self.editor.register_plugin()
+        self.widgets.append(self.editor)
 
         self.set_splash("Loading Workspace Widget")
         from workbench.plugins.workspacewidget import WorkspaceWidget
@@ -305,20 +305,24 @@ class MainWindow(QMainWindow):
 
         # layout definition
         logmessages = self.messagedisplay
-        #ipython = self.ipythonconsole
+        ipython = self.ipythonconsole
         workspacewidget = self.workspacewidget
-        #editor = self.editor
+        editor = self.editor
         default_layout = {
             'widgets': [
                 # column 0
                 [[workspacewidget]],
                 # column 1
+                [[editor, ipython]],
+                # column 2
                 [[logmessages]]
             ],
             'width-fraction': [0.25,    # column 0 width
-                               0.75],   # column 1 width
-            'height-fraction': [[0.5, 0.5],  # column 0 row heights
-                                [1.0]]  # column 1 row heights
+                               0.50,    # column 1 width
+                               0.25],   # column 2 width
+            'height-fraction': [[1.0],  # column 0 row heights
+                                [1.0],  # column 1 row heights
+                                [1.0]]  # column 2 row heights
         }
 
         with widget_updates_disabled(self):
