@@ -178,6 +178,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_save_roi)
         self.connect(self.ui.pushButton_integrateROI, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_roi)
+        self.connect(self.ui.pushButton_exportMaskToFile, QtCore.SIGNAL('clicked()'),
+                     self.do_export_mask)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_addUBScans, QtCore.SIGNAL('clicked()'),
@@ -1206,6 +1208,33 @@ class MainWindow(QtGui.QMainWindow):
         vec_q = (q_x, q_y, q_z)
 
         return hkl, vec_q
+
+    def do_export_mask(self):
+        """
+        export selected mask to file
+        :return:
+        """
+        # get selected mask name
+        mask_name = str(self.ui.comboBox_viewRawDataMasks.currentText())
+        if mask_name == 'No Mask':
+            self.pop_one_button_dialog('No mask is selected.  Saving is aborted.')
+            return
+
+        # get the output file name
+        roi_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Output mask/ROI file name',
+                                                              self._myControl._workDir,
+                                                              'XML Files (*.xml);;All Files (*.*)'))
+        if len(roi_file_name) == 0:
+            return
+
+        # other information
+
+
+        # save file
+        self._myControl.save_roi_to_file(None, None, mask_name, roi_file_name)
+
+        return
+
 
     def do_export_selected_peaks_to_integrate(self):
         """
@@ -2290,7 +2319,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get the experiment and scan value
         status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
-        assert status
+        if not status:
+            raise RuntimeError('Experiment number and Scan number must be given!')
         exp_number = par_val_list[0]
         scan_number = par_val_list[1]
 
@@ -2310,6 +2340,8 @@ class MainWindow(QtGui.QMainWindow):
         # set it to combo-box
         self.ui.comboBox_maskNames1.addItem(roi_name)
         self.ui.comboBox_maskNames2.addItem(roi_name)
+        self.ui.comboBox_maskNamesSurvey.addItem(roi_name)
+        self.ui.comboBox_viewRawDataMasks.addItem(roi_name)
 
         return
 
@@ -3335,7 +3367,6 @@ class MainWindow(QtGui.QMainWindow):
         # set the experiment
         self._myControl.set_local_data_dir(str(self.ui.lineEdit_localSpiceDir.text()))
         self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
-        self._myControl.set_server_url(str(self.ui.lineEdit_url.text()))
 
         self._show_message('Session {0} has been loaded.'.format(filename))
 
@@ -3429,15 +3460,26 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get the XML file to load
         file_filter = 'XML Files (*.xml);;All Files (*)'
-        mask_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Open Masking File', self._homeDir,
+        mask_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Open Masking File',
+                                                               self._myControl.get_working_directory(),
                                                                file_filter))
 
-        # call controller to load mask XML
-        self._controller.load_mask_file(mask_file_name)
+        # generate a mask name and load by calling controller to load mask XML
+        roi_name = os.path.basename(mask_file_name).split('.')[0]
+        lower_left_corner, upper_right_corner = self._myControl.load_mask_file(mask_file_name, roi_name)
 
-        # generate a mask name
-        mask_name = 'User'
-        raise NotImplementedError('Loading mask with name {0} has not been implemented.'.format(mask_name))
+        # set UI
+        self.ui.comboBox_maskNames1.addItem(roi_name)
+        self.ui.comboBox_maskNames2.addItem(roi_name)
+        self.ui.comboBox_maskNamesSurvey.addItem(roi_name)
+        self.ui.comboBox_maskNamesSurvey.setCurrentIndex(self.ui.comboBox_maskNames1.count() - 1)
+        self.ui.comboBox_viewRawDataMasks.addItem(roi_name)
+        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count() - 1)
+
+        # plot ROI on 2D plot
+        self.ui.graphicsView_detector2dPlot.set_roi(lower_left_corner, upper_right_corner)
+
+        return
 
     def menu_quit(self):
         """
@@ -3609,6 +3651,12 @@ class MainWindow(QtGui.QMainWindow):
         last_1_project_path = str(self.ui.label_last1Path.text())
         settings.setValue('last1path', last_1_project_path)
 
+        # survey
+        survey_start = str(self.ui.lineEdit_surveyStartPt.text())
+        survey_stop = str(self.ui.lineEdit_surveyEndPt.text())
+        settings.setValue('survey_start_scan', survey_start)
+        settings.setValue('survey_stop_scan', survey_stop)
+
         return
 
     def load_settings(self):
@@ -3659,6 +3707,12 @@ class MainWindow(QtGui.QMainWindow):
             # last project
             last_1_project_path = str(settings.value('last1path'))
             self.ui.label_last1Path.setText(last_1_project_path)
+
+            # survey
+            survey_start = str(settings.value('survey_start_scan'))
+            self.ui.lineEdit_surveyStartPt.setText(survey_start)
+            survey_stop = str(settings.value('survey_stop_scan'))
+            self.ui.lineEdit_surveyEndPt.text(survey_stop)
 
         except TypeError as err:
             self.pop_one_button_dialog(str(err))

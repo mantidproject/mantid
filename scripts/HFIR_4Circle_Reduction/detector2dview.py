@@ -331,6 +331,30 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return
 
+    def set_roi(self, lower_left_corner, upper_right_corner, plot=True):
+        """
+        set ROI to class variables
+        :param lower_left_corner:
+        :param upper_right_corner:
+        :param plot: if True, then plot ROI
+        :return:
+        """
+        # check inputs
+        assert len(lower_left_corner) == 2, 'Lower left corner row/col coordinate {0} must have 2 items.' \
+                                            ''.format(lower_left_corner)
+        assert len(upper_right_corner) == 2, 'Upper right corner row/col coordinate {0} must have 2 items.' \
+                                             ''.format(upper_right_corner)
+
+        # set lower left corner and upper right corner
+        self._roiStart = lower_left_corner
+        self._roiEnd = upper_right_corner
+
+        # plot
+        if plot:
+            self.plot_roi()
+
+        return
+
     def update_roi_poly(self, cursor_x, cursor_y):
         """Update region of interest.  It is to
         (1) remove the original polygon
