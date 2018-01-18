@@ -77,7 +77,6 @@ class RunTabPresenter(object):
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
         self._facility = facility
-
         # Logger
         self.sans_logger = Logger("SANS")
         # Name of grpah to output to

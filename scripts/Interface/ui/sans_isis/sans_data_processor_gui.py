@@ -27,6 +27,8 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, ge
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file,
                                        get_instrument_from_gui_selection, get_string_for_gui_from_instrument)
 
+from sans.common.general_functions import get_instrument
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Gui Classes
@@ -260,11 +262,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.data_processor_table.accept(self._main_presenter)
 
         # Set the list of available instruments in the widget and the default instrument
-        instrument_name = SANSInstrument.to_string(self.instrument)
+        instrument_name = config.getString("default.instrument")#SANSInstrument.to_string(self.instrument)
+        instrument_name_enum = get_instrument(instrument_name)
         self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_name)
 
-        if instrument_name:
-            self._set_mantid_instrument(instrument_name)
+        if instrument_name_enum:
+            self.set_instrument_settings(instrument_name_enum)
+
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
         self.data_processor_table.processButtonClicked.connect(self._processed_clicked)

@@ -12,7 +12,7 @@ from sans.common.enums import (DetectorType, SANSFacility, IntegralEnum)
 from sans.user_file.state_director import StateDirectorISIS
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
-from sans.gui_logic.models.diagnostic_page_model import run_integral
+from sans.gui_logic.models.diagnostics_page_model import run_integral
 
 
 # -----------------------------------------------
@@ -69,7 +69,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         if os.path.exists(f_name):
             os.remove(f_name)
 
-    def test_that_reduction_core_evaluates_LAB(self):
+    def test_that_produces_correct_workspace_for_SANS2D(self):
         # Arrange
         # Build the data information
         data_builder = get_data_builder(SANSFacility.ISIS)
@@ -95,10 +95,10 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         state = user_file_director.construct()
 
         # Act
-        output_workspace = run_integral('5-11', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
+        output_workspace = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
 
         # Evaluate it up to a defined point
-        reference_file_name = "SANS2D_ws_D20_reference.nxs"
+        reference_file_name = "SANS2D_ws_diagnostic_reference.nxs"
         self._compare_workspace(output_workspace, reference_file_name)
 
 
