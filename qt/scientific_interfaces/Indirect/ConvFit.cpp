@@ -38,6 +38,7 @@ void ConvFit::setup() {
   // Create Property Managers
   setMinimumSpectrum(0);
   setMaximumSpectrum(0);
+  setDefaultPeakType("Lorentzian");
 
   auto fitRangeSelector = m_uiForm->ppPlotTop->addRangeSelector("ConvFitRange");
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
@@ -119,7 +120,7 @@ void ConvFit::setup() {
   m_properties["InstrumentResolution"] =
       m_dblManager->addProperty("InstrumentResolution");
 
-  enablePlotGuess();
+  disablePlotGuess();
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -170,6 +171,11 @@ void ConvFit::run() {
   }
 }
 
+bool ConvFit::canPlotGuess() const {
+  return m_uiForm->dsResInput->isValid() &&
+         IndirectFitAnalysisTab::canPlotGuess();
+}
+
 void ConvFit::addFunctionGroupToComboBox(
     const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   m_fitTypeToFunction[groupName] = functions[0]->name();
@@ -185,8 +191,6 @@ IFunction_sptr ConvFit::fitFunction() const {
         AnalysisDataService::Instance().doesExist("__ConvFit_Resolution")))
     return CompositeFunction_sptr(new CompositeFunction);
 
-  int backIndex = backgroundIndex();
-
   auto backgroundFunction = background();
   if (backgroundFunction)
     comp->addFunction(backgroundFunction);
@@ -198,7 +202,7 @@ IFunction_sptr ConvFit::fitFunction() const {
   auto compositeModel =
       boost::dynamic_pointer_cast<CompositeFunction>(modelFunction);
 
-  if (m_usedTemperature) {
+  if (boolSettingValue("UseTempCorrection")) {
     if (compositeModel)
       modelFunction = addTemperatureCorrection(compositeModel);
     else
@@ -223,7 +227,7 @@ ConvFit::functionNameChanges(IFunction_sptr model) const {
 
   QString prefixSuffix = "";
 
-  if (m_usedTemperature)
+  if (boolSettingValue("UseTempCorrection"))
     prefixSuffix = "f1.";
 
   if (compositeModel) {
@@ -602,6 +606,7 @@ void ConvFit::extendResolutionWorkspace() {
       appendAlg->execute();
     }
   }
+  updatePlotGuess();
 }
 
 /**
@@ -653,7 +658,7 @@ ConvFit::appendAlgorithm(MatrixWorkspace_sptr leftWS,
 IFunction_sptr ConvFit::createTemperatureCorrection() const {
   // create temperature correction function to multiply with the lorentzians
   IFunction_sptr tempFunc;
-  QString temperature = QString::number(m_temperature);
+  QString temperature = QString::number(doubleSettingValue("TempCorrection"));
 
   // create user function for the exponential correction
   // (x*temp) / 1-exp(-(x*temp))
@@ -823,7 +828,6 @@ void ConvFit::disablePlotGuess() {
 void ConvFit::enablePlotGuess() {
   m_uiForm->ckPlotGuess->setEnabled(true);
   m_uiForm->ckPlotGuess->blockSignals(false);
-  plotGuess();
 }
 
 /**
@@ -832,8 +836,8 @@ void ConvFit::enablePlotGuess() {
 void ConvFit::plotGuess() {
 
   // Do nothing if there is not a sample and resolution
-  if (m_uiForm->dsResInput->isValid() && m_uiForm->ckPlotGuess->isChecked()) {
-    extendResolutionWorkspace();
+  if (m_uiForm->ckPlotGuess->isEnabled() &&
+      m_uiForm->ckPlotGuess->isChecked()) {
     IndirectFitAnalysisTab::plotGuess(m_uiForm->ppPlotTop);
   } else {
     m_uiForm->ppPlotTop->removeSpectrum("Guess");

@@ -17,6 +17,8 @@ public:
 
   Mantid::API::IFunction_sptr fitFunction() const override;
 
+  bool canPlotGuess() const override;
+
 protected:
   // Used in auto generating defaults for parameters
   QHash<QString, double> createDefaultValues() const override;
