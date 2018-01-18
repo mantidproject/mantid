@@ -44,7 +44,7 @@ public:
 
   MOCK_METHOD0(resetCanvas, void());
 
-  MOCK_METHOD0(showRefinementResultsSelected, bool());
+  MOCK_CONST_METHOD0(showRefinementResultsSelected, bool());
 
   MOCK_METHOD1(updateRunList,
                void(const std::vector<std::pair<int, size_t>> &runLabels));
