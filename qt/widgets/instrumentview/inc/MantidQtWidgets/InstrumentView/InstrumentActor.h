@@ -215,11 +215,13 @@ private:
   calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace);
   /// Sum the counts in detectors if the workspace has equal bins for all
   /// spectra
-  void sumDetectorsUniform(const std::vector<size_t> &dets, std::vector<double> &x,
+  void sumDetectorsUniform(const std::vector<size_t> &dets,
+                           std::vector<double> &x,
                            std::vector<double> &y) const;
   /// Sum the counts in detectors if the workspace is ragged
-  void sumDetectorsRagged(const std::vector<size_t> &dets, std::vector<double> &x,
-                          std::vector<double> &y, size_t size) const;
+  void sumDetectorsRagged(const std::vector<size_t> &dets,
+                          std::vector<double> &x, std::vector<double> &y,
+                          size_t size) const;
 
   void setupPickColors();
 
@@ -258,22 +260,13 @@ private:
   bool m_volumeRender;
   /// Color map scale type: linear or log
   GraphOptions::ScaleType m_scaleType;
-  /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor
-  /// constructors
-  mutable std::vector<Mantid::detid_t> m_detIDs;
-  /// All non-detector component IDs in order of pickIDs. For any index i a
-  /// pickID of the component
-  /// is m_detIDs.size() + i.
-  mutable std::vector<Mantid::Geometry::ComponentID> m_nonDetIDs;
-
-  /// All detector positions, in order of pickIDs, populated by Obj..Actor
-  /// constructors
-  mutable std::vector<Mantid::Kernel::V3D> m_detPos;
   /// Position to refer to when detector not found
   const Mantid::Kernel::V3D m_defaultPos;
 
   /// Colors in order of component info
-  mutable std::vector<GLColor> m_colors;
+  std::vector<GLColor> m_colors;
+  std::vector<size_t> m_monitors;
+  std::vector<size_t> m_components;
   /// Colour of a masked detector
   GLColor m_maskedColor;
   /// Colour of a "failed" detector

@@ -45,6 +45,8 @@ size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
   index += b - 1;
   return index;
 }
+
+GLColor defaultDetectorColor() { return GLColor(200, 200, 200, 1); }
 } // namespace
 
 double InstrumentActor::m_tolerance = 0.00001;
@@ -81,6 +83,13 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
         "InstrumentActor passed a workspace that isn't a MatrixWorkspace");
 
   const auto &componentInfo = sharedWorkspace->componentInfo();
+  const auto &detectorInfo = sharedWorkspace->detectorInfo();
+  for (size_t i = 0; i < componentInfo.size(); ++i) {
+    if (!componentInfo.isDetector(i))
+      m_components.push_back(i);
+    else if (detectorInfo.isMonitor(i))
+      m_monitors.push_back(i);
+  }
 
   m_isCompVisible.assign(componentInfo.size(), true);
   setupPickColors();
@@ -343,15 +352,7 @@ void InstrumentActor::clearMasks() {
 }
 
 std::vector<size_t> InstrumentActor::getMonitors() const {
-  const auto &detectorInfo = getDetectorInfo();
-  std::vector<size_t> monitors;
-
-  for (size_t i = 0; i < detectorInfo.size(); i++) {
-    if (detectorInfo.isMonitor(i))
-      monitors.push_back(i);
-  }
-
-  return monitors;
+  return m_monitors;
 }
 
 Instrument_const_sptr InstrumentActor::getInstrument() const {
@@ -647,15 +648,22 @@ void InstrumentActor::resetColors() {
 
       if (detectorInfo.isMasked(detIndex) || masked) {
         m_colors[detIndex] = m_maskedColor;
+        continue;
       } else {
         auto integratedValue = m_specIntegrs[wi];
-        color = m_colorMap.rgb(qwtInterval, integratedValue);
+        auto color = m_colorMap.rgb(qwtInterval, integratedValue);
         m_colors[detIndex] = GLColor(
             qRed(color), qGreen(color), qBlue(color),
             static_cast<int>(255 * (integratedValue / m_DataMaxScaleValue)));
+        continue;
       }
+      continue;
     }
   }
+
+  for (auto comp : m_components) 
+    m_colors[comp] = defaultDetectorColor();
+  
   setupPickColors();
   invalidateDisplayLists();
   emit colorMapChanged();
@@ -1136,12 +1144,11 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
   auto workspace = getWorkspace();
   calculateIntegratedSpectra(*workspace);
-  auto monitors = getMonitors();
   std::vector<size_t> monitorIndices;
 
-  monitorIndices.reserve(monitors.size());
-  for (auto monitor : monitors)
-	  monitorIndices.push_back(getWorkspaceIndex(monitor));
+  monitorIndices.reserve(m_monitors.size());
+  for (auto monitor : m_monitors)
+    monitorIndices.push_back(getWorkspaceIndex(monitor));
 
   // check that there is at least 1 non-monitor spectrum
   if (monitorIndices.size() == m_specIntegrs.size()) {
@@ -1158,30 +1165,40 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
     m_DataMinValue = DBL_MAX;
     m_DataMaxValue = -DBL_MAX;
 
-    // Now we need to convert to a vector where each entry is the sum for the
-    // detector ID at that spot (in integrated_values).
-    for (size_t i = 0; i < m_specIntegrs.size(); ++i) {
-      // skip the monitors
-      if (std::find(monitorIndices.begin(), monitorIndices.end(), i) !=
-          monitorIndices.end()) {
-        continue;
-      }
-      double sum = m_specIntegrs[i];
-      if (!std::isfinite(sum)) {
-        throw std::runtime_error(
-            "The workspace contains values that cannot be displayed (infinite "
-            "or NaN).\n"
-            "Please run ReplaceSpecialValues algorithm for correction.");
-      }
-      if (sum < m_DataMinValue) {
-        m_DataMinValue = sum;
-      }
-      if (sum > m_DataMaxValue) {
-        m_DataMaxValue = sum;
-      }
-      if (sum > 0 && sum < m_DataPositiveMinValue) {
-        m_DataPositiveMinValue = sum;
-      }
+    if (std::any_of(m_specIntegrs.begin(), m_specIntegrs.end(),
+                    [](double val) { return !std::isfinite(val); }))
+      throw std::runtime_error(
+          "The workspace contains values that cannot be displayed (infinite "
+          "or NaN).\n"
+          "Please run ReplaceSpecialValues algorithm for correction.");
+
+    std::vector<double> copy;
+    copy.reserve(m_specIntegrs.size());
+    size_t i = 0;
+    const auto &spectrumInfo = workspace->spectrumInfo();
+
+    //Ignore monitors indices if multiple detectors aren't grouped.
+    std::remove_copy_if(
+        m_specIntegrs.cbegin(), m_specIntegrs.cend(), std::back_inserter(copy),
+        [&spectrumInfo, &monitorIndices, &i](double val) {
+          auto ret = spectrumInfo.spectrumDefinition(i).size() == 0 &&
+                     std::find(monitorIndices.begin(), monitorIndices.end(),
+                               i) != monitorIndices.end();
+          ++i;
+          return ret;
+        });
+    
+    copy.shrink_to_fit();
+
+    auto res = std::minmax_element(copy.cbegin(), copy.cend());
+    m_DataMinValue = *res.first;
+    m_DataMaxValue = *res.second;
+    if (m_DataMinValue > 0)
+      m_DataPositiveMinValue = m_DataMinValue;
+    else {
+      auto lb = std::lower_bound(copy.cbegin(), copy.cend(), 0);
+      if (lb != copy.cend())
+        m_DataPositiveMinValue = *lb;
     }
   }
 
