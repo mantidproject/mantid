@@ -27,7 +27,7 @@ def find_bases(qs, tolerance):
     indicies = []
     for q in offsets:
         added_to_pool = False
-        for key, pool in pools.iteritems():
+        for key, pool in pools.items():
             result = np.absolute(q - round_nearest(q, pool))
             if np.all(result <= tolerance):
                 added_to_pool = True
