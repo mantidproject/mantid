@@ -24,6 +24,8 @@ import atexit
 import importlib
 import sys
 
+from Tkinter import Tk
+
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
@@ -306,6 +308,10 @@ class MainWindow(QMainWindow):
                 self.maximized_flag = is_maximized
             elif is_maximized:
                 self.setWindowState(Qt.WindowMaximized)
+                # Use Tkinter to find full screen size if maximized
+                # This is required as self.size before initial show returns the size of the splash screen
+                self.window_size = QSize(Tk().winfo_screenwidth(), Tk().winfo_screenheight())
+
 
     def setup_default_layouts(self, window_settings):
         """Set or reset the layouts of the child widgets"""
