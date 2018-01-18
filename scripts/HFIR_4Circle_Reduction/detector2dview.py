@@ -203,6 +203,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         Remove the rectangular for region of interest
         :return:
         """
+        # FIXME ASAP - Use triangular like Py4Circle???
         if self._myPolygon is not None:
             # polygon is of type matplotlib.patches.Polygon
             self._myPolygon.remove()

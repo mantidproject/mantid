@@ -1883,6 +1883,9 @@ class MainWindow(QtGui.QMainWindow):
         """ Mask a Pt and re-plot
         :return:
         """
+        # TODO FIXME ASAP - This breaks if trying to mask detector with a loaded ROI/Mask workspace
+        # TODO Solution : Read tag and then find out whether there is already a workspace assigned to it!
+
         # get experiment, scan
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run,
                                                         self.ui.lineEdit_rawDataPtNo],
@@ -2342,6 +2345,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_maskNames2.addItem(roi_name)
         self.ui.comboBox_maskNamesSurvey.addItem(roi_name)
         self.ui.comboBox_viewRawDataMasks.addItem(roi_name)
+        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count()-1)
 
         return
 
@@ -3712,7 +3716,7 @@ class MainWindow(QtGui.QMainWindow):
             survey_start = str(settings.value('survey_start_scan'))
             self.ui.lineEdit_surveyStartPt.setText(survey_start)
             survey_stop = str(settings.value('survey_stop_scan'))
-            self.ui.lineEdit_surveyEndPt.text(survey_stop)
+            self.ui.lineEdit_surveyEndPt.setText(survey_stop)
 
         except TypeError as err:
             self.pop_one_button_dialog(str(err))

@@ -2608,6 +2608,9 @@ class CWSCDReductionControl(object):
         # get mask workspace name
         if tag in self._maskWorkspaceDict:
             mask_ws_name = self._maskWorkspaceDict[tag]
+            if AnalysisDataService.doesExist(mask_ws_name) is None:
+                raise RuntimeError('Mask workspace {0} of tag {1} does not exist in ADS.'
+                                   ''.format(mask_ws_name, tag))
         else:
             mask_ws_name = self.check_generate_mask_workspace(exp_number=exp_number, scan_number=scan_number,
                                                               mask_tag=tag, check_throw=True)
