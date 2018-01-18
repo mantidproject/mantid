@@ -33,8 +33,6 @@ class FractionIndexingTests(unittest.TestCase):
 
         _, ndim, bases = indexing.find_bases(qs, tolerance=.02)
 
-        print bases
-
         self.assertEqual(ndim, 2)
         npt.assert_array_equal(bases[1], qs[0])
         npt.assert_array_equal(bases[2], qs[1])
