@@ -36,6 +36,13 @@ class ProgressObserver(AlgorithmObserver):
             self.message = None
         self.model.update_progress(self)
 
+    def errorHandle(self, message):
+        """
+        Error handling including cancelling algorithm
+        :param message: Error message (unused)
+        """
+        self.model.remove_observer(self)
+
 
 class AlgorithmProgressModel(AlgorithmObserver):
     """
@@ -57,12 +64,18 @@ class AlgorithmProgressModel(AlgorithmObserver):
             del self.presenters[index]
 
     def startingHandle(self, alg):
+        """
+        Called when a new algorithm starts. Registers a new ProgressObserver for
+        this algorithm.
+        :param alg: The new algorithm.
+        """
         progress_observer = ProgressObserver(self, alg)
         progress_observer.observeProgress(alg)
         progress_observer.observeFinish(alg)
+        progress_observer.observeError(alg)
         self.progress_observers.append(progress_observer)
         for presenter in self.presenters:
-            presenter.close_progress_bar()
+            presenter.update()
 
     def update_progress(self, progress_observer):
         """
@@ -81,13 +94,15 @@ class AlgorithmProgressModel(AlgorithmObserver):
         if index >= 0:
             del self.progress_observers[index]
             for presenter in self.presenters:
-                presenter.close_progress_bar()
+                presenter.update()
 
     def get_running_algorithm_data(self):
         """
         Create data describing running algorithms.
-        :return: A list of tuples of two elements: first one is the algorithm's name
-            and the second is a list of algorithm property descriptors - 3-element lists of the form:
+        :return: A list of tuples of three elements:
+            1. an id of the algorithm
+            2. the algorithm's name
+            3. a list of algorithm property descriptors - 3-element lists of the form:
                 [prop_name, prop_value_as_str, 'Default' or '']
         """
         algorithm_data = []
@@ -95,5 +110,5 @@ class AlgorithmProgressModel(AlgorithmObserver):
             properties = []
             for prop in observer.properties():
                 properties.append([prop.name, str(prop.value), 'Default' if prop.isDefault else ''])
-            algorithm_data.append((observer.name(), properties))
+            algorithm_data.append((observer.name(), observer.algorithm, properties))
         return algorithm_data

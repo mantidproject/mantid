@@ -20,7 +20,7 @@ class AlgorithmProgressPresenter(object):
         """
         pass
 
-    def close_progress_bar(self):
+    def update(self):
         """
         Close (remove) the progress bar when algorithm finishes.
         """

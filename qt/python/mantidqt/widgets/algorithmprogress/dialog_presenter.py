@@ -15,9 +15,9 @@ class AlgorithmProgressDialogPresenter(QObject):
         self.view = view
         self.model = model
         self.model.add_presenter(self)
-        self.need_update.connect(self.update, Qt.QueuedConnection)
+        self.need_update.connect(self.update_gui, Qt.QueuedConnection)
 
-    def update(self):
+    def update_gui(self):
         """
         Update the gui elements.
         """
@@ -32,7 +32,7 @@ class AlgorithmProgressDialogPresenter(QObject):
         """
         pass
 
-    def close_progress_bar(self):
+    def update(self):
         """
         Close (remove) the progress bar when algorithm finishes.
         """
@@ -41,3 +41,11 @@ class AlgorithmProgressDialogPresenter(QObject):
     def close(self):
         self.model.remove_presenter(self)
         self.view.close()
+
+    def cancel_algorithm(self, algorithm_id):
+        """
+        Cancel an algorithm.
+        :param algorithm_id: An id of an algorithm
+        """
+        # algorithm_id is actually an instance of an algorithm
+        algorithm_id.cancel()

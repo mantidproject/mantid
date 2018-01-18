@@ -9,6 +9,25 @@ from mantidqt import resources
 from .dialog_presenter import AlgorithmProgressDialogPresenter
 
 
+class CancelButton(QPushButton):
+    """
+    Button that cancels an algorithm
+    """
+    def __init__(self, presenter, algorithm_id):
+        """
+        Init an instance
+        :param presenter: The presenter for the dialog
+        :param algorithm_id: Some id of an algorithm
+        """
+        super(CancelButton, self).__init__('Cancel')
+        self.presenter = presenter
+        self.algorithm_id = algorithm_id
+        self.clicked.connect(self.cancel_algorithm, Qt.QueuedConnection)
+
+    def cancel_algorithm(self):
+        self.presenter.cancel_algorithm(self.algorithm_id)
+
+
 class AlgorithmMonitorDialog(QDialog):
     """
     Displays progress of all running algorithms.
@@ -40,7 +59,7 @@ class AlgorithmMonitorDialog(QDialog):
         self.resize(500, 300)
 
         self.presenter = AlgorithmProgressDialogPresenter(self, model)
-        self.presenter.update()
+        self.presenter.update_gui()
 
     def update(self, data):
         """
@@ -53,9 +72,9 @@ class AlgorithmMonitorDialog(QDialog):
             self.tree.addTopLevelItem(item)
             progress_bar = QProgressBar()
             progress_bar.setAlignment(Qt.AlignHCenter)
-            cancel_button = QPushButton("Cancel")
+            cancel_button = CancelButton(self.presenter, alg[1])
             self.tree.setItemWidget(item, 1, progress_bar)
             self.tree.setItemWidget(item, 2, cancel_button)
-            for prop in alg[1]:
+            for prop in alg[2]:
                 item.addChild(QTreeWidgetItem(prop))
 
