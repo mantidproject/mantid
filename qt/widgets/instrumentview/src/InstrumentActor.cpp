@@ -1171,33 +1171,23 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
           "or NaN).\n"
           "Please run ReplaceSpecialValues algorithm for correction.");
 
-    std::vector<double> copy;
-    copy.reserve(m_specIntegrs.size());
-    size_t i = 0;
     const auto &spectrumInfo = workspace->spectrumInfo();
 
-    // Ignore monitors indices if multiple detectors aren't grouped.
-    std::remove_copy_if(
-        m_specIntegrs.cbegin(), m_specIntegrs.cend(), std::back_inserter(copy),
-        [&spectrumInfo, &monitorIndices, &i](double val) {
-          auto ret = spectrumInfo.spectrumDefinition(i).size() == 0 &&
-                     std::find(monitorIndices.begin(), monitorIndices.end(),
-                               i) != monitorIndices.end();
-          ++i;
-          return ret;
-        });
+    // Ignore monitors if multiple detectors aren't grouped.
+    for (size_t i = 0; i < m_specIntegrs.size(); i++) {
+      if (spectrumInfo.spectrumDefinition(i).size() == 1 &&
+          std::find(monitorIndices.begin(), monitorIndices.end(), i) !=
+              monitorIndices.end())
+        continue;
 
-    copy.shrink_to_fit();
+      auto sum = m_specIntegrs[i];
 
-    auto res = std::minmax_element(copy.cbegin(), copy.cend());
-    m_DataMinValue = *res.first;
-    m_DataMaxValue = *res.second;
-    if (m_DataMinValue > 0)
-      m_DataPositiveMinValue = m_DataMinValue;
-    else {
-      auto lb = std::lower_bound(copy.cbegin(), copy.cend(), 0);
-      if (lb != copy.cend())
-        m_DataPositiveMinValue = *lb;
+      if (sum < m_DataMinValue)
+        m_DataMinValue = sum;
+      if (sum > m_DataMaxValue)
+        m_DataMaxValue = sum;
+      if (sum > 0 && sum < m_DataPositiveMinValue)
+        m_DataPositiveMinValue = sum;
     }
   }
 
