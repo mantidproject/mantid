@@ -129,13 +129,15 @@ void export_IPeak() {
       .def("getFinalEnergy", &IPeak::getFinalEnergy, arg("self"),
            "Get the final neutron energy in meV.")
       .def("getEnergyTransfer", &IPeak::getEnergyTransfer, arg("self"),
-           "Get the initial neutron energy minus the final neutron energy in meV."
+           "Get the initial neutron energy minus the final neutron energy in "
+           "meV."
            "\n\n.. versionadded:: 3.12.0")
       .def("setInitialEnergy", &IPeak::setInitialEnergy,
            (arg("self"), arg("initial_energy")),
            "Set the initial (incident) neutron energy in meV.")
       .def("setFinalEnergy", &IPeak::setFinalEnergy,
-           (arg("self"), arg("final_energy")), "Set the final neutron energy in meV.")
+           (arg("self"), arg("final_energy")),
+           "Set the final neutron energy in meV.")
       .def("getIntensity", &IPeak::getIntensity, arg("self"),
            "Return the integrated peak intensity")
       .def("getSigmaIntensity", &IPeak::getSigmaIntensity, arg("self"),
