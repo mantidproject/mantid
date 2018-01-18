@@ -179,9 +179,9 @@ void InstrumentActor::setUpWorkspace(
   const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
   m_detIndex2WsIndex.resize(sharedWorkspace->componentInfo().size());
   for (size_t wi = 0; wi < spectrumInfo.size(); wi++) {
-	  const auto &specDef = spectrumInfo.spectrumDefinition(wi);
-	  for (auto info : specDef) 
-		  m_detIndex2WsIndex[info.first] = wi;
+    const auto &specDef = spectrumInfo.spectrumDefinition(wi);
+    for (auto info : specDef)
+      m_detIndex2WsIndex[info.first] = wi;
   }
 
   // set some values as the variables will be used
@@ -351,9 +351,7 @@ void InstrumentActor::clearMasks() {
   }
 }
 
-std::vector<size_t> InstrumentActor::getMonitors() const {
-  return m_monitors;
-}
+std::vector<size_t> InstrumentActor::getMonitors() const { return m_monitors; }
 
 Instrument_const_sptr InstrumentActor::getInstrument() const {
   Instrument_const_sptr retval;
@@ -448,8 +446,8 @@ void InstrumentActor::setIntegrationRange(const double &xmin,
  *  @return The signal
  */
 double InstrumentActor::getIntegratedCounts(size_t index) const {
-    size_t i = getWorkspaceIndex(index);
-    return m_specIntegrs.at(i);
+  size_t i = getWorkspaceIndex(index);
+  return m_specIntegrs.at(i);
 }
 
 /**
@@ -466,7 +464,8 @@ double InstrumentActor::getIntegratedCounts(size_t index) const {
  * @param size :: (optional input) Size of the output vectors. If not given it
  * will be determined automatically.
  */
-void InstrumentActor::sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x,
+void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
+                                   std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   if (size > ws->blocksize() || size == 0) {
@@ -554,7 +553,7 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
 
   size_t nSpec = 0; // number of actual spectra to add
   // fill in the temp workspace with the data from the detectors
-  for(auto det: dets) {
+  for (auto det : dets) {
     try {
       size_t index = getWorkspaceIndex(det);
       dws->setHistogram(nSpec, ws->histogram(index));
@@ -661,9 +660,9 @@ void InstrumentActor::resetColors() {
     }
   }
 
-  for (auto comp : m_components) 
+  for (auto comp : m_components)
     m_colors[comp] = defaultDetectorColor();
-  
+
   setupPickColors();
   invalidateDisplayLists();
   emit colorMapChanged();
@@ -1177,7 +1176,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
     size_t i = 0;
     const auto &spectrumInfo = workspace->spectrumInfo();
 
-    //Ignore monitors indices if multiple detectors aren't grouped.
+    // Ignore monitors indices if multiple detectors aren't grouped.
     std::remove_copy_if(
         m_specIntegrs.cbegin(), m_specIntegrs.cend(), std::back_inserter(copy),
         [&spectrumInfo, &monitorIndices, &i](double val) {
@@ -1187,7 +1186,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
           ++i;
           return ret;
         });
-    
+
     copy.shrink_to_fit();
 
     auto res = std::minmax_element(copy.cbegin(), copy.cend());
@@ -1212,7 +1211,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
   std::vector<size_t> wsIndices;
   wsIndices.reserve(indices.size());
-  for (auto det: indices) 
+  for (auto det : indices)
     wsIndices.push_back(getWorkspaceIndex(det));
   if (!indices.empty()) {
     m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, wsIndices);
