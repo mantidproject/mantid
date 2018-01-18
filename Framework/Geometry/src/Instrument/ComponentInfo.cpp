@@ -99,7 +99,7 @@ ComponentInfo::~ComponentInfo() = default;
 
 std::vector<size_t>
 ComponentInfo::detectorsInSubtree(size_t componentIndex) const {
-  return m_componentInfo->detectorsInFullSubtree(componentIndex);
+  return m_componentInfo->detectorsInSubtree(componentIndex);
 }
 
 std::vector<size_t>

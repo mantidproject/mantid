@@ -112,7 +112,7 @@ std::unique_ptr<ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo() const {
 }
 
 std::vector<size_t>
-ComponentInfo::detectorsInFullSubtree(const size_t componentIndex) const {
+ComponentInfo::detectorsInSubtree(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
     /* This is a single detector. Just return the corresponding index.
      * detectorIndex == componentIndex
@@ -328,7 +328,7 @@ void ComponentInfo::setPosition(const size_t componentIndex,
   if (isDetector(componentIndex))
     return m_detectorInfo->setPosition(componentIndex, newPosition);
 
-  // Optimization: Not using detectorsInFullSubtree and componentsInSubtree to
+  // Optimization: Not using detectorsInSubtree and componentsInSubtree to
   // avoid
   // memory allocations.
   // Optimization: Split loop over detectors and other components.

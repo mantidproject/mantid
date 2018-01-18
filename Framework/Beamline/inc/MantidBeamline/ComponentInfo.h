@@ -107,7 +107,7 @@ public:
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
   /// Clone method
   std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;
-  std::vector<size_t> detectorsInFullSubtree(const size_t componentIndex) const;
+  std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(const size_t componentIndex) const;
   const std::vector<size_t> &children(const size_t componentIndex) const;
   size_t size() const;
