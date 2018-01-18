@@ -26,15 +26,16 @@ protected slots:
   void newDataLoaded(const QString wsName);
   void specMinChanged(int value);
   void specMaxChanged(int value);
-  void minChanged(double val);
-  void maxChanged(double val);
-  void updateRS(QtProperty *prop, double val);
+  void startXChanged(double startX) override;
+  void endXChanged(double endX) override;
   void saveClicked();
   void plotClicked();
   void algorithmComplete(bool error) override;
-  void modelSelection(int selected);
+  void modelSelection(const QString& model);
   void updatePreviewPlots() override;
-  void plotGuess();
+  void rangeChanged(double xMin, double xMax) override;
+  void plotGuess() override;
+  void updatePlotOptions() override;
 
 private:
   void disablePlotGuess() override;
@@ -42,12 +43,8 @@ private:
   Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
                                                int specMin, int specMax);
   std::string modelToAlgorithmProperty(const QString &model);
-  Mantid::API::IFunction_sptr createFunction(const QString &modelName);
-  Mantid::API::IFunction_sptr
-  getFunction(const QString &functionName) const override;
 
-  Ui::MSDFit m_uiForm;
-  QtTreePropertyBrowser *m_msdTree;
+  std::unique_ptr<Ui::MSDFit> m_uiForm;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
