@@ -21,11 +21,13 @@ from __future__ import (absolute_import, unicode_literals)
 # third-party library imports
 from mantid.api import AnalysisDataService
 from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
-from mantidqt.widgets.workspacewidget.workspacetreewidget import PlotSelectionDialog, WorkspaceTreeWidget
+from mantidqt.widgets.workspacewidget.plotselectiondialog import PlotSelectionDialog
+from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
+from workbench.plotting.functions import plot_spectrum
 
 
 class WorkspaceWidget(PluginWidget):
@@ -57,4 +59,13 @@ class WorkspaceWidget(PluginWidget):
     def _do_plot1d(self, selected_ws):
         workspaces = [AnalysisDataService.Instance()[selected_ws.encode('utf-8')]]
         selection_dlg = PlotSelectionDialog(workspaces, parent=self)
-        selection_dlg.exec_()
+        res = selection_dlg.exec_()
+        if res == PlotSelectionDialog.Rejected:
+            # cancelled
+            return
+        else:
+            user_selection = selection_dlg.user_selection
+            # the dialog guarantees that only 1 of spectrum/indices is supplied
+            assert user_selection.spectra is None or user_selection.wksp_indices
+            plot_spectrum(workspaces, spectrum_nums=user_selection.spectra,
+                          wksp_indices=user_selection.wksp_indices)
