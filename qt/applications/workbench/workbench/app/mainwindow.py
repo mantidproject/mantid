@@ -129,6 +129,9 @@ class MainWindow(QMainWindow):
         self.algorithm_selector = None
         self.widgets = []
 
+        # Widget layout map: required for use in Qt.connection
+        self._layout_widget_info = None
+
         # Menus
         self.file_menu = None
         self.file_menu_actions = None
@@ -417,10 +420,10 @@ class MainWindow(QMainWindow):
                     dockwidget.setMaximumHeight(new_height)
                     dockwidget.updateGeometry()
 
-            self._custom_layout_timer = QTimer(self)
-            self._custom_layout_timer.timeout.connect(self.layout_fix_timer)
-            self._custom_layout_timer.setSingleShot(True)
-            self._custom_layout_timer.start(500)
+            custom_layout_timer = QTimer(self)
+            custom_layout_timer.timeout.connect(self.layout_fix_timer)
+            custom_layout_timer.setSingleShot(True)
+            custom_layout_timer.start(500)
 
     def layout_fix_timer(self):
         """Fixes the height of docks after a new layout is set."""
