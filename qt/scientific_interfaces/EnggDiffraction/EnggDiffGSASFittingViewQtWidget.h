@@ -15,6 +15,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
   Q_OBJECT
 
 public:  
+  EnggDiffGSASFittingViewQtWidget();
+
   void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 

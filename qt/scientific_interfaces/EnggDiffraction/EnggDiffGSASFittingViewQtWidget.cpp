@@ -3,6 +3,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
+  m_ui.setupUi(this);
+}
+
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
     const Mantid::API::ITableWorkspace_sptr latticeParams) const {
   throw std::runtime_error("Not yet implemented");
