@@ -1143,11 +1143,10 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
   auto workspace = getWorkspace();
   calculateIntegratedSpectra(*workspace);
-  std::vector<size_t> monitorIndices;
+  std::set<size_t> monitorIndices;
 
-  monitorIndices.reserve(m_monitors.size());
   for (auto monitor : m_monitors)
-    monitorIndices.push_back(getWorkspaceIndex(monitor));
+    monitorIndices.emplace(getWorkspaceIndex(monitor));
 
   // check that there is at least 1 non-monitor spectrum
   if (monitorIndices.size() == m_specIntegrs.size()) {
@@ -1175,7 +1174,8 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
     // Ignore monitors if multiple detectors aren't grouped.
     for (size_t i = 0; i < m_specIntegrs.size(); i++) {
-      if (spectrumInfo.spectrumDefinition(i).size() == 1 &&
+      const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
+      if (spectrumDefinition.size() == 1 &&
           std::find(monitorIndices.begin(), monitorIndices.end(), i) !=
               monitorIndices.end())
         continue;
