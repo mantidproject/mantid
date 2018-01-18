@@ -49,7 +49,7 @@ from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDockWidget, QFileDialog, QMainWindow,
                             QSplashScreen)  # noqa
-from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
+from mantidqt.utils.qt import plugins, widget_updates_disabled, block_signals  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -133,6 +133,8 @@ class MainWindow(QMainWindow):
         self.file_menu = None
         self.file_menu_actions = None
         self.editor_menu = None
+        self.view_menu = None
+        self.view_menu_actions = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -144,8 +146,6 @@ class MainWindow(QMainWindow):
         # menus must be done first so they can be filled by the
         # plugins in register_plugin
         self.create_menus()
-        self.create_actions()
-        self.populate_menus()
 
         # widgets
         self.set_splash("Loading message display")
@@ -181,6 +181,8 @@ class MainWindow(QMainWindow):
 
         self.setup_layout()
         self.read_user_settings()
+        self.create_actions()
+        self.populate_menus()
 
     def set_splash(self, msg=None):
         if not self.splash:
@@ -193,6 +195,7 @@ class MainWindow(QMainWindow):
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")
         self.editor_menu = self.menuBar().addMenu("&Editor")
+        self.view_menu = self.menuBar().addMenu("&View")
 
     def create_actions(self):
         # --- general application menu options --
@@ -211,9 +214,17 @@ class MainWindow(QMainWindow):
                                     shortcut_context=Qt.ApplicationShortcut)
         self.file_menu_actions = [action_open, action_save, None, action_quit]
 
+        # view menu
+        action_restore_default = create_action(self, "Restore Default Layout",
+                                               on_triggered=self.setup_default_layouts,
+                                               shortcut="Shift+F10",
+                                               shortcut_context=Qt.ApplicationShortcut)
+        self.view_menu_actions = [action_restore_default]
+
     def populate_menus(self):
         # Link to menus
         add_actions(self.file_menu, self.file_menu_actions)
+        add_actions(self.view_menu, self.view_menu_actions)
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
@@ -310,12 +321,14 @@ class MainWindow(QMainWindow):
                 self.setWindowState(Qt.WindowMaximized)
                 # Use Tkinter to find full screen size if maximized
                 # This is required as self.size before initial show returns the size of the splash screen
-                self.window_size = QSize(Tk().winfo_screenwidth(), Tk().winfo_screenheight())
+                tk = Tk()
+                self.window_size = QSize(tk.winfo_screenwidth(), tk.winfo_screenheight())
+                tk.destroy()
 
-
-    def setup_default_layouts(self, window_settings):
+    def setup_default_layouts(self, window_settings=False):
         """Set or reset the layouts of the child widgets"""
-        self.set_window_settings(*window_settings)
+        if window_settings is not False:
+            self.set_window_settings(*window_settings)
 
         # layout definition
         logmessages = self.messagedisplay
