@@ -339,7 +339,7 @@ public:
 
   void checkTrackIntercept(Track &track,
                            const std::vector<Link> &expectedResults) {
-    int index = 0;
+    size_t index = 0;
     for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
          ++it) {
       if (index < expectedResults.size()) {
@@ -353,7 +353,7 @@ public:
       }
       ++index;
     }
-    TS_ASSERT_EQUALS(index, static_cast<int>(expectedResults.size()));
+    TS_ASSERT_EQUALS(index, expectedResults.size());
   }
 
   void checkTrackIntercept(IObject_sptr obj, Track &track,
@@ -706,6 +706,7 @@ public:
   void testFindPointInOctahedron() {
     auto geom_obj = createOctahedron();
     Kernel::V3D pt;
+    TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
     TS_ASSERT_LESS_THAN_EQUALS(abs(pt.X()) + abs(pt.Y()) + abs(pt.Z()), 1.0)
   }
 

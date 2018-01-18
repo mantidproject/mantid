@@ -392,7 +392,7 @@ public:
 
   void checkTrackIntercept(Track &track,
                            const std::vector<Link> &expectedResults) {
-    int index = 0;
+    size_t index = 0;
     for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
          ++it) {
       if (index < expectedResults.size()) {
@@ -406,7 +406,7 @@ public:
       }
       ++index;
     }
-    TS_ASSERT_EQUALS(index, static_cast<int>(expectedResults.size()));
+    TS_ASSERT_EQUALS(index, expectedResults.size());
   }
 
   void checkTrackIntercept(IObject_sptr obj, Track &track,
