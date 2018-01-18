@@ -3,69 +3,71 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-void MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::displayRwp(const double rwp) const{
-    }
+void EnggDiffGSASFittingViewQtWidget::displayRwp(const double rwp) const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-std::string MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::getFocusedFileName() const{
-      return std::string();
-    }
+std::string EnggDiffGSASFittingViewQtWidget::getFocusedFileName() const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-std::string MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::getGSASIIProjectPath() const{
-      return std::string();
-    }
+std::string EnggDiffGSASFittingViewQtWidget::getGSASIIProjectPath() const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-std::string MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::getInstrumentFileName() const {
-      return std::string();
-    }
+std::string EnggDiffGSASFittingViewQtWidget::getInstrumentFileName() const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-std::string MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::getPathToGSASII() const{
-      return std::string();
-    }
+std::string EnggDiffGSASFittingViewQtWidget::getPathToGSASII() const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-double MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::getPawleyDMin() const {
-      return 0.0;
-    }
+double EnggDiffGSASFittingViewQtWidget::getPawleyDMin() const { 
+  throw std::runtime_error("Not yet implemented");
+}
 
-    double MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::getPawleyNegativeWeight() const
-    {
-      return 0.0;
-    }
+double EnggDiffGSASFittingViewQtWidget::getPawleyNegativeWeight() const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-    std::vector<std::string> MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::getPhaseFileNames() const
-    {
-      return std::vector<std::string>();
-    }
+std::vector<std::string>
+EnggDiffGSASFittingViewQtWidget::getPhaseFileNames() const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-    GSASRefinementMethod MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::getRefinementMethod() const
-    {
-      return GSASRefinementMethod();
-    }
+GSASRefinementMethod
+EnggDiffGSASFittingViewQtWidget::getRefinementMethod() const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-    std::pair<int, size_t> MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const
-    {
-      return std::pair<int, size_t>();
-    }
+std::pair<int, size_t>
+EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-    void MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::plotCurve(const std::vector<boost::shared_ptr<QwtData>>& curve)
-    {
-    }
+void EnggDiffGSASFittingViewQtWidget::plotCurve(
+    const std::vector<boost::shared_ptr<QwtData>> &curve) {
+  throw std::runtime_error("Not yet implemented");
+}
 
-    void MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::resetCanvas()
-    {
-    }
+void EnggDiffGSASFittingViewQtWidget::resetCanvas() {
+  throw std::runtime_error("Not yet implemented");
+}
 
-    bool MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::showRefinementResultsSelected() const
-    {
-      return false;
-    }
+bool EnggDiffGSASFittingViewQtWidget::showRefinementResultsSelected() const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-    void MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::updateRunList(const std::vector<std::pair<int, size_t>>& runLabels)
-    {
-    }
+void EnggDiffGSASFittingViewQtWidget::updateRunList(
+    const std::vector<std::pair<int, size_t>> &runLabels) {
+  throw std::runtime_error("Not yet implemented");
+}
 
-    void MantidQt::CustomInterfaces::EnggDiffGSASFittingViewQtWidget::userWarning(const std::string & warningDescription) const
-    {
-    }
+void EnggDiffGSASFittingViewQtWidget::userWarning(
+    const std::string &warningDescription) const {
+  throw std::runtime_error("Not yet implemented");
+}
 
-  } // CustomInterfaces
+} // CustomInterfaces
 } // MantidQt

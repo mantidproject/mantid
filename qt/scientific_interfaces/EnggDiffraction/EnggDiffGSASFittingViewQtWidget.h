@@ -9,45 +9,46 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-  class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget :
-    public QWidget,
-    public IEnggDiffGSASFittingView {
-    Q_OBJECT
-  
-  public:
-    void displayLatticeParams(
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
+    : public QWidget,
+      public IEnggDiffGSASFittingView {
+  Q_OBJECT
+
+public:
+  void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 
-    void displayRwp(const double rwp) const override;
+  void displayRwp(const double rwp) const override;
 
-    std::string getFocusedFileName() const override;
+  std::string getFocusedFileName() const override;
 
-    std::string getGSASIIProjectPath() const override;
+  std::string getGSASIIProjectPath() const override;
 
-    std::string getInstrumentFileName() const override;
+  std::string getInstrumentFileName() const override;
 
-    std::string getPathToGSASII() const override;
+  std::string getPathToGSASII() const override;
 
-    double getPawleyDMin() const override;
+  double getPawleyDMin() const override;
 
-    double getPawleyNegativeWeight() const override;
+  double getPawleyNegativeWeight() const override;
 
-    std::vector<std::string> getPhaseFileNames() const override;
+  std::vector<std::string> getPhaseFileNames() const override;
 
-    GSASRefinementMethod getRefinementMethod() const override;
+  GSASRefinementMethod getRefinementMethod() const override;
 
-    std::pair<int, size_t> getSelectedRunLabel() const override;
+  std::pair<int, size_t> getSelectedRunLabel() const override;
 
-    void plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
+  void plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
 
-    void resetCanvas() override;
+  void resetCanvas() override;
 
-    bool showRefinementResultsSelected() const override;
+  bool showRefinementResultsSelected() const override;
 
-    void updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) override;
+  void
+  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) override;
 
-    void userWarning(const std::string &warningDescription) const override;
-  };
+  void userWarning(const std::string &warningDescription) const override;
+};
 
 } // MantidQt
 } // CustomInterfaces
