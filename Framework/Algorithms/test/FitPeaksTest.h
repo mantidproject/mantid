@@ -55,7 +55,10 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  void Pass_test_multiPeaksMultiSpectra() {
+  /**
+   * @brief test_multiPeaksMultiSpectra
+   */
+  void Passed_test_multiPeaksMultiSpectra() {
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -270,7 +273,7 @@ public:
    * 2. no signal with event count workspace
    * @brief test_NoSignaleWorkspace2D
    */
-  void test_NoSignaleWorkspace2D() {
+  void Passed_test_NoSignaleWorkspace2D() {
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -328,14 +331,19 @@ public:
     API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(
         peak_param_ws_name, &peak_param_ws_exist);
 
+    // fitted peak position workspace.  should contain 1 spectrum for workspace
+    // index 3
     if (peak_pos_ws_exist) {
+      TS_ASSERT_EQUALS(peak_pos_ws->getNumberHistograms(), 1);
+      HistogramData::HistogramX hist_x = peak_pos_ws->histogram(0).x();
       HistogramData::HistogramY hist_y = peak_pos_ws->histogram(0).y();
-      TS_ASSERT_EQUALS(hist_y.size(), 15);
-      TS_ASSERT_DELTA(hist_y[0], 0., 1.E-12);
+      TS_ASSERT_EQUALS(hist_y.size(), 17);
+      TS_ASSERT_DELTA(hist_x[0], 0.5044, 1.E-12);
+      TS_ASSERT_DELTA(hist_y[0], -1., 1.E-12);
     }
 
     if (peak_param_ws_exist) {
-      TS_ASSERT_EQUALS(peak_param_ws->rowCount(), 15);
+      TS_ASSERT_EQUALS(peak_param_ws->rowCount(), 17);
     }
 
     if (!peak_pos_ws_exist || !peak_param_ws_exist)
@@ -354,7 +362,7 @@ public:
   /** Test fit Gaussian peaks with high background
    * @brief Later_test_HighBackgroundPeaks
    */
-  void test_HighBackgroundPeaks() {
+  void Current_test_HighBackgroundPeaks() {
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -451,8 +459,7 @@ public:
     // 0.6307, 0.6867, 0.728299, 0.89198, 1.07577, 1.26145
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("BackgroundFunction", "Linear"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
         "PeakCenters", "1.0758, 0.89198, 0.728299, 0.6867"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowLeftBoundary",
@@ -661,7 +668,7 @@ public:
             AnalysisDataService::Instance().retrieve("diamond_3peaks"));
     TS_ASSERT(ws);
 
-    return "Diamond2Peaks";
+    return "diamond_3peaks";
   }
 
   //----------------------------------------------------------------------------------------------

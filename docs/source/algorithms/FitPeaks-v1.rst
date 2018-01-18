@@ -275,7 +275,8 @@ It is a MatrixWorkspace containing the peak positions expected and fitted.
   * -1: empty spectrum
   * -2: spectrum with too few counts
   * -3: peak is low
-  * -4: blabla
+  * -4: TODO : find out the answer
+  * -5: TODO : find out the answer
 
 
 
