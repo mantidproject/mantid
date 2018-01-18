@@ -11,11 +11,13 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <QStringList>
 
 template <class Key, class T> class QHash;
 template <class Key, class T> class QMultiMap;
+template <class T> class QList;
 class QString;
-class QStringList;
+class QWidget;
 class Table;
 class MultiLayer;
 class MantidMatrix;
