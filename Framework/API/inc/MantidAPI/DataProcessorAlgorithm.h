@@ -141,7 +141,19 @@ private:
   std::string m_propertyManagerPropertyName;
   /// Map property names to names in supplied properties manager
   std::map<std::string, std::string> m_nameToPMName;
+
+  // This method is a workaround for the C4661 compiler warning in visual
+  // studio. This allows the template declaration and definition to be separated
+  // in different files. See stack overflow article for a more detailed
+  // explanation:
+  // https://stackoverflow.com/questions/44160467/warning-c4661no-suitable-definition-provided-for-explicit-template-instantiatio
+  // https://stackoverflow.com/questions/33517902/how-to-export-a-class-derived-from-an-explicitly-instantiated-template-in-visual
+  void visualStudioC4661Workaround();
 };
+
+template <>
+MANTID_API_DLL void
+GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround();
 
 using DataProcessorAlgorithm = GenericDataProcessorAlgorithm<Algorithm>;
 using SerialDataProcessorAlgorithm =
