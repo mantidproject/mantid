@@ -94,6 +94,9 @@ void EnggDiffractionViewQtGUI::initLayout() {
       m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
+  m_gsasWidget = new EnggDiffGSASFittingViewQtWidget();
+  m_ui.tabMain->addTab(m_gsasWidget, QString("GSAS-II Refinement"));
+  
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));
@@ -655,6 +658,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
 
   // fitting
   m_fittingWidget->enable(enable);
+  m_gsasWidget->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {

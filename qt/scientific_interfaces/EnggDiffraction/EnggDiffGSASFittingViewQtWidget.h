@@ -14,12 +14,12 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
       public IEnggDiffGSASFittingView {
   Q_OBJECT
 
-public:
+public:  
   void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 
   void displayRwp(const double rwp) const override;
-
+  
   std::string getFocusedFileName() const override;
 
   std::string getGSASIIProjectPath() const override;
@@ -42,12 +42,17 @@ public:
 
   void resetCanvas() override;
 
+  void setEnabled(const bool enabled);
+
   bool showRefinementResultsSelected() const override;
 
   void
   updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) override;
 
   void userWarning(const std::string &warningDescription) const override;
+
+ private:
+  Ui::EnggDiffractionQtTabGSAS m_ui;
 };
 
 } // MantidQt

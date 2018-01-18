@@ -3,6 +3,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
+    const Mantid::API::ITableWorkspace_sptr latticeParams) const {
+  throw std::runtime_error("Not yet implemented");
+}
+
 void EnggDiffGSASFittingViewQtWidget::displayRwp(const double rwp) const {
   throw std::runtime_error("Not yet implemented");
 }
@@ -23,7 +28,7 @@ std::string EnggDiffGSASFittingViewQtWidget::getPathToGSASII() const {
   throw std::runtime_error("Not yet implemented");
 }
 
-double EnggDiffGSASFittingViewQtWidget::getPawleyDMin() const { 
+double EnggDiffGSASFittingViewQtWidget::getPawleyDMin() const {
   throw std::runtime_error("Not yet implemented");
 }
 
@@ -53,6 +58,31 @@ void EnggDiffGSASFittingViewQtWidget::plotCurve(
 
 void EnggDiffGSASFittingViewQtWidget::resetCanvas() {
   throw std::runtime_error("Not yet implemented");
+}
+
+void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
+  m_ui.lineEdit_runFile->setEnabled(enabled);
+  m_ui.pushButton_browseRunFile->setEnabled(enabled);
+  m_ui.pushButton_loadRun->setEnabled(enabled);
+
+  m_ui.lineEdit_instParamsFile->setEnabled(enabled);
+  m_ui.pushButton_browseInstParams->setEnabled(enabled);
+
+  m_ui.lineEdit_phaseFiles->setEnabled(enabled);
+  m_ui.pushButton_browsePhaseFiles->setEnabled(enabled);
+
+  m_ui.lineEdit_gsasProjPath->setEnabled(enabled);
+  m_ui.pushButton_gsasProjPath->setEnabled(enabled);
+
+  m_ui.lineEdit_gsasHome->setEnabled(enabled);
+  m_ui.pushButton_browseGSASHome->setEnabled(enabled);
+
+  m_ui.comboBox_refinementMethod->setEnabled(enabled);
+
+  m_ui.lineEdit_pawleyDMin->setEnabled(enabled);
+  m_ui.lineEdit_pawleyNegativeWeight->setEnabled(enabled);
+
+  m_ui.checkBox_showRefinementResults->setEnabled(enabled);
 }
 
 bool EnggDiffGSASFittingViewQtWidget::showRefinementResultsSelected() const {
