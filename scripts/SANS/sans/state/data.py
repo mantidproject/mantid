@@ -107,6 +107,8 @@ class StateData(StateBase):
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
 def set_information_from_file(data_info):
+    import pydevd
+    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     file_name = data_info.sample_scatter
     file_information_factory = SANSFileInformationFactory()
     file_information = file_information_factory.create_sans_file_information(file_name)

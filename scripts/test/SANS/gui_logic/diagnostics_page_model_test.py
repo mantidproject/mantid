@@ -26,9 +26,9 @@ class DiagnosticsPageModelTest(unittest.TestCase):
 
         state_from_view =  StateGuiModel(user_file_items)
 
-        state = create_state(state_from_view, '34484', '', SANSFacility.ISIS)
+        state = create_state(state_from_view, "SANS2D00022024", '', SANSFacility.ISIS)
 
-        self.assertEqual(state.data.sample_scatter, '34484')
+        self.assertEqual(state.data.sample_scatter, "SANS2D00022024")
 
 if __name__ == '__main__':
     unittest.main()
