@@ -707,7 +707,7 @@ public:
     auto geom_obj = createOctahedron();
     Kernel::V3D pt;
     TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
-    TS_ASSERT_LESS_THAN_EQUALS(abs(pt.X()) + abs(pt.Y()) + abs(pt.Z()), 1.0)
+    TS_ASSERT_LESS_THAN_EQUALS(abs(pt.X()) + abs(pt.Y()) + abs(pt.Z()), 1.0);
   }
 
   void testFindPointInLShape() {
