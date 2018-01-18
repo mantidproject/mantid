@@ -5,7 +5,7 @@ namespace CustomInterfaces {
 
 template <size_t NumBanks, typename T>
 void RunMap<NumBanks, T>::add(const int runNumber, const size_t bank,
-                              const T itemToAdd) {
+                              const T &itemToAdd) {
   validateBankID(bank);
   m_map[bank - 1][runNumber] = itemToAdd;
 }

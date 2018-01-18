@@ -22,7 +22,7 @@ public:
    @param bank The bank ID associated with the item
    @param itemToAdd The item to add
    */
-  void add(const int runNumber, const size_t bank, const T itemToAdd);
+  void add(const int runNumber, const size_t bank, const T &itemToAdd);
 
   /// Check whether the map contains an entry for this run number and bank ID
   bool contains(const int runNumber, const size_t bank) const;
