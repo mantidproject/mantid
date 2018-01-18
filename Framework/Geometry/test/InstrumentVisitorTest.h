@@ -238,8 +238,7 @@ public:
     compInfo->setDetectorInfo(detInfo.get());
     detInfo->setComponentInfo(compInfo.get());
 
-    TS_ASSERT_EQUALS(compInfo->detectorsInSubtree(3),
-                     std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(compInfo->detectorsInSubtree(3), std::vector<size_t>{0});
   }
 
   void test_visitor_component_ranges_check() {

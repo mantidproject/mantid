@@ -628,17 +628,13 @@ public:
     /*
     Note that detectors are always the first n component indexes!
     */
-    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(0),
-                     std::vector<size_t>{0});
-    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(1),
-                     std::vector<size_t>{1});
-    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(2),
-                     std::vector<size_t>{2});
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(0), std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(1), std::vector<size_t>{1});
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(2), std::vector<size_t>{2});
 
     // Now we have non-detector components
-    TS_ASSERT_EQUALS(
-        compInfo.detectorsInSubtree(4 /*component index of root*/),
-        std::vector<size_t>({0, 2, 1}));
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(4 /*component index of root*/),
+                     std::vector<size_t>({0, 2, 1}));
     TS_ASSERT_EQUALS(
         compInfo.detectorsInSubtree(3 /*component index of sub-assembly*/),
         std::vector<size_t>({0, 2}));
