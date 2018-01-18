@@ -111,6 +111,13 @@ std::vector<Command_uptr> TwoLevelTreeManager::publishCommands() {
   return commands;
 }
 
+void TwoLevelTreeManager::invalidateAllProcessed() {
+  forEachGroup(*m_model,
+               [this](int group) -> void { setProcessed(false, group); });
+  forEachRow(*m_model, [this](int group, int row)
+                           -> void { setProcessed(false, row, group); });
+}
+
 /**
 Insert a row after the last selected row. If a group was selected, the new row
 is appended to that group. If nothing was selected, the new row is appended to

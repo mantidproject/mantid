@@ -32,8 +32,6 @@
 #include <iterator>
 #include <sstream>
 
-#include <iostream>
-
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -260,27 +258,40 @@ void GenericDataProcessorPresenter::acceptViews(
   updateWidgetEnabledState(false);
 }
 
-bool GenericDataProcessorPresenter::areOptionsUpdated() {
-  auto newPreprocessingOptions =
+/**
+Returns the name of the reduced workspace for a given row
+@param data :: [input] The data for this row
+@param prefix : A prefix to be appended to the generated ws name
+@throws std::runtime_error if the workspace could not be prepared
+@returns : The name of the workspace
+*/
+QString GenericDataProcessorPresenter::getReducedWorkspaceName(
+    const QStringList &data, const QString &prefix) const {
+  return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
+      data, m_whitelist, prefix);
+}
+
+void GenericDataProcessorPresenter::settingsChanged() {
+  m_preprocessing.m_options =
       convertColumnOptionsFromQMap(m_mainPresenter->getPreprocessingOptions());
-  auto newProcessingOptions =
+  m_processingOptions =
       convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
-  auto newPostprocessingOptions =
-      m_mainPresenter->getPostprocessingOptionsAsString();
-
-  auto settingsChanged =
-      m_preprocessing.m_options != newPreprocessingOptions ||
-      m_processingOptions != newProcessingOptions ||
-      (hasPostprocessing() &&
-       m_postprocessing->m_options != newPostprocessingOptions);
-
-  m_preprocessing.m_options = newPreprocessingOptions;
-  m_processingOptions = newProcessingOptions;
 
   if (hasPostprocessing())
-    m_postprocessing->m_options = newPostprocessingOptions;
+    m_postprocessing->m_options =
+        m_mainPresenter->getPostprocessingOptionsAsString();
 
-  return settingsChanged;
+  m_manager->invalidateAllProcessed();
+}
+
+bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
+  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
+    auto outputWorkspaceName =
+        getReducedWorkspaceName(row.second, m_processor.prefix(i));
+    if (!workspaceExists(outputWorkspaceName))
+      return false;
+  }
+  return true;
 }
 
 /**
@@ -299,10 +310,6 @@ void GenericDataProcessorPresenter::process() {
   if (m_selectedData.size() == 0)
     return;
 
-  // Set the global settings. If any have been changed, set all groups and rows
-  // as unprocessed
-  auto settingsHaveChanged = areOptionsUpdated();
-
   // Clear the group queue
   m_group_queue = GroupQueue();
 
@@ -314,7 +321,7 @@ void GenericDataProcessorPresenter::process() {
         hasPostprocessing() &&
         !workspaceExists(getPostprocessedWorkspaceName(group.second));
 
-    if (settingsHaveChanged || groupOutputNotFound)
+    if (groupOutputNotFound)
       m_manager->setProcessed(false, group.first);
 
     // Groups that are already processed or cannot be post-processed (only 1
@@ -330,16 +337,8 @@ void GenericDataProcessorPresenter::process() {
       rowQueue.push(row);
 
       // Set group as unprocessed if settings have changed or the expected
-      // output
-      // workspaces cannot be found
-      bool rowOutputFound = true;
-      for (auto i = 0u;
-           i < m_processor.numberOfOutputProperties() && rowOutputFound; i++) {
-        rowOutputFound = workspaceExists(
-            getReducedWorkspaceName(row.second, m_processor.prefix(i)));
-      }
-
-      if (settingsHaveChanged || !rowOutputFound)
+      // output workspaces cannot be found
+      if (!rowOutputExists(row))
         m_manager->setProcessed(false, row.first, group.first);
 
       // Rows that are already processed do not count in progress
@@ -548,6 +547,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 bool GenericDataProcessorPresenter::hasPostprocessing() const {
   return bool(m_postprocessing);
 }
+
 /**
 Post-processes the workspaces created by the given rows together.
 @param groupData : the data in a given group as received from the tree manager
@@ -638,21 +638,6 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   return AnalysisDataService::Instance().retrieveWS<Workspace>(
       outputName.toStdString());
 }
-
-/**
-Returns the name of the reduced workspace for a given row
-@param data :: [input] The data for this row
-@param prefix : A prefix to be appended to the generated ws name
-@throws std::runtime_error if the workspace could not be prepared
-@returns : The name of the workspace
-*/
-QString
-GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
-                                                       const QString &prefix) {
-  return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
-      data, m_whitelist, prefix);
-}
-
 /**
 Returns the name of the reduced workspace for a given group
 @param groupData : The data in a given group
@@ -1515,6 +1500,8 @@ void GenericDataProcessorPresenter::accept(
   m_mainPresenter = mainPresenter;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
+  settingsChanged();
+
   m_mainPresenter->notifyADSChanged(m_workspaceList);
   // Presenter should initially be in the paused state
   m_mainPresenter->pause();

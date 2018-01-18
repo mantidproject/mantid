@@ -55,6 +55,7 @@ public:
   }
 
   void test_table_presenters_accept_this_presenter() {
+    NiceMock<MockMainWindowPresenter> mockMainWindowPresenter;
     NiceMock<MockRunsTabView> mockRunsTabView;
     MockProgressableView mockProgress;
     MockDataProcessorPresenter mockTablePresenter_1;
@@ -74,6 +75,7 @@ public:
     // Constructor
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
                                    tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainWindowPresenter);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
