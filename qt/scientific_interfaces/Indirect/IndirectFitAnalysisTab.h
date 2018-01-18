@@ -50,10 +50,14 @@ public:
 
   bool previousFitModelSelected() const;
 
+  virtual bool canPlotGuess() const;
+
   void moveCustomFunctionsToEnd();
 
   void setParameterValue(const std::string &functionName,
                          const std::string &parameterName, double value);
+
+  void setDefaultPeakType(const std::string &function);
 
   void addCheckBoxFunctionGroup(
       const QString &groupName,
@@ -114,8 +118,6 @@ public:
   functionNameChanges(Mantid::API::IFunction_sptr function) const;
 
   virtual Mantid::API::MatrixWorkspace_sptr fitWorkspace() const;
-
-  void updatePlotGuess();
 
 protected:
   void addPropertyBrowserToUI(FitTab tab);
@@ -197,6 +199,8 @@ protected slots:
 
   virtual void plotGuess() = 0;
 
+  void updatePlotGuess();
+
   virtual void updatePlotOptions() = 0;
 
   void emitFunctionChanged();
@@ -219,7 +223,6 @@ private:
   QHash<QString, QString> m_functionNameChanges;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   bool m_appendResults;
-  bool m_guessEnabled;
 };
 
 } // namespace IDA

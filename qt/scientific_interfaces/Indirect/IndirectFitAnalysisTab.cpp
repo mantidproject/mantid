@@ -291,6 +291,13 @@ bool IndirectFitAnalysisTab::previousFitModelSelected() const {
 }
 
 /**
+ * @return  True if a guess plot can be fit, false otherwise.
+ */
+bool IndirectFitAnalysisTab::canPlotGuess() const {
+  return !emptyModel() && inputWorkspace();
+}
+
+/**
  * Moves the functions attached to a custom function group, to the end of the
  * model.
  */
@@ -310,6 +317,15 @@ void IndirectFitAnalysisTab::setParameterValue(const std::string &functionName,
                                                const std::string &parameterName,
                                                double value) {
   m_fitPropertyBrowser->setParameterValue(functionName, parameterName, value);
+}
+
+/**
+ * Sets the default peak type for the indirect property browser.
+ *
+ * @param function  The name of the default peak function to set.
+ */
+void IndirectFitAnalysisTab::setDefaultPeakType(const std::string &function) {
+  m_fitPropertyBrowser->setDefaultPeakType(function);
 }
 
 /**
@@ -483,10 +499,11 @@ void IndirectFitAnalysisTab::addOptionalDoubleSetting(
  */
 void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
   disablePlotGuess();
+  m_fitPropertyBrowser->setWorkspaceIndex(spectrum);
   IndirectDataAnalysisTab::setSelectedSpectrum(spectrum);
   updateParameterValues();
   updatePreviewPlots();
-  enablePlotGuess();
+  updatePlotGuess();
 }
 
 /**
@@ -963,16 +980,16 @@ void IndirectFitAnalysisTab::plotGuess(
 }
 
 /**
- * Enables or disables the plot guess feature in this indirect fit analysis
- * tab, depending on whether the selected model is empty.
+ * Enables or disables the plot guess feature in this indirect fit analysiss
+ * tab, depending on whether the selected model is empty and whether an input
+ * workspace has been set.
  */
 void IndirectFitAnalysisTab::updatePlotGuess() {
-  bool modelIsEmpty = emptyModel();
-
-  if (modelIsEmpty && m_guessEnabled)
-    disablePlotGuess();
-  else if (!modelIsEmpty && !m_guessEnabled)
+  if (canPlotGuess())
     enablePlotGuess();
+  else
+    disablePlotGuess();
+  plotGuess();
 }
 
 /*
