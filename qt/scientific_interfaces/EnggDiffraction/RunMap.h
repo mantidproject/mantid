@@ -41,6 +41,8 @@ public:
 private:
   std::vector<int> getAllRunNumbers() const;
 
+  void validateBankID(const size_t bank) const;
+
   std::array<std::unordered_map<int, T>, NumBanks> m_map;
 };
 
