@@ -1,12 +1,5 @@
 #include <algorithm>
 
-namespace {
-
-template <typename T> void insertInOrder(const T &item, std::vector<T> &vec) {
-  vec.insert(std::upper_bound(vec.begin(), vec.end(), item), item);
-}
-}
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -59,16 +52,13 @@ RunMap<NumBanks, T>::getRunNumbersAndBankIDs() const {
 }
 
 template <size_t NumBanks, typename T>
-std::vector<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
-  std::vector<int> runNumbers;
+std::set<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
+  std::set<int> runNumbers;
 
   for (const auto &bank : m_map) {
     for (const auto &runBankPair : bank) {
       const auto runNumber = runBankPair.first;
-      if (std::find(runNumbers.begin(), runNumbers.end(), runNumber) ==
-          runNumbers.end()) {
-        insertInOrder(runNumber, runNumbers);
-      }
+      runNumbers.insert(runNumber);
     }
   }
 

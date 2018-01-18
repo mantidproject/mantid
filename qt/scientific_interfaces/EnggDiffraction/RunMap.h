@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_RUNMAP_H_
 
 #include <array>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -39,7 +40,7 @@ public:
   size_t size() const;
 
 private:
-  std::vector<int> getAllRunNumbers() const;
+  std::set<int> getAllRunNumbers() const;
 
   void validateBankID(const size_t bank) const;
 
