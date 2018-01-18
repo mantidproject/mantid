@@ -73,15 +73,12 @@ public:
   virtual ~MeshObject();
   /// Clone
   IObject *clone() const override {
-    if (size(m_vertices) > 0)
+    if (m_vertices.size() > 0)
       return new MeshObject(*this);
     else {
       throw("Unintialised MeshObject cannot be copied");
     }
   }
-
-  void initialize(const int nPts, const int nFaces, const double *points,
-                  int *faces);
 
   void initialize(const std::vector<int> &faces,
                   const std::vector<Mantid::Kernel::V3D> &vertices);
@@ -123,8 +120,6 @@ public:
 
   /// Return cached value of axis-aligned bounding box
   const BoundingBox &getBoundingBox() const override;
-  /// Set a null bounding box for this object
-  void setNullBoundingBox();
 
   // find internal point to object
   int getPointInObject(Kernel::V3D &point) const override;
@@ -181,21 +176,20 @@ private:
   /// Search object for valid point
   bool searchForObject(Kernel::V3D &point) const;
 
-  /// Contents
-  std::vector<int> m_triangles;
-  std::vector<Kernel::V3D> m_vertices;
-
   /// Cache for object's bounding box
   mutable BoundingBox m_boundingBox;
 
   /// Tolerence distance
   const double M_TOLERANCE = 0.000001;
 
+  /// Numerical identifier of object
+  int m_object_number;
+
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> m_handler;
 
-  /// Numerical identifier of object
-  int m_object_number;
+  // String from which object may be defined
+  std::string m_string;
 
   /// Optional string identifier
   std::string m_id;
@@ -207,8 +201,10 @@ private:
   /// a pointer to a class for writing to the geometry cache
   boost::shared_ptr<vtkGeometryCacheWriter> m_vtk_cache_writer;
 
-  // String from which object may be defined
-  std::string m_string;
+  /// Contents
+  std::vector<int> m_triangles;
+  std::vector<Kernel::V3D> m_vertices;
+
 };
 
 } // NAMESPACE Geometry

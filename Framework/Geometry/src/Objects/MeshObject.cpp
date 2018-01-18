@@ -81,31 +81,6 @@ MeshObject &MeshObject::operator=(const MeshObject &A) {
 MeshObject::~MeshObject() = default;
 
 /*
- * Initialise in CacheGeogmetryRenderer format
- * @param nPts :: number of vertices
- * @param nFaces :: number of faces
- * @param points :: vertex coordinates
- * @param faces :: Triangles specified by vertex index in anticlockwise order
- * as seen from outside.
- */
-void MeshObject::initialize(const int nPts, const int nFaces,
-                            const double *points, int *faces) {
-
-  std::vector<V3D> vertices;
-  for (int i = 0; i < nPts; ++i) {
-    vertices.push_back(
-        V3D(nPts + (3 * i), nPts + (3 * i + 1), nPts + (3 * i + 2)));
-  }
-
-  std::vector<int> triangles;
-  for (int i = 0; i < 3 * nFaces; ++i) {
-    triangles.push_back(nFaces + i);
-  }
-
-  initialize(triangles, vertices);
-}
-
-/*
  * Initialise with vectors.
  * @param faces :: Triangles specified by vertex index in anticlockwise order
  * as seen from outside.
@@ -263,7 +238,7 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
  * @param start :: Start point of ray
  * @param direction :: Direction of ray
  * @param intersectionPoints :: Intersection points (not sorted)
- * @param EntryExitFlags :: +1 ray enters -1 ray exits at corresponding point
+ * @param entryExitFlags :: +1 ray enters -1 ray exits at corresponding point
 */
 void MeshObject::getIntersections(const Kernel::V3D &start,
                                   const Kernel::V3D &direction,
@@ -349,7 +324,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
 */
 bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2,
                              V3D &vertex3) const {
-  bool triangleExists = index < numberOfTriangles();
+  bool triangleExists = index < m_triangles.size()/3;
   if (triangleExists) {
     vertex1 = m_vertices[m_triangles[3 * index]];
     vertex2 = m_vertices[m_triangles[3 * index + 1]];
@@ -526,7 +501,7 @@ const BoundingBox &MeshObject::getBoundingBox() const {
       maxX = maxY = maxZ = -huge;
 
       // Loop over all vertices and determine minima and maxima on each axis
-      for (int i = 0; i < m_vertices.size(); ++i) {
+      for (size_t i = 0; i < m_vertices.size(); ++i) {
         auto vx = m_vertices[i].X();
         auto vy = m_vertices[i].Y();
         auto vz = m_vertices[i].Z();
