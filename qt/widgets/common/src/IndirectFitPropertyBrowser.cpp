@@ -179,9 +179,14 @@ void IndirectFitPropertyBrowser::init() {
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
+  connect(this, SIGNAL(functionCleared()), this, SLOT(clearCustomFunctions()));
+
   initLayout(w);
 }
 
+/**
+ * @return  The selected background function.
+ */
 IFunction_sptr IndirectFitPropertyBrowser::background() const {
   if (m_backgroundHandler != nullptr)
     return m_backgroundHandler->function()->clone();
@@ -189,13 +194,21 @@ IFunction_sptr IndirectFitPropertyBrowser::background() const {
     return nullptr;
 }
 
+/**
+ * @return  The function index of the selected background. -1 if no background
+ *          is selected.
+ */
 int IndirectFitPropertyBrowser::backgroundIndex() const {
   if (m_backgroundHandler != nullptr)
-    return functionIndex(m_backgroundHandler->function());
+    return m_backgroundHandler->functionPrefix().right(1).toInt();
   else
     return -1;
 }
 
+/**
+ * @param   The function, whose function index to retrieve.
+ * @return  The function index of the specified function in the browser.
+ */
 int IndirectFitPropertyBrowser::functionIndex(IFunction_sptr function) const {
   for (size_t i = 0u; i < compositeFunction()->nFunctions(); ++i) {
     if (compositeFunction()->getFunction(i) == function)
@@ -204,11 +217,17 @@ int IndirectFitPropertyBrowser::functionIndex(IFunction_sptr function) const {
   return -1;
 }
 
+/**
+ * @return  The selected fit type in the fit type combo box.
+ */
 QString IndirectFitPropertyBrowser::selectedFitType() const {
   const auto index = m_enumManager->value(m_functionsInComboBox);
   return m_enumManager->enumNames(m_functionsInComboBox)[index];
 }
 
+/**
+ * @return  The name of the selected background function.
+ */
 QString IndirectFitPropertyBrowser::backgroundName() const {
   auto background = enumValue(m_backgroundSelection);
   if (background.isEmpty())
@@ -217,10 +236,11 @@ QString IndirectFitPropertyBrowser::backgroundName() const {
     return background;
 }
 
-QString IndirectFitPropertyBrowser::backgroundPrefix() const {
-  return m_backgroundHandler->functionPrefix();
-}
-
+/**
+ * @param functionName  The name of the function.
+ * @return              The number of custom functions, with the specified name,
+ *                      included in the selected model.
+ */
 size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
     const std::string &functionName) const {
 
@@ -230,6 +250,12 @@ size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
     return 0;
 }
 
+/**
+ * @param functionName  The name of the function containing the parameter.
+ * @param parameterName The name of the parameter whose value to retrieve.
+ * @return              The value of the parameter with the specified name, in
+ *                      the function with the specified name.
+ */
 double IndirectFitPropertyBrowser::parameterValue(
     const std::string &functionName, const std::string &parameterName) const {
   const auto composite = compositeFunction();
@@ -243,6 +269,14 @@ double IndirectFitPropertyBrowser::parameterValue(
   return 0.0;
 }
 
+/**
+ * Sets the value of the parameter with the specified name, in the function with
+ * the specified name.
+ *
+ * @param functionName  The name of the function containing the parameter.
+ * @param parameterName The name of the parameter to set.
+ * @param value         The value to set.
+ */
 void IndirectFitPropertyBrowser::setParameterValue(
     const std::string &functionName, const std::string &parameterName,
     double value) {
@@ -258,6 +292,14 @@ void IndirectFitPropertyBrowser::setParameterValue(
   updateParameters();
 }
 
+/**
+ * Sets the value of the parameter with the specified name, in the specified
+ * function.
+ *
+ * @param function      The function containing the parameter.
+ * @param parameterName The name of the parameter to set.
+ * @param value         The value to set.
+ */
 void IndirectFitPropertyBrowser::setParameterValue(
     IFunction_sptr function, const std::string &parameterName, double value) {
   if (function->hasParameter(parameterName)) {
@@ -266,22 +308,43 @@ void IndirectFitPropertyBrowser::setParameterValue(
   }
 }
 
+/**
+ * Sets the background to add to the selected model.
+ *
+ * @param backgroundName  The name of the background to add.
+ */
 void IndirectFitPropertyBrowser::setBackground(
     const std::string &backgroundName) {
   if (m_backgroundHandler != nullptr && backgroundIndex() >= 0)
     FitPropertyBrowser::removeFunction(m_backgroundHandler);
 
-  if (backgroundName != "None") {
+  if (backgroundName != "None")
     m_backgroundHandler = addFunction(backgroundName);
-  } else
+  else
     m_backgroundHandler = nullptr;
 }
 
+/**
+ * Updates the values of the function parameters in this fit property browser,
+ * using the specified map from parameter name to updated value.
+ *
+ * @param parameterValues A map from the name of a parameter to its updated
+ *                        value.
+ */
 void IndirectFitPropertyBrowser::updateParameterValues(
     const QHash<QString, double> &parameterValues) {
   updateParameterValues(getHandler(), parameterValues);
 }
 
+/**
+ * Updates the values of the parameters of the function held by the specified
+ * property handler, using the specified map from parameter name to updated
+ * value.
+ *
+ * @param functionHandler The property handler containing the function.
+ * @param parameterValues A map from the name of a parameter to its updated
+ *                        value.
+ */
 void IndirectFitPropertyBrowser::updateParameterValues(
     PropertyHandler *functionHandler,
     const QHash<QString, double> &parameterValues) {
@@ -305,6 +368,11 @@ void IndirectFitPropertyBrowser::updateParameterValues(
   updateParameters();
 }
 
+/**
+ * Sets the available background options in this indirect fit property browser.
+ *
+ * @param backgrounds A list of the names of available backgrouns to set.
+ */
 void IndirectFitPropertyBrowser::setBackgroundOptions(
     const QStringList &backgrounds) {
   const auto currentlyHidden =
@@ -319,6 +387,10 @@ void IndirectFitPropertyBrowser::setBackgroundOptions(
   m_enumManager->setEnumNames(m_backgroundSelection, backgrounds);
 }
 
+/**
+ * Moves the functions attached to a custom function group, to the end of the
+ * model.
+ */
 void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
   blockSignals(true);
   for (auto &handlerProperty : m_orderedFunctionGroups) {
@@ -327,33 +399,59 @@ void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
     for (int i = 0; i < handlers.size(); ++i) {
       auto &handler = handlers[i];
       const auto function = handler->function();
-      handler->removeFunction();
-      handler = addFunction(function->asString());
+
+      if (handler->parentHandler() != nullptr) {
+        handler->removeFunction();
+        handler = addFunction(function->asString());
+      }
     }
   }
   blockSignals(false);
 }
 
+/**
+ * @param settingKey  The key of the boolean setting whose value to retrieve.
+ * @return            The value of the boolean setting with the specified key.
+ */
 bool IndirectFitPropertyBrowser::boolSettingValue(
     const QString &settingKey) const {
   return m_boolManager->value(m_customSettings[settingKey]);
 }
 
+/**
+ * @param settingKey  The key of the integer setting whose value to retrieve.
+ * @return            The value of the integer setting with the specified key.
+ */
 int IndirectFitPropertyBrowser::intSettingValue(
     const QString &settingKey) const {
   return m_intManager->value(m_customSettings[settingKey]);
 }
 
+/**
+ * @param settingKey  The key of the double setting whose value to retrieve.
+ * @return            The value of the double setting with the specified key.
+ */
 double IndirectFitPropertyBrowser::doubleSettingValue(
     const QString &settingKey) const {
   return m_doubleManager->value(m_customSettings[settingKey]);
 }
 
+/**
+ * @param settingKey  The key of the enum setting whose value to retrieve.
+ * @return            The value of the enum setting with the specified key.
+ */
 QString
 IndirectFitPropertyBrowser::enumSettingValue(const QString &settingKey) const {
   return m_enumManager->value(m_customSettings[settingKey]);
 }
 
+/**
+ * Adds a boolean custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the boolean setting to add.
+ * @param settingName   The display name of the boolean setting to add.
+ * @param defaultValue  The default value of the boolean setting.
+ */
 void IndirectFitPropertyBrowser::addBoolCustomSetting(
     const QString &settingKey, const QString &settingName, bool defaultValue) {
   auto settingProperty = m_boolManager->addProperty(settingName);
@@ -361,6 +459,13 @@ void IndirectFitPropertyBrowser::addBoolCustomSetting(
   addCustomSetting(settingKey, settingProperty);
 }
 
+/**
+ * Adds an integer custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the integer setting to add.
+ * @param settingName   The display name of the integer setting to add.
+ * @param defaultValue  The default value of the integer setting.
+ */
 void IndirectFitPropertyBrowser::addIntCustomSetting(const QString &settingKey,
                                                      const QString &settingName,
                                                      int defaultValue) {
@@ -369,6 +474,13 @@ void IndirectFitPropertyBrowser::addIntCustomSetting(const QString &settingKey,
   addCustomSetting(settingKey, settingProperty);
 }
 
+/**
+ * Adds a double custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the double setting to add.
+ * @param settingName   The display name of the double setting to add.
+ * @param defaultValue  The default value of the double setting.
+ */
 void IndirectFitPropertyBrowser::addDoubleCustomSetting(
     const QString &settingKey, const QString &settingName,
     double defaultValue) {
@@ -377,6 +489,13 @@ void IndirectFitPropertyBrowser::addDoubleCustomSetting(
   addCustomSetting(settingKey, settingProperty);
 }
 
+/**
+ * Adds an enum custom setting, with the specified key and display name.
+ *
+ * @param settingKey    The key of the enum setting to add.
+ * @param settingName   The display name of the enum setting to add.
+ * @param defaultValue  The default value of the enum setting.
+ */
 void IndirectFitPropertyBrowser::addEnumCustomSetting(
     const QString &settingKey, const QString &settingName,
     const QStringList &options) {
@@ -385,6 +504,13 @@ void IndirectFitPropertyBrowser::addEnumCustomSetting(
   addCustomSetting(settingKey, settingProperty);
 }
 
+/**
+ * Adds a custom setting with the specified key to this indirect fit property
+ * browser.
+ *
+ * @param settingKey      The key of the custom setting to add.
+ * @param settingProperty The property to display in the fit property browser.
+ */
 void IndirectFitPropertyBrowser::addCustomSetting(const QString &settingKey,
                                                   QtProperty *settingProperty) {
   m_customSettingsGroup->addSubProperty(settingProperty);
@@ -399,6 +525,18 @@ void IndirectFitPropertyBrowser::addCustomSetting(const QString &settingKey,
   m_customSettings[settingKey] = settingProperty;
 }
 
+/**
+ * Adds an optional double custom setting, with the specified key and display
+ * name.
+ *
+ * @param settingKey    The key of the optional double setting to add.
+ * @param settingName   The display name of the optional double setting to add.
+ * @param optionKey     The key of the setting specifying whether to use this
+ *                      this optional setting.
+ * @param optionName    The display name of the setting specifying whether to
+ *                      use this optional setting.
+ * @param defaultValue  The default value of the optional double setting.
+ */
 void IndirectFitPropertyBrowser::addOptionalDoubleSetting(
     const QString &settingKey, const QString &settingName,
     const QString &optionKey, const QString &optionName, bool enabled,
@@ -409,6 +547,17 @@ void IndirectFitPropertyBrowser::addOptionalDoubleSetting(
                      enabled);
 }
 
+/**
+ * Adds an optional custom setting, with the specified key and display name.
+ *
+ * @param settingKey      The key of the optional double setting to add.
+ * @param settingProperty The property to display in the fit property browser.
+ * @param optionKey       The key of the setting specifying whether to use this
+ *                        this optional setting.
+ * @param optionName      The display name of the setting specifying whether to
+ *                        use this optional setting.
+ * @param defaultValue    The default value of the optional double setting.
+ */
 void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
                                                     QtProperty *settingProperty,
                                                     const QString &optionKey,
@@ -425,6 +574,15 @@ void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
     optionProperty->addSubProperty(settingProperty);
 }
 
+/**
+ * Adds a check-box with the specified name, to this fit property browser, which
+ * when checked adds the specified functions to the mode and when unchecked,
+ * removes them.
+ *
+ * @param groupName     The name/label of the check-box to add.
+ * @param functions     The functions to be added when the check-box is checked.
+ * @param defaultValue  The default value of the check-box.
+ */
 void IndirectFitPropertyBrowser::addCheckBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions,
     bool defaultValue) {
@@ -433,6 +591,17 @@ void IndirectFitPropertyBrowser::addCheckBoxFunctionGroup(
   addCustomFunctionGroup(groupName, functions);
 }
 
+/**
+ * Adds a number spinner with the specified name, to this fit property browser,
+ * which specifies how many multiples of the specified functions should be added
+ * to the model.
+ *
+ * @param groupName     The name/label of the spinner to add.
+ * @param functions     The functions to be added.
+ * @param minimum       The minimum value of the spinner.
+ * @param maximum       The maximum value of the spinner.
+ * @param defaultValue  The default value of the spinner.
+ */
 void IndirectFitPropertyBrowser::addSpinnerFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions,
     int minimum, int maximum, int defaultValue) {
@@ -444,6 +613,14 @@ void IndirectFitPropertyBrowser::addSpinnerFunctionGroup(
   addCustomFunctionGroup(groupName, functions);
 }
 
+/**
+ * Adds an option with the specified name, to the fit type combo-box in this fit
+ * property browser, which adds the specified functions to the model.
+ *
+ * @param groupName The name of the option to be added to the fit type
+ *                  combo-box.
+ * @param functions The functions added by the option.
+ */
 void IndirectFitPropertyBrowser::addComboBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   if (m_functionsInComboBox == nullptr) {
@@ -459,6 +636,13 @@ void IndirectFitPropertyBrowser::addComboBoxFunctionGroup(
   addCustomFunctionGroup(groupName, functions);
 }
 
+/**
+ * Adds a custom function group to this fit property browser, with the specified
+ * name and the associated specified functions.
+ *
+ * @param groupName The name of the function group.
+ * @param functions The functions associated to the function group.
+ */
 void IndirectFitPropertyBrowser::addCustomFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   m_groupToFunctionList[groupName] = functions;
@@ -470,6 +654,15 @@ void IndirectFitPropertyBrowser::addCustomFunctionGroup(
   }
 }
 
+/**
+ * Adds a specified multiple of the custom function group with the specified
+ * name. Displays the functions in the specified property.
+ *
+ * @param prop      The property in which to display the functions.
+ * @param groupName The name of the function group.
+ * @param multiples The number of times to add the functions in the function
+ *                  group.
+ */
 void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
                                                     const QString &groupName,
                                                     const int &multiples) {
@@ -477,6 +670,13 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
     addCustomFunctions(prop, groupName);
 }
 
+/**
+ * Adds the custom function group with the specified name. Displays the
+ * functions in the specified property.
+ *
+ * @param prop      The property in which to display the functions.
+ * @param groupName The name of the function group.
+ */
 void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
                                                     const QString &groupName) {
   if (!m_functionHandlers.contains(prop))
@@ -492,10 +692,33 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
   emit functionChanged();
 }
 
+/**
+ * Clears all custom functions in this fit property browser.
+ */
+void IndirectFitPropertyBrowser::clearCustomFunctions() {
+  for (const auto &prop : m_functionHandlers.keys()) {
+    if (m_functionsAsCheckBox.contains(prop))
+      m_boolManager->setValue(prop, false);
+    else if (m_functionsAsSpinner.contains(prop))
+      m_intManager->setValue(prop, 0);
+    m_functionHandlers[prop].clear();
+  }
+
+  setBackground("None");
+  m_enumManager->setValue(m_backgroundSelection, 0);
+  m_enumManager->setValue(m_functionsInComboBox, 0);
+}
+
+/**
+ * Clears all custom functions in the specified property.
+ *
+ * @param prop  The property to clear of custom functions.
+ */
 void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
   blockSignals(true);
   for (const auto &functionHandler : m_functionHandlers[prop]) {
-    if (functionIndex(functionHandler->function()) >= 0) {
+
+    if (functionHandler->parentHandler() != nullptr) {
       FitPropertyBrowser::removeFunction(functionHandler);
       m_customFunctionCount[functionHandler->function()->name()] -= 1;
     }
@@ -508,6 +731,17 @@ void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
   emit functionChanged();
 }
 
+/**
+ * Creates a custom function group property, to use for displaying an
+ * option for selecting the function group.
+ *
+ * @param groupName       The name of the function group.
+ * @param propertyManager The property manager, to be used to create
+ *                        the property.
+ * @param atFront         If true, moves the created function group
+ *                        property to precede others in this indirect
+ *                        fit property.
+ */
 QtProperty *IndirectFitPropertyBrowser::createFunctionGroupProperty(
     const QString &groupName, QtAbstractPropertyManager *propertyManager,
     bool atFront) {
@@ -525,6 +759,12 @@ QtProperty *IndirectFitPropertyBrowser::createFunctionGroupProperty(
   return functionProperty;
 }
 
+/**
+ * Removes the function, associated to the specified handler, from this indirect
+ * fit property browser.
+ *
+ * @param handler The handler containing the function to be removed.
+ */
 void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
 
   for (const auto &prop : m_functionHandlers.keys()) {
@@ -547,16 +787,27 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
   if (handler == m_backgroundHandler)
     m_enumManager->setValue(m_backgroundSelection, 0);
 
-  if (functionIndex(handler->function()) >= 0)
+  if (handler->parentHandler() != nullptr)
     FitPropertyBrowser::removeFunction(handler);
 }
 
+/**
+ * Schedules a fit.
+ */
 void IndirectFitPropertyBrowser::fit() { emit fitScheduled(); }
 
+/**
+ * Schedules a sequential fit.
+ */
 void IndirectFitPropertyBrowser::sequentialFit() {
   emit sequentialFitScheduled();
 }
 
+/**
+ * Called when an enum value changes in this indirect fit property browser.
+ *
+ * @param prop  The property containing the enum value which was changed.
+ */
 void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
 
   if (prop == m_functionsInComboBox) {
@@ -570,6 +821,11 @@ void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
   FitPropertyBrowser::enumChanged(prop);
 }
 
+/**
+ * Called when a boolean value changes in this indirect fit property browser.
+ *
+ * @param prop  The property containing the boolean value which was changed.
+ */
 void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
   const auto propertyName = prop->propertyName();
 
@@ -591,6 +847,11 @@ void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
   FitPropertyBrowser::boolChanged(prop);
 }
 
+/**
+* Called when an integer value changes in this indirect fit property browser.
+*
+* @param prop  The property containing the integer value which was changed.
+*/
 void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
 
   if (m_functionsAsSpinner.contains(prop)) {
@@ -602,6 +863,10 @@ void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
   FitPropertyBrowser::intChanged(prop);
 }
 
+/**
+ * @param prop  The property whose enum value to extract.
+ * @return      The enum value of the specified property.
+ */
 QString IndirectFitPropertyBrowser::enumValue(QtProperty *prop) const {
   const auto values = m_enumManager->enumNames(prop);
   if (values.isEmpty())

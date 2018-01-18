@@ -32,8 +32,6 @@ public:
 
   QString backgroundName() const;
 
-  QString backgroundPrefix() const;
-
   size_t numberOfCustomFunctions(const std::string &functionName) const;
 
   double parameterValue(const std::string &functionName,
@@ -118,6 +116,8 @@ protected slots:
   void boolChanged(QtProperty *prop) override;
 
   void intChanged(QtProperty *prop) override;
+
+  void clearCustomFunctions();
 
 signals:
   void customBoolChanged(const QString &settingName, bool value);
