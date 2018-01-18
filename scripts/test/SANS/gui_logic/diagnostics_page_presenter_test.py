@@ -12,6 +12,7 @@ else:
     import mock
 
 
+
 class DiagnosticsPagePresenterTest(unittest.TestCase):
     def setUp(self):
         self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
