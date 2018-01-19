@@ -42,7 +42,7 @@ protected slots:
   void newDataLoaded(const QString &wsName);
   void extendResolutionWorkspace();
   void updatePreviewPlots() override;
-  void rangeChanged(double xMin, double xMax) override;
+  void updatePlotRange() override;
   void plotGuess() override;
   void singleFit();
   void specMinChanged(int value);
