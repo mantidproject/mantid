@@ -38,13 +38,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport AlgorithmObserverAdapter : public API::AlgorithmObserver {
 public:
   explicit AlgorithmObserverAdapter(PyObject *self);
-  AlgorithmObserverAdapter(const AlgorithmObserverAdapter&) = delete;
-  AlgorithmObserverAdapter& operator=(const AlgorithmObserverAdapter&) = delete;
+  AlgorithmObserverAdapter(const AlgorithmObserverAdapter &) = delete;
+  AlgorithmObserverAdapter &
+  operator=(const AlgorithmObserverAdapter &) = delete;
   void progressHandle(const API::IAlgorithm *alg, double p,
                       const std::string &msg) override;
   void startingHandle(API::IAlgorithm_sptr alg) override;
   void finishHandle(const API::IAlgorithm *alg) override;
-  void errorHandle(const API::IAlgorithm *alg, const std::string &what) override;
+  void errorHandle(const API::IAlgorithm *alg,
+                   const std::string &what) override;
+
 private:
   /// Return the PyObject that owns this wrapper, i.e. self
   inline PyObject *getSelf() const { return m_self; }
