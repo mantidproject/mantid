@@ -18,8 +18,13 @@ class _GSASIIRefineFitPeaksTestHelper(object):
     _path_to_gsas = None
 
     def path_to_gsas(self):
-        if not self._path_to_gsas:
-            self._path_to_gsas = os.path.join(site.USER_SITE, "g2conda", "GSASII")
+        if self._path_to_gsas is not None:
+            gsas_location = os.path.join(site.USER_SITE, "g2conda", "GSASII")
+            if os.path.isdir(gsas_location):
+                self._path_to_gsas = os.path.join(site.USER_SITE, "g2conda", "GSASII")
+            else:
+                self._path_to_gsas = ""
+
         return self._path_to_gsas
 
     def input_ws_path(self):
@@ -52,15 +57,11 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRe
         self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
         input_ws = Load(Filename=self.input_ws_path())
 
-        gsas_path = self.path_to_gsas()
-        if not gsas_path:
-            self.fail("Could not find GSAS-II installation")
-
         self.gof, self.rwp, _ = GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
                                                      InputWorkspace=input_ws,
                                                      PhaseInfoFile=self.phase_file_path(),
                                                      InstrumentFile=self.inst_param_file_path(),
-                                                     PathToGSASII=gsas_path,
+                                                     PathToGSASII=self.path_to_gsas(),
                                                      SaveGSASIIProjectFile=self.gsas_proj_path,
                                                      MuteGSASII=True,
                                                      LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
@@ -93,15 +94,11 @@ class GSASIIRefineFitPeaksPawleyTest(stresstesting.MantidStressTest, _GSASIIRefi
         self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
         input_ws = Load(Filename=self.input_ws_path())
 
-        gsas_path = self.path_to_gsas()
-        if not gsas_path:
-            self.fail("Could not find GSAS-II installation")
-
         self.gof, self.rwp, _ = GSASIIRefineFitPeaks(RefinementMethod="Pawley refinement",
                                                      InputWorkspace=input_ws,
                                                      PhaseInfoFile=self.phase_file_path(),
                                                      InstrumentFile=self.inst_param_file_path(),
-                                                     PathToGSASII=gsas_path,
+                                                     PathToGSASII=self.path_to_gsas(),
                                                      SaveGSASIIProjectFile=self.gsas_proj_path,
                                                      MuteGSASII=True,
                                                      LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
