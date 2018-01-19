@@ -812,7 +812,6 @@ void ConvFit::updatePreviewPlots() {
   const auto baseGroupName = outputWorkspaceName() + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(baseGroupName, m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
-  IndirectDataAnalysisTab::updatePlotRange("ConvFitRange", m_uiForm->ppPlotTop);
 }
 
 void ConvFit::updatePlotRange() {

@@ -152,8 +152,10 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(plotGuess()));
 
-  connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
-          SLOT(updatePlotRange()));
+  connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
+          SLOT(startXChanged(double)));
+  connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
+          SLOT(endXChanged(double)));
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
           SLOT(plotGuess()));
 
@@ -726,9 +728,8 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   m_parameterValues.clear();
   m_fitFunction.reset();
   m_outputFitName = "";
-  blockSignals(true);
   updatePreviewPlots();
-  blockSignals(false);
+  updatePlotRange();
 }
 
 /*
