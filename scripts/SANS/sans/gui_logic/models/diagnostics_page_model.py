@@ -2,13 +2,14 @@ from sans.common.general_functions import parse_diagnostic_settings
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
 from sans.common.general_functions import (create_child_algorithm, create_managed_non_child_algorithm)
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import IntegralEnum, DetectorType
+from sans.common.enums import IntegralEnum, DetectorType, SANSDataType
 from mantid.api import AlgorithmPropertyWithValue
-from sans.algorithm_detail.batch_execution import set_output_workspaces_on_load_algorithm, get_workspace_from_algorithm
+from sans.algorithm_detail.batch_execution import set_output_workspaces_on_load_algorithm, get_workspace_from_algorithm, provide_loaded_data, create_unmanaged_algorithm, add_to_group
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
+from mantid import AnalysisDataService
 
 try:
     import mantidplot
@@ -18,24 +19,42 @@ except (Exception, Warning):
 
 def run_integral(range, mask, integral, detector, state):
     ranges = parse_range(range)
-    input_workspace = load_workspace(state)
-    input_workspace = crop_workspace(DetectorType.to_string(detector), input_workspace)
+    input_workspaces = load_workspace(state)
 
-    if mask:
-        input_workspace = apply_mask(state, input_workspace, DetectorType.to_string(detector))
-
-    x_dim, y_dim = get_detector_size_from_sans_file(state, detector)
+    is_multi_range = len (ranges) > 1
 
     output_workspaces = []
-    for range in ranges:
-        output_workspace = generate_output_workspace_name(range, integral, mask, detector, input_workspace.name())
-        output_workspace = run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_dim)
-        output_workspaces.append(output_workspace)
+    for input_workspace in input_workspaces:
+        input_workspace_name = input_workspace.name()
+        input_workspace = crop_workspace(DetectorType.to_string(detector), input_workspace)
 
-    plot_graph(output_workspaces)
+        if mask:
+            input_workspace = apply_mask(state, input_workspace, DetectorType.to_string(detector))
+
+        x_dim, y_dim = get_detector_size_from_sans_file(state, detector)
+
+
+        output_workspace = integrate_ranges(ranges, integral, mask, detector, input_workspace_name, input_workspace, x_dim, y_dim,
+                                            is_multi_range)
+        plot_graph(output_workspace)
+
+        output_workspaces.append(output_workspace)
 
     return output_workspaces
 
+
+def integrate_ranges(ranges, integral, mask, detector, input_workspace_name, input_workspace, x_dim, y_dim, is_multi_range):
+    for range in ranges:
+        output_workspace = generate_output_workspace_name(range, integral, mask, detector, input_workspace_name)
+        output_workspace = run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_dim)
+
+        if is_multi_range:
+            add_to_group(output_workspace, input_workspace_name + '_ranges')
+
+    if is_multi_range:
+        return AnalysisDataService.retrieve(input_workspace_name + '_ranges')
+    else:
+        return output_workspace
 
 def parse_range(range):
     if range:
@@ -45,22 +64,19 @@ def parse_range(range):
 
 
 def load_workspace(state):
-    use_optimizations = True
-    # Load the data
-    state_serialized = state.property_manager
-    load_name = "SANSLoad"
-    load_options = {"SANSState": state_serialized,
-                    "PublishToCache": use_optimizations,
-                    "UseCached": use_optimizations,
-                    "MoveWorkspace": False}
+    workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
+                         SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
+                         SANSDataType.SampleDirect: "SampleDirectWorkspace",
+                         SANSDataType.CanScatter: "CanScatterWorkspace",
+                         SANSDataType.CanTransmission: "CanTransmissionWorkspace",
+                         SANSDataType.CanDirect: "CanDirectWorkspace"}
 
-    # Set the output workspaces
-    set_output_workspaces_on_load_algorithm(load_options, state)
+    workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkspace",
+                            SANSDataType.CanScatter: "CanScatterMonitorWorkspace"}
 
-    load_alg = create_managed_non_child_algorithm(load_name, **load_options)
-    load_alg.execute()
+    workspaces, monitors = provide_loaded_data(state, False, workspace_to_name, workspace_to_monitor)
 
-    return get_workspace_from_algorithm(load_alg, 'SampleScatterWorkspace')
+    return workspaces[SANSDataType.SampleScatter]
 
 
 def crop_workspace(component, workspace):
@@ -68,7 +84,7 @@ def crop_workspace(component, workspace):
     crop_options = {"InputWorkspace": workspace,
                     "OutputWorkspace": EMPTY_NAME,
                     "Component": component}
-    crop_alg = create_child_algorithm('', crop_name, **crop_options)
+    crop_alg = create_unmanaged_algorithm(crop_name, **crop_options)
     crop_alg.execute()
     return crop_alg.getProperty("OutputWorkspace").value
 
@@ -78,17 +94,17 @@ def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_d
     hv_max = range[1]
 
     if integral == IntegralEnum.Horizontal:
-        ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='x',
+        output_workspace = ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='x',
                                HorizontalAxis='y', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
-        SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
+        output_workspace = SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
                    EndWorkspaceIndex=hv_max)
     elif integral == IntegralEnum.Vertical:
-        ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='y',
+        output_workspace = ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='y',
                                HorizontalAxis='x', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
-        SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
+        output_workspace = SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
                    EndWorkspaceIndex=hv_max)
     elif integral == IntegralEnum.Time:
-        SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace,
+        output_workspace = SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace,
                    StartWorkspaceIndex=hv_min, EndWorkspaceIndex=hv_max)
 
     return output_workspace
@@ -97,9 +113,10 @@ def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_d
 def generate_output_workspace_name(range, integral, mask, detector, input_workspace_name):
     integral_string = IntegralEnum.to_string(integral)
     detector_string = DetectorType.to_string(detector)
-    return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range, integral_string,
-                                                                         detector_string, mask)
 
+    return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range,
+                                                                             integral_string,
+                                                                             detector_string, mask)
 
 def plot_graph(workspace):
     if mantidplot:

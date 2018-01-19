@@ -284,6 +284,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         if instrument_name_enum:
             self.set_instrument_settings(instrument_name_enum)
+            self._instrument_changed()
 
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
