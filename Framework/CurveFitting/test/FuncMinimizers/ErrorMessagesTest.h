@@ -50,7 +50,7 @@ public:
       fit.setProperty("MaxIterations", 10);
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
-      TS_ASSERT_EQUALS(status, "cannot reach the specified tolerance in F");
+      TS_ASSERT_EQUALS(status, "Changes in function value are too small");
     }
     {
       Fit fit;

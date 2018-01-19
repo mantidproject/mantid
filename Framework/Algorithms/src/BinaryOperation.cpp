@@ -22,15 +22,6 @@ using std::size_t;
 
 namespace Mantid {
 namespace Algorithms {
-BinaryOperation::BinaryOperation()
-    : API::Algorithm(), m_lhs(), m_elhs(), m_rhs(), m_erhs(), m_out(), m_eout(),
-      m_AllowDifferentNumberSpectra(false), m_ClearRHSWorkspace(false),
-      m_matchXSize(false), m_flipSides(false), m_keepEventWorkspace(false),
-      m_useHistogramForRhsEventWorkspace(false),
-      m_do2D_even_for_SingleColumn_on_rhs(false) {}
-
-BinaryOperation::~BinaryOperation() {}
-
 /** Initialisation method.
  *  Defines input and output workspaces
  *
@@ -1041,6 +1032,25 @@ BinaryOperation::buildBinaryOperationTable(
   }
 
   return table;
+}
+
+Parallel::ExecutionMode BinaryOperation::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  if (static_cast<bool>(getProperty("AllowDifferentNumberSpectra")))
+    return Parallel::ExecutionMode::Invalid;
+  auto lhs = storageModes.find(inputPropName1())->second;
+  auto rhs = storageModes.find(inputPropName2())->second;
+  // Two identical modes is ok
+  if (lhs == rhs)
+    return getCorrespondingExecutionMode(storageModes.begin()->second);
+  // Mode <X> times Cloned is ok if the cloned workspace is WorkspaceSingleValue
+  if (rhs == Parallel::StorageMode::Cloned) {
+    API::MatrixWorkspace_const_sptr ws = getProperty(inputPropName2());
+    if (boost::dynamic_pointer_cast<const WorkspaceSingleValue>(ws))
+      return getCorrespondingExecutionMode(lhs);
+  }
+  // Other options are not ok (e.g., MasterOnly times Distributed)
+  return Parallel::ExecutionMode::Invalid;
 }
 
 } // namespace Algorithms

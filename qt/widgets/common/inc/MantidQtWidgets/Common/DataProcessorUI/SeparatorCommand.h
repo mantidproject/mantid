@@ -46,6 +46,7 @@ public:
   QString tooltip() override { return QString(); }
   QString whatsthis() override { return QString(); }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }

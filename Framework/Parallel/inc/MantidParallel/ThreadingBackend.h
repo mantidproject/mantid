@@ -3,6 +3,7 @@
 
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
+#include "MantidParallel/Status.h"
 #include "MantidKernel/make_unique.h"
 
 #include <boost/archive/binary_oarchive.hpp>
@@ -16,6 +17,7 @@
 #include <ostream>
 #include <sstream>
 #include <tuple>
+#include <vector>
 
 namespace Mantid {
 namespace Parallel {
@@ -63,7 +65,7 @@ public:
   void send(int source, int dest, int tag, T &&... args);
 
   template <typename... T>
-  void recv(int dest, int source, int tag, T &&... args);
+  Status recv(int dest, int source, int tag, T &&... args);
 
   template <typename... T>
   Request isend(int source, int dest, int tag, T &&... args);
@@ -92,22 +94,32 @@ void saveToStream(boost::archive::binary_oarchive &oa,
 template <class T>
 void saveToStream(boost::archive::binary_oarchive &oa, const T *data,
                   const size_t count) {
+  oa.operator<<(count);
   for (size_t i = 0; i < count; ++i)
     oa.operator<<(data[i]);
 }
 template <class T>
-void loadFromStream(boost::archive::binary_iarchive &ia, T &data) {
+size_t loadFromStream(boost::archive::binary_iarchive &ia, T &data) {
   ia.operator>>(data);
+  return sizeof(T);
 }
 template <class T>
-void loadFromStream(boost::archive::binary_iarchive &ia, std::vector<T> &data) {
+size_t loadFromStream(boost::archive::binary_iarchive &ia,
+                      std::vector<T> &data) {
   ia.operator>>(data);
+  return data.size() * sizeof(T);
 }
 template <class T>
-void loadFromStream(boost::archive::binary_iarchive &ia, T *data,
-                    const size_t count) {
-  for (size_t i = 0; i < count; ++i)
+size_t loadFromStream(boost::archive::binary_iarchive &ia, T *data,
+                      const size_t count) {
+  size_t received;
+  ia.operator>>(received);
+  for (size_t i = 0; i < count; ++i) {
+    if (i >= received)
+      return i * sizeof(T);
     ia.operator>>(data[i]);
+  }
+  return count * sizeof(T);
 }
 }
 
@@ -131,7 +143,7 @@ void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
 }
 
 template <typename... T>
-void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
+Status ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
   const auto key = std::make_tuple(source, dest, tag);
   std::unique_ptr<std::stringbuf> buf;
   while (true) {
@@ -151,7 +163,7 @@ void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
   }
   std::istream is(buf.get());
   boost::archive::binary_iarchive ia(is);
-  detail::loadFromStream(ia, std::forward<T>(args)...);
+  return Status(detail::loadFromStream(ia, std::forward<T>(args)...));
 }
 
 template <typename... T>

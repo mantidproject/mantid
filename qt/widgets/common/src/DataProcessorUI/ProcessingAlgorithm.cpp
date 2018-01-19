@@ -83,6 +83,16 @@ QString ProcessingAlgorithm::inputPropertyName(size_t index) const {
 QString ProcessingAlgorithm::outputPropertyName(size_t index) const {
   return m_outputProperties[index];
 }
+
+/** Returns the list of output property names
+ */
+std::vector<QString> ProcessingAlgorithm::outputProperties() const {
+  return m_outputProperties;
+}
+
+/** Returns the list of prefixes associated with the output properties
+ */
+std::vector<QString> ProcessingAlgorithm::prefixes() const { return m_prefix; }
 }
 }
 }
