@@ -165,6 +165,7 @@ void ConvFit::setup() {
  */
 void ConvFit::run() {
   if (validate()) {
+    m_uiForm->ckPlotGuess->setChecked(false);
     m_usedTemperature = boolSettingValue("UseTempCorrection");
     m_temperature = doubleSettingValue("TempCorrection");
     executeSequentialFit();
@@ -302,41 +303,42 @@ ConvFit::applyTemperatureCorrection(IFunction_sptr function,
   return product;
 }
 
-IAlgorithm_sptr ConvFit::singleFitAlgorithm() {
+std::string ConvFit::createSingleFitOutputName() const {
+  return constructBaseName() + std::to_string(selectedSpectrum());
+}
+
+std::string ConvFit::createSequentialFitOutputName() const {
+  const auto specMin = std::to_string(minimumSpectrum());
+  const auto specMax = std::to_string(maximumSpectrum());
+  return constructBaseName() + specMin + "_to_" + specMax;
+}
+
+std::string ConvFit::constructBaseName() const {
+  auto outputName = inputWorkspace()->getName();
+
+  // Remove _red
+  const auto cutIndex = outputName.find_last_of('_');
+  if (cutIndex != std::string::npos)
+    outputName = outputName.substr(0, cutIndex);
+
+  const auto background = backgroundString(backgroundType()).toStdString();
+  const auto fitType = fitTypeString().toStdString();
+  outputName += "conv_" + fitType + background;
+  return outputName;
+}
+
+IAlgorithm_sptr ConvFit::singleFitAlgorithm() const {
   const auto spectrum = selectedSpectrum();
   return sequentialFit(spectrum, spectrum);
 }
 
-IAlgorithm_sptr ConvFit::sequentialFitAlgorithm() {
+IAlgorithm_sptr ConvFit::sequentialFitAlgorithm() const {
   const auto specMin = minimumSpectrum();
   const auto specMax = maximumSpectrum();
   return sequentialFit(specMin, specMax);
 }
 
 IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin, const int &specMax) {
-  // Construct expected name
-  m_baseName = QString::fromStdString(inputWorkspace()->getName());
-
-  // Remove _red
-  const auto cutIndex = m_baseName.lastIndexOf("_");
-  if (cutIndex != -1) {
-    m_baseName = m_baseName.left(cutIndex + 1);
-  }
-
-  // Add fit specific suffix
-  const auto bgType = backgroundString(backgroundType());
-  const auto fitType = fitTypeString();
-  m_baseName += "conv_";
-  m_baseName += fitType;
-  m_baseName += bgType;
-  m_baseName += QString::number(specMin);
-
-  if (specMin != specMax) {
-    m_baseName += "_to_";
-    m_baseName += QString::number(specMax);
-  }
-
-  // Run ConvolutionFitSequential Algorithm
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
   cfs->setProperty("PassWSIndexToFunction", true);
@@ -344,11 +346,11 @@ IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin, const int &specMax) {
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("ExtractMembers", boolSettingValue("ExtractMembers"));
-  cfs->setProperty("OutputWorkspace", (m_baseName.toStdString() + "_Result"));
+  cfs->setProperty("OutputWorkspace", outputWorkspaceName() + "_Result");
   return cfs;
 }
 
-QString ConvFit::backgroundType() {
+QString ConvFit::backgroundType() const {
   const auto backgroundString = backgroundName();
 
   if (backgroundString == "None") {
@@ -369,14 +371,14 @@ QString ConvFit::backgroundType() {
  * Handles saving the workspace when save is clicked
  */
 void ConvFit::saveClicked() {
-  IndirectFitAnalysisTab::saveResult(m_baseName.toStdString() + "_Result");
+  IndirectFitAnalysisTab::saveResult(outputWorkspaceName() + "_Result");
 }
 
 /**
  * Handles plotting the workspace when plot is clicked
  */
 void ConvFit::plotClicked() {
-  IndirectFitAnalysisTab::plotResult(m_baseName.toStdString() + "_Result",
+  IndirectFitAnalysisTab::plotResult(outputWorkspaceName() + "_Result",
                                      m_uiForm->cbPlotType->currentText());
 }
 
@@ -395,7 +397,7 @@ void ConvFit::algorithmComplete(bool error) {
     return;
   }
 
-  std::string outputPrefix = m_baseName.toStdString();
+  std::string outputPrefix = outputWorkspaceName();
 
   const auto resultName = outputPrefix + "_Result";
   MatrixWorkspace_sptr resultWs =
@@ -505,7 +507,6 @@ void ConvFit::loadSettings(const QSettings &settings) {
  * @param wsName Name of new workspace loaded
  */
 void ConvFit::newDataLoaded(const QString &wsName) {
-  m_baseName.clear();
   IndirectFitAnalysisTab::newInputDataLoaded(wsName);
   updateHWHMFromResolution();
 
@@ -810,7 +811,7 @@ void ConvFit::updatePreviewPlots() {
   const auto inputWS = inputWorkspace();
 
   // If there is a result workspace plot then plot it
-  const auto baseGroupName = m_baseName.toStdString() + "_Workspaces";
+  const auto baseGroupName = outputWorkspaceName() + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(baseGroupName, m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
   IndirectDataAnalysisTab::updatePlotRange("ConvFitRange", m_uiForm->ppPlotTop);

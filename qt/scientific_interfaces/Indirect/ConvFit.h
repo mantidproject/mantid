@@ -22,8 +22,11 @@ public:
 protected:
   // Used in auto generating defaults for parameters
   QHash<QString, double> createDefaultValues() const override;
-  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() override;
-  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() override;
+  std::string createSingleFitOutputName() const override;
+  std::string createSequentialFitOutputName() const override;
+  std::string ConvFit::constructBaseName() const;
+  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
+  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   QHash<QString, QString> ConvFit::functionNameChanges(
       Mantid::API::IFunction_sptr model) const override;
 
@@ -106,13 +109,12 @@ private:
                                 const std::string &logType);
   Mantid::API::IAlgorithm_sptr sequentialFit(const int &specMin,
                                              const int &specMax);
-  QString backgroundType();
+  QString backgroundType() const;
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;
   bool m_confitResFileType;
   bool m_usedTemperature;
   double m_temperature;
-  QString m_baseName;
 
   // ShortHand Naming for fit functions
   QHash<QString, QString> m_fitStrings;
