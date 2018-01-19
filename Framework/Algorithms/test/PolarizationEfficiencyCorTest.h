@@ -980,61 +980,73 @@ private:
       }
     }
   }
-  void invertedF1(Eigen::Matrix4d &m, const double f1) {
+  Eigen::Matrix4d invertedF1(const double f1) {
+    Eigen::Matrix4d m;
     m << f1, 0., 0., 0., 0., f1, 0., 0., f1 - 1., 0., 1., 0., 0., f1 - 1., 0.,
         1.;
     m *= 1. / f1;
+    return m;
   }
 
-  void invertedF1Derivative(Eigen::Matrix4d &m, const double f1) {
+  Eigen::Matrix4d invertedF1Derivative(const double f1) {
+    Eigen::Matrix4d m;
     m << 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., -1., 0., 0., 1., 0., -1.;
     m *= 1. / (f1 * f1);
+    return m;
   }
 
-  void invertedF2(Eigen::Matrix4d &m, const double f2) {
+  Eigen::Matrix4d invertedF2(const double f2) {
+    Eigen::Matrix4d m;
     m << f2, 0., 0., 0., f2 - 1., 1., 0., 0., 0., 0., f2, 0., 0., 0., f2 - 1.,
         1.;
     m *= 1. / f2;
+    return m;
   }
 
-  void invertedF2Derivative(Eigen::Matrix4d &m, const double f2) {
+  Eigen::Matrix4d invertedF2Derivative(const double f2) {
+    Eigen::Matrix4d m;
     m << 0., 0., 0., 0., 1., -1., 0., 0., 0., 0., 0., 0., 0., 0., 1., -1.;
     m *= 1. / (f2 * f2);
+    return m;
   }
 
-  void invertedP1(Eigen::Matrix4d &m, const double p1) {
+  Eigen::Matrix4d invertedP1(const double p1) {
+    Eigen::Matrix4d m;
     m << p1 - 1., 0., p1, 0., 0., p1 - 1., 0., p1, p1, 0., p1 - 1., 0., 0., p1,
         0., p1 - 1.;
     m *= 1. / (2. * p1 - 1.);
+    return m;
   }
 
-  void invertedP1Derivative(Eigen::Matrix4d &m, const double p1) {
+  Eigen::Matrix4d invertedP1Derivative(const double p1) {
+    Eigen::Matrix4d m;
     m << 1., 0., -1., 0., 0., 1., 0., -1., -1., 0., 1., 0., 0., -1., 0., 1.;
     m *= 1. / (2. * p1 - 1.) / (2. * p1 - 1.);
+    return m;
   }
 
-  void invertedP2(Eigen::Matrix4d &m, const double p2) {
+  Eigen::Matrix4d invertedP2(const double p2) {
+    Eigen::Matrix4d m;
     m << p2 - 1., p2, 0., 0., p2, p2 - 1., 0., 0., 0., 0., p2 - 1., p2, 0., 0.,
         p2, p2 - 1.;
     m *= 1. / (2. * p2 - 1.);
+    return m;
   }
 
-  void invertedP2Derivative(Eigen::Matrix4d &m, const double p2) {
+  Eigen::Matrix4d invertedP2Derivative(const double p2) {
+    Eigen::Matrix4d m;
     m << 1., -1., 0., 0., -1., 1., 0., 0., 0., 0., 1., -1., 0., 0., -1., 1.;
     m *= 1. / (2. * p2 - 1.) / (2. * p2 - 1.);
+    return m;
   }
 
   Eigen::Vector4d correction(const Eigen::Vector4d &y, const double f1,
                              const double f2, const double p1,
                              const double p2) {
-    Eigen::Matrix4d F1;
-    invertedF1(F1, f1);
-    Eigen::Matrix4d F2;
-    invertedF2(F2, f2);
-    Eigen::Matrix4d P1;
-    invertedP1(P1, p1);
-    Eigen::Matrix4d P2;
-    invertedP2(P2, p2);
+    const Eigen::Matrix4d F1 = invertedF1(f1);
+    const Eigen::Matrix4d F2 = invertedF2(f2);
+    const Eigen::Matrix4d P1 = invertedP1(p1);
+    const Eigen::Matrix4d P2 = invertedP2(p2);
     const Eigen::Matrix4d inverted = (P2 * P1 * F2 * F1).matrix();
     return (inverted * y).matrix();
   }
@@ -1043,26 +1055,14 @@ private:
                         const double f1, const double f1e, const double f2,
                         const double f2e, const double p1, const double p1e,
                         const double p2, const double p2e) {
-    Eigen::Matrix4d F1;
-    invertedF1(F1, f1);
-    Eigen::Matrix4d dF1;
-    invertedF1Derivative(dF1, f1);
-    dF1 *= f1e;
-    Eigen::Matrix4d F2;
-    invertedF2(F2, f2);
-    Eigen::Matrix4d dF2;
-    invertedF2Derivative(dF2, f2);
-    dF2 *= f2e;
-    Eigen::Matrix4d P1;
-    invertedP1(P1, p1);
-    Eigen::Matrix4d dP1;
-    invertedP1Derivative(dP1, p1);
-    dP1 *= p1e;
-    Eigen::Matrix4d P2;
-    invertedP2(P2, p2);
-    Eigen::Matrix4d dP2;
-    invertedP2Derivative(dP2, p2);
-    dP2 *= p2e;
+    const Eigen::Matrix4d F1 = invertedF1(f1);
+    const Eigen::Matrix4d dF1 = f1e * invertedF1Derivative(f1);
+    const Eigen::Matrix4d F2 = invertedF2(f2);
+    const Eigen::Matrix4d dF2 = f2e * invertedF2Derivative(f2);
+    const Eigen::Matrix4d P1 = invertedP1(p1);
+    const Eigen::Matrix4d dP1 = p1e * invertedP1Derivative(p1);
+    const Eigen::Matrix4d P2 = invertedP2(p2);
+    const Eigen::Matrix4d dP2 = p2e * invertedP2Derivative(p2);
     const auto p2Error = (dP2 * P1 * F2 * F1 * y).array();
     const auto p1Error = (P2 * dP1 * F2 * F1 * y).array();
     const auto f2Error = (P2 * P1 * dF2 * F1 * y).array();
@@ -1084,7 +1084,7 @@ private:
     Eigen::Matrix2d P1;
     P1 << p1 - 1., p1, p1, p1 - 1.;
     P1 *= 1. / (2. * p1 - 1.);
-    const auto inverted = P1 * F1;
+    const Eigen::Matrix2d inverted = (P1 * F1).matrix();
     return static_cast<Eigen::Vector2d>(inverted * y);
   }
 
