@@ -76,10 +76,10 @@ protected:
   int selectedSpectrum() const;
 
   /// Retrieve the selected minimum spectrum
-  int minimumSpectrum();
+  int minimumSpectrum() const;
 
   /// Retrieve the selected maximum spectrum
-  int maximumSpectrum();
+  int maximumSpectrum() const;
 
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 

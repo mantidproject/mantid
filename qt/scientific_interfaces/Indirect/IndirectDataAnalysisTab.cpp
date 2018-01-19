@@ -111,7 +111,7 @@ void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
  *
  * @return  The selected minimum spectrum.
  */
-int IndirectDataAnalysisTab::minimumSpectrum() { return m_minSpectrum; }
+int IndirectDataAnalysisTab::minimumSpectrum() const { return m_minSpectrum; }
 
 /**
  * Sets the selected spectrum.
@@ -127,7 +127,7 @@ void IndirectDataAnalysisTab::setMinimumSpectrum(int spectrum) {
  *
  * @return  The selected maximum spectrum.
  */
-int IndirectDataAnalysisTab::maximumSpectrum() { return m_maxSpectrum; }
+int IndirectDataAnalysisTab::maximumSpectrum() const { return m_maxSpectrum; }
 
 /**
  * Sets the selected maximum spectrum.
