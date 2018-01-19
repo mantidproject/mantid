@@ -5,7 +5,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import (QDialog, QHeaderView, QHBoxLayout, QProgressBar, QPushButton,
                             QTreeWidget, QTreeWidgetItem, QVBoxLayout)
 
-from mantidqt import resources
+from mantidqt import resources  # noqa
 from .dialog_presenter import AlgorithmProgressDialogPresenter
 
 
@@ -79,4 +79,3 @@ class AlgorithmMonitorDialog(QDialog):
             self.tree.setItemWidget(item, 2, cancel_button)
             for prop in properties:
                 item.addChild(QTreeWidgetItem(prop))
-
