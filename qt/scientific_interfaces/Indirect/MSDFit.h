@@ -32,7 +32,7 @@ protected slots:
   void plotClicked();
   void algorithmComplete(bool error) override;
   void updatePreviewPlots() override;
-  void rangeChanged(double xMin, double xMax) override;
+  void updatePlotRange() override;
   void plotGuess() override;
   void updatePlotOptions() override;
 

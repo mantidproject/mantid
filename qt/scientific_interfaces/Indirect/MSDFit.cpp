@@ -179,10 +179,9 @@ void MSDFit::updatePreviewPlots() {
   const auto groupName = outputWorkspaceName() + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
-  IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm->ppPlotTop);
 }
 
-void MSDFit::rangeChanged(double, double) {
+void MSDFit::updatePlotRange() {
   IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm->ppPlotTop);
 }
 
