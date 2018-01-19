@@ -228,7 +228,7 @@ public:
     const double rwp = 75.5;
     model.addRwpValue(123, 1, rwp);
 
-    boost::optional<double> retrievedRwp = boost::none;
+    boost::optional<double> retrievedRwp(boost::none);
     TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(123, 1));
     TS_ASSERT(retrievedRwp);
     TS_ASSERT_EQUALS(rwp, *retrievedRwp);
