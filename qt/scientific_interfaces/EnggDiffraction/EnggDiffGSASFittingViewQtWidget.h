@@ -56,6 +56,7 @@ public:
 
 private slots:
   void browseFocusedRun();
+  void loadFocusedRun();
 
 private:
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;

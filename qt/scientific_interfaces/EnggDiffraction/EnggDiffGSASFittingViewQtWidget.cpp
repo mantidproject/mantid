@@ -8,8 +8,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
-  m_ui.setupUi(this);
-
   auto model = std::make_unique<EnggDiffGSASFittingModel>();
   m_presenter.reset(new EnggDiffGSASFittingPresenter(std::move(model), this));
 }
@@ -67,6 +65,10 @@ EnggDiffGSASFittingViewQtWidget::getRefinementMethod() const {
 std::pair<int, size_t>
 EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const {
   throw std::runtime_error("Not yet implemented");
+}
+
+void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
+  m_presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
 }
 
 void EnggDiffGSASFittingViewQtWidget::plotCurve(
