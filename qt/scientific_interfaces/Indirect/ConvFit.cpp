@@ -322,9 +322,7 @@ std::string ConvFit::constructBaseName() const {
     outputName = outputName.substr(0, cutIndex);
 
   const auto background = backgroundString(backgroundType()).toStdString();
-  const auto fitType = fitTypeString().toStdString();
-  outputName += "conv_" + fitType + background;
-  return outputName;
+  return outputName + "_conv_" + fitTypeString() + background;
 }
 
 IAlgorithm_sptr ConvFit::singleFitAlgorithm() const {
@@ -763,8 +761,8 @@ ConvFit::loadParameterFileAlgorithm(MatrixWorkspace_sptr workspace,
  *
  * @returns the generated QString.
  */
-QString ConvFit::fitTypeString() const {
-  QString fitType("");
+std::string ConvFit::fitTypeString() const {
+  std::string fitType;
 
   if (numberOfCustomFunctions("DeltaFunction") > 0)
     fitType += "Delta";

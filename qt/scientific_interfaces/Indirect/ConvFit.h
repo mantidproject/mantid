@@ -98,7 +98,7 @@ private:
       const QString &prefixSuffix, int fromIndex, int toIndex, int offset,
       QHash<QString, QString> &functionNameChanges) const;
 
-  QString fitTypeString() const;
+  std::string fitTypeString() const;
   QString backgroundString(const QString &backgroundType) const;
   void addFunctionGroupToComboBox(
       const QString &groupName,
@@ -117,7 +117,7 @@ private:
   double m_temperature;
 
   // ShortHand Naming for fit functions
-  QHash<QString, QString> m_fitStrings;
+  QHash<QString, std::string> m_fitStrings;
   QHash<QString, std::string> m_fitTypeToFunction;
 };
 
