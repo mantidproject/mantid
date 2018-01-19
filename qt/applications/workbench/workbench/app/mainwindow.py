@@ -126,6 +126,8 @@ class MainWindow(QMainWindow):
         self.editor = None
         self.algorithm_selector = None
         self.widgets = []
+        # Pop-up widgets
+        self.manage_directory_widget = None
 
         # Widget layout map: required for use in Qt.connection
         self._layout_widget_info = None
@@ -209,11 +211,13 @@ class MainWindow(QMainWindow):
                                     on_triggered=self.save_file,
                                     shortcut="Ctrl+S",
                                     shortcut_context=Qt.ApplicationShortcut)
+        action_manage_directories = create_action(self, "Manage User Directories",
+                                                  on_triggered=self.open_manage_directories)
 
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
-        self.file_menu_actions = [action_open, action_save, None, action_quit]
+        self.file_menu_actions = [action_open, action_save, action_manage_directories, None, action_quit]
 
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
@@ -466,6 +470,19 @@ class MainWindow(QMainWindow):
     def save_file(self):
         # todo: how should this interact with project saving and workspaces when they are implemented?
         self.editor.save_current_file()
+
+    def open_manage_directories(self):
+        # todo: get this to show dialog - import appears to work (code reach cpp debug)
+        if self.manage_directory_widget is None:  # Create if not initialized
+            from workbench.plugins.manageuserdirectories import ManageUserDirectoriesWidget
+            self.manage_directory_widget = ManageUserDirectoriesWidget(self)
+            self.manage_directory_widget.show()
+
+        elif self.manage_directory_widget.isVisible():  # Focus widget if already open
+            self.manage_directory_widget.setFocus()
+        else:
+            self.manage_directory_widget.show()
+            self.manage_directory_widget.setFocus()
 
 
 def initialize():
