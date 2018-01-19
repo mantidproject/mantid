@@ -8,10 +8,10 @@
 
 if exist %DEV_PYTHON_EXE% (
    @echo Using %DEV_PYTHON_EXE%
-   %DEV_PYTHON_EXE% install_gsas_proxy.py -v %VETTED_REVISION_NUMBER%
+   %DEV_PYTHON_EXE% install_gsas_proxy.py -v %VETTED_REVISION_NUMBER% -d %CD:~0,3%
 ) else (if exist %RELEASE_PYTHON_EXE% (
    @echo Using %RELEASE_PYTHON_EXE%
-   %RELEASE_PYTHON_EXE% install_gsas_proxy.py -v %VETTED_REVISION_NUMBER%
+   %RELEASE_PYTHON_EXE% install_gsas_proxy.py -v %VETTED_REVISION_NUMBER% -d %CD:~0,3%
 ) else (
    echo Could not find Mantid Python executable
 )

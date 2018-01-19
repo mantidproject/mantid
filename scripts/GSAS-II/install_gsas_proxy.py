@@ -1,6 +1,7 @@
 import argparse
 import os
 import pip
+import site
 import subprocess
 import urllib2
 import zipfile
@@ -29,7 +30,7 @@ def unzip_file(zip_file_name, target_directory):
 
 def download_bootstrap(revision_number, target_location):
     url = GSAS_BOOTSTRAP_URL
-    if revision_number is not None:
+    if revision_number:
         url += "?r={}".format(revision_number)
 
     response = urllib2.urlopen(url)
@@ -41,8 +42,7 @@ def download_bootstrap(revision_number, target_location):
 
 
 def gsas_install_directory():
-    root_dir = os.path.abspath(os.sep)
-    return root_dir
+    return site.USER_SITE
 
 
 def package_is_installed(package_name):
@@ -59,6 +59,8 @@ def install_package(package_name):
 
 def install_gsasii(install_directory, revision_number):
     print("Downloading GSAS mini-SVN kit")
+    if not os.path.exists(install_directory):
+        os.makedirs(install_directory)
     proxy_zip_file = os.path.join(install_directory, GSAS_PROXY_FILE_NAME)
     download_zip_file(target_location=proxy_zip_file)
 

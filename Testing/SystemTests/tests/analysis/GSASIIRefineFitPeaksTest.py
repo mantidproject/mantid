@@ -2,68 +2,10 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import re
 import mantid
+import site
 import stresstesting
 import tempfile
 from mantid.simpleapi import GSASIIRefineFitPeaks, Load
-
-
-class _GSASFinder(object):
-    """
-    Helper class for unit test - the algorithm can't run without a version of GSAS-II that includes the module
-    GSASIIscriptable (added April 2017)
-    """
-    @staticmethod
-    def _find_directory_by_name(cur_dir_name, cur_dir_path, name_to_find, level, max_level):
-        """
-        Perform a depth-limited depth-first search to try and find a directory with a given name
-        """
-        if cur_dir_name == name_to_find:
-            return cur_dir_path
-
-        if level == max_level:
-            return None
-
-        list_dir = os.listdir(cur_dir_path)
-        for child in list_dir:
-            child_path = os.path.join(cur_dir_path, child)
-            if os.path.isdir(child_path):
-                try:
-                    path = _GSASFinder._find_directory_by_name(cur_dir_name=child, cur_dir_path=child_path,
-                                                               level=level + 1, name_to_find=name_to_find,
-                                                               max_level=max_level)
-                except OSError:  # Probably "Permission denied". Either way, just ignore it
-                    pass
-                else:
-                    if path is not None:
-                        return path
-
-    @staticmethod
-    def _path_to_g2conda():
-        """
-        Find the g2conda directory (where GSAS-II normally sits), as long as it exists less than 3 levels away from
-        the root directory
-        """
-        root_directory = os.path.abspath(os.sep)
-        return _GSASFinder._find_directory_by_name(cur_dir_path=root_directory, cur_dir_name=root_directory, level=0,
-                                                   name_to_find="g2conda", max_level=3)
-
-    @staticmethod
-    def GSASIIscriptable_location():
-        """
-        Find the path to GSASIIscriptable.py, if it exists and is less than 2 levels away from the root directory
-        :return Path to GSAS-II directory if found, and empty string if not
-        """
-        path_to_g2conda = _GSASFinder._path_to_g2conda()
-        if path_to_g2conda is None:
-            return ""
-
-        if os.path.isfile(os.path.join(path_to_g2conda, "GSASIIscriptable.py")):
-            return path_to_g2conda
-
-        if os.path.isfile(os.path.join(path_to_g2conda, "GSASII", "GSASIIscriptable.py")):
-            return os.path.join(path_to_g2conda, "GSASII")
-
-        return ""
 
 
 class _GSASIIRefineFitPeaksTestHelper(object):
@@ -76,8 +18,8 @@ class _GSASIIRefineFitPeaksTestHelper(object):
     _path_to_gsas = None
 
     def path_to_gsas(self):
-        if self._path_to_gsas is None:
-            self._path_to_gsas = _GSASFinder.GSASIIscriptable_location()
+        if not self._path_to_gsas:
+            self._path_to_gsas = os.path.join(site.USER_SITE, "g2conda", "GSASII")
         return self._path_to_gsas
 
     def input_ws_path(self):
