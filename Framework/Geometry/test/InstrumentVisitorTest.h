@@ -307,15 +307,18 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
                       visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
 
-    const size_t bankIndex = compInfo->indexOf(
-        instrument->getComponentByName("bank1")->getComponentID());
-    TS_ASSERT(compInfo->componentType(bankIndex) ==
-              ComponentType::Rectangular); // Bank is rectangular
-    TS_ASSERT(compInfo->componentType(compInfo->source()) ==
-              ComponentType::Generic); // Source is not a rectangular bank
-    TS_ASSERT_EQUALS(compInfo->componentType(0),
-                     ComponentType::Detector); //  A detector is never a bank,
-                                               //  let alone a detector
+    using Mantid::Beamline::ComponentType;
+
+    const size_t bankIndex = compInfo->indexOfAny("bank1");
+    TS_ASSERT_EQUALS(compInfo->componentType(bankIndex),
+                     ComponentType::Rectangular); // Bank is rectangular
+    TS_ASSERT_DIFFERS(
+        compInfo->componentType(compInfo->source()),
+        ComponentType::Rectangular); // Source is not a rectangular bank
+    TS_ASSERT_DIFFERS(compInfo->componentType(0),
+                      ComponentType::Rectangular); //  A detector is never a
+                                                   //  bank, let alone a
+                                                   //  detector
   }
 
   void test_visitation_of_non_rectangular_detectors() {
@@ -400,7 +403,7 @@ public:
     // Check root name
     TS_ASSERT_EQUALS("basic_rect", componentInfo->name(componentInfo->root()));
     // Backward check that we get the right index
-    TS_ASSERT_EQUALS(componentInfo->indexOf("basic_rect"),
+    TS_ASSERT_EQUALS(componentInfo->indexOfAny("basic_rect"),
                      componentInfo->root());
 
     // Check all names are the same in old instrument and component info

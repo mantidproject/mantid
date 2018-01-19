@@ -77,18 +77,11 @@ private:
       std::map<size_t, size_t> &mutableDetExclusions,
       IteratorT &mutableIterator) const;
   template <typename IteratorT>
-  void
-  growBoundingBoxAsBankOfTubes(size_t index,
-                               const Geometry::BoundingBox *reference,
-                               Geometry::BoundingBox &mutableBB,
-                               std::map<size_t, size_t> &mutableDetExclusions,
-                               IteratorT &mutableIterator) const;
-  template <typename IteratorT>
-  void growBoundingBoxAsTube(size_t index,
-                             const Geometry::BoundingBox *reference,
-                             Geometry::BoundingBox &mutableBB,
-                             std::map<size_t, size_t> &mutableDetExclusions,
-                             IteratorT &mutableIterator) const;
+  void growBoundingBoxAsOutline(size_t index,
+                                const Geometry::BoundingBox *reference,
+                                Geometry::BoundingBox &mutableBB,
+                                std::map<size_t, size_t> &mutableDetExclusions,
+                                IteratorT &mutableIterator) const;
   void growBoundingBoxByDetectors(
       size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
       const std::map<size_t, size_t> &detectorExclusions) const;
@@ -110,7 +103,7 @@ public:
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
-  size_t indexOf(const std::string &name) const;
+  size_t indexOfAny(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;
   Kernel::V3D position(const size_t componentIndex) const;
   Kernel::V3D position(const std::pair<size_t, size_t> index) const;
@@ -143,7 +136,7 @@ public:
   const IComponent *componentID(const size_t componentIndex) const {
     return m_componentIds->operator[](componentIndex);
   }
-  bool hasShape(const size_t componentIndex) const;
+  bool hasValidShape(const size_t componentIndex) const;
   const Geometry::IObject &shape(const size_t componentIndex) const;
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;

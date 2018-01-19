@@ -1053,10 +1053,5 @@ Parallel::ExecutionMode BinaryOperation::getParallelExecutionMode(
   return Parallel::ExecutionMode::Invalid;
 }
 
-void BinaryOperation::execNonMaster() {
-  API::MatrixWorkspace_const_sptr ws = getProperty(inputPropName1());
-  setProperty(outputPropName(), ws->cloneEmpty());
-}
-
 } // namespace Algorithms
 } // namespace Mantid
