@@ -96,9 +96,9 @@ A detailed version of this is found in [2].
 Normalized Laue
 ###############
 
-.. math:: bAverage = <b> = \frac{1}{N_{atoms}}\sum_{i}b_{i}
-.. math:: bSquaredAverage = <b^2> = \frac{1}{N_{atoms}}\sum_{i}b_{i}^2
-.. math:: NormalizedLaue = \frac{<b^2>-<b>^2}{<b>^2}
+The low-:math:`Q` limit of :math:`S(Q)` is :math:`-L` where :math:`L` is called the normalized Laue term
+
+.. math:: L = \frac{<b_{tot}^2>-<b_{coh}>^2}{<b_{coh}>^2}
 
 References
 ----------
