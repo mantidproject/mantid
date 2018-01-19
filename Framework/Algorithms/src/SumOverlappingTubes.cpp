@@ -8,7 +8,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -215,12 +214,11 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
     // Try to get the component. It should be a tube with pixels in the
     // y-direction, the height bins are then taken as the detector positions.
     const auto &componentInfo = m_workspaceList.front()->componentInfo();
-    const auto &detectorInfo = m_workspaceList.front()->detectorInfo();
     const auto componentIndex = componentInfo.indexOf(componentName);
     const auto &detsInSubtree =
         componentInfo.detectorsInSubtree(componentIndex);
     for (const auto detIndex : detsInSubtree) {
-      const auto posY = detectorInfo.position({detIndex, 0}).Y();
+      const auto posY = componentInfo.position({detIndex, 0}).Y();
       if (heightBinning.size() == 2 &&
           (posY < heightBinning[0] || posY > heightBinning[1]))
         continue;
