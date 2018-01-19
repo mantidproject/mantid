@@ -1,6 +1,6 @@
+#include "EnggDiffGSASFittingViewQtWidget.h"
 #include "EnggDiffGSASFittingModel.h"
 #include "EnggDiffGSASFittingPresenter.h"
-#include "EnggDiffGSASFittingViewQtWidget.h"
 
 #include <QFileDialog>
 
@@ -9,7 +9,7 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
   m_ui.setupUi(this);
-  
+
   auto model = std::make_unique<EnggDiffGSASFittingModel>();
   m_presenter.reset(new EnggDiffGSASFittingPresenter(std::move(model), this));
 }
@@ -21,10 +21,12 @@ void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
 
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
     const Mantid::API::ITableWorkspace_sptr latticeParams) const {
+  (void)latticeParams;
   throw std::runtime_error("Not yet implemented");
 }
 
 void EnggDiffGSASFittingViewQtWidget::displayRwp(const double rwp) const {
+  (void)rwp;
   throw std::runtime_error("Not yet implemented");
 }
 
@@ -69,6 +71,7 @@ EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const {
 
 void EnggDiffGSASFittingViewQtWidget::plotCurve(
     const std::vector<boost::shared_ptr<QwtData>> &curve) {
+  (void)curve;
   throw std::runtime_error("Not yet implemented");
 }
 
@@ -118,11 +121,13 @@ bool EnggDiffGSASFittingViewQtWidget::showRefinementResultsSelected() const {
 
 void EnggDiffGSASFittingViewQtWidget::updateRunList(
     const std::vector<std::pair<int, size_t>> &runLabels) {
+  (void)runLabels;
   throw std::runtime_error("Not yet implemented");
 }
 
 void EnggDiffGSASFittingViewQtWidget::userWarning(
     const std::string &warningDescription) const {
+  (void)warningDescription;
   throw std::runtime_error("Not yet implemented");
 }
 
