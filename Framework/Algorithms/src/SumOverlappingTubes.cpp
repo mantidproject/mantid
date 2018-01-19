@@ -214,7 +214,7 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
     // Try to get the component. It should be a tube with pixels in the
     // y-direction, the height bins are then taken as the detector positions.
     const auto &componentInfo = m_workspaceList.front()->componentInfo();
-    const auto componentIndex = componentInfo.indexOf(componentName);
+    const auto componentIndex = componentInfo.indexOfAny(componentName);
     const auto &detsInSubtree =
         componentInfo.detectorsInSubtree(componentIndex);
     for (const auto detIndex : detsInSubtree) {
