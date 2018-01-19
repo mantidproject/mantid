@@ -793,7 +793,6 @@ private:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = idealEfficiencies(edges);
-    constexpr char *OUTWS_NAME{"output"};
     PolarizationEfficiencyCor alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -801,7 +800,7 @@ private:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
+        alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     const std::string presentFlipperConf =
         missingFlipperConf == "01" ? "10" : "01";
@@ -815,7 +814,7 @@ private:
     const std::array<std::string, 4> POL_DIRS{{"++", "+-", "-+", "--"}};
     for (size_t i = 0; i != 4; ++i) {
       const auto &dir = POL_DIRS[i];
-      const std::string wsName = OUTWS_NAME + std::string("_") + dir;
+      const std::string wsName = m_outputWSName + std::string("_") + dir;
       MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
           outputWS->getItem(wsName));
       TS_ASSERT(ws)
