@@ -19,24 +19,23 @@ from __future__ import (absolute_import, unicode_literals)
 # system imports
 
 # third-party library imports
-from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
+from mantidqt.widgets.algorithmselector import AlgorithmSelectorWidget
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
 
 
-class WorkspaceWidget(PluginWidget):
-    """Provides a Workspace Widget for workspace manipulation"""
+class AlgorithmSelector(PluginWidget):
+    """Provides an algorithm selector widget for selecting algorithms to run"""
 
     def __init__(self, parent):
-        super(WorkspaceWidget, self).__init__(parent)
+        super(AlgorithmSelector, self).__init__(parent)
 
         # layout
-        self.workspacewidget = WorkspaceTreeWidget(MantidTreeModel())
+        self.algorithm_selector = AlgorithmSelectorWidget()
         layout = QVBoxLayout()
-        layout.addWidget(self.workspacewidget)
+        layout.addWidget(self.algorithm_selector)
         self.setLayout(layout)
 
 # ----------------- Plugin API --------------------
@@ -45,7 +44,7 @@ class WorkspaceWidget(PluginWidget):
         self.main.add_dockwidget(self)
 
     def get_plugin_title(self):
-        return "Workspaces"
+        return "Algorithms"
 
     def read_user_settings(self, _):
         pass
