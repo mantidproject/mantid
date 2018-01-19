@@ -147,16 +147,13 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
 
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-          SLOT(parameterUpdated(const Mantid::API::IFunction *)));
-  connect(m_fitPropertyBrowser,
-          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(emitParameterChanged(const Mantid::API::IFunction *)));
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(plotGuess()));
 
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
-          SLOT(rangeChanged(double, double)));
+          SLOT(updatePlotRange()));
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
           SLOT(plotGuess()));
 
@@ -303,6 +300,17 @@ const std::string &IndirectFitAnalysisTab::outputWorkspaceName() const {
 }
 
 /**
+ * Sets whether the custom setting with the specified name is enabled.
+ *
+ * @param settingName The name of the custom setting.
+ * @param enabled     True if custom setting should be enabled, false otherwise.
+ */
+void IndirectFitAnalysisTab::setCustomSettingEnabled(const QString &customName,
+                                                     bool enabled) {
+  m_fitPropertyBrowser->setCustomSettingEnabled(customName, enabled);
+}
+
+/**
  * Moves the functions attached to a custom function group, to the end of the
  * model.
  */
@@ -396,6 +404,18 @@ void IndirectFitAnalysisTab::setBackgroundOptions(
  */
 bool IndirectFitAnalysisTab::boolSettingValue(const QString &settingKey) const {
   return m_fitPropertyBrowser->boolSettingValue(settingKey);
+}
+
+/**
+ * Sets the value of the custom boolean setting, with the specified key, to the
+ * specified value.
+ *
+ * @param settingKey  The key of the custom boolean setting.
+ * @param value       The value to set the boolean custom setting to.
+ */
+void IndirectFitAnalysisTab::setCustomBoolSetting(const QString &settingKey,
+                                                  bool value) {
+  m_fitPropertyBrowser->setCustomBoolSetting(settingKey, value);
 }
 
 /**

@@ -54,6 +54,8 @@ public:
 
   const std::string &outputWorkspaceName() const;
 
+  void setCustomSettingEnabled(const QString &customName, bool enabled);
+
   void moveCustomFunctionsToEnd();
 
   void setParameterValue(const std::string &functionName,
@@ -78,6 +80,8 @@ public:
   void setBackgroundOptions(const QStringList &backgrounds);
 
   bool boolSettingValue(const QString &settingKey) const;
+
+  void setCustomBoolSetting(const QString &settingKey, bool value);
 
   int intSettingValue(const QString &settingKey) const;
 
@@ -187,7 +191,7 @@ protected slots:
 
   void xMaxSelected(double xMax);
 
-  virtual void rangeChanged(double xMin, double xMax) = 0;
+  virtual void updatePlotRange() = 0;
 
   void executeSingleFit();
 
