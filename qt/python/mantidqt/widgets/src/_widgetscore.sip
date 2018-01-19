@@ -181,8 +181,6 @@ public:
 // WorkspaceWidget and dependencies
 // ---------------------------------
 
-
-
 class MantidDisplayBase /Abstract/ {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
@@ -218,4 +216,16 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 public:
   WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb /Transfer/,
                             QWidget *parent /TransferThis/ = nullptr);
+};
+
+// ---------------------------------
+// Manage User Directories
+// ---------------------------------
+
+class ManageUserDirectories : QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+%End
+public:
+  ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
 };
