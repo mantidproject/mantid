@@ -102,6 +102,8 @@ std::string IqtFit::fitTypeString() const {
 
   if (numberOfStretched > 0)
     return std::to_string(numberOfStretched) + "S";
+
+  return "";
 }
 
 MatrixWorkspace_sptr IqtFit::fitWorkspace() const {
