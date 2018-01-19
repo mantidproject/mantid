@@ -264,9 +264,9 @@ public:
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
                             std::string(e.what()),
-                            "Component not_a_component could not be found.");
+                            "not_a_component does not exist");
     AnalysisDataService::Instance().remove("testWS");
   }
 

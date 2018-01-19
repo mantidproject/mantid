@@ -7,6 +7,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -212,21 +214,17 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
       (m_outputType != "1D" && heightBinning.size() == 2)) {
     // Try to get the component. It should be a tube with pixels in the
     // y-direction, the height bins are then taken as the detector positions.
-    const auto &ws = m_workspaceList.front();
-    const auto &inst = ws->getInstrument()->baseInstrument();
-    const auto comp = inst->getComponentByName(componentName);
-    if (!comp)
-      throw std::runtime_error("Component " + componentName +
-                               " could not be found.");
-    const auto &compAss = dynamic_cast<const ICompAssembly &>(*comp);
-    std::vector<IComponent_const_sptr> children;
-    compAss.getChildren(children, false);
-    for (const auto &child : children) {
-      const auto posY = child->getPos().Y();
+    const auto &componentInfo = m_workspaceList.front()->componentInfo();
+    const auto &detectorInfo = m_workspaceList.front()->detectorInfo();
+    const auto componentIndex = componentInfo.indexOf(componentName);
+    const auto &detsInSubtree =
+        componentInfo.detectorsInSubtree(componentIndex);
+    for (const auto detIndex : detsInSubtree) {
+      const auto posY = detectorInfo.position({detIndex, 0}).Y();
       if (heightBinning.size() == 2 &&
           (posY < heightBinning[0] || posY > heightBinning[1]))
         continue;
-      m_heightAxis.push_back(child->getPos().Y());
+      m_heightAxis.push_back(posY);
     }
   } else {
     if (heightBinning.size() != 3) {
