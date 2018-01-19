@@ -97,9 +97,19 @@ TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const std::string &GSASIIProjectFile, const double dMin,
     const double negativeWeight) {
   // Mock method - just create some dummy output and ignore all the parameters
+  // Do some pointless casts to stifle unused parameter warnings
+  (void)GSASIIProjectFile;
+  (void)refinementMethod;
+  (void)dmin;
+  (void)phaseFiles;
+  (void)pathToGSASII;
+  (void)negativeWeight;
+  (void)inputWorkspace;
+  (void)instParamFile;
+
   const static std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
   const static std::array<std::array<double, 3>, 1> targetTableValues = {
-      {{1, 2, 3}}};
+      {{{1, 2, 3}}}};
   const auto latticeParams =
       createDummyTable(columnHeadings, targetTableValues);
 
@@ -218,7 +228,7 @@ public:
     const double rwp = 75.5;
     model.addRwpValue(123, 1, rwp);
 
-    boost::optional<double> retrievedRwp;
+    boost::optional<double> retrievedRwp = boost::none;
     TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(123, 1));
     TS_ASSERT(retrievedRwp);
     TS_ASSERT_EQUALS(rwp, *retrievedRwp);
@@ -230,7 +240,7 @@ public:
   void test_getLatticeParams() {
     const std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
     const std::array<std::array<double, 3>, 1> targetTableValues = {
-        {{1, 2, 3}}};
+        {{{1, 2, 3}}}};
     const auto table = createDummyTable(columnHeadings, targetTableValues);
 
     TestEnggDiffGSASFittingModel model;

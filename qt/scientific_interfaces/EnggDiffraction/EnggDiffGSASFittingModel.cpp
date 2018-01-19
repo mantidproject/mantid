@@ -134,7 +134,7 @@ boost::optional<double> EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     gsasAlg->execute();
 
     rwp = gsasAlg->getProperty("Rwp");
-  } catch (const std::exception &e) {
+  } catch (const std::exception) {
     return boost::none;
   }
   return rwp;
@@ -211,7 +211,7 @@ bool EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) {
     loadAlg->setProperty("Filename", filename);
     loadAlg->setProperty("OutputWorkspace", wsName);
     loadAlg->execute();
-  } catch (const std::exception &e) {
+  } catch (const std::exception) {
     return false;
   }
 
