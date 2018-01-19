@@ -38,15 +38,17 @@ Algorithms
 - :ref:`CompressEvents <algm-CompressEvents>` now supports compressing events with pulse time.
 - :ref:`MaskBins <algm-MaskBins>` now uses a modernized and standardized way for providing a list of workspace indices. For compatibility reasons the previous ``SpectraList`` property is still supported.
 - :ref:`Fit <algm-Fit>` has had a bug fixed that prevented a fix from being removed.
+- :ref:`LoadMcStas <algm-LoadMcStas>` now loads event data in separate workspaces (single scattering, multiple scattering) as well as all scattering.
 - :ref:`LoadMask <algm-LoadMask>` has had a bug fixed that could, under certain conditions, cause detectors from previously loaded masking to be added to the currently loaded masking.
 - In :ref:`MaxEnt <algm-MaxEnt>` the ``EvolChi`` and  ``EvolAngle`` workspaces only contain data up until the result has converged.
+- New algorithm :ref:`CropWorkspaceRagged <algm-CropWorkspaceRagged>` will crop each spectrum with a different x-range
 - :ref:`LoadLamp <algm-LoadLamp>` is a new algorithm to load processed HDF5 files produced by LAMP program at ILL.
+- :ref:`SaveNexus <algm-SaveNexus>` will no longer crash when passed a ``PeaksWorkspace`` with integrated peaks that have missing radius information. 
 
 Fitting
 -------
 - :ref:`EISFDiffSphere <func-EISFDiffSphere>` fits the Q-dependence on the EISF of a particle undergoing continuous diffusion but confined to a spherical volume.
 - :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>` fits the Q-dependence on the EISF of an alkyl molecule, like a membrane lipd.
-
 
 Core Functionality
 ------------------
@@ -55,7 +57,8 @@ Core Functionality
 - Added new functionality to ``datasearch.searcharchive`` :ref:`property <Properties File>` to only search the default facility
 - The status of a fit in the fit window is now at the top of the of the dialog instead of the bottom.
 - Condition to check if a property is enabled when serializing.
-- Workspace locking no longer prevents simple read operations required to display the workspace context menu in MantidPlot.
+- Workspace locking no longer prevents simple read operations required to display the workspace conext menu in Mantidplot.
+- TableWorkspaces can new be converted to a python dictionary by calling the ``table.toDict()`` function.
 - Added new classes ``ConfigObserver`` for listening for changes to any configuration property and ``ConfigPropertyObserver`` for listening to changes to an individual config property of interest.
 
 Performance
@@ -74,6 +77,7 @@ In `mantid.simpleapi`, a keyword has been implemented for function-like algorith
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
 - The previously mentioned ``ConfigObserver`` and ``ConfigPropertyObserver`` classes are also exposed to python.
 - ``mantid.kernel.V3D`` vectors now support negation through the usual ``-`` operator.
+- ``mantid.api.IPeak`` has two new functions ``getEnergyTransfer`` which returns the difference between the initial and final energy and ``getIntensityOverSigma`` which gets the peak intensity divided by the error in intensity.
 
 Support for unicode property names has been added to python. This means that one can run the following in python2 or python3.
 
