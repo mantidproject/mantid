@@ -83,65 +83,25 @@ void IqtFit::setup() {
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(m_uiForm->pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
           SLOT(plotGuess()));
 }
 
 void IqtFit::run() {
-  if (!validate())
-    return;
-
-  executeSequentialFit();
+  if (validate())
+    executeSequentialFit();
 }
 
-/**
- * Constructs the desired output base name for the  IqtFitMultiple
- * @param inputName     :: Name of the inputworkspace
- * @param fitType       :: The type of fit that is being performed
- * @param multi         :: If the fit is running the IqtFitMultiple
- * @param specMin       :: Minimum number of spectra being fitted
- * @param specMax       :: Maximum number of spectra being fitted
- * @return the base name
- */
-std::string IqtFit::constructBaseName(const std::string &inputName,
-                                      const std::string &fitType,
-                                      const bool &multi, const size_t &specMin,
-                                      const size_t &specMax) const {
-  QString functionType = QString::fromStdString(fitType);
-  if (multi) {
-    functionType += "mult_s";
-  }
-
-  QString baseName = QString::fromStdString(inputName);
-  baseName = baseName.left(baseName.lastIndexOf("_"));
-  baseName += "_IqtFit_";
-  baseName += functionType;
-  baseName += QString::number(specMin);
-
-  // Check whether a single spectrum is being fit
-  if (specMin != specMax) {
-    baseName += "_to_";
-    baseName += QString::number(specMax);
-  }
-  const auto baseName_str = baseName.toStdString();
-  return baseName_str;
-}
-
-QString IqtFit::fitTypeString() const {
+std::string IqtFit::fitTypeString() const {
   const auto numberOfExponential = numberOfCustomFunctions("ExpDecay");
   const auto numberOfStretched = numberOfCustomFunctions("StretchExp");
-  QString fitType;
 
   if (numberOfExponential > 0)
-    fitType = QString::number(numberOfExponential) + "E";
+    return std::to_string(numberOfExponential) + "E";
 
   if (numberOfStretched > 0)
-    fitType += QString::number(numberOfStretched) + "S";
-
-  if (fitType.isEmpty())
-    return "s";
-  else
-    return fitType + "_s";
+    return std::to_string(numberOfStretched) + "S";
 }
 
 MatrixWorkspace_sptr IqtFit::fitWorkspace() const {
@@ -150,12 +110,37 @@ MatrixWorkspace_sptr IqtFit::fitWorkspace() const {
   return replaceAlg->getProperty("OutputWorkspace");
 }
 
-IAlgorithm_sptr IqtFit::singleFitAlgorithm() {
+std::string IqtFit::constructBaseName() const {
+  auto outputName = inputWorkspace()->getName();
+
+  // Remove _red
+  const auto cutIndex = outputName.find_last_of('_');
+  if (cutIndex != std::string::npos)
+    outputName = outputName.substr(0, cutIndex);
+
+  outputName += "_IqtFit_" + fitTypeString();
+
+  if (boolSettingValue("ConstrainBeta"))
+    outputName += "mult";
+  return outputName + "_s";
+}
+
+std::string IqtFit::createSingleFitOutputName() const {
+  return constructBaseName() + std::to_string(selectedSpectrum());
+}
+
+std::string IqtFit::createSequentialFitOutputName() const {
+  const auto minSpectrum = std::to_string(minimumSpectrum());
+  const auto maxSpectrum = std::to_string(maximumSpectrum());
+  return constructBaseName() + minSpectrum + maxSpectrum;
+}
+
+IAlgorithm_sptr IqtFit::singleFitAlgorithm() const {
   size_t specNo = static_cast<size_t>(m_uiForm->spPlotSpectrum->value());
   return iqtFitAlgorithm(inputWorkspace(), specNo, specNo);
 }
 
-IAlgorithm_sptr IqtFit::sequentialFitAlgorithm() {
+IAlgorithm_sptr IqtFit::sequentialFitAlgorithm() const {
   size_t specMin = static_cast<size_t>(m_uiForm->spSpectraMin->value());
   size_t specMax = static_cast<size_t>(m_uiForm->spSpectraMax->value());
   return iqtFitAlgorithm(inputWorkspace(), specMin, specMax);
@@ -163,33 +148,27 @@ IAlgorithm_sptr IqtFit::sequentialFitAlgorithm() {
 
 IAlgorithm_sptr IqtFit::iqtFitAlgorithm(MatrixWorkspace_sptr inputWs,
                                         const size_t &specMin,
-                                        const size_t &specMax) {
+                                        const size_t &specMax) const {
+  const auto outputName = outputWorkspaceName();
   const bool constrainBeta = boolSettingValue("ConstrainBeta");
   const bool constrainIntens = boolSettingValue("ConstrainIntensities");
 
-  const auto fitType = fitTypeString().toStdString();
-  m_plotOption = m_uiForm->cbPlotType->currentText().toStdString();
-
-  m_baseName =
-      constructBaseName(inputWs->getName(), fitType, true, specMin, specMax);
-
   IAlgorithm_sptr iqtFitAlg;
 
-  if (!constrainBeta) {
-    iqtFitAlg = AlgorithmManager::Instance().create("IqtFitSequential");
-  } else {
+  if (constrainBeta)
     iqtFitAlg = AlgorithmManager::Instance().create("IqtFitMultiple");
-  }
+  else
+    iqtFitAlg = AlgorithmManager::Instance().create("IqtFitSequential");
 
   iqtFitAlg->initialize();
-  iqtFitAlg->setProperty("FitType", fitType);
+  iqtFitAlg->setProperty("FitType", fitTypeString());
   iqtFitAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
   iqtFitAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
   iqtFitAlg->setProperty("ConstrainIntensities", constrainIntens);
-  iqtFitAlg->setProperty("OutputResultWorkspace", m_baseName + "_Result");
+  iqtFitAlg->setProperty("OutputResultWorkspace", outputName + "_Result");
   iqtFitAlg->setProperty("OutputParameterWorkspace",
-                         m_baseName + "_Parameters");
-  iqtFitAlg->setProperty("OutputWorkspaceGroup", m_baseName + "_Workspaces");
+                         outputName + "_Parameters");
+  iqtFitAlg->setProperty("OutputWorkspaceGroup", outputName + "_Workspaces");
   return iqtFitAlg;
 }
 
@@ -206,15 +185,15 @@ void IqtFit::updatePlotOptions() {
  * Plot workspace based on user input
  */
 void IqtFit::plotWorkspace() {
-  IndirectFitAnalysisTab::plotResult(m_baseName + "_Result",
-                                     QString::fromStdString(m_plotOption));
+  IndirectFitAnalysisTab::plotResult(outputWorkspaceName() + "_Result",
+                                     m_uiForm->cbPlotType->currentText());
 }
 
 /**
  * Save the result of the algorithm
  */
 void IqtFit::saveResult() {
-  IndirectFitAnalysisTab::saveResult(m_baseName + "_Result");
+  IndirectFitAnalysisTab::saveResult(outputWorkspaceName() + "_Result");
 }
 
 /**
@@ -232,7 +211,8 @@ void IqtFit::algorithmComplete(bool error) {
     return;
   }
 
-  IndirectFitAnalysisTab::fitAlgorithmComplete(m_baseName + "_Parameters");
+  IndirectFitAnalysisTab::fitAlgorithmComplete(outputWorkspaceName() +
+                                               "_Parameters");
   m_uiForm->pbPlot->setEnabled(true);
   m_uiForm->pbSave->setEnabled(true);
   m_uiForm->cbPlotType->setEnabled(true);
@@ -268,7 +248,6 @@ void IqtFit::loadSettings(const QSettings &settings) {
  */
 void IqtFit::newDataLoaded(const QString wsName) {
   IndirectFitAnalysisTab::newInputDataLoaded(wsName);
-  m_baseName.clear();
 
   int maxWsIndex =
       static_cast<int>(inputWorkspace()->getNumberHistograms()) - 1;
@@ -285,16 +264,9 @@ void IqtFit::newDataLoaded(const QString wsName) {
   m_uiForm->spSpectraMax->setValue(maxWsIndex);
 }
 
-/**
- * Update the current plot option selected
- */
-void IqtFit::updateCurrentPlotOption(QString newOption) {
-  m_plotOption = newOption.toStdString();
-}
-
 void IqtFit::updatePreviewPlots() {
   // If there is a result workspace plot then plot it
-  const auto groupName = m_baseName + "_Workspaces";
+  const auto groupName = outputWorkspaceName() + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
 
@@ -369,11 +341,8 @@ void IqtFit::endXChanged(double endX) {
 }
 
 void IqtFit::singleFit() {
-  if (!validate())
-    return;
-
-  size_t specNo = m_uiForm->spPlotSpectrum->text().toULongLong();
-  runFitAlgorithm(iqtFitAlgorithm(inputWorkspace(), specNo, specNo));
+  if (validate())
+    executeSingleFit();
 }
 
 void IqtFit::disablePlotGuess() {

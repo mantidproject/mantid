@@ -35,8 +35,10 @@ private:
 
 protected:
   QHash<QString, double> createDefaultValues() const;
-  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() override;
-  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() override;
+  std::string createSingleFitOutputName() const override;
+  std::string createSequentialFitOutputName() const override;
+  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
+  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
                         int maxIterations) const override;
 
@@ -48,7 +50,6 @@ protected slots:
   void specMaxChanged(int value);
   void startXChanged(double startX) override;
   void endXChanged(double endX) override;
-  void updateCurrentPlotOption(QString newOption);
   void singleFit();
   void plotGuess() override;
   void algorithmComplete(bool error) override;
@@ -60,20 +61,15 @@ private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
 
-  std::string constructBaseName(const std::string &inputName,
-                                const std::string &fitType, const bool &multi,
-                                const size_t &specMin,
-                                const size_t &specMax) const;
-  QString fitTypeString() const;
+  std::string constructBaseName() const;
+  std::string fitTypeString() const;
   Mantid::API::IAlgorithm_sptr
   iqtFitAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWs,
-                  const size_t &specMin, const size_t &specMax);
+                  const size_t &specMin, const size_t &specMax) const;
   Mantid::API::IAlgorithm_sptr
   replaceInfinityAndNaN(Mantid::API::MatrixWorkspace_sptr inputWS) const;
 
   std::unique_ptr<Ui::IqtFit> m_uiForm;
-  std::string m_plotOption;
-  std::string m_baseName;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
