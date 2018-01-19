@@ -35,7 +35,6 @@ void MSDFit::setup() {
   addComboBoxFunctionGroup("Peters", {peters});
   addComboBoxFunctionGroup("Yi", {yi});
 
-  modelSelection(selectedFitType());
   disablePlotGuess();
 
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
@@ -72,42 +71,46 @@ void MSDFit::setup() {
 }
 
 void MSDFit::run() {
-  if (!validate())
-    return;
-
-  // Set the result workspace for Python script export
-  const auto model = selectedFitType();
-  QString dataName = m_uiForm->dsSampleInput->getCurrentDataName();
-
-  const int specMin = m_uiForm->spSpectraMin->value();
-  const int specMax = m_uiForm->spSpectraMax->value();
-
-  m_pythonExportWsName =
-      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
-      std::to_string(specMin) + "_to_s" + std::to_string(specMax) + "_" +
-      model.toStdString() + "_msd";
-
-  auto msdAlg =
-      msdFitAlgorithm(modelToAlgorithmProperty(model), specMin, specMax);
-  runFitAlgorithm(msdAlg);
+  if (validate())
+    executeSequentialFit();
 }
 
 void MSDFit::singleFit() {
-  if (!validate())
-    return;
+  if (validate())
+    executeSingleFit();
+}
 
-  // Set the result workspace for Python script export
+std::string MSDFit::createSingleFitOutputName() const {
+  return constructBaseName() + std::to_string(selectedSpectrum());
+}
+
+std::string MSDFit::createSequentialFitOutputName() const {
+  const auto specMin = std::to_string(minimumSpectrum());
+  const auto specMax = std::to_string(maximumSpectrum());
+  return constructBaseName() + specMin + "_to_" + specMax;
+}
+
+std::string MSDFit::constructBaseName() const {
+  auto outputName = inputWorkspace()->getName();
+  const auto model = selectedFitType().toStdString();
+
+  const auto cutIndex = outputName.find_last_of('_');
+  if (cutIndex != std::string::npos)
+    outputName = outputName.substr(0, cutIndex);
+  return outputName + "_MSD_" + model + "_s";
+}
+
+IAlgorithm_sptr MSDFit::singleFitAlgorithm() const {
   const auto model = selectedFitType();
-  QString dataName = m_uiForm->dsSampleInput->getCurrentDataName();
-  int fitSpec = m_uiForm->spPlotSpectrum->value();
+  const auto fitSpec = m_uiForm->spPlotSpectrum->value();
+  return msdFitAlgorithm(modelToAlgorithmProperty(model), fitSpec, fitSpec);
+}
 
-  m_pythonExportWsName =
-      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
-      std::to_string(fitSpec) + "_" + model.toStdString() + "_msd";
-
-  auto msdAlg =
-      msdFitAlgorithm(modelToAlgorithmProperty(model), fitSpec, fitSpec);
-  runFitAlgorithm(msdAlg);
+IAlgorithm_sptr MSDFit::sequentialFitAlgorithm() const {
+  const auto model = selectedFitType();
+  const auto specMin = m_uiForm->spSpectraMin->value();
+  const auto specMax = m_uiForm->spSpectraMax->value();
+  return msdFitAlgorithm(modelToAlgorithmProperty(model), specMin, specMax);
 }
 
 /*
@@ -123,24 +126,13 @@ void MSDFit::singleFit() {
  *                minimum and maximum.
  */
 IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, int specMin,
-                                        int specMax) {
-  auto wsName = m_uiForm->dsSampleInput->getCurrentDataName().toStdString();
-  double xStart = m_dblManager->value(m_properties["StartX"]);
-  double xEnd = m_dblManager->value(m_properties["EndX"]);
-
-  setMinimumSpectrum(specMin);
-  setMaximumSpectrum(specMax);
-
+                                        int specMax) const {
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
-  msdAlg->setProperty("InputWorkspace", wsName);
   msdAlg->setProperty("Model", model);
-  msdAlg->setProperty("XStart", xStart);
-  msdAlg->setProperty("XEnd", xEnd);
   msdAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
   msdAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
-  msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
-
+  msdAlg->setProperty("OutputWorkspace", outputWorkspaceName());
   return msdAlg;
 }
 
@@ -176,7 +168,7 @@ void MSDFit::algorithmComplete(bool error) {
   if (error)
     return;
 
-  IndirectFitAnalysisTab::fitAlgorithmComplete(m_pythonExportWsName +
+  IndirectFitAnalysisTab::fitAlgorithmComplete(outputWorkspaceName() +
                                                "_Parameters");
   // Enable plot and save
   m_uiForm->pbPlot->setEnabled(true);
@@ -184,7 +176,7 @@ void MSDFit::algorithmComplete(bool error) {
 }
 
 void MSDFit::updatePreviewPlots() {
-  const auto groupName = m_pythonExportWsName + "_Workspaces";
+  const auto groupName = outputWorkspaceName() + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
   IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm->ppPlotTop);
@@ -224,7 +216,6 @@ void MSDFit::updatePlotOptions() {}
  * @param wsName Name of new workspace loaded
  */
 void MSDFit::newDataLoaded(const QString wsName) {
-  m_pythonExportWsName = "";
   IndirectFitAnalysisTab::newInputDataLoaded(wsName);
   auto const &workspace = inputWorkspace();
   int maxWsIndex = 0;
@@ -281,19 +272,6 @@ void MSDFit::endXChanged(double endX) {
   rangeSelector->blockSignals(false);
 }
 
-void MSDFit::modelSelection(const QString &model) {
-
-  if (!m_pythonExportWsName.empty()) {
-    auto idx = m_pythonExportWsName.rfind("_");
-    m_pythonExportWsName = m_pythonExportWsName.substr(0, idx);
-    idx = m_pythonExportWsName.rfind("_");
-    m_pythonExportWsName = m_pythonExportWsName.substr(0, idx);
-    m_pythonExportWsName += "_" + model.toStdString() + "_msd";
-  }
-
-  m_uiForm->ckPlotGuess->setChecked(false);
-}
-
 /*
  * Given the selected model in the interface, returns the name of
  * the associated model to pass to the MSDFit algorithm.
@@ -301,7 +279,7 @@ void MSDFit::modelSelection(const QString &model) {
  * @param model The name of the model as displayed in the interface.
  * @return      The name of the model as defined in the MSDFit algorithm.
  */
-std::string MSDFit::modelToAlgorithmProperty(const QString &model) {
+std::string MSDFit::modelToAlgorithmProperty(const QString &model) const {
 
   if (model == "Gaussian")
     return "Gauss";
@@ -317,14 +295,14 @@ std::string MSDFit::modelToAlgorithmProperty(const QString &model) {
  * Handles saving of workspace
  */
 void MSDFit::saveClicked() {
-  IndirectFitAnalysisTab::saveResult(m_pythonExportWsName);
+  IndirectFitAnalysisTab::saveResult(outputWorkspaceName());
 }
 
 /**
  * Handles mantid plotting
  */
 void MSDFit::plotClicked() {
-  IndirectFitAnalysisTab::plotResult(m_pythonExportWsName + "_Workspaces",
+  IndirectFitAnalysisTab::plotResult(outputWorkspaceName() + "_Workspaces",
                                      "All");
 }
 

@@ -31,18 +31,24 @@ protected slots:
   void saveClicked();
   void plotClicked();
   void algorithmComplete(bool error) override;
-  void modelSelection(const QString& model);
   void updatePreviewPlots() override;
   void rangeChanged(double xMin, double xMax) override;
   void plotGuess() override;
   void updatePlotOptions() override;
 
+protected:
+  std::string createSingleFitOutputName() const override;
+  std::string createSequentialFitOutputName() const override;
+  std::string constructBaseName() const;
+  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
+  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
+
 private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
   Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
-                                               int specMin, int specMax);
-  std::string modelToAlgorithmProperty(const QString &model);
+                                               int specMin, int specMax) const;
+  std::string modelToAlgorithmProperty(const QString &model) const;
 
   std::unique_ptr<Ui::MSDFit> m_uiForm;
 };
