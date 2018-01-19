@@ -144,8 +144,10 @@ public:
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the coherent scattering length squared, <b>^2, for a given wavelength
-  /// in fm^2.
+  /**
+   * Get the coherent scattering length squared, <b>^2, for a given wavelength
+   * in fm^2.
+   */
   double cohScatterLengthSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
@@ -155,8 +157,10 @@ public:
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Return the total scattering length squared, <b^2>, for a given wavelength
-  /// in fm^2.
+  /**
+   * Return the total scattering length squared, <b^2>, for a given wavelength
+   *  in fm^2.
+   */
   double totalScatterLengthSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
