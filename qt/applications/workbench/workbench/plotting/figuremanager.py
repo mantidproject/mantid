@@ -160,7 +160,7 @@ class FigureManagerWorkbench(FigureManagerBase):
         else:
             # dispatch through event loop to we end up on the main thread
             QMetaObject.invokeMethod(self, "_destroy_impl",
-                                    Qt.BlockingQueuedConnection)
+                                     Qt.BlockingQueuedConnection)
             if self._destroy_exc is not None:
                 exc_info = self._destroy_exc
                 self._destroy_exc = None
@@ -250,4 +250,19 @@ def new_figure_manager_given_figure(num, figure):
     manager = FigureManagerWorkbench(canvas, num)
     return manager
 
+
 show = Show()
+
+
+if __name__ == '__main__':
+    # testing code
+    import numpy as np
+    qapp = QApplication([' '])
+    x = np.linspace(0, 2*np.pi, 100)
+    y = np.cos(x)
+    fig_mgr = new_figure_manager(1)
+    fig = fig_mgr.canvas.figure
+    ax = fig.add_subplot(111)
+    ax.plot(x, y)
+    fig.show()
+    qapp.exec_()
