@@ -12,15 +12,12 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 
 namespace {
 /// Component coordinates for Figaro, in meter.
