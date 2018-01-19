@@ -5,6 +5,8 @@
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
 
+#include <qwt_plot_curve.h>
+
 #include "ui_EnggDiffractionQtTabGSAS.h"
 
 namespace MantidQt {
@@ -17,6 +19,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
 
 public:
   EnggDiffGSASFittingViewQtWidget();
+
+  ~EnggDiffGSASFittingViewQtWidget() override;
 
   void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
@@ -57,8 +61,11 @@ public:
 private slots:
   void browseFocusedRun();
   void loadFocusedRun();
+  void selectRun();
 
 private:
+  std::vector<QwtPlotCurve *> m_focusedRunCurves;
+
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
   Ui::EnggDiffractionQtTabGSAS m_ui;

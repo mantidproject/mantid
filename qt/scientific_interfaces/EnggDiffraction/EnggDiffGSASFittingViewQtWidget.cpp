@@ -8,8 +8,20 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
+  setupUI();
+
   auto model = std::make_unique<EnggDiffGSASFittingModel>();
   m_presenter.reset(new EnggDiffGSASFittingPresenter(std::move(model), this));
+  m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
+}
+
+EnggDiffGSASFittingViewQtWidget::~EnggDiffGSASFittingViewQtWidget() {
+  m_presenter->notify(IEnggDiffGSASFittingPresenter::ShutDown);
+
+  for (auto curves : m_focusedRunCurves) {
+    curves->detach();
+    delete curves;
+  }
 }
 
 void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
@@ -20,51 +32,54 @@ void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
     const Mantid::API::ITableWorkspace_sptr latticeParams) const {
   (void)latticeParams;
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("displayLatticeParams not yet implemented");
 }
 
 void EnggDiffGSASFittingViewQtWidget::displayRwp(const double rwp) const {
   (void)rwp;
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("displayRwp not yet implemented");
 }
 
 std::string EnggDiffGSASFittingViewQtWidget::getFocusedFileName() const {
-  throw std::runtime_error("Not yet implemented");
+  return m_ui.lineEdit_runFile->text().toStdString();
 }
 
 std::string EnggDiffGSASFittingViewQtWidget::getGSASIIProjectPath() const {
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("getGSASIIProjectPath not yet implemented");
 }
 
 std::string EnggDiffGSASFittingViewQtWidget::getInstrumentFileName() const {
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("getInstrumentFileName not yet implemented");
 }
 
 std::string EnggDiffGSASFittingViewQtWidget::getPathToGSASII() const {
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("getPathToGSASII not yet implemented");
 }
 
 double EnggDiffGSASFittingViewQtWidget::getPawleyDMin() const {
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("getPawleyDMin not yet implemented");
 }
 
 double EnggDiffGSASFittingViewQtWidget::getPawleyNegativeWeight() const {
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("getPawleyNegativeWeight not yet implemented");
 }
 
 std::vector<std::string>
 EnggDiffGSASFittingViewQtWidget::getPhaseFileNames() const {
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("getPhaseFileNames not yet implemented");
 }
 
 GSASRefinementMethod
 EnggDiffGSASFittingViewQtWidget::getRefinementMethod() const {
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("getRefinementMethod not yet implemented");
 }
 
 std::pair<int, size_t>
 EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const {
-  throw std::runtime_error("Not yet implemented");
+  const auto currentItemLabel =
+      m_ui.listWidget_runLabels->currentItem()->text();
+  const auto pieces = currentItemLabel.split("_");
+  return std::make_pair(pieces[0].toInt(), pieces[1].toUInt());
 }
 
 void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
@@ -72,13 +87,35 @@ void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
 }
 
 void EnggDiffGSASFittingViewQtWidget::plotCurve(
-    const std::vector<boost::shared_ptr<QwtData>> &curve) {
-  (void)curve;
-  throw std::runtime_error("Not yet implemented");
+    const std::vector<boost::shared_ptr<QwtData>> &curves) {
+
+  for (size_t i = 0; i < curves.size(); ++i) {
+    auto *curve = curves[i].get();
+    QwtPlotCurve *plotCurve = new QwtPlotCurve();
+
+    m_focusedRunCurves.push_back(plotCurve);
+    m_focusedRunCurves[i]->setData(*curve);
+    m_focusedRunCurves[i]->attach(m_ui.plotArea);
+  }
+
+  m_ui.plotArea->replot();
 }
 
 void EnggDiffGSASFittingViewQtWidget::resetCanvas() {
-  throw std::runtime_error("Not yet implemented");
+  for (auto curve : m_focusedRunCurves) {
+    if (curve) {
+      curve->detach();
+      delete curve;
+    }
+  }
+
+  if (m_focusedRunCurves.size() > 0) {
+    m_focusedRunCurves.clear();
+  }
+}
+
+void EnggDiffGSASFittingViewQtWidget::selectRun() {
+  m_presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
 }
 
 void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
@@ -115,22 +152,30 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
   m_ui.setupUi(this);
   connect(m_ui.pushButton_browseRunFile, SIGNAL(clicked()), this,
           SLOT(browseFocusedRun()));
+  connect(m_ui.pushButton_loadRun, SIGNAL(clicked()), this,
+          SLOT(loadFocusedRun()));
+  connect(m_ui.listWidget_runLabels, SIGNAL(itemSelectionChanged()), this,
+          SLOT(selectRun()));
 }
 
 bool EnggDiffGSASFittingViewQtWidget::showRefinementResultsSelected() const {
-  throw std::runtime_error("Not yet implemented");
+  return m_ui.checkBox_showRefinementResults->isChecked();
 }
 
 void EnggDiffGSASFittingViewQtWidget::updateRunList(
     const std::vector<std::pair<int, size_t>> &runLabels) {
-  (void)runLabels;
-  throw std::runtime_error("Not yet implemented");
+  m_ui.listWidget_runLabels->clear();
+  for (const auto &runLabel : runLabels) {
+    const auto labelStr = QString::number(runLabel.first) + tr("_") +
+                          QString::number(runLabel.second);
+    m_ui.listWidget_runLabels->addItem(labelStr);
+  }
 }
 
 void EnggDiffGSASFittingViewQtWidget::userWarning(
     const std::string &warningDescription) const {
   (void)warningDescription;
-  throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("userWarning not yet implemented");
 }
 
 } // CustomInterfaces
