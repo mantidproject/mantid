@@ -940,6 +940,43 @@ public:
                      compInfo.parent(compInfo.indexOf(bankId)));
   }
 
+  void test_physical_neutronic_beamline_same_when_no_physical_instrument_set() {
+
+    auto inst = ComponentCreationHelper::createMinimalInstrument(
+        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+        V3D{12, 0, 0} /*detector*/);
+
+    // instrument has no physical instrument associated. Neturonic and physical
+    // instrument are the same.
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+
+    // Beamline parts are actually same objects
+    TS_ASSERT_EQUALS(&expInfo.componentInfo(),
+                     &expInfo.componentInfoPhysical());
+    TS_ASSERT_EQUALS(&expInfo.detectorInfo(), &expInfo.detectorInfoPhysical());
+  }
+
+  void test_physical_neutronic_beamline_differ_when_physical_instrument_set() {
+
+    auto neutInst = ComponentCreationHelper::createMinimalInstrument(
+        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+        V3D{12, 0, 0} /*detector*/);
+
+    // Attach a physical instrument to the neutronic one
+    neutInst->setPhysicalInstrument(
+        std::unique_ptr<Mantid::Geometry::Instrument>(neutInst->clone()));
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(neutInst);
+
+    // Beamline parts are actually same objects
+    TS_ASSERT_DIFFERS(&expInfo.componentInfo(),
+                      &expInfo.componentInfoPhysical());
+    TS_ASSERT_DIFFERS(&expInfo.detectorInfo(), &expInfo.detectorInfoPhysical());
+  }
+
 private:
   void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name,
                                   const std::string &value) {

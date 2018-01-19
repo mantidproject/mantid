@@ -163,12 +163,14 @@ public:
                                            const std::string &date = "");
 
   const Geometry::DetectorInfo &detectorInfo() const;
+  const Geometry::DetectorInfo &detectorInfoPhysical() const;
   Geometry::DetectorInfo &mutableDetectorInfo();
 
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
 
   const Geometry::ComponentInfo &componentInfo() const;
+  const Geometry::ComponentInfo &componentInfoPhysical() const;
   Geometry::ComponentInfo &mutableComponentInfo();
 
   void invalidateSpectrumDefinition(const size_t index);

@@ -1156,11 +1156,23 @@ bool ParameterMap::hasComponentInfo(const Instrument *instrument) const {
   return static_cast<bool>(m_componentInfo);
 }
 
+bool ParameterMap::hasPhysicalBeamline() const {
+  return static_cast<bool>(m_componentInfoPhysical);
+}
+
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
 const Geometry::DetectorInfo &ParameterMap::detectorInfo() const {
   if (!hasDetectorInfo(m_instrument))
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
+}
+
+const DetectorInfo &ParameterMap::detectorInfoPhysical() const {
+  if (!static_cast<bool>(m_detectorInfoPhysical)) {
+    throw std::runtime_error(
+        "Cannot return reference to NULL physical DetectorInfo");
+  }
+  return *m_detectorInfoPhysical;
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
@@ -1176,6 +1188,14 @@ const Geometry::ComponentInfo &ParameterMap::componentInfo() const {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
   return *m_componentInfo;
+}
+
+const ComponentInfo &ParameterMap::componentInfoPhysical() const {
+  if (!static_cast<bool>(m_componentInfoPhysical)) {
+    throw std::runtime_error(
+        "Cannot return reference to NULL physical ComponentInfo");
+  }
+  return *m_componentInfoPhysical;
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
@@ -1212,6 +1232,10 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
                            "base instrument, not a parametrized instrument");
   m_instrument = instrument;
   std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
+  if (m_instrument->hasPhysicalInstrument()) {
+    std::tie(m_componentInfoPhysical, m_detectorInfoPhysical) =
+        m_instrument->getPhysicalInstrument()->makeBeamline(*this);
+  }
 }
 
 } // Namespace Geometry

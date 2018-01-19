@@ -188,6 +188,10 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
   }
 }
 
+bool Instrument::hasPhysicalInstrument() const {
+  return bool(m_physicalInstrument);
+}
+
 /** INDIRECT GEOMETRY INSTRUMENTS ONLY: Sets the physical instrument.
  *  The holding instrument is then the 'neutronic' one, and is used in all
  * algorithms.

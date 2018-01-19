@@ -1042,6 +1042,14 @@ const Geometry::DetectorInfo &ExperimentInfo::detectorInfo() const {
   return m_parmap->detectorInfo();
 }
 
+const DetectorInfo &ExperimentInfo::detectorInfoPhysical() const {
+  populateIfNotLoaded();
+  if (m_parmap->hasPhysicalBeamline())
+    return m_parmap->detectorInfoPhysical();
+  // Neturonic is the same as physical
+  return m_parmap->detectorInfo();
+}
+
 /** Return a non-const reference to the DetectorInfo object. */
 Geometry::DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   populateIfNotLoaded();
@@ -1107,6 +1115,13 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
 }
 
 const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const {
+  return m_parmap->componentInfo();
+}
+
+const ComponentInfo &ExperimentInfo::componentInfoPhysical() const {
+  if (m_parmap->hasPhysicalBeamline())
+    return m_parmap->componentInfoPhysical();
+  // Neutronic and physical are the same
   return m_parmap->componentInfo();
 }
 

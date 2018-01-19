@@ -212,6 +212,7 @@ public:
   // Methods for use with indirect geometry instruments,
   // where the physical instrument differs from the 'neutronic' one
   boost::shared_ptr<const Instrument> getPhysicalInstrument() const;
+  bool hasPhysicalInstrument() const;
   void setPhysicalInstrument(std::unique_ptr<Instrument>);
 
   void getInstrumentParameters(double &l1, Kernel::V3D &beamline,

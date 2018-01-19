@@ -339,9 +339,12 @@ public:
 
   bool hasDetectorInfo(const Instrument *instrument) const;
   bool hasComponentInfo(const Instrument *instrument) const;
+  bool hasPhysicalBeamline() const;
   const Geometry::DetectorInfo &detectorInfo() const;
+  const Geometry::DetectorInfo &detectorInfoPhysical() const;
   Geometry::DetectorInfo &mutableDetectorInfo();
   const Geometry::ComponentInfo &componentInfo() const;
+  const Geometry::ComponentInfo &componentInfoPhysical() const;
   Geometry::ComponentInfo &mutableComponentInfo();
   size_t detectorIndex(const detid_t detID) const;
   size_t componentIndex(const Geometry::ComponentID componentId) const;
@@ -379,6 +382,14 @@ private:
   /// Pointer to the ComponentInfo wrapper. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
   std::unique_ptr<Geometry::ComponentInfo> m_componentInfo;
+
+  /// Pointer to the DetectorInfo wrapper. NULL unless the instrument is
+  /// associated with the instrument and that has a physical instrument.
+  std::unique_ptr<Geometry::DetectorInfo> m_detectorInfoPhysical;
+
+  /// Pointer to the ComponentInfo wrapper. NULL unless the instrument is
+  /// associated with the instrument and that has a physical instrument.
+  std::unique_ptr<Geometry::ComponentInfo> m_componentInfoPhysical;
 
   /// Pointer to the owning instrument for translating detector IDs into
   /// detector indices when accessing the DetectorInfo object. If the workspace
