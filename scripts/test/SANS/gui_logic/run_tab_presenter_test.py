@@ -21,12 +21,6 @@ if sys.version_info.major == 3:
 else:
     import mock
 
-
-# BATCH_FILE_TEST_CONTENT_1 = "# MANTID_BATCH_FILE add more text here\n" \
-#                             "sample_sans,1,sample_trans,2,sample_direct_beam,3," \
-#                             "output_as,test_file,user_file,user_test_file\n" \
-#                             "sample_sans,1,can_sans,2,output_as,test_file2\n"
-
 BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SampleScatter: 1, BatchReductionEntry.SampleTransmission: 2,
                               BatchReductionEntry.SampleDirect: 3, BatchReductionEntry.Output: 'test_file',
                               BatchReductionEntry.UserFile: 'user_test_file'},
@@ -39,14 +33,9 @@ BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                               BatchReductionEntry.Output: 'test_file', BatchReductionEntry.UserFile: 'user_test_file'},
                              {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
 
-
-# BATCH_FILE_TEST_CONTENT_2 = "# MANTID_BATCH_FILE add more text here\n" \
-#                             "sample_sans,SANS2D00022024,sample_trans,SANS2D00022048," \
-#                             "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
-#                             "sample_sans,SANS2D00022024,output_as,test_file2\n"
-
-BATCH_FILE_TEST_CONTENT_3 = "# MANTID_BATCH_FILE add more text here\n" \
-                            "sample_sans,1p3,output_as,test_file\n"
+BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SampleScatter: '1',
+                              BatchReductionEntry.SampleScatterPeriod: '3',
+                              BatchReductionEntry.Output: 'test_file'}]
 
 
 class MultiPeriodMock(object):
@@ -220,8 +209,8 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Assert
-        self.assertTrue(view.add_row.call_count == 1)
-        self.assertTrue(view.set_multi_period_view_mode.call_count == 1)
+        self.assertEqual(view.add_row.call_count, 1)
+        self.assertEqual(view.set_multi_period_view_mode.call_count, 1)
 
         expected_row = "SampleScatter:1,ssp:3,SampleTrans:,stp:,SampleDirect:,sdp:," \
                        "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file"
