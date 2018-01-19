@@ -145,21 +145,26 @@ public:
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
   /**
-   * Get the coherent scattering length squared, <b>^2, for a given wavelength
-   * in fm^2.
+   * Get the coherent scattering length squared, \f$<b>^2\f$, for a given
+   * wavelength
+   * in \f$fm^2\f$.
    */
   double cohScatterLengthSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the incoherent length squared, <b>^2, for a given wavelength in fm^2.
+  /**
+   * Get the incoherent length squared, \f$<b>^2\f$, for a given wavelength in
+   * \f$fm^2\f$.
+   */
   double incohScatterLengthSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
   /**
-   * Return the total scattering length squared, <b^2>, for a given wavelength
-   *  in fm^2.
+   * Return the total scattering length squared, \f$<b^2>\f$, for a given
+   * wavelength
+   *  in \f$fm^2\f$.
    */
   double totalScatterLengthSqrd(
       const double lambda =
