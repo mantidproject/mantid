@@ -185,8 +185,8 @@ public:
     // to be weighted by the fraction of strong peak contained in a standard
     // core. This is not exactly the same because of the weighting from the
     // strong peak
-    TS_ASSERT_DELTA(weak_inti, 83.6960, 0.5);
-    TS_ASSERT_DELTA(weak_sigi, 8.37, 0.1);
+    TS_ASSERT_DELTA(weak_inti, numWeakEvents, 0.5);
+    TS_ASSERT_DELTA(weak_sigi, 10, 0.1);
 
     weak_inti = 0;
     weak_sigi = 0;
@@ -260,7 +260,7 @@ public:
     // core. This is not exactly the same because of the weighting from the
     // strong peak
     TS_ASSERT_DELTA(weak_inti, numWeakEvents, 35);
-    TS_ASSERT_DELTA(weak_sigi, 8.62, 0.2);
+    TS_ASSERT_DELTA(weak_sigi, 10, 0.2);
   }
 
   void test_estimateSignalToNoiseRatioInPerfectCase() {
@@ -298,17 +298,17 @@ public:
     const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
     const auto ratio3 = integrator.estimateSignalToNoiseRatio(params, peak_3);
 
-    TS_ASSERT_DELTA(ratio1, numStrongEvents, 0.0001);
-    TS_ASSERT_DELTA(ratio2, numWeakEvents, 0.0001);
-    TS_ASSERT_DELTA(ratio3, numWeakEvents / 2, 0.0001);
+    TS_ASSERT_DELTA(ratio1, numStrongEvents / 100, 1e-4);
+    TS_ASSERT_DELTA(ratio2, numWeakEvents / 10, 1e-4);
+    TS_ASSERT_DELTA(ratio3, 7.071, 1e-4);
   }
 
   void test_estimateSignalToNoiseRatioWithBackgroundAndOnePercentCulling() {
-    doTestSignalToNoiseRatio(true, 171.90, 1.2632, 0.1824);
+    doTestSignalToNoiseRatio(true, 99.3898, 5.4788, 1.0597);
   }
 
   void test_estimateSignalToNoiseRatioWithBackgroundAndNoOnePercentCulling() {
-    doTestSignalToNoiseRatio(false, 160.33, 1.088, 0.094);
+    doTestSignalToNoiseRatio(false, 99.3417, 5.0972, 0.5821);
   }
 
 private:
