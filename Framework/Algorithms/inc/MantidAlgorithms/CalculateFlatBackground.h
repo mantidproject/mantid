@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHMS_CALCULATEFLATBACKGROUND_H_
 #define MANTID_ALGORITHMS_CALCULATEFLATBACKGROUND_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -53,13 +50,8 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalculateFlatBackground : public API::Algorithm {
+class DLLExport CalculateFlatBackground : public API::ParallelAlgorithm {
 public:
-  /// (Empty) Constructor
-  CalculateFlatBackground() : API::Algorithm() {}
-  /// Virtual destructor
-  ~CalculateFlatBackground() = default;
-
   /// Algorithm's name
   const std::string name() const override { return "CalculateFlatBackground"; }
   /// Summary of algorithms purpose

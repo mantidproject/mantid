@@ -76,6 +76,8 @@ public:
   V2D operator*(const double factor) const;
   /// Scale this
   V2D &operator*=(const double factor);
+  /// Negate
+  V2D operator-() const noexcept;
 
   ///@}
 

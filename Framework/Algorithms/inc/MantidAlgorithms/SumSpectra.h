@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHMS_SUMSPECTRA_H_
 #define MANTID_ALGORITHMS_SUMSPECTRA_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidGeometry/IDTypes.h"
 #include <set>
 
@@ -54,10 +51,8 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SumSpectra : public API::Algorithm {
+class DLLExport SumSpectra : public API::ParallelAlgorithm {
 public:
-  /// Default constructor
-  SumSpectra();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SumSpectra"; }
   /// Summary of algorithms purpose
@@ -96,21 +91,21 @@ private:
   void determineIndices(const size_t numberOfSpectra);
 
   /// The output spectrum number
-  specnum_t m_outSpecNum;
+  specnum_t m_outSpecNum{0};
   /// Set true to keep monitors
-  bool m_keepMonitors;
+  bool m_keepMonitors{false};
   /// Set true to remove special values before processing
-  bool m_replaceSpecialValues;
+  bool m_replaceSpecialValues{false};
   /// numberOfSpectra in the input
-  size_t m_numberOfSpectra;
+  size_t m_numberOfSpectra{0};
   /// Blocksize of the input workspace
-  size_t m_yLength;
+  size_t m_yLength{0};
   /// Set of indices to sum
   std::set<size_t> m_indices;
 
   // if calculating additional workspace with specially weighted averages is
   // necessary
-  bool m_calculateWeightedSum;
+  bool m_calculateWeightedSum{false};
 };
 
 } // namespace Algorithm

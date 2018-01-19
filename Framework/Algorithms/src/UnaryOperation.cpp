@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/UnaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -13,10 +10,6 @@ using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace Algorithms {
-UnaryOperation::UnaryOperation() : API::Algorithm() {
-  this->useHistogram = false;
-}
-
 /** Initialisation method.
  *  Defines input and output workspace properties
  */

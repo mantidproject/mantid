@@ -181,7 +181,7 @@ function (mtd_add_qt_target)
   endif()
 
   if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
-    _prune_usr_local_include ( ${PARSED_LINK_LIBS} )
+    prune_usr_local_include ( ${PARSED_LINK_LIBS} )
   endif ()
 
   target_link_libraries (${_target} PRIVATE ${_qt_link_libraries}
@@ -412,7 +412,7 @@ endfunction ()
 # at the front causing cross-talk between Qt4/Qt5 headers.
 # This prunes /usr/local/include from an interface includes property
 # so they don't get transitively passed to future targets.
-function ( _prune_usr_local_include )
+function ( prune_usr_local_include )
   foreach ( _it ${ARGN} )
     if ( TARGET ${_it} )
       get_property ( _tmp TARGET ${_it} PROPERTY INTERFACE_INCLUDE_DIRECTORIES )

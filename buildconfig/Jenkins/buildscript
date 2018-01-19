@@ -305,6 +305,8 @@ if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]]; then
   if [ -d $BUILD_DIR/docs/doctrees ]; then
     rm -rf $BUILD_DIR/docs/doctrees/*
   fi
+  # Build HTML to verify that no referencing errors have crept in.
+  $SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target docs-html"
   $SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target docs-test"
 fi
 

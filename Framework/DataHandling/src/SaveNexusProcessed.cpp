@@ -33,11 +33,6 @@ typedef NeXus::NexusFileIO::optional_size_t optional_size_t;
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNexusProcessed)
 
-/// Empty default constructor
-SaveNexusProcessed::SaveNexusProcessed()
-    : Algorithm(), m_timeProgInit(0.0), m_progress() {}
-
-//-----------------------------------------------------------------------------------------------
 /** Initialisation method.
  *
  */
