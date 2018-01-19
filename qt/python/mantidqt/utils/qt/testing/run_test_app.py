@@ -80,9 +80,9 @@ def open_in_window(widget_name, script):
         If the test yields an integer it is interpreted as the number of seconds to wait
         until the next step.
     """
+    raw_input('Please attach the Debugger now if required. Press any key to continue')
     setup_library_paths()
     app = QApplication([""])
-
     w = create_widget(widget_name)
     w.setWindowTitle(widget_name)
     w.show()
