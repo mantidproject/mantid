@@ -107,14 +107,14 @@ class TotalScatteringTest(stresstesting.MantidStressTest):
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 51
-        expected_peak_values = [0.0187231,
-                                0.0583586,
-                                0.2241280,
-                                0.2752230,
-                                1.0252800]
+        # After rebin this is at X index 37
+        expected_peak_values = [0.0002294,
+                                0.0606328,
+                                0.2007917,
+                                0.1436630,
+                                0.9823244]
         for index, ws in enumerate(self.pdf_output):
-            self.assertAlmostEqual(ws.dataY(0)[51], expected_peak_values[index], places=3)
+            self.assertAlmostEqual(ws.dataY(0)[37], expected_peak_values[index], places=3)
 
 
 def run_total_scattering(run_number, merge_banks):

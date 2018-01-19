@@ -23,9 +23,6 @@ public:
                         const WhiteList &whitelist, const GroupData &groupData);
   QString getPostprocessedWorkspaceName(const WhiteList &whitelist,
                                         const GroupData &groupData);
-  QString getReducedWorkspaceName(const WhiteList &whitelist,
-                                  const QStringList &data,
-                                  const QString &prefix = "");
   QString m_options;
   PostprocessingAlgorithm m_algorithm;
   std::map<QString, QString> m_map;

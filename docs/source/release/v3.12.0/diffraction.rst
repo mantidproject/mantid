@@ -28,7 +28,9 @@ Powder Diffraction
 - New algorithm :ref:`algm-SumOverlappingTubes` combines a detector scan for D2B into a single workspace.
 - ISIS Powder scripts for HRPD now support extra TOF windows 10-50 and 180-280
 - After calling create_vanadium and focus in ISIS Powder scripts on POLARIS, the output workspaces always contain the sample material if it is set using set_sample_material. (To view the sample material, right click the workspace and click 'Sample Material...')
+- Using grouping files with only one bank was enabled in ISIS Powder, and related errors to do with mismatched number of parameters were made more readable
 - It is now possible to set beam parameters (height and width) using instrument_object.set_beam_parameters(height=123, width=456).
+- The ``mode`` parameter for POLARIS in ISIS Powder now behaves as described in the documentation - it persists through function calls and is case insensitive
 
 Engineering Diffraction
 -----------------------
@@ -38,10 +40,12 @@ Engineering Diffraction
   latest version of GSAS-II, allowing Rietveld and Pawley refinement
   within Mantid.
 - Usability improvements in the GUI:
+
   + The "Invalid RB number" popup window in the GUI has been replaced with a more user-friendly message
   + Improved progress reporting for Calibration and Focus
   + Enabled multi-run fitting and plotting in the Fitting tab
-     
+  + Improved unit conversions when using the peak picker
+  
 Single Crystal Diffraction
 --------------------------
 - :ref:`FilterPeaks <algm-FilterPeaks>` now supports filtering peaks by TOF, d-spacing, and wavelength.

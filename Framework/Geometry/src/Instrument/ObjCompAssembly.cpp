@@ -18,9 +18,9 @@ Mantid::Kernel::Logger g_log("ObjCompAssembly");
 
 namespace Mantid {
 namespace Geometry {
-using Kernel::V3D;
-using Kernel::Quat;
 using Kernel::DblMatrix;
+using Kernel::Quat;
+using Kernel::V3D;
 
 /// Void deleter for shared pointers
 class NoDeleting {
@@ -238,12 +238,12 @@ void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
 }
 
 /**
-* Find a component by name.
-* @param cname :: The name of the component. If there are multiple matches, the
-* first one found is returned.
-* @param nlevels :: Optional argument to limit number of levels searched.
-* @returns A shared pointer to the component
-*/
+ * Find a component by name.
+ * @param cname :: The name of the component. If there are multiple matches, the
+ * first one found is returned.
+ * @param nlevels :: Optional argument to limit number of levels searched.
+ * @returns A shared pointer to the component
+ */
 boost::shared_ptr<const IComponent>
 ObjCompAssembly::getComponentByName(const std::string &cname,
                                     int nlevels) const {
@@ -357,7 +357,8 @@ void ObjCompAssembly::testIntersectionWithChildren(
 
 size_t ObjCompAssembly::registerContents(
     Mantid::Geometry::ComponentVisitor &visitor) const {
-  return visitor.registerComponentAssembly(*this);
+  // Generic Assembly registration call.
+  return visitor.registerObjComponentAssembly(*this);
 }
 
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to

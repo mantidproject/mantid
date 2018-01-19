@@ -35,12 +35,12 @@ class PyQtConfig(object):
           self.sip_dir = os.path.join(sys.prefix, 'sip', name)
       elif sys.platform == 'darwin':
           # hardcoded to homebrew Cellar
-          cellar_prefix = '/usr/local/Cellar'
+          cellar_prefix = '/usr/local/opt'
           qt_maj_version = self.version_str[0]
           if qt_maj_version == '4':
-              self.sip_dir = os.path.join(cellar_prefix, 'pyqt@4', self.version_str, 'share', 'sip')
+              self.sip_dir = os.path.join(cellar_prefix, 'pyqt@4', 'share', 'sip')
           elif qt_maj_version == '5':
-              self.sip_dir = os.path.join(cellar_prefix, 'pyqt', self.version_str, 'share', 'sip', 'Qt5')
+              self.sip_dir = os.path.join(cellar_prefix, 'pyqt', 'share', 'sip', 'Qt5')
           else:
               raise RuntimeError("Unknown Qt version ({}) found. Unable to determine location of PyQt sip files."
                                  "Please update FindPyQt accordingly.".format(self.version_str[0]))

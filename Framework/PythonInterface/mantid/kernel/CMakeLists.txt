@@ -9,6 +9,8 @@ set ( MODULE_TEMPLATE src/kernel.cpp.in )
 #    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
   src/Exports/ConfigService.cpp
+  src/Exports/ConfigObserver.cpp
+  src/Exports/ConfigPropertyObserver.cpp
   src/Exports/DataItem.cpp
   src/Exports/IPropertyManager.cpp
   src/Exports/Property.cpp
