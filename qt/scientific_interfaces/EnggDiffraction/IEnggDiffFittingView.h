@@ -5,8 +5,11 @@
 #include "IEnggDiffractionSettings.h"
 #include "IEnggDiffractionUserMsg.h"
 
+#include "MantidKernel/Unit.h"
+
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 
 class QwtData;
 
@@ -49,11 +52,12 @@ public:
   virtual ~IEnggDiffFittingView() = default;
 
   /**
-   * returns directory of the file name to preform fitting on
+   * Get value of the input files text box
    *
-   * @return directory as std::string
+   * @return (hopefully) comma-separated list of focused files to load for
+   * fitting
    */
-  virtual std::string getFittingRunNo() const = 0;
+  virtual std::string getFocusedFileNames() const = 0;
 
   /**
    * A list of dSpacing values to be translated into TOF
@@ -61,7 +65,7 @@ public:
    *
    * @return list of dSpacing values as std::string
    */
-  virtual std::string fittingPeaksData() const = 0;
+  virtual std::string getExpectedPeaksInput() const = 0;
 
   /**
    * Sets the peak list according to the string given
@@ -69,13 +73,6 @@ public:
    * @param peakList list of expected peaks to be fitted as std::string
    */
   virtual void setPeakList(const std::string &peakList) const = 0;
-
-  /**
-   * adds the number of banks to the combo-box widget on the interface
-   *
-   * @param bankID the bank number to add to combo-box
-   */
-  virtual void addBankItem(std::string bankID) = 0;
 
   /**
    * enables the Fit All button when multi-run number given
@@ -91,40 +88,6 @@ public:
   * the list widget
   */
   virtual void addRunNoItem(std::string runNo) = 0;
-
-  /**
-   * emits the signal within view when run number/bank changed
-   */
-  virtual void setBankEmit() = 0;
-
-  /**
-   * sets the bank combo-box according to given index
-   *
-   * @param idx as int of the bank to set
-   */
-  virtual void setBankIdComboBox(int idx) = 0;
-
-  /**
-   * Deletes all items from the fitting combo-box widget
-   */
-  virtual void clearFittingComboBox() const = 0;
-
-  /**
-   * Enables or disables the fitting combo-box
-   *
-   * @param enable or disable the fitting combo-box widget
-   */
-  virtual void enableFittingComboBox(bool enable) const = 0;
-
-  /**
-  * gets the index of the bank according to text found
-  *
-  * @param bank as a std::string to find in widget
-  *
-  * @returns int index of the combo-box where the
-  * string is found
-  */
-  virtual int getFittingComboIdx(std::string bank) const = 0;
 
   /**
    * Deletes all items from the fitting list widget
@@ -192,9 +155,21 @@ public:
   virtual int getFittingListWidgetCurrentRow() const = 0;
 
   /**
+  * Update the fitting list widget with a list of workspace run and bank numbers
+  */
+  virtual void
+  updateFittingListWidget(const std::vector<std::string> &rows) = 0;
+
+  /**
   * @return The text on the current selected row of the list widget
   */
-  virtual std::string getFittingListWidgetCurrentValue() const = 0;
+  virtual boost::optional<std::string>
+  getFittingListWidgetCurrentValue() const = 0;
+
+  /**
+  * @return Whether the list widget currently has an item selected
+  */
+  virtual bool listWidgetHasSelectedRow() const = 0;
 
   /**
    * Sets the current row of the fitting list widget
@@ -204,11 +179,11 @@ public:
   virtual void setFittingListWidgetCurrentRow(int idx) const = 0;
 
   /**
-   * sets the fitting run number according to path
+   * Set value of the text box for input filenames
    *
-   * @param path of the selected focused run file
+   * @param path Comma-separated list of files to add
    */
-  virtual void setFittingRunNo(const std::string &path) = 0;
+  virtual void setFocusedFileNames(const std::string &path) = 0;
 
   /**
    * gets the global vector in view containing focused file directory
@@ -263,9 +238,11 @@ public:
    * @param data of the workspace to be passed as QwtData
    * @param focused to check whether focused workspace
    * @param plotSinglePeaks whether to plot single peak fitting ws
+   * @param xAxisLabel Label specifying the x axis units
    */
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                             bool focused, bool plotSinglePeaks) = 0;
+                             bool focused, bool plotSinglePeaks,
+                             const std::string &xAxisLabel) = 0;
 
   /**
    * resets the canvas to avoid multiple plotting
@@ -294,6 +271,11 @@ public:
    * @param newInstrument the new instrument that is selected
    */
   virtual void setCurrentInstrument(const std::string &newInstrument) = 0;
+
+  /**
+  * Get whether the user has selected to plot reconstructed peaks over the run
+  */
+  virtual bool plotFittedPeaksEnabled() const = 0;
 };
 
 } // namespace CustomInterfaces

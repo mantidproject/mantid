@@ -93,7 +93,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -2040,16 +2040,6 @@ intermediate ranges are there for comparison</string>
               <layout class="QHBoxLayout" name="horizontalLayout_12">
                <item>
                 <layout class="QGridLayout" name="gridLayout_29">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_2">
-                   <property name="text">
-                    <string>Rescale</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="frontDetRescale"/>
-                 </item>
                  <item row="0" column="2">
                   <widget class="QCheckBox" name="frontDetRescaleCB">
                    <property name="enabled">
@@ -2066,6 +2056,16 @@ intermediate ranges are there for comparison</string>
                     <string>Shift</string>
                    </property>
                   </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_2">
+                   <property name="text">
+                    <string>Rescale</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="frontDetRescale"/>
                  </item>
                  <item row="1" column="1">
                   <widget class="QLineEdit" name="frontDetShift"/>
@@ -2105,58 +2105,69 @@ intermediate ranges are there for comparison</string>
                </item>
               </layout>
              </item>
-             <item row="6" column="1" colspan="3">
-              <layout class="QGridLayout" name="gridLayout_30">
-               <item row="0" column="2">
-                <widget class="QLineEdit" name="frontDetQmax"/>
-               </item>
-               <item row="1" column="0">
-                <spacer name="horizontalSpacer_8">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLineEdit" name="frontDetQmin"/>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLabel" name="label_8">
-                 <property name="text">
-                  <string>to</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="3">
-                <widget class="QCheckBox" name="frontDetQrangeOnOff">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="5" column="1" colspan="2">
-              <widget class="QLabel" name="label_12">
-               <property name="text">
-                <string>Q range</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_30">
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="frontDetQmin"/>
+            </item>
+            <item row="0" column="4">
+             <widget class="QCheckBox" name="frontDetQrangeOnOff">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="frontDetQmax"/>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>to</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QCheckBox" name="mergeQRangeOnOff">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="mergeQMin"/>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLineEdit" name="mergeQMax"/>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>to</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>Q range for fit</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_19">
+              <property name="text">
+               <string>Q range for merge</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>

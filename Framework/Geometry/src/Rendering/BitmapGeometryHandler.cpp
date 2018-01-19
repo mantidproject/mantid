@@ -25,7 +25,7 @@ BitmapGeometryHandler::BitmapGeometryHandler(RectangularDetector *comp)
 }
 
 BitmapGeometryHandler::BitmapGeometryHandler()
-    : GeometryHandler(static_cast<Object *>(nullptr)), m_rectDet(nullptr) {}
+    : GeometryHandler(static_cast<CSGObject *>(nullptr)), m_rectDet(nullptr) {}
 
 ///< Create an instance of concrete geometry handler for ObjComponent
 BitmapGeometryHandler *
@@ -36,13 +36,13 @@ BitmapGeometryHandler::createInstance(IObjComponent *comp) {
 
 ///< Create an instance of concrete geometry handler for Object
 BitmapGeometryHandler *
-BitmapGeometryHandler::createInstance(boost::shared_ptr<Object> obj) {
+BitmapGeometryHandler::createInstance(boost::shared_ptr<CSGObject> obj) {
   (void)obj;
   return new BitmapGeometryHandler();
 }
 
 ///< Create an instance of concrete geometry handler for Object
-GeometryHandler *BitmapGeometryHandler::createInstance(Object *obj) {
+GeometryHandler *BitmapGeometryHandler::createInstance(CSGObject *obj) {
   (void)obj;
   return new BitmapGeometryHandler();
 }

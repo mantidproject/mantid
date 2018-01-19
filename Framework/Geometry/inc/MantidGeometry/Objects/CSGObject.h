@@ -1,0 +1,279 @@
+#ifndef MANTID_GEOMETRY_OBJECT_H_
+#define MANTID_GEOMETRY_OBJECT_H_
+
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/IObject.h"
+
+#include "BoundingBox.h"
+#include <map>
+#include <memory>
+
+namespace Mantid {
+//----------------------------------------------------------------------
+// Forward declarations
+//----------------------------------------------------------------------
+namespace Kernel {
+class PseudoRandomNumberGenerator;
+class Material;
+class V3D;
+}
+
+namespace Geometry {
+class CacheGeometryHandler;
+class CompGrp;
+class GeometryHandler;
+class Rule;
+class Surface;
+class Track;
+class vtkGeometryCacheReader;
+class vtkGeometryCacheWriter;
+
+/**
+\class CSGObject
+\brief Constructive Solid Geometry object
+\version 1.0
+\date July 2007
+\author S. Ansell
+
+A Constructive Solid Geometry (CSG) object, implemented
+as a collection of Rules and surface objects
+
+Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
+
+This file is part of Mantid.
+
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTID_GEOMETRY_DLL CSGObject : public IObject {
+public:
+  /// Default constructor
+  CSGObject();
+  /// Constructor providing shape xml.
+  CSGObject(const std::string &shapeXML);
+  /// Copy constructor
+  CSGObject(const CSGObject &);
+  /// Assignment operator
+  CSGObject &operator=(const CSGObject &);
+  /// Destructor
+  virtual ~CSGObject();
+  /// Clone
+  IObject *clone() const override { return new CSGObject(*this); }
+
+  /// Return the top rule
+  const Rule *topRule() const { return TopRule.get(); }
+  void setID(const std::string &id) override { m_id = id; }
+  const std::string &id() const override { return m_id; }
+
+  void setName(const int nx) override { ObjNum = nx; } ///< Set Name
+  int getName() const override { return ObjNum; }      ///< Get Name
+
+  void setMaterial(const Kernel::Material &material) override;
+  const Kernel::Material material() const override;
+
+  /// Return whether this object has a valid shape
+  bool hasValidShape() const override;
+  int setObject(const int ON, const std::string &Ln) override;
+  int procString(const std::string &Line);
+  int complementaryObject(const int Cnum,
+                          std::string &Ln); ///< Process a complementary object
+  int hasComplement() const;
+
+  int populate(const std::map<int, boost::shared_ptr<Surface>> &);
+  int createSurfaceList(const int outFlag = 0); ///< create Surface list
+  int addSurfString(const std::string &);       ///< Not implemented
+  int removeSurface(const int SurfN);
+  int substituteSurf(const int SurfN, const int NsurfN,
+                     const boost::shared_ptr<Surface> &SPtr);
+  void makeComplement();
+  void convertComplement(const std::map<int, CSGObject> &);
+
+  virtual void print() const;
+  void printTree() const;
+
+  bool
+  isValid(const Kernel::V3D &) const override; ///< Check if a point is valid
+  bool isValid(const std::map<int, int> &)
+      const; ///< Check if a set of surfaces are valid.
+  bool isOnSide(const Kernel::V3D &) const override;
+  int calcValidType(const Kernel::V3D &Pt,
+                    const Kernel::V3D &uVec) const override;
+
+  std::vector<int> getSurfaceIndex() const;
+  /// Get the list of surfaces (const version)
+  const std::vector<const Surface *> &getSurfacePtr() const {
+    return m_SurList;
+  }
+  /// Get the list of surfaces
+  std::vector<const Surface *> &getSurfacePtr() { return m_SurList; }
+
+  std::string cellCompStr() const;
+  std::string cellStr(const std::map<int, CSGObject> &) const;
+
+  std::string str() const;
+  void write(std::ostream &) const; ///< MCNPX output
+
+  // INTERSECTION
+  int interceptSurface(Geometry::Track &) const override;
+
+  // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
+  double solidAngle(const Kernel::V3D &observer) const override;
+  // Solid angle with a scaling of the object
+  double solidAngle(const Kernel::V3D &observer,
+                    const Kernel::V3D &scaleFactor) const override;
+  // solid angle via triangulation
+  double triangleSolidAngle(const Kernel::V3D &observer) const;
+  // Solid angle via triangulation with scaling factor for object size
+  double triangleSolidAngle(const Kernel::V3D &observer,
+                            const Kernel::V3D &scaleFactor) const;
+  // solid angle via ray tracing
+  double rayTraceSolidAngle(const Kernel::V3D &observer) const;
+
+  /// Calculates the volume of this object.
+  double volume() const override;
+
+  /// Calculate (or return cached value of) Axis Aligned Bounding box
+  /// (DEPRECATED)
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
+                      double &ymin, double &zmin) const override;
+
+  /// Return cached value of axis-aligned bounding box
+  const BoundingBox &getBoundingBox() const override;
+  /// Define axis-aligned bounding box
+  void defineBoundingBox(const double &xMax, const double &yMax,
+                         const double &zMax, const double &xMin,
+                         const double &yMin, const double &zMin);
+  /// Set a null bounding box for this object
+  void setNullBoundingBox();
+  // find internal point to object
+  int getPointInObject(Kernel::V3D &point) const override;
+
+  /// Select a random point within the object
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const size_t) const override;
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const BoundingBox &activeRegion,
+                                    const size_t) const override;
+
+  // Rendering member functions
+  void draw() const override;
+  // Initialize Drawing
+  void initDraw() const override;
+  // Get Geometry Handler
+  boost::shared_ptr<GeometryHandler> getGeometryHandler() override;
+  /// Set Geometry Handler
+  void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
+
+  /// set vtkGeometryCache writer
+  void setVtkGeometryCacheWriter(
+      boost::shared_ptr<vtkGeometryCacheWriter>) override;
+  /// set vtkGeometryCache reader
+  void setVtkGeometryCacheReader(
+      boost::shared_ptr<vtkGeometryCacheReader>) override;
+  void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+                     double &myradius, double &myheight) const override;
+  /// Getter for the shape xml
+  std::string getShapeXML() const override;
+
+private:
+  int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
+               int &compUnit) const;
+  std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule>) const;
+  int checkSurfaceValid(const Kernel::V3D &, const Kernel::V3D &) const;
+
+  /// Calculate bounding box using Rule system
+  void calcBoundingBoxByRule();
+
+  /// Calculate bounding box using object's vertices
+  void calcBoundingBoxByVertices();
+
+  /// Calculate bounding box using object's geometric data
+  void calcBoundingBoxByGeometry();
+
+  int searchForObject(Kernel::V3D &) const;
+  double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
+                               const Kernel::V3D &c,
+                               const Kernel::V3D &observer) const;
+  double CuboidSolidAngle(const Kernel::V3D observer,
+                          const std::vector<Kernel::V3D> vectors) const;
+  double SphereSolidAngle(const Kernel::V3D observer,
+                          const std::vector<Kernel::V3D> vectors,
+                          const double radius) const;
+  double CylinderSolidAngle(const Kernel::V3D &observer,
+                            const Mantid::Kernel::V3D &centre,
+                            const Mantid::Kernel::V3D &axis,
+                            const double radius, const double height) const;
+  double ConeSolidAngle(const Kernel::V3D &observer,
+                        const Mantid::Kernel::V3D &centre,
+                        const Mantid::Kernel::V3D &axis, const double radius,
+                        const double height) const;
+
+  /// Returns the volume.
+  double monteCarloVolume() const;
+  /// Returns the volume.
+  double singleShotMonteCarloVolume(const int shotSize,
+                                    const size_t seed) const;
+
+  /// Top rule [ Geometric scope of object]
+  std::unique_ptr<Rule> TopRule;
+  /// Object's bounding box
+  BoundingBox m_boundingBox;
+  // -- DEPRECATED --
+  mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache
+      AABByMax,             ///< ymax of Axis aligned bounding box cache
+      AABBzMax,             ///< zmax of Axis aligned bounding box cache
+      AABBxMin,             ///< xmin of Axis aligned bounding box cache
+      AABByMin,             ///< xmin of Axis aligned bounding box cache
+      AABBzMin;             ///< zmin of Axis Aligned Bounding Box Cache
+  mutable bool boolBounded; ///< flag true if a bounding box exists, either by
+
+  /// Creation number
+  int ObjNum;
+  /// Geometry Handle for rendering
+  boost::shared_ptr<GeometryHandler> m_handler;
+  friend class CacheGeometryHandler;
+  /// Is geometry caching enabled?
+  bool bGeometryCaching;
+  /// a pointer to a class for reading from the geometry cache
+  boost::shared_ptr<vtkGeometryCacheReader> vtkCacheReader;
+  /// a pointer to a class for writing to the geometry cache
+  boost::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
+  void updateGeometryHandler();
+  /// for solid angle from triangulation
+  int NumberOfTriangles() const;
+  int NumberOfPoints() const;
+  int *getTriangleFaces() const;
+  double *getTriangleVertices() const;
+  /// original shape xml used to generate this object.
+  std::string m_shapeXML;
+  /// Optional string identifier
+  std::string m_id;
+  /// material composition
+  std::unique_ptr<Kernel::Material> m_material;
+
+protected:
+  std::vector<const Surface *> m_SurList; ///< Full surfaces (make a map
+  /// including complementary object ?)
+};
+
+} // NAMESPACE Geometry
+} // NAMESPACE Mantid
+
+#endif /*MANTID_GEOMETRY_OBJECT_H_*/

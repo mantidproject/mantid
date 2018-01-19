@@ -11,9 +11,6 @@ namespace Kernel {
 class Material;
 class V3D;
 }
-namespace Geometry {
-class Object;
-}
 
 namespace Algorithms {
 

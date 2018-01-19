@@ -12,7 +12,6 @@ try:
     import mantidplot
 except ImportError:
     pass
-
 from ui.sans_isis.masking_table import MaskingTable
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME

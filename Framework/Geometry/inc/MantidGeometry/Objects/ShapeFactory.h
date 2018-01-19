@@ -26,7 +26,8 @@ namespace Mantid {
 
 namespace Geometry {
 class Surface;
-class Object;
+class IObject;
+class CSGObject;
 
 struct CuboidCorners {
   Kernel::V3D lfb;
@@ -83,16 +84,14 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_GEOMETRY_DLL ShapeFactory {
 public:
-  template <typename ObjectType = Object>
-  boost::shared_ptr<ObjectType> createShape(Poco::XML::Element *pElem);
-  template <typename ObjectType = Object>
-  boost::shared_ptr<ObjectType> createShape(std::string shapeXML,
-                                            bool addTypeTag = true);
+  boost::shared_ptr<IObject> createShape(Poco::XML::Element *pElem);
+  boost::shared_ptr<IObject> createShape(std::string shapeXML,
+                                         bool addTypeTag = true);
 
-  boost::shared_ptr<Object> createHexahedralShape(double xlb, double xlf,
-                                                  double xrf, double xrb,
-                                                  double ylb, double ylf,
-                                                  double yrf, double yrb);
+  boost::shared_ptr<IObject> createHexahedralShape(double xlb, double xlf,
+                                                   double xrf, double xrb,
+                                                   double ylb, double ylf,
+                                                   double yrf, double yrb);
 
 private:
   std::string parseSphere(Poco::XML::Element *pElem,
@@ -154,7 +153,8 @@ private:
                                               const std::string &name);
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
-  void createGeometryHandler(Poco::XML::Element *, boost::shared_ptr<Object>);
+  void createGeometryHandler(Poco::XML::Element *,
+                             boost::shared_ptr<CSGObject>);
 };
 
 } // namespace Geometry

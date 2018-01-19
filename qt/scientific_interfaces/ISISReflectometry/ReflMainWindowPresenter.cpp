@@ -4,6 +4,9 @@
 #include "IReflEventTabPresenter.h"
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
+#include <iostream>
+
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,7 +31,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_savePresenter->acceptMainPresenter(this);
-  // Settings tab does not need a main presenter
+  m_settingsPresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
   m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
@@ -55,6 +58,10 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
+void ReflMainWindowPresenter::settingsChanged(int group) {
+  m_runsPresenter->settingsChanged(group);
+}
+
 /** Returns values passed for 'Transmission run(s)'
 *
 * @param group :: Index of the group in 'Settings' tab from which to get the
@@ -65,7 +72,7 @@ std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
 
-  return m_settingsPresenter->getTransmissionRuns(group, false);
+  return m_settingsPresenter->getTransmissionRuns(group);
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -74,7 +81,7 @@ std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
 *options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-std::string ReflMainWindowPresenter::getTransmissionOptions(int group) const {
+OptionsQMap ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
 
@@ -87,7 +94,7 @@ std::string ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 *options
 * @return :: Global processing options
 */
-std::string ReflMainWindowPresenter::getReductionOptions(int group) const {
+OptionsQMap ReflMainWindowPresenter::getReductionOptions(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
 

@@ -832,6 +832,20 @@ advanced properties and chemical properties)
     # Now allowed as object does not have a chemical formula associated
     my_sample.set_material(...)
 
+.. _set_beam_parameters-ref:
+
+Setting beam parameters
+-----------------------
+
+The beam width and height can be set for the instrument.
+These are then used for total scattering corrections.
+
+.. code-block:: python
+
+ from isis_powder import Polaris
+ polaris_obj = Polaris(...)
+ polaris.obj.set_beam_parameters(height=1.23, width=4,56)
+
 .. _instrument_advanced_properties_isis-powder-diffraction-ref:
 
 Instrument advanced properties

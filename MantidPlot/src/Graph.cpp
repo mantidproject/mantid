@@ -6274,14 +6274,14 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     for (auto lineIt = lineVec.begin(); lineIt != lineVec.end(); ++lineIt) {
       const std::string &line = *lineIt;
 
-      if (line.compare("MantidMatrixCurve") == 0) {
+      if (line == "MantidMatrixCurve") {
         // Moving onto the next MantidMatrixCurve.
         lastCurveID++;
         continue;
       }
 
       // Handle sections as appropriate.
-      if (line.compare("<SkipPoints>") == 0) {
+      if (line == "<SkipPoints>") {
         PlotCurve *c = dynamic_cast<PlotCurve *>(curve(lastCurveID));
         if (!c)
           continue;
@@ -6292,7 +6292,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
         int value = 0;
         Mantid::Kernel::Strings::convert<int>(contents, value);
         c->setSkipSymbolsCount(value);
-      } else if (line.compare("<CurveLabels>") == 0) {
+      } else if (line == "<CurveLabels>") {
         // Start reading from next line
         lineIt++;
         if (lineIt == lineVec.end())
@@ -6308,7 +6308,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
         // We now have StringList of the lines we want.
         restoreCurveLabels(lastCurveID, lst);
-      } else if (line.compare("<MantidYErrors>") == 0) {
+      } else if (line == "<MantidYErrors>") {
         MantidCurve *c = dynamic_cast<MantidCurve *>(curve(lastCurveID));
         if (!c)
           continue;

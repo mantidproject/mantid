@@ -58,7 +58,7 @@ public:
   // probably add others)
   explicit ObjComponent(const std::string &name, IComponent *parent = nullptr);
   explicit ObjComponent(const std::string &name,
-                        boost::shared_ptr<const Object> shape,
+                        boost::shared_ptr<const IObject> shape,
                         IComponent *parent = nullptr);
 
   /** Virtual Copy Constructor
@@ -89,9 +89,10 @@ public:
   void initDraw() const override;
 
   /// Return the shape of the component
-  const boost::shared_ptr<const Object> shape() const override;
+  const boost::shared_ptr<const IObject> shape() const override;
   /// Set a new shape on the component
-  void setShape(boost::shared_ptr<const Object> newShape);
+  /// void setShape(boost::shared_ptr<const IObject> newShape);
+  void setShape(IObject_const_sptr newShape);
   /// Return the material this component is made from
   const Kernel::Material material() const override;
 
@@ -103,7 +104,7 @@ protected:
   // Made a pointer to a const object. Since this is a shared object we
   // shouldn't be
   // exposing non-const methods of Object through this class.
-  boost::shared_ptr<const Object> m_shape;
+  boost::shared_ptr<const IObject> m_shape;
 
   const Kernel::V3D factorOutComponentPosition(const Kernel::V3D &point) const;
   const Kernel::V3D takeOutRotation(Kernel::V3D point) const;

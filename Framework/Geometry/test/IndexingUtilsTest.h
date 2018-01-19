@@ -314,7 +314,7 @@ public:
     IndexingUtils::FFTScanFor_Directions(directions, q_vectors, d_min, d_max,
                                          required_tolerance, degrees_per_step);
 
-    TS_ASSERT_EQUALS(5, directions.size());
+    TS_ASSERT_EQUALS(8, directions.size());
 
     for (size_t i = 0; i < 3; i++) {
       V3D vec = directions[i];

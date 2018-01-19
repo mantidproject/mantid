@@ -7,10 +7,12 @@
 
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 class MultipleExperimentInfosTest : public CxxTest::TestSuite {
 public:
@@ -35,6 +37,37 @@ public:
     TS_ASSERT_EQUALS(copy.getNumExperimentInfo(), 1);
     TSM_ASSERT_DIFFERS("ExperimentInfo's were deep-copied",
                        copy.getExperimentInfo(0), mei.getExperimentInfo(0));
+  }
+
+  void testHasOrientedLattice() {
+    constexpr uint16_t nExperimentInfosToAdd = 3;
+
+    MultipleExperimentInfos mei;
+    TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
+
+    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
+
+    // add some oriented lattices to the multiple experiment info
+    for (uint16_t i = 0; i < nExperimentInfosToAdd; ++i) {
+      ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
+      mei.addExperimentInfo(experimentInfo);
+      mei.getExperimentInfo(i)->mutableSample().setOrientedLattice(latt);
+      TS_ASSERT_EQUALS(mei.hasOrientedLattice(), true);
+    }
+
+    // take them away one by one starting with the first, leave the last one
+    for (uint16_t i = 0; i < nExperimentInfosToAdd - 1; ++i) {
+      mei.getExperimentInfo(i)->mutableSample().clearOrientedLattice();
+      TS_ASSERT_EQUALS(mei.hasOrientedLattice(), true);
+    }
+
+    // remove the last one
+    mei.getExperimentInfo((nExperimentInfosToAdd - 1))
+        ->mutableSample()
+        .clearOrientedLattice();
+    TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
+
+    delete latt;
   }
 };
 

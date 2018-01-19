@@ -4,8 +4,8 @@
 """
 from __future__ import (absolute_import, division, print_function)
 import math
-import functools
 import numpy as np
+import functools
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -40,6 +40,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
     def PyInit(self):
         """ Initialization """
         self.declareProperty(StringArrayProperty("RunNumbers"), "List of run numbers to process")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
+                                               Direction.Input, PropertyMode.Optional),
+                             "Optionally, we can provide a workspace directly")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
@@ -96,7 +99,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
     def PyExec(self):
         """ Main execution """
         # DATA
-        dataRunNumbers = self.getProperty("RunNumbers").value
         dataPeakRange = self.getProperty("SignalPeakPixelRange").value
         dataBackRange = self.getProperty("SignalBackgroundPixelRange").value
 
@@ -105,21 +107,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         normBackRange = self.getProperty("NormBackgroundPixelRange").value
         normPeakRange = self.getProperty("NormPeakPixelRange").value
 
-        # If we have multiple files, add them
-        file_list = []
-        for item in dataRunNumbers:
-            # The standard mode of operation is to give a run number as input
-            try:
-                data_file = FileFinder.findRuns("%s%s" % (INSTRUMENT_NAME, item))[0]
-            except RuntimeError:
-                # Allow for a file name or file path as input
-                data_file = FileFinder.findRuns(item)[0]
-            file_list.append(data_file)
-        runs = functools.reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
-
-        entry_name = self.getProperty("EntryName").value
-        ws_event_data = LoadEventNexus(Filename=runs, NXentryName=entry_name,
-                                       OutputWorkspace="%s_%s" % (INSTRUMENT_NAME, dataRunNumbers[0]))
+        # Load the data
+        ws_event_data = self.load_data()
 
         # Number of pixels in each direction
         self.number_of_pixels_x = int(ws_event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
@@ -187,6 +176,33 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         AnalysisDataService.remove(str(normalized_data))
 
         self.setProperty('OutputWorkspace', q_rebin)
+
+    def load_data(self):
+        """
+            Load the data. We can either load it from the specified
+            run numbers, or use the input workspace if no runs are specified.
+        """
+        dataRunNumbers = self.getProperty("RunNumbers").value
+        ws_event_data = self.getProperty("InputWorkspace").value
+
+        if len(dataRunNumbers) > 0:
+            # If we have multiple files, add them
+            file_list = []
+            for item in dataRunNumbers:
+                # The standard mode of operation is to give a run number as input
+                try:
+                    data_file = FileFinder.findRuns("%s%s" % (INSTRUMENT_NAME, item))[0]
+                except RuntimeError:
+                    # Allow for a file name or file path as input
+                    data_file = FileFinder.findRuns(item)[0]
+                file_list.append(data_file)
+            runs = functools.reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
+            entry_name = self.getProperty("EntryName").value
+            ws_event_data = LoadEventNexus(Filename=runs, NXentryName=entry_name,
+                                           OutputWorkspace="%s_%s" % (INSTRUMENT_NAME, dataRunNumbers[0]))
+        elif ws_event_data is None:
+            raise RuntimeError("No input data was specified")
+        return ws_event_data
 
     def load_direct_beam(self, normalizationRunNumber):
         """

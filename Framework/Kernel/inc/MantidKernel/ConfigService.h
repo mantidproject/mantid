@@ -240,7 +240,7 @@ public:
   void setConsoleLogLevel(int logLevel);
   /// Sets the log level priority for the selected Filter log channel
   void setFilterChannelLogLevel(const std::string &filterChannelName,
-                                int logLevel);
+                                int logLevel, bool quiet = false);
 
   /// Look for an instrument
   const InstrumentInfo &

@@ -8,6 +8,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

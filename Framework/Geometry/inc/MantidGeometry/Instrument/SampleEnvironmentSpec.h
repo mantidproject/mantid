@@ -43,7 +43,7 @@ class MANTID_GEOMETRY_DLL SampleEnvironmentSpec {
 public:
   // Convenience typedefs
   using ContainerIndex = std::unordered_map<std::string, Container_const_sptr>;
-  using ComponentList = std::vector<Object_const_sptr>;
+  using ComponentList = std::vector<IObject_const_sptr>;
 
   SampleEnvironmentSpec(std::string name);
 
@@ -58,7 +58,7 @@ public:
   SampleEnvironment_uptr buildEnvironment(const std::string &canID) const;
 
   void addContainer(const Container_const_sptr &can);
-  void addComponent(const Object_const_sptr &component);
+  void addComponent(const IObject_const_sptr &component);
 
 private:
   std::string m_name;

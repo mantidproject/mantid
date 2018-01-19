@@ -11,7 +11,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -287,7 +287,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
      * The angular width is computed using the l2 distance from the sample
      */
     Kernel::V3D pos;
-    boost::shared_ptr<const Object>
+    boost::shared_ptr<const IObject>
         shape; // Defined in its own reference frame with centre at 0,0,0
     Kernel::Quat rot;
 

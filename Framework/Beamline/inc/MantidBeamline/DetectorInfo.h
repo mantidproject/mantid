@@ -125,7 +125,9 @@ private:
   Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
   Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
       nullptr};
+  /// For (detector index, time index) -> linear index conversions
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
+  /// For linear index -> (detector index, time index) conversions
   Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
   ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
 };

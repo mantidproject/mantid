@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 
-#include "IndirectDataAnalysisTab.h"
+#include "IndirectFitAnalysisTab.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_IqtFit.h"
@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IqtFit : public IndirectDataAnalysisTab {
+class DLLExport IqtFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
@@ -31,10 +31,10 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
-private slots:
+protected slots:
   void typeSelection(int index);
   void newDataLoaded(const QString wsName);
-  void updatePlot();
+  void updatePreviewPlots() override;
   void specMinChanged(int value);
   void specMaxChanged(int value);
   void xMinSelected(double val);
@@ -44,24 +44,18 @@ private slots:
   void checkBoxUpdate(QtProperty *prop, bool checked);
   void updateCurrentPlotOption(QString newOption);
   void singleFit();
-  void updateGuessPlot();
-  void plotGuess(QtProperty *);
+  void plotGuess();
   void fitContextMenu(const QPoint &);
-  void fixItem();
-  void unFixItem();
-  void singleFitComplete(bool error);
-  void algorithmComplete(bool error);
+  void algorithmComplete(bool error) override;
   void plotWorkspace();
   void saveResult();
-  void plotCurrentPreview();
-  void updateProperties(int specNo);
 
 private:
+  void disablePlotGuess() override;
+  void enablePlotGuess() override;
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tie = false);
-  QtProperty *createExponential(const QString &);
-  QtProperty *createStretchedExp(const QString &);
-  void setDefaultParameters(const QString &name);
+  void setDefaultParameters();
   QString fitTypeString() const;
   void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
   QString minimizerString(QString outputName) const;
@@ -71,29 +65,18 @@ private:
   Mantid::API::IAlgorithm_sptr
   iqtFitAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWs,
                   const size_t &specMin, const size_t &specMax);
-  void updateFitFunctions();
-  void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
-  QHash<QString, QString>
-  createParameterToPropertyMap(const QVector<QString> &functionNames);
-  void
-  extendParameterToPropertyMap(const QString &functionName,
-                               const QString &prefix,
-                               QHash<QString, QString> &parameterToProperty);
+  QVector<QString> indexToFitFunctions(const int &fitTypeIndex) const;
   Mantid::API::IAlgorithm_sptr replaceInfinityAndNaN(const std::string &wsName);
+  Mantid::API::IFunction_sptr
+  getFunction(const QString &functionName) const override;
 
   Ui::IqtFit m_uiForm;
-  QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_iqtFTree; ///< IqtFit Property Browser
-  QMap<QtProperty *, QtProperty *> m_fixedProps;
   QString m_ties;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
   std::string m_plotOption;
   std::string m_baseName;
-
-  QVector<QString> m_fitFunctions;
-  QHash<QString, QHash<size_t, double>> m_parameterValues;
-  QHash<QString, QString> m_parameterToProperty;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

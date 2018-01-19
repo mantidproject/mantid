@@ -7,7 +7,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
 
 #include <QRgb>

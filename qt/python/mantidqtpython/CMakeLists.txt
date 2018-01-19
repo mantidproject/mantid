@@ -20,6 +20,7 @@ set ( HEADER_DEPENDS
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/UserSubWindow.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/InterfaceManager.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MantidDesktopServices.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MessageDisplay.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MWRunFiles.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FitPropertyBrowser.h
@@ -76,7 +77,6 @@ set ( HEADER_DEPENDS
 mtd_add_sip_module (
   MODULE_NAME mantidqtpython
   TARGET_NAME mantidqtpython
-  SIP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}
   SIP_SRCS mantidqtpython_def.sip
   HEADER_DEPS ${HEADER_DEPENDS}
   PYQT_VERSION 4
