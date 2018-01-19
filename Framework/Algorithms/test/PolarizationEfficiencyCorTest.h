@@ -1036,8 +1036,8 @@ private:
     invertedP1(P1, p1);
     Eigen::Matrix4d P2;
     invertedP2(P2, p2);
-    const auto inverted = P2 * P1 * F2 * F1;
-    return static_cast<Eigen::Vector4d>(inverted * y);
+    const Eigen::Matrix4d inverted = (P2 * P1 * F2 * F1).matrix();
+    return (inverted * y).matrix();
   }
 
   Eigen::Vector4d error(const Eigen::Vector4d &y, const Eigen::Vector4d &e,
