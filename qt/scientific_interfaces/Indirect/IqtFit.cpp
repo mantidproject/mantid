@@ -282,6 +282,7 @@ void IqtFit::updatePreviewPlots() {
   const auto groupName = outputWorkspaceName() + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
+  IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm->ppPlotTop);
 }
 
 void IqtFit::updatePlotRange() {
