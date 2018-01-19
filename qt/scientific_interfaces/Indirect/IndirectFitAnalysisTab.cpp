@@ -942,8 +942,7 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   disconnect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
              this, SLOT(plotGuess()));
 
-  fitAlgorithm->setProperty("InputWorkspace", fitWorkspace());
-
+  setAlgorithmProperty(fitAlgorithm, "InputWorkspace", fitWorkspace());
   setAlgorithmProperty(fitAlgorithm, "Function", fitFunction()->asString());
   setAlgorithmProperty(fitAlgorithm, "StartX", m_fitPropertyBrowser->startX());
   setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
