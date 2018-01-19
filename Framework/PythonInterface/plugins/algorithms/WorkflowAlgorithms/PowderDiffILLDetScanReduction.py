@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator
+from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
+    FloatArrayProperty, StringListValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty
 from mantid.simpleapi import *
 
@@ -20,9 +21,12 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        height_range = self.getProperty('HeightRange').value
-        if len(height_range) > 2:
-            issues['HeightRange'] = 'HeightRange must contain a minimum and maximum only'
+        if not (self.getProperty("Output2DTubes").value or
+                self.getProperty("Output2D").value or
+                self.getProperty("Output1D").value):
+            issues['Output2DTubes'] = 'No output chosen'
+            issues['Output2D'] = 'No output chosen'
+            issues['Output1D'] = 'No output chosen'
 
         return issues
 
@@ -52,7 +56,9 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
                              defaultValue=True,
                              doc='Output a 1D workspace with counts against scattering angle.')
 
-        self.declareProperty(FloatArrayProperty(name='HeightRange', values=[], validator=FloatArrayOrderedPairsValidator()),
+        self.declareProperty(FloatArrayProperty(name='HeightRange', values=[],
+                                                validator=CompositeValidator([FloatArrayOrderedPairsValidator(),
+                                                                              FloatArrayLengthValidator(0, 2)])),
                              doc='A pair of values, comma separated, to give the minimum and maximum height range (in m). If not specified '
                                  'the full height range is used.')
 
@@ -75,7 +81,7 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         height_range = ''
         height_range_prop = self.getProperty('HeightRange').value
         if (len(height_range_prop) == 2):
-            height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])
+            height_range = ','.join(height_range_prop)
 
         output_workspaces = []
         output_workspace_name = self.getPropertyValue('OutputWorkspace')
@@ -124,7 +130,7 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',') + 1 + runs.count('+') + 4)
 
         data_type = 'Raw'
-        if self.getPropertyValue('UseCalibratedData'):
+        if self.getProperty('UseCalibratedData').value:
             data_type = 'Calibrated'
 
         for runs_list in runs.split(','):
