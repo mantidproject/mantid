@@ -108,7 +108,7 @@ private:
                                 const std::string &logText,
                                 const std::string &logType);
   Mantid::API::IAlgorithm_sptr sequentialFit(const int &specMin,
-                                             const int &specMax);
+                                             const int &specMax) const;
   QString backgroundType() const;
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;

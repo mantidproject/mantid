@@ -338,7 +338,7 @@ IAlgorithm_sptr ConvFit::sequentialFitAlgorithm() const {
   return sequentialFit(specMin, specMax);
 }
 
-IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin, const int &specMax) {
+IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin, const int &specMax) const {
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
   cfs->setProperty("PassWSIndexToFunction", true);
