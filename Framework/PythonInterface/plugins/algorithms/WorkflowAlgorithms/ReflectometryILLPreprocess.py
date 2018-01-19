@@ -4,7 +4,8 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty, MatrixWorkspaceProperty,
                         MultipleFileProperty, PropertyMode)
-from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, IntBoundedValidator, Property, StringListValidator)
+from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, FloatBoundedValidator, IntBoundedValidator, Property,
+                           StringListValidator)
 from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertToDistribution, ConvertUnits, CreateEmptyTableWorkspace,
                               CropWorkspace, Divide, ExtractMonitors, Fit, GroupDetectors, Integration, LoadILLReflectometry, MergeRuns,
                               Minus, mtd, NormaliseToMonitor, Scale, Transpose)
@@ -14,8 +15,10 @@ import ReflectometryILL_common as common
 
 
 class Prop:
+    BEAM_CENTRE = 'BeamCentre'
     BEAM_POS = 'BeamPosition'
     BKG_METHOD = 'FlatBackground'
+    BEAM_ANGLE = 'BraggAngle'
     DIRECT_BEAM_POS = 'DirectBeamPosition'
     FLUX_NORM_METHOD = 'FluxNormalisation'
     FOREGROUND_CENTRE = 'ForegroundCentre'
@@ -141,6 +144,12 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='A beam position table corresponding to InputWorkspace.')
+        self.declareProperty(Prop.BEAM_ANGLE,
+                             defaultValue=Property.EMPTY_DBL,
+                             doc='A user-defined beam angle.')
+        self.declareProperty(Prop.BEAM_CENTRE,
+                             defaultValue=Property.EMPTY_DBL,
+                             doc='A workspace index corresponding to the beam centre.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS,
                                                      defaultValue='',
                                                      direction=Direction.Output),
@@ -227,6 +236,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
         if len(wRange) == 2 and wRange[1] < wRange[0]:
             issues[Prop.WAVELENGTH_RANGE] = 'Upper limit is smaller than the lower limit.'
+        if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
+            beamCentre = self.getProperty(Prop.BEAM_CENTRE).value
+            if beamCentre < 0 or beamCentre > 255:
+                issues[Prop.BEAM_CENTRE] = 'Value should be between 0 and 255.'
         return issues
 
     def _applyWavelengthRange(self, ws):
@@ -370,6 +383,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 else:
                     # f is a list; concatenate.
                     flattened += f
+            beamCentre = self.getProperty(Prop.BEAM_CENTRE).value
+            beamAngle = self.getProperty(Prop.BEAM_ANGLE).value
             dbPosWS = ''
             if not self.getProperty(Prop.DIRECT_BEAM_POS).isDefault:
                 dbPosWS = self.getProperty(Prop.DIRECT_BEAM_POS).value
@@ -379,7 +394,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             beamPosWSName = self._names.withSuffix('beamPos-' + numor)
             LoadILLReflectometry(Filename=filename,
                                  OutputWorkspace=firstWSName,
-                                 BeamPosition=dbPosWS,
+                                 DirectBeamPosition=dbPosWS,
+                                 BeamCentre=beamCentre,
+                                 BraggAngle=beamAngle,
                                  XUnit='TimeOfFlight',
                                  OutputBeamPosition=beamPosWSName,
                                  EnableLogging=self._subalgLogging)
@@ -392,7 +409,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 rawWSName = self._names.withSuffix('raw-' + numor)
                 LoadILLReflectometry(Filename=filename,
                                      OutputWorkspace=rawWSName,
-                                     BeamPosition=dbPosWS,
+                                     DirectBeamPosition=dbPosWS,
                                      XUnit='TimeOfFlight',
                                      EnableLogging=self._subalgLogging)
                 rawWS = mtd[rawWSName]
