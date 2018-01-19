@@ -101,11 +101,6 @@ void PeaksViewer::setPresenter(
             SIGNAL(zoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int)),
             this,
             SLOT(onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int)));
-    connect(widget,
-            SIGNAL(peaksSorted(const std::string &, const bool,
-                               Mantid::API::IPeaksWorkspace_const_sptr)),
-            this, SLOT(onPeaksSorted(const std::string &, const bool,
-                                     Mantid::API::IPeaksWorkspace_const_sptr)));
     layout()->addWidget(widget);
     ++it;
   }
@@ -393,18 +388,6 @@ void PeaksViewer::onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
 void PeaksViewer::onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
                                int peakIndex) {
   m_presenter->zoomToPeak(peaksWS, peakIndex);
-}
-
-/**
- * Handler for sorting of a peaks workspace.
- * @param columnToSortBy : Column to sort by
- * @param sortedAscending : Sort direction
- * @param peaksWS : Workspace to be sorted
- */
-void PeaksViewer::onPeaksSorted(
-    const std::string &columnToSortBy, const bool sortedAscending,
-    Mantid::API::IPeaksWorkspace_const_sptr peaksWS) {
-  m_presenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
 }
 
 /**

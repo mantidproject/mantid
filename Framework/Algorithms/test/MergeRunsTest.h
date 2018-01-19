@@ -1745,7 +1745,7 @@ public:
     for (size_t i = 0; i < 10; ++i) {
       // Create a D2B type workspace
       const auto &ws = WorkspaceCreationHelper::
-          create2DDetectorScanWorkspaceWithFullInstrument(10000, 1, 25,
+          create2DDetectorScanWorkspaceWithFullInstrument(5000, 1, 25,
                                                           i * 1000);
       std::string wsName = "a" + std::to_string(i);
       AnalysisDataService::Instance().addOrReplace(wsName, ws);

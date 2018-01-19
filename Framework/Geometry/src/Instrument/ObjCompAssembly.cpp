@@ -1,6 +1,5 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
-#include "MantidGeometry/Instrument/ComponentVisitorHelper.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -358,15 +357,8 @@ void ObjCompAssembly::testIntersectionWithChildren(
 
 size_t ObjCompAssembly::registerContents(
     Mantid::Geometry::ComponentVisitor &visitor) const {
-  // via common helper
-  const auto name = this->getName();
-  if (ComponentVisitorHelper::matchesPackOfTubes(name)) {
-    return visitor.registerBankOfTubes(*this);
-  } else if (ComponentVisitorHelper::matchesPSDTube(name)) {
-    return visitor.registerTubeObj(*this);
-  }
   // Generic Assembly registration call.
-  return visitor.registerComponentAssembly(*this);
+  return visitor.registerObjComponentAssembly(*this);
 }
 
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to

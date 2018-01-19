@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/AlgorithmInputHistory.cpp
 	src/AlgorithmPropertiesWidget.cpp
 	src/AlgorithmRunner.cpp
+	src/AlternateCSPythonLexer.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
 	src/DropEventHelper.cpp
@@ -55,6 +56,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/AbstractTreeModel.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/OneLevelTreeManager.cpp
+        src/DataProcessorUI/OptionsMap.cpp
 	src/DataProcessorUI/PostprocessingAlgorithm.cpp
 	src/DataProcessorUI/PreprocessingAlgorithm.cpp
 	src/DataProcessorUI/PreprocessMap.cpp
@@ -62,6 +64,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
 	src/DataProcessorUI/TwoLevelTreeManager.cpp
 	src/DataProcessorUI/WhiteList.cpp
+        src/DataProcessorUI/WorkspaceNameUtils.cpp
     src/DataProcessorUI/PostprocessingStep.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
     src/DataProcessorUI/Column.cpp
@@ -91,6 +94,7 @@ set ( SRC_FILES
 	src/LogValueSelector.cpp
 	src/MWDiag.cpp
 	src/MantidHelpWindow.cpp
+	src/MantidTreeModel.cpp
 	src/MantidTreeWidget.cpp
 	src/MantidTreeWidgetItem.cpp
 	src/MantidWSIndexDialog.cpp
@@ -115,8 +119,9 @@ set ( SRC_FILES
 	src/TrackedAction.cpp
 	src/UserFunctionDialog.cpp
 	src/WorkspacePresenter/ADSAdapter.cpp
-	src/WorkspacePresenter/WorkspaceTreeWidget.cpp
 	src/WorkspacePresenter/WorkspacePresenter.cpp
+    src/WorkspacePresenter/WorkspaceTreeWidget.cpp
+	src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
@@ -194,6 +199,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/IndirectInstrumentConfig.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
+  inc/MantidQtWidgets/Common/MantidTreeModel.h
   inc/MantidQtWidgets/Common/MantidTreeWidget.h
   inc/MantidQtWidgets/Common/MantidHelpWindow.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
@@ -224,7 +230,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
-
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
@@ -249,6 +255,7 @@ set ( INC_FILES
 	${MOC_FILES}
 	inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
 	inc/MantidQtWidgets/Common/AlgorithmRunner.h
+	inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
 	inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/Configurable.h
 	inc/MantidQtWidgets/Common/DllOption.h
@@ -304,6 +311,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h
@@ -325,6 +334,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WhiteList.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/ParseKeyValueString.h
 	inc/MantidQtWidgets/Common/ParseNumerics.h
