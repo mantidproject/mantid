@@ -45,6 +45,8 @@ public:
 
   void setBackground(const std::string &backgroundName);
 
+  void setCustomSettingEnabled(const QString &customName, bool enabled);
+
   void moveCustomFunctionsToEnd();
 
   void addCheckBoxFunctionGroup(
@@ -54,8 +56,8 @@ public:
 
   void addSpinnerFunctionGroup(
       const QString &groupName,
-      const std::vector<Mantid::API::IFunction_sptr> &functions, int minimum = 0,
-      int maximum = 10, int defaultValue = 0);
+      const std::vector<Mantid::API::IFunction_sptr> &functions,
+      int minimum = 0, int maximum = 10, int defaultValue = 0);
 
   void addComboBoxFunctionGroup(
       const QString &groupName,
@@ -64,6 +66,8 @@ public:
   void setBackgroundOptions(const QStringList &backgrounds);
 
   bool boolSettingValue(const QString &settingKey) const;
+
+  void setCustomBoolSetting(const QString &settingKey, bool value);
 
   int intSettingValue(const QString &settingKey) const;
 
@@ -172,7 +176,8 @@ private:
   QHash<QtProperty *, QtProperty *> m_optionalProperties;
 
   std::string selectedBackground;
-  QHash<QString, std::vector<Mantid::API::IFunction_sptr>> m_groupToFunctionList;
+  QHash<QString, std::vector<Mantid::API::IFunction_sptr>>
+      m_groupToFunctionList;
 };
 
 } // namespace MantidWidgets

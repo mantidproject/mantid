@@ -327,6 +327,17 @@ void IndirectFitPropertyBrowser::setBackground(
 }
 
 /**
+ * Sets whether the custom setting with the specified name is enabled.
+ *
+ * @param settingName The name of the custom setting.
+ * @param enabled     True if custom setting should be enabled, false otherwise.
+ */
+void IndirectFitPropertyBrowser::setCustomSettingEnabled(
+    const QString &settingName, bool enabled) {
+  m_customSettings[settingName]->setEnabled(enabled);
+}
+
+/**
  * Updates the values of the function parameters in this fit property browser,
  * using the specified map from parameter name to updated value.
  *
@@ -422,6 +433,18 @@ void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
 bool IndirectFitPropertyBrowser::boolSettingValue(
     const QString &settingKey) const {
   return m_boolManager->value(m_customSettings[settingKey]);
+}
+
+/**
+ * Sets the value of the custom boolean setting, with the specified key, to the
+ * specified value.
+ *
+ * @param settingKey  The key of the custom boolean setting.
+ * @param value       The value to set the boolean custom setting to.
+ */
+void IndirectFitPropertyBrowser::setCustomBoolSetting(const QString &settingKey,
+                                                      bool value) {
+  m_boolManager->setValue(m_customSettings[settingKey], value);
 }
 
 /**
