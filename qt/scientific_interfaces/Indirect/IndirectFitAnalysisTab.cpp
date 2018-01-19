@@ -296,6 +296,13 @@ bool IndirectFitAnalysisTab::canPlotGuess() const {
 }
 
 /**
+ * @return  The output workspace name used in the most recent fit.
+ */
+const std::string &IndirectFitAnalysisTab::outputWorkspaceName() const {
+  return m_outputFitName;
+}
+
+/**
  * Moves the functions attached to a custom function group, to the end of the
  * model.
  */
@@ -698,6 +705,7 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   setPreviewPlotWorkspace(inputWs);
   m_parameterValues.clear();
   m_fitFunction.reset();
+  m_outputFitName = "";
   blockSignals(true);
   updatePreviewPlots();
   blockSignals(false);
@@ -822,9 +830,16 @@ void IndirectFitAnalysisTab::updatePlot(
 }
 
 /**
+ * @return  The output workspace name to use for a sequential fit.
+ */
+std::string IndirectFitAnalysisTab::createSequentialFitOutputName() const {
+  return createSingleFitOutputName();
+}
+
+/**
  * @return The current single fit algorithm for this indirect fit analysis tab.
  */
-IAlgorithm_sptr IndirectFitAnalysisTab::singleFitAlgorithm() {
+IAlgorithm_sptr IndirectFitAnalysisTab::singleFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("Fit");
   algorithm->setProperty("WorkspaceIndex",
                          m_fitPropertyBrowser->workspaceIndex());
@@ -835,7 +850,7 @@ IAlgorithm_sptr IndirectFitAnalysisTab::singleFitAlgorithm() {
  * @return The current sequential fit algorithm for this indirect fit analysis
  *         tab.
  */
-IAlgorithm_sptr IndirectFitAnalysisTab::sequentialFitAlgorithm() {
+IAlgorithm_sptr IndirectFitAnalysisTab::sequentialFitAlgorithm() const {
   return singleFitAlgorithm();
 }
 
@@ -843,6 +858,7 @@ IAlgorithm_sptr IndirectFitAnalysisTab::sequentialFitAlgorithm() {
  * Executes the single fit algorithm defined in this indirect fit analysis tab.
  */
 void IndirectFitAnalysisTab::executeSingleFit() {
+  m_outputFitName = createSingleFitOutputName();
   runFitAlgorithm(singleFitAlgorithm());
 }
 
@@ -851,6 +867,7 @@ void IndirectFitAnalysisTab::executeSingleFit() {
  * tab.
  */
 void IndirectFitAnalysisTab::executeSequentialFit() {
+  m_outputFitName = createSequentialFitOutputName();
   runFitAlgorithm(sequentialFitAlgorithm());
 }
 

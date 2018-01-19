@@ -52,6 +52,8 @@ public:
 
   virtual bool canPlotGuess() const;
 
+  const std::string &outputWorkspaceName() const;
+
   void moveCustomFunctionsToEnd();
 
   void setParameterValue(const std::string &functionName,
@@ -145,9 +147,9 @@ protected:
 
   void plotGuess(MantidWidgets::PreviewPlot *previewPlot);
 
-  virtual Mantid::API::IAlgorithm_sptr singleFitAlgorithm();
+  virtual Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const;
 
-  virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm();
+  virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
 
   Mantid::API::MatrixWorkspace_sptr
   createGuessWorkspace(Mantid::API::IFunction_const_sptr func, size_t wsIndex);
@@ -164,6 +166,10 @@ protected:
 
   virtual void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
                                 int maxIterations) const;
+
+  virtual std::string createSequentialFitOutputName() const;
+
+  virtual std::string createSingleFitOutputName() const = 0;
 
 signals:
   void functionChanged();
@@ -222,6 +228,8 @@ private:
   QHash<QString, double> m_defaultPropertyValues;
   QHash<QString, QString> m_functionNameChanges;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
+
+  std::string m_outputFitName;
   bool m_appendResults;
 };
 
