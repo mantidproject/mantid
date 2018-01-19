@@ -19,7 +19,7 @@ namespace MantidWidgets {
 
 WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb,
                                                      QWidget *parent)
-    : WorkspaceTreeWidget(mdb, parent), m_plot1D(new QAction("1D...", this)) {
+    : WorkspaceTreeWidget(mdb, parent), m_plot1D(new QAction("spectrum...", this)) {
   // connections
   connect(m_plot1D, SIGNAL(triggered()), this, SLOT(onPlot1DClicked()));
 }

@@ -19,6 +19,7 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # 3rd party imports
+import numpy as np
 import qtawesome as qta
 from qtpy.QtWidgets import QDialogButtonBox
 
@@ -26,14 +27,15 @@ from qtpy.QtWidgets import QDialogButtonBox
 from mantidqt.utils.qt import load_ui
 
 # Constants
-PLACEHOLDER_FORMAT = 'valid range: {}-{}'
+RANGE_SPECIFIER = '-'
+PLACEHOLDER_FORMAT = 'valid range: {}' + RANGE_SPECIFIER + '{}'
 RED_ASTERISK = None
 
 
 def red_asterisk():
     global RED_ASTERISK
     if RED_ASTERISK is None:
-        RED_ASTERISK = qta.icon('fa.asterisk', color='red', scale_factor=0.7)
+        RED_ASTERISK = qta.icon('fa.asterisk', color='red', scale_factor=0.6)
     return RED_ASTERISK
 
 
@@ -60,7 +62,7 @@ class PlotSelectionDialog(PlotSelectionDialogUIBase):
         self._workspaces = workspaces
         self.spec_min, self.spec_max = None, None
         self.wi_min, self.wi_max = None, None
-        self.user_selection = None
+        self.selection = None
         self._ui = None
 
         self._init_ui()
@@ -71,9 +73,9 @@ class PlotSelectionDialog(PlotSelectionDialogUIBase):
         self.accept()
 
     def on_plot_all_clicked(self):
-        user_selection = PlotSelection(self._workspaces)
-        user_selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
-        self.user_selection = user_selection
+        selection = PlotSelection(self._workspaces)
+        selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
+        self.selection = selection
         self.accept()
 
     # ------------------- Private -------------------------
@@ -116,22 +118,127 @@ class PlotSelectionDialog(PlotSelectionDialogUIBase):
         ui.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(self.reject)
         ui.buttonBox.button(QDialogButtonBox.YesToAll).clicked.connect(self.on_plot_all_clicked)
 
-        # line edits are mutally exclusive
-        ui.wkspIndices.textChanged.connect(ui.specNums.clear)
-        ui.specNums.textChanged.connect(ui.wkspIndices.clear)
+        # line edits are mutually exclusive
+        ui.wkspIndices.textChanged.connect(self._on_wkspindices_changed)
+        ui.specNums.textChanged.connect(self._on_specnums_changed)
 
-        # activate ok when we have valid input
-        ui.wkspIndices.textChanged.connect(self._update_ok_btn_status)
-        ui.specNums.textChanged.connect(self._update_ok_btn_status)
-
-    def _update_ok_btn_status(self):
+    def _on_wkspindices_changed(self):
         ui = self._ui
-        index_box_valid = self._indices_box_valid()
-        spnums_box_valid = self._spectra_nums_box_valid()
-        ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(index_box_valid or spnums_box_valid)
+        ui.specNums.clear()
+        ui.specNumsValid.hide()
 
-    def _indices_box_valid(self):
-        return self._ui.wkspIndices.text() != ""
+        self._parse_wksp_indices()
+        ui.wkspIndicesValid.setVisible(not self._is_input_valid())
+        ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
-    def _spectra_nums_box_valid(self):
-        return self._ui.specNums.text() != ""
+    def _on_specnums_changed(self):
+        ui = self._ui
+        ui.wkspIndices.clear()
+        ui.wkspIndicesValid.hide()
+
+        self._parse_spec_nums()
+        ui.specNumsValid.setVisible(not self._is_input_valid())
+        ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
+
+    def _parse_wksp_indices(self):
+        wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
+        if wksp_indices:
+            selection = PlotSelection(self._workspaces)
+            selection.wksp_indices = wksp_indices
+        else:
+            selection = None
+        self.selection = selection
+
+    def _parse_spec_nums(self):
+        spec_nums = parse_selection_str(self._ui.specNums.text(), self.spec_min, self.spec_max)
+        if spec_nums:
+            selection = PlotSelection(self._workspaces)
+            selection.spectra = spec_nums
+        else:
+            selection = None
+        self.selection = selection
+
+    def _is_input_valid(self):
+        return self.selection is not None
+
+
+def get_plot_selection(workspaces, parent_widget):
+    """Decides whether it is necessary to request user input
+    when asked to plot a list of workspaces. The input
+    dialog will only be shown in the case where all workspaces
+    have more than 1 spectrum
+
+    :param workspaces: A list of workspaces that will be plotted
+    :param parent_widget: A parent_widget to use for the input selection dialog
+    :returns: Either a PlotSelection object containing the details of workspaces to plot or None indicating
+    the request was cancelled
+    """
+    single_spectra_ws = [wksp.getNumberHistograms() for wksp in workspaces if wksp.getNumberHistograms() == 1]
+    if len(single_spectra_ws) > 0:
+        # At least 1 workspace contains only a single spectrum so this is all
+        # that is possible to plot for all of them
+        selection = PlotSelection(workspaces)
+        selection.wksp_indices = [0]
+        return selection
+    else:
+        selection_dlg = PlotSelectionDialog(workspaces, parent=parent_widget)
+        res = selection_dlg.exec_()
+        if res == PlotSelectionDialog.Rejected:
+            # cancelled
+            return None
+        else:
+            user_selection = selection_dlg.selection
+            # the dialog should guarantee that only 1 of spectrum/indices is supplied
+            assert user_selection.spectra is None or user_selection.wksp_indices is None
+            return user_selection
+
+
+def parse_selection_str(txt, min_val, max_val):
+    """Parse an input string containing plot index selection.
+
+    :param txt: A single line of text containing a comma-separated list of values or range of values, i.e.
+    3-4,5,6,8,10-11
+    :param min_val: The minimum allowed value
+    :param max_val: The maximum allowed value
+    :returns A list containing each value in the range or None if the string is invalid
+    """
+    def append_if_valid(out, val):
+        try:
+            val = int(val)
+            if is_in_range(val):
+                out.add(val)
+            else:
+                return False
+        except ValueError:
+            return False
+        return True
+
+    def is_in_range(val):
+        return min_val <= val <= max_val
+
+    # split up any commas
+    comma_separated = txt.split(',')
+    # find and expand ranges
+    parsed_numbers = set()
+    valid = True
+    for cs_item in comma_separated:
+        post_split = cs_item.split('-')
+        if len(post_split) == 1:
+            valid = append_if_valid(parsed_numbers, post_split[0])
+        elif len(post_split) == 2:
+            # parse as range
+            try:
+                beg, end = int(post_split[0]), int(post_split[1])
+            except ValueError:
+                valid = False
+            else:
+                if is_in_range(beg) and is_in_range(end):
+                    parsed_numbers = parsed_numbers.union(set(range(beg, end+1)))
+                else:
+                    valid = False
+        else:
+            valid = False
+        if not valid:
+            break
+
+    return list(parsed_numbers) if valid > 0 else None

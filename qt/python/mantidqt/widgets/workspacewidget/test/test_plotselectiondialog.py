@@ -16,15 +16,16 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # std imports
+import time
 import unittest
 
 # 3rdparty imports
 from mantid.simpleapi import CreateSampleWorkspace, CropWorkspace
-from qtpy.QtWidgets import QApplication, QDialogButtonBox
+from qtpy.QtWidgets import QDialogButtonBox
 
 # local imports
 from mantidqt.utils.qt.testing import requires_qapp
-from mantidqt.widgets.workspacewidget.plotselectiondialog import PlotSelectionDialog
+from mantidqt.widgets.workspacewidget.plotselectiondialog import parse_selection_str, PlotSelectionDialog
 
 
 @requires_qapp
@@ -74,10 +75,41 @@ class PlotSelectionDialogTest(unittest.TestCase):
         ws = CreateSampleWorkspace(OutputWorkspace='ws', StoreInADS=False)
         dlg = PlotSelectionDialog([ws])
         dlg._ui.buttonBox.button(QDialogButtonBox.YesToAll).click()
-        self.assertTrue(dlg.user_selection is not None)
-        self.assertTrue(dlg.user_selection.spectra is None)
-        self.assertEqual(range(200), dlg.user_selection.wksp_indices)
+        self.assertTrue(dlg.selection is not None)
+        self.assertTrue(dlg.selection.spectra is None)
+        self.assertEqual(range(200), dlg.selection.wksp_indices)
+
+    def test_parse_selection_str_single_number(self):
+        s = '1'
+        self.assertEqual([1], parse_selection_str(s, 1, 3))
+        s = '2'
+        self.assertEqual([2], parse_selection_str(s, 1, 3))
+        s = '3'
+        self.assertEqual([3], parse_selection_str(s, 1, 3))
+        s = '-1'
+        self.assertTrue(parse_selection_str(s, 1, 1) is None)
+        s = '1'
+        self.assertTrue(parse_selection_str(s, 2, 2) is None)
+        s = '1'
+        self.assertTrue(parse_selection_str(s, 2, 3) is None)
+
+    def test_parse_selection_str_single_range(self):
+        s = '1-3'
+        self.assertEqual([1, 2, 3], parse_selection_str(s, 1, 3))
+        s = '2-4'
+        self.assertEqual([2, 3, 4], parse_selection_str(s, 1, 5))
+        s = '2-4'
+        self.assertTrue(parse_selection_str(s, 2, 3) is None)
+        s = '2-4'
+        self.assertTrue(parse_selection_str(s, 3, 5) is None)
+
+    def test_parse_selection_str_mix_number_range_spaces(self):
+        s = '1-3, 5,8,10, 11 ,12-14 , 15 -16, 16- 19'
+        self.assertEqual([1, 2, 3, 5, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                         parse_selection_str(s, 1, 20))
 
 
 if __name__ == '__main__':
     unittest.main()
+    # investigate why this is needed to avoid a segfault on Linux
+    time.sleep(0.5)
