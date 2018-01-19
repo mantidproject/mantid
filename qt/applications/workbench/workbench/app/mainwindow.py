@@ -391,8 +391,8 @@ class MainWindow(QMainWindow):
                 widget = widgets_layout[c][0][0].dockwidget
                 min_width, max_width = widget.minimumWidth(), widget.maximumWidth()
                 info = {'widget': widget,
-                        'dock min width': min_width,
-                        'dock max width': max_width}
+                        'dock-min-width': min_width,
+                        'dock-max-width': max_width}
                 self._layout_widget_info.append(info)
                 new_width = int(default_layout['width-fraction'][c] * width)
                 widget.setMinimumWidth(new_width)
@@ -407,12 +407,12 @@ class MainWindow(QMainWindow):
                     dock_min_h = dockwidget.minimumHeight()
                     dock_max_h = dockwidget.maximumHeight()
                     info = {'widget': widget,
-                            'dock min height': dock_min_h,
-                            'dock max height': dock_max_h}
+                            'dock-min-height': dock_min_h,
+                            'dock-max-height': dock_max_h}
                     self._layout_widget_info.append(info)
-                    # The 0.95 factor is to adjust height based on usefull
+                    # The 0.95 factor is to adjust height based on useful
                     # estimated area in the window
-                    new_height = int(default_layout['height-fraction'][c][r] * height)
+                    new_height = int(default_layout['height-fraction'][c][r] * height * 0.95)
                     dockwidget.setMinimumHeight(new_height)
                     dockwidget.setMaximumHeight(new_height)
                     dockwidget.updateGeometry()
@@ -426,13 +426,17 @@ class MainWindow(QMainWindow):
         """Fixes the height of docks after a new layout is set."""
         info = self._layout_widget_info
         for i in info:
-            dockwidget = i['widget']
-            if 'dock min width' in i:
-                dockwidget.setMinimumWidth(i['dock min width'])
-                dockwidget.setMaximumWidth(i['dock max width'])
-            if 'dock min height' in i:
-                dockwidget.setMinimumHeight(i['dock min height'])
-                dockwidget.setMaximumHeight(i['dock max height'])
+            # Check that the widget has been correctly cast to dockwidget
+            try:
+                dockwidget = i['widget'].dockwidget
+            except AttributeError:
+                dockwidget = i['widget']
+            if 'dock-min-width' in i:
+                dockwidget.setMinimumWidth(i['dock-min-width'])
+                dockwidget.setMaximumWidth(i['dock-max-width'])
+            if 'dock-min-height' in i:
+                dockwidget.setMinimumHeight(i['dock-min-height'])
+                dockwidget.setMaximumHeight(i['dock-max-height'])
 
         self.setUpdatesEnabled(True)
 
