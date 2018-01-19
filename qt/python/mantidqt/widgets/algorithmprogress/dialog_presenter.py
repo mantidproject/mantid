@@ -19,6 +19,7 @@ class AlgorithmProgressDialogPresenter(AlgorithmProgressPresenterBase):
         """
         Update the gui elements.
         """
+        self.progress_bars.clear()
         algorithm_data = self.model.get_running_algorithm_data()
         self.view.update(algorithm_data)
 
@@ -39,17 +40,12 @@ class AlgorithmProgressDialogPresenter(AlgorithmProgressPresenterBase):
         """
         progress_bar = self.progress_bars.get(algorithm_id, None)
         if progress_bar is not None:
-            self.set_progress_bar(progress_bar, progress, message)
+            self.need_update_progress_bar.emit(progress_bar, progress, message)
 
-    def update(self, algorithms):
+    def update(self):
         """
-        Close (remove) the progress bar when algorithm finishes.
-        :param algorithms: A list of running algorithms
+        Update the gui asynchronously.
         """
-        stored_algorithms = self.progress_bars.keys()
-        for alg in stored_algorithms:
-            if alg not in algorithms:
-                del self.progress_bars[alg]
         self.need_update_gui.emit()
 
     def close(self):

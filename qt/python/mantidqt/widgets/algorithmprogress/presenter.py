@@ -23,25 +23,24 @@ class AlgorithmProgressPresenter(AlgorithmProgressPresenterBase):
         :param message: A message that may come from the algorithm.
         """
         if algorithm is self.algorithm:
-            self.set_progress_bar(self.view.progress_bar, progress, message)
+            self.need_update_progress_bar.emit(self.view.progress_bar, progress, message)
 
     def update_gui(self):
         """
-        Close (remove) the progress bar when algorithm finishes.
-        :param algorithms: A list of running algorithms
+        Update the gui.
         """
+        algorithms = self.model.get_running_algorithms()
+        if len(algorithms) == 0:
+            self.algorithm = None
+        else:
+            self.algorithm = algorithms[-1]
         if self.algorithm is None:
             self.view.hide_progress_bar()
         else:
             self.view.show_progress_bar()
 
-    def update(self, algorithms):
+    def update(self):
         """
-        Close (remove) the progress bar when algorithm finishes.
-        :param algorithms: A list of running algorithms
+        Update the gui asynchronously.
         """
-        if len(algorithms) == 0:
-            self.algorithm = None
-        else:
-            self.algorithm = algorithms[-1]
         self.need_update_gui.emit()

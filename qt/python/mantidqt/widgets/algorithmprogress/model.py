@@ -77,9 +77,8 @@ class AlgorithmProgressModel(AlgorithmObserver):
         self.update_presenter()
 
     def update_presenter(self):
-        algorithms = [obs.algorithm for obs in self.progress_observers]
         for presenter in self.presenters:
-            presenter.update(algorithms)
+            presenter.update()
 
     def update_progress(self, progress_observer):
         """
@@ -100,6 +99,9 @@ class AlgorithmProgressModel(AlgorithmObserver):
         if index >= 0:
             del self.progress_observers[index]
             self.update_presenter()
+
+    def get_running_algorithms(self):
+        return [obs.algorithm for obs in self.progress_observers]
 
     def get_running_algorithm_data(self):
         """

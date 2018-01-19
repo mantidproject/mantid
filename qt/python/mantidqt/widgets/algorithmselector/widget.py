@@ -8,6 +8,7 @@ from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxL
 
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.interfacemanager import InterfaceManager
+from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
 
@@ -168,6 +169,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         layout = QVBoxLayout()
         layout.addLayout(top_layout)
         layout.addWidget(self.tree)
+        layout.addWidget(AlgorithmProgressWidget())
         self.setLayout(layout)
 
     def populate_ui(self, data):

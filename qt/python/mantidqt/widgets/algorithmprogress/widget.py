@@ -21,7 +21,6 @@ class AlgorithmProgressWidget(QWidget):
         self.layout.addWidget(self.details_button)
         self.setLayout(self.layout)
         self.presenter = AlgorithmProgressPresenter(self)
-        self.dialog = None
 
     def show_progress_bar(self):
         if self.progress_bar is None:
@@ -38,5 +37,5 @@ class AlgorithmProgressWidget(QWidget):
             self.progress_bar = None
 
     def show_dialog(self):
-        self.dialog = AlgorithmMonitorDialog(self, self.presenter.model)
-        self.dialog.show()
+        dialog = AlgorithmMonitorDialog(self, self.presenter.model)
+        dialog.show()
