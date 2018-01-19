@@ -100,7 +100,7 @@ TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   // Do some pointless casts to stifle unused parameter warnings
   (void)GSASIIProjectFile;
   (void)refinementMethod;
-  (void)dmin;
+  (void)dMin;
   (void)phaseFiles;
   (void)pathToGSASII;
   (void)negativeWeight;
