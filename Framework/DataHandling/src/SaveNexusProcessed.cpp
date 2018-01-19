@@ -363,7 +363,7 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events,
  * */
 void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
                                    const bool uniformSpectra,
-                                   const std::vector<int> spec) {
+                                   const std::vector<int> &spec) {
   m_progress = make_unique<Progress>(this, m_timeProgInit, 1.0,
                                      m_eventWorkspace->getNumberEvents() * 2);
 

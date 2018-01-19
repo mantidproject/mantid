@@ -89,7 +89,7 @@ private:
                                   float *errorSquareds, int64_t *pulsetimes);
 
   void execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
-                 const bool uniformSpectra, const std::vector<int> spec);
+                 const bool uniformSpectra, const std::vector<int> &spec);
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
