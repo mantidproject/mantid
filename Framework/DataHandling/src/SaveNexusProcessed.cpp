@@ -331,8 +331,8 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events,
   if (events.empty())
     return;
 
-  auto it = events.cbegin();
-  auto it_end = events.cend();
+  const auto it = events.cbegin();
+  const auto it_end = events.cend();
 
   // Fill the C-arrays with the fields from all the events, as requested.
   if (tofs) {
