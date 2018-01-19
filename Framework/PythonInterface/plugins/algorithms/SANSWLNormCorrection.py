@@ -19,12 +19,12 @@ from mantid.simpleapi import *
 '''
 
 
-class SANSSuperImpose(PythonAlgorithm):
+class SANSWLNormCorrection(PythonAlgorithm):
     def category(self):
         return 'SANS'
 
     def name(self):
-        return "SANSSuperImpose"
+        return "SANSWLNormCorrection"
 
     def summary(self):
         return "From the input Workspace group calculates I(Scaled) = K * I(Original) -b "
@@ -532,4 +532,4 @@ class SANSSuperImpose(PythonAlgorithm):
 
 ##########################################################################
 
-AlgorithmFactory.subscribe(SANSSuperImpose)
+AlgorithmFactory.subscribe(SANSWLNormCorrection)

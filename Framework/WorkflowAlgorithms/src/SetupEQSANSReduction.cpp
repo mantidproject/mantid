@@ -597,6 +597,27 @@ void SetupEQSANSReduction::init() {
   setPropertyGroup("Do2DReduction", iq1d_grp);
   setPropertyGroup("IQ2DNumberOfBins", iq1d_grp);
 
+  //
+  // WLNormCorrection
+  std::string wlnorm_grp = "Wavelength Normalization Correction";
+  declareProperty("DoWLNormCorrection", true);
+  declareProperty("InputWorkspaceReference", 0);
+  declareProperty("Qmin", EMPTY_DBL());
+  declareProperty("Qmax", EMPTY_DBL());
+  declareProperty("DiscardBeginGlobal", 0);
+  declareProperty("DiscardEndGlobal", 0);
+  declareProperty(make_unique<ArrayProperty<double>>("KList"));
+  declareProperty(make_unique<ArrayProperty<double>>("BList"));
+  // -- Define group --
+  setPropertyGroup("DoWLNormCorrection", wlnorm_grp);
+  setPropertyGroup("InputWorkspaceReference", wlnorm_grp);
+  setPropertyGroup("Qmin", wlnorm_grp);
+  setPropertyGroup("Qmax", wlnorm_grp);
+  setPropertyGroup("DiscardBeginGlobal", wlnorm_grp);
+  setPropertyGroup("DiscardEndGlobal", wlnorm_grp);
+  setPropertyGroup("KList", wlnorm_grp);
+  setPropertyGroup("BList", wlnorm_grp);
+
   // Outputs
   declareProperty("ProcessInfo", "", "Additional process information");
   declareProperty("OutputDirectory", "",
@@ -872,6 +893,7 @@ void SetupEQSANSReduction::exec() {
     reductionManager->declareProperty(std::move(iqalgProp));
   }
 
+
   // 2D reduction
   const bool do2DReduction = getProperty("Do2DReduction");
   if (do2DReduction) {
@@ -883,6 +905,34 @@ void SetupEQSANSReduction::exec() {
     reductionManager->declareProperty(std::move(xyalgProp));
   }
   setPropertyValue("OutputMessage", "EQSANS reduction options set");
+
+
+  // WLNormCorrection
+  const bool doWLNormCorrection = getProperty("DoWLNormCorrection");
+  if (doWLNormCorrection) {
+
+	  const int n_bins = getPropertyValue("InputWorkspaceReference");
+	  const double n_bins = getPropertyValue("Qmin");
+	  const double n_bins = getPropertyValue("Qmax");
+	  const int n_bins = getPropertyValue("DiscardBeginGlobal");
+	  const int n_bins = getPropertyValue("DiscardEndGlobal");
+	  const std::string n_bins = getPropertyValue("KList");
+	  const std::string n_bins = getPropertyValue("BList");
+
+
+	  IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
+	    // The following is broken, try PropertyValue
+	    maskAlg->setPropertyValue("Facility", "SNS");
+	    maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
+	    maskAlg->setPropertyValue("MaskedEdges", maskEdges);
+	    maskAlg->setProperty("MaskedSide", maskSide);
+	    auto maskAlgProp = make_unique<AlgorithmProperty>("MaskAlgorithm");
+	    maskAlgProp->setValue(maskAlg->toString());
+	    reductionManager->declareProperty(std::move(maskAlgProp));
+
+  }
+  setPropertyValue("OutputMessage", "WLNormCorrection options set");
+
 
   // Save a string representation of this algorithm
   auto setupAlgProp = make_unique<AlgorithmProperty>("SetupAlgorithm");
