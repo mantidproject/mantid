@@ -53,6 +53,7 @@ set ( TEST_FILES
   test/ReflSaveTabPresenterTest.h
   test/ReflSettingsPresenterTest.h
   test/ReflSettingsTabPresenterTest.h
+  test/RunMapTest.h
   test/UserInputValidatorTest.h
 )
 

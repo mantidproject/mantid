@@ -27,6 +27,7 @@ set ( INC_FILES
 	IEnggDiffGSASFittingView.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
+	RunMap.h
 )
 
 set ( MOC_FILES
