@@ -18,6 +18,10 @@ from __future__ import absolute_import
 
 # std imports
 import atexit
+import gc
+
+# 3rdparty imports
+from six import itervalues
 
 
 class CurrentFigure(object):
@@ -79,7 +83,7 @@ class CurrentFigure(object):
     def destroy_fig(cls, fig):
         "*fig* is a Figure instance"
         num = None
-        for manager in six.itervalues(cls.figs):
+        for manager in itervalues(cls.figs):
             if manager.canvas.figure == fig:
                 num = manager.num
                 break
@@ -154,4 +158,3 @@ class CurrentFigure(object):
                 f_mgr.canvas.draw_idle()
 
 atexit.register(CurrentFigure.destroy_all)
-

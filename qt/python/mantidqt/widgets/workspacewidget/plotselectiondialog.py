@@ -19,7 +19,6 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # 3rd party imports
-import numpy as np
 import qtawesome as qta
 from qtpy.QtWidgets import QDialogButtonBox
 
