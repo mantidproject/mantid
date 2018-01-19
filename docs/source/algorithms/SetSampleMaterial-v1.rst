@@ -98,6 +98,8 @@ Normalized Laue
 
 The low-:math:`Q` limit of :math:`S(Q)` is :math:`-L` where :math:`L` is called the normalized Laue term
 
+.. math:: bAverage = <b_{coh}> = \frac{1}{N_{atoms}}\sum_{i}b_{coh,i}
+.. math:: bSquaredAverage = <b_{tot}^2> = \frac{1}{N_{atoms}}\sum_{i}b_{tot,i}^2
 .. math:: L = \frac{<b_{tot}^2>-<b_{coh}>^2}{<b_{coh}>^2}
 
 References
