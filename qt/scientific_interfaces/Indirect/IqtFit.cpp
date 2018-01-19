@@ -47,6 +47,7 @@ void IqtFit::setup() {
   // Add custom settings
   addBoolCustomSetting("ConstrainIntensities", "Constrain Intensities");
   addBoolCustomSetting("ConstrainBeta", "Constrain Beta Over All Q");
+  setCustomSettingEnabled("ConstrainBeta", false);
 
   // Set available background options
   setBackgroundOptions({"None", "FlatBackground"});
@@ -77,8 +78,6 @@ void IqtFit::setup() {
   connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(setMaximumSpectrum(int)));
 
-  connect(m_uiForm->cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
-          SLOT(updateCurrentPlotOption(QString)));
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(m_uiForm->pbPlotPreview, SIGNAL(clicked()), this,
@@ -86,6 +85,18 @@ void IqtFit::setup() {
 
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
           SLOT(plotGuess()));
+
+  connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
+}
+
+void IqtFit::fitFunctionChanged() {
+
+  if (numberOfCustomFunctions("StretchExp") > 0) {
+    setCustomSettingEnabled("ConstrainBeta", true);
+  } else {
+    setCustomBoolSetting("ConstrainBeta", false);
+    setCustomSettingEnabled("ConstrainBeta", false);
+  }
 }
 
 void IqtFit::run() {
@@ -163,7 +174,7 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(MatrixWorkspace_sptr inputWs,
     iqtFitAlg = AlgorithmManager::Instance().create("IqtFitSequential");
 
   iqtFitAlg->initialize();
-  iqtFitAlg->setProperty("FitType", fitTypeString());
+  iqtFitAlg->setProperty("FitType", fitTypeString() + "_s");
   iqtFitAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
   iqtFitAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
   iqtFitAlg->setProperty("ConstrainIntensities", constrainIntens);
@@ -271,12 +282,9 @@ void IqtFit::updatePreviewPlots() {
   const auto groupName = outputWorkspaceName() + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
-
-  IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm->ppPlotTop);
-  plotGuess();
 }
 
-void IqtFit::rangeChanged(double, double) {
+void IqtFit::updatePlotRange() {
   IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm->ppPlotTop);
 }
 

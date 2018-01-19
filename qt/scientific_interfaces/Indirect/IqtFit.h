@@ -45,7 +45,7 @@ protected:
 protected slots:
   void newDataLoaded(const QString wsName);
   void updatePreviewPlots() override;
-  void rangeChanged(double xMin, double xMax) override;
+  void updatePlotRange() override;
   void specMinChanged(int value);
   void specMaxChanged(int value);
   void startXChanged(double startX) override;
@@ -56,6 +56,7 @@ protected slots:
   void updatePlotOptions() override;
   void plotWorkspace();
   void saveResult();
+  void fitFunctionChanged();
 
 private:
   void disablePlotGuess() override;
