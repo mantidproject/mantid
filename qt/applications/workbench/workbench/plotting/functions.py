@@ -21,10 +21,9 @@ our custom window.
 # std imports
 
 # 3rd party imports
+import matplotlib.pyplot as plt
 
 # local imports
-from workbench.plotting.currentfigure import CurrentFigure
-from workbench.plotting.figuremanager import new_figure_manager
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -39,16 +38,10 @@ def plot_spectrum(workspaces, spectrum_nums=None, wksp_indices=None):
     # check inputs
     if spectrum_nums is not None and wksp_indices is not None:
         raise ValueError("plot_spectrum: Both spectrum_nums and wksp_indices supplied. "
-                         "Please supply only 1")
-
-    # window/figure creation
-    figure_mgr = CurrentFigure.get_active()
-    if figure_mgr is None:
-        figure_mgr = new_figure_manager(1)
-    CurrentFigure.set_active(figure_mgr)
-    fig = figure_mgr.canvas.figure
+                         "Please supply only 1.")
 
     # do plotting
+    fig = plt.figure()
     ax = fig.add_subplot(111, projection=PROJECTION)
     if spectrum_nums is not None:
         kw, rows = 'specNum', spectrum_nums

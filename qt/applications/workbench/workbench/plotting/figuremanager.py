@@ -29,12 +29,13 @@ from qtpy.QtWidgets import qApp, QApplication, QLabel, QMainWindow
 from six import reraise, text_type
 
 # local imports
-from workbench.plotting.currentfigure import CurrentFigure
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 
 # Import the *real* matplotlib backend for the canvas
+mpl_qt_backend = importlib.import_module('matplotlib.backends.backend_qt{}'.format(QT_VERSION[0]))
 mpl_qtagg_backend = importlib.import_module('matplotlib.backends.backend_qt{}agg'.format(QT_VERSION[0]))
 try:
+    Gcf = getattr(mpl_qt_backend, 'Gcf')
     FigureCanvas = getattr(mpl_qtagg_backend, 'FigureCanvasQTAgg')
 except KeyError:
     raise ImportError("Unknown form of matplotlib Qt backend.")
@@ -129,11 +130,11 @@ class FigureManagerWorkbench(FigureManagerBase):
             return
         self.window._destroying = True
         try:
-            CurrentFigure.destroy(self.num)
-        except AttributeError:
+            Gcf.destroy(self.num)
+        except AttributeError as exc:
             pass
             # It seems that when the python session is killed,
-            # CurrentFigure can get destroyed before the CurrentFigure.destroy
+            # Gcf can get destroyed before the Gcf.destroy
             # line is run, leading to a useless AttributeError.
 
     def _get_toolbar(self, canvas, parent):
@@ -166,6 +167,9 @@ class FigureManagerWorkbench(FigureManagerBase):
                 self._destroy_exc = None
                 reraise(*exc_info)
 
+    def hold(self):
+        self.toolbar.hold()
+
     def _destroy_impl(self):
         self.window._destroying = True
         self.window.destroyed.connect(self._widgetclosed)
@@ -194,7 +198,7 @@ class Show(object):
         block is ignored as calling mainloop does nothing anyway
         since the event loop is already running
         """
-        managers = CurrentFigure.get_all_fig_managers()
+        managers = Gcf.get_all_fig_managers()
         if not managers:
             return
 

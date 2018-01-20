@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
         self.editor.register_plugin()
         self.widgets.append(self.editor)
 
-        self.set_splash("Loading Workspace Widget")
+        self.set_splash("Loading workspace widget")
         from workbench.plugins.workspacewidget import WorkspaceWidget
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
@@ -411,9 +411,14 @@ def start_workbench(app):
     # changing anything!
     main_window = MainWindow()
 
-    # Load matplotlib as early as possible to setup backend
+    # Load matplotlib as early as possible.
+    # Setup our custom backend and monkey patch in custom current figure manager
     main_window.set_splash('Preloading matplotlib')
     mpl = importlib.import_module('matplotlib')
+    # Replace vanilla Gcf with our custom instance
+    _pylab_helpers = importlib.import_module('matplotlib._pylab_helpers')
+    currentfigure = importlib.import_module('workbench.plotting.currentfigure')
+    setattr(_pylab_helpers, 'Gcf', getattr(currentfigure, 'CurrentFigure'))
     # Set up out custom matplotlib backend early. It must be done on
     # the main thread
     mpl.use(MPL_BACKEND)

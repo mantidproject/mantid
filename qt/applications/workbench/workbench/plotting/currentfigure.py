@@ -33,14 +33,13 @@ class CurrentFigure(object):
 
     Attributes:
 
+        *_active*:
+          A reference to the figure that is set as active, can be None
+
         *figs*:
           dictionary of the form {*num*: *manager*, ...}
-
-        *_activeQue*:
-          list of *managers*, with active one at the end.
-
     """
-    _activeQue = []
+    _active = None
     figs = {}
 
     @classmethod
@@ -67,14 +66,8 @@ class CurrentFigure(object):
         manager = cls.figs[num]
         manager.canvas.mpl_disconnect(manager._cidgcf)
 
-        # There must be a good reason for the following careful
-        # rebuilding of the activeQue; what is it?
-        oldQue = cls._activeQue[:]
-        cls._activeQue = []
-        for f in oldQue:
-            if f != manager:
-                cls._activeQue.append(f)
-
+        if cls._active.num == num:
+            cls._active = None
         del cls.figs[num]
         manager.destroy()
         gc.collect(1)
@@ -99,7 +92,7 @@ class CurrentFigure(object):
             manager.canvas.mpl_disconnect(manager._cidgcf)
             manager.destroy()
 
-        cls._activeQue = []
+        cls._active = None
         cls.figs.clear()
         gc.collect(1)
 
@@ -129,23 +122,21 @@ class CurrentFigure(object):
         """
         Return the manager of the active figure, or *None*.
         """
-        if len(cls._activeQue) == 0:
-            return None
-        else:
-            return cls._activeQue[-1]
+        return cls._active
 
     @classmethod
     def set_active(cls, manager):
         """
         Make the figure corresponding to *manager* the active one.
+
+        Notifies all other figures to disable their active status.
         """
-        oldQue = cls._activeQue[:]
-        cls._activeQue = []
-        for m in oldQue:
-            if m != manager:
-                cls._activeQue.append(m)
-        cls._activeQue.append(manager)
-        cls.figs[manager.num] = manager
+        cls._active = manager
+        active_num = manager.num
+        cls.figs[active_num] = manager
+        for manager in itervalues(cls.figs):
+            if manager.num != active_num:
+                manager.hold()
 
     @classmethod
     def draw_all(cls, force=False):
@@ -156,5 +147,6 @@ class CurrentFigure(object):
         for f_mgr in cls.get_all_fig_managers():
             if force or f_mgr.canvas.figure.stale:
                 f_mgr.canvas.draw_idle()
+
 
 atexit.register(CurrentFigure.destroy_all)
