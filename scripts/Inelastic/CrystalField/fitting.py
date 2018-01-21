@@ -50,8 +50,8 @@ def ionname2Nre(ionname):
 def getSymmAllowedParam(sym_str):
     if 'T' in sym_str or 'O' in sym_str:
         return ['B40', 'B44', 'B60', 'B64']
-    strmaker = lambda x: ['B'+str(k)+str(x) for k in [2, 4, 6] if x <= k]
-    istrmaker = lambda x: ['IB'+str(k)+str(x) for k in [2, 4, 6] if x <= k]
+    strmaker = lambda x: ['B'+str(k)+str(x) for k in [2, 4, 6] if x <= k] # noqa: E731
+    istrmaker = lambda x: ['IB'+str(k)+str(x) for k in [2, 4, 6] if x <= k] # noqa: E731
     if any([sym_str == val for val in ['C1', 'Ci']]):
         return sum([strmaker(i) for i in range(7)]+[istrmaker(i) for i in range(1, 7)],[])
     retval = strmaker(0)
