@@ -47,30 +47,32 @@ def ionname2Nre(ionname):
     return nre
 
 
+def cfpstrmaker(x, pref='B'):
+    return [pref+str(k)+str(x) for k in [2, 4, 6] if x <= k]
+
+
 def getSymmAllowedParam(sym_str):
     if 'T' in sym_str or 'O' in sym_str:
         return ['B40', 'B44', 'B60', 'B64']
-    strmaker = lambda x: ['B'+str(k)+str(x) for k in [2, 4, 6] if x <= k] # noqa: E731
-    istrmaker = lambda x: ['IB'+str(k)+str(x) for k in [2, 4, 6] if x <= k] # noqa: E731
     if any([sym_str == val for val in ['C1', 'Ci']]):
-        return sum([strmaker(i) for i in range(7)]+[istrmaker(i) for i in range(1, 7)],[])
-    retval = strmaker(0)
+        return sum([strmaker(i) for i in range(7)]+[cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
+    retval = cfpstrmaker(0)
     if '6' in sym_str or '3' in sym_str:
-        retval += strmaker(6)
+        retval += cfpstrmaker(6)
         if any([sym_str == val for val in ['C6', 'C3h', 'C6h']]):
-            retval += istrmaker(6)
+            retval += cfpstrmaker(6, 'IB')
     if ('3' in sym_str and '3h' not in sym_str) or 'S6' in sym_str:
-        retval += strmaker(3)
+        retval += cfpstrmaker(3)
         if any([sym_str == val for val in ['C3', 'S6']]):
-            retval += istrmaker(3) + istrmaker(6)
+            retval += cfpstrmaker(3, 'IB') + cfpstrmaker(6, 'IB')
     if '4' in sym_str or '2' in sym_str:
-        retval += strmaker(4)
+        retval += cfpstrmaker(4)
         if any([sym_str == val for val in ['C4', 'S4', 'C4h']]):
-            retval += istrmaker(4)
+            retval += cfpstrmaker(4, 'IB')
     if ('2' in sym_str and '2d' not in sym_str) or 'Cs' in sym_str:
-        retval += strmaker(2)
+        retval += cfpstrmaker(2)
         if any([sym_str == val for val in ['C2', 'Cs', 'C2h']]):
-            retval += istrmaker(2) + istrmaker(4)
+            retval += cfpstrmaker(2, 'IB') + cfpstrmaker(4, 'IB')
     return retval
 
 
