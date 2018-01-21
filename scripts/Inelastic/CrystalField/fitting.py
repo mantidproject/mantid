@@ -55,7 +55,8 @@ def getSymmAllowedParam(sym_str):
     if 'T' in sym_str or 'O' in sym_str:
         return ['B40', 'B44', 'B60', 'B64']
     if any([sym_str == val for val in ['C1', 'Ci']]):
-        return sum([strmaker(i) for i in range(7)]+[cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
+        return sum([cfpstrmaker(i) for i in range(7)] +
+                   [cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
     retval = cfpstrmaker(0)
     if '6' in sym_str or '3' in sym_str:
         retval += cfpstrmaker(6)
