@@ -850,10 +850,10 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
     for (size_t i = 0; i < nSpec; ++i) {
       auto spectrumIntensityScaling =
           m_control.getFunction(i)->getParameter("IntensityScaling");
-      spectra[i]->addFunction(buildSpectrum(
-          nre, energies, waveFunctions, temperatures[i], 
-          FWHMs.size() > i ? FWHMs[i] : 0., i,
-          addBackground, ionIntensityScaling * spectrumIntensityScaling));
+      spectra[i]->addFunction(
+          buildSpectrum(nre, energies, waveFunctions, temperatures[i],
+                        FWHMs.size() > i ? FWHMs[i] : 0., i, addBackground,
+                        ionIntensityScaling * spectrumIntensityScaling));
     }
 
     size_t i = 0;
@@ -1093,7 +1093,7 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
   auto &FWHMs = m_control.FWHMs();
   for (size_t iSpec = 0; iSpec < temperatures.size(); ++iSpec) {
     updateSpectrum(*fun.getFunction(iSpec), nre, energies, waveFunctions,
-                   temperatures[iSpec], 
+                   temperatures[iSpec],
                    FWHMs.size() > iSpec ? FWHMs[iSpec] : 0., iSpec, iFirst);
   }
 
