@@ -1,3 +1,4 @@
+from six import string_types
 import numpy as np
 
 from CrystalField import CrystalField, Function
@@ -71,6 +72,9 @@ class CrystalFieldMultiSite(object):
 
         parameter_dict = kwargs.pop('parameters', None)
         attribute_dict = kwargs.pop('attributes', None)
+        ties_dict = kwargs.pop('ties', None)
+        constraints_list = kwargs.pop('constraints', None)
+        fix_list = kwargs.pop('fixedParameters', None)
 
         kwargs = self._setMandatoryArguments(kwargs)
 
@@ -88,6 +92,14 @@ class CrystalFieldMultiSite(object):
         if parameter_dict is not None:
             for name, value in parameter_dict.items():
                 self.function.setParameter(name, value)
+        if ties_dict:
+            for name, value in parameter_dict.items():
+                self.function.tie(name, value)
+        if constraints_list:
+            self.function.addConstraints(','.join(constraints_list))
+        if fix_list:
+            for param in fix_list:
+                self.function.fixParameter(param)
 
     def _setMandatoryArguments(self, kwargs):
         if 'Temperatures' in kwargs:
@@ -424,6 +436,21 @@ class CrystalFieldMultiSite(object):
     @property
     def background(self):
         return self._background
+
+    @background.setter
+    def background(self, value):
+        if hasattr(value, 'peak') and hasattr(value, 'background'):
+            # Input is a CrystalField.Background object
+            if value.peak and value.background:
+                self._setBackground(peak=str(value.peak.function), background=str(value.background.function))
+            elif value.peak:
+                self._setBackground(peak=str(value.peak.function))
+            else:
+                self._setBackground(background=str(value.background.function))
+        elif hasattr(value, 'function'):
+            self._setBackground(background=str(value.function))
+        else:
+            self._setBackground(background=value)
 
     @property
     def Ions(self):

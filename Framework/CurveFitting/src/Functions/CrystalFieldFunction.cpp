@@ -492,7 +492,8 @@ void CrystalFieldFunction::setAttribute(const std::string &attName,
     m_source.reset();
   }
   attRef.first->setAttribute(attRef.second, attr);
-  if (attName.find("FWHM") != std::string::npos) {
+  if (attName.find("FWHM") != std::string::npos ||
+      attName.find("Background") != std::string::npos) {
     m_dirtyTarget = true;
   }
 }
@@ -635,9 +636,12 @@ void CrystalFieldFunction::buildSourceFunction() const {
       m_parameterResetCache.size() == m_source->nParams()) {
     for (size_t i = 0; i < m_parameterResetCache.size(); ++i) {
       m_source->setParameter(i, m_parameterResetCache[i]);
+      if (m_fixResetCache[i])
+        m_source->fix(i);
     }
   }
   m_parameterResetCache.clear();
+  m_fixResetCache.clear();
 }
 
 /// Update spectrum function if necessary.
@@ -744,10 +748,9 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   for (size_t i = 0; i < nSpec; ++i) {
     auto intensityScaling =
         m_control.getFunction(i)->getParameter("IntensityScaling");
-    fun->addFunction(buildSpectrum(nre, energies, waveFunctions,
-                                   temperatures[i], FWHMs.size() > i ? FWHMs[i] : 0.,
-                                   i, addBackground,
-                                   intensityScaling));
+    fun->addFunction(buildSpectrum(
+        nre, energies, waveFunctions, temperatures[i],
+        FWHMs.size() > i ? FWHMs[i] : 0., i, addBackground, intensityScaling));
     fun->setDomainIndex(i, i);
   }
   auto &physProps = m_control.physProps();
@@ -1148,7 +1151,7 @@ void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
       auto &ionSpectrum =
           dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
       updateSpectrum(ionSpectrum, nre, energies, waveFunctions,
-                     temperatures[iSpec], 
+                     temperatures[iSpec],
                      FWHMs.size() > iSpec ? FWHMs[iSpec] : 0., iSpec, iFirst);
     }
 
@@ -1397,8 +1400,10 @@ void CrystalFieldFunction::cacheSourceParameters() const {
   }
   auto np = m_source->nParams();
   m_parameterResetCache.resize(np);
+  m_fixResetCache.resize(np);
   for (size_t i = 0; i < np; ++i) {
     m_parameterResetCache[i] = m_source->getParameter(i);
+    m_fixResetCache[i] = m_source->isFixed(i);
   }
 }
 

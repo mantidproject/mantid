@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
 import warnings
-from six import string_types
+from six import string_types, iteritems
 
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
@@ -486,7 +486,7 @@ class CrystalField(object):
     @ResolutionModel.setter
     def ResolutionModel(self, value):
         from .function import ResolutionModel
-        if isinstance(value, ResolutionModel):
+        if hasattr(value, 'model'):
             self._resolutionModel = value
         else:
             self._resolutionModel = ResolutionModel(value)
@@ -965,14 +965,29 @@ class CrystalField(object):
             for bparam in CrystalField.field_parameter_names:
                 params['ion0.' + bparam] = self[bparam]
                 params['ion1.' + bparam] = other[bparam]
+            ties = {}
+            fixes = []
+            for prefix, obj in iteritems({'ion0.':self, 'ion1.':other}):
+                tiestr = obj.function.getTies()
+                if tiestr:
+                    for tiepair in [tie.split('=') for tie in tiestr.split(',')]:
+                        ties[prefix + tiepair[0]] = tiepair[1]
+                for par_id in [id for id in range(obj.function.nParams()) if obj.function.isFixed(id)]:
+                    parName = obj.function.getParamName(par_id)
+                    if obj.background is not None:
+                        parName = parName.split('.')[-1]
+                    if parName not in self.field_parameter_names:
+                        continue
+                    fixes.append(prefix + parName)
             if self._resolutionModel is None:
                fwhms = [self._getFWHM(x) for x in range(self.NumberOfSpectra)]
                return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                            FWHM = fwhms, parameters=params, abundances=[1.0, 1.0])
+                                            FWHM = fwhms, parameters=params, abundances=[1.0, 1.0],
+                                            ties = ties, fixedParameters = fixes)
             else:
                return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
                                             ResolutionModel=self._resolutionModel, parameters=params, 
-                                            abundances=[1.0, 1.0])
+                                            abundances=[1.0, 1.0], ties = ties, fixedParameters = fixes)
 
     def __mul__(self, factor):
         ffactor = float(factor)
@@ -1039,11 +1054,11 @@ class CrystalField(object):
         return params
 
     def _getFieldTies(self):
-        ties = re.match('ties=\((.*?)\)', str(self.crystalFieldFunction))
+        ties = re.search('ties=\((.*?)\)', str(self.crystalFieldFunction))
         return ties.group(1) if ties else ''
 
     def _getFieldConstraints(self):
-        constraints = re.match('constraints=\((.*?)\)', str(self.crystalFieldFunction))
+        constraints = re.search('constraints=\((.*?)\)', str(self.crystalFieldFunction))
         return constraints.group(1) if constraints else ''
 
     def _getPhysProp(self, ppobj, workspace, ws_index):
