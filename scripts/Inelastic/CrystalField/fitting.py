@@ -28,6 +28,7 @@ def makeWorkspace(xArray, yArray):
 def islistlike(arg):
     return (not hasattr(arg, "strip")) and (hasattr(arg, "__getitem__") or hasattr(arg, "__iter__")) and hasattr(arg, "__len__")
 
+
 def ionname2Nre(ionname):
     ion_nre_map = {'Ce': 1, 'Pr': 2, 'Nd': 3, 'Pm': 4, 'Sm': 5, 'Eu': 6, 'Gd': 7,
                    'Tb': 8, 'Dy': 9, 'Ho': 10, 'Er': 11, 'Tm': 12, 'Yb': 13}
@@ -44,6 +45,34 @@ def ionname2Nre(ionname):
     else:
         nre = ion_nre_map[ionname]
     return nre
+
+
+def getSymmAllowedParam(sym_str):
+    if 'T' in sym_str or 'O' in sym_str:
+        return ['B40', 'B44', 'B60', 'B64']
+    strmaker = lambda x: ['B'+str(k)+str(x) for k in [2, 4, 6] if x <= k]
+    istrmaker = lambda x: ['IB'+str(k)+str(x) for k in [2, 4, 6] if x <= k]
+    if any([sym_str == val for val in ['C1', 'Ci']]):
+        return sum([strmaker(i) for i in range(7)]+[istrmaker(i) for i in range(1, 7)],[])
+    retval = strmaker(0)
+    if '6' in sym_str or '3' in sym_str:
+        retval += strmaker(6)
+        if any([sym_str == val for val in ['C6', 'C3h', 'C6h']]):
+            retval += istrmaker(6)
+    if ('3' in sym_str and '3h' not in sym_str) or 'S6' in sym_str:
+        retval += strmaker(3)
+        if any([sym_str == val for val in ['C3', 'S6']]):
+            retval += istrmaker(3) + istrmaker(6)
+    if '4' in sym_str or '2' in sym_str:
+        retval += strmaker(4)
+        if any([sym_str == val for val in ['C4', 'S4', 'C4h']]):
+            retval += istrmaker(4)
+    if ('2' in sym_str and '2d' not in sym_str) or 'Cs' in sym_str:
+        retval += strmaker(2)
+        if any([sym_str == val for val in ['C2', 'Cs', 'C2h']]):
+            retval += istrmaker(2) + istrmaker(4)
+    return retval
+
 
 #pylint: disable=too-many-instance-attributes,too-many-public-methods
 class CrystalField(object):
@@ -179,7 +208,7 @@ class CrystalField(object):
         for param in CrystalField.field_parameter_names:
             if param in free_parameters:
                 self.function.setParameter(param, free_parameters[param])
-            else:
+            elif param not in getSymmAllowedParam(self.Symmetry):
                 self.function.fixParameter(param)
 
         self._setPeaks()
@@ -451,7 +480,7 @@ class CrystalField(object):
         self._dirty_spectra = True
         # If both FWHM and ResolutionModel is set, may cause runtime errors
         self._resolutionModel = None
-        if self._isMultiSpectrum: 
+        if self._isMultiSpectrum:
             for i in range(self.NumberOfSpectra):
                 if self.crystalFieldFunction.getAttributeValue('FWHMX%s' % i):
                     self.crystalFieldFunction.setAttributeValue('FWHMX%s' % i, [])
@@ -881,7 +910,7 @@ class CrystalField(object):
         ix = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hx, self._eigenvectors))
         iy = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hy, self._eigenvectors))
         iz = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hz, self._eigenvectors))
-        gj = 2. if (self._nre < 1) else lande_g[self._nre - 1]
+        gj = 2. if (self._nre < 1) else self.lande_g[self._nre - 1]
         gJuB = gj * physical_constants['Bohr magneton in eV/T'][0] * 1000.
         trans = np.multiply(ix, np.conj(ix)) + np.multiply(iy, np.conj(iy)) + np.multiply(iz, np.conj(iz))
         return trans / (gJuB ** 2)
@@ -980,14 +1009,14 @@ class CrystalField(object):
                         continue
                     fixes.append(prefix + parName)
             if self._resolutionModel is None:
-               fwhms = [self._getFWHM(x) for x in range(self.NumberOfSpectra)]
-               return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                            FWHM = fwhms, parameters=params, abundances=[1.0, 1.0],
-                                            ties = ties, fixedParameters = fixes)
+                fwhms = [self._getFWHM(x) for x in range(self.NumberOfSpectra)]
+                return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
+                                             FWHM = fwhms, parameters=params, abundances=[1.0, 1.0],
+                                             ties = ties, fixedParameters = fixes)
             else:
-               return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                            ResolutionModel=self._resolutionModel, parameters=params, 
-                                            abundances=[1.0, 1.0], ties = ties, fixedParameters = fixes)
+                return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
+                                             ResolutionModel=self._resolutionModel, parameters=params,
+                                             abundances=[1.0, 1.0], ties = ties, fixedParameters = fixes)
 
     def __mul__(self, factor):
         ffactor = float(factor)
@@ -1170,8 +1199,8 @@ class CrystalFieldSite(object):
             return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM = FWHM,
                                          abundances=abundances, parameters=params)
         else:
-            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, 
-                                         ResolutionModel=self.crystalField.ResolutionModel, 
+            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
+                                         ResolutionModel=self.crystalField.ResolutionModel,
                                          abundances=abundances, parameters=params)
 
 
@@ -1226,12 +1255,12 @@ class CrystalFieldFit(object):
                 pars = Parameters[ni] if islistlike(Parameters[ni]) else Parameters
                 ion = self.model.Ions[ni]
                 ranges = split2range(Ion=ion, EnergySplitting=EnergySplitting, Parameters=pars)
-                constraints += [('%s<ion%d.%s<%s' % (-bound, ni, parName, bound)) 
+                constraints += [('%s<ion%d.%s<%s' % (-bound, ni, parName, bound))
                                 for parName, bound in ranges.items()]
         else:
             ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting,
                                  Parameters=Parameters)
-            constraints = [('%s<%s<%s' % (-bound, parName, bound)) 
+            constraints = [('%s<%s<%s' % (-bound, parName, bound))
                            for parName, bound in ranges.items()]
         self.model.constraints(*constraints)
         if 'Type' not in kwargs or kwargs['Type'] == 'Monte Carlo':

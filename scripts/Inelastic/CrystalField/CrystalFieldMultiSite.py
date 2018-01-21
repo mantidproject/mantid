@@ -1,4 +1,3 @@
-from six import string_types
 import numpy as np
 
 from CrystalField import CrystalField, Function
@@ -153,7 +152,7 @@ class CrystalFieldMultiSite(object):
 
         return self._calcSpectrum(i, ws, ws_index)
 
-    def calc_xmin_xmax(self, i=0): 
+    def calc_xmin_xmax(self, i=0):
         peaks = np.array([])
         for idx in range(len(self.Ions)):
             blm = {}
@@ -451,6 +450,9 @@ class CrystalFieldMultiSite(object):
             self._setBackground(background=str(value.function))
         else:
             self._setBackground(background=value)
+        # Need this for a weird python bug: "IndexError: Function index (2) out of range (2)"
+        # if user calls print(self.function) after setting background
+        _ = self.function.getTies() # noqa: F841
 
     @property
     def Ions(self):
