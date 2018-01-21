@@ -17,6 +17,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
+import functools
 
 # third-party library imports
 from mantid.api import AnalysisDataService
@@ -27,7 +28,7 @@ from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import plot_spectrum
+from workbench.plotting.functions import plot
 
 
 class WorkspaceWidget(PluginWidget):
@@ -44,7 +45,8 @@ class WorkspaceWidget(PluginWidget):
         self.setLayout(layout)
 
         # behaviour
-        workspacewidget.plot1DClicked.connect(self._do_plot1d)
+        workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot1d, errors=False))
+        workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot1d, errors=True))
 
     # ----------------- Plugin API --------------------
 
@@ -56,9 +58,10 @@ class WorkspaceWidget(PluginWidget):
 
     # ----------------- Behaviour --------------------
 
-    def _do_plot1d(self, selected_ws):
+    def _do_plot1d(self, selected_ws, errors):
         workspaces = [AnalysisDataService.Instance()[selected_ws.encode('utf-8')]]
         selection = get_plot_selection(workspaces, self)
         if selection is not None:
-            plot_spectrum(workspaces, spectrum_nums=selection.spectra,
-                          wksp_indices=selection.wksp_indices)
+            plot(workspaces, spectrum_nums=selection.spectra,
+                 wksp_indices=selection.wksp_indices,
+                 errors=errors)

@@ -131,7 +131,7 @@ class FigureManagerWorkbench(FigureManagerBase):
         self.window._destroying = True
         try:
             Gcf.destroy(self.num)
-        except AttributeError as exc:
+        except AttributeError:
             pass
             # It seems that when the python session is killed,
             # Gcf can get destroyed before the Gcf.destroy

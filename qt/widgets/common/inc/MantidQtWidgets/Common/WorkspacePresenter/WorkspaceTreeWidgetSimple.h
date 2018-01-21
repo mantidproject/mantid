@@ -59,14 +59,15 @@ public:
   void popupContextMenu() override;
 
 signals:
-  void plot1DClicked(const QString &workspaceName);
+  void plotSpectrumClicked(const QString &workspaceName);
+  void plotSpectrumWithErrorsClicked(const QString &workspaceName);
 
 private slots:
-  void onPlot1DClicked();
-
+  void onPlotSpectrumClicked();
+  void onPlotSpectrumWithErrorsClicked();
 
 private:
-  QAction *m_plot1D;
+  QAction *m_plotSpectrum, *m_plotSpectrumWithErrs;
 };
 }
 }
