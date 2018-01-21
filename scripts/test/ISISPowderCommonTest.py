@@ -5,7 +5,7 @@ import unittest
 
 from six_shim import assertRaisesRegex
 
-from isis_powder.routines import common, common_enums
+from isis_powder.routines import common, common_enums, SampleDetails
 
 
 class ISISPowderCommonTest(unittest.TestCase):
@@ -518,6 +518,35 @@ class ISISPowderCommonTest(unittest.TestCase):
                                         empty_sample_ws_string=ws_file_name)
 
         mantid.DeleteWorkspace(sample_ws)
+
+    def test_generate_sample_geometry(self):
+        # Create mock SampleDetails
+        sample_details = SampleDetails(height=4.0, radius=3.0,
+                                       center=[0.5, 1.0, -3.2], shape='cylinder')
+        # Run test
+        result = common.generate_sample_geometry(sample_details)
+        # Validate result
+        expected = {'Shape': 'Cylinder',
+                    'Height': 4.0,
+                    'Radius': 3.0,
+                    'Center': [0.5, 1.0, -3.2]}
+        self.assertEquals(result, expected)
+
+    def test_generate_sample_material(self):
+        # Create mock SampleDetails
+        sample_details = SampleDetails(height=1.0, radius=1.0,
+                                       center=[0.0, 0.0, 0.0])
+        sample_details.set_material(chemical_formula='Si', number_density=1.5)
+        sample_details.set_material_properties(absorption_cross_section=123,
+                                               scattering_cross_section=456)
+        # Run test
+        result = common.generate_sample_material(sample_details)
+        # Validate
+        expected = {'ChemicalFormula': 'Si',
+                    'SampleNumberDensity': 1.5,
+                    'AttenuationXSection': 123.0,
+                    'ScatteringXSection': 456.0}
+        self.assertEquals(result, expected)
 
 
 class ISISPowderMockInst(object):

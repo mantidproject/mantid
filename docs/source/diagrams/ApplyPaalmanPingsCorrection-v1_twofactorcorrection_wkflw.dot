@@ -1,0 +1,65 @@
+digraph ApplyPaalmanPingsCorrection_TwoFactorCorrection {
+  label="ApplyPaalmanPingsCorrection Two Factor Corrections Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    IsAccInWavelength       [label="Is in Wavelength?"]
+    IsAssInWavelength       [label="Is in Wavelength?"]
+    IsSampleInWavelength    [label="Is in Wavelength?"]
+    IsCanInWavelength       [label="Is in Wavelength?"]
+  }
+
+  subgraph params {
+    $param_style
+    SampleWorkspace
+    CorrectionsWorkspace
+    CanWorkspace
+    CanScaleFactor
+    CanShiftFactor
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    ScaleX
+    Scale
+    Minus
+    ConvertUnits_Acc    [label="ConvertUnits"]
+    ConvertUnits_Ass    [label="ConvertUnits"]
+    ConvertUnits_Sample [label="ConvertUnits"]
+    ConvertUnits_Can    [label="ConvertUnits"]
+    ConvertUnits_Final  [label="ConvertUnits"]
+    Divide_Sample       [label="Divide"]
+    Divide_Can          [label="Divide"]
+  }
+
+  CorrectionsWorkspace  -> IsAccInWavelength    [label="Ac,c"]
+  CorrectionsWorkspace  -> IsAssInWavelength    [label="As,s"]
+
+  IsAccInWavelength     -> ConvertUnits_Acc     [label="No"]
+  IsAssInWavelength     -> ConvertUnits_Ass     [label="No"]
+  IsSampleInWavelength  -> ConvertUnits_Sample  [label="No"]
+  IsCanInWavelength     -> ConvertUnits_Can     [label="No"]
+
+  ConvertUnits_Can      -> ScaleX
+  IsCanInWavelength     -> ScaleX               [label="Yes"]
+  CanShiftFactor        -> ScaleX
+  CanScaleFactor        -> Scale
+  ScaleX                -> Scale
+
+  IsSampleInWavelength  -> Divide_Sample        [label="Yes, LHSWorkspace"]
+  ConvertUnits_Sample   -> Divide_Sample        [label="LHSWorkspace"]
+  IsAssInWavelength     -> Divide_Sample        [label="Yes, RHSWorkspace"]
+  ConvertUnits_Ass      -> Divide_Sample        [label="RHSWorkspace"]
+
+  Scale                 -> Divide_Can           [label="LHSWorkspace"]
+  IsAccInWavelength     -> Divide_Can           [label="Yes, RHSWorkspace"]
+  ConvertUnits_Acc      -> Divide_Can           [label="RHSWorkspace"]
+
+  Divide_Sample         -> Minus                [label="LHSWorkspace"]
+  Divide_Can            -> Minus                [label="RHSWorkspace"]
+
+  Minus                 -> ConvertUnits_Final
+  ConvertUnits_Final    -> OutputWorkspace
+}

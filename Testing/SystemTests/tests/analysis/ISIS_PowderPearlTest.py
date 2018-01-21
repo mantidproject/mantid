@@ -55,10 +55,9 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
         return True
 
     def validate(self):
-        return (_compare_ws(reference_file_name="ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),
-                            results="PEARL98472_tt70-Results-D-Grp") and
-                _compare_ws(reference_file_name="ISIS_Powder-PEARL00098472_splined.nxs",
-                            results="Van_spline_data_tt70"))
+        self.tolerance = 0.05  # Required for difference in spline data between operating systems
+        return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode), \
+               "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined.nxs"
 
     def cleanup(self):
         try:
@@ -111,7 +110,32 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        return focus_validation(self.focus_results)
+        self.tolerance = 1e-10  # Required for difference in spline data between operating systems
+        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
+
+
+class FocusWithAbsorbCorrectionsTest(stresstesting.MantidStressTest):
+
+    focus_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        self.focus_results = run_focus_with_absorb_corrections()
+
+    def validate(self):
+        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70_absorb.nxs"
 
     def cleanup(self):
         try:
@@ -134,8 +158,9 @@ class CreateCalTest(stresstesting.MantidStressTest):
         setup_mantid_paths()
         self.calibration_results = run_create_cal()
 
-    def valid(self):
-        return ceria_validator(self.calibration_results)
+    def validate(self):
+        self.tolerance = 1e-5
+        return "PRL98494_tt88_grouped", "ISIS_Powder-PEARL98494_grouped.nxs"
 
     def cleanup(self):
         try:
@@ -184,30 +209,15 @@ def run_focus():
     shutil.copy(original_splined_path, spline_path)
 
     inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
-    return inst_object.focus(run_number=run_number, vanadium_normalisation=True,
+    return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
                              perform_attenuation=True, attenuation_file_path=attenuation_path)
 
 
-def focus_validation(results):
-    reference_file_name = "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def ceria_validator(results):
-    reference_file_name = "ISIS_Powder-PEARL00098494_grouped.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def _compare_ws(reference_file_name, results):
-    ref_ws = mantid.Load(Filename=reference_file_name)
-
-    is_valid = len(results) > 0
-
-    if not (mantid.CompareWorkspaces(Workspace1=results, Workspace2=ref_ws)):
-        is_valid = False
-        print(results.getName() + " was not equal to: " + ref_ws.getName())
-
-    return is_valid
+def run_focus_with_absorb_corrections():
+    run_number = 98507
+    inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
+    return inst_object.focus(run_number=run_number, vanadium_normalisation=False, perform_attenuation=False,
+                             do_absorb_corrections=True)
 
 
 def setup_mantid_paths():

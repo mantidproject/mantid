@@ -194,10 +194,6 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         self.assertEqual(opt_inst_obj.script_facing_name, optional_value)
 
-    def test_POLARIS_name_suffix(self):
-        pol = Polaris(user_name="test", calibration_directory="", output_directory="", suffix="-suf")
-        self.assertEquals(pol._generate_output_file_name("123"), "POL123-suf")
-
 
 class SampleEnum(object):
     enum_friendly_name = "test_enum_name"

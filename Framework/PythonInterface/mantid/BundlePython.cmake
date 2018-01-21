@@ -23,6 +23,7 @@ if( MSVC )
                                                                           PATTERN "*_d.pyd" EXCLUDE PATTERN "*_d.dll" EXCLUDE )
   install ( DIRECTORY ${PYTHON_DIR}/Lib DESTINATION bin PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE PATTERN "*_d.pyd" EXCLUDE )
   install ( DIRECTORY ${PYTHON_DIR}/Scripts DESTINATION bin PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE PATTERN "*_d.py" EXCLUDE )
+  install ( DIRECTORY ${PYTHON_DIR}/tcl DESTINATION bin PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
   install ( FILES ${PYTHON_DIR}/python27.dll ${PYTHON_EXECUTABLE} ${PYTHONW_EXECUTABLE} DESTINATION bin )
 
 endif()

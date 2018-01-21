@@ -115,6 +115,9 @@ void MuonProcess::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
+
+  declareProperty("CropWorkspace", true,
+                  "Determines if the input workspace should be cropped");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -294,23 +297,25 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
 
     ws = changeOffset->getProperty("OutputWorkspace");
   }
+  bool toCrop = getProperty("CropWorkspace");
+  if (toCrop) {
+    // Crop workspace, if need to
+    double Xmin = getProperty("Xmin");
+    double Xmax = getProperty("Xmax");
+    if (Xmin != EMPTY_DBL() || Xmax != EMPTY_DBL()) {
+      IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
+      crop->setProperty("InputWorkspace", ws);
 
-  // Crop workspace, if need to
-  double Xmin = getProperty("Xmin");
-  double Xmax = getProperty("Xmax");
-  if (Xmin != EMPTY_DBL() || Xmax != EMPTY_DBL()) {
-    IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
-    crop->setProperty("InputWorkspace", ws);
+      if (Xmin != EMPTY_DBL())
+        crop->setProperty("Xmin", Xmin);
 
-    if (Xmin != EMPTY_DBL())
-      crop->setProperty("Xmin", Xmin);
+      if (Xmax != EMPTY_DBL())
+        crop->setProperty("Xmax", Xmax);
 
-    if (Xmax != EMPTY_DBL())
-      crop->setProperty("Xmax", Xmax);
+      crop->execute();
 
-    crop->execute();
-
-    ws = crop->getProperty("OutputWorkspace");
+      ws = crop->getProperty("OutputWorkspace");
+    }
   }
 
   // Rebin workspace if need to

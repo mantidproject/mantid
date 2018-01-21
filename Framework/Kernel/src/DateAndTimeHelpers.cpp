@@ -3,6 +3,8 @@
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
+#include <numeric>
+#include <stdexcept>
 
 namespace {
 std::tuple<bool, size_t, std::string> isARGUSDateTime(const std::string &date) {
@@ -71,6 +73,26 @@ std::string verifyAndSanitizeISO8601(const std::string &date,
   }
 
   return date;
+}
+
+/**
+ * @brief averageSorted Assuming that the vector is sorted, find the average
+ * time
+ */
+Types::Core::DateAndTime
+averageSorted(const std::vector<Types::Core::DateAndTime> &times) {
+  if (times.empty())
+    throw std::invalid_argument("Cannot find average of empty vector");
+
+  // to avoid overflow subtract the first time off from everything
+  // and find the average in between
+  const int64_t first = times.begin()->totalNanoseconds();
+  int64_t total = 0;
+  for (const auto &it : times)
+    total += (it.totalNanoseconds() - first);
+  double avg = static_cast<double>(total) / static_cast<double>(times.size());
+
+  return times.front() + static_cast<int64_t>(avg);
 }
 
 } // namespace DateAndTimeHelpers

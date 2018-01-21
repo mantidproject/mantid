@@ -90,9 +90,10 @@ class Instrument(object):
         :param center: center of Gaussian
         :returns: numpy array with calculated Gaussian values
         """
-        sigma_factor = 2.0 * sigma * sigma
-        norm = AbinsModules.AbinsParameters.pkt_per_peak / (2 * AbinsModules.AbinsParameters.fwhm * sigma)
-        return 1.0 / (np.sqrt(sigma_factor * np.pi) * norm) * np.exp(-(points - center) ** 2 / sigma_factor)
+        two_sigma = 2.0 * sigma
+        sigma_factor = two_sigma * sigma
+        norm = AbinsModules.AbinsParameters.pkt_per_peak / (AbinsModules.AbinsParameters.fwhm * two_sigma)
+        return np.exp(-(points - center) ** 2 / sigma_factor) / (np.sqrt(sigma_factor * np.pi) * norm)
 
     def __str__(self):
         return self._name

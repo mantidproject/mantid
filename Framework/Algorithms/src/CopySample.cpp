@@ -14,6 +14,7 @@ DECLARE_ALGORITHM(CopySample)
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Geometry::SampleEnvironment;
+using Geometry::IObject;
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -163,11 +164,11 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
   if (environmentFlag)
     to.setEnvironment(new SampleEnvironment(from.getEnvironment()));
   if (shapeFlag) {
-    auto rhsObject = from.getShape(); // copy
+    auto rhsObject = boost::shared_ptr<IObject>(from.getShape().clone());
     const auto lhsMaterial = to.getMaterial();
     // reset to original lhs material
     if (!materialFlag) {
-      rhsObject.setMaterial(lhsMaterial);
+      rhsObject->setMaterial(lhsMaterial);
     }
     to.setShape(rhsObject);
     to.setGeometryFlag(from.getGeometryFlag());
@@ -175,8 +176,8 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
     to.setThickness(from.getThickness());
     to.setWidth(from.getWidth());
   } else if (materialFlag) {
-    auto lhsObject = to.getShape(); // copy
-    lhsObject.setMaterial(from.getMaterial());
+    auto lhsObject = boost::shared_ptr<IObject>(to.getShape().clone());
+    lhsObject->setMaterial(from.getMaterial());
     to.setShape(lhsObject);
   }
 

@@ -5,15 +5,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
+#include <QDoubleValidator>
 #include <QLineEdit>
 #include <QList>
-#include <QValidator>
-#include <QDoubleValidator>
 #include <QRegExpValidator>
+#include <QValidator>
 
 using namespace Mantid::API;
 
@@ -191,6 +191,17 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  const auto sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+  const auto sampleWsNameStr = sampleWsName.toStdString();
+  bool sampleExists =
+      AnalysisDataService::Instance().doesExist(sampleWsNameStr);
+
+  if (sampleExists &&
+      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sampleWsNameStr)) {
+    uiv.addErrorMessage(
+        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  }
 
   // Validate chemical formula
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
@@ -230,11 +241,21 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
       uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
     }
 
+    const auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
+    const auto containerWsNameStr = containerWsName.toStdString();
+    bool containerExists =
+        AnalysisDataService::Instance().doesExist(containerWsNameStr);
+
+    if (containerExists &&
+        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerWsNameStr)) {
+      uiv.addErrorMessage(
+          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+    }
+
     // Ensure sample and container are the same kind of data
-    auto sampleWsName = m_uiForm.dsSample->getCurrentDataName();
     const auto sampleType = sampleWsName.right(sampleWsName.length() -
                                                sampleWsName.lastIndexOf("_"));
-    auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
     const auto containerType = containerWsName.right(
         containerWsName.length() - containerWsName.lastIndexOf("_"));
 
@@ -369,6 +390,11 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
 
+  if (!ws) {
+    displayInvalidWorkspaceTypeError(wsName.toStdString(), g_log);
+    return;
+  }
+
   try {
     m_uiForm.doubleEfixed->setValue(getEFixed(ws));
   } catch (std::runtime_error &) {
@@ -406,32 +432,54 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
       wsName.toStdString());
 
   if (!ws) {
-    g_log.warning() << "Failed to find workspace " << wsName.toStdString()
-                    << '\n';
     return;
   }
 
   auto instrument = ws->getInstrument();
 
-  const std::string beamWidthParamName = "Workflow.beam-width";
-  if (instrument->hasParameter(beamWidthParamName)) {
-    const auto beamWidth = QString::fromStdString(
-        instrument->getStringParameter(beamWidthParamName)[0]);
-    const auto beamWidthValue = beamWidth.toDouble();
-
-    m_uiForm.spCylBeamWidth->setValue(beamWidthValue);
-    m_uiForm.spAnnBeamWidth->setValue(beamWidthValue);
+  if (!instrument) {
+    g_log.warning() << "Failed to find instrument parameters in the workspace "
+                    << wsName.toStdString() << '\n';
+    return;
   }
 
-  const std::string beamHeightParamName = "Workflow.beam-height";
-  if (instrument->hasParameter(beamHeightParamName)) {
-    const auto beamHeight = QString::fromStdString(
-        instrument->getStringParameter(beamHeightParamName)[0]);
-    const auto beamHeightValue = beamHeight.toDouble();
+  const auto beamWidth =
+      getInstrumentParameter(instrument, "Workflow.beam-width");
 
-    m_uiForm.spCylBeamHeight->setValue(beamHeightValue);
-    m_uiForm.spAnnBeamHeight->setValue(beamHeightValue);
+  if (beamWidth) {
+    m_uiForm.spCylBeamWidth->setValue(beamWidth.get());
+    m_uiForm.spAnnBeamWidth->setValue(beamWidth.get());
   }
+
+  const auto beamHeight =
+      getInstrumentParameter(instrument, "Workflow.beam-height");
+
+  if (beamHeight) {
+    m_uiForm.spCylBeamHeight->setValue(beamHeight.get());
+    m_uiForm.spAnnBeamHeight->setValue(beamHeight.get());
+  }
+}
+
+/**
+ * Attempt to extract an instrument double parameter from a specified
+ * instrument.
+ *
+ * @param instrument    The instrument to extract the parameter from.
+ * @param parameterName The name of the parameter to extract.
+ *
+ * @return              The extracted parameter if it is found, else
+ *                      boost::none.
+ */
+boost::optional<double> CalculatePaalmanPings::getInstrumentParameter(
+    Mantid::Geometry::Instrument_const_sptr instrument,
+    const std::string &parameterName) {
+
+  if (instrument->hasParameter(parameterName)) {
+    const auto parameterValue = QString::fromStdString(
+        instrument->getStringParameter(parameterName)[0]);
+    return parameterValue.toDouble();
+  }
+  return boost::none;
 }
 
 /**
@@ -493,7 +541,7 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
     alg->setProperty("CanFrontThickness", canFrontThickness);
 
     const auto canBackThickness = m_uiForm.spFlatCanBackThickness->value();
-    alg->setProperty("SampleThickness", canBackThickness);
+    alg->setProperty("CanBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
     const auto canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
     alg->setProperty("CanOuterRadius", canOuterRadius);

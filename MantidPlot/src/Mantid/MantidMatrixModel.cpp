@@ -8,10 +8,15 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
+#include "MantidQtWidgets/Common/QStringUtils.h"
+
 #include <QApplication>
 #include <QObject>
 #include <QPalette>
 #include <QVariant>
+
+using MantidQt::API::toQStringInternal;
+
 // ----------   MantidMatrixModel   ------------------ //
 
 /**   MantidMatrixModel constructor.
@@ -132,7 +137,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
       }
     }
 
-    QString unit = QString::fromStdWString(axis->unit()->label().utf8());
+    QString unit = toQStringInternal(axis->unit()->label().utf8());
 
     // Handle RefAxis for X axis
     Mantid::API::RefAxis *refAxis = dynamic_cast<Mantid::API::RefAxis *>(axis);

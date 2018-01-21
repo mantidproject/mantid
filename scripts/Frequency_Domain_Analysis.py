@@ -23,6 +23,10 @@ class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
         self.setCentralWidget(view)
         self.setWindowTitle("Frequency Domain Analysis")
 
+    # cancel algs if window is closed
+    def closeEvent(self,event):
+        self.presenter.close()
+
 
 def qapp():
     if QtGui.QApplication.instance():

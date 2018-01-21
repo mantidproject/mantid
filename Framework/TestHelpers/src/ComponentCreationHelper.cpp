@@ -11,28 +11,29 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/Quat.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
-#include <Poco/Path.h>
-#include <boost/shared_array.hpp>
-#include <boost/make_shared.hpp>
 #include "MantidGeometry/IDetector.h"
+#include <Poco/Path.h>
+#include <boost/make_shared.hpp>
+#include <boost/shared_array.hpp>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 namespace ComponentCreationHelper {
 //----------------------------------------------------------------------------------------------
@@ -59,11 +60,31 @@ std::string cappedCylinderXML(double radius, double height,
 /**
  * Create a capped cylinder object
  */
-Object_sptr createCappedCylinder(double radius, double height,
-                                 const V3D &baseCentre, const V3D &axis,
-                                 const std::string &id) {
+IObject_sptr createCappedCylinder(double radius, double height,
+                                  const V3D &baseCentre, const V3D &axis,
+                                  const std::string &id) {
   return ShapeFactory().createShape(
       cappedCylinderXML(radius, height, baseCentre, axis, id));
+}
+
+void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
+                           std::string name = "moderator") {
+  ObjComponent *source =
+      new ObjComponent(name, IObject_sptr(new CSGObject), instrument.get());
+  source->setPos(sourcePos);
+  instrument->add(source);
+  instrument->markAsSource(source);
+}
+
+void addSampleToInstrument(Instrument_sptr &instrument, const V3D &samplePos) {
+  // Define a sample as a simple sphere
+  IObject_sptr sampleSphere =
+      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
+  ObjComponent *sample =
+      new ObjComponent("sample", sampleSphere, instrument.get());
+  instrument->setPos(samplePos);
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -84,16 +105,16 @@ std::string sphereXML(double radius, const V3D &centre, const std::string &id) {
 /**
  * Create a sphere object
  */
-Object_sptr createSphere(double radius, const V3D &centre,
-                         const std::string &id) {
+IObject_sptr createSphere(double radius, const V3D &centre,
+                          const std::string &id) {
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }
 
 //----------------------------------------------------------------------------------------------
 /** Create a cuboid shape for your pixels */
-Object_sptr createCuboid(double x_side_length, double y_side_length,
-                         double z_side_length) {
+IObject_sptr createCuboid(double x_side_length, double y_side_length,
+                          double z_side_length) {
   double szX = x_side_length;
   double szY = (y_side_length == -1.0 ? szX : y_side_length);
   double szZ = (z_side_length == -1.0 ? szX : z_side_length);
@@ -111,19 +132,19 @@ Object_sptr createCuboid(double x_side_length, double y_side_length,
 
   std::string xmlCuboidShape(xmlShapeStream.str());
   ShapeFactory shapeCreator;
-  Object_sptr cuboidShape = shapeCreator.createShape(xmlCuboidShape);
+  auto cuboidShape = shapeCreator.createShape(xmlCuboidShape);
   return cuboidShape;
 }
 
 //----------------------------------------------------------------------------------------------
 /**
-* Create a component assembly at the origin made up of 4 cylindrical detectors
-*/
+ * Create a component assembly at the origin made up of 4 cylindrical detectors
+ */
 boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
   boost::shared_ptr<CompAssembly> bank =
       boost::make_shared<CompAssembly>("BankName");
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   // Four object components
   for (size_t i = 1; i < 5; ++i) {
@@ -139,7 +160,7 @@ boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
  * Create an object component that has a defined shape
  */
 ObjComponent *createSingleObjectComponent() {
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   return new ObjComponent("pixel", pixelShape);
 }
@@ -148,8 +169,8 @@ ObjComponent *createSingleObjectComponent() {
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */
-Object_sptr createHollowShell(double innerRadius, double outerRadius,
-                              const V3D &centre) {
+IObject_sptr createHollowShell(double innerRadius, double outerRadius,
+                               const V3D &centre) {
   std::string wholeXML = sphereXML(innerRadius, centre, "inner") + "\n" +
                          sphereXML(outerRadius, centre, "outer") + "\n" +
                          "<algebra val=\"(outer (# inner))\" />";
@@ -167,7 +188,7 @@ createDetectorGroupWith5CylindricalDetectors() {
   const int ndets = 5;
   std::vector<boost::shared_ptr<const IDetector>> groupMembers(ndets);
   // One object
-  Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(
+  auto detShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
@@ -190,7 +211,7 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
 
   std::vector<boost::shared_ptr<const IDetector>> groupMembers(nDet);
   // One object
-  Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(
+  auto detShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   for (unsigned int i = 0; i < nDet; ++i) {
     std::ostringstream os;
@@ -210,7 +231,7 @@ createVectorOfCylindricalDetectors(const double R_min, const double R_max,
   // One object
   double R0 = 0.5;
   double h = 1.5;
-  Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(
+  auto detShape = ComponentCreationHelper::createCappedCylinder(
       R0, h, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
   int NY = int(ceil(2 * R_max / h) + 1);
@@ -266,7 +287,7 @@ Instrument_sptr createTestInstrumentCylindrical(
   auto testInst = boost::make_shared<Instrument>("basic");
 
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
@@ -299,29 +320,63 @@ Instrument_sptr createTestInstrumentCylindrical(
     bank->setPos(V3D(0.0, 0.0, 5.0 * banknum));
   }
 
-  // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
-  source->setPos(sourcePos);
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, testInst.get());
-  testInst->setPos(samplePos);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
+  addSourceToInstrument(testInst, sourcePos);
+  addSampleToInstrument(testInst, samplePos);
 
   return testInst;
 }
 
+Mantid::Geometry::Instrument_sptr
+createCylInstrumentWithVerticalOffsetsSpecified(
+    size_t nTubes, std::vector<double> verticalOffsets, size_t nDetsPerTube,
+    double xMin, double xMax, double yMin, double yMax) {
+  // Pixel shape
+  const double ySpan = (yMax - yMin);
+  const double xSpan = (xMax - xMin);
+  const double tubeDiameter =
+      xSpan / static_cast<double>(nTubes);   // No gaps between tubes
+  const double cylRadius = tubeDiameter / 2; // No gaps between tubes
+  const double cylHeight = ySpan / static_cast<double>(nDetsPerTube);
+  const double bankZPos = 2;
+  const double sourceZPos = -10;
+  const double sampleZPos = 0;
+
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
+      cylRadius, cylHeight, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.),
+      "pixel-shape");
+  auto instrument = boost::make_shared<Instrument>("instrument_with_tubes");
+  CompAssembly *bank = new CompAssembly("sixteenpack");
+  for (size_t i = 0; i < nTubes; ++i) {
+    ObjCompAssembly *tube = new ObjCompAssembly("tube" + std::to_string(i));
+    for (size_t j = 0; j < nDetsPerTube; ++j) {
+
+      auto id = static_cast<int>(i * nDetsPerTube + j);
+      Detector *physicalPixel =
+          new Detector("det-" + std::to_string(id), id, pixelShape, tube);
+      tube->add(physicalPixel);
+      physicalPixel->setPos(V3D(0, static_cast<double>(j) * cylHeight, 0));
+      instrument->markAsDetector(physicalPixel);
+    }
+    tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter,
+                     -ySpan / 2 + verticalOffsets[i], 0));
+    tube->setOutline(tube->createOutline());
+    Mantid::Geometry::BoundingBox tmp = tube->shape()->getBoundingBox();
+    bank->add(tube);
+  }
+  bank->setPos(V3D(0, 0, bankZPos));
+  instrument->add(bank);
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
+      "0,0,0"));
+  addSourceToInstrument(instrument, V3D(0, 0, sourceZPos));
+  addSampleToInstrument(instrument, V3D(0, 0, sampleZPos));
+  return instrument;
+}
+
 /** create instrument with cylindrical detecotrs located in specific positions
-*
-*
-*/
+ *
+ *
+ */
 bool double_cmprsn(double x1, double x2) {
   const double TOL(1.e-4);
   if (std::fabs(x1 + x2) < TOL) {
@@ -369,7 +424,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
   cylHeight = 2 * L2_min * sin(dPol_min * 0.5);
 
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
   // Just increment pixel ID's
@@ -391,21 +446,8 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
   testInst->add(bank);
   bank->setPos(V3D(0., 0., 0.));
 
-  // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
-  source->setPos(V3D(0.0, 0.0, -L2_min));
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
-      createSphere(cylRadius, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -L2_min));
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
   return testInst;
 }
@@ -419,7 +461,7 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
@@ -471,21 +513,8 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
                        pixelSpacing, bankName.str(), bankPos, bankRot);
   }
 
-  // Define a source component
-  ObjComponent *source = new ObjComponent(
-      "source", createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"), testInst.get());
-  source->setPos(V3D(0.0, 0.0, -10.));
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0), "source");
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
   return testInst;
 }
@@ -510,7 +539,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
@@ -541,21 +570,8 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
     bank->setRot(Quat(90.0, V3D(0, 1, 0)));
   }
 
-  // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
-  source->setPos(V3D(0.0, 0.0, -10.));
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
   return testInst;
 }
@@ -683,4 +699,61 @@ Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->add(trolley2);
   return instrument;
 }
+
+Mantid::Geometry::Instrument_sptr
+createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
+                             bool mirrorTubes) {
+  // Need a tube based instrument.
+  //
+  // Pixels will be numbered simply from 1->nTubes*nPixelsPerTube with a 1:1
+  // mapping
+  //
+  // Tubes will be located at 1 m from the sample (0, 0, 0) from 0 -> 90 deg
+  // If mirror is set to true they will go from 0 -> -90 deg
+  Instrument_sptr testInst(new Instrument("PSDTubeInst"));
+  int xDirection(1);
+  if (mirrorTubes)
+    xDirection = -1;
+
+  testInst->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::X, Right,
+      "0,0,0"));
+
+  // Pixel shape
+  const double pixelRadius(0.01);
+  const double pixelHeight(0.003);
+  const double radius(1.0);
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
+      pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0),
+      V3D(0.0, 1.0, 0.0), "pixelShape");
+  for (size_t i = 0; i < nTubes; ++i) {
+    std::ostringstream lexer;
+    lexer << "tube-" << i;
+    const auto theta = (M_PI / 2.0) * double(i) / (double(nTubes) - 1);
+    auto x = xDirection * radius * sin(theta);
+    // A small correction to make testing easier where the instrument is
+    // mirrored
+    if (i == 0 && xDirection < 0)
+      x = -1e-32;
+    const auto z = radius * cos(theta);
+    CompAssembly *tube = new CompAssembly(lexer.str());
+    tube->setPos(V3D(x, 0.0, z));
+    for (size_t j = 0; j < nPixelsPerTube; ++j) {
+      lexer.str("");
+      lexer << "pixel-" << i *nPixelsPerTube + j;
+      Detector *pixel = new Detector(
+          lexer.str(), int(i * nPixelsPerTube + j + 1), pixelShape, tube);
+      const double xpos = 0.0;
+      const double ypos = double(j) * pixelHeight;
+      pixel->setPos(xpos, ypos, 0.0);
+      tube->add(pixel);
+      testInst->markAsDetector(pixel);
+    }
+    testInst->add(tube);
+  }
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -1.0));
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
+
+  return testInst;
 }
+} // namespace ComponentCreationHelper

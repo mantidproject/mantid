@@ -120,6 +120,7 @@ The following parameters may also be optionally set:
 
 - :ref:`file_ext_gem_isis-powder-diffraction-ref`
 - :ref:`sample_empty_gem_isis-powder-diffraction-ref`
+- :ref:`suffix_gem_isis-powder-diffraction-ref`
 - :ref:`unit_to_keep_gem_isis-powder-diffraction-ref`
 
 If :ref:`sample_empty_gem_isis-powder-diffraction-ref` is
@@ -543,6 +544,21 @@ Example Input:
 ..  code-block:: python
 
   gem_example.focus(unit_to_keep="dSpacing", ...)
+
+.. _suffix_gem_isis-powder-diffraction-ref:
+
+suffix
+^^^^^^
+*Optional*
+
+This parameter specifies a suffix to append the names of output files
+during a focus.
+
+Example Input:
+
+.. code-block:: python
+
+  gem_example.focus(suffix="-corr", ...)
 
 .. _user_name_gem_isis-powder-diffraction-ref:
 

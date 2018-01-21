@@ -41,9 +41,13 @@ def crop_banks_using_crop_list(bank_list, crop_values_list):
         # This error is probably internal as we control the bank lists
         raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
 
+    num_banks = len(bank_list)
+    num_crop_vals = len(crop_values_list)
+
     # Finally check the number of elements are equal
-    if len(bank_list) != len(crop_values_list):
-        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
+    if num_banks != num_crop_vals:
+        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument.\n"
+                           "{} cropping windows were supplied for {} banks".format(num_crop_vals, num_banks))
 
     output_list = []
     for spectra, cropping_values in zip(bank_list, crop_values_list):
@@ -547,3 +551,34 @@ def _run_number_generator(processed_string):
         return number_generator.value.tolist()
     except RuntimeError:
         raise ValueError("Could not generate run numbers from this input: " + processed_string)
+
+
+def generate_sample_geometry(sample_details):
+    """
+    Generates the expected input for sample geometry using the SampleDetails class
+    :param sample_details: Instance of SampleDetails containing details about sample geometry and material
+    :return: A map of the sample geometry
+    """
+    return {'Shape': 'Cylinder',
+            'Height': sample_details.height(),
+            'Radius': sample_details.radius(),
+            'Center': sample_details.center()}
+
+
+def generate_sample_material(sample_details):
+    """
+    Generates the expected input for sample material using the SampleDetails class
+    :param sample_details: Instance of SampleDetails containing details about sample geometry and material
+    :return: A map of the sample material
+    """
+    material = sample_details.material_object
+    # See SetSampleMaterial for documentation on this dictionary
+    material_json = {'ChemicalFormula': material.chemical_formula}
+    if material.number_density:
+        material_json["SampleNumberDensity"] = material.number_density
+    if material.absorption_cross_section:
+        material_json["AttenuationXSection"] = material.absorption_cross_section
+    if material.scattering_cross_section:
+        material_json["ScatteringXSection"] = material.scattering_cross_section
+
+    return material_json

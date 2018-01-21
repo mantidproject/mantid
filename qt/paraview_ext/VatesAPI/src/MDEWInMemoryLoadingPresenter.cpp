@@ -5,7 +5,6 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include <qwt_double_interval.h>
 #include <vtkUnstructuredGrid.h>
 
 namespace Mantid {

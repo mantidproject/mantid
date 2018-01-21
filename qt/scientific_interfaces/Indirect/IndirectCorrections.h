@@ -23,9 +23,8 @@ namespace CustomInterfaces {
 enum CorrectionTabChoice {
   CONTAINER_SUBTRACTION,
   CALC_CORR,
-  APPLY_CORR,
-  ABSORPTION_CORRECTIONS
-
+  ABSORPTION_CORRECTIONS,
+  APPLY_CORR
 };
 
 // Forward Declaration

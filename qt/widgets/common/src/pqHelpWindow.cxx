@@ -270,10 +270,10 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
 
 // setup the content pane
 #if defined(USE_QTWEBKIT)
+  m_browser = new QWebView(this);
   QNetworkAccessManager *oldManager = m_browser->page()->networkAccessManager();
   pqNetworkAccessManager *newManager =
       new pqNetworkAccessManager(m_helpEngine, oldManager, this);
-  m_browser = new QWebView(this);
   m_browser->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
   m_browser->page()->setNetworkAccessManager(newManager);
   m_browser->page()->setForwardUnsupportedContent(false);

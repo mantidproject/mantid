@@ -721,7 +721,7 @@ public:
 
     // One object
     const double cylRadius(0.004), cylHeight(0.0002);
-    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+    IObject_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
         cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
         "pixel-shape");
 

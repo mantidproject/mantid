@@ -107,7 +107,7 @@ private:
     using ComponentCreationHelper::createCappedCylinder;
     using ComponentCreationHelper::createTestInstrumentCylindrical;
     using Mantid::Geometry::ObjComponent;
-    using Mantid::Geometry::Object;
+    using Mantid::Geometry::CSGObject;
     using Mantid::Kernel::Material;
     using Mantid::Kernel::V3D;
     using Mantid::PhysicalConstants::getNeutronAtom;
@@ -136,7 +136,7 @@ private:
         createCappedCylinder(radius, height, V3D(), V3D(0., 1., 0.), "sample");
     const double numberDensity(0.07261);
     cylinder->setMaterial(Material("V", getNeutronAtom(23), numberDensity));
-    testWS->mutableSample().setShape(*cylinder);
+    testWS->mutableSample().setShape(cylinder);
 
     // Move the detector to a known position
     const double twoTheta = 0.10821;
@@ -156,7 +156,7 @@ private:
   MatrixWorkspace_sptr createTestWorkspaceWithNoSampleShape() {
     using ComponentCreationHelper::createTestInstrumentCylindrical;
     using Mantid::Geometry::ObjComponent;
-    using Mantid::Geometry::Object;
+    using Mantid::Geometry::CSGObject;
     using Mantid::Kernel::V3D;
     using WorkspaceCreationHelper::create2DWorkspaceBinned;
 

@@ -51,6 +51,7 @@ set ( TEST_PY_FILES
       test/IndirectCommonTests.py
       test/ISISDirecInelasticConfigTest.py
       test/ISISPowderAbsorptionTest.py
+      test/ISISPowderAbstractInstrumentTest.py
       test/ISISPowderCommonTest.py
       test/ISISPowderInstrumentSettingsTest.py
       test/ISISPowderRunDetailsTest.py

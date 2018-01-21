@@ -4,7 +4,7 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"

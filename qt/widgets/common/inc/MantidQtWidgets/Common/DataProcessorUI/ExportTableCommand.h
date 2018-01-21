@@ -51,6 +51,7 @@ public:
     return QString("Opens a dialog to export a table as .TBL file");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }
