@@ -29,13 +29,13 @@ DECLARE_ALGORITHM(SaveLauenorm)
 /** Initialize the algorithm's properties.
  */
 void SaveLauenorm::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
   declareProperty(
       make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save),
       "Select the directory and base name for the output files.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("ScalePeaks", 1.0, mustBePositive,
                   "Multiply FSQ and sig(FSQ) by scaleFactor");
@@ -43,8 +43,8 @@ void SaveLauenorm::init() {
   declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
   declareProperty("MaxWavelength", EMPTY_DBL(),
                   "Maximum wavelength (Angstroms)");
-  std::vector<std::string> histoTypes{"Bank", "RunNumber",
-                                      "Both Bank and RunNumber"};
+  std::vector<std::string> histoTypes{ "Bank", "RunNumber",
+                                       "Both Bank and RunNumber" };
   declareProperty("SortFilesBy", histoTypes[0],
                   boost::make_shared<StringListValidator>(histoTypes),
                   "Sort into files by bank(default), run number or both.");
@@ -58,9 +58,10 @@ void SaveLauenorm::init() {
                                         "SetDetScale.\n"
                                         "If false, no change (default).");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>("EliminateBankNumbers",
-                                                      Direction::Input),
+      Kernel::make_unique<ArrayProperty<std::string> >("EliminateBankNumbers",
+                                                       Direction::Input),
       "Comma deliminated string of bank numbers to exclude for example 1,2,5");
+  declareProperty("LaueScaleFormat", false, "New format for Lauescale");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -78,6 +79,7 @@ void SaveLauenorm::exec() {
   double minIsigI = getProperty("MinIsigI");
   double minIntensity = getProperty("MinIntensity");
   int widthBorder = getProperty("WidthBorder");
+  bool LaueScaleFormat = getProperty("LaueScaleFormat");
 
   // sequenceNo and run number
   int sequenceNo = 0;
@@ -87,7 +89,7 @@ void SaveLauenorm::exec() {
   std::ostringstream ss;
 
   // We must sort the peaks
-  std::vector<std::pair<std::string, bool>> criteria;
+  std::vector<std::pair<std::string, bool> > criteria;
   if (type.compare(0, 2, "Ba") == 0)
     criteria.push_back(std::pair<std::string, bool>("BankName", true));
   else if (type.compare(0, 2, "Ru") == 0)
