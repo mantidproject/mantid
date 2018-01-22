@@ -6,6 +6,7 @@ set ( TEST_PY_FILES
   CSGObjectTest.py
   GoniometerTest.py
   IComponentTest.py
+  IPeakTest.py
   InstrumentTest.py
   OrientedLatticeTest.py
   RectangularDetectorTest.py

@@ -41,9 +41,13 @@ def crop_banks_using_crop_list(bank_list, crop_values_list):
         # This error is probably internal as we control the bank lists
         raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
 
+    num_banks = len(bank_list)
+    num_crop_vals = len(crop_values_list)
+
     # Finally check the number of elements are equal
-    if len(bank_list) != len(crop_values_list):
-        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
+    if num_banks != num_crop_vals:
+        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument.\n"
+                           "{} cropping windows were supplied for {} banks".format(num_crop_vals, num_banks))
 
     output_list = []
     for spectra, cropping_values in zip(bank_list, crop_values_list):

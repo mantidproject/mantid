@@ -163,5 +163,32 @@ std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
   }
   return kvp;
 }
+
+/** Convert an options map to a comma-separated list of key=value pairs
+ */
+QString convertMapToString(const std::map<QString, QString> &optionsMap) {
+  QString result;
+  bool first = true;
+
+  for (auto &kvp : optionsMap) {
+    if (kvp.second.isEmpty())
+      continue;
+
+    if (!first)
+      result += ", ";
+    else
+      first = false;
+
+    const auto key = kvp.first;
+    auto value = kvp.second;
+
+    // Put quotes around the value
+    value = "'" + value + "'";
+
+    result += key + "=" + value;
+  }
+
+  return result;
+}
 }
 }

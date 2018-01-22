@@ -27,8 +27,10 @@ import sys
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
+SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
-STDERR = sys.stderr
+ORIGINAL_STDOUT = sys.stdout
+ORIGINAL_STDERR = sys.stderr
 
 # -----------------------------------------------------------------------------
 # Requirements
@@ -43,7 +45,7 @@ requirements.check_qt()
 from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
                          QPoint, QSize, Qt)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow,
+from qtpy.QtWidgets import (QApplication, QDockWidget, QFileDialog, QMainWindow,
                             QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
@@ -103,7 +105,7 @@ from workbench.external.mantid import prepare_mantid_env  # noqa
 
 class MainWindow(QMainWindow):
 
-    DOCKOPTIONS = QMainWindow.AllowTabbedDocks|QMainWindow.AllowNestedDocks
+    DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -120,10 +122,14 @@ class MainWindow(QMainWindow):
         # widgets
         self.messagedisplay = None
         self.ipythonconsole = None
+        self.workspacewidget = None
+        self.editor = None
+        self.widgets = []
 
         # Menus
         self.file_menu = None
         self.file_menu_actions = None
+        self.editor_menu = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -132,6 +138,8 @@ class MainWindow(QMainWindow):
         self.setDockOptions(self.DOCKOPTIONS)
 
     def setup(self):
+        # menus must be done first so they can be filled by the
+        # plugins in register_plugin
         self.create_menus()
         self.create_actions()
         self.populate_menus()
@@ -140,14 +148,29 @@ class MainWindow(QMainWindow):
         self.set_splash("Loading message display")
         from workbench.plugins.logmessagedisplay import LogMessageDisplay
         self.messagedisplay = LogMessageDisplay(self)
+        # this takes over stdout/stderr
         self.messagedisplay.register_plugin()
+        self.widgets.append(self.messagedisplay)
 
         self.set_splash("Loading IPython console")
         from workbench.plugins.jupyterconsole import JupyterConsole
         self.ipythonconsole = JupyterConsole(self)
         self.ipythonconsole.register_plugin()
+        self.widgets.append(self.ipythonconsole)
+
+        self.set_splash("Loading code editing widget")
+        from workbench.plugins.editor import MultiFileEditor
+        self.editor = MultiFileEditor(self)
+        self.editor.register_plugin()
+        self.widgets.append(self.editor)
+
+        self.set_splash("Loading Workspace Widget")
+        from workbench.plugins.workspacewidget import WorkspaceWidget
+        self.workspacewidget = WorkspaceWidget(self)
+        self.workspacewidget.register_plugin()
 
         self.setup_layout()
+        self.read_user_settings()
 
     def set_splash(self, msg=None):
         if not self.splash:
@@ -159,12 +182,24 @@ class MainWindow(QMainWindow):
 
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")
+        self.editor_menu = self.menuBar().addMenu("&Editor")
 
     def create_actions(self):
+        # --- general application menu options --
+        # file menu
+        action_open = create_action(self, "Open File",
+                                    on_triggered=self.open_file,
+                                    shortcut="Ctrl+O",
+                                    shortcut_context=Qt.ApplicationShortcut)
+        action_save = create_action(self, "Save File",
+                                    on_triggered=self.save_file,
+                                    shortcut="Ctrl+S",
+                                    shortcut_context=Qt.ApplicationShortcut)
+
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
-        self.file_menu_actions = [action_quit]
+        self.file_menu_actions = [action_open, action_save, None, action_quit]
 
     def populate_menus(self):
         # Link to menus
@@ -174,6 +209,8 @@ class MainWindow(QMainWindow):
         """Create a dockwidget around a plugin and add the dock to window"""
         dockwidget, location = plugin.create_dockwidget()
         self.addDockWidget(location, dockwidget)
+
+    # ----------------------- Layout ---------------------------------
 
     def setup_layout(self):
         window_settings = self.load_window_settings('window/')
@@ -269,17 +306,21 @@ class MainWindow(QMainWindow):
         # layout definition
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
+        workspacewidget = self.workspacewidget
+        editor = self.editor
         default_layout = {
             'widgets': [
                 # column 0
-                [[ipython]],
+                [[workspacewidget]],
                 # column 1
+                [[editor, ipython]],
+                # column 2
                 [[logmessages]]
             ],
             'width-fraction': [0.75,    # column 0 width
                                0.25],   # column 1 width
-            'height-fraction': [[1.0],  # column 0 row heights
-                                [1.0]]  # column 0 row heights
+            'height-fraction': [[0.5, 0.5],  # column 0 row heights
+                                [1.0]]  # column 1 row heights
         }
 
         with widget_updates_disabled(self):
@@ -305,7 +346,7 @@ class MainWindow(QMainWindow):
                 for row in column:
                     for i in range(len(row) - 1):
                         first, second = row[i], row[i+1]
-                        self.tabifyDockWidget(first, second)
+                        self.tabifyDockWidget(first.dockwidget, second.dockwidget)
 
                     # Raise front widget per row
                     row[0].dockwidget.show()
@@ -324,6 +365,23 @@ class MainWindow(QMainWindow):
         self.maximize_dockwidget(restore=True)  # Restore non-maximized layout
         qba = self.saveState()
         CONF.set(section, prefix + 'state', qbytearray_to_str(qba))
+
+    def read_user_settings(self):
+        for widget in self.widgets:
+            widget.read_user_settings(CONF.qsettings)
+
+    # ----------------------- Slots ---------------------------------
+    def open_file(self):
+        # todo: when more file types are added this should
+        # live in its own type
+        filepath, _ = QFileDialog.getOpenFileName(self, "Open File...", "", "Python (*.py)")
+        if not filepath:
+            return
+        self.editor.open_file_in_new_tab(filepath)
+
+    def save_file(self):
+        # todo: how should this interact with project saving and workspaces when they are implemented?
+        self.editor.save_current_file()
 
 
 def initialize():
@@ -351,10 +409,10 @@ def start_workbench(app):
     main_window = MainWindow()
     main_window.setup()
 
-    preloaded_packages = ('mantid', 'matplotlib')
+    preloaded_packages = ('mantid',)
     for name in preloaded_packages:
         main_window.set_splash('Preloading ' + name)
-        importlib.import_module('mantid')
+        importlib.import_module(name)
 
     main_window.show()
     if main_window.splash:
@@ -370,10 +428,13 @@ def main():
     # Prepare for mantid import
     prepare_mantid_env()
 
-    # TODO: parse command arguments
+    # todo: parse command arguments
 
     # general initialization
     app = initialize()
+    # the default sys check interval leads to long lags
+    # when request scripts to be aborted
+    sys.setcheckinterval(SYSCHECK_INTERVAL)
     main_window = None
     try:
         main_window = start_workbench(app)
@@ -383,7 +444,7 @@ def main():
         # This is type of thing we want to capture and have reports
         # about. Prints to stderr as we can't really count on anything
         # else
-        traceback.print_exc(file=STDERR)
+        traceback.print_exc(file=ORIGINAL_STDERR)
 
     if main_window is None:
         # An exception occurred don't exit here
