@@ -7,6 +7,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include <iostream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -156,23 +157,27 @@ void TransformMD::exec() {
   if (histo) {
     // Recalculate all the values since the dimensions changed.
     histo->cacheValues();
-    if (m_scaling[0] < 0.0) {
+    // Expect first 3 dimensions to be -1 for changing conventions
+    if (m_scaling[0] == -1.0) {
       signal_t *signals = histo->getSignalArray();
       signal_t *errorsSq = histo->getErrorSquaredArray();
 
-      size_t nPoints = histo->getNPoints();
+      size_t nPoints = 1;
       size_t d4 = 1;
       size_t nd = histo->getNumDims();
-      if (nd > 3) {
-        nPoints = 1;
-        for (size_t i = 0; i < 3; i++) {
+      for (size_t i = 0; i < nd; i++) {
+        if (m_scaling[i] == -1.0) {
           Geometry::IMDDimension_const_sptr dim = histo->getDimension(i);
           // Find the extents
           nPoints *=
-              static_cast<size_t>(dim->getMaximum() - dim->getMinimum() + 1);
+              static_cast<size_t>(dim->getNBins());
         }
-        d4 = histo->getNPoints() / nPoints;
+        else {
+          break;
+        }
       }
+      d4 = histo->getNPoints() / nPoints;
+      std::cout << nPoints<<"  "<<d4<<"\n";
 
       for (size_t i = 0; i < d4; i++) {
         this->reverse(signals + i * nPoints, nPoints);
