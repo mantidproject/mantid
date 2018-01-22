@@ -54,7 +54,6 @@ plugins.setup_library_paths()
 if hasattr(Qt, 'AA_EnableHighDpiScaling'):
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
-
 # -----------------------------------------------------------------------------
 # Create the application instance early, set the application name for window
 # titles and hold on to a reference to it. Required to be performed early so
@@ -205,13 +204,16 @@ class MainWindow(QMainWindow):
         action_open = create_action(self, "Open File",
                                     on_triggered=self.open_file,
                                     shortcut="Ctrl+O",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut_context=Qt.ApplicationShortcut,
+                                    icon_name="fa.folder-open")
         action_save = create_action(self, "Save File",
                                     on_triggered=self.save_file,
                                     shortcut="Ctrl+S",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut_context=Qt.ApplicationShortcut,
+                                    icon_name="fa.save")
         action_manage_directories = create_action(self, "Manage User Directories",
-                                                  on_triggered=self.open_manage_directories)
+                                                  on_triggered=self.open_manage_directories,
+                                                  icon_name="fa.folder")
 
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
