@@ -21,7 +21,10 @@ void MaskBinsData::addXRange(double start, double end,
 void MaskBinsData::mask(const std::string &wsName) const {
   for (auto mask = m_masks.begin(); mask != m_masks.end(); ++mask) {
     auto &spectra = mask->spectra;
-    std::vector<int> spectraList(spectra.begin(), spectra.end());
+    std::vector<int> spectraList(spectra.size());
+    std::transform(
+        spectra.cbegin(), spectra.cend(), spectraList.begin(),
+        [](const size_t spec) -> int { return static_cast<int>(spec); });
     auto alg = Mantid::API::AlgorithmManager::Instance().create("MaskBins", -1);
     alg->setPropertyValue("InputWorkspace", wsName);
     alg->setPropertyValue("OutputWorkspace", wsName);
