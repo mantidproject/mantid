@@ -41,32 +41,46 @@ namespace LiveData {
 */
 class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
 public:
-  KafkaTopicSubscriber(std::string broker, std::string topic);
-  ~KafkaTopicSubscriber();
+  KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics,
+                       SubscribeAtOption subscribeOption);
+  ~KafkaTopicSubscriber() override;
 
-  const std::string topic() const;
+  std::vector<std::string> topics() const;
 
-  virtual void subscribe() override;
-  virtual void subscribe(int64_t offset) override;
-  virtual void consumeMessage(std::string *payload) override;
+  void subscribe() override;
+  void subscribe(int64_t offset) override;
+  void consumeMessage(std::string *payload, int64_t &offset, int32_t &partition,
+                      std::string &topic) override;
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override;
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override;
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
   static const std::string RUN_TOPIC_SUFFIX;
   static const std::string DET_SPEC_TOPIC_SUFFIX;
+  static const std::string SAMPLE_ENV_TOPIC_SUFFIX;
 
   static const int64_t IGNORE_OFFSET = -1;
 
 private:
   std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
   std::string m_brokerAddr;
-  std::string m_topicName;
+  std::vector<std::string> m_topicNames;
+  SubscribeAtOption m_subscribeOption = SubscribeAtOption::OFFSET;
 
+  void subscribeAtTime(int64_t time);
   void reportSuccessOrFailure(const RdKafka::ErrorCode &error,
                               int64_t confOffset) const;
 
-  void subscribeAtOffset(int64_t offset) const;
-  void checkTopicExists() const;
+  void subscribeAtOffset(int64_t offset);
+  void checkTopicsExist() const;
   void createConsumer();
+  int64_t getCurrentOffset(const std::string &topic, int partition);
+  std::vector<RdKafka::TopicPartition *> getTopicPartitions();
+  std::unique_ptr<RdKafka::Metadata> queryMetadata() const;
 };
 
 } // namespace LiveData

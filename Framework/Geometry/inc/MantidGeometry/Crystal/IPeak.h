@@ -63,12 +63,13 @@ public:
 
   virtual double getInitialEnergy() const = 0;
   virtual double getFinalEnergy() const = 0;
+  virtual double getEnergyTransfer() const = 0;
   virtual void setInitialEnergy(double m_InitialEnergy) = 0;
   virtual void setFinalEnergy(double m_FinalEnergy) = 0;
 
   virtual double getIntensity() const = 0;
   virtual double getSigmaIntensity() const = 0;
-
+  virtual double getIntensityOverSigma() const = 0;
   virtual void setIntensity(double m_Intensity) = 0;
   virtual void setSigmaIntensity(double m_SigmaIntensity) = 0;
 

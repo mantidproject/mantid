@@ -1,13 +1,11 @@
-//------------------------
-// Includes
-//------------------------
 #include "MantidAlgorithms/CreateSingleValuedWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidIndexing/IndexInfo.h"
 
-using namespace Mantid::Algorithms;
+namespace Mantid {
+namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSingleValuedWorkspace)
@@ -26,21 +24,26 @@ void CreateSingleValuedWorkspace::init() {
 }
 
 void CreateSingleValuedWorkspace::exec() {
-  // Get the property values
   double dataValue = getProperty("DataValue");
   double errorValue = getProperty("ErrorValue");
 
-  using namespace Mantid::DataObjects;
-  using namespace Mantid::API;
-  using namespace Mantid::Kernel;
-  // Create the workspace
-  MatrixWorkspace_sptr singleValued =
-      WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
+  Indexing::IndexInfo indexInfo(1, Parallel::StorageMode::Cloned,
+                                communicator());
+  auto singleValued = DataObjects::create<DataObjects::WorkspaceSingleValue>(
+      indexInfo, HistogramData::Points(1));
 
   singleValued->mutableX(0)[0] = 0.0;
   singleValued->mutableY(0)[0] = dataValue;
   singleValued->mutableE(0)[0] = errorValue;
 
-  setProperty("OutputWorkspace", singleValued);
-  // Done :)
+  setProperty("OutputWorkspace", std::move(singleValued));
 }
+
+Parallel::ExecutionMode CreateSingleValuedWorkspace::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  static_cast<void>(storageModes);
+  return Parallel::ExecutionMode::Identical;
+}
+
+} // Algorithms
+} // Mantid

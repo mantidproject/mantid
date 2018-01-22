@@ -51,19 +51,22 @@ public:
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD0(selectAll, void());
-  MOCK_METHOD0(pause, void());
-  MOCK_METHOD0(resume, void());
+  MOCK_METHOD1(updateMenuEnabledState, void(const bool));
+  MOCK_METHOD1(setProcessButtonEnabled, void(const bool));
+  MOCK_METHOD1(setInstrumentComboEnabled, void(const bool));
+  MOCK_METHOD1(setTreeEnabled, void(const bool));
+  MOCK_METHOD1(setOutputNotebookEnabled, void(const bool));
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const QString &text));
 
   MOCK_METHOD1(setModel, void(const QString &));
-  MOCK_METHOD1(setTableList, void(const QSet<QString> &));
   MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<QString, QVariant> &));
+  MOCK_METHOD0(settingsChanged, void());
 
   // Processing options
   MOCK_METHOD1(setForcedReProcessing, void(bool));
@@ -105,12 +108,11 @@ public:
   MOCK_METHOD2(giveUserWarning, void(QString, QString));
   MOCK_METHOD2(giveUserCritical, void(QString, QString));
   MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
-  MOCK_CONST_METHOD0(getPreprocessingProperties, QString());
 
   // Global options
-  MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, QString());
-  MOCK_CONST_METHOD0(getProcessingOptions, QString());
-  MOCK_CONST_METHOD0(getPostprocessingOptions, QString());
+  MOCK_CONST_METHOD0(getPreprocessingOptions, ColumnOptionsQMap());
+  MOCK_CONST_METHOD0(getProcessingOptions, OptionsQMap());
+  MOCK_CONST_METHOD0(getPostprocessingOptionsAsString, QString());
   MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
 
   // Event handling
@@ -145,6 +147,7 @@ public:
   MOCK_METHOD0(publishCommandsMocked, void());
   MOCK_METHOD0(skipProcessing, void());
   MOCK_METHOD1(setForcedReProcessing, void(bool));
+  MOCK_METHOD0(settingsChanged, void());
 
 private:
   // Calls we don't care about

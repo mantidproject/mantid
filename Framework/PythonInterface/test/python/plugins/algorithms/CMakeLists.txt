@@ -21,6 +21,7 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   CorrectTOFTest.py
   CreateWorkspaceTest.py
+  CropWorkspaceRaggedTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
   DeltaPDF3DTest.py
@@ -47,6 +48,7 @@ set ( TEST_PY_FILES
   LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
+  LoadLampTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
   LoadNMoldyn3AsciiTest.py
@@ -67,6 +69,7 @@ set ( TEST_PY_FILES
   SANSWideAngleCorrectionTest.py
   SaveNexusPDTest.py
   SavePlot1DAsJsonTest.py
+  SaveReflectionsTest.py
   SaveVulcanGSSTest.py
   ExtractMonitorsTest.py
   SetDetScaleTest.py

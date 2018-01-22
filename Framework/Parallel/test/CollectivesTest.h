@@ -40,6 +40,16 @@ void run_gather_short_version(const Communicator &comm) {
   }
 }
 
+void run_all_gather(const Communicator &comm) {
+  int value = 123 * comm.rank();
+  std::vector<int> result;
+  TS_ASSERT_THROWS_NOTHING(Parallel::all_gather(comm, value, result));
+  TS_ASSERT_EQUALS(result.size(), comm.size());
+  for (int i = 0; i < comm.size(); ++i) {
+    TS_ASSERT_EQUALS(result[i], 123 * i);
+  }
+}
+
 void run_all_to_all(const Communicator &comm) {
   std::vector<int> data;
   for (int rank = 0; rank < comm.size(); ++rank)
@@ -65,6 +75,8 @@ public:
   void test_gather_short_version() {
     ParallelTestHelpers::runParallel(run_gather_short_version);
   }
+
+  void test_all_gather() { ParallelTestHelpers::runParallel(run_all_gather); }
 
   void test_all_to_all() { ParallelTestHelpers::runParallel(run_all_to_all); }
 };
