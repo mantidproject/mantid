@@ -150,17 +150,16 @@ std::string IqtFit::createSequentialFitOutputName() const {
 
 IAlgorithm_sptr IqtFit::singleFitAlgorithm() const {
   size_t specNo = static_cast<size_t>(m_uiForm->spPlotSpectrum->value());
-  return iqtFitAlgorithm(inputWorkspace(), specNo, specNo);
+  return iqtFitAlgorithm(specNo, specNo);
 }
 
 IAlgorithm_sptr IqtFit::sequentialFitAlgorithm() const {
   size_t specMin = static_cast<size_t>(m_uiForm->spSpectraMin->value());
   size_t specMax = static_cast<size_t>(m_uiForm->spSpectraMax->value());
-  return iqtFitAlgorithm(inputWorkspace(), specMin, specMax);
+  return iqtFitAlgorithm(specMin, specMax);
 }
 
-IAlgorithm_sptr IqtFit::iqtFitAlgorithm(MatrixWorkspace_sptr inputWs,
-                                        const size_t &specMin,
+IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
                                         const size_t &specMax) const {
   const auto outputName = outputWorkspaceName();
   const bool constrainBeta = boolSettingValue("ConstrainBeta");

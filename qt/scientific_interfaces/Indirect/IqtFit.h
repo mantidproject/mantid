@@ -64,9 +64,8 @@ private:
 
   std::string constructBaseName() const;
   std::string fitTypeString() const;
-  Mantid::API::IAlgorithm_sptr
-  iqtFitAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWs,
-                  const size_t &specMin, const size_t &specMax) const;
+  Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
+                                               const size_t &specMax) const;
   Mantid::API::IAlgorithm_sptr
   replaceInfinityAndNaN(Mantid::API::MatrixWorkspace_sptr inputWS) const;
 
