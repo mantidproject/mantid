@@ -112,7 +112,7 @@ void calcRectangleIntersections(
     MatrixWorkspace_const_sptr outputWS, const std::vector<double> &yAxis,
     const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
     const size_t x_start, const size_t x_end,
-    std::vector<std::tuple<int, int, double>> &areaInfo) {
+    std::vector<std::tuple<size_t, size_t, double>> &areaInfo) {
   const auto &xAxis = outputWS->x(0);
   std::vector<double> width;
   for (size_t xi = x_start; xi < x_end; ++xi) {
@@ -162,7 +162,7 @@ void calcTrapezoidYIntersections(
     MatrixWorkspace_const_sptr outputWS, const std::vector<double> &yAxis,
     const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
     const size_t x_start, const size_t x_end,
-    std::vector<std::tuple<int, int, double>> &areaInfo) {
+    std::vector<std::tuple<size_t, size_t, double>> &areaInfo) {
   // The algorithm proceeds as follows:
   // 1. Determine the left/right bin boundaries on the x- (horizontal)-grid.
   // 2. Loop along x, for each 1-output-bin wide strip construct a new input Q.
@@ -203,7 +203,6 @@ void calcTrapezoidYIntersections(
   }
 
   // Step 1 - construct the left/right bin lims on the lines of the y-grid.
-  // First get equations for the top and bottom diagonal lines
   const double NaN = std::numeric_limits<double>::quiet_NaN();
   const double DBL_EPS = std::numeric_limits<double>::epsilon();
   std::vector<double> leftLim(nx * (ny + 1), NaN);
@@ -214,10 +213,12 @@ void calcTrapezoidYIntersections(
   auto y1_it = yAxis.begin() + y_end + 1;
   const size_t ymax = (y_end == yAxis.size()) ? ny : (ny + 1);
   if ((mTop >= 0 && mBot >= 0) || (mTop < 0 && mBot < 0)) {
-    // Shape: /=/ or \=\  - top diag is left, bot is right or vice versa.
+    // Diagonals in same direction: For a given x-parallel line,
+    // Left limit given by one diagonal, right limit given by other
     double left_val, right_val;
     for (size_t yj = 0; yj < ymax; ++yj) {
       const size_t yjx = yj * nx;
+      // First, find the far left/right limits, given by the inputQ
       if (mTop >= 0) {
         left_val = (yAxis[yj + y_start] - cTop) / mTop;
         right_val = (yAxis[yj + y_start] - cBot) / mBot;
@@ -245,6 +246,7 @@ void calcTrapezoidYIntersections(
         right_it = x1_it - 1;
         rightLim[nx - 1 + yjx] = lr_x;
       }
+      // Now populate the bin boundaries in between
       if (left_it < right_it && right_it != x1_it) {
         for (auto x_it = left_it; x_it != right_it; ++x_it) {
           leftLim[li + 1 + yjx] = *x_it;
@@ -253,7 +255,7 @@ void calcTrapezoidYIntersections(
       }
     }
   } else {
-    // Shape: <=| or |=>  - top diag is upper l/r, bot is lower l/r
+    // In this case, the diagonals are all on one side or the other.
     const size_t y2 =
         std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ll_y : lr_y) - y0_it;
     const size_t y3 =
@@ -302,7 +304,7 @@ void calcTrapezoidYIntersections(
   size_t vertBits = 0;
   size_t yj0, yj1;
   for (size_t xi = x_start; xi < x_end; ++xi) {
-    size_t xj = xi - x_start;
+    const size_t xj = xi - x_start;
     // Define new 1-bin wide input quadrilateral
     if (xi > x_start) {
       nll = nlr;
@@ -450,7 +452,7 @@ void calcGeneralIntersections(
     MatrixWorkspace_const_sptr outputWS, const std::vector<double> &yAxis,
     const Quadrilateral &inputQ, const size_t qstart, const size_t qend,
     const size_t x_start, const size_t x_end,
-    std::vector<std::tuple<int, int, double>> &areaInfo) {
+    std::vector<std::tuple<size_t, size_t, double>> &areaInfo) {
   const auto &xAxis = outputWS->x(0);
   ConvexPolygon intersectOverlap;
   for (size_t yi = qstart; yi < qend; ++yi) {
@@ -606,7 +608,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   // defined as rectangular. If the inputQ is is also rectangular or
   // trapezoidal, a simpler/faster way of calculating the intersection area
   // of all or some bins can be used.
-  std::vector<std::tuple<int, int, double>> areaInfo;
+  std::vector<std::tuple<size_t, size_t, double>> areaInfo;
   const double inputQArea = inputQ.area();
   const QuadrilateralType inputQType = getQuadrilateralType(inputQ);
   if (inputQType == Rectangle) {
@@ -621,8 +623,8 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   }
 
   for (auto ai : areaInfo) {
-    const int xi = std::get<0>(ai);
-    const int yi = std::get<1>(ai);
+    const size_t xi = std::get<0>(ai);
+    const size_t yi = std::get<1>(ai);
     const double weight = std::get<2>(ai) / inputQArea;
     PARALLEL_CRITICAL(overlap) {
       outputWS->mutableY(yi)[xi] += signal * weight;

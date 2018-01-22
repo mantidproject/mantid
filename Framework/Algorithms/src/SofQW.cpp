@@ -146,6 +146,7 @@ void SofQW::exec() {
  *  @param[in]  binParams The bin parameters from the user
  *  @param[out] newAxis        The 'vertical' axis defined by the given
  * parameters
+ *  @param[out] ebinParams     The 'horizontal' axis parameters (optional)
  *  @return A pointer to the newly-created workspace
  */
 API::MatrixWorkspace_sptr
