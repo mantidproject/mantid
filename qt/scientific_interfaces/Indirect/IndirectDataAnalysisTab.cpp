@@ -95,7 +95,9 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
  *
  * @return  The selected spectrum.
  */
-int IndirectDataAnalysisTab::selectedSpectrum() const { return m_selectedSpectrum; }
+int IndirectDataAnalysisTab::selectedSpectrum() const {
+  return m_selectedSpectrum;
+}
 
 /**
  * Sets the selected spectrum.
@@ -255,7 +257,8 @@ void IndirectDataAnalysisTab::updatePlot(
     WorkspaceGroup_sptr outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
-  if (outputWS && selectedSpectrum() >= minimumSpectrum())
+  if (outputWS && selectedSpectrum() >= minimumSpectrum() &&
+      selectedSpectrum() <= maximumSpectrum())
     updatePlot(outputWS, selectedSpectrum() - minimumSpectrum(), fitPreviewPlot,
                diffPreviewPlot);
   else {
