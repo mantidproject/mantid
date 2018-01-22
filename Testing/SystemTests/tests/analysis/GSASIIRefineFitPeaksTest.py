@@ -18,7 +18,7 @@ class _GSASIIRefineFitPeaksTestHelper(object):
     _path_to_gsas = None
 
     def path_to_gsas(self):
-        if self._path_to_gsas is not None:
+        if self._path_to_gsas is None:
             gsas_location = os.path.join(site.USER_SITE, "g2conda", "GSASII")
             if os.path.isdir(gsas_location):
                 self._path_to_gsas = os.path.join(site.USER_SITE, "g2conda", "GSASII")
