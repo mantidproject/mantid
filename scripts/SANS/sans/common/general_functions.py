@@ -48,7 +48,7 @@ def get_log_value(run, log_name, log_type):
             output = log_type(run.getLogData(log_name).value[0])
         else:
             # Get the first entry which is past the start time log
-            start_time = run.startTime()
+            start_time = run.startTime().to_datetime64()
             times = log_property.times
             values = log_property.value
 

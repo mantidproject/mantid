@@ -307,8 +307,7 @@ def getChargeAndTime(ws_event):
     r = ws_event.getRun()
     charges = r.getLogData('proton_charge')
     total_charge = sum(charges.value)
-    time_passed = (charges.times[-1] - charges.times[0]).total_microseconds()
-    time_passed /= 1e6
+    time_passed = (charges.times[-1] - charges.times[0]) / np.timedelta64(1, 's')
     return total_charge, time_passed
 
 
