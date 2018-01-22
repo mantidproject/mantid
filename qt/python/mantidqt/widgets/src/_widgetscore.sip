@@ -220,6 +220,6 @@ public:
                             QWidget *parent /TransferThis/ = nullptr);
 
 signals:
-  void plotSpectrumClicked(const QString & workspaceName);
-  void plotSpectrumWithErrorsClicked(const QString & workspaceName);
+  void plotSpectrumClicked(const QStringList & workspaceName);
+  void plotSpectrumWithErrorsClicked(const QStringList & workspaceName);
 };

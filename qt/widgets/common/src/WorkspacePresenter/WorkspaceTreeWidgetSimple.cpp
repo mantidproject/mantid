@@ -67,11 +67,11 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
 }
 
 void WorkspaceTreeWidgetSimple::onPlotSpectrumClicked() {
-  emit plotSpectrumClicked(selectedWsName);
+  emit plotSpectrumClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 void WorkspaceTreeWidgetSimple::onPlotSpectrumWithErrorsClicked() {
-  emit plotSpectrumWithErrorsClicked(selectedWsName);
+  emit plotSpectrumWithErrorsClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

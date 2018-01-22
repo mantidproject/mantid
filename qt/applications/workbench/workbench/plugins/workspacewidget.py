@@ -58,8 +58,9 @@ class WorkspaceWidget(PluginWidget):
 
     # ----------------- Behaviour --------------------
 
-    def _do_plot1d(self, selected_ws, errors):
-        workspaces = [AnalysisDataService.Instance()[selected_ws.encode('utf-8')]]
+    def _do_plot1d(self, workspace_names, errors):
+        ads = AnalysisDataService.Instance()
+        workspaces = [ads[name.encode('utf-8')] for name in workspace_names]
         selection = get_plot_selection(workspaces, self)
         if selection is not None:
             plot(workspaces, spectrum_nums=selection.spectra,

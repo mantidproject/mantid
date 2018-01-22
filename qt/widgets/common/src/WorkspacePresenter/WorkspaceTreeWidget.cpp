@@ -193,6 +193,16 @@ StringList WorkspaceTreeWidget::getSelectedWorkspaceNames() const {
   return names;
 }
 
+QStringList WorkspaceTreeWidget::getSelectedWorkspaceNamesAsQList() const {
+  auto items = m_tree->selectedItems();
+  QStringList names;
+
+  for (auto &item : items) {
+    names.append(item->text(0));
+  }
+  return names;
+}
+
 /** Returns a pointer to the selected workspace (the first if multiple
 *   workspaces selected)
 */

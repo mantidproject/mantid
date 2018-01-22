@@ -59,8 +59,8 @@ public:
   void popupContextMenu() override;
 
 signals:
-  void plotSpectrumClicked(const QString &workspaceName);
-  void plotSpectrumWithErrorsClicked(const QString &workspaceName);
+  void plotSpectrumClicked(const QStringList &workspaceName);
+  void plotSpectrumWithErrorsClicked(const QStringList &workspaceName);
 
 private slots:
   void onPlotSpectrumClicked();
