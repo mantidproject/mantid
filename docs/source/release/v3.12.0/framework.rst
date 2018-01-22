@@ -44,6 +44,7 @@ Algorithms
 - New algorithm :ref:`CropWorkspaceRagged <algm-CropWorkspaceRagged>` will crop each spectrum with a different x-range
 - :ref:`LoadLamp <algm-LoadLamp>` is a new algorithm to load processed HDF5 files produced by LAMP program at ILL.
 - :ref:`SaveNexus <algm-SaveNexus>` will no longer crash when passed a ``PeaksWorkspace`` with integrated peaks that have missing radius information. 
+- :ref:`SaveReflections <algm-LoadLamp>` is a new algorithm to save PeaksWorkspaces to Fullprof, Jana, GSAS, and SHELX text formats. 
 
 Fitting
 -------
