@@ -1,6 +1,7 @@
 #include "QtReflSettingsView.h"
 #include "ReflSettingsPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -72,23 +73,19 @@ void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
 * values.
 */
 void QtReflSettingsView::setExpDefaults(ExperimentOptionDefaults defaults) {
-
-  int amIndex =
-      m_ui.analysisModeComboBox->findText(QString::fromStdString(defaults.AnalysisMode));
-  if (amIndex != -1)
-    m_ui.analysisModeComboBox->setCurrentIndex(amIndex);
-
-  int pcIndex =
-      m_ui.polCorrComboBox->findText(QString::fromStdString(defaults.PolarizationAnalysis));
-  if (pcIndex != -1)
-    m_ui.polCorrComboBox->setCurrentIndex(pcIndex);
-
-  m_ui.CRhoEdit->setText(QString::fromStdString(defaults.CRho));
-  m_ui.CAlphaEdit->setText(QString::fromStdString(defaults.CAlpha));
-  m_ui.CApEdit->setText(QString::fromStdString(defaults.CAp));
-  m_ui.CPpEdit->setText(QString::fromStdString(defaults.CPp));
-  m_ui.startOverlapEdit->setText(QString::number(defaults.TransRunStartOverlap));
-  m_ui.endOverlapEdit->setText(QString::number(defaults.TransRunEndOverlap));
+  setSelected(*m_ui.analysisModeComboBox, defaults.AnalysisMode);
+  setText(*m_ui.startOverlapEdit, defaults.TransRunStartOverlap);
+  setText(*m_ui.endOverlapEdit, defaults.TransRunEndOverlap);
+  setSelected(*m_ui.polCorrComboBox, defaults.PolarizationAnalysis);
+  setText(*m_ui.CRhoEdit, defaults.CRho);
+  setText(*m_ui.CAlphaEdit, defaults.CAlpha);
+  setText(*m_ui.CApEdit, defaults.CAp);
+  setText(*m_ui.CPpEdit, defaults.CPp);
+  setText(*m_ui.startOverlapEdit, defaults.TransRunStartOverlap);
+  setText(*m_ui.endOverlapEdit, defaults.TransRunEndOverlap);
+  setText(*m_ui.momentumTransferStepEdit, defaults.MomentumTransferStep);
+  setText(*m_ui.scaleFactorEdit, defaults.ScaleFactor);
+  setText(stitchOptionsLineEdit(), defaults.StitchParams);
 }
 
 void QtReflSettingsView::setSelected(QComboBox &box, std::string const &str) {
@@ -102,36 +99,42 @@ void QtReflSettingsView::setText(QLineEdit &lineEdit, double value) {
   lineEdit.setText(valueAsString);
 }
 
+void QtReflSettingsView::setText(QLineEdit &lineEdit, int value) {
+  auto valueAsString = QString::number(value);
+  lineEdit.setText(valueAsString);
+}
+
 void QtReflSettingsView::setText(QLineEdit &lineEdit, std::string const &text) {
   auto textAsQString = QString::fromStdString(text);
   lineEdit.setText(textAsQString);
+}
+
+void QtReflSettingsView::setChecked(QCheckBox &checkBox, bool checked) {
+  auto checkedAsCheckState = checked ? Qt::Checked : Qt::Unchecked;
+  checkBox.setCheckState(checkedAsCheckState);
 }
 
 /* Sets default values for all instrument settings given a list of default
 * values.
 */
 void QtReflSettingsView::setInstDefaults(InstrumentOptionDefaults defaults) {
-
-  auto intMonCheckState =
-      (defaults.NormalizeByIntegratedMonitors) ? Qt::Checked : Qt::Unchecked;
-  m_ui.intMonCheckBox->setCheckState(intMonCheckState);
-
+  setChecked(*m_ui.intMonCheckBox, defaults.NormalizeByIntegratedMonitors);
   setText(*m_ui.monIntMinEdit, defaults.MonitorIntegralMin);
   setText(*m_ui.monIntMaxEdit, defaults.MonitorIntegralMax);
   setText(*m_ui.monBgMinEdit, defaults.MonitorBackgroundMin);
   setText(*m_ui.monBgMaxEdit, defaults.MonitorBackgroundMax);
   setText(*m_ui.lamMinEdit, defaults.LambdaMin);
   setText(*m_ui.lamMaxEdit, defaults.LambdaMax);
-  setText(*m_ui.I0MonIndexEdit, std::to_string(defaults.I0MonitorIndex));
-
-  setSelected(*m_ui.detectorCorrectionTypeComboBox, defaults.DetectorCorrectionType);
-  setText(stitchOptionsLineEdit(), defaults.ProcessingInstructions);
+  setText(*m_ui.I0MonIndexEdit, defaults.I0MonitorIndex);
+  setSelected(*m_ui.detectorCorrectionTypeComboBox,
+              defaults.DetectorCorrectionType);
+  setText(*m_ui.procInstEdit, defaults.ProcessingInstructions);
 }
 
 /* Sets the enabled status of polarisation corrections and parameters
 * @param enable :: [input] bool to enable options or not
 */
-void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) const {
+void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
 
   if (enable && (!m_isPolCorrEnabled || !experimentSettingsEnabled()))
     return;
@@ -144,9 +147,7 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) const {
 
   if (!enable) {
     // Set polarisation corrections text to 'None' when disabled
-    int noneIndex = m_ui.polCorrComboBox->findText("None");
-    if (noneIndex != -1)
-      m_ui.polCorrComboBox->setCurrentIndex(noneIndex);
+    setSelected(*m_ui.polCorrComboBox, "None");
     // Clear all parameters as well
     m_ui.CRhoEdit->clear();
     m_ui.CAlphaEdit->clear();
@@ -155,11 +156,30 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) const {
   }
 }
 
+std::string QtReflSettingsView::getText(QLineEdit const &lineEdit) const {
+  return lineEdit.text().toStdString();
+}
+
+std::string QtReflSettingsView::getText(QComboBox const &box) const {
+  return box.currentText().toStdString();
+}
+
+void QtReflSettingsView::showOptionLoadError(AccumulatedTypeErrors const &errors) {
+  auto message =
+      QString("Unable to retrieve default values for the following parameters "
+              "because:\n");
+  for (auto &error : errors)
+    message += "'" + QString::fromStdString(error.parameterName()) + "' should hold an " +
+               QString::fromStdString(error.expectedType()) + " value but does not.";
+  QMessageBox::warning(this, "Failed to load default from parameter file",
+                       message);
+}
+
 /** Returns global options for 'Stitch1DMany'
 * @return :: Global options for 'Stitch1DMany'
 */
 std::string QtReflSettingsView::getStitchOptions() const {
-  return stitchOptionsLineEdit().text().toStdString();
+  return getText(stitchOptionsLineEdit());
 }
 
 QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
@@ -181,95 +201,83 @@ void QtReflSettingsView::createStitchHints(
 * @return :: selected analysis mode
 */
 std::string QtReflSettingsView::getAnalysisMode() const {
-
-  return m_ui.analysisModeComboBox->currentText().toStdString();
+  return getText(*m_ui.analysisModeComboBox);
 }
 
 /** Return selected transmission run(s)
 * @return :: selected transmission run(s)
 */
 std::string QtReflSettingsView::getTransmissionRuns() const {
-
-  return m_ui.transmissionRunsEdit->text().toStdString();
+  return getText(*m_ui.transmissionRunsEdit);
 }
 
 /** Return start overlap
 * @return :: start overlap
 */
 std::string QtReflSettingsView::getStartOverlap() const {
-
-  return m_ui.startOverlapEdit->text().toStdString();
+  return getText(*m_ui.startOverlapEdit);
 }
 
 /** Return end overlap
 * @return :: end overlap
 */
 std::string QtReflSettingsView::getEndOverlap() const {
-
-  return m_ui.endOverlapEdit->text().toStdString();
+  return getText(*m_ui.endOverlapEdit);
 }
 
 /** Return selected polarisation corrections
 * @return :: selected polarisation corrections
 */
 std::string QtReflSettingsView::getPolarisationCorrections() const {
-
-  return m_ui.polCorrComboBox->currentText().toStdString();
+  return getText(*m_ui.polCorrComboBox);
 }
 
 /** Return CRho
 * @return :: polarization correction CRho
 */
 std::string QtReflSettingsView::getCRho() const {
-
-  return m_ui.CRhoEdit->text().toStdString();
+  return getText(*m_ui.CRhoEdit);
 }
 
 /** Return CAlpha
 * @return :: polarization correction CAlpha
 */
 std::string QtReflSettingsView::getCAlpha() const {
-
-  return m_ui.CAlphaEdit->text().toStdString();
+  return getText(*m_ui.CAlphaEdit);
 }
 
 /** Return CAp
 * @return :: polarization correction CAp
 */
 std::string QtReflSettingsView::getCAp() const {
-
-  return m_ui.CApEdit->text().toStdString();
+  return getText(*m_ui.CApEdit);
 }
 
 /** Return CPp
 * @return :: polarization correction CPp
 */
 std::string QtReflSettingsView::getCPp() const {
-
-  return m_ui.CPpEdit->text().toStdString();
+  return getText(*m_ui.CPpEdit);
 }
 
 /** Return momentum transfer limits
 * @return :: momentum transfer limits
 */
 std::string QtReflSettingsView::getMomentumTransferStep() const {
-
-  return m_ui.momentumTransferStepEdit->text().toStdString();
+  return getText(*m_ui.momentumTransferStepEdit);
 }
 
 /** Return scale factor
 * @return :: scale factor
 */
 std::string QtReflSettingsView::getScaleFactor() const {
-
-  return m_ui.scaleFactorEdit->text().toStdString();
+  return getText(*m_ui.scaleFactorEdit);
 }
 
 /** Return integrated monitors option
 * @return :: integrated monitors check
 */
 std::string QtReflSettingsView::getIntMonCheck() const {
-
   return m_ui.intMonCheckBox->isChecked() ? "1" : "0";
 }
 
@@ -277,79 +285,69 @@ std::string QtReflSettingsView::getIntMonCheck() const {
 * @return :: monitor integral min
 */
 std::string QtReflSettingsView::getMonitorIntegralMin() const {
-
-  return m_ui.monIntMinEdit->text().toStdString();
+  return getText(*m_ui.monIntMinEdit);
 }
 
 /** Return monitor integral wavelength max
 * @return :: monitor integral max
 */
 std::string QtReflSettingsView::getMonitorIntegralMax() const {
-
-  return m_ui.monIntMaxEdit->text().toStdString();
+  return getText(*m_ui.monIntMaxEdit);
 }
 
 /** Return monitor background wavelength min
 * @return :: monitor background min
 */
 std::string QtReflSettingsView::getMonitorBackgroundMin() const {
-
-  return m_ui.monBgMinEdit->text().toStdString();
+  return getText(*m_ui.monBgMinEdit);
 }
 
 /** Return monitor background wavelength max
 * @return :: monitor background max
 */
 std::string QtReflSettingsView::getMonitorBackgroundMax() const {
-
-  return m_ui.monBgMaxEdit->text().toStdString();
+  return getText(*m_ui.monBgMaxEdit);
 }
 
 /** Return wavelength min
 * @return :: lambda min
 */
 std::string QtReflSettingsView::getLambdaMin() const {
-
-  return m_ui.lamMinEdit->text().toStdString();
+  return getText(*m_ui.lamMinEdit);
 }
 
 /** Return wavelength max
 * @return :: lambda max
 */
 std::string QtReflSettingsView::getLambdaMax() const {
-
-  return m_ui.lamMaxEdit->text().toStdString();
+  return getText(*m_ui.lamMaxEdit);
 }
 
 /** Return I0MonitorIndex
 * @return :: I0MonitorIndex
 */
 std::string QtReflSettingsView::getI0MonitorIndex() const {
-
-  return m_ui.I0MonIndexEdit->text().toStdString();
+  return getText(*m_ui.I0MonIndexEdit);
 }
 
 /** Return processing instructions
 * @return :: processing instructions
 */
 std::string QtReflSettingsView::getProcessingInstructions() const {
-
-  return m_ui.procInstEdit->text().toStdString();
+  return getText(*m_ui.procInstEdit);
 }
 
 /** Return selected correction type
 * @return :: selected correction type
 */
 std::string QtReflSettingsView::getDetectorCorrectionType() const {
-
-  return m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
+  return getText(*m_ui.detectorCorrectionTypeComboBox);
 }
 
 /** Returns the status of experiment settings group
 * @return :: the status of the checkable group
 */
 bool QtReflSettingsView::experimentSettingsEnabled() const {
-
   return m_ui.expSettingsGroup->isChecked();
 }
 
@@ -357,7 +355,6 @@ bool QtReflSettingsView::experimentSettingsEnabled() const {
 * @return :: the status of the checkable group
 */
 bool QtReflSettingsView::instrumentSettingsEnabled() const {
-
   return m_ui.instSettingsGroup->isChecked();
 }
 

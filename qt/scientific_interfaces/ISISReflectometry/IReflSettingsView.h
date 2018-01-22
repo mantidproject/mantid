@@ -6,6 +6,7 @@
 #include <vector>
 #include "ExperimentOptionDefaults.h"
 #include "InstrumentOptionDefaults.h"
+#include "GetInstrumentParameter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -84,11 +85,12 @@ public:
   /// Set default values for settings
   virtual void setExpDefaults(ExperimentOptionDefaults defaults) = 0;
   virtual void setInstDefaults(InstrumentOptionDefaults defaults) = 0;
+  virtual void showOptionLoadError(AccumulatedTypeErrors const& errors) = 0;
 
   /// Sets status of whether polarisation corrections should be enabled/disabled
   virtual void setIsPolCorrEnabled(bool enable) const = 0;
   /// Set polarisation corrections and parameters enabled/disabled
-  virtual void setPolarisationOptionsEnabled(bool enable) const = 0;
+  virtual void setPolarisationOptionsEnabled(bool enable) = 0;
 };
 }
 }

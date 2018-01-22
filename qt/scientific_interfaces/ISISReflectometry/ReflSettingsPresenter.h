@@ -73,6 +73,7 @@ private:
   /// Name of the current instrument in use
   std::string m_currentInstrumentName;
 };
+
 }
 }
 #endif /* MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H */

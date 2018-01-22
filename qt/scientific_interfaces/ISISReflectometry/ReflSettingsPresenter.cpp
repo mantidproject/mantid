@@ -304,41 +304,68 @@ T firstFromParameterFileOr(Instrument_const_sptr instrument,
       .value_or(ifEmptyOrWrongType);
 }
 
+class InstrumentParameters {
+public:
+  InstrumentParameters(Instrument_const_sptr instrument)
+      : m_instrument(std::move(instrument)) {}
+
+  template <typename T> T valueOrDefault(std::string const &parameterName) {
+    return valueOr(parameterName, T());
+  }
+
+  template <typename T>
+  T valueOr(std::string const &parameterName, T defaultValue) {
+    try {
+      return firstFromParameterFileOr(m_instrument, parameterName,
+                                      defaultValue);
+    } catch (InstrumentParameterTypeMissmatch const &ex) {
+      m_errors.emplace_back(ex);
+      return defaultValue;
+    }
+  }
+
+  AccumulatedTypeErrors const &typeErrors() const { return m_errors; }
+  bool hasAccumulatedErrors() const { return !m_errors.empty(); }
+
+private:
+  Instrument_const_sptr m_instrument;
+  AccumulatedTypeErrors m_errors;
+};
+
 /** Fills experiment settings with default values
 */
 void ReflSettingsPresenter::getExpDefaults() {
   auto alg = createReductionAlg();
   auto instrument = createEmptyInstrument(m_currentInstrumentName);
+  auto parameters = InstrumentParameters(instrument);
 
   auto experimentDefaults = ExperimentOptionDefaults();
 
-  experimentDefaults.AnalysisMode = firstFromParameterFileOr<std::string>(
-      instrument, "AnalysisMode", alg->getPropertyValue("AnalysisMode"));
+  experimentDefaults.AnalysisMode = parameters.valueOr<std::string>(
+      "AnalysisMode", alg->getPropertyValue("AnalysisMode"));
   experimentDefaults.PolarizationAnalysis =
       alg->getPropertyValue("PolarizationAnalysis");
-  experimentDefaults.CRho =
-      firstFromParameterFileOr<std::string>(instrument, "crho", "");
-  experimentDefaults.CAlpha =
-      firstFromParameterFileOr<std::string>(instrument, "calpha", "");
-  experimentDefaults.CAp =
-      firstFromParameterFileOr<std::string>(instrument, "cAp", "");
-  experimentDefaults.CPp =
-      firstFromParameterFileOr<std::string>(instrument, "cPp", "");
+  experimentDefaults.CRho = parameters.valueOrDefault<std::string>("crho");
+  experimentDefaults.CAlpha = parameters.valueOrDefault<std::string>("calpha");
+  experimentDefaults.CAp = parameters.valueOrDefault<std::string>("cAp");
+  experimentDefaults.CPp = parameters.valueOrDefault<std::string>("cPp");
   experimentDefaults.MomentumTransferStep =
-      firstFromParameterFileOr(instrument, "dQ/Q", 0.0);
-  experimentDefaults.ScaleFactor =
-      firstFromParameterFileOr(instrument, "Scale", 0.0);
+      parameters.valueOrDefault<double>("dQ/Q");
+  experimentDefaults.ScaleFactor = parameters.valueOrDefault<double>("Scale");
   experimentDefaults.StitchParams =
-      firstFromParameterFileOr<std::string>(instrument, "Params", "");
+      parameters.valueOrDefault<std::string>("Params");
 
   if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
     experimentDefaults.TransRunStartOverlap =
-        firstFromParameterFileOr(instrument, "TransRunStartOverlap", 0.0);
+        parameters.valueOrDefault<double>("TransRunStartOverlap");
     experimentDefaults.TransRunEndOverlap =
-        firstFromParameterFileOr(instrument, "TransRunEndOverlap", 0.0);
+        parameters.valueOrDefault<double>("TransRunEndOverlap");
   }
-
   m_view->setExpDefaults(experimentDefaults);
+
+  if (parameters.hasAccumulatedErrors()) {
+    m_view->showOptionLoadError(parameters.typeErrors());
+  }
 }
 
 /** Fills instrument settings with default values
@@ -346,42 +373,42 @@ void ReflSettingsPresenter::getExpDefaults() {
 void ReflSettingsPresenter::getInstDefaults() {
   auto alg = createReductionAlg();
   auto instrument = createEmptyInstrument(m_currentInstrumentName);
+  auto parameters = InstrumentParameters(instrument);
 
   auto instrumentDefaults = InstrumentOptionDefaults();
-  instrumentDefaults.NormalizeByIntegratedMonitors =
-      firstFromParameterFileOr(instrument, "IntegratedMonitors",
-                               boost::lexical_cast<bool>(alg->getPropertyValue(
-                                   "NormalizeByIntegratedMonitors")));
+
+  instrumentDefaults.NormalizeByIntegratedMonitors = parameters.valueOr<bool>(
+      "IntegratedMonitors", boost::lexical_cast<bool>(alg->getPropertyValue(
+                                "NormalizeByIntegratedMonitors")));
   instrumentDefaults.MonitorIntegralMin =
-      firstFromParameterFileOr(instrument, "MonitorIntegralMin", 0.0);
+      parameters.valueOrDefault<double>("MonitorIntegralMin");
 
   instrumentDefaults.MonitorIntegralMax =
-      firstFromParameterFileOr(instrument, "MonitorIntegralMax", 0.0);
+      parameters.valueOrDefault<double>("MonitorIntegralMax");
 
   instrumentDefaults.MonitorBackgroundMin =
-      firstFromParameterFileOr(instrument, "MonitorBackgroundMin", 0.0);
+      parameters.valueOrDefault<double>("MonitorBackgroundMin");
 
   instrumentDefaults.MonitorBackgroundMax =
-      firstFromParameterFileOr(instrument, "MonitorBackgroundMax", 0.0);
+      parameters.valueOrDefault<double>("MonitorBackgroundMax");
 
-  instrumentDefaults.LambdaMin =
-      firstFromParameterFileOr(instrument, "LambdaMin", 0.0);
-
-  instrumentDefaults.LambdaMax =
-      firstFromParameterFileOr(instrument, "LambdaMax", 0.0);
+  instrumentDefaults.LambdaMin = parameters.valueOrDefault<double>("LambdaMin");
+  instrumentDefaults.LambdaMax = parameters.valueOrDefault<double>("LambdaMax");
 
   instrumentDefaults.I0MonitorIndex =
-      firstFromParameterFileOr(instrument, "I0MonitorIndex", 0);
+      parameters.valueOrDefault<int>("I0MonitorIndex");
 
   instrumentDefaults.ProcessingInstructions =
-      firstFromParameterFileOr<std::string>(instrument,
-                                            "ProcessingInstructions", "");
+      parameters.valueOrDefault<std::string>("ProcessingInstructions");
 
   instrumentDefaults.DetectorCorrectionType =
-      firstFromParameterFileOr<std::string>(instrument,
-                                            "DetectorCorrectionType", "");
+      parameters.valueOrDefault<std::string>("DetectorCorrectionType");
 
   m_view->setInstDefaults(instrumentDefaults);
+
+  if (parameters.hasAccumulatedErrors()) {
+    m_view->showOptionLoadError(parameters.typeErrors());
+  }
 }
 
 /** Generates and returns an instance of the ReflectometryReductionOneAuto

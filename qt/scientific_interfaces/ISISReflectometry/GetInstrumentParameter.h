@@ -9,31 +9,54 @@ template <typename T> class InstrumentParameter;
 
 template <> class InstrumentParameter<std::string> {
 public:
-  static std::vector<std::string> get(Mantid::Geometry::Instrument_const_sptr instrument,
-                                      std::string const &parameterName);
+  static std::vector<std::string>
+  get(Mantid::Geometry::Instrument_const_sptr instrument,
+      std::string const &parameterName);
 };
 
 template <> class InstrumentParameter<double> {
 public:
-  static std::vector<double> get(Mantid::Geometry::Instrument_const_sptr instrument,
-                                 std::string const &parameterName);
+  static std::vector<double>
+  get(Mantid::Geometry::Instrument_const_sptr instrument,
+      std::string const &parameterName);
 };
 
 template <> class InstrumentParameter<int> {
 public:
-  static std::vector<int> get(Mantid::Geometry::Instrument_const_sptr instrument,
-                              std::string const &parameterName);
+  static std::vector<int>
+  get(Mantid::Geometry::Instrument_const_sptr instrument,
+      std::string const &parameterName);
 };
 
 template <> class InstrumentParameter<bool> {
 public:
-  static std::vector<bool> get(Mantid::Geometry::Instrument_const_sptr instrument,
-                               std::string const &parameterName);
+  static std::vector<bool>
+  get(Mantid::Geometry::Instrument_const_sptr instrument,
+      std::string const &parameterName);
 };
 
+class InstrumentParameterTypeMissmatch : public std::runtime_error {
+public:
+  InstrumentParameterTypeMissmatch(std::string parameterName,
+                                   std::string expectedType,
+                                   std::runtime_error const &ex);
+
+  std::string const &parameterName() const;
+  std::string const &expectedType() const;
+  std::string const &originalMessage() const;
+
+private:
+  std::string m_parameterName;
+  std::string m_expectedType;
+  std::string m_originalMessage;
+};
+
+using AccumulatedTypeErrors = std::vector<InstrumentParameterTypeMissmatch>;
+
 template <typename T>
-std::vector<T> getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
-                                      std::string const &parameterName) {
+std::vector<T>
+getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
+                       std::string const &parameterName) {
   return InstrumentParameter<T>::get(instrument, parameterName);
 }
 }
