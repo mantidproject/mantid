@@ -97,6 +97,11 @@ bool JumpFit::validate() {
  * script that runs JumpFit
  */
 void JumpFit::run() {
+  const auto widthName = m_uiForm->cbWidth->currentText().toStdString();
+  const auto width = static_cast<int>(m_spectraList[widthName]);
+  setMinimumSpectrum(width);
+  setMaximumSpectrum(width);
+
   if (validate())
     executeSequentialFit();
 }
@@ -157,9 +162,10 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   if (m_spectraList.size() > 0) {
     m_uiForm->cbWidth->setEnabled(true);
     const auto currentWidth = m_uiForm->cbWidth->currentText().toStdString();
-    setSelectedSpectrum(static_cast<int>(m_spectraList[currentWidth]));
-    setMinimumSpectrum(static_cast<int>(m_spectraList[currentWidth]));
-    setMaximumSpectrum(static_cast<int>(m_spectraList[currentWidth]));
+    const auto width = static_cast<int>(m_spectraList[currentWidth]);
+    setMinimumSpectrum(width);
+    setMaximumSpectrum(width);
+    setSelectedSpectrum(width);
   } else {
     m_uiForm->cbWidth->setEnabled(false);
     emit showMessageBox("Workspace doesn't appear to contain any width data");
@@ -217,10 +223,8 @@ std::map<std::string, size_t> JumpFit::findAxisLabelsWithSubstrings(
 void JumpFit::handleWidthChange(const QString &text) {
   const auto width = text.toStdString();
 
-  if (m_spectraList.find(width) != m_spectraList.end()) {
+  if (m_spectraList.find(width) != m_spectraList.end())
     setSelectedSpectrum(static_cast<int>(m_spectraList[width]));
-    updatePreviewPlots();
-  }
 }
 
 void JumpFit::startXChanged(double startX) {
