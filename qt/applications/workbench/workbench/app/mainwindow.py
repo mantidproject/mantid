@@ -476,7 +476,7 @@ class MainWindow(QMainWindow):
 
     def open_manage_directories(self):
         manage_directory_widget = ManageUserDirectories(self)
-        manage_directory_widget.show()
+        manage_directory_widget.exec_()
 
 
 def initialize():
