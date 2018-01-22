@@ -520,6 +520,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              RHSWorkspace=bkgWS,
                              OutputWorkspace=subtractedWSName,
                              EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
         self._cleanup.cleanup(bkgWS)
         return subtractedWS
 
