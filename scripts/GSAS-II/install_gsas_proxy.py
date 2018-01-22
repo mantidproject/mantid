@@ -41,10 +41,6 @@ def download_bootstrap(revision_number, target_location):
         out_file.write(bootstrap_file)
 
 
-def gsas_install_directory():
-    return site.USER_SITE
-
-
 def package_is_installed(package_name):
     try:
         exec("import " + package_name)
@@ -86,11 +82,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to install GSAS-II")
 
     parser.add_argument("-d", "--install-dir",
-                        default=gsas_install_directory(),
+                        default=os.path.abspath(os.sep),
                         type=str,
                         dest="install_dir",
                         help="Directory to install GSAS-II in "
-                             "(leave blank for Mantid default plugins directory (recommended)")
+                             "(leave blank to use current drive (Windows) or / (Linux)")
 
     parser.add_argument("-v", "--version",
                         default=0,
@@ -98,6 +94,18 @@ if __name__ == "__main__":
                         dest="version",
                         help="SVN revision number to install (leave blank to use the latest revision")
 
+    parser.add_argument("-b", "--build-server",
+                        action="store_true",
+                        default=False,
+                        dest="build_server_mode",
+                        help="Build server mode. Install GSAS-II in Python user site package directory "
+                             "and don't wait for prompt before exiting")
+
     args = parser.parse_args()
-    install_gsasii(install_directory=args.install_dir,
-                   revision_number=args.version)
+
+    if args.build_server_mode:
+        install_dir = site.USER_SITE
+    else:
+        install_dir = args.install_dir
+
+    install_gsasii(install_directory=install_dir, revision_number=args.version)
