@@ -50,7 +50,7 @@ Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
 Requires: python-qt5-devel
 Requires: python-QtPy
-Requires: python-qtawesome
+Requires: python2-QtAwesome
 Requires: python-devel
 Requires: python-setuptools
 Requires: python-ipython >= 1.1
@@ -112,7 +112,7 @@ Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
 Requires: python-qt5-devel
 Requires: python3-QtPy
-Requires: python3-qtawesome
+%{?fedora:Requires: python3-QtAwesome}
 Requires: python3-numpy
 Requires: python3-scipy
 Requires: python3-sphinx
