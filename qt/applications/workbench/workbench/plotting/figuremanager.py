@@ -207,7 +207,6 @@ class FigureManagerWorkbench(FigureManagerBase):
         # We assume this is used for editing axis information e.g. labels
 
 
-
 class Show(object):
     """
 
