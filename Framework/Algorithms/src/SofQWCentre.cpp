@@ -120,7 +120,7 @@ void SofQWCentre::exec() {
             (detectorInfo.position(idet) - detectorInfo.samplePosition());
         scatterDir.normalize();
         for (size_t j = 0; j < numBins; ++j) {
-          if (X[j] < xAxis.front() || X[j+1] > xAxis.back())
+          if (X[j] < xAxis.front() || X[j + 1] > xAxis.back())
             continue;
 
           const double deltaE = 0.5 * (X[j] + X[j + 1]);

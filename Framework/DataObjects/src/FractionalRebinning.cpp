@@ -211,24 +211,24 @@ void calcTrapezoidYIntersections(
   // First get equations for the top and bottom diagonal lines
   const double NaN = std::numeric_limits<double>::quiet_NaN();
   const double DBL_EPS = std::numeric_limits<double>::epsilon();
-  std::vector<double> leftLim(nx * ny, NaN);
-  std::vector<double> rightLim(nx * ny, NaN);
+  std::vector<double> leftLim(nx * (ny + 1), NaN);
+  std::vector<double> rightLim(nx * (ny + 1), NaN);
   auto x0_it = xAxis.begin() + x_start;
   auto x1_it = xAxis.begin() + x_end + 1;
   auto y0_it = yAxis.begin() + y_start;
   auto y1_it = yAxis.begin() + y_end + 1;
+  const size_t ymax = (y_end == yAxis.size()) ? ny : (ny + 1);
   if ((mTop >= 0 && mBot >= 0) || (mTop < 0 && mBot < 0)) {
-    // Shape: /=/ or \=\  - top diag is left, bot is lower right or vice versa.
+    // Shape: /=/ or \=\  - top diag is left, bot is right or vice versa.
     double left_val, right_val;
-    const size_t ymax = (y_end == yAxis.size()) ? (ny - 1) : ny;
     for (size_t yj = 0; yj < ymax; ++yj) {
       const size_t yjx = yj * nx;
       if (mTop >= 0) {
-        left_val = (yAxis[yj + y_start + 1] - cTop) / mTop;
-        right_val = (yAxis[yj + y_start + 1] - cBot) / mBot;
+        left_val = (yAxis[yj + y_start] - cTop) / mTop;
+        right_val = (yAxis[yj + y_start] - cBot) / mBot;
       } else {
-        left_val = (yAxis[yj + y_start + 1] - cBot) / mBot;
-        right_val = (yAxis[yj + y_start + 1] - cTop) / mTop;
+        left_val = (yAxis[yj + y_start] - cBot) / mBot;
+        right_val = (yAxis[yj + y_start] - cTop) / mTop;
       }
       if (left_val < ll_x || left_val > lr_x)
         left_val = NaN;
@@ -239,14 +239,14 @@ void calcTrapezoidYIntersections(
       if (left_it != x1_it) {
         li = left_it - x0_it - 1;
         leftLim[li + yjx] = left_val;
-      } else if (yAxis[yj + y_start + 1] < ul_y) {
+      } else if (yAxis[yj + y_start] < ul_y) {
         left_it = x0_it + 1;
         leftLim[li + yjx] = ll_x;
       }
       auto right_it = std::upper_bound(x0_it, x1_it, right_val);
       if (right_it != x1_it) {
         rightLim[right_it - x0_it - 1 + yjx] = right_val;
-      } else if (yAxis[yj + y_start + 1] < ur_y) {
+      } else if (yAxis[yj + y_start] < ur_y) {
         right_it = x1_it - 1;
         rightLim[nx - 1 + yjx] = lr_x;
       }
@@ -260,18 +260,18 @@ void calcTrapezoidYIntersections(
   } else {
     // Shape: <=| or |=>  - top diag is upper l/r, bot is lower l/r
     const size_t y2 =
-        std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ll_y : lr_y) - y0_it - 1;
+        std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ll_y : lr_y) - y0_it;
     const size_t y3 =
-        std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ul_y : ur_y) - y0_it - 1;
+        std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ul_y : ur_y) - y0_it;
     double val;
-    for (size_t yj = 0; yj < (ny - 1); ++yj) {
+    for (size_t yj = 0; yj < ymax; ++yj) {
       const size_t yjx = yj * nx;
       if (yj < y2) {
-        val = (yAxis[yj + y_start + 1] - cBot) / mBot;
+        val = (yAxis[yj + y_start] - cBot) / mBot;
       } else if (yj < y3) {
         val = (mTop >= 0) ? ll_x : lr_x;
       } else {
-        val = (yAxis[yj + y_start + 1] - cTop) / mTop;
+        val = (yAxis[yj + y_start] - cTop) / mTop;
       }
       if (val < ll_x || val > lr_x)
         val = NaN;
@@ -322,8 +322,8 @@ void calcTrapezoidYIntersections(
     }
     // Step 3 - loop over y, find poly. area depending on which vertices are in
     for (size_t yi = y_start; yi < y_end; ++yi) {
-      yj0 = ((yi > y_start) ? yi - y_start - 1 : 0) * nx;
-      yj1 = (yi - y_start) * nx;
+      yj0 = (yi - y_start) * nx;
+      yj1 = (yi - y_start + 1) * nx;
       // Checks if this bin is completely inside new quadrilateral
       if (yAxis[yi] > std::max(nll.Y(), nlr.Y()) &&
           yAxis[yi + 1] < std::min(nul.Y(), nur.Y())) {
@@ -494,9 +494,7 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
       if (progress)
         progress->report("Calculating errors");
       double eValue = std::sqrt(outputE[j]);
-      // Don't do this for a RebinnedOutput workspace. The fractions
-      // take care of such things.
-      if (inputWS->isDistribution() && inputWS->id() != "RebinnedOutput") {
+      if (inputWS->isDistribution()) {
         const double binWidth = outputX[j + 1] - outputX[j];
         outputY[j] /= binWidth;
         eValue /= binWidth;
@@ -532,8 +530,7 @@ void rebinToOutput(const Quadrilateral &inputQ,
   const auto &inY = inputWS->y(i);
   const auto &inE = inputWS->e(i);
   // It seems to be more efficient to construct this once and clear it before
-  // each calculation
-  // in the loop
+  // each calculation in the loop
   ConvexPolygon intersectOverlap;
   for (size_t y = qstart; y < qend; ++y) {
     const double vlo = verticalAxis[y];
@@ -601,10 +598,14 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              x_start, x_end))
     return;
 
-  // Don't do the overlap removal if already RebinnedOutput.
-  // This wreaks havoc on the data.
-  const bool removeBinWidth(inputWS->isDistribution() &&
-                            inputWS->id() != "RebinnedOutput");
+  // If the input workspace was normalized by the bin width, we need to
+  // recover the original Y value, we do it by 'removing' the bin width
+  double error = inE[j];
+  if (inputWS->isDistribution()) {
+    const double overlapWidth = inX[j + 1] - inX[j];
+    signal *= overlapWidth;
+    error *= overlapWidth;
+  }
 
   // The intersection overlap algorithm is relatively costly. The outputQ is
   // defined as rectangular. If the inputQ is is also rectangular or
@@ -624,42 +625,14 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              x_start, x_end, areaInfo);
   }
 
-  // Needed later in case the input has been "finalized"
-  double error = inE[j];
-  const double overlapWidth = inX[j + 1] - inX[j];
-
-  // If the input is a RebinnedOutput workspace with frac. area we need
-  // to account for the weight of the input bin in the output bin weights
-  // double inputWeight = 1.;
-  // auto inputRB = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
-  // if (inputRB) {
-  //   const auto &inF = inputRB->dataF(i);
-  //   inputWeight = inF[j];
-  //   // If the signal/error has been "finalized" (scaled by 1/inF) then
-  //   // we need to undo this before carrying on.
-  //   if (inputRB->isFinalized()) {
-  //     signal *= inF[j];
-  //     error *= inF[j];
-  //   }
-  // }
-
   for (auto ai : areaInfo) {
     const int xi = std::get<0>(ai);
     const int yi = std::get<1>(ai);
     const double weight = std::get<2>(ai) / inputQArea;
-    double yValue = signal * weight;
-    double eValue = error * weight;
-    if (removeBinWidth) {
-      // If the input workspace was normalized by the bin width, we need to
-      // recover the original Y value, we do it by 'removing' the bin width
-      yValue *= overlapWidth;
-      eValue *= overlapWidth;
-    }
     PARALLEL_CRITICAL(overlap) {
-      outputWS->mutableY(yi)[xi] += yValue;
-      outputWS->mutableE(yi)[xi] +=
-          eValue * eValue;               // variance added in quadrature
-      outputWS->dataF(yi)[xi] += weight; // * inputWeight;
+      outputWS->mutableY(yi)[xi] += signal * weight;
+      outputWS->mutableE(yi)[xi] += pow(error * weight, 2);
+      outputWS->dataF(yi)[xi] += weight;
     }
   }
 }

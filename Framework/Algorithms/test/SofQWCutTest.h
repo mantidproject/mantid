@@ -29,7 +29,6 @@ public:
 
     Workspace_sptr loadedWS = loader.getProperty("OutputWorkspace");
     auto inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS);
-    //WorkspaceHelpers::makeDistribution(inWS);
 
     // First make a cut along |Q|
     SQWType sqw_q;
@@ -57,8 +56,7 @@ public:
     wsname_e << "_tmp_e_" << loadedWS;
     TS_ASSERT_THROWS_NOTHING(
         sqw_e.setPropertyValue("OutputWorkspace", wsname_e.str()));
-    TS_ASSERT_THROWS_NOTHING(
-        sqw_e.setPropertyValue("QAxisBinning", "5,5,10"));
+    TS_ASSERT_THROWS_NOTHING(sqw_e.setPropertyValue("QAxisBinning", "5,5,10"));
     TS_ASSERT_THROWS_NOTHING(sqw_e.setPropertyValue("EMode", "Direct"));
     TS_ASSERT_THROWS_NOTHING(
         sqw_e.setPropertyValue("EAxisBinning", "-5,0.5,55"));
@@ -81,7 +79,7 @@ public:
     auto result = runSQW<Mantid::Algorithms::SofQW>();
     const double delta(1e-08);
 
-    auto ws_q = 
+    auto ws_q =
         boost::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
     TS_ASSERT_EQUALS(ws_q->getAxis(0)->length(), 2);
     TS_ASSERT_EQUALS(ws_q->getAxis(0)->unit()->unitID(), "DeltaE");
@@ -103,7 +101,7 @@ public:
     TS_ASSERT_DELTA(ws_q->readY(575)[0], 453.761721652, delta);
     TS_ASSERT_DELTA(ws_q->readE(575)[0], 13.114162862, delta);
 
-    auto ws_e = 
+    auto ws_e =
         boost::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
     TS_ASSERT_EQUALS(ws_e->getAxis(0)->length(), 121);
     TS_ASSERT_EQUALS(ws_e->getAxis(0)->unit()->unitID(), "DeltaE");
@@ -130,7 +128,7 @@ public:
     auto result = runSQW<Mantid::Algorithms::SofQWPolygon>();
     const double delta(1e-08);
 
-    auto ws_q = 
+    auto ws_q =
         boost::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
     TS_ASSERT_EQUALS(ws_q->getAxis(0)->length(), 2);
     TS_ASSERT_EQUALS(ws_q->getAxis(0)->unit()->unitID(), "DeltaE");
@@ -152,7 +150,7 @@ public:
     TS_ASSERT_DELTA(ws_q->readY(787)[0], 12.280788436, delta);
     TS_ASSERT_DELTA(ws_q->readE(787)[0], 0.239880567, delta);
 
-    auto ws_e = 
+    auto ws_e =
         boost::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
     TS_ASSERT_EQUALS(ws_e->getAxis(0)->length(), 121);
     TS_ASSERT_EQUALS(ws_e->getAxis(0)->unit()->unitID(), "DeltaE");
@@ -179,7 +177,7 @@ public:
     auto result = runSQW<Mantid::Algorithms::SofQWNormalisedPolygon>();
     const double delta(1e-08);
 
-    auto ws_q = 
+    auto ws_q =
         boost::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
     TS_ASSERT_EQUALS(ws_q->getAxis(0)->length(), 2);
     TS_ASSERT_EQUALS(ws_q->getAxis(0)->unit()->unitID(), "DeltaE");
@@ -201,7 +199,7 @@ public:
     TS_ASSERT_DELTA(ws_q->readY(745)[0], 2.086237760, delta);
     TS_ASSERT_DELTA(ws_q->readE(745)[0], 0.034274820, delta);
 
-    auto ws_e = 
+    auto ws_e =
         boost::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
     TS_ASSERT_EQUALS(ws_e->getAxis(0)->length(), 121);
     TS_ASSERT_EQUALS(ws_e->getAxis(0)->unit()->unitID(), "DeltaE");
@@ -223,7 +221,6 @@ public:
     TS_ASSERT_DELTA(ws_e->readY(0)[119], 0.027223857, delta);
     TS_ASSERT_DELTA(ws_e->readE(0)[119], 0.002884865, delta);
   }
-
 };
 
 #endif /*SOFQWCUTTEST_H_*/
