@@ -1,10 +1,10 @@
 from sans.common.general_functions import parse_diagnostic_settings
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
-from sans.common.general_functions import (create_child_algorithm, create_managed_non_child_algorithm)
+from sans.common.general_functions import (create_child_algorithm)
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import IntegralEnum, DetectorType, SANSDataType
 from mantid.api import AlgorithmPropertyWithValue
-from sans.algorithm_detail.batch_execution import set_output_workspaces_on_load_algorithm, get_workspace_from_algorithm, provide_loaded_data, create_unmanaged_algorithm, add_to_group
+from sans.algorithm_detail.batch_execution import provide_loaded_data, create_unmanaged_algorithm, add_to_group
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
@@ -33,7 +33,6 @@ def run_integral(range, mask, integral, detector, state):
 
         x_dim, y_dim = get_detector_size_from_sans_file(state, detector)
 
-
         output_workspace = integrate_ranges(ranges, integral, mask, detector, input_workspace_name, input_workspace, x_dim, y_dim,
                                             is_multi_range)
         plot_graph(output_workspace)
@@ -55,6 +54,7 @@ def integrate_ranges(ranges, integral, mask, detector, input_workspace_name, inp
         return AnalysisDataService.retrieve(input_workspace_name + '_ranges')
     else:
         return output_workspace
+
 
 def parse_range(range):
     if range:
@@ -95,17 +95,17 @@ def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_d
 
     if integral == IntegralEnum.Horizontal:
         output_workspace = ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='x',
-                               HorizontalAxis='y', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
+                                                  HorizontalAxis='y', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
         output_workspace = SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
-                   EndWorkspaceIndex=hv_max)
+                                      EndWorkspaceIndex=hv_max)
     elif integral == IntegralEnum.Vertical:
         output_workspace = ConvertAxesToRealSpace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, VerticalAxis='y',
-                               HorizontalAxis='x', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
+                                                  HorizontalAxis='x', NumberVerticalBins=int(x_dim), NumberHorizontalBins=int(y_dim))
         output_workspace = SumSpectra(InputWorkspace=output_workspace, OutputWorkspace=output_workspace, StartWorkspaceIndex=hv_min,
-                   EndWorkspaceIndex=hv_max)
+                                      EndWorkspaceIndex=hv_max)
     elif integral == IntegralEnum.Time:
         output_workspace = SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace,
-                   StartWorkspaceIndex=hv_min, EndWorkspaceIndex=hv_max)
+                                      StartWorkspaceIndex=hv_min, EndWorkspaceIndex=hv_max)
 
     return output_workspace
 
@@ -115,8 +115,9 @@ def generate_output_workspace_name(range, integral, mask, detector, input_worksp
     detector_string = DetectorType.to_string(detector)
 
     return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range,
-                                                                             integral_string,
-                                                                             detector_string, mask)
+                                                                         integral_string,
+                                                                         detector_string, mask)
+
 
 def plot_graph(workspace):
     if mantidplot:
@@ -146,9 +147,9 @@ def get_detector_size_from_sans_file(state, detector):
                                                  float)['high-angle-detector-num-rows']
     else:
         x_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-columns", float)[
-            'low-angle-detector-num-columns']
+                                                 'low-angle-detector-num-columns']
         y_dim = get_named_elements_from_ipf_file(instrument_file[1], "low-angle-detector-num-rows", float)[
-            'low-angle-detector-num-rows']
+                                                 'low-angle-detector-num-rows']
 
     return x_dim, y_dim
 
