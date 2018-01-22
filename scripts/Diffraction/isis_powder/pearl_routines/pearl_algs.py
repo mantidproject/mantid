@@ -21,8 +21,9 @@ def attenuate_workspace(attenuation_file_path, ws_to_correct):
     return pearl_attenuated_ws
 
 
-def apply_vanadium_absorb_corrections(van_ws, run_details):
-    absorb_ws = mantid.Load(Filename=run_details.vanadium_absorption_path)
+def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
+    if absorb_ws is None:
+        absorb_ws = mantid.Load(Filename=run_details.vanadium_absorption_path)
 
     van_original_units = van_ws.getAxis(0).getUnit().unitID()
     absorb_units = absorb_ws.getAxis(0).getUnit().unitID()
@@ -47,20 +48,17 @@ def generate_out_name(run_number_string, long_mode_on, tt_mode):
     return output_name
 
 
-def generate_vanadium_absorb_corrections(van_ws):
-    raise NotImplementedError("Generating absorption corrections needs to be implemented correctly")
-
-    # TODO are these values applicable to all instruments
+def generate_vanadium_absorb_corrections(van_ws, output_filename):
     shape_ws = mantid.CloneWorkspace(InputWorkspace=van_ws)
+    shape_ws = mantid.ConvertUnits(InputWorkspace=shape_ws, OutputWorkspace=shape_ws, Target="Wavelength")
     mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
                                                       <radius val="0.005" /> </sphere>')
 
-    calibration_full_paths = None
     absorb_ws = \
         mantid.AbsorptionCorrection(InputWorkspace=shape_ws, AttenuationXSection="5.08",
                                     ScatteringXSection="5.1", SampleNumberDensity="0.072",
                                     NumberOfWavelengthPoints="25", ElementSize="0.05")
-    mantid.SaveNexus(Filename=calibration_full_paths["vanadium_absorption"],
+    mantid.SaveNexus(Filename=output_filename,
                      InputWorkspace=absorb_ws, Append=False)
     common.remove_intermediate_workspace(shape_ws)
     return absorb_ws

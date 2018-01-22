@@ -3,6 +3,7 @@
 
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 #include <memory>
+#include <vector>
 
 namespace Mantid {
 namespace LiveData {
@@ -37,9 +38,11 @@ public:
   ~IKafkaBroker() = default;
 
   virtual std::unique_ptr<IKafkaStreamSubscriber>
-  subscribe(const std::string &topic) const = 0;
+  subscribe(std::vector<std::string> topics,
+            SubscribeAtOption subscribeOption) const = 0;
   virtual std::unique_ptr<IKafkaStreamSubscriber>
-  subscribe(const std::string &topic, int64_t offset) const = 0;
+  subscribe(std::vector<std::string> topics, int64_t offset,
+            SubscribeAtOption subscribeOption) const = 0;
 };
 
 } // namespace LiveData

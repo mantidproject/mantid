@@ -10,8 +10,15 @@ import mantid
 import mantidqtpython as mqt
 from .ValidateOL import ValidateOL
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+try:
+    from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+except ImportError:
+    try:
+        from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+    except ImportError:
+        raise ImportError("Cannot import navigation toolbar")
 from matplotlib.figure import Figure
-from  mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
+from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
 import numpy
 import copy
@@ -26,6 +33,10 @@ def float2Input(x):
 
 
 # pylint: disable=too-many-instance-attributes
+
+
+class CustomNavigationToolbar(NavigationToolbar):
+    toolitems = [t for t in NavigationToolbar.toolitems if t[0] in ('Home', 'Pan', 'Zoom')]
 
 
 class DGSPlannerGUI(QtGui.QWidget):
@@ -82,7 +93,11 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.trajfig = Subplot(self.figure, 1, 1, 1, grid_helper=self.grid_helper)
         self.trajfig.hold(True)
         self.figure.add_subplot(self.trajfig)
-        self.layout().addWidget(self.canvas)
+        self.toolbar = CustomNavigationToolbar(self.canvas, self)
+        figureLayout = QtGui.QVBoxLayout()
+        figureLayout.addWidget(self.toolbar,0)
+        figureLayout.addWidget(self.canvas,1)
+        self.layout().addLayout(figureLayout)
         self.needToClear = False
         self.saveDir = ''
 

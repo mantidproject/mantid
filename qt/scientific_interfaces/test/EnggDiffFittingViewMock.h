@@ -157,6 +157,8 @@ public:
   // virtual void setCurrentInstrument(const std::string &newInstrument) = 0;
   MOCK_METHOD1(setCurrentInstrument, void(const std::string &newInstrument));
 
+  MOCK_CONST_METHOD0(plotFittedPeaksEnabled, bool());
+
   // virtual void updateFittingListWidget(const std::vector<std::string> &rows)
   // = 0;
   MOCK_METHOD1(updateFittingListWidget,

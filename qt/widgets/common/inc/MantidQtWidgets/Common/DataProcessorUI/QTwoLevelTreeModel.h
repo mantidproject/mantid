@@ -102,6 +102,20 @@ private:
   std::vector<std::vector<std::pair<int, bool>>> m_rowsOfGroup;
 };
 
+template <typename Action>
+void forEachGroup(QTwoLevelTreeModel &model, Action act) {
+  for (int group = 0; group < model.rowCount(); group++)
+    act(group);
+}
+
+template <typename Action>
+void forEachRow(QTwoLevelTreeModel &model, Action act) {
+  forEachGroup(model, [&model, &act](int group) -> void {
+    for (int row = 0; row < model.rowCount(model.index(group, 0)); row++)
+      act(group, row);
+  });
+}
+
 /// Typedef for a shared pointer to \c QTwoLevelTreeModel
 using QTwoLevelTreeModel_sptr = boost::shared_ptr<QTwoLevelTreeModel>;
 } // namespace DataProcessor
