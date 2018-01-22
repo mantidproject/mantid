@@ -8,8 +8,7 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     std::unique_ptr<IEnggDiffGSASFittingModel> model,
     IEnggDiffGSASFittingView *view)
-    : m_model(std::move(model)), m_view(view),
-      m_viewHasClosed(false) {}
+    : m_model(std::move(model)), m_view(view), m_viewHasClosed(false) {}
 
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     EnggDiffGSASFittingPresenter &&other)

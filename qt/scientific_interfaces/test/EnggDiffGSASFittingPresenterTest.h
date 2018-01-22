@@ -256,8 +256,7 @@ private:
     m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();
 
     std::unique_ptr<EnggDiffGSASFittingPresenter> pres_uptr(
-        new EnggDiffGSASFittingPresenter(std::move(mockModel),
-                                         m_mockViewPtr));
+        new EnggDiffGSASFittingPresenter(std::move(mockModel), m_mockViewPtr));
     return pres_uptr;
   }
 
