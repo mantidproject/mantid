@@ -414,10 +414,9 @@ class MainWindow(QMainWindow):
             # fix column height
             for c, column in enumerate(widgets_layout):
                 for r in range(len(column) - 1):
-                    widget = column[r][0]
-                    dockwidget = widget.dockwidget
-                    dock_min_h = dockwidget.minimumHeight()
-                    dock_max_h = dockwidget.maximumHeight()
+                    widget = column[r][0].dockwidget
+                    dock_min_h = widget.minimumHeight()
+                    dock_max_h = widget.maximumHeight()
                     info = {'widget': widget,
                             'dock-min-height': dock_min_h,
                             'dock-max-height': dock_max_h}
@@ -425,9 +424,9 @@ class MainWindow(QMainWindow):
                     # The 0.95 factor is to adjust height based on useful
                     # estimated area in the window
                     new_height = int(default_layout['height-fraction'][c][r] * height * 0.95)
-                    dockwidget.setMinimumHeight(new_height)
-                    dockwidget.setMaximumHeight(new_height)
-                    dockwidget.updateGeometry()
+                    widget.setMinimumHeight(new_height)
+                    widget.setMaximumHeight(new_height)
+                    widget.updateGeometry()
 
             custom_layout_timer = QTimer(self)
             custom_layout_timer.timeout.connect(self.layout_fix_timer)
@@ -438,11 +437,7 @@ class MainWindow(QMainWindow):
         """Fixes the height of docks after a new layout is set."""
         info = self._layout_widget_info
         for i in info:
-            # Check that the widget has been correctly cast to dockwidget
-            try:
-                dockwidget = i['widget'].dockwidget
-            except AttributeError:
-                dockwidget = i['widget']
+            dockwidget = i['widget']
             if 'dock-min-width' in i:
                 dockwidget.setMinimumWidth(i['dock-min-width'])
                 dockwidget.setMaximumWidth(i['dock-max-width'])
