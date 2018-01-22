@@ -28,15 +28,11 @@ class MockObserver(AlgorithmObserver):
 
     def __init__(self):
         super(MockObserver, self).__init__()
-        self.starting_handled = False
         self.finish_handled = False
         self.error_message = None
         self.progress_message = None
         self.first_progress_reported = False
         self.second_progress_reported = False
-
-    def startingHandle(self, alg):
-        self.starting_handled = True
 
     def finishHandle(self):
         self.finish_handled = True
@@ -53,20 +49,20 @@ class MockObserver(AlgorithmObserver):
             self.second_progress_reported = True
 
 
+class MockObserverStarting(AlgorithmObserver):
+
+    def __init__(self):
+        super(MockObserverStarting, self).__init__()
+        self.starting_handled = False
+
+    def startingHandle(self, alg):
+        self.starting_handled = True
+
+
 class TestAlgorithmObserver(unittest.TestCase):
 
-    def test_default_observer(self):
-        observer = AlgorithmObserver()
-        observer.observeStarting()
-        algorithm = AlgorithmManager.create("MockAlgorithm", -1)
-        try:
-            # Check that nothing crashes if the base class is used
-            algorithm.execute()
-        except:
-            self.fail('Default AlgorithmObserver is broken')
-
     def test_starting_handle(self):
-        observer = MockObserver()
+        observer = MockObserverStarting()
         observer.observeStarting()
         algorithm = AlgorithmManager.create("MockAlgorithm", -1)
         algorithm.execute()
