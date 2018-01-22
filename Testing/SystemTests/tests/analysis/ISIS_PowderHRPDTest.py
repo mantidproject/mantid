@@ -79,7 +79,7 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        self.tolerance=0.05  # Required for difference in spline data between operating systems
+        self.tolerance=0.25  # Required for difference in spline data between operating systems
         return self.focus_results.getName(), "HRPD66063_focused.nxs"
 
     def cleanup(self):

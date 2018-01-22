@@ -177,6 +177,14 @@ void EnggDiffFittingPresenter::notify(
   case IEnggDiffFittingPresenter::selectRun:
     processSelectRun();
     break;
+
+  case IEnggDiffFittingPresenter::updatePlotFittedPeaks:
+    processUpdatePlotFitPeaks();
+    break;
+
+  case IEnggDiffFittingPresenter::removeRun:
+    processRemoveRun();
+    break;
   }
 }
 
@@ -246,7 +254,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
     try {
       // should now plot the focused workspace when single peak fitting
       // process fails
-      plotFitPeaksCurves();
+      plotAlignedWorkspace(m_view->plotFittedPeaksEnabled());
 
     } catch (std::runtime_error &re) {
       g_log.error() << "Unable to finish the plotting of the graph for "
@@ -281,21 +289,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
   m_multiRunMode = false;
 }
 
-void EnggDiffFittingPresenter::processSelectRun() {
-  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
-  if (listLabel) {
-    int runNumber;
-    size_t bank;
-    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
-
-    if (m_model->hasFittedPeaksForRun(runNumber, bank)) {
-      plotFitPeaksCurves();
-    } else {
-      const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
-      plotFocusedFile(m_model->hasFittedPeaksForRun(runNumber, bank), ws);
-    }
-  }
-}
+void EnggDiffFittingPresenter::processSelectRun() { updatePlot(); }
 
 void EnggDiffFittingPresenter::processStart() {}
 
@@ -328,10 +322,7 @@ void EnggDiffFittingPresenter::processLoad() {
                                                               pair.second);
                  });
   m_view->enableFittingListWidget(true);
-  m_view->clearFittingListWidget();
-  std::for_each(
-      listWidgetLabels.begin(), listWidgetLabels.end(),
-      [&](const std::string &listLabel) { m_view->addRunNoItem(listLabel); });
+  m_view->updateFittingListWidget(listWidgetLabels);
 
   m_view->enableFitAllButton(m_model->getNumFocusedWorkspaces() > 1);
 }
@@ -346,6 +337,34 @@ void EnggDiffFittingPresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
   for (size_t i = 0; i < msgs.size(); i++) {
     g_log.information() << msgs[i] << '\n';
+  }
+}
+
+void EnggDiffFittingPresenter::processUpdatePlotFitPeaks() { updatePlot(); }
+
+void EnggDiffFittingPresenter::processRemoveRun() {
+  const auto workspaceLabel = m_view->getFittingListWidgetCurrentValue();
+
+  if (workspaceLabel) {
+    const auto runBankPair =
+        runAndBankNumberFromListWidgetLabel(*workspaceLabel);
+    const auto bank = runBankPair.first;
+    const auto runNumber = runBankPair.second;
+    m_model->removeRun(bank, runNumber);
+
+    const auto runNoBankPairs = m_model->getRunNumbersAndBankIDs();
+    std::vector<std::string> listWidgetLabels;
+    std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
+                   std::back_inserter(listWidgetLabels),
+                   [](const std::pair<int, size_t> &pair) {
+                     return listWidgetLabelFromRunAndBankNumber(pair.first,
+                                                                pair.second);
+                   });
+    m_view->updateFittingListWidget(listWidgetLabels);
+  } else {
+    m_view->userWarning("No run selected",
+                        "Tried to remove run but no run was selected.\n"
+                        "Please select a run and try again");
   }
 }
 
@@ -481,7 +500,15 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
 
   // run the algorithm EnggFitPeaks with workspace loaded above
   // requires unit in Time of Flight
-  m_model->enggFitPeaks(runNumber, bank, expectedPeaks);
+  try {
+    m_model->enggFitPeaks(runNumber, bank, expectedPeaks);
+  } catch (const std::runtime_error &exc) {
+    g_log.error() << "Could not run the algorithm EnggFitPeaks successfully."
+                  << exc.what();
+    m_view->userError("Could not run the algorithm EnggFitPeaks successfully",
+                      exc.what());
+    return;
+  }
 
   const auto outFilename = m_view->getCurrentInstrument() +
                            std::to_string(runNumber) +
@@ -609,6 +636,31 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
   }
 }
 
+void EnggDiffFittingPresenter::updatePlot() {
+  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+  if (listLabel) {
+    int runNumber;
+    size_t bank;
+    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
+
+    const bool fitResultsExist = m_model->hasFittedPeaksForRun(runNumber, bank);
+    const bool plotFittedPeaksEnabled = m_view->plotFittedPeaksEnabled();
+
+    if (fitResultsExist) {
+      plotAlignedWorkspace(plotFittedPeaksEnabled);
+    } else {
+      if (plotFittedPeaksEnabled) {
+        m_view->userWarning("Cannot plot fitted peaks",
+                            "Cannot plot fitted peaks, as none have been "
+                            "generated by a fit. Plotting focused workspace "
+                            "instead.");
+      }
+      const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
+      plotFocusedFile(false, ws);
+    }
+  }
+}
+
 bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
@@ -656,7 +708,8 @@ void EnggDiffFittingPresenter::plotFocusedFile(
   }
 }
 
-void EnggDiffFittingPresenter::plotFitPeaksCurves() {
+void EnggDiffFittingPresenter::plotAlignedWorkspace(
+    const bool plotFittedPeaks) {
   try {
 
     // detaches previous plots from canvas
@@ -676,23 +729,14 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 
-    if (m_fittingFinishedOK) {
+    if (plotFittedPeaks) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
       auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false, true,
                             generateXAxisLabel(ws->getAxis(0)->unit()));
       m_view->showStatus("Peaks fitted successfully");
-
-    } else {
-      g_log.notice()
-          << "Focused workspace has been plotted to the "
-             "graph; further peaks can be adding using Peak Tools.\n";
-      g_log.warning() << "Peaks could not be plotted as the fitting process "
-                         "did not finish correctly.\n";
-      m_view->showStatus("No peaks could be fitted");
     }
-
   } catch (std::runtime_error) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "

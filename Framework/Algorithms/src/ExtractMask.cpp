@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ExtractMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
@@ -51,6 +52,11 @@ void ExtractMask::exec() {
 
   // List masked of detector IDs
   std::vector<detid_t> detectorList;
+  const auto &detInfo = inputWS->detectorInfo();
+  const auto &detIds = detInfo.detectorIDs();
+  for (size_t i = 0; i < detInfo.size(); ++i)
+    if (detInfo.isMasked(i))
+      detectorList.push_back(detIds[i]);
 
   // Create a new workspace for the results, copy from the input to ensure
   // that we copy over the instrument and current masking
@@ -69,10 +75,6 @@ void ExtractMask::exec() {
       // special workspaces can mysteriously have the mask bit set
       inputIsMasked = (inputWSIsSpecial && inputMaskWS->isMaskedIndex(i)) ||
                       spectrumInfo.isMasked(i);
-      if (inputIsMasked) {
-        detid_t id = spectrumInfo.detector(i).getID();
-        PARALLEL_CRITICAL(name) { detectorList.push_back(id); }
-      }
     }
     maskWS->setMaskedIndex(i, inputIsMasked);
     prog.report();

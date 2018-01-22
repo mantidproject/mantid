@@ -28,8 +28,10 @@ public:
   virtual Mantid::API::ITableWorkspace_sptr
   getFitResults(const int runNumber, const size_t bank) const = 0;
 
-  virtual std::string getWorkspaceFilename(const int runNumber,
-                                           const size_t bank) const = 0;
+  virtual const std::string &getWorkspaceFilename(const int runNumber,
+                                                  const size_t bank) const = 0;
+
+  virtual void removeRun(const int runNumber, const size_t bank) = 0;
 
   virtual void loadWorkspaces(const std::string &filenames) = 0;
 

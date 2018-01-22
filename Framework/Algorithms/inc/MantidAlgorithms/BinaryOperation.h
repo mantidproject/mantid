@@ -55,11 +55,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport BinaryOperation : public API::Algorithm {
 public:
-  /// Default constructor
-  BinaryOperation();
-  /// Destructor
-  ~BinaryOperation() override;
-
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic"; }
 
@@ -76,6 +71,10 @@ public:
                             const API::MatrixWorkspace_const_sptr &rhs);
 
 protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
+
   // Overridden Algorithm methods
   void exec() override;
   void init() override;
@@ -241,36 +240,36 @@ protected:
   DataObjects::EventWorkspace_sptr m_eout;
 
   /// The property value
-  bool m_AllowDifferentNumberSpectra;
+  bool m_AllowDifferentNumberSpectra{false};
   /// Flag to clear RHS workspace in binary operation
-  bool m_ClearRHSWorkspace;
+  bool m_ClearRHSWorkspace{false};
 
   //------ Requirements -----------
 
   /// matchXSize set to true if the X sizes of histograms must match.
-  bool m_matchXSize;
+  bool m_matchXSize{false};
 
   /// flipSides set to true if the rhs and lhs operands should be flipped - for
   /// commutative binary operations, normally.
-  bool m_flipSides;
+  bool m_flipSides{false};
 
   /// Variable set to true if the operation allows the output to stay as an
   /// EventWorkspace. If this returns false, any EventWorkspace will be
   /// converted to Workspace2D. This is ignored if the lhs operand is not an
   /// EventWorkspace.
-  bool m_keepEventWorkspace;
+  bool m_keepEventWorkspace{false};
 
   /** Are we going to use the histogram representation of the RHS event list
    * when performing the operation?
    * e.g. divide and multiply? Plus and Minus will set this to false (default).
    */
-  bool m_useHistogramForRhsEventWorkspace;
+  bool m_useHistogramForRhsEventWorkspace{false};
 
   /** Special case for plus/minus: if there is only one bin on the RHS, use the
    * 2D method (appending event lists)
    * so that the single bin is not treated as a scalar
    */
-  bool m_do2D_even_for_SingleColumn_on_rhs;
+  bool m_do2D_even_for_SingleColumn_on_rhs{false};
 
 private:
   void doSingleValue();

@@ -80,7 +80,7 @@ class MaxEntView(QtGui.QWidget):
         table_utils.setTableHeaders(self.tableA)
 
         table_utils.setRowName(self.tableA,0,"Chi target")
-        self.chiTarget= table_utils.addDoubleToTable(self.tableA,100,0)
+        self.chiTarget= table_utils.addDoubleToTable(self.tableA,1.0,0)
 
         table_utils.setRowName(self.tableA,1,"Chi (precision)")
         self.chiEps= table_utils.addDoubleToTable(self.tableA,0.001,1)
@@ -150,7 +150,7 @@ class MaxEntView(QtGui.QWidget):
         inputs["ResolutionFactor"]=int(self.resolution_box.text())
         inputs["A"] = float(self.AConst.text())
         inputs["AutoShift"]=self.shift_box.checkState()
-        inputs["ChiTarget"]=float(self.chiTarget.text())
+        inputs["ChiTargetOverN"]=float(self.chiTarget.text())
         inputs["ChiEps"]=float(self.chiEps.text())
         inputs["DistancePenalty"]=float(self.dist.text())
         inputs["MaxAngle"]=float(self.angle.text())

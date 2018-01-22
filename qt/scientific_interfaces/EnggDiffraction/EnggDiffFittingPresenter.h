@@ -78,7 +78,7 @@ public:
   void plotFocusedFile(bool plotSinglePeaks,
                        Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
 
-  void plotFitPeaksCurves();
+  void plotAlignedWorkspace(const bool plotFittedPeaks);
 
 protected:
   void processStart();
@@ -87,6 +87,8 @@ protected:
   void processFitAllPeaks();
   void processShutDown();
   void processLogMsg();
+  void processUpdatePlotFitPeaks();
+  void processRemoveRun();
 
   /// clean shut down of model, view, etc.
   void cleanup();
@@ -96,6 +98,8 @@ protected slots:
   void fittingFinished();
 
 private:
+  void updatePlot();
+
   bool isDigit(const std::string &text) const;
 
   void warnFileNotFound(const std::exception &ex);
