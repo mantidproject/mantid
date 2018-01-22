@@ -2,25 +2,29 @@ from sans.common.enums import SANSInstrument, ISISReductionMode
 from PyQt4 import QtGui, QtCore
 import os
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Option column globals
 # ----------------------------------------------------------------------------------------------------------------------
-SAMPLE_SCATTER_INDEX = 0
-SAMPLE_SCATTER_PERIOD_INDEX = 1
-SAMPLE_TRANSMISSION_INDEX = 2
-SAMPLE_TRANSMISSION_PERIOD_INDEX = 3
-SAMPLE_DIRECT_INDEX = 4
-SAMPLE_DIRECT_PERIOD_INDEX = 5
-CAN_SCATTER_INDEX = 6
-CAN_SCATTER_PERIOD_INDEX = 7
-CAN_TRANSMISSION_INDEX = 8
-CAN_TRANSMISSION_PERIOD_INDEX = 9
-CAN_DIRECT_INDEX = 10
-CAN_DIRECT_PERIOD_INDEX = 11
-OUTPUT_NAME_INDEX = 12
-USER_FILE_INDEX = 13
-OPTIONS_INDEX = 14
-HIDDEN_OPTIONS_INDEX = 15
+def generate_table_index(multi_period):
+    table_index = {}
+    table_index.update({'SAMPLE_SCATTER_INDEX': 0})
+    table_index.update({'SAMPLE_SCATTER_PERIOD_INDEX': 1 if multi_period else None})
+    table_index.update({'SAMPLE_TRANSMISSION_INDEX': 2 if multi_period else 1})
+    table_index.update({'SAMPLE_TRANSMISSION_PERIOD_INDEX': 3 if multi_period else None})
+    table_index.update({'SAMPLE_DIRECT_INDEX': 4 if multi_period else 2})
+    table_index.update({'SAMPLE_DIRECT_PERIOD_INDEX': 5 if multi_period else None})
+    table_index.update({'CAN_SCATTER_INDEX': 6 if multi_period else 3})
+    table_index.update({'CAN_SCATTER_PERIOD_INDEX': 7 if multi_period else None})
+    table_index.update({'CAN_TRANSMISSION_INDEX': 8 if multi_period else 4})
+    table_index.update({'CAN_TRANSMISSION_PERIOD_INDEX': 9 if multi_period else None})
+    table_index.update({'CAN_DIRECT_INDEX': 10 if multi_period else 5})
+    table_index.update({'CAN_DIRECT_PERIOD_INDEX': 11 if multi_period else None})
+    table_index.update({'OUTPUT_NAME_INDEX': 12 if multi_period else 6})
+    table_index.update({'USER_FILE_INDEX': 13 if multi_period else 7})
+    table_index.update({'OPTIONS_INDEX': 14 if multi_period else 8})
+    table_index.update({'HIDDEN_OPTIONS_INDEX': 15 if multi_period else 9})
+    return table_index
 
 OPTIONS_SEPARATOR = ","
 OPTIONS_EQUAL = "="

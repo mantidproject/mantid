@@ -1,7 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 
-#include <map>
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+
 #include <string>
 
 namespace MantidQt {
@@ -44,9 +45,11 @@ public:
 
   /// Pre-processing
   virtual std::string getTransmissionRuns(int group) const = 0;
-  virtual std::string getTransmissionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getTransmissionOptions(int group) const = 0;
   /// Processing
-  virtual std::string getReductionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getReductionOptions(int group) const = 0;
   /// Post-processing
   virtual std::string getStitchOptions(int group) const = 0;
   /// Time-slicing values

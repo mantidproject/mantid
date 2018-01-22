@@ -171,14 +171,6 @@ std::string QtReflSettingsView::getAnalysisMode() const {
   return m_ui.analysisModeComboBox->currentText().toStdString();
 }
 
-/** Return direct beam
-* @return :: direct beam range
-*/
-std::string QtReflSettingsView::getDirectBeam() const {
-
-  return m_ui.directBeamEdit->text().toStdString();
-}
-
 /** Return selected transmission run(s)
 * @return :: selected transmission run(s)
 */

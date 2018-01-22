@@ -6,6 +6,7 @@
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
@@ -33,6 +34,7 @@ GET_POINTER_SPECIALIZATION(ITableWorkspace)
 namespace {
 namespace bpl = boost::python;
 namespace Converters = Mantid::PythonInterface::Converters;
+namespace NumPy = Mantid::PythonInterface::NumPy;
 
 // Numpy PyArray_IsIntegerScalar is broken for Python 3 for numpy < 1.11
 #if PY_MAJOR_VERSION >= 3
@@ -139,7 +141,7 @@ void setValue(const Column_sptr column, const int row,
   }
 #define SET_VECTOR_CELL(R, _, T)                                               \
   else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
-    if (!PyArray_Check(value.ptr())) {                                         \
+    if (!NumPy::NdArray::check(value)) {                                       \
       column->cell<T>(row) =                                                   \
           Converters::PySequenceToVector<T::value_type>(value)();              \
     } else {                                                                   \

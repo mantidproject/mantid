@@ -18,10 +18,12 @@
 #include "../ISISReflectometry/IReflSettingsView.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -62,8 +64,10 @@ public:
   MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
-  MOCK_METHOD2(setRowActionEnabled, void(int, bool));
+  MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
+  MOCK_METHOD1(setTransferButtonEnabled, void(bool));
+  MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
@@ -195,9 +199,9 @@ public:
 
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
-  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(bool));
-  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
-  MOCK_CONST_METHOD0(getReductionOptions, std::string());
+  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
+  MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
+  MOCK_CONST_METHOD0(getReductionOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_METHOD1(setInstrumentName, void(const std::string &));
   void notify(IReflSettingsPresenter::Flag flag) override { UNUSED_ARG(flag); }
@@ -206,9 +210,9 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
-  MOCK_CONST_METHOD2(getTransmissionRuns, std::string(int, bool));
-  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
-  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
+  MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
+  MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   void setInstrumentName(const std::string &instName) override {
     UNUSED_ARG(instName);
@@ -228,8 +232,8 @@ public:
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
   MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
-  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
-  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
+  MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());

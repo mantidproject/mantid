@@ -166,16 +166,13 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("UniformEven"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(6)
-        .WillRepeatedly(Return(QString()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -210,7 +207,7 @@ public:
     TS_ASSERT(workspaceExists("TOF_13462_monitors"));
     TS_ASSERT(workspaceExists("TRANS_13463"));
     TS_ASSERT(workspaceExists("TRANS_13464"));
-    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463+13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -253,16 +250,13 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Uniform"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(8)
-        .WillRepeatedly(Return(QString()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -308,7 +302,7 @@ public:
     TS_ASSERT(workspaceExists("TOF_13462_monitors"));
     TS_ASSERT(workspaceExists("TRANS_13463"));
     TS_ASSERT(workspaceExists("TRANS_13464"));
-    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463+13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -351,16 +345,13 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(6)
-        .WillRepeatedly(Return(QString()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -395,7 +386,7 @@ public:
     TS_ASSERT(workspaceExists("TOF_13462_monitors"));
     TS_ASSERT(workspaceExists("TRANS_13463"));
     TS_ASSERT(workspaceExists("TRANS_13464"));
-    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463+13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -438,16 +429,13 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("LogValue"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(6)
-        .WillRepeatedly(Return(QString()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -482,7 +470,7 @@ public:
     TS_ASSERT(workspaceExists("TOF_13462_monitors"));
     TS_ASSERT(workspaceExists("TRANS_13463"));
     TS_ASSERT(workspaceExists("TRANS_13464"));
-    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463+13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -525,16 +513,13 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(1)
-        .WillOnce(Return(QString()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(QString()));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
@@ -589,16 +574,13 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())

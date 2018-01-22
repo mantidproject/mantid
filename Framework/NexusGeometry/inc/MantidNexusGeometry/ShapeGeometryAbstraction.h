@@ -4,7 +4,7 @@
 // Includes
 //------------------
 
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include "MantidNexusGeometry/ShapeAbstractCreator.h"
@@ -18,7 +18,7 @@
 namespace Mantid {
 namespace NexusGeometry {
 
-typedef boost::shared_ptr<Geometry::Object> objectHolder;
+typedef boost::shared_ptr<Geometry::IObject> objectHolder;
 typedef boost::shared_ptr<Geometry::Surface> surfaceHolder;
 
 class DLLExport ShapeGeometryAbstraction

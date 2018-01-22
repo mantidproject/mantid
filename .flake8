@@ -14,6 +14,7 @@ exclude =
     installers,
     instrument,
     MantidPlot,
+    qt/applications/workbench/workbench/app/resources.py,
     qt/paraview_ext,
     qt/scientific_interfaces,
     qt/widgets,

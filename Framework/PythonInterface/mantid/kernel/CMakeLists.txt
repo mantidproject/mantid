@@ -36,6 +36,7 @@ set ( EXPORT_FILES
   src/Exports/ListValidator.cpp
   src/Exports/ArrayLengthValidator.cpp
   src/Exports/ArrayBoundedValidator.cpp
+  src/Exports/ArrayOrderedPairsValidator.cpp
   src/Exports/MandatoryValidator.cpp
   src/Exports/CompositeValidator.cpp
   src/Exports/LogFilter.cpp

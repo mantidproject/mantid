@@ -8,6 +8,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+using namespace MantidQt::MantidWidgets::DataProcessor;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -37,13 +39,11 @@ void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
 /** Returns values passed for 'Transmission run(s)'
 *
 * @param group :: The group from which to get the values
-* @param loadRuns :: If true, will try to load transmission runs as well
 * @return :: Values passed for 'Transmission run(s)'
 */
-std::string ReflSettingsTabPresenter::getTransmissionRuns(int group,
-                                                          bool loadRuns) const {
+std::string ReflSettingsTabPresenter::getTransmissionRuns(int group) const {
 
-  return m_settingsPresenters.at(group)->getTransmissionRuns(loadRuns);
+  return m_settingsPresenters.at(group)->getTransmissionRuns();
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -51,7 +51,7 @@ std::string ReflSettingsTabPresenter::getTransmissionRuns(int group,
 * @param group :: The group from which to get the options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-std::string ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
+OptionsQMap ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
 
   return m_settingsPresenters.at(group)->getTransmissionOptions();
 }
@@ -61,7 +61,7 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
 * @param group :: The group from which to get the options
 * @return :: Global options for 'ReflectometryReductionOneAuto'
 */
-std::string ReflSettingsTabPresenter::getReductionOptions(int group) const {
+OptionsQMap ReflSettingsTabPresenter::getReductionOptions(int group) const {
 
   return m_settingsPresenters.at(group)->getReductionOptions();
 }

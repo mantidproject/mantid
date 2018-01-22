@@ -20,11 +20,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-SumSpectra::SumSpectra()
-    : API::Algorithm(), m_outSpecNum(0), m_keepMonitors(false),
-      m_replaceSpecialValues(false), m_numberOfSpectra(0), m_yLength(0),
-      m_indices(), m_calculateWeightedSum(false) {}
-
 /** Initialisation method.
  *
  */

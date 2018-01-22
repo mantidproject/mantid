@@ -1,4 +1,5 @@
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Surface.h"
@@ -70,7 +71,8 @@ objectHolder
 ShapeGeometryAbstraction::createShape(std::map<int, surfaceHolder> &surfaces,
                                       std::string &algebra,
                                       std::vector<double> &boundingBox) {
-  objectHolder shape = boost::make_shared<Geometry::Object>();
+  boost::shared_ptr<Geometry::CSGObject> shape =
+      boost::make_shared<Geometry::CSGObject>();
   shape->setObject(21, algebra);
   shape->populate(surfaces);
   // Boundingbox x,y,z:max; x,y,z:min

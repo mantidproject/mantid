@@ -487,10 +487,12 @@ class BASISDiffraction(DataProcessorAlgorithm):
         Create a temporary file and flag for removal upon algorithm completion.
         :return: (str) absolute path to the temporary file.
         """
-        file_object, file_name = \
-            tempfile.mkstemp(prefix='BASISDiffraction_',
-                             suffix='.nxs',
-                             dir=mantid_config['defaultsave.directory'])
+        f = tempfile.NamedTemporaryFile(prefix='BASISDiffraction_',
+                                        suffix='.nxs',
+                                        dir=mantid_config['defaultsave.directory'],
+                                        delete=False)
+        file_name = f.name
+        f.close()
         self._temps.files.append(file_name)  # flag for removal
         return file_name
 

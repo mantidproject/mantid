@@ -10,7 +10,7 @@ class GeometryHandler;
 class OCGeometryRenderer;
 class OCGeometryGenerator;
 class IObjComponent;
-class Object;
+class CSGObject;
 /**
    \class OCGeometryHandler
    \brief Place holder for OpenCascade library geometry triangulation and
@@ -55,15 +55,15 @@ private:
   OCGeometryGenerator *
       Triangulator; ///< Geometry generator to triangulate Object
 public:
-  OCGeometryHandler(IObjComponent *comp);           ///< Constructor
-  OCGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
-  OCGeometryHandler(Object *obj);                   ///< Constructor
+  OCGeometryHandler(IObjComponent *comp);              ///< Constructor
+  OCGeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
+  OCGeometryHandler(CSGObject *obj);                   ///< Constructor
   boost::shared_ptr<GeometryHandler>
   clone() const override;        ///< Virtual copy constructor
   ~OCGeometryHandler() override; ///< Destructor
   GeometryHandler *createInstance(IObjComponent *comp) override;
-  GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
-  GeometryHandler *createInstance(Object *) override;
+  GeometryHandler *createInstance(boost::shared_ptr<CSGObject> obj) override;
+  GeometryHandler *createInstance(CSGObject *) override;
   void Triangulate() override;
   void Render() override;
   void Initialize() override;

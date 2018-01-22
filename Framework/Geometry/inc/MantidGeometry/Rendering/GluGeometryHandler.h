@@ -12,7 +12,7 @@ namespace Geometry {
 class GeometryHandler;
 class GluGeometryRenderer;
 class IObjComponent;
-class Object;
+class CSGObject;
 /**
    \class GluGeometryHandler
    \brief Place holder for geometry triangulation and rendering with special
@@ -71,14 +71,14 @@ private:
       type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 public:
   GluGeometryHandler(const GluGeometryHandler &other);
-  GluGeometryHandler(IObjComponent *comp);           ///< Constructor
-  GluGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
-  GluGeometryHandler(Object *obj);                   ///< Constructor
+  GluGeometryHandler(IObjComponent *comp);              ///< Constructor
+  GluGeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
+  GluGeometryHandler(CSGObject *obj);                   ///< Constructor
   boost::shared_ptr<GeometryHandler> clone() const override;
   ~GluGeometryHandler() override; ///< Destructor
   GeometryHandler *createInstance(IObjComponent *comp) override;
-  GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
-  GeometryHandler *createInstance(Object *) override;
+  GeometryHandler *createInstance(boost::shared_ptr<CSGObject> obj) override;
+  GeometryHandler *createInstance(CSGObject *) override;
   /// sets the geometry handler for a cuboid
   void setCuboid(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &,
                  const Kernel::V3D &);

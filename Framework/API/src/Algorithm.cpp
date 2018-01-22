@@ -775,7 +775,7 @@ void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
   for (auto prop : props) {
     auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (prop->direction() == Mantid::Kernel::Direction::Output && wsProp) {
-      if (prop->value().empty()) {
+      if (prop->value().empty() && !wsProp->isOptional()) {
         prop->createTemporaryValue();
       }
     }
@@ -1301,7 +1301,7 @@ bool Algorithm::processGroups() {
   // ---------- Create all the output workspaces ----------------------------
   for (auto &pureOutputWorkspaceProp : m_pureOutputWorkspaceProps) {
     Property *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
-    if (prop) {
+    if (prop && !prop->value().empty()) {
       auto outWSGrp = boost::make_shared<WorkspaceGroup>();
       outGroups.push_back(outWSGrp);
       // Put the GROUP in the ADS
@@ -1370,6 +1370,8 @@ bool Algorithm::processGroups() {
               dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp])) {
         // Default name = "in1_in2_out"
         const std::string inName = prop->value();
+        if (inName.empty())
+          continue;
         std::string outName;
         if (m_groupsHaveSimilarNames) {
           outName.append(inName).append("_").append(
@@ -1419,6 +1421,10 @@ bool Algorithm::processGroups() {
     // this has to be done after execute() because a workspace must exist
     // when it is added to a group
     for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
+      Property *prop =
+          dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
+      if (prop && prop->value().empty())
+        continue;
       // And add it to the output group
       outGroups[owp]->add(outputWSNames[owp]);
     }

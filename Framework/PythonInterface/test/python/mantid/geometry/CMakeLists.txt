@@ -3,10 +3,10 @@
 ##
 set ( TEST_PY_FILES
   BoundingBoxTest.py
+  CSGObjectTest.py
   GoniometerTest.py
   IComponentTest.py
   InstrumentTest.py
-  ObjectTest.py
   OrientedLatticeTest.py
   RectangularDetectorTest.py
   ReferenceFrameTest.py

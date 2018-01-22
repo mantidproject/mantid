@@ -7,7 +7,7 @@ class TopoDS_Shape;
 
 namespace Mantid {
 namespace Geometry {
-class Object;
+class CSGObject;
 class Intersection;
 class Union;
 class SurfPoint;
@@ -54,13 +54,13 @@ class Torus;
 */
 class MANTID_GEOMETRY_DLL OCGeometryGenerator {
 private:
-  const Object *Obj;        ///< Input Object
+  const CSGObject *Obj;     ///< Input Object
   TopoDS_Shape *ObjSurface; ///< Storage for the output surface
   /// Analyze the object
   void AnalyzeObject();
 
 public:
-  OCGeometryGenerator(const Object *obj);
+  OCGeometryGenerator(const CSGObject *obj);
   ~OCGeometryGenerator();
   void Generate();
   TopoDS_Shape *getObjectSurface();

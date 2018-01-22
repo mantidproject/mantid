@@ -52,7 +52,8 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         spectra = flags['spectra']
         sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
                                          flags['diff_mode'], fit_mode,
-                                         flags.get('bin_parameters', None))
+                                         flags.get('bin_parameters', None),
+                                         flags.get('load_log_files', True))
         flags['runs'] = runs
         if spectra == 'backward' or spectra == 'forward':
             flags['back_scattering'] = spectra == 'backward'
@@ -74,7 +75,8 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             container_data = load_and_crop_data(flags['container_runs'], spectra,
                                                 flags['ip_file'],
                                                 flags['diff_mode'], fit_mode,
-                                                flags.get('bin_parameters', None))
+                                                flags.get('bin_parameters', None),
+                                                flags.get('load_log_files', True))
 
     return fit_tof_impl(sample_data, container_data, flags, iterations, convergence_threshold)
 
@@ -343,7 +345,7 @@ def fit_tof_iteration(sample_data, container_data, flags):
 
 
 def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
-                       fit_mode='spectra', rebin_params=None):
+                       fit_mode='spectra', rebin_params=None, load_log_files=True):
     """
     @param runs The string giving the runs to load
     @param spectra A list of spectra to load
@@ -379,10 +381,10 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
     else:
         diff_mode = "SingleDifference"
 
-    kwargs = {"Filename": runs,
-              "Mode": diff_mode, "InstrumentParFile": ip_file,
-              "SpectrumList": spectra, "SumSpectra": sum_spectra,
-              "OutputWorkspace": output_name}
+    kwargs = {"Filename": runs, "Mode": diff_mode,
+              "InstrumentParFile": ip_file, "SpectrumList": spectra,
+              "SumSpectra": sum_spectra, "OutputWorkspace": output_name,
+              'LoadLogFiles' : load_log_files}
     full_range = ms.LoadVesuvio(**kwargs)
     tof_data = ms.CropWorkspace(InputWorkspace=full_range,
                                 XMin=instrument.tof_range[0],

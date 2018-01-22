@@ -26,7 +26,7 @@ namespace IDA {
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
     : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr),
       m_parent(nullptr), m_inputWorkspace(), m_previewPlotWorkspace(),
-      m_selectedSpectrum(0) {
+      m_selectedSpectrum(0), m_minSpectrum(0), m_maxSpectrum(0) {
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
 
   // Create Editor Factories
@@ -311,14 +311,17 @@ void IndirectDataAnalysisTab::updatePlot(
 void IndirectDataAnalysisTab::updatePlotRange(
     const QString &rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot,
     const QString &startRangePropName, const QString &endRangePropName) {
-  try {
-    const QPair<double, double> curveRange =
-        previewPlot->getCurveRange("Sample");
-    auto rangeSelector = previewPlot->getRangeSelector(rangeName);
-    setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
-                         m_properties[endRangePropName], curveRange);
-  } catch (std::exception &exc) {
-    showMessageBox(exc.what());
+
+  if (inputWorkspace()) {
+    try {
+      const QPair<double, double> curveRange =
+          previewPlot->getCurveRange("Sample");
+      auto rangeSelector = previewPlot->getRangeSelector(rangeName);
+      setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
+                           m_properties[endRangePropName], curveRange);
+    } catch (std::exception &exc) {
+      showMessageBox(exc.what());
+    }
   }
 }
 

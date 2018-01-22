@@ -195,7 +195,7 @@ ConfigServiceImpl::ConfigServiceImpl()
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
   m_ConfigPaths.emplace("mantidqt.python_interfaces_directory", true);
-  m_ConfigPaths.emplace("plugins.directory", true);
+  m_ConfigPaths.emplace("framework.plugins.directory", true);
   m_ConfigPaths.emplace("pvplugins.directory", false);
   m_ConfigPaths.emplace("mantidqt.plugins.directory", false);
   m_ConfigPaths.emplace("instrumentDefinition.directory", true);
@@ -2089,14 +2089,13 @@ void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
 }
 
 /** Sets the Log level for a filter channel
- * @param filterChannelName the channel name of the filter channel to change
- * @param logLevel the integer value of the log level to set, 1=Critical,
- * 7=Debug
- * @throws std::invalid_argument if the channel name is incorrect or it is not a
- * filterChannel
- */
+* @param filterChannelName the channel name of the filter channel to change
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+* @throws std::invalid_argument if the channel name is incorrect or it is not a
+* filterChannel
+*/
 void ConfigServiceImpl::setFilterChannelLogLevel(
-    const std::string &filterChannelName, int logLevel) {
+    const std::string &filterChannelName, int logLevel, bool quiet) {
   Poco::Channel *channel = nullptr;
   try {
     channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
@@ -2115,9 +2114,11 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
     if (rootLevel != lowestLogLevel) {
       Mantid::Kernel::Logger::setLevelForAll(lowestLogLevel);
     }
-    g_log.log(filterChannelName + " log channel set to " +
-                  Logger::PriorityNames[logLevel] + " priority",
-              static_cast<Logger::Priority>(logLevel));
+    if (!quiet) {
+      g_log.log(filterChannelName + " log channel set to " +
+                    Logger::PriorityNames[logLevel] + " priority",
+                static_cast<Logger::Priority>(logLevel));
+    }
   } else {
     throw std::invalid_argument(filterChannelName +
                                 " was not a filter channel");

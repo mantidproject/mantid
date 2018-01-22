@@ -6,7 +6,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/IObjComponent.h"
 
 namespace Mantid {
@@ -65,7 +65,7 @@ public:
   static bool compareName(const std::string &proposedMatch);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(boost::shared_ptr<Object> shape, int xpixels, double xstart,
+  void initialize(boost::shared_ptr<IObject> shape, int xpixels, double xstart,
                   double xstep, int ypixels, double ystart, double ystep,
                   int idstart, bool idfillbyfirst_y, int idstepbyrow,
                   int idstep = 1);
@@ -151,7 +151,7 @@ public:
   void initDraw() const override;
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> shape() const override;
+  const boost::shared_ptr<const IObject> shape() const override;
   /// Returns the material of the detector
   const Kernel::Material material() const override;
 
@@ -192,7 +192,7 @@ private:
   unsigned int m_textureID;
 
   /// Pointer to the shape of the pixels in this detector array.
-  boost::shared_ptr<Object> mShape;
+  boost::shared_ptr<IObject> mShape;
   /// minimum detector id
   int m_minDetId;
   /// maximum detector id

@@ -12,6 +12,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <boost/python/stl_iterator.hpp>
 #include <boost/python/str.hpp>
 
 using namespace Mantid::Kernel;
@@ -80,11 +81,16 @@ void setProperty(IPropertyManager &self, const boost::python::object &name,
 }
 
 void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
-  const boost::python::list keys = kwargs.keys();
-  const size_t numItems = boost::python::len(keys);
-  for (size_t i = 0; i < numItems; ++i) {
-    const boost::python::object value = kwargs[keys[i]];
-    setProperty(self, keys[i], value);
+#if PY_MAJOR_VERSION >= 3
+  const object view = kwargs.attr("items")();
+  const object objectItems(handle<>(PyObject_GetIter(view.ptr())));
+#else
+  const object objectItems = kwargs.iteritems();
+#endif
+  auto begin = stl_input_iterator<object>(objectItems);
+  auto end = stl_input_iterator<object>();
+  for (auto it = begin; it != end; ++it) {
+    setProperty(self, (*it)[0], (*it)[1]);
   }
 }
 

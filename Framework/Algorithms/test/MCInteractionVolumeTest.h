@@ -137,7 +137,7 @@ public:
         MCInteractionVolume mcv(sample, sample.getShape().getBoundingBox()),
         std::invalid_argument);
     // valid shape
-    sample.setShape(*ComponentCreationHelper::createSphere(1));
+    sample.setShape(ComponentCreationHelper::createSphere(1));
     TS_ASSERT_THROWS_NOTHING(
         MCInteractionVolume mcv(sample, sample.getShape().getBoundingBox()));
   }

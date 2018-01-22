@@ -1473,7 +1473,7 @@ void FindPeaks::createFunctions() {
   // FIXME (No In This Ticket)  Need to have a uniformed routine to name
   // background function
   std::string backgroundposix;
-  if (m_backgroundType.compare("Quadratic")) {
+  if (m_backgroundType != "Quadratic") {
     // FlatBackground, LinearBackground, Quadratic
     backgroundposix = "Background";
   }

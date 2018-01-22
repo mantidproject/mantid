@@ -97,8 +97,9 @@ build/
 *.tmp
 *.vspscc
 .builds
-qt/python/mantidqt/utils/qt/plugins.py
 *.egg-info/
+qt/python/mantidqt/utils/qt/plugins.py
+qt/applications/workbench/workbench/app/resources.py
 
 # Visual C++ cache files
 ipch/

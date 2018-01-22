@@ -8,7 +8,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Geometry;
@@ -342,8 +342,7 @@ public:
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</cylinder>";
-    boost::shared_ptr<Object> s =
-        Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
+    auto s = Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");
     Component *det1 = new ObjComponent("Det1Name", s);
@@ -357,7 +356,7 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    boost::shared_ptr<Object> shape = bank.createOutline();
+    boost::shared_ptr<IObject> shape = bank.createOutline();
     TS_ASSERT(shape);
 
     int otype;
@@ -379,8 +378,7 @@ public:
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</segmented-cylinder>";
-    boost::shared_ptr<Object> s =
-        Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
+    auto s = Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");
     Component *det1 = new ObjComponent("Det1Name", s);
@@ -394,7 +392,7 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    TS_ASSERT_THROWS(boost::shared_ptr<Object> shape = bank.createOutline(),
+    TS_ASSERT_THROWS(boost::shared_ptr<IObject> shape = bank.createOutline(),
                      std::runtime_error);
   }
 };

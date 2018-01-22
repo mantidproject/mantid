@@ -48,11 +48,13 @@ set ( TEST_PY_FILES
   LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
+  LoadLampTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
   LoadNMoldyn3AsciiTest.py
   LoadNMoldyn4Ascii1DTest.py
   LoadNMoldyn4AsciiTest.py
+  LRPeakSelectionTest.py
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
