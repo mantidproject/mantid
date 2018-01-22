@@ -95,6 +95,7 @@ QApplication.processEvents(QEventLoop.AllEvents)
 # -----------------------------------------------------------------------------
 from mantidqt.py3compat import qbytearray_to_str  # noqa
 from mantidqt.utils.qt import add_actions, create_action  # noqa
+from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 from workbench.config.main import CONF  # noqa
 from workbench.external.mantid import prepare_mantid_env  # noqa
 
@@ -126,8 +127,6 @@ class MainWindow(QMainWindow):
         self.editor = None
         self.algorithm_selector = None
         self.widgets = []
-        # Pop-up widgets
-        self.manage_directory_widget = None
 
         # Widget layout map: required for use in Qt.connection
         self._layout_widget_info = None
@@ -472,17 +471,8 @@ class MainWindow(QMainWindow):
         self.editor.save_current_file()
 
     def open_manage_directories(self):
-        # todo: get this to show dialog - import appears to work (code reach cpp debug)
-        if self.manage_directory_widget is None:  # Create if not initialized
-            from workbench.plugins.manageuserdirectories import ManageUserDirectoriesWidget
-            self.manage_directory_widget = ManageUserDirectoriesWidget(self)
-            self.manage_directory_widget.show()
-
-        elif self.manage_directory_widget.isVisible():  # Focus widget if already open
-            self.manage_directory_widget.setFocus()
-        else:
-            self.manage_directory_widget.show()
-            self.manage_directory_widget.setFocus()
+        manage_directory_widget = ManageUserDirectories(self)
+        manage_directory_widget.show()
 
 
 def initialize():
