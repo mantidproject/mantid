@@ -72,6 +72,7 @@ class FocusTest(stresstesting.MantidStressTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
+    self.tolerance = 1e-13
 
     def requiredFiles(self):
         return _gen_required_files()
