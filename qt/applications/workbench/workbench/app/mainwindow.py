@@ -477,6 +477,7 @@ class MainWindow(QMainWindow):
     def open_manage_directories(self):
         ManageUserDirectories(self).exec_()
 
+
 def initialize():
     """Perform an initialization of the application instance. Most notably
     this patches sys.exit so that it does nothing.
