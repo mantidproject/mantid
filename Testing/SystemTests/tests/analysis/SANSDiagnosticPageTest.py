@@ -101,6 +101,28 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         reference_file_name = "SANS2D_ws_diagnostic_referance.nxs"
         self._compare_workspace(output_workspaces[0], reference_file_name)
 
+    def test_that_produces_correct_workspace_multiperiod_LARMOR(self):
+        # Arrange
+        # Build the data information
+        data_builder = get_data_builder(SANSFacility.ISIS)
+        data_builder.set_sample_scatter("LARMOR00013065")
+        data_builder.set_calibration("80tubeCalibration_1-05-2015_r3157-3160.nxs")
+        data_state = data_builder.build()
+
+        # Get the rest of the state from the user file
+        user_file_director = StateDirectorISIS(data_state)
+        user_file_director.set_user_file("USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt")
+
+        # Construct the final state
+        state = user_file_director.construct()
+
+        # Act
+        output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
+
+        # Evaluate it up to a defined point
+        reference_file_name = "LARMOR_ws_diagnostic_referance.nxs"
+        self._compare_workspace(output_workspaces[0], reference_file_name)
+
 
 class SANSDiagnosticPageRunnerTest(stresstesting.MantidStressTest):
     def __init__(self):
