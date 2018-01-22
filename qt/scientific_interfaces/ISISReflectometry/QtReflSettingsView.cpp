@@ -2,6 +2,7 @@
 #include "ReflSettingsPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include <QMessageBox>
+#include "MantidKernel/System.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -11,13 +12,15 @@ using namespace MantidQt::MantidWidgets;
 //----------------------------------------------------------------------------------------------
 /** Constructor
 * @param parent :: [input] The parent of this widget
+* @param group :: The number of the group this settings view's settings
+* correspond to.
 */
-QtReflSettingsView::QtReflSettingsView(QWidget *parent) {
+QtReflSettingsView::QtReflSettingsView(int group, QWidget *parent) {
 
   UNUSED_ARG(parent);
   initLayout();
 
-  m_presenter.reset(new ReflSettingsPresenter(this));
+  m_presenter.reset(new ReflSettingsPresenter(this, group));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -37,13 +40,86 @@ void QtReflSettingsView::initLayout() {
           SLOT(requestInstDefaults()));
   connect(m_ui.expSettingsGroup, SIGNAL(clicked(bool)), this,
           SLOT(setPolarisationOptionsEnabled(bool)));
+  connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(summationTypeChanged(int)));
+  connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
+          SLOT(setDetectorCorrectionEnabled(bool)));
+
+  connectChangeListeners();
+}
+
+void QtReflSettingsView::connectSettingsChange(QLineEdit *edit) {
+  connect(edit, SIGNAL(textChanged(QString const &)), this,
+          SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::connectSettingsChange(QComboBox *edit) {
+  connect(edit, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::connectSettingsChange(QCheckBox *edit) {
+  connect(edit, SIGNAL(stateChanged(int)), this, SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::connectSettingsChange(QGroupBox *edit) {
+  connect(edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::connectChangeListeners() {
+  connectExperimentSettingsChangeListeners();
+  connectInstrumentSettingsChangeListeners();
+}
+
+void QtReflSettingsView::connectInstrumentSettingsChangeListeners() {
+  connectSettingsChange(m_ui.instSettingsGroup);
+  connectSettingsChange(m_ui.intMonCheckBox);
+  connectSettingsChange(m_ui.monIntMinEdit);
+  connectSettingsChange(m_ui.monIntMaxEdit);
+  connectSettingsChange(m_ui.monBgMinEdit);
+  connectSettingsChange(m_ui.monBgMaxEdit);
+  connectSettingsChange(m_ui.lamMinEdit);
+  connectSettingsChange(m_ui.lamMaxEdit);
+  connectSettingsChange(m_ui.I0MonIndexEdit);
+  connectSettingsChange(m_ui.procInstEdit);
+  connectSettingsChange(m_ui.detectorCorrectionTypeComboBox);
+  connectSettingsChange(m_ui.correctDetectorsCheckBox);
+  connectSettingsChange(m_ui.reductionTypeComboBox);
+  connectSettingsChange(m_ui.summationTypeComboBox);
+}
+
+void QtReflSettingsView::connectExperimentSettingsChangeListeners() {
+  connectSettingsChange(m_ui.expSettingsGroup);
+  connectSettingsChange(m_ui.analysisModeComboBox);
+  connectSettingsChange(m_ui.transmissionRunsEdit);
+  connectSettingsChange(m_ui.startOverlapEdit);
+  connectSettingsChange(m_ui.endOverlapEdit);
+  connectSettingsChange(m_ui.polCorrComboBox);
+  connectSettingsChange(m_ui.CRhoEdit);
+  connectSettingsChange(m_ui.CAlphaEdit);
+  connectSettingsChange(m_ui.CApEdit);
+  connectSettingsChange(m_ui.CPpEdit);
+  connectSettingsChange(m_ui.momentumTransferStepEdit);
+  connectSettingsChange(m_ui.scaleFactorEdit);
+}
+
+void QtReflSettingsView::notifySettingsChanged() {
+  m_presenter->notify(IReflSettingsPresenter::SettingsChangedFlag);
+}
+
+void QtReflSettingsView::summationTypeChanged(int reductionTypeIndex) {
+  UNUSED_ARG(reductionTypeIndex);
+  m_presenter->notify(IReflSettingsPresenter::Flag::SummationTypeChanged);
+}
+
+void QtReflSettingsView::setReductionTypeEnabled(bool enable) {
+  m_ui.reductionTypeComboBox->setEnabled(enable);
 }
 
 /** Returns the presenter managing this view
 * @return :: A pointer to the presenter
 */
 IReflSettingsPresenter *QtReflSettingsView::getPresenter() const {
-
   return m_presenter.get();
 }
 
@@ -129,6 +205,10 @@ void QtReflSettingsView::setInstDefaults(InstrumentOptionDefaults defaults) {
   setSelected(*m_ui.detectorCorrectionTypeComboBox,
               defaults.DetectorCorrectionType);
   setText(*m_ui.procInstEdit, defaults.ProcessingInstructions);
+}
+
+void QtReflSettingsView::setDetectorCorrectionEnabled(bool enabled) {
+  m_ui.detectorCorrectionTypeComboBox->setEnabled(enabled);
 }
 
 /* Sets the enabled status of polarisation corrections and parameters
@@ -337,11 +417,23 @@ std::string QtReflSettingsView::getProcessingInstructions() const {
   return getText(*m_ui.procInstEdit);
 }
 
+std::string QtReflSettingsView::getReductionType() const {
+  return getText(*m_ui.reductionTypeComboBox);
+}
+
+std::string QtReflSettingsView::getSummationType() const {
+  return getText(*m_ui.summationTypeComboBox);
+}
+
 /** Return selected correction type
 * @return :: selected correction type
 */
 std::string QtReflSettingsView::getDetectorCorrectionType() const {
   return getText(*m_ui.detectorCorrectionTypeComboBox);
+}
+
+bool QtReflSettingsView::detectorCorrectionEnabled() const {
+  return m_ui.correctDetectorsCheckBox->isChecked();
 }
 
 /** Returns the status of experiment settings group

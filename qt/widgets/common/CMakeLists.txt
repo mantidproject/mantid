@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/AlgorithmInputHistory.cpp
 	src/AlgorithmPropertiesWidget.cpp
 	src/AlgorithmRunner.cpp
+	src/AlternateCSPythonLexer.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
 	src/DropEventHelper.cpp
@@ -93,6 +94,7 @@ set ( SRC_FILES
 	src/LogValueSelector.cpp
 	src/MWDiag.cpp
 	src/MantidHelpWindow.cpp
+	src/MantidTreeModel.cpp
 	src/MantidTreeWidget.cpp
 	src/MantidTreeWidgetItem.cpp
 	src/MantidWSIndexDialog.cpp
@@ -117,8 +119,9 @@ set ( SRC_FILES
 	src/TrackedAction.cpp
 	src/UserFunctionDialog.cpp
 	src/WorkspacePresenter/ADSAdapter.cpp
-	src/WorkspacePresenter/WorkspaceTreeWidget.cpp
 	src/WorkspacePresenter/WorkspacePresenter.cpp
+    src/WorkspacePresenter/WorkspaceTreeWidget.cpp
+	src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
@@ -196,6 +199,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/IndirectInstrumentConfig.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
+  inc/MantidQtWidgets/Common/MantidTreeModel.h
   inc/MantidQtWidgets/Common/MantidTreeWidget.h
   inc/MantidQtWidgets/Common/MantidHelpWindow.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
@@ -226,7 +230,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
-
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
@@ -251,6 +255,7 @@ set ( INC_FILES
 	${MOC_FILES}
 	inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
 	inc/MantidQtWidgets/Common/AlgorithmRunner.h
+	inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
 	inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/Configurable.h
 	inc/MantidQtWidgets/Common/DllOption.h

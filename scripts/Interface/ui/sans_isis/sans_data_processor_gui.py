@@ -217,7 +217,23 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Q Resolution
         self.q_resolution_moderator_file_push_button.clicked.connect(self._on_load_moderator_file)
 
+        self.plot_results_checkbox.stateChanged.connect(self._on_plot_results_toggled)
+        self.use_optimizations_checkbox.stateChanged.connect(self._on_use_optimisations_changed)
+
+        self.output_mode_memory_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_file_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_both_radio_button.toggled.connect(self._on_output_mode_changed)
+
         return True
+
+    def _on_output_mode_changed(self, state):
+        self.data_processor_table.settingsChanged()
+
+    def _on_use_optimisations_changed(self, state):
+        self.data_processor_table.settingsChanged()
+
+    def _on_plot_results_toggled(self, state):
+        self.data_processor_table.settingsChanged()
 
     def create_data_table(self, show_periods):
         # Delete an already existing table
