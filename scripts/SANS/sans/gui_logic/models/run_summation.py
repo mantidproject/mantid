@@ -1,7 +1,6 @@
 import SANSadd2
-from mantid.kernel import *
-from mantid.api import *
 from ui.sans_isis.work_handler import WorkHandler
+
 
 class RunSummation(object):
     def __init__(self, work_handler):
