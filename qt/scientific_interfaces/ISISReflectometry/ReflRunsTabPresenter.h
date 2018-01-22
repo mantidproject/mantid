@@ -85,6 +85,7 @@ public:
   /// Reduction paused/resumed confirmation handler
   void confirmReductionPaused() const override;
   void confirmReductionResumed() const override;
+  void settingsChanged(int group) override;
 
 private:
   /// The search model

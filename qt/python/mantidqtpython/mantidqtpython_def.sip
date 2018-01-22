@@ -1575,6 +1575,7 @@ QString getCell(int, int, int parentRow = 0, int parentColumn = 0);
 int getNumberOfRows();
 void clearTable();
 void skipProcessing();
+void settingsChanged();
 
 signals:
 void runPythonCode(const QString &);
@@ -2459,4 +2460,41 @@ private:
 };
 
 };//end namespace MantidWidgets
+
+
+namespace SpectrumView 
+{
+class SpectrumView : QMainWindow
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
+%End
+
+%Docstring
+    This is the QMainWindow for the SpectrumView data viewer.  Data is
+    displayed in an SpectrumView, by constructing the SpectrumView object and
+    specifying a particular data source.
+%End
+public:
+    SpectrumView(QWidget *parent=nullptr);
+    void renderWorkspace(const QString &wsName);
+%Docstring
+    Renders a workspace in the SpectrumViewer
+
+    Args:
+        wsName The name of the workspace to be rendered.
+%End
+
+    void selectData(int spectrumNumber, double dataVal);
+%Docstring
+    Programmatically set horizontal and vertical graph data.
+
+    Args:
+        spectrumNumber SpectrumNumber in the workspace to be displayed.
+        dataVal Data value to be displayed (based on workspace units).
+%End
+private:
+    SpectrumView(const MantidQt::SpectrumView::SpectrumView &);
+};
+};//end namespace SpectrumView
 };//end namespace MantidQt

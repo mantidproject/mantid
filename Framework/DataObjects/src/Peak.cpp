@@ -707,14 +707,16 @@ void Peak::setMonitorCount(double m_monitorCount) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get the final neutron energy */
+/** Get the final neutron energy in meV */
 double Peak::getFinalEnergy() const { return m_finalEnergy; }
 
-/** Get the initial (incident) neutron energy */
+/** Get the initial (incident) neutron energy in meV */
 double Peak::getInitialEnergy() const { return m_initialEnergy; }
 
-/** Get the difference between the initial and final neutron energy */
-double Peak::getEnergy() const { return getInitialEnergy() - getFinalEnergy(); }
+/** Get the difference between the initial and final neutron energy in meV */
+double Peak::getEnergyTransfer() const {
+  return getInitialEnergy() - getFinalEnergy();
+}
 
 //----------------------------------------------------------------------------------------------
 /** Get the H index of the peak */

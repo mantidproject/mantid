@@ -123,8 +123,8 @@ class MainWindow(QMainWindow):
         # widgets
         self.messagedisplay = None
         self.ipythonconsole = None
-        self.editor = None
         self.workspacewidget = None
+        self.editor = None
         self.widgets = []
 
         # Menus
@@ -307,8 +307,8 @@ class MainWindow(QMainWindow):
         # layout definition
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
-        editor = self.editor
         workspacewidget = self.workspacewidget
+        editor = self.editor
         default_layout = {
             'widgets': [
                 # column 0
