@@ -234,11 +234,6 @@ class MainWindow(QMainWindow):
             widget_actions.append(action)
         return widget_actions
 
-    @staticmethod
-    def show_hide_widget(widget, make_visible):
-        widget.dockwidget.setVisible(make_visible)
-
-
     def populate_menus(self):
         # Link to menus
         add_actions(self.file_menu, self.file_menu_actions)
