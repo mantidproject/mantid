@@ -42,17 +42,18 @@ public:
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
   enum Notification {
-    Start,        ///< Start and setup interface
-    FittingRunNo, ///< Creates widgets and handles multi/run numbers
-    Load,         ///< Load the focused file to the canvas
-    FitPeaks,     ///< Preforms single peak fits
-    FitAllPeaks,  ///< Preforms multiple runs in sequence single peak fits
-    addPeaks,     ///< Adds peak to the list
-    browsePeaks,  ///< Browse peaks to the list
-    savePeaks,    ///< Save the peaks list
-    ShutDown,     ///< closing the interface
-    LogMsg,       ///< need to send a message to the Mantid log system
-    selectRun,    ///< update plot with new run selected from list widget
+    Start,       ///< Start and setup interface
+    Load,        ///< Load the focused file to the canvas
+    FitPeaks,    ///< Preforms single peak fits
+    FitAllPeaks, ///< Preforms multiple runs in sequence single peak fits
+    addPeaks,    ///< Adds peak to the list
+    browsePeaks, ///< Browse peaks to the list
+    savePeaks,   ///< Save the peaks list
+    ShutDown,    ///< closing the interface
+    LogMsg,      ///< need to send a message to the Mantid log system
+    selectRun,   ///< update plot with new run selected from list widget
+    removeRun,   ///< remove a run from the model and the list widget
+    updatePlotFittedPeaks ///< hide/show fitted peaks in the plot as required
   };
 
   /**

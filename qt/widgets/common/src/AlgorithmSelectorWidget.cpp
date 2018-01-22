@@ -178,8 +178,8 @@ void AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate(
 // Use an anonymous namespace to keep these at file scope
 namespace {
 
-bool Algorithm_descriptor_less(const Algorithm_descriptor &d1,
-                               const Algorithm_descriptor &d2) {
+bool AlgorithmDescriptorLess(const AlgorithmDescriptor &d1,
+                             const AlgorithmDescriptor &d2) {
   if (d1.category < d2.category)
     return true;
   else if (d1.category == d2.category && d1.name < d2.name)
@@ -191,8 +191,8 @@ bool Algorithm_descriptor_less(const Algorithm_descriptor &d1,
   return false;
 }
 
-bool Algorithm_descriptor_name_less(const Algorithm_descriptor &d1,
-                                    const Algorithm_descriptor &d2) {
+bool AlgorithmDescriptorNameLess(const AlgorithmDescriptor &d1,
+                                 const AlgorithmDescriptor &d2) {
   return d1.name < d2.name;
 }
 }
@@ -269,11 +269,11 @@ void AlgorithmTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
 void AlgorithmTreeWidget::update() {
   this->clear();
 
-  typedef std::vector<Algorithm_descriptor> AlgNamesType;
+  typedef std::vector<AlgorithmDescriptor> AlgNamesType;
   AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
 
   // sort by category/name/version to fill QTreeWidget
-  sort(names.begin(), names.end(), Algorithm_descriptor_less);
+  sort(names.begin(), names.end(), AlgorithmDescriptorLess);
 
   QMap<QString, QTreeWidgetItem *>
       categories; // keeps track of categories added to the tree
@@ -347,7 +347,7 @@ void FindAlgComboBox::update() {
   addAliases(names);
 
   // sort by algorithm names only to fill this combobox
-  sort(names.begin(), names.end(), Algorithm_descriptor_name_less);
+  sort(names.begin(), names.end(), AlgorithmDescriptorNameLess);
 
   this->clear();
   std::string prevName = "";
@@ -366,7 +366,7 @@ void FindAlgComboBox::addAliases(AlgNamesType &algNamesList) {
        i != algNamesList.end(); ++i) {
     // the alias is not empty and is not just different by case from the name
     if ((!i->alias.empty()) && (!boost::iequals(i->alias, i->name))) {
-      Algorithm_descriptor newAlias(*i);
+      AlgorithmDescriptor newAlias(*i);
       newAlias.name = i->alias + " [" + i->name + "]";
       aliasList.push_back(newAlias);
     }

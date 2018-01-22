@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
+#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -11,21 +13,18 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/Timer.h"
+#include "MantidIndexing/IndexInfo.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Geometry::IDetector_const_sptr;
 
 class BinaryOpHelper : public Mantid::Algorithms::BinaryOperation {
 public:
-  /// Default constructor
-  BinaryOpHelper() : BinaryOperation(){};
-  /// Destructor
-  ~BinaryOpHelper() override{};
-
   /// function to return a name of the algorithm, must be overridden in all
   /// algorithms
   const std::string name() const override { return "BinaryOpHelper"; }
@@ -63,6 +62,108 @@ private:
                               const double, Mantid::MantidVec &,
                               Mantid::MantidVec &) override {}
 };
+
+namespace {
+void run_parallel(const Parallel::Communicator &comm,
+                  const Parallel::StorageMode storageMode) {
+  using namespace Parallel;
+  auto alg = ParallelTestHelpers::create<BinaryOpHelper>(comm);
+  if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageMode, comm);
+    alg->setProperty("LHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+    alg->setProperty("RHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  }
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+  } else {
+    TS_ASSERT_EQUALS(out, nullptr);
+  }
+}
+
+void run_parallel_mismatch_fail(const Parallel::Communicator &comm,
+                                const Parallel::StorageMode storageModeA,
+                                const Parallel::StorageMode storageModeB) {
+  using namespace Parallel;
+  auto alg = ParallelTestHelpers::create<BinaryOpHelper>(comm);
+  if (comm.rank() == 0 || storageModeA != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageModeA, comm);
+    alg->setProperty("LHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  }
+  if (comm.rank() == 0 || storageModeB != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageModeB, comm);
+    alg->setProperty("RHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  }
+  if (comm.size() > 1) {
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::runtime_error &e, std::string(e.what()),
+        "Algorithm does not support execution with input workspaces of the "
+        "following storage types: \nLHSWorkspace " +
+            toString(storageModeA) + "\nRHSWorkspace " +
+            toString(storageModeB) + "\n.");
+  } else {
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(out->storageMode(), storageModeA);
+  }
+}
+
+void run_parallel_single_value(const Parallel::Communicator &comm,
+                               const Parallel::StorageMode storageModeA,
+                               const Parallel::StorageMode storageModeB) {
+  using namespace Parallel;
+  auto alg = ParallelTestHelpers::create<BinaryOpHelper>(comm);
+  if (comm.rank() == 0 || storageModeA != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageModeA, comm);
+    alg->setProperty("LHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  }
+  if (comm.rank() == 0 || storageModeB != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(1, storageModeB, comm);
+    alg->setProperty("RHSWorkspace", create<WorkspaceSingleValue>(
+                                         indexInfo, HistogramData::Points(1)));
+  }
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  if (comm.rank() == 0 || storageModeA != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(out->storageMode(), storageModeA);
+  } else {
+    TS_ASSERT_EQUALS(out, nullptr);
+  }
+}
+
+void run_parallel_AllowDifferentNumberSpectra_fail(
+    const Parallel::Communicator &comm,
+    const Parallel::StorageMode storageMode) {
+  using namespace Parallel;
+  auto alg = ParallelTestHelpers::create<BinaryOpHelper>(comm);
+  if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageMode, comm);
+    alg->setProperty("LHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+    alg->setProperty("RHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  } else {
+    alg->setProperty("LHSWorkspace",
+                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
+    alg->setProperty("RHSWorkspace",
+                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
+  }
+  alg->setProperty("AllowDifferentNumberSpectra", true);
+  if (comm.size() > 1) {
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+  } else {
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+  }
+}
+}
 
 class BinaryOperationTest : public CxxTest::TestSuite {
 public:
@@ -290,6 +391,62 @@ public:
     for (int i = 0; i < 2000; i++) {
       TS_ASSERT_EQUALS((*table)[i], i / 100);
     }
+  }
+
+  void test_parallel_Distributed() {
+    ParallelTestHelpers::runParallel(run_parallel,
+                                     Parallel::StorageMode::Distributed);
+  }
+
+  void test_parallel_Cloned() {
+    ParallelTestHelpers::runParallel(run_parallel,
+                                     Parallel::StorageMode::Cloned);
+  }
+
+  void test_parallel_MasterOnly() {
+    ParallelTestHelpers::runParallel(run_parallel,
+                                     Parallel::StorageMode::MasterOnly);
+  }
+
+  void test_parallel_mistmatch_fail() {
+    using ParallelTestHelpers::runParallel;
+    auto cloned = Parallel::StorageMode::Cloned;
+    auto distri = Parallel::StorageMode::Distributed;
+    auto master = Parallel::StorageMode::MasterOnly;
+    runParallel(run_parallel_mismatch_fail, cloned, distri);
+    runParallel(run_parallel_mismatch_fail, cloned, master);
+    runParallel(run_parallel_mismatch_fail, distri, cloned);
+    runParallel(run_parallel_mismatch_fail, distri, master);
+    runParallel(run_parallel_mismatch_fail, master, cloned);
+    runParallel(run_parallel_mismatch_fail, master, distri);
+  }
+
+  void test_parallel_Cloned_ClonedSingle() {
+    ParallelTestHelpers::runParallel(run_parallel_single_value,
+                                     Parallel::StorageMode::Cloned,
+                                     Parallel::StorageMode::Cloned);
+  }
+
+  void test_parallel_Distributed_ClonedSingle() {
+    ParallelTestHelpers::runParallel(run_parallel_single_value,
+                                     Parallel::StorageMode::Distributed,
+                                     Parallel::StorageMode::Cloned);
+  }
+
+  void test_parallel_MasterOnly_ClonedSingle() {
+    ParallelTestHelpers::runParallel(run_parallel_single_value,
+                                     Parallel::StorageMode::MasterOnly,
+                                     Parallel::StorageMode::Cloned);
+  }
+
+  void test_parallel_AllowDifferentNumberSpectra_fail() {
+    using ParallelTestHelpers::runParallel;
+    runParallel(run_parallel_AllowDifferentNumberSpectra_fail,
+                Parallel::StorageMode::Cloned);
+    runParallel(run_parallel_AllowDifferentNumberSpectra_fail,
+                Parallel::StorageMode::Distributed);
+    runParallel(run_parallel_AllowDifferentNumberSpectra_fail,
+                Parallel::StorageMode::MasterOnly);
   }
 };
 

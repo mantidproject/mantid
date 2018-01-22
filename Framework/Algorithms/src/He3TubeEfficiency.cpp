@@ -9,7 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -258,7 +258,7 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
 void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
                                             double &detRadius,
                                             Kernel::V3D &detAxis) {
-  boost::shared_ptr<const Geometry::Object> shape_sptr = det.shape();
+  boost::shared_ptr<const Geometry::IObject> shape_sptr = det.shape();
   if (!shape_sptr) {
     throw std::runtime_error(
         "Detector geometry error: detector with id: " +
@@ -267,7 +267,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
         "The algorithm works for instruments with one-to-one "
         "spectra-to-detector maps only!");
   }
-  std::map<const Geometry::Object *,
+  std::map<const Geometry::IObject *,
            std::pair<double, Kernel::V3D>>::const_iterator it =
       this->shapeCache.find(shape_sptr.get());
   if (it == this->shapeCache.end()) {
@@ -280,10 +280,10 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
       detAxis = Kernel::V3D(0, 1, 0);
       // assume radii in z and x and the axis is in the y
       PARALLEL_CRITICAL(deteff_shapecachea) {
-        this->shapeCache.insert(
-            std::pair<const Geometry::Object *, std::pair<double, Kernel::V3D>>(
-                shape_sptr.get(),
-                std::pair<double, Kernel::V3D>(detRadius, detAxis)));
+        this->shapeCache.insert(std::pair<const Geometry::IObject *,
+                                          std::pair<double, Kernel::V3D>>(
+            shape_sptr.get(),
+            std::pair<double, Kernel::V3D>(detRadius, detAxis)));
       }
       return;
     }
@@ -295,10 +295,10 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
       // assume that y and z are radii of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
       PARALLEL_CRITICAL(deteff_shapecacheb) {
-        this->shapeCache.insert(
-            std::pair<const Geometry::Object *, std::pair<double, Kernel::V3D>>(
-                shape_sptr.get(),
-                std::pair<double, Kernel::V3D>(detRadius, detAxis)));
+        this->shapeCache.insert(std::pair<const Geometry::IObject *,
+                                          std::pair<double, Kernel::V3D>>(
+            shape_sptr.get(),
+            std::pair<double, Kernel::V3D>(detRadius, detAxis)));
       }
       return;
     }
@@ -307,10 +307,10 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
       detRadius = xDist / 2.0;
       detAxis = Kernel::V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec) {
-        this->shapeCache.insert(
-            std::pair<const Geometry::Object *, std::pair<double, Kernel::V3D>>(
-                shape_sptr.get(),
-                std::pair<double, Kernel::V3D>(detRadius, detAxis)));
+        this->shapeCache.insert(std::pair<const Geometry::IObject *,
+                                          std::pair<double, Kernel::V3D>>(
+            shape_sptr.get(),
+            std::pair<double, Kernel::V3D>(detRadius, detAxis)));
       }
       return;
     }
@@ -333,7 +333,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
  * @returns The distance to the surface in metres
  */
 double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
-                                        const Geometry::Object *shape) const {
+                                        const Geometry::IObject *shape) const {
   // get a vector from the point that was passed to the origin
   Kernel::V3D direction = Kernel::V3D(0.0, 0.0, 0.0) - start;
   // it needs to be a unit vector

@@ -76,6 +76,44 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
     mantid.DeleteWorkspace(converted_group)
 
 
+def generate_ts_pdf(run_number, focus_file_path, merge_banks=False):
+    focused_ws = _obtain_focused_run(run_number, focus_file_path)
+    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.getName(), Target="MomentumTransfer")
+    if merge_banks:
+        raise RuntimeError("Merging banks is currently not supported")
+    pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",
+                                            Filter=True)
+    pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
+                                         PreserveEvents=True)
+    return pdf_output
+
+
+def _obtain_focused_run(run_number, focus_file_path):
+    """
+    Searches for the focused workspace to use (based on user specified run number) in the ADS and then the output
+    directory.
+    If unsuccessful, a ValueError exception is thrown.
+    :param run_number: The run number to search for.
+    :param focus_file_path: The expected file path for the focused file.
+    :return: The focused workspace.
+    """
+    # Try the ADS first to avoid undesired loading
+    if mantid.mtd.doesExist('%s-Results-TOF-Grp' % run_number):
+        focused_ws = mantid.mtd['%s-Results-TOF-Grp' % run_number]
+    elif mantid.mtd.doesExist('%s-Results-D-Grp' % run_number):
+        focused_ws = mantid.mtd['%s-Results-D-Grp' % run_number]
+    else:
+        # Check output directory
+        print('No loaded focused files found. Searching in output directory...')
+        try:
+            focused_ws = mantid.LoadNexus(Filename=focus_file_path, OutputWorkspace='focused_ws').OutputWorkspace
+        except ValueError:
+            raise ValueError("Could not find focused file for run number:%s\n"
+                             "Please ensure a focused file has been produced and is located in the output directory."
+                             % run_number)
+    return focused_ws
+
+
 def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
     output_workspaces = list(workspaces_to_mask)
 

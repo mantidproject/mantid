@@ -5,6 +5,7 @@
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -122,8 +123,6 @@ private:
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
-  std::list<API::MatrixWorkspace_sptr>
-  validateInputs(const std::vector<std::string> &inputWorkspaces);
   bool validateInputsForEventWorkspaces(
       const std::vector<std::string> &inputWorkspaces);
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
@@ -155,6 +154,12 @@ private:
   std::vector<AdditionTable> m_tables;
   /// Total number of histograms in the output workspace
   size_t m_outputSize = 0;
+
+  std::vector<SpectrumDefinition>
+  buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
+                     const Geometry::DetectorInfo &addeeDetInfo,
+                     const Geometry::DetectorInfo &outDetInfo,
+                     const Geometry::DetectorInfo &newOutDetInfo);
 };
 
 } // namespace Algorithm

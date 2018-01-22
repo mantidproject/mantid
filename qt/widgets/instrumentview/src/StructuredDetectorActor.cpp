@@ -10,7 +10,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 #include <cfloat>

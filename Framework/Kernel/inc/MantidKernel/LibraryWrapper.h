@@ -38,19 +38,24 @@ namespace Kernel {
  */
 class MANTID_KERNEL_DLL LibraryWrapper {
 public:
-  LibraryWrapper();
-  virtual ~LibraryWrapper();
+  // Move-only class. The internal module pointer
+  // is not safe to copy around.
+  LibraryWrapper() = default;
+  // No copy
+  LibraryWrapper(const LibraryWrapper &) = delete;
+  LibraryWrapper &operator=(const LibraryWrapper &) = delete;
 
-  // Returns true if DLL is opened or already open
-  bool OpenLibrary(const std::string &);
+  LibraryWrapper(LibraryWrapper &&src);
+  LibraryWrapper &operator=(LibraryWrapper &&rhs);
+  ~LibraryWrapper();
 
-  bool OpenLibrary(const std::string &, const std::string &);
+  bool openLibrary(const std::string &filepath);
 
 private:
   /** An untyped pointer to the loaded library.
    * This is created and deleted by this class.
    **/
-  void *module;
+  void *m_module = nullptr;
 };
 
 } // namespace Kernel

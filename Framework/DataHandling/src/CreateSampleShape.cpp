@@ -3,6 +3,7 @@
 //--------------------------------
 #include "MantidDataHandling/CreateSampleShape.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Material.h"
 #include "MantidAPI/Sample.h"
@@ -46,11 +47,15 @@ void CreateSampleShape::exec() {
   if (shape->hasValidShape()) {
     const auto mat = workspace->sample().getMaterial();
     shape->setMaterial(mat);
-    workspace->mutableSample().setShape(*shape);
+    workspace->mutableSample().setShape(shape);
   } else {
     std::ostringstream msg;
-    msg << "Object has invalid shape. TopRule = " << shape->topRule()
-        << ", number of surfaces = " << shape->getSurfacePtr().size() << "\n";
+    msg << "Object has invalid shape.";
+    if (auto csgShape = dynamic_cast<Geometry::CSGObject *>(shape.get())) {
+      msg << " TopRule = " << csgShape->topRule()
+          << ", number of surfaces = " << csgShape->getSurfacePtr().size()
+          << "\n";
+    }
     throw std::runtime_error(msg.str());
   }
   // Done!

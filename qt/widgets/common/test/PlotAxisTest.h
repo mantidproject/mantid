@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -80,7 +81,8 @@ public:
     ws->getAxis(0)->setUnit("TOF");
     ws->replaceAxis(1, new Mantid::API::NumericAxis(1));
     ws->getAxis(1)->setUnit("TOF");
-    QString expected = QString::fromWCharArray(L"Time-of-flight (\u03bcs)");
+    QString expected =
+        MantidQt::API::toQStringInternal(L"Time-of-flight (\u03bcs)");
     TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 0).title());
     TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 1).title());
   }
@@ -94,8 +96,8 @@ public:
     const auto lbl = xunit->label();
     // the Y unit should be (<x_unit_label>)^-1 when plotting as distribution
     // instead of (<x_unit_label>^-1).
-    TS_ASSERT_EQUALS(" (" + QString::fromStdWString(lbl.utf8()) + ")" +
-                         QString::fromWCharArray(L"\u207b\u00b9"),
+    TS_ASSERT_EQUALS(" (" + MantidQt::API::toQStringInternal(lbl.utf8()) + ")" +
+                         MantidQt::API::toQStringInternal(L"\u207b\u00b9"),
                      PlotAxis(true, *ws).title());
   }
 
@@ -139,7 +141,7 @@ public:
         Mantid::Geometry::GeneralFrame::GeneralFrameTOF,
         UnitLabel("us", L"\u03bcs", "\\mu s"));
     MDHistoDimension dim("tof", "dimx", frame, 0.0f, 1.0f, 10);
-    QString expected = QString::fromWCharArray(L"tof (\u03bcs)");
+    QString expected = MantidQt::API::toQStringInternal(L"tof (\u03bcs)");
     TS_ASSERT_EQUALS(expected, PlotAxis(dim).title());
   }
 

@@ -47,6 +47,4 @@ class WorkHandler(object):
         self._worker.signals.finished.connect(self.on_finished)
         self._worker.signals.error.connect(self.on_error)
 
-        if not self.thread_pool:
-            self.thread_pool = QThreadPool()
-        self.thread_pool.start(self._worker)
+        QThreadPool.globalInstance().start(self._worker)

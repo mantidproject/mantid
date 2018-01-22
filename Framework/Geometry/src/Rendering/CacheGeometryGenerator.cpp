@@ -1,7 +1,7 @@
 #include <vector>
 #include <cmath>
 #include "MantidKernel/Matrix.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/CacheGeometryGenerator.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
@@ -16,7 +16,7 @@ namespace Geometry {
  * Constructor
  * @param obj :: input object
  */
-CacheGeometryGenerator::CacheGeometryGenerator(Object *obj) : Obj(obj) {
+CacheGeometryGenerator::CacheGeometryGenerator(CSGObject *obj) : Obj(obj) {
   mNoOfVertices = 0;
   mNoOfTriangles = 0;
   mFaces = nullptr;

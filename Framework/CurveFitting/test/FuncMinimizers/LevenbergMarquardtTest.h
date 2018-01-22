@@ -324,7 +324,7 @@ public:
     s.initialize(costFun);
     TS_ASSERT(!s.minimize());
 
-    TS_ASSERT_EQUALS(s.getError(), "cannot reach the specified tolerance in F");
+    TS_ASSERT_EQUALS(s.getError(), "Changes in function value are too small");
   }
 };
 

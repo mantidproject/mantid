@@ -54,7 +54,8 @@ public:
     NiceMock<MockDataProcessorPresenter> mockPresenter;
     OpenTableCommand command(&mockPresenter);
 
-    // The presenter should be notified with the OpenTableFlag
+    // The presenter should not be notified with the OpenTableFlag because
+    // this is a submenu rather than an action
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::OpenTableFlag))
         .Times(Exactly(0));
     // Execute the command
