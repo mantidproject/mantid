@@ -34,7 +34,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_hold_triggered = QtCore.Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'fa.home', 'home', False),
+        ('Home', 'Reset original view', 'fa.home', 'home', None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'fa.arrows-alt', 'pan', False),
         ('Zoom', 'Zoom to rectangle', 'fa.search-plus', 'zoom', False),
         (None, None, None, None, None),
