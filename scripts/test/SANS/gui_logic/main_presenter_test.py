@@ -20,8 +20,9 @@ class MainPresenterTest(unittest.TestCase):
     def test_that_the_white_list_is_correct(self):
         presenter = MainPresenter(SANSFacility.ISIS)
         self.assertTrue(presenter.get_number_of_white_list_items() == 0)
-        white_list = presenter.get_white_list()
-        self.assertTrue(presenter.get_number_of_white_list_items() == 17)
+        white_list = presenter.get_white_list(show_periods=True)
+        self.assertTrue(presenter.get_number_of_white_list_items() == 19)
+
         self.assertTrue(white_list[0].algorithm_property == "SampleScatter")
         self.assertTrue(white_list[1].algorithm_property == "SampleScatterPeriod")
         self.assertTrue(white_list[2].algorithm_property == "SampleTransmission")
@@ -35,18 +36,20 @@ class MainPresenterTest(unittest.TestCase):
         self.assertTrue(white_list[10].algorithm_property == "CanDirect")
         self.assertTrue(white_list[11].algorithm_property == "CanDirectPeriod")
         self.assertTrue(white_list[12].algorithm_property == "UseOptimizations")
-        self.assertTrue(white_list[13].algorithm_property == "OutputName")
-        self.assertTrue(white_list[14].algorithm_property == "UserFile")
-        self.assertTrue(white_list[15].algorithm_property == "RowIndex")
-        self.assertTrue(white_list[16].algorithm_property == "OutputMode")
+        self.assertTrue(white_list[13].algorithm_property == "PlotResults")
+        self.assertTrue(white_list[14].algorithm_property == "OutputName")
+        self.assertTrue(white_list[15].algorithm_property == "UserFile")
+        self.assertTrue(white_list[16].algorithm_property == "RowIndex")
+        self.assertTrue(white_list[17].algorithm_property == "OutputMode")
+        self.assertTrue(white_list[18].algorithm_property == "OutputGraph")
 
     def test_that_black_list_is_correct(self):
         presenter = MainPresenter(SANSFacility.ISIS)
         expected = "InputWorkspace,OutputWorkspace,SampleScatter,SampleScatterPeriod,SampleTransmission," \
                    "SampleTransmissionPeriod,SampleDirect,SampleDirectPeriod,CanScatter,CanScatterPeriod," \
                    "CanTransmission,CanTransmissionPeriod,CanDirect,CanDirectPeriod," \
-                   "UseOptimizations,OutputName,UserFile,RowIndex,OutputMode,"
-        self.assertTrue(expected == presenter.get_black_list())
+                   "UseOptimizations,PlotResults,OutputName,UserFile,RowIndex,OutputMode,OutputGraph,"
+        self.assertEqual(expected, presenter.get_black_list())
 
     def test_that_gets_pre_processing_options_are_valid_and_other_options_are_empty(self):
         # Arrange
@@ -64,10 +67,11 @@ class MainPresenterTest(unittest.TestCase):
         pre_processing_options = presenter.getProcessingOptions()
 
         # Assert
-        expected = "UseOptimizations=1,OutputMode=PublishToADS"
-        self.assertTrue(expected == pre_processing_options)
-        self.assertFalse(presenter.getPreprocessingOptionsAsString())
-        self.assertFalse(presenter.getPostprocessingOptions())
+        expected = {'UseOptimizations':'1','OutputMode':'PublishToADS','PlotResults':'1', \
+                    'OutputGraph':'SANS-Latest'}
+        self.assertEqual(expected, pre_processing_options)
+        self.assertFalse(presenter.getPreprocessingOptions())
+        self.assertFalse(presenter.getPostprocessingOptionsAsString())
 
         # Clean up
         remove_file(sample_user_file)

@@ -17,9 +17,9 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     """
     A DataProcessorMainPresenter. The base class provides default implementations
     but we should re-implement the following methods:
-    - getPreprocessingOptionsAsString() -- to supply global pre-processing options to the table widget
+    - getPreprocessingOptions() -- to supply global pre-processing options to the table widget
     - getProcessingOptions() -- to supply global processing options
-    - getPostprocessingOptions() -- to supply global post-processing options
+    - getPostprocessingOptionsAsString() -- to supply global post-processing options
     - notifyADSChanged() -- to act when the ADS changed, typically we want to update
       table actions with the list of table workspaces that can be loaded into the interface
 
@@ -32,21 +32,21 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
         super(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter, self).__init__()
         self.gui = gui
 
-    def getPreprocessingOptionsAsString(self):
+    def getPreprocessingOptions(self):
         """
-        Return global pre-processing options as a string.
-        The string must be a sequence of key=value separated by ','.
+        Return global pre-processing options as a dict of key:value pairs
         """
-        return ""
+        empty = {}
+        return empty
 
     def getProcessingOptions(self):
         """
-        Return global processing options as a string.
-        The string must be a sequence of key=value separated by ','.
+        Return global processing options as a dict of key:value pairs
         """
-        return ""
+        empty = {}
+        return empty
 
-    def getPostprocessingOptions(self):
+    def getPostprocessingOptionsAsString(self):
         """
         Return global post-processing options as a string.
         The string must be a sequence of key=value separated by ','.

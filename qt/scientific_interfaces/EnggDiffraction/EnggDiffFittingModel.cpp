@@ -17,33 +17,8 @@ using namespace Mantid;
 
 namespace { // helpers
 
-template <typename T> void insertInOrder(const T &item, std::vector<T> &vec) {
-  vec.insert(std::upper_bound(vec.begin(), vec.end(), item), item);
-}
-
 bool isDigit(const std::string &text) {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
-}
-
-template <typename T, size_t S>
-T getFromRunMap(const int runNumber, const size_t bank,
-                const RunMap<S, T> map) {
-  if (bank < 1 || bank > map.size()) {
-    throw std::invalid_argument("Tried to access invalid bank: " +
-                                std::to_string(bank));
-  }
-  if (map[bank - 1].find(runNumber) == map[bank - 1].end()) {
-    throw std::invalid_argument("Tried to access invalid run number " +
-                                std::to_string(runNumber) + " for bank " +
-                                std::to_string(bank));
-  }
-  return map[bank - 1].at(runNumber);
-}
-
-template <typename T, size_t S>
-void addToRunMap(const int runNumber, const size_t bank, RunMap<S, T> &map,
-                 const T itemToAdd) {
-  map[bank - 1][runNumber] = itemToAdd;
 }
 
 } // anonymous namespace
@@ -54,26 +29,53 @@ namespace CustomInterfaces {
 void EnggDiffFittingModel::addFocusedWorkspace(
     const int runNumber, const size_t bank, const API::MatrixWorkspace_sptr ws,
     const std::string &filename) {
-  addToRunMap(runNumber, bank, m_focusedWorkspaceMap, ws);
-  addToRunMap(runNumber, bank, m_wsFilenameMap, filename);
+  m_focusedWorkspaceMap.add(runNumber, bank, ws);
+  m_wsFilenameMap.add(runNumber, bank, filename);
 }
 
 void EnggDiffFittingModel::addFitResults(
     const int runNumber, const size_t bank,
     const Mantid::API::ITableWorkspace_sptr ws) {
-  addToRunMap(runNumber, bank, m_fitParamsMap, ws);
+  m_fitParamsMap.add(runNumber, bank, ws);
 }
 
-std::string
+const std::string &
 EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
                                            const size_t bank) const {
-  return getFromRunMap(runNumber, bank, m_wsFilenameMap);
+  return m_wsFilenameMap.get(runNumber, bank);
 }
 
 Mantid::API::ITableWorkspace_sptr
 EnggDiffFittingModel::getFitResults(const int runNumber,
                                     const size_t bank) const {
-  return getFromRunMap(runNumber, bank, m_fitParamsMap);
+  return m_fitParamsMap.get(runNumber, bank);
+}
+
+namespace {
+
+template <size_t S, typename T>
+void removeFromRunMapAndADS(const int runNumber, const size_t bank,
+                            RunMap<S, T> &map,
+                            Mantid::API::AnalysisDataServiceImpl &ADS) {
+  if (map.contains(runNumber, bank)) {
+    const auto &name = map.get(runNumber, bank)->getName();
+    map.remove(runNumber, bank);
+    if (ADS.doesExist(name)) {
+      ADS.remove(name);
+    }
+  }
+}
+
+} // anonymous namespace
+
+void EnggDiffFittingModel::removeRun(const int runNumber, const size_t bank) {
+  m_wsFilenameMap.remove(runNumber, bank);
+
+  auto &ADS = Mantid::API::AnalysisDataService::Instance();
+  removeFromRunMapAndADS(runNumber, bank, m_focusedWorkspaceMap, ADS);
+  removeFromRunMapAndADS(runNumber, bank, m_fittedPeaksMap, ADS);
+  removeFromRunMapAndADS(runNumber, bank, m_alignedWorkspaceMap, ADS);
+  removeFromRunMapAndADS(runNumber, bank, m_fitParamsMap, ADS);
 }
 
 void EnggDiffFittingModel::setDifcTzero(
@@ -111,23 +113,18 @@ void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
   auto enggFitPeaksAlg =
       Mantid::API::AlgorithmManager::Instance().create("EnggFitPeaks");
 
-  try {
-    enggFitPeaksAlg->initialize();
-    enggFitPeaksAlg->setProperty("InputWorkspace", ws);
-    if (!expectedPeaks.empty()) {
-      enggFitPeaksAlg->setProperty("ExpectedPeaks", expectedPeaks);
-    }
-    enggFitPeaksAlg->setProperty("FittedPeaks", FIT_RESULTS_TABLE_NAME);
-    enggFitPeaksAlg->execute();
-
-    API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-    const auto fitResultsTable =
-        ADS.retrieveWS<API::ITableWorkspace>(FIT_RESULTS_TABLE_NAME);
-    addFitResults(runNumber, bank, fitResultsTable);
-  } catch (std::exception) {
-    throw std::runtime_error(
-        "Could not run the algorithm EnggFitPeaks successfully.");
+  enggFitPeaksAlg->initialize();
+  enggFitPeaksAlg->setProperty("InputWorkspace", ws);
+  if (!expectedPeaks.empty()) {
+    enggFitPeaksAlg->setProperty("ExpectedPeaks", expectedPeaks);
   }
+  enggFitPeaksAlg->setProperty("FittedPeaks", FIT_RESULTS_TABLE_NAME);
+  enggFitPeaksAlg->execute();
+
+  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
+  const auto fitResultsTable =
+      ADS.retrieveWS<API::ITableWorkspace>(FIT_RESULTS_TABLE_NAME);
+  addFitResults(runNumber, bank, fitResultsTable);
 }
 
 void EnggDiffFittingModel::saveDiffFittingAscii(
@@ -150,7 +147,6 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
   const auto focusedWS = getFocusedWorkspace(runNumber, bank);
 
   const size_t numberOfPeaks = fitFunctionParams->rowCount();
-  const std::string fittedPeaksWSName = "engggui_fitting_single_peaks";
 
   for (size_t i = 0; i < numberOfPeaks; ++i) {
     const auto functionDescription = createFunctionString(fitFunctionParams, i);
@@ -169,43 +165,54 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
                             singlePeakWSName);
 
     if (i == 0) {
-      cloneWorkspace(focusedWS, fittedPeaksWSName);
-      setDataToClonedWS(singlePeakWSName, fittedPeaksWSName);
+      cloneWorkspace(focusedWS, FITTED_PEAKS_WS_NAME);
+      setDataToClonedWS(singlePeakWSName, FITTED_PEAKS_WS_NAME);
     } else {
       const std::string clonedWSName =
           "__engggui_cloned_peaks_" + std::to_string(i);
       cloneWorkspace(focusedWS, clonedWSName);
       setDataToClonedWS(singlePeakWSName, clonedWSName);
 
-      appendSpectra(fittedPeaksWSName, clonedWSName);
+      appendSpectra(FITTED_PEAKS_WS_NAME, clonedWSName);
     }
   }
 
   const std::string alignedWSName = FOCUSED_WS_NAME + "_d";
-  alignDetectors(getFocusedWorkspace(runNumber, bank), alignedWSName);
-  alignDetectors(fittedPeaksWSName, fittedPeaksWSName);
+  cloneWorkspace(focusedWS, alignedWSName);
+  alignDetectors(alignedWSName, alignedWSName);
+
+  alignDetectors(FITTED_PEAKS_WS_NAME, FITTED_PEAKS_WS_NAME);
 
   const auto &ADS = Mantid::API::AnalysisDataService::Instance();
 
   const auto fittedPeaksWS =
-      ADS.retrieveWS<Mantid::API::MatrixWorkspace>(fittedPeaksWSName);
-  addToRunMap(runNumber, bank, m_fittedPeaksMap, fittedPeaksWS);
+      ADS.retrieveWS<Mantid::API::MatrixWorkspace>(FITTED_PEAKS_WS_NAME);
+  m_fittedPeaksMap.add(runNumber, bank, fittedPeaksWS);
 
   const auto alignedFocusedWS =
       ADS.retrieveWS<Mantid::API::MatrixWorkspace>(alignedWSName);
-  addToRunMap(runNumber, bank, m_alignedWorkspaceMap, alignedFocusedWS);
+  m_alignedWorkspaceMap.add(runNumber, bank, alignedFocusedWS);
+}
+
+size_t EnggDiffFittingModel::getNumFocusedWorkspaces() const {
+  return m_focusedWorkspaceMap.size();
+}
+
+bool EnggDiffFittingModel::hasFittedPeaksForRun(const int runNumber,
+                                                const size_t bank) const {
+  return m_fittedPeaksMap.contains(runNumber, bank);
 }
 
 Mantid::API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getAlignedWorkspace(const int runNumber,
                                           const size_t bank) const {
-  return getFromRunMap(runNumber, bank, m_alignedWorkspaceMap);
+  return m_alignedWorkspaceMap.get(runNumber, bank);
 }
 
 Mantid::API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getFittedPeaksWS(const int runNumber,
                                        const size_t bank) const {
-  return getFromRunMap(runNumber, bank, m_fittedPeaksMap);
+  return m_fittedPeaksMap.get(runNumber, bank);
 }
 
 void EnggDiffFittingModel::evaluateFunction(
@@ -255,7 +262,7 @@ void EnggDiffFittingModel::rebinToFocusedWorkspace(
 
 void EnggDiffFittingModel::cloneWorkspace(
     const Mantid::API::MatrixWorkspace_sptr inputWorkspace,
-    const std::string &outputWSName) {
+    const std::string &outputWSName) const {
   auto cloneWSAlg =
       Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
   cloneWSAlg->initialize();
@@ -275,7 +282,7 @@ void EnggDiffFittingModel::setDataToClonedWS(const std::string &wsToCopyName,
 }
 
 void EnggDiffFittingModel::appendSpectra(const std::string &ws1Name,
-                                         const std::string &ws2Name) {
+                                         const std::string &ws2Name) const {
   auto appendSpectraAlg =
       Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
 
@@ -363,8 +370,8 @@ void EnggDiffFittingModel::loadWorkspace(const std::string &filename,
   loadAlg->execute();
 }
 
-void EnggDiffFittingModel::renameWorkspace(API::MatrixWorkspace_sptr inputWS,
-                                           const std::string &newName) {
+void EnggDiffFittingModel::renameWorkspace(API::Workspace_sptr inputWS,
+                                           const std::string &newName) const {
   auto renameAlg = API::AlgorithmManager::Instance().create("RenameWorkspace");
   renameAlg->setProperty("InputWorkspace", inputWS);
   renameAlg->setProperty("OutputWorkspace", newName);
@@ -383,23 +390,65 @@ void EnggDiffFittingModel::groupWorkspaces(
 API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getFocusedWorkspace(const int runNumber,
                                           const size_t bank) const {
-  return getFromRunMap(runNumber, bank, m_focusedWorkspaceMap);
+  return m_focusedWorkspaceMap.get(runNumber, bank);
 }
 
-std::vector<int> EnggDiffFittingModel::getAllRunNumbers() const {
-  std::vector<int> runNumbers;
+void EnggDiffFittingModel::mergeTables(
+    const API::ITableWorkspace_sptr tableToCopy,
+    API::ITableWorkspace_sptr targetTable) const {
+  for (size_t i = 0; i < tableToCopy->rowCount(); ++i) {
+    API::TableRow rowToCopy = tableToCopy->getRow(i);
+    API::TableRow newRow = targetTable->appendRow();
 
-  for (const auto &workspaces : m_focusedWorkspaceMap) {
-    for (const auto &kvPair : workspaces) {
-      const auto runNumber = kvPair.first;
-      if (std::find(runNumbers.begin(), runNumbers.end(), runNumber) ==
-          runNumbers.end()) {
-        insertInOrder(runNumber, runNumbers);
-      }
+    for (size_t j = 0; j < tableToCopy->columnCount(); ++j) {
+      double valueToCopy;
+      rowToCopy >> valueToCopy;
+      newRow << valueToCopy;
     }
   }
+}
 
-  return runNumbers;
+void EnggDiffFittingModel::addAllFitResultsToADS() const {
+  auto fitParamsTable = Mantid::API::WorkspaceFactory::Instance().createTable();
+  renameWorkspace(fitParamsTable, FIT_RESULTS_TABLE_NAME);
+
+  const auto runNumberBankPairs = getRunNumbersAndBankIDs();
+
+  for (const auto &runNumberBankPair : runNumberBankPairs) {
+    const int runNumber = runNumberBankPair.first;
+    const size_t bank = runNumberBankPair.second;
+
+    const auto singleWSFitResults = getFitResults(runNumber, bank);
+
+    if (runNumberBankPair == *runNumberBankPairs.begin()) {
+      // First element - copy column headings over
+      const auto columnHeaders = singleWSFitResults->getColumnNames();
+      for (const auto &header : columnHeaders) {
+        fitParamsTable->addColumn("double", header);
+      }
+    }
+    mergeTables(singleWSFitResults, fitParamsTable);
+  }
+}
+
+void EnggDiffFittingModel::addAllFittedPeaksToADS() const {
+  const auto runNumberBankPairs = getRunNumbersAndBankIDs();
+  if (runNumberBankPairs.size() < 1) {
+    return;
+  }
+  const auto firstWSLabel = runNumberBankPairs[0];
+  auto fittedPeaksWS =
+      getFittedPeaksWS(firstWSLabel.first, firstWSLabel.second);
+  cloneWorkspace(fittedPeaksWS, FITTED_PEAKS_WS_NAME);
+
+  for (size_t i = 1; i < runNumberBankPairs.size(); ++i) {
+    const auto wsLabel = runNumberBankPairs[i];
+    const int runNumber = wsLabel.first;
+    const size_t bank = wsLabel.second;
+
+    auto wsToAppend = getFittedPeaksWS(runNumber, bank);
+    appendSpectra(FITTED_PEAKS_WS_NAME, wsToAppend->getName());
+  }
 }
 
 namespace {
@@ -453,18 +502,7 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
 
 std::vector<std::pair<int, size_t>>
 EnggDiffFittingModel::getRunNumbersAndBankIDs() const {
-  std::vector<std::pair<int, size_t>> pairs;
-
-  const auto runNumbers = getAllRunNumbers();
-  for (const auto runNumber : runNumbers) {
-    for (size_t i = 0; i < m_focusedWorkspaceMap.size(); ++i) {
-      if (m_focusedWorkspaceMap[i].find(runNumber) !=
-          m_focusedWorkspaceMap[i].end()) {
-        pairs.push_back(std::pair<int, size_t>(runNumber, i + 1));
-      }
-    }
-  }
-  return pairs;
+  return m_focusedWorkspaceMap.getRunNumbersAndBankIDs();
 }
 
 size_t
@@ -537,6 +575,8 @@ const std::string EnggDiffFittingModel::FOCUSED_WS_NAME =
     "engggui_fitting_focused_ws";
 const std::string EnggDiffFittingModel::FIT_RESULTS_TABLE_NAME =
     "engggui_fitting_fitpeaks_params";
+const std::string EnggDiffFittingModel::FITTED_PEAKS_WS_NAME =
+    "engggui_fitting_single_peaks";
 
 const double EnggDiffFittingModel::DEFAULT_DIFA = 0.0;
 const double EnggDiffFittingModel::DEFAULT_DIFC = 18400.0;

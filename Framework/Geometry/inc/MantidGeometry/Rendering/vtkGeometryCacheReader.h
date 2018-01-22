@@ -13,6 +13,8 @@ class DOMParser;
 namespace Mantid {
 
 namespace Geometry {
+class IObject;
+
 /**
    \class vtkGeometryCacheReader
    \brief Reads the Geometry Cache from the file to the Object
@@ -55,9 +57,9 @@ private:
   void readTriangles(Poco::XML::Element *pEle, int *noOfTriangles, int **faces);
 
 public:
-  vtkGeometryCacheReader(std::string filename); ///< Constructor
-  ~vtkGeometryCacheReader();                    ///< Destructor
-  void readCacheForObject(Object *obj);
+  vtkGeometryCacheReader(std::string filename);
+  ~vtkGeometryCacheReader();
+  void readCacheForObject(IObject *obj);
 };
 
 } // NAMESPACE Geometry

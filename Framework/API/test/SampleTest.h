@@ -6,6 +6,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -30,19 +31,19 @@ public:
   //--------------------------------------------------------------------------------------------
 
   void testShape() {
-    Object_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
+    IObject_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
         0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
-    TS_ASSERT_THROWS_NOTHING(sample.setShape(*shape_sptr))
-    const Object &sampleShape = sample.getShape();
+    TS_ASSERT_THROWS_NOTHING(sample.setShape(shape_sptr))
+    const IObject &sampleShape = sample.getShape();
     TS_ASSERT_EQUALS(shape_sptr->getName(), sampleShape.getName());
   }
 
   void test_Setting_Default_Shape_Is_Accepted() {
     Sample sample;
-    Object object;
-    TS_ASSERT_EQUALS(object.hasValidShape(), false);
+    IObject_sptr object;
     TS_ASSERT_THROWS_NOTHING(sample.setShape(object));
+    TS_ASSERT_EQUALS(sample.getShape().hasValidShape(), false);
   }
 
   void test_That_Requests_For_An_Undefined_Environment_Throw() {
@@ -56,7 +57,7 @@ public:
     const std::string envName("TestKit");
     SampleEnvironment *kit =
         new SampleEnvironment(envName, boost::make_shared<const Container>(""));
-    kit->add(boost::make_shared<const Object>());
+    kit->add(boost::make_shared<const CSGObject>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
 
@@ -259,8 +260,8 @@ public:
     Material vanBlock("vanBlock",
                       Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    Object shape;
-    shape.setMaterial(vanBlock);
+    IObject_sptr shape = Mantid::Geometry::ShapeFactory().createShape("");
+    shape->setMaterial(vanBlock);
     sample.setShape(shape);
 
     const Material &mat = sample.getMaterial();
@@ -309,10 +310,10 @@ public:
     NexusTestHelper th(true);
     th.createFile("SampleTest.nxs");
 
-    Object_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
+    IObject_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
         0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
-    sample.setShape(*shape_sptr);
+    sample.setShape(shape_sptr);
     sample.setName("NameOfASample");
     sample.setWidth(1.234);
     OrientedLattice latt(4, 5, 6, 90, 91, 92);

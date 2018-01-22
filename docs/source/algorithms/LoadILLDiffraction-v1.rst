@@ -24,8 +24,8 @@ For D20 1-dimensional detector, it supports 3 resolution modes:
 
 - **high** is when each pixel is split by 3, resulting in 4608 pixels. This corresponds to IDF *D20_hr*.
 
-Note, that all the IDFs contain only active pixels, and do not count the first and last banks which are inactive.
-These are the first and last 32 pixels in low resolution mode.
+Note, that all the IDFs contain only active pixels, and do not count the last 2 banks which are permanently inactive.
+
 The *2theta* value of the first pixel is read from the file, and the whole detector is rotated correspondingly.
 
 Scans
@@ -33,11 +33,11 @@ Scans
 
 The loader is able to load the following scan configurations:
 
-- **no scan**, used for D20, when a single file contains a single dataset, e.g. data acquired at one temperature point. In this case x-axis is just a single point.
+- **no scan**, used for D20, when a single file contains a single dataset, e.g. data acquired with static detector at a single temperature point. In this case x-axis is just a single point.
 
 - **detector scan**, used always for D2B, and for D20 calibration runs, when the detector moves during the run. In this configuration the output is a *scanning workspace* containing one spectrum for each pixel at each time index. The x-axis is again a single point.
 
-- **other scan**, e.g. omega scan for D20, which is another type of motor scan, but the detector does not move. In this case, the data in the raw file is organised just as for *detector scan*, but the output workspace is not a *scanning workspace*. It is a regular workspace with x-axis corresponding to the scanned variable, e.g. omega angle.
+- **other scan**, e.g. omega scan for D20, which is another type of motor scan, but it is not the detector that moves, but the sample. In this case, the data in the raw file is organised just as for *detector scan*, but the output workspace is not a *scanning workspace*. It is a regular workspace with x-axis corresponding to the scanned variable, e.g. omega angle.
 
 Logs
 ####
@@ -93,4 +93,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

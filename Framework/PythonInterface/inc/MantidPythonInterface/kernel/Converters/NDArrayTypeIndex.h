@@ -40,6 +40,7 @@ namespace Converters {
  */
 template <typename T> struct PYTHON_KERNEL_DLL NDArrayTypeIndex {
   static int typenum;
+  static char typecode;
 };
 }
 }

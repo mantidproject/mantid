@@ -79,8 +79,10 @@ public:
                           rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
-  void setRowActionEnabled(int index, bool enabled) override;
+  void updateMenuEnabledState(bool isProcessing) override;
   void setAutoreduceButtonEnabled(bool enabled) override;
+  void setTransferButtonEnabled(bool enabled) override;
+  void setInstrumentComboEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -110,12 +112,12 @@ private:
   std::shared_ptr<IReflRunsTabPresenter> m_presenter;
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
-  // the interface
+  // Command adapters
+  std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
+  // the interface (uses actions owned by m_commands)
   Ui::ReflRunsTabWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
-  // Command adapters
-  std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
 
 private slots:
   void on_actionSearch_triggered();

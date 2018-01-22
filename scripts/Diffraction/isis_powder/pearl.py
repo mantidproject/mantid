@@ -24,10 +24,8 @@ class Pearl(AbstractInst):
     def focus(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        # Pearl does not have absorption corrections for a sample
-        do_absorb_corrections = False
         return self._focus(run_number_string=self._inst_settings.run_number,
-                           do_absorb_corrections=do_absorb_corrections,
+                           do_absorb_corrections=self._inst_settings.absorb_corrections,
                            do_van_normalisation=self._inst_settings.van_norm)
 
     def create_vanadium(self, **kwargs):
@@ -82,8 +80,6 @@ class Pearl(AbstractInst):
         self._cached_run_details[run_number_string_key] = pearl_algs.get_run_details(
             run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
         return self._cached_run_details[run_number_string_key]
-
-    # Params #
 
     def _generate_output_file_name(self, run_number_string):
         inst = self._inst_settings
@@ -151,18 +147,18 @@ class Pearl(AbstractInst):
         return cropped_ws
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
-        # TODO move generating absorption corrections to an instrument param
-        gen_absorb = False
-        if gen_absorb:
-            pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_correct)
+        if self._inst_settings.gen_absorb:
+            absorb_file_name = self._inst_settings.absorb_out_file
+            if not absorb_file_name:
+                raise RuntimeError("\"absorb_corrections_out_filename\" must be supplied when generating absorption "
+                                   "corrections")
+            absorb_corrections = pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_correct,
+                                                                                 output_filename=absorb_file_name)
+        else:
+            absorb_corrections = None
 
-        if not self._is_vanadium:
-            # This is sample absorption corrections which is not supported on Pearl.
-            # We should not get here as the absorption flag shouldn't do anything whilst focusing on Pearl
-            raise RuntimeError("Cannot run Absorption corrections for a sample on Pearl. Please contact development "
-                               "team.")
-
-        return pearl_algs.apply_vanadium_absorb_corrections(van_ws=ws_to_correct, run_details=run_details)
+        return pearl_algs.apply_vanadium_absorb_corrections(van_ws=ws_to_correct, run_details=run_details,
+                                                            absorb_ws=absorb_corrections)
 
     def _switch_long_mode_inst_settings(self, long_mode_on):
         self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on),

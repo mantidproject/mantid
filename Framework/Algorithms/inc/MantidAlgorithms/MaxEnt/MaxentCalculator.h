@@ -69,6 +69,10 @@ public:
   // Returns the chi-square
   double getChisq();
 
+  std::vector<double> calculateData(const std::vector<double> &image) const;
+  std::vector<double> calculateImage(const std::vector<double> &data) const;
+  double calculateChiSquared(const std::vector<double> &data) const;
+
 private:
   // Calculates the gradient of chi
   std::vector<double> calculateChiGrad() const;

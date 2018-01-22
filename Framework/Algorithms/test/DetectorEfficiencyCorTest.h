@@ -121,8 +121,7 @@ private:
 
     // convert into a Geometry object
     bool addTypeTag = true;
-    boost::shared_ptr<Object> shape =
-        ShapeFactory().createShape(xmlShape, addTypeTag);
+    auto shape = ShapeFactory().createShape(xmlShape, addTypeTag);
 
     boost::shared_ptr<Instrument> instrument = boost::make_shared<Instrument>();
     const int ndets(2);
