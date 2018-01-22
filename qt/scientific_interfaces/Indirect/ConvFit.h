@@ -24,11 +24,11 @@ protected:
   QHash<QString, double> createDefaultValues() const override;
   std::string createSingleFitOutputName() const override;
   std::string createSequentialFitOutputName() const override;
-  std::string ConvFit::constructBaseName() const;
+  std::string constructBaseName() const;
   Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
-  QHash<QString, QString> ConvFit::functionNameChanges(
-      Mantid::API::IFunction_sptr model) const override;
+  QHash<QString, QString>
+  functionNameChanges(Mantid::API::IFunction_sptr model) const override;
 
 private:
   void setup() override;
@@ -72,9 +72,9 @@ private:
   addTemperatureCorrection(Mantid::API::IFunction_sptr model) const;
   Mantid::API::CompositeFunction_sptr
   addTemperatureCorrection(Mantid::API::CompositeFunction_sptr model) const;
-  Mantid::API::CompositeFunction_sptr ConvFit::applyTemperatureCorrection(
-      Mantid::API::IFunction_sptr function,
-      Mantid::API::IFunction_sptr correction) const;
+  Mantid::API::CompositeFunction_sptr
+  applyTemperatureCorrection(Mantid::API::IFunction_sptr function,
+                             Mantid::API::IFunction_sptr correction) const;
   Mantid::API::IFunction_sptr createTemperatureCorrection() const;
   Mantid::API::IFunction_sptr createResolutionFunction() const;
 

@@ -28,8 +28,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
-    : IndirectFitAnalysisTab(parent), m_confitResFileType(),
-      m_uiForm(new Ui::ConvFit) {
+    : IndirectFitAnalysisTab(parent), m_uiForm(new Ui::ConvFit),
+      m_confitResFileType() {
   m_uiForm->setupUi(parent);
   IndirectFitAnalysisTab::addPropertyBrowserToUI(m_uiForm.get());
 }
@@ -726,8 +726,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
