@@ -85,9 +85,9 @@ private:
   appendAlgorithm(Mantid::API::MatrixWorkspace_sptr leftWS,
                   Mantid::API::MatrixWorkspace_sptr rightWS, int numHistograms,
                   const std::string &outputWSName) const;
-  Mantid::API::IAlgorithm_sptr ConvFit::loadParameterFileAlgorithm(
-      Mantid::API::MatrixWorkspace_sptr workspace,
-      const std::string &filename) const;
+  Mantid::API::IAlgorithm_sptr
+  loadParameterFileAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
+                             const std::string &filename) const;
 
   void
   addFunctionNameChanges(Mantid::API::IFunction_sptr model,
