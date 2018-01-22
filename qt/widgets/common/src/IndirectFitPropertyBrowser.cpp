@@ -205,8 +205,8 @@ int IndirectFitPropertyBrowser::backgroundIndex() const {
 }
 
 /**
- * @param   The function, whose function index to retrieve.
- * @return  The function index of the specified function in the browser.
+ * @param function  The function, whose function index to retrieve.
+ * @return          The function index of the specified function in the browser.
  */
 int IndirectFitPropertyBrowser::functionIndex(IFunction_sptr function) const {
   for (size_t i = 0u; i < compositeFunction()->nFunctions(); ++i) {
@@ -520,7 +520,7 @@ void IndirectFitPropertyBrowser::addDoubleCustomSetting(
  *
  * @param settingKey    The key of the enum setting to add.
  * @param settingName   The display name of the enum setting to add.
- * @param defaultValue  The default value of the enum setting.
+ * @param options       The available options in the enum setting.
  */
 void IndirectFitPropertyBrowser::addEnumCustomSetting(
     const QString &settingKey, const QString &settingName,
@@ -561,6 +561,8 @@ void IndirectFitPropertyBrowser::addCustomSetting(const QString &settingKey,
  *                      this optional setting.
  * @param optionName    The display name of the setting specifying whether to
  *                      use this optional setting.
+ * @param enabled       True if the setting should start enabled, false
+ *                      otherwise.
  * @param defaultValue  The default value of the optional double setting.
  */
 void IndirectFitPropertyBrowser::addOptionalDoubleSetting(
@@ -582,7 +584,8 @@ void IndirectFitPropertyBrowser::addOptionalDoubleSetting(
  *                        this optional setting.
  * @param optionName      The display name of the setting specifying whether to
  *                        use this optional setting.
- * @param defaultValue    The default value of the optional double setting.
+ * @param enabled         True if the setting should start enabled, false
+ *                        otherwise.
  */
 void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
                                                     QtProperty *settingProperty,
