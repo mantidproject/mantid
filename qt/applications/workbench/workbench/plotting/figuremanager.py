@@ -95,8 +95,9 @@ class FigureManagerWorkbench(FigureManagerBase):
         if self.toolbar is not None:
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
-            self.toolbar.sig_hold_triggered.connect(functools.partial(Gcf.set_hold, self))
-            self.toolbar.sig_active_triggered.connect(functools.partial(Gcf.set_active, self))
+            if hasattr(Gcf, 'set_hold'):
+                self.toolbar.sig_hold_triggered.connect(functools.partial(Gcf.set_hold, self))
+                self.toolbar.sig_active_triggered.connect(functools.partial(Gcf.set_active, self))
             tbs_height = self.toolbar.sizeHint().height()
         else:
             tbs_height = 0
@@ -120,6 +121,11 @@ class FigureManagerWorkbench(FigureManagerBase):
             if self.toolbar is not None:
                 self.toolbar.update()
         self.canvas.figure.add_axobserver(notify_axes_change)
+
+        # Register canvas observers
+        self._cids = []
+        self._cids.append(self.canvas.mpl_connect('button_press_event', self.on_button_press))
+
         self.window.raise_()
 
     def full_screen_toggle(self):
@@ -132,6 +138,7 @@ class FigureManagerWorkbench(FigureManagerBase):
         if self.window._destroying:
             return
         self.window._destroying = True
+        map(self.canvas.mpl_disconnect, self._cids)
         try:
             Gcf.destroy(self.num)
         except AttributeError:
@@ -191,6 +198,14 @@ class FigureManagerWorkbench(FigureManagerBase):
 
     def set_window_title(self, title):
         self.window.setWindowTitle(title)
+
+    # ------------------------ Interaction events --------------------
+    def on_button_press(self, event):
+        if not event.dblclick:
+            # shortcut
+            return
+        # We assume this is used for editing axis information e.g. labels
+
 
 
 class Show(object):
@@ -267,19 +282,13 @@ show = Show()
 if __name__ == '__main__':
     # testing code
     import numpy as np
-    from six import itervalues
     qapp = QApplication([' '])
     x = np.linspace(0, 2*np.pi, 100)
     cx, sx = np.cos(x), np.sin(x)
     fig_mgr_1 = new_figure_manager(1)
     fig1 = fig_mgr_1.canvas.figure
     ax = fig1.add_subplot(111)
+    ax.set_title("Test title")
     ax.plot(x, cx)
     fig1.show()
-    fig_mgr_2 = new_figure_manager(2)
-    fig1 = fig_mgr_2.canvas.figure
-    ax = fig1.add_subplot(111)
-    ax.plot(x, sx)
-    fig1.show()
-
     qapp.exec_()
