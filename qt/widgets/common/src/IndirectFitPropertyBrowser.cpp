@@ -102,9 +102,6 @@ void IndirectFitPropertyBrowser::init() {
   /* Create input - output properties */
   QtProperty *settingsGroup = m_groupManager->addProperty("Settings");
 
-  const auto backgroundSelection =
-      m_enumManager->addProperty("Background Type");
-
   m_minimizer = m_enumManager->addProperty("Minimizer");
   m_minimizers << "Levenberg-Marquardt"
                << "Levenberg-MarquardtMD"
@@ -471,7 +468,7 @@ double IndirectFitPropertyBrowser::doubleSettingValue(
  */
 QString
 IndirectFitPropertyBrowser::enumSettingValue(const QString &settingKey) const {
-  return m_enumManager->value(m_customSettings[settingKey]);
+  return enumValue(m_customSettings[settingKey]);
 }
 
 /**
@@ -615,9 +612,10 @@ void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
 void IndirectFitPropertyBrowser::addCheckBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions,
     bool defaultValue) {
-  m_functionsAsCheckBox.insert(
-      createFunctionGroupProperty(groupName, m_boolManager));
+  auto boolProperty = createFunctionGroupProperty(groupName, m_boolManager);
+  m_functionsAsCheckBox.insert(boolProperty);
   addCustomFunctionGroup(groupName, functions);
+  m_boolManager->setValue(boolProperty, defaultValue);
 }
 
 /**
