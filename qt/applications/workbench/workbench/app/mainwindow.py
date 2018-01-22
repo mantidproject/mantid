@@ -60,6 +60,7 @@ if hasattr(Qt, 'AA_EnableHighDpiScaling'):
 # that the splash screen can be displayed
 # -----------------------------------------------------------------------------
 
+
 def qapplication():
     """Either return a reference to an existing application instance
     or create a new one
