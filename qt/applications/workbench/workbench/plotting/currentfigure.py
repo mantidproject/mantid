@@ -43,15 +43,12 @@ class CurrentFigure(object):
     figs = {}
 
     @classmethod
-    def get_fig_manager(cls, num):
+    def get_fig_manager(cls, _):
         """
-        If figure manager *num* exists, make it the active
-        figure and return the manager; otherwise return *None*.
+        If an active figure manager exists return it; otherwise
+        return *None*.
         """
-        manager = cls.figs.get(num, None)
-        if manager is not None:
-            cls.set_active(manager)
-        return manager
+        return cls.get_active()
 
     @classmethod
     def destroy(cls, num):
@@ -148,5 +145,12 @@ class CurrentFigure(object):
             if force or f_mgr.canvas.figure.stale:
                 f_mgr.canvas.draw_idle()
 
+    # ------------------ Our additional interface -----------------
+
+    @classmethod
+    def set_hold(cls, manager):
+        """If this manager is active then set inactive"""
+        if cls._active == manager:
+            cls._active = None
 
 atexit.register(CurrentFigure.destroy_all)

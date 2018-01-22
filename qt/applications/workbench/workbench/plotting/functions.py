@@ -55,6 +55,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
         kw, nums = 'wkspIndex', wksp_indices
     # create figure
     fig = plt.figure()
+    # we may be overwriting an active figure so clear everything
+    fig.clf()
     ax = fig.add_subplot(111, projection=PROJECTION)
     for ws in workspaces:
         for num in nums:
@@ -63,6 +65,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
                 ax.errorbar(ws, **{kw:num, 'label': '_hidden_on_legend'})
     ax.legend()
     ax.set_title(workspaces[0].getName())
+    fig.canvas.draw()
     fig.show()
     return fig
 

@@ -18,6 +18,7 @@
 
 # std imports
 import importlib
+import functools
 import sys
 
 # 3rdparty imports
@@ -94,6 +95,8 @@ class FigureManagerWorkbench(FigureManagerBase):
         if self.toolbar is not None:
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
+            self.toolbar.sig_hold_triggered.connect(functools.partial(Gcf.set_hold, self))
+            self.toolbar.sig_active_triggered.connect(functools.partial(Gcf.set_active, self))
             tbs_height = self.toolbar.sizeHint().height()
         else:
             tbs_height = 0
@@ -168,6 +171,9 @@ class FigureManagerWorkbench(FigureManagerBase):
                 reraise(*exc_info)
 
     def hold(self):
+        """
+        Mark this figure as held
+        """
         self.toolbar.hold()
 
     def _destroy_impl(self):
@@ -261,12 +267,19 @@ show = Show()
 if __name__ == '__main__':
     # testing code
     import numpy as np
+    from six import itervalues
     qapp = QApplication([' '])
     x = np.linspace(0, 2*np.pi, 100)
-    y = np.cos(x)
-    fig_mgr = new_figure_manager(1)
-    fig = fig_mgr.canvas.figure
-    ax = fig.add_subplot(111)
-    ax.plot(x, y)
-    fig.show()
+    cx, sx = np.cos(x), np.sin(x)
+    fig_mgr_1 = new_figure_manager(1)
+    fig1 = fig_mgr_1.canvas.figure
+    ax = fig1.add_subplot(111)
+    ax.plot(x, cx)
+    fig1.show()
+    fig_mgr_2 = new_figure_manager(2)
+    fig1 = fig_mgr_2.canvas.figure
+    ax = fig1.add_subplot(111)
+    ax.plot(x, sx)
+    fig1.show()
+
     qapp.exec_()

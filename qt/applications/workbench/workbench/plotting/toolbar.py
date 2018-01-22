@@ -30,6 +30,9 @@ from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
+    sig_active_triggered = QtCore.Signal()
+    sig_hold_triggered = QtCore.Signal()
+
     toolitems = (
         ('Home', 'Reset original view', 'fa.home', 'home', False),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'fa.arrows-alt', 'pan', False),
@@ -84,10 +87,12 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def hold(self, *args):
         self._actions['hold'].setChecked(True)
         self._actions['active'].setChecked(False)
+        self.sig_hold_triggered.emit()
 
     def active(self, *args):
         self._actions['active'].setChecked(True)
         self._actions['hold'].setChecked(False)
+        self.sig_active_triggered.emit()
 
     def print_figure(self):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
