@@ -1,5 +1,7 @@
 set ( SRC_FILES
     MeasurementItem.cpp
+    InstrumentOptionDefaults.cpp
+    ExperimentOptionDefaults.cpp
     QtReflEventTabView.cpp
     QtReflEventView.cpp
     QtReflMainWindowView.cpp

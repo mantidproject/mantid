@@ -17,6 +17,8 @@
 #include "../ISISReflectometry/IReflSettingsTabPresenter.h"
 #include "../ISISReflectometry/IReflSettingsView.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
+#include "../ISISReflectometry/ExperimentOptionDefaults.h"
+#include "../ISISReflectometry/InstrumentOptionDefaults.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include <gmock/gmock.h>
@@ -104,9 +106,8 @@ public:
   MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
   MOCK_METHOD1(setPolarisationOptionsEnabled, void(bool));
-  MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string> &));
-  MOCK_CONST_METHOD2(setInstDefaults, void(const std::vector<double> &,
-                                           const std::vector<std::string> &));
+  MOCK_METHOD1(setExpDefaults, void(ExperimentOptionDefaults));
+  MOCK_METHOD1(setInstDefaults, void(InstrumentOptionDefaults));
   MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
   MOCK_CONST_METHOD0(experimentSettingsEnabled, bool());
   MOCK_CONST_METHOD0(instrumentSettingsEnabled, bool());

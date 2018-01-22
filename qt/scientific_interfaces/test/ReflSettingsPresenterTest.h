@@ -265,12 +265,15 @@ public:
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
 
-    std::vector<std::string> defaults = {
-        "PointDetectorAnalysis", "None",
-        "1.006831,-0.011467,0.002244,-0.000095",
-        "1.017526,-0.017183,0.003136,-0.000140",
-        "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0", "10", "12"};
+    ExperimentOptionDefaults defaults;
+    defaults.AnalysisMode = "PointDetectorAnalysis";
+    defaults.PolarizationAnalysis = "None";
+    defaults.CRho = "1.006831,-0.011467,0.002244,-0.000095";
+    defaults.CAlpha = "1.017526,-0.017183,0.003136,-0.000140";
+    defaults.CAp = "0.917940,0.038265,-0.006645,0.000282";
+    defaults.CPp = "0.972762,0.001828,-0.000261,0.0";
+    defaults.TransRunStartOverlap = 10.0;
+    defaults.TransRunEndOverlap = 12.0;
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
@@ -288,12 +291,19 @@ public:
         .Times(Exactly(1));
     presenter.setInstrumentName("INTER");
 
-    std::vector<double> defaults_double = {1.,  4.0, 10., 17.,
-                                           18., 1.5, 17., 2.0};
-    std::vector<std::string> defaults_str = {"VerticalShift"};
+    auto defaults = InstrumentOptionDefaults();
 
-    EXPECT_CALL(mockView, setInstDefaults(defaults_double, defaults_str))
-        .Times(1);
+    defaults.NormalizeByIntegratedMonitors = true;
+    defaults.MonitorIntegralMin = 4.0;
+    defaults.MonitorIntegralMax = 10.0;
+    defaults.MonitorBackgroundMin = 17.0;
+    defaults.MonitorBackgroundMax = 18.0;
+    defaults.LambdaMin = 1.5;
+    defaults.LambdaMax = 17.0;
+    defaults.I0MonitorIndex = 2.0;
+    defaults.DetectorCorrectionType = "VerticalShift";
+
+    EXPECT_CALL(mockView, setInstDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

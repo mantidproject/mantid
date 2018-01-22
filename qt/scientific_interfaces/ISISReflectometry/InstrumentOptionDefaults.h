@@ -2,11 +2,13 @@
 #define MANTID_ISISREFLECTOMETRY_INSTRUMENTOPTIONDEFAULTS_H
 #include <string>
 #include "MantidGeometry/Instrument.h"
+#include <ostream>
+#include "DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-struct InstrumentOptionDefaults {
+struct MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentOptionDefaults {
   bool NormalizeByIntegratedMonitors;
   double MonitorIntegralMin;
   double MonitorIntegralMax;
@@ -19,6 +21,12 @@ struct InstrumentOptionDefaults {
   std::string DetectorCorrectionType;
 };
 
+bool MANTIDQT_ISISREFLECTOMETRY_DLL
+operator==(InstrumentOptionDefaults const &lhs,
+           InstrumentOptionDefaults const &rhs);
+
+std::ostream MANTIDQT_ISISREFLECTOMETRY_DLL &
+operator<<(std::ostream &os, InstrumentOptionDefaults const &defaults);
 }
 }
 #endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTOPTIONDEFAULTS_H

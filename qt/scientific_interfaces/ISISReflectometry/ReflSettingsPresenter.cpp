@@ -361,7 +361,7 @@ void ReflSettingsPresenter::getExpDefaults() {
     experimentDefaults.TransRunEndOverlap =
         parameters.valueOrDefault<double>("TransRunEndOverlap");
   }
-  m_view->setExpDefaults(experimentDefaults);
+  m_view->setExpDefaults(std::move(experimentDefaults));
 
   if (parameters.hasAccumulatedErrors()) {
     m_view->showOptionLoadError(parameters.typeErrors());
@@ -404,7 +404,7 @@ void ReflSettingsPresenter::getInstDefaults() {
   instrumentDefaults.DetectorCorrectionType =
       parameters.valueOrDefault<std::string>("DetectorCorrectionType");
 
-  m_view->setInstDefaults(instrumentDefaults);
+  m_view->setInstDefaults(std::move(instrumentDefaults));
 
   if (parameters.hasAccumulatedErrors()) {
     m_view->showOptionLoadError(parameters.typeErrors());

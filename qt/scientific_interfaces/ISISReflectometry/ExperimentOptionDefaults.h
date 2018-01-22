@@ -1,11 +1,12 @@
 #ifndef MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H
 #define MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H
 #include <string>
-#include "MantidGeometry/Instrument.h"
+#include <ostream>
+#include "DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-struct ExperimentOptionDefaults {
+struct MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults {
   std::string AnalysisMode;
   std::string PolarizationAnalysis;
   std::string CRho;
@@ -18,6 +19,13 @@ struct ExperimentOptionDefaults {
   double ScaleFactor;
   std::string StitchParams;
 };
+
+bool MANTIDQT_ISISREFLECTOMETRY_DLL
+operator==(const ExperimentOptionDefaults &lhs,
+           const ExperimentOptionDefaults &rhs);
+
+std::ostream &MANTIDQT_ISISREFLECTOMETRY_DLL
+operator<<(std::ostream &os, ExperimentOptionDefaults const &defaults);
 }
 }
 #endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H
