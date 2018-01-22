@@ -202,12 +202,12 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         # --- general application menu options --
         # file menu
-        action_open = create_action(self, "Open File",
+        action_open = create_action(self, "Open",
                                     on_triggered=self.open_file,
                                     shortcut="Ctrl+O",
                                     shortcut_context=Qt.ApplicationShortcut,
                                     icon_name="fa.folder-open")
-        action_save = create_action(self, "Save File",
+        action_save = create_action(self, "Save",
                                     on_triggered=self.save_file,
                                     shortcut="Ctrl+S",
                                     shortcut_context=Qt.ApplicationShortcut,
@@ -218,7 +218,8 @@ class MainWindow(QMainWindow):
 
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut_context=Qt.ApplicationShortcut,
+                                    icon_name="fa.power-off")
         self.file_menu_actions = [action_open, action_save, action_manage_directories, None, action_quit]
 
         # view menu
