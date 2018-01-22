@@ -300,9 +300,9 @@ void calcTrapezoidYIntersections(
   ConvexPolygon poly;
   areaInfo.reserve(nx * ny);
   size_t vertBits = 0;
-  size_t xj, yj0, yj1;
+  size_t yj0, yj1;
   for (size_t xi = x_start; xi < x_end; ++xi) {
-    xj = xi - x_start;
+    size_t xj = xi - x_start;
     // Define new 1-bin wide input quadrilateral
     if (xi > x_start) {
       nll = nlr;
