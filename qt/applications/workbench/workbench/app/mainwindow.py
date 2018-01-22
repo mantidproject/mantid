@@ -475,9 +475,7 @@ class MainWindow(QMainWindow):
         self.editor.save_current_file()
 
     def open_manage_directories(self):
-        manage_directory_widget = ManageUserDirectories(self)
-        manage_directory_widget.exec_()
-
+        ManageUserDirectories(self).exec_()
 
 def initialize():
     """Perform an initialization of the application instance. Most notably
