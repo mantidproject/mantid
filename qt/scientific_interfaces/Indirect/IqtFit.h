@@ -34,7 +34,7 @@ private:
   void loadSettings(const QSettings &settings) override;
 
 protected:
-  QHash<QString, double> createDefaultValues() const;
+  QHash<QString, double> createDefaultValues() const override;
   std::string createSingleFitOutputName() const override;
   std::string createSequentialFitOutputName() const override;
   Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
