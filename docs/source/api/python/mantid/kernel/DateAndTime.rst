@@ -19,6 +19,12 @@ internally, use the code:
 
    times = np.array(times, dtype=np.int64) * np.timedelta64(1,'ns') + np.datetime64('1990-01-01T00:00')
 
+With :class:`numpy.datetime64`, finding the number of seconds between two times is simply
+
+.. code-block:: python
+
+   diff = (timeArray[-1]-timeArray[0]) / np.timedelta64(1, 's')
+
 .. module:`mantid.kernel`
 
 .. autoclass:: mantid.kernel.DateAndTime
