@@ -27,7 +27,7 @@ public:
 
   void displayRwp(const double rwp) const override;
 
-  std::string getFocusedFileName() const override;
+  std::vector<std::string> getFocusedFileNames() const override;
 
   std::string getGSASIIProjectPath() const override;
 
@@ -70,7 +70,7 @@ private:
 
   Ui::EnggDiffractionQtTabGSAS m_ui;
 
-  void setFocusedRunFileName(const QString &filename);
+  void setFocusedRunFileNames(const QStringList &filenames);
 
   void setupUI();
 };

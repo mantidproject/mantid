@@ -32,10 +32,10 @@ public:
   virtual void displayRwp(const double rwp) const = 0;
 
   /**
-   Get the name of the focused run file the user has requested to load
-   @return Filename to load
+   Get the names of the focused run files the user has requested to load
+   @return Vector of filenames to load
    */
-  virtual std::string getFocusedFileName() const = 0;
+  virtual std::vector<std::string> getFocusedFileNames() const = 0;
 
   /**
    Get the path to export the created GSAS-II project file to

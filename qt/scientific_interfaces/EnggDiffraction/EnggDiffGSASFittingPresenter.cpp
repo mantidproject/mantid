@@ -136,8 +136,12 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
 }
 
 void EnggDiffGSASFittingPresenter::processLoadRun() {
-  const auto focusedFileName = m_view->getFocusedFileName();
-  const auto loadSuccessful = m_model->loadFocusedRun(focusedFileName);
+  const auto focusedFileNames = m_view->getFocusedFileNames();
+  bool loadSuccessful = true;
+
+  for (const auto fileName : focusedFileNames) {
+    loadSuccessful &= m_model->loadFocusedRun(fileName);
+  }
 
   if (loadSuccessful) {
     const auto runLabels = m_model->getRunLabels();

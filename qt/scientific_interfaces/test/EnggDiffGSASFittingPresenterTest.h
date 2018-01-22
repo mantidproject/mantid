@@ -22,9 +22,9 @@ public:
     auto presenter = setUpPresenter();
     const auto filename = "Valid filename";
 
-    EXPECT_CALL(*m_mockViewPtr, getFocusedFileName())
+    EXPECT_CALL(*m_mockViewPtr, getFocusedFileNames())
         .Times(1)
-        .WillOnce(Return(filename));
+        .WillOnce(Return(std::vector<std::string>({filename})));
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
         .WillOnce(Return(true));
@@ -47,9 +47,9 @@ public:
     auto presenter = setUpPresenter();
     const auto filename = "Invalid filename";
 
-    EXPECT_CALL(*m_mockViewPtr, getFocusedFileName())
+    EXPECT_CALL(*m_mockViewPtr, getFocusedFileNames())
         .Times(1)
-        .WillOnce(Return(filename));
+        .WillOnce(Return(std::vector<std::string>({filename})));
 
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)

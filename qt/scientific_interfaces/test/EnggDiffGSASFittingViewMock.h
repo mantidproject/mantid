@@ -17,7 +17,7 @@ public:
 
   MOCK_CONST_METHOD1(displayRwp, void(const double rwp));
 
-  MOCK_CONST_METHOD0(getFocusedFileName, std::string());
+  MOCK_CONST_METHOD0(getFocusedFileNames, std::vector<std::string>());
 
   MOCK_CONST_METHOD0(getGSASIIProjectPath, std::string());
 

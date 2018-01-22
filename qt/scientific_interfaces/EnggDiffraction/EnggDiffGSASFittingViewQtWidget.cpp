@@ -25,8 +25,9 @@ EnggDiffGSASFittingViewQtWidget::~EnggDiffGSASFittingViewQtWidget() {
 }
 
 void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
-  QString path(QFileDialog::getOpenFileName(this, tr("Find focused run file")));
-  setFocusedRunFileName(path);
+  const auto filenames(
+      QFileDialog::getOpenFileNames(this, tr("Find focused run files")));
+  setFocusedRunFileNames(filenames);
 }
 
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
@@ -40,8 +41,15 @@ void EnggDiffGSASFittingViewQtWidget::displayRwp(const double rwp) const {
   throw std::runtime_error("displayRwp not yet implemented");
 }
 
-std::string EnggDiffGSASFittingViewQtWidget::getFocusedFileName() const {
-  return m_ui.lineEdit_runFile->text().toStdString();
+std::vector<std::string>
+EnggDiffGSASFittingViewQtWidget::getFocusedFileNames() const {
+  const auto filenamesQStringList = m_ui.lineEdit_runFile->text().split(",");
+  std::vector<std::string> filenames;
+
+  for (const auto &filenameQString : filenamesQStringList) {
+    filenames.push_back(filenameQString.toStdString());
+  }
+  return filenames;
 }
 
 std::string EnggDiffGSASFittingViewQtWidget::getGSASIIProjectPath() const {
@@ -143,9 +151,9 @@ void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
   m_ui.checkBox_showRefinementResults->setEnabled(enabled);
 }
 
-void EnggDiffGSASFittingViewQtWidget::setFocusedRunFileName(
-    const QString &filename) {
-  m_ui.lineEdit_runFile->setText(filename);
+void EnggDiffGSASFittingViewQtWidget::setFocusedRunFileNames(
+    const QStringList &filenames) {
+  m_ui.lineEdit_runFile->setText(filenames.join(tr(",")));
 }
 
 void EnggDiffGSASFittingViewQtWidget::setupUI() {
