@@ -315,7 +315,7 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
 * the default is false
 * @returns A vector of descriptor objects
 */
-std::vector<Algorithm_descriptor>
+std::vector<AlgorithmDescriptor>
 AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
   // algorithm names
   auto sv = getKeys(true);
@@ -327,12 +327,12 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
   }
 
   // results vector
-  std::vector<Algorithm_descriptor> res;
+  std::vector<AlgorithmDescriptor> res;
 
   for (const auto &s : sv) {
     if (s.empty())
       continue;
-    Algorithm_descriptor desc;
+    AlgorithmDescriptor desc;
     size_t i = s.find('|');
     if (i == std::string::npos) {
       desc.name = s;

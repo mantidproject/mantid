@@ -161,8 +161,8 @@ public:
     TS_ASSERT_DELTA(data->y(0)[27], 0.612, 0.001);
 
     // Test that the algorithm converged
-    TS_ASSERT_EQUALS(chi->y(0).back(), 0);
-    TS_ASSERT_EQUALS(angle->y(0).back(), 0);
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
   }
 
   void test_sine() {
@@ -196,8 +196,9 @@ public:
     TS_ASSERT_DELTA(data->y(0)[26], 0.824, 0.001);
     TS_ASSERT_DELTA(data->y(0)[27], 0.721, 0.001);
     // Test that the algorithm converged
-    TS_ASSERT_EQUALS(chi->y(0).back(), 0);
-    TS_ASSERT_EQUALS(angle->y(0).back(), 0);
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
+    // seg faults after these tests.....
   }
 
   void test_sine_cosine_neg() {
@@ -236,7 +237,7 @@ public:
     // Positive images
 
     auto ws = createWorkspaceComplex();
-
+    //    TS_ASSERT_EQUALS(ws->getNumberHistograms(),0)
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
