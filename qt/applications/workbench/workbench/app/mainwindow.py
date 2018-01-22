@@ -43,7 +43,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
+from qtpy.QtCore import (QByteArray, QEventLoop,
                          QPoint, QSize, Qt)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDockWidget, QFileDialog, QMainWindow,
@@ -52,8 +52,6 @@ from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
-if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
 
 # -----------------------------------------------------------------------------
@@ -61,7 +59,6 @@ if hasattr(Qt, 'AA_EnableHighDpiScaling'):
 # titles and hold on to a reference to it. Required to be performed early so
 # that the splash screen can be displayed
 # -----------------------------------------------------------------------------
-
 def qapplication():
     """Either return a reference to an existing application instance
     or create a new one
@@ -113,6 +110,8 @@ class MainWindow(QMainWindow):
 
         qapp = QApplication.instance()
         qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
         self.setWindowTitle("Mantid Workbench")
 

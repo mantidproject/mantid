@@ -17,29 +17,21 @@
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 
 # std imports
-import importlib
 import functools
 import sys
 
 # 3rdparty imports
 import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
-from qtpy import QT_VERSION
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib._pylab_helpers import Gcf
 from qtpy.QtCore import Qt, QMetaObject, QThread, Signal
 from qtpy.QtWidgets import qApp, QApplication, QLabel, QMainWindow
 from six import reraise, text_type
 
 # local imports
+from workbench.plotting.propertiesdialog import LabelEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
-
-# Import the *real* matplotlib backend for the canvas
-mpl_qt_backend = importlib.import_module('matplotlib.backends.backend_qt{}'.format(QT_VERSION[0]))
-mpl_qtagg_backend = importlib.import_module('matplotlib.backends.backend_qt{}agg'.format(QT_VERSION[0]))
-try:
-    Gcf = getattr(mpl_qt_backend, 'Gcf')
-    FigureCanvas = getattr(mpl_qtagg_backend, 'FigureCanvasQTAgg')
-except KeyError:
-    raise ImportError("Unknown form of matplotlib Qt backend.")
 
 
 class MainWindow(QMainWindow):
@@ -205,12 +197,31 @@ class FigureManagerWorkbench(FigureManagerBase):
             # shortcut
             return
         # We assume this is used for editing axis information e.g. labels
+        # which are outside of the axes so event.inaxes is no use.
+        canvas = self.canvas
+        figure = canvas.figure
+        try:
+            ax = figure.get_axes()[0]
+        except IndexError:
+            return
+
+        def show_label_editor(target):
+            editor = LabelEditor(canvas, target)
+            # Qt has 0,0 at top left, mpl at bottom right. QDialogs
+            # have no parent so coordinates are relative to desktop
+            editor.move(event.x, figure.bbox.height - event.y + self.window.y())
+            editor.exec_()
+
+        if ax.title.contains(event)[0]:
+            show_label_editor(ax.title)
+        elif ax.xaxis.label.contains(event)[0]:
+            show_label_editor(ax.xaxis.label)
+        elif ax.yaxis.label.contains(event)[0]:
+            show_label_editor(ax.yaxis.label)
 
 
 class Show(object):
-    """
 
-    """
     def __call__(self, block=None):
         """
         Show all figures.
@@ -270,7 +281,7 @@ def new_figure_manager_given_figure(num, figure):
     """
     Create a new figure manager instance for the given figure.
     """
-    canvas = FigureCanvas(figure)
+    canvas = FigureCanvasQTAgg(figure)
     manager = FigureManagerWorkbench(canvas, num)
     return manager
 
@@ -282,12 +293,19 @@ if __name__ == '__main__':
     # testing code
     import numpy as np
     qapp = QApplication([' '])
+    qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+        qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+
     x = np.linspace(0, 2*np.pi, 100)
     cx, sx = np.cos(x), np.sin(x)
     fig_mgr_1 = new_figure_manager(1)
     fig1 = fig_mgr_1.canvas.figure
     ax = fig1.add_subplot(111)
     ax.set_title("Test title")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+
     ax.plot(x, cx)
     fig1.show()
     qapp.exec_()
