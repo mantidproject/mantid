@@ -25,16 +25,16 @@ class Prop:
     FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
     INPUT_WS = 'InputWorkspace'
     CLEANUP = 'Cleanup'
-    LOWER_BKG_OFFSET = 'LowerBackgroundOffset'
-    LOWER_BKG_WIDTH = 'LowerBackgroundWidth'
+    LOW_BKG_OFFSET = 'LowAngleBkgOffset'
+    LOW_BKG_WIDTH = 'LowAngleBkgWidth'
     OUTPUT_WS = 'OutputWorkspace'
     OUTPUT_BEAM_POS = 'OutputBeamPosition'
     RUN = 'Run'
     SLIT_NORM = 'SlitNormalisation'
     SUBALG_LOGGING = 'SubalgorithmLogging'
     SUM_OUTPUT = 'SumOutput'
-    UPPER_BKG_OFFSET = 'UpperBackgroundOffset'
-    UPPER_BKG_WIDTH = 'UpperBackgroundWidth'
+    HIGH_BKG_OFFSET = 'HighAngleBkgOffset'
+    HIGH_BKG_WIDTH = 'HighAngleBkgWidth'
     WATER_REFERENCE = 'WaterReference'
     WAVELENGTH_RANGE = 'WavelengthRange'
 
@@ -199,20 +199,20 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=BkgMethod.CONSTANT,
                              validator=StringListValidator([BkgMethod.CONSTANT, BkgMethod.LINEAR, BkgMethod.OFF]),
                              doc='Flat background calculation method for background subtraction.')
-        self.declareProperty(Prop.LOWER_BKG_OFFSET,
+        self.declareProperty(Prop.LOW_BKG_OFFSET,
                              defaultValue=7,
                              validator=nonnegativeInt,
                              doc='Distance of flat background region towards smaller detector angles from the foreground centre, ' +
                                  'in pixels.')
-        self.declareProperty(Prop.LOWER_BKG_WIDTH,
+        self.declareProperty(Prop.LOW_BKG_WIDTH,
                              defaultValue=5,
                              validator=nonnegativeInt,
                              doc='Width of flat background region towards smaller detector angles from the foreground centre, in pixels.')
-        self.declareProperty(Prop.UPPER_BKG_OFFSET,
+        self.declareProperty(Prop.HIGH_BKG_OFFSET,
                              defaultValue=7,
                              validator=nonnegativeInt,
                              doc='Distance of flat background region towards larger detector angles from the foreground centre, in pixels.')
-        self.declareProperty(Prop.UPPER_BKG_WIDTH,
+        self.declareProperty(Prop.HIGH_BKG_WIDTH,
                              defaultValue=5,
                              validator=nonnegativeInt,
                              doc='Width of flat background region towards larger detector angles from the foreground centre, in pixels.')
@@ -227,7 +227,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         issues = dict()
         # TODO check that either RUN or INPUT_WS is given.
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
-            if self.getProperty(Prop.LOWER_BKG_WIDTH).value == 0 and self.getProperty(Prop.UPPER_BKG_WIDTH).value == 0:
+            if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
                 issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background widths are zero.'
             if not self.getProperty(Prop.INPUT_WS).isDefault and self.getProperty(Prop.BEAM_POS).isDefault \
                     and self.getProperty(Prop.FOREGROUND_CENTRE).isDefault:
@@ -337,17 +337,17 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         peakHalfWidth = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
         if peakHalfWidth == Property.EMPTY_INT:
             peakHalfWidth = 0
-        lowerOffset = self.getProperty(Prop.LOWER_BKG_OFFSET).value
-        lowerWidth = self.getProperty(Prop.LOWER_BKG_WIDTH).value
-        lowerStartIndex = peakPos + peakHalfWidth + lowerOffset
-        lowerEndIndex = lowerStartIndex + lowerWidth
-        lowerRange = [lowerStartIndex + 0.5, lowerEndIndex + 0.5]
-        upperOffset = self.getProperty(Prop.UPPER_BKG_OFFSET).value
-        upperWidth = self.getProperty(Prop.UPPER_BKG_WIDTH).value
-        upperEndIndex = peakPos - peakHalfWidth - upperOffset
-        upperStartIndex = upperEndIndex - upperWidth
-        upperRange = [upperStartIndex - 0.5, upperEndIndex - 0.5]
-        return upperRange + lowerRange
+        lowOffset = self.getProperty(Prop.LOW_BKG_OFFSET).value
+        lowWidth = self.getProperty(Prop.LOW_BKG_WIDTH).value
+        lowStartIndex = peakPos + peakHalfWidth + lowOffset
+        lowEndIndex = lowStartIndex + lowWidth
+        lowRange = [lowStartIndex + 0.5, lowEndIndex + 0.5]
+        highOffset = self.getProperty(Prop.HIGH_BKG_OFFSET).value
+        highWidth = self.getProperty(Prop.HIGH_BKG_WIDTH).value
+        highEndIndex = peakPos - peakHalfWidth - highOffset
+        highStartIndex = highEndIndex - highWidth
+        highRange = [highStartIndex - 0.5, highEndIndex - 0.5]
+        return highRange + lowRange
 
     def _foregroundCentre(self, ws, beamPosWS):
         """Return the detector id of the foreground centre pixel."""
