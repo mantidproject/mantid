@@ -1322,7 +1322,6 @@ void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto ws = actor.getWorkspace();
   const auto &componentInfo = actor.getComponentInfo();
-  auto detid = actor.getDetID(detindex);
   auto parent = componentInfo.parent(detindex);
   auto ass = componentInfo.detectorsInSubtree(parent);
 
@@ -1336,7 +1335,6 @@ void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
   if (err)
     err->resize(x.size(), 0);
 
-  const auto &detectorInfo = actor.getDetectorInfo();
   for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
       auto index = actor.getWorkspaceIndex(det);
