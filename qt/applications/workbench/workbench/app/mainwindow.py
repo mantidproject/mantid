@@ -149,18 +149,11 @@ class MainWindow(QMainWindow):
         self.create_menus()
 
         # widgets
-        self.set_splash("Loading message display")
-        from workbench.plugins.logmessagedisplay import LogMessageDisplay
-        self.messagedisplay = LogMessageDisplay(self)
-        # this takes over stdout/stderr
-        self.messagedisplay.register_plugin()
-        self.widgets.append(self.messagedisplay)
-
-        self.set_splash("Loading IPython console")
-        from workbench.plugins.jupyterconsole import JupyterConsole
-        self.ipythonconsole = JupyterConsole(self)
-        self.ipythonconsole.register_plugin()
-        self.widgets.append(self.ipythonconsole)
+        self.set_splash("Loading Algorithm Selector")
+        from workbench.plugins.algorithmselectorwidget import AlgorithmSelector
+        self.algorithm_selector = AlgorithmSelector(self)
+        self.algorithm_selector.register_plugin()
+        self.widgets.append(self.algorithm_selector)
 
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
@@ -168,17 +161,24 @@ class MainWindow(QMainWindow):
         self.editor.register_plugin()
         self.widgets.append(self.editor)
 
+        self.set_splash("Loading IPython console")
+        from workbench.plugins.jupyterconsole import JupyterConsole
+        self.ipythonconsole = JupyterConsole(self)
+        self.ipythonconsole.register_plugin()
+        self.widgets.append(self.ipythonconsole)
+
+        self.set_splash("Loading message display")
+        from workbench.plugins.logmessagedisplay import LogMessageDisplay
+        self.messagedisplay = LogMessageDisplay(self)
+        # this takes over stdout/stderr
+        self.messagedisplay.register_plugin()
+        self.widgets.append(self.messagedisplay)
+
         self.set_splash("Loading Workspace Widget")
         from workbench.plugins.workspacewidget import WorkspaceWidget
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
-
-        self.set_splash("Loading Algorithm Selector")
-        from workbench.plugins.algorithmselectorwidget import AlgorithmSelector
-        self.algorithm_selector = AlgorithmSelector(self)
-        self.algorithm_selector.register_plugin()
-        self.widgets.append(self.algorithm_selector)
 
         self.setup_layout()
         self.read_user_settings()
@@ -220,7 +220,24 @@ class MainWindow(QMainWindow):
                                                on_triggered=self.setup_default_layouts,
                                                shortcut="Shift+F10",
                                                shortcut_context=Qt.ApplicationShortcut)
-        self.view_menu_actions = [action_restore_default]
+        self.view_menu_actions = [action_restore_default, None] + self.create_widget_actions()
+
+    def create_widget_actions(self):
+        """
+        Creates menu actions to show/hide dockable widgets.
+        This uses all widgets that are in self.widgets
+        :return: A list of show/hide actions for all widgets
+        """
+        widget_actions = []
+        for widget in self.widgets:
+            action = widget.dockwidget.toggleViewAction()
+            widget_actions.append(action)
+        return widget_actions
+
+    @staticmethod
+    def show_hide_widget(widget, make_visible):
+        widget.dockwidget.setVisible(make_visible)
+
 
     def populate_menus(self):
         # Link to menus
