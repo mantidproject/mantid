@@ -79,8 +79,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                              doc="Goodness of fit value (Chi squared)")
         self.declareProperty(name=self.PROP_OUT_RWP, defaultValue=0.0, direction=Direction.Output,
                              doc="Weight profile R-factor (Rwp) discrepancy index for the goodness of fit")
-        self.declareProperty(name=self.PROP_OUT_SIGMA, direction=Direction.Output, doc="Sigma-1 profile coefficient")
-        self.declareProperty(name=self.PROP_OUT_GAMMA, direction=Direction.Output,
+        self.declareProperty(name=self.PROP_OUT_SIGMA, direction=Direction.Output, defaultValue=0.0,
+                             doc="Sigma-1 profile coefficient")
+        self.declareProperty(name=self.PROP_OUT_GAMMA, direction=Direction.Output, defaultValue=0.0,
                              doc="Gamma-1 profile coefficient (called X in GSAS-II)")
         self.declareProperty(ITableWorkspaceProperty(name=self.PROP_OUT_LATTICE_PARAMS, direction=Direction.Output,
                                                      defaultValue=self.PROP_OUT_LATTICE_PARAMS),
@@ -120,8 +121,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                 self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj,
                                                      do_pawley=refinement_method == self.REFINEMENT_METHODS[0])
             self._set_output_properties(rwp=rwp, gof=gof, lattice_params=lattice_params,
-                                        gamma=gsas_proj.values()[5]["Instrument Parameters"][0]["X"],
-                                        sigma=gsas_proj.values()[5]["Instrument Parameters"][0]["sig-1"])
+                                        gamma=gsas_proj.values()[5]["Instrument Parameters"][0]["X"][1],
+                                        sigma=gsas_proj.values()[5]["Instrument Parameters"][0]["sig-1"][1])
 
     def _build_output_lattice_table(self, lattice_params):
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
