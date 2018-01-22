@@ -150,7 +150,7 @@ required for Mantid development.
 
 %changelog
 
-* Mon Jan 22 2017 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+* Mon Jan 22 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Added qtawesome
 
 * Tue Dec 05 2017 Peter Peterson <petersonpf@ornl.gov>
