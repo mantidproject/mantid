@@ -21,16 +21,11 @@ namespace FractionalRebinning {
 
 const double POS_TOLERANCE = 1.e-10;
 
-enum QuadrilateralType {
-  Rectangle,
-  TrapezoidX,
-  TrapezoidY,
-  General
-};
+enum QuadrilateralType { Rectangle, TrapezoidX, TrapezoidY, General };
 
 /**
  * Determine the (axis-aligned) quadrilateral type of the input polygon
- * @param inputQ Input polygon (assumed vertices are in order: ll, ul, ur, lr)
+ * @param inputQ Input polygon (assumes vertices are in order: ll, ul, ur, lr)
  */
 QuadrilateralType getQuadrilateralType(const Quadrilateral inputQ) {
   const bool inputQHasXParallel =
@@ -173,8 +168,8 @@ void calcTrapezoidYIntersections(
   // 2. Loop along x, for each 1-output-bin wide strip construct a new input Q.
   // 3. Loop along y, in each bin determine if any vertex of the new input Q
   //    lies within the bin. Construct an overlap polygon depending on which
-  //    vertices are in. The polygon will include the included vertices and
-  //    left/right points previously calc.
+  //    vertices are in. The polygon will include these vertices of inputQ
+  //    and left/right points previously calc.
   const auto &xAxis = outputWS->x(0);
 
   V2D ll = inputQ[0], ul = inputQ[1], ur = inputQ[2], lr = inputQ[3];
@@ -382,7 +377,7 @@ void calcTrapezoidYIntersections(
             area = polyArea(l1, r1, nlr, l1);
           break;
         // Now check cases where two vertices are in.
-        case(LL_IN | UL_IN) :
+        case (LL_IN | UL_IN):
           if (mTop >= 0) {
             if (mBot < 0)
               area = polyArea(nll, nul, l1, r1, r0, l0, nll);
@@ -392,7 +387,7 @@ void calcTrapezoidYIntersections(
             area = polyArea(nll, nul, r0, l0, nll);
           }
           break;
-        case(UR_IN | LR_IN) :
+        case (UR_IN | LR_IN):
           if (mBot >= 0) {
             if (mTop < 0)
               area = polyArea(nur, nlr, r0, l0, l1, r1, nur);
@@ -402,33 +397,33 @@ void calcTrapezoidYIntersections(
             area = polyArea(nur, nlr, l1, r1, nur);
           }
           break;
-        case(UL_IN | UR_IN) :
+        case (UL_IN | UR_IN):
           area = polyArea(nul, nur, r0, l0, nul);
           break;
-        case(LL_IN | LR_IN) :
+        case (LL_IN | LR_IN):
           area = polyArea(nlr, nll, l1, r1, nlr);
           break;
-        case(LL_IN | UR_IN) :
+        case (LL_IN | UR_IN):
           area = polyArea(nll, l1, r1, nur, r0, l0, nll);
           break;
-        case(UL_IN | LR_IN) :
+        case (UL_IN | LR_IN):
           area = polyArea(nul, l1, r1, nlr, r0, l0, nul);
           break;
         // Now check cases where three vertices are in.
-        case(UL_IN | UR_IN | LR_IN) :
+        case (UL_IN | UR_IN | LR_IN):
           area = polyArea(nul, nur, nlr, r0, l0, nul);
           break;
-        case(LL_IN | UR_IN | LR_IN) :
+        case (LL_IN | UR_IN | LR_IN):
           area = polyArea(nll, l1, r1, nur, nlr, nll);
           break;
-        case(LL_IN | UL_IN | LR_IN) :
+        case (LL_IN | UL_IN | LR_IN):
           area = polyArea(nlr, nll, nul, l1, r1, nlr);
           break;
-        case(LL_IN | UL_IN | UR_IN) :
+        case (LL_IN | UL_IN | UR_IN):
           area = polyArea(nul, nur, r0, l0, nll, nul);
           break;
         // Finally, the case where all vertices are in.
-        case(LL_IN | UL_IN | UR_IN | LR_IN) :
+        case (LL_IN | UL_IN | UR_IN | LR_IN):
           area = polyArea(nll, nul, nur, nlr, nll);
           break;
         }
