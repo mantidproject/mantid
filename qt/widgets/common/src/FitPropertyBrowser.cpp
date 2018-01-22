@@ -254,7 +254,7 @@ void FitPropertyBrowser::init() {
 
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
-  
+
   initLayout(w);
 }
 
@@ -2773,8 +2773,8 @@ void FitPropertyBrowser::setupMultifit() {
           }
         }
         QString wsParam = ",WSParam=(WorkspaceIndex=" + QString::number(i);
-        wsParam += ",StartX=" + QString::number(startX()) +
-                   ",EndX=" + QString::number(endX()) + ")";
+        wsParam += ",StartX=" + QString::number(startX()) + ",EndX=" +
+                   QString::number(endX()) + ")";
         funIni += fun1Ini + ",Workspace=" + wsName + wsParam + ";";
       }
       if (!tieStr.isEmpty()) {
@@ -2972,9 +2972,9 @@ void FitPropertyBrowser::setWorkspaceProperties() {
 void FitPropertyBrowser::addWorkspaceIndexToBrowser() {
   if (m_browser->isItemVisible(m_settingsGroup)) {
     if (!m_settingsGroup->property()->subProperties().contains(
-      m_workspaceIndex)) {
+            m_workspaceIndex)) {
       m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
-        m_workspace);
+                                                     m_workspace);
     }
   }
 }

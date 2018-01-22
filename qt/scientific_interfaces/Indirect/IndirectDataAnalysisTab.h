@@ -102,8 +102,8 @@ protected:
 
   void updatePlotRange(const QString &rangeName,
                        MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                       const QString &startRangePropName="",
-                       const QString &endRangePropName="");
+                       const QString &startRangePropName = "",
+                       const QString &endRangePropName = "");
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
