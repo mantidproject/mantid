@@ -928,10 +928,8 @@ void ConvFit::backgLevel(double val) {
 void ConvFit::updateHWHMFromResolution() {
   auto resolution = getInstrumentResolution(inputWorkspace());
 
-  if (resolution > 0 && selectedFitType().contains("Lorentzian")) {
-    auto peakCentre = parameterValue("Lorentzian", "PeakCentre");
+  if (resolution > 0 && selectedFitType().contains("Lorentzian"))
     hwhmMaxChanged(resolution / 2.0);
-  }
 }
 
 /**

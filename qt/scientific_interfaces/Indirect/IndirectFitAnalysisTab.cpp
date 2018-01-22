@@ -115,7 +115,7 @@ bool equivalentFunctions(IFunction_const_sptr func1,
 
 class WidgetAdder : public boost::static_visitor<> {
 public:
-  WidgetAdder(QWidget *widget) : m_widget(widget) {}
+  explicit WidgetAdder(QWidget *widget) : m_widget(widget) {}
 
   template <typename Form> void operator()(Form form) const {
     form->properties->addWidget(m_widget);
