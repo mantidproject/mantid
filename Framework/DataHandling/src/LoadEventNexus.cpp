@@ -868,6 +868,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       shortest_tof = 0.0;
       longest_tof = 1e10;
     } catch (const std::runtime_error &) {
+      g_log.warning()
+          << "ParallelEventLoader failed, falling back to default loader.\n";
     }
     safeOpenFile(m_filename);
   }
