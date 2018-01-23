@@ -222,4 +222,5 @@ public:
 signals:
   void plotSpectrumClicked(const QStringList & workspaceName);
   void plotSpectrumWithErrorsClicked(const QStringList & workspaceName);
+  void plotColorfillClicked(const QStringList &workspaceName);
 };

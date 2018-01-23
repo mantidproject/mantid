@@ -28,7 +28,16 @@ from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import plot
+from workbench.plotting.functions import pcolormesh, plot
+
+
+def _workspaces_from_names(names):
+    """Convert a list of workspace names to a list of workspace handles
+
+    :param names: List of names of workspaces
+    """
+    ads = AnalysisDataService.Instance()
+    return [ads[name.encode('utf-8')] for name in names]
 
 
 class WorkspaceWidget(PluginWidget):
@@ -45,8 +54,11 @@ class WorkspaceWidget(PluginWidget):
         self.setLayout(layout)
 
         # behaviour
-        workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot1d, errors=False))
-        workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot1d, errors=True))
+        workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                      errors=False))
+        workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                                errors=True))
+        workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
 
     # ----------------- Plugin API --------------------
 
@@ -56,17 +68,36 @@ class WorkspaceWidget(PluginWidget):
     def get_plugin_title(self):
         return "Workspaces"
 
+    def read_user_settings(self, _):
+        pass
+
     # ----------------- Behaviour --------------------
 
-    def _do_plot1d(self, workspace_names, errors):
+    def _do_plot_spectrum(self, names, errors):
+        """
+        Plot spectra from the selected workspaces
+
+        :param names: A list of workspace names
+        :param errors: If true then error bars will be plotted on the points
+        """
         try:
-            ads = AnalysisDataService.Instance()
-            workspaces = [ads[name.encode('utf-8')] for name in workspace_names]
-            selection = get_plot_selection(workspaces, self)
+            selection = get_plot_selection(_workspaces_from_names(names), self)
             if selection is not None:
                 plot(selection.workspaces, spectrum_nums=selection.spectra,
                      wksp_indices=selection.wksp_indices,
                      errors=errors)
+        except BaseException:
+            import traceback
+            traceback.print_exc()
+
+    def _do_plot_colorfill(self, names):
+        """
+        Plot a colorfill from the selected workspaces
+
+        :param names: A list of workspace names
+        """
+        try:
+            pcolormesh(_workspaces_from_names(names))
         except BaseException:
             import traceback
             traceback.print_exc()

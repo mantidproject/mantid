@@ -30,11 +30,40 @@ import matplotlib.pyplot as plt
 # Constants
 # -----------------------------------------------------------------------------
 PROJECTION = 'mantid'
-
+DEFAULT_COLORMAP = 'viridis'
 
 # -----------------------------------------------------------------------------
 # Functions
 # -----------------------------------------------------------------------------
+
+def raise_if_not_sequence(seq, seq_name):
+    accepted_types = [list, tuple]
+    if type(seq) not in accepted_types:
+        raise ValueError("{} should be a list or tuple".format(seq_name))
+
+
+def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
+    """Raises a ValueError if any arguments have the incorrect types"""
+    if spectrum_nums is not None and wksp_indices is not None:
+        raise ValueError("Both spectrum_nums and wksp_indices supplied. "
+                         "Please supply only 1.")
+
+    if not isinstance(workspaces, MatrixWorkspace):
+        raise_if_not_sequence(workspaces, 'Workspaces')
+
+    if spectrum_nums is not None:
+        raise_if_not_sequence(spectrum_nums, 'spectrum_nums')
+
+    if wksp_indices is not None:
+        raise_if_not_sequence(wksp_indices, 'wksp_indices')
+
+
+def _validate_pcolormesh_inputs(workspaces):
+    """Raises a ValueError if any arguments have the incorrect types"""
+    if not isinstance(workspaces, MatrixWorkspace):
+        raise_if_not_sequence(workspaces, 'Workspaces')
+
+
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
     """
     Create a figure with a single subplot and for each workspace/index add a
@@ -64,31 +93,35 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
             plot_fn(ws, **{kw: num})
 
     ax.legend()
-    ax.set_title(workspaces[0].getName())
+    ax.set_title(workspaces[0].name())
     fig.canvas.draw()
     fig.show()
     return fig
 
 
-def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
-    """Raises a ValueError if any arguments have the incorrect types"""
-    def raise_if_not_sequence(seq):
-        accepted_types = [list, tuple]
-        if type(seq) not in accepted_types:
-            raise ValueError("Workspaces should be a list or tuple")
+def pcolormesh(workspaces):
+    """
+    Create a figure containing subplots
 
-    if spectrum_nums is not None and wksp_indices is not None:
-        raise ValueError("Both spectrum_nums and wksp_indices supplied. "
-                         "Please supply only 1.")
-
-    if not isinstance(workspaces, MatrixWorkspace):
-        raise_if_not_sequence(workspaces)
-
-    if spectrum_nums is not None:
-        raise_if_not_sequence(spectrum_nums)
-
-    if wksp_indices is not None:
-        raise_if_not_sequence(wksp_indices)
+    :param workspaces: A list of workspace handles
+    :param spectrum_nums: A list of spectrum number identifiers (general start from 1)
+    :param wksp_indices: A list of workspace indexes (starts from 0)
+    :param errors: If true then error bars are added for each plot
+    :returns: The figure containing the plots
+    """
+    # check inputs
+    _validate_pcolormesh_inputs(workspaces)
+    # # we may be overwriting an active figure so clear everything
+    fig = plt.figure()
+    fig.clf()
+    nrows, ncols = 1, 1
+    ax = fig.add_subplot(1, nrows, ncols, projection=PROJECTION)
+    pcm = ax.pcolormesh(workspaces[0], cmap=DEFAULT_COLORMAP)
+    fig.colorbar(pcm, ax=ax)
+    ax.set_title(workspaces[0].name())
+    fig.canvas.draw()
+    fig.show()
+    return fig
 
 
 # Compatibility function for existing MantidPlot functionality
@@ -115,13 +148,6 @@ def plotSpectrum(workspaces, indices, distribution=None, error_bars=False,
         fmt = 'o'
     else:
         fmt = '-'
-    # create figure
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection=PROJECTION)
-    for ws in workspaces:
-        for idx in indices:
-            ax.plot(ws, wkspIndex=idx, fmt=fmt)
-            if error_bars:
-                ax.errorbar(ws, wkspIndex=idx)
-    fig.show()
-    return fig
+
+    return plot(workspaces, wksp_indices=indices,
+                errors=error_bars, fmt=fmt)

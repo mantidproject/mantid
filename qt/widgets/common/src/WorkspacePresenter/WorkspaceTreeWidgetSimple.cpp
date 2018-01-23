@@ -21,12 +21,15 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb,
                                                      QWidget *parent)
     : WorkspaceTreeWidget(mdb, parent),
       m_plotSpectrum(new QAction("spectrum...", this)),
-      m_plotSpectrumWithErrs(new QAction("spectrum with errors...", this)) {
+      m_plotSpectrumWithErrs(new QAction("spectrum with errors...", this)),
+      m_plotColorfill(new QAction("colorfill", this)) {
   // connections
   connect(m_plotSpectrum, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumClicked()));
   connect(m_plotSpectrumWithErrs, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumWithErrorsClicked()));
+  connect(m_plotColorfill, SIGNAL(triggered()), this,
+          SLOT(onPlotColorfillClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -52,6 +55,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     QMenu *plotSubMenu(new QMenu("Plot", menu));
     plotSubMenu->addAction(m_plotSpectrum);
     plotSubMenu->addAction(m_plotSpectrumWithErrs);
+    plotSubMenu->addAction(m_plotColorfill);
     menu->addMenu(plotSubMenu);
 
     menu->addSeparator();
@@ -72,6 +76,10 @@ void WorkspaceTreeWidgetSimple::onPlotSpectrumClicked() {
 
 void WorkspaceTreeWidgetSimple::onPlotSpectrumWithErrorsClicked() {
   emit plotSpectrumWithErrorsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onPlotColorfillClicked() {
+  emit plotColorfillClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets
