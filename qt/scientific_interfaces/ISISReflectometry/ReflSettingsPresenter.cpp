@@ -281,7 +281,7 @@ T firstFromParameterFileOr(Instrument_const_sptr instrument,
 
 class InstrumentParameters {
 public:
-  InstrumentParameters(Instrument_const_sptr instrument)
+  explicit InstrumentParameters(Instrument_const_sptr instrument)
       : m_instrument(std::move(instrument)) {}
 
   template <typename T> T valueOrDefault(std::string const &parameterName) {

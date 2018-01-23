@@ -37,9 +37,9 @@ public:
 
 class InstrumentParameterTypeMissmatch : public std::runtime_error {
 public:
-  InstrumentParameterTypeMissmatch(std::string parameterName,
-                                   std::string expectedType,
-                                   std::runtime_error const &ex);
+  InstrumentParameterTypeMissmatch(const std::string &parameterName,
+                                   const std::string &expectedType,
+                                   const std::runtime_error &ex);
 
   std::string const &parameterName() const;
   std::string const &expectedType() const;

@@ -43,14 +43,14 @@ std::vector<double> InstrumentParameter<double>::get(
 }
 
 InstrumentParameterTypeMissmatch::InstrumentParameterTypeMissmatch(
-    std::string parameterName, std::string expectedType,
+    std::string const &parameterName, std::string const &expectedType,
     std::runtime_error const &ex)
     : std::runtime_error(std::string("Instrument parameter '") + parameterName +
                          std::string("' does not have the expected type '") +
                          expectedType +
                          std::string("'.\n Original Message: \n") + ex.what()),
-      m_parameterName(std::move(parameterName)),
-      m_expectedType(std::move(expectedType)), m_originalMessage(ex.what()) {}
+      m_parameterName(parameterName), m_expectedType(expectedType),
+      m_originalMessage(ex.what()) {}
 
 std::string const &InstrumentParameterTypeMissmatch::parameterName() const {
   return m_parameterName;
