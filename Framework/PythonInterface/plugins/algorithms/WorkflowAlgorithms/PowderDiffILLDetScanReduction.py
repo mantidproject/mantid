@@ -71,6 +71,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         if self.getProperty('UseCalibratedData').value:
             data_type = 'Calibrated'
 
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=6)
+
+        self._progress.report('Loading data')
         input_workspace = LoadAndMerge(Filename=self.getPropertyValue('Run'),
                                        LoaderName='LoadILLDiffraction',
                                        LoaderOptions={'DataType': data_type})
@@ -83,7 +86,6 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
             self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
                              + str(supported_instruments))
 
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=4)
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
             input_group = NormaliseToMonitor(InputWorkspace=input_group, MonitorID=0)
@@ -125,9 +127,8 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         self._progress.report('Finishing up...')
 
-        output_workspace = GroupWorkspaces(output_workspaces, output_workspace_name)
-        self.setProperty('OutputWorkspace', output_workspace)
-
+        GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=output_workspace_name)
+        self.setProperty('OutputWorkspace', output_workspace_name)
 
 # Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderDiffILLDetScanReduction)
