@@ -44,10 +44,10 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         ('Active', 'When enabled future plots will overwrite this figure', None, 'active', True),
         ('Hold', 'When enabled this holds this figure open ', None, 'hold', False),
         (None, None, None, None, None),
-        ('Save', 'Save the figure', 'fa.save', 'save_figure', False),
+        ('Save', 'Save the figure', 'fa.save', 'save_figure', None),
         ('Print','Print the figure', 'fa.print', 'print_figure', None),
         (None, None, None, None, None),
-        ('Customize', 'Configure plot options', 'fa.cog', 'edit_parameters', False)
+        ('Customize', 'Configure plot options', 'fa.cog', 'edit_parameters', None)
     )
 
     def _init_toolbar(self):
