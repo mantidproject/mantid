@@ -42,10 +42,9 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
-                         QPoint, QSize, Qt, QTimer)  # noqa
+from qtpy.QtCore import (QCoreApplication, QEventLoop, Qt, QTimer)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDesktopWidget, QDockWidget, QFileDialog,
+from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
