@@ -49,7 +49,7 @@ public:
   void addRwpValue(const RunLabel &runLabel, const double rwp);
 
 private:
-  inline boost::optional<double> doGSASRefinementAlgorithm(
+  inline double doGSASRefinementAlgorithm(
       API::MatrixWorkspace_sptr inputWorkspace,
       const std::string &outputWorkspaceName,
       const std::string &latticeParamsName, const std::string &refinementMethod,
@@ -85,8 +85,7 @@ inline bool TestEnggDiffGSASFittingModel::containsFocusedRun(
   return hasFocusedRun(runLabel);
 }
 
-inline boost::optional<double>
-TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
+inline double TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     API::MatrixWorkspace_sptr inputWorkspace,
     const std::string &outputWorkspaceName,
     const std::string &latticeParamsName, const std::string &refinementMethod,
@@ -288,11 +287,11 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     model.addFocusedWorkspace(runLabel, ws);
 
-    bool success = false;
+    std::string failure = "Failure";
     TS_ASSERT_THROWS_NOTHING(
-        success = model.doPawleyRefinement(
+        failure = model.doPawleyRefinement(
             runLabel, "", std::vector<std::string>({}), "", "", 0, 0));
-    TS_ASSERT(success);
+    TS_ASSERT(failure.empty());
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);
@@ -317,11 +316,11 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     model.addFocusedWorkspace(runLabel, ws);
 
-    bool success = false;
+    std::string failure = "Failure";
     TS_ASSERT_THROWS_NOTHING(
-        success = model.doRietveldRefinement(
+        failure = model.doRietveldRefinement(
             runLabel, "", std::vector<std::string>({}), "", ""));
-    TS_ASSERT(success);
+    TS_ASSERT(failure.empty());
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);

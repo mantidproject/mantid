@@ -56,9 +56,7 @@ public:
 
     EXPECT_CALL(*m_mockModelPtr, getRunLabels()).Times(0);
 
-    EXPECT_CALL(
-        *m_mockViewPtr,
-        userWarning("Load failed", "Failure message"))
+    EXPECT_CALL(*m_mockViewPtr, userWarning("Load failed", "Failure message"))
         .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
@@ -184,10 +182,9 @@ public:
                 doRietveldRefinement(runLabel, instParams, phaseFiles,
                                      pathToGSASII, GSASIIProjectFile))
         .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Refinement failed",
-                            "Refinement failed, see the log for more details"));
+        .WillOnce(Return("Refinement failure description"));
+    EXPECT_CALL(*m_mockViewPtr, userWarning("Refinement failed",
+                                            "Refinement failure description"));
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -235,10 +232,9 @@ public:
                                    pathToGSASII, GSASIIProjectFile, dmin,
                                    negativeWeight))
         .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Refinement failed",
-                            "Refinement failed, see the log for more details"));
+        .WillOnce(Return("Refinement failure description"));
+    EXPECT_CALL(*m_mockViewPtr, userWarning("Refinement failed",
+                                            "Refinement failure description"));
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();

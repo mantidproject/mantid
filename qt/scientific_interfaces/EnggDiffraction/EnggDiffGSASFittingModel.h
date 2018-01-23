@@ -12,19 +12,20 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
     : public IEnggDiffGSASFittingModel {
 
 public:
-  bool doPawleyRefinement(const RunLabel &runLabel,
-                          const std::string &instParamFile,
-                          const std::vector<std::string> &phaseFiles,
-                          const std::string &pathToGSASII,
-                          const std::string &GSASIIProjectFile,
-                          const double dMin,
-                          const double negativeWeight) override;
+  std::string doPawleyRefinement(const RunLabel &runLabel,
+                                 const std::string &instParamFile,
+                                 const std::vector<std::string> &phaseFiles,
+                                 const std::string &pathToGSASII,
+                                 const std::string &GSASIIProjectFile,
+                                 const double dMin,
+                                 const double negativeWeight) override;
 
-  bool doRietveldRefinement(const RunLabel &runLabel,
-                            const std::string &instParamFile,
-                            const std::vector<std::string> &phaseFiles,
-                            const std::string &pathToGSASII,
-                            const std::string &GSASIIProjectFile) override;
+  std::string
+  doRietveldRefinement(const RunLabel &runLabel,
+                       const std::string &instParamFile,
+                       const std::vector<std::string> &phaseFiles,
+                       const std::string &pathToGSASII,
+                       const std::string &GSASIIProjectFile) override;
 
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFittedPeaks(const RunLabel &runLabel) const override;
@@ -94,8 +95,8 @@ private:
   /// Run GSASIIRefineFitPeaks
   /// Note this must be virtual so that it can be mocked out by the helper class
   /// in EnggDiffGSASFittingModelTest
-  /// Returns Rwp of the fit (empty optional if fit was unsuccessful)
-  virtual boost::optional<double> doGSASRefinementAlgorithm(
+  /// Returns Rwp of the fit
+  virtual double doGSASRefinementAlgorithm(
       Mantid::API::MatrixWorkspace_sptr inputWorkspace,
       const std::string &outputWorkspaceName,
       const std::string &latticeParamsName, const std::string &refinementMethod,
