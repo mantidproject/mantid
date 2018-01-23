@@ -33,6 +33,8 @@ class DRange(object):
     def __eq__(self, drange_map):
         return self._range[0] == drange_map[0] and self._range[1] == drange_map[1]
 
+    def __hash__(self):
+        return hash((self._range[0], self._range[1]))
 
 TIME_REGIME_TO_DRANGE = {
     1.17e4: DRange(0.7, 2.5),
