@@ -223,7 +223,7 @@ public:
   }
 
   void testGetIntMonCheck() {
-    MockSettingsView mockView;
+    NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
     auto presenter = makeReflSettingsPresenter(&mockView);
 
@@ -452,19 +452,23 @@ public:
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
 
-    ExperimentOptionDefaults defaults;
-    defaults.AnalysisMode = "PointDetectorAnalysis";
-    defaults.PolarizationAnalysis = "None";
-    defaults.CRho = "1.006831,-0.011467,0.002244,-0.000095";
-    defaults.CAlpha = "1.017526,-0.017183,0.003136,-0.000140";
-    defaults.CAp = "0.917940,0.038265,-0.006645,0.000282";
-    defaults.CPp = "0.972762,0.001828,-0.000261,0.0";
-    defaults.TransRunStartOverlap = 10.0;
-    defaults.TransRunEndOverlap = 12.0;
+    auto defaultsSetInIDF = ExperimentOptionDefaults();
+    defaultsSetInIDF.AnalysisMode = "PointDetectorAnalysis";
+    defaultsSetInIDF.PolarizationAnalysis = "None";
+    defaultsSetInIDF.CRho = "1.006831,-0.011467,0.002244,-0.000095";
+    defaultsSetInIDF.CAlpha = "1.017526,-0.017183,0.003136,-0.000140";
+    defaultsSetInIDF.CAp = "0.917940,0.038265,-0.006645,0.000282";
+    defaultsSetInIDF.CPp = "0.972762,0.001828,-0.000261,0.0";
+    defaultsSetInIDF.TransRunStartOverlap = 10.0;
+    defaultsSetInIDF.TransRunEndOverlap = 12.0;
 
-    EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
+    EXPECT_CALL(mockView, setExpDefaults(defaultsSetInIDF)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void expectNoOptionLoadErrors(MockSettingsView &mockView) {
+    EXPECT_CALL(mockView, showOptionLoadError(_)).Times(0);
   }
 
   void testInstrumentDefaults() {
@@ -476,21 +480,22 @@ public:
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
+    expectNoOptionLoadErrors(mockView);
+
     presenter.setInstrumentName("INTER");
+    auto defaultsSetInIDF = InstrumentOptionDefaults();
 
-    auto defaults = InstrumentOptionDefaults();
+    defaultsSetInIDF.NormalizeByIntegratedMonitors = true;
+    defaultsSetInIDF.MonitorIntegralMin = 4.0;
+    defaultsSetInIDF.MonitorIntegralMax = 10.0;
+    defaultsSetInIDF.MonitorBackgroundMin = 17.0;
+    defaultsSetInIDF.MonitorBackgroundMax = 18.0;
+    defaultsSetInIDF.LambdaMin = 1.5;
+    defaultsSetInIDF.LambdaMax = 17.0;
+    defaultsSetInIDF.I0MonitorIndex = 2.0;
+    defaultsSetInIDF.DetectorCorrectionType = "VerticalShift";
 
-    defaults.NormalizeByIntegratedMonitors = true;
-    defaults.MonitorIntegralMin = 4.0;
-    defaults.MonitorIntegralMax = 10.0;
-    defaults.MonitorBackgroundMin = 17.0;
-    defaults.MonitorBackgroundMax = 18.0;
-    defaults.LambdaMin = 1.5;
-    defaults.LambdaMax = 17.0;
-    defaults.I0MonitorIndex = 2.0;
-    defaults.DetectorCorrectionType = "VerticalShift";
-
-    EXPECT_CALL(mockView, setInstDefaults(defaults)).Times(1);
+    EXPECT_CALL(mockView, setInstDefaults(defaultsSetInIDF)).Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

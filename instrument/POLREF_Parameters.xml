@@ -20,7 +20,7 @@
   <parameter name="MonitorIntegralMax">
    <value val="10.0"/>
   </parameter>
-  
+
   <parameter name="PointDetectorStart">
     <value val="3"/>
   </parameter>
@@ -36,7 +36,7 @@
     <value val="5"/>
   </parameter>
 
-  <parameter name="I0MonitorIndex">
+  <parameter name="I0MonitorIndex" type="int">
     <value val="2"/>
   </parameter>
 
@@ -55,7 +55,7 @@
   <parameter name="TransRunEndOverlap"> <!-- in wavelength -->
     <value val="12"/>
   </parameter>
-  
+
    <!-- parameters for efficiency correction -->
    <parameter name="correction" type="string">
     <value val="polynomial"/>

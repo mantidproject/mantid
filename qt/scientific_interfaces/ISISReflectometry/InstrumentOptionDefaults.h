@@ -21,11 +21,11 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentOptionDefaults {
   std::string DetectorCorrectionType;
 };
 
-bool MANTIDQT_ISISREFLECTOMETRY_DLL
+MANTIDQT_ISISREFLECTOMETRY_DLL bool
 operator==(InstrumentOptionDefaults const &lhs,
            InstrumentOptionDefaults const &rhs);
 
-std::ostream MANTIDQT_ISISREFLECTOMETRY_DLL &
+MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
 operator<<(std::ostream &os, InstrumentOptionDefaults const &defaults);
 }
 }

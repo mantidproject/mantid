@@ -17,14 +17,14 @@ bool operator==(const ExperimentOptionDefaults &lhs,
 std::ostream &operator<<(std::ostream &os,
                          ExperimentOptionDefaults const &defaults) {
   os << "{ AnalysisMode: '" << defaults.AnalysisMode
-     << ", PolarizationAnalysis: '" << defaults.PolarizationAnalysis
-     << "', CRho: '" << defaults.CRho << "', CAlpha: '" << defaults.CAlpha
-     << "', CAp: '" << defaults.CAp << "', CPp: '" << defaults.CPp
-     << "', TransRunStartOverlap: " << defaults.TransRunStartOverlap
-     << ", TransRunEndOverlap: " << defaults.TransRunEndOverlap
-     << ", MomentumTransferStep: " << defaults.MomentumTransferStep
-     << ", ScaleFactor: " << defaults.ScaleFactor << "', StitchParams: '"
-     << defaults.StitchParams << " }" << std::endl;
+     << ", \nPolarizationAnalysis: '" << defaults.PolarizationAnalysis
+     << "',\nCRho: '" << defaults.CRho << "',\nCAlpha: '" << defaults.CAlpha
+     << "',\nCAp: '" << defaults.CAp << "', \nCPp: '" << defaults.CPp
+     << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap
+     << ",\nTransRunEndOverlap: " << defaults.TransRunEndOverlap
+     << ",\nMomentumTransferStep: " << defaults.MomentumTransferStep
+     << ",\nScaleFactor: " << defaults.ScaleFactor << ", \nStitchParams: '"
+     << defaults.StitchParams << "' }" << std::endl;
   return os;
 }
 }

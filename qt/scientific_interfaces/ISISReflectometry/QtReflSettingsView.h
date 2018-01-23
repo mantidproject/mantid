@@ -119,7 +119,6 @@ public slots:
   /// Sets enabled status for polarisation corrections and parameters
   void setPolarisationOptionsEnabled(bool enable) override;
   void setReductionTypeEnabled(bool enable) override;
-  void setPolarisationOptionsEnabled(bool enable) override;
   void setDetectorCorrectionEnabled(bool enable) override;
   void notifySettingsChanged();
 

@@ -10,16 +10,8 @@
     <value val="18.0"/>
   </parameter>
 
-<!--  <parameter name="MonitorIntegralMin">
+  <parameter name="MonitorIntegralMin">
     <value val="4.0"/>
-  </parameter> -->
-
-  <parameter name="DetectorCorrectionType" type="string">
-    <value val="RotateAroundSample"/>
-  </parameter>
-
-  <parameter name="Params" type="string">
-    <value val="1,2,3"/>
   </parameter>
 
   <parameter name="MonitorIntegralMax">
@@ -41,7 +33,7 @@
     <value val="6"/>
   </parameter>
 
-  <parameter name="I0MonitorIndex">
+  <parameter name="I0MonitorIndex" type="int">
     <value val="2"/>
   </parameter>
 

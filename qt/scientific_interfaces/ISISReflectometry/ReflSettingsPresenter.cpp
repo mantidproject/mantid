@@ -377,7 +377,7 @@ void ReflSettingsPresenter::getInstDefaults() {
       parameters.valueOrDefault<std::string>("ProcessingInstructions");
 
   instrumentDefaults.DetectorCorrectionType =
-      parameters.valueOrDefault<std::string>("DetectorCorrectionType");
+      parameters.valueOr<std::string>("DetectorCorrectionType", alg->getPropertyValue("DetectorCorrectionType"));
 
   m_view->setInstDefaults(std::move(instrumentDefaults));
 

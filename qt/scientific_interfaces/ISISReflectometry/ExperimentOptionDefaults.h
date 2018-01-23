@@ -20,11 +20,11 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults {
   std::string StitchParams;
 };
 
-bool MANTIDQT_ISISREFLECTOMETRY_DLL
+MANTIDQT_ISISREFLECTOMETRY_DLL bool
 operator==(const ExperimentOptionDefaults &lhs,
            const ExperimentOptionDefaults &rhs);
 
-std::ostream &MANTIDQT_ISISREFLECTOMETRY_DLL
+MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
 operator<<(std::ostream &os, ExperimentOptionDefaults const &defaults);
 }
 }

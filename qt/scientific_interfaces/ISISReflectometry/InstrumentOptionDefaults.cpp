@@ -8,7 +8,8 @@ bool operator==(InstrumentOptionDefaults const &lhs,
          lhs.MonitorIntegralMin == rhs.MonitorIntegralMin &&
          lhs.MonitorIntegralMax == rhs.MonitorIntegralMax &&
          lhs.MonitorBackgroundMin == rhs.MonitorBackgroundMin &&
-         lhs.LambdaMin == rhs.LambdaMax &&
+         lhs.LambdaMin == rhs.LambdaMin &&
+         lhs.LambdaMax == rhs.LambdaMax &&
          lhs.I0MonitorIndex == rhs.I0MonitorIndex &&
          lhs.ProcessingInstructions == rhs.ProcessingInstructions &&
          lhs.DetectorCorrectionType == rhs.DetectorCorrectionType;
@@ -18,15 +19,16 @@ std::ostream &operator<<(std::ostream &os,
                          InstrumentOptionDefaults const &defaults) {
   os << "{ NormalizeByIntegratedMonitors: "
      << (defaults.NormalizeByIntegratedMonitors ? "true" : "false")
-     << ", MonitorIntegralMin: " << defaults.MonitorIntegralMin
-     << ", MonitorIntegralMax: " << defaults.MonitorIntegralMax
-     << ", MonitorBackgroundMin: " << defaults.MonitorBackgroundMin
-     << ", MonitorBackgroundMax: " << defaults.MonitorBackgroundMax
-     << ", LambdaMin: " << defaults.LambdaMin << ", LambdaMax: '"
-     << defaults.LambdaMax << ", I0MonitorIndex: " << defaults.I0MonitorIndex
-     << ", ProcessingInstructions: '" << defaults.ProcessingInstructions
-     << "', DetectorCorrectionType: '" << defaults.DetectorCorrectionType
-     << std::endl;
+     << ",\n MonitorIntegralMin: " << defaults.MonitorIntegralMin
+     << ",\n MonitorIntegralMax: " << defaults.MonitorIntegralMax
+     << ",\n MonitorBackgroundMin: " << defaults.MonitorBackgroundMin
+     << ",\n MonitorBackgroundMax: " << defaults.MonitorBackgroundMax
+     << ",\n LambdaMin: " << defaults.LambdaMin
+     << ",\n LambdaMax: " << defaults.LambdaMax
+     << ",\n I0MonitorIndex: " << defaults.I0MonitorIndex
+     << ",\n ProcessingInstructions: '" << defaults.ProcessingInstructions
+     << "',\n DetectorCorrectionType: '" << defaults.DetectorCorrectionType
+     << "' }" << std::endl;
   return os;
 }
 }
