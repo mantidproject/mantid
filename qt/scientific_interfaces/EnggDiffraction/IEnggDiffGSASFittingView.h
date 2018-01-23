@@ -107,10 +107,20 @@ public:
   virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
 
   /**
+   Display an error to the user
+   @param errorTitle Title of the error
+   @param errorDescription Longer description of the error
+  */
+  virtual void userError(const std::string &errorTitle,
+                         const std::string &errorDescription) const = 0;
+
+  /**
    Display a warning to the user
-   @param warningDescription The warning to show
+   @param warningTitle Title of the warning
+   @param warningDescription Longer description of the warning
    */
-  virtual void userWarning(const std::string &warningDescription) const = 0;
+  virtual void userWarning(const std::string &warningTitle,
+                           const std::string &warningDescription) const = 0;
 };
 
 } // namespace CustomInterfaces

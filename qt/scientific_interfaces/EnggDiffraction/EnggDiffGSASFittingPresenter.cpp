@@ -61,11 +61,12 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
   const auto rwp = m_model->getRwp(runLabel);
 
   if (!fittedPeaks || !latticeParams || !rwp) {
-    m_view->userWarning("Unexpectedly tried to plot fit results for invalid "
-                        "run, run number = " +
-                        std::to_string(runLabel.runNumber) + ", bank ID = " +
-                        std::to_string(runLabel.bank) +
-                        ". Please contact the development team");
+    m_view->userError("Invalid run identifier",
+                      "Unexpectedly tried to plot fit results for invalid "
+                      "run, run number = " +
+                          std::to_string(runLabel.runNumber) + ", bank ID = " +
+                          std::to_string(runLabel.bank) +
+                          ". Please contact the development team");
     return;
   }
 
@@ -124,7 +125,8 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   if (refinementSuccessful) {
     updatePlot(runLabel);
   } else {
-    m_view->userWarning("Refinement failed, see the log for more details");
+    m_view->userWarning("Refinement failed",
+                        "Refinement failed, see the log for more details");
   }
 }
 
@@ -140,7 +142,8 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
     const auto runLabels = m_model->getRunLabels();
     m_view->updateRunList(runLabels);
   } else {
-    m_view->userWarning("Load failed, see the log for more details");
+    m_view->userWarning("Load failed",
+                        "Load failed, see the log for more details");
   }
 }
 
@@ -156,9 +159,11 @@ void EnggDiffGSASFittingPresenter::processShutDown() { m_viewHasClosed = true; }
 void EnggDiffGSASFittingPresenter::updatePlot(const RunLabel &runLabel) {
   const auto focusedWSOptional = m_model->getFocusedWorkspace(runLabel);
   if (!focusedWSOptional) {
-    m_view->userWarning("Tried to access invalid run, runNumber " +
-                        std::to_string(runLabel.runNumber) + " and bank ID " +
-                        std::to_string(runLabel.bank));
+    m_view->userError("Invalid run identifier",
+                      "Tried to access invalid run, runNumber " +
+                          std::to_string(runLabel.runNumber) + " and bank ID " +
+                          std::to_string(runLabel.bank) +
+                          ". Please contact the development team");
     return;
   }
   const auto focusedWS = *focusedWSOptional;
