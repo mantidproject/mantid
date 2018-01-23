@@ -136,4 +136,3 @@ class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
 
     def _get_refinement_method(self):
         return "Pawley refinement"
-
