@@ -360,7 +360,7 @@ void ReflSettingsPresenter::getExpDefaults() {
 
   defaults.MomentumTransferStep = parameters.optional<double>("dQ/Q");
   defaults.ScaleFactor = parameters.optional<double>("Scale");
-  defaults.StitchParams = parameters.optional<std::string>("Params");
+  defaults.StitchParams = parameters.optional<std::string>("Stitch1DMany");
 
   if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
     defaults.TransRunStartOverlap =
