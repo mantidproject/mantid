@@ -58,11 +58,11 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
     # we may be overwriting an active figure so clear everything
     fig.clf()
     ax = fig.add_subplot(111, projection=PROJECTION)
+    plot_fn = ax.errorbar if errors else ax.plot
     for ws in workspaces:
         for num in nums:
-            ax.plot(ws, **{kw:num})
-            if errors:
-                ax.errorbar(ws, **{kw:num, 'label': '_hidden_on_legend'})
+            plot_fn(ws, **{kw: num})
+
     ax.legend()
     ax.set_title(workspaces[0].getName())
     fig.canvas.draw()
