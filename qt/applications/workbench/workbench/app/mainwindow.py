@@ -149,6 +149,7 @@ class MainWindow(QMainWindow):
         self.create_menus()
 
         # widgets
+        # Log message display must be imported first
         self.set_splash("Loading message display")
         from workbench.plugins.logmessagedisplay import LogMessageDisplay
         self.messagedisplay = LogMessageDisplay(self)
@@ -259,6 +260,10 @@ class MainWindow(QMainWindow):
 
     def setup_default_layouts(self):
         """Set or reset the layouts of the child widgets"""
+
+        # When restoring default layout dock all widgets first
+        for w in self.widgets:
+            w.dockwidget.setFloating(False)
 
         # layout definition
         logmessages = self.messagedisplay
