@@ -27,6 +27,12 @@ class DRange(object):
     def __str__(self):
         return '%.3f - %.3f Angstrom' % (self._range[0], self._range[1])
 
+    def __lt__(self, drange_map):
+        return self._range[0] < drange_map[0]
+
+    def __eq__(self, drange_map):
+        return self._range[0] == drange_map[0] and self._range[1] == drange_map[1]
+
 
 TIME_REGIME_TO_DRANGE = {
     1.17e4: DRange(0.7, 2.5),
@@ -216,7 +222,7 @@ def average_ws_list(ws_list):
         raise RuntimeError("getAverageWs: Trying to take an average of nothing")
 
     if num_workspaces == 1:
-        return ws_list[0]
+        return CloneWorkspace(InputWorkspace=ws_list[0], OutputWorkspace="cloned", StoreInADS=False)
 
     return sum(ws_list) / num_workspaces
 
@@ -363,6 +369,21 @@ def rebin_and_average(ws_list):
     return average_ws_list(rebin_to_smallest(*ws_list))
 
 
+def delete_workspaces(workspace_names):
+    """
+    Deletes the workspaces with the specified names, using the specified
+    delete_set_property and delete_exec methods of a deleting algorithm.
+
+    :param workspace_names:     The names of the workspaces to delete.
+    :param delete_set_property: The setProperty method of the delete algorithm.
+    :param delete_exec:         The execute method of the delete algorithm.
+    """
+    for workspace_name in workspace_names:
+
+        if mtd.doesExist(workspace_name):
+            DeleteWorkspace(workspace_name)
+
+
 def diffraction_calibrator(calibration_file):
     """
     Creates a diffraction calibrator, which takes a DRange and a workspace
@@ -414,12 +435,13 @@ def create_loader(ipf_filename, minimum_spectrum, maximum_spectrum, load_logs, l
     return loader
 
 
-def create_drange_map_generator(runs_loader, combinator):
+def create_drange_map_generator(runs_loader, combinator, delete_runs=True):
     """
     Creates a drange map generator, which creates a drange map from a supplied string of runs.
 
     :param runs_loader: The loader to use in loading the runs.
     :param combinator:  The combinator used to combine the runs.
+    :param delete_runs: If true, deletes the loaded runs after addition to the drange map.
     :return:            A drange map generator.
     """
 
@@ -427,6 +449,8 @@ def create_drange_map_generator(runs_loader, combinator):
         drange_map = DRangeToWorkspaceMap()
         workspace_names, _ = runs_loader(runs)
         drange_map.add_workspaces([transform(workspace_name) for workspace_name in workspace_names], combinator)
+        if delete_runs:
+            delete_workspaces(workspace_names)
         return drange_map
 
     return generator
@@ -576,7 +600,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             output_ws = MergeRuns(InputWorkspaces=temp_ws_names,
                                   OutputWorkspace="merged_sample_runs",
                                   StoreInADS=False, EnableLogging=False)
-            self._delete_workspaces(temp_ws_names)
+            delete_workspaces(temp_ws_names)
         elif len(result_map) == 1:
             output_ws = list(result_map.values())[0]
         else:
@@ -591,7 +615,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         if self._output_ws_name:
             mtd.addOrReplace(self._output_ws_name, output_ws)
 
-        d_ranges = result_map.keys()
+        d_ranges = sorted(result_map.keys())
         AddSampleLog(Workspace=output_ws, LogName="D-Ranges",
                      LogText=", ".join(map(str, d_ranges)))
 
@@ -623,20 +647,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             output_ws.setE(i, result_e)
 
         self.setProperty("OutputWorkspace", output_ws)
-
-    def _delete_workspaces(self, workspace_names):
-        """
-        Deletes the workspaces with the specified names, using the specified
-        delete_set_property and delete_exec methods of a deleting algorithm.
-
-        :param workspace_names:     The names of the workspaces to delete.
-        :param delete_set_property: The setProperty method of the delete algorithm.
-        :param delete_exec:         The execute method of the delete algorithm.
-        """
-        for workspace_name in workspace_names:
-
-            if mtd.doesExist(workspace_name):
-                DeleteWorkspace(workspace_name)
 
     def _parse_string_array(self, string):
         """
