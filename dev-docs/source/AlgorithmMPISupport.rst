@@ -492,7 +492,7 @@ Supported Algorithms
 Algorithm                              Supported modes         Comments
 ====================================== ======================= ========
 AlignAndFocusPowder                    all
-AlignAndFocusPowderFromFiles           all
+AlignAndFocusPowderFromFiles           Distributed
 AlignDetectors                         all                     with ``StorageMode::Distributed`` this touches only detectors that have spectra on this rank, i.e., the modified instrument is not in an identical state on all ranks
 BinaryOperation                        all                     not supported if ``AllowDifferentNumberSpectra`` is enabled
 CalculateChiSquared                    MasterOnly, Identical   see ``IFittingAlgorithm``
@@ -621,6 +621,7 @@ SaveNexus                              MasterOnly
 SaveNexusProcessed                     MasterOnly
 Scale                                  all
 SignalOverError                        all                     see ``UnaryOperation``
+SNSPowderReduction                     Distributed
 SortEvents                             all
 SortTableWorkspace                     MasterOnly, Identical
 SumSpectra                             MasterOnly, Identical
