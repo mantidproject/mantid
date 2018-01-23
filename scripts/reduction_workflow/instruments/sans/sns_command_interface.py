@@ -40,7 +40,6 @@ from .hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDi
 from .hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide  # noqa: F401
 from .hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale  # noqa: F401
 from .hfir_command_interface import Stitch  # noqa: F401
-from .hfir_command_interface import SetWedges  # noqa: F401
 
 from reduction_workflow.find_data import find_data
 
@@ -140,32 +139,3 @@ def SetDetectorOffset(distance):
 
 def SetSampleOffset(distance):
     ReductionSingleton().reduction_properties["SampleOffset"] = distance
-
-
-def WLNormCorrection(reference_ws=1, qmin=None, qmax=None,
-                     discard_begin=0, discard_end=0,
-                     k=[], b=[]):
-    '''
-    This runs the SANSWLNormCorrection algorithm
-    k and b can be values or lists
-    reference_ws use an integer position in the list of workspaces starting at 1
-    '''
-    
-    ReductionSingleton().reduction_properties["DoWLNormCorrection"] = True
-    
-    ReductionSingleton().reduction_properties["InputWorkspaceReference"] = reference_ws
-    ReductionSingleton().reduction_properties["Qmin"] = qmin
-    ReductionSingleton().reduction_properties["Qmax"] = qmax
-    ReductionSingleton().reduction_properties["DiscardBeginGlobal"] = discard_begin
-    ReductionSingleton().reduction_properties["DiscardEndGlobal"] = discard_end
-    
-    if type(k) == list:
-        ReductionSingleton().reduction_properties["KList"] = k
-    else:
-        ReductionSingleton().reduction_properties["KList"] = [k]
-        
-    if type(b) == list:
-        ReductionSingleton().reduction_properties["BList"] = b
-    else:
-        ReductionSingleton().reduction_properties["BList"] = [b]
-    

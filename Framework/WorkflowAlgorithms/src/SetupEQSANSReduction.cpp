@@ -574,14 +574,6 @@ void SetupEQSANSReduction::init() {
   declareProperty("SampleApertureDiameter", 10.0,
                   "Sample aperture diameter [mm]");
 
-  // Wedge options
-  declareProperty("NumberOfWedges", 2, positiveInt,
-                  "Number of wedges to calculate.");
-  declareProperty("WedgeAngle", 30.0,
-                  "Opening angle of each wedge, in degrees.");
-  declareProperty("WedgeOffset", 0.0,
-                  "Angular offset for the wedges, in degrees.");
-
   declareProperty("Do2DReduction", true);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
                   "Number of I(qx,qy) bins.");
@@ -596,27 +588,6 @@ void SetupEQSANSReduction::init() {
   setPropertyGroup("SampleApertureDiameter", iq1d_grp);
   setPropertyGroup("Do2DReduction", iq1d_grp);
   setPropertyGroup("IQ2DNumberOfBins", iq1d_grp);
-
-  //
-  // WLNormCorrection
-  std::string wlnorm_grp = "Wavelength Normalization Correction";
-  declareProperty("DoWLNormCorrection", true);
-  declareProperty("InputWorkspaceReference", 0);
-  declareProperty("Qmin", EMPTY_DBL());
-  declareProperty("Qmax", EMPTY_DBL());
-  declareProperty("DiscardBeginGlobal", 0);
-  declareProperty("DiscardEndGlobal", 0);
-  declareProperty(make_unique<ArrayProperty<double>>("KList"));
-  declareProperty(make_unique<ArrayProperty<double>>("BList"));
-  // -- Define group --
-  setPropertyGroup("DoWLNormCorrection", wlnorm_grp);
-  setPropertyGroup("InputWorkspaceReference", wlnorm_grp);
-  setPropertyGroup("Qmin", wlnorm_grp);
-  setPropertyGroup("Qmax", wlnorm_grp);
-  setPropertyGroup("DiscardBeginGlobal", wlnorm_grp);
-  setPropertyGroup("DiscardEndGlobal", wlnorm_grp);
-  setPropertyGroup("KList", wlnorm_grp);
-  setPropertyGroup("BList", wlnorm_grp);
 
   // Outputs
   declareProperty("ProcessInfo", "", "Additional process information");
@@ -872,9 +843,6 @@ void SetupEQSANSReduction::exec() {
     const bool computeResolution = getProperty("ComputeResolution");
     const bool indepBinning = getProperty("IQIndependentBinning");
     const bool scaleResults = getProperty("IQScaleResults");
-    const std::string n_wedges = getPropertyValue("NumberOfWedges");
-    const double wedge_angle = getProperty("WedgeAngle");
-    const double wedge_offset = getProperty("WedgeOffset");
 
     IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("NumberOfBins", nBins);
@@ -884,15 +852,11 @@ void SetupEQSANSReduction::exec() {
     iqAlg->setProperty("IndependentBinning", indepBinning);
     iqAlg->setProperty("SampleApertureDiameter", sampleApert);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-    iqAlg->setProperty("NumberOfWedges", n_wedges);
-    iqAlg->setProperty("WedgeAngle", wedge_angle);
-    iqAlg->setProperty("WedgeOffset", wedge_offset);
 
     auto iqalgProp = make_unique<AlgorithmProperty>("IQAlgorithm");
     iqalgProp->setValue(iqAlg->toString());
     reductionManager->declareProperty(std::move(iqalgProp));
   }
-
 
   // 2D reduction
   const bool do2DReduction = getProperty("Do2DReduction");
@@ -905,34 +869,6 @@ void SetupEQSANSReduction::exec() {
     reductionManager->declareProperty(std::move(xyalgProp));
   }
   setPropertyValue("OutputMessage", "EQSANS reduction options set");
-
-
-  // WLNormCorrection
-  const bool doWLNormCorrection = getProperty("DoWLNormCorrection");
-  if (doWLNormCorrection) {
-
-	  const int n_bins = getPropertyValue("InputWorkspaceReference");
-	  const double n_bins = getPropertyValue("Qmin");
-	  const double n_bins = getPropertyValue("Qmax");
-	  const int n_bins = getPropertyValue("DiscardBeginGlobal");
-	  const int n_bins = getPropertyValue("DiscardEndGlobal");
-	  const std::string n_bins = getPropertyValue("KList");
-	  const std::string n_bins = getPropertyValue("BList");
-
-
-	  IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
-	    // The following is broken, try PropertyValue
-	    maskAlg->setPropertyValue("Facility", "SNS");
-	    maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
-	    maskAlg->setPropertyValue("MaskedEdges", maskEdges);
-	    maskAlg->setProperty("MaskedSide", maskSide);
-	    auto maskAlgProp = make_unique<AlgorithmProperty>("MaskAlgorithm");
-	    maskAlgProp->setValue(maskAlg->toString());
-	    reductionManager->declareProperty(std::move(maskAlgProp));
-
-  }
-  setPropertyValue("OutputMessage", "WLNormCorrection options set");
-
 
   // Save a string representation of this algorithm
   auto setupAlgProp = make_unique<AlgorithmProperty>("SetupAlgorithm");
