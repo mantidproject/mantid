@@ -1,7 +1,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
 
@@ -15,8 +15,8 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(TableWorkspace)
 
 ITableWorkspace_sptr makeTableWorkspace() {
-   return WorkspaceFactory::Instance().createTable();
- }
+  return WorkspaceFactory::Instance().createTable();
+}
 
 void export_TableWorkspace() {
 

@@ -476,15 +476,14 @@ bpl::dict toDict(const ITableWorkspace &self) {
 
 /** Constructor function for ITableWorkspaces */
 ITableWorkspace_sptr makeTableWorkspace() {
-   return WorkspaceFactory::Instance().createTable();
- }
-
+  return WorkspaceFactory::Instance().createTable();
+}
 
 class ITableWorkspacePickleSuite : public boost::python::pickle_suite {
 public:
   static dict getstate(const ITableWorkspace &ws) {
     dict data;
-    data["data"] = toDict(ws); 
+    data["data"] = toDict(ws);
     data["meta_data"] = writeMetaData(ws);
     return data;
   }
@@ -523,19 +522,19 @@ public:
    * @param ws :: the workspace to load data into
    * @param state :: the pickled state of the table
    */
-  static void readMetaData(ITableWorkspace& ws, const dict& state) {
-      const auto& metaData = state["meta_data"];
-      const auto& columnNames = metaData["column_names"]; 
-      const auto& columnTypes = metaData["column_types"]; 
+  static void readMetaData(ITableWorkspace &ws, const dict &state) {
+    const auto &metaData = state["meta_data"];
+    const auto &columnNames = metaData["column_names"];
+    const auto &columnTypes = metaData["column_types"];
 
-      const ssize_t numColumns = len(columnNames);
-      for (ssize_t colIndex = 0; colIndex < numColumns; ++colIndex) {
-        const auto& key = columnNames[colIndex];
-        const auto& value = columnTypes[colIndex];
-        const auto& name = extract<std::string>(key);
-        const auto& type = extract<std::string>(value);
-        ws.addColumn(type, name);
-      }
+    const ssize_t numColumns = len(columnNames);
+    for (ssize_t colIndex = 0; colIndex < numColumns; ++colIndex) {
+      const auto &key = columnNames[colIndex];
+      const auto &value = columnTypes[colIndex];
+      const auto &name = extract<std::string>(key);
+      const auto &type = extract<std::string>(value);
+      ws.addColumn(type, name);
+    }
   }
 
   /** Read the data from a python dict into the table workspace
@@ -543,28 +542,28 @@ public:
    * @param ws :: the workspace to load data into
    * @param state :: the pickled state of the table
    */
-  static void readData(ITableWorkspace& ws, const dict& state) {
-      const auto& data = state["data"];
-      const auto& names = ws.getColumnNames();
+  static void readData(ITableWorkspace &ws, const dict &state) {
+    const auto &data = state["data"];
+    const auto &names = ws.getColumnNames();
 
-      if (names.empty()) {
-          return;
-      }
+    if (names.empty()) {
+      return;
+    }
 
-      ssize_t numRows = len(data[names[0]]);
-      for (int rowIndex = 0; rowIndex < numRows; ++rowIndex) {
-          ws.appendRow();
-          for (const auto& name : names) {
-              setValue(ws.getColumn(name), static_cast<int>(rowIndex), data[name][rowIndex]);
-          }
+    ssize_t numRows = len(data[names[0]]);
+    for (int rowIndex = 0; rowIndex < numRows; ++rowIndex) {
+      ws.appendRow();
+      for (const auto &name : names) {
+        setValue(ws.getColumn(name), static_cast<int>(rowIndex),
+                 data[name][rowIndex]);
       }
+    }
   }
 };
 
-
 void export_ITableWorkspace() {
   using Mantid::PythonInterface::Policies::VectorToNumpy;
-  
+
   std::string iTableWorkspace_docstring =
       "Most of the information from a table workspace is returned ";
   iTableWorkspace_docstring +=
@@ -573,7 +572,8 @@ void export_ITableWorkspace() {
       "rows return dicts. This object does support the idom 'for row in ";
   iTableWorkspace_docstring += "ITableWorkspace'.";
 
-  class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>("ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
+  class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
+      "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
       .def_pickle(ITableWorkspacePickleSuite())
       .def("__init__", make_constructor(&makeTableWorkspace))
       .def("addColumn", &addColumnSimple,
@@ -644,10 +644,11 @@ void export_ITableWorkspace() {
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name")
 
-      .def("setCell", &setCell, (arg("self"), arg("row_or_column"),
-                                 arg("column_or_row"), arg("value")),
+      .def("setCell", &setCell,
+           (arg("self"), arg("row_or_column"), arg("column_or_row"),
+            arg("value")),
            "Sets the value of a given cell. If the first argument is a "
-           
+
            "as a column name")
 
       .def("toDict", &toDict, (arg("self")),
