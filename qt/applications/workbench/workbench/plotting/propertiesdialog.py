@@ -163,7 +163,6 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.gridBox.setChecked(model.grid)
 
 
-
 class XAxisEditor(AxisEditor):
 
     def __init__(self, canvas, axes):

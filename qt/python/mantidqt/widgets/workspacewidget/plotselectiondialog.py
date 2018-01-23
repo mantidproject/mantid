@@ -19,7 +19,7 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # 3rd party imports
-from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
+from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger
 import qtawesome as qta
 from qtpy.QtWidgets import QDialogButtonBox
@@ -204,7 +204,6 @@ def flatten(workspaces):
     :param workspaces: A list containing workspace handles
     :return: A list where each element is a single MatrixWorkspace
     """
-    ads = AnalysisDataService.Instance()
     flat = []
     for ws in workspaces:
         if isinstance(ws, MatrixWorkspace):
