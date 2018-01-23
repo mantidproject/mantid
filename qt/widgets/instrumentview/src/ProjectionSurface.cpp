@@ -9,7 +9,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Unit.h"
 
 #include <QRgb>
@@ -36,7 +36,7 @@ namespace MantidWidgets {
 * instrument
 */
 ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
-    : m_instrActor(rootActor), m_viewImage(NULL), m_pickImage(NULL),
+    : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr),
       m_viewRect(), m_selectRect(), m_interactionMode(MoveMode),
       m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
       m_showPeakLabels(false), m_showPeakRelativeIntensity(false),
@@ -156,11 +156,11 @@ void ProjectionSurface::resetInstrumentActor(const InstrumentActor *rootActor) {
 void ProjectionSurface::clear() {
   if (m_viewImage) {
     delete m_viewImage;
-    m_viewImage = NULL;
+    m_viewImage = nullptr;
   }
   if (m_pickImage) {
     delete m_pickImage;
-    m_pickImage = NULL;
+    m_pickImage = nullptr;
   }
   m_viewChanged = true;
   m_redrawPicking = true;

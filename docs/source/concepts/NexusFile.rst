@@ -18,9 +18,9 @@ The general structure of NEXUS files is explained in http://download.nexusformat
 
 Here are some specific details:
 
-ISIS uses NEXUS files for both histrogram and event data and SNS uses NEXUS for event data only. 
-Also both ISIS and SNS use the same structure for event data. 
-Hence there are two principal types of NEXUS files loaded by Mantid 
+ISIS uses NEXUS files for both histrogram and event data and SNS uses NEXUS for event data only.
+Also both ISIS and SNS use the same structure for event data.
+Hence there are two principal types of NEXUS files loaded by Mantid
 
  - ISIS histogram Nexus file, which is loaded by :ref:`LoadISISNexus <algm-LoadISISNexus>` and
  - Event Nexus file, which is loaded by :ref:`LoadEventNexus <algm-LoadEventNexus>`.
@@ -31,16 +31,11 @@ ISIS uses two versions of Nexus files for muon histogram data:
  - Muon Nexus file v2, which is loaded by :ref:`LoadEventNexus v2<algm-LoadMuonNexus-v2>`.
 
 
-As well as Nexus files loaded by Mantid, there is a kind of Nexus file, 
+As well as Nexus files loaded by Mantid, there is a kind of Nexus file,
 which is produced by Mantid, when it saves a workspace
-to Nexus, which is called a Processed Nexus file and is saved by 
+to Nexus, which is called a Processed Nexus file and is saved by
 :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>`.
 
-See also
---------
-
-:ref:`RAW File <RAW File>` an older data file format.
-
-
+.. seealso:: :ref:`RAW File <RAW File>` an older data file format.
 
 .. categories:: Concepts

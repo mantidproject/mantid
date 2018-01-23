@@ -36,8 +36,8 @@ Usage
    ws = CalculateDIFC(ws, OutputWorkspace="ws")
 
    # Print the result
-   print "The output workspace has %i spectra" % ws.getNumberHistograms()
-   print "DIFC of pixel %i is %1.f" % (100, ws.readY(100)[0])
+   print("The output workspace has {} spectra".format(ws.getNumberHistograms()))
+   print("DIFC of pixel {} is {:.0f}".format(100, ws.readY(100)[0]))
 
 Output:
 

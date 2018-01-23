@@ -630,5 +630,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         return ws_name[:suffix_pos] + '_' + str(energy) + ws_name[suffix_pos:]
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionFWS)

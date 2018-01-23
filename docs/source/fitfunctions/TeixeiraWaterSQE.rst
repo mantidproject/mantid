@@ -68,16 +68,17 @@ The value of the momentum transfer :math:`Q` is contained in the loaded data
     name=LinearBackground"""
     # Let's fit spectrum with workspace index 5. Appropriate value of Q is picked up
     # automatically from workspace 'data' and passed on to the fit function
-    out,chi2,covariance,params,curves=Fit(Function=function, InputWorkspace=data,
-        WorkspaceIndex=5, CreateOutput=True, Output="fit", MaxIterations=100)
+    fit_output = Fit(Function=function, InputWorkspace=data, WorkspaceIndex=5,
+                     CreateOutput=True, Output="fit", MaxIterations=100)
+    params = fit_output.OutputParameters  # table containing the optimal fit parameters
+
     # Check some results
-    drow=params.row(6)
     DiffCoeff = params.row(6)["Value"]
     Tau = params.row(7)["Value"]
     if abs(DiffCoeff-2.1)/2.1 < 0.1 and abs(Tau-1.85)/1.85 < 0.1:
         print("Optimal parameters within 10% of expected values")
     else:
-        print(DiffCoeff, Tau, chi2)
+        print(DiffCoeff, Tau, fit_output.OutputChi2overDoF)
 
 
 **Example - Global fit to a synthetic signal:**

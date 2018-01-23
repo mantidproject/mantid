@@ -13,8 +13,8 @@ CompositePeaksPresenter::CompositePeaksPresenter(
     ZoomablePeaksView *const zoomablePlottingWidget,
     PeaksPresenter_sptr defaultPresenter)
     : m_zoomablePlottingWidget(zoomablePlottingWidget),
-      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1) {
-  if (m_zoomablePlottingWidget == NULL) {
+      m_default(defaultPresenter), m_owner(nullptr), m_zoomedPeakIndex(-1) {
+  if (m_zoomablePlottingWidget == nullptr) {
     throw std::runtime_error("Zoomable Plotting Widget is NULL");
   }
 }
@@ -337,7 +337,12 @@ void CompositePeaksPresenter::setShown(
     return m_default->setShown(shown);
   }
   auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
-  (*iterator)->setShown(shown);
+  if (iterator == m_subjects.end())
+    return;
+
+  auto presenter = *iterator;
+  if (presenter)
+    presenter->setShown(shown);
 }
 
 /**
@@ -355,24 +360,6 @@ void CompositePeaksPresenter::zoomToPeak(
   m_zoomablePlottingWidget->zoomToRectangle(boundingBox);
   m_zoomedPeakIndex = peakIndex;
   m_zoomedPresenter = subjectPresenter;
-}
-
-/**
- * Sort the peaks workspace.
- * @param peaksWS : Peaks list to sort.
- * @param columnToSortBy : Column to sort by.
- * @param sortedAscending : Direction of the sort. True for Ascending.
- */
-void CompositePeaksPresenter::sortPeaksWorkspace(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS,
-    const std::string &columnToSortBy, const bool sortedAscending) {
-  auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
-  auto subjectPresenter = *iterator;
-  subjectPresenter->sortPeaksWorkspace(columnToSortBy, sortedAscending);
-  // We want to zoom out now, because any currently selected peak will be wrong.
-  m_zoomablePlottingWidget->resetView();
-  m_zoomedPeakIndex = -1;
-  m_zoomedPresenter.reset();
 }
 
 /**

@@ -1,26 +1,30 @@
 #ifndef MANTID_CRYSTAL_FINDSXPEAKSHELPER_H_
 #define MANTID_CRYSTAL_FINDSXPEAKSHELPER_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/EmptyValues.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 
-#include <vector>
 #include <boost/optional.hpp>
-#include <iterator>
 #include <iostream>
+#include <iterator>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
 class ProgressBase;
 }
-}
+} // namespace Mantid
 
 namespace Mantid {
 namespace Crystal {
 namespace FindSXPeaksHelper {
+
+/// enum to determine the units of the workspaces X axis we are searching in
+enum class XAxisUnit { TOF, DSPACING };
 
 /* ------------------------------------------------------------------------------------------
  * Single Crystal peak representation
@@ -38,8 +42,9 @@ public:
 
   /// Object comparison. Note that the tolerances are absolute and there is one
   /// per trait.
-  bool compare(const SXPeak &rhs, const double tofTolerance,
-               const double phiTolerance, const double thetaTolerance) const;
+  bool compare(const SXPeak &rhs, const double xTolerance,
+               const double phiTolerance, const double thetaTolerance,
+               const XAxisUnit tofUnits = XAxisUnit::TOF) const;
 
   /// Getter for LabQ
   Mantid::Kernel::V3D getQ() const;
@@ -51,10 +56,10 @@ public:
   void reduce();
 
   friend std::ostream &operator<<(std::ostream &os, const SXPeak &rhs) {
-    os << rhs._t << "," << rhs._th2 << "," << rhs._phi << "," << rhs._intensity
-       << "\n";
+    os << rhs.m_tof << "," << rhs.m_twoTheta << "," << rhs.m_phi << ","
+       << rhs.m_intensity << "\n";
     os << " Spectra";
-    std::copy(rhs._spectral.begin(), rhs._spectral.end(),
+    std::copy(rhs.m_spectra.begin(), rhs.m_spectra.end(),
               std::ostream_iterator<int>(os, ","));
     return os;
   }
@@ -64,28 +69,30 @@ public:
   detid_t getDetectorId() const;
 
 private:
-  /// TOF
-  double _t;
-  /// 2 * theta
-  double _th2;
-  /// PSI angle
-  double _phi;
-  /// Measured intensity of SXPeak
-  double _intensity;
-  /// Contributing spectra
-  std::vector<int> _spectral;
+  /// TOF for the peak centre
+  double m_tof;
+  /// d-spacing at the peak centre
+  double m_dSpacing;
+  /// 2 * theta angle for then centre detector of the peak
+  double m_twoTheta;
+  /// Phi angle for the centre detector of the peak
+  double m_phi;
+  /// Measured intensity of centre of the peak
+  double m_intensity;
+  /// Contributing spectra to this peak
+  std::vector<int> m_spectra;
   /// Detector-sample distance
-  double _Ltot;
+  double m_LTotal;
   /// Detector workspace index
-  size_t _wsIndex;
+  size_t m_wsIndex;
   /// Detector ID
-  detid_t _detId;
+  detid_t m_detId;
   /// Number of contributing pixels
-  int npixels;
+  int m_nPixels;
   /// Unit vector in the direction of the wavevector
-  Kernel::V3D _unitWaveVector;
+  Kernel::V3D m_unitWaveVector;
   /// Q Convention
-  std::string _convention;
+  std::string m_qConvention;
 };
 
 using yIt = Mantid::HistogramData::HistogramY::const_iterator;
@@ -146,7 +153,8 @@ public:
   PeakFindingStrategy(const BackgroundStrategy *backgroundStrategy,
                       const API::SpectrumInfo &spectrumInfo,
                       const double minValue = EMPTY_DBL(),
-                      const double maxValue = EMPTY_DBL());
+                      const double maxValue = EMPTY_DBL(),
+                      const XAxisUnit units = XAxisUnit::TOF);
   PeakList findSXPeaks(const HistogramData::HistogramX &x,
                        const HistogramData::HistogramY &y,
                        const int workspaceIndex) const;
@@ -154,8 +162,9 @@ public:
 protected:
   BoundsIterator getBounds(const HistogramData::HistogramX &x) const;
   double calculatePhi(size_t workspaceIndex) const;
-  double getTof(const HistogramData::HistogramX &x,
-                const size_t peakLocation) const;
+  double getXValue(const HistogramData::HistogramX &x,
+                   const size_t peakLocation) const;
+  double convertToTOF(const double xValue, const size_t workspaceIndex) const;
   virtual PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
                                  const HistogramData::HistogramY &y, Bound low,
                                  Bound high,
@@ -165,6 +174,7 @@ protected:
   const double m_minValue = EMPTY_DBL();
   const double m_maxValue = EMPTY_DBL();
   const API::SpectrumInfo &m_spectrumInfo;
+  const XAxisUnit m_units;
 };
 
 class DLLExport StrongestPeaksStrategy : public PeakFindingStrategy {
@@ -172,7 +182,8 @@ public:
   StrongestPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                          const API::SpectrumInfo &spectrumInfo,
                          const double minValue = EMPTY_DBL(),
-                         const double maxValue = EMPTY_DBL());
+                         const double maxValue = EMPTY_DBL(),
+                         const XAxisUnit units = XAxisUnit::TOF);
   PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
                          const HistogramData::HistogramY &y, Bound low,
                          Bound high, const int workspaceIndex) const override;
@@ -183,7 +194,8 @@ public:
   AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                    const API::SpectrumInfo &spectrumInfo,
                    const double minValue = EMPTY_DBL(),
-                   const double maxValue = EMPTY_DBL());
+                   const double maxValue = EMPTY_DBL(),
+                   const XAxisUnit units = XAxisUnit::TOF);
   PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
                          const HistogramData::HistogramY &y, Bound low,
                          Bound high, const int workspaceIndex) const override;
@@ -223,13 +235,15 @@ class DLLExport AbsoluteCompareStrategy : public CompareStrategy {
 public:
   AbsoluteCompareStrategy(const double tofResolution,
                           const double phiResolution,
-                          const double twoThetaResolution);
+                          const double twoThetaResolution,
+                          const XAxisUnit units = XAxisUnit::TOF);
   bool compare(const SXPeak &lhs, const SXPeak &rhs) const override;
 
 private:
-  const double m_tofResolution;
+  const double m_xUnitResolution;
   double m_phiResolution;
   double m_twoThetaResolution;
+  const XAxisUnit m_units;
 };
 
 /* ------------------------------------------------------------------------------------------

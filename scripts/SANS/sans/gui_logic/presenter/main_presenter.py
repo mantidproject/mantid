@@ -18,15 +18,15 @@ class PresenterEnum(object):
         pass
 
 
-class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
+class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter):
     """
     Comments below are from Raquel:
 
     A DataProcessorMainPresenter. The base class provides default implementations
     but we should re-implement the following methods:
-    - getPreprocessingOptionsAsString() -- to supply global pre-processing options to the table widget
+    - getPreprocessingOptions() -- to supply global pre-processing options to the table widget
     - getProcessingOptions() -- to supply global processing options
-    - getPostprocessingOptions() -- to supply global post-processing options
+    - getPostprocessingOptionsAsString() -- to supply global post-processing options
     - notifyADSChanged() -- to act when the ADS changed, typically we want to update
       table actions with the list of table workspaces that can be loaded into the interface
 
@@ -36,7 +36,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
     """
 
     def __init__(self, facility):
-        super(MantidQt.MantidWidgets.DataProcessorMainPresenter, self).__init__()
+        super(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter, self).__init__()
 
         self._view = None
 
@@ -60,9 +60,8 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
             self._gui_algorithm_name = get_gui_algorithm_name(self._facility)
         return self._gui_algorithm_name
 
-    def get_white_list(self):
-        if self._white_list is None:
-            self._white_list = get_white_list()
+    def get_white_list(self, show_periods=False):
+        self._white_list = get_white_list(show_periods=show_periods)
         return self._white_list
 
     def get_number_of_white_list_items(self):
@@ -85,10 +84,11 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
     # ------------------------------------------------------------------------------------------------------------------
     # Unused
     # ------------------------------------------------------------------------------------------------------------------
-    def getPreprocessingOptionsAsString(self):
-        return ""
+    def getPreprocessingOptions(self):
+        empty = {}
+        return empty
 
-    def getPostprocessingOptions(self):
+    def getPostprocessingOptionsAsString(self):
         return ""
 
     def notifyADSChanged(self, workspace_list):

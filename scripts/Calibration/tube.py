@@ -76,10 +76,10 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     Define the calibrated positions of the detectors inside the tubes defined
     in tubeSet.
 
-    Tubes may be considered a list of detectors alined that may be considered
+    Tubes may be considered a list of detectors aligned that may be considered
     as pixels for the analogy when they values are displayed.
 
-    The position of these pixels are provided by the manufactor, but its real
+    The position of these pixels are provided by the manufacturer, but its real
     position depends on the electronics inside the tube and varies slightly
     from tube to tube. The calibrate method, aims to find the real positions
     of the detectors (pixels) inside the tube.
@@ -351,13 +351,13 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
            # skip finding peaks
            fit_peaks_to_position()
 
-    :param fitPolyn: Define the order of the polinomial to fit the pixels positions agains the known positions. The \
+    :param fitPolyn: Define the order of the polynomial to fit the pixels positions against the known positions. The \
     acceptable values are 1, 2 or 3. Default = 2.
 
 
     :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It \
     may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate \
-    to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes. \
+    to append the new values to the given peakTable. This is useful when you have to operate in subsets of tubes. \
     (see :py:mod:`~Examples.TubeCalibDemoMerlin` that shows a nice inspection on this table).
 
     .. code-block:: python
@@ -382,236 +382,60 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     FITPOLIN = 'fitPolyn'
     OUTPUTPEAK = 'outputPeak'
 
+    param_helper = _CalibrationParameterHelper(FITPAR, MARGIN, RANGELIST, CALIBTABLE, PLOTTUBE, EXCLUDESHORT,
+                                               OVERRIDEPEAKS, FITPOLIN, OUTPUTPEAK)
+
     # check that only valid arguments were passed through kwargs
-    for key in kwargs.keys():
-        if key not in [FITPAR, MARGIN, RANGELIST, CALIBTABLE, PLOTTUBE,
-                       EXCLUDESHORT, OVERRIDEPEAKS, FITPOLIN,
-                       OUTPUTPEAK]:
-            msg = "Wrong argument: '%s'! This argument is not defined in the signature of this function. Hint: remember" \
-                  "that arguments are case sensitive" % key
-            raise RuntimeError(msg)
+    param_helper.ensure_no_unknown_kwargs(kwargs)
 
     # check parameter ws: if it was given as string, transform it in
     # mantid object
-    if isinstance(ws, str):
-        ws = mtd[ws]
-    if not isinstance(ws, MatrixWorkspace):
-        raise RuntimeError("Wrong argument ws = %s. It must be a MatrixWorkspace" % (str(ws)))
+    ws = _CalibrationParameterHelper.enforce_matrix_ws(ws)
 
     # check parameter tubeSet. It accepts string or preferable a TubeSpec
-    if isinstance(tubeSet, str):
-        selectedTubes = tubeSet
-        tubeSet = TubeSpec(ws)
-        tubeSet.setTubeSpecByString(selectedTubes)
-    elif isinstance(tubeSet, list):
-        selectedTubes = tubeSet
-        tubeSet = TubeSpec(ws)
-        tubeSet.setTubeSpecByStringArray(selectedTubes)
-    elif not isinstance(tubeSet, TubeSpec):
-        raise RuntimeError(
-            "Wrong argument tubeSet. It must be a TubeSpec or a string that defines the set of tubes to be calibrated."
-            "For example: WISH/panel03")
+    tubeSet = _CalibrationParameterHelper.enforce_tube_spec(tubeSet, ws)
 
     # check the known_positions parameter
-    # for old version compatibility, it also accepts IdealTube, eventhough
+    # for old version compatibility, it also accepts IdealTube, even though
     # they should only be used internally
-    if not (isinstance(knownPositions, list) or isinstance(knownPositions, tuple) or isinstance(knownPositions, numpy.ndarray)):
-        raise RuntimeError(
-            "Wrong argument knownPositions. It expects a list of values for the positions expected for the peaks in"
-            "relation to the center of the tube")
-    else:
-        idealTube = IdealTube()
-        idealTube.setArray(numpy.array(knownPositions))
+    _CalibrationParameterHelper.validate_known_positions(knownPositions)
+    ideal_tube = IdealTube()
+    ideal_tube.setArray(numpy.array(knownPositions))
 
-    for val in knownPositions:
-        if val >= 100:
-            # Tube is greater than 100m - this is probably wrong so print an error
-            raise ValueError("The following value: " + str(val) + " is greater or equal than 100m in length"
-                             "\nHave you remembered to convert to meters?")
-
+    n_peaks = len(ideal_tube.getArray())
     # deal with funcForm parameter
-    try:
-        nPeaks = len(idealTube.getArray())
-        if len(funcForm) != nPeaks:
-            raise 1
-        for val in funcForm:
-            if val not in [1, 2]:
-                raise 2
-    except:
-        raise RuntimeError(
-            "Wrong argument FuncForm. It expects a list of values describing the form of everysingle peaks. So, for"
-            "example, if there are three peaks where the first is a peak and the followers as edge,"
-            "funcForm = [1, 2, 2].Currently, it is defined 1-Gaussian Peak, 2 - Edge. The knownPos has %d elements"
-            "and the given funcForm has %d." % (nPeaks, len(funcForm)))
+    _CalibrationParameterHelper.validate_func_form(funcForm, n_peaks)
 
     # apply the functional form to the ideal Tube
-    idealTube.setForm(funcForm)
+    ideal_tube.setForm(funcForm)
 
     # check the FITPAR parameter (optional)
     # if the FITPAR is given, than it will just pass on, if the FITPAR is
     # not given, it will create a FITPAR 'guessing' the centre positions,
     # and allowing the find peaks calibration methods to adjust the parameter
     # for the peaks automatically
-    if FITPAR in kwargs:
-        fitPar = kwargs[FITPAR]
-        # fitPar must be a TubeCalibFitParams
-        if not isinstance(fitPar, TubeCalibFitParams):
-            raise RuntimeError(
-                "Wrong argument %s. This argument, when given, must be a valid TubeCalibFitParams object" % FITPAR)
-    else:
-        # create a fit parameters guessing centre positions
-        # the guessing obeys the following rule:
-        #
-        # centre_pixel = known_pos * ndets/tube_length + ndets / 2
-        #
-        # Get tube length and number of detectors
-        tube_length = tubeSet.getTubeLength(0)
-        # ndets = len(wsp_index_for_tube0)
-        dummy_id1, ndets, dummy_step = tubeSet.getDetectorInfoFromTube(0)
+    fit_par = param_helper.get_parameter(FITPAR, kwargs, tube_set=tubeSet, ideal_tube=ideal_tube)
 
-        known_pos = idealTube.getArray()
-        # position of the peaks in pixels
-        centre_pixel = known_pos * ndets / tube_length + ndets * 0.5
-
-        fitPar = TubeCalibFitParams(centre_pixel)
-        # make it automatic, it means, that for every tube,
-        # the parameters for fit will be re-evaluated, from the first
-        # guess positions given by centre_pixel
-        fitPar.setAutomatic(True)
-
-    # check the MARGIN paramter (optional)
     if MARGIN in kwargs:
-        try:
-            margin = float(kwargs[MARGIN])
-        except:
-            raise RuntimeError("Wrong argument %s. It was expected a number!" % MARGIN)
-        fitPar.setMargin(margin)
+        margin = param_helper.get_parameter(MARGIN, kwargs)
+        fit_par.setMargin(margin)
 
-    # deal with RANGELIST parameter
-    if RANGELIST in kwargs:
-        rangeList = kwargs[RANGELIST]
-        if isinstance(rangeList, int):
-            rangeList = [rangeList]
-        try:
-            # this deals with list and tuples and iterables to make sure
-            # rangeList becomes a list
-            rangeList = list(rangeList)
-        except:
-            raise RuntimeError("Wrong argument %s. It expects a list of indexes for calibration" % RANGELIST)
-    else:
-        rangeList = range(tubeSet.getNumTubes())
+    range_list = param_helper.get_parameter(RANGELIST, kwargs, default_range_list=tubeSet.getNumTubes())
+    calib_table = param_helper.get_parameter(CALIBTABLE, kwargs)
+    plot_tube = param_helper.get_parameter(PLOTTUBE, kwargs)
+    exclude_short_tubes = param_helper.get_parameter(EXCLUDESHORT, kwargs)
+    override_peaks = param_helper.get_parameter(OVERRIDEPEAKS, kwargs, tube_set=tubeSet, ideal_tube=ideal_tube)
+    polin_fit = param_helper.get_parameter(FITPOLIN, kwargs)
+    output_peak, delete_peak_table_after = param_helper.get_parameter(OUTPUTPEAK, kwargs, ideal_tube=ideal_tube)
 
-    # check if the user passed the option calibTable
-    if CALIBTABLE in kwargs:
-        calibTable = kwargs[CALIBTABLE]
-        # ensure the correct type is passed
-        # if a string was passed, transform it in mantid object
-        if isinstance(calibTable, str):
-            calibTable = mtd[calibTable]
-        # check that calibTable has the expected form
-        try:
-            if not isinstance(calibTable, ITableWorkspace):
-                raise 1
-            if calibTable.columnCount() != 2:
-                raise 2
-            colNames = calibTable.getColumnNames()
-            if colNames[0] != 'Detector ID' or colNames[1] != 'Detector Position':
-                raise 3
-        except:
-            raise RuntimeError(
-                "Invalid type for %s. The expected type was ITableWorkspace with 2 columns(Detector ID and Detector"
-                "Positions)" % CALIBTABLE)
-    else:
-        calibTable = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
-        # "Detector ID" column required by ApplyCalibration
-        calibTable.addColumn(type="int", name="Detector ID")
-        # "Detector Position" column required by ApplyCalibration
-        calibTable.addColumn(type="V3D", name="Detector Position")
+    getCalibration(ws, tubeSet, calib_table, fit_par, ideal_tube, output_peak,
+                   override_peaks, exclude_short_tubes, plot_tube, range_list, polin_fit)
 
-    # deal with plotTube option
-    if PLOTTUBE in kwargs:
-        plotTube = kwargs[PLOTTUBE]
-        if isinstance(plotTube, int):
-            plotTube = [plotTube]
-        try:
-            plotTube = list(plotTube)
-        except:
-            raise RuntimeError("Wrong argument %s. It expects an index (int) or a list of indexes" % PLOTTUBE)
+    if delete_peak_table_after:
+        DeleteWorkspace(str(output_peak))
+        return calib_table
     else:
-        plotTube = []
-
-    # deal with minimun tubes sizes
-    if EXCLUDESHORT in kwargs:
-        excludeShortTubes = kwargs[EXCLUDESHORT]
-        try:
-            excludeShortTubes = float(excludeShortTubes)
-        except:
-            raise RuntimeError(
-                "Wrong argument %s. It expects a float value for the minimun size of tubes to be calibrated")
-    else:
-        # a tube with length 0 can not be calibrated, this is the minimun value
-        excludeShortTubes = 0.0
-
-    # deal with OVERRIDEPEAKS parameters
-    if OVERRIDEPEAKS in kwargs:
-        overridePeaks = kwargs[OVERRIDEPEAKS]
-        try:
-            nPeaks = len(idealTube.getArray())
-            # check the format of override peaks
-            if not isinstance(overridePeaks, dict):
-                raise 1
-            for key in overridePeaks.keys():
-                if not isinstance(key, int):
-                    raise 2
-                if key < 0 or key >= tubeSet.getNumTubes():
-                    raise 3
-                if len(overridePeaks[key]) != nPeaks:
-                    raise 4
-        except:
-            raise RuntimeError(
-                "Wrong argument %s. It expects a dictionary with key as the tube index and the value as a list of peaks"
-                "positions. Ex (3 peaks): overridePeaks = {1:[2,5.4,500]}" % OVERRIDEPEAKS)
-    else:
-        overridePeaks = dict()
-
-    # deal with FITPOLIN parameter
-    if FITPOLIN in kwargs:
-        polinFit = kwargs[FITPOLIN]
-        if polinFit not in [1, 2, 3]:
-            raise RuntimeError(
-                "Wrong argument %s. It expects a number 1 for linear, 2 for quadratic, or 3 for 3rd polinomial order"
-                "when fitting the pixels positions agains the known positions" % FITPOLIN)
-    else:
-        polinFit = 2
-
-    # deal with OUTPUT PEAK
-    deletePeakTableAfter = False
-    if OUTPUTPEAK in kwargs:
-        outputPeak = kwargs[OUTPUTPEAK]
-    else:
-        outputPeak = False
-    if isinstance(outputPeak, ITableWorkspace):
-        if outputPeak.columnCount() < len(idealTube.getArray()):
-            raise RuntimeError(
-                "Wrong argument %s. It expects a boolean flag, or a ITableWorksapce with columns (TubeId, Peak1,...,"
-                "PeakM) for M = number of peaks given in knownPositions" % OUTPUTPEAK)
-    else:
-        if not outputPeak:
-            deletePeakTableAfter = True
-        # create the output peak table
-        outputPeak = CreateEmptyTableWorkspace(OutputWorkspace="PeakTable")
-        outputPeak.addColumn(type='str', name='TubeId')
-        for i in range(len(idealTube.getArray())):
-            outputPeak.addColumn(type='float', name='Peak%d' % (i + 1))
-
-    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak,
-                   overridePeaks, excludeShortTubes, plotTube, rangeList, polinFit)
-
-    if deletePeakTableAfter:
-        DeleteWorkspace(str(outputPeak))
-        return calibTable
-    else:
-        return calibTable, outputPeak
+        return calib_table, output_peak
 
 
 def savePeak(peakTable, filePath):
@@ -861,3 +685,282 @@ def correctMisalignedTubes(ws, calibrationTable, peaksTable, spec, idealTube,
         cleanUpFit()
 
     return corrections_table
+
+
+class _CalibrationParameterHelper(object):
+
+    def __init__(self, FITPAR, MARGIN, RANGELIST, CALIBTABLE, PLOTTUBE, EXCLUDESHORT, OVERRIDEPEAKS, FITPOLIN,
+                 OUTPUTPEAK):
+        self.FITPAR = FITPAR
+        self.MARGIN = MARGIN
+        self.RANGELIST = RANGELIST
+        self.CALIBTABLE = CALIBTABLE
+        self.PLOTTUBE = PLOTTUBE
+        self.EXCLUDESHORT = EXCLUDESHORT
+        self.OVERRIDEPEAKS = OVERRIDEPEAKS
+        self.FITPOLIN = FITPOLIN
+        self.OUTPUTPEAK = OUTPUTPEAK
+        self.allowed_kwargs = {FITPAR, MARGIN, RANGELIST, CALIBTABLE, PLOTTUBE, EXCLUDESHORT, OVERRIDEPEAKS, FITPOLIN,
+                               OUTPUTPEAK}
+
+    def ensure_no_unknown_kwargs(self, kwargs):
+        for key in kwargs.keys():
+            if key not in self.allowed_kwargs:
+                msg = "Wrong argument: '{0}'! This argument is not defined in the signature of this function. Hint: remember" \
+                      "that arguments are case sensitive".format(key)
+                raise RuntimeError(msg)
+
+    @staticmethod
+    def enforce_matrix_ws(ws):
+        if isinstance(ws, MatrixWorkspace):
+            return ws
+        if isinstance(ws, str):
+            return mtd[ws]
+        raise RuntimeError("Wrong argument ws = %s. It must be a MatrixWorkspace" % (str(ws)))
+
+    @staticmethod
+    def enforce_tube_spec(tube_set, ws):
+        if isinstance(tube_set, str):
+            selected_tubes = tube_set
+            tube_set = TubeSpec(ws)
+            tube_set.setTubeSpecByString(selected_tubes)
+            return tube_set
+        if isinstance(tube_set, list):
+            selected_tubes = tube_set
+            tube_set = TubeSpec(ws)
+            tube_set.setTubeSpecByStringArray(selected_tubes)
+            return tube_set
+        if isinstance(tube_set, TubeSpec):
+            return tube_set
+        raise RuntimeError("Wrong argument tubeSet. "
+                           "It must be a TubeSpec or a string that defines the set of tubes to be calibrated. "
+                           "For example: WISH/panel03")
+
+    @staticmethod
+    def validate_known_positions(known_positions):
+        if not (isinstance(known_positions, list) or
+                isinstance(known_positions, tuple) or
+                isinstance(known_positions, numpy.ndarray)):
+            raise RuntimeError(
+                "Wrong argument knownPositions. It expects a list of values for the positions expected for the peaks in"
+                "relation to the center of the tube")
+
+        for val in known_positions:
+            if val >= 100:
+                # Tube is greater than 100m - this is probably wrong so print an error
+                raise ValueError("The following value: " + str(val) + " is greater or equal than 100m in length"
+                                                                      "\nHave you remembered to convert to meters?")
+
+    @staticmethod
+    def validate_func_form(func_form, n_peaks):
+        try:
+            if len(func_form) != n_peaks:
+                raise 1
+            for val in func_form:
+                if val not in [1, 2]:
+                    raise 2
+        except:
+            raise RuntimeError(
+                "Wrong argument FuncForm. It expects a list of values describing the form of everysingle peaks. So, for"
+                "example, if there are three peaks where the first is a peak and the followers as edge,"
+                "funcForm = [1, 2, 2].Currently, it is defined 1-Gaussian Peak, 2 - Edge. The knownPos has %d elements"
+                "and the given funcForm has %d." % (n_peaks, len(func_form)))
+
+    def get_parameter(self, name, args, **kwargs):
+        if name == self.FITPAR:
+            return self._get_fit_par(args, tube_set=kwargs["tube_set"], ideal_tube=kwargs["ideal_tube"])
+        if name == self.MARGIN:
+            return self._get_margin(args)
+        if name == self.RANGELIST:
+            return self._get_range_list(args, default_range_list=kwargs["default_range_list"])
+        if name == self.CALIBTABLE:
+            return self._get_calib_table(args)
+        if name == self.PLOTTUBE:
+            return self._get_plot_tube(args)
+        if name == self.EXCLUDESHORT:
+            return self._get_exclude_short(args)
+        if name == self.OVERRIDEPEAKS:
+            return self._get_override_peaks(args, tube_set=kwargs["tube_set"], ideal_tube=kwargs["ideal_tube"])
+        if name == self.OUTPUTPEAK:
+            return self._get_output_peak(args, ideal_tube=kwargs["ideal_tube"])
+        if name == self.FITPOLIN:
+            return self._get_fit_polin(args)
+
+    def _get_output_peak(self, args, ideal_tube):
+        delete_peak_table_after = False
+        if self.OUTPUTPEAK in args:
+            output_peak = args[self.OUTPUTPEAK]
+        else:
+            output_peak = False
+
+        if isinstance(output_peak, ITableWorkspace):
+            if output_peak.columnCount() < len(ideal_tube.getArray()):
+                raise RuntimeError(
+                    "Wrong argument {0}. "
+                    "It expects a boolean flag, or a ITableWorksapce with columns (TubeId, Peak1,...,"
+                    "PeakM) for M = number of peaks given in knownPositions".format(self.OUTPUTPEAK))
+            return output_peak, delete_peak_table_after
+
+        else:
+            if not output_peak:
+                delete_peak_table_after = True
+
+            # create the output peak table
+            output_peak = CreateEmptyTableWorkspace(OutputWorkspace="PeakTable")
+            output_peak.addColumn(type='str', name='TubeId')
+            for i in range(len(ideal_tube.getArray())):
+                output_peak.addColumn(type='float', name='Peak%d' % (i + 1))
+            return output_peak, delete_peak_table_after
+
+    def _get_fit_polin(self, args):
+        if self.FITPOLIN in args:
+            polin_fit = args[self.FITPOLIN]
+            if polin_fit not in [1, 2, 3]:
+                raise RuntimeError(
+                    "Wrong argument {0}. "
+                    "It expects a number 1 for linear, 2 for quadratic, or 3 for 3rd polinomial order"
+                    "when fitting the pixels positions agains the known positions".format(self.FITPOLIN))
+            else:
+                return polin_fit
+        else:
+            return 2
+
+    def _get_override_peaks(self, args, tube_set, ideal_tube):
+        if self.OVERRIDEPEAKS in args:
+            override_peaks = args[self.OVERRIDEPEAKS]
+            try:
+                n_peaks = len(ideal_tube.getArray())
+                # check the format of override peaks
+                if not isinstance(override_peaks, dict):
+                    raise 1
+                for key in override_peaks.keys():
+                    if not isinstance(key, int):
+                        raise 2
+                    if key < 0 or key >= tube_set.getNumTubes():
+                        raise 3
+                    if len(override_peaks[key]) != n_peaks:
+                        raise 4
+            except:
+                raise RuntimeError(
+                    "Wrong argument {0}. "
+                    "It expects a dictionary with key as the tube index and the value as a list of peaks positions. "
+                    "Ex (3 peaks): override_peaks = {1:[2,5.4,500]}".format(self.OVERRIDEPEAKS))
+            else:
+                return override_peaks
+        else:
+            return dict()
+
+    def _get_exclude_short(self, args):
+        if self.EXCLUDESHORT in args:
+            exclude_short_tubes = args[self.EXCLUDESHORT]
+            try:
+                exclude_short_tubes = float(exclude_short_tubes)
+            except:
+                raise RuntimeError(
+                    "Wrong argument {0}. It expects a float value for the minimun size of tubes to be calibrated".
+                    format(self.EXCLUDESHORT))
+            else:
+                return exclude_short_tubes
+        else:
+            # a tube with length 0 can not be calibrated, this is the minimun value
+            return 0.0
+
+    def _get_plot_tube(self, args):
+        if self.PLOTTUBE in args:
+            plot_tube = args[self.PLOTTUBE]
+            if isinstance(plot_tube, int):
+                plot_tube = [plot_tube]
+            try:
+                plot_tube = list(plot_tube)
+            except:
+                raise RuntimeError("Wrong argument {0}. It expects an index (int) or a list of indexes".
+                                   format(self.PLOTTUBE))
+            else:
+                return plot_tube
+        else:
+            return []
+
+    def _get_calib_table(self, args):
+        if self.CALIBTABLE in args:
+            calib_table = args[self.CALIBTABLE]
+            # ensure the correct type is passed
+            # if a string was passed, transform it in mantid object
+            if isinstance(calib_table, str):
+                calib_table = mtd[calib_table]
+            # check that calibTable has the expected form
+            try:
+                if not isinstance(calib_table, ITableWorkspace):
+                    raise 1
+                if calib_table.columnCount() != 2:
+                    raise 2
+                colNames = calib_table.getColumnNames()
+                if colNames[0] != 'Detector ID' or colNames[1] != 'Detector Position':
+                    raise 3
+            except:
+                raise RuntimeError(
+                    "Invalid type for {0}."
+                    "The expected type was ITableWorkspace with 2 columns(Detector ID and Detector Positions)".
+                    format(self.CALIBTABLE))
+            else:
+                return calib_table
+        else:
+            calib_table = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
+            # "Detector ID" column required by ApplyCalibration
+            calib_table.addColumn(type="int", name="Detector ID")
+            # "Detector Position" column required by ApplyCalibration
+            calib_table.addColumn(type="V3D", name="Detector Position")
+            return calib_table
+
+    def _get_range_list(self, args, default_range_list):
+        if self.RANGELIST in args:
+            range_list = args[self.RANGELIST]
+            if isinstance(range_list, int):
+                range_list = range_list
+            try:
+                # this deals with list and tuples and iterables to make sure
+                # range_list becomes a list
+                range_list = list(range_list)
+            except:
+                raise RuntimeError("Wrong argument {0}. It expects a list of indexes for calibration".
+                                   format(self.RANGELIST))
+            else:
+                return range_list
+        else:
+            return default_range_list
+
+    def _get_margin(self, args):
+        try:
+            return float(args[self.MARGIN])
+        except:
+            raise RuntimeError("Wrong argument {0}. It was expected a number!".format(self.MARGIN))
+
+    def _get_fit_par(self, args, tube_set, ideal_tube):
+        if self.FITPAR in args:
+            fit_par = args[self.FITPAR]
+            # fitPar must be a TubeCalibFitParams
+            if not isinstance(fit_par, TubeCalibFitParams):
+                raise RuntimeError(
+                    "Wrong argument {0}. This argument, when given, must be a valid TubeCalibFitParams object".
+                    format(self.FITPAR))
+        else:
+            # create a fit parameters guessing centre positions
+            # the guessing obeys the following rule:
+            #
+            # centre_pixel = known_pos * ndets/tube_length + ndets / 2
+            #
+            # Get tube length and number of detectors
+            tube_length = tube_set.getTubeLength(0)
+            # ndets = len(wsp_index_for_tube0)
+            dummy_id1, ndets, dummy_step = tube_set.getDetectorInfoFromTube(0)
+
+            known_pos = ideal_tube.getArray()
+            # position of the peaks in pixels
+            centre_pixel = known_pos * ndets / tube_length + ndets * 0.5
+
+            fit_par = TubeCalibFitParams(centre_pixel)
+            # make it automatic, it means, that for every tube,
+            # the parameters for fit will be re-evaluated, from the first
+            # guess positions given by centre_pixel
+            fit_par.setAutomatic(True)
+
+        return fit_par

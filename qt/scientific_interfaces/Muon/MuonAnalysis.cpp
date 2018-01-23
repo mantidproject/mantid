@@ -74,6 +74,44 @@ using Mantid::API::Grouping;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MuonAnalysis");
+
+void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
+  Workspace_sptr ws_ptr =
+      AnalysisDataService::Instance().retrieve(wsName.toStdString());
+  MatrixWorkspace_sptr matrix_workspace =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+  const auto &xData = matrix_workspace->x(0);
+
+  const auto xMin = *min_element(xData.begin(), xData.end());
+  const auto xMax = *max_element(xData.begin(), xData.end());
+  // make our own y limits for plot (not all of the data)
+  if (xMin < params["XAxisMin"].toDouble() ||
+      xMax > params["XAxisMin"].toDouble()) {
+
+    std::vector<double> yPlusEData, yMinusEData;
+    for (size_t index = 0; index < matrix_workspace->e(0).size(); index++) {
+      const auto &yData = matrix_workspace->y(0)[index];
+      const auto &eData = matrix_workspace->e(0)[index];
+      yPlusEData.push_back(yData + eData);
+      yMinusEData.push_back(yData - eData);
+    }
+
+    auto xN = std::distance(xData.begin(),
+                            std::upper_bound(xData.begin(), xData.end(),
+                                             params["XAxisMax"].toDouble()));
+    auto x0 = std::distance(xData.begin(),
+                            std::lower_bound(xData.begin(), xData.end(),
+                                             params["XAxisMin"].toDouble()));
+    params["YAxisMax"] = QString::number(
+        *max_element(yPlusEData.begin() + x0, yPlusEData.begin() + xN));
+    params["YAxisMin"] = QString::number(
+        *min_element(yMinusEData.begin() + x0, yMinusEData.begin() + xN));
+    params["YAxisAuto"] = "False";
+  } else {
+    // make sure auto scale is on
+    params["YAxisAuto"] = "True";
+  }
+}
 }
 
 // Static constants
@@ -89,12 +127,12 @@ const std::string MuonAnalysis::PEAK_RADIUS_CONFIG("curvefitting.peakRadius");
 MuonAnalysis::MuonAnalysis(QWidget *parent)
     : UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"),
       m_grouped_name(m_workspace_name + "Grouped"), m_currentDataName(),
-      m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), m_currentTab(NULL),
-      m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
-      m_updating(false), m_updatingGrouping(false), m_loaded(false),
-      m_deadTimesChanged(false), m_textToDisplay(""), m_optionTab(NULL),
-      m_fitDataTab(NULL),
-      m_resultTableTab(NULL), // Will be created in initLayout()
+      m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
+      m_currentTab(nullptr), m_groupNames(),
+      m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false),
+      m_updatingGrouping(false), m_loaded(false), m_deadTimesChanged(false),
+      m_textToDisplay(""), m_optionTab(nullptr), m_fitDataTab(nullptr),
+      m_resultTableTab(nullptr), // Will be created in initLayout()
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
       m_currentLabel("NoLabelSet"), m_numPeriods(0),
       m_groupingHelper(this->m_uiForm), m_functionBrowser(nullptr),
@@ -340,7 +378,7 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
 */
 void MuonAnalysis::muonAnalysisHelpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Muon_Analysis"));
+                                                 QString("Muon Analysis"));
 }
 
 /**
@@ -348,7 +386,7 @@ void MuonAnalysis::muonAnalysisHelpClicked() {
 */
 void MuonAnalysis::muonAnalysisHelpGroupingClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon_Analysis"), QString("grouping-options"));
+      nullptr, QString("Muon Analysis"), QString("grouping-options"));
 }
 
 /**
@@ -842,14 +880,14 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
       std::stringstream detNumRead;
       if (numDet > 0) {
         detNumRead << numDet;
-        if (itemNdet == NULL)
+        if (itemNdet == nullptr)
           m_uiForm.groupTable->setItem(
               row, 2, new QTableWidgetItem(detNumRead.str().c_str()));
         else {
           itemNdet->setText(detNumRead.str().c_str());
         }
       } else {
-        if (itemNdet == NULL)
+        if (itemNdet == nullptr)
           m_uiForm.groupTable->setItem(
               row, 2, new QTableWidgetItem("Invalid IDs string"));
         else
@@ -862,7 +900,7 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
   if (column == 0) {
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(row, 0);
 
-    if (itemName == NULL) // Just in case it wasn't assigned
+    if (itemName == nullptr) // Just in case it wasn't assigned
     {
       itemName = new QTableWidgetItem("");
       m_uiForm.groupTable->setItem(row, 0, itemName);
@@ -945,7 +983,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
   if (column == 0) {
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(row, 0);
 
-    if (itemName == NULL) // Just in case it wasn't assigned
+    if (itemName == nullptr) // Just in case it wasn't assigned
     {
       itemName = new QTableWidgetItem("");
       m_uiForm.pairTable->setItem(row, 0, itemName);
@@ -1701,7 +1739,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  layer = window.activeLayer()";
   s << "  if layer is not None:";
   s << "    kept_fits = 0";
-  s << "    for i in range(layer.numCurves() - 1, -1, -1):"; // reversed
+  s << "    for i in range(layer.numCurves() - 1, 0, -1):"; // reversed
   s << "      title = layer.curveTitle(i)";
   s << "      if title == \"CompositeFunction\":";
   s << "        continue"; // keep all guesses
@@ -1712,15 +1750,18 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Plot data in the given window with given options
   s << "def plot_data(ws_name,errors, connect, window_to_use):";
+  bool addToTable = false;
   if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry) {
     // clang-format off
     s << "  w = plotSpectrum(source = ws_name,"
          "indices = 0,"
          "distribution = mantidqtpython.MantidQt.DistributionFalse,"
-         "error_bars = errors," 
+         "error_bars = errors,"
          "type = connect,"
          "window = window_to_use)";
     // clang-format on
+    // set if TFAsymm is on or off
+    addToTable = getIfTFAsymmStore();
   } else {
     // clang-format off
     s << "  w = plotSpectrum(source = ws_name,"
@@ -1740,7 +1781,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Format the graph scale, title, legends and colours
   // Data (most recently added curve) should be black
-  s << "def format_graph(graph, ws_name, log_scale, y_auto, y_min, y_max):";
+  s << "def format_graph(graph, ws_name, log_scale, y_auto, y_min, "
+       "y_max,x_min,x_max):";
   s << "  layer = graph.activeLayer()";
   s << "  num_curves = layer.numCurves()";
   s << "  layer.setCurveTitle(num_curves, ws_name)";
@@ -1748,6 +1790,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  for i in range(0, num_curves):";
   s << "    color = i + 1 if i != num_curves - 1 else 0";
   s << "    layer.setCurveLineColor(i, color)";
+
   s << "  if log_scale:";
   s << "    layer.logYlinX()";
   s << "  else:";
@@ -1759,14 +1802,24 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "      layer.setAxisScale(Layer.Left, float(y_min), float(y_max))";
   s << "    except ValueError:";
   s << "      layer.setAutoScale()";
+  s << "  layer.setScale(2,float(x_min),float(x_max))";
+
   s << "";
 
   // Plot the data!
   s << "win = get_window('%WSNAME%', '%PREV%', %USEPREV%)";
   s << "if %FITSTOKEEP% != -1:";
+  // leave the 0th layer -> layer is not empty
   s << "  remove_data(win, %FITSTOKEEP%)";
   s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
-  s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
+  // if there is more than one layer delete the oldest one manually
+  s << "if %FITSTOKEEP% != -1:";
+  s << "  layer = win.activeLayer()";
+  s << "  if layer.numCurves()>1:";
+  s << "     layer.removeCurve(0)";
+
+  s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', "
+       "'%YMAX%','%XMIN%','%XMAX%')";
 
   QString pyS;
 
@@ -1790,6 +1843,9 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   pyS.replace("%YAUTO%", params["YAxisAuto"]);
   pyS.replace("%YMIN%", params["YAxisMin"]);
   pyS.replace("%YMAX%", params["YAxisMax"]);
+  pyS.replace("%XMIN%", params["XAxisMin"]);
+  pyS.replace("%XMAX%", params["XAxisMax"]);
+
   if (policy == MuonAnalysisOptionTab::PreviousWindow) {
     pyS.replace("%FITSTOKEEP%", m_uiForm.spinBoxNPlotsToKeep->text());
   } else {
@@ -1797,7 +1853,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
-  m_fitDataPresenter->storeNormalization(safeWSName.toStdString());
+  m_fitDataPresenter->storeNormalization(safeWSName.toStdString(), addToTable);
 }
 
 /**
@@ -1810,6 +1866,11 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
+
+  params["XAxisMin"] =
+      QString::number(m_uiForm.timeAxisStartAtInput->text().toDouble());
+  params["XAxisMax"] =
+      QString::number(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
   // If autoscale disabled
   if (params["YAxisAuto"] == "False") {
@@ -1833,6 +1894,8 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
         params["YAxisMax"] =
             QString::number(*max_element(yData.begin(), yData.end()));
     }
+  } else {
+    zoomYAxis(wsName, params);
   }
 
   return params;
@@ -2193,6 +2256,7 @@ void MuonAnalysis::handleGroupBox() {
     updateLabels(names[0]);
   }
   m_fitDataPresenter->handleSelectedDataChanged(true);
+  m_dataSelector->checkForMultiGroupPeriodSelection();
 }
 /**
 * Handle"periods" selected/deselected
@@ -2939,7 +3003,6 @@ Workspace_sptr
 MuonAnalysis::groupWorkspace(const std::string &wsName,
                              const std::string &groupingName) const {
   ScopedWorkspace outputEntry;
-
   // Use MuonProcess in "correct and group" mode.
   // No dead time correction so all it does is group the workspaces.
   try {
@@ -2957,9 +3020,9 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
     groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
-
     groupAlg->execute();
-    m_fitDataPresenter->storeNormalization(wsName);
+    bool addToTable = getIfTFAsymmStore();
+    m_fitDataPresenter->storeNormalization(wsName, addToTable);
 
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
@@ -3191,6 +3254,13 @@ void MuonAnalysis::setAnalysisTabsEnabled(const bool enabled) {
     const auto &index = m_uiForm.tabWidget->indexOf(tab);
     m_uiForm.tabWidget->setTabEnabled(index, enabled);
   }
+}
+
+bool MuonAnalysis::getIfTFAsymmStore() const {
+  Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
+  bool value =
+      m_dataLoader.isContainedIn(m_groupPairName, options.grouping.groupNames);
+  return value;
 }
 
 } // namespace MantidQt

@@ -564,7 +564,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           QString::fromLocal8Bit(opj.layerXAxisTitle(g, l).txt.c_str())));
       graph->setYAxisTitle(parseOriginText(
           QString::fromLocal8Bit(opj.layerYAxisTitle(g, l).txt.c_str())));
-      LegendWidget *legend = 0;
+      LegendWidget *legend = nullptr;
       if (!opj.layerLegend(g, l).txt.empty()) {
         legend = graph->newLegend(parseOriginText(
             QString::fromLocal8Bit(opj.layerLegend(g, l).txt.c_str())));
@@ -625,7 +625,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           QStringList formulas;
           double start, end;
           int s;
-          PlotCurve *curve = NULL;
+          PlotCurve *curve = nullptr;
           switch (data[0].toAscii()) {
           case 'T':
             tableName = data.right(data.length() - 2);
@@ -1045,8 +1045,8 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
                    translateOrigin2QtiplotLineStyle(grids[3].style))));
 
       grid->setAxis(2, 0);
-      grid->enableZeroLineX(0);
-      grid->enableZeroLineY(0);
+      grid->enableZeroLineX(false);
+      grid->enableZeroLineY(false);
 
       vector<graphAxisFormat> formats = opj.layerAxisFormat(g, l);
       vector<graphAxisTick> ticks = opj.layerAxisTickLabels(g, l);

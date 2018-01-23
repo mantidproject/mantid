@@ -302,5 +302,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # set the output workspace
         self.setProperty('OutputWorkspace', mtd[finalname])
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(AlignAndFocusPowderFromFiles)

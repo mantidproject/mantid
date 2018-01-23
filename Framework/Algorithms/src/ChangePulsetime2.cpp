@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ChangePulsetime2.h"
+#include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -19,7 +20,8 @@ using std::size_t;
 /** Initialize the algorithm's properties.
  */
 void ChangePulsetime2::init() {
-  declareWorkspaceInputProperties<EventWorkspace>("InputWorkspace");
+  declareWorkspaceInputProperties<EventWorkspace>("InputWorkspace",
+                                                  "An input event workspace.");
   declareProperty(
       make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
       "Number of seconds (a float) to add to each event's pulse "

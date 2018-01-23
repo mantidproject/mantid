@@ -199,13 +199,6 @@ void CreateWorkspace::exec() {
     const std::vector<double>::difference_type yEnd = yStart + ySize;
     auto local_i = localIndices[0];
 
-    if (!parentWS) {
-      // There is no instrument so setting detector IDs makes no sense, but if
-      // we don't we break quite a few unit tests relying on this legacy
-      // behavior.
-      outputWS->getSpectrum(local_i).setDetectorID(i + 1);
-    }
-
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
     if (!commonX)
@@ -291,14 +284,6 @@ Parallel::ExecutionMode CreateWorkspace::getParallelExecutionMode(
       throw std::invalid_argument("Input workspace storage mode differs from "
                                   "requested output workspace storage mode.");
   return Parallel::getCorrespondingExecutionMode(storageMode);
-}
-
-void CreateWorkspace::execNonMaster() {
-  MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
-  if (parentWS)
-    return Algorithm::execNonMaster();
-  setProperty("OutputWorkspace", Kernel::make_unique<Workspace2D>(
-                                     Parallel::StorageMode::MasterOnly));
 }
 
 } // Algorithms

@@ -526,13 +526,13 @@ void ReflectometryReductionOneAuto::exec() {
         momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
       if (!momentumTransferStep.is_initialized()) {
         IAlgorithm_sptr calcResAlg =
-            AlgorithmManager::Instance().create("CalculateResolution");
+            AlgorithmManager::Instance().create("NRCalculateSlitResolution");
         calcResAlg->setProperty("Workspace", in_ws);
         calcResAlg->setProperty("TwoTheta", theta_in.get());
         calcResAlg->execute();
         if (!calcResAlg->isExecuted())
           throw std::runtime_error(
-              "CalculateResolution failed. Please manually "
+              "NRCalculateSlitResolution failed. Please manually "
               "enter a value in the dQ/Q column.");
         double resolution = calcResAlg->getProperty("Resolution");
         momentumTransferStep = resolution;

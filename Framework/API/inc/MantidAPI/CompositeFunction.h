@@ -209,6 +209,10 @@ public:
                               const char *value) {
     setLocalAttribute(i, attName, Attribute(std::string(value)));
   }
+  /// Change status of parameter
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  /// Get status of parameter
+  ParameterStatus getParameterStatus(size_t i) const override;
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -216,10 +220,6 @@ protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
-  /// Change status of parameter
-  void setParameterStatus(size_t i, ParameterStatus status) override;
-  /// Get status of parameter
-  ParameterStatus getParameterStatus(size_t i) const override;
   /// Writes itself into a string
   std::string writeToString(
       const std::string &parentLocalAttributesStr = "") const override;

@@ -1,11 +1,11 @@
 .. _DataProcessorWidget_DevelopersGuide-ref:
 
-DataProcessor widget: a guide for Mantid developers 
+DataProcessor widget: a guide for Mantid developers
 ===================================================
 
 .. contents:: Table of Contents
     :local:
-    
+
 Introduction
 ------------
 
@@ -24,7 +24,7 @@ What the widget is for
 ----------------------
 
 The DataProcessor widget is a technique-independent *MantidWidget* that can be used to execute complex
-batch-processing via *DataProcessorAlgorithms* by reducing sequentially groups of runs that can be later 
+batch-processing via *DataProcessorAlgorithms* by reducing sequentially groups of runs that can be later
 post-processed.
 
 The widget, displayed below, consists in a set of table editing options, a processing table where runs can be entered
@@ -50,7 +50,7 @@ Below is an example illustrating how to create a white list and add some columns
 
 .. code-block:: python
 
-    whitelist = MantidQt.MantidWidgets.DataProcessorWhiteList()
+    whitelist = MantidQt.MantidWidgets.DataProcessor.WhiteList()
     whitelist.addElement('Runs', 'InputWorkspace', 'The run to reduce')
     whitelist.addElement('Angle', 'ThetaIn', 'The incident angle')
     whitelist.addElement('Transmission Runs', 'FirstTransmissionRun', 'Transmission runs')
@@ -80,7 +80,7 @@ no effect on the way the table is displayed. Therefore, the following whitelist:
 
 .. code-block:: python
 
-    whitelist = MantidQt.MantidWidgets.DataProcessorWhiteList()
+    whitelist = MantidQt.MantidWidgets.DataProcessor.WhiteList()
     whitelist.addElement('Runs', 'InputWorkspace', 'The run to reduce', True, '')
     whitelist.addElement('Angle', 'ThetaIn', 'The incident angle', False, '')
     whitelist.addElement('Transmission Runs', 'FirstTransmissionRun', 'Transmission runs', False, '')
@@ -115,7 +115,7 @@ names and values are pre-processing algorithms. In this example, a pre-process m
 
 .. code-block:: python
 
-    preprocess_map = MantidQt.MantidWidgets.DataProcessorPreprocessMap()
+    preprocess_map = MantidQt.MantidWidgets.DataProcessor.PreprocessMap()
     preprocess_map.addElement('Runs', 'Plus')
     preprocess_map.addElement('Transmission Runs', 'CreateTransmissionWorkspaceAuto')
 
@@ -156,7 +156,7 @@ the loaded workspaces. The example below:
 
 .. code-block:: python
 
-    preprocess_map = MantidQt.MantidWidgets.DataProcessorPreprocessMap()
+    preprocess_map = MantidQt.MantidWidgets.DataProcessor.PreprocessMap()
     preprocess_map.addElement('Runs', 'Plus', 'TOF_')
     preprocess_map.addElement('Transmission Runs', 'CreateTransmissionWorkspaceAuto', 'TRANS_')
 
@@ -200,7 +200,7 @@ A processing algorithm can be created like this:
 
 .. code-block:: python
 
-    alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_')
+    alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_')
 
 This tells the widget that each rown in the table should be reduced with :ref:`algm-ReflectometryReductionOneAuto`, and
 the output workspaces resulting from the reduction should be named with prefixes :literal:`IvsQ_binned_`, :literal:`Ivs_Q` and
@@ -210,18 +210,18 @@ blacklist of algorithms properties can be provided as a string of comma-separate
 
 .. code-block:: python
 
-    alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('ReflectometryReductionOneAuto', 'IvsQ_binned_, IvsQ_, IvsLam_',
-															  'InputWorkspace,'
-															  'ThetaIn,'
-															  'FirstTransmissionWorkspace,'
-															  'SecondTransmissionWorkspace,'
-															  'MomentumTransferMin,'
-															  'MomentumTransferMax,'
-															  'MomentumTransferStep,'
-															  'ScaleFactor,'
-															  'OutputWorkspaceBinned,'
-															  'OutputWorkspace,'
-															  'OutputWorkspaceWavelength,')
+    alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm('ReflectometryReductionOneAuto', 'IvsQ_binned_, IvsQ_, IvsLam_',
+                                                                   'InputWorkspace,'
+                                                                   'ThetaIn,'
+                                                                   'FirstTransmissionWorkspace,'
+                                                                   'SecondTransmissionWorkspace,'
+                                                                   'MomentumTransferMin,'
+                                                                   'MomentumTransferMax,'
+                                                                   'MomentumTransferStep,'
+                                                                   'ScaleFactor,'
+                                                                   'OutputWorkspaceBinned,'
+                                                                   'OutputWorkspace,'
+                                                                   'OutputWorkspaceWavelength,')
 
 The only effect of the blacklist is on the *Options* column, not in the reduction. This column uses a *HintingLineEdit* (a MantidWidget)
 delegate to provide auto-completion functionality so that when users start typing in this column, they get a list of algorithm
@@ -263,7 +263,7 @@ Below is a summary in pseudocode:
 		if (column_name in pre_process_map)
 		  load and pre-process_runs;
 		  alg->setPropertyValue(algorithm_property, pre_processed_runs);
-	      
+
 		else
 		  alg->setPropertyValue(algorithm_property, cell);
 
@@ -299,15 +299,15 @@ algorithm is in this case :ref:`algm-Stitch1DMany`, and can be defined as:
 
 .. code-block:: python
 
-    post_alg = MantidQt.MantidWidgets.DataProcessorPostprocessingAlgorithm('Stitch1DMany', 'IvsQ_')
+    post_alg = MantidQt.MantidWidgets.DataProcessor.PostprocessingAlgorithm('Stitch1DMany', 'IvsQ_')
 
 As with pre-processing and processing algorithms, a third parameter indicating the list of properties
 to blacklist can be used. As with the pre-process map, you must add manually a hinting line edit
 and link the post-processing black list to it, as this functionality is not available by default.
-	
+
 .. code-block:: python
 
-    post_alg = MantidQt.MantidWidgets.DataProcessorPostprocessingAlgorithm('Stitch1DMany', 'IvsQ_', 'InputWorkspaces, OutputWorkspaces')
+    post_alg = MantidQt.MantidWidgets.DataProcessor.PostprocessingAlgorithm('Stitch1DMany', 'IvsQ_', 'InputWorkspaces, OutputWorkspaces')
 
 .. note::
 
@@ -361,8 +361,8 @@ assuming that you don't need to pre-process and post-process groups of runs, the
 
     // Constructor: no pre-processing, no post-processing
     GenericDataProcessorPresenter(
-        const DataProcessorWhiteList &whitelist,
-        const DataProcessorProcessingAlgorithm &processor);
+        const WhiteList &whitelist,
+        const ProcessingAlgorithm &processor);
 
 should become:
 
@@ -370,8 +370,8 @@ should become:
 
     // Constructor: no pre-processing, no post-processing
     GenericDataProcessorPresenter(
-        const DataProcessorWhiteList &whitelist,
-        const DataProcessorProcessingAlgorithm &processor,
+        const WhiteList &whitelist,
+        const ProcessingAlgorithm &processor,
         const std::string &loader = "Load");
 
 Then in the implementation, the following should be enough:
@@ -385,13 +385,13 @@ Then in the implementation, the following should be enough:
     * @param loader :: The loading algorithm
     */
     GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-        const DataProcessorWhiteList &whitelist,
-        const DataProcessorProcessingAlgorithm &processor,
+        const WhiteList &whitelist,
+        const ProcessingAlgorithm &processor,
         const std::string &loader)
         : GenericDataProcessorPresenter(
               whitelist,
-              std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
-              processor, DataProcessorPostprocessingAlgorithm(),
+              std::map<std::string, PreprocessingAlgorithm>(),
+              processor, PostprocessingAlgorithm(),
               std::map<std::string, std::string>(), loader) {}
 
 In addition, if you are using the widget in a Python interface, you will have to expose this
@@ -402,8 +402,8 @@ Assuming the example above, i.e. no pre-processing and no post-processing, the c
 .. code-block:: c
 
     // Constructor: no pre-processing, no post-processing
-    QDataProcessorWidget(const DataProcessorWhiteList &,
-                         const DataProcessorProcessingAlgorithm &,
+    QDataProcessorWidget(const WhiteList &,
+                         const ProcessingAlgorithm &,
                          QWidget *parent);
 
 should become:
@@ -411,8 +411,8 @@ should become:
 .. code-block:: c
 
     // Constructor: no pre-processing, no post-processing
-    QDataProcessorWidget(const DataProcessorWhiteList &,
-                         const DataProcessorProcessingAlgorithm &,
+    QDataProcessorWidget(const WhiteList &,
+                         const ProcessingAlgorithm &,
                          const QString &loader,
                          QWidget *parent);
 
@@ -427,8 +427,8 @@ and then the implementation would be:
     * @param parent :: The parent of this view
     */
     QDataProcessorWidget::QDataProcessorWidget(
-        const DataProcessorWhiteList &whitelist,
-        const DataProcessorProcessingAlgorithm &algorithm,
+        const WhiteList &whitelist,
+        const ProcessingAlgorithm &algorithm,
 		const QString &loader, QWidget *parent)
         : QDataProcessorWidget(
               Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
@@ -436,7 +436,7 @@ and then the implementation would be:
                                                                          loader.toStdString()),
               parent) {}
 
-Finally, you will need to modify file :literal:`MantidQt/Python/mantidqt.sip` to include the
+Finally, you will need to modify file :literal:`qt/python/mantidqtpython/mantidqtpython_def.sip` to include the
 above constructor:
 
 .. code-block:: c
@@ -444,11 +444,11 @@ above constructor:
     class QDataProcessorWidget : QWidget
     {
     %TypeHeaderCode
-    #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
+    #include "MantidQtWidgets/DataProcessorUI/QDataProcessorWidget.h"
     %End
     public:
-    QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
-                         const MantidQt::MantidWidgets::DataProcessorProcessingAlgorithm &,
+    QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
+                         const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                          const QString &,
                          QWidget *parent );
     ...
@@ -573,7 +573,7 @@ the processing algorithm, that is, if the processing algorithm was created as:
 
 .. code-block:: python
 
-    alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_','')
+    alg = MantidQt.MantidWidgets.ProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_','')
 
 the name of the first output workspace returned by the processing algorithm will start with prefix
 :literal:`IvsQ_binned_`, the name of the second output workspace return by the algorithm will start with
@@ -607,7 +607,7 @@ If a post-processing algorithm is defined:
 
 .. code-block:: python
 
-    post_alg = MantidQt.MantidWidgets.DataProcessorPostprocessingAlgorithm('Stitch1DMany', 'stitched_', 'InputWorkspaces, OutputWorkspaces')
+    post_alg = MantidQt.MantidWidgets.DataProcessor.PostprocessingAlgorithm('Stitch1DMany', 'stitched_', 'InputWorkspaces, OutputWorkspaces')
 
 the name of the post-processed workspace will start with prefix specified in the post-processing algorithm, stitched in this case,
 plus the names of the reduced workspaces without their prefixes joined with "_". That is, in this example we would get a workspace
@@ -703,4 +703,3 @@ How to use the widget from a Python interface
 There is a toy example written in Python that can be found in mantid/scripts/Interface/ui/dataprocessorinterface.
 It is currently invisible to users, but you can make it visible for you by adding :literal:`Utility/DataProcessorInterface.py` to
 Framework/Properties/Mantid.properties.template. This will make the toy example appear under category :literal:`Utility`.
-

@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTION_H_
 #define MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -67,6 +67,18 @@ private:
 
   /// Input workspace
   API::MatrixWorkspace_sptr m_inputWS;
+  /// Workspace with custom divergence term
+  API::MatrixWorkspace_sptr m_divergenceWS;
+
+  /// workspace holding the term for just the time-of-flight portion of the
+  /// resolution
+  API::MatrixWorkspace_sptr m_resTof;
+  /// workspace holding the term for just the flight path portion of the
+  /// resolution
+  API::MatrixWorkspace_sptr m_resPathLength;
+  /// workspace holding the term for just the angular/solid angle portion of the
+  /// resolution
+  API::MatrixWorkspace_sptr m_resAngle;
 
   /// Output workspace
   API::MatrixWorkspace_sptr m_outputWS;

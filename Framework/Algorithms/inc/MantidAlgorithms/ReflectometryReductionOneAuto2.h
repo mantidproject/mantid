@@ -60,7 +60,8 @@ private:
   /// Correct detector positions vertically
   Mantid::API::MatrixWorkspace_sptr
   correctDetectorPositions(const std::string &instructions,
-                           Mantid::API::MatrixWorkspace_sptr inputWS);
+                           Mantid::API::MatrixWorkspace_sptr inputWS,
+                           const double twoTheta);
   /// Calculate theta
   double calculateTheta(const std::string &instructions,
                         Mantid::API::MatrixWorkspace_sptr inputWS);
@@ -68,8 +69,6 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS, double theta,
                 std::vector<double> &params);
-  /// Populate direct beam properties
-  void populateDirectBeamProperties(Mantid::API::IAlgorithm_sptr alg);
   /// Populate algorithmic correction properties
   void populateAlgorithmicCorrectionProperties(
       Mantid::API::IAlgorithm_sptr alg,

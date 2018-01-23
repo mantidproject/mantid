@@ -429,12 +429,12 @@ public:
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
 
-    Detector *det = new Detector("point-detector", 1, NULL);
+    Detector *det = new Detector("point-detector", 1, nullptr);
     det->setPos(20, (20 - sample->getPos().X()), 0);
     instrument->add(det);
     instrument->markAsDetector(det);
 
-    Detector *monitor = new Detector("Monitor", 2, NULL);
+    Detector *monitor = new Detector("Monitor", 2, nullptr);
     monitor->setPos(14, 0, 0);
     instrument->add(monitor);
     instrument->markAsMonitor(monitor);
@@ -523,12 +523,12 @@ public:
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
 
-    Detector *det = new Detector("point-detector", 1, NULL);
+    Detector *det = new Detector("point-detector", 1, nullptr);
     det->setPos(20, (20 - sample->getPos().X()), 0);
     instrument->add(det);
     instrument->markAsDetector(det);
 
-    Detector *monitor = new Detector("Monitor", 2, NULL);
+    Detector *monitor = new Detector("Monitor", 2, nullptr);
     monitor->setPos(14, 0, 0);
     instrument->add(monitor);
     instrument->markAsMonitor(monitor);

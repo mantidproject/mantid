@@ -96,7 +96,7 @@ public:
   bool setQObject(QObject *, const char *, PyObject *dict);
   /// Set a reference to a QObject in the global dictionary
   bool setQObject(QObject *val, const char *name) override {
-    return setQObject(val, name, NULL);
+    return setQObject(val, name, nullptr);
   }
   /// Set a reference to an int in the global dictionary
   bool setInt(int, const char *) override;
@@ -139,6 +139,8 @@ private:
   PyObject *m_sys;
   /// Pointer to the main threads state
   PyThreadState *m_mainThreadState;
+  /// Wrap's acquisition of the GIL
+  PythonGIL m_gil;
 };
 
 #endif

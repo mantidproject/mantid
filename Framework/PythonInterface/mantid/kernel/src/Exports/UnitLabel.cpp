@@ -42,7 +42,7 @@ createLabel(const object &ascii, const object &utf8, const object &latex) {
  * @return A new Python unicode string with the contents of the utf8 label
  */
 PyObject *utf8ToUnicode(UnitLabel &self) {
-  const auto label = self.utf8();
+  const auto &label = self.utf8();
   return PyUnicode_FromWideChar(label.c_str(), label.size());
 }
 }

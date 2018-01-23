@@ -87,7 +87,10 @@ def main(sysarg):
     try:
         return_value = sphinx.cmdline.main(argv)
     finally:
-        from IPython.qt.console import pygments_highlighter
+        try:
+            from qtconsole import pygments_highlighter
+        except ImportError:
+            from IPython.qt.console import pygments_highlighter # deprecated in ipython 4
         RegexLexer.get_tokens_unprocessed = pygments_highlighter.get_tokens_unprocessed
     sys.exit(return_value)
 

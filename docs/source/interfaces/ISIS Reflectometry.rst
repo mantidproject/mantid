@@ -308,7 +308,7 @@ Columns
 | dQ/Q                | No        | Contains the resolution used when rebinning                                     |
 |                     |           | output workspaces. If left blank, this is                                       |
 |                     |           | calculated for you using the                                                    |
-|                     |           | CalculateResolution algorithm. This value is                                    |
+|                     |           | NRCalculateSlitResolution algorithm. This value is                              |
 |                     |           | negated so that Logarithmic binning can be                                      |
 |                     |           | applied for the IvsQ workspace.                                                 |
 |                     |           | If you desire linear binning then you                                           |

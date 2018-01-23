@@ -90,9 +90,9 @@ Usage
   offsetws = mtd["Vulcan_idl_offsets"]
   groupws = mtd["Vulcan_idl_group"]
   for iws in [0, 100, 1000, 3500, 7000]:
-    print "Spectrum %-5d Offset = %.5f of Group %d" % (iws, offsetws.readY(iws)[0], groupws.readY(iws)[0])
+    print("Spectrum {:<5} Offset = {:.5f} of Group {:.0f}".format(iws, offsetws.readY(iws)[0], groupws.readY(iws)[0]))
   maskws = mtd["Vulcan_idl_mask"]
-  print "Size of mask workspace = %d" % (maskws.getNumberHistograms())
+  print("Size of mask workspace = {}".format(maskws.getNumberHistograms()))
 
 .. testcleanup::
 

@@ -44,7 +44,6 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
 
 using namespace Kernel;
 using namespace API;
-using Geometry::Instrument;
 using namespace Mantid::NeXus;
 using HistogramData::BinEdges;
 using HistogramData::Counts;

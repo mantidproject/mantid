@@ -1076,7 +1076,8 @@ public:
     Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
     const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+    const size_t numBins = outWS->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       TS_ASSERT_EQUALS(outWS->x(0)[i], i);
       TS_ASSERT_EQUALS(outWS->y(0)[i], i);
     }
@@ -1097,7 +1098,8 @@ public:
     Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
     const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+    const size_t numBins = outWS->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       TS_ASSERT_EQUALS(outWS->x(0)[i], i);
       TS_ASSERT_EQUALS(outWS->y(0)[i], i);
     }

@@ -7,7 +7,6 @@
 #include <iomanip>
 
 using Mantid::Kernel::DblMatrix;
-using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::OrientedLattice;
 
 namespace Mantid {

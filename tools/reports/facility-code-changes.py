@@ -64,6 +64,24 @@ def generate_commit_data(year_start, year_end):
             f.close()
 
 
+def _ensure_is_directory(filepath):
+    if not os.path.isdir(filepath):
+        print("ERROR: Specified repository location is not a directory.")
+        exit()
+
+
+def _assign_change_to_facility(domains, changes, year, facility_dict, date_key, increment):
+    found = False
+    for domain in domains.keys():
+        if domain in changes:
+            # ORNL didn't join until 2009
+            if domains[domain] == 'ORNL' and int(year) < 2009:
+                domain = 'stfc.ac.uk'
+            facility_dict[date_key][domains[domain]] != increment
+            found = True
+    return found, facility_dict
+
+
 if __name__ == '__main__':
     print("Generating some random metrics...\n")
 
@@ -80,13 +98,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     repolocation = args.repository
 
-    if not os.path.isdir(repolocation):
-        print("ERROR: Specified repository location is not a directory.")
-        exit()
+    _ensure_is_directory(repolocation)
 
     organisations = ['STFC', 'ORNL', 'ESS', 'ILL', 'PSI', 'ANSTO', 'KITWARE', 'JUELICH', 'OTHERS']
 
-    domains = {}
     domains = {'stfc.ac.uk': 'STFC',
                'clrc.ac.uk': 'STFC',
                'tessella.com': 'STFC',
@@ -140,9 +155,7 @@ if __name__ == '__main__':
     csvadded = open('facility-added-lines.csv', 'w')
     csvremoved = open('facility-removed-lines.csv', 'w')
 
-    field_names = ['date']
-    for org in organisations:
-        field_names.append(org)
+    field_names = ['date'] + organisations
 
     commits_writer = csv.DictWriter(csvcommits, fieldnames=field_names)
     commits_writer.writeheader()
@@ -174,9 +187,8 @@ if __name__ == '__main__':
             email_changes = ''
             email_commits = ''
             # Don't go past the current month
-            if current_year == year:
-                if month > current_month:
-                    continue
+            if current_year == year and month > current_month:
+                continue
 
             print("Getting stats for {0}-{1:02d}".format(str(year), month))
             since = "--since='{0}-{1}-1'".format(str(year), str(month))
@@ -204,14 +216,9 @@ if __name__ == '__main__':
                 removed = 0
 
                 # Is the line blank (or None)
-                if line is None or len(line) is 0:
+                if line is None or len(line.strip().replace("\n", "")) == 0:
                     # print("BLANK:'{0}'".format(str(line)))
                     continue
-                if len(line.strip().replace('\n', '')) == 0:
-                    # print("BLANK:'{0}'".format(str(line)))
-                    continue
-
-                # print(line)
 
                 # Is the line an email address ?
                 if "@" in line:
@@ -223,28 +230,26 @@ if __name__ == '__main__':
                     if 'files changed' in item:
                         changed = item.strip().split(' ')[0]
                         # print("FILES CHANGED:{0}".format(changed))
-                    if 'insertions(+)' in item:
+                    elif 'insertions(+)' in item:
                         added = item.strip().split(' ')[0]
                         # print ("INSERTIONS:{0}".format(added))
-                    if 'deletions(-)' in item:
+                    elif 'deletions(-)' in item:
                         removed = item.strip().split(' ')[0]
                         # print ("DELETIONS:{0}".format(removed))
 
-                found = False
-                # Assign each to a facility
-                for domain in domains.keys():
-                    if domain in email_changes:
-                        # ORNL didn't join until 2009
-                        if domains[domain] == 'ORNL' and int(year) < 2009:
-                            domain = 'stfc.ac.uk'
-                        facility_changed[date_key][domains[domain]] += int(changed)
-                        facility_added[date_key][domains[domain]] += int(added)
-                        facility_removed[date_key][domains[domain]] += int(removed)
-                        found = True
-                        # print("FILES CHANGED:{0} ==> {1}".format(changed,domains[domain]))
-                        # print("FILES CHANGED:{0} ==> {1}".format(added,domains[domain]))
-                        # print("FILES CHANGED:{0} ==> {1}".format(removed,domains[domain]))
-
+                (facility_changed, found_changed) = _assign_change_to_facility(domains=domains, changes=email_changes,
+                                                                               year=year, date_key=date_key,
+                                                                               facility_dict=facility_changed,
+                                                                               increment=int(changed))
+                (facility_added, found_added) = _assign_change_to_facility(domains=domains, changes=email_changes,
+                                                                           year=year, date_key=date_key,
+                                                                           facility_dict=facility_added,
+                                                                           increment=int(added))
+                (facility_removed, found_removed) = _assign_change_to_facility(domains=domains, changes=email_changes,
+                                                                               year=year, date_key=date_key,
+                                                                               facility_dict=facility_removed,
+                                                                               increment=int(removed))
+                found = found_changed or found_added or found_removed
                 # Print out the email address if it didn't match anything
                 if not found:
                     print("Email ({0}) couldn't be matched to a facility!".format(str(email_changes)))
@@ -256,18 +261,10 @@ if __name__ == '__main__':
             f2reading = open('facility-commits-{0}.stdout'.format(date_key), 'r', buffering=0)
 
             for line in f2reading:
-                found = False
                 email_commits = line.replace('"','').strip()
-                found = False
-                # Assign each to a facility
-                for domain in domains.keys():
-                    if domain in email_commits:
-                        # ORNL didn't join until 2009
-                        if domains[domain] == 'ORNL' and int(year) < 2009:
-                            domain = 'stfc.ac.uk'
-                        facility_commits[date_key][domains[domain]] += 1
-                        found = True
-
+                (found, facility_commits) = _assign_change_to_facility(domains=domains, changes=email_commits,
+                                                                       year=year, facility_dict=facility_commits,
+                                                                       date_key=date_key, increment=1)
                 if not found:
                     print("Email for commits ({0}) couldn't be matched to a facility!".format(str(email_commits)))
 

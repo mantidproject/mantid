@@ -116,7 +116,7 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
  */
 Mantid::Geometry::IComponent_const_sptr
 SpecularReflectionAlgorithm::getSurfaceSampleComponent(
-    Mantid::Geometry::Instrument_const_sptr inst) {
+    Mantid::Geometry::Instrument_const_sptr inst) const {
   std::string sampleComponent = "some-surface-holder";
   if (!isPropertyDefault("SampleComponentName")) {
     sampleComponent = this->getPropertyValue("SampleComponentName");
@@ -141,7 +141,7 @@ SpecularReflectionAlgorithm::getSurfaceSampleComponent(
  */
 boost::shared_ptr<const Mantid::Geometry::IComponent>
 SpecularReflectionAlgorithm::getDetectorComponent(
-    MatrixWorkspace_sptr workspace, const bool isPointDetector) {
+    MatrixWorkspace_sptr workspace, const bool isPointDetector) const {
   boost::shared_ptr<const IComponent> searchResult;
   if (!isPropertyDefault("SpectrumNumbersOfDetectors")) {
     const std::vector<int> spectrumNumbers =
@@ -197,6 +197,36 @@ bool SpecularReflectionAlgorithm::isPropertyDefault(
     const std::string &propertyName) const {
   Property *property = this->getProperty(propertyName);
   return property->isDefault();
+}
+
+/**
+ * Calculate the twoTheta angle from the detector and sample locations.
+ * @return: twoTheta
+ */
+double SpecularReflectionAlgorithm::calculateTwoTheta() const {
+  MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
+
+  const std::string analysisMode = this->getProperty("AnalysisMode");
+
+  Instrument_const_sptr instrument = inWS->getInstrument();
+
+  IComponent_const_sptr detector =
+      this->getDetectorComponent(inWS, analysisMode == pointDetectorAnalysis);
+
+  IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+
+  const V3D detSample = detector->getPos() - sample->getPos();
+
+  boost::shared_ptr<const ReferenceFrame> refFrame =
+      instrument->getReferenceFrame();
+
+  const double upoffset = refFrame->vecPointingUp().scalar_prod(detSample);
+  const double beamoffset =
+      refFrame->vecPointingAlongBeam().scalar_prod(detSample);
+
+  const double twoTheta = std::atan2(upoffset, beamoffset) * 180 / M_PI;
+
+  return twoTheta;
 }
 
 } // namespace Algorithms

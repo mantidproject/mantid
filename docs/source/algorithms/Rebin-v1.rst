@@ -97,8 +97,8 @@ Usage
    # rebin from min to max with size bin = 2
    ws = Rebin(ws, 2)
 
-   print "The rebinned X values are: " + str(ws.readX(0))
-   print "The rebinned Y values are: " + str(ws.readY(0))
+   print("The rebinned X values are: {}".format(ws.readX(0)))
+   print("The rebinned Y values are: {}".format(ws.readY(0)))
 
 Output:
 
@@ -119,7 +119,7 @@ Output:
    # rebin from min to max with logarithmic bins of 0.5
    ws = Rebin(ws, -0.5)
 
-   print "The 2nd and 3rd rebinned X values are: " + str(ws.readX(0)[1:3])
+   print("The 2nd and 3rd rebinned X values are: {}".format(ws.readX(0)[1:3]))
 
 Output:
 
@@ -139,7 +139,7 @@ Output:
    # rebin from 0 to 3 in steps of 2 and from 3 to 9 in steps of 3
    ws = Rebin(ws, "1,2,3,3,9")
 
-   print "The rebinned X values are: " + str(ws.readX(0))
+   print("The rebinned X values are: {}".format(ws.readX(0)))
 
 Output:
 
@@ -159,8 +159,8 @@ Output:
    # rebin from min to max with size bin = 2
    ws = Rebin(ws, 2, FullBinsOnly=True)
 
-   print "The rebinned X values are: " + str(ws.readX(0))
-   print "The rebinned Y values are: " + str(ws.readY(0))
+   print("The rebinned X values are: {}".format(ws.readX(0)))
+   print("The rebinned Y values are: {}".format(ws.readY(0)))
 
 Output:
 
@@ -176,13 +176,13 @@ Output:
    # create some event workspace
    ws = CreateSampleWorkspace(WorkspaceType="Event")
 
-   print "What type is the workspace before 1st rebin: " + ws.id()
+   print("What type is the workspace before 1st rebin: {}".format(ws.id()))
    # rebin from min to max with size bin = 2 preserving event workspace (default behaviour)
    ws = Rebin(ws, 2)
-   print "What type is the workspace after 1st rebin: " + ws.id()
+   print("What type is the workspace after 1st rebin: {}".format(ws.id()))
    ws = Rebin(ws, 2, PreserveEvents=False)
-   print "What type is the workspace after 2nd rebin: " + ws.id()
-   # note you can also check the type of a workspace using: print isinstance(ws, IEventWorkspace)
+   print("What type is the workspace after 2nd rebin: {}".format(ws.id()))
+   # note you can also check the type of a workspace using: print(isinstance(ws, IEventWorkspace))
 
 Output:
 

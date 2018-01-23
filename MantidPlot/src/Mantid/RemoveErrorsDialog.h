@@ -10,7 +10,7 @@ class RemoveErrorsDialog;
 class RemoveErrorsDialog : public QDialog {
   Q_OBJECT
 public:
-  explicit RemoveErrorsDialog(QWidget *parent = 0);
+  explicit RemoveErrorsDialog(QWidget *parent = nullptr);
   ~RemoveErrorsDialog() override;
 
   //! Supply the dialog with a curves list

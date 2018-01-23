@@ -156,7 +156,7 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
                                      const std::string &op,
                                      const std::string &name, bool inplace,
                                      bool reverse) {
-  std::string algoName = op;
+  const std::string &algoName = op;
 
   // Create the single valued workspace first so that it is run as a top-level
   // algorithm
@@ -164,17 +164,15 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
   API::Algorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged(
       "CreateSingleValuedWorkspace");
   alg->setChild(false);
+  alg->setAlwaysStoreInADS(false);
   alg->initialize();
   alg->setProperty<double>("DataValue", value);
-  const std::string tmp_name("__tmp_binary_operation_double");
+  const std::string tmp_name("not_applicable");
   alg->setPropertyValue("OutputWorkspace", tmp_name);
   alg->execute();
   MatrixWorkspace_sptr singleValue;
-  API::AnalysisDataServiceImpl &data_store =
-      API::AnalysisDataService::Instance();
   if (alg->isExecuted()) {
-    singleValue = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-        data_store.retrieve(tmp_name));
+    singleValue = alg->getProperty("OutputWorkspace");
   } else {
     throw std::runtime_error(
         "performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
@@ -183,8 +181,6 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
   ResultType result =
       performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(
           inputWS, singleValue, algoName, name, inplace, reverse);
-  // Delete the temporary
-  data_store.remove(tmp_name);
   return result;
 }
 

@@ -201,5 +201,6 @@ class TOFTOFMergeRuns(PythonAlgorithm):
             else:
                 return True
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(TOFTOFMergeRuns)

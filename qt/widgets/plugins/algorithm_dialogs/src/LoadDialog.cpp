@@ -2,21 +2,21 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDialog.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/MWRunFiles.h"
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
-#include <QUrl>
 #include <QDesktopWidget>
 #include <QFileInfo>
+#include <QUrl>
 
 // Mantid
-#include "MantidKernel/Property.h"
-#include "MantidKernel/MaskedProperty.h"
-#include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/Property.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 namespace MantidQt {
@@ -34,6 +34,20 @@ struct HoldFlag {
   bool &heldflag;
 };
 }
+
+// Blocks signals sent to the load button for the duration
+// of it's lifetime.
+class PreventLoadRequests {
+public:
+  explicit PreventLoadRequests(LoadDialog &dialog) : m_dialog(dialog) {
+    m_dialog.disableLoadRequests();
+  }
+
+  ~PreventLoadRequests() { m_dialog.enableLoadRequests(); }
+
+private:
+  LoadDialog &m_dialog;
+};
 
 // Declare the dialog. Name must match the class name
 DECLARE_DIALOG(LoadDialog)
@@ -67,8 +81,7 @@ void LoadDialog::createDynamicWidgets() {
 
 /// Override the help button clicked method
 void LoadDialog::helpClicked() {
-  const std::string &loaderName =
-      getAlgorithm()->getPropertyValue("LoaderName");
+  const auto loaderName = getAlgorithm()->getPropertyValue("LoaderName");
   QString helpPage = (loaderName.empty()) ? QString("Load")
                                           : QString::fromStdString(loaderName);
   MantidQt::API::HelpWindow::showAlgorithm(this->nativeParentWidget(),
@@ -111,19 +124,22 @@ void LoadDialog::enableNameSuggestion(const bool on) {
   }
 }
 
+void LoadDialog::enableLoadRequests() { m_okButton->blockSignals(false); }
+
+void LoadDialog::disableLoadRequests() { m_okButton->blockSignals(true); }
+
 /**
  * Called when the run button is clicked
  */
 void LoadDialog::accept() {
   // The file widget may have been edited but not lost focus so that the search
-  // wasn't
-  // attempted for the new contents. Force one here.
+  // wasn't attempted for the new contents. Force one here.
   // The widget does nothing if the contents have not changed so it will be
   // quick for this case
+  auto preventLoadRequestsWhileAlive = PreventLoadRequests(*this);
   m_form.fileWidget->findFiles();
-  while (m_form.fileWidget->isSearching() || m_populating) {
+  while (m_form.fileWidget->isSearching() || m_populating)
     QApplication::instance()->processEvents();
-  }
 
   // Check that the file still exists just incase it somehow got removed
   std::string errMess =
@@ -131,9 +147,8 @@ void LoadDialog::accept() {
   if (!errMess.empty()) {
     m_currentFiles = "";
     createDynamicWidgets();
-    return;
-  }
-  AlgorithmDialog::accept();
+  } else
+    AlgorithmDialog::accept();
 }
 
 //--------------------------------------------------------------------------
@@ -217,8 +232,8 @@ void LoadDialog::removeOldInputWidgets(QVBoxLayout *layout) {
       if (QWidget *w = child->widget()) {
         w->deleteLater();
       } else if (QLayout *l = child->layout()) {
-        QLayoutItem *subChild(NULL);
-        while ((subChild = l->takeAt(0)) != NULL) {
+        QLayoutItem *subChild(nullptr);
+        while ((subChild = l->takeAt(0)) != nullptr) {
           subChild->widget()->deleteLater();
         }
       }
@@ -314,8 +329,8 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
   using MantidQt::API::MWRunFiles;
 
   QString propName = QString::fromStdString(prop->name());
-  QWidget *inputWidget(NULL);
-  QHBoxLayout *widgetLayout(NULL);
+  QWidget *inputWidget(nullptr);
+  QHBoxLayout *widgetLayout(nullptr);
   bool addValidator(true);
 
   // Boolean properties use the name labels differently

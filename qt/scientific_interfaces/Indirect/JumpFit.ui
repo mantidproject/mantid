@@ -120,23 +120,65 @@
       <layout class="QVBoxLayout" name="treeSpace"/>
      </item>
      <item>
-      <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
-       <property name="canvasColour" stdset="0">
-        <color>
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
-        </color>
-       </property>
-       <property name="showLegend" stdset="0">
-        <bool>true</bool>
-       </property>
-       <property name="curveErrorBars" stdset="0">
-        <stringlist>
-         <string>Sample</string>
-        </stringlist>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="loPlots" stretch="5,3">
+       <item>
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>125</height>
+          </size>
+         </property>
+         <property name="canvasColour" stdset="0">
+          <color>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </property>
+         <property name="showLegend" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="curveErrorBars" stdset="0">
+          <stringlist>
+           <string>Sample</string>
+          </stringlist>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>75</height>
+          </size>
+         </property>
+         <property name="showLegend" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="canvasColour" stdset="0">
+          <color>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -221,7 +263,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/PreviewPlot.h</header>
+   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

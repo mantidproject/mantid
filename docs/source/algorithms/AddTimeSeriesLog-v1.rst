@@ -33,17 +33,17 @@ Usage
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:50:00", Value=100.2)
 
     log = ws.getRun().getLogData("my_log")
-    print "my_log has %i entries" % log.size()
+    print("my_log has {} entries".format(log.size()))
     for i in range(log.size()):
-      print "\t%s\t%f" % (log.times[i], log.value[i])
+      print("\t{}\t{:.6f}".format(log.times[i], log.value[i]))
 
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:00:00", Value=12, Type="int", DeleteExisting=True)
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:50:00", Value=34, Type="int")
 
     log = ws.getRun().getLogData("my_log")
-    print "my_log now has %i entries" % log.size()
+    print("my_log now has {} entries".format(log.size()))
     for i in range(log.size()):
-      print "\t%s\t%i" % (log.times[i], log.value[i])
+      print("\t{}\t{}".format(log.times[i], log.value[i]))
 
 Output:
 

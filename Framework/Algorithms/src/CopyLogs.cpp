@@ -56,7 +56,7 @@ void CopyLogs::exec() {
 
   // get logs from input workspace
   Run &inputRun = inputWs->mutableRun();
-  auto inputLogs = inputRun.getLogData();
+  const auto &inputLogs = inputRun.getLogData();
 
   // get run from output workspace
   Run &outputRun = outputWs->mutableRun();

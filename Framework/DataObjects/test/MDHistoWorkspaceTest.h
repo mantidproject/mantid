@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
@@ -21,7 +22,6 @@
 #include "MantidKernel/Strings.h"
 #include "PropertyManagerHelper.h"
 
-using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -257,6 +257,18 @@ public:
     TS_ASSERT_EQUALS(b->getNumExperimentInfo(), a->getNumExperimentInfo());
     TS_ASSERT_EQUALS(b->displayNormalization(), a->displayNormalization());
     checkWorkspace(b, 1.23, 3.234, 123.);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_clone_clear_workspace_name() {
+    auto ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
+    const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
+    AnalysisDataService::Instance().add(name, ws);
+    TS_ASSERT_EQUALS(ws->getName(), name)
+    auto cloned = ws->clone();
+    TS_ASSERT(cloned->getName().empty())
+    AnalysisDataService::Instance().clear();
   }
 
   //--------------------------------------------------------------------------------------
@@ -1094,7 +1106,7 @@ public:
   }
 
   void test_maskNULL() {
-    doTestMasking(NULL, 0); // 1000 out of 1000 bins masked
+    doTestMasking(nullptr, 0); // 1000 out of 1000 bins masked
   }
 
   void test_mask_everything() {

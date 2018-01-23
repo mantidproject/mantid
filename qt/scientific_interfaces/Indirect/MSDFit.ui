@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>949</width>
-    <height>733</height>
+    <width>522</width>
+    <height>571</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,36 +15,41 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
+    <widget class="QGroupBox" name="modelBox">
+     <property name="title">
+      <string>Model</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QComboBox" name="cbModelInput">
+        <item>
+         <property name="text">
+          <string>Gaussian</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Peters</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Yi</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="gbInput">
      <property name="title">
       <string>Input</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_18">
       <item>
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist>
-          <string>_eq2</string>
-         </stringlist>
-        </property>
-        <property name="fileBrowserSuffixes" stdset="0">
-         <stringlist>
-          <string>_eq2.nxs</string>
-         </stringlist>
-        </property>
-        <property name="showLoad" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="ShowGroups" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true"/>
       </item>
      </layout>
     </widget>
@@ -52,28 +57,88 @@
    <item>
     <layout class="QHBoxLayout" name="loMSDFit">
      <item>
-      <layout class="QVBoxLayout" name="properties"/>
-     </item>
-     <item>
       <layout class="QVBoxLayout" name="loMSDPlot">
        <item>
-        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
-         <property name="showLegend" stdset="0">
-          <bool>true</bool>
-         </property>
-         <property name="curveErrorBars" stdset="0">
-          <stringlist>
-           <string>Sample</string>
-          </stringlist>
-         </property>
-         <property name="canvasColour" stdset="0">
-          <color>
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="loPlotProperties">
+         <item>
+          <layout class="QVBoxLayout" name="loProperties">
+           <item>
+            <widget class="QCheckBox" name="ckPlotGuess">
+             <property name="text">
+              <string>Plot Guess</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="properties"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="loPlotsLayout" stretch="5,3">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetNoConstraint</enum>
+           </property>
+           <item>
+            <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>125</height>
+              </size>
+             </property>
+             <property name="showLegend" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="curveErrorBars" stdset="0">
+              <stringlist>
+               <string>Sample</string>
+              </stringlist>
+             </property>
+             <property name="canvasColour" stdset="0">
+              <color>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
+              </color>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>1</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>75</height>
+              </size>
+             </property>
+             <property name="showLegend" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="canvasColour" stdset="0">
+              <color>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
+              </color>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="loPlotOptions">
@@ -249,7 +314,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/PreviewPlot.h</header>
+   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

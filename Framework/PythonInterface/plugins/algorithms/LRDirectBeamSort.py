@@ -259,4 +259,5 @@ class LRDirectBeamSort(PythonAlgorithm):
                              ScalingFactorFile=scaling_file)
         logger.notice(summary)
 
+
 AlgorithmFactory.subscribe(LRDirectBeamSort)

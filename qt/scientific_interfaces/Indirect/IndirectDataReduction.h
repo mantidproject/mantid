@@ -59,7 +59,7 @@ class IndirectDataReduction : public MantidQt::API::UserSubWindow {
 
 public:
   /// Default Constructor
-  explicit IndirectDataReduction(QWidget *parent = 0);
+  explicit IndirectDataReduction(QWidget *parent = nullptr);
   /// Destructor
   ~IndirectDataReduction() override;
   /// Interface name

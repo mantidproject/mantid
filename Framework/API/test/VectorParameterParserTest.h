@@ -70,7 +70,7 @@ public:
         dynamic_cast<ConcreteVectorDblParam *>(product);
 
     TSM_ASSERT("The wrong product parameter has been produced",
-               (actualProduct != NULL));
+               (actualProduct != nullptr));
     double v1 = (*actualProduct)[0];
     double v2 = (*actualProduct)[1];
     double v3 = (*actualProduct)[2];
@@ -131,7 +131,7 @@ public:
         dynamic_cast<ConcreteVectorBoolParam *>(product);
 
     TSM_ASSERT("The wrong product parameter has been produced",
-               (actualProduct != NULL));
+               (actualProduct != nullptr));
 
     bool v1 = (*actualProduct)[0];
     bool v2 = (*actualProduct)[1];
@@ -167,7 +167,7 @@ public:
 
     ConcreteVectorDblParamParser parser;
     ConcreteVectorDblParam *product = parser.createWithoutDelegation(pRootElem);
-    TS_ASSERT(product != NULL);
+    TS_ASSERT(product != nullptr);
     delete product;
   }
 };

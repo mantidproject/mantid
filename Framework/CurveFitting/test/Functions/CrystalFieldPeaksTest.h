@@ -519,6 +519,10 @@ public:
     TS_ASSERT_EQUALS(tie->asString(), "B64=-21*B60");
   }
 
+  void test_CrystalFieldPeaksBaseImpl() {
+    Mantid::CurveFitting::Functions::CrystalFieldPeaksBaseImpl fun;
+  }
+
 private:
   bool isFixed(const IFunction &fun, const std::string &par) {
     auto i = fun.parameterIndex(par);

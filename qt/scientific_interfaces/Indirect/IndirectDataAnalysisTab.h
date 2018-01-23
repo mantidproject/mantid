@@ -1,10 +1,14 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "IndirectDataAnalysis.h"
 #include "IndirectTab.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+
+#include <boost/weak_ptr.hpp>
 
 class QwtPlotCurve;
 class QwtPlot;
@@ -15,7 +19,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class RangeSelector;
 }
-}
+} // namespace MantidQt
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -26,10 +30,10 @@ class RangeSelector;
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -46,7 +50,7 @@ class DLLExport IndirectDataAnalysisTab : public IndirectTab {
 
 public:
   /// Constructor
-  IndirectDataAnalysisTab(QWidget *parent = 0);
+  IndirectDataAnalysisTab(QWidget *parent = nullptr);
 
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);
@@ -54,6 +58,82 @@ public:
 protected:
   /// Function to run a string as python code
   void runPythonScript(const QString &pyInput);
+
+  /// Retrieve input workspace
+  Mantid::API::MatrixWorkspace_sptr inputWorkspace();
+
+  /// Set input workspace
+  void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
+
+  /// Retrieve preview plot workspace
+  Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace();
+
+  /// Set preview plot workspace
+  void setPreviewPlotWorkspace(
+      Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
+
+  /// Retrieve the selected spectrum
+  int selectedSpectrum();
+
+  /// Retrieve the selected minimum spectrum
+  int minimumSpectrum();
+
+  /// Retrieve the selected maximum spectrum
+  int maximumSpectrum();
+
+  void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
+
+  void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlot(Mantid::API::WorkspaceGroup_sptr outputWS,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  virtual void
+  updatePlot(const std::string &workspaceName,
+             MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+             MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlot(Mantid::API::MatrixWorkspace_sptr outputWS,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlotRange(const QString &rangeName,
+                       MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+                       const QString &startRangePropName = "StartX",
+                       const QString &endRangePropName = "EndX");
+
+  void plotGuess(MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+                 Mantid::API::IFunction_sptr function);
+
+  Mantid::API::MatrixWorkspace_sptr
+  createGuessWorkspace(Mantid::API::IFunction_sptr func, size_t wsIndex);
+
+  std::vector<double> computeOutput(Mantid::API::IFunction_sptr func,
+                                    const std::vector<double> &dataX);
+
+  Mantid::API::IAlgorithm_sptr
+  createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
+                           const std::vector<double> &dataX,
+                           const std::vector<double> &dataY);
+
+  Mantid::API::IFunction_sptr
+  createPopulatedFunction(const std::string &funcName,
+                          Mantid::API::IFunction_sptr comp, QtProperty *group,
+                          bool tie = false, const std::string &pref = "");
+
+  Mantid::API::IFunction_sptr
+  createPopulatedFunction(const std::string &funcName, QtProperty *group,
+                          bool tie = false, const std::string &pref = "");
+
+  void populateFunction(Mantid::API::IFunction_sptr func, QtProperty *group,
+                        bool tie = false, const std::string &pref = "");
+
+  void populateFunction(Mantid::API::IFunction_sptr func,
+                        Mantid::API::IFunction_sptr comp, QtProperty *group,
+                        bool tie = false, const std::string &pref = "");
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
@@ -63,6 +143,18 @@ protected:
 protected slots:
   /// Slot that can be called when a user eidts an input.
   void inputChanged();
+
+  /// Plots the current preview data
+  void plotCurrentPreview();
+
+  /// Sets the selected spectrum
+  void setSelectedSpectrum(int spectrum);
+
+  /// Sets the maximum spectrum
+  void setMaximumSpectrum(int spectrum);
+
+  /// Sets the minimum spectrum
+  void setMinimumSpectrum(int spectrum);
 
 private:
   /// Overidden by child class.
@@ -77,7 +169,15 @@ private:
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
+  Mantid::API::MatrixWorkspace_sptr m_guessWorkspace;
+  int m_guessSpectrum;
+  int m_selectedSpectrum;
+  int m_minSpectrum;
+  int m_maxSpectrum;
 };
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

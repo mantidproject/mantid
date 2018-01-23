@@ -3,8 +3,6 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
 
-import mantid
-
 from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
@@ -17,8 +15,8 @@ from sans.test_helper.user_file_test_helper import create_user_file, sample_user
 class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
     def _get_table_model(option_string=""):
-        table_index_model = TableIndexModel(0, "SANS2D00022024", "", "",
-                                            "", "", "", "", option_string)
+        table_index_model = TableIndexModel(0, "SANS2D00022024", "", "", "", "", "", "", "", "",
+                                            "", "", "", "", "", option_string)
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
         return table_model
@@ -48,8 +46,8 @@ class GuiStateDirectorTest(unittest.TestCase):
         self.assertTrue(state.wavelength.wavelength_high == 12.5)
 
     def test_that_will_raise_when_models_are_incomplete(self):
-        table_index_model = TableIndexModel(0, "", "", "",
-                                            "", "", "")
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                               "", "", "", "", "", "")
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
         state_model = self._get_state_gui_model()
@@ -69,5 +67,3 @@ class GuiStateDirectorTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-

@@ -46,7 +46,7 @@ DataSetDialog::DataSetDialog(const QString &text, ApplicationWindow *app,
   setWindowTitle(tr("MantidPlot - Select data set"));
 
   d_operation = ApplicationWindow::NoAnalysis;
-  d_graph = 0;
+  d_graph = nullptr;
 
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   QHBoxLayout *bottomLayout = new QHBoxLayout();

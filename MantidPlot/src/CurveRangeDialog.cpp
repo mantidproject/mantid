@@ -39,7 +39,7 @@
 #include <QSpinBox>
 
 CurveRangeDialog::CurveRangeDialog(QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), d_curve(NULL), d_graph(NULL) {
+    : QDialog(parent, fl), d_curve(nullptr), d_graph(nullptr) {
   setWindowTitle(tr("MantidPlot - Plot range"));
   setObjectName("CurveRangeDialog");
 

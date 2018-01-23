@@ -150,7 +150,7 @@ void Quasi::run() {
         " If run, the algorithm will default to saving files "
         "to the current working directory."
         " Would you still like to run the algorithm?";
-    int result = QMessageBox::question(NULL, tr("Save Directory"),
+    int result = QMessageBox::question(nullptr, tr("Save Directory"),
                                        tr(textMessage), QMessageBox::Yes,
                                        QMessageBox::No, QMessageBox::NoButton);
     if (result == QMessageBox::No) {

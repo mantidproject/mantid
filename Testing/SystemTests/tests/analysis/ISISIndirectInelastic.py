@@ -639,10 +639,12 @@ class ISISIndirectInelasticElwinAndMSDFit(with_metaclass(ABCMeta, ISISIndirectIn
     the other in this test.
     '''
 
-    def _run(self):
-        '''Defines the workflow for the test'''
+    def __init__(self):
+        super(ISISIndirectInelasticElwinAndMSDFit, self).__init__()
         self.tolerance = 1e-7
 
+    def _run(self):
+        '''Defines the workflow for the test'''
         elwin_input = '__ElWinMult_in'
         elwin_results = ['__ElWinMult_q', '__ElWinMult_q2', '__ElWinMult_elf']
 
@@ -664,8 +666,8 @@ class ISISIndirectInelasticElwinAndMSDFit(with_metaclass(ABCMeta, ISISIndirectIn
             SaveNexusProcessed(Filename=filename,
                                InputWorkspace=ws)
 
-        eq2_file = elwin_results[1]
-        msdfit_result = MSDFit(InputWorkspace=eq2_file,
+        eq_file = elwin_results[0]
+        msdfit_result = MSDFit(InputWorkspace=eq_file,
                                XStart=self.startX,
                                XEnd=self.endX,
                                SpecMax=1)
@@ -699,11 +701,12 @@ class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
     def __init__(self):
         ISISIndirectInelasticElwinAndMSDFit.__init__(self)
+        self.tolerance = 5e-6
         self.files = ['osi97935_graphite002_red.nxs',
                       'osi97936_graphite002_red.nxs']
         self.eRange = [-0.02, 0.02]
-        self.startX = 0.195082
-        self.endX = 3.202128
+        self.startX = 0.189077
+        self.endX = 1.8141
 
     def get_reference_files(self):
         return ['II.OSIRISElwinEQ1.nxs',
@@ -720,8 +723,8 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
         self.files = ['irs53664_graphite002_red.nxs',
                       'irs53665_graphite002_red.nxs']
         self.eRange = [-0.02, 0.02]
-        self.startX = 0.313679
-        self.endX = 3.285377
+        self.startX = 0.441682
+        self.endX = 1.85378
 
     def get_reference_files(self):
         return ['II.IRISElwinEQ1.nxs',

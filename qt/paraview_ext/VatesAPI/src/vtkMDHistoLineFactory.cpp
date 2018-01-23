@@ -73,10 +73,9 @@ vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
     const int nBinsX =
         static_cast<int>(m_workspace->getXDimension()->getNBins());
 
-    const coord_t maxX = m_workspace->getXDimension()->getMaximum();
     const coord_t minX = m_workspace->getXDimension()->getMinimum();
 
-    coord_t incrementX = (maxX - minX) / coord_t(nBinsX - 1);
+    coord_t incrementX = m_workspace->getXDimension()->getBinWidth();
 
     const int imageSize = nBinsX;
     vtkNew<vtkPoints> points;

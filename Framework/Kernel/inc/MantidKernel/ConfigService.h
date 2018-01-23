@@ -240,7 +240,7 @@ public:
   void setConsoleLogLevel(int logLevel);
   /// Sets the log level priority for the selected Filter log channel
   void setFilterChannelLogLevel(const std::string &filterChannelName,
-                                int logLevel);
+                                int logLevel, bool quiet = false);
 
   /// Look for an instrument
   const InstrumentInfo &
@@ -254,12 +254,6 @@ public:
 
   // Starts up the logging
   void configureLogging();
-
-  /// Return true if ParaView plugins are available
-  bool pvPluginsAvailable() const;
-
-  /// Return the path to the pv plugins
-  const std::string getPVPluginsPath() const;
 
   /// Gets the proxy for the system
   Kernel::ProxyInfo &getProxy(const std::string &url);

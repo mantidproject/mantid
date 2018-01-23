@@ -23,6 +23,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
+using Mantid::Types::Event::TofEvent;
 
 class DiffractionFocussing2Test : public CxxTest::TestSuite {
 public:

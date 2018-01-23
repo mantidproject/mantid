@@ -293,7 +293,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
   }
 
   // scale parameter, header BSCALE in the fits standard
-  if ("" == header.headerKeys[m_headerScaleKey]) {
+  if (header.headerKeys[m_headerScaleKey].empty()) {
     header.scale = 1;
   } else {
     try {
@@ -308,7 +308,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
   }
 
   // data offsset parameter, header BZERO in the fits standard
-  if ("" == header.headerKeys[m_headerOffsetKey]) {
+  if (header.headerKeys[m_headerOffsetKey].empty()) {
     header.offset = 0;
   } else {
     try {
@@ -361,7 +361,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
 void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
                                  const FITSInfo &hdrFirst) {
   bool valid = true;
-  if (hdr.extension != "") {
+  if (!hdr.extension.empty()) {
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": extensions found in the header.\n";
@@ -625,7 +625,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
         if (key == g_END_KEYNAME)
           endFound = true;
 
-        if (key != "")
+        if (!key.empty())
           headerInfo.headerKeys[key] = value;
       }
     }
@@ -1141,7 +1141,7 @@ void LoadFITS::setupDefaultKeywordNames() {
  *  Maps the header keys to specified values
  */
 void LoadFITS::mapHeaderKeys() {
-  if ("" == getPropertyValue(g_HEADER_MAP_NAME))
+  if (getPropertyValue(g_HEADER_MAP_NAME).empty())
     return;
 
   // If a map file is selected, use that.
@@ -1157,19 +1157,19 @@ void LoadFITS::mapHeaderKeys() {
       while (getline(fStream, line)) {
         boost::split(lineSplit, line, boost::is_any_of("="));
 
-        if (lineSplit[0] == g_ROTATION_NAME && lineSplit[1] != "")
+        if (lineSplit[0] == g_ROTATION_NAME && !lineSplit[1].empty())
           m_headerRotationKey = lineSplit[1];
 
-        if (lineSplit[0] == g_BIT_DEPTH_NAME && lineSplit[1] != "")
+        if (lineSplit[0] == g_BIT_DEPTH_NAME && !lineSplit[1].empty())
           m_headerBitDepthKey = lineSplit[1];
 
-        if (lineSplit[0] == g_AXIS_NAMES_NAME && lineSplit[1] != "") {
+        if (lineSplit[0] == g_AXIS_NAMES_NAME && !lineSplit[1].empty()) {
           m_headerAxisNameKeys.clear();
           boost::split(m_headerAxisNameKeys, lineSplit[1],
                        boost::is_any_of(","));
         }
 
-        if (lineSplit[0] == g_IMAGE_KEY_NAME && lineSplit[1] != "") {
+        if (lineSplit[0] == g_IMAGE_KEY_NAME && !lineSplit[1].empty()) {
           m_headerImageKeyKey = lineSplit[1];
         }
       }

@@ -4,15 +4,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountVariances;
+using namespace Mantid::HistogramData;
 
 class DetectorEfficiencyCorTest : public CxxTest::TestSuite {
 public:
@@ -53,6 +52,7 @@ public:
   void testDataWithUngroupedDetectors() {
     using namespace Mantid::API;
     auto inputWS = createTestWorkspace();
+    inputWS->getSpectrum(0).setDetectorID(1);
 
     Mantid::Algorithms::DetectorEfficiencyCor grouper;
     TS_ASSERT_THROWS_NOTHING(grouper.initialize());
@@ -110,18 +110,6 @@ private:
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
     using namespace Mantid::DataObjects;
-    using Mantid::MantidVecPtr;
-
-    const int nspecs(1);
-    const int nbins(4);
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", nspecs, nbins + 1, nbins);
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-
-    space2D->setHistogram(0, BinEdges{1e-14, 2e-14, 3e-14, 4e-14, 4.0},
-                          Counts{10, 11, 12, 0},
-                          CountVariances{5.0, 5.0, 5.0, 0.0});
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
@@ -133,8 +121,7 @@ private:
 
     // convert into a Geometry object
     bool addTypeTag = true;
-    boost::shared_ptr<Object> shape =
-        ShapeFactory().createShape(xmlShape, addTypeTag);
+    auto shape = ShapeFactory().createShape(xmlShape, addTypeTag);
 
     boost::shared_ptr<Instrument> instrument = boost::make_shared<Instrument>();
     const int ndets(2);
@@ -146,17 +133,23 @@ private:
       instrument->markAsDetector(detector);
       detectors.push_back(detector);
     }
-    space2D->setInstrument(instrument);
     ObjComponent *sample = new ObjComponent("sample", shape, NULL);
     sample->setPos(0, 0, 0);
     instrument->markAsSamplePos(sample);
+
+    const int nspecs(1);
+    auto space2D = create<Workspace2D>(
+        instrument, nspecs,
+        Histogram(BinEdges{1e-14, 2e-14, 3e-14, 4e-14, 4.0},
+                  Counts{10, 11, 12, 0}, CountVariances{5.0, 5.0, 5.0, 0.0}));
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
 
     ParameterMap &pmap = space2D->instrumentParameters();
     for (const auto detector : detectors) {
       pmap.add("double", detector, "TubePressure", 10.0);
       pmap.add("double", detector, "TubeThickness", 0.0008);
     }
-    return space2D;
+    return std::move(space2D);
   }
 };
 

@@ -95,6 +95,7 @@ class ReduceMAPS(ReductionWrapper):
         # use this method to use standard file name generating function
         return None
 
+
 #----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     import os

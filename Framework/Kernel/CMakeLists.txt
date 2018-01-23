@@ -13,8 +13,11 @@ set ( SRC_FILES
 	src/CompositeValidator.cpp
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
-	src/DataItem.cpp
+	src/ConfigObserver.cpp
+	src/ConfigPropertyObserver.cpp
 	src/DateAndTime.cpp
+	src/DataItem.cpp
+	src/DateAndTimeHelpers.cpp
 	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
@@ -128,14 +131,14 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
-        src/NeutronAtom.cpp
-        src/FacilityInfo.cpp
-        src/FilterChannel.cpp
-        src/FileValidator.cpp
-        src/DirectoryValidator.cpp
-        src/PropertyManager.cpp
-        src/Unit.cpp
-        src/System.cpp
+	src/NeutronAtom.cpp
+	src/FacilityInfo.cpp
+	src/FilterChannel.cpp
+	src/FileValidator.cpp
+	src/DirectoryValidator.cpp
+	src/PropertyManager.cpp
+	src/Unit.cpp
+	src/System.cpp
 )
 
 set ( INC_FILES
@@ -161,9 +164,12 @@ set ( INC_FILES
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
+	inc/MantidKernel/ConfigObserver.h
+	inc/MantidKernel/ConfigPropertyObserver.h
+  inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
-	inc/MantidKernel/DateAndTime.h
+	inc/MantidKernel/DateAndTimeHelpers.h
 	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DateValidator.h
 	inc/MantidKernel/DeltaEMode.h
@@ -236,8 +242,8 @@ set ( INC_FILES
 	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
+	inc/MantidKernel/NearestNeighbours.h
 	inc/MantidKernel/NetworkProxy.h
-        inc/MantidKernel/NearestNeighbours.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NormalDistribution.h
@@ -332,9 +338,11 @@ set ( TEST_FILES
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
+	ConfigObserverTest.h
+	ConfigPropertyObserverTest.h
 	CowPtrTest.h
 	DataServiceTest.h
-	DateAndTimeTest.h
+	DateAndTimeHelpersTest.h
 	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
@@ -342,6 +350,7 @@ set ( TEST_FILES
 	DirectoryValidatorTest.h
 	DiskBufferISaveableTest.h
 	DiskBufferTest.h
+	DllOpenTest.h
 	DynamicFactoryTest.h
 	EigenConversionHelpersTest.h
 	EnabledWhenPropertyTest.h
@@ -391,7 +400,7 @@ set ( TEST_FILES
 	MutexTest.h
 	NDPseudoRandomNumberGeneratorTest.h
 	NDRandomNumberGeneratorTest.h
-        NearestNeighboursTest.h
+	NearestNeighboursTest.h
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
 	NormalDistributionTest.h
@@ -476,7 +485,8 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
 
-target_include_directories ( Kernel SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIR} PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+target_include_directories ( Kernel SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR}
+  PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
@@ -557,20 +567,21 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
   set ( MANTID_ROOT ${CMAKE_SOURCE_DIR}/.. )
 endif ()
 
-set ( PLUGINS "." )
+set ( FRAMEWORK_PLUGINS_DIR "." )
+set ( QT_PLUGINS_DIR "." )
+# %V will be replaced with the major version of Qt at runtime
 if ( MAKE_VATES )
-  set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
+  set ( PV_PLUGINS_DIR "./plugins/paraview/qt%V" )
   if ( MSVC )
     set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
   else()
     set ( PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
   endif()
 else ()
-  set ( PV_PLUGINS "" )
+  set ( PV_PLUGINS_DIR "" )
   set ( PARAVIEW_PYTHON_PATHS "")
 endif ()
 set ( IGNORE_PARAVIEW "0" )
-set ( QTPLUGINS "." )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )
 set ( CHECK_FOR_NEW_MANTID_VERSION "0" )
 set ( ENABLE_USAGE_REPORTS "0" )
@@ -615,7 +626,7 @@ endforeach()
 # These settings carry down to the installation configuration below
 if ( MPI_BUILD )
   set ( CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
-  set ( PV_PLUGINS "" )
+  set ( PV_PLUGINS_DIR "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
   option ( ENABLE_FILE_LOGGING "Enable logging to file for development builds. It is always enabled for packages" ON )
@@ -668,8 +679,8 @@ if ( NOT MPI_BUILD )
   set ( FILELOGGER_CHANNEL fileFilterChannel )
 endif ()
 set ( ENABLE_WEB_UPDATES 1 )
-set ( PLUGINS ${MANTID_ROOT}/plugins )
-set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
+set ( FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins )
+set ( PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python" )
 if(MAKE_VATES)
   if (APPLE)
     set ( PARAVIEW_PYTHON_PATHS "../Libraries;../Python;../Python/vtk")
@@ -720,14 +731,14 @@ set ( PYTHONSCRIPT_DIRS "${WITH_SEMICOLONS}" )
 # For a framework-only (e.g. MPI) build some of these are not relevant and should
 # be left empty to avoid warnings on starting Mantid
 if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
-  set ( QTPLUGINS "" )
+  set ( QT_PLUGINS_DIR "" )
   set ( COLORMAPS_FOLDER "" )
-  set ( PV_PLUGINS "" )
+  set ( PV_PLUGINS_DIR "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  set ( QTPLUGINS ${MANTID_ROOT}/plugins/qtplugins/mantid )
+  set ( QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V" )
+  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt%V" )
   set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
-  set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
 endif ()
 
 set ( CONSOLECHANNELCLASS "StdoutChannel" )

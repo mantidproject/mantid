@@ -81,7 +81,9 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
           SLOT(setCaption(const QString &)));
 
   m_selectionType = Single;
+
   m_infoController = nullptr;
+  m_plotController = nullptr;
 
   m_activeTool = new QLabel(this);
   // set up the tool bar

@@ -60,11 +60,11 @@ muParserScript::muParserScript(ScriptingEnv *env, const QString &name,
   for (const muParserScripting::mathFunction *i =
            muParserScripting::math_functions;
        i->name; i++)
-    if (i->numargs == 1 && i->fun1 != NULL)
+    if (i->numargs == 1 && i->fun1 != nullptr)
       parser.DefineFun(i->name, i->fun1);
-    else if (i->numargs == 2 && i->fun2 != NULL)
+    else if (i->numargs == 2 && i->fun2 != nullptr)
       parser.DefineFun(i->name, i->fun2);
-    else if (i->numargs == 3 && i->fun3 != NULL)
+    else if (i->numargs == 3 && i->fun3 != nullptr)
       parser.DefineFun(i->name, i->fun3);
 
   if (isOfType(context, "Table")) {
@@ -307,7 +307,7 @@ double *muParserScript::defineVariable(const char *name, double val) {
     valptr = new double;
     if (!valptr) {
       emit error(tr("Out of memory"), "", 0);
-      return 0;
+      return nullptr;
     }
     try {
       parser.DefineVar(name, valptr);
@@ -414,7 +414,7 @@ double muParserScript::evalSingleLine() {
   return val;
 }
 
-muParserScript *muParserScript::current = NULL;
+muParserScript *muParserScript::current = nullptr;
 
 bool muParserScript::compileImpl() {
   const QString code = QString::fromStdString(codeString());

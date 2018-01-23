@@ -21,6 +21,9 @@ calculated for the centre-point of each element, and a numerical
 integration is carried out using these path lengths over the volume
 elements.
 
+The output workspace will contain the attenuation factors. To apply
+the correction you must divide your data set by the resulting factors.
+
 Note that the duration of this algorithm is strongly dependent on the
 element size chosen, and that too small an element size can cause the
 algorithm to fail because of insufficient memory.
@@ -75,12 +78,12 @@ Usage
 **Example: A simple spherical sample**
 
 .. testcode:: ExSimpleSpere
-    
+
     #setup the sample shape
     sphere = '''<sphere id="sample-sphere">
-          <centre x="0" y="0" z="0"/>
-          <radius val="0.1" />
-      </sphere>'''
+    <centre x="0" y="0" z="0"/>
+    <radius val="0.1" />
+    </sphere>'''
 
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     ws = ConvertUnits(ws,"Wavelength")
@@ -90,14 +93,21 @@ Usage
 
     #restrict the number of wavelength points to speed up the example
     wsOut = AbsorptionCorrection(ws, NumberOfWavelengthPoints=5, ElementSize=3)
+    wsCorrected = ws / wsOut
 
-    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+    print("The created workspace has one entry for each spectra: {}".format(wsOut.getNumberHistograms()))
+    print("Original y values:  {}".format(ws.readY(0)))
+    print("Corrected y values:  {}".format(wsCorrected.readY(0)))
 
 Output:
 
 .. testoutput:: ExSimpleSpere
 
     The created workspace has one entry for each spectra: 1
+    Original y values:  [  5.68751434   5.68751434  15.68751434   5.68751434   5.68751434
+       1.56242829]
+    Corrected y values:  [   818.24346185   2375.60869191  14208.84555679   9470.18486922
+      15715.10873581   5745.75458361]
 
 .. categories::
 

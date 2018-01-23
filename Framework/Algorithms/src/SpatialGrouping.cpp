@@ -14,8 +14,6 @@
 #include <algorithm>
 #include "MantidAPI/ISpectrum.h"
 
-using Mantid::API::ISpectrum;
-
 namespace {
 /*
 * Comparison operator for use in std::sort when dealing with a vector of

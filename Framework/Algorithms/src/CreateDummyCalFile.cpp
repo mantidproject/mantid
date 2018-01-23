@@ -16,10 +16,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
-
 namespace Mantid {
 namespace Algorithms {
 

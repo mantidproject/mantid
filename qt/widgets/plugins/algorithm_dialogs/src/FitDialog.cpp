@@ -42,7 +42,7 @@ DECLARE_DIALOG(FitDialog)
  */
 InputWorkspaceWidget::InputWorkspaceWidget(FitDialog *parent, int domainIndex)
     : QWidget(parent), m_fitDialog(parent), m_domainIndex(domainIndex),
-      m_dynamicProperties(NULL) {
+      m_dynamicProperties(nullptr) {
   m_wsPropName = "InputWorkspace";
   if (domainIndex > 0) {
     m_wsPropName += "_" + QString::number(domainIndex);
@@ -121,7 +121,7 @@ void InputWorkspaceWidget::setDynamicProperties() {
     delete w;
   }
 
-  m_dynamicProperties = NULL;
+  m_dynamicProperties = nullptr;
 
   if (m_fitDialog->isMD()) {
     if (isMDWorkspace()) {
@@ -202,7 +202,7 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent)
     layout->addWidget(new QLabel("Maximum size"), 3, 0);
     layout->addWidget(m_maxSize, 3, 1);
   } else {
-    m_maxSize = NULL;
+    m_maxSize = nullptr;
   }
 
   QString wsName = parent->getWorkspaceName();
@@ -216,8 +216,8 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent)
     if (ws) {
       m_workspaceIndex->setRange(0,
                                  static_cast<int>(ws->getNumberHistograms()));
-      if (ws->blocksize() > 0) {
-        const Mantid::MantidVec &x = ws->readX(0);
+      const Mantid::MantidVec &x = ws->readX(0);
+      if (!x.empty()) {
         m_startX->setText(QString::number(x.front()));
         m_endX->setText(QString::number(x.back()));
       }
@@ -285,7 +285,7 @@ MDPropertiesWidget::MDPropertiesWidget(InputWorkspaceWidget *parent)
     layout->addWidget(new QLabel("Maximum size"), 3, 0);
     layout->addWidget(m_maxSize, 3, 1);
   } else {
-    m_maxSize = NULL;
+    m_maxSize = nullptr;
   }
 }
 

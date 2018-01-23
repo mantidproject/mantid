@@ -20,6 +20,21 @@ using MantidQt::MantidWidgets::MuonFitPropertyBrowser;
 
 namespace {
 Logger g_log("MuonSequentialFitDialog");
+std::string removePath(const std::string &labelIn) {
+  size_t path = labelIn.find_last_of("/");
+  if (path == std::string::npos) {
+    path = labelIn.find_last_of('\\');
+  }
+  std::string useThisLabel = labelIn;
+  if (path != std::string::npos) {
+    path = path + 1;
+    size_t end = labelIn.find_last_of(".");
+    useThisLabel = labelIn.substr(path);
+    useThisLabel = useThisLabel.substr(0, end - path);
+    auto test = useThisLabel;
+  }
+  return useThisLabel;
+}
 }
 const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
 
@@ -224,7 +239,7 @@ bool MuonSequentialFitDialog::isInputValid() {
  */
 void MuonSequentialFitDialog::updateControlButtonType(DialogState newState) {
   // Disconnect everything connected to pressed() signal of the button
-  disconnect(m_ui.controlButton, SIGNAL(pressed()), 0, 0);
+  disconnect(m_ui.controlButton, SIGNAL(pressed()), nullptr, nullptr);
 
   // Connect to appropriate slot
   auto buttonSlot = (newState == Running) ? SLOT(stopFit()) : SLOT(startFit());
@@ -328,7 +343,7 @@ void MuonSequentialFitDialog::continueFit() {
   // Get names of workspaces to fit
   const auto wsNames = m_dataPresenter->generateWorkspaceNames(
       m_ui.runs->getInstrumentOverride().toStdString(),
-      m_ui.runs->getText().toStdString(), false);
+      removePath(m_ui.runs->getText().toStdString()), false);
   if (wsNames.size() == 0) {
     QMessageBox::critical(
         this, "No data to fit",

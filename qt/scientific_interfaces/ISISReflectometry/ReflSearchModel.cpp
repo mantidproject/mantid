@@ -157,7 +157,7 @@ Provide flags on an index by index basis
 */
 Qt::ItemFlags ReflSearchModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
-    return 0;
+    return nullptr;
   else
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }

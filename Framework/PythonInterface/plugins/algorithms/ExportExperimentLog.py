@@ -557,5 +557,6 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return localtimestr
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ExportExperimentLog)

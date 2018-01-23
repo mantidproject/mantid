@@ -346,7 +346,7 @@ void AlignAndFocusPowder::exec() {
     if (tolerance > 0.) {
       g_log.information() << "running CompressEvents(Tolerance=" << tolerance
                           << ") started at "
-                          << Kernel::DateAndTime::getCurrentTime() << "\n";
+                          << Types::Core::DateAndTime::getCurrentTime() << "\n";
       API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
       compressAlg->setProperty("InputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
@@ -369,7 +369,7 @@ void AlignAndFocusPowder::exec() {
 
     g_log.information() << "running CropWorkspace(TOFmin=" << xmin
                         << ", TOFmax=" << xmax << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
     cropAlg->setProperty("InputWorkspace", m_outputW);
     cropAlg->setProperty("OutputWorkspace", m_outputW);
@@ -390,7 +390,7 @@ void AlignAndFocusPowder::exec() {
     if (m_outputEW->getNumberEvents() > 0) {
       g_log.information() << "running RemovePromptPulse(Width="
                           << removePromptPulseWidth << ") started at "
-                          << Kernel::DateAndTime::getCurrentTime() << "\n";
+                          << Types::Core::DateAndTime::getCurrentTime() << "\n";
       API::IAlgorithm_sptr filterPAlg =
           createChildAlgorithm("RemovePromptPulse");
       filterPAlg->setProperty("InputWorkspace", m_outputW);
@@ -407,7 +407,7 @@ void AlignAndFocusPowder::exec() {
 
   if (maskBinTableWS) {
     g_log.information() << "running MaskBinsFromTable started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr alg = createChildAlgorithm("MaskBinsFromTable");
     alg->setProperty("InputWorkspace", m_outputW);
     alg->setProperty("OutputWorkspace", m_outputW);
@@ -420,7 +420,7 @@ void AlignAndFocusPowder::exec() {
 
   if (m_maskWS) {
     g_log.information() << "running MaskDetectors started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
     maskAlg->setProperty("Workspace", m_outputW);
     maskAlg->setProperty("MaskedWorkspace", m_maskWS);
@@ -437,7 +437,7 @@ void AlignAndFocusPowder::exec() {
 
   if (m_calibrationWS) {
     g_log.information() << "running AlignDetectors started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
     alignAlg->setProperty("InputWorkspace", m_outputW);
     alignAlg->setProperty("OutputWorkspace", m_outputW);
@@ -458,7 +458,7 @@ void AlignAndFocusPowder::exec() {
   if (LRef > 0.) {
     g_log.information() << "running UnwrapSNS(LRef=" << LRef << ",Tmin=" << tmin
                         << ",Tmax=" << tmax << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr removeAlg = createChildAlgorithm("UnwrapSNS");
     removeAlg->setProperty("InputWorkspace", m_outputW);
     removeAlg->setProperty("OutputWorkspace", m_outputW);
@@ -489,7 +489,7 @@ void AlignAndFocusPowder::exec() {
     if (!isEmpty(maxwl))
       g_log.information() << ", WavelengthMax=" << maxwl;
     g_log.information() << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
     API::IAlgorithm_sptr removeAlg = createChildAlgorithm("CropWorkspace");
     removeAlg->setProperty("InputWorkspace", m_outputW);
@@ -504,7 +504,7 @@ void AlignAndFocusPowder::exec() {
   } else if (DIFCref > 0.) {
     g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                         << ",K=3.22) started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     EventWorkspace_sptr ews =
         boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
@@ -628,7 +628,7 @@ void AlignAndFocusPowder::exec() {
   if ((m_outputEW) && (tolerance > 0.)) {
     g_log.information() << "running CompressEvents(Tolerance=" << tolerance
                         << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
     compressAlg->setProperty("InputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
@@ -664,7 +664,7 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::editInstrument(
     std::vector<specnum_t> specids, std::vector<double> l2s,
     std::vector<double> phis) {
   g_log.information() << "running EditInstrumentGeometry started at "
-                      << Kernel::DateAndTime::getCurrentTime() << "\n";
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
   API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
   editAlg->setProperty("Workspace", ws);
@@ -696,7 +696,7 @@ AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
   }
 
   g_log.information() << "running DiffractionFocussing started at "
-                      << Kernel::DateAndTime::getCurrentTime() << "\n";
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
   API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", ws);
@@ -717,7 +717,7 @@ AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws,
                                   std::string target) {
   g_log.information() << "running ConvertUnits(Target=" << target
                       << ") started at "
-                      << Kernel::DateAndTime::getCurrentTime() << "\n";
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
   API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
   convert2Alg->setProperty("InputWorkspace", matrixws);
@@ -741,7 +741,7 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
                         << ", LogBinning=" << (m_resampleX < 0) << ", dMin("
                         << m_dmins.size() << "), dmax(" << m_dmaxs.size()
                         << ")) started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
     alg->setProperty("InputWorkspace", matrixws);
     alg->setProperty("OutputWorkspace", matrixws);
@@ -766,7 +766,7 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
     for (double param : m_params)
       g_log.information() << param << " ";
     g_log.information() << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
     rebin3Alg->setProperty("InputWorkspace", matrixws);
     rebin3Alg->setProperty("OutputWorkspace", matrixws);
@@ -943,6 +943,9 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
     AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
     this->setPropertyValue("GroupingWorkspace", name);
   }
+
+  if (calFilename.empty())
+    return;
 
   g_log.information() << "Loading Calibration file \"" << calFilename << "\"\n";
 

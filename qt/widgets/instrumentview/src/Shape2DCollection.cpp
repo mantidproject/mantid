@@ -18,8 +18,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 Shape2DCollection::Shape2DCollection()
-    : Shape2D(), m_wx(0), m_wy(0), m_h(0), m_currentShape(NULL), m_currentCP(0),
-      m_overridingCursor(false) {}
+    : Shape2D(), m_wx(0), m_wy(0), m_h(0), m_currentShape(nullptr),
+      m_currentCP(0), m_overridingCursor(false) {}
 
 Shape2DCollection::~Shape2DCollection() {
   foreach (Shape2D *shape, m_shapes) { delete shape; }
@@ -110,7 +110,7 @@ void Shape2DCollection::removeShape(Shape2D *shape, bool sendSignal) {
 void Shape2DCollection::removeShapes(const QList<Shape2D *> &shapeList) {
   foreach (Shape2D *shape, shapeList) {
     if (shape == m_currentShape) {
-      m_currentShape = NULL;
+      m_currentShape = nullptr;
     }
     removeShape(shape, false);
   }
@@ -180,7 +180,7 @@ Shape2D *Shape2DCollection::createShape(const QString &type, int x,
   QStringList complexType = type.split(' ', QString::SkipEmptyParts);
 
   if (complexType.size() < 2)
-    return NULL;
+    return nullptr;
 
   QString mainType = complexType[0];
 
@@ -204,7 +204,7 @@ void Shape2DCollection::deselectAll() {
     shape->setSelected(false);
   }
   m_selectedShapes.clear();
-  m_currentShape = NULL;
+  m_currentShape = nullptr;
   if (m_overridingCursor) {
     m_overridingCursor = false;
     QApplication::restoreOverrideCursor();
@@ -452,7 +452,7 @@ void Shape2DCollection::edit(Shape2D *shape) {
 void Shape2DCollection::finishEdit() {
   if (m_currentShape) {
     m_currentShape->edit(false);
-    m_currentShape = NULL;
+    m_currentShape = nullptr;
   }
 }
 
@@ -509,7 +509,7 @@ void Shape2DCollection::deselectControlPoint() {
 void Shape2DCollection::removeCurrentShape() {
   if (m_currentShape) {
     this->removeShape(m_currentShape);
-    m_currentShape = NULL;
+    m_currentShape = nullptr;
     emit shapesDeselected();
   }
 }
@@ -539,7 +539,7 @@ void Shape2DCollection::clear() {
   foreach (Shape2D *shape, m_shapes) { delete shape; }
   m_shapes.clear();
   m_selectedShapes.clear();
-  m_currentShape = NULL;
+  m_currentShape = nullptr;
   emit shapesDeselected();
 }
 
@@ -741,7 +741,7 @@ void Shape2DCollection::eraseFree(const QPolygonF &polygon) {
  */
 void Shape2DCollection::loadFromProject(const std::string &lines) {
   API::TSVSerialiser tsv(lines);
-  for (auto shapeLines : tsv.sections("shape")) {
+  for (const auto &shapeLines : tsv.sections("shape")) {
     Shape2D *shape = Shape2D::loadFromProject(shapeLines);
     m_shapes.push_back(shape);
     emit shapeCreated();

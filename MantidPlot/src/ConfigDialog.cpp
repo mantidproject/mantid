@@ -77,7 +77,7 @@ Description          : Preferences dialog
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
-#include "MantidQtWidgets/Common/MdPlottingCmapsProvider.h"
+#include "MdPlottingCmapsProvider.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
 
@@ -716,7 +716,7 @@ void ConfigDialog::initMantidPage() {
 
   // Populate boxes
   auto faclist = cfgSvc.getFacilityNames();
-  for (auto it : faclist) {
+  for (const auto &it : faclist) {
     facility->addItem(QString::fromStdString(it));
   }
 
@@ -796,7 +796,7 @@ void ConfigDialog::initMdPlottingGeneralTab() {
   generalTabLayout->addWidget(label);
 
   // Set the color maps
-  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  MdPlottingCmapsProvider mdPlottingCmapsProvider;
   QStringList colorMapNames;
   QStringList colorMapFiles;
   mdPlottingCmapsProvider.getColorMapsForMdPlotting(colorMapNames,
@@ -879,7 +879,7 @@ void ConfigDialog::initMdPlottingVsiTab() {
 
   // Set the color map selection for the VSI
   QStringList maps;
-  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  MdPlottingCmapsProvider mdPlottingCmapsProvider;
   mdPlottingCmapsProvider.getColorMapsForVSI(maps);
 
   MantidQt::API::MdConstants mdConstants;
@@ -1197,7 +1197,7 @@ void ConfigDialog::populateProgramTree() {
 
 void ConfigDialog::updateProgramTree() {
   // Store into a map ready to go into config service when apply is clicked
-  for (const auto itr : m_sendToSettings) {
+  for (const auto &itr : m_sendToSettings) {
     // creating the map of kvps needs to happen first as createing the item
     // requires them.
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
@@ -1223,7 +1223,7 @@ void ConfigDialog::updateChildren(
     QTreeWidgetItem *program) {
   program->takeChildren();
   // get the current program's (itr) keys and values (pItr)
-  for (const auto pItr : programKeysAndDetails) {
+  for (const auto &pItr : programKeysAndDetails) {
     QTreeWidgetItem *item = new QTreeWidgetItem(program);
     QString itemText = QString("   ")
                            .append(QString::fromStdString(pItr.first))
@@ -1242,7 +1242,7 @@ void ConfigDialog::updateSendToTab() {
   std::vector<std::string> programNames =
       cfgSvc.getKeys("workspace.sendto.name");
 
-  for (const auto itr : m_sendToSettings) {
+  for (const auto &itr : m_sendToSettings) {
     for (size_t i = 0; i < programNames.size(); ++i) {
       if (programNames[i] == itr.first) {
         // The selected program hasn't been deleted so set to blank string (all
@@ -1255,7 +1255,7 @@ void ConfigDialog::updateSendToTab() {
 
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
 
-    for (const auto pItr : programKeysAndDetails) {
+    for (const auto &pItr : programKeysAndDetails) {
       if (pItr.second != "")
         cfgSvc.setString("workspace.sendto." + itr.first + "." + pItr.first,
                          pItr.second);
@@ -1289,7 +1289,7 @@ void ConfigDialog::refreshTreeCategories() {
   widgetMap categories; // Keeps track of categories added to the tree
 
   // Loop over all categories loaded into Mantid
-  for (const auto i : categoryMap) {
+  for (const auto &i : categoryMap) {
 
     QString catNames = QString::fromStdString(i.first);
     // Start recursion down building tree from names
@@ -1968,7 +1968,7 @@ void ConfigDialog::initFittingPage() {
 
   lblPeaksColor = new QLabel();
   multiPeakLayout->addWidget(lblPeaksColor);
-  boxPeaksColor = new ColorBox(0);
+  boxPeaksColor = new ColorBox(nullptr);
   boxPeaksColor->setCurrentIndex(app->peakCurvesColor);
   multiPeakLayout->addWidget(boxPeaksColor);
 
@@ -2465,8 +2465,8 @@ void ConfigDialog::apply() {
   sep.replace(tr("SPACE"), " ");
   sep.replace("\\s", " ");
 
-  if (sep.contains(QRegExp("[0-9.eE+-]")) != 0) {
-    QMessageBox::warning(0, tr("MantidPlot - Import options error"),
+  if (sep.contains(QRegExp("[0-9.eE+-]"))) {
+    QMessageBox::warning(nullptr, tr("MantidPlot - Import options error"),
                          tr("The separator must not contain the following "
                             "characters: 0-9eE.+-"));
     return;
@@ -2591,9 +2591,10 @@ void ConfigDialog::apply() {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QList<MdiSubWindow *> windows = app->windowsList();
     foreach (MdiSubWindow *w, windows) {
+      auto oldLocale = w->locale();
       w->setLocale(locale);
       if (auto table = dynamic_cast<Table *>(w))
-        table->updateDecimalSeparators();
+        table->updateDecimalSeparators(oldLocale);
       else if (auto matrix = dynamic_cast<Matrix *>(w))
         matrix->resetView();
     }
@@ -2871,7 +2872,7 @@ QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent) {
     }
 
     QStringList childResults = buildHiddenCategoryString(item);
-    for (const auto it : childResults) {
+    for (const auto &it : childResults) {
       results.append(item->text(0) + "\\" + it);
     }
   }

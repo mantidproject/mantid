@@ -69,7 +69,7 @@ public:
     Mantid::coord_t coord1[2] = {-1, -1};
     float expectedSignal = 1;
     float expectedErrorSq = 2;
-    inserter.insertMDEvent(expectedSignal, expectedErrorSq, 1, 1, coord1);
+    inserter.insertMDEvent(expectedSignal, expectedErrorSq, 0, 1, coord1);
     ws2d->refreshCache();
 
     // Check the mdevent via the parent box.
@@ -78,7 +78,7 @@ public:
     TS_ASSERT_EQUALS(expectedErrorSq, ws2d->getBox()->getErrorSquared());
 
     // Add another md event
-    inserter.insertMDEvent(expectedSignal, expectedErrorSq, 1, 1, coord1);
+    inserter.insertMDEvent(expectedSignal, expectedErrorSq, 0, 1, coord1);
     ws2d->refreshCache();
     TS_ASSERT_EQUALS(2, ws2d->getNPoints());
   }
@@ -101,7 +101,7 @@ public:
     Mantid::coord_t coord1[2] = {-1, -1};
     float expectedSignal = 1;
     float expectedErrorSq = 2;
-    inserter.insertMDEvent(expectedSignal, expectedErrorSq, 1, 1, coord1);
+    inserter.insertMDEvent(expectedSignal, expectedErrorSq, 0, 1, coord1);
     ws2d->refreshCache();
 
     // Check the mdevent via the parent box.
@@ -110,7 +110,7 @@ public:
     TS_ASSERT_EQUALS(expectedErrorSq, ws2d->getBox()->getErrorSquared());
 
     // Add another md event
-    inserter.insertMDEvent(expectedSignal, expectedErrorSq, 1, 1, coord1);
+    inserter.insertMDEvent(expectedSignal, expectedErrorSq, 0, 1, coord1);
     ws2d->refreshCache();
     TS_ASSERT_EQUALS(2, ws2d->getNPoints());
   }

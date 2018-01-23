@@ -1,7 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
-
 from mantid.kernel import (V3D, Quat)
 from mantid.api import AnalysisDataService
 from sans.common.general_functions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log,
@@ -168,6 +166,14 @@ class SANSFunctionsTest(unittest.TestCase):
         output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB)
         # Assert
         self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
+
+    def test_that_creates_correct_transmission_workspace_name(self):
+        # Arrange
+        state = SANSFunctionsTest._get_state()
+        # Act
+        output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB, data_type = 'Sample', transmission = True)
+        # Assert
+        self.assertTrue("12345_trans_Sample_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
 
     def test_that_sanitises_instrument_names(self):
         name1 = sanitise_instrument_name("LOQ_trans")

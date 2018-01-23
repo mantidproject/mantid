@@ -1099,7 +1099,7 @@ void LeBailFit::parseBraggPeaksParametersTable() {
   /* FIXME This section is disabled.  It should be a new ticket to turn on this
   option.
   bool userexcludepeaks = false;
-  if (colnames.size() >= 5 && colnames[4].compare("Include/Exclude") == 0)
+  if (colnames.size() >= 5 && colnames[4] == "Include/Exclude")
   {
   userexcludepeaks = true;
   }
@@ -1297,7 +1297,7 @@ void LeBailFit::exportInstrumentParameterToTable(
   std::map<std::string, double>::iterator opiter;
   for (paramiter = parammap.begin(); paramiter != parammap.end(); ++paramiter) {
     std::string parname = paramiter->first;
-    if (parname.compare("Height")) {
+    if (parname != "Height") {
       // Export every parameter except "Height"
 
       // a) current value

@@ -51,7 +51,7 @@ public: // public constants and enums
 
 public: // public constructor, destructor and functions
   /// Default Constructor
-  IndirectTools(QWidget *parent = 0);
+  IndirectTools(QWidget *parent = nullptr);
   /// Destructor
   ~IndirectTools() override;
   /// Interface name

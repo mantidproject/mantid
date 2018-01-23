@@ -1,6 +1,7 @@
 #pylint: disable=W0403,R0902
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
+import numpy
 import time
 import random
 from HFIR_4Circle_Reduction.fourcircle_utility import *

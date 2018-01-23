@@ -1,10 +1,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IndirectBayesTab.h"
-
-using MantidQt::MantidWidgets::RangeSelector;
 
 namespace MantidQt {
 namespace CustomInterfaces {

@@ -1,9 +1,11 @@
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 try:
     import sqlite3
     has_sql = True
 except ImportError:
     has_sql = False
-    print "Error importing sqlite3. SQL will not work"
+    print("Error importing sqlite3. SQL will not work")
 
 import reporters
 import datetime
@@ -65,7 +67,7 @@ def get_TestResult_from_row(row):
     res = testresult.TestResult()
     res.testID = row[0]
     # ------ Get each entry in the table ---------
-    for i in xrange(len(TABLE_FIELDS)):
+    for i in range(len(TABLE_FIELDS)):
         res[TABLE_FIELDS[i]] = row[i+1]
 
     return (res)
@@ -210,9 +212,9 @@ def setup_database():
     """ Routine to set up the mysql database the first time.
     WARNING: THIS DELETES ANY TABLES ALREADY THERE
     """
-    print "Setting up SQL database at",get_database_filename()
+    print("Setting up SQL database at",get_database_filename())
     if os.path.exists(get_database_filename()):
-        print "Creating a backup at", get_database_filename()+".bak"
+        print("Creating a backup at", get_database_filename()+".bak")
         shutil.copyfile(get_database_filename(), get_database_filename()+".bak")
 
     db = SQLgetConnection()
@@ -222,7 +224,7 @@ def setup_database():
         c.execute("DROP TABLE TestRuns;")
         c.execute("DROP TABLE Revisions;")
     except:
-        print "Error dropping tables. Perhaps one does not exist (this is normal on first run)."
+        print("Error dropping tables. Perhaps one does not exist (this is normal on first run).")
 
     c.execute("""CREATE TABLE TestRuns (
     testID INTEGER PRIMARY KEY,
@@ -296,7 +298,7 @@ class SQLResultReporter(reporters.ResultReporter):
 #============================================================================================
 def generate_fake_data(num_extra = 0):
     """ Make up some data for a database """
-    print "Generating fake data..."
+    print("Generating fake data...")
     setup_database()
     rep = SQLResultReporter()
     for timer in [9400, 9410,9411, 9412] + range(9420,9440) + [9450, 9466] + range(9450, 9450+num_extra):
@@ -313,7 +315,7 @@ def generate_fake_data(num_extra = 0):
                 result["status"] = ["failed","success"][result["success"]]
                 result["revision"] = rev
                 rep.dispatchResults(result)
-    print "... Fake data made."
+    print("... Fake data made.")
 
 
 #=====================================================================
@@ -322,5 +324,4 @@ if __name__ == "__main__":
     generate_fake_data()
 
     res = get_latest_result()
-    print res
-
+    print(res)

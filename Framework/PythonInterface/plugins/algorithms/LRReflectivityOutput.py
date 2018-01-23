@@ -240,4 +240,5 @@ class LRReflectivityOutput(PythonAlgorithm):
             if AnalysisDataService.doesExist(ws + '_scaled'):
                 AnalysisDataService.remove(ws + '_scaled')
 
+
 AlgorithmFactory.subscribe(LRReflectivityOutput)

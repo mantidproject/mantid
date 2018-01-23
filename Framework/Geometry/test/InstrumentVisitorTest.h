@@ -3,21 +3,20 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include <set>
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <algorithm>
 #include <boost/make_shared.hpp>
+#include <set>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -31,7 +30,7 @@ makeParameterized(boost::shared_ptr<const Instrument> baseInstrument) {
   return boost::make_shared<const Instrument>(
       baseInstrument, boost::make_shared<ParameterMap>());
 }
-}
+} // namespace
 
 class InstrumentVisitorTest : public CxxTest::TestSuite {
 public:
@@ -291,42 +290,8 @@ public:
     TS_ASSERT_EQUALS(visitor.detectorIds()->at(0), 1); // index 0 is ID 1
   }
 
-  void test_visitor_drops_detectors_without_id() {
-    /*
-     We have to go via DetectorInfo::indexOf to get the index of a detector.
-     if this throws because the detector has an invalid id, we are forced to
-     drop it.
-     Some IDFs i.e. SNAP have montiors with detector ids <  0.
-    */
-
-    // Create a very basic instrument to visit
-    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
-                                           V3D(10, 0, 0) /*sample pos*/
-                                           ,
-                                           V3D(11, 0, 0) /*detector position*/);
-
-    // Create an add a duplicate detector
-    Detector *det =
-        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
-    visitee->add(det);
-    visitee->markAsDetector(det);
-
-    InstrumentVisitor visitor(visitee);
-
-    // Visit everything
-    visitor.walkInstrument();
-
-    size_t expectedSize = 0;
-    ++expectedSize; // only detector
-    ++expectedSize; // source
-    ++expectedSize; // sample
-    ++expectedSize; // instrument
-    // Note no second detector counted
-    TS_ASSERT_EQUALS(visitor.size(), expectedSize);
-  }
-
   void test_visitation_of_rectangular_detector() {
-
+    using Mantid::Beamline::ComponentType;
     // Need confidence that this works properly for RectangularDetectors
     const int nPixelsWide = 10; // Gives 10*10 detectors in total
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
@@ -334,8 +299,42 @@ public:
     InstrumentVisitor visitor(instrument);
     visitor.walkInstrument();
 
+    auto wrappers =
+        InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
+    auto compInfo = std::move(std::get<0>(wrappers));
+    auto detInfo = std::move(std::get<1>(wrappers));
+
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
                       visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
+
+    using Mantid::Beamline::ComponentType;
+
+    const size_t bankIndex = compInfo->indexOfAny("bank1");
+    TS_ASSERT_EQUALS(compInfo->componentType(bankIndex),
+                     ComponentType::Rectangular); // Bank is rectangular
+    TS_ASSERT_DIFFERS(
+        compInfo->componentType(compInfo->source()),
+        ComponentType::Rectangular); // Source is not a rectangular bank
+    TS_ASSERT_DIFFERS(compInfo->componentType(0),
+                      ComponentType::Rectangular); //  A detector is never a
+                                                   //  bank, let alone a
+                                                   //  detector
+  }
+
+  void test_visitation_of_non_rectangular_detectors() {
+    using Mantid::Beamline::ComponentType;
+
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentCylindrical(1 /*n banks*/);
+    auto wrappers =
+        InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
+    auto compInfo = std::move(std::get<0>(wrappers));
+    auto detInfo = std::move(std::get<1>(wrappers));
+
+    // Nothing should be marked as a rectangular bank
+    for (size_t index = 0; index < compInfo->size(); ++index) {
+      TS_ASSERT(compInfo->componentType(index) != ComponentType::Rectangular);
+    }
   }
 
   void test_parent_indices() {
@@ -388,6 +387,30 @@ public:
                       &subAssemblyShape);
     TSM_ASSERT_EQUALS("Shape object should be reused", &detectorShape,
                       &componentInfo->shape(1 /*another detector*/));
+  }
+
+  void test_names() {
+
+    const int nPixelsWide = 10; // Gives 10*10 detectors in total
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
+
+    // Visit everything
+    auto wrappers =
+        InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
+    auto componentInfo = std::move(std::get<0>(wrappers));
+
+    // Check root name
+    TS_ASSERT_EQUALS("basic_rect", componentInfo->name(componentInfo->root()));
+    // Backward check that we get the right index
+    TS_ASSERT_EQUALS(componentInfo->indexOfAny("basic_rect"),
+                     componentInfo->root());
+
+    // Check all names are the same in old instrument and component info
+    for (size_t index = 0; index < componentInfo->size(); ++index) {
+      TS_ASSERT_EQUALS(componentInfo->componentID(index)->getName(),
+                       componentInfo->name(index));
+    }
   }
 
   void test_purge_scale_factors() {

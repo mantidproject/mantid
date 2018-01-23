@@ -80,7 +80,7 @@ void MagFormFactorCorrection::exec() {
   }
 
   // Parses the ion name and get handle to MagneticIon object
-  const MagneticIon ion = getMagneticIon(ionNameStr);
+  const MagneticIon &ion = getMagneticIon(ionNameStr);
   // Gets the vector of form factor values
   std::vector<double> FF;
   FF.reserve(Qvals.size());

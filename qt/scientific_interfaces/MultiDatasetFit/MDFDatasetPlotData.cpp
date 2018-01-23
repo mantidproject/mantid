@@ -1,5 +1,5 @@
 #include "MDFDatasetPlotData.h"
-#include "MantidQtWidgets/Common/ErrorCurve.h"
+#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,7 +22,7 @@ namespace MDF {
 DatasetPlotData::DatasetPlotData(const QString &wsName, int wsIndex,
                                  const QString &outputWSName)
     : m_dataCurve(new QwtPlotCurve(wsName + QString(" (%1)").arg(wsIndex))),
-      m_dataErrorCurve(NULL), m_calcCurve(NULL), m_diffCurve(NULL),
+      m_dataErrorCurve(nullptr), m_calcCurve(nullptr), m_diffCurve(nullptr),
       m_showDataErrorBars(false) {
   // get the data workspace
   auto ws = Mantid::API::AnalysisDataService::Instance()

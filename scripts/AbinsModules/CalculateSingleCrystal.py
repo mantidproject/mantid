@@ -5,9 +5,9 @@ import AbinsModules
 class CalculateSingleCrystal(AbinsModules.IOmodule):
     def __init__(self, filename=None, abins_data=None, temperature=None):
         """
-        @param filename:  name of input DFT filename
-        @param abins_data: object of type AbinsData with data from phonon DFT file
-        @param temperature:  temperature in K
+        :param filename:  name of input DFT filename
+        :param abins_data: object of type AbinsData with data from phonon DFT file
+        :param temperature:  temperature in K
         """
         if not isinstance(abins_data, AbinsModules.AbinsData):
             raise ValueError("Object of AbinsData was expected.")
@@ -37,7 +37,7 @@ class CalculateSingleCrystal(AbinsModules.IOmodule):
         Calculates data needed for calculation of S(Q, omega) in case experimental sample is in
         the form of single crystal.
         Saves calculated data to an hdf file.
-        @return:  object of type SingleCrystalData
+        :returns:  object of type SingleCrystalData
         """
 
         data = self._calculate_crystal()

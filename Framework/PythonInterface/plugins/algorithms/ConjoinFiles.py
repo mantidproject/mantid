@@ -67,4 +67,5 @@ class ConjoinFiles(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", mtd[wksp])
 
+
 AlgorithmFactory.subscribe(ConjoinFiles)

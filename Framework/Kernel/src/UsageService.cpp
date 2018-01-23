@@ -215,19 +215,20 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-  // paraview version or zero
-  if (ConfigService::Instance().pvPluginsAvailable()) {
-    message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
-  } else {
-    message["ParaView"] = 0;
-  }
+#if defined(MAKE_VATES)
+  // paraview
+  message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
+#else
+  message["ParaView"] = 0;
+#endif
 
   // mantid version and sha1
   message["mantidVersion"] = MantidVersion::version();
   message["mantidSha1"] = MantidVersion::revisionFull();
 
   // mantid version and sha1
-  message["dateTime"] = DateAndTime::getCurrentTime().toISO8601String();
+  message["dateTime"] =
+      Types::Core::DateAndTime::getCurrentTime().toISO8601String();
 
   message["application"] = m_application;
 
@@ -263,7 +264,7 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
       thisFeature["count"] = featureItem.second;
       features.append(thisFeature);
     }
-    if (features.size() > 0) {
+    if (!features.empty()) {
       message["features"] = features;
       return writer.write(message);
     }

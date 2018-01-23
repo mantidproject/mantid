@@ -1,26 +1,29 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 
-#include "ui_IqtFit.h"
-#include "IndirectDataAnalysisTab.h"
+#include "IndirectFitAnalysisTab.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "ui_IqtFit.h"
+
+#include <boost/weak_ptr.hpp>
 
 namespace Mantid {
 namespace API {
 class IFunction;
 class CompositeFunction;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport IqtFit : public IndirectDataAnalysisTab {
+
+class DLLExport IqtFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
-  IqtFit(QWidget *parent = 0);
+  IqtFit(QWidget *parent = nullptr);
 
 private:
   void setup() override;
@@ -28,10 +31,10 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
-private slots:
+protected slots:
   void typeSelection(int index);
   void newDataLoaded(const QString wsName);
-  void updatePlot();
+  void updatePreviewPlots() override;
   void specMinChanged(int value);
   void specMaxChanged(int value);
   void xMinSelected(double val);
@@ -39,43 +42,36 @@ private slots:
   void backgroundSelected(double val);
   void propertyChanged(QtProperty *, double);
   void checkBoxUpdate(QtProperty *prop, bool checked);
-  void plotGuessChanged(bool);
   void updateCurrentPlotOption(QString newOption);
   void singleFit();
-  void plotGuess(QtProperty *);
+  void plotGuess();
   void fitContextMenu(const QPoint &);
-  void fixItem();
-  void unFixItem();
-  void singleFitComplete(bool error);
-  void algorithmComplete(bool error);
+  void algorithmComplete(bool error) override;
   void plotWorkspace();
   void saveResult();
-  void plotCurrentPreview();
 
 private:
+  void disablePlotGuess() override;
+  void enablePlotGuess() override;
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tie = false);
-  boost::shared_ptr<Mantid::API::IFunction>
-  createExponentialFunction(const QString &name, bool tie = false);
-  QtProperty *createExponential(const QString &);
-  QtProperty *createStretchedExp(const QString &);
-  void setDefaultParameters(const QString &name);
+  void setDefaultParameters();
   QString fitTypeString() const;
   void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
   QString minimizerString(QString outputName) const;
   std::string constructBaseName(const std::string &inputName,
                                 const std::string &fitType, const bool &multi,
-                                const long &specMin, const long &specMax);
+                                const size_t &specMin, const size_t &specMax);
+  Mantid::API::IAlgorithm_sptr
+  iqtFitAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWs,
+                  const size_t &specMin, const size_t &specMax);
+  QVector<QString> indexToFitFunctions(const int &fitTypeIndex) const;
+  Mantid::API::IAlgorithm_sptr replaceInfinityAndNaN(const std::string &wsName);
+  Mantid::API::IFunction_sptr
+  getFunction(const QString &functionName) const override;
 
   Ui::IqtFit m_uiForm;
-  QtStringPropertyManager *m_stringManager;
-  QtTreePropertyBrowser *m_iqtFTree;           ///< IqtFit Property Browser
-  QtDoublePropertyManager *m_iqtFRangeManager; ///< StartX and EndX for IqtFit
-  QMap<QtProperty *, QtProperty *> m_fixedProps;
-  Mantid::API::MatrixWorkspace_sptr m_iqtFInputWS;
-  Mantid::API::MatrixWorkspace_sptr m_iqtFOutputWS;
-  Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
-  QString m_iqtFInputWSName;
+  QtTreePropertyBrowser *m_iqtFTree; ///< IqtFit Property Browser
   QString m_ties;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;

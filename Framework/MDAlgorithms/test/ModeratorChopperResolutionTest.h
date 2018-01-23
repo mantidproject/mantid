@@ -22,7 +22,7 @@ public:
 
     boost::shared_ptr<CachedExperimentInfo> testCachedExperimentInfo =
         createTestCachedExperimentInfo();
-    ModeratorChopperResolution *modChop(NULL);
+    ModeratorChopperResolution *modChop(nullptr);
 
     TS_ASSERT_THROWS_NOTHING(
         modChop = new ModeratorChopperResolution(*testCachedExperimentInfo));
@@ -47,7 +47,7 @@ private:
         "frame"));
     Detector *det1 = new Detector("det1", 1, instrument.get());
     const V3D detPos(1, 1, 1);
-    Object_sptr shape = ComponentCreationHelper::createCappedCylinder(
+    auto shape = ComponentCreationHelper::createCappedCylinder(
         0.012, 0.01, detPos, V3D(0, 1, 0), "cyl");
     det1->setShape(shape);
     instrument->add(det1);

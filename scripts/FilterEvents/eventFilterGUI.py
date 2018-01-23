@@ -1187,7 +1187,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def helpClicked(self):
         from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("FilterEventUI")
+        showCustomInterfaceHelp("Filter Events")
 
     def _resetGUI(self, resetfilerun=False):
         """ Reset GUI including all text edits and etc.

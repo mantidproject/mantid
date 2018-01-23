@@ -31,7 +31,7 @@ public:
     auto numbers = {2, 1, 4, 5};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     return Kernel::make_unique<SpectrumNumberTranslator>(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              ranks, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -57,7 +57,17 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
+                             1, PartitionIndex(0),
+                             Partitioner::MonitorStrategy::CloneOnEachPartition,
+                             std::vector<GlobalSpectrumIndex>{}),
+        PartitionIndex(0)));
+  }
+
+  void test_construct_empty() {
+    std::vector<SpectrumNumber> spectrumNumbers;
+    TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -69,18 +79,70 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     // This works, but functionality is limited, see tests below.
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0)));
   }
 
+  void test_construct_parent() {
+    auto numbers = {1, 2, 3, 4};
+    std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
+    SpectrumNumberTranslator parent(
+        spectrumNumbers, RoundRobinPartitioner(
+                             1, PartitionIndex(0),
+                             Partitioner::MonitorStrategy::CloneOnEachPartition,
+                             std::vector<GlobalSpectrumIndex>{}),
+        PartitionIndex(0));
+
+    TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(spectrumNumbers, parent));
+    spectrumNumbers.erase(spectrumNumbers.begin() + 1);
+    TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(spectrumNumbers, parent));
+    spectrumNumbers.erase(spectrumNumbers.begin());
+    TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(spectrumNumbers, parent));
+    spectrumNumbers.erase(spectrumNumbers.begin());
+    TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(spectrumNumbers, parent));
+    spectrumNumbers.erase(spectrumNumbers.begin());
+    TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(spectrumNumbers, parent));
+  }
+
+  void test_construct_parent_reorder() {
+    auto numbers = {1, 2, 3, 4};
+    std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
+    SpectrumNumberTranslator parent(
+        spectrumNumbers, RoundRobinPartitioner(
+                             1, PartitionIndex(0),
+                             Partitioner::MonitorStrategy::CloneOnEachPartition,
+                             std::vector<GlobalSpectrumIndex>{}),
+        PartitionIndex(0));
+
+    std::iter_swap(spectrumNumbers.begin(), spectrumNumbers.end() - 1);
+    SpectrumNumberTranslator reordered(spectrumNumbers, parent);
+    TS_ASSERT_EQUALS(reordered.spectrumNumber(0), 4);
+    TS_ASSERT_EQUALS(reordered.spectrumNumber(3), 1);
+  }
+
+  void test_construct_parent_bad_spectrum_numbers() {
+    auto numbers = {1, 2, 3, 4};
+    std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
+    SpectrumNumberTranslator parent(
+        spectrumNumbers, RoundRobinPartitioner(
+                             1, PartitionIndex(0),
+                             Partitioner::MonitorStrategy::CloneOnEachPartition,
+                             std::vector<GlobalSpectrumIndex>{}),
+        PartitionIndex(0));
+
+    spectrumNumbers[1] = 7; // 7 is not in parent.
+    TS_ASSERT_THROWS(SpectrumNumberTranslator(spectrumNumbers, parent),
+                     std::out_of_range);
+  }
+
   void test_access_bad_spectrum_numbers() {
     auto numbers = {1, 2, 3, 3};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -107,7 +169,7 @@ public:
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -133,7 +195,7 @@ public:
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -182,8 +244,9 @@ public:
     auto translator = makeTranslator(1, 0);
     auto set = translator->makeIndexSet(SpectrumNumber(1), SpectrumNumber(5));
     TS_ASSERT_EQUALS(set.size(), 4);
-    TS_ASSERT_EQUALS(set[0], 0);
-    TS_ASSERT_EQUALS(set[1], 1);
+    // IndexSet is ordered by spectrum number.
+    TS_ASSERT_EQUALS(set[0], 1);
+    TS_ASSERT_EQUALS(set[1], 0);
     TS_ASSERT_EQUALS(set[2], 2);
     TS_ASSERT_EQUALS(set[3], 3);
   }
@@ -269,8 +332,9 @@ public:
     auto translator = makeTranslator(1, 0);
     auto set1 = translator->makeIndexSet(makeSpectrumNumbers({1, 2}));
     TS_ASSERT_EQUALS(set1.size(), 2);
-    TS_ASSERT_EQUALS(set1[0], 0);
-    TS_ASSERT_EQUALS(set1[1], 1);
+    // Order of spectrum numbers preserved.
+    TS_ASSERT_EQUALS(set1[0], 1);
+    TS_ASSERT_EQUALS(set1[1], 0);
     auto set2 = translator->makeIndexSet(makeSpectrumNumbers({4, 5}));
     TS_ASSERT_EQUALS(set2.size(), 2);
     TS_ASSERT_EQUALS(set2[0], 2);
@@ -331,6 +395,31 @@ public:
     auto set2 = translator->makeIndexSet(makeGlobalSpectrumIndices({2, 3}));
     TS_ASSERT_EQUALS(set2.size(), 1);
     TS_ASSERT_EQUALS(set2[0], 1);
+  }
+
+  void test_construct_parent_3_ranks() {
+    auto parent = makeTranslator(3, 0);
+    auto numbers = {2, 1, 4, 5};
+    std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
+
+    SpectrumNumberTranslator translator1(spectrumNumbers, *parent);
+    TS_ASSERT_EQUALS(translator1.globalSize(), 4);
+    TS_ASSERT_EQUALS(translator1.localSize(), 2); // 2 and 5 are on this rank.
+
+    spectrumNumbers.erase(spectrumNumbers.begin());
+    SpectrumNumberTranslator translator2(spectrumNumbers, *parent);
+    TS_ASSERT_EQUALS(translator2.globalSize(), 3);
+    TS_ASSERT_EQUALS(translator2.localSize(), 1);
+
+    spectrumNumbers.erase(spectrumNumbers.begin());
+    SpectrumNumberTranslator translator3(spectrumNumbers, *parent);
+    TS_ASSERT_EQUALS(translator3.globalSize(), 2);
+    TS_ASSERT_EQUALS(translator3.localSize(), 1);
+
+    spectrumNumbers.erase(spectrumNumbers.end() - 1);
+    SpectrumNumberTranslator translator4(spectrumNumbers, *parent);
+    TS_ASSERT_EQUALS(translator4.globalSize(), 1);
+    TS_ASSERT_EQUALS(translator4.localSize(), 0);
   }
 };
 

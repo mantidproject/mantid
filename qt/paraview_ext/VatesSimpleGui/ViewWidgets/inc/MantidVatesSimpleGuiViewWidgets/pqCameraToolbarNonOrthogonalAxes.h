@@ -76,11 +76,11 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
 
 public:
   pqCameraToolbarNonOrthogonalAxes(const QString &title,
-                                   QWidget *parentObject = 0)
+                                   QWidget *parentObject = nullptr)
       : Superclass(title, parentObject) {
     this->constructor();
   }
-  pqCameraToolbarNonOrthogonalAxes(QWidget *parentObject = 0)
+  pqCameraToolbarNonOrthogonalAxes(QWidget *parentObject = nullptr)
       : Superclass(parentObject) {
     this->constructor();
   }

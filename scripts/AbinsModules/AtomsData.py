@@ -20,7 +20,7 @@ class AtomsDaTa(AbinsModules.GeneralData):
     def _append(self, item=None):
         """
         Adds one elements to the collection of atoms data.
-        @param item: element to be added
+        :param item: element to be added
         """
 
         if not isinstance(item, dict):
@@ -33,15 +33,15 @@ class AtomsDaTa(AbinsModules.GeneralData):
         if not item["symbol"] in AbinsModules.AbinsConstants.ALL_SYMBOLS:
             raise ValueError("Invalid value of symbol.")
 
-        # "fract_coord"
-        fract_coord = item["fract_coord"]
-        if not isinstance(fract_coord, np.ndarray):
+        # "coord"
+        coord = item["coord"]
+        if not isinstance(coord, np.ndarray):
             raise ValueError("Coordinates of an atom should have a form of a numpy array.")
-        if len(fract_coord.shape) != 1:
+        if len(coord.shape) != 1:
             raise ValueError("Coordinates should have a form of 1D numpy array.")
-        if fract_coord.shape[0] != 3:
+        if coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
-        if fract_coord.dtype.num != AbinsModules.AbinsConstants.FLOAT_ID:
+        if coord.dtype.num != AbinsModules.AbinsConstants.FLOAT_ID:
             raise ValueError("All coordinates should be real numbers.")
 
         # "sort"

@@ -1,6 +1,9 @@
 #include "MantidQtWidgets/SliceViewer/XYLimitsDialog.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidKernel/UnitLabel.h"
 #include <QIntValidator>
+
+using MantidQt::API::toQStringInternal;
 
 XYLimitsDialog::XYLimitsDialog(QWidget *parent) : QDialog(parent) {
   ui.setupUi(this);
@@ -20,14 +23,14 @@ XYLimitsDialog::~XYLimitsDialog() {}
  * @param dim : IMDDimension */
 void XYLimitsDialog::setXDim(Mantid::Geometry::IMDDimension_const_sptr dim) {
   ui.lblXName->setText(QString::fromStdString(dim->getName()));
-  ui.lblXUnits->setText(QString::fromStdWString(dim->getUnits().utf8()));
+  ui.lblXUnits->setText(toQStringInternal(dim->getUnits().utf8()));
 }
 
 /** Set the labels for the Y dimensions
  * @param dim : IMDDimension */
 void XYLimitsDialog::setYDim(Mantid::Geometry::IMDDimension_const_sptr dim) {
   ui.lblYName->setText(QString::fromStdString(dim->getName()));
-  ui.lblYUnits->setText(QString::fromStdWString(dim->getUnits().utf8()));
+  ui.lblYUnits->setText(toQStringInternal(dim->getUnits().utf8()));
 }
 
 //------------------------------------------------------------------------------------------

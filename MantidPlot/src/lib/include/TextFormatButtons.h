@@ -52,7 +52,7 @@ public:
    * \param parent parent widget
    */
   TextFormatButtons(QTextEdit *textEdit, Buttons buttons = Plot3D,
-                    QWidget *parent = 0);
+                    QWidget *parent = nullptr);
   void setButtons(Buttons btns);
 
 private:

@@ -6,6 +6,7 @@ Release Notes
    :maxdepth: 1
    :titlesonly:
 
+   v3.12.0 <v3.12.0/index>
    v3.11.0 <v3.11.0/index>
    v3.10.1 <v3.10.1/index>
    v3.10.0 <v3.10.0/index>

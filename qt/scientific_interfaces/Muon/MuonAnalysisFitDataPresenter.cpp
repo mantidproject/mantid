@@ -344,7 +344,7 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     }
   }
 
-  for (const auto runsVector : runNumberVectors) {
+  for (const auto &runsVector : runNumberVectors) {
     params.runs = runsVector;
     for (const auto &group : groups) {
       params.itemType = getItemType(group.toStdString());
@@ -367,9 +367,12 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 * If the workspace is already in the table
 * do nothing.
 * @param name :: the name of the workspace to add.
+* @param addToTable :: if to add the normalization data
+* to the MuonAnalysisTFNormalizations table
 */
-void MuonAnalysisFitDataPresenter::storeNormalization(std::string name) const {
-  if (m_isItTFAsymm) {
+void MuonAnalysisFitDataPresenter::storeNormalization(std::string name,
+                                                      bool addToTable) const {
+  if (addToTable) {
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(
             "MuonAnalysisTFNormalizations")) {
       Mantid::API::ITableWorkspace_sptr table =
@@ -380,6 +383,7 @@ void MuonAnalysisFitDataPresenter::storeNormalization(std::string name) const {
       table->addColumn("str", "name");
       table->addColumn("str", "method");
     }
+
     Mantid::API::ITableWorkspace_sptr table =
         boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
@@ -479,7 +483,13 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     err << "Failed to create analysis workspace " << name << ": " << ex.what();
     g_log.error(err.str());
   }
-  storeNormalization(name);
+  const auto grouping = m_grouping;
+  auto groupName = params.itemName;
+  if (std::find(grouping.groupNames.begin(), grouping.groupNames.end(),
+                groupName) != grouping.groupNames.end()) {
+
+    storeNormalization(name, true);
+  }
 
   return outputWS;
 }

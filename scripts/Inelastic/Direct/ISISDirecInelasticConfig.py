@@ -243,29 +243,11 @@ class UserProperties(object):
     # pylint: disable=R0912
     def check_input(self, instrument, start_date, cycle, rb_folder_or_id):
         """Verify that input is correct"""
-        if instrument not in INELASTIC_INSTRUMENTS:
-            raise RuntimeError("Instrument {0} has to be one of "
-                               "ISIS inelastic instruments".format(instrument))
-        if isinstance(start_date, str):
-            # the date of express -- let's make it long in the past
-            if start_date.lower() == 'none':
-                start_date = '19800101'
-                error = False
-            else:
-                start_date = start_date.replace('-', '')
-                if len(start_date) != 8:
-                    start_date = '20' + start_date
-                if len(start_date) == 8:
-                    error = False
-                else:
-                    error = True
-        else:
-            error = True
-        if error:
-            raise RuntimeError("Experiment start date should be defined as"
-                               " a sting in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
+        # Checks if instrument is inelastic and raises RuntimeError if not
+        self.validate_instrument(instrument)
 
-        #
+        # Checks if the date is valid and raises a RuntimeError if not
+        start_date = self.validate_date(start_date)
 
         def convert_cycle_int(cycle_int):
             if cycle_int > 999:  # Full cycle format 20151
@@ -311,6 +293,34 @@ class UserProperties(object):
             rb_exist = False
 
         return instrument, start_date, cycle, rb_folder_or_id, rb_exist
+
+#-----------------------------------------------------------------------------------------------
+
+    def validate_instrument(self, instrument):
+        if instrument not in INELASTIC_INSTRUMENTS:
+            raise RuntimeError("Instrument {0} has to be one of "
+                               "ISIS inelastic instruments".format(instrument))
+
+    def validate_date(self, start_date):
+        if isinstance(start_date, str):
+            # the date of express -- let's make it long in the past
+            if start_date.lower() == 'none':
+                start_date = '19800101'
+                error = False
+            else:
+                start_date = start_date.replace('-', '')
+                if len(start_date) != 8:
+                    start_date = '20' + start_date
+                if len(start_date) == 8:
+                    error = False
+                else:
+                    error = True
+        else:
+            error = True
+        if error:
+            raise RuntimeError("Experiment start date should be defined as"
+                               " a sting in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
+        return start_date
 
     def get_all_instruments(self):
         """ Return list of all instruments, user is working on during this cycle"""

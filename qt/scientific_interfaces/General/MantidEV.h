@@ -1,8 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 #define MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 
-#include <QtCore/QtCore>
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <QActionGroup>
 #include <QRunnable>
 #include <Poco/NObserver.h>
@@ -13,6 +12,9 @@
 #include "MantidEVWorker.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/SelectionNotificationService.h"
+
+class QSettings;
+class QThreadPool;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -192,7 +194,7 @@ class MantidEV : public API::UserSubWindow {
 
 public:
   /// Constructor
-  explicit MantidEV(QWidget *parent = 0);
+  explicit MantidEV(QWidget *parent = nullptr);
 
   /// Destructor
   ~MantidEV() override;

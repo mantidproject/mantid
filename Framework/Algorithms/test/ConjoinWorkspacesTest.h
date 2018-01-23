@@ -158,15 +158,18 @@ public:
   }
 
   void testMismatchedEventWorkspace() {
-    auto ws1 = setupMismatchedWorkspace(0, 2, "100,200,700");
-    auto ws2 = setupMismatchedWorkspace(3, 5, "100,200,1000");
+    setupMismatchedWorkspace("testMismatchedEventWorkspace1", 0, 2,
+                             "100,200,700");
+    setupMismatchedWorkspace("testMismatchedEventWorkspace2", 3, 5,
+                             "100,200,1000");
 
     ConjoinWorkspaces conj;
     conj.initialize();
     conj.setRethrows(true);
 
-    conj.setProperty("InputWorkspace1", ws1);
-    conj.setProperty("InputWorkspace2", ws2);
+    conj.setProperty("InputWorkspace1", "testMismatchedEventWorkspace1");
+    conj.setProperty("InputWorkspace2", "testMismatchedEventWorkspace2");
+
     TS_ASSERT_THROWS(conj.execute(), std::invalid_argument);
     TS_ASSERT(!conj.isExecuted());
   }
@@ -218,7 +221,7 @@ public:
 
   void performTestNoOverlap(bool event) {
     MatrixWorkspace_sptr ws1, ws2, out;
-    int numBins = 20;
+    const int numBins = 20;
 
     if (event) {
       ws1 = WorkspaceCreationHelper::createEventWorkspace2(
@@ -246,13 +249,59 @@ public:
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 15);
     TS_ASSERT_EQUALS(out->blocksize(), numBins);
 
-    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++)
-      for (size_t x = 0; x < out->blocksize(); x++)
-        TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
+    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
+      const auto &y = out->y(wi);
+      for (const auto value : y)
+        TS_ASSERT_DELTA(value, 2.0, 1e-5);
+    }
   }
 
   void test_DONTCheckForOverlap_Events() { performTestNoOverlap(true); }
   void test_DONTCheckForOverlap_2D() { performTestNoOverlap(false); }
+
+  void performNonConstantBins(bool event) {
+    MatrixWorkspace_sptr ws1, ws2, out;
+    const int numBins = 20;
+
+    if (event) {
+      ws1 = WorkspaceCreationHelper::createEventWorkspace2(
+          10, numBins); // 2 events per bin
+      ws2 = WorkspaceCreationHelper::createEventWorkspace2(5, numBins + 1);
+    } else {
+      ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
+      ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins + 1);
+    }
+    AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
+    AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
+
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", ws1Name));
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace2", ws2Name));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckOverlapping", false));
+    TS_ASSERT_THROWS_NOTHING(conj.execute();)
+    TS_ASSERT(conj.isExecuted());
+
+    TS_ASSERT_THROWS_NOTHING(out = getWSFromADS(ws1Name););
+    if (!out)
+      return;
+
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 15);
+
+    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
+      const auto &y = out->y(wi);
+      if (wi < 10) {
+        TS_ASSERT_EQUALS(y.size(), numBins);
+      } else {
+        TS_ASSERT_EQUALS(y.size(), numBins + 1);
+      }
+      for (const auto value : y)
+        TS_ASSERT_DELTA(value, 2.0, 1e-5);
+    }
+  }
+
+  void test_NonConstantBins_Events() { performNonConstantBins(true); }
+  void test_NonConstantBins_2D() { performNonConstantBins(false); }
 
   void setupAlgForSetYUnitAndLabel(ConjoinWorkspaces &conj) {
     MatrixWorkspace_sptr ws1, ws2, out;
@@ -339,11 +388,12 @@ private:
   const std::string ws1Name{"ws1name"};
   const std::string ws2Name{"ws2name"};
 
-  MatrixWorkspace_sptr
-  setupMismatchedWorkspace(int startIndex, int endIndex,
-                           const std::string &rebinParams) const {
+  void setupMismatchedWorkspace(const std::string &name, int startIndex,
+                                int endIndex,
+                                const std::string &rebinParams) const {
     MatrixWorkspace_sptr ews =
         WorkspaceCreationHelper::createEventWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace(name, ews);
 
     // Crop ews to have first 3 spectra, ews2 to have second 3
     CropWorkspace crop;
@@ -352,21 +402,16 @@ private:
     crop.setProperty("InputWorkspace", ews);
     crop.setProperty("StartWorkspaceIndex", startIndex);
     crop.setProperty("EndWorkspaceIndex", endIndex);
-    crop.setProperty("OutputWorkspace", "out");
+    crop.setProperty("OutputWorkspace", name);
     crop.execute();
-
-    MatrixWorkspace_sptr cropped = crop.getProperty("OutputWorkspace");
 
     Rebin rebin;
     rebin.setChild(true);
     rebin.initialize();
-    rebin.setProperty("InputWorkspace", cropped);
+    rebin.setProperty("InputWorkspace", name);
     rebin.setProperty("Params", rebinParams);
-    rebin.setProperty("OutputWorkspace", "out");
+    rebin.setProperty("OutputWorkspace", name);
     rebin.execute();
-
-    MatrixWorkspace_sptr out = rebin.getProperty("OutputWorkspace");
-    return out;
   }
 };
 

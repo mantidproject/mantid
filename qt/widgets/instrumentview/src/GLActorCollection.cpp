@@ -4,10 +4,10 @@
 
 #include "MantidKernel/Exception.h"
 
-#include <stdexcept>
-#include <functional>
 #include <algorithm>
-#include <float.h>
+#include <cfloat>
+#include <functional>
+#include <stdexcept>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -138,7 +138,7 @@ int GLActorCollection::getNumberOfActors() {
 */
 GLActor *GLActorCollection::getActor(int index) {
   if (index < 0 || index > static_cast<int>(mActorsList.size()))
-    return NULL;
+    return nullptr;
   return mActorsList.at(index);
 }
 

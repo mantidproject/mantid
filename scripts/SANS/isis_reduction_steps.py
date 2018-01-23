@@ -710,7 +710,7 @@ class Mask_ISIS(ReductionStep):
 
         return bank
 
-    def parse_instruction(self, instName, details):
+    def parse_instruction(self, instName, details): # noqa: C901
         """
             Parse an instruction line from an ISIS mask file
             @param instName Instrument name. Used for MASK Ssp command to tell what bank it refer to
@@ -3270,7 +3270,7 @@ class UserFile(ReductionStep):
         self.executed = True
         return self.executed
 
-    def read_line(self, line, reducer):
+    def read_line(self, line, reducer): # noqa: C901
         # This is so that I can be sure all EOL characters have been removed
         line = line.lstrip().rstrip()
         upper_line = line.upper()
@@ -3443,7 +3443,7 @@ class UserFile(ReductionStep):
         reducer._corr_and_scale.rescale = 100.0
 
     # Read a limit line of a mask file
-    def readLimitValues(self, limit_line, reducer):
+    def readLimitValues(self, limit_line, reducer): # noqa: C901
         limits = limit_line.split('L/')
         if len(limits) != 2:
             _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
@@ -3541,7 +3541,7 @@ class UserFile(ReductionStep):
         else:
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
-    def _read_mon_line(self, details, reducer):
+    def _read_mon_line(self, details, reducer): # noqa: C901
 
         # MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
         interpolate = False
@@ -3888,7 +3888,6 @@ class UserFile(ReductionStep):
         @param arguments: the arguments of a QResolution line
         @param reducer: a reducer object
         '''
-        arguments = arguments.upper()
         if arguments.find('=') == -1:
             return self._read_q_resolution_line_on_off(arguments, reducer)
 
@@ -3897,7 +3896,7 @@ class UserFile(ReductionStep):
         arguments = [element.strip() for element in arguments]
 
         # Check if it is the moderator file name, if so add it and return
-        if arguments[0].startswith('MODERATOR'):
+        if arguments[0].upper().startswith('MODERATOR'):
             # pylint: disable=bare-except
             try:
                 reducer.to_Q.set_q_resolution_moderator(file_name=arguments[1])

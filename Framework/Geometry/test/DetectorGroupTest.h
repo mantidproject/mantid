@@ -111,7 +111,7 @@ public:
   void test_signed_two_theta() {
     // Create a cluster consisting of a single detector.
     DetectorGroup cluster;
-    Detector *det = new Detector("det", 0, 0);
+    Detector *det = new Detector("det", 0, nullptr);
     det->setPos(1, -1, 0);
     cluster.addDetector(IDetector_const_sptr(det));
 

@@ -29,8 +29,8 @@
 #include "fft2D.h"
 #include "../Matrix.h"
 //#define _USE_MATH_DEFINES
-#include <math.h>
 #include <QVarLengthArray>
+#include <cmath>
 void fft(double *x_int_re, double *x_int_im, int taille) {
   int size_2 = taille >> 1;
   double base = 2 * M_PI / taille;

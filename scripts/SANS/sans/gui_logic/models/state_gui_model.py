@@ -7,9 +7,9 @@ are not available in the model associated with the data table.
 from __future__ import (absolute_import, division, print_function)
 
 from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, SampleId, MonId, TransId, GravityId,
-                                          QResolutionId, FitId, event_binning_string_values, set_scales_entry,
+                                          QResolutionId, FitId, MaskId, event_binning_string_values, set_scales_entry,
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,
-                                          q_rebin_values, fit_general, mask_angle_entry, range_entry)
+                                          q_rebin_values, fit_general, mask_angle_entry, range_entry, position_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
                                DetectorType, DataType, FitType)
 
@@ -84,6 +84,59 @@ class StateGuiModel(object):
     def save_types(self, value):
         self.set_simple_element(element_id=OtherId.save_types, value=value)
 
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # BeamCentre TAB
+    # ==================================================================================================================
+    # ==================================================================================================================
+    @property
+    def lab_pos_1(self):
+        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos1")
+
+    @lab_pos_1.setter
+    def lab_pos_1(self, value):
+        self._update_centre(pos_1=value)
+
+    @property
+    def lab_pos_2(self):
+        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos2")
+
+    @lab_pos_2.setter
+    def lab_pos_2(self, value):
+        self._update_centre(pos_2=value)
+
+    @property
+    def hab_pos_1(self):
+        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos1")
+
+    @hab_pos_1.setter
+    def hab_pos_1(self, value):
+        self._update_centre(pos_1=value)
+
+    @property
+    def hab_pos_2(self):
+        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos2")
+
+    @hab_pos_2.setter
+    def hab_pos_2(self, value):
+        self._update_centre(pos_2=value)
+
+    def _update_centre(self, pos_1=None, pos_2=None, detector_type=None):
+        if SetId.centre in self._user_file_items:
+            settings = self._user_file_items[SetId.centre]
+        else:
+            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overriden
+            # and if not we want it to fail.
+            settings = [position_entry(pos1=0.0, pos2=0.0, detector_type=DetectorType.LAB)]
+
+        new_settings = []
+        for setting in settings:
+            new_pos1 = pos_1 if pos_1 else setting.pos1
+            new_pos2 = pos_2 if pos_2 else setting.pos2
+            new_detector_type = detector_type if detector_type else setting.detector_type
+            new_setting = position_entry(pos1=new_pos1, pos2=new_pos2, detector_type=new_detector_type)
+            new_settings.append(new_setting)
+        self._user_file_items.update({SetId.centre: new_settings})
     # ==================================================================================================================
     # ==================================================================================================================
     # General TAB
@@ -247,6 +300,30 @@ class StateGuiModel(object):
         # Update for the scale
         self._update_merged_fit(element_id=DetectorId.rescale_fit, q_stop=value)
 
+    @property
+    def merge_mask(self):
+        return self.get_simple_element(element_id=OtherId.merge_mask, default_value=False)
+
+    @merge_mask.setter
+    def merge_mask(self, value):
+        self.set_simple_element(element_id=OtherId.merge_mask, value=value)
+
+    @property
+    def merge_max(self):
+        return self.get_simple_element(element_id=OtherId.merge_max, default_value=None)
+
+    @merge_max.setter
+    def merge_max(self, value):
+        self.set_simple_element(element_id=OtherId.merge_max, value=value)
+
+    @property
+    def merge_min(self):
+        return self.get_simple_element(element_id=OtherId.merge_min, default_value=None)
+
+    @merge_min.setter
+    def merge_min(self, value):
+        self.set_simple_element(element_id=OtherId.merge_min, value=value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode
     # ------------------------------------------------------------------------------------------------------------------
@@ -395,13 +472,12 @@ class StateGuiModel(object):
     # ADJUSTMENT TAB
     # ==================================================================================================================
     # ==================================================================================================================
-    def _update_incident_spectrum_info(self, spectrum=None, interpolate=None, is_trans=False):
+    def _update_incident_spectrum_info(self, spectrum=None, interpolate=False, is_trans=False):
         if MonId.spectrum in self._user_file_items:
             settings = self._user_file_items[MonId.spectrum]
         else:
-            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
-            # and if not we want it to fail.
-            settings = [monitor_spectrum(spectrum=-1, is_trans=is_trans, interpolate=is_trans)]
+            # If the entry does not already exist, then add it.
+            settings = [monitor_spectrum(spectrum=spectrum, is_trans=is_trans, interpolate=interpolate)]
 
         new_settings = []
         for setting in settings:
@@ -500,12 +576,12 @@ class StateGuiModel(object):
         self.set_simple_element(element_id=TransId.spec, value=value)
 
     @property
-    def transmission_m4_shift(self):
+    def transmission_mn_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         return self.get_simple_element(element_id=TransId.spec_shift, default_value="")
 
-    @transmission_m4_shift.setter
-    def transmission_m4_shift(self, value):
+    @transmission_mn_shift.setter
+    def transmission_mn_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         self.set_simple_element(element_id=TransId.spec_shift, value=value)
 
@@ -639,6 +715,14 @@ class StateGuiModel(object):
     def transmission_can_wavelength_max(self, value):
         self._set_transmission_fit(data_type=DataType.Can, stop=value)
 
+    @property
+    def show_transmission(self):
+        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=False)
+
+    @show_transmission.setter
+    def show_transmission(self, value):
+        self.set_simple_element(element_id=OtherId.show_transmission, value=value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength- and pixel-adjustment files
     # ------------------------------------------------------------------------------------------------------------------
@@ -749,24 +833,6 @@ class StateGuiModel(object):
             new_step_type_value = step_type_value if step_type_value is not None else setting.step_type
             new_settings.append(simple_range(start=None, stop=new_stop, step=new_step, step_type=new_step_type_value))
         self._user_file_items.update({element_id: new_settings})
-
-    @property
-    def q_1d_min(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
-                                                      attribute="min")
-
-    @q_1d_min.setter
-    def q_1d_min(self, value):
-        self._set_q_1d_limits(min_value=value)
-
-    @property
-    def q_1d_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
-                                                      attribute="max")
-
-    @q_1d_max.setter
-    def q_1d_max(self, value):
-        self._set_q_1d_limits(max_value=value)
 
     @property
     def q_1d_rebin_string(self):
@@ -984,6 +1050,24 @@ class StateGuiModel(object):
     @radius_limit_max.setter
     def radius_limit_max(self, value):
         self._set_radius_limit(max_value=value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Mask files
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def mask_files(self):
+        if MaskId.file in self._user_file_items:
+            return self._user_file_items[MaskId.file]
+        return []
+
+    @mask_files.setter
+    def mask_files(self, value):
+        if value is None:
+            return
+        if MaskId.file in self._user_file_items:
+            del self._user_file_items[MaskId.file]
+        new_state_entries = {MaskId.file: value}
+        self._user_file_items.update(new_state_entries)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Output name

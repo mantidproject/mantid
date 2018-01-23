@@ -1,11 +1,12 @@
 #pylint: disable=invalid-name
 #!/usr/bin/python
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import VTKConvert
 
 if  len(sys.argv) == 1 :
-    print "Usage: processISISData file-name1 file-name2 ...\n       processISISDATA dir-name"
+    print("Usage: processISISData file-name1 file-name2 ...\n       processISISDATA dir-name")
     exit(1)
 
 names=[]
@@ -20,7 +21,7 @@ prefix=""
 if  is_dir :
     prefix = sys.argv[1].split('/')[0] + "-VTU/"
     if  os.path.isdir(prefix) :
-        print "Directory " + prefix + " already exists, please move\n"
+        print("Directory " + prefix + " already exists, please move\n")
         exit(1)
     else:
         os.mkdir(prefix)

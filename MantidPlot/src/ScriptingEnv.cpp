@@ -103,11 +103,11 @@ ScriptingLangManager::ScriptingLang ScriptingLangManager::g_langs[] = {
     {"muParser", muParserScripting::constructor},
     {"Python", PythonScripting::constructor},
     // Sentinel defining the end of the list
-    {NULL, NULL}};
+    {nullptr, nullptr}};
 
 ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent) {
   if (!g_langs[0].constructor) {
-    return NULL;
+    return nullptr;
   } else {
     return g_langs[0].constructor(parent);
   }
@@ -120,7 +120,7 @@ ScriptingEnv *ScriptingLangManager::newEnv(const QString &name,
       return l->constructor(parent);
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 QStringList ScriptingLangManager::languages() {

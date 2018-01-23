@@ -26,9 +26,11 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
                                  KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),
         runInfoTopic(instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
         spDetInfoTopic(instrumentName +
-                       KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
+                       KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX),
+        sampleEnvTopic(instrumentName +
+                       KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX);
     m_decoder = Kernel::make_unique<KafkaEventStreamDecoder>(
-        broker, eventTopic, runInfoTopic, spDetInfoTopic);
+        broker, eventTopic, runInfoTopic, spDetInfoTopic, sampleEnvTopic);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaEventListener::connect - Connection Error: "
                   << exc.what() << "\n";
@@ -38,7 +40,7 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
 }
 
 /// @copydoc ILiveListener::start
-void KafkaEventListener::start(Kernel::DateAndTime startTime) {
+void KafkaEventListener::start(Types::Core::DateAndTime startTime) {
   bool startNow = true;
   // Workaround for existing LiveListener interface
   // startTime of 0 means start from now

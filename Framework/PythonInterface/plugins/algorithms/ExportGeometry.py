@@ -139,4 +139,5 @@ class ExportGeometry(PythonAlgorithm):
                 component = instrument.getComponentByName(component)
                 self.__writexml(handle, component)
 
+
 AlgorithmFactory.subscribe(ExportGeometry)

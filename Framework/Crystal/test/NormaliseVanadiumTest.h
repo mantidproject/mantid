@@ -29,6 +29,8 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 /** Create an EventWorkspace containing fake data of single-crystal diffraction.

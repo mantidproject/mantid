@@ -133,10 +133,11 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   for (size_t d = 0; d < numDims; d++) {
     std::vector<double> axis;
     IMDDimension_const_sptr dim = ws->getDimension(d);
-    for (size_t n = 0; n < dim->getNBins() + 1; n++)
+    auto nbounds = dim->getNBoundaries();
+    for (size_t n = 0; n < nbounds; n++)
       axis.push_back(dim->getX(n));
     file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64,
-                   static_cast<int>(dim->getNBins() + 1), true);
+                   static_cast<int>(dim->getNBoundaries()), true);
     file->putData(&axis[0]);
     file->putAttr("units", std::string(dim->getUnits()));
     file->putAttr("long_name", std::string(dim->getName()));

@@ -12,6 +12,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
+                        ../../TestHelpers/src/ParallelRunner.cpp
                         NXcanSASTestHelper.cpp
       )
 

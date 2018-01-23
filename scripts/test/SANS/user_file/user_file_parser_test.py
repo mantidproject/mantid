@@ -6,13 +6,13 @@ from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, F
 from sans.user_file.user_file_parser import (DetParser, LimitParser, MaskParser, SampleParser, SetParser, TransParser,
                                              TubeCalibFileParser, QResolutionParser, FitParser, GravityParser,
                                              MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser, LOQParser,
-                                             UserFileParser, LARMORParser)
+                                             UserFileParser, LARMORParser, CompatibilityParser)
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                           single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
                                           mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
                                           position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
-                                          fit_general, MonId, monitor_length, monitor_file, GravityId,
+                                          fit_general, MonId, monitor_length, monitor_file, GravityId, OtherId,
                                           monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
 
 
@@ -532,10 +532,11 @@ class TransParserTest(unittest.TestCase):
 
     def test_that_trans_spec_shift_is_parsed_correctly(self):
         valid_settings = {"TRANS/TRANSPEC=4/SHIFT=23": {TransId.spec_shift: 23, TransId.spec: 4},
-                          "TRANS/TRANSPEC =4/ SHIFT = 23": {TransId.spec_shift: 23, TransId.spec: 4}}
+                          "TRANS/TRANSPEC =4/ SHIFT = 23": {TransId.spec_shift: 23, TransId.spec: 4},
+                          "TRANS/TRANSPEC =6/ SHIFT = 23": {TransId.spec_shift: 23, TransId.spec: 6},
+                          }
 
-        invalid_settings = {"TRANS/TRANSPEC=6/SHIFT=23": RuntimeError,
-                            "TRANS/TRANSPEC=4/SHIFT/23": RuntimeError,
+        invalid_settings = {"TRANS/TRANSPEC=4/SHIFT/23": RuntimeError,
                             "TRANS/TRANSPEC=4/SHIFT 23": RuntimeError,
                             "TRANS/TRANSPEC/SHIFT=23": RuntimeError,
                             "TRANS/TRANSPEC=6/SHIFT=t": RuntimeError}
@@ -736,6 +737,21 @@ class GravityParserTest(unittest.TestCase):
 
         gravity_parser = GravityParser()
         do_test(gravity_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
+
+
+class CompatibilityParserTest(unittest.TestCase):
+    def test_that_gets_type(self):
+        self.assertTrue(CompatibilityParser.get_type(), "COMPATIBILITY")
+
+    def test_that_compatibility_on_off_is_parsed_correctly(self):
+        valid_settings = {"COMPATIBILITY on ": {OtherId.use_compatibility_mode: True},
+                          "COMPATIBILITY   OFF ": {OtherId.use_compatibility_mode: False}}
+
+        invalid_settings = {"COMPATIBILITY ": RuntimeError,
+                            "COMPATIBILITY ONN": RuntimeError}
+
+        compatibility_parser = CompatibilityParser()
+        do_test(compatibility_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
 
 class MaskFileParserTest(unittest.TestCase):

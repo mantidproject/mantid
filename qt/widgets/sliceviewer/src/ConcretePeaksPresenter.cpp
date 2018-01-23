@@ -154,7 +154,8 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
     : m_viewFactory(viewFactory), m_peaksWS(peaksWS),
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
-      m_owningPresenter(NULL), m_isHidden(false), m_editMode(SliceViewer::None),
+      m_owningPresenter(nullptr), m_isHidden(false),
+      m_editMode(SliceViewer::None),
       m_hasAddPeaksMode(
           canAddPeaksTo(peaksWS.get(), m_transform->getCoordinateSystem())) {
   // Check that the workspaces appear to be compatible. Log if otherwise.
@@ -420,31 +421,6 @@ ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const {
                             "of range.");
   }
   return m_viewPeaks->getBoundingBox(peakIndex);
-}
-
-void ConcretePeaksPresenter::sortPeaksWorkspace(const std::string &byColumnName,
-                                                const bool ascending) {
-  Mantid::API::IPeaksWorkspace_sptr peaksWS =
-      boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
-
-  // Sort the Peaks in-place.
-  Mantid::API::IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("SortPeaksWorkspace");
-  alg->setChild(true);
-  alg->setRethrows(true);
-  alg->initialize();
-  alg->setProperty("InputWorkspace", peaksWS);
-  alg->setPropertyValue("OutputWorkspace", "SortedPeaksWorkspace");
-  alg->setProperty("OutputWorkspace", peaksWS);
-  alg->setProperty("SortAscending", ascending);
-  alg->setPropertyValue("ColumnNameToSortBy", byColumnName);
-  alg->execute();
-
-  // Reproduce the views.
-  this->produceViews();
-
-  // Give the new views the current slice point.
-  m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(), m_viewablePeaks);
 }
 
 void ConcretePeaksPresenter::setPeakSizeOnProjection(const double fraction) {

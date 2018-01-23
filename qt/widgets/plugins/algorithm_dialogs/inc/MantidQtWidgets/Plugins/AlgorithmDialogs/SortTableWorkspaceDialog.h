@@ -44,7 +44,7 @@ class SortTableWorkspaceDialog : public API::AlgorithmDialog {
 
 public:
   /// Default constructor
-  SortTableWorkspaceDialog(QWidget *parent = NULL);
+  SortTableWorkspaceDialog(QWidget *parent = nullptr);
 
 private:
   /// Initialize the layout

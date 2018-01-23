@@ -246,7 +246,7 @@ void BoundingBox::realign(std::vector<Kernel::V3D> const *const pCS) {
  * @param other :: The bounding box that should be encompassed
  */
 void BoundingBox::grow(const BoundingBox &other) {
-  m_null = false;
+  m_null &= other.isNull();
   // If the current box is empty then we definitely need to grow
   if (minPoint() == V3D() && maxPoint() == V3D()) {
     m_minPoint = other.minPoint();

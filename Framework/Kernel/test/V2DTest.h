@@ -107,6 +107,19 @@ public:
     TS_ASSERT_EQUALS(p1, V2D(9.0, 27.0));
   }
 
+  void test_Negate_Gives_Same_Length_But_Opposite_Direction() {
+    const V2D p1(-3, 9);
+    const V2D p2 = -p1;
+    TS_ASSERT_EQUALS(p2, V2D(3, -9))
+  }
+
+  void test_Negate_Works_With_Special_Values() {
+    const V2D p1(INFINITY, std::nan(""));
+    const V2D p2 = -p1;
+    TS_ASSERT_EQUALS(p2.X(), -INFINITY);
+    TS_ASSERT(std::isnan(p2.Y()));
+  }
+
   void test_Equality_Gives_True_When_Diff_Less_Than_Tolerance() {
     const double tolerance = std::numeric_limits<double>::epsilon();
     V2D first(5, 10);

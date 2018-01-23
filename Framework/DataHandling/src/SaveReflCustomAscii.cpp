@@ -34,7 +34,7 @@ void SaveReflCustomAscii::extraHeaders(std::ofstream &file) {
   std::string subtitleEntry;
   std::string title = getProperty("Title");
 
-  if (title != "") // if is toggled
+  if (!title.empty()) // if is toggled
   {
     file << "#" << title << '\n';
   }

@@ -14,21 +14,18 @@ Mantid 3.11.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
+We are proud to announce version 3.11.0 of Mantid, celebrating 10 years of the Mantid project supporting Neutron and Muon research.
 
-We are proud to announce version 3.11.0 of Mantid. This release celebrates 10 years of the Mantid project supporting Neutron and Muon research.
+This release includes improvements to allow Mantid to handle scanning workspaces, where detectors may be in several locations for different time periods, and updates to the VSI to improve the performance of slicing regularly binned data. There have also been some significant performance enhancements for various algorithms within the framework due to the ongoing efforts to improving our handling of instrument geometry.
 
-**TODO: Add paragraph summarizing big changes**
-
-This is just one of many improvements in this release, so please take a
+These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
 Mantid, and we would like to thank all of our beta testers for their
 time and effort helping us to make this another reliable version of Mantid.
 
-Throughout the Mantid project we put a lot of effort into ensuring
-Mantid is a robust and reliable product. Thank you to everyone that has
+Thank you to everyone that has
 reported any issues to us. Please keep on reporting any problems you
 have, or crashes that occur on our `forum`_.
 
@@ -49,8 +46,8 @@ Changes
 .. toctree::
    :titlesonly:
 
-   Framework <framework>
    User Interface & Usability <ui>
+   Framework <framework>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
    SANS <sans>

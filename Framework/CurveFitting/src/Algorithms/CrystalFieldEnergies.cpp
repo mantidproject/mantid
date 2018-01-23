@@ -12,7 +12,6 @@ namespace Mantid {
 namespace CurveFitting {
 
 using Mantid::Kernel::Direction;
-using Mantid::API::WorkspaceProperty;
 using Mantid::CurveFitting::ComplexFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranVector;

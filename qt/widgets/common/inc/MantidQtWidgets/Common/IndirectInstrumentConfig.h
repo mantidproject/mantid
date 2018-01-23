@@ -61,7 +61,7 @@ class EXPORT_OPT_MANTIDQT_COMMON IndirectInstrumentConfig
                  setShowInstrumentLabel)
 
 public:
-  IndirectInstrumentConfig(QWidget *parent = 0);
+  IndirectInstrumentConfig(QWidget *parent = nullptr);
   ~IndirectInstrumentConfig() override;
 
   /* Getters and setters for Qt properties */

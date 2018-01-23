@@ -17,7 +17,36 @@
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
 			operators -->
 		<parameter name="formula_eff" type="string">
-			<value val="exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))" />
+			<!-- The xml escape sequence &gt; below means 'greater than' -->
+			<value val="e &gt; 5.113 ? 0.94*(1-exp(-3.284/sqrt(e))) : exp(-0.0565/sqrt(e))*(1-exp(-3.284/sqrt(e)))" />
+		</parameter>
+
+		<!-- Default monitor spectrum number for monitor normalisation. -->
+		<parameter name="default-incident-monitor-spectrum" type="int">
+			<value val="338" />
+		</parameter>
+		<!-- Preferred scaling after normalisation to monitor counts. -->
+		<parameter name="scaling_after_monitor_normalisation">
+			<value val="1000" />
+		</parameter>
+		<!-- MergeRuns behavior when merging sample logs. -->
+		<parameter name="sample_logs_sum" type="string">
+			<value val="Detector.detsum, duration, monitor1.monsum" />
+		</parameter>
+		<parameter name="sample_logs_time_series" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn_tolerances" type="string">
+			<value val="1.0" />
+		</parameter>
+		<parameter name="sample_logs_fail" type="string">
+			<value val="monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2" />
+		</parameter>
+		<parameter name="sample_logs_fail_tolerances" type="string">
+			<value val="0, 0, 0" />
 		</parameter>
 
 	</component-link>

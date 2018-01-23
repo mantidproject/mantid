@@ -1,8 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
-
-import mantid
-
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
@@ -132,6 +129,31 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.reduction_mode is ISISReductionMode.All)
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Reduction range
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_merge_mask_is_false_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertFalse(state_gui_model.merge_mask)
+
+    def test_that_merge_mask_can_be_set_to_something_else(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.merge_mask = True
+        self.assertTrue(state_gui_model.merge_mask)
+
+    def test_that_merge_min_is_None_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.merge_min == None)
+
+    def test_that_merge_max_is_None_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.merge_max == None)
+
+    def test_that_merge_min_can_be_set(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.merge_min = 78.9
+        self.assertTrue(state_gui_model.merge_min == 78.9)
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Reduction dimensionality
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_defaults_for_merge_are_empty_and_false(self):
@@ -254,6 +276,12 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.normalization_incident_monitor = 3
         self.assertTrue(state_gui_model.normalization_incident_monitor == 3)
 
+    def test_that_can_set_only_interpolation(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.normalization_interpolate = True
+        self.assertTrue(state_gui_model.normalization_incident_monitor is None)
+        self.assertTrue(state_gui_model.normalization_interpolate)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission
     # ------------------------------------------------------------------------------------------------------------------
@@ -271,6 +299,12 @@ class StateGuiModelTest(unittest.TestCase):
         # # Reassign
         state_gui_model.transmission_incident_monitor = 3
         self.assertTrue(state_gui_model.transmission_incident_monitor == 3)
+
+    def test_that_can_set_only_transmission_interpolation(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.transmission_interpolate = True
+        self.assertTrue(state_gui_model.transmission_incident_monitor is None)
+        self.assertTrue(state_gui_model.transmission_interpolate)
 
     def test_that_can_set_normalization_and_transmission_monitor_and_rebin_type_settings(self):
         pass
@@ -299,14 +333,14 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.transmission_monitor = 4
         self.assertTrue(state_gui_model.transmission_monitor == 4)
 
-    def test_that_transmission_m4_shift_default_is_empty(self):
+    def test_that_transmission_mn_shift_default_is_empty(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertTrue(state_gui_model.transmission_m4_shift == "")
+        self.assertTrue(state_gui_model.transmission_mn_shift == "")
 
-    def test_that_transmission_m4_shift_can_be_set(self):
+    def test_that_transmission_mn_shift_can_be_set(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.transmission_m4_shift = 234
-        self.assertTrue(state_gui_model.transmission_m4_shift == 234)
+        state_gui_model.transmission_mn_shift = 234
+        self.assertTrue(state_gui_model.transmission_mn_shift == 234)
 
     def test_that_default_for_adjustment_files_are_empty(self):
         state_gui_model = StateGuiModel({"test": [1]})
@@ -363,6 +397,15 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.transmission_can_wavelength_min == 1.3)
         self.assertTrue(state_gui_model.transmission_can_wavelength_max == 10.3)
 
+    def test_that_default_show_transmission_is_false(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertFalse(state_gui_model.show_transmission)
+
+    def test_that_can_set_show_transmission(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.show_transmission = True
+        self.assertTrue(state_gui_model.show_transmission)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # Q TAB
@@ -374,8 +417,6 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_q_limits_default_to_empty(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertTrue(state_gui_model.q_1d_min == "")
-        self.assertTrue(state_gui_model.q_1d_max == "")
         self.assertTrue(state_gui_model.q_1d_rebin_string == "")
 
         self.assertTrue(state_gui_model.q_xy_max == "")
@@ -384,15 +425,11 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_can_set_the_q_limits(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.q_1d_min = 11.2
-        state_gui_model.q_1d_max = 123.3
         state_gui_model.q_1d_rebin_string = "test"
         state_gui_model.q_xy_max = 1.
         state_gui_model.q_xy_step = 122.
         state_gui_model.q_xy_step_type = RangeStepType.Log
 
-        self.assertTrue(state_gui_model.q_1d_min == 11.2)
-        self.assertTrue(state_gui_model.q_1d_max == 123.3)
         self.assertTrue(state_gui_model.q_1d_rebin_string == "test")
         self.assertTrue(state_gui_model.q_xy_max == 1.)
         self.assertTrue(state_gui_model.q_xy_step == 122.)
@@ -492,8 +529,18 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.radius_limit_min == 12.)
         self.assertTrue(state_gui_model.radius_limit_max == 13.)
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Mask files
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_mask_file_defaults_are_empty(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.mask_files == [])
+
+    def test_that_mask_file_can_be_set(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.mask_files = ["file.txt", "file2.txt"]
+        self.assertTrue(state_gui_model.mask_files == ["file.txt", "file2.txt"])
+
 
 if __name__ == '__main__':
     unittest.main()
-
-

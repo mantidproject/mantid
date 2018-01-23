@@ -16,6 +16,7 @@ if ( CXXTEST_FOUND )
   target_link_libraries( GeometryTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             Geometry
             Beamline
+            Types
             Kernel
             ${NEXUS_LIBRARIES}
             ${GSL_LIBRARIES}

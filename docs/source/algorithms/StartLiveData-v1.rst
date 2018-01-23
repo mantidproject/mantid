@@ -148,8 +148,8 @@ Usage
 
     try:
         captureLive()
-    except Exception, exc:
-        print "Error occurred starting live data"
+    except Exception:
+        print("Error occurred starting live data")
     finally:
         thread.join() # this must get hit
 
@@ -158,7 +158,7 @@ Usage
 
     #get the ouput workspace
     wsOut = mtd["wsOut"]
-    print "The workspace contains %i events" % wsOut.getNumberEvents()
+    print("The workspace contains %i events" % wsOut.getNumberEvents())
 
 Output:
 
@@ -212,8 +212,8 @@ Output:
 
     try:
         captureLive()
-    except Exception, exc:
-        print "Error occurred starting live data"
+    except Exception:
+        print("Error occurred starting live data")
     finally:
         thread.join() # this must get hit
 
@@ -222,8 +222,8 @@ Output:
 
     #get the ouput workspace
     wsOut = mtd["wsOut"]
-    print "The workspace contains %i periods" % wsOut.getNumberOfEntries()
-    print "Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms()
+    print("The workspace contains %i periods" % wsOut.getNumberOfEntries())
+    print("Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms())
     time.sleep(1)
 
 Output:

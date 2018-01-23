@@ -5,7 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include "qwt_plot_curve.h"
 #include <QLineEdit>
@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 SANSPlotSpecial::SANSPlotSpecial(QWidget *parent)
-    : QFrame(parent), m_rangeSelector(NULL), m_transforms(), m_current(""),
+    : QFrame(parent), m_rangeSelector(nullptr), m_transforms(), m_current(""),
       m_dataCurve(new QwtPlotCurve()), m_linearCurve(new QwtPlotCurve()),
       m_rearrangingTable(false) {
   m_uiForm.setupUi(this);
@@ -472,10 +472,10 @@ QwtPlotCurve *SANSPlotSpecial::plotMiniplot(
     size_t workspaceIndex) {
   bool data = (curve == m_dataCurve);
 
-  if (curve != NULL) {
-    curve->attach(0);
+  if (curve != nullptr) {
+    curve->attach(nullptr);
     delete curve;
-    curve = 0;
+    curve = nullptr;
   }
 
   curve = new QwtPlotCurve();

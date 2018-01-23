@@ -315,5 +315,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         return (left_half+right_half)/2.0
 
+
 # Subscribe algorithm to Mantid software
 AlgorithmFactory.subscribe(AngularAutoCorrelationsTwoAxes)

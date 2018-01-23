@@ -68,6 +68,15 @@ void MANTID_KERNEL_DLL
 convertToBinBoundary(const std::vector<double> &bin_centers,
                      std::vector<double> &bin_edges);
 
+/// Gets the bin of a value from a vector of bin centers
+size_t MANTID_KERNEL_DLL
+indexOfValueFromCenters(const std::vector<double> &bin_centers,
+                        const double value);
+
+/// Gets the bin of a value from a vector of bin edges
+size_t MANTID_KERNEL_DLL
+indexOfValueFromEdges(const std::vector<double> &bin_edges, const double value);
+
 bool MANTID_KERNEL_DLL isConstantValue(const std::vector<double> &arra);
 
 /**

@@ -5,22 +5,22 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/LibraryManager.h"
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
@@ -78,20 +78,16 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_displayActionPlotGuess(nullptr), m_displayActionQuality(nullptr),
       m_displayActionClearAll(nullptr), m_setupActionCustomSetup(nullptr),
       m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
-      m_fitTree(nullptr), m_currentHandler(0), m_defaultFunction("Gaussian"),
-      m_defaultPeak("Gaussian"), m_defaultBackground("LinearBackground"),
-      m_index_(0), m_peakToolOn(false), m_auto_back(false),
+      m_fitTree(nullptr), m_currentHandler(nullptr),
+      m_defaultFunction("Gaussian"), m_defaultPeak("Gaussian"),
+      m_defaultBackground("LinearBackground"), m_index_(0), m_peakToolOn(false),
+      m_auto_back(false),
       m_autoBgName(QString::fromStdString(
           Mantid::Kernel::ConfigService::Instance().getString(
               "curvefitting.autoBackground"))),
       m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
       m_shouldBeNormalised(false) {
-  // Make sure plugins are loaded
-  std::string libpath =
-      Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
-  if (!libpath.empty()) {
-    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-  }
+  Mantid::API::FrameworkManager::Instance().loadPlugins();
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
   // loaded
@@ -466,11 +462,10 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   m_status->hide();
   connect(this, SIGNAL(fitResultsChanged(const QString &)), this,
           SLOT(showFitResultStatus(const QString &)), Qt::QueuedConnection);
-
+  layout->addWidget(m_status);
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
   layout->addWidget(m_browser);
-  layout->addWidget(m_status);
 
   setWidget(w);
 
@@ -1656,6 +1651,7 @@ void FitPropertyBrowser::showFitResultStatus(const QString &status) {
   if (status != "success") {
     color = "red";
   }
+
   m_status->setText(
       QString("Status: <span style='color:%2'>%1</span>").arg(text, color));
   m_status->show();
@@ -1824,7 +1820,7 @@ void FitPropertyBrowser::setEndX(double value) {
 QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent,
                                             QtProperty *prop) const {
   QList<QtBrowserItem *> children = parent->children();
-  QtBrowserItem *res = 0;
+  QtBrowserItem *res = nullptr;
   for (int i = 0; i < children.size(); i++) {
     if (children[i]->property() == prop) {
       return children[i];
@@ -1835,7 +1831,7 @@ QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent,
     if (res)
       return res;
   }
-  return 0;
+  return nullptr;
 }
 
 /**
@@ -2076,11 +2072,51 @@ void FitPropertyBrowser::deleteTie() {
   PropertyHandler *h = getHandler()->findHandler(paramProp);
   if (!h)
     return;
-
-  if (ci->property()->propertyName() != "Tie") {
-    h->removeTie(ci->property()->propertyName());
+  // get name of parent property (i.e. function)
+  if (paramProp->propertyName() != "Tie") {
+    auto parameterMap = h->getTies();
+    auto match = parameterMap.find(paramProp->propertyName());
+    if (match != parameterMap.end()) {
+      paramProp = match.value();
+    }
+  }
+  if (paramProp->propertyName() == "Tie") {
+    auto ties = h->getTies();
+    QString qParName = ties.key(paramProp, "");
+    std::string parName = qParName.toStdString();
+    QStringList functionNames;
+    // ithParameter = -1 => not found
+    int ithParameter = -1;
+    for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
+      Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(),
+                                                   i);
+      Mantid::API::IFunction *function = parameterRef.getLocalFunction();
+      // Pick out parameters with the same name as the one we're tying from
+      if (function->parameterName(
+              static_cast<int>(parameterRef.getLocalIndex())) == parName) {
+        if (ithParameter == -1 &&
+            function ==
+                h->function()
+                    .get()) // If this is the 'tied from' parameter, remember it
+        {
+          ithParameter = static_cast<int>(i);
+        } else // Otherwise add it to the list of potential 'tyees'
+        {
+          functionNames << QString::fromStdString(
+              m_compositeFunction->parameterName(i));
+        }
+      }
+    }
+    if (functionNames.empty() && ithParameter < 0) {
+      QMessageBox::information(this, "Mantid - information",
+                               "Cannot find a parameter with this tie");
+    } else {
+      QString tieExpr = QString::fromStdString(
+          m_compositeFunction->parameterName(ithParameter));
+      h->removeTie(paramProp, tieExpr.toStdString());
+    }
   } else {
-    h->removeTie(ci->property());
+    h->removeTie(ci->property()->propertyName());
   }
 }
 

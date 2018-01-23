@@ -248,7 +248,7 @@ void Goniometer::recalculateR() {
  */
 void Goniometer::saveNexus(::NeXus::File *file,
                            const std::string &group) const {
-  file->makeGroup(group, "NXpositioner", 1);
+  file->makeGroup(group, "NXpositioner", true);
   file->putAttr("version", 1);
   // Because the order of the axes is very important, they have to be written
   // and read out in the same order

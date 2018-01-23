@@ -237,7 +237,7 @@ class LoadDNSLegacy(PythonAlgorithm):
 
         # add other sample logs
         logs["names"].extend(["deterota", "mon_sum", "duration", "huber", "omega", "T1", "T2", "Tsp"])
-        logs["values"].extend([metadata.deterota, metadata.monitor_counts, metadata.duration,
+        logs["values"].extend([metadata.deterota, float(metadata.monitor_counts), metadata.duration,
                                metadata.huber, metadata.huber - metadata.deterota,
                                metadata.temp1, metadata.temp2, metadata.tsp])
         logs["units"].extend(["Degrees", "Counts", "Seconds", "Degrees", "Degrees", "K", "K", "K"])

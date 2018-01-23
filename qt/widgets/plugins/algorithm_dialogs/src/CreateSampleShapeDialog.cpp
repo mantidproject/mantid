@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h"
 
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 #include <QMenu>
 #include <QLabel>
@@ -36,7 +36,7 @@ using namespace MantidQt::CustomDialogs;
  * Constructor
  */
 CreateSampleShapeDialog::CreateSampleShapeDialog(QWidget *parent)
-    : AlgorithmDialog(parent), m_shapeTree(NULL), m_setup_map(),
+    : AlgorithmDialog(parent), m_shapeTree(nullptr), m_setup_map(),
       m_details_map(), m_ops_map() {
   m_object_viewer = new MantidGLWidget;
 }
@@ -200,11 +200,10 @@ void CreateSampleShapeDialog::update3DView() {
   //     (infcyl_1:(infcyl_2:infcyl_3))))\" />\n";
 
   Mantid::Geometry::ShapeFactory sFactory;
-  boost::shared_ptr<Mantid::Geometry::Object> shape_sptr =
-      sFactory.createShape(shapexml);
+  auto shape_sptr = sFactory.createShape(shapexml);
   // std::cerr << "\n--------- XML String -----------\n" << shapexml <<
   // "\n---------------------\n";
-  if (shape_sptr == boost::shared_ptr<Mantid::Geometry::Object>())
+  if (shape_sptr == boost::shared_ptr<Mantid::Geometry::CSGObject>())
     return;
   try {
     shape_sptr->initDraw();
@@ -312,7 +311,7 @@ BinaryTreeWidgetItem *CreateSampleShapeDialog::getSelectedItem() {
     QMessageBox::information(this, "CreateSampleShape",
                              "Please select an item in the list as a parent.");
   }
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -453,7 +452,7 @@ void CreateSampleShapeDialog::setupDetailsBox() {
     return;
   QString shapename = item->text(0);
   if (m_setup_map.contains(shapename)) {
-    ShapeDetails *obj = NULL;
+    ShapeDetails *obj = nullptr;
     if (m_details_map.contains(item)) {
       obj = m_details_map.value(item);
     } else {
@@ -475,7 +474,7 @@ CreateSampleShapeDialog::createDetailsWidget(const QString &shapename) const {
   if (m_setup_map.contains(shapename)) {
     return m_setup_map.value(shapename)->createInstance();
   }
-  return NULL;
+  return nullptr;
 }
 
 /**

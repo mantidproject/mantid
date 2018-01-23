@@ -34,7 +34,7 @@ If you want to check if a variable points to something that is an Table Workspac
     tableWS = CreateEmptyTableWorkspace()
 
     if tableWS is ITableWorkspace:
-        print tableWS.getName() + " is a " + tableWS.id()
+        print(tableWS.getName() + " is a " + tableWS.id())
 
 Output:
 
@@ -98,8 +98,11 @@ Table Workspace Properties
     #setup as above
 
     # Rows
-    print "Row count:", tableWS.rowCount()
-    print tableWS.row(0) # row values as a dictionary
+    print("Row count: {}".format(tableWS.rowCount()))
+    print("Detector Position: {0}, Detector Name: {1}, Detector ID: {2}".format(
+                    tableWS.row(0)["Detector Position"],
+                    tableWS.row(0)["Detector Name"],
+                    tableWS.row(0)["Detector ID"])) # row values as a dictionary
     # Resize the table
     tableWS.setRowCount(4)
     # Add Rows
@@ -111,8 +114,8 @@ Table Workspace Properties
     tableWS.addRow ( nextRow )
 
     # Columns
-    print "Column count:", tableWS.columnCount()
-    print "Column names:", tableWS.getColumnNames()
+    print("Column count: {}".format(tableWS.columnCount()))
+    print("Column names: {}".format(tableWS.getColumnNames()))
     columnValuesList = tableWS.column(0)
     # To remove a column
     tableWS.removeColumn("Detector Name")
@@ -122,7 +125,7 @@ Table Workspace Properties
     :options: +NORMALIZE_WHITESPACE
 
     Row count: 3
-    {'Detector Position': [9,0,0], 'Detector Name': 'Detector 1', 'Detector ID': 1}
+    Detector Position: [9,0,0], Detector Name: Detector 1, Detector ID: 1
     Column count: 3
     Column names: ['Detector ID', 'Detector Name', 'Detector Position']
 

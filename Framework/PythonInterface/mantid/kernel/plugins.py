@@ -242,7 +242,8 @@ def contains_algorithm(filename):
     #endif
     alg_found = True
     try:
-        with open(filename,'r') as plugin_file:
+        from io import open
+        with open(filename,'r', encoding='UTF-8') as plugin_file:
             for line in readlines_reversed(plugin_file):
                 if 'AlgorithmFactory.subscribe' in line:
                     alg_found = True

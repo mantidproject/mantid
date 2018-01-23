@@ -8,7 +8,7 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
@@ -19,7 +19,6 @@
 
 #include <cfloat>
 
-using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IObjComponent;
 using Mantid::Geometry::ICompAssembly;
@@ -27,8 +26,6 @@ using Mantid::Geometry::ObjCompAssembly;
 using Mantid::Geometry::ComponentID;
 using Mantid::Geometry::RectangularDetector;
 using Mantid::Geometry::StructuredDetector;
-using Mantid::Geometry::IDetector;
-using Mantid::Geometry::Object;
 
 namespace MantidQt {
 namespace MantidWidgets {

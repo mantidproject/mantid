@@ -13,6 +13,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
 
 class MatrixWorkspaceMDIteratorTest : public CxxTest::TestSuite {
 public:
@@ -23,12 +24,12 @@ public:
     ws->initialize(4, 6, 5);
     NumericAxis *ax1 = new NumericAxis(4);
     for (size_t wi = 0; wi < 4; wi++) {
-      ax1->setValue(wi, double(wi) * 2.0);
+      ax1->setValue(wi, static_cast<double>(wi) * 2.0);
       for (size_t x = 0; x < 6; x++) {
-        ws->dataX(wi)[x] = double(x) * 2.0;
+        ws->dataX(wi)[x] = static_cast<double>(x) * 2.0;
         if (x < 5) {
-          ws->dataY(wi)[x] = double(wi * 10 + x);
-          ws->dataE(wi)[x] = double((wi * 10 + x) * 2);
+          ws->dataY(wi)[x] = static_cast<double>(wi * 10 + x);
+          ws->dataE(wi)[x] = static_cast<double>((wi * 10 + x) * 2);
         }
       }
     }
@@ -51,7 +52,7 @@ public:
 
   void test_iterating() {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
-    IMDIterator *it = NULL;
+    IMDIterator *it = nullptr;
     TS_ASSERT_THROWS_NOTHING(it = ws->createIterator(NULL));
     TS_ASSERT_EQUALS(it->getDataSize(), 20);
     TS_ASSERT_DELTA(it->getSignal(), 0.0, 1e-5);
@@ -100,16 +101,17 @@ public:
 
     for (size_t i = 0; i < iterators.size(); i++) {
       IMDIterator *it = iterators[i];
+      const double i_d = static_cast<double>(i);
       // Only 5 elements per each iterator
       TS_ASSERT_EQUALS(it->getDataSize(), 5);
-      TS_ASSERT_DELTA(it->getSignal(), double(i) * 10 + 0.0, 1e-5);
+      TS_ASSERT_DELTA(it->getSignal(), i_d * 10 + 0.0, 1e-5);
       it->next();
-      TS_ASSERT_DELTA(it->getSignal(), double(i) * 10 + 1.0, 1e-5);
-      TS_ASSERT_DELTA(it->getError(), double(i) * 20 + 2.0, 1e-5);
+      TS_ASSERT_DELTA(it->getSignal(), i_d * 10 + 1.0, 1e-5);
+      TS_ASSERT_DELTA(it->getError(), i_d * 20 + 2.0, 1e-5);
       // Coordinates at X index = 1
       TS_ASSERT_DELTA(it->getCenter()[0], 3.0, 1e-5);
       // And this coordinate is the spectrum number
-      TS_ASSERT_DELTA(it->getCenter()[1], double(i * 2), 1e-5);
+      TS_ASSERT_DELTA(it->getCenter()[1], i_d * 2, 1e-5);
       TS_ASSERT(it->next());
       TS_ASSERT(it->next());
       TS_ASSERT(it->next());
@@ -127,6 +129,53 @@ public:
       it->next();
     }
     delete it;
+  }
+
+  void testUnequalBins() {
+    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
+    // set the first spectrum to be different
+    ws->setHistogram(0, BinEdges({0, 1, 2}), Counts({10, 20}));
+
+    // quick checks to make sure things are returning the expected values
+    TS_ASSERT(!(ws->isCommonBins()));
+    TS_ASSERT_THROWS(ws->blocksize(), std::logic_error);
+    TS_ASSERT_EQUALS(ws->size(), 17);
+    // Split in 4 iterators
+    std::vector<IMDIterator *> iterators = ws->createIterators(4, nullptr);
+    TS_ASSERT_EQUALS(iterators.size(), 4);
+
+    for (size_t i = 0; i < iterators.size(); i++) {
+      IMDIterator *it = iterators[i];
+      const double i_d = static_cast<double>(i);
+      if (i == 0) {
+        // Only 5 elements per each iterator
+        TS_ASSERT_EQUALS(it->getDataSize(), 2);
+        TS_ASSERT_DELTA(it->getSignal(), 10.0, 1e-5);
+        it->next();
+        TS_ASSERT_DELTA(it->getSignal(), 20., 1e-5);
+        TS_ASSERT_DELTA(it->getError(), std::sqrt(20), 1e-5);
+        // Coordinates at X index = 1
+        TS_ASSERT_DELTA(it->getCenter()[0], 1.5, 1e-5);
+        // And this coordinate is the spectrum number
+        TS_ASSERT_DELTA(it->getCenter()[1], 0.0, 1e-5);
+      } else {
+        // Only 5 elements per each iterator
+        TS_ASSERT_EQUALS(it->getDataSize(), 5);
+        TS_ASSERT_DELTA(it->getSignal(), i_d * 10 + 0.0, 1e-5);
+        it->next();
+        TS_ASSERT_DELTA(it->getSignal(), i_d * 10 + 1.0, 1e-5);
+        TS_ASSERT_DELTA(it->getError(), i_d * 20 + 2.0, 1e-5);
+        // Coordinates at X index = 1
+        TS_ASSERT_DELTA(it->getCenter()[0], 3.0, 1e-5);
+        // And this coordinate is the spectrum number
+        TS_ASSERT_DELTA(it->getCenter()[1], i_d * 2, 1e-5);
+        TS_ASSERT(it->next()); // more elements in i != 0
+        TS_ASSERT(it->next());
+        TS_ASSERT(it->next());
+      }
+      TS_ASSERT(!it->next());
+      delete it;
+    }
   }
 };
 

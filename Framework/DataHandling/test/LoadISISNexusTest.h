@@ -42,10 +42,10 @@ private:
   // entry.
   void checkPeriodLogData(MatrixWorkspace_sptr workspace,
                           int expectedPeriodNumber) {
-    Property *p = NULL;
+    Property *p = nullptr;
     TS_ASSERT_THROWS_NOTHING(
         p = fetchPeriodLog(workspace, expectedPeriodNumber));
-    TS_ASSERT(p != NULL)
+    TS_ASSERT(p != nullptr)
     TSM_ASSERT_THROWS("Shouldn't have a period less than the expected entry",
                       fetchPeriodLog(workspace, expectedPeriodNumber - 1),
                       Mantid::Kernel::Exception::NotFoundError);
@@ -61,7 +61,7 @@ private:
                      std::stoi(current_period_log->value()));
 
     // Check time series properties have been filtered by period
-    p = NULL;
+    p = nullptr;
     TSM_ASSERT_THROWS_NOTHING("Cannot retrieve stheta log",
                               p = workspace->run().getLogData("stheta"));
     auto stheta = dynamic_cast<FilteredTimeSeriesProperty<double> *>(p);

@@ -184,7 +184,7 @@ void PeakColumn::read(size_t index, const std::string &text) {
  * @param index :: index of the peak to modify
  * @param in :: input stream
  */
-void PeakColumn::read(const size_t index, std::istream &in) {
+void PeakColumn::read(const size_t index, std::istringstream &in) {
   if (this->getReadOnly() || index >= m_peaks.size())
     return;
 

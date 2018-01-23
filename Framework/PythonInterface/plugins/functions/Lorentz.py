@@ -67,5 +67,6 @@ class Lorentz(IFunction1D):
             jacobian.set(i,2, 1.0)
             i += 1
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(Lorentz)

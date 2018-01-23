@@ -22,7 +22,7 @@ public:
   // This interface's categories.
   static QString categoryInfo() { return "General"; }
 
-  explicit StepScan(QWidget *parent = 0);
+  explicit StepScan(QWidget *parent = nullptr);
   ~StepScan() override;
 
 signals:

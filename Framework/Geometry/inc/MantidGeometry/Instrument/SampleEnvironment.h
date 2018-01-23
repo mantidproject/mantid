@@ -66,12 +66,12 @@ public:
   bool isValid(const Kernel::V3D &point) const;
   int interceptSurfaces(Track &track) const;
 
-  void add(const Object_const_sptr &component);
+  void add(const IObject_const_sptr &component);
 
 private:
   std::string m_name;
   // Element zero is always assumed to be the can
-  std::vector<Object_const_sptr> m_components;
+  std::vector<IObject_const_sptr> m_components;
 };
 
 // Typedef a unique_ptr

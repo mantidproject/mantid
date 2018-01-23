@@ -33,7 +33,7 @@ Usage
 
    output = RemoveExpDecay(input)
 
-   print "Exp. decay removed:", output.readY(0)
+   print("Exp. decay removed: {}".format(output.readY(0)))
 
 Output:
 

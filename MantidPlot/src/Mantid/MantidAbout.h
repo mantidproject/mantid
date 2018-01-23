@@ -41,7 +41,7 @@ class MantidAbout : public MantidQt::API::MantidDialog {
 
 public:
   /// constructor
-  explicit MantidAbout(QWidget *parent = 0);
+  explicit MantidAbout(QWidget *parent = nullptr);
   /// destructor
   ~MantidAbout() override {}
 

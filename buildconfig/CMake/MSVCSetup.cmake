@@ -13,19 +13,13 @@ add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL -DJSON_DLL )
 add_definitions ( -DPOCO_NO_UNWINDOWS )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
-# Workaround Qt compiler detection
-#https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
-#https://bugreports.qt.io/browse/QTBUG-39142
-add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
 
 ##########################################################################
 # Additional compiler flags
 ##########################################################################
 # /MP     - Compile .cpp files in parallel
 # /W3     - Warning Level 3 (This is also the default)
-# /Zc:wchar_t- - Do not treat wchar_t as a builtin type. Required for Qt to
-#           work with wstring
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3 /Zc:wchar_t-" )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3" )
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
@@ -39,6 +33,11 @@ else()
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
 endif()
+
+###########################################################################
+# Qt5 is always in the same place
+###########################################################################
+set ( Qt5_DIR ${THIRD_PARTY_DIR}/lib/qt5/lib/cmake/Qt5 )
 
 ###########################################################################
 # On Windows we want to bundle Python.
@@ -131,6 +130,9 @@ configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
 ###########################################################################
 set ( BIN_DIR bin )
 set ( LIB_DIR ${BIN_DIR} )
+# This is the root of the plugins directory
 set ( PLUGINS_DIR plugins )
-set ( PVPLUGINS_DIR PVPlugins )
-set ( PVPLUGINS_SUBDIR PVPlugins ) # Need to tidy these things up!
+# Separate directory of plugins to be discovered by the ParaView framework
+# These cannot be mixed with our other plugins. Further sub-directories
+# based on the Qt version will also be created by the installation targets
+set ( PVPLUGINS_SUBDIR paraview ) # Need to tidy these things up!

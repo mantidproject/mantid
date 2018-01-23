@@ -44,7 +44,7 @@ class V3D;
 
 namespace Geometry {
 class ICompAssembly;
-class Object;
+class CSGObject;
 }
 }
 

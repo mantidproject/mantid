@@ -2,34 +2,35 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
 import AbinsModules
+from  mantid.kernel import Atom
 
 
-class LoadCASTEP(AbinsModules.GeneralDFTProgram):
+class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
     """
     Class which handles loading files from foo.phonon output CASTEP files.
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
     """
 
-    def __init__(self, input_dft_filename):
+    def __init__(self, input_ab_initio_filename):
         """
 
-        @param input_dft_filename: name of file with phonon data (foo.phonon)
+        :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
         """
-        super(LoadCASTEP, self).__init__(input_dft_filename=input_dft_filename)
+        super(LoadCASTEP, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
 
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
         self._sum_rule = None
-        self._dft_program = "CASTEP"
+        self._ab_initio_program = "CASTEP"
 
     # noinspection PyMethodMayBeStatic
     def _parse_block_header(self, header_match, block_count):
         """
         Parses the header of a block of frequencies and intensities
 
-        @param header_match: the regex match to the header
-        @param block_count: the count of blocks found so far
-        @return weight for this block of values
+        :param header_match: the regex match to the header
+        :param block_count: the count of blocks found so far
+        :returns: weight for this block of values
         """
         # Found header block at start of frequencies
         if self._sum_rule and block_count == 0:
@@ -47,11 +48,11 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         """
         Reads information from the header of a <>.phonon file
 
-        @param f_handle: handle to the file.
-        @return List of ions in file as list of tuple of (ion, mode number)
+        :param f_handle: handle to the file.
+        :returns: List of ions in file as list of tuple of (ion, mode number)
         """
         file_data = {"atoms": {}}
-
+        masses_from_file = []
         while True:
             line = f_handle.readline()
 
@@ -75,26 +76,38 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
                     line = f_handle.readline()
                     line_data = line.strip().split()
                     indx = int(line_data[0]) - 1  # -1 to convert to zero based indexing
-                    symbol = line_data[4]
+
+                    # only name of element in the name
+                    if ":" not in line_data[4]:
+                        symbol = line_data[4]
+                    # D,T etc
+                    else:
+                        # possible scenarios:
+                        # H:D1
+                        # H:D2
+                        symbol = "H"
+                    masses_from_file.append(float(line_data[5]))
                     ion = {"symbol": symbol,
-                           "fract_coord": np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])]),
+                           "coord": np.array(float(line_data[1]) * file_data['unit_cell'][0] +
+                                             float(line_data[2]) * file_data['unit_cell'][1] +
+                                             float(line_data[3]) * file_data['unit_cell'][2]),
                            # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
                            "sort": indx,
-                           "mass": float(line_data[5])}
+                           "mass": Atom(symbol=symbol).mass}
                     file_data["atoms"].update({"atom_%s" % indx: ion})
+
+            self.check_isotopes_substitution(atoms=file_data["atoms"], masses=masses_from_file)
 
             if 'END header' in line:
                 if self._num_atoms is None or self._num_phonons is None:
                     raise IOError("Failed to parse file. Invalid file header.")
                 return file_data
 
-                # ----------------------------------------------------------------------------------------
-
     def _parse_phonon_freq_block(self, f_handle):
         """
         Reads frequencies block from <>.phonon file.
 
-        @param f_handle: handle to the file.
+        :param f_handle: handle to the file.
         """
 
         freq = []
@@ -109,8 +122,8 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         """
         Parses the unit cell vectors in a .phonon file.
 
-        @param f_handle: Handle to the file
-        @return Numpy array of unit vectors
+        :param f_handle: Handle to the file
+        :returns: Numpy array of unit vectors
         """
         data = []
         for _ in range(3):
@@ -124,8 +137,8 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
     def _parse_phonon_eigenvectors(self, f_handle):
         """
 
-        @param f_handle: file object to read
-        @return: eigenvectors (atomic displacements) for all k-points
+        :param f_handle: file object to read
+        :returns: eigenvectors (atomic displacements) for all k-points
         """
 
         dim = 3  # we have 3D space
@@ -151,7 +164,7 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
     def _check_acoustic_sum(self):
         """
         Checks if acoustic sum correction has been applied during calculations.
-        @return: True is correction has been applied, otherwise False.
+        :returns: True is correction has been applied, otherwise False.
         """
         header_str_sum = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + " \
                          r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
@@ -165,13 +178,13 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
 
             return found
 
-    def read_phonon_file(self):
+    def read_vibrational_or_phonon_data(self):
         """
         Reads frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic displacements
         from a <>.phonon file. Save frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic
         displacements, hash of the phonon file (hash) to <>.hdf5
 
-        @return  object of type AbinsData.
+        :returns:  object of type AbinsData.
         """
         file_data = {}
 
@@ -224,11 +237,25 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
                     vectors = self._parse_phonon_eigenvectors(f_handle=f_handle)
                     eigenvectors.append(vectors)
 
+        # normalise eigenvectors:
+
+        # atomic displacements: [num_k, num_atom, num_freq, dim]
+        disp = np.asarray(eigenvectors)
+
+        # num_k: number of k-points
+        # num_atom: number of atoms
+        # num_freq: number of frequencies
+        # dim: dimension (atoms vibrate in 3D so dim=3)
+        # [num_k, num_atom, num_freq, dim] -> [num_k, num_atom, num_freq, dim, dim] -> [num_k, num_atom, num_freq]
+        # -> [num_k, num_freq]
+        norm = np.sum(np.trace(np.einsum('lkin, lkim->lkinm', disp, disp.conjugate()), axis1=3, axis2=4), axis=1)
+        factor = 1.0 / np.sqrt(norm)
+        disp = np.einsum('ijkl, ik-> ijkl', disp, factor)
+
         file_data.update({"frequencies": np.asarray(frequencies),
                           "weights": np.asarray(weights),
                           "k_vectors": np.asarray(k_vectors),
-                          "atomic_displacements":
-                              np.asarray(eigenvectors) * AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+                          "atomic_displacements": disp
                           })
 
         self._recover_symmetry_points(data=file_data)
@@ -239,6 +266,6 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         for key in data_to_save:
             data[key] = file_data[key]
 
-        self.save_dft_data(data=data)
+        self.save_ab_initio_data(data=data)
 
         return self._rearrange_data(data=file_data)

@@ -178,7 +178,7 @@ def get_geometry_properties(reducer):
     return geometry_properties
 
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, # noqa: C901
                 centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
         @param filename: the CSV file with the list of runs to analyse

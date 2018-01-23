@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from mantid.simpleapi import Load
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -7,6 +8,80 @@ import numpy as np
 
 
 # -------------------------------------------------------------------------------
+
+def create_range_from(range_str, delimiter):
+    """
+    Creates a range from the specified string, by splitting by the specified
+    delimiter.
+
+    :param range_str:   The range string, in the format A-B where A is the lower
+                        bound of the range, - is the delimiter and B is the upper
+                        bound of the range.
+    :param delimiter:   The range delimiter.
+    :return:            The range created from the range string.
+    """
+    lower, upper = range_str.split(delimiter, 1)
+    return range(int(lower), int(upper)+1)
+
+
+def create_file_range_parser(instrument):
+    """
+    Creates a parser which takes a specified file range string of the
+    format A-B, and returns a list of the files in that range preceded
+    by the specified instrument name.
+
+    :param instrument:  The instrument name.
+    :return:            A file range parser.
+    """
+
+    def parser(file_range):
+        file_range = file_range.strip()
+        # Check whether this is a range or single file
+        try:
+            if '-' in file_range:
+                return [[instrument + str(run) for run in create_range_from(file_range, '-')]]
+            elif ':' in file_range:
+                return [[instrument + str(run)] for run in create_range_from(file_range, ':')]
+            elif '+' in file_range:
+                return [[instrument + run for run in file_range.split('+')]]
+            else:
+                return [[instrument + str(int(file_range))]]
+        except ValueError:
+            return [[file_range]]
+
+    return parser
+
+
+def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=True, load_logs=True, load_opts=None):
+    """
+    Loads a set of files from specified file ranges and extracts just the spectra we
+    care about (i.e. detector range and monitor).
+
+    @param file_ranges List of data file ranges
+    @param ipf_filename File path/name for the instrument parameter file to load
+    @param spec_min Minimum spectra ID to load
+    @param spec_max Maximum spectra ID to load
+    @param sum_files Sum loaded files
+    @param load_logs Load log files when loading runs
+    @param load_opts Additional options to be passed to load algorithm
+
+    @return List of loaded workspace names and flag indicating chopped data
+    """
+    instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
+    instrument = instrument.split('_')[0]
+    parse_file_range = create_file_range_parser(instrument)
+    file_ranges = [file_range for range_str in file_ranges for file_range in range_str.split(',')]
+    file_groups = [file_group for file_range in file_ranges for file_group in parse_file_range(file_range)]
+
+    workspace_names = []
+    chopped_data = False
+
+    for file_group in file_groups:
+        created_workspaces, chopped_data = load_files(file_group, ipf_filename, spec_min,
+                                                      spec_max, sum_files, load_logs, load_opts)
+        workspace_names.extend(created_workspaces)
+
+    return workspace_names, chopped_data
 
 
 def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
@@ -23,79 +98,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
     @return List of loaded workspace names and flag indicating chopped data
     """
-    from mantid.simpleapi import (Load, LoadVesuvio, LoadParameterFile,
-                                  ChopData, ExtractSingleSpectrum,
-                                  CropWorkspace)
-
-    if load_opts is None:
-        load_opts = {}
-
-    workspace_names = []
-
-    for filename in data_files:
-        # The filename without path and extension will be the workspace name
-        ws_name = os.path.splitext(os.path.basename(str(filename)))[0]
-        logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
-
-        if 'VESUVIO' in ipf_filename:
-            # Load all spectra. They are cropped later
-            LoadVesuvio(Filename=str(filename),
-                        OutputWorkspace=ws_name,
-                        SpectrumList='1-198',
-                        **load_opts)
-        else:
-            Load(Filename=filename,
-                 OutputWorkspace=ws_name,
-                 LoadLogFiles=load_logs,
-                 **load_opts)
-
-        # Load the instrument parameters
-        LoadParameterFile(Workspace=ws_name,
-                          Filename=ipf_filename)
-
-        # Add the workspace to the list of workspaces
-        workspace_names.append(ws_name)
-
-        # Get the spectrum number for the monitor
-        instrument = mtd[ws_name].getInstrument()
-        monitor_index = int(instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')[0])
-        logger.debug('Workspace %s monitor 1 spectrum number :%d' % (ws_name, monitor_index))
-
-        # Chop data if required
-        try:
-            chop_threshold = mtd[ws_name].getInstrument().getNumberParameter('Workflow.ChopDataIfGreaterThan')[0]
-            x_max = mtd[ws_name].readX(0)[-1]
-            chopped_data = x_max > chop_threshold
-        except IndexError:
-            chopped_data = False
-        logger.information('Workspace {0} need data chop: {1}'.format(ws_name, str(chopped_data)))
-
-        workspaces = [ws_name]
-        if chopped_data:
-            ChopData(InputWorkspace=ws_name,
-                     OutputWorkspace=ws_name,
-                     MonitorWorkspaceIndex=monitor_index,
-                     IntegrationRangeLower=5000.0,
-                     IntegrationRangeUpper=10000.0,
-                     NChops=5)
-            workspaces = mtd[ws_name].getNames()
-
-        for chop_ws_name in workspaces:
-            # Get the monitor spectrum
-            monitor_ws_name = chop_ws_name + '_mon'
-            ExtractSingleSpectrum(InputWorkspace=chop_ws_name,
-                                  OutputWorkspace=monitor_ws_name,
-                                  WorkspaceIndex=monitor_index)
-
-            # Crop to the detectors required
-            chop_ws = mtd[chop_ws_name]
-            CropWorkspace(InputWorkspace=chop_ws_name,
-                          OutputWorkspace=chop_ws_name,
-                          StartWorkspaceIndex=chop_ws.getIndexFromSpectrumNumber(int(spec_min)),
-                          EndWorkspaceIndex=chop_ws.getIndexFromSpectrumNumber(int(spec_max)))
-
-    logger.information('Loaded workspace names: %s' % (str(workspace_names)))
-    logger.information('Chopped data: %s' % (str(chopped_data)))
+    workspace_names, chopped_data = _load_files(data_files, ipf_filename, spec_min, spec_max, load_logs, load_opts)
 
     # Sum files if needed
     if sum_files and len(data_files) > 1:
@@ -107,6 +110,166 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     logger.information('Summed workspace names: %s' % (str(workspace_names)))
 
     return workspace_names, chopped_data
+
+
+def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=True, load_opts=None):
+    """
+    Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
+
+    @param file_specifiers List of data file specifiers
+    @param ipf_filename File path/name for the instrument parameter file to load
+    @param spec_min Minimum spectra ID to load
+    @param spec_max Maximum spectra ID to load
+    @param load_logs Load log files when loading runs
+    @param load_opts Additional options to be passed to load algorithm
+
+    @return List of loaded workspace names and flag indicating chopped data
+    """
+    delete_monitors = False
+
+    if load_opts is None:
+        load_opts = {}
+
+    if "DeleteMonitors" in load_opts:
+        delete_monitors = load_opts["DeleteMonitors"]
+        load_opts.pop("DeleteMonitors")
+
+    workspace_names = []
+    chopped_data = False
+
+    for file_specifier in file_specifiers:
+        # The filename without path and extension will be the workspace name
+        ws_name = os.path.splitext(os.path.basename(str(file_specifier)))[0]
+        logger.debug('Loading file %s as workspace %s' % (file_specifier, ws_name))
+        do_load(file_specifier, ws_name, ipf_filename, load_logs, load_opts)
+        workspace = mtd[ws_name]
+
+        # Add the workspace to the list of workspaces
+        workspace_names.append(ws_name)
+
+        # Get the spectrum number for the monitor
+        instrument = workspace.getInstrument()
+        monitor_param = instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')
+
+        if monitor_param:
+            monitor_index = int(monitor_param[0])
+            logger.debug('Workspace %s monitor 1 spectrum number :%d' % (ws_name, monitor_index))
+
+            workspaces, chopped_data = chop_workspace(workspace, monitor_index)
+            crop_workspaces(workspaces, spec_min, spec_max, not delete_monitors, monitor_index)
+
+    logger.information('Loaded workspace names: %s' % (str(workspace_names)))
+    logger.information('Chopped data: %s' % (str(chopped_data)))
+
+    if delete_monitors:
+        load_opts['DeleteMonitors'] = True
+
+    return workspace_names, chopped_data
+
+
+# -------------------------------------------------------------------------------
+
+
+def do_load(file_specifier, output_ws_name, ipf_filename, load_logs, load_opts):
+    """
+    Loads the files, passing the given file specifier in the load command.
+
+    :param file_specifier:  The file specifier (single file, range or sum)
+    :param output_ws_name:  The name of the output workspace to create
+    :param ipf_filename:    The instrument parameter file to load with
+    :param load_opts:       Additional loading options
+    :param load_logs:       If True, load logs
+    """
+    from mantid.simpleapi import LoadVesuvio, LoadParameterFile
+
+    if 'VESUVIO' in ipf_filename:
+        # Load all spectra. They are cropped later
+        LoadVesuvio(Filename=str(file_specifier),
+                    OutputWorkspace=output_ws_name,
+                    SpectrumList='1-198',
+                    **load_opts)
+    else:
+        Load(Filename=file_specifier,
+             OutputWorkspace=output_ws_name,
+             LoadLogFiles=load_logs,
+             **load_opts)
+
+    # Load the instrument parameters
+    LoadParameterFile(Workspace=output_ws_name,
+                      Filename=ipf_filename)
+
+
+# -------------------------------------------------------------------------------
+
+
+def chop_workspace(workspace, monitor_index):
+    """
+    Chops the specified workspace if its maximum x-value exceeds its instrument
+    parameter, 'Workflow.ChopDataIfGreaterThan'.
+
+    :param workspace:     The workspace to chop
+    :param monitor_index: The index of the monitor spectra in the workspace.
+    :return:              A tuple of the list of output workspace names and a boolean
+                          specifying whether the workspace was chopped.
+    """
+    from mantid.simpleapi import ChopData
+
+    workspace_name = workspace.getName()
+
+    # Chop data if required
+    try:
+        chop_threshold = workspace.getInstrument().getNumberParameter('Workflow.ChopDataIfGreaterThan')[0]
+        x_max = workspace.readX(0)[-1]
+        chopped_data = x_max > chop_threshold
+    except IndexError:
+        logger.warning("Chop threshold not found in instrument parameters")
+        chopped_data = False
+    logger.information('Workspace {0} need data chop: {1}'.format(workspace_name, str(chopped_data)))
+
+    if chopped_data:
+        ChopData(InputWorkspace=workspace,
+                 OutputWorkspace=workspace_name,
+                 MonitorWorkspaceIndex=monitor_index,
+                 IntegrationRangeLower=5000.0,
+                 IntegrationRangeUpper=10000.0,
+                 NChops=5)
+        return mtd[workspace_name].getNames(), True
+    else:
+        return [workspace_name], False
+
+
+# -------------------------------------------------------------------------------
+
+
+def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, monitor_index=0):
+    """
+    Crops the workspaces with the specified workspace names, from the specified minimum
+    spectra to the specified maximum spectra.
+
+    :param workspace_names:     The names of the workspaces to crop
+    :param spec_min:            The minimum spectra of the cropping region
+    :param spec_max:            The maximum spectra of the cropping region
+    :param extract_monitors:    If True, extracts monitors from the workspaces
+    :param monitor_index:       The index of the monitors in the workspaces
+    """
+    from mantid.simpleapi import ExtractSingleSpectrum, CropWorkspace
+
+    for workspace_name in workspace_names:
+
+        if extract_monitors:
+            # Get the monitor spectrum
+            monitor_ws_name = workspace_name + '_mon'
+            ExtractSingleSpectrum(InputWorkspace=workspace_name,
+                                  OutputWorkspace=monitor_ws_name,
+                                  WorkspaceIndex=monitor_index)
+
+        # Crop to the detectors required
+        workspace = mtd[workspace_name]
+
+        CropWorkspace(InputWorkspace=workspace_name,
+                      OutputWorkspace=workspace_name,
+                      StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
+                      EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
 
 
 # -------------------------------------------------------------------------------
@@ -423,9 +586,28 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
     """
-    from mantid.simpleapi import (MaskDetectors, GroupDetectors)
+    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws)
 
-    instrument = mtd[workspace_name].getInstrument()
+    if grouped_ws is not None:
+        mtd.addOrReplace(workspace_name, grouped_ws)
+
+
+def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None):
+    """
+    Groups spectra in a given workspace according to the Workflow.GroupingMethod and
+    Workflow.GroupingFile parameters and GroupingPolicy property.
+
+    @param workspace Workspace to group spectra of
+    @param masked_detectors List of spectra numbers to mask
+    @param method Grouping method (IPF, All, Individual, File, Workspace)
+    @param group_file File for File method
+    @param group_ws Workspace for Workspace method
+    """
+    instrument = workspace.getInstrument()
+    group_detectors = AlgorithmManager.create("GroupDetectors")
+    group_detectors.setChild(True)
+    group_detectors.setProperty("InputWorkspace", workspace)
+    group_detectors.setProperty("Behaviour", 'Average')
 
     # If grouping as per he IPF is desired
     if method == 'IPF':
@@ -439,22 +621,19 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
         # Otherwise use the value of GroupingPolicy
         grouping_method = method
 
-    logger.information('Grouping method for workspace %s is %s' % (workspace_name, grouping_method))
+    logger.information('Grouping method for workspace %s is %s' % (workspace.getName(), grouping_method))
 
     if grouping_method == 'Individual':
         # Nothing to do here
-        return
+        return None
 
     elif grouping_method == 'All':
         # Get a list of all spectra minus those which are masked
-        num_spec = mtd[workspace_name].getNumberHistograms()
+        num_spec = workspace.getNumberHistograms()
         spectra_list = [spec for spec in range(0, num_spec) if spec not in masked_detectors]
 
         # Apply the grouping
-        GroupDetectors(InputWorkspace=workspace_name,
-                       OutputWorkspace=workspace_name,
-                       Behaviour='Average',
-                       WorkspaceIndexList=spectra_list)
+        group_detectors.setProperty("WorkspaceIndexList", spectra_list)
 
     elif grouping_method == 'File':
         # Get the filename for the grouping file
@@ -476,24 +655,21 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
 
         # Mask detectors if required
         if len(masked_detectors) > 0:
-            MaskDetectors(Workspace=workspace_name,
-                          WorkspaceIndexList=masked_detectors)
+            _mask_detectors(workspace, masked_detectors)
 
         # Apply the grouping
-        GroupDetectors(InputWorkspace=workspace_name,
-                       OutputWorkspace=workspace_name,
-                       Behaviour='Average',
-                       MapFile=grouping_file)
+        group_detectors.setProperty("MapFile", grouping_file)
 
     elif grouping_method == 'Workspace':
         # Apply the grouping
-        GroupDetectors(InputWorkspace=workspace_name,
-                       OutputWorkspace=workspace_name,
-                       Behaviour='Average',
-                       CopyGroupingFromWorkspace=group_ws)
+        group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
 
     else:
-        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace_name))
+        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))
+
+    group_detectors.setProperty("OutputWorkspace", "__temp")
+    group_detectors.execute()
+    return group_detectors.getProperty("OutputWorkspace").value
 
 
 # -------------------------------------------------------------------------------
@@ -681,12 +857,7 @@ def save_reduction(workspace_names, formats, x_units='DeltaE'):
                       Filename=workspace_name + '.nxspe')
 
         if 'ascii' in formats:
-            # Changed to version 2 to enable re-loading of files into mantid
-            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
-            saveAsciiAlg.initialize()
-            saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
-            saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
-            saveAsciiAlg.execute()
+            _save_ascii(workspace_name, workspace_name + ".dat")
 
         if 'aclimax' in formats:
             if x_units == 'DeltaE_inWavenumber':
@@ -782,4 +953,39 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
         except RuntimeError:
             logger.warning('Rebinning failed, will try to continue anyway.')
 
+
 # -------------------------------------------------------------------------------
+
+# ========== Child Algorithms ==========
+
+def _mask_detectors(workspace, masked_indices):
+    """
+    Masks the detectors at the specified indices in the specified
+    workspace.
+
+    :param workspace:       The workspace whose detectors to mask.
+    :param masked_indices:  The indices of the detectors to mask.
+    """
+    mask_detectors = AlgorithmManager.createUnmanaged("MaskDetectors")
+    mask_detectors.setChild(True)
+    mask_detectors.initialize()
+    mask_detectors.setProperty("Workspace", workspace)
+    mask_detectors.setProperty("WorkspaceIndexList", masked_indices)
+    mask_detectors.execute()
+
+
+def _save_ascii(workspace, file_name):
+    """
+    Saves the specified workspace into a file with the specified name,
+    in ASCII-format.
+
+    :param workspace:   The workspace to save.
+    :param file_name:   The name of the file to save the workspace into.
+    """
+    # Changed to version 2 to enable re-loading of files into mantid
+    save_ascii_alg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
+    save_ascii_alg.setChild(True)
+    save_ascii_alg.initialize()
+    save_ascii_alg.setProperty('InputWorkspace', workspace)
+    save_ascii_alg.setProperty('Filename', file_name + '.dat')
+    save_ascii_alg.execute()

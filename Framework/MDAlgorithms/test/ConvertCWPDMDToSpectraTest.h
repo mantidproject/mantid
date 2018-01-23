@@ -20,6 +20,7 @@ using Mantid::DataHandling::LoadSpiceAscii;
 using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class ConvertCWPDMDToSpectraTest : public CxxTest::TestSuite {
 public:

@@ -79,9 +79,6 @@ void Integration::exec() {
 
   /// The value in X to start the integration from
   double minRange = getProperty("RangeLower");
-  if (isEmpty(minRange)) {
-    minRange = std::numeric_limits<double>::lowest();
-  }
   /// The value in X to finish the integration at
   double maxRange = getProperty("RangeUpper");
   /// The spectrum to start the integration from
@@ -147,6 +144,9 @@ void Integration::exec() {
         rangeFilterEventWorkspace(eventInputWS, evntMinRange, evntMaxRange);
 
     progressStart = 0.5;
+  }
+  if (isEmpty(minRange)) {
+    minRange = std::numeric_limits<double>::lowest();
   }
 
   // Create the 2D workspace (with 1 bin) for the output

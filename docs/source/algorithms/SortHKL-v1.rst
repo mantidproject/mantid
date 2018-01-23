@@ -39,7 +39,7 @@ Finally, the peaks in the output workspace are sorted by H, K and L.
 Usage
 -----
 
-The following usage example uses data obtained from a trigonal structure. The peaks are loaded and a UB-matrix
+The following usage example uses data obtained from a trigonal structure. The peaks are loaded and a :ref:`UB matrix <Lattice>`
 is determined. The peaks are transformed to conform with a conventional cell, which has hexagonal metric
 and rhombohedral centering:
 
@@ -59,11 +59,11 @@ and rhombohedral centering:
 
     statistics = statistics_table.row(0)
 
-    print 'Data set statistics:'
-    print '        Peaks: {0}'.format(sorted.getNumberPeaks())
-    print '       Unique: {0}'.format(statistics['No. of Unique Reflections'])
-    print ' Completeness: {0}%'.format(round(statistics['Data Completeness'], 2))
-    print '   Redundancy: {0}'.format(round(statistics['Multiplicity'], 2))
+    print('Data set statistics:')
+    print('        Peaks: {0}'.format(sorted.getNumberPeaks()))
+    print('       Unique: {0}'.format(statistics['No. of Unique Reflections']))
+    print(' Completeness: {0}%'.format(round(statistics['Data Completeness'], 2)))
+    print('   Redundancy: {0}'.format(round(statistics['Multiplicity'], 2)))
 
 Output:
 

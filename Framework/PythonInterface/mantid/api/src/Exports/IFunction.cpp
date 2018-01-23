@@ -1,6 +1,9 @@
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
+#include "MantidAPI/CompositeFunction.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -8,7 +11,9 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::IFunction;
+using Mantid::API::IFunction_sptr;
 using Mantid::PythonInterface::IFunctionAdapter;
+using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IFunction)
@@ -60,6 +65,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1,
                                        2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixAll_Overloads, fixAll, 0, 1)
+typedef void (IFunction::*removeTieByName)(const std::string &);
+
 GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
@@ -92,6 +99,12 @@ void export_IFunction() {
       .def("attributeNames", &IFunction::getAttributeNames, arg("self"),
            "The names of all the attributes")
 
+      .def("hasAttribute", &IFunction::hasAttribute, (arg("self"), arg("name")),
+           "Return whether there is an attribute of the given name")
+
+      .def("hasParameter", &IFunction::hasParameter, (arg("self"), arg("name")),
+           "Return whether there is an parameter of the given name")
+
       .def("nParams", &IFunction::nParams, arg("self"),
            "Return the number of parameters")
 
@@ -114,12 +127,21 @@ void export_IFunction() {
                IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
+      .def("__getitem__", (double (IFunction::*)(const std::string &) const) &
+                              IFunction::getParameter,
+           (arg("self"), arg("name")), "Get the value of the named parameter")
+
       .def("setParameter", (setParameterType1)&IFunction::setParameter,
            setParameterType1_Overloads(
                (arg("self"), arg("i"), arg("value"), arg("explicitlySet")),
                "Sets the value of the ith parameter"))
 
       .def("setParameter", (setParameterType2)&IFunction::setParameter,
+           setParameterType2_Overloads(
+               (arg("self"), arg("name"), arg("value"), arg("explicitlySet")),
+               "Sets the value of the named parameter"))
+
+      .def("__setitem__", (setParameterType2)&IFunction::setParameter,
            setParameterType2_Overloads(
                (arg("self"), arg("name"), arg("value"), arg("explicitlySet")),
                "Sets the value of the named parameter"))
@@ -204,6 +226,9 @@ void export_IFunction() {
            "Split this function (if needed) into a list of "
            "independent functions")
 
+      .def("nDomains", &IFunction::getNumberDomains, arg("self"),
+           "Get the number of domains.")
+
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),
            "Returns a list of the categories for an algorithm")
@@ -219,7 +244,10 @@ void export_IFunction() {
       .def("getParamValue",
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
+
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),
            "Return a string representation of the function");
+
+  TypeRegistry::subscribe<TypedPropertyValueHandler<IFunction_sptr>>();
 }

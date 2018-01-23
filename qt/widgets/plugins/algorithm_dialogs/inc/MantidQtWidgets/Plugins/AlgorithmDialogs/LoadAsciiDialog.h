@@ -51,7 +51,7 @@ class LoadAsciiDialog : public MantidQt::API::AlgorithmDialog {
 
 public:
   /// Constructor
-  LoadAsciiDialog(QWidget *parent = 0);
+  LoadAsciiDialog(QWidget *parent = nullptr);
   /// Destruktor
   ~LoadAsciiDialog() override;
 

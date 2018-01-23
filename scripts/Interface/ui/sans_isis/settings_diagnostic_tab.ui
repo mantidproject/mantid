@@ -88,6 +88,39 @@
      </column>
     </widget>
    </item>
+   <item>
+    <widget class="QGroupBox" name="save_state_group_box">
+     <property name="title">
+      <string>Save current state to file</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="save_state_label">
+        <property name="text">
+         <string>Save to</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="save_state_browse_push_button">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="save_state_line_edit"/>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="save_state_save_push_button">
+        <property name="text">
+         <string>Save</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

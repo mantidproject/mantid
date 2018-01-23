@@ -38,7 +38,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(hab.rotation_correction == 0.0)
 
         # SANS2D-specific
-        self.assertTrue(move.monitor_4_offset == -70.0/1000.)
+        self.assertTrue(move.monitor_n_offset == -70.0/1000.)
 
     def _assert_mask(self, state):
         mask = state.mask
@@ -62,6 +62,9 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
     def _assert_reduction(self, state):
         reduction = state.reduction
         self.assertTrue(reduction.reduction_mode is ISISReductionMode.LAB)
+        self.assertFalse(reduction.merge_mask)
+        self.assertTrue(reduction.merge_min == None)
+        self.assertTrue(reduction.merge_max == None)
 
     def _assert_scale(self, state):
         scale = state.scale
@@ -147,6 +150,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low == 1.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high == 12.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order == 0)
+        self.assertTrue(adjustment.show_transmission == False)
 
         # Wavelength and Pixel Adjustment
         wavelength_and_pixel_adjustment = adjustment.wavelength_and_pixel_adjustment

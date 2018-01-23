@@ -1,9 +1,9 @@
 #include "MantidQtWidgets/InstrumentView/Viewport.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include <math.h>
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidKernel/V3D.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
+#include <cmath>
 #include <limits>
 
 namespace MantidQt {

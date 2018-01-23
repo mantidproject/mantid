@@ -29,7 +29,7 @@ RectangularDetectorPixel::RectangularDetectorPixel(
  * @param col :: column of the pixel in the panel
  */
 RectangularDetectorPixel::RectangularDetectorPixel(
-    const std::string &name, int id, boost::shared_ptr<Object> shape,
+    const std::string &name, int id, boost::shared_ptr<IObject> shape,
     IComponent *parent, RectangularDetector *panel, size_t row, size_t col)
     : Detector(name, id, shape, parent), m_panel(panel), m_row(row),
       m_col(col) {

@@ -3,6 +3,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -208,8 +209,8 @@ void Property::setUnits(const std::string &unit) { m_units = unit; }
  * @param start :: the beginning time to filter from
  * @param stop :: the ending time to filter to
  * */
-void Property::filterByTime(const Kernel::DateAndTime &start,
-                            const Kernel::DateAndTime &stop) {
+void Property::filterByTime(const Types::Core::DateAndTime &start,
+                            const Types::Core::DateAndTime &stop) {
   UNUSED_ARG(start);
   UNUSED_ARG(stop);
   // Do nothing in general
@@ -343,6 +344,8 @@ std::string getUnmangledTypeName(const std::type_info &type) {
     typestrings.emplace(typeid(std::vector<double>).name(), string("dbl list"));
     typestrings.emplace(typeid(std::vector<std::vector<string>>).name(),
                         string("list of str lists"));
+    typestrings.emplace(typeid(OptionalBool).name(),
+                        string("optional boolean"));
 
     // Workspaces
     typestrings.emplace(typeid(boost::shared_ptr<Workspace>).name(),

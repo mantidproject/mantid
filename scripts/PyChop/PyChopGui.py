@@ -774,6 +774,7 @@ def show():
         app.exec_()
     return window
 
+
 if __name__ == '__main__':
     if QtGui.QApplication.instance():
         app = QtGui.QApplication.instance()

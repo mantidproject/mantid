@@ -19,7 +19,6 @@
 
 using namespace Mantid::API;
 using namespace boost::python;
-using Mantid::Kernel::AbstractInstantiator;
 using Mantid::PythonInterface::PythonObjectInstantiator;
 
 GET_POINTER_SPECIALIZATION(AlgorithmFactoryImpl)
@@ -58,6 +57,21 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
     versions.attr("append")(ver);
   }
   return inventory;
+}
+
+/**
+ * Return algorithm descriptors as a python list of lists.
+ * @param self :: An instance of AlgorithmFactory.
+ * @param includeHidden :: If true hidden algorithms are included.
+ */
+list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden) {
+  auto descriptors = self.getDescriptors(includeHidden);
+  list pyDescriptors;
+  for (auto &descr : descriptors) {
+    boost::python::object d(descr);
+    pyDescriptors.append(d);
+  }
+  return pyDescriptors;
 }
 
 //------------------------------------------------------------------------------
@@ -126,6 +140,12 @@ GCC_DIAG_ON(cast-qual)
 
 void export_AlgorithmFactory() {
 
+  class_<AlgorithmDescriptor>("AlgorithmDescriptor")
+      .def_readonly("name", &AlgorithmDescriptor::name)
+      .def_readonly("alias", &AlgorithmDescriptor::alias)
+      .def_readonly("category", &AlgorithmDescriptor::category)
+      .def_readonly("version", &AlgorithmDescriptor::version);
+
   class_<AlgorithmFactoryImpl, boost::noncopyable>("AlgorithmFactoryImpl",
                                                    no_init)
       .def("exists", &AlgorithmFactoryImpl::exists,
@@ -143,6 +163,14 @@ void export_AlgorithmFactory() {
       .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from "
            "PythonAlgorithm into the factory")
+      .def("getDescriptors", &getDescriptors,
+           (arg("self"), arg("include_hidden")),
+           "Return a list of descriptors of registered algorithms. Each "
+           "descriptor is a list: [name, version, category, alias].")
+      .def("unsubscribe", &AlgorithmFactoryImpl::unsubscribe,
+           (arg("self"), arg("name"), arg("version")),
+           "Returns the highest version of the named algorithm. Throws "
+           "ValueError if no algorithm can be found")
 
       .def("Instance", &AlgorithmFactory::Instance,
            return_value_policy<reference_existing_object>(),

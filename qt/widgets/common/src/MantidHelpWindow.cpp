@@ -10,12 +10,16 @@
 #include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <QApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QHelpEngine>
 #include <QLatin1Char>
 #include <QLatin1String>
 #include <QResource>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QStandardPaths>
+#endif
 #include <QString>
 #include <QTemporaryFile>
 #include <QTextStream>
@@ -37,7 +41,7 @@ Mantid::Kernel::Logger g_log("MantidHelpWindow");
 }
 
 // initialise the help window
-pqHelpWindow *MantidHelpWindow::g_helpWindow = NULL;
+pqHelpWindow *MantidHelpWindow::g_helpWindow = nullptr;
 
 /// Base url for all of the files in the project.
 const QString BASE_URL("qthelp://org.mantidproject/doc/");
@@ -438,8 +442,15 @@ void MantidHelpWindow::determineFileLocs() {
 
   // determine cache file location
   m_cacheFile = COLLECTION_FILE.toStdString();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString dataLoc =
-      MantidDesktopServices::storageLocation(QDesktopServices::DataLocation);
+      QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+#else
+  QString dataLoc =
+      QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) +
+      "/data";
+#endif
+
   if (dataLoc.endsWith("mantidproject")) {
     Poco::Path path(dataLoc.toStdString(), m_cacheFile);
     m_cacheFile = path.absolute().toString();

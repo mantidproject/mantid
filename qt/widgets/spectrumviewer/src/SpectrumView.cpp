@@ -2,6 +2,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 #include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
@@ -11,6 +12,8 @@
 #include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
 #include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
 
+#include <QDropEvent>
+#include <QSettings>
 #include <boost/make_shared.hpp>
 
 namespace MantidQt {
@@ -29,7 +32,8 @@ namespace SpectrumView {
  */
 SpectrumView::SpectrumView(QWidget *parent)
     : QMainWindow(parent), WorkspaceObserver(), m_ui(new Ui::SpectrumViewer()),
-      m_sliderHandler(NULL), m_rangeHandler(NULL), m_emodeHandler(NULL) {
+      m_sliderHandler(nullptr), m_rangeHandler(nullptr),
+      m_emodeHandler(nullptr) {
   m_ui->setupUi(this);
   connect(m_ui->imageTabs, SIGNAL(currentChanged(int)), this,
           SLOT(changeSpectrumDisplay(int)));
@@ -152,6 +156,19 @@ void SpectrumView::renderWorkspace(
 }
 
 /**
+ * Renders a new workspace on the spectrum viewer.
+ *
+ * @param wsName The name of the matrix workspace to render
+ */
+void SpectrumView::renderWorkspace(const QString &wsName) {
+  Mantid::API::MatrixWorkspace_const_sptr wksp =
+      Mantid::API::AnalysisDataService::Instance()
+          .retrieveWS<const Mantid::API::MatrixWorkspace>(wsName.toStdString());
+
+  renderWorkspace(wksp);
+}
+
+/**
  * Setup the various handlers (energy-mode, slider, range) for UI controls.
  */
 void SpectrumView::updateHandlers() {
@@ -243,6 +260,15 @@ void SpectrumView::respondToTabCloseReqest(int tab) {
   if (m_spectrumDisplay.size() == 1) {
     m_ui->imageTabs->setTabsClosable(false);
   }
+}
+
+void SpectrumView::selectData(int spectrumNumber, double dataVal) {
+  auto index = m_ui->imageTabs->currentIndex();
+  auto y = static_cast<double>(spectrumNumber - 1);
+  auto x = dataVal;
+  m_spectrumDisplay.at(index)->setHGraph(y);
+  m_spectrumDisplay.at(index)->setVGraph(x);
+  m_spectrumDisplay.at(index)->showInfoList(x, y);
 }
 
 /**
@@ -366,7 +392,7 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app) {
     spec.writeLine("ColorMapFileName") << colorMapFileName;
 
   spec.writeLine("Workspaces");
-  for (auto source : m_dataSource) {
+  for (const auto &source : m_dataSource) {
     spec << source->getWorkspace()->getName();
   }
 
@@ -395,7 +421,7 @@ std::string SpectrumView::getWindowName() {
 
 std::vector<std::string> SpectrumView::getWorkspaceNames() {
   std::vector<std::string> names;
-  for (auto source : m_dataSource) {
+  for (const auto &source : m_dataSource) {
     names.push_back(source->getWorkspace()->getName());
   }
   return names;

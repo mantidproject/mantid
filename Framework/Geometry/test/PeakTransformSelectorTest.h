@@ -114,10 +114,10 @@ public:
     // Check the outputs and usage.
     TSM_ASSERT("Should not have selected the wrong factory",
                boost::dynamic_pointer_cast<MockPeakTransformFactoryB>(
-                   selectedFactory) == NULL);
+                   selectedFactory) == nullptr);
     TSM_ASSERT("Should have selected the right factory",
                boost::dynamic_pointer_cast<MockPeakTransformFactoryA>(
-                   selectedFactory) != NULL);
+                   selectedFactory) != nullptr);
     TS_ASSERT(Mock::VerifyAndClearExpectations(pWrongFactory));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRightFactory));
   }
@@ -149,10 +149,10 @@ public:
     // Check the outputs and usage.
     TSM_ASSERT("Should not have selected the wrong factory",
                boost::dynamic_pointer_cast<MockPeakTransformFactoryB>(
-                   selectedFactory) == NULL);
+                   selectedFactory) == nullptr);
     TSM_ASSERT("Should have selected the right factory",
                boost::dynamic_pointer_cast<MockPeakTransformFactoryA>(
-                   selectedFactory) != NULL);
+                   selectedFactory) != nullptr);
     TS_ASSERT(Mock::VerifyAndClearExpectations(pWrongFactory));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRightFactory));
   }

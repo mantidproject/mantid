@@ -351,6 +351,8 @@ important reason to insist on this.
    spectrum may be the sum of counts from a number of detectors and
    Mantid, behind the scene, use the IDs to keep track of this.
 
+.. warning:: As of version 3.12 of Mantid, Instruments in Mantid will no longer silently discard detectors defined with duplicate IDs. Detector IDs (including Monitors) must be unique across the Instrument. IDFs cannot be loaded if they violate this.
+
 The <idlist> element and the idlist attribute of the elements is used to assign
 detector IDs. The notation for using idlist is
 

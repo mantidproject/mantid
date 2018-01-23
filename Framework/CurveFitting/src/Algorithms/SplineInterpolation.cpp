@@ -222,8 +222,7 @@ void SplineInterpolation::exec() {
     }
   }
   // Store the output workspaces
-  std::string derivWsName = getPropertyValue("OutputWorkspaceDeriv");
-  if (order > 0 && derivWsName != "") {
+  if (order > 0 && !isDefault("OutputWorkspaceDeriv")) {
     // Store derivatives in a grouped workspace
     WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
     for (size_t i = 0; i < histNo; ++i) {
@@ -357,7 +356,8 @@ void SplineInterpolation::extrapolateFlat(
       derivs[row]->mutableY(0)[bin] = 0.;
     }
   }
-  for (size_t bin = indices.second; bin < ows->blocksize(); ++bin) {
+  const size_t numBins = ows->blocksize();
+  for (size_t bin = indices.second; bin < numBins; ++bin) {
     ows->mutableY(row)[bin] = yLast;
     if (doDerivs) {
       // if derivatives are requested

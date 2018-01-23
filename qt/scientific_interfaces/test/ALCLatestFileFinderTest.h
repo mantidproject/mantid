@@ -13,7 +13,7 @@
 
 using MantidQt::CustomInterfaces::ALCLatestFileFinder;
 using ScopedFileHelper::ScopedFile;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 /**
  * Temporary directory that is deleted when it goes out of scope

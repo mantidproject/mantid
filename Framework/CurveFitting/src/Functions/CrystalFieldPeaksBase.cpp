@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
+#include "MantidKernel/Exception.h"
 
 #include <functional>
 #include <map>
@@ -445,11 +446,22 @@ void CrystalFieldPeaksBase::setAttribute(const std::string &name,
   if (name == "Symmetry") {
     auto symmIter = SYMMETRY_MAP.find(attr.asString());
     if (symmIter == SYMMETRY_MAP.end()) {
-      throw std::runtime_error("Unknown symmetry passed to CrystalFieldPeaks.");
+      throw std::runtime_error(
+          "Unknown symmetry passed to CrystalFieldPeaks: " + attr.asString());
     }
     symmIter->second(*this);
   }
   IFunction::setAttribute(name, attr);
+}
+
+std::string CrystalFieldPeaksBaseImpl::name() const {
+  return "CrystalFieldPeaksBaseImpl";
+}
+
+void CrystalFieldPeaksBaseImpl::function(const API::FunctionDomain &,
+                                         API::FunctionValues &) const {
+  throw Kernel::Exception::NotImplementedError(
+      "Method is intentionally not implemented.");
 }
 
 } // namespace Functions

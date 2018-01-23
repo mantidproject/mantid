@@ -43,7 +43,7 @@ public:
     delete[] b;
 
     // Create the axis that the tests will be performed on
-    refAxis = new RefAxis(5, space);
+    refAxis = new RefAxis(space);
     refAxis->title() = "test axis";
     refAxis->unit() = UnitFactory::Instance().create("TOF");
   }

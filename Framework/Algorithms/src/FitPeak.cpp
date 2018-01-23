@@ -28,7 +28,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
 
 using namespace std;
 
@@ -1147,7 +1146,7 @@ void FitPeak::init() {
                   "from proposed value more than "
                   "the given value, fit is treated as failure. ");
 
-  vector<string> costFuncOptions{"Chi-Square", "Rwp"};
+  std::array<string, 2> costFuncOptions = {{"Chi-Square", "Rwp"}};
   declareProperty("CostFunction", "Chi-Square",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),

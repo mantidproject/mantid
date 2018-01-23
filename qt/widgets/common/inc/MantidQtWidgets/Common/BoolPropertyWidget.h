@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include <qcheckbox.h>
+#include <QCheckBox>
 
 namespace MantidQt {
 namespace API {
@@ -40,7 +40,7 @@ class DLLExport BoolPropertyWidget : public PropertyWidget {
 
 public:
   BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> *prop,
-                     QWidget *parent = NULL, QGridLayout *layout = NULL,
+                     QWidget *parent = nullptr, QGridLayout *layout = nullptr,
                      int row = -1);
   ~BoolPropertyWidget() override;
   QString getValue() const override;

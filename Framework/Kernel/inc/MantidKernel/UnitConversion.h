@@ -48,8 +48,8 @@ public:
                     const double l1, const double l2, const double theta,
                     const DeltaEMode::Type emode, const double efixed);
 
-  /// Convert to ElasticQ
-  static double run(const double theta, const double efixed);
+  /// Convert to ElasticQ from Energy
+  static double convertToElasticQ(const double theta, const double efixed);
 
 private:
   /// Perform a quick conversion
@@ -61,9 +61,6 @@ private:
                               const double l2, const double theta,
                               const DeltaEMode::Type emode,
                               const double efixed);
-
-  /// Convert to ElasticQ from Energy
-  static double convertToElasticQ(const double theta, const double efixed);
 };
 
 } // namespace Kernel

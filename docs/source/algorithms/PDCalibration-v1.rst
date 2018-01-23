@@ -29,7 +29,17 @@ with uncalibrated pixels masked.
 
 The resulting calibration table can be saved with
 :ref:`algm-SaveDiffCal`, loaded with :ref:`algm-LoadDiffCal` and
-applied to a workspace with :ref:`algm-AlignDetectors`.
+applied to a workspace with :ref:`algm-AlignDetectors`. There are also
+three workspaces placed in the ``DiagnosticWorkspace`` group. They
+contain the fitted positions in dspace( ``_dspacing``), peak widths
+(``_width``), peak heights (``_height``), and instrument resolution
+(delta-d/d ``_resolution``). Since multiple peak shapes can be used,
+see the documentation for the individual `fit functions
+<../fitfunctions/index.html>`_ to see how they relate to the effective
+values displayed in the diagnostic tables. For ``Gaussian`` and
+``Lorentzian``, the widths and resolution are converted to values that
+can be directly compared with the results of
+:ref:`algm-EstimateResolutionDiffraction`.
 
 Usage
 -----
@@ -53,7 +63,8 @@ Usage
                  TofBinning=[300,-.001,16666.7],
                  PreviousCalibration=oldCal,
                  PeakPositions=dvalues,
-                 OutputCalibrationTable='cal')
+                 OutputCalibrationTable='cal',
+                 DiagnosticWorkspaces='diag')
 
    # Print the result
    print("The calibrated difc at detid {detid} is {difc}".format(**mtd['cal'].row(40000)))
@@ -67,4 +78,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

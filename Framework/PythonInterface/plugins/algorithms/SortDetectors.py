@@ -77,4 +77,5 @@ class SortDetectors(PythonAlgorithm):
         self.setProperty("DownstreamSpectra", numpy.array(downinds))
         self.setProperty("DownstreamDetectorDistances", numpy.array(downdist))
 
+
 AlgorithmFactory.subscribe(SortDetectors)

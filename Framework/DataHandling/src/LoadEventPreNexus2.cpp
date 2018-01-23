@@ -49,13 +49,11 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-using boost::posix_time::ptime;
-using boost::posix_time::time_duration;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using DataObjects::TofEvent;
-using std::cout;
+using Types::Event::TofEvent;
+using Types::Core::DateAndTime;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -991,7 +989,7 @@ void LoadEventPreNexus2::procEventsLinear(
 
   // Storages
   std::map<PixelType, size_t> local_pidindexmap;
-  std::vector<std::vector<Kernel::DateAndTime>> local_pulsetimes;
+  std::vector<std::vector<Types::Core::DateAndTime>> local_pulsetimes;
   std::vector<std::vector<double>> local_tofs;
   std::set<PixelType> local_wrongdetids;
 
@@ -1089,7 +1087,7 @@ void LoadEventPreNexus2::procEventsLinear(
         size_t newindex = local_pulsetimes.size();
         local_pidindexmap[pid] = newindex;
 
-        std::vector<Kernel::DateAndTime> tempvectime;
+        std::vector<Types::Core::DateAndTime> tempvectime;
         std::vector<double> temptofs;
         local_pulsetimes.push_back(tempvectime);
         local_tofs.push_back(temptofs);
@@ -1138,7 +1136,7 @@ void LoadEventPreNexus2::procEventsLinear(
         size_t newindex = this->wrongdetid_pulsetimes.size();
         this->wrongdetidmap[tmpid] = newindex;
 
-        std::vector<Kernel::DateAndTime> temppulsetimes;
+        std::vector<Types::Core::DateAndTime> temppulsetimes;
         std::vector<double> temptofs;
         this->wrongdetid_pulsetimes.push_back(temppulsetimes);
         this->wrongdetid_tofs.push_back(temptofs);

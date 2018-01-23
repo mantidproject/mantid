@@ -41,7 +41,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ObserverCallback : public QObject {
 
 public:
   ObserverCallback(WorkspaceObserver *observer)
-      : QObject(NULL), m_observer(observer) {}
+      : QObject(nullptr), m_observer(observer) {}
 
 signals:
   /// Delete signal handler

@@ -5,6 +5,7 @@
 set ( PY_FILES
   __init__.py
   algorithm_decorator.py
+  illhelpers.py
   tempfile_wrapper.py
   testrunner.py
   mlzhelpers.py
@@ -41,6 +42,8 @@ target_link_libraries ( PythonWorkspaceCreationHelper LINK_PRIVATE ${TCMALLOC_LI
             DataHandling
             API
             HistogramData
+            Indexing
+	    Types
             Kernel
             Geometry
             ${PYTHON_LIBRARIES}

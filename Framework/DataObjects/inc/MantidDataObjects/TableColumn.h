@@ -123,7 +123,7 @@ public:
   /// Read in a string and set the value at the given index
   void read(size_t index, const std::string &text) override;
   /// Read in from stream and set the value at the given index
-  void read(const size_t index, std::istream &in) override;
+  void read(const size_t index, std::istringstream &in) override;
   /// Type check
   bool isBool() const override { return typeid(Type) == typeid(API::Boolean); }
   /// Memory used by the column
@@ -245,6 +245,17 @@ inline void TableColumn<std::string>::read(size_t index,
   m_data[index] = text;
 }
 
+/// Template specialization for strings so they can contain spaces
+template <>
+inline void TableColumn<std::string>::read(size_t index,
+                                           std::istringstream &text) {
+  /* As opposed to other types, assigning strings via a stream does not work if
+   * it contains a whitespace character, so instead the assignment operator is
+   * used.
+   */
+  m_data[index] = text.str();
+}
+
 /// Read in a string and set the value at the given index
 template <typename Type>
 void TableColumn<Type>::read(size_t index, const std::string &text) {
@@ -254,8 +265,10 @@ void TableColumn<Type>::read(size_t index, const std::string &text) {
 
 /// Read in from stream and set the value at the given index
 template <typename Type>
-void TableColumn<Type>::read(size_t index, std::istream &in) {
-  in >> m_data[index];
+void TableColumn<Type>::read(size_t index, std::istringstream &in) {
+  Type t;
+  in >> t;
+  m_data[index] = t;
 }
 
 namespace {

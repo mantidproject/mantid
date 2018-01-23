@@ -140,15 +140,18 @@ IndexSet<T>::IndexSet(int64_t min, int64_t max, size_t fullRange) {
 }
 
 /// Constructor for a set containing all specified indices. Range is verified at
-/// construction time and duplicates are removed.
+/// construction time and duplicates cause an error.
 template <class T>
 IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange)
     : m_isRange(false) {
-  // We use a set to create unique and ordered indices.
-  std::set<size_t> index_set(indices.cbegin(), indices.cend());
-  if (!index_set.empty() && *(index_set.rbegin()) >= fullRange)
+  // Validate indices, using m_indices as buffer (reassigned later).
+  m_indices = indices;
+  std::sort(m_indices.begin(), m_indices.end());
+  if (!m_indices.empty() && *m_indices.rbegin() >= fullRange)
     throw std::out_of_range("IndexSet: specified index is out of range");
-  m_indices = std::vector<size_t>(index_set.begin(), index_set.end());
+  if (std::adjacent_find(m_indices.begin(), m_indices.end()) != m_indices.end())
+    throw std::runtime_error("IndexSet: duplicate indices are not allowed");
+  m_indices = indices;
   m_size = m_indices.size();
 }
 

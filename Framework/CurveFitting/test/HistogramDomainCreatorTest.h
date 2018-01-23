@@ -446,9 +446,10 @@ private:
     for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
       auto &x = ws2->mutableX(is);
       auto &y = ws2->mutableY(is);
-      for (size_t i = 0; i < ws2->blocksize(); ++i) {
-        x[i] = 0.1 * double(i) + 0.01 * double(is);
-        y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
+      const double is_d = static_cast<double>(is);
+      for (size_t i = 0; i < y.size(); ++i) {
+        x[i] = 0.1 * static_cast<double>(i) + 0.01 * is_d;
+        y[i] = (10.0 + is_d) * exp(-(x[i]) / (0.5 * (1. + is_d)));
       }
       if (histogram)
         x.back() = x[x.size() - 2] + 0.1;

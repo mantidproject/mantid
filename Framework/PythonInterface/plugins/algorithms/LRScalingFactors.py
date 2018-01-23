@@ -485,4 +485,5 @@ class LRScalingFactors(PythonAlgorithm):
 
         return str(workspace)
 
+
 AlgorithmFactory.subscribe(LRScalingFactors)

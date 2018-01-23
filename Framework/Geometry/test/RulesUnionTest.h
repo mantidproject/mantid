@@ -9,7 +9,7 @@
 #include <cfloat>
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
@@ -26,8 +26,8 @@ class RulesUnionTest : public CxxTest::TestSuite {
 public:
   void testDefaultConstructor() {
     Union A;
-    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)0);
-    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
+    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)nullptr);
+    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)nullptr);
   }
 
   void testTwoRuleConstructor() {
@@ -173,7 +173,7 @@ public:
     auto ptrS2 = S2.get();
     Union A;
     A.setLeaf(std::move(S2), 1);
-    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)0);
+    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)nullptr);
     TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     A.setLeaf(std::move(S1), 0);
     TS_ASSERT_EQUALS(A.display(), "10 : 11");
@@ -227,7 +227,7 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.findKey(10), ptrS1);
     TS_ASSERT_EQUALS(A.findKey(11), ptrS2);
-    TS_ASSERT_EQUALS(A.findKey(15), (Rule *)0);
+    TS_ASSERT_EQUALS(A.findKey(15), (Rule *)nullptr);
   }
 
   void testIsComplementary() { // Problem: it only detects whether first leaf or

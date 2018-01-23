@@ -39,10 +39,10 @@ Usage
     ws2 = CreateSampleWorkspace(NumBanks=1,BankPixelWidth=bankPixelWidth)
     MaskDetectors(ws2,MaskedWorkspace="wsMask")
 
-    print "Masked Detectors"
-    print "n ws    ws2"
+    print("Masked Detectors")
+    print("n ws    ws2")
     for i in range (ws.getNumberHistograms()):
-        print "%i %-5s %s" % (i, ws.getDetector(i).isMasked(), ws2.getDetector(i).isMasked())
+        print("%i %-5s %s" % (i, ws.getDetector(i).isMasked(), ws2.getDetector(i).isMasked()))
 
 Output:
 

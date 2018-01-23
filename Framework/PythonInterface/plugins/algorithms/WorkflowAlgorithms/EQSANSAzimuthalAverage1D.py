@@ -404,4 +404,5 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
                 qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
             return qmin, -(math.pow(10.0,qstep)-1.0), qmax
 
+
 AlgorithmFactory.subscribe(EQSANSAzimuthalAverage1D)

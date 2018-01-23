@@ -80,7 +80,7 @@ public:
     TwoD  ///< For 2D reductions
   };
   /// Default Constructor
-  explicit SANSRunWindow(QWidget *parent = 0);
+  explicit SANSRunWindow(QWidget *parent = nullptr);
   /// Destructor
   ~SANSRunWindow() override;
 
@@ -291,6 +291,7 @@ private slots:
   void updateTransInfo(int state);
   /// So user can decide to use fixed q range or not
   void updateFrontDetQrange(int state);
+  void updateMergeQRange(int state);
   void checkList();
   /// Adds a warning message to the tab title
   void setLoggerTabTitleToWarn();

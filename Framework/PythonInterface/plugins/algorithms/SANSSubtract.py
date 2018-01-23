@@ -173,4 +173,5 @@ class SANSSubtract(PythonAlgorithm):
 
         return
 
+
 AlgorithmFactory.subscribe(SANSSubtract)

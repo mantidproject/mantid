@@ -27,11 +27,7 @@ is inferred from other properties, depending on the value of :literal:`AnalysisM
 Note that ProcessingInstructions are workspace indices, not detector IDs. The first few workspaces may correspond
 to monitors, rather than detectors of interest. For the syntax of this property, see :ref:`algm-GroupDetectors`.
 
-Once the algorithm determines the detectors of interest it corrects their positions according to :literal:`ThetaIn`,
-if given, for which it runs :ref:`algm-SpecularReflectionPositionCorrect`. The detectors are moved either by shifting them
-vertically, or by rotating them around the sample position, as specified by :literal:`DetectorCorrectionType`.
-If :literal:`ThetaIn` is not set, detectors will not be corrected. However, it is recommended to use this option to
-ensure that :ref:`algm-ReflectometryReductionOne` is able to convert from wavelength to momentum transfer properly.
+:literal:`theta` is calcualted using :literal:`SpecularReflectionCalculateTheta`. This is passed through to :literal:`ReflectometryReductionOne` and :literal:`2 * theta` is passed through to :literal:`CalculateResolution`. :literal:`theta` can be overridden by setting :literal:`ThetaIn` or :literal:`ThetaLogName` (:literal:`ThetaIn` takes precedence if both are given). If :literal:`CorrectDetectors` is also true, then the algorithm corrects the positions of the detectors of interest to :literal:`2 * theta` using :ref:`algm-SpecularReflectionPositionCorrect`. The detectors are moved either by shifting them vertically, or by rotating them around the sample position, as specified by :literal:`DetectorCorrectionType`.
 
 Next, the algorithm will try to populate input properties which have not been set. Specifically, it will search for
 :literal:`LambdaMin`, :literal:`LambdaMax`, :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundMin`, :literal:`MonitorBackgroundMax`,
@@ -67,7 +63,7 @@ Note that when using a correction algorithm, monitors will not be integrated, ev
 
 Finally, properties :literal:`MomentumTransferMin`, :literal:`MomentumTransferStep` and :literal:`MomentumTransferMax` are
 used to rebin the output workspace in Q, and :literal:`ScaleFactor` is used to scale the rebinned workspace. When they
-are not provided the algorithm will attempt to determine the bin width using :ref:`algm-CalculateResolution` (note that, for
+are not provided the algorithm will attempt to determine the bin width using :ref:`algm-NRCalculateSlitResolution` (note that, for
 the latter to run successfully, a :literal:`slit` component with a :literal:`vertical gap` must be defined in the
 instrument definition file).
 
@@ -138,12 +134,12 @@ Usage
     run = Load(Filename='INTER00013460.nxs')
     IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7)
 
-    print "%.5f" % (IvsLam.readY(0)[175])
-    print "%.5f" % (IvsLam.readY(0)[176])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[106])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[107])
-    print "%.5f" % (IvsQ.readY(0)[13])
-    print "%.5f" % (IvsQ.readY(0)[14])
+    print("{:.5f}".format(IvsLam.readY(0)[175]))
+    print("{:.5f}".format(IvsLam.readY(0)[176]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
+    print("{:.5f}".format(IvsQ.readY(0)[13]))
+    print("{:.5f}".format(IvsQ.readY(0)[14]))
 
 Output:
 
@@ -153,8 +149,8 @@ Output:
     0.00462
     0.63441
     0.41079
-    0.44780
-    0.23690
+    0.44792
+    0.23703
 
 **Example - Basic reduction with a transmission run**
 
@@ -164,12 +160,12 @@ Output:
     trans = Load(Filename='INTER00013463.nxs')
     IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
 
-    print "%.5f" % (IvsLam.readY(0)[164])
-    print "%.5f" % (IvsLam.readY(0)[164])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[96])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[97])
-    print "%.5f" % (IvsQ.readY(0)[5])
-    print "%.5f" % (IvsQ.readY(0)[6])
+    print("{:.5f}".format(IvsLam.readY(0)[164]))
+    print("{:.5f}".format(IvsLam.readY(0)[164]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[96]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[97]))
+    print("{:.5f}".format(IvsQ.readY(0)[5]))
+    print("{:.5f}".format(IvsQ.readY(0)[6]))
 
 Output:
 
@@ -179,8 +175,8 @@ Output:
     0.00338
     1.16756
     0.89144
-    1.46645
-    1.41351
+    1.46655
+    1.41327
 
 **Example - Reduction overriding some default values**
 
@@ -189,12 +185,12 @@ Output:
     run = Load(Filename='INTER00013460.nxs')
     IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, DetectorCorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
-    print "%.5f" % (IvsLam.readY(0)[175])
-    print "%.5f" % (IvsLam.readY(0)[176])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[106])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[107])
-    print "%.5f" % (IvsQ.readY(0)[5])
-    print "%.5f" % (IvsQ.readY(0)[6])
+    print("{:.5f}".format(IvsLam.readY(0)[175]))
+    print("{:.5f}".format(IvsLam.readY(0)[176]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
+    print("{:.5f}".format(IvsQ.readY(0)[5]))
+    print("{:.5f}".format(IvsQ.readY(0)[6]))
 
 Output:
 
@@ -204,8 +200,8 @@ Output:
     0.00462
     0.64241
     0.41453
-    0.51028
-    0.52241
+    0.51029
+    0.52240
 
 .. categories::
 

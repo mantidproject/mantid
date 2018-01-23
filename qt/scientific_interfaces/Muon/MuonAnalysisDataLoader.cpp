@@ -76,7 +76,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
   const auto toString = [](QStringList qsl) {
     std::ostringstream oss;
     qsl.sort();
-    for (const QString qs : qsl) {
+    for (const QString &qs : qsl) {
       oss << qs.toStdString() << ",";
     }
     return oss.str();
@@ -98,7 +98,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
   std::string instrName; // Instrument name all the run files should belong to
 
   // Go through all the files and try to load them
-  for (const auto fileName : files) {
+  for (const auto &fileName : files) {
     std::string file = fileName.toStdString();
 
     // Set up load algorithm
@@ -379,6 +379,7 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
   alg->setProperty("Mode", "Analyse");
   alg->setProperty("TimeZero", options.timeZero);             // user input
   alg->setProperty("LoadedTimeZero", options.loadedTimeZero); // from file
+  alg->setProperty("CropWorkspace", false);
   alg->setProperty("Xmin", options.timeLimits.first);
   double Xmax = options.timeLimits.second;
   if (Xmax != Mantid::EMPTY_DBL()) {

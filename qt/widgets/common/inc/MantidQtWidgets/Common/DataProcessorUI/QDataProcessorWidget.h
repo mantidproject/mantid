@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -12,13 +12,14 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
-class DataProcessorCommandAdapter;
+class QtCommandAdapter;
 class DataProcessorMainPresenter;
-class DataProcessorPreprocessMap;
-class DataProcessorProcessingAlgorithm;
-class DataProcessorPostprocessingAlgorithm;
-class DataProcessorWhiteList;
+class PreprocessMap;
+class ProcessingAlgorithm;
+class PostprocessingAlgorithm;
+class WhiteList;
 
 /** QDataProcessorWidget : Provides an interface for processing table
 data.
@@ -52,33 +53,24 @@ class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
   Q_OBJECT
 public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
-                       QWidget *parent = 0);
-  QDataProcessorWidget(const DataProcessorWhiteList &, QWidget *parent);
-  QDataProcessorWidget(const DataProcessorWhiteList &,
-                       const DataProcessorProcessingAlgorithm &,
+                       QWidget *parent = nullptr);
+  QDataProcessorWidget(const WhiteList &, QWidget *parent);
+  QDataProcessorWidget(const WhiteList &, const ProcessingAlgorithm &,
                        QWidget *parent);
-  QDataProcessorWidget(const DataProcessorWhiteList &,
-                       const DataProcessorPreprocessMap &,
-                       const DataProcessorProcessingAlgorithm &,
-                       QWidget *parent);
-  QDataProcessorWidget(const DataProcessorWhiteList &,
-                       const DataProcessorProcessingAlgorithm &,
-                       const DataProcessorPostprocessingAlgorithm &,
-                       QWidget *parent);
-  QDataProcessorWidget(const DataProcessorWhiteList &,
-                       const DataProcessorPreprocessMap &,
-                       const DataProcessorProcessingAlgorithm &,
-                       const DataProcessorPostprocessingAlgorithm &,
-                       QWidget *parent);
+  QDataProcessorWidget(const WhiteList &, const PreprocessMap &,
+                       const ProcessingAlgorithm &, QWidget *parent);
+  QDataProcessorWidget(const WhiteList &, const ProcessingAlgorithm &,
+                       const PostprocessingAlgorithm &, QWidget *parent);
+  QDataProcessorWidget(const WhiteList &, const PreprocessMap &,
+                       const ProcessingAlgorithm &,
+                       const PostprocessingAlgorithm &, QWidget *parent);
   ~QDataProcessorWidget() override;
 
   // Add actions to the toolbar
-  void addActions(
-      std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
+  void addActions(std::vector<std::unique_ptr<Command>> commands) override;
 
   // Connect the model
-  void
-  showTable(boost::shared_ptr<AbstractDataProcessorTreeModel> model) override;
+  void showTable(boost::shared_ptr<AbstractTreeModel> model) override;
 
   // Dialog/Prompt methods
   QString requestNotebookPath() override;
@@ -110,13 +102,15 @@ public:
   // Select all rows/groups
   void selectAll() override;
 
-  // Handle pause/resume of data reduction
-  void pause() override;
-  void resume() override;
+  // Update enabled/disabled state of widgets
+  void updateMenuEnabledState(const bool isProcessing) override;
+  void setProcessButtonEnabled(const bool enabled) override;
+  void setInstrumentComboEnabled(const bool enabled) override;
+  void setTreeEnabled(const bool enabled) override;
+  void setOutputNotebookEnabled(const bool enabled) override;
 
   // Setter methods
   void setSelection(const std::set<int> &groups) override;
-  void setTableList(const QSet<QString> &tables) override;
   void setInstrumentList(const QString &instruments,
                          const QString &defaultInstrument) override;
   void
@@ -156,10 +150,13 @@ public:
 
   void emitProcessingFinished() override { emit processingFinished(); }
 
+  void skipProcessing() override;
+  void settingsChanged();
 signals:
   void processButtonClicked();
   void processingFinished();
   void instrumentHasChanged();
+  void dataChanged(const QModelIndex &, const QModelIndex &);
 
 private:
   // initialise the interface
@@ -168,16 +165,16 @@ private:
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
-  boost::shared_ptr<AbstractDataProcessorTreeModel> m_model;
-  // the interface
+  boost::shared_ptr<AbstractTreeModel> m_model;
+  // Command adapters
+  std::vector<std::unique_ptr<QtCommandAdapter>> m_commands;
+  // the interface (uses actions owned by m_commands)
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open
   QString m_toOpen;
   // the context menu
   QMenu *m_contextMenu;
   QSignalMapper *m_openMap;
-  // Command adapters
-  std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);
@@ -196,7 +193,7 @@ private slots:
   void ensureHasExtension(QString &filename) const;
 };
 
-} // namespace Mantid
+} // namespace DataProcessor
 } // namespace MantidWidgets
-
+} // namespace Mantid
 #endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_ */

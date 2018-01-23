@@ -148,16 +148,17 @@ class plot(data,insert):
             plt.xlim([self.xrange["start"],self.xrange["end"]])
         if  self.yrange["start"]!=0.0 or self.yrange["end"]!=0.0:
             plt.xlim([self.yrange["start"],self.yrange["end"]])
-        if self.logs['x']==True:
+        if self.logs['x']:
             plt.xscale("log")
-        if self.logs['y']==True:
+        if self.logs['y']:
             plt.yscale("log")
         plt.tight_layout()
         if save=="":
             plt.show()
         else:
-            print ("saving to "+save.replace(" ","_"))
-            plt.savefig(save.replace(" ","_"))
+            output_file = save.replace(",","")
+            print ("saving to "+output_file.replace(" ","_"))
+            plt.savefig(output_file.replace(" ","_"))
 
     # safe is used if the y values (strings) all have unique names
     def make_y_bar_plot(self,safe=True,save=""):

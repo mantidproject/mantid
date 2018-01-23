@@ -1,4 +1,5 @@
 #include "MantidKernel/CompositeValidator.h"
+#include <sstream>
 #include <unordered_set>
 
 using namespace Mantid::Kernel;
@@ -6,7 +7,8 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Kernel {
 /// Default constructor
-CompositeValidator::CompositeValidator() : IValidator(), m_children() {}
+CompositeValidator::CompositeValidator(const CompositeRelation &relation)
+    : IValidator(), m_children(), m_relation(relation) {}
 
 /// Destructor
 CompositeValidator::~CompositeValidator() { m_children.clear(); }
@@ -50,7 +52,7 @@ std::vector<std::string> CompositeValidator::allowedValues() const {
  */
 Kernel::IValidator_sptr CompositeValidator::clone() const {
   boost::shared_ptr<CompositeValidator> copy =
-      boost::make_shared<CompositeValidator>();
+      boost::make_shared<CompositeValidator>(m_relation);
   for (const auto &itr : m_children) {
     copy->add(itr->clone());
   }
@@ -69,16 +71,71 @@ void CompositeValidator::add(Kernel::IValidator_sptr child) {
  *  @return A user level description of the first problem it finds otherwise ""
  */
 std::string CompositeValidator::check(const boost::any &value) const {
-  auto itrEnd = m_children.end();
-  for (auto itr = m_children.begin(); itr != itrEnd; ++itr) {
-    std::string error = (*itr)->check(value);
+  switch (m_relation) {
+  case CompositeRelation::AND:
+    return checkAll(value);
+  case CompositeRelation::OR:
+    return checkAny(value);
+  default:
+    throw std::runtime_error("Unimplemented composite validator relation");
+  }
+}
+
+std::string CompositeValidator::checkAll(const boost::any &value) const {
+  for (const auto &validator : m_children) {
+    const auto error = validator->check(value);
     // exit on the first error, to avoid passing doing more tests on invalid
     // objects that could fail
-    if (error != "")
+    if (!error.empty())
       return error;
   }
   // there were no errors
   return "";
+}
+
+std::string CompositeValidator::checkAny(const boost::any &value) const {
+  std::stringstream errorStream;
+
+  // Lambda to check if a validator is valid. If it is not valid then
+  // capture its error message to a stream so we can potentially print it out
+  // to the user if required.
+  const auto checkIfValid =
+      [&errorStream, &value](const IValidator_sptr validator) {
+        const auto errorMessage = validator->check(value);
+        if (errorMessage.empty()) {
+          return true;
+        } else {
+          // capture error message to possibly later.
+          errorStream << errorMessage << "\n";
+          return false;
+        }
+      };
+
+  const auto valid =
+      std::any_of(m_children.begin(), m_children.end(), checkIfValid);
+  return buildErrorMessage(valid, errorStream.str());
+}
+
+/** Return a user friendly error message
+ *
+ * Returns empty string if no errors were found.
+ *
+ * @param valid :: whether all the validator succeded
+ * @param errors :: the combined list of errors from the child validators
+ * @return a user friendly message with all the child validator messages
+ * combined.
+ */
+std::string
+CompositeValidator::buildErrorMessage(const bool valid,
+                                      const std::string &errors) const {
+  if (!valid) {
+    return "Invalid property. You must statisfy one of the following "
+           "conditions:\n" +
+           errors;
+  } else {
+    // there were no errors
+    return "";
+  }
 }
 
 } // namespace Mantid

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Timer.h"
+#include <chrono>
 #include <ostream>
 #include <sstream>
 
@@ -11,13 +12,7 @@ namespace Kernel {
 /** Constructor.
  *  Instantiating the object starts the timer.
  */
-Timer::Timer() {
-#ifdef _WIN32
-  m_start = clock();
-#else /* linux & mac */
-  gettimeofday(&m_start, nullptr);
-#endif
-}
+Timer::Timer() { m_start = std::chrono::high_resolution_clock::now(); }
 
 /** Returns the wall-clock time elapsed in seconds since the Timer object's
  *creation, or the last call to elapsed
@@ -38,29 +33,14 @@ float Timer::elapsed(bool reset) {
  * @return time in seconds
  */
 float Timer::elapsed_no_reset() const {
-#ifdef _WIN32
-  clock_t now = clock();
-  const float retval = float(now - m_start) / CLOCKS_PER_SEC;
-#else /* linux & mac */
-  timeval now;
-  gettimeofday(&now, nullptr);
-  const float retval =
-      float(now.tv_sec - m_start.tv_sec) +
-      float(static_cast<float>(now.tv_usec - m_start.tv_usec) / 1e6);
-#endif
-  return retval;
+  const auto now = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<float> duration = now - m_start;
+
+  return duration.count();
 }
 
 /// Explicitly reset the timer.
-void Timer::reset() {
-#ifdef _WIN32
-  m_start = clock();
-#else /* linux & mac */
-  timeval now;
-  gettimeofday(&now, nullptr);
-  m_start = now;
-#endif
-}
+void Timer::reset() { m_start = std::chrono::high_resolution_clock::now(); }
 
 /// Convert the elapsed time (without reseting) to a string.
 std::string Timer::str() const {

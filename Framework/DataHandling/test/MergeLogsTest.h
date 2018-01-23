@@ -54,13 +54,13 @@ public:
     size_t num2 = 12;
 
     for (size_t i = 0; i < num1; i++) {
-      Kernel::DateAndTime time(t1_ns);
+      Types::Core::DateAndTime time(t1_ns);
       p1->addValue(time, v1);
       t1_ns += dt_ns;
     }
 
     for (size_t i = 0; i < num2; i++) {
-      Kernel::DateAndTime time(t2_ns);
+      Types::Core::DateAndTime time(t2_ns);
       p2->addValue(time, v2);
       t2_ns += dt_ns;
     }
@@ -94,9 +94,10 @@ public:
 
     TS_ASSERT_EQUALS(mergprop->size(), p1->size() + p2->size());
 
-    std::vector<Kernel::DateAndTime> mergedtimes = mergprop->timesAsVector();
+    std::vector<Types::Core::DateAndTime> mergedtimes =
+        mergprop->timesAsVector();
     for (size_t i = 0; i < 2 * num1; i++) {
-      Kernel::DateAndTime logtime = mergedtimes[i];
+      Types::Core::DateAndTime logtime = mergedtimes[i];
       double logvalue = mergprop->getSingleValue(logtime);
       if (i % 2 == 0) {
         TS_ASSERT_DELTA(logvalue, -1.0, 0.001);
@@ -106,7 +107,7 @@ public:
     } // ENDFOR
 
     for (size_t i = 2 * num1; i < num1 + num2; i++) {
-      Kernel::DateAndTime logtime = mergedtimes[i];
+      Types::Core::DateAndTime logtime = mergedtimes[i];
       double logvalue = mergprop->getSingleValue(logtime);
       TS_ASSERT_DELTA(logvalue, 1.0, 0.001);
     }

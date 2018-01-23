@@ -774,6 +774,16 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
   }
 }
 
+/// Check if a string attribute is empty
+bool IFunction::Attribute::isEmpty() const {
+  try {
+    return boost::get<std::string>(m_data).empty();
+  } catch (...) {
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute as string");
+  }
+}
+
 namespace {
 /**
  * Attribute visitor setting new value to an attribute
@@ -1107,7 +1117,7 @@ void IFunction::setMatrixWorkspace(
 
             // add tie if specified for this parameter in instrument definition
             // file
-            if (fitParam.getTie().compare("")) {
+            if (!fitParam.getTie().empty()) {
               std::ostringstream str;
               str << getParameter(i);
               tie(parameterName(i), str.str());
@@ -1115,11 +1125,11 @@ void IFunction::setMatrixWorkspace(
 
             // add constraint if specified for this parameter in instrument
             // definition file
-            if (fitParam.getConstraint().compare("")) {
+            if (!fitParam.getConstraint().empty()) {
               IConstraint *constraint =
                   ConstraintFactory::Instance().createInitialized(
                       this, fitParam.getConstraint());
-              if (fitParam.getConstraintPenaltyFactor().compare("")) {
+              if (!fitParam.getConstraintPenaltyFactor().empty()) {
                 try {
                   double penalty =
                       std::stod(fitParam.getConstraintPenaltyFactor());
@@ -1387,14 +1397,18 @@ void IFunction::unfixParameter(const std::string &name) {
 /// @param isDefault :: If true fix them by default
 void IFunction::fixAll(bool isDefault) {
   for (size_t i = 0; i < nParams(); ++i) {
-    fix(i, isDefault);
+    if (isActive(i)) {
+      fix(i, isDefault);
+    }
   }
 }
 
 /// Free all parameters
 void IFunction::unfixAll() {
   for (size_t i = 0; i < nParams(); ++i) {
-    unfix(i);
+    if (isFixed(i)) {
+      unfix(i);
+    }
   }
 }
 

@@ -23,8 +23,6 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using DataObjects::EventWorkspace;
-using Kernel::Exception::InstrumentDefinitionError;
-using Kernel::Exception::NotFoundError;
 using std::size_t;
 using std::string;
 

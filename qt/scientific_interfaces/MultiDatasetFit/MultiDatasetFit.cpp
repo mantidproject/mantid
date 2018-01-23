@@ -8,7 +8,10 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -25,11 +28,63 @@ namespace {
 const int zoomToolPage = 0;
 const int rangeToolPage = 1;
 Mantid::Kernel::Logger g_log("MultiDatasetFit");
+
+/// Copy parameter values into a table workspace that is ready for
+/// plotting them against a dataset index.
+void formatParametersForPlotting(const Mantid::API::IFunction &function,
+                                 const std::string &parametersPropertyName) {
+
+  const auto nDomains = function.getNumberDomains();
+
+  if (nDomains < 2) {
+    // Single domain fit: nothing to plot.
+    return;
+  }
+
+  // function must be MultiDomainFunction by the logic of the interface.
+  // If it's not the cast error will tell us about it.
+  const auto &mdFunction =
+      dynamic_cast<const Mantid::API::MultiDomainFunction &>(function);
+
+  if (mdFunction.nFunctions() == 0) {
+    // Fit button was hit by mistake? Nothing to do here.
+    // A warning will be shown elsewhere.
+    return;
+  }
+
+  assert(nDomains == mdFunction.nFunctions());
+
+  auto table =
+      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  auto col = table->addColumn("double", "Dataset");
+  col->setPlotType(1); // X-values inplots
+
+  // Add columns for parameters and their errors
+  const auto &fun = *mdFunction.getFunction(0);
+  for (size_t iPar = 0; iPar < fun.nParams(); ++iPar) {
+    table->addColumn("double", fun.parameterName(iPar));
+    table->addColumn("double", fun.parameterName(iPar) + "_Err");
+  }
+
+  // Fill in the columns
+  table->setRowCount(nDomains);
+  for (size_t iData = 0; iData < nDomains; ++iData) {
+    Mantid::API::TableRow row = table->getRow(iData);
+    row << static_cast<double>(iData);
+    const auto &fun = *mdFunction.getFunction(iData);
+    for (size_t iPar = 0; iPar < fun.nParams(); ++iPar) {
+      row << fun.getParameter(iPar) << fun.getError(iPar);
+    }
+  }
+
+  // Store the table in the ADS
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(
+      parametersPropertyName + "_vs_dataset", table);
+}
 }
 
 namespace MantidQt {
 namespace CustomInterfaces {
-using Mantid::Kernel::Math::StatisticType;
 
 // Register the class with the factory
 DECLARE_SUBWINDOW(MultiDatasetFit)
@@ -37,9 +92,9 @@ DECLARE_SUBWINDOW(MultiDatasetFit)
 /// Constructor
 /// @param parent :: The parent widget
 MultiDatasetFit::MultiDatasetFit(QWidget *parent)
-    : UserSubWindow(parent), m_plotController(NULL), m_dataController(NULL),
-      m_functionBrowser(NULL), m_fitOptionsBrowser(NULL),
-      m_fitAllSettings(QMessageBox::No) {}
+    : UserSubWindow(parent), m_plotController(nullptr),
+      m_dataController(nullptr), m_functionBrowser(nullptr),
+      m_fitOptionsBrowser(nullptr), m_fitAllSettings(QMessageBox::No) {}
 
 MultiDatasetFit::~MultiDatasetFit() {
   saveSettings();
@@ -97,7 +152,8 @@ void MultiDatasetFit::initLayout() {
 
   QSplitter *splitter = new QSplitter(Qt::Vertical, this);
 
-  m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
+  m_functionBrowser =
+      new MantidQt::MantidWidgets::FunctionBrowser(nullptr, true);
   m_functionBrowser->setColumnSizes(100, 100, 45);
   splitter->addWidget(m_functionBrowser);
   connect(m_functionBrowser,
@@ -120,7 +176,7 @@ void MultiDatasetFit::initLayout() {
           SLOT(addDatasets(int)));
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(
-      NULL,
+      nullptr,
       MantidQt::MantidWidgets::FitOptionsBrowser::SimultaneousAndSequential);
   connect(m_fitOptionsBrowser, SIGNAL(changedToSequentialFitting()), this,
           SLOT(setLogNames()));
@@ -449,6 +505,8 @@ void MultiDatasetFit::finishFit(bool error) {
       auto chiSquared = QString::fromStdString(
           algorithm->getPropertyValue("OutputChi2overDoF"));
       setFitStatusInfo(status, chiSquared);
+      formatParametersForPlotting(
+          *fun, algorithm->getPropertyValue("OutputParameters"));
     } else {
       // After a sequential fit
       auto paramsWSName =

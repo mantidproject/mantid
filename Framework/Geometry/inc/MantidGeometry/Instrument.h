@@ -196,18 +196,18 @@ public:
   boost::shared_ptr<ParameterMap> getParameterMap() const;
 
   /// @return the date from which the instrument definition begins to be valid.
-  Kernel::DateAndTime getValidFromDate() const { return m_ValidFrom; }
+  Types::Core::DateAndTime getValidFromDate() const { return m_ValidFrom; }
 
   /// @return the date at which the instrument definition is no longer valid.
-  Kernel::DateAndTime getValidToDate() const { return m_ValidTo; }
+  Types::Core::DateAndTime getValidToDate() const { return m_ValidTo; }
 
   /// Set the date from which the instrument definition begins to be valid.
   /// @param val :: date
-  void setValidFromDate(const Kernel::DateAndTime &val);
+  void setValidFromDate(const Types::Core::DateAndTime &val);
 
   /// Set the date at which the instrument definition is no longer valid.
   /// @param val :: date
-  void setValidToDate(const Kernel::DateAndTime &val) { m_ValidTo = val; }
+  void setValidToDate(const Types::Core::DateAndTime &val) { m_ValidTo = val; }
 
   // Methods for use with indirect geometry instruments,
   // where the physical instrument differs from the 'neutronic' one
@@ -313,9 +313,9 @@ private:
   boost::shared_ptr<ParameterMap> m_map_nonconst;
 
   /// the date from which the instrument definition begins to be valid.
-  Kernel::DateAndTime m_ValidFrom;
+  Types::Core::DateAndTime m_ValidFrom;
   /// the date at which the instrument definition is no longer valid.
-  Kernel::DateAndTime m_ValidTo;
+  Types::Core::DateAndTime m_ValidTo;
 
   /// Path to the original IDF .xml file that was loaded for this instrument
   mutable std::string m_filename;

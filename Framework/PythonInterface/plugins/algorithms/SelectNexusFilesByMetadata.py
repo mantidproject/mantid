@@ -123,5 +123,6 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
             self.log().warning('Invalid value for the nexus entry %s in file %s. Skipping the file.' % (item, run))
             return False
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SelectNexusFilesByMetadata)

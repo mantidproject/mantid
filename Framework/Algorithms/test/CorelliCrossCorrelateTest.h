@@ -15,6 +15,8 @@ using Mantid::Algorithms::CorelliCrossCorrelate;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class CorelliCrossCorrelateTest : public CxxTest::TestSuite {
 public:

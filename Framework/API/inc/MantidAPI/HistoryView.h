@@ -53,9 +53,10 @@ public:
   void unrollAll();
   void roll(size_t index);
   void rollAll();
-  void filterBetweenExecDate(Mantid::Kernel::DateAndTime start,
-                             Mantid::Kernel::DateAndTime end =
-                                 Mantid::Kernel::DateAndTime::getCurrentTime());
+  void
+  filterBetweenExecDate(Mantid::Types::Core::DateAndTime start,
+                        Mantid::Types::Core::DateAndTime end =
+                            Mantid::Types::Core::DateAndTime::getCurrentTime());
   /**
   * Get the list of History Items for this view.
   *

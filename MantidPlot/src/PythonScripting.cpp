@@ -68,8 +68,8 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) {
 
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
-    : ScriptingEnv(parent, "Python"), m_globals(NULL), m_math(NULL),
-      m_sys(NULL), m_mainThreadState(NULL) {}
+    : ScriptingEnv(parent, "Python"), m_globals(nullptr), m_math(nullptr),
+      m_sys(nullptr), m_mainThreadState(nullptr) {}
 
 PythonScripting::~PythonScripting() {}
 
@@ -77,8 +77,7 @@ PythonScripting::~PythonScripting() {}
  * @param args A list of strings that denoting command line arguments
  */
 void PythonScripting::setSysArgs(const QStringList &args) {
-  ScopedPythonGIL gil;
-
+  ScopedPythonGIL lock;
   PyObject *argv = toPyList(args);
   if (argv && m_sys) {
     PyDict_SetItemString(m_sys, "argv", argv);
@@ -138,9 +137,8 @@ bool PythonScripting::start() {
 #else
   PyImport_AppendInittab("_qti", &init_qti);
 #endif
-  Py_Initialize();
-  // Assume this is called at startup by the the main thread so no GIL
-  // required...yet
+  PythonInterpreter::initialize();
+  ScopedPythonGIL lock;
 
   // Keep a hold of the globals, math and sys dictionary objects
   PyObject *mainmod = PyImport_AddModule("__main__");
@@ -190,20 +188,6 @@ bool PythonScripting::start() {
   } else {
     d_initialized = false;
   }
-  if (d_initialized) {
-    // We will be using C threads created outside of the Python threading module
-    // so we need the GIL. This creates and acquires the lock for this thread
-    PyEval_InitThreads();
-    // We immediately release the lock and threadstate so that other points in
-    // the code can simply use the PyGILstate_Ensure/PyGILstate_Release()
-    // mechanism (through the ScopedPythonGIL class) and they don't
-    // need to worry about swapping out the threadstate before hand.
-    // It would be better if the ScopedPythonGIL handled this but
-    // PyEval_SaveThread() needs to be called in the thread that spawns the
-    // new C thread meaning that ScopedPythonGIL could no longer
-    // be used as a simple RAII class on the stack from within the new thread.
-    m_mainThreadState = PyEval_SaveThread();
-  }
   return d_initialized;
 }
 
@@ -211,9 +195,12 @@ bool PythonScripting::start() {
  * Shutdown the interpreter
  */
 void PythonScripting::shutdown() {
-  PyEval_RestoreThread(m_mainThreadState);
+  // The scoped lock cannot be used here as after the
+  // finalize call no Python code can execute.
+  PythonGIL gil;
+  gil.acquire();
   Py_XDECREF(m_math);
-  Py_Finalize();
+  PythonInterpreter::finalize();
 }
 
 void PythonScripting::setupPythonPath() {
@@ -304,7 +291,7 @@ PyObject *PythonScripting::toPyList(const QStringList &items) {
   Py_ssize_t length = static_cast<Py_ssize_t>(items.length());
   PyObject *pylist = PyList_New((length));
   for (Py_ssize_t i = 0; i < length; ++i) {
-    QString item = items.at(static_cast<int>(i));
+    const QString &item = items.at(static_cast<int>(i));
     PyList_SetItem(pylist, i, FROM_CSTRING(item.toAscii()));
   }
   return pylist;
@@ -340,7 +327,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
                                  PyObject *dict) {
   if (!val)
     return false;
-  PyObject *pyobj = NULL;
+  PyObject *pyobj = nullptr;
 
   if (!sipAPI__qti) {
     throw std::runtime_error("sipAPI_qti is undefined");
@@ -351,7 +338,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
   const sipTypeDef *klass = sipFindType(val->metaObject()->className());
   if (!klass)
     return false;
-  pyobj = sipConvertFromType(val, klass, NULL);
+  pyobj = sipConvertFromType(val, klass, nullptr);
 
   if (!pyobj)
     return false;
@@ -365,7 +352,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
 }
 
 bool PythonScripting::setInt(int val, const char *name) {
-  return setInt(val, name, NULL);
+  return setInt(val, name, nullptr);
 }
 
 bool PythonScripting::setInt(int val, const char *name, PyObject *dict) {
@@ -381,7 +368,7 @@ bool PythonScripting::setInt(int val, const char *name, PyObject *dict) {
 }
 
 bool PythonScripting::setDouble(double val, const char *name) {
-  return setDouble(val, name, NULL);
+  return setDouble(val, name, nullptr);
 }
 
 bool PythonScripting::setDouble(double val, const char *name, PyObject *dict) {

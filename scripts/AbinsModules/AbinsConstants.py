@@ -52,7 +52,7 @@ ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
 ALL_KEYWORDS_K_DATA = ["weights", "k_vectors", "frequencies", "atomic_displacements", "unit_cell"]
 
 # keywords which define data structure of AtomsData
-ALL_KEYWORDS_ATOMS_DATA = ["symbol", "fract_coord", "sort", "mass"]
+ALL_KEYWORDS_ATOMS_DATA = ["symbol", "coord", "sort", "mass"]
 # keywords which define data structure for PowderData
 ALL_KEYWORDS_POWDER_DATA = ["b_tensors", "a_tensors"]
 
@@ -128,9 +128,7 @@ NUM_ZERO = 10e-15
 
 MAX_ORDER = 4  # max quantum order event
 
-NUMPY_VERSION_REQUIRED = "1.6.0"  # Abins requires numpy 1.6.0 or higher
-
-ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP"]
+ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
 ONE_DIMENSIONAL_SPECTRUM = 1
@@ -167,8 +165,18 @@ MAX_WAVENUMBER = 5000.0  # in cm^-1
 MAX_POINTS_PER_PEAK = 1000
 MIN_POINTS_PER_PEAK = 1
 
-SMALL_S = 1e-5
-MAX_THRESHOLD = 1.0
+SMALL_S = 1e-6
+MAX_THRESHOLD = 0.3
 
 ONE_CHARACTER = 1
-EOF = ""
+EOF = b""
+
+ROTATIONS_AND_TRANSLATIONS = 6
+
+# This constant is used to check whether for the given atom mass averaged over all isotopes or mass of the
+# specific isotope is used.
+MASS_EPS = 1e-2  # in amu units.
+
+# this constant is used to check if in a system for the given symbol of an element all atoms with this symbol have
+# the same mass
+ONLY_ONE_MASS = 1

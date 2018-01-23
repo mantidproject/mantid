@@ -1,15 +1,17 @@
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
-#include <MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h>
+#include <MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
 
 #include <QApplication>
+#include <QDrag>
 #include <QDragMoveEvent>
 #include <QFileInfo>
 #include <QList>
+#include <QMimeData>
 #include <QUrl>
 
 using namespace Mantid::API;
@@ -21,9 +23,8 @@ Mantid::Kernel::Logger treelog("MantidTreeWidget");
 namespace MantidQt {
 namespace MantidWidgets {
 
-MantidTreeWidget::MantidTreeWidget(QWorkspaceDockView *w,
-                                   MantidDisplayBase *mui)
-    : QTreeWidget(w), m_dockWidget(w), m_mantidUI(mui),
+MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
+    : QTreeWidget(parent), m_mantidUI(mui),
       m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -56,17 +57,7 @@ void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de) {
 * @param de :: The drag drop event
 */
 void MantidTreeWidget::dropEvent(QDropEvent *de) {
-  QStringList filenames;
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    QList<QUrl> urlList = mimeData->urls();
-    for (int i = 0; i < urlList.size(); ++i) {
-      QString fName = urlList[i].toLocalFile();
-      if (fName.size() > 0) {
-        filenames.append(fName);
-      }
-    }
-  }
+  const auto filenames = DropEventHelper::getFileNames(de);
   de->acceptProposedAction();
 
   for (int i = 0; i < filenames.size(); ++i) {

@@ -3,11 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -74,6 +77,33 @@ public:
       }
     }
     TS_ASSERT_EQUALS(nTies, 1); // Fixed values not ties.
+  }
+
+  void test_evaluate_function() {
+    auto ws =
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100, 1.0, 3.0);
+    std::string fun =
+        "name=CrystalFieldHeatCapacity,Ion=Ce,Symmetry=C2v,"
+        "B20=0.37,B22=3.9, B40=-0.03,B42=-0.1,B44=-0.12, "
+        "ties=(BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=BextX)";
+
+    Algorithms::EvaluateFunction eval;
+    eval.initialize();
+    eval.setProperty("Function", fun);
+    eval.setProperty("InputWorkspace", ws);
+    eval.setPropertyValue("OutputWorkspace", "out");
+    eval.execute();
+
+    auto out =
+        API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+
+    auto y = out->histogram(1).counts();
+    TS_ASSERT_DELTA(y[10], 0.0305, 1e-4);
+    TS_ASSERT_DELTA(y[30], 3.7753, 1e-4);
+    TS_ASSERT_DELTA(y[70], 5.1547, 1e-4);
+    TS_ASSERT_DELTA(y[99], 3.4470, 1e-4);
+
+    API::AnalysisDataService::Instance().clear();
   }
 };
 

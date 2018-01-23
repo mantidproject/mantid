@@ -39,7 +39,7 @@ class QtReflEventView : public QWidget, public IReflEventView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit QtReflEventView(QWidget *parent = 0);
+  explicit QtReflEventView(QWidget *parent = nullptr);
   /// Destructor
   ~QtReflEventView() override;
   /// Returns the presenter managing this view

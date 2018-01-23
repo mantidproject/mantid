@@ -136,7 +136,7 @@ class StateMoveSANS2D(StateMove):
     lab_detector_x = FloatParameter()
     lab_detector_z = FloatParameter()
 
-    monitor_4_offset = FloatParameter()
+    monitor_n_offset = FloatParameter()
 
     def __init__(self):
         super(StateMoveSANS2D, self).__init__()
@@ -156,7 +156,7 @@ class StateMoveSANS2D(StateMove):
         # Set the monitor names
         self.monitor_names = {}
 
-        self.monitor_4_offset = 0.0
+        self.monitor_n_offset = 0.0
 
         # Setup the detectors
         self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),

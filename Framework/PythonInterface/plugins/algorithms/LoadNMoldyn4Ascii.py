@@ -306,4 +306,5 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 
 #------------------------------------------------------------------------------
 
+
 AlgorithmFactory.subscribe(LoadNMoldyn4Ascii)

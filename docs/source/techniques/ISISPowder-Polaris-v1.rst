@@ -118,11 +118,8 @@ The following parameters may also be optionally set:
 
 - :ref:`file_ext_polaris_isis-powder-diffraction-ref`
 - :ref:`sample_empty_polaris_isis_powder-diffraction-ref`
+- :ref:`suffix_polaris_isis-powder-diffraction-ref`
 
-If :ref:`sample_empty_polaris_isis_powder-diffraction-ref` is 
-set then the following parameter is also required:
-
-- :ref:`sample_empty_scale_polaris_isis-powder-diffraction-ref`
 
 Example
 =======
@@ -164,7 +161,43 @@ Example
 
   polaris_example.set_sample(sample=sample_obj)
 
+.. _create_total_scattering_pdf_polaris-isis-powder-ref:
+
+
+create_total_scattering_pdf
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. warning:: Total scattering support is not yet fully implemented.
+             Any results obtaining from using the below routine in its current
+             state should not be considered accurate or complete.
+
+The *create_total_scattering_pdf* method allows a user to create a Pair Distribution Function (PDF)
+from focused POLARIS data, with a view performing further total scattering analysis.
+
+With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
+the focused_workspace.
+
+This function requires the run_number you wish to analyse. The focused file for this run number must
+either be loaded in Mantid with the naming format given by the *focus* method:
+
+*<run number>-Results-<TOF/D>-Grp*
+
+for example:
+
+12345-Results-TOF-Grp
+
+Or the focused file must be in the output directory of the POLARIS instrument.
+
+
+Example
+=======
+
+..  code-block:: python
+
+  polaris_example.create_total_scattering_pdf(run_number='12345',
+                                              merge_banks=False)
+
 .. _calibration_mapping_polaris-isis-powder-ref:
+
 
 Calibration Mapping File
 -------------------------
@@ -509,7 +542,7 @@ Please visit the above page for more details.
 
 *Note: If this parameter is set to* **True**
 :ref:`sample_empty_scale_polaris_isis-powder-diffraction-ref`
-*must also be set.*
+*must also be set.* This is set to 1.0 by default.
 
 Example Input:
 
@@ -520,25 +553,20 @@ Example Input:
   # Or a range of numbers
   polaris_example.focus(sample_empty="100-110", ...)
 
+.. _suffix_polaris_isis-powder-diffraction-ref:
+  
+suffix
+^^^^^^
+*Optional*
 
-.. _sample_empty_scale_polaris_isis-powder-diffraction-ref:
-
-sample_empty_scale
-^^^^^^^^^^^^^^^^^^
-Required if :ref:`sample_empty_polaris_isis_powder-diffraction-ref` 
-is set to **True**
-
-Sets a factor to scale the sample empty run(s) to before
-subtracting. This value is multiplied after summing the 
-sample empty runs and before subtracting the empty from
-the data set. For more details see: :ref:`Scale <algm-Scale-v1>`.
+This parameter specifies a suffix to append the names of output files
+during a focus.
 
 Example Input:
 
-..  code-block:: python
+.. code-block:: python
 
-  # Scale sample empty to 90% of original
-  polaris_example.focus(sample_empty_scale=0.9, ...)
+  polaris_example.focus(suffix="-corr", ...) 
 
 .. _user_name_polaris_isis-powder-diffraction-ref:
 
@@ -614,8 +642,8 @@ On POLARIS this is set to the following:
 
 .. _masking_file_name_polaris_isis-powder-diffraction-ref:
 
-masking_file_name
-^^^^^^^^^^^^^^^^^^
+vanadium_peaks_masking_file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Determines the name of the masking file containing the 
 masks to remove Bragg peaks on Polaris. This file must 
 be located within the top level of the
@@ -625,7 +653,26 @@ On POLARIS this is set to the following:
 
 ..  code-block:: python
 
-  masking_file_name: "VanaPeaks.dat"
+  vanadium_peaks_masking_file: "VanaPeaks.dat"
+
+.. _sample_empty_scale_polaris_isis-powder-diffraction-ref:
+
+sample_empty_scale
+^^^^^^^^^^^^^^^^^^
+Required if :ref:`sample_empty_polaris_isis_powder-diffraction-ref` 
+is set to **True**
+
+Sets a factor to scale the sample empty run(s) to before
+subtracting. This value is multiplied after summing the 
+sample empty runs and before subtracting the empty from
+the data set. For more details see: :ref:`Scale <algm-Scale-v1>`.
+
+Example Input:
+
+..  code-block:: python
+
+  # Scale sample empty to 90% of original
+  polaris_example.focus(sample_empty_scale=0.9, ...)
 
 .. _raw_data_cropping_values_polaris_isis-powder-diffraction-ref:
 
@@ -727,7 +774,7 @@ On POLARIS this is set to the following:
 
 .. code-block:: python
 		
-  cylinder_sample_radius = 0.4
+  cylinder_sample_radius = 0.25
 
 cylinder_position
 =================

@@ -721,10 +721,8 @@ public:
     TS_ASSERT_DELTA(fun->getParameter(41), 44.24, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(42), 1.1, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(43), 0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(44), 0, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(45), 1.1, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(46), 0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(47), 0, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(48), 1.1, 1e-2);
     TS_ASSERT(fun->isActive(36));
     TS_ASSERT(fun->isActive(39));
@@ -742,16 +740,12 @@ public:
     TS_ASSERT_DELTA(fun->getParameter(35), 0.00, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(36), 1.10, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(37), 0.00, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(38), 27.04, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(39), 1.10, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(40), 0.0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(41), 44.24, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(42), 1.1, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(43), 0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(44), 0, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(45), 1.1, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(46), 0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(47), 0, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(48), 1.1, 1e-2);
     TS_ASSERT(fun->isActive(36));
     TS_ASSERT(!fun->isActive(39));

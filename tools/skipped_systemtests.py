@@ -87,6 +87,7 @@ def generateTable(interesting, labels, heading):
             printResultCell(label in interesting[test], len(label))
         print()
 
+
 skipped = {}
 failed = {}
 totalCount = 0

@@ -60,7 +60,7 @@ extern const std::string ANY, LIST;
  */
 class MANTID_KERNEL_DLL ReverseCaselessCompare {
 public:
-  bool operator()(const std::string &a, const std::string &b);
+  bool operator()(const std::string &a, const std::string &b) const;
 };
 
 /**

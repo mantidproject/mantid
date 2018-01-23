@@ -447,7 +447,7 @@ def ChangeAngles(inWS, instr, theta):
 def InstrParas(ws, instr, ana, refl):
     idf_dir = config['instrumentDefinition.directory']
     idf = idf_dir + instr + '_Definition.xml'
-    LoadInstrument(Workspace=ws, Filename=idf, RewriteSpectraMap=False)
+    LoadInstrument(Workspace=ws, Filename=idf, RewriteSpectraMap=True)
     ipf = idf_dir + instr + '_' + ana + '_' + refl + '_Parameters.xml'
     LoadParameterFile(Workspace=ws, Filename=ipf)
 

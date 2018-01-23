@@ -26,10 +26,10 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/Common/SignalRange.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
-#include "MantidQtWidgets/Common/QwtRasterDataMDNonOrthogonal.h"
+#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMDNonOrthogonal.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 #include "MantidQtWidgets/SliceViewer/CustomTools.h"
 #include "MantidQtWidgets/SliceViewer/DimensionSliceWidget.h"
@@ -45,6 +45,15 @@
 #include "MantidQtWidgets/SliceViewer/SliceViewerFunctions.h"
 #include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
+#include <QClipboard>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QSettings>
+#include <QToolTip>
+#include <QUrl>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_rescaler.h>
 #include <Poco/AutoPtr.h>
@@ -66,8 +75,6 @@ using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
 using MantidQt::API::AlgorithmRunner;
 
 namespace MantidQt {
@@ -89,7 +96,8 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL), m_lastRatioState(Guess) {
+      m_peaksSliderWidget(nullptr), m_lastRatioState(Guess),
+      m_holdDisplayUpdates(false) {
 
   ui.setupUi(this);
   std::string enableNonOrthogonal;
@@ -156,6 +164,16 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_algoRunner = new AlgorithmRunner(this);
   QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this,
                    SLOT(dynamicRebinComplete(bool)));
+
+  // disconnect and reconnect here
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
+                   SLOT(checkForHKLDimension()));
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
+                   SLOT(switchAxis()));
+  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
+                   SLOT(switchQWTRaster(bool)));
+  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
+                   SLOT(setNonOrthogonalbtn()));
 
   initMenus();
 
@@ -729,18 +747,16 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 * @param ws :: IMDWorkspace to show.
 */
 void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
+  struct ScopedFlag {
+    explicit ScopedFlag(bool &b) : m_flag(b) { m_flag = true; }
+    ~ScopedFlag() { m_flag = false; }
+    bool &value() { return m_flag; }
+    bool &m_flag;
+  };
+  ScopedFlag holdDisplayUpdates(m_holdDisplayUpdates);
   m_ws = ws;
 
   m_coordinateTransform = createCoordinateTransform(*ws, m_dimX, m_dimY);
-  // disconnect and reconnect here
-  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-                   SLOT(checkForHKLDimension()));
-  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-                   SLOT(switchAxis()));
-  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
-                   SLOT(switchQWTRaster(bool)));
-  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
-                   SLOT(setNonOrthogonalbtn()));
   m_firstNonOrthogonalWorkspaceOpen = true;
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
@@ -832,11 +848,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   }
 
   // Initial display update
-  this->updateDisplay(
-      !m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
-
-  // Don't reset axes next time
-  m_firstWorkspaceOpen = true;
+  //  this->updateDisplay(
+  //      !m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
 
   // For showing the original coordinates
   ui.frmMouseInfo->setVisible(false);
@@ -857,6 +870,13 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
   m_canSwitchScales = true;
+
+  holdDisplayUpdates.value() = false;
+  this->updateDisplay(
+      !m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
+
+  // Don't reset axes next time
+  m_firstWorkspaceOpen = true;
 }
 
 //------------------------------------------------------------------------------
@@ -1599,7 +1619,7 @@ void SliceViewer::showInfoAt(double x, double y) {
 //------------------------------------------------------------------------------
 /** Update the 2D plot using all the current controls settings */
 void SliceViewer::updateDisplay(bool resetAxes) {
-  if (!m_ws)
+  if (!m_ws || m_holdDisplayUpdates)
     return;
   size_t oldX = m_dimX;
   size_t oldY = m_dimY;
@@ -1716,7 +1736,6 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
 }
 
 void SliceViewer::checkForHKLDimension() {
-
   if (API::requiresSkewMatrix(*m_ws)) {
     m_coordinateTransform->checkDimensionsForHKL(*m_ws, m_dimX, m_dimY);
     auto isHKL = API::isHKLDimensions(*m_ws, m_dimX, m_dimY);
@@ -1734,7 +1753,8 @@ void SliceViewer::checkForHKLDimension() {
       switchQWTRaster(useNonOrthogonal);
     }
   }
-  emit setNonOrthogonalbtn();
+
+  setNonOrthogonalbtn();
 }
 //==============================================================================
 //================================ PYTHON METHODS ==============================
@@ -2433,7 +2453,7 @@ void SliceViewer::setNonOrthogonalbtn() {
   };
 
   // temporary to disable if peak overlay is on
-  emit disableOrthogonalAnalysisTools(ui.btnNonOrthogonalToggle->isChecked());
+  disableOrthogonalAnalysisTools(ui.btnNonOrthogonalToggle->isChecked());
 }
 
 void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
@@ -2663,7 +2683,7 @@ void SliceViewer::updatePeakOverlaySliderWidget() {
 * to update the collection of peaks presetners.
 */
 void SliceViewer::updatePeaksOverlay() {
-  if (m_peaksSliderWidget != NULL) {
+  if (m_peaksSliderWidget != nullptr) {
     auto xInterval = getXLimits();
     auto yInterval = getYLimits();
     PeakBoundingBox viewableRegion(
@@ -2883,7 +2903,7 @@ void SliceViewer::loadFromProject(const std::string &lines) {
     API::TSVSerialiser peaks(peaksViewerLines);
 
     QStringList names;
-    for (auto section : peaks.sections("peaksworkspace")) {
+    for (const auto &section : peaks.sections("peaksworkspace")) {
       API::TSVSerialiser sec(section);
       QString name;
 
@@ -2977,6 +2997,7 @@ std::string SliceViewer::saveDimensionWidgets() const {
 }
 
 void SliceViewer::switchAxis() {
+
   if (m_canSwitchScales) { // cannot be called when sliceviewer first
                            // initialised because axis is inaccurate
     auto isHKL = API::isHKLDimensions(*m_ws, m_dimX, m_dimY);

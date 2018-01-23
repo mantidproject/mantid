@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
@@ -13,9 +13,6 @@ using Kernel::V3D;
 namespace Algorithms {
 
 namespace {
-
-// Maximum number of attempts to generate a scatter point
-constexpr size_t MAX_SCATTER_ATTEMPTS = 500;
 
 /**
  * Compute the attenuation factor for the given coefficients
@@ -37,12 +34,15 @@ double attenuation(double rho, double sigma, double length) {
  * @param sample A reference to a sample object that defines a valid shape
  * & material
  * @param activeRegion Restrict scattering point sampling to this region
+ * @param maxScatterAttempts The maximum number of tries to generate a random
+ * point within the object. [Default=5000]
  */
 MCInteractionVolume::MCInteractionVolume(
-    const API::Sample &sample, const Geometry::BoundingBox &activeRegion)
-    : m_sample(sample.getShape()), m_env(nullptr),
-      m_activeRegion(activeRegion) {
-  if (!m_sample.hasValidShape()) {
+    const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
+    const size_t maxScatterAttempts)
+    : m_sample(sample.getShape().clone()), m_env(nullptr),
+      m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts) {
+  if (!m_sample->hasValidShape()) {
     throw std::invalid_argument(
         "MCInteractionVolume() - Sample shape does not have a valid shape.");
   }
@@ -62,7 +62,7 @@ MCInteractionVolume::MCInteractionVolume(
  * @return A reference to the bounding box
  */
 const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
-  return m_sample.getBoundingBox();
+  return m_sample->getBoundingBox();
 }
 
 /**
@@ -90,15 +90,15 @@ double MCInteractionVolume::calculateAbsorption(
   V3D scatterPos;
   if (m_env && (rng.nextValue() > 0.5)) {
     scatterPos =
-        m_env->generatePoint(rng, m_activeRegion, MAX_SCATTER_ATTEMPTS);
+        m_env->generatePoint(rng, m_activeRegion, m_maxScatterAttempts);
   } else {
-    scatterPos = m_sample.generatePointInObject(rng, m_activeRegion,
-                                                MAX_SCATTER_ATTEMPTS);
+    scatterPos = m_sample->generatePointInObject(rng, m_activeRegion,
+                                                 m_maxScatterAttempts);
   }
   auto toStart = startPos - scatterPos;
   toStart.normalize();
   Track beforeScatter(scatterPos, toStart);
-  int nlinks = m_sample.interceptSurface(beforeScatter);
+  int nlinks = m_sample->interceptSurface(beforeScatter);
   if (m_env) {
     nlinks += m_env->interceptSurfaces(beforeScatter);
   }
@@ -127,7 +127,7 @@ double MCInteractionVolume::calculateAbsorption(
   V3D scatteredDirec = endPos - scatterPos;
   scatteredDirec.normalize();
   Track afterScatter(scatterPos, scatteredDirec);
-  m_sample.interceptSurface(afterScatter);
+  m_sample->interceptSurface(afterScatter);
   if (m_env) {
     m_env->interceptSurfaces(afterScatter);
   }

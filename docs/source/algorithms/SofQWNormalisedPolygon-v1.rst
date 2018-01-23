@@ -44,14 +44,14 @@ Usage
    # convert workspace into Matrix workspace with Q-dE coordinates 
    ws=SofQWNormalisedPolygon(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
   
-   print "The converted X-Y values are:"
+   print("The converted X-Y values are:")
    Xrow=ws.readX(59);
    Yrow=ws.readY(59);   
-   for i in xrange(0,20):
-    print '! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]),
-    if (i+1)%10 == 0:
-        print '!\n',
-   print '! {0:>6.2f} ------- !'.format(Xrow[20]),
+   line1= " ".join('! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]) for i in range(0,10))
+   print(line1 + " !")
+   line2= " ".join('! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]) for i in range(10,20))
+   print(line2 + " !")
+   print('! {0:>6.2f} ------- !'.format(Xrow[20]))
 
 
 

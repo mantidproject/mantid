@@ -22,6 +22,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 class FilterByTimeTest : public CxxTest::TestSuite {
 public:

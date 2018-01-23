@@ -87,7 +87,7 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
     return std::make_pair(boost::make_shared<NoShape>(),
                           make_tuple(0., 0., 0.));
 
-  const auto &events = result.get();
+  const auto &events = *result;
   if (events.empty())
     return std::make_pair(boost::make_shared<NoShape>(),
                           make_tuple(0., 0., 0.));
@@ -98,9 +98,9 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   std::vector<V3D> eigen_vectors;
   getEigenVectors(cov_matrix, eigen_vectors);
 
-  std::vector<double> sigmas;
+  std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas.push_back(stdDev(events, eigen_vectors[i], params.regionRadius));
+    sigmas[i] = stdDev(events, eigen_vectors[i], params.regionRadius);
   }
 
   bool invalid_peak =
@@ -183,7 +183,7 @@ Integrate3DEvents::integrateWeakPeak(
   if (!result)
     return boost::make_shared<NoShape>();
 
-  const auto &events = result.get();
+  const auto &events = *result;
 
   const auto &directions = shape->directions();
   const auto &abcBackgroundInnerRadii = shape->abcRadiiBackgroundInner();
@@ -238,7 +238,7 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   if (!result)
     return .0;
 
-  const auto &events = result.get();
+  const auto &events = *result;
   if (events.empty())
     return .0;
 
@@ -248,9 +248,9 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   std::vector<V3D> eigen_vectors;
   getEigenVectors(cov_matrix, eigen_vectors);
 
-  std::vector<double> sigmas;
+  std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas.push_back(stdDev(events, eigen_vectors[i], params.regionRadius));
+    sigmas[i] = stdDev(events, eigen_vectors[i], params.regionRadius);
   }
 
   const auto max_sigma = *std::max_element(sigmas.begin(), sigmas.end());
@@ -282,23 +282,22 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   return inti / std::max(1.0, (ratio * backgrd));
 }
 
-boost::optional<const std::vector<std::pair<double, V3D>> &>
+const std::vector<std::pair<double, V3D>> *
 Integrate3DEvents::getEvents(const V3D &peak_q) {
   const auto hkl_key = getHklKey(peak_q);
 
   if (hkl_key == 0)
-    return boost::optional<const std::vector<std::pair<double, V3D>> &>();
+    return nullptr;
 
   const auto pos = m_event_lists.find(hkl_key);
-  using EventListType = const decltype(pos->second) &;
 
   if (m_event_lists.end() == pos)
-    return boost::optional<EventListType>();
+    return nullptr;
 
   if (pos->second.size() < 3) // if there are not enough events
-    return boost::optional<EventListType>();
+    return nullptr;
 
-  return boost::make_optional<EventListType>(pos->second);
+  return &(pos->second);
 }
 
 bool Integrate3DEvents::correctForDetectorEdges(
@@ -404,9 +403,9 @@ Integrate3DEvents::ellipseIntegrateEvents(
   std::vector<V3D> eigen_vectors;
   getEigenVectors(cov_matrix, eigen_vectors);
 
-  std::vector<double> sigmas;
+  std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas.push_back(stdDev(some_events, eigen_vectors[i], m_radius));
+    sigmas[i] = stdDev(some_events, eigen_vectors[i], m_radius);
   }
 
   bool invalid_peak =

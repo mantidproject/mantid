@@ -147,7 +147,7 @@ public:
     using namespace Mantid::VATES;
     using namespace Mantid::API;
 
-    IMDWorkspace *nullWorkspace = NULL;
+    IMDWorkspace *nullWorkspace = nullptr;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
     vtkPeakMarkerFactory factory("signal");

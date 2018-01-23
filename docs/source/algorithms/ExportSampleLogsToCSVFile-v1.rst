@@ -100,8 +100,8 @@ Usage
 
    headerfilename = os.path.join(defaultdir, "testphase4_header.txt")
 
-   print "File is created = ", os.path.exists(savefile)
-   print "Header file is created = ", os.path.exists(headerfilename)
+   print("File is created =  {}".format(os.path.exists(savefile)))
+   print("Header file is created =  {}".format(os.path.exists(headerfilename)))
 
    # Get the lines of both files
    sfile = open(savefile, 'r')
@@ -111,8 +111,8 @@ Usage
    hlines = hfile.readlines()
    hfile.close()
 
-   print "Number of lines in File =", len(slines)
-   print "Number of lines in Header file =", len(hlines)
+   print("Number of lines in File = {}".format(len(slines)))
+   print("Number of lines in Header file = {}".format(len(hlines)))
    
 .. testcleanup:: ExExportSampleToTSV
 

@@ -18,7 +18,6 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
-
 sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot
@@ -219,6 +218,17 @@ def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False
     _printMessage('#Set front detector rescale/shift values')
 
 
+def SetMergeQRange(q_min=None, q_max=None):
+    """
+        Stores property about the detector which is used to specify merge range.
+        @param qMin: When set to None (default) then for merge use the overlapping q region of front and rear detectors
+        @param qMax: When set to None (default) then for merge use the overlapping q region of front and rear detectors
+    """
+    ReductionSingleton().instrument.getDetector('FRONT').mergeRange = ReductionSingleton().instrument. \
+        getDetector('FRONT')._MergeRange(q_max, q_min)
+    _printMessage('#Set merge range values')
+
+
 def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range
@@ -371,7 +381,7 @@ def GetMismatchedDetList():
 # pylint: disable = too-many-branches
 
 
-def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None,
+def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, # noqa: C901
                       resetSetup=True, out_fit_settings=dict()):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
@@ -416,7 +426,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         ReductionSingleton().full_trans_wav = full_trans_wav
 
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
-
     rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift
     # check if fit is required.
     fitRequired = False
@@ -514,9 +523,9 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         except KeyError:
             # The CAN was not specified
             consider_can = False
-
         # Get fit paramters
-        scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
+        scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
+        merge_range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
 
         kwargs_stitch = {"HABCountsSample": Cf,
                          "HABNormSample": Nf,
@@ -526,7 +535,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                          "Mode": fit_mode,
                          "ScaleFactor": scale_factor,
                          "ShiftFactor": shift_factor,
-                         "OutputWorkspace": retWSname_merged}
+                         "OutputWorkspace": retWSname_merged,
+                         "MergeMask": merge_range.q_merge_range}
         if consider_can:
             kwargs_can = {"HABCountsCan": Cf_can,
                           "HABNormCan": Nf_can,
@@ -534,6 +544,19 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                           "LABNormCan": Nr_can,
                           "ProcessCan": True}
             kwargs_stitch.update(kwargs_can)
+
+        if rAnds.qRangeUserSelected:
+            q_range_stitch = {"FitMin": fit_min,
+                              "FitMax": fit_max}
+            kwargs_stitch.update(q_range_stitch)
+
+        if merge_range.q_merge_range:
+            if merge_range.q_min:
+                q_range_options = {"MergeMin": merge_range.q_min}
+                kwargs_stitch.update(q_range_options)
+            if merge_range.q_max:
+                q_range_options = {"MergeMax": merge_range.q_max}
+                kwargs_stitch.update(q_range_options)
 
         alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
         alg_stitch.execute()
@@ -1076,7 +1099,6 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     """
     COORD1STEP = ReductionSingleton().inst.cen_find_step
     COORD2STEP = ReductionSingleton().inst.cen_find_step2
-
     XSF = ReductionSingleton().inst.beam_centre_scale_factor1
     YSF = ReductionSingleton().inst.beam_centre_scale_factor2
     coord1_scale_factor = XSF
@@ -1129,7 +1151,7 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
-    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
+    beam_center_logger.report_status(0, COORD1NEW, COORD2NEW, resCoord1_old, resCoord2_old)
 
     # If we have 0 iterations then we should return here. At this point the
     # Left/Right/Up/Down workspaces have been already created by the SeekCentre function.

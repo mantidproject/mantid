@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-from IndirectReductionCommon import load_files
+from IndirectReductionCommon import load_files, load_file_ranges
 
 from mantid.simpleapi import *
 from mantid.api import *
@@ -83,8 +83,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              doc='Rebin parameters.')
 
         self.declareProperty(name='GroupingPolicy', defaultValue='All',
-                             validator=StringListValidator(['All', 'Individual', 'IPF']),
+                             validator=StringListValidator(['All', 'Individual', 'Workspace', 'IPF']),
                              doc='Selects the type of detector grouping to be used.')
+        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
+                                               direction=Direction.Input,
+                                               optional=PropertyMode.Optional),
+                             doc='Workspace containing spectra grouping.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
@@ -124,13 +128,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 logger.warning('type = ' + str(type(mode)))
                 issues['CalFile'] = 'Cal Files are currently only available for use in OSIRIS diffspec mode'
 
-        num_samples = len(input_files)
-        num_vanadium = len(self.getProperty('VanadiumFiles').value)
-        if num_samples != num_vanadium and num_vanadium != 0:
-            run_num_mismatch = 'You must input the same number of sample and vanadium runs'
-            issues['InputFiles'] = run_num_mismatch
-            issues['VanadiumFiles'] = run_num_mismatch
-
         return issues
 
     # ------------------------------------------------------------------------------
@@ -156,13 +153,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             load_opts['Mode'] = 'FoilOut'
             load_opts['LoadMonitors'] = True
 
-        self._workspace_names, self._chopped_data = load_files(self._data_files,
-                                                               self._ipf_filename,
-                                                               self._spectra_range[0],
-                                                               self._spectra_range[1],
-                                                               sum_files=self._sum_files,
-                                                               load_logs=self._load_logs,
-                                                               load_opts=load_opts)
+        self._workspace_names, self._chopped_data = load_file_ranges(self._data_files,
+                                                                     self._ipf_filename,
+                                                                     self._spectra_range[0],
+                                                                     self._spectra_range[1],
+                                                                     sum_files=self._sum_files,
+                                                                     load_logs=self._load_logs,
+                                                                     load_opts=load_opts)
 
         # applies the changes in the provided calibration file
         self._apply_calibration()
@@ -175,9 +172,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                               self._ipf_filename,
                                               self._spectra_range[0],
                                               self._spectra_range[1],
-                                              sum_files=self._sum_files,
                                               load_logs=self._load_logs,
                                               load_opts=load_opts)
+
+            if len(self._workspace_names) > len(self._vanadium_runs):
+                raise RuntimeError("There cannot be more sample runs than vanadium runs.")
 
         for index, c_ws_name in enumerate(self._workspace_names):
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -267,21 +266,20 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
                 # Group spectra
                 group_spectra(ws_name,
-                              masked_detectors,
-                              self._grouping_method)
+                              masked_detectors=masked_detectors,
+                              method=self._grouping_method,
+                              group_ws=self._grouping_workspace)
 
             if is_multi_frame:
                 fold_chopped(c_ws_name)
 
         # Remove the container workspaces
         if self._container_workspace is not None:
-            DeleteWorkspace(self._container_workspace)
-            DeleteWorkspace(self._container_workspace + '_mon')
+            self._delete_all([self._container_workspace])
 
+        # Remove the vanadium workspaces
         if self._vanadium_ws:
-            for van_ws in self._vanadium_ws:
-                DeleteWorkspace(van_ws)
-                DeleteWorkspace(van_ws+'_mon')
+            self._delete_all(self._vanadium_ws)
 
         # Rename output workspaces
         output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
@@ -298,7 +296,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         """
         Gets algorithm properties.
         """
-
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._data_files = self.getProperty('InputFiles').value
         self._container_data_files = self.getProperty('ContainerFiles').value
@@ -312,6 +309,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._spectra_range = self.getProperty('SpectraRange').value
         self._rebin_string = self.getPropertyValue('RebinParam')
         self._grouping_method = self.getPropertyValue('GroupingPolicy')
+        grouping_ws_name = self.getPropertyValue("GroupingWorkspace")
+        self._grouping_workspace = mtd[grouping_ws_name] if grouping_ws_name else None
 
         if self._rebin_string == '':
             self._rebin_string = None
@@ -330,17 +329,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             self._ipf_filename = os.path.join(config['instrumentDefinition.directory'], self._ipf_filename)
         logger.information('IPF filename is: %s' % self._ipf_filename)
 
+        if len(self._data_files) == 1:
+            logger.warning('SumFiles options has no effect when only one file is provided')
         # Only enable sum files if we actually have more than one file
-        sum_files = self.getProperty('SumFiles').value
-        self._sum_files = False
-
-        if sum_files:
-            num_raw_files = len(self._data_files)
-            if num_raw_files > 1:
-                self._sum_files = True
-                logger.information('Summing files enabled (have %d files)' % num_raw_files)
-            else:
-                logger.information('SumFiles options is ignored when only one file is provided')
+        self._sum_files = self.getProperty('SumFiles').value
 
     def _apply_calibration(self):
         """
@@ -378,7 +370,20 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                       Factor=scale_factor,
                       Operation='Multiply')
 
+    def _delete_all(self, workspace_names):
+        """
+        Deletes the workspaces with the specified names and their associated
+        monitor workspaces.
+
+        :param workspace_names: The names of the workspaces to delete.
+        """
+
+        for workspace_name in workspace_names:
+            DeleteWorkspace(workspace_name)
+
+            if mtd.doesExist(workspace_name + "_mon"):
+                DeleteWorkspace(workspace_name + '_mon')
+
 
 # ------------------------------------------------------------------------------
-
 AlgorithmFactory.subscribe(ISISIndirectDiffractionReduction)

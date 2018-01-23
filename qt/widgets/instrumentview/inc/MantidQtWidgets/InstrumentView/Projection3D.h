@@ -39,7 +39,7 @@ public:
   void set3DAxesState(bool on);
   void setWireframe(bool on);
 
-  void componentSelected(Mantid::Geometry::ComponentID = NULL) override;
+  void componentSelected(Mantid::Geometry::ComponentID = nullptr) override;
   void getSelectedDetectors(QList<int> &dets) override;
   void getMaskedDetectors(QList<int> &dets) const override;
   void resize(int, int) override;

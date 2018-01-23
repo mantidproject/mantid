@@ -49,9 +49,9 @@ def get_geometry_information(ipf_path, detector_type):
                                      number_of_pixels_override=number_of_pixels_override)
 
     # Determine the prefix for the detector
-    if detector_type is DetectorType.HAB:
+    if detector_type is DetectorType.LAB:
         prefix = "low-angle-detector-"
-    elif detector_type is DetectorType.LAB:
+    elif detector_type is DetectorType.HAB:
         prefix = "high-angle-detector-"
     else:
         raise RuntimeError("MaskingParser: Tyring to get information for unknown "
@@ -124,6 +124,9 @@ class SpectraBlock(object):
             self._detector_orientation = DetectorOrientation.Horizontal
         elif self._instrument is SANSInstrument.LOQ:
             self._first_spectrum_number = 3
+            self._detector_orientation = DetectorOrientation.Horizontal
+        elif self._instrument is SANSInstrument.ZOOM:
+            self._first_spectrum_number = 9
             self._detector_orientation = DetectorOrientation.Horizontal
         else:
             raise RuntimeError("MaskParser: Cannot handle masking request for "

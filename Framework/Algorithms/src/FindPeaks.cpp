@@ -1,7 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
+#include "MantidAlgorithms/SmoothData.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -13,6 +11,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/GlobalSpectrumIndex.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -26,8 +26,8 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
+using namespace Mantid::HistogramData;
+using namespace Mantid::Indexing;
 
 // const double MINHEIGHT = 2.00000001;
 
@@ -43,8 +43,7 @@ DECLARE_ALGORITHM(FindPeaks)
 FindPeaks::FindPeaks()
     : API::Algorithm(), m_peakParameterNames(), m_bkgdParameterNames(),
       m_bkgdOrder(0), m_outPeakTableWS(), m_dataWS(), m_inputPeakFWHM(0),
-      m_wsIndex(0), singleSpectrum(false), m_highBackground(false),
-      m_rawPeaksTable(false), m_numTableParams(0),
+      m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
       m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""),
       m_backgroundType(""), m_vecPeakCentre(), m_vecFitWindows(),
       m_backgroundFunction(), m_peakFunction(), m_minGuessedPeakWidth(0),
@@ -146,9 +145,7 @@ void FindPeaks::init() {
       "this peak will not be fit.  It is designed for EventWorkspace with "
       "integer counts.");
 
-  std::vector<std::string> costFuncOptions;
-  costFuncOptions.emplace_back("Chi-Square");
-  costFuncOptions.emplace_back("Rwp");
+  std::array<std::string, 2> costFuncOptions = {{"Chi-Square", "Rwp"}};
   declareProperty("CostFunction", "Chi-Square",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),
@@ -214,16 +211,20 @@ void FindPeaks::processAlgorithmProperties() {
   m_dataWS = getProperty("InputWorkspace");
 
   // WorkspaceIndex
-  m_wsIndex = getProperty("WorkspaceIndex");
-  singleSpectrum = !isEmpty(m_wsIndex);
-  if (singleSpectrum &&
-      m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms())) {
-    g_log.warning() << "The value of WorkspaceIndex provided (" << m_wsIndex
-                    << ") is larger than the size of this workspace ("
-                    << m_dataWS->getNumberHistograms() << ")\n";
-    throw Kernel::Exception::IndexError(m_wsIndex,
-                                        m_dataWS->getNumberHistograms() - 1,
-                                        "FindPeaks WorkspaceIndex property");
+  int wsIndex = getProperty("WorkspaceIndex");
+  if (!isEmpty(wsIndex)) {
+    if (wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms())) {
+      g_log.warning() << "The value of WorkspaceIndex provided (" << wsIndex
+                      << ") is larger than the size of this workspace ("
+                      << m_dataWS->getNumberHistograms() << ")\n";
+      throw Kernel::Exception::IndexError(wsIndex,
+                                          m_dataWS->getNumberHistograms() - 1,
+                                          "FindPeaks WorkspaceIndex property");
+    }
+    m_indexSet = m_dataWS->indexInfo().makeIndexSet(
+        {static_cast<Indexing::GlobalSpectrumIndex>(wsIndex)});
+  } else {
+    m_indexSet = m_dataWS->indexInfo().makeIndexSet();
   }
 
   // Peak width
@@ -335,13 +336,9 @@ void FindPeaks::findPeaksGivenStartingPoints(
   std::size_t numPeaks = peakcentres.size();
 
   // Loop over the spectra searching for peaks
-  const int start = singleSpectrum ? m_wsIndex : 0;
-  const int end = singleSpectrum
-                      ? m_wsIndex + 1
-                      : static_cast<int>(m_dataWS->getNumberHistograms());
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, end - start);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
 
-  for (int spec = start; spec < end; ++spec) {
+  for (const auto spec : m_indexSet) {
     const auto &vecX = m_dataWS->x(spec);
 
     double practical_x_min = vecX.front();
@@ -391,8 +388,8 @@ void FindPeaks::findPeaksGivenStartingPoints(
       // Check whether it is the in data range
       if (x_center > practical_x_min && x_center < practical_x_max) {
         if (useWindows)
-          fitPeakInWindow(m_dataWS, spec, x_center, fitwindows[2 * ipeak],
-                          fitwindows[2 * ipeak + 1]);
+          fitPeakInWindow(m_dataWS, static_cast<int>(spec), x_center,
+                          fitwindows[2 * ipeak], fitwindows[2 * ipeak + 1]);
         else {
           bool hasLeftPeak = (ipeak > 0);
           double leftpeakcentre = 0.;
@@ -404,9 +401,9 @@ void FindPeaks::findPeaksGivenStartingPoints(
           if (hasRightPeak)
             rightpeakcentre = peakcentres[ipeak + 1];
 
-          fitPeakGivenFWHM(m_dataWS, spec, x_center, m_inputPeakFWHM,
-                           hasLeftPeak, leftpeakcentre, hasRightPeak,
-                           rightpeakcentre);
+          fitPeakGivenFWHM(m_dataWS, static_cast<int>(spec), x_center,
+                           m_inputPeakFWHM, hasLeftPeak, leftpeakcentre,
+                           hasRightPeak, rightpeakcentre);
         }
       } else {
         g_log.warning() << "Given peak centre " << x_center
@@ -427,7 +424,7 @@ void FindPeaks::findPeaksGivenStartingPoints(
   */
 void FindPeaks::findPeaksUsingMariscotti() {
   // At this point the data has not been smoothed yet.
-  MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(m_dataWS);
+  auto smoothedData = this->calculateSecondDifference(m_dataWS);
 
   // The optimum number of points in the smoothing, according to Mariscotti, is
   // 0.6*fwhm
@@ -436,10 +433,8 @@ void FindPeaks::findPeaksUsingMariscotti() {
   if (!(w % 2))
     ++w;
 
-  // Carry out the number of smoothing steps given by g_z (should be 5)
-  for (int i = 0; i < g_z; ++i) {
-    this->smoothData(smoothedData, w);
-  }
+  smoothData(smoothedData, w, g_z);
+
   // Now calculate the errors on the smoothed data
   this->calculateStandardDeviation(m_dataWS, smoothedData, w);
 
@@ -450,24 +445,17 @@ void FindPeaks::findPeaksUsingMariscotti() {
   // Can't calculate n2 or n3 yet because they need i0
   const int tolerance = getProperty("Tolerance");
 
-  //  // Temporary - to allow me to look at smoothed data
-  //  setProperty("SmoothedData",smoothedData);
-
   // Loop over the spectra searching for peaks
-  const int start = singleSpectrum ? m_wsIndex : 0;
-  const int end = singleSpectrum
-                      ? m_wsIndex + 1
-                      : static_cast<int>(smoothedData->getNumberHistograms());
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, end - start);
-  const int blocksize = static_cast<int>(smoothedData->blocksize());
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
 
-  for (int k = start; k < end; ++k) {
-    const auto &S = smoothedData->y(k);
-    const auto &F = smoothedData->e(k);
+  for (size_t k_out = 0; k_out < m_indexSet.size(); ++k_out) {
+    const size_t k = m_indexSet[k_out];
+    const auto &S = smoothedData[k_out].y();
+    const auto &F = smoothedData[k_out].e();
 
     // This implements the flow chart given on page 320 of Mariscotti
     int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
-    for (int i = 1; i < blocksize; ++i) {
+    for (int i = 1; i < static_cast<int>(S.size()); ++i) {
 
       int M = 0;
       if (S[i] > F[i])
@@ -607,7 +595,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
         if (i_max >= wssize)
           i_max = wssize - 1;
 
-        this->fitSinglePeak(m_dataWS, k, i_min, i_max, i4);
+        this->fitSinglePeak(m_dataWS, static_cast<int>(k), i_min, i_max, i4);
 
         // reset and go searching for the next peak
         i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
@@ -629,25 +617,22 @@ void FindPeaks::findPeaksUsingMariscotti() {
   *  @param input :: The workspace to calculate the second difference of
   *  @return A workspace containing the second difference
   */
-API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
+std::vector<Histogram> FindPeaks::calculateSecondDifference(
     const API::MatrixWorkspace_const_sptr &input) {
-  // We need a new workspace the same size as the input ont
-  MatrixWorkspace_sptr diffed = WorkspaceFactory::Instance().create(input);
-
-  const size_t numHists = input->getNumberHistograms();
-  const size_t blocksize = input->blocksize();
+  std::vector<Histogram> diffed;
 
   // Loop over spectra
-  for (size_t i = 0; i < size_t(numHists); ++i) {
-    // Copy over the X values
-    diffed->setSharedX(i, input->sharedX(i));
+  for (const auto i : m_indexSet) {
+    diffed.push_back(input->histogram(i));
+    diffed.back().mutableY() = 0.0;
+    diffed.back().mutableE() = 0.0;
 
     const auto &Y = input->y(i);
-    auto &S = diffed->mutableY(i);
+    auto &S = diffed.back().mutableY();
     // Go through each spectrum calculating the second difference at each point
     // First and last points in each spectrum left as zero (you'd never be able
     // to find peaks that close to the edge anyway)
-    for (size_t j = 1; j < blocksize - 1; ++j) {
+    for (size_t j = 1; j < S.size() - 1; ++j) {
       S[j] = Y[j - 1] - 2 * Y[j] + Y[j + 1];
     }
   }
@@ -656,24 +641,17 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
 }
 
 //----------------------------------------------------------------------------------------------
-/** Calls the SmoothData algorithm as a Child Algorithm on a workspace.
-  * It is used in Mariscotti
-  *  @param WS :: The workspace containing the data to be smoothed. The smoothed
- * result will be stored in this pointer.
+/** Smooth data for Mariscotti.
+  *  @param histograms :: Vector of histograms to be smoothed (inplace).
   *  @param w ::  The number of data points which should contribute to each
  * smoothed point
+  *  @param g_z :: The number of smoothing steps given by g_z (should be 5)
   */
-void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w) {
-  g_log.information("Smoothing the input data");
-  IAlgorithm_sptr smooth = createChildAlgorithm("SmoothData");
-  smooth->setProperty("InputWorkspace", WS);
-  // The number of points which contribute to each smoothed point
-  std::vector<int> wvec;
-  wvec.push_back(w);
-  smooth->setProperty("NPoints", wvec);
-  smooth->executeAsChildAlg();
-  // Get back the result
-  WS = smooth->getProperty("OutputWorkspace");
+void FindPeaks::smoothData(std::vector<Histogram> &histograms, const int w,
+                           const int g_z) {
+  for (auto &histogram : histograms)
+    for (int i = 0; i < g_z; ++i)
+      histogram = smooth(histogram, w);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -688,7 +666,7 @@ void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w) {
   */
 void FindPeaks::calculateStandardDeviation(
     const API::MatrixWorkspace_const_sptr &input,
-    const API::MatrixWorkspace_sptr &smoothed, const int &w) {
+    std::vector<HistogramData::Histogram> &smoothed, const int &w) {
   // Guard against anyone changing the value of z, which would mean different
   // phi values were needed (see Marriscotti p.312)
   static_assert(g_z == 5, "Value of z has changed!");
@@ -698,12 +676,9 @@ void FindPeaks::calculateStandardDeviation(
   const double constant =
       sqrt(static_cast<double>(this->computePhi(w))) / factor;
 
-  const size_t numHists = smoothed->getNumberHistograms();
-  for (size_t i = 0; i < size_t(numHists); ++i) {
-    smoothed->setSharedE(i, input->sharedE(i));
-    std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),
-                   smoothed->mutableE(i).begin(),
-                   std::bind2nd(std::multiplies<double>(), constant));
+  for (size_t i = 0; i < m_indexSet.size(); ++i) {
+    size_t i_in = m_indexSet[i];
+    smoothed[i].mutableE() = input->e(i_in) * constant;
   }
 }
 
@@ -1498,7 +1473,7 @@ void FindPeaks::createFunctions() {
   // FIXME (No In This Ticket)  Need to have a uniformed routine to name
   // background function
   std::string backgroundposix;
-  if (m_backgroundType.compare("Quadratic")) {
+  if (m_backgroundType != "Quadratic") {
     // FlatBackground, LinearBackground, Quadratic
     backgroundposix = "Background";
   }

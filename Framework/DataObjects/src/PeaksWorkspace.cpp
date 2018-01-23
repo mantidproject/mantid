@@ -156,20 +156,19 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
   if (badPeaks.empty())
     return;
-  std::sort(badPeaks.begin(), badPeaks.end());
-  auto index = peaks.begin();
-  auto end = peaks.end();
-  auto result = index;
-  for (int i = 0; index < end; ++index, ++i) {
-    // if index of peak is not in badPeaks
-    if (!std::binary_search(badPeaks.begin(), badPeaks.end(), i)) {
-      // include in result
-      *result = std::move(*index);
-      ++result;
-    }
-  }
-  // erase peaks outside of result
-  peaks.erase(result, peaks.end());
+  // if index of peak is in badPeaks remove
+  int ip = -1;
+  auto it =
+      std::remove_if(peaks.begin(), peaks.end(), [&ip, badPeaks](Peak &pk) {
+        (void)pk;
+        ip++;
+        for (auto ibp = badPeaks.begin(); ibp != badPeaks.end(); ++ibp) {
+          if (*ibp == ip)
+            return true;
+        }
+        return false;
+      });
+  peaks.erase(it, peaks.end());
 }
 
 //---------------------------------------------------------------------------------------------
@@ -878,15 +877,9 @@ PeaksWorkspace::getSpecialCoordinateSystem() const {
 struct NullDeleter {
   template <typename T> void operator()(T *) {}
 };
-/**Get access to shared pointer containing workspace porperties, cashes the
- shared pointer
- into internal class variable to not allow shared pointer being deleted */
+/**Get access to shared pointer containing workspace porperties */
 API::LogManager_sptr PeaksWorkspace::logs() {
-  if (m_logCash)
-    return m_logCash;
-
-  m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
-  return m_logCash;
+  return API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
 }
 
 /** Get constant access to shared pointer containing workspace porperties;

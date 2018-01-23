@@ -110,6 +110,7 @@ class MatrixUBInputWidget(QtGui.QWidget):
         except:
             mantid.logger.error("Could not open the file, or not a valid UB matrix")
 
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     inputol=mantid.geometry.OrientedLattice(2,3,4,90,90,90)

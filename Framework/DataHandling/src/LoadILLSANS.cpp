@@ -39,7 +39,7 @@ int LoadILLSANS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLSANS::category() const {
-  return "DataHandling\\Nexus";
+  return "DataHandling\\Nexus;ILL\\SANS";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ void LoadILLSANS::exec() {
 void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentNamePath) {
 
-  if (instrumentNamePath == "") {
+  if (instrumentNamePath.empty()) {
     std::string message("Cannot set the instrument name from the Nexus file!");
     g_log.error(message);
     throw std::runtime_error(message);

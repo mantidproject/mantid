@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -62,7 +62,7 @@ public:
     sampleShape->setID("mysample");
     Material alum("Al", getNeutronAtom(13), 2.6989);
     sampleShape->setMaterial(alum);
-    inputWS->mutableSample().setShape(*sampleShape);
+    inputWS->mutableSample().setShape(sampleShape);
 
     CreateSampleShape alg;
     alg.initialize();
@@ -100,7 +100,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "TestWorkspace"));
 
-    const Mantid::Geometry::Object &sample = ws->sample().getShape();
+    auto &sample = ws->sample().getShape();
     Mantid::Kernel::V3D point(x, y, z);
 
     if (inside) {

@@ -72,9 +72,9 @@ Usage
     # Run the algorithm
     q, q2, elf = ElasticWindowMultiple(input, -0.1, 0.1)
 
-    print 'ELF X axis: %s' % elf.getAxis(0).getUnit().caption()
-    print 'ELF spectra count: %d' % elf.getNumberHistograms()
-    print 'ELF bin count: %d' % elf.blocksize()
+    print('ELF X axis: %s' % elf.getAxis(0).getUnit().caption())
+    print('ELF spectra count: %d' % elf.getNumberHistograms())
+    print('ELF bin count: %d' % elf.blocksize())
 
     # Reset the facility to the original setting
     config['default.facility'] = facility

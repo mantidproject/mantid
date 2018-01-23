@@ -50,6 +50,7 @@ their usage.
 Instrument Reference
 ---------------------------------
 - :ref:`isis-powder-diffraction-gem-ref`
+- :ref:`isis-powder-diffraction-hrpd-ref`
 - :ref:`isis-powder-diffraction-pearl-ref`
 - :ref:`isis-powder-diffraction-polaris-ref`
 

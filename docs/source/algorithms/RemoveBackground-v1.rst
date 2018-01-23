@@ -60,13 +60,13 @@ Proof of concept background removal algorithm::
     wsParent = mtd[groupedFilename];
     
     nHist = wsParent.getNumberHistograms();
-    print "Parent workspace contains {0:10} histograms".format(nHist)
+    print("Parent workspace contains {0:10} histograms".format(nHist))
     # Get the energy binning correspondent to the binning produced by rebin function (not to re-implement the same function)
     ws1s = ExtractSingleSpectrum(wsParent,0);
     ws1s = ConvertUnits(ws1s,'DeltaE','Direct',Ei);
     ws1s = Rebin(ws1s,Params=[e_min,dE,e_max]);
     e_bins = ws1s.dataX(0);
-    nBins =e_bins.size;
+    nBins = e_bins.size;
 
     x=[e_bins[i] for i in xrange(0,nBins)]
     y=[0 for xx in xrange(0,len(x)-1)]*nHist
@@ -102,7 +102,7 @@ Proof of concept background removal algorithm::
        eGrid.setE(nspec, error)
     else:  # signal and error for background is 0 anyway.
         pass
-    #print " bg at spectra {0} equal to : {1}".format(nspec,bg[0])
+    #print(" bg at spectra {0} equal to : {1}".format(nspec,bg[0]))
 
         
   background = eGrid;
@@ -206,9 +206,9 @@ Usage
    ER = Result .dataE(0);
    
    # print first spectra, Note invalid error calculations
-   print "| x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|"
-   for i in xrange(0,20):
-      print "|{0:10}|{1:10}|{2:10.4f}|{3:10.3f}|{4:10.3f}|{5:10.3f}|".format(XS[i],XR[i],YS[i],YR[i],ES[i],ER[i]);
+   print("| x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|")
+   for i in range(0,20):
+      print("|{0:10}|{1:10}|{2:10.4f}|{3:10.3f}|{4:10.3f}|{5:10.3f}|".format(XS[i],XR[i],YS[i],YR[i],ES[i],ER[i]))
    
 .. testoutput:: ExFlatBkgRemoval
 

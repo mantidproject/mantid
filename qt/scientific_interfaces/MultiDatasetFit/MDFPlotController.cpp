@@ -6,7 +6,7 @@
 #include "MDFFunctionPlotData.h"
 
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"

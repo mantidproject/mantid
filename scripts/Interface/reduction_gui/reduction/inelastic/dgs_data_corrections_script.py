@@ -37,7 +37,7 @@ class DataCorrectionsScript(BaseScriptElement):
         self.reset()
 
     def set_default_pars(self, inst_name):
-        import dgs_utils
+        from . import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
         DataCorrectionsScript.monitor_int_low = int(ip.get_parameter("norm-mon1-min"))
         DataCorrectionsScript.monitor_int_high = int(ip.get_parameter("norm-mon1-max"))

@@ -12,7 +12,7 @@
 
 #include <map>
 #include <QWidget>
-#include <qcolor.h>
+#include <QColor>
 #include <QPointer>
 #include <boost/shared_ptr.hpp>
 

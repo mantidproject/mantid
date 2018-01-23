@@ -12,7 +12,7 @@ import inspect
 import math
 import os
 import re
-from six import types, iteritems
+from six import types, iteritems, PY3
 import numpy as np
 import h5py as h5
 
@@ -216,7 +216,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     #    for the slice region we don't want to be masked.
     # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
     #    cylinder.
-    xmlstring += '<algebra val="((' + cout_id + ' (#' + cin_id  + ')) (' + p1id + ':' + p2id + '))"/>\n'
+    xmlstring += '<algebra val="(#(' + cout_id + ' (#' + cin_id  + ')) : (' + p1id + ':' + p2id + '))"/>\n'
     return xmlstring
 
 
@@ -365,7 +365,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     return hist, (tot_t, tot_c, part_t, part_c)
 
 
-def sliceParser(str_to_parser):
+def sliceParser(str_to_parser): # noqa: C901
     """
     Create a list of boundaries from a string defing the slices.
     Valid syntax is:
@@ -727,9 +727,16 @@ def check_if_is_event_data(file_name):
         # Open instrument group
         is_event_mode = False
         for value in list(first_entry.values()):
-            if "NX_class" in value.attrs and "NXevent_data" == value.attrs["NX_class"]:
-                is_event_mode = True
-                break
+            if "NX_class" in value.attrs:
+                if PY3:
+                    if "NXevent_data" == value.attrs["NX_class"].decode() :
+                        is_event_mode = True
+                        break
+                else:
+                    if "NXevent_data" == value.attrs["NX_class"]:
+                        is_event_mode = True
+                        break
+
     return is_event_mode
 
 
@@ -1556,7 +1563,6 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
     '''
     min_q = None
     max_q = None
-
     front_data = mtd[front_data_name]
     front_dataX = front_data.readX(0)
 
@@ -1895,6 +1901,12 @@ def extract_fit_parameters(rAnds):
     scale_factor = rAnds.scale
     shift_factor = rAnds.shift
 
+    if rAnds.qRangeUserSelected:
+        fit_min = rAnds.qMin
+        fit_max = rAnds.qMax
+    else:
+        fit_min = None
+        fit_max = None
     # Set the fit mode
     fit_mode = None
     if rAnds.fitScale and rAnds.fitShift:
@@ -1905,7 +1917,7 @@ def extract_fit_parameters(rAnds):
         fit_mode = "ShiftOnly"
     else:
         fit_mode = "None"
-    return scale_factor, shift_factor, fit_mode
+    return scale_factor, shift_factor, fit_mode, fit_min, fit_max
 
 
 def check_has_bench_rot(workspace, log_dict=None):
@@ -2317,6 +2329,7 @@ class RunDetails(object):
 ###############################################################################
 ########################## End of Deprecated Code #############################
 ###############################################################################
+
 
 if __name__ == '__main__':
     pass

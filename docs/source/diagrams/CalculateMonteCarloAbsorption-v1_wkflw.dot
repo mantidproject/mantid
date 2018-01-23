@@ -1,0 +1,202 @@
+digraph CalculateMonteCarloAbsorption {
+    label="CalculateMonteCarloAbsorption Flowchart"
+    $global_style
+
+  subgraph params {
+    $param_style
+    SampleWorkspace
+    SampleChemicalFormula
+    SampleDensityType
+    SampleDensity
+    BeamHeight
+    BeamWidth
+    NumberOfWavelengthPoints
+    EventsPerPoint
+    Interpolation
+    ContainerWorkspace
+    ContainerChemicalFormula
+    ContainerDensityType
+    ContainerDensity
+    Shape
+    SampleWidth
+    SampleThickness
+    SampleCenter
+    SampleAngle
+    SampleRadius
+    SampleInnerRadius
+    SampleOuterRadius
+    ContainerFrontThickness
+    ContainerBackThickness
+    ContainerInnerRadius
+    ContainerOuterRadius
+    CorrectionsWorkspace
+  }
+
+  subgraph decisions {
+    $decision_style
+    Shape
+    is_x_in_wavelength                          [label="Is x-axis of workspace\nin units of wavelength?"]
+    is_y_in_wavelength                          [label="Is y-axis of workspace\nin units of wavelength?"]
+    is_x_in_energy_transfer                     [label="Is x-axis of workspace\nin units of energy transfer?"]
+    is_y_in_energy_transfer                     [label="Is x-axis of workspace\nin units of energy transfer?"]
+    emode_is_indirect                           [label="Is E-Mode of workspace, indirect?"]
+    is_x_in_momentum_transfer                   [label="Is x-axis of workspace\nin units of momentum transfer?"]
+    is_isis_instrument_1                        [label="Is instrument in workspace\nan ISIS instrument?"]
+    is_isis_instrument_2                        [label="Is instrument in workspace\nan ISIS instrument?"]
+    container_supplied                          [label="Container supplied?"]
+    shape_value_sample                          [label="Supplied Shape Value?"]
+    shape_value_container                       [label="Supplied Shape Value?"]
+  }
+
+  subgraph processes {
+    $process_style
+    update_instrument_angles                    [label="Update the instrument angles\nin a given workspace from\nQ-Values and wavelength"]
+    load_elastic_instrument_definition          [label="Load the elastic instrument\ndefinition file into the\nworkspace using the\nLoadInstrument algorithm"]
+    set_efixed                                  [label="Sets the EFixed parameter\nin the workspace using\nthe SetInstrumentParameter algorithm"]
+    calculate_wavelengths                       [label="Calculate wavelengths for\nthe workspace"]
+    calculate_offset_front                      [label="Calculate average of two\ninputs and take negative"]
+    calculate_offset_back                       [label="Average the two inputs"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    SimpleShapeMonteCarloAbsorption_sample      [label="SimpleShapeMonteCarloAbsorption"]
+    SimpleShapeMonteCarloAbsorption_container   [label="SimpleShapeMonteCarloAbsorption"]
+    SimpleShapeMonteCarloAbsorption_containerm1 [label="SimpleShapeMonteCarloAbsorption"]
+    SimpleShapeMonteCarloAbsorption_containerm2 [label="SimpleShapeMonteCarloAbsorption"]
+    CloneWorkspace_wave                         [label="CloneWorkspace"]
+    CloneWorkspace_indirect                     [label="CloneWorkspace"]
+    Transpose_wave                              [label="Transpose"]
+    Transpose_energy                            [label="Transpose"]
+    Transpose_indirect                          [label="Transpose"]
+    ConvertUnits_energy                         [label="ConvertUnits"]
+    ConvertUnits_direct                         [label="ConvertUnits"]
+    AddSampleLogMultiple
+    GroupWorkspaces
+    Multiply
+    CropWorkspace
+    ConvertToHistogram
+  }
+
+  subgraph values {
+    $value_style
+    Wavelength
+    FlatPlate_sample                            [label="Flat Plate"]
+    Annulus_sample                              [label="Annulus"]
+    Cylinder_sample                             [label="Cylinder"]
+    FlatPlate_container                         [label="Flat Plate"]
+    Annulus_container                           [label="Annulus"]
+    Cylinder_container                          [label="Cylinder"]
+  }
+
+  SampleWorkspace                       -> is_x_in_wavelength                           [label="Convert Sample\nto Wavelength"]
+  ContainerWorkspace                    -> is_x_in_wavelength                           [label="Convert Container\nto Wavelength"]
+  is_x_in_wavelength                    -> CloneWorkspace_wave                          [label="Yes"]
+  is_x_in_wavelength                    -> is_y_in_wavelength                           [label="No"]
+  is_y_in_wavelength                    -> Transpose_wave                               [label="Yes"]
+  is_y_in_wavelength                    -> is_x_in_energy_transfer                      [label="No"]
+  is_x_in_energy_transfer               -> ConvertUnits_energy                          [label="Yes"]
+  is_x_in_energy_transfer               -> is_y_in_energy_transfer                      [label="No"]
+  is_y_in_energy_transfer               -> Transpose_energy                             [label="Yes"]
+  is_y_in_energy_transfer               -> emode_is_indirect                            [label="No"]
+  emode_is_indirect                     -> is_x_in_momentum_transfer                    [label="Yes"]
+  emode_is_indirect                     -> ConvertUnits_direct                          [label="Yes"]
+  is_x_in_momentum_transfer             -> Transpose_indirect                           [label="Yes"]
+  is_x_in_momentum_transfer             -> CloneWorkspace_indirect                      [label="Yes"]
+  Wavelength                            -> ConvertUnits_energy
+  Wavelength                            -> ConvertUnits_direct
+  CloneWorkspace_indirect               -> is_isis_instrument_1
+  Transpose_indirect                    -> is_isis_instrument_1
+  is_isis_instrument_1                  -> load_elastic_instrument_definition           [label="Yes"]
+  is_isis_instrument_1                  -> set_efixed                                   [label="No"]
+  load_elastic_instrument_definition    -> set_efixed
+  set_efixed                            -> ConvertToHistogram
+  ConvertToHistogram                    -> CropWorkspace
+  CropWorkspace                         -> calculate_wavelengths
+  calculate_wavelengths                 -> is_isis_instrument_2
+  is_isis_instrument_2                  -> update_instrument_angles                     [label="Yes"]
+  Transpose_energy                      -> ConvertUnits_energy
+
+  ConvertUnits_energy                   -> SimpleShapeMonteCarloAbsorption_sample
+  update_instrument_angles              -> SimpleShapeMonteCarloAbsorption_sample
+  is_isis_instrument_2                  -> SimpleShapeMonteCarloAbsorption_sample       [label="No"]
+  CloneWorkspace_wave                   -> SimpleShapeMonteCarloAbsorption_sample
+  Transpose_wave                        -> SimpleShapeMonteCarloAbsorption_sample
+  ConvertUnits_direct                   -> SimpleShapeMonteCarloAbsorption_sample
+
+  BeamHeight                            -> SimpleShapeMonteCarloAbsorption_sample
+  BeamWidth                             -> SimpleShapeMonteCarloAbsorption_sample
+  NumberOfWavelengthPoints              -> SimpleShapeMonteCarloAbsorption_sample
+  EventsPerPoint                        -> SimpleShapeMonteCarloAbsorption_sample
+  Interpolation                         -> SimpleShapeMonteCarloAbsorption_sample
+  SampleChemicalFormula                 -> SimpleShapeMonteCarloAbsorption_sample
+  SampleDensityType                     -> SimpleShapeMonteCarloAbsorption_sample
+  SampleDensity                         -> SimpleShapeMonteCarloAbsorption_sample
+  Height                                -> SimpleShapeMonteCarloAbsorption_sample
+  Shape                                 -> SimpleShapeMonteCarloAbsorption_sample
+  FlatPlate_sample                      -> SimpleShapeMonteCarloAbsorption_sample
+  Annulus_sample                        -> SimpleShapeMonteCarloAbsorption_sample
+  Cylinder_sample                       -> SimpleShapeMonteCarloAbsorption_sample
+  shape_value_sample                    -> FlatPlate_sample                             [label="Flat Plate"]
+  shape_value_sample                    -> Annulus_sample                               [label="Annulus"]
+  shape_value_sample                    -> Cylinder_sample                              [label="Cylinder"]
+  SampleWidth                           -> FlatPlate_sample
+  SampleThickness                       -> FlatPlate_sample
+  SampleAngle                           -> FlatPlate_sample
+  SampleCenter                          -> FlatPlate_sample
+  SampleRadius                          -> Cylinder_sample
+  SampleInnerRadius                     -> Annulus_sample
+  SampleOuterRadius                     -> Annulus_sample
+
+  SimpleShapeMonteCarloAbsorption_sample -> AddSampleLogMultiple
+  AddSampleLogMultiple                   -> GroupWorkspaces
+  SimpleShapeMonteCarloAbsorption_sample -> container_supplied
+
+  BeamHeight                            -> SimpleShapeMonteCarloAbsorption_container
+  BeamWidth                             -> SimpleShapeMonteCarloAbsorption_container
+  NumberOfWavelengthPoints              -> SimpleShapeMonteCarloAbsorption_container
+  EventsPerPoint                        -> SimpleShapeMonteCarloAbsorption_container
+  Interpolation                         -> SimpleShapeMonteCarloAbsorption_container
+  container_supplied                    -> SimpleShapeMonteCarloAbsorption_container    [label="Yes"]
+  ContainerChemicalFormula              -> SimpleShapeMonteCarloAbsorption_container
+  ContainerDensityType                  -> SimpleShapeMonteCarloAbsorption_container
+  ContainerDensity                      -> SimpleShapeMonteCarloAbsorption_container
+  Height                                -> SimpleShapeMonteCarloAbsorption_container
+  Shape                                 -> SimpleShapeMonteCarloAbsorption_container
+  Annulus_container                     -> SimpleShapeMonteCarloAbsorption_container
+  Cylinder_container                    -> SimpleShapeMonteCarloAbsorption_container
+  shape_value_container                 -> FlatPlate_container                          [label="Flat Plate"]
+  shape_value_container                 -> Annulus_container                            [label="Annulus"]
+  shape_value_container                 -> Annulus_container                            [label="Cylinder"]
+  ContainerInnerRadius                  -> Annulus_container
+  ContainerOuterRadius                  -> Annulus_container
+  ContainerInnerRadius                  -> Cylinder_container
+  ContainerOuterRadius                  -> Cylinder_container
+
+  BeamHeight                            -> SimpleShapeMonteCarloAbsorption_containerm1
+  BeamWidth                             -> SimpleShapeMonteCarloAbsorption_containerm1
+  NumberOfWavelengthPoints              -> SimpleShapeMonteCarloAbsorption_containerm1
+  EventsPerPoint                        -> SimpleShapeMonteCarloAbsorption_containerm1
+  Interpolation                         -> SimpleShapeMonteCarloAbsorption_containerm1
+
+  BeamHeight                            -> SimpleShapeMonteCarloAbsorption_containerm2
+  BeamWidth                             -> SimpleShapeMonteCarloAbsorption_containerm2
+  NumberOfWavelengthPoints              -> SimpleShapeMonteCarloAbsorption_containerm2
+  EventsPerPoint                        -> SimpleShapeMonteCarloAbsorption_containerm2
+  Interpolation                         -> SimpleShapeMonteCarloAbsorption_containerm2
+
+  FlatPlate_container                   -> SimpleShapeMonteCarloAbsorption_containerm1
+  FlatPlate_container                   -> SimpleShapeMonteCarloAbsorption_containerm2
+  SampleWidth                           -> SimpleShapeMonteCarloAbsorption_containerm1
+  SampleAngle                           -> SimpleShapeMonteCarloAbsorption_containerm1
+  ContainerFrontThickness               -> SimpleShapeMonteCarloAbsorption_containerm1
+  calculate_offset_front                -> SimpleShapeMonteCarloAbsorption_containerm1
+  ContainerBackThickness                -> SimpleShapeMonteCarloAbsorption_containerm2
+  calculate_offset_back                 -> SimpleShapeMonteCarloAbsorption_containerm2
+
+  SimpleShapeMonteCarloAbsorption_containerm1 -> Multiply
+  SimpleShapeMonteCarloAbsorption_containerm2 -> Multiply
+
+  Multiply                              -> GroupWorkspaces
+  GroupWorkspaces                       -> CorrectionsWorkspace
+}

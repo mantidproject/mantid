@@ -11,7 +11,8 @@ import re
 import numpy as np
 
 from mantid import mtd
-from mantid.api import (AnalysisDataService, WorkspaceFactory, TextAxis)
+from mantid.api import (AnalysisDataService, MatrixWorkspace, WorkspaceFactory, TextAxis)
+from mantid.kernel import MaterialBuilder
 from vesuvio.instrument import VESUVIO
 
 import mantid.simpleapi as ms
@@ -25,7 +26,8 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     """
     The main entry point for user scripts fitting in TOF.
 
-    :param runs: A string specifying the runs to process
+    :param runs: A string specifying the runs to process, or a workspace containing
+                 the loaded runs
     :param flags: A dictionary of flags to control the processing
     :param iterations: Maximum number of iterations to perform
     :param convergence_threshold: Maximum difference in the cost
@@ -38,23 +40,81 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         raise ValueError('Must perform at least one iteration')
 
     # Load
-    spectra = flags['spectra']
     fit_mode = flags['fit_mode']
-    sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
-                                     flags['diff_mode'], fit_mode,
-                                     flags.get('bin_parameters', None))
+    back_banks = VESUVIO().backward_banks
+
+    if isinstance(runs, MatrixWorkspace):
+        sample_data = runs
+        flags['runs'] = runs.getName()
+        flags['spectra'] = sample_data.getAxis(0).extractValues()
+        flags['back_scattering'] = any([lower <= flags['spectra'][0] <= upper for lower, upper in back_banks])
+    else:
+        spectra = flags['spectra']
+        sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
+                                         flags['diff_mode'], fit_mode,
+                                         flags.get('bin_parameters', None),
+                                         flags.get('load_log_files', True))
+        flags['runs'] = runs
+        if spectra == 'backward' or spectra == 'forward':
+            flags['back_scattering'] = spectra == 'backward'
+        else:
+            try:
+                first_spec = int(spectra.split("-")[0])
+                flags['back_scattering'] = any([lower <= first_spec <= upper for lower, upper in back_banks])
+            except:
+                raise RuntimeError("Invalid value given for spectrum range: Range must either be 'forward', "
+                                   "'backward' or specified with the syntax 'a-b'.")
 
     # Load container runs if provided
     container_data = None
     if flags.get('container_runs', None) is not None:
-        container_data = load_and_crop_data(flags['container_runs'], spectra,
-                                            flags['ip_file'],
-                                            flags['diff_mode'], fit_mode,
-                                            flags.get('bin_parameters', None))
+
+        if isinstance(flags['container_runs'], MatrixWorkspace):
+            container_data = flags['container_runs']
+        else:
+            container_data = load_and_crop_data(flags['container_runs'], spectra,
+                                                flags['ip_file'],
+                                                flags['diff_mode'], fit_mode,
+                                                flags.get('bin_parameters', None),
+                                                flags.get('load_log_files', True))
+
+    return fit_tof_impl(sample_data, container_data, flags, iterations, convergence_threshold)
+
+
+def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_threshold):
+    # Check if multiple scattering flags have been defined
+    if 'ms_flags' in flags:
+
+        # Check if hydrogen constraints have been defined
+        if 'HydrogenConstraints' in flags['ms_flags']:
+            flags['ms_flags']['HydrogenConstraints'] = \
+                _parse_ms_hydrogen_constraints(flags['ms_flags']['HydrogenConstraints'])
+        else:
+            flags['ms_flags']['HydrogenConstraints'] = dict()
+    else:
+        raise RuntimeError("Multiple scattering flags not provided. Set the ms_flag, 'ms_enabled' "
+                           "to false, in order to disable multiple scattering corrections.")
 
     last_results = None
-
     exit_iteration = 0
+
+    index_to_symbol_map = filter(lambda x: 'symbol' in x[1], enumerate(flags['masses']))
+    index_to_symbol_map = {str(k): v['symbol'] for k, v in index_to_symbol_map}
+
+    hydrogen_indices = set()
+    if flags['back_scattering']:
+        hydrogen_indices = {int(k) for k, _ in filter(lambda x: x[1] == 'H',
+                                                      index_to_symbol_map.items())}
+        symbols = set()
+        for symbol in flags['ms_flags']['HydrogenConstraints']:
+            symbols.add(symbol)
+        for symbol in index_to_symbol_map.values():
+            symbols.discard(symbol)
+
+        if symbols:
+            raise RuntimeError("HydrogenConstraints contains references to the following,"
+                               " undefined masses: " + ','.join(symbols))
+    flags['index_to_symbol_map'] = index_to_symbol_map
 
     for iteration in range(1, iterations + 1):
         iteration_flags = copy.deepcopy(flags)
@@ -62,10 +122,11 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
         if last_results is not None:
             iteration_flags['masses'] = _update_masses_from_params(copy.deepcopy(flags['masses']),
-                                                                   last_results[2])
+                                                                   last_results[2],
+                                                                   ignore_indices=hydrogen_indices)
 
         print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
-        results = fit_tof_iteration(sample_data, container_data, runs, iteration_flags)
+        results = fit_tof_iteration(sample_data, container_data, iteration_flags)
         exit_iteration += 1
 
         if last_results is not None and convergence_threshold is not None:
@@ -85,46 +146,60 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     return last_results[0], last_results[2], last_results[3], exit_iteration
 
 
-def fit_tof_iteration(sample_data, container_data, runs, flags):
+def fit_tof_iteration(sample_data, container_data, flags):
     """
     Performs a single iterations of the time of flight corrections and fitting
     workflow.
 
     :param sample_data: Loaded sample data workspaces
     :param container_data: Loaded container data workspaces
-    :param runs: A string specifying the runs to process
     :param flags: A dictionary of flags to control the processing
     :return: Tuple of (workspace group name, pre correction fit parameters,
              final fit parameters, chi^2 values)
     """
     # Transform inputs into something the algorithm can understand
     if isinstance(flags['masses'][0], list):
-        mass_values = _create_profile_strs_and_mass_list(copy.deepcopy(flags['masses'][0]))[0]
-        profiles_strs = []
+        mass_values, _, all_mass_values, _ = \
+            _create_profile_strs_and_mass_list(copy.deepcopy(flags['masses'][0]))
+
+        profiles_strs, all_profiles_strs = [], []
         for mass_spec in flags['masses']:
-            profiles_strs.append(_create_profile_strs_and_mass_list(mass_spec)[1])
+            _, profiles_str, _, all_profiles_str = _create_profile_strs_and_mass_list(mass_spec)
+            profiles_strs.append(profiles_str)
+            all_profiles_strs.append(all_profiles_str)
     else:
-        mass_values, profiles_strs = _create_profile_strs_and_mass_list(flags['masses'])
+        mass_values, profiles_strs, all_mass_values, all_profiles_strs = \
+            _create_profile_strs_and_mass_list(flags['masses'])
+
     background_str = _create_background_str(flags.get('background', None))
     intensity_constraints = _create_intensity_constraint_str(flags['intensity_constraints'])
     ties = _create_user_defined_ties_str(flags['masses'])
 
     num_spec = sample_data.getNumberHistograms()
+    gamma_correct = flags.get('gamma_correct', False)
     pre_correct_pars_workspace = None
     pars_workspace = None
     fit_workspace = None
     max_fit_iterations = flags.get('max_fit_iterations', 5000)
-
+    index_to_symbol_map = flags.get('index_to_symbol_map', dict())
+    back_scattering = flags.get('back_scattering', False)
     output_groups = []
     chi2_values = []
     data_workspaces = []
     result_workspaces = []
+    runs = flags['runs']
     group_name = runs + '_result'
+
+    # Create function for retrieving profiles by index outside of loop,
+    # to reduce for loops done inside loop.
+    get_profiles = _create_get_profiles_function(all_profiles_strs,
+                                                 profiles_strs,
+                                                 back_scattering)
+
+    fit_masses = mass_values if back_scattering else all_mass_values
+
     for index in range(num_spec):
-        if isinstance(profiles_strs, list):
-            profiles = profiles_strs[index]
-        else:
-            profiles = profiles_strs
+        all_profiles, fit_profiles = get_profiles(index)
 
         suffix = _create_fit_workspace_suffix(index,
                                               sample_data,
@@ -140,8 +215,8 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         corrections_fit_name = "__vesuvio_corrections_fit"
         ms.VesuvioTOFFit(InputWorkspace=sample_data,
                          WorkspaceIndex=index,
-                         Masses=mass_values,
-                         MassProfiles=profiles,
+                         Masses=fit_masses,
+                         MassProfiles=fit_profiles,
                          Background=background_str,
                          IntensityConstraints=intensity_constraints,
                          Ties=ties,
@@ -170,9 +245,10 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                               OutputWorkspace=corrected_data_name,
                               LinearFitResult=linear_correction_fit_params_name,
                               WorkspaceIndex=index,
-                              GammaBackground=flags.get('gamma_correct', False),
-                              Masses=mass_values,
-                              MassProfiles=profiles,
+                              GammaBackground=gamma_correct,
+                              Masses=all_mass_values,
+                              MassProfiles=all_profiles,
+                              MassIndexToSymbolMap=index_to_symbol_map,
                               IntensityConstraints=intensity_constraints,
                               MultipleScattering=flags.get('ms_enabled', True),
                               GammaBackgroundScale=flags.get('fixed_gamma_scaling', 0.0),
@@ -184,8 +260,8 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         pars_name = runs + "_params" + suffix
         fit_result = ms.VesuvioTOFFit(InputWorkspace=corrected_data_name,
                                       WorkspaceIndex=0,
-                                      Masses=mass_values,
-                                      MassProfiles=profiles,
+                                      Masses=fit_masses,
+                                      MassProfiles=fit_profiles,
                                       Background=background_str,
                                       IntensityConstraints=intensity_constraints,
                                       Ties=ties,
@@ -207,8 +283,8 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         if fit_workspace is None:
             fit_workspace = _create_param_workspace(num_spec, mtd[linear_correction_fit_params_name])
 
-        spec_num_str = str(sample_data.getSpectrum(index).getSpectrumNo())
-        current_spec = 'spectrum_' + spec_num_str
+        spec_no = sample_data.getSpectrum(index).getSpectrumNo()
+        current_spec = 'spectrum_' + str(spec_no)
 
         _update_fit_params(pre_correct_pars_workspace,
                            index, mtd[pre_correction_pars_name],
@@ -269,7 +345,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
 
 
 def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
-                       fit_mode='spectra', rebin_params=None):
+                       fit_mode='spectra', rebin_params=None, load_log_files=True):
     """
     @param runs The string giving the runs to load
     @param spectra A list of spectra to load
@@ -305,10 +381,10 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
     else:
         diff_mode = "SingleDifference"
 
-    kwargs = {"Filename": runs,
-              "Mode": diff_mode, "InstrumentParFile": ip_file,
-              "SpectrumList": spectra, "SumSpectra": sum_spectra,
-              "OutputWorkspace": output_name}
+    kwargs = {"Filename": runs, "Mode": diff_mode,
+              "InstrumentParFile": ip_file, "SpectrumList": spectra,
+              "SumSpectra": sum_spectra, "OutputWorkspace": output_name,
+              'LoadLogFiles' : load_log_files}
     full_range = ms.LoadVesuvio(**kwargs)
     tof_data = ms.CropWorkspace(InputWorkspace=full_range,
                                 XMin=instrument.tof_range[0],
@@ -327,23 +403,105 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
 # Private Functions
 # --------------------------------------------------------------------------------
 
+def _create_get_profiles_function(all_profiles_strs, profiles_strs, back_scattering):
+    """
+    Create a function which takes an index and returns a tuple of the corresponding
+    mass profiles and fitting mass profiles, where the fitting mass profiles are equal
+    to all mass profiles, unless back_scattering is true, in which case, hydrogen profiles
+    are removed from fitting mass profiles.
 
-def _update_masses_from_params(old_masses, param_ws):
+    :param all_profiles_strs:   All mass profile strings.
+    :param profiles_strs:       Equivalent to all_profiles_strs with hydrogen profiles
+                                removed.
+    :param back_scattering:     Whether back_scattering spectra are being fit
+    :return:                    A function for retrieving a tuple of all mass profile
+                                strings and fitting mass profile strings for a given
+                                spectrum index.
+    """
+
+    if isinstance(profiles_strs, list):
+
+        if back_scattering:
+            def get_profiles(idx):
+                return all_profiles_strs[idx], profiles_strs[idx]
+        else:
+            def get_profiles(idx):
+                return all_profiles_strs[idx], all_profiles_strs[idx]
+    else:
+
+        if back_scattering:
+            def get_profiles(_):
+                return all_profiles_strs, profiles_strs
+        else:
+            def get_profiles(_):
+                return all_profiles_strs, all_profiles_strs
+
+    return get_profiles
+
+
+def _parse_ms_hydrogen_constraints(constraints):
+    """
+    Parses the specified hydrogen constraints from a list of constraints,
+    to a dictionary of the chemical symbols of each constraint mapped to
+    their corresponding constraint properties (factor and weight).
+
+    :param constraints: The hydrogen constraints to parse.
+    :return:            A dictionary mapping chemical symbol to constraint
+                        properties.
+    :raise:             A RuntimeError if a constraint doesn't hasn't been
+                        given an associated chemical symbol.
+    """
+    if not isinstance(constraints, dict):
+        parsed = dict()
+
+        try:
+            for constraint in constraints:
+                parsed.update(_parse_ms_hydrogen_constraint(constraint))
+        except AttributeError:
+            raise RuntimeError("HydrogenConstraints are incorrectly formatted.")
+
+        return parsed
+
+    try:
+        return _parse_ms_hydrogen_constraint(constraints)
+    except AttributeError:
+        raise RuntimeError("HydrogenConstraints are incorrectly formatted.")
+
+
+def _parse_ms_hydrogen_constraint(constraint):
+    symbol = constraint.pop("symbol", None)
+
+    if symbol is None:
+        raise RuntimeError("Invalid hydrogen constraint: " +
+                           str(constraint) +
+                           " - No symbol provided")
+    return {symbol: constraint}
+
+
+def _update_masses_from_params(old_masses, param_ws, ignore_indices=set()):
     """
     Update the masses flag based on the results of a fit.
 
     @param old_masses The existing masses dictionary
     @param param_ws The workspace to update from
+    @param ignore_indices A set of mass indices, where the associated masses
+                          should be ignored when updating the specified old
+                          masses from the specified parameter workspace.
     @return The modified mass dictionary
     """
-    for mass in old_masses:
+    mass_indices = []
+
+    for idx, mass in enumerate(old_masses):
         for param in mass.keys():
-            params_list = ['value', 'function', 'hermite_coeffs',
+            params_list = ['symbol', 'value', 'function', 'hermite_coeffs',
                            'k_free', 'sears_flag', 'width']
             if param.lower() not in params_list:
                 del mass[param]
             elif param.lower() == 'width' and not isinstance(mass[param], list):
                 del mass[param]
+
+        if idx not in ignore_indices:
+            mass_indices.append(idx)
 
     masses = []
     num_masses = len(old_masses)
@@ -353,20 +511,22 @@ def _update_masses_from_params(old_masses, param_ws):
     function_regex = re.compile("f([0-9]+).([A-z0-9_]+)")
 
     for spec_idx in range(param_ws.blocksize()):
+
         for idx, param in enumerate(param_ws.getAxis(1).extractValues()):
             # Ignore the cost function
             if param == "Cost function value":
                 continue
 
             param_re = function_regex.match(param)
-            mass_idx = int(param_re.group(1))
+            mass_idx = mass_indices[int(param_re.group(1))]
+
             if mass_idx >= num_masses:
                 continue
 
             param_name = param_re.group(2).lower()
             if param_name == 'width' and isinstance(masses[spec_idx][mass_idx].get(param_name, None), list):
                 masses[spec_idx][mass_idx][param_name][1] = param_ws.dataY(idx)[spec_idx]
-            else:
+            elif 'symbol' not in masses[spec_idx][mass_idx] or param_name != 'mass':
                 masses[spec_idx][mass_idx][param_name] = param_ws.dataY(idx)[spec_idx]
 
     return masses
@@ -419,21 +579,46 @@ def _create_profile_strs_and_mass_list(profile_flags):
     Create a string suitable for the algorithms out of the mass profile flags
     and a list of mass values
     :param profile_flags: A list of dict objects for the mass profile flags
-    :return: A string to pass to the algorithm & a list of masses
+    :return: A tuple of list of masses, a string to pass to the algorithm and
+             a dictionary containing a map from mass index to a symbol - where
+             chemical formula was used to define a mass.
     """
+    material_builder = MaterialBuilder()
     mass_values, profiles = [], []
-    for mass_prop in profile_flags:
-        function_props = ["function={0}".format(mass_prop["function"])]
-        del mass_prop["function"]
-        for key, value in iteritems(mass_prop):
-            if key == 'value':
-                mass_values.append(value)
-            else:
-                function_props.append("{0}={1}".format(key, value))
-        profiles.append(",".join(function_props))
-    profiles = ";".join(profiles)
+    all_mass_values, all_profiles = [], []
+    for idx, mass_prop in enumerate(profile_flags):
+        function_name = ("function=%s," % mass_prop.pop('function'))
+        function_props = ["{0}={1}".format(key, value) for key, value in mass_prop.items()]
+        function_props = ("%s,%s" % (function_name, (','.join(function_props))))
 
-    return mass_values, profiles
+        mass_value = mass_prop.pop('value', None)
+        if mass_value is None:
+            symbol = mass_prop.pop('symbol', None)
+
+            if symbol is None:
+                raise RuntimeError('Invalid mass specified - ' + str(mass_prop)
+                                   + " - either 'value' or 'symbol' must be given.")
+
+            try:
+                if symbol == 'H':
+                    mass = material_builder.setFormula(symbol).build().relativeMolecularMass()
+                    all_mass_values.append(mass)
+                    all_profiles.append(function_props)
+                    continue
+
+                mass_value = material_builder.setFormula(symbol).build().relativeMolecularMass()
+            except BaseException as exc:
+                raise RuntimeError('Error when parsing mass - ' + str(mass_prop) + ": "
+                                   + "\n" + str(exc))
+
+        all_mass_values.append(mass_value)
+        mass_values.append(mass_value)
+        all_profiles.append(function_props)
+        profiles.append(function_props)
+
+    profiles = ";".join(profiles)
+    all_profiles = ";".join(all_profiles)
+    return mass_values, profiles, all_mass_values, all_profiles
 
 
 def _create_background_str(background_flags):

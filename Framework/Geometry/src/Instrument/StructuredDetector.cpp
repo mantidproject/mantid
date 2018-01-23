@@ -1,7 +1,9 @@
 #include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/StructuredGeometryHandler.h"
@@ -18,8 +20,6 @@ namespace Mantid {
 namespace Geometry {
 
 using Kernel::V3D;
-using Kernel::Quat;
-using Kernel::Matrix;
 
 /** Empty constructor
 */
@@ -420,7 +420,7 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   ylb -= ypos;
 
   ShapeFactory factory;
-  boost::shared_ptr<Mantid::Geometry::Object> shape =
+  boost::shared_ptr<Mantid::Geometry::IObject> shape =
       factory.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector
@@ -518,6 +518,10 @@ int StructuredDetector::getPointInObject(V3D &) const {
 * @param assemblyBox :: A BoundingBox object that will be overwritten
 */
 void StructuredDetector::getBoundingBox(BoundingBox &assemblyBox) const {
+  if (hasComponentInfo()) {
+    assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
+    return;
+  }
   if (!m_cachedBoundingBox) {
     m_cachedBoundingBox = new BoundingBox();
     // Get all the corners
@@ -568,7 +572,7 @@ void StructuredDetector::initDraw() const {
 }
 
 /// Returns the shape of the Object
-const boost::shared_ptr<const Object> StructuredDetector::shape() const {
+const boost::shared_ptr<const IObject> StructuredDetector::shape() const {
   // --- Create a hexahedral shape for your pixels ----
   auto w = this->xPixels() + 1;
   auto xlb = m_xvalues[0];
@@ -641,6 +645,11 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   os << "Number of children :" << ass.nelements() << '\n';
   ass.printChildren(os);
   return os;
+}
+
+size_t StructuredDetector::registerContents(
+    class ComponentVisitor &componentVisitor) const {
+  return componentVisitor.registerStructuredBank(*this);
 }
 
 } // namespace Geometry

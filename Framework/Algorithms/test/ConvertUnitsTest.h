@@ -15,7 +15,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -58,7 +58,8 @@ void setup_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -93,7 +94,8 @@ void setup_Points_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -537,13 +539,13 @@ public:
     // Define a source and sample position
     // Define a source component
     ObjComponent *source =
-        new ObjComponent("moderator", Object_sptr(), testInst.get());
+        new ObjComponent("moderator", IObject_sptr(), testInst.get());
     source->setPos(V3D(0, 0.0, -11.739));
     testInst->add(source);
     testInst->markAsSource(source);
     // Define a sample as a simple sphere
     ObjComponent *sample =
-        new ObjComponent("samplePos", Object_sptr(), testInst.get());
+        new ObjComponent("samplePos", IObject_sptr(), testInst.get());
     testInst->setPos(0.0, 0.0, 0.0);
     testInst->add(sample);
     testInst->markAsSamplePos(sample);
@@ -752,9 +754,9 @@ public:
       }
     } else if (sortType == PULSETIME_SORT) {
       // Check directly that it is indeed increasing
-      Mantid::Kernel::DateAndTime last_x;
+      Mantid::Types::Core::DateAndTime last_x;
       for (size_t i = 0; i < el.getNumberEvents(); i++) {
-        Mantid::Kernel::DateAndTime x = el.getEvent(i).pulseTime();
+        Mantid::Types::Core::DateAndTime x = el.getEvent(i).pulseTime();
         TS_ASSERT(x >= last_x);
         last_x = x;
       }

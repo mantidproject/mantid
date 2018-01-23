@@ -57,5 +57,6 @@ class Example1DFunction(IFunction1D):
             jacobian.set(i,1,x)
             i += 1
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(Example1DFunction)

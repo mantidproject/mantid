@@ -66,5 +66,6 @@ class NormaliseSpectra(DataProcessorAlgorithm):
         self._input_ws = mtd[self._input_ws_name]
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(NormaliseSpectra)

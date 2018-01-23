@@ -45,7 +45,6 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
     output_workspace = reduction_alg.getProperty("OutputWorkspace").value
     output_workspace_count = reduction_alg.getProperty("SumOfCounts").value
     output_workspace_norm = reduction_alg.getProperty("SumOfNormFactors").value
-
     # Pull the result out of the workspace
     output_bundle = OutputBundle(state=reduction_setting_bundle.state,
                                  data_type=reduction_setting_bundle.data_type,

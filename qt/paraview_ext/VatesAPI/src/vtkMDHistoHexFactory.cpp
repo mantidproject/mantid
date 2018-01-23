@@ -105,8 +105,8 @@ struct PointsWorker {
     incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
     incrementZ = (maxZ - minZ) / static_cast<coord_t>(nBinsZ);
 
-    nPointsX = nBinsX + 1;
-    nPointsY = nBinsY + 1;
+    nPointsX = static_cast<int>(ws.getXDimension()->getNBoundaries());
+    nPointsY = static_cast<int>(ws.getYDimension()->getNBoundaries());
   }
   void operator()(vtkIdType begin, vtkIdType end) {
     float in[3];
@@ -218,9 +218,12 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   progress.eventRaised(0.33);
 
   vtkNew<vtkPoints> points;
-  const vtkIdType nPointsX = nBinsX + 1;
-  const vtkIdType nPointsY = nBinsY + 1;
-  const vtkIdType nPointsZ = nBinsZ + 1;
+  const vtkIdType nPointsX =
+      static_cast<int>(m_workspace->getXDimension()->getNBoundaries());
+  const vtkIdType nPointsY =
+      static_cast<int>(m_workspace->getYDimension()->getNBoundaries());
+  const vtkIdType nPointsZ =
+      static_cast<int>(m_workspace->getZDimension()->getNBoundaries());
   points->SetNumberOfPoints(nPointsX * nPointsY * nPointsZ);
 
   PointsWorker ptsfunc(*m_workspace, points.GetPointer());

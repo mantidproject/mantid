@@ -9,6 +9,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 #    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
+  src/Exports/AlgorithmObserver.cpp
   src/Exports/AlgorithmProxy.cpp
   src/Exports/AlgorithmHistory.cpp
   src/Exports/CatalogManager.cpp
@@ -75,6 +76,7 @@ set ( EXPORT_FILES
   src/Exports/Projection.cpp
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
+  src/Exports/MultiDomainFunction.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
@@ -143,6 +145,7 @@ target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTI
             PythonGeometryModule
             PythonKernelModule
             API
+	    Types
             Kernel
             HistogramData
             Geometry

@@ -164,10 +164,8 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
         nullptr, certificateHandler, context);
 
     // Session takes ownership of socket
-    Poco::Net::SecureStreamSocket *socket =
-        new Poco::Net::SecureStreamSocket(context);
-    Poco::Net::HTTPSClientSession session(*socket);
-    socket = nullptr;
+    Poco::Net::SecureStreamSocket socket{context};
+    Poco::Net::HTTPSClientSession session{socket};
     session.setHost(uri.getHost());
     session.setPort(uri.getPort());
 
@@ -215,12 +213,6 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
   // I have opted to catch the exception and do nothing as this allows the
   // load/download functionality to work.
   // However, the port the user used to download the file will be left open.
-  //
-  // In addition, there's a crash when destructing SecureSocketImpl (internal to
-  // SecureSocketStream, which is
-  // created and destroyed by HTTPSClientSession). We avoid that crash by
-  // instantiating SecureSocketStream
-  // ourselves and passing it to the HTTPSClientSession, which takes ownership.
   catch (Poco::Exception &error) {
     throw std::runtime_error(error.displayText());
   }

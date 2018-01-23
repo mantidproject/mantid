@@ -10,12 +10,10 @@
 #include <utility>
 #include <unordered_set>
 
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
-using Mantid::Kernel::ProxyInfo;
-using Mantid::Kernel::NetworkProxy;
 
 // from poco
 #include <Poco/Path.h>
@@ -1318,7 +1316,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
 
   // g_log.debug() << "SetAutoUpdate... begin\n";
   try {
-    BOOST_FOREACH (auto &path, files_to_update) {
+    for (auto &path : files_to_update) {
       RepositoryEntry &entry = repo.at(path);
       entry.auto_update = option;
       updateLocalJson(path, entry); // TODO: update local json without opening

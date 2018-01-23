@@ -71,7 +71,7 @@ class FitDialog : public API::AlgorithmDialog {
 
 public:
   /// Default constructor
-  FitDialog(QWidget *parent = NULL);
+  FitDialog(QWidget *parent = nullptr);
 
 private slots:
   /// Override the help button clicked method

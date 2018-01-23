@@ -93,7 +93,7 @@ struct MandatoryFirst {
   /// in the list
   bool operator()(const Property *p1, const Property *p2) const {
     // this is false, unless p1 is not valid and p2 is valid
-    return (p1->isValid() != "") && (p2->isValid() == "");
+    return (!p1->isValid().empty()) && (p2->isValid().empty());
   }
 };
 
@@ -169,6 +169,25 @@ object getOutputProperties(IAlgorithm &self) {
   ToPyString toPyStr;
   for (const auto &p : properties) {
     if (p->direction() == Direction::Output) {
+      names.append(handle<>(toPyStr(p->name())));
+    }
+  }
+  return names;
+}
+
+/**
+ * Returns a list of inout property names in the order they were declared
+ * @param self :: A pointer to the python object wrapping and Algorithm.
+ * @return A Python list of strings
+ */
+object getInOutProperties(IAlgorithm &self) {
+  const PropertyVector &properties(self.getProperties()); // No copy
+
+  Environment::GlobalInterpreterLock gil;
+  list names;
+  ToPyString toPyStr;
+  for (const auto &p : properties) {
+    if (p->direction() == Direction::InOut) {
       names.append(handle<>(toPyStr(p->name())));
     }
   }
@@ -374,6 +393,8 @@ void export_ialgorithm() {
            "optional ones.")
       .def("outputProperties", &getOutputProperties, arg("self"),
            "Returns a list of the output properties on the algorithm")
+      .def("inoutProperties", &getInOutProperties, arg("self"),
+           "Returns a list of the inout properties on the algorithm")
       .def("isInitialized", &IAlgorithm::isInitialized, arg("self"),
            "Returns True if the algorithm is initialized, False otherwise")
       .def("isExecuted", &IAlgorithm::isExecuted, arg("self"),

@@ -96,6 +96,7 @@ _translations = {
     'John Hill'               : 'Hill, John',
     'Ian Bush'                : 'Bush, Ian',
     'Steven Hahn'             : 'Hahn, Steven',
+    'Steven E. Hahn'          : 'Hahn, Steven',
     'Joachim Wuttke (o)'      : 'Wuttke, Joachim',
     'DiegoMonserrat'          : 'Monserrat, Diego',
     'Diego Monserrat'         : 'Monserrat, Diego',
@@ -147,7 +148,17 @@ _translations = {
     'Tasev'                   : 'Tasev, Dimitar',
     'Mayer Alexandra'         : 'Mayer, Alexandra',
     'simonfernandes'          : 'Fernandes, Simon',
-    'Simon Fernandes'         : 'Fernandes, Simon'
+    'Simon Fernandes'         : 'Fernandes, Simon',
+    'brandonhewer'            : 'Hewer, Brandon',
+    'Brandon Hewer'            : 'Hewer, Brandon',
+    'Thomas Lohnert'          : 'Lohnert, Thomas',
+    'James Tricker'           : 'Tricker, James',
+    'Matthew Bowles'          : 'Bowles, Matthew',
+    'josephframsay'           : 'Ramsay, Joseph F.',
+    'Joseph Ramsay'           : 'Ramsay, Joseph F.',
+    'Adam Washington'         : 'Wahington, Adam',
+    'Edward Brown'            : 'Brown, Edward',
+    'Matthew Andrew'          : 'Andrew, Matthew'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

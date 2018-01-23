@@ -76,5 +76,6 @@ class SetDetScale(PythonAlgorithm):
         for dList in listParse:
             api.SetInstrumentParameter(Workspace=ws,ParameterType="Number",**dList)
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SetDetScale)

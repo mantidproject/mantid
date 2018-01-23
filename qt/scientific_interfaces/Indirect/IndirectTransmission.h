@@ -42,7 +42,7 @@ class DLLExport IndirectTransmission : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  IndirectTransmission(IndirectDataReduction *idrUI, QWidget *parent = 0);
+  IndirectTransmission(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
   ~IndirectTransmission() override;
 
   void setup() override;

@@ -49,8 +49,8 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void
-  start(const Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(const Types::Core::DateAndTime startTime =
+                 Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   ILiveListener::RunStatus runStatus() override;
@@ -104,7 +104,7 @@ private:
       return false;
     if (m_instrumentName.empty())
       return false;
-    if (m_dataStartTime == Kernel::DateAndTime())
+    if (m_dataStartTime == Types::Core::DateAndTime())
       return false;
 
     return haveRequiredLogs();
@@ -114,7 +114,7 @@ private:
   bool haveRequiredLogs();
 
   void appendEvent(const uint32_t pixelId, const double tof,
-                   const Mantid::Kernel::DateAndTime pulseTime);
+                   const Mantid::Types::Core::DateAndTime pulseTime);
   // tof is "Time Of Flight" and is in units of microsecondss relative to the
   // start of the pulse
   // (There's some documentation that says nanoseconds, but Russell Taylor
@@ -154,14 +154,14 @@ private:
   bool m_stopThread{false}; // background thread checks this periodically.
                             // If true, the thread exits
 
-  Kernel::DateAndTime m_startTime; // The requested start time for the data
-                                   // stream (needed by the run() function)
+  Types::Core::DateAndTime m_startTime; // The requested start time for the data
+                                        // stream (needed by the run() function)
 
   // Used to initialize the scan_index property if we haven't received a packet
   // with the 'real' value by the time we call initWorkspacePart2.  (We can't
   // delay the call to initWorkspacePart2 because we might never receive a
   // 'real' value for that property.
-  Kernel::DateAndTime m_dataStartTime;
+  Types::Core::DateAndTime m_dataStartTime;
 
   // These 2 determine whether or not we filter out events that arrive when
   // the run is paused.

@@ -4,6 +4,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
 #include <boost/shared_ptr.hpp>
@@ -58,7 +59,7 @@ public:
   Mantid::detid_t detID;  ///< Detector ID
   Mantid::Kernel::V3D position;  ///< Detector position
   Mantid::Kernel::Quat rotation; ///< Detector orientation
-  boost::shared_ptr<const Mantid::Geometry::Object>
+  boost::shared_ptr<const Mantid::Geometry::IObject>
       shape;                       ///< Shape of the detector
   Mantid::Kernel::V3D scaleFactor; ///< Detector's scale factor
 };
@@ -91,7 +92,7 @@ public:
 
   /** @name Implemented public virtual methods */
   //@{
-  void componentSelected(Mantid::Geometry::ComponentID = NULL) override;
+  void componentSelected(Mantid::Geometry::ComponentID = nullptr) override;
   void getSelectedDetectors(QList<int> &dets) override;
   void getMaskedDetectors(QList<int> &dets) const override;
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);

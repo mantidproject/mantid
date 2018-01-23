@@ -197,7 +197,7 @@ public:
     for (size_t i = 0; i < sparseWS->getNumberHistograms(); ++i) {
       auto &ys = sparseWS->mutableY(i);
       auto &es = sparseWS->mutableE(i);
-      for (size_t j = 0; j < sparseWS->blocksize(); ++j) {
+      for (size_t j = 0; j < ys.size(); ++j) {
         ys[j] = static_cast<double>(i);
         es[j] = std::sqrt(ys[j]);
       }

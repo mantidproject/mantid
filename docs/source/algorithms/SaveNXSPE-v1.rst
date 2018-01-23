@@ -48,16 +48,16 @@ Usage
    # By desigghn, SaveMXSPE does not store detector's ID-s. LoadNXSPE sets detector's ID-s to defaults.
    # To compare loaded and saved workspaces here, one needs to set-up default detector's ID-s to the source workspace.
    nSpec = out_ws.getNumberHistograms()
-   for i in xrange(0,nSpec):
+   for i in range(0,nSpec):
        sp=out_ws.getSpectrum(i);
        sp.setDetectorID(i+1);
    in_ws = LoadNXSPE(file_path)
    
    ws_comparison_rez = CompareWorkspaces(out_ws,in_ws,1.e-9,CheckInstrument=False)
-   print "Contents of the first spectrum = " + str(in_ws.readY(0)) + "."
-   print "Initial and loaded workspaces comparison is:",str(ws_comparison_rez[0])
+   print("Contents of the first spectrum = {}.".format(in_ws.readY(0)))
+   print("Initial and loaded workspaces comparison is: {}".format(str(ws_comparison_rez[0])))
    run = in_ws.getRun();
-   print "Loaded workspace has attached incident energy Ei={0:5} and rotation angle Psi={1:5}deg".format(run.getLogData('Ei').value,run.getLogData('psi').value)
+   print("Loaded workspace has attached incident energy Ei={0:.1f} and rotation angle Psi= {1:.1f}deg".format(run.getLogData('Ei').value,run.getLogData('psi').value))
    
 
 .. testcleanup:: ExSimpleSavingRoundtrip

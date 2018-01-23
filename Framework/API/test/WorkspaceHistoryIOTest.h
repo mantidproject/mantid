@@ -13,6 +13,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class WorkspaceHistoryIOTest : public CxxTest::TestSuite {
 private:

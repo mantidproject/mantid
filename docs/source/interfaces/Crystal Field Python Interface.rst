@@ -58,7 +58,7 @@ Which can also be used to query the value of a parameter::
 Calculating the Eigensystem
 ---------------------------
 
-`CrystalFiled` class has methods to calculate the Hamiltonian and its eigensystem::
+`CrystalField` class has methods to calculate the Hamiltonian and its eigensystem::
 
   # Calculate and return the Hamiltonian matrix as a 2D numpy array.
   h = cf.getHamiltonian()
@@ -339,24 +339,6 @@ was initially a scalar value but is then redefined to be a list or vice versa), 
 `FWHM` and `peaks` parameters are cleared. Any crystal field parameters previously defined will be retained, however.
 
 
-Multiple Ions
--------------
-
-If there are multiple ions define `CrystalField` objects for each ion separately then add them together::
-
-    params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
-              'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
-    cf1 = CrystalField('Ce', 'C2v', **params)
-    cf2 = CrystalField('Pr', 'C2v', **params)
-    cf = cf1 + cf2
-
-The expression that combines the `CrystalField` objects also defines the contributions of each site into the overall intensity.
-The higher the coefficient of the object in the expression the higher its relative contribution. For example::
-
-    cf = 2*cf1 + cf2
-
-means that the intensity of `cf1` should be twice that of `cf2`.
-
 Fitting
 -------
 
@@ -366,15 +348,102 @@ instance (object) of the `CrystalFieldFit` class::
     from CrystalField import CrystalFieldFit
     # In case of a single spectrum (ws is a workspace)
     fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
-    
+
     # Or for multiple spectra
     fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2])
-    
+
 Then call `fit()` method::
 
     fit.fit()
-    
+
 After fitting finishes the `CrystalField` object updates automatically and contains new fitted parameter values.
+
+
+Multiple Ions
+-------------
+
+If there are multiple ions you can define `CrystalField` objects for each ion separately then add them together to
+create a CrystalFieldMultiSite object::
+
+    params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
+              'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
+    cf1 = CrystalField('Ce', 'C2v', **params)
+    cf2 = CrystalField('Pr', 'C2v', **params)
+    cfms = cf1 + cf2
+
+The expression that combines the `CrystalField` objects also defines the contributions of each site into the overall intensity.
+The higher the coefficient of the object in the expression the higher its relative contribution. For example::
+
+    cf = 2*cf1 + cf2
+
+means that the intensity of `cf1` should be twice that of `cf2`.
+
+Alternatively, you can create a `CrystalFieldMultiSite` object directly. This takes Ions, Symmetries, Temperatures and peak widths as lists::
+
+    cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1])
+
+To access parameters of a CrystalFieldMultiSite object, prefix with the ion index::
+
+    cfms['ion0.B40'] = -0.031
+    cfms['ion1.B20'] = 0.37737
+    b = cfms['ion0.B22']
+
+
+Parameters can be set when creating the object by passing in a dictionary using the `parameters` keyword::
+
+    cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1],
+                                 parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
+                                               'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
+
+A background can also be set this way, or using `cfms.background.` It can be passed as a string, a Function object(s), or a 
+CompositeFunction object::
+
+    cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHMs=[1.0],
+                              Background='name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0')
+
+    cfms = CrystalFieldMultiSite(Ions=['Ce'], Symmetries=['C2v'], Temperatures=[50], FWHMs=[0.9],
+                                   Background=LinearBackground(A0=1.0), BackgroundPeak=Gaussian(Height=10, Sigma=0.3))
+
+    cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHMs=[1.0],
+                                   Background= Gaussian(PeakCentre=1) + LinearBackground())
+
+Ties and constraints are set similiarly to `CrystalField` objects. `f` prefixes have been changed to be more descriptive::
+
+    cfms = CrystalFieldMultiSite(Ions=['Ce','Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
+                                   Background=FlatBackground(), BackgroundPeak=Gaussian(Height=10, Sigma=0.3),
+                                   parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
+                                               'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
+    cfms.ties({'sp0.bg.f0.Height': 10.1})
+    cfms.constraints('sp0.bg.f0.Sigma > 0.1')
+    cfms.constraints('ion0.sp0.pk1.FWHM < 2.2')
+    cfms.ties({'ion0.sp1.pk2.FWHM': '2*ion0.sp1.pk1.FWHM', 'ion1.sp1.pk3.FWHM': '2*ion1.sp1.pk2.FWHM'})
+
+When fitting, all parameters are assumed to be free. Parameters must be fixed explicitly. Fitting example::
+
+    cf = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0, 50.0],
+                                    FWHMs=[1.0, 1.0], ToleranceIntensity=6.0, ToleranceEnergy=1.0,  FixAllPeaks=True,
+                                   parameters=params)
+
+    cf.fix('ion0.BmolX', 'ion0.BmolY', 'ion0.BmolZ', 'ion0.BextX', 'ion0.BextY', 'ion0.BextZ', 'ion0.B40',
+           'ion0.B42', 'ion0.B44', 'ion0.B60', 'ion0.B62', 'ion0.B64', 'ion0.B66', 'ion0.IntensityScaling',
+           'ion1.BmolX', 'ion1.BmolY', 'ion1.BmolZ', 'ion1.BextX', 'ion1.BextY', 'ion1.BextZ', 'ion1.B40',
+           'ion1.B42', 'ion1.B44', 'ion1.B60', 'ion1.B62', 'ion1.B64', 'ion1.B66', 'ion1.IntensityScaling',
+           'sp0.IntensityScaling', 'sp1.IntensityScaling')
+
+    chi2 = CalculateChiSquared(str(cf.function), InputWorkspace=ws1, InputWorkspace_1=ws2)[1]
+
+    fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2], MaxIterations=10)
+    fit.fit()
+
+Calculating a spectrum can be done with `CrystalFieldMultiSite` in the same way as a `CrystalField` object.
+
+CrystalFieldMultiSite can also be used in the single-site case to use the `CrystalFieldFunction` fitting function. It
+can be used like a `CrystalField` object in this way, although `Temperatures` and `FWHMs` must still be passed as lists::
+
+    cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.0], PeakShape='Gaussian',
+                                     BmolX=1.0, B40=-0.02)
+
+
 
 Finding Initial Parameters
 --------------------------

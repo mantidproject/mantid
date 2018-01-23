@@ -25,6 +25,11 @@ class StateReductionModeTest(unittest.TestCase):
         state.detector_names[DetectorType.to_string(DetectorType.LAB)] = "Test1"
         state.detector_names[DetectorType.to_string(DetectorType.HAB)] = "Test2"
 
+        state.merge_mask = True
+        state.merge_min = 78.89
+        state.merge_max = 56.4
+
+
         # Assert
         merge_strategy = state.get_merge_strategy()
         self.assertTrue(merge_strategy[0] is ISISReductionMode.LAB)
@@ -70,6 +75,13 @@ class StateReductionModeBuilderTest(unittest.TestCase):
         builder.set_merge_shift(merge_shift)
         builder.set_merge_scale(merge_scale)
 
+        merge_mask = True
+        merge_min = 12.23
+        merge_max = 45.89
+        builder.set_merge_mask(merge_mask)
+        builder.set_merge_min(merge_min)
+        builder.set_merge_max(merge_max)
+
         state = builder.build()
 
         # Assert
@@ -80,6 +92,9 @@ class StateReductionModeBuilderTest(unittest.TestCase):
         self.assertTrue(state.merge_scale == merge_scale)
         detector_names = state.detector_names
         self.assertTrue(detector_names[DetectorType.to_string(DetectorType.LAB)] == "main-detector-bank")
+        self.assertTrue(state.merge_mask)
+        self.assertTrue(state.merge_min == merge_min)
+        self.assertTrue(state.merge_max == merge_max)
 
 
 if __name__ == '__main__':

@@ -279,4 +279,5 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
         else:
             Logger(__file__).error("Could not find output directory")
 
+
 AlgorithmFactory.subscribe(EQSANSDirectBeamTransmission)

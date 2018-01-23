@@ -1,16 +1,16 @@
 #ifndef MANTID_KERNEL_LISTVALIDATOR_H_
 #define MANTID_KERNEL_LISTVALIDATOR_H_
 
-#include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/TypedValidator.h"
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #endif
-#include <vector>
-#include <set>
 #include <map>
+#include <set>
 #include <unordered_set>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -48,39 +48,12 @@ public:
   ListValidator() : TypedValidator<TYPE>(), m_allowMultiSelection(false) {}
 
   /** Constructor
-   *  @param values :: A set of values consisting of the valid values
-   *  @param allowMultiSelection :: True if the list allows multi selection
-   */
-  explicit ListValidator(const std::set<TYPE> &values,
-                         const bool allowMultiSelection = false)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_allowMultiSelection(allowMultiSelection) {
-    if (m_allowMultiSelection) {
-      throw Kernel::Exception::NotImplementedError(
-          "The List Validator does not support Multi selection yet");
-    }
-  }
-
-  /** Constructor
-   *  @param values :: An unordered set of values consisting of the valid values
-   *  @param allowMultiSelection :: True if the list allows multi selection
-   */
-  explicit ListValidator(const std::unordered_set<TYPE> &values,
-                         const bool allowMultiSelection = false)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_allowMultiSelection(allowMultiSelection) {
-    if (m_allowMultiSelection) {
-      throw Kernel::Exception::NotImplementedError(
-          "The List Validator does not support Multi selection yet");
-    }
-  }
-
-  /** Constructor
-   *  @param values :: A vector of the valid values
+   *  @param values :: An iterable type of the valid values
    *  @param aliases :: Optional aliases for the valid values.
    *  @param allowMultiSelection :: True if the list allows multi selection
    */
-  explicit ListValidator(const std::vector<TYPE> &values,
+  template <typename T>
+  explicit ListValidator(const T &values,
                          const std::map<std::string, std::string> &aliases =
                              std::map<std::string, std::string>(),
                          const bool allowMultiSelection = false)
@@ -97,11 +70,12 @@ public:
                                     aliasIt->second);
         if (m_allowMultiSelection) {
           throw Kernel::Exception::NotImplementedError(
-              "The List Validator does not support Multi selection yet");
+              "The List Validator does not support multi selection yet");
         }
       }
     }
   }
+
   /// Clone the validator
   IValidator_sptr clone() const override {
     return boost::make_shared<ListValidator<TYPE>>(*this);

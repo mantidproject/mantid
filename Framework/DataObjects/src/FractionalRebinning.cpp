@@ -35,7 +35,7 @@ bool getIntersectionRegion(MatrixWorkspace_const_sptr outputWS,
                            const std::vector<double> &verticalAxis,
                            const Quadrilateral &inputQ, size_t &qstart,
                            size_t &qend, size_t &x_start, size_t &x_end) {
-  const MantidVec &xAxis = outputWS->readX(0);
+  const auto &xAxis = outputWS->x(0);
   const double xn_lo(inputQ.minX()), xn_hi(inputQ.maxX());
   const double yn_lo(inputQ.minY()), yn_hi(inputQ.maxY());
 
@@ -81,13 +81,13 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
                      boost::shared_ptr<Progress> progress) {
   for (int64_t i = 0; i < static_cast<int64_t>(outputWS->getNumberHistograms());
        ++i) {
-    MantidVec &outputY = outputWS->dataY(i);
-    MantidVec &outputE = outputWS->dataE(i);
-    for (size_t j = 0; j < outputWS->blocksize(); ++j) {
+    const auto &outputX = outputWS->x(i);
+    auto &outputY = outputWS->mutableY(i);
+    auto &outputE = outputWS->mutableE(i);
+    for (size_t j = 0; j < outputY.size(); ++j) {
       if (progress)
         progress->report("Calculating errors");
-      const double binWidth =
-          (outputWS->readX(i)[j + 1] - outputWS->readX(i)[j]);
+      const double binWidth = outputX[j + 1] - outputX[j];
       double eValue = std::sqrt(outputE[j]);
       // Don't do this for a RebinnedOutput workspace. The fractions
       // take care of such things.
@@ -116,15 +116,15 @@ void rebinToOutput(const Quadrilateral &inputQ,
                    MatrixWorkspace_const_sptr inputWS, const size_t i,
                    const size_t j, MatrixWorkspace_sptr outputWS,
                    const std::vector<double> &verticalAxis) {
-  const MantidVec &X = outputWS->readX(0);
+  const auto &X = outputWS->x(0);
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
   if (!getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend,
                              x_start, x_end))
     return;
 
-  const auto &inY = inputWS->readY(i);
-  const auto &inE = inputWS->readE(i);
+  const auto &inY = inputWS->y(i);
+  const auto &inE = inputWS->e(i);
   // It seems to be more efficient to construct this once and clear it before
   // each calculation
   // in the loop
@@ -156,8 +156,8 @@ void rebinToOutput(const Quadrilateral &inputQ,
         }
         eValue = eValue * eValue;
         PARALLEL_CRITICAL(overlap_sum) {
-          outputWS->dataY(y)[xi] += yValue;
-          outputWS->dataE(y)[xi] += eValue;
+          outputWS->mutableY(y)[xi] += yValue;
+          outputWS->mutableE(y)[xi] += eValue;
         }
       }
     }
@@ -179,16 +179,16 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              MatrixWorkspace_const_sptr inputWS, const size_t i,
                              const size_t j, RebinnedOutput_sptr outputWS,
                              const std::vector<double> &verticalAxis) {
-  const MantidVec &X = outputWS->readX(0);
+  const auto &X = outputWS->x(0);
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
   if (!getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend,
                              x_start, x_end))
     return;
 
-  const auto &inX = inputWS->readX(i);
-  const auto &inY = inputWS->readY(i);
-  const auto &inE = inputWS->readE(i);
+  const auto &inX = inputWS->x(i);
+  const auto &inY = inputWS->y(i);
+  const auto &inE = inputWS->e(i);
   // Don't do the overlap removal if already RebinnedOutput.
   // This wreaks havoc on the data.
   const bool removeBinWidth(inputWS->isDistribution() &&
@@ -226,8 +226,8 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
         }
         eValue *= eValue;
         PARALLEL_CRITICAL(overlap) {
-          outputWS->dataY(yi)[xi] += yValue;
-          outputWS->dataE(yi)[xi] += eValue;
+          outputWS->mutableY(yi)[xi] += yValue;
+          outputWS->mutableE(yi)[xi] += eValue;
           outputWS->dataF(yi)[xi] += weight;
         }
       }

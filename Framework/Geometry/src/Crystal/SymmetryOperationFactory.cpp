@@ -32,6 +32,7 @@ SymmetryOperationFactoryImpl::createSymOps(const std::string &identifiers) {
 std::vector<SymmetryOperation> SymmetryOperationFactoryImpl::createSymOps(
     const std::vector<std::string> &identifiers) {
   std::vector<SymmetryOperation> symOps;
+  symOps.reserve(identifiers.size());
   for (const auto &identifier : identifiers) {
     symOps.push_back(createSymOp(boost::trim_copy(identifier)));
   }

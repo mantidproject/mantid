@@ -15,7 +15,7 @@
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::LogFilterGenerator;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::LogFilter;
 using Mantid::Kernel::TimeSeriesProperty;
 

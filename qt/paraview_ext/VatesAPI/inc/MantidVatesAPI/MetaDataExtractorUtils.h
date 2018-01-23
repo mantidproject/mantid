@@ -3,7 +3,6 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include <qwt_double_interval.h>
 #include <string>
 
 /**

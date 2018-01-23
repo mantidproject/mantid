@@ -8,7 +8,7 @@
 #include "ReflGenericDataProcessorPresenterFactory.h"
 #include "ReflRunsTabPresenter.h"
 #include "ReflSearchModel.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
@@ -51,20 +51,24 @@ void QtReflRunsTabView::initLayout() {
   ReflGenericDataProcessorPresenterFactory presenterFactory;
 
   QDataProcessorWidget *qDataProcessorWidget_1 = new QDataProcessorWidget(
-      std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
+      std::unique_ptr<DataProcessor::DataProcessorPresenter>(
+          presenterFactory.create()),
+      this);
   ui.toolbox->addItem(qDataProcessorWidget_1, "Group 1");
   connect(qDataProcessorWidget_1,
           SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
   QDataProcessorWidget *qDataProcessorWidget_2 = new QDataProcessorWidget(
-      std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
+      std::unique_ptr<DataProcessor::DataProcessorPresenter>(
+          presenterFactory.create()),
+      this);
   ui.toolbox->addItem(qDataProcessorWidget_2, "Group 2");
   connect(qDataProcessorWidget_2,
           SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
-  std::vector<DataProcessorPresenter *> processingWidgets;
+  std::vector<DataProcessor::DataProcessorPresenter *> processingWidgets;
   processingWidgets.push_back(qDataProcessorWidget_1->getPresenter());
   processingWidgets.push_back(qDataProcessorWidget_2->getPresenter());
 
@@ -114,10 +118,10 @@ void QtReflRunsTabView::initLayout() {
 * @param command : [input] The command (action) to add
 */
 void QtReflRunsTabView::addToMenu(QMenu *menu,
-                                  DataProcessorCommand_uptr command) {
+                                  DataProcessor::Command_uptr command) {
 
-  m_commands.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
-      menu, std::move(command)));
+  m_commands.push_back(
+      Mantid::Kernel::make_unique<QtCommandAdapter>(menu, std::move(command)));
 }
 
 /**
@@ -126,9 +130,8 @@ void QtReflRunsTabView::addToMenu(QMenu *menu,
 * "Reflectometry" menu
 */
 void QtReflRunsTabView::setTableCommands(
-    std::vector<DataProcessorCommand_uptr> tableCommands) {
+    std::vector<DataProcessor::Command_uptr> tableCommands) {
 
-  ui.menuTable->clear();
   for (auto &command : tableCommands) {
     addToMenu(ui.menuTable, std::move(command));
   }
@@ -145,9 +148,8 @@ void QtReflRunsTabView::setTableCommands(
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
 void QtReflRunsTabView::setRowCommands(
-    std::vector<DataProcessorCommand_uptr> rowCommands) {
+    std::vector<DataProcessor::Command_uptr> rowCommands) {
 
-  ui.menuRows->clear();
   for (auto &command : rowCommands) {
     addToMenu(ui.menuRows, std::move(command));
   }
@@ -164,16 +166,22 @@ void QtReflRunsTabView::setAllSearchRowsSelected() {
 /**
 * Clears all the actions (commands)
 */
-void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
+void QtReflRunsTabView::clearCommands() {
+  ui.menuRows->clear();
+  ui.menuTable->clear();
+  m_commands.clear();
+}
 
 /**
-* Sets a specific action in the "Edit" menu enabled or disabled
-* @param index : The index of the action in the "Edit" menu
-* @param enabled : Whether to enable or disable the action
+* Updates actions in the menus to be enabled or disabled
+* according to whether processing is running or not.
+* @param isProcessing: Whether processing is running
 */
-void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
+void QtReflRunsTabView::updateMenuEnabledState(bool isProcessing) {
 
-  ui.menuRows->actions()[index]->setEnabled(enabled);
+  for (auto &command : m_commands) {
+    command->updateEnabledState(isProcessing);
+  }
 }
 
 /**
@@ -183,6 +191,24 @@ void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
 void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
 
   ui.buttonAutoreduce->setEnabled(enabled);
+}
+
+/**
+* Sets the "Transfer" button enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setTransferButtonEnabled(bool enabled) {
+
+  ui.buttonTransfer->setEnabled(enabled);
+}
+
+/**
+* Sets the "Instrument" combo box enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
+
+  ui.comboSearchInstrument->setEnabled(enabled);
 }
 
 /**

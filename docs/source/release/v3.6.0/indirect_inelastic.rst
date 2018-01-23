@@ -71,7 +71,7 @@ Data Reduction
 ILL Energy Transfer
 ~~~~~~~~~~~~~~~~~~~
 
--  Changed :ref:`IndirectILLReduction <algm-IndirectILLReduction>` algorithm to support the new format for
+-  Changed `IndirectILLReduction <http://docs.mantidproject.org/v3.6.0/algorithms/IndirectILLReduction-v1.html>`_ algorithm to support the new format for
    raw ``.nxs`` files.
 
 Diffraction

@@ -729,7 +729,6 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_cen
 
     # loop over Pt. to sum for peak's intensity
     sum_intensity = 0.
-    error_2 = 0.
     used_pt_list = list()
 
     # raw intensity

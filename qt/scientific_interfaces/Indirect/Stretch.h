@@ -11,7 +11,7 @@ class DLLExport Stretch : public IndirectBayesTab {
   Q_OBJECT
 
 public:
-  Stretch(QWidget *parent = 0);
+  Stretch(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectBayesTab
   void setup() override;

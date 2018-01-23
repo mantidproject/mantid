@@ -125,7 +125,7 @@ public:
 
     // change the local download directory by adding a unittest subdirectory
     auto testDirectories = m_originalInstDir;
-    Poco::Path localDownloadPath(m_originalInstDir[0]);
+    Poco::Path localDownloadPath(Poco::Path::temp());
     localDownloadPath.pushDirectory(TEST_SUFFIX);
     m_localInstDir = localDownloadPath.toString();
     createDirectory(localDownloadPath);

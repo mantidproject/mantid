@@ -40,7 +40,7 @@ Usage
     # perform the algorithm
     SaveILLCosmosAscii(InputWorkspace=ws1,Filename=savefile)
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 .. testcleanup:: ExILLCosmosSimple
 

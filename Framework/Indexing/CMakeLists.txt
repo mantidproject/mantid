@@ -5,10 +5,12 @@ set ( SRC_FILES
 	src/LegacyConversion.cpp
 	src/Partitioner.cpp
 	src/RoundRobinPartitioner.cpp
+	src/Scatter.cpp
 	src/SpectrumNumberTranslator.cpp
 )
 
 set ( INC_FILES
+	inc/MantidIndexing/Conversion.h
 	inc/MantidIndexing/DetectorID.h
 	inc/MantidIndexing/DllConfig.h
 	inc/MantidIndexing/Extract.h
@@ -21,12 +23,14 @@ set ( INC_FILES
 	inc/MantidIndexing/PartitionIndex.h
 	inc/MantidIndexing/Partitioner.h
 	inc/MantidIndexing/RoundRobinPartitioner.h
+	inc/MantidIndexing/Scatter.h
 	inc/MantidIndexing/SpectrumIndexSet.h
 	inc/MantidIndexing/SpectrumNumber.h
 	inc/MantidIndexing/SpectrumNumberTranslator.h
 )
 
 set ( TEST_FILES
+	ConversionTest.h
 	DetectorIDTest.h
 	ExtractTest.h
 	GlobalSpectrumIndexTest.h
@@ -38,6 +42,7 @@ set ( TEST_FILES
 	PartitionIndexTest.h
 	PartitionerTest.h
 	RoundRobinPartitionerTest.h
+	ScatterTest.h
 	SpectrumIndexSetTest.h
 	SpectrumNumberTest.h
 	SpectrumNumberTranslatorTest.h

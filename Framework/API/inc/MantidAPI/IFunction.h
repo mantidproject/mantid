@@ -288,6 +288,8 @@ public:
     bool asBool() const;
     /// Returns bool value if attribute is a vector, throws exception otherwise
     std::vector<double> asVector() const;
+    /// Check if a string attribute is empty
+    bool isEmpty() const;
 
     /// Sets new value if attribute is a string
     void setString(const std::string &str);

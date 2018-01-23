@@ -83,8 +83,16 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 /// instrument.
 size_t DetectorInfo::size() const { return m_detectorIDs->size(); }
 
+/// Returns the size of DetectorInfo taking into account scanning, i.e., the sum
+/// of the number of scan points for every detector in the instrument.
+size_t DetectorInfo::scanSize() const { return m_detectorInfo->scanSize(); }
+
 /// Returns true if the beamline has scanning detectors.
 bool DetectorInfo::isScanning() const { return m_detectorInfo->isScanning(); }
+
+/// Returns true if the beamline has scanning detectors and they have all the
+/// same scan intervals.
+bool DetectorInfo::isSyncScan() const { return m_detectorInfo->isSyncScan(); }
 
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
@@ -320,8 +328,8 @@ size_t DetectorInfo::scanCount(const size_t index) const {
 /** Returns the scan interval of the detector with given index.
  *
  * The interval start and end values would typically correspond to nanoseconds
- * since 1990, as in Kernel::DateAndTime. */
-std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
+ * since 1990, as in Types::Core::DateAndTime. */
+std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
 DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
   const auto &interval = m_detectorInfo->scanInterval(index);
   return {interval.first, interval.second};
@@ -330,13 +338,14 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
 /** Set the scan interval of the detector with given detector index.
  *
  * The interval start and end values would typically correspond to nanoseconds
- * since 1990, as in Kernel::DateAndTime. Note that it is currently not possible
+ * since 1990, as in Types::Core::DateAndTime. Note that it is currently not
+ *possible
  * to modify scan intervals for a DetectorInfo with time-dependent detectors,
  * i.e., time intervals must be set with this method before merging individual
  * scans. */
 void DetectorInfo::setScanInterval(
-    const size_t index,
-    const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval) {
+    const size_t index, const std::pair<Types::Core::DateAndTime,
+                                        Types::Core::DateAndTime> &interval) {
   m_detectorInfo->setScanInterval(index, {interval.first.totalNanoseconds(),
                                           interval.second.totalNanoseconds()});
 }
@@ -345,8 +354,8 @@ void DetectorInfo::setScanInterval(
  *
  * Prefer this over setting intervals for individual detectors since it enables
  * internal performance optimization. See also overload for other details. */
-void DetectorInfo::setScanInterval(
-    const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval) {
+void DetectorInfo::setScanInterval(const std::pair<
+    Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
   m_detectorInfo->setScanInterval(
       {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
 }

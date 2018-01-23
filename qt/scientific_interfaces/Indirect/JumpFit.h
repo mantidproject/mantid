@@ -1,17 +1,19 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
+#include "IndirectFitAnalysisTab.h"
 #include "ui_JumpFit.h"
-#include "IndirectDataAnalysisTab.h"
+
+#include "MantidAPI/IFunction.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport JumpFit : public IndirectDataAnalysisTab {
+class DLLExport JumpFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
-  JumpFit(QWidget *parent = 0);
+  JumpFit(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectDataAnalysisTab
   void setup() override;
@@ -20,7 +22,7 @@ public:
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
 
-private slots:
+protected slots:
   /// Handle when the sample input is ready
   void handleSampleInputReady(const QString &filename);
   /// Slot to handle plotting a different spectrum of the workspace
@@ -28,47 +30,49 @@ private slots:
   /// Slot for when the range on the range selector changes
   void qRangeChanged(double min, double max);
   /// Slot to update the guides when the range properties change
-  void updateProperties(QtProperty *prop, double val);
+  void updateRS(QtProperty *prop, double val);
   /// Find all spectra with width data in the workspace
   void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
   /// Handles plotting results of algorithm on miniplot
-  void fitAlgDone(bool error);
+  void algorithmComplete(bool error) override;
   /// Handles a fit algorithm being selected
   void fitFunctionSelected(const QString &functionName);
   /// Generates the plot guess data
-  void generatePlotGuess();
-  /// Add the plot guess to the mini plot
-  void plotGuess(bool error);
+  void plotGuess();
   /// Handles plotting and saving
+  void updatePreviewPlots() override;
   void saveClicked();
   void plotClicked();
-  void plotCurrentPreview();
+
+protected:
+  /// Creates the algorithm to use in fitting.
+  Mantid::API::IAlgorithm_sptr
+  createFitAlgorithm(Mantid::API::IFunction_sptr func);
+
+  Mantid::API::IAlgorithm_sptr
+  processParametersAlgorithm(const std::string &parameterWSName,
+                             const std::string &resultWSName);
+
+  Mantid::API::IAlgorithm_sptr
+  deleteWorkspaceAlgorithm(const std::string &workspaceName);
+
+  Mantid::API::IAlgorithm_sptr
+  renameWorkspaceAlgorithm(const std::string &workspaceToRename,
+                           const std::string &newName);
 
 private:
-  /// Gets a list of parameter names for a given fit function
-  QStringList getFunctionParameters(const QString &functionName);
-
-  /// Generates the function string for fitting
-  std::string generateFunctionName(const QString &functionName);
-
-  /// Clears the mini plot of data excluding sample
-  void clearPlot();
-
-  /// Deletes Plot Guess Workspace after use
-  void deletePlotGuessWorkspaces(const bool &removePlotGuess);
+  void disablePlotGuess() override;
+  void enablePlotGuess() override;
 
   // The UI form
   Ui::JumpFit m_uiForm;
 
-  // Map of axis labels to spectrum number
+  /// Map of axis labels to spectrum number
   std::map<std::string, int> m_spectraList;
 
   QtTreePropertyBrowser *m_jfTree;
 
-  Mantid::API::IAlgorithm_sptr m_fitAlg;
-
-  Mantid::API::MatrixWorkspace_sptr m_jfInputWS;
-  int m_specNo;
+  std::string m_baseName;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

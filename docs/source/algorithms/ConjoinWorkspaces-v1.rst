@@ -81,14 +81,14 @@ Usage
 .. testcode:: ConjoinWorkspacesEx
 
     ws1 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, BinWidth=10, Xmax=50)
-    print("Number of spectra in first workspace = " +  str(ws1.getNumberHistograms()))
+    print("Number of spectra in first workspace = {}".format(ws1.getNumberHistograms()))
     ws2 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=3, BankPixelWidth=1, BinWidth=10, Xmax=50)
-    print("Number of spectra in second workspace = " +  str(ws2.getNumberHistograms()))
+    print("Number of spectra in second workspace = {}".format(ws2.getNumberHistograms()))
     ConjoinWorkspaces(InputWorkspace1=ws1, InputWorkspace2=ws2, CheckOverlapping=False, YAxisUnit="New unit", YAxisLabel="New label")
     ws = mtd['ws1'] # Have to update workspace from ADS, as it is an in-out parameter
-    print("Number of spectra after ConjoinWorkspaces = " + str(ws.getNumberHistograms()))
-    print("Y unit is " + ws.YUnit())
-    print("Y label " + ws.YUnitLabel())
+    print("Number of spectra after ConjoinWorkspaces = {}".format(ws.getNumberHistograms()))
+    print("Y unit is {}".format(ws.YUnit()))
+    print("Y label {}".format(ws.YUnitLabel()))
 
 Output:
 

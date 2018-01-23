@@ -55,7 +55,7 @@ class ConvertTableToMatrixWorkspaceDialog : public API::AlgorithmDialog {
 
 public:
   /// Default constructor
-  ConvertTableToMatrixWorkspaceDialog(QWidget *parent = NULL);
+  ConvertTableToMatrixWorkspaceDialog(QWidget *parent = nullptr);
 
 private slots:
   /// Update the column name widgets

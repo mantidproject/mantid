@@ -56,7 +56,7 @@ private:
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
 
-    Detector *det = new Detector("my-detector", 1, NULL);
+    Detector *det = new Detector("my-detector", 1, nullptr);
     det->setPos(20, (20 - sample->getPos().X()), 0);
     instrument->add(det);
     instrument->markAsDetector(det);

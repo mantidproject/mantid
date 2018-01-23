@@ -13,7 +13,6 @@
 
 using Mantid::Geometry::Group;
 using Mantid::Geometry::SpaceGroup;
-using Mantid::Geometry::SymmetryOperation;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(SpaceGroup)

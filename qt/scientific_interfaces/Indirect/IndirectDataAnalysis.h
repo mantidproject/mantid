@@ -4,12 +4,12 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectDataAnalysis.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IndirectTab.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_IndirectDataAnalysis.h"
 
-#include <Poco/NObserver.h>
 #include "MantidKernel/ConfigService.h"
+#include <Poco/NObserver.h>
 
 class DoubleEditorFactory;
 class QtCheckBoxFactory;
@@ -48,7 +48,7 @@ public:
   // This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
   /// Default Constructor
-  explicit IndirectDataAnalysis(QWidget *parent = 0);
+  explicit IndirectDataAnalysis(QWidget *parent = nullptr);
 
 private:
   /// Initialize the layout

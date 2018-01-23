@@ -42,10 +42,10 @@ void UserFitFunctionDialog::addFunction(const QString &op, bool brackets) {
   QTreeWidgetItem *item = selection.first();
   QTreeWidgetItem *parentItem = item->parent();
 
-  if (parentItem == NULL)
+  if (parentItem == nullptr)
     return; // this sould never happen, just in case
 
-  if (parentItem->parent() != NULL)
+  if (parentItem->parent() != nullptr)
     item = parentItem;
 
   // QTextCursor cursor = ui.teExpression->textCursor();

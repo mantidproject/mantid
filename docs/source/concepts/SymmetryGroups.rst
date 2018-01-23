@@ -88,11 +88,11 @@ As described above, the operations are represented using the Jones-faithful nota
 
     # This time the identifier is already normalized
     symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
-    print symOp.getIdentifier()
+    print(symOp.getIdentifier())
 
     # This is an example for an identifier that changes
     symOp = SymmetryOperationFactory.createSymOp("1/2+x,y,z")
-    print symOp.getIdentifier()
+    print(symOp.getIdentifier())
 
 Executing the above code yields the following output, which shows how the operation identifier is modified in some cases:
 
@@ -110,11 +110,11 @@ For ease of use with multiple symmetry operations it's also possible to create m
     # Create a list of symmetry operations
     symOps = SymmetryOperationFactory.createSymOps("x,y,-z; -x,-y,-z; z,x,y")
 
-    print "Number of operations:", len(symOps)
-    print "Operations:"
+    print("Number of operations: " + str(len(symOps)))
+    print("Operations:")
 
     for op in symOps:
-	print op.getIdentifier()
+       print(op.getIdentifier())
 
 This prints each identifier on a new line:
 
@@ -137,7 +137,7 @@ Symmetry operation objects can be used to transform coordinates or Miller indice
     coordinates = [0.3, 0.4, 0.5]
     coordinatesPrime = symOp.transformCoordinates(coordinates)
 
-    print "Transformed coordinates:", coordinatesPrime
+    print("Transformed coordinates: " + str(coordinatesPrime))
 
 This script generates a symmetry operation that is used in hexagonal coordinate systems and uses it to transform the given coordinates:
 
@@ -156,7 +156,7 @@ As transforming HKLs requires slightly different math, there is a special method
     hkl = [1, -1, 3]
     hklPrime = symOp.transformHKL(hkl)
 
-    print "Transformed hkl:", hklPrime
+    print("Transformed hkl: " + str(hklPrime))
 
 The above code will print the transformed Miller index triplet:
 
@@ -173,13 +173,13 @@ It's also possible to query the order of a symmetry operation. The next example 
     symOp = SymmetryOperationFactory.createSymOp("-y,x,z")
 
     k = symOp.getOrder()
-    print "Order of the symmetry operation:", k
+    print("Order of the symmetry operation: " + str(k))
 
     x = [0.3, 0.4, 0.5]
-    print "Original point: ["+(','.join(" %.1f"%c for c in x)).strip()+"]"
+    print("Original point: ["+(','.join(" %.1f"%c for c in x)).strip()+"]")
     for i in range(k):
         x = symOp.transformCoordinates(x)
-        print "After", i + 1, "application(s):", x
+        print("After {0} application(s): {1}".format(i + 1, x))
 
 .. testoutput :: ExSymmetryOperationOrder
 
@@ -204,9 +204,9 @@ Section 11.2 in the same book describes how to derive symmetry elements from mat
     symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
     element = SymmetryElementFactory.createSymElement(symOp)
 
-    print "The element corresponding to 'x,y,-z' has the following symbol:", element.getHMSymbol()
-    print "The mirror plane is perpendicular to:", element.getAxis()
-    print "Sense of rotation (or NoRotation):", element.getRotationSense()
+    print("The element corresponding to 'x,y,-z' has the following symbol: " + str(element.getHMSymbol()))
+    print("The mirror plane is perpendicular to: " + str(element.getAxis()))
+    print("Sense of rotation (or NoRotation): " + str(element.getRotationSense()))
 
 In this case, it's a mirror plane perpendicular to the :math:`z`-axis:
 
@@ -266,8 +266,8 @@ Combining the symmetry operations does not result into any new operations, so th
 
     group = Group("x,y,z; -x,-y,-z; -x,y,-z; x,-y,z")
 
-    print "Order of group:", group.getOrder()
-    print "Fulfills group axioms:", group.isGroup()
+    print("Order of group: " + str(group.getOrder()))
+    print("Fulfills group axioms: " + str(group.isGroup()))
 
 This code confirms what was demonstrated by the group table above, the specified set of symmetry operations fulfills the group axioms:
 
@@ -284,11 +284,11 @@ For more fine-grained information, the four axioms can also be checked separatel
 
     group = Group("x,y,z; -x,y,-z; x,-y,z")
 
-    print "Group axioms fulfilled:"
-    print "  1. Closure:", group.fulfillsAxiom(GroupAxiom.Closure)
-    print "  2. Associativity:", group.fulfillsAxiom(GroupAxiom.Associativity)
-    print "  3. Identity:", group.fulfillsAxiom(GroupAxiom.Identity)
-    print "  4. Inversion:", group.fulfillsAxiom(GroupAxiom.Inversion)
+    print("Group axioms fulfilled:")
+    print("  1. Closure: " + str(group.fulfillsAxiom(GroupAxiom.Closure)))
+    print("  2. Associativity: " + str(group.fulfillsAxiom(GroupAxiom.Associativity)))
+    print("  3. Identity: " + str(group.fulfillsAxiom(GroupAxiom.Identity)))
+    print("  4. Inversion: " + str(group.fulfillsAxiom(GroupAxiom.Inversion)))
 
 The code reveals that axioms 2 - 4 are fulfilled, but that the group is not closed:
 
@@ -308,11 +308,11 @@ Looking into the group table above shows the reason: The combination of a mirror
 
     group = Group("-x,-y,-z; -x,y,-z; x,-y,z")
 
-    print "Group axioms fulfilled:"
-    print "  1. Closure:", group.fulfillsAxiom(GroupAxiom.Closure)
-    print "  2. Associativity:", group.fulfillsAxiom(GroupAxiom.Associativity)
-    print "  3. Identity:", group.fulfillsAxiom(GroupAxiom.Identity)
-    print "  4. Inversion:", group.fulfillsAxiom(GroupAxiom.Inversion)
+    print("Group axioms fulfilled:")
+    print("  1. Closure: " + str(group.fulfillsAxiom(GroupAxiom.Closure)))
+    print("  2. Associativity: " + str(group.fulfillsAxiom(GroupAxiom.Associativity)))
+    print("  3. Identity: " + str(group.fulfillsAxiom(GroupAxiom.Identity)))
+    print("  4. Inversion: " + str(group.fulfillsAxiom(GroupAxiom.Inversion)))
 
 In contrast to removing the inversion, the group now also lacks an identity element:
 

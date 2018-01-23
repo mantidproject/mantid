@@ -55,8 +55,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         self.assertEquals(ws_DOS.getAxis(0).getUnit().unitID(), 'DeltaE_inWavenumber')
         self.assertEquals(ws_DOS.blocksize(), 200)
         # Checks that the Bose factor correction is ok.
-        dos_eplus = np.max(ws_DOS.readY(0)[range(100,200)])
-        dos_eminus = np.max(ws_DOS.readY(0)[range(0,100)])
+        dos_eplus = np.max(ws_DOS.readY(0)[100:200])
+        dos_eminus = np.max(ws_DOS.readY(0)[:100])
         self.assertAlmostEqual(dos_eplus, dos_eminus, places=1)
         # Check that unit conversion from cm^-1 to meV works and also that conversion to states/meV is done
         ws = self.convertToWavenumber(ws)

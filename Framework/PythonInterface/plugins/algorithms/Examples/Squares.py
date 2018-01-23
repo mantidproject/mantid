@@ -62,4 +62,5 @@ class Squares(PythonAlgorithm):
 
 #############################################################################################
 
+
 AlgorithmFactory.subscribe(Squares)

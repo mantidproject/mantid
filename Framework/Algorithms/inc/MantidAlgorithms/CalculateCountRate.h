@@ -79,7 +79,7 @@ protected: // for testing, actually private
   /// spurion search ranges (TOF or other units requested)
   double m_XRangeMin{0}, m_XRangeMax{0};
   /// experiment time ranges:
-  Kernel::DateAndTime m_TRangeMin{0}, m_TRangeMax{0};
+  Types::Core::DateAndTime m_TRangeMin{0}, m_TRangeMax{0};
   /// temporary workspace used to keep intermediate results
   DataObjects::EventWorkspace_sptr m_workingWS;
 

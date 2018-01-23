@@ -5,13 +5,16 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "DllOption.h"
 
+#include <QLineEdit>
+
 #include <map>
-#include <QtGui>
 #include <string>
 
 //------------------------------------------------------------------------------
 // Forward declaration
 //------------------------------------------------------------------------------
+class QLabel;
+
 namespace MantidQt {
 namespace MantidWidgets {
 /** HintingLineEdit : A QLineEdit widget providing autocompletion.
@@ -61,6 +64,9 @@ protected:
 protected slots:
   void updateHints(const QString &text);
   void hideHints();
+
+private:
+  static QPalette createFixedPalette();
 };
 } // namespace MantidWidgets
 } // namepsace MantidQt

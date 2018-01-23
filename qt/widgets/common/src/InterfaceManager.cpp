@@ -1,37 +1,40 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include <Poco/Environment.h>
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/InterfaceFactory.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/InterfaceFactory.h"
 #include "MantidQtWidgets/Common/GenericDialog.h"
+#include "MantidQtWidgets/Common/PluginLibraries.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/LibraryManager.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
 
+#include <Poco/Environment.h>
 #include <QStringList>
 
 using namespace MantidQt::API;
+using Mantid::Kernel::AbstractInstantiator;
 
 namespace {
 // static logger
 Mantid::Kernel::Logger g_log("InterfaceManager");
+
+// Load libraries once
+std::once_flag DLLS_LOADED;
 }
 
 // initialise VATES factory
 Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *
-    InterfaceManager::m_vatesGuiFactory = NULL;
+    InterfaceManager::m_vatesGuiFactory = nullptr;
 // initialise HelpWindow factory
 Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *
-    InterfaceManager::m_helpViewer = NULL;
+    InterfaceManager::m_helpViewer = nullptr;
 
 //----------------------------------
 // Public member functions
@@ -56,7 +59,7 @@ AlgorithmDialog *InterfaceManager::createDialog(
     bool forScript, const QHash<QString, QString> &presetValues,
     const QString &optionalMsg, const QStringList &enabled,
     const QStringList &disabled) {
-  AlgorithmDialog *dlg = NULL;
+  AlgorithmDialog *dlg = nullptr;
   if (AlgorithmDialogFactory::Instance().exists(alg->name() + "Dialog")) {
     g_log.debug() << "Creating a specialised dialog for " << alg->name()
                   << '\n';
@@ -73,8 +76,8 @@ AlgorithmDialog *InterfaceManager::createDialog(
   dlg->setAttribute(Qt::WA_DeleteOnClose, true);
 
   // Set the QDialog window flags to ensure the dialog ends up on top
-  Qt::WindowFlags flags = 0;
-  flags |= Qt::Window;
+  Qt::WindowFlags flags = nullptr;
+  flags |= Qt::Dialog;
   flags |= Qt::WindowCloseButtonHint;
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
@@ -137,12 +140,12 @@ AlgorithmDialog *InterfaceManager::createDialogFromName(
  */
 UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
                                                  QWidget *parent) {
-  UserSubWindow *user_win = NULL;
+  UserSubWindow *user_win = nullptr;
   std::string iname = interface_name.toStdString();
   try {
     user_win = UserSubWindowFactory::Instance().createUnwrapped(iname);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    user_win = NULL;
+    user_win = nullptr;
   }
   if (user_win) {
     g_log.debug() << "Created a specialised interface for " << iname << '\n';
@@ -177,25 +180,9 @@ QStringList InterfaceManager::getUserSubWindowKeys() const {
 /// Default Constructor
 InterfaceManager::InterfaceManager() {
   // Attempt to load libraries that may contain custom interface classes
-  const std::string libpath =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "mantidqt.plugins.directory");
-  if (!libpath.empty()) {
-    // Lazy loading. Avoid loading libraries every time a new instance is
-    // created.
-    static bool isLoaded;
-    if (!isLoaded) {
-      int nloaded =
-          Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-      if (nloaded == 0) {
-        g_log.warning() << "Unable to load Qt plugin libraries.\n"
-                        << "Please check that the 'mantidqt.plugins.directory' "
-                           "variable in the .properties file points to "
-                        << "the correct location.\n";
-      }
-      isLoaded = true;
-    }
-  }
+  std::call_once(DLLS_LOADED, []() {
+    loadPluginsFromCfgPath("mantidqt.plugins.directory");
+  });
 }
 
 /// Destructor
@@ -210,10 +197,12 @@ void InterfaceManager::registerVatesGuiFactory(
 Getter to determine if vates components have been installed.
 @return true if they are available.
 */
-bool InterfaceManager::hasVatesLibraries() { return NULL != m_vatesGuiFactory; }
+bool InterfaceManager::hasVatesLibraries() {
+  return nullptr != m_vatesGuiFactory;
+}
 
 VatesViewerInterface *InterfaceManager::createVatesSimpleGui() const {
-  if (m_vatesGuiFactory == NULL) {
+  if (m_vatesGuiFactory == nullptr) {
     g_log.error() << "InterfaceManager::createVatesSimpleGui is null. Mantid "
                      "Vates package is probably not installed.\n";
     throw Mantid::Kernel::Exception::NullPointerException(
@@ -234,7 +223,7 @@ void InterfaceManager::registerHelpWindowFactory(
 }
 
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
-  if (m_helpViewer == NULL) {
+  if (m_helpViewer == nullptr) {
     g_log.error("InterfaceManager::createHelpWindow is null.");
     throw Mantid::Kernel::Exception::NullPointerException(
         "InterfaceManager::createHelpWindow", "m_helpViewer");

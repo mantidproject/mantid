@@ -26,7 +26,7 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   using Mantid::Kernel::Logger;
 
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
-    g_log.debug() << "Running Python code:\n" << code.toAscii().data() << "\n";
+    g_log.debug() << "Running Python code:\n" << qPrintable(code) << "\n";
 
   if (no_output) {
     emit runAsPythonScript(code, true);
@@ -47,7 +47,9 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   QString tmpstring = tmp_file.fileName();
   tmp_file.close();
   QString code_to_run =
-      "import sys; sys.stdout = open(\"" + tmpstring + "\", 'w');\n" + code;
+      "from __future__ import (absolute_import, division, print_function)\n"
+      "import sys; sys.stdout = open(\"" +
+      tmpstring + "\", 'w');\n" + code;
   emit runAsPythonScript(code_to_run, true);
 
   // Now get the output
@@ -61,8 +63,8 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   // FIXME: Ticket-9217 - Commented out for the moment to try and get working
   // with clang
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
-    g_log.debug() << "Raw output from execution:\n"
-                  << tmpstring.toAscii().data() << "\n";
+    g_log.debug() << "Raw output from execution:\n" << qPrintable(tmpstring)
+                  << "\n";
   return tmpstring;
 }
 /** This Python helper function converts a list of strings into one

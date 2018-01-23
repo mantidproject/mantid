@@ -72,6 +72,38 @@ public:
                       1e-12);
     }
   }
+
+  void test_change_n() {
+    Polynomial pol;
+    pol.setAttributeValue("n", 3);
+    pol.setParameter("A0", 4.0);
+    pol.setParameter("A1", 3.0);
+    pol.setParameter("A2", 2.0);
+    pol.setParameter("A3", 1.0);
+    pol.setAttributeValue("n", 5);
+    TS_ASSERT_EQUALS(pol.getParameter(0), 4.0);
+    TS_ASSERT_EQUALS(pol.getParameter(1), 3.0);
+    TS_ASSERT_EQUALS(pol.getParameter(2), 2.0);
+    TS_ASSERT_EQUALS(pol.getParameter(3), 1.0);
+    TS_ASSERT_EQUALS(pol.getParameter(4), 0.0);
+    TS_ASSERT_EQUALS(pol.getParameter(5), 0.0);
+  }
+
+  void test_change_n_1() {
+    Polynomial pol;
+    pol.setAttributeValue("n", 5);
+    pol.setParameter("A0", 4.0);
+    pol.setParameter("A1", 3.0);
+    pol.setParameter("A2", 2.0);
+    pol.setParameter("A3", 1.0);
+    pol.setParameter("A4", -1.0);
+    pol.setParameter("A5", -2.0);
+    pol.setAttributeValue("n", 3);
+    TS_ASSERT_EQUALS(pol.getParameter(0), 4.0);
+    TS_ASSERT_EQUALS(pol.getParameter(1), 3.0);
+    TS_ASSERT_EQUALS(pol.getParameter(2), 2.0);
+    TS_ASSERT_EQUALS(pol.getParameter(3), 1.0);
+  }
 };
 
 #endif /* MANTID_CURVEFITTING_POLYNOMIALTEST_H_ */

@@ -88,4 +88,5 @@ class DakotaChiSquared(PythonAlgorithm):
         if len(soeName)==0:
             mantid.simpleapi.DeleteWorkspace(__soe.name())
 
+
 AlgorithmFactory.subscribe(DakotaChiSquared)

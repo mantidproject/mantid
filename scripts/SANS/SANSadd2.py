@@ -18,7 +18,7 @@ ADD_FILES_NEW_TEMPORARY = "AddFilesNewTempory"
 ADD_FILES_NEW_TEMPORARY_MONITORS = "AddFilesNewTempory_monitors"
 
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False,
+def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, # noqa: C901
              binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts=None):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
@@ -375,6 +375,7 @@ def _copyLog(lastPath, logFile, pathout):
         error = 'Error copying log file ' + logFile + ' to directory ' + pathout+'\n'
         print(error)
         logger.notice(error)
+
 
 if __name__ == '__main__':
     add_runs(('16183','16197'),'SANS2D','.nxs')

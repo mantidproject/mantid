@@ -59,7 +59,8 @@ public:
   enum WeightingMethod { NoWeighting, Instrumental, Statistical, Dataset };
   enum FitType { BuiltIn = 0, Plugin = 1, User = 2 };
 
-  Fit(ApplicationWindow *parent, Graph *g = 0, const QString &name = QString());
+  Fit(ApplicationWindow *parent, Graph *g = nullptr,
+      const QString &name = QString());
   Fit(ApplicationWindow *parent, Table *t, const QString &name = QString());
   ~Fit() override;
 

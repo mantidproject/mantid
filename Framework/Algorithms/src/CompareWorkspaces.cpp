@@ -23,6 +23,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareWorkspaces)
@@ -1177,6 +1178,22 @@ bool CompareWorkspaces::relErr(double x1, double x2, double errorVal) const {
     return (num > errorVal);
 
   return (num / den > errorVal);
+}
+
+Parallel::ExecutionMode CompareWorkspaces::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  using namespace Parallel;
+  if (storageModes.at("Workspace1") == StorageMode::Cloned) {
+    if (storageModes.at("Workspace2") == StorageMode::Cloned)
+      return getCorrespondingExecutionMode(StorageMode::Cloned);
+    if (storageModes.at("Workspace2") == StorageMode::MasterOnly)
+      return getCorrespondingExecutionMode(StorageMode::MasterOnly);
+  }
+  if (storageModes.at("Workspace1") == StorageMode::MasterOnly) {
+    if (storageModes.at("Workspace2") != StorageMode::Distributed)
+      return getCorrespondingExecutionMode(StorageMode::MasterOnly);
+  }
+  return ExecutionMode::Invalid;
 }
 
 } // namespace Algorithms

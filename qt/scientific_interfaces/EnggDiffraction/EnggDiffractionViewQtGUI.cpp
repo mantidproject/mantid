@@ -61,8 +61,6 @@ EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_fittingWidget(nullptr),
       m_currentInst("ENGINX"), m_splashMsg(nullptr), m_presenter(nullptr) {}
 
-EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
-
 void EnggDiffractionViewQtGUI::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
@@ -133,13 +131,13 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   if (m_uiTabCalib.MWRunFiles_new_vanadium_num->getUserInput()
           .toString()
           .isEmpty()) {
-    m_uiTabCalib.MWRunFiles_new_vanadium_num->setUserInput(
+    m_uiTabCalib.MWRunFiles_new_vanadium_num->setFileTextWithoutSearch(
         QString::fromStdString(vanadiumRun));
   }
   if (m_uiTabCalib.MWRunFiles_new_ceria_num->getUserInput()
           .toString()
           .isEmpty()) {
-    m_uiTabCalib.MWRunFiles_new_ceria_num->setUserInput(
+    m_uiTabCalib.MWRunFiles_new_ceria_num->setFileTextWithoutSearch(
         QString::fromStdString(ceriaRun));
   }
 
@@ -274,6 +272,7 @@ void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
 void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(g_settingsGroup));
+  auto fname = qs.fileName();
 
   m_ui.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
@@ -663,14 +662,6 @@ void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   }
 }
 
-void EnggDiffractionViewQtGUI::highlightRbNumber(bool isValid) {
-  if (!isValid) {
-    m_ui.label_RBNumber->setStyleSheet("background-color: red; color : white;");
-  } else {
-    m_ui.label_RBNumber->setStyleSheet("background-color: white");
-  }
-}
-
 std::vector<std::string> EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
   return qListToVector(
       m_uiTabPreproc.MWRunFiles_preproc_run_num->getFilenames(),
@@ -993,6 +984,11 @@ bool EnggDiffractionViewQtGUI::saveFocusedOutputFiles() const {
   return m_uiTabFocus.checkBox_save_output_files->checkState();
 }
 
+void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::showInvalidRBNumber(
+    const bool rbNumberIsValid) {
+  m_ui.label_invalidRBNumber->setVisible(!rbNumberIsValid);
+}
+
 void EnggDiffractionViewQtGUI::plotFocusStatus() {
   if (focusedOutWorkspace()) {
     m_uiTabFocus.comboBox_PlotData->setEnabled(true);
@@ -1113,7 +1109,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
 
 void EnggDiffractionViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Engineering_Diffraction"));
+      nullptr, QString("Engineering Diffraction"));
 }
 
 void EnggDiffractionViewQtGUI::updateTabsInstrument(

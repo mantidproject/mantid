@@ -65,7 +65,8 @@ public:
         TS_ASSERT_EQUALS((*it).second, 1.0);
       }
 
-      for (size_t j = 0; j < outputWS->blocksize(); ++j) {
+      const size_t numBins = outputWS->blocksize();
+      for (size_t j = 0; j < numBins; ++j) {
         if (j >= 20 && j < 23) {
           TS_ASSERT_EQUALS(outputWS->y(i)[j], 0.0);
           TS_ASSERT_EQUALS(outputWS->e(i)[j], 0.0);

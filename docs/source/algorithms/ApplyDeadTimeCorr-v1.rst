@@ -66,7 +66,7 @@ Usage
    format_str = 'Spectrum: {0:d}; original: {1:.3f}; corrected: {2:.3f}'
 
    for s in [0,32,63]:
-      print format_str.format(s, original.readY(s)[0], corrected.readY(s)[0])
+      print(format_str.format(s, original.readY(s)[0], corrected.readY(s)[0]))
 
 Output:
 
@@ -95,7 +95,7 @@ Output:
    format_str = 'Spectrum: {0:d}; original: {1:.3f}; corrected: {2:.3f}'
 
    for s in [0,32,63]:
-      print format_str.format(s, original.readY(s)[0], corrected.readY(s)[0])
+      print(format_str.format(s, original.readY(s)[0], corrected.readY(s)[0]))
 
 Output:
 

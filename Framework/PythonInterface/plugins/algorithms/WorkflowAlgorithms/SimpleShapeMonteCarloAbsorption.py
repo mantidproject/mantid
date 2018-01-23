@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress)
 from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 
@@ -52,20 +51,20 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='MaterialAlreadyDefined', defaultValue=False,
                              doc='Select this option if the material has already been defined')
 
-        materialDefinedProp = EnabledWhenProperty('MaterialAlreadyDefined', PropertyCriterion.IsDefault)
+        material_defined_prop = EnabledWhenProperty('MaterialAlreadyDefined', PropertyCriterion.IsDefault)
 
         self.declareProperty(name='ChemicalFormula', defaultValue='',
                              doc='Chemical formula of sample')
-        self.setPropertySettings('ChemicalFormula', materialDefinedProp)
+        self.setPropertySettings('ChemicalFormula', material_defined_prop)
 
         self.declareProperty(name='DensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density')
-        self.setPropertySettings('DensityType', materialDefinedProp)
+        self.setPropertySettings('DensityType', material_defined_prop)
 
         self.declareProperty(name='Density', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
-        self.setPropertySettings('Density', materialDefinedProp)
+        self.setPropertySettings('Density', material_defined_prop)
 
         # -------------------------------------------------------------------------------------------
 
@@ -101,9 +100,9 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Geometry of sample environment. Options are: FlatPlate, Cylinder, Annulus')
 
-        flatPlateCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
-        cylinderCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
-        annulusCondition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
+        flat_plate_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
+        cylinder_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
+        annulus_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
 
         # height is common to all options
 
@@ -116,40 +115,40 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='Width', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Width of the FlatPlate sample environment (cm)')
-        self.setPropertySettings('Width', flatPlateCondition)
+        self.setPropertySettings('Width', flat_plate_condition)
 
         self.declareProperty(name='Thickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(),
                              doc='Thickness of the FlatPlate sample environment (cm)')
-        self.setPropertySettings('Thickness', flatPlateCondition)
+        self.setPropertySettings('Thickness', flat_plate_condition)
 
         self.declareProperty(name='Center', defaultValue=0.0,
                              doc='Center of the FlatPlate sample environment')
-        self.setPropertySettings('Center', flatPlateCondition)
+        self.setPropertySettings('Center', flat_plate_condition)
 
         self.declareProperty(name='Angle', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Angle of the FlatPlate sample environment with respect to the beam (degrees)')
-        self.setPropertySettings('Angle', flatPlateCondition)
+        self.setPropertySettings('Angle', flat_plate_condition)
 
         # cylinder options
 
         self.declareProperty(name='Radius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Radius of the Cylinder sample environment (cm)')
-        self.setPropertySettings('Radius', cylinderCondition)
+        self.setPropertySettings('Radius', cylinder_condition)
 
         # annulus options
 
         self.declareProperty(name='OuterRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the Annulus sample environment (cm)')
-        self.setPropertySettings('OuterRadius', annulusCondition)
+        self.setPropertySettings('OuterRadius', annulus_condition)
 
         self.declareProperty(name='InnerRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the Annulus sample environment (cm)')
-        self.setPropertySettings('InnerRadius', annulusCondition)
+        self.setPropertySettings('InnerRadius', annulus_condition)
 
         # -------------------------------------------------------------------------------------------
 
@@ -164,10 +163,12 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         prog.report('Setting up sample environment')
 
         # set the beam shape
-        SetBeam(self._input_ws_name,
-                Geometry={'Shape': 'Slit',
-                          'Width': self._beam_width,
-                          'Height': self._beam_height})
+        set_beam_alg = self.createChildAlgorithm("SetBeam", enableLogging=False)
+        set_beam_alg.setProperty("InputWorkspace", self._input_ws)
+        set_beam_alg.setProperty("Geometry", {'Shape': 'Slit',
+                                              'Width': self._beam_width,
+                                              'Height': self._beam_height})
+        set_beam_alg.execute()
 
         # set the sample geometry
         sample_geometry = dict()
@@ -192,11 +193,14 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
             sample_geometry['Center'] = [0.0, 0.0, 0.0]
             sample_geometry['Axis'] = 1
 
+        set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
+        set_sample_alg.setProperty("InputWorkspace", self._input_ws)
+        set_sample_alg.setProperty("Geometry", sample_geometry)
+
         # set sample
         if self._material_defined:
             # set sample without sample material
-            SetSample(InputWorkspace=self._input_ws_name,
-                      Geometry=sample_geometry)
+            set_sample_alg.execute()
 
         else:
             # set the sample material
@@ -208,17 +212,24 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
             if self._density_type == 'Number Density':
                 sample_material['SampleNumberDensity'] = self._density
 
-            SetSample(InputWorkspace=self._input_ws_name,
-                      Geometry=sample_geometry,
-                      Material=sample_material)
+            set_sample_alg.setProperty("Material", sample_material)
+
+            try:
+                set_sample_alg.execute()
+            except RuntimeError as exc:
+                raise RuntimeError("Supplied chemical formula was invalid: \n" + str(exc))
 
         prog.report('Calculating sample corrections')
 
-        MonteCarloAbsorption(InputWorkspace=self._input_ws_name,
-                             OutputWorkspace=self._output_ws,
-                             EventsPerPoint=self._events,
-                             NumberOfWavelengthPoints=self._number_wavelengths,
-                             Interpolation=self._interpolation)
+        monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True)
+        monte_carlo_alg.setProperty("InputWorkspace", self._input_ws)
+        monte_carlo_alg.setProperty("OutputWorkspace", self._output_ws)
+        monte_carlo_alg.setProperty("EventsPerPoint", self._events)
+        monte_carlo_alg.setProperty("NumberOfWavelengthPoints", self._number_wavelengths)
+        monte_carlo_alg.setProperty("Interpolation", self._interpolation)
+        monte_carlo_alg.execute()
+
+        output_ws = monte_carlo_alg.getProperty("OutputWorkspace").value
 
         prog.report('Recording Sample Logs')
 
@@ -231,17 +242,17 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
             log_values.append(value)
 
         add_sample_log_alg = self.createChildAlgorithm('AddSampleLogMultiple', enableLogging=False)
-        add_sample_log_alg.setProperty('Workspace', self._output_ws)
+        add_sample_log_alg.setProperty('Workspace', output_ws)
         add_sample_log_alg.setProperty('LogNames', log_names)
         add_sample_log_alg.setProperty('LogValues', log_values)
         add_sample_log_alg.execute()
 
-        self.setProperty('OutputWorkspace', self._output_ws)
+        self.setProperty('OutputWorkspace', output_ws)
 
     def _setup(self):
 
         # basic options
-        self._input_ws_name = self.getPropertyValue('InputWorkspace')
+        self._input_ws = self.getProperty('InputWorkspace').value
         self._material_defined = self.getProperty('MaterialAlreadyDefined').value
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')
         self._density_type = self.getPropertyValue('DensityType')

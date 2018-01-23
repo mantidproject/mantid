@@ -36,7 +36,7 @@ public:
         "</facility>"
         "</facilities>";
 
-    CatalogInfo *catalogInfo = NULL;
+    CatalogInfo *catalogInfo = nullptr;
     TS_ASSERT_THROWS_NOTHING(catalogInfo = getCatalogFromXML(facilitiesXml));
 
     TS_ASSERT_EQUALS(catalogInfo->catalogName(), "ICat3Catalog");
@@ -77,7 +77,7 @@ public:
         "</facility>"
         "</facilities>";
 
-    CatalogInfo *catalogInfo = NULL;
+    CatalogInfo *catalogInfo = nullptr;
     TS_ASSERT_THROWS_NOTHING(catalogInfo = getCatalogFromXML(facilitiesXml));
 
     // Set the paths to test against.

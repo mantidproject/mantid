@@ -31,6 +31,7 @@ class SANS2DGUISearchCentre(sansgui.SANS2DGUIReduction):
       # there is no workspace to be checked against
         return True
 
+
 if __name__ == "__main__":
     test = SANS2DGUISearchCentre()
     test.execute()

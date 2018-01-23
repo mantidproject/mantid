@@ -16,8 +16,9 @@
 using namespace std;
 using namespace Mantid;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
@@ -72,6 +73,20 @@ public:
       TS_ASSERT_EQUALS(ws->dataE(i).size(), nbins);
       ;
     }
+  }
+
+  void testUnequalBins() {
+    // try normal kind first
+    TS_ASSERT_EQUALS(ws->blocksize(), 5);
+    TS_ASSERT(ws->isCommonBins());
+    TS_ASSERT_EQUALS(ws->size(), 50);
+
+    // mess with the binning and the results change
+    Workspace2D_sptr cloned(ws->clone());
+    cloned->setHistogram(0, Points(0), Counts(0));
+    TS_ASSERT_THROWS(cloned->blocksize(), std::logic_error);
+    TS_ASSERT(!(cloned->isCommonBins()));
+    TS_ASSERT_EQUALS(cloned->size(), 45);
   }
 
   void testId() { TS_ASSERT_EQUALS(ws->id(), "Workspace2D"); }

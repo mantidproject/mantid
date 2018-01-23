@@ -31,7 +31,7 @@ public:
     boost::scoped_ptr<InvalidParameter> invalparam(pInvalidParam);
 
     TSM_ASSERT("The paramter generated should be an InvalidParamter",
-               NULL != pInvalidParam);
+               nullptr != pInvalidParam);
     TSM_ASSERT_EQUALS("The invalid parameter has not been parsed correctly.",
                       "x", invalparam->getValue());
   }

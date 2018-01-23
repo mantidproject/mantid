@@ -43,18 +43,18 @@ MDHWNexusLoadingPresenter::MDHWNexusLoadingPresenter(
 bool MDHWNexusLoadingPresenter::canReadFile() const {
   // Quick check based on extension.
   if (!canLoadFileBasedOnExtension(m_filename, ".nxs")) {
-    return 0;
+    return false;
   }
   auto file = Kernel::make_unique<::NeXus::File>(this->m_filename);
   // MDHistoWorkspace file has a different name for the entry
   try {
     file->openGroup("MDHistoWorkspace", "NXentry");
-    return 1;
+    return true;
   } catch (::NeXus::Exception &) {
     // If the entry name does not match, then it can't read the file.
-    return 0;
+    return false;
   }
-  return 0;
+  return false;
 }
 
 /**

@@ -78,4 +78,5 @@ class FilterLogByTime(PythonAlgorithm):
         op = getattr(numpy, operation)
         return op(values)
 
+
 AlgorithmFactory.subscribe(FilterLogByTime)

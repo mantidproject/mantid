@@ -53,7 +53,7 @@ public:
    * @param parent :: parent widget
    * @param fl :: window flags
    */
-  ErrDialog(ApplicationWindow *parent, Qt::WFlags fl = 0);
+  ErrDialog(ApplicationWindow *parent, Qt::WFlags fl = nullptr);
 
 private:
   QLabel *textLabel1;

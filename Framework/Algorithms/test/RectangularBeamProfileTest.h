@@ -89,7 +89,7 @@ public:
     const V3D center;
     RectangularBeamProfile profile(createTestFrame(), center, width, height);
     Sample testSample;
-    testSample.setShape(*ComponentCreationHelper::createSphere(0.5));
+    testSample.setShape(ComponentCreationHelper::createSphere(0.5));
 
     auto region = profile.defineActiveRegion(testSample);
     TS_ASSERT(region.isNonNull());
@@ -104,7 +104,7 @@ public:
     const V3D center;
     RectangularBeamProfile profile(createTestFrame(), center, width, height);
     Sample testSample;
-    testSample.setShape(*ComponentCreationHelper::createSphere(0.5));
+    testSample.setShape(ComponentCreationHelper::createSphere(0.5));
 
     auto region = profile.defineActiveRegion(testSample);
     TS_ASSERT(region.isNonNull());

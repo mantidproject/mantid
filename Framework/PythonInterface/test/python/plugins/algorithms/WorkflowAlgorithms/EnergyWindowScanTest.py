@@ -26,9 +26,9 @@ class EnergyWindowScanTest(unittest.TestCase):
         EnergyWindowScan(InputFiles="IRS26176.RAW", Instrument='IRIS', Analyser='graphite',
                          Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
                          InelasticRange='0, 0.5', GroupingMethod='Individual', MSDFit=True)
-        scan_ws = mtd['Scan_el_eq2_0_Workspace']
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), -2.4719849)
-        self.assertEqual(round(scan_ws.readY(0)[1], 7), -2.3400994)
+        scan_ws = mtd['Scan_el_eq1_Gauss_0_Workspace']
+        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.0844171)
+        self.assertEqual(round(scan_ws.readY(0)[1], 7), 0.0963181)
 
 
 if __name__ == '__main__':

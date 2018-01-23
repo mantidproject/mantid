@@ -12,34 +12,36 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
-#include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/V3D.h"
 
 #include <cmath>
 #include <sstream>
+#include <utility>
 
 namespace WorkspaceCreationHelper {
 using namespace Mantid;
@@ -50,6 +52,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps)
     : m_Progress(
@@ -57,8 +61,14 @@ MockAlgorithm::MockAlgorithm(size_t nSteps)
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
                          const double height_, const FitStatus fitStatus_)
-    : peakCentre(peakCentre_), peakCentreError(0), sigma(sigma_), sigmaError(0),
-      height(height_), heightError(0), chiSq(0), fitStatus(fitStatus_) {}
+    : peakCentre(peakCentre_), sigma(sigma_), height(height_),
+      fitStatus(fitStatus_) {}
+
+EPPTableRow::EPPTableRow(const int index, const double peakCentre_,
+                         const double sigma_, const double height_,
+                         const FitStatus fitStatus_)
+    : workspaceIndex(index), peakCentre(peakCentre_), sigma(sigma_),
+      height(height_), fitStatus(fitStatus_) {}
 
 /**
  * @param name :: The name of the workspace
@@ -95,11 +105,13 @@ Histogram createHisto(bool isHistogram, YType &&yAxis, EType &&eAxis) {
   const size_t yValsSize = yAxis.size();
   if (isHistogram) {
     BinEdges xAxis(yValsSize + 1, LinearGenerator(1, 1));
-    Histogram histo{std::move(xAxis), std::move(yAxis), std::move(eAxis)};
+    Histogram histo{std::move(xAxis), std::forward<YType>(yAxis),
+                    std::forward<EType>(eAxis)};
     return histo;
   } else {
     Points xAxis(yValsSize, LinearGenerator(1, 1));
-    Histogram pointsHisto{std::move(xAxis), std::move(yAxis), std::move(eAxis)};
+    Histogram pointsHisto{std::move(xAxis), std::forward<YType>(yAxis),
+                          std::forward<EType>(eAxis)};
     return pointsHisto;
   }
 }
@@ -246,14 +258,17 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
     xmlShape += "<algebra val=\"shape\" /> ";
 
     ShapeFactory sFactory;
-    boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
+    auto shape = sFactory.createShape(xmlShape);
     for (int i = 0; i < nhist; ++i) {
-      Detector *det = new Detector("det", detid_t(i), shape, nullptr);
+      Detector *det = new Detector("det", detid_t(i + 1), shape, nullptr);
       det->setPos(i, i + 1, 1);
       instrument->add(det);
       instrument->markAsDetector(det);
     }
     workspace->setInstrument(instrument);
+    // Set IndexInfo without explicit spectrum definitions to trigger building
+    // default mapping of spectra to detectors in new instrument.
+    workspace->setIndexInfo(Indexing::IndexInfo(nhist));
   }
 
   auto &spectrumInfo = workspace->mutableSpectrumInfo();
@@ -373,6 +388,32 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
 }
 
 //================================================================================================================
+/*
+ * startTime is in seconds
+ */
+MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime,
+    size_t firstInterval, bool includeMonitors, bool startYNegative,
+    bool isHistogram, const std::string &instrumentName) {
+
+  auto baseWS = create2DWorkspaceWithFullInstrument(
+      nhist, nbins, includeMonitors, startYNegative, isHistogram,
+      instrumentName);
+
+  auto builder =
+      ScanningWorkspaceBuilder(baseWS->getInstrument(), nTimeIndexes, nbins);
+
+  std::vector<double> timeRanges;
+  for (size_t i = 0; i < nTimeIndexes; ++i) {
+    timeRanges.push_back(double(i + firstInterval));
+  }
+
+  builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
+
+  return builder.buildWorkspace();
+}
+
+//================================================================================================================
 /** Create an Workspace2D with an instrument that contains
  *RectangularDetector's.
  * Bins will be 0.0, 1.0, to numBins, filled with signal=2.0, M_SQRT2
@@ -472,53 +513,141 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
   return ws;
 }
 
-/**
- * Create a very small 2D workspace for a virtual reflectometry instrument.
- * @return workspace with instrument attached.
- * @param startX : X Tof start value for the workspace.
+/** Adds a component to an instrument
+ *
+ * @param instrument :: instrument to which the component will be added
+ * @param position :: position of the component
+ * @param name :: name of the component
+ * @return a component pointer
  */
-MatrixWorkspace_sptr
-create2DWorkspaceWithReflectometryInstrument(double startX) {
-  Instrument_sptr instrument = boost::make_shared<Instrument>();
-  instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
+ObjComponent *addComponent(Instrument_sptr &instrument, const V3D &position,
+                           const std::string &name) {
+  ObjComponent *component = new ObjComponent(name);
+  component->setPos(position);
+  instrument->add(component);
+  return component;
+}
 
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(V3D(0, 0, 0));
-  instrument->add(source);
+/** Adds a source to an instrument
+ *
+ * @param instrument :: instrument to which the source will be added
+ * @param position :: position of the source
+ * @param name :: name of the source
+ */
+void addSource(Instrument_sptr &instrument, const V3D &position,
+               const std::string &name) {
+  auto source = addComponent(instrument, position, name);
   instrument->markAsSource(source);
+}
 
-  Detector *monitor = new Detector("Monitor", 1, nullptr);
-  monitor->setPos(14, 0, 0);
+/** Adds a sample to an instrument
+ *
+ * @param instrument :: instrument to which the sample will be added
+ * @param position :: position of the sample
+ * @param name :: name of the sample
+ */
+void addSample(Instrument_sptr &instrument, const V3D &position,
+               const std::string &name) {
+  auto sample = addComponent(instrument, position, name);
+  instrument->markAsSamplePos(sample);
+}
+
+/** Adds a monitor to an instrument
+ *
+ * @param instrument :: instrument to which the monitor will be added
+ * @param position :: position of the monitor
+ * @param ID :: identification number of the monitor
+ * @param name :: name of the monitor
+ */
+void addMonitor(Instrument_sptr &instrument, const V3D &position, const int ID,
+                const std::string &name) {
+  Detector *monitor = new Detector(name, ID, nullptr);
+  monitor->setPos(position);
   instrument->add(monitor);
   instrument->markAsMonitor(monitor);
+}
 
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
-  sample->setPos(V3D(15, 0, 0));
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
-
+/** Adds a detector to an instrument
+ *
+ * @param instrument :: instrument to which the detector will be added
+ * @param position :: position of the detector
+ * @param ID :: identification number of the detector
+ * @param name :: name of the detector
+ */
+void addDetector(Instrument_sptr &instrument, const V3D &position, const int ID,
+                 const std::string &name) {
   // Where 0.01 is half detector width etc.
-  Detector *det = new Detector(
-      "point-detector", 2,
-      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
-  det->setPos(20, (20 - sample->getPos().X()), 0);
-  instrument->add(det);
-  instrument->markAsDetector(det);
+  Detector *detector = new Detector(
+      name, ID, ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03),
+      nullptr);
+  detector->setPos(position);
+  instrument->add(detector);
+  instrument->markAsDetector(detector);
+}
 
-  const int nSpectra = 2;
-  const int nBins = 100;
-  const double deltaX = 2000; // TOF
+/** Creates a binned 2DWorkspace with title and TOF x-axis and counts y-axis
+ *
+ * @param startX :: start TOF x-value
+ * @param nSpectra :: number of spectra
+ * @param nBins :: number of bins
+ * @param deltaX :: TOF delta x-value
+ * @return a Workspace2D
+ */
+DataObjects::Workspace2D_sptr reflectometryWorkspace(const double startX,
+                                                     const int nSpectra,
+                                                     const int nBins,
+                                                     const double deltaX) {
+
   auto workspace = create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
 
   workspace->setTitle(
       "Test histogram"); // actually adds a property call run_title to the logs
   workspace->getAxis(0)->setUnit("TOF");
   workspace->setYUnit("Counts");
+  return workspace;
+}
 
+/**
+ * Create a very small 2D workspace for a virtual reflectometry instrument.
+ * @return workspace with instrument attached.
+ * @param startX : X Tof start value for the workspace.
+ * @param slit1Pos :: slit 1 position
+ * @param slit2Pos :: slit 2 position
+ * @param vg1 :: vertical slit 1
+ * @param vg2 :: vertical slit 2
+ * @param sourcePos :: source position
+ * @param monitorPos :: monitor position
+ * @param samplePos :: sample position
+ * @param detectorPos :: detector position
+ * @param nSpectra :: number of spectra
+ * @param nBins :: number of bins
+ * @param deltaX :: TOF delta x-value
+ */
+MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
+    double startX, V3D slit1Pos, V3D slit2Pos, double vg1, double vg2,
+    V3D sourcePos, V3D monitorPos, V3D samplePos, V3D detectorPos,
+    const int nSpectra, const int nBins, const double deltaX) {
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      PointingAlong::Y, PointingAlong::X, Handedness::Left, "0,0,0"));
+
+  addSource(instrument, sourcePos, "source");
+  addMonitor(instrument, monitorPos, 1, "Monitor");
+  addSample(instrument, samplePos, "some-surface-holder");
+  addDetector(instrument, detectorPos, 2, "point-detector");
+  auto slit1 = addComponent(instrument, slit1Pos, "slit1");
+  auto slit2 = addComponent(instrument, slit2Pos, "slit2");
+
+  auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
   workspace->setInstrument(instrument);
-  workspace->getSpectrum(0).setDetectorID(det->getID());
-  workspace->getSpectrum(1).setDetectorID(monitor->getID());
+
+  ParameterMap &pmap = workspace->instrumentParameters();
+  pmap.addDouble(slit1, "vertical gap", vg1);
+  pmap.addDouble(slit2, "vertical gap", vg2);
+
+  workspace->getSpectrum(0).setDetectorID(2);
+  workspace->getSpectrum(1).setDetectorID(1);
+
   return workspace;
 }
 
@@ -529,68 +658,38 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
 * @param startX : X Tof start value for the workspace.
 * @param detSize : optional detector height (default is 0 which puts all
 * detectors at the same position)
+* @param nSpectra :: number of spectra
+* @param nBins :: number of bins
+* @param deltaX :: TOF delta x-value
 */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-    double startX, const double detSize) {
+    double startX, const double detSize, const int nSpectra, const int nBins,
+    const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
-  instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      PointingAlong::Y /*up*/, PointingAlong::X /*along*/, Handedness::Left,
+      "0,0,0"));
 
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(V3D(0, 0, 0));
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
-  sample->setPos(V3D(15, 0, 0));
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
-
-  Detector *monitor = new Detector("Monitor", 1, nullptr);
-  monitor->setPos(14, 0, 0);
-  instrument->add(monitor);
-  instrument->markAsMonitor(monitor);
+  addSource(instrument, V3D(0, 0, 0), "source");
+  addSample(instrument, V3D(15, 0, 0), "some-surface-holder");
+  addMonitor(instrument, V3D(14, 0, 0), 1, "Monitor");
 
   // Place the central detector at 45 degrees (i.e. the distance
   // from the sample in Y is the same as the distance in X).
-  const double detPosX = 20;
-  const double detPosY = detPosX - sample->getPos().X();
+  const double posX = 20;
+  const double posY = posX - 15;
+  addDetector(instrument, V3D(posX, posY - detSize, 0), 2,
+              "point-detector"); // offset below centre
+  addDetector(instrument, V3D(posX, posY, 0), 3, "point-detector"); // at centre
+  addDetector(instrument, V3D(posX, posY + detSize, 0), 4,
+              "point-detector"); // offset above centre
 
-  Detector *det1 = new Detector(
-      "point-detector", 2,
-      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
-  det1->setPos(detPosX, detPosY - detSize, 0); // offset below centre
-  instrument->add(det1);
-  instrument->markAsDetector(det1);
-
-  Detector *det2 = new Detector(
-      "point-detector", 3,
-      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
-  det2->setPos(detPosX, detPosY, 0); // at centre
-  instrument->add(det2);
-  instrument->markAsDetector(det2);
-
-  Detector *det3 = new Detector(
-      "point-detector", 4,
-      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
-  det3->setPos(detPosX, detPosY + detSize, 0); // offset above centre
-  instrument->add(det3);
-  instrument->markAsDetector(det3);
-
-  const int nSpectra = 4;
-  const int nBins = 20;
-  const double deltaX = 5000; // TOF
-  auto workspace = create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
-
-  workspace->setTitle("Test histogram");
-  workspace->getAxis(0)->setUnit("TOF");
-  workspace->setYUnit("Counts");
-
+  auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
   workspace->setInstrument(instrument);
-  workspace->getSpectrum(0).setDetectorID(monitor->getID());
-  workspace->getSpectrum(1).setDetectorID(det1->getID());
-  workspace->getSpectrum(2).setDetectorID(det2->getID());
-  workspace->getSpectrum(3).setDetectorID(det3->getID());
+  workspace->getSpectrum(0).setDetectorID(1);
+  workspace->getSpectrum(1).setDetectorID(2);
+  workspace->getSpectrum(2).setDetectorID(3);
+  workspace->getSpectrum(3).setDetectorID(4);
   return workspace;
 }
 
@@ -601,27 +700,16 @@ void createInstrumentForWorkspaceWithDistances(
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
 
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(sourcePosition);
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  ObjComponent *sample = new ObjComponent("sample");
-  sample->setPos(samplePosition);
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
+  addSource(instrument, sourcePosition, "source");
+  addSample(instrument, samplePosition, "sample");
 
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
-    Detector *det = new Detector(buffer.str(), i, nullptr);
-    det->setPos(detectorPositions[i]);
-    instrument->add(det);
-    instrument->markAsDetector(det);
+    addDetector(instrument, detectorPositions[i], i, buffer.str());
 
     // Link it to the workspace
-    workspace->getSpectrum(i).clearDetectorIDs();
-    workspace->getSpectrum(i).addDetectorID(det->getID());
+    workspace->getSpectrum(i).addDetectorID(i);
   }
   workspace->setInstrument(instrument);
 }
@@ -831,6 +919,8 @@ createGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
           static_cast<int>(numHist)));
   for (int g = 0; g < static_cast<int>(numHist); g++) {
     auto &spec = retVal->getSpectrum(g);
+    spec.addDetectorID(
+        g + 1); // Legacy comptibilty: Used to be default IDs in Workspace2D.
     for (int i = 1; i <= 9; i++)
       spec.addDetectorID(g * 9 + i);
     spec.setSpectrumNo(g + 1); // Match detector ID and spec NO
@@ -845,7 +935,7 @@ void displayDataY(MatrixWorkspace_const_sptr ws) {
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &y = ws->y(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < y.size(); ++j) {
       std::cout << y[j] << " ";
     }
     std::cout << '\n';
@@ -860,7 +950,7 @@ void displayDataX(MatrixWorkspace_const_sptr ws) {
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &x = ws->x(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < x.size(); ++j) {
       std::cout << x[j] << " ";
     }
     std::cout << '\n';
@@ -874,7 +964,7 @@ void displayDataE(MatrixWorkspace_const_sptr ws) {
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &e = ws->e(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < e.size(); ++j) {
       std::cout << e[j] << " ";
     }
     std::cout << '\n';
@@ -1409,7 +1499,11 @@ createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
   auto statusColumn = ws->addColumn("str", "FitStatus");
   for (size_t i = 0; i != rows.size(); ++i) {
     const auto &row = rows[i];
-    wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    if (row.workspaceIndex < 0) {
+      wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    } else {
+      wsIndexColumn->cell<int>(i) = row.workspaceIndex;
+    }
     centreColumn->cell<double>(i) = row.peakCentre;
     centreErrorColumn->cell<double>(i) = row.peakCentreError;
     sigmaColumn->cell<double>(i) = row.sigma;

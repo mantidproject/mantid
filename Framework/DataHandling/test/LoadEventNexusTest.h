@@ -12,13 +12,98 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
+#include "MantidIndexing/SpectrumNumber.h"
+#include "MantidParallel/Collectives.h"
+#include "MantidParallel/Communicator.h"
+#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidTestHelpers/ParallelRunner.h"
+
 #include <cxxtest/TestSuite.h>
 
+using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
+
+namespace {
+boost::shared_ptr<const EventWorkspace>
+load_reference_workspace(const std::string &filename) {
+  // Construct default communicator *without* threading backend. In non-MPI run
+  // (such as when running unit tests) this will thus just be a communicator
+  // containing a single rank, independently on all ranks, which is what we want
+  // for default loading bhavior.
+  Parallel::Communicator comm;
+  auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
+  alg->setProperty("Filename", filename);
+  alg->setProperty("LoadLogs", false);
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  TS_ASSERT(alg->isExecuted());
+  Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<const EventWorkspace>(out);
+}
+
+void run_MPI_load(const Parallel::Communicator &comm,
+                  boost::shared_ptr<std::mutex> mutex) {
+  boost::shared_ptr<const EventWorkspace> reference;
+  boost::shared_ptr<const EventWorkspace> eventWS;
+  {
+    std::lock_guard<std::mutex> lock(*mutex);
+    const std::string filename("CNCS_7860_event.nxs");
+    reference = load_reference_workspace(filename);
+    auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
+    alg->setProperty("Filename", filename);
+    alg->setProperty("LoadLogs", false);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
+    if (comm.size() != 1) {
+      TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
+    }
+    eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(out);
+  }
+  const size_t localSize = eventWS->getNumberHistograms();
+  auto localEventCount = eventWS->getNumberEvents();
+  std::vector<size_t> localSizes;
+  std::vector<size_t> localEventCounts;
+  Parallel::gather(comm, localSize, localSizes, 0);
+  Parallel::gather(comm, localEventCount, localEventCounts, 0);
+  if (comm.rank() == 0) {
+    TS_ASSERT_EQUALS(std::accumulate(localSizes.begin(), localSizes.end(),
+                                     static_cast<size_t>(0)),
+                     static_cast<size_t>(51200));
+    TS_ASSERT_EQUALS(std::accumulate(localEventCounts.begin(),
+                                     localEventCounts.end(),
+                                     static_cast<size_t>(0)),
+                     static_cast<size_t>(112266));
+  }
+
+  const auto &indexInfo = eventWS->indexInfo();
+  size_t localCompared = 0;
+  for (size_t i = 0; i < reference->getNumberHistograms(); ++i) {
+    for (const auto &index :
+         indexInfo.makeIndexSet({static_cast<Indexing::SpectrumNumber>(
+             reference->getSpectrum(i).getSpectrumNo())})) {
+      TS_ASSERT_EQUALS(eventWS->getSpectrum(index), reference->getSpectrum(i));
+      ++localCompared;
+    }
+  }
+  // Consistency check: Make sure we really compared all spectra (protects
+  // against missing spectrum numbers or inconsistent mapping in IndexInfo).
+  std::vector<size_t> compared;
+  Parallel::gather(comm, localCompared, compared, 0);
+  if (comm.rank() == 0) {
+    TS_ASSERT_EQUALS(std::accumulate(compared.begin(), compared.end(),
+                                     static_cast<size_t>(0)),
+                     reference->getNumberHistograms());
+  }
+}
+}
 
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
@@ -246,14 +331,12 @@ public:
     TSM_ASSERT("The number of spectra in the workspace should be equal to the "
                "spectra filtered",
                outWs->getNumberHistograms() == specList.size());
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(0).getSpectrumNo() == 13);
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(1).getSpectrumNo() == 16);
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(2).getSpectrumNo() == 21);
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(3).getSpectrumNo() == 28);
+    // Spectrum numbers match those that same detector would have in unfiltered
+    // load, in this case detID + 1 since IDs in instrument start at 0.
+    TS_ASSERT_EQUALS(outWs->getSpectrum(0).getSpectrumNo(), 14);
+    TS_ASSERT_EQUALS(outWs->getSpectrum(1).getSpectrumNo(), 17);
+    TS_ASSERT_EQUALS(outWs->getSpectrum(2).getSpectrumNo(), 22);
+    TS_ASSERT_EQUALS(outWs->getSpectrum(3).getSpectrumNo(), 29);
 
     // B) test SpectrumMin and SpectrumMax
     wsName = "test_partial_spectra_loading_SpectrumMin_SpectrumMax";
@@ -274,9 +357,11 @@ public:
     // check number and indices of spectra
     const size_t numSpecs = specMax - specMin + 1;
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), numSpecs);
+    // Spectrum numbers match those that same detector would have in unfiltered
+    // load, in this case detID + 1 since IDs in instrument start at 0.
     for (size_t specIdx = 0; specIdx < numSpecs; specIdx++) {
       TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx).getSpectrumNo(),
-                       static_cast<int>(specMin + specIdx));
+                       static_cast<int>(specMin + specIdx + 1));
     }
 
     // C) test SpectrumList + SpectrumMin and SpectrumMax
@@ -310,12 +395,14 @@ public:
     // check number and indices of spectra
     const size_t n = sMax - sMin + 1; // this n is the 20...22, excluding '17'
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), n + 1); // +1 is the '17'
-    // 17 should come from SpectrumList
-    TS_ASSERT_EQUALS(outWs->getSpectrum(0).getSpectrumNo(), 17);
+    // Spectrum numbers match those that same detector would have in unfiltered
+    // load, in this case detID + 1 since IDs in instrument start at 0.
+    // 18 should come from SpectrumList
+    TS_ASSERT_EQUALS(outWs->getSpectrum(0).getSpectrumNo(), 18);
     // and then sMin(20)...sMax(22)
     for (size_t specIdx = 0; specIdx < n; specIdx++) {
       TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx + 1).getSpectrumNo(),
-                       static_cast<int>(sMin + specIdx));
+                       static_cast<int>(sMin + specIdx + 1));
     }
   }
 
@@ -357,8 +444,8 @@ public:
     auto outWs2 =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName2);
 
-    TSM_ASSERT("The number of spectra in the workspace should be 12",
-               outWs->getNumberHistograms() == 12);
+    TSM_ASSERT_EQUALS("The number of spectra in the workspace should be 12",
+                      outWs->getNumberHistograms(), 12);
 
     TSM_ASSERT_EQUALS("The number of events in the precount and not precount "
                       "workspaces do not match",
@@ -746,6 +833,15 @@ public:
 
       isFirstChildWorkspace = false;
     }
+  }
+
+  void test_MPI_load() {
+    int threads = 3; // Limited number of threads to avoid long running test.
+    ParallelTestHelpers::ParallelRunner runner(threads);
+    // Test reads from multiple threads, which is not supported by our HDF5
+    // libraries, so we need a mutex.
+    auto hdf5Mutex = boost::make_shared<std::mutex>();
+    runner.run(run_MPI_load, hdf5Mutex);
   }
 
 private:

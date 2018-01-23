@@ -5,10 +5,12 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidIndexing/IndexInfo.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -19,11 +21,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
-using HistogramData::Counts;
-using HistogramData::CountStandardDeviations;
-
-/// Empty default constructor
-LoadEmptyInstrument::LoadEmptyInstrument() {}
+using namespace HistogramData;
 
 /**
 * Return the confidence with with this algorithm can load the file
@@ -98,10 +96,6 @@ void LoadEmptyInstrument::init() {
  *values
  */
 void LoadEmptyInstrument::exec() {
-  // Get other properties
-  const double detector_value = getProperty("DetectorValue");
-  const double monitor_value = getProperty("MonitorValue");
-
   // load the instrument into this workspace
   MatrixWorkspace_sptr ws = this->runLoadInstrument();
   Instrument_const_sptr instrument = ws->getInstrument();
@@ -117,44 +111,34 @@ void LoadEmptyInstrument::exec() {
         "No detectors found in instrument");
   }
 
+  Indexing::IndexInfo indexInfo(number_spectra);
   bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
-
-  MatrixWorkspace_sptr outWS;
-
   if (MakeEventWorkspace) {
-    // Make a brand new EventWorkspace
-    outWS = WorkspaceFactory::Instance().create("EventWorkspace",
-                                                number_spectra, 2, 1);
-    // Copy geometry over.
-    WorkspaceFactory::Instance().initializeFromParent(*ws, *outWS, true);
+    setProperty(
+        "OutputWorkspace",
+        create<EventWorkspace>(
+            *ws, indexInfo, BinEdges{0.0, std::numeric_limits<double>::min()}));
   } else {
-    // Now create the outputworkspace and copy over the instrument object
-    outWS = WorkspaceFactory::Instance().create(ws, number_spectra, 2, 1);
-  }
+    const double detector_value = getProperty("DetectorValue");
+    const double monitor_value = getProperty("MonitorValue");
+    auto ws2D = create<MatrixWorkspace>(
+        *ws, indexInfo, Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value),
+                                  CountStandardDeviations(1, detector_value)));
 
-  outWS->rebuildSpectraMapping(true /* include monitors */);
-
-  // ---- Set the values ----------
-  if (!MakeEventWorkspace) {
-    auto ws2D = boost::dynamic_pointer_cast<Workspace2D>(outWS);
-    Counts v_y(1, detector_value);
     Counts v_monitor_y(1, monitor_value);
-    CountStandardDeviations v_e(1, detector_value);
     CountStandardDeviations v_monitor_e(1, monitor_value);
 
     const auto &spectrumInfo = ws2D->spectrumInfo();
-    for (size_t i = 0; i < ws2D->getNumberHistograms(); i++) {
+    const auto size = static_cast<int64_t>(spectrumInfo.size());
+#pragma omp parallel for
+    for (int64_t i = 0; i < size; i++) {
       if (spectrumInfo.isMonitor(i)) {
         ws2D->setCounts(i, v_monitor_y);
         ws2D->setCountStandardDeviations(i, v_monitor_e);
-      } else {
-        ws2D->setCounts(i, v_y);
-        ws2D->setCountStandardDeviations(i, v_e);
       }
     }
+    setProperty("OutputWorkspace", std::move(ws2D));
   }
-  // Save in output
-  this->setProperty("OutputWorkspace", outWS);
 }
 
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)

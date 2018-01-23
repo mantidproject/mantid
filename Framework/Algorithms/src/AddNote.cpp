@@ -10,6 +10,7 @@ namespace Algorithms {
 
 using namespace API;
 using namespace Kernel;
+using Types::Core::DateAndTime;
 
 namespace {
 /**

@@ -13,13 +13,61 @@
 			<value val="2.0" />
 		</parameter>
 
+		<!-- Default monitor spectrum number for monitor normalisation. -->
+		<parameter name="default-incident-monitor-spectrum" type="int">
+			<value val="397" />
+		</parameter>
+		<!-- Preferred scaling after normalisation to monitor counts. -->
+		<parameter name="scaling_after_monitor_normalisation">
+			<value val="1000" />
+		</parameter>
+		<!-- MergeRuns behavior when merging sample logs. -->
+		<parameter name="sample_logs_sum" type="string">
+			<value val="actual_time, Detector.detsum, Detector_Rosace.detsum, duration, monitor.monsum" />
+		</parameter>
+		<parameter name="sample_logs_time_series" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn_tolerances" type="string">
+			<value val="1.0" />
+		</parameter>
+		<parameter name="sample_logs_fail" type="string">
+			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2" />
+		</parameter>
+		<parameter name="sample_logs_fail_tolerances" type="string">
+			<value val="0, 0, 0" />
+		</parameter>
+
+	</component-link>
+
+	<component-link name="wide_angle">
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser 
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
 			operators -->
 		<parameter name="formula_eff" type="string">
-			<value val="0.951*exp(-0.0887/sqrt(e))*(1.0-exp(-5.597/sqrt(e)))" />
+			<value val="0.951*exp(-0.0887/sqrt(e))*(1-exp(-5.597/sqrt(e)))" />
 		</parameter>
+	</component-link>
 
+	<component-link name="rosace">
+		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser 
+			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
+			operators -->
+		<parameter name="formula_eff" type="string">
+			<value val="1-exp(-6.1343/sqrt(e))" />
+		</parameter>
+	</component-link>
+
+	<component-link name="monitors">
+		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser 
+			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
+			operators -->
+		<parameter name="formula_eff" type="string">
+			<value val="1" />
+		</parameter>
 	</component-link>
 
 </parameter-file>

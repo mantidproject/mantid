@@ -6,9 +6,9 @@
 #include "MantidKernel/V3D.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
-#include <math.h>
 #include <sstream>
 #include <stdexcept>
 

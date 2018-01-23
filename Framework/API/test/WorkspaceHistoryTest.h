@@ -100,10 +100,10 @@ public:
     simplesum2.execute();
 
     WorkspaceHistory history;
-    AlgorithmHistory alg1(&simplesum,
-                          Mantid::Kernel::DateAndTime::defaultTime(), 1.0, 0);
-    AlgorithmHistory alg2(&simplesum2,
-                          Mantid::Kernel::DateAndTime::defaultTime(), 1.0, 1);
+    AlgorithmHistory alg1(
+        &simplesum, Mantid::Types::Core::DateAndTime::defaultTime(), 1.0, 0);
+    AlgorithmHistory alg2(
+        &simplesum2, Mantid::Types::Core::DateAndTime::defaultTime(), 1.0, 1);
 
     history.addHistory(boost::make_shared<AlgorithmHistory>(alg1));
     history.addHistory(boost::make_shared<AlgorithmHistory>(alg2));

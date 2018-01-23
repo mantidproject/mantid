@@ -1,15 +1,16 @@
-#pylint: disable=invalid-name
 #!/usr/bin/env python
-
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import optparse
 import sys
 try:
     import periodictable
     if not periodictable.__version__.startswith("1.3."):
-        print "*****Require periodictable 1.3.*"
+        print("*****Require periodictable 1.3.*")
         sys.exit(-1)
-except ImportError, e:
-    print "*****To use this you must 'easy_install periodictable'"
+except ImportError as e:
+    print("*****To use this you must 'easy_install periodictable'")
     sys.exit(-1)
 
 VERSION = "1.0"
@@ -57,10 +58,12 @@ def writeElement(handle, element):
     if label in BANNED:
         return []
     labels = [label]
+    # Write the isotopic average first
     writeBegin(handle, label, element.symbol, element.number)
     writeMiddle(handle, 0., element)
     writeEnd(handle)
-    for key in element._isotopes.keys():
+    # Now all isotopes ordered by A
+    for key in sorted(element._isotopes.keys()):
         labels.append(writeIsotope(handle, element, key))
     return labels
 
@@ -83,12 +86,13 @@ def readExisting(filename):
     after = "".join(lines[index_stop+1:])
     return (before, after)
 
+
 if __name__ == "__main__":
     # command line options
     info = []
     info.append("Generate a source file (.cpp) with the supplied filename. The")
     info.append("source file will contain all of the information necessary for")
-    info.append("the atoms and thier isotopes.")
+    info.append("the atoms and their isotopes.")
     parser = optparse.OptionParser("usage: %prog [options] <filename>",
                                    None, optparse.Option, VERSION, 'error',
                                    " ".join(info))
@@ -105,7 +109,7 @@ if __name__ == "__main__":
     (code_before, code_after) = readExisting(filename)
 
     # setup the file for the elements and isotopes
-    print "writing information to %s" % filename
+    print("writing information to %s" % filename)
     handle = open(filename, 'w')
     handle.write(code_before) # write out what was before the delimitor
     handle.write(DELIMITOR_START+"\n")
@@ -119,10 +123,11 @@ if __name__ == "__main__":
     handle.write("\n")
 
     # write an array of all atoms and elements
-    handle.write("/// All of the atoms in a single array so it can be searched.\n")
+    handle.write("// All of the atoms in a single array so it can be searched.\n")
+    handle.write("// getAtom() expects them to be sorted first by Z number then by A number.\n")
     handle.write("static Atom ATOMS[] = {\n")
     numAtoms = len(atomNames)
-    for i in xrange(0, numAtoms, 10):
+    for i in range(0, numAtoms, 10):
         handle.write(", ".join(atomNames[i:i+10]))
         if i+10 < numAtoms:
             handle.write(",")

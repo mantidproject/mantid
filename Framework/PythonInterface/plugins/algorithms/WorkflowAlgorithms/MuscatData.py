@@ -81,4 +81,5 @@ class MuscatData(PythonAlgorithm):
         saveOp = self.getProperty('Save').value
         Main.MuscatDataStart(sname,geom,neut,beam,sam,sqw,kr1,verbOp,plotOp,saveOp)
 
+
 AlgorithmFactory.subscribe(MuscatData)                    # Register algorithm with Mantid

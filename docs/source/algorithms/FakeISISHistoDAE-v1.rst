@@ -61,8 +61,8 @@ Usage
 
     try:
         captureLive()
-    except Exception, exc:
-        print "Error occurred starting live data"
+    except:
+        print("Error occurred starting live data")
     finally:
         thread.join() # this must get hit
 
@@ -71,7 +71,7 @@ Usage
 
     #get the ouput workspace
     wsOut = mtd["wsOut"]
-    print "The workspace contains %i histograms" % wsOut.getNumberHistograms()
+    print("The workspace contains %i histograms" % wsOut.getNumberHistograms())
 
 Output:
 

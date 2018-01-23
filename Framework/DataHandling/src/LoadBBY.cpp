@@ -333,21 +333,41 @@ void LoadBBY::exec() {
       "bm_counts", static_cast<double>(frame_count) * period /
                        1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
 
-  Kernel::time_duration duration = boost::posix_time::microseconds(
+  Types::Core::time_duration duration = boost::posix_time::microseconds(
       static_cast<boost::int64_t>(static_cast<double>(frame_count) * period));
 
-  Kernel::DateAndTime start_time("2000-01-01T00:00:00");
-  Kernel::DateAndTime end_time(start_time + duration);
+  Types::Core::DateAndTime start_time("2000-01-01T00:00:00");
+  Types::Core::DateAndTime end_time(start_time + duration);
 
   logManager.addProperty("start_time", start_time.toISO8601String());
   logManager.addProperty("end_time", end_time.toISO8601String());
   logManager.addProperty("is_tof", instrumentInfo.is_tof);
 
-  logManager.addProperty("sample_name", instrumentInfo.sample_name);
-  logManager.addProperty("sample_aperture", instrumentInfo.sample_aperture);
-  logManager.addProperty("source_aperture", instrumentInfo.source_aperture);
-
   std::string time_str = start_time.toISO8601String();
+
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_name",
+                                   instrumentInfo.sample_name);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_description",
+                                   instrumentInfo.sample_description);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_aperture",
+                                   instrumentInfo.sample_aperture);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_x",
+                                   instrumentInfo.sample_x);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_y",
+                                   instrumentInfo.sample_y);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_z",
+                                   instrumentInfo.sample_z);
+
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "wavelength",
+                                   instrumentInfo.wavelength);
+
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "source_aperture",
+                                   instrumentInfo.source_aperture);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "master1_chopper_id",
+                                   instrumentInfo.master1_chopper_id);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "master2_chopper_id",
+                                   instrumentInfo.master2_chopper_id);
+
   AddSinglePointTimeSeriesProperty(logManager, time_str, "Lt0_value",
                                    instrumentInfo.Lt0_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "Ltof_curtainl_value",
@@ -457,8 +477,15 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
   instrumentInfo.wavelength = 0.0;
 
   instrumentInfo.sample_name = "UNKNOWN";
+  instrumentInfo.sample_description = "UNKNOWN";
   instrumentInfo.sample_aperture = 0.0;
+  instrumentInfo.sample_x = 0.0;
+  instrumentInfo.sample_y = 0.0;
+  instrumentInfo.sample_z = 0.0;
+
   instrumentInfo.source_aperture = 0.0;
+  instrumentInfo.master1_chopper_id = -1;
+  instrumentInfo.master2_chopper_id = -1;
 
   instrumentInfo.period_master = 0.0;
   instrumentInfo.period_slave = (1.0 / 50.0) * 1.0e6;
@@ -518,10 +545,23 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
       if (loadNXString(entry, "sample/name", tmp_str))
         instrumentInfo.sample_name = tmp_str;
+      if (loadNXString(entry, "sample/description", tmp_str))
+        instrumentInfo.sample_description = tmp_str;
       if (loadNXDataSet(entry, "sample/sample_aperture", tmp_float))
         instrumentInfo.sample_aperture = tmp_float;
+      if (loadNXDataSet(entry, "sample/samx", tmp_float))
+        instrumentInfo.sample_x = tmp_float;
+      if (loadNXDataSet(entry, "sample/samy", tmp_float))
+        instrumentInfo.sample_y = tmp_float;
+      if (loadNXDataSet(entry, "sample/samz", tmp_float))
+        instrumentInfo.sample_z = tmp_float;
+
       if (loadNXDataSet(entry, "instrument/source_aperture", tmp_float))
         instrumentInfo.source_aperture = tmp_float;
+      if (loadNXDataSet(entry, "instrument/master1_chopper_id", tmp_int32))
+        instrumentInfo.master1_chopper_id = tmp_int32;
+      if (loadNXDataSet(entry, "instrument/master2_chopper_id", tmp_int32))
+        instrumentInfo.master2_chopper_id = tmp_int32;
 
       if (loadNXString(entry, "instrument/detector/frame_source", tmp_str))
         instrumentInfo.is_tof = tmp_str == "EXTERNAL";

@@ -4,11 +4,10 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewSplatterPlotSMPlugin "1.0"
 	SERVER_MANAGER_XML SplatterPlot.xml
 	SERVER_MANAGER_SOURCES vtkSplatterPlot.cxx
 	GUI_RESOURCES SplatterPlot.qrc)
-	
-# Add to the 'VatesParaViewPlugins' group in VS
-set_property( TARGET MantidParaViewSplatterPlotSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
+set_pvplugin_properties (MantidParaViewSplatterPlotSMPlugin QT_VERSION 4)
 
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+
+include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
 target_link_libraries( MantidParaViewSplatterPlotSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}  
 ${CORE_MANTIDLIBS}
@@ -16,16 +15,13 @@ DataObjects
 VatesAPI
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
-${QWT_LIBRARIES}
+${QWT5_LIBRARIES}
 ${vtkjsoncpp_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidParaViewSplatterPlotSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")
+  set_target_properties ( MantidParaViewSplatterPlotSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/Libraries;@loader_path/../../../Contents/MacOS")
 endif ()
 
-# Put library into subfolder.
-SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewSplatterPlotSMPlugin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})
-
-install( TARGETS MantidParaViewSplatterPlotSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
+install_pvplugin (MantidParaViewSplatterPlotSMPlugin QT_VERSION 4)
 

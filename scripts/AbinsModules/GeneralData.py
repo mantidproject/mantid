@@ -17,7 +17,7 @@ class GeneralData(object):
     def extract(self):
         """
         Returns the data.
-        @return: data
+        :returns: data
         """
         return None
 

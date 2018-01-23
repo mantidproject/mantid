@@ -82,5 +82,6 @@ class LoadSINQ(PythonAlgorithm):
         self.setProperty("OutputWorkspace",ws)
         mantid.simpleapi.DeleteWorkspace(wname)
 
+
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQ)

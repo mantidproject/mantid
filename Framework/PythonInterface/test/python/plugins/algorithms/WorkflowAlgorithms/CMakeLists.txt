@@ -7,7 +7,14 @@ set ( TEST_PY_FILES
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
+  CalculateMonteCarloAbsorptionTest.py
   DetectorFloodWeightingTest.py
+  DirectILLApplySelfShieldingTest.py
+  DirectILLCollectDataTest.py
+  DirectILLDiagnosticsTest.py
+  DirectILLIntegrateVanadiumTest.py
+  DirectILLReductionTest.py
+  DirectILLSelfShieldingTest.py
   EnergyWindowScanTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   IndirectAnnulusAbsorptionTest.py
@@ -32,6 +39,7 @@ set ( TEST_PY_FILES
   MolDynTest.py
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py
+  PowderDiffILLReductionTest.py
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py

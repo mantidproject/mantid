@@ -57,7 +57,7 @@ class DLLExport IndirectSymmetrise : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *parent = 0);
+  IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
   ~IndirectSymmetrise() override;
 
   void setup() override;

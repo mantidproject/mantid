@@ -236,4 +236,5 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
             g_of_x.append(self.integrator(y_data, all_gx[i], x_data))
         return np.asarray(g_of_x)
 
+
 AlgorithmFactory.subscribe(LoadNMoldyn4Ascii1D)

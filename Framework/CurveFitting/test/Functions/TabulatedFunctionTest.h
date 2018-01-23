@@ -4,13 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
-#include "MantidCurveFitting/Functions/UserFunction.h"
-#include "MantidCurveFitting/Jacobian.h"
-#include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

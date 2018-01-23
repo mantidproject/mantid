@@ -11,7 +11,6 @@ from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
     PropertyManagerDataService, StringListValidator
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
-# Use xrange in Python 2
 from six.moves import range #pylint: disable=redefined-builtin
 
 if AlgorithmFactory.exists('GatherWorkspaces'):
@@ -175,7 +174,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(IntArrayProperty("VanadiumBackgroundNumber", values=[0], validator=arrvalidatorVanBack),
                              doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction."
                                  "")
-        self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load,
+        self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".h5", ".hd5", ".hdf", ".cal"]))  # CalFileName
         self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml"]), "Overrides grouping from CalibrationFile")
@@ -1500,6 +1499,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # END-FOR
 
         return out_ws_name_list
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SNSPowderReduction)

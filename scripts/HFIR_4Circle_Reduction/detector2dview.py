@@ -1,13 +1,14 @@
 #pylint: disable=W0403,R0902,R0903,R0904,W0212
 from __future__ import (absolute_import, division, print_function)
-import os
-import numpy as np
 from HFIR_4Circle_Reduction import mpl2dgraphicsview
+import numpy as np
+import os
 
 
 class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
     """
     Customized 2D detector view
+
     """
     class MousePress(object):
         RELEASED = 0
@@ -137,16 +138,12 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         ur_row = max(self._roiStart[0], self._roiEnd[0])
         ur_col = max(self._roiStart[1], self._roiEnd[1])
 
-        # print('Row: {0} : {1}  Col: {2} : {3}'.format(ll_row, ur_row, ll_col, ur_col))
-
+        #roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
+        #sum_0 = roi_matrix.sum(0)
+        #sum_1 = roi_matrix.sum(1)
         roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
-
         sum_0 = roi_matrix.sum(0)
-        #  print(sum_0)
         sum_1 = roi_matrix.sum(1)
-        #  print(sum_1)
-        print('[SUM 0] Dimension: {0}'.format(sum_0.shape))
-        print('[SUM 1] Dimension: {0}'.format(sum_1.shape))
 
         # write to file
         base_name = os.path.join(output_dir, 'Exp{0}_Scan{1}_Pt{2}'.format(exp_number, scan_number, pt_number))
@@ -335,7 +332,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         return
 
     def update_roi_poly(self, cursor_x, cursor_y):
-        """ Update region of interest.  It is to
+        """Update region of interest.  It is to
         (1) remove the original polygon
         (2) draw a new polygon
         :return:

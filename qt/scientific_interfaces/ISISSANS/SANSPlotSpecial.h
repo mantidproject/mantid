@@ -72,7 +72,7 @@ public:
     InterceptDerived,
     InterceptUnits
   };
-  explicit SANSPlotSpecial(QWidget *parent = 0);
+  explicit SANSPlotSpecial(QWidget *parent = nullptr);
   ~SANSPlotSpecial() override;
 
 public slots:

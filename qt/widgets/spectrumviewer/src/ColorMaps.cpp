@@ -1,6 +1,6 @@
 
+#include <cmath>
 #include <sstream>
-#include <math.h>
 
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 

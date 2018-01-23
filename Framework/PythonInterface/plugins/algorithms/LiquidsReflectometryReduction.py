@@ -587,4 +587,5 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             logger.error("Could not find scaling factor for %s" % str(incident_medium))
         return workspace
 
+
 AlgorithmFactory.subscribe(LiquidsReflectometryReduction)

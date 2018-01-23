@@ -62,7 +62,7 @@ class CreateSampleShapeDialog : public MantidQt::API::AlgorithmDialog {
 
 public:
   /// Default constructor
-  CreateSampleShapeDialog(QWidget *parent = 0);
+  CreateSampleShapeDialog(QWidget *parent = nullptr);
 
   /// Destructor
   ~CreateSampleShapeDialog() override;
@@ -151,7 +151,7 @@ class BinaryTreeWidget : public QTreeWidget {
 
 public:
   /// Default constructor
-  BinaryTreeWidget(QWidget *parent = 0);
+  BinaryTreeWidget(QWidget *parent = nullptr);
 
   // Return the root of the binary tree
   BinaryTreeWidgetItem *root() const;
@@ -177,7 +177,7 @@ class ComboBoxDelegate : public QItemDelegate {
 
 public:
   /// Default constructor
-  ComboBoxDelegate(QWidget *parent = 0);
+  ComboBoxDelegate(QWidget *parent = nullptr);
   /// Create an editor for the item
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override;

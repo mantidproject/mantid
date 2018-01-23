@@ -1,6 +1,6 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Logger.h"
 
@@ -76,7 +76,7 @@ void vtkGeometryCacheWriter::createVTKFileHeader() {
  * Adds the geometry of the Object to the document
  * @param obj :: The object to add
  */
-void vtkGeometryCacheWriter::addObject(Object *obj) {
+void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   // First check whether Object can be written to the file
   boost::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
   if (!(handle->canTriangulate()))

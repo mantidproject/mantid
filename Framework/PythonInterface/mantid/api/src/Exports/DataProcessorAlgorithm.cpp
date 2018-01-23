@@ -5,7 +5,6 @@
 #include <boost/python/overloads.hpp>
 
 using namespace Mantid::API;
-using Mantid::Kernel::Direction;
 using Mantid::PythonInterface::DataProcessorAdapter;
 using namespace boost::python;
 

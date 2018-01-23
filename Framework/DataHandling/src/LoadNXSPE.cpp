@@ -275,7 +275,7 @@ void LoadNXSPE::exec() {
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  Geometry::Object_const_sptr cuboid(
+  boost::shared_ptr<const Geometry::CSGObject> cuboid(
       createCuboid(0.1, 0.1, 0.1)); // FIXME: memory hog on rendering. Also,
                                     // make each detector separate size
   for (std::size_t i = 0; i < numSpectra; ++i) {
@@ -304,6 +304,7 @@ void LoadNXSPE::exec() {
   for (std::size_t i = 0; i < numSpectra; ++i) {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
+    outputWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
     outputWS->setBinEdges(i, edges);
     if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
@@ -341,7 +342,8 @@ void LoadNXSPE::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-Geometry::Object_sptr LoadNXSPE::createCuboid(double dx, double dy, double dz) {
+boost::shared_ptr<Geometry::CSGObject>
+LoadNXSPE::createCuboid(double dx, double dy, double dz) {
 
   dx = 0.5 * std::fabs(dx);
   dy = 0.5 * std::fabs(dy);
@@ -402,7 +404,8 @@ Geometry::Object_sptr LoadNXSPE::createCuboid(double dx, double dy, double dz) {
 
   // A sphere
   std::string ObjSphere = "-41";
-  Geometry::Object_sptr retVal = boost::make_shared<Geometry::Object>();
+  boost::shared_ptr<Geometry::CSGObject> retVal =
+      boost::make_shared<Geometry::CSGObject>();
   retVal->setObject(41, ObjSphere);
   retVal->populate(SphSurMap);
 

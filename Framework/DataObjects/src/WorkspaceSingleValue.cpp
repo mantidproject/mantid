@@ -10,8 +10,9 @@ using std::size_t;
 DECLARE_WORKSPACE(WorkspaceSingleValue)
 
 /// Constructor
-WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
-    : API::HistoWorkspace() {
+WorkspaceSingleValue::WorkspaceSingleValue(
+    double value, double error, const Parallel::StorageMode storageMode)
+    : API::HistoWorkspace(storageMode) {
   initialize(1, 1, 1);
   // Set the "histogram" to the single value
   data.dataX().resize(1, 0.0);
@@ -41,9 +42,7 @@ void WorkspaceSingleValue::init(const std::size_t &NVectors,
   (void)YLength; // Avoid compiler warning
 }
 
-void WorkspaceSingleValue::init(const std::size_t &NVectors,
-                                const HistogramData::Histogram &histogram) {
-  UNUSED_ARG(NVectors);
+void WorkspaceSingleValue::init(const HistogramData::Histogram &histogram) {
   UNUSED_ARG(histogram);
 }
 

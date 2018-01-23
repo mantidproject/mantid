@@ -44,10 +44,6 @@ class MatrixWorkspace;
 */
 class MANTID_API_DLL NumericAxis : public Axis {
 public:
-  /// Find the index of the value in the given set of edges
-  static size_t indexOfValue(const double value,
-                             const std::vector<double> &edges);
-
   NumericAxis(const std::size_t &length);
   NumericAxis(const std::vector<double> &centres);
 
@@ -86,10 +82,6 @@ protected:
 private:
   /// Private, undefined copy assignment operator
   const NumericAxis &operator=(const NumericAxis &);
-
-  /// A vector holding the edge values, computed from the distance between
-  /// values
-  std::vector<double> m_edges;
 };
 
 } // namespace API

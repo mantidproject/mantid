@@ -232,13 +232,14 @@ public:
 
   void test_correct_detector_position_INTER() {
     auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
 
     // Use the default correction type, which is a vertical shift
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inter);
-    alg.setProperty("ThetaIn", 0.7);
+    alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
@@ -246,6 +247,14 @@ public:
     alg.setProperty("ProcessingInstructions", "3:4");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+
+    // Check default rebin params
+    const double qStep = alg.getProperty("MomentumTransferStep");
+    const double qMin = alg.getProperty("MomentumTransferMin");
+    const double qMax = alg.getProperty("MomentumTransferMax");
+    TS_ASSERT_DELTA(qStep, 0.034028, 1e-6);
+    TS_ASSERT_DELTA(qMin, out->x(0).front(), 1e-6);
+    TS_ASSERT_DELTA(qMax, out->x(0).back(), 1e-6);
 
     // Compare instrument components before and after
     auto instIn = inter->getInstrument();
@@ -277,10 +286,10 @@ public:
     TS_ASSERT_DIFFERS(point2In.Y(), point2Out.Y());
     TS_ASSERT_DELTA(point1Out.Y() /
                         (point1Out.Z() - instOut->getSample()->getPos().Z()),
-                    std::tan(0.7 * 2 * M_PI / 180), 1e-4);
+                    std::tan(theta * 2 * M_PI / 180), 1e-4);
     TS_ASSERT_DELTA(point2Out.Y() /
                         (point2Out.Z() - instOut->getSample()->getPos().Z()),
-                    std::tan(0.7 * 2 * M_PI / 180), 1e-4);
+                    std::tan(theta * 2 * M_PI / 180), 1e-4);
   }
 
   void test_correct_detector_position_rotation_POLREF() {
@@ -335,11 +344,13 @@ public:
     auto polref = loadRun("CSP79590.raw");
 
     // Correct by shifting detectors vertically
+    // Also explicitly pass CorrectDetectors=1
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", polref);
     alg.setProperty("ThetaIn", 0.25);
+    alg.setProperty("CorrectDetectors", "1");
     alg.setProperty("DetectorCorrectionType", "VerticalShift");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("MomentumTransferStep", 0.01);
@@ -371,6 +382,93 @@ public:
     TS_ASSERT_DELTA(detectorOut.Y() /
                         (detectorOut.Z() - instOut->getSample()->getPos().Z()),
                     std::tan(0.25 * 2 * M_PI / 180), 1e-4);
+  }
+
+  void test_correct_detector_position_from_logs() {
+    auto inter = loadRun("INTER00013460.nxs");
+    double theta = 0.7;
+
+    // Use theta from the logs to correct detector positions
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaLogName", "theta");
+    alg.setProperty("CorrectDetectors", "1");
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("OutputWorkspace", "IvsQ");
+    alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
+    alg.setProperty("ProcessingInstructions", "3:4");
+    alg.execute();
+    MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
+
+    // Compare instrument components before and after
+    auto instIn = inter->getInstrument();
+    auto instOut = corrected->getInstrument();
+
+    // The following components should not have been moved
+    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor1")->getPos(),
+                     instOut->getComponentByName("monitor1")->getPos());
+    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor2")->getPos(),
+                     instOut->getComponentByName("monitor2")->getPos());
+    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor3")->getPos(),
+                     instOut->getComponentByName("monitor3")->getPos());
+    TS_ASSERT_EQUALS(instIn->getComponentByName("linear-detector")->getPos(),
+                     instOut->getComponentByName("linear-detector")->getPos());
+
+    // Only 'point-detector' and 'point-detector2' should have been moved
+    // vertically (along Y)
+
+    auto point1In = instIn->getComponentByName("point-detector")->getPos();
+    auto point2In = instIn->getComponentByName("point-detector2")->getPos();
+    auto point1Out = instOut->getComponentByName("point-detector")->getPos();
+    auto point2Out = instOut->getComponentByName("point-detector2")->getPos();
+
+    TS_ASSERT_EQUALS(point1In.X(), point1Out.X());
+    TS_ASSERT_EQUALS(point1In.Z(), point1Out.Z());
+    TS_ASSERT_EQUALS(point2In.X(), point2Out.X());
+    TS_ASSERT_EQUALS(point2In.Z(), point2Out.Z());
+    TS_ASSERT_DIFFERS(point1In.Y(), point1Out.Y());
+    TS_ASSERT_DIFFERS(point2In.Y(), point2Out.Y());
+    TS_ASSERT_DELTA(point1Out.Y() /
+                        (point1Out.Z() - instOut->getSample()->getPos().Z()),
+                    std::tan(theta * 2 * M_PI / 180), 1e-4);
+    TS_ASSERT_DELTA(point2Out.Y() /
+                        (point2Out.Z() - instOut->getSample()->getPos().Z()),
+                    std::tan(theta * 2 * M_PI / 180), 1e-4);
+  }
+
+  void test_override_ThetaIn_without_correcting_detectors() {
+    auto inter = loadRun("INTER00013460.nxs");
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("CorrectDetectors", "0");
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("OutputWorkspace", "IvsQ");
+    alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
+    alg.setProperty("ProcessingInstructions", "3:4");
+    alg.execute();
+    MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
+
+    // Compare instrument components before and after
+    auto instIn = inter->getInstrument();
+    auto instOut = corrected->getInstrument();
+
+    // the detectors should not have been moved
+
+    auto point1In = instIn->getComponentByName("point-detector")->getPos();
+    auto point2In = instIn->getComponentByName("point-detector2")->getPos();
+    auto point1Out = instOut->getComponentByName("point-detector")->getPos();
+    auto point2Out = instOut->getComponentByName("point-detector2")->getPos();
+
+    TS_ASSERT_EQUALS(point1In, point1Out);
+    TS_ASSERT_EQUALS(point2In, point2Out);
   }
 
   void test_sum_transmission_workspaces() {
@@ -420,6 +518,14 @@ public:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
     MatrixWorkspace_sptr outQbinned = alg.getProperty("OutputWorkspaceBinned");
+
+    // Check the rebin params have not changed
+    const double qStep = alg.getProperty("MomentumTransferStep");
+    const double qMin = alg.getProperty("MomentumTransferMin");
+    const double qMax = alg.getProperty("MomentumTransferMax");
+    TS_ASSERT_EQUALS(qStep, -0.04);
+    TS_ASSERT_EQUALS(qMin, 1.0);
+    TS_ASSERT_EQUALS(qMax, 10.0);
 
     TS_ASSERT_EQUALS(outQbinned->getNumberHistograms(), 1);
     // blocksize = (10.0 - 1.0) / 0.04

@@ -38,13 +38,13 @@
 
 FunctionCurve::FunctionCurve(const QString &name)
     : PlotCurve(name), d_function_type(Normal), d_variable("x"), d_formulas(),
-      d_from(0.0), d_to(0.0), m_identifier(NULL) {
+      d_from(0.0), d_to(0.0), m_identifier(nullptr) {
   setType(GraphOptions::Function);
 }
 
 FunctionCurve::FunctionCurve(const FunctionType &t, const QString &name)
     : PlotCurve(name), d_function_type(t), d_variable("x"), d_formulas(),
-      d_from(0.0), d_to(0.0), m_identifier(NULL) {
+      d_from(0.0), d_to(0.0), m_identifier(nullptr) {
   // d_variable = "x";
   setType(GraphOptions::Function);
 }
@@ -146,10 +146,12 @@ void FunctionCurve::loadData(int points) {
       if (d_to > wsXPoints.back())
         d_to = wsXPoints.back();
 
-      std::vector<double> X;
-      X.reserve(wsXPoints.size());
+      const auto numBins = wsXPoints.size();
 
-      for (int i = 0; i < static_cast<int>(ws->blocksize()); i++) {
+      std::vector<double> X;
+      X.reserve(numBins);
+
+      for (size_t i = 0; i < numBins; i++) {
         const double x = wsXPoints[i];
         if (x < d_from)
           continue;
@@ -263,10 +265,12 @@ void FunctionCurve::loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws,
     if (d_to > wsXPoints.back())
       d_to = wsXPoints.back();
 
-    std::vector<double> X;
-    X.reserve(wsXPoints.size());
+    const size_t numBins = wsXPoints.size();
 
-    for (int i = 0; i < static_cast<int>(ws->blocksize()); i++) {
+    std::vector<double> X;
+    X.reserve(numBins);
+
+    for (size_t i = 0; i < numBins; i++) {
       const double x = wsXPoints[i];
       if (x < d_from)
         continue;

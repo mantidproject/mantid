@@ -5,7 +5,7 @@
 
 #include "DllConfig.h"
 #include "IALCBaselineModellingView.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include "ui_ALCBaselineModellingView.h"
 

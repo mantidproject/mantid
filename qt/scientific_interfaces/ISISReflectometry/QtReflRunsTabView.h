@@ -12,9 +12,11 @@
 namespace MantidQt {
 
 namespace MantidWidgets {
+namespace DataProcessor {
 // Forward decs
-class DataProcessorCommand;
-class DataProcessorCommandAdapter;
+class Command;
+class QtCommandAdapter;
+}
 class SlitCalculator;
 }
 namespace API {
@@ -27,9 +29,8 @@ namespace CustomInterfaces {
 class IReflRunsTabPresenter;
 class ReflSearchModel;
 
-using MantidWidgets::DataProcessorCommand;
-using MantidWidgets::DataProcessorCommandAdapter;
 using MantidWidgets::SlitCalculator;
+namespace DataProcessor = MantidWidgets::DataProcessor;
 
 /** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
@@ -62,7 +63,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
   Q_OBJECT
 public:
   /// Constructor
-  QtReflRunsTabView(QWidget *parent = 0);
+  QtReflRunsTabView(QWidget *parent = nullptr);
   /// Destructor
   ~QtReflRunsTabView() override;
   // Connect the model
@@ -72,14 +73,16 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setTableCommands(std::vector<std::unique_ptr<DataProcessorCommand>>
+  void setTableCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
                             tableCommands) override;
-  void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
+  void setRowCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
+                          rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
-  void setRowActionEnabled(int index, bool enabled) override;
+  void updateMenuEnabledState(bool isProcessing) override;
   void setAutoreduceButtonEnabled(bool enabled) override;
+  void setTransferButtonEnabled(bool enabled) override;
+  void setInstrumentComboEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -101,7 +104,7 @@ private:
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
-  void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
+  void addToMenu(QMenu *menu, std::unique_ptr<DataProcessor::Command> command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -109,12 +112,12 @@ private:
   std::shared_ptr<IReflRunsTabPresenter> m_presenter;
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
-  // the interface
+  // Command adapters
+  std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
+  // the interface (uses actions owned by m_commands)
   Ui::ReflRunsTabWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
-  // Command adapters
-  std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
 
 private slots:
   void on_actionSearch_triggered();

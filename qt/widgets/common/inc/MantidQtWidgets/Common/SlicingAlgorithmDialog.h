@@ -33,7 +33,7 @@ class EXPORT_OPT_MANTIDQT_COMMON SlicingAlgorithmDialog
   Q_OBJECT
 public:
   /// Default Constructor
-  SlicingAlgorithmDialog(QWidget *parent = 0);
+  SlicingAlgorithmDialog(QWidget *parent = nullptr);
 
   /// Destructor
   ~SlicingAlgorithmDialog() override;
@@ -124,11 +124,10 @@ private:
 Class SliceMDDialog
 Concrete SlicingAlgorithm Dialog geared for SliceMD
 */
-class EXPORT_OPT_MANTIDQT_COMMON SliceMDDialog
-    : public SlicingAlgorithmDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SliceMDDialog : public SlicingAlgorithmDialog {
   Q_OBJECT
 public:
-  SliceMDDialog(QWidget *parent = NULL) : SlicingAlgorithmDialog(parent) {}
+  SliceMDDialog(QWidget *parent = nullptr) : SlicingAlgorithmDialog(parent) {}
 
   ~SliceMDDialog() override {}
 
@@ -139,11 +138,10 @@ public:
 Class BinMDDialog
 Concrete BinMDDialog Dialog geared for BinMD
 */
-class EXPORT_OPT_MANTIDQT_COMMON BinMDDialog
-    : public SlicingAlgorithmDialog {
+class EXPORT_OPT_MANTIDQT_COMMON BinMDDialog : public SlicingAlgorithmDialog {
   Q_OBJECT
 public:
-  BinMDDialog(QWidget *parent = NULL) : SlicingAlgorithmDialog(parent) {}
+  BinMDDialog(QWidget *parent = nullptr) : SlicingAlgorithmDialog(parent) {}
   ~BinMDDialog() override {}
   void customiseInitLayout() override;
 };

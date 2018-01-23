@@ -16,12 +16,9 @@
 
 #include <boost/lexical_cast.hpp>
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::NodeList;
 using Poco::XML::Node;
-using Poco::XML::Text;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

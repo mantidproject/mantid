@@ -34,8 +34,6 @@ using namespace API;
 using namespace Kernel;
 using namespace CurveFitting;
 using namespace CurveFitting::Functions;
-using Geometry::Link;
-using Geometry::ParameterMap;
 using Geometry::Track;
 
 namespace {

@@ -7,7 +7,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
 
 #include <QRgb>
@@ -24,7 +24,6 @@
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::Exception::NotFoundError;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -318,7 +317,7 @@ bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,
 void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id) {
   boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
       m_instrActor->getInstrument();
-  if (id == NULL) {
+  if (id == nullptr) {
     id = instr->getComponentID();
   }
   boost::shared_ptr<const Mantid::Geometry::IComponent> comp =
