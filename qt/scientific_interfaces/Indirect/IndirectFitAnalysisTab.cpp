@@ -720,7 +720,6 @@ void IndirectFitAnalysisTab::xMaxSelected(double xMax) {
 void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
-  m_fitPropertyBrowser->setWorkspaceName(wsName);
   setInputWorkspace(inputWs);
   m_defaultPropertyValues = createDefaultValues();
   m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
@@ -730,6 +729,7 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   m_outputFitName = "";
   updatePreviewPlots();
   updatePlotRange();
+  m_fitPropertyBrowser->setWorkspaceName(wsName);
 }
 
 /*
