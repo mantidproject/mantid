@@ -319,59 +319,6 @@ class MainWindow(QMainWindow):
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
 
-            # set the width and height
-            self._layout_widget_info = []
-            width, height = self.window_size.width(), self.window_size.height()
-
-            # fix column width
-            for c in range(len(widgets_layout)):
-                widget = widgets_layout[c][0][0].dockwidget
-                min_width, max_width = widget.minimumWidth(), widget.maximumWidth()
-                info = {'widget': widget,
-                        'dock-min-width': min_width,
-                        'dock-max-width': max_width}
-                self._layout_widget_info.append(info)
-                new_width = int(default_layout['width-fraction'][c] * width)
-                widget.setMinimumWidth(new_width)
-                widget.setMaximumWidth(new_width)
-                widget.updateGeometry()
-
-            # fix column height
-            for c, column in enumerate(widgets_layout):
-                for r in range(len(column) - 1):
-                    widget = column[r][0].dockwidget
-                    dock_min_h = widget.minimumHeight()
-                    dock_max_h = widget.maximumHeight()
-                    info = {'widget': widget,
-                            'dock-min-height': dock_min_h,
-                            'dock-max-height': dock_max_h}
-                    self._layout_widget_info.append(info)
-                    # The 0.95 factor is to adjust height based on useful
-                    # estimated area in the window
-                    new_height = int(default_layout['height-fraction'][c][r] * height * 0.95)
-                    widget.setMinimumHeight(new_height)
-                    widget.setMaximumHeight(new_height)
-                    widget.updateGeometry()
-
-            custom_layout_timer = QTimer(self)
-            custom_layout_timer.timeout.connect(self.layout_fix_timer)
-            custom_layout_timer.setSingleShot(True)
-            custom_layout_timer.start(500)
-
-    def layout_fix_timer(self):
-        """Fixes the height of docks after a new layout is set."""
-        info = self._layout_widget_info
-        for i in info:
-            dockwidget = i['widget']
-            if 'dock-min-width' in i:
-                dockwidget.setMinimumWidth(i['dock-min-width'])
-                dockwidget.setMaximumWidth(i['dock-max-width'])
-            if 'dock-min-height' in i:
-                dockwidget.setMinimumHeight(i['dock-min-height'])
-                dockwidget.setMaximumHeight(i['dock-max-height'])
-
-        self.setUpdatesEnabled(True)
-
     def read_user_settings(self):
         for widget in self.widgets:
             widget.read_user_settings(CONF.qsettings)
