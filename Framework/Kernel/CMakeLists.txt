@@ -481,7 +481,7 @@ set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
 target_include_directories ( Kernel SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIR} PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+#  set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
 # Add to the 'Framework' group in VS

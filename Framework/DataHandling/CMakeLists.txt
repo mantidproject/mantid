@@ -525,7 +525,7 @@ set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling
                         COMPILE_DEFINITIONS "IN_MANTID_DATAHANDLING")
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+#  set_target_properties ( DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 endif ()
 
 # Add to the 'Framework' group in VS

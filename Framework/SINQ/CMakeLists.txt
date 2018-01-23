@@ -145,7 +145,7 @@ set_target_properties ( SINQ PROPERTIES OUTPUT_NAME MantidSINQ
                                         COMPILE_DEFINITIONS "IN_MANTID_SINQ" )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( SINQ PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+#  set_target_properties ( SINQ PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 endif () 
 
 # Add to the 'Framework' group in VS

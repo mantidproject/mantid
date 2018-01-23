@@ -107,7 +107,7 @@ set_target_properties ( HistogramData PROPERTIES OUTPUT_NAME MantidHistogramData
   COMPILE_DEFINITIONS IN_MANTID_HISTOGRAMDATA )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( HistogramData PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+#  set_target_properties ( HistogramData PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
 # Add to the 'Framework' group in VS

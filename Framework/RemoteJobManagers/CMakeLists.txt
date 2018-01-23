@@ -42,7 +42,7 @@ add_library ( RemoteJobManagers ${SRC_FILES} ${INC_FILES})
 set_target_properties ( RemoteJobManagers PROPERTIES OUTPUT_NAME MantidRemoteJobManagers )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( RemoteJobManagers PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+#  set_target_properties ( RemoteJobManagers PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 endif () 
 
 # Add to the 'Framework' group in VS

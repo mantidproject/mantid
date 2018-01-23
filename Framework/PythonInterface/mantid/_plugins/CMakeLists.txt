@@ -65,8 +65,8 @@ target_link_libraries ( PythonCurveFittingModule LINK_PRIVATE ${TCMALLOC_LIBRARI
 
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties( PythonCurveFittingModule PROPERTIES
-                         INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
+#  set_target_properties( PythonCurveFittingModule PROPERTIES
+#                         INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
 endif ()
 ###########################################################################
 # Installation settings

@@ -404,7 +404,7 @@ set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms
     COMPILE_DEFINITIONS IN_MANTID_MDALGORITHMS )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-    set_target_properties ( MDAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+#    set_target_properties ( MDAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 endif () 
 
 # Add to the 'Framework' group in VS

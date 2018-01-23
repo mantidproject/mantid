@@ -81,8 +81,8 @@ target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIE
 
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties( PythonDataObjectsModule PROPERTIES
-                         INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
+#  set_target_properties( PythonDataObjectsModule PROPERTIES
+#                         INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
 endif ()
 ###########################################################################
 # Installation settings
