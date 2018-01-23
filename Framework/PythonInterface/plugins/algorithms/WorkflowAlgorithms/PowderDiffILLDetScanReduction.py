@@ -115,8 +115,7 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
 
         self._progress.report('Finishing up...')
 
-        grouped_output_workspace = GroupWorkspaces(output_workspaces)
-        RenameWorkspace(InputWorkspace=grouped_output_workspace, OutputWorkspace=output_workspace_name)
+        GroupWorkspaces(output_workspaces, output_workspace_name)
         self.setProperty('OutputWorkspace', output_workspace_name)
 
     def _load(self):
