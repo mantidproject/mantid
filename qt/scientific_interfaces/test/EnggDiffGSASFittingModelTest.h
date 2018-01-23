@@ -139,7 +139,7 @@ public:
     const static std::string inputFilename = "ENGINX_277208_focused_bank_2.nxs";
     TestEnggDiffGSASFittingModel model;
 
-    boost::optional<std::string> failure(boost::none);
+    auto failure = boost::make_optional<std::string>("Failure");
     TS_ASSERT_THROWS_NOTHING(failure = model.loadFocusedRun(inputFilename));
     TS_ASSERT(!failure);
 
