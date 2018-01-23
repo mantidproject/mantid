@@ -27,16 +27,13 @@ Constructor
 @param coordinateSystem : Name of coordinate system used
 @param defaultForegroundPeakViewColor : Default peak foreground colour
 @param defaultBackgroundPeakViewColor : Default peak background colour
-@param canAddPeaks : Flag to indicate that peaks can be added. False for no add
-mode.
 @param parent : parent widget
 */
 PeaksWorkspaceWidget::PeaksWorkspaceWidget(
     Mantid::API::IPeaksWorkspace_const_sptr ws,
     const std::string &coordinateSystem,
     PeakViewColor defaultForegroundPeakViewColor,
-    PeakViewColor defaultBackgroundPeakViewColor, const bool canAddPeaks,
-    PeaksViewer *parent)
+    PeakViewColor defaultBackgroundPeakViewColor, PeaksViewer *parent)
     : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem),
       m_foregroundPeakViewColor(defaultForegroundPeakViewColor),
       m_backgroundPeakViewColor(defaultBackgroundPeakViewColor),
@@ -83,9 +80,7 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
 
   ui.ckShowBackground->setVisible(true);
   ui.lblShowBackgroundColour->setVisible(true);
-
-  // Don't allow peaks to be added if it has been forbidden
-  ui.btnAddPeak->setEnabled(canAddPeaks);
+  ui.btnAddPeak->setEnabled(true);
 
   // Populate controls with data.
   populate();
