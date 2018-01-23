@@ -67,16 +67,26 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                              doc='Output workspace containing the reduced data.')
 
     def PyExec(self):
-        input_workspaces = self._load()
-        instrument_name = input_workspaces[0].getInstrument().getName()
+        data_type = 'Raw'
+        if self.getProperty('UseCalibratedData').value:
+            data_type = 'Calibrated'
+
+        input_workspace = LoadAndMerge(Filename=self.getPropertyValue('Run'),
+                                       LoaderName='LoadILLDiffraction',
+                                       LoaderOptions={'DataType': data_type})
+        # We might already have a group, but group just in case
+        input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
+
+        instrument_name = input_group[0].getInstrument().getName()
         supported_instruments = ['D2B', 'D20']
         if instrument_name not in supported_instruments:
             self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
                              + str(supported_instruments))
 
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=4)
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
-            input_workspaces = NormaliseToMonitor(InputWorkspace=input_workspaces, MonitorID=0)
+            input_group = NormaliseToMonitor(InputWorkspace=input_group, MonitorID=0)
 
         height_range = ''
         height_range_prop = self.getProperty('HeightRange').value
@@ -88,7 +98,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         self._progress.report('Doing Output2DTubes Option')
         if self.getProperty('Output2DTubes').value:
-            output2DTubes = SumOverlappingTubes(InputWorkspaces=input_workspaces,
+            output2DTubes = SumOverlappingTubes(InputWorkspaces=input_group,
                                                 OutputType='2DTubes',
                                                 HeightAxis=height_range,
                                                 OutputWorkspace=output_workspace_name + '_2DTubes')
@@ -96,7 +106,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         self._progress.report('Doing Output2D Option')
         if self.getProperty('Output2D').value:
-            output2D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
+            output2D = SumOverlappingTubes(InputWorkspaces=input_group,
                                            OutputType='2D',
                                            CropNegativeScatteringAngles=True,
                                            HeightAxis=height_range,
@@ -105,56 +115,18 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         self._progress.report('Doing Output1D Option')
         if self.getProperty('Output1D').value:
-            output1D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
+            output1D = SumOverlappingTubes(InputWorkspaces=input_group,
                                            OutputType='1D',
                                            CropNegativeScatteringAngles=True,
                                            HeightAxis=height_range,
                                            OutputWorkspace=output_workspace_name + '_1D')
             output_workspaces.append(output1D)
-        DeleteWorkspace('input_workspaces')
+        DeleteWorkspace('input_group')
 
         self._progress.report('Finishing up...')
 
         output_workspace = GroupWorkspaces(output_workspaces, output_workspace_name)
         self.setProperty('OutputWorkspace', output_workspace)
-
-    def _load(self):
-        """
-            Loads the list of runs
-            If sum is requested, MergeRuns is called
-            @return : the list of the loaded ws names
-        """
-        runs = self.getPropertyValue('Run')
-        to_group = []
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',') + 1 + runs.count('+') + 4)
-
-        data_type = 'Raw'
-        if self.getProperty('UseCalibratedData').value:
-            data_type = 'Calibrated'
-
-        for runs_list in runs.split(','):
-            runs_sum = runs_list.split('+')
-            if len(runs_sum) == 1:
-                run = os.path.basename(runs_sum[0]).split('.')[0]
-                self._progress.report('Loading run #' + run)
-                LoadILLDiffraction(Filename=runs_sum[0], OutputWorkspace=run, DataType=data_type)
-                to_group.append(run)
-            else:
-                for i, run in enumerate(runs_sum):
-                    runnumber = os.path.basename(run).split('.')[0]
-                    output_ws_name = 'merged_runs'
-                    if i == 0:
-                        self._progress.report('Loading run #' + run)
-                        LoadILLDiffraction(Filename=run, OutputWorkspace=output_ws_name, DataType=data_type)
-                        to_group.append(output_ws_name)
-                    else:
-                        run = runnumber
-                        self._progress.report('Loading run #' + run)
-                        LoadILLDiffraction(Filename=run, OutputWorkspace=run, DataType=data_type)
-                        MergeRuns(InputWorkspaces=[output_ws_name, run], OutputWorkspace=output_ws_name)
-                        DeleteWorkspace(Workspace=run)
-
-        return GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace='input_workspaces')
 
 
 # Register the algorithm with Mantid
