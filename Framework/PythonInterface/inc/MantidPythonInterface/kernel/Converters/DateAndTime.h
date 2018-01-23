@@ -1,7 +1,7 @@
 #ifndef MANTID_PYTHONINERFACE_CONVERTERS_DATEANDTIME_H_
 #define MANTID_PYTHONINERFACE_CONVERTERS_DATEANDTIME_H_
 /**
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+    Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
 
     This file is part of Mantid.

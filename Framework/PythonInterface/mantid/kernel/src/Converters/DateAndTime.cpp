@@ -11,16 +11,6 @@ namespace {
 // there is a different EPOCH for DateAndTime vs npy_datetime
 const npy_datetime UNIX_EPOCH_NS =
     DateAndTime("1970-01-01T00:00").totalNanoseconds();
-
-/* datetime64[ns] from 64bit integer - numpy's interface requires this to be
- * non-const
- * The parts of the string are
- * M = NPY_DATETIMELTR
- * 8 = 8 bit datasize because npy_datetime is a typedef for int64_t
- * [ns] = units description for nanosecond resolution
- */
-// PyArray_Descr *NP_DATETIME64_NS_DESCR = func_PyArray_Descr(
-//      "M8[ns]");
 }
 
 namespace Mantid {

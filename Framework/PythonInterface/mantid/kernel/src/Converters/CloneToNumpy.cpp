@@ -159,7 +159,7 @@ INSTANTIATE_CLONE(double)
 INSTANTIATE_CLONE(float)
 // Need further 1D specialisation for string
 INSTANTIATE_CLONE1D(std::string)
-// Need further 1D specialisation for string
+// Need further 1D specialisation for DateAndTime
 INSTANTIATE_CLONEND(Types::Core::DateAndTime)
 // Need further ND specialisation for bool
 INSTANTIATE_CLONEND(bool)
