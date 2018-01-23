@@ -1329,10 +1329,10 @@ void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
   auto ass = componentInfo.detectorsInSubtree(parent);
 
   auto wi = actor.getWorkspaceIndex(detindex);
-  
+
   if (wi == InstrumentActor::INVALID_INDEX)
     return;
-  
+
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
 
