@@ -30,6 +30,7 @@ from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
+    sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
 
@@ -37,6 +38,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         ('Home', 'Reset original view', 'fa.home', 'home', None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'fa.arrows-alt', 'pan', False),
         ('Zoom', 'Zoom to rectangle', 'fa.search-plus', 'zoom', False),
+        (None, None, None, None, None),
+        ('Grid', 'Toggle grid on/off', None, 'toggle_grid', False),
         (None, None, None, None, None),
         ('Active', 'When enabled future plots will overwrite this figure', None, 'active', True),
         ('Hold', 'When enabled this holds this figure open ', None, 'hold', False),
@@ -83,6 +86,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
         # Adjust icon size or they are too small in PyQt5 by default
         self.setIconSize(QtCore.QSize(24, 24))
+
+    def toggle_grid(self):
+        self.sig_grid_toggle_triggered.emit()
 
     def hold(self, *args):
         self._actions['hold'].setChecked(True)

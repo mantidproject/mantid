@@ -87,6 +87,7 @@ class FigureManagerWorkbench(FigureManagerBase):
         if self.toolbar is not None:
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
+            self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             if hasattr(Gcf, 'set_hold'):
                 self.toolbar.sig_hold_triggered.connect(functools.partial(Gcf.set_hold, self))
                 self.toolbar.sig_active_triggered.connect(functools.partial(Gcf.set_active, self))
@@ -168,6 +169,16 @@ class FigureManagerWorkbench(FigureManagerBase):
                 exc_info = self._destroy_exc
                 self._destroy_exc = None
                 reraise(*exc_info)
+
+    def grid_toggle(self):
+        """
+        Toggle grid lines on/off
+        """
+        canvas = self.canvas
+        axes = canvas.figure.get_axes()
+        for ax in axes:
+            ax.grid()
+        canvas.draw_idle()
 
     def hold(self):
         """
