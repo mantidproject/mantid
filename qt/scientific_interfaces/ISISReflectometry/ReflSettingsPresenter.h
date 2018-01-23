@@ -96,7 +96,6 @@ private:
   std::string m_currentInstrumentName;
   int m_group;
 };
-
 }
 }
 #endif /* MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H */

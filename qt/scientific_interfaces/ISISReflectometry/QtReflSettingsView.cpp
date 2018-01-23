@@ -244,13 +244,16 @@ std::string QtReflSettingsView::getText(QComboBox const &box) const {
   return box.currentText().toStdString();
 }
 
-void QtReflSettingsView::showOptionLoadError(AccumulatedTypeErrors const &errors) {
+void QtReflSettingsView::showOptionLoadError(
+    AccumulatedTypeErrors const &errors) {
   auto message =
       QString("Unable to retrieve default values for the following parameters "
               "because:\n");
   for (auto &error : errors)
-    message += "'" + QString::fromStdString(error.parameterName()) + "' should hold an " +
-               QString::fromStdString(error.expectedType()) + " value but does not.";
+    message += "'" + QString::fromStdString(error.parameterName()) +
+               "' should hold an " +
+               QString::fromStdString(error.expectedType()) +
+               " value but does not.";
   QMessageBox::warning(this, "Failed to load default from parameter file",
                        message);
 }

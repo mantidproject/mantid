@@ -115,7 +115,7 @@ public:
   MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
   MOCK_CONST_METHOD0(experimentSettingsEnabled, bool());
   MOCK_CONST_METHOD0(instrumentSettingsEnabled, bool());
-  MOCK_METHOD1(showOptionLoadError, void(AccumulatedTypeErrors const&));
+  MOCK_METHOD1(showOptionLoadError, void(AccumulatedTypeErrors const &));
   MOCK_CONST_METHOD0(detectorCorrectionEnabled, bool());
   // Calls we don't care about
   void

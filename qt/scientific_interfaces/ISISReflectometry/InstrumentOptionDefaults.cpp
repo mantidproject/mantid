@@ -8,8 +8,7 @@ bool operator==(InstrumentOptionDefaults const &lhs,
          lhs.MonitorIntegralMin == rhs.MonitorIntegralMin &&
          lhs.MonitorIntegralMax == rhs.MonitorIntegralMax &&
          lhs.MonitorBackgroundMin == rhs.MonitorBackgroundMin &&
-         lhs.LambdaMin == rhs.LambdaMin &&
-         lhs.LambdaMax == rhs.LambdaMax &&
+         lhs.LambdaMin == rhs.LambdaMin && lhs.LambdaMax == rhs.LambdaMax &&
          lhs.I0MonitorIndex == rhs.I0MonitorIndex &&
          lhs.ProcessingInstructions == rhs.ProcessingInstructions &&
          lhs.DetectorCorrectionType == rhs.DetectorCorrectionType;

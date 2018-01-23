@@ -452,17 +452,17 @@ public:
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
 
-    auto defaultsSetInIDF = ExperimentOptionDefaults();
-    defaultsSetInIDF.AnalysisMode = "PointDetectorAnalysis";
-    defaultsSetInIDF.PolarizationAnalysis = "None";
-    defaultsSetInIDF.CRho = "1.006831,-0.011467,0.002244,-0.000095";
-    defaultsSetInIDF.CAlpha = "1.017526,-0.017183,0.003136,-0.000140";
-    defaultsSetInIDF.CAp = "0.917940,0.038265,-0.006645,0.000282";
-    defaultsSetInIDF.CPp = "0.972762,0.001828,-0.000261,0.0";
-    defaultsSetInIDF.TransRunStartOverlap = 10.0;
-    defaultsSetInIDF.TransRunEndOverlap = 12.0;
+    auto fromIDFOrReductionAlg = ExperimentOptionDefaults();
+    fromIDFOrReductionAlg.AnalysisMode = "PointDetectorAnalysis";
+    fromIDFOrReductionAlg.PolarizationAnalysis = "None";
+    fromIDFOrReductionAlg.CRho = "1.006831,-0.011467,0.002244,-0.000095";
+    fromIDFOrReductionAlg.CAlpha = "1.017526,-0.017183,0.003136,-0.000140";
+    fromIDFOrReductionAlg.CAp = "0.917940,0.038265,-0.006645,0.000282";
+    fromIDFOrReductionAlg.CPp = "0.972762,0.001828,-0.000261,0.0";
+    fromIDFOrReductionAlg.TransRunStartOverlap = 10.0;
+    fromIDFOrReductionAlg.TransRunEndOverlap = 12.0;
 
-    EXPECT_CALL(mockView, setExpDefaults(defaultsSetInIDF)).Times(1);
+    EXPECT_CALL(mockView, setExpDefaults(fromIDFOrReductionAlg)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -483,19 +483,19 @@ public:
     expectNoOptionLoadErrors(mockView);
 
     presenter.setInstrumentName("INTER");
-    auto defaultsSetInIDF = InstrumentOptionDefaults();
+    auto fromIDFOrReductionAlg = InstrumentOptionDefaults();
 
-    defaultsSetInIDF.NormalizeByIntegratedMonitors = true;
-    defaultsSetInIDF.MonitorIntegralMin = 4.0;
-    defaultsSetInIDF.MonitorIntegralMax = 10.0;
-    defaultsSetInIDF.MonitorBackgroundMin = 17.0;
-    defaultsSetInIDF.MonitorBackgroundMax = 18.0;
-    defaultsSetInIDF.LambdaMin = 1.5;
-    defaultsSetInIDF.LambdaMax = 17.0;
-    defaultsSetInIDF.I0MonitorIndex = 2.0;
-    defaultsSetInIDF.DetectorCorrectionType = "VerticalShift";
+    fromIDFOrReductionAlg.NormalizeByIntegratedMonitors = true;
+    fromIDFOrReductionAlg.MonitorIntegralMin = 4.0;
+    fromIDFOrReductionAlg.MonitorIntegralMax = 10.0;
+    fromIDFOrReductionAlg.MonitorBackgroundMin = 17.0;
+    fromIDFOrReductionAlg.MonitorBackgroundMax = 18.0;
+    fromIDFOrReductionAlg.LambdaMin = 1.5;
+    fromIDFOrReductionAlg.LambdaMax = 17.0;
+    fromIDFOrReductionAlg.I0MonitorIndex = 2.0;
+    fromIDFOrReductionAlg.DetectorCorrectionType = "VerticalShift";
 
-    EXPECT_CALL(mockView, setInstDefaults(defaultsSetInIDF)).Times(1);
+    EXPECT_CALL(mockView, setInstDefaults(fromIDFOrReductionAlg)).Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
