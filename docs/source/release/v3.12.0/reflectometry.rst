@@ -50,6 +50,11 @@ Improvements
 ############
 
 - Removed the ``RegionOfDirectBeam`` property from :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` because this is not used.
+- Improvements to :ref:`algm-LoadILLReflectometry`:
+    - Figaro NeXus files are now properly handled.
+    - A new property, *BeamCentre* allows user to manually specify the beam position on the detector.
+    - The *BeamPosition* property was renamed to *DirectBeamPosition* to better reflect its usage.
+    - The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector will be rotated such that the reflected peak on the detector will be at twice *BraggAngle*.
 
 
 Bug fixes
