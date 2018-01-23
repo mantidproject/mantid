@@ -1,6 +1,7 @@
 #pylint: disable=W0403,R0902,R0903,R0904,W0212
 from __future__ import (absolute_import, division, print_function)
 from HFIR_4Circle_Reduction import mpl2dgraphicsview
+from PyQt4 import QtCore
 import numpy as np
 import os
 
@@ -14,6 +15,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         RELEASED = 0
         LEFT = 1
         RIGHT = 3
+
+    newROIDefinedSignal = QtCore.pyqtSignal(int, int, int, int)  # return coordinate of the
 
     def __init__(self, parent):
         """
@@ -34,7 +37,6 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         # class status variables
         self._roiSelectMode = False
         # region of interest. None or 2 tuple of 2-tuple for upper left corner and lower right corner
-        self._myROI = None
         self._roiStart = None
         self._roiEnd = None
 
@@ -68,6 +70,19 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         # plot
         self.plot_roi()
+
+        return
+
+    def clear_canvas(self):
+        """
+        clear canvas (override base class)
+        :return:
+        """
+        # clear the current record
+        self._myPolygon = None
+
+        # call base class
+        super(Detector2DView, self).clear_canvas()
 
         return
 
@@ -194,6 +209,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         vertex_array[3][1] = self._roiEnd[1]
 
         # register
+        if self._myPolygon is not None:
+            self._myPolygon.remove()
+            self._myPolygon = None
         self._myPolygon = self._myCanvas.plot_polygon(vertex_array, fill=False, color='w')
 
         return
@@ -203,7 +221,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         Remove the rectangular for region of interest
         :return:
         """
-        # FIXME ASAP - Use triangular like Py4Circle???
+        print ('[DB...BAT] Try to remove ROI {0}'.format(self._myPolygon))
         if self._myPolygon is not None:
             # polygon is of type matplotlib.patches.Polygon
             self._myPolygon.remove()
@@ -214,6 +232,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
             self._roiStart = None
             self._roiEnd = None
+
+        else:
+            print ('[NOTICE] Polygon is None.  Nothing to remove')
 
         return
 
@@ -302,6 +323,10 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         if self._roiSelectMode and prev_mouse_pressed == Detector2DView.MousePress.LEFT:
             # end the ROI selection mode
             self.update_roi_poly(self._currX, self._currY)
+
+            # send a signal to parent such that a rew ROI is defined
+            self.newROIDefinedSignal.emit(self._roiStart[0], self._roiStart[1], self._roiEnd[0], self._roiEnd[1])
+
         # END-IF
 
         return
@@ -329,6 +354,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         assert parent_window is not None, 'Parent window cannot be None'
 
         self._myParentWindow = parent_window
+
+        self.newROIDefinedSignal.connect(self._myParentWindow.evt_new_roi)
 
         return
 

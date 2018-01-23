@@ -106,7 +106,10 @@ class MatrixTable(tableBase.NTableWidget):
 
         # think of reset
         if self.rowCount() != num_rows or self.columnCount() != num_cols:
-            raise RuntimeError('ASAP')
+            errmsg = 'Number of rows to set {0} is not equal to current number of rows {1} or ' \
+                     'Number of columns to set {2} is not equal to current number of columns {3}' \
+                     ''.format(self.rowCount(), num_rows, self.columnCount(), num_cols)
+            raise RuntimeError(errmsg)
 
         return
 

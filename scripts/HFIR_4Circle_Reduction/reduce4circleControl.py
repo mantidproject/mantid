@@ -129,7 +129,7 @@ class CWSCDReductionControl(object):
         # reference workspace for LoadMask
         self._refWorkspaceForMask = None
         self._currMaskWSName = None   # current mask work space's name
-        self._maskWorkspaceDict = dict()
+        self._maskWorkspaceDict = dict()  # key: roi name.  value: name of MaskWorkspace
         # Region of interest: key = (experiment, scan), value = 2-tuple of 2-tuple: ( (lx, ly), (ux, uy))
         self._roiDict = dict()
 
@@ -217,8 +217,7 @@ class CWSCDReductionControl(object):
 
         return return_k_index
 
-    @staticmethod
-    def apply_mask(exp_number, scan_number, pt_number):
+    def apply_mask(self, exp_number, scan_number, pt_number, roi_name=None):
         """
         Apply mask on a Pt./run. by using a standard non-tag-based mask workspace's name
         Requirements:
@@ -229,6 +228,7 @@ class CWSCDReductionControl(object):
         :param exp_number:
         :param scan_number:
         :param pt_number:
+        :param roi_name: a string or a None
         :return:
         """
         # check
@@ -239,15 +239,23 @@ class CWSCDReductionControl(object):
         assert isinstance(pt_number, int), 'Pt number {0} must be an integer but not a {1}' \
                                            ''.format(pt_number, type(pt_number))
 
-        # get workspaces' names by standard naming scheme
+        # get raw workspace for counts
         raw_pt_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
-        mask_ws_name = get_mask_ws_name(exp_number, scan_number)
 
-        # check workspace existing
-        if AnalysisDataService.doesExist(raw_pt_ws_name) is False:
-            raise RuntimeError('Raw data workspace for exp %d scan %d pt %d does not exist.' % (
-                exp_number, scan_number, pt_number
-            ))
+        if roi_name is None:
+            # a new ROI to create mask workspace
+            # get workspaces' names by standard naming scheme
+            mask_ws_name = get_mask_ws_name(exp_number, scan_number)
+
+            # check workspace existing
+            if AnalysisDataService.doesExist(raw_pt_ws_name) is False:
+                raise RuntimeError('Raw data workspace for exp %d scan %d pt %d does not exist.' % (
+                    exp_number, scan_number, pt_number
+                ))
+        else:
+            # an existing mask
+            mask_ws_name = self._maskWorkspaceDict[roi_name]
+        # END-IF
 
         # mask detectors
         mantidsimple.MaskDetectors(Workspace=raw_pt_ws_name, MaskedWorkspace=mask_ws_name)
@@ -906,30 +914,42 @@ class CWSCDReductionControl(object):
 
         return self._refinedUBTup[1], self._refinedUBTup[2], self._refinedUBTup[3]
 
-    def get_region_of_interest(self, exp_number, scan_number):
+    def get_region_of_interest(self, exp_number, scan_number, roi_name=None):
         """ Get region of interest
-        :param exp_number:
-        :param scan_number:
+        :param exp_number: if ROI name is given, it doesn't matter
+        :param scan_number: if ROI name is given, it doesn't matter
+        :param roi_name: name of the ROI
         :return: region of interest
         """
-        # check
-        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer.'.format(exp_number)
-        assert isinstance(scan_number, int) or scan_number is None, 'Scan number {0} must be either an integer or None.' \
-                                                                    ''.format(scan_number)
+        assert isinstance(roi_name, str) or roi_name is None,\
+            'ROI name {0} must be a string or None but not a {1}.'.format(roi_name, type(roi_name))
 
-        if (exp_number, scan_number) in self._roiDict:
-            # able to find region of interest for this scan
+        if roi_name is not None and roi_name in self._roiDict:
+            # ROI
             ret_status = True
-            ret_value = self._roiDict[(exp_number, scan_number)]
-        elif exp_number in self._roiDict:
-            # able to find region of interest for this experiment
-            ret_status = True
-            ret_value = self._roiDict[exp_number]
+            ret_value = self._roiDict[roi_name]
+
         else:
-            # region of interest of experiment is not defined
-            ret_status = False
-            ret_value = 'Unable to find ROI for experiment %d. Existing includes %s.' % (exp_number,
-                                                                                         str(self._roiDict.keys()))
+            # check
+            assert isinstance(exp_number, int), 'Experiment number {0} must be an integer.'.format(exp_number)
+            assert isinstance(scan_number,
+                              int) or scan_number is None, 'Scan number {0} must be either an integer or None.' \
+                                                           ''.format(scan_number)
+
+            if (exp_number, scan_number) in self._roiDict:
+                # able to find region of interest for this scan
+                ret_status = True
+                ret_value = self._roiDict[(exp_number, scan_number)]
+
+            elif exp_number in self._roiDict:
+                # able to find region of interest for this experiment
+                ret_status = True
+                ret_value = self._roiDict[exp_number]
+            else:
+                # region of interest of experiment is not defined
+                ret_status = False
+                ret_value = 'Unable to find ROI for experiment %d. Existing includes %s.' % (exp_number,
+                                                                                             str(self._roiDict.keys()))
 
         return ret_status, ret_value
 
@@ -2034,8 +2054,10 @@ class CWSCDReductionControl(object):
         :return:
         """
         # Check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}' \
+                                             ''.format(scan_number, type(scan_number))
         assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2
         assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2
 
@@ -2043,14 +2065,45 @@ class CWSCDReductionControl(object):
         ll_y = int(lower_left_corner[1])
         ur_x = int(upper_right_corner[0])
         ur_y = int(upper_right_corner[1])
-        assert ll_x < ur_x and ll_y < ur_y, 'Lower left corner (%.5f, %.5f) vs. upper right corner ' \
-                                            '(%.5f, %.5f) ' % (ll_x, ll_y, ur_x, ur_y)
+        if ll_x >= ur_x or ll_y >= ur_y:
+            err_msg = 'Lower left corner ({0}, {1}) and upper right corner are in a line ({2}, {3})' \
+                      ''.format(ll_x, ll_y, ur_x, ur_y)
+            raise RuntimeError(err_msg)
 
         # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
         # then it is better and easier to support client to search this ROI by experiment number
         # and only the latest is saved by this key
         self._roiDict[(exp_number, scan_number)] = ((ll_x, ll_y), (ur_x, ur_y))
         self._roiDict[exp_number] = ((ll_x, ll_y), (ur_x, ur_y))
+
+        return
+
+    def set_roi_by_name(self, roi_name, lower_left_corner, upper_right_corner):
+        """
+        Set region of interest and record it by user-specified ROI name
+        :param roi_name:
+        :param lower_left_corner:
+        :param upper_right_corner:
+        :return:
+        """
+        assert isinstance(roi_name, str), 'ROI name {0} must be an integer but not a {1}' \
+                                         ''.format(roi_name, type(roi_name))
+        assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2
+        assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2
+
+        ll_x = int(lower_left_corner[0])
+        ll_y = int(lower_left_corner[1])
+        ur_x = int(upper_right_corner[0])
+        ur_y = int(upper_right_corner[1])
+        if ll_x >= ur_x or ll_y >= ur_y:
+            err_msg = 'Lower left corner ({0}, {1}) and upper right corner are in a line ({2}, {3})' \
+                      ''.format(ll_x, ll_y, ur_x, ur_y)
+            raise RuntimeError(err_msg)
+
+        # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
+        # then it is better and easier to support client to search this ROI by experiment number
+        # and only the latest is saved by this key
+        self._roiDict[roi_name] = ((ll_x, ll_y), (ur_x, ur_y))
 
         return
 
@@ -2572,10 +2625,13 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check
-        assert isinstance(tag, str), 'Tag must be a string'
-        assert len(region_of_interest) == 2
-        assert len(region_of_interest[0]) == 2
-        assert len(region_of_interest[1]) == 2
+        assert isinstance(tag, str), 'Tag {0} must be a string {1}'.format(tag, type(tag))
+        assert len(region_of_interest) == 2,\
+            'Size of ROI must be 2 but not {0}'.format(len(region_of_interest))
+        assert len(region_of_interest[0]) == 2,\
+            'Size of ROI[0] must be 2 but not {0}'.format(len(region_of_interest[0]))
+        assert len(region_of_interest[1]) == 2,\
+            'Size of ROI[1] must be 2 but not {0}'.format(len(region_of_interest[1]))
 
         # example:  ret_value = self._roiDict[exp_number]
         self._roiDict[tag] = region_of_interest

@@ -154,9 +154,6 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         # legend and color bar
         self._colorBar = None
 
-        # polygon
-        self._myPolygon = None
-
         # Buffer of data
         self._currentArray2D = None
 
@@ -239,8 +236,6 @@ class Qt4Mpl2dCanvas(FigureCanvas):
     def addImage(self, imagefilename):
         """ Add an image by file
         """
-        #import matplotlib.image as mpimg
-
         # set aspect to auto mode
         self.axes.set_aspect('auto')
 
@@ -277,10 +272,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
             self.fig.clear()
             # Re-create subplot
             self.axes = self.fig.add_subplot(111)
-
-        # clear polygon
-        if self._myPolygon is not None:
-            self._myPolygon.remove()
+        # END-FOR
 
         # flush/commit
         self._flush()
