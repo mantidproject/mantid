@@ -42,10 +42,9 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
-                         QPoint, QSize, Qt, QTimer)  # noqa
+from qtpy.QtCore import (QCoreApplication, QEventLoop, Qt, QTimer)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
-from qtpy.QtWidgets import (QApplication, QDesktopWidget, QDockWidget, QFileDialog,
+from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
@@ -150,6 +149,7 @@ class MainWindow(QMainWindow):
         self.create_menus()
 
         # widgets
+        # Log message display must be imported first
         self.set_splash("Loading message display")
         from workbench.plugins.logmessagedisplay import LogMessageDisplay
         self.messagedisplay = LogMessageDisplay(self)
@@ -157,11 +157,11 @@ class MainWindow(QMainWindow):
         self.messagedisplay.register_plugin()
         self.widgets.append(self.messagedisplay)
 
-        self.set_splash("Loading IPython console")
-        from workbench.plugins.jupyterconsole import JupyterConsole
-        self.ipythonconsole = JupyterConsole(self)
-        self.ipythonconsole.register_plugin()
-        self.widgets.append(self.ipythonconsole)
+        self.set_splash("Loading Algorithm Selector")
+        from workbench.plugins.algorithmselectorwidget import AlgorithmSelector
+        self.algorithm_selector = AlgorithmSelector(self)
+        self.algorithm_selector.register_plugin()
+        self.widgets.append(self.algorithm_selector)
 
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
@@ -169,17 +169,17 @@ class MainWindow(QMainWindow):
         self.editor.register_plugin()
         self.widgets.append(self.editor)
 
+        self.set_splash("Loading IPython console")
+        from workbench.plugins.jupyterconsole import JupyterConsole
+        self.ipythonconsole = JupyterConsole(self)
+        self.ipythonconsole.register_plugin()
+        self.widgets.append(self.ipythonconsole)
+
         self.set_splash("Loading Workspace Widget")
         from workbench.plugins.workspacewidget import WorkspaceWidget
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
-
-        self.set_splash("Loading Algorithm Selector")
-        from workbench.plugins.algorithmselectorwidget import AlgorithmSelector
-        self.algorithm_selector = AlgorithmSelector(self)
-        self.algorithm_selector.register_plugin()
-        self.widgets.append(self.algorithm_selector)
 
         self.setup_layout()
         self.read_user_settings()
@@ -224,10 +224,22 @@ class MainWindow(QMainWindow):
 
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
-                                               on_triggered=self.setup_default_layouts,
+                                               on_triggered=self.prep_window_for_reset,
                                                shortcut="Shift+F10",
                                                shortcut_context=Qt.ApplicationShortcut)
-        self.view_menu_actions = [action_restore_default]
+        self.view_menu_actions = [action_restore_default, None] + self.create_widget_actions()
+
+    def create_widget_actions(self):
+        """
+        Creates menu actions to show/hide dockable widgets.
+        This uses all widgets that are in self.widgets
+        :return: A list of show/hide actions for all widgets
+        """
+        widget_actions = []
+        for widget in self.widgets:
+            action = widget.dockwidget.toggleViewAction()
+            widget_actions.append(action)
+        return widget_actions
 
     def populate_menus(self):
         # Link to menus
@@ -242,101 +254,26 @@ class MainWindow(QMainWindow):
     # ----------------------- Layout ---------------------------------
 
     def setup_layout(self):
-        window_settings = self.load_window_settings('window/')
-        hexstate = window_settings[0]
-        if hexstate is None:
-            self.setup_for_first_run(window_settings)
-        else:
-            self.set_window_settings(*window_settings)
+        self.setup_for_first_run()
 
-    def setup_for_first_run(self, window_settings):
+    def setup_for_first_run(self):
         """Assume this is a first run of the application and set layouts
         accordingly"""
         self.setWindowState(Qt.WindowMaximized)
-        self.setup_default_layouts(window_settings)
+        desktop = QDesktopWidget()
+        self.window_size = desktop.screenGeometry().size()
+        self.setup_default_layouts()
 
-    def load_window_settings(self, prefix, section='main'):
-        """Load window layout settings from userconfig-based configuration
-        with *prefix*, under *section*
-        default: if True, do not restore inner layout"""
-        get_func = CONF.get
-        window_size = get_func(section, prefix + 'size')
-        try:
-            hexstate = get_func(section, prefix + 'state')
-        except KeyError:
-            hexstate = None
-        pos = get_func(section, prefix + 'position')
+    def prep_window_for_reset(self):
+        """Function to reset all dock widgets to a state where they can be
+        ordered by setup_default_layout"""
+        for widget in self.widgets:
+            widget.dockwidget.setFloating(False)  # Bring back any floating windows
+            self.addDockWidget(Qt.LeftDockWidgetArea, widget.dockwidget)  # Un-tabify all widgets
+        self.setup_default_layouts()
 
-        # It's necessary to verify if the window/position value is valid
-        # with the current screen.
-        width = pos[0]
-        height = pos[1]
-        screen_shape = QApplication.desktop().geometry()
-        current_width = screen_shape.width()
-        current_height = screen_shape.height()
-        if current_width < width or current_height < height:
-            pos = CONF.get_default(section, prefix + 'position')
-
-        is_maximized = get_func(section, prefix + 'is_maximized')
-        is_fullscreen = get_func(section, prefix + 'is_fullscreen')
-        return hexstate, window_size, pos, is_maximized, \
-            is_fullscreen
-
-    def get_window_settings(self):
-        """Return current window settings
-        Symetric to the 'set_window_settings' setter"""
-        window_size = (self.window_size.width(), self.window_size.height())
-        is_fullscreen = self.isFullScreen()
-        if is_fullscreen:
-            is_maximized = self.maximized_flag
-        else:
-            is_maximized = self.isMaximized()
-        pos = (self.window_position.x(), self.window_position.y())
-        hexstate = qbytearray_to_str(self.saveState())
-        return (hexstate, window_size, pos, is_maximized,
-                is_fullscreen)
-
-    def set_window_settings(self, hexstate, window_size, pos,
-                            is_maximized, is_fullscreen):
-        """Set window settings
-        Symetric to the 'get_window_settings' accessor"""
-        with widget_updates_disabled(self):
-            self.window_size = QSize(window_size[0], window_size[1])  # width,height
-            self.window_position = QPoint(pos[0], pos[1])  # x,y
-            self.setWindowState(Qt.WindowNoState)
-            self.resize(self.window_size)
-            self.move(self.window_position)
-
-            # Window layout
-            if hexstate:
-                self.restoreState(QByteArray().fromHex(
-                    str(hexstate).encode('utf-8')))
-                # QDockWidget objects are not painted if restored as floating
-                # windows, so we must dock them before showing the mainwindow.
-                for widget in self.children():
-                    if isinstance(widget, QDockWidget) and widget.isFloating():
-                        self.floating_dockwidgets.append(widget)
-                        widget.setFloating(False)
-
-            # Is fullscreen?
-            if is_fullscreen:
-                self.setWindowState(Qt.WindowFullScreen)
-
-            # Is maximized?
-            if is_fullscreen:
-                self.maximized_flag = is_maximized
-            elif is_maximized:
-                self.setWindowState(Qt.WindowMaximized)
-                # Use QDesktopWidget to find full screen size if maximized
-                # This is required as self.size before initial show returns the size of the splash screen
-                desktop = QDesktopWidget()
-                self.window_size = desktop.screenGeometry().size()
-
-    def setup_default_layouts(self, window_settings=False):
+    def setup_default_layouts(self):
         """Set or reset the layouts of the child widgets"""
-        if window_settings is not False:
-            self.set_window_settings(*window_settings)
-
         # layout definition
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
@@ -388,74 +325,6 @@ class MainWindow(QMainWindow):
                     # Raise front widget per row
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
-
-            # set the width and height
-            self._layout_widget_info = []
-            width, height = self.window_size.width(), self.window_size.height()
-
-            # fix column width
-            for c in range(len(widgets_layout)):
-                widget = widgets_layout[c][0][0].dockwidget
-                min_width, max_width = widget.minimumWidth(), widget.maximumWidth()
-                info = {'widget': widget,
-                        'dock min width': min_width,
-                        'dock max width': max_width}
-                self._layout_widget_info.append(info)
-                new_width = int(default_layout['width-fraction'][c] * width)
-                widget.setMinimumWidth(new_width)
-                widget.setMaximumWidth(new_width)
-                widget.updateGeometry()
-
-            # fix column height
-            for c, column in enumerate(widgets_layout):
-                for r in range(len(column) - 1):
-                    widget = column[r][0]
-                    dockwidget = widget.dockwidget
-                    dock_min_h = dockwidget.minimumHeight()
-                    dock_max_h = dockwidget.maximumHeight()
-                    info = {'widget': widget,
-                            'dock min height': dock_min_h,
-                            'dock max height': dock_max_h}
-                    self._layout_widget_info.append(info)
-                    # The 0.95 factor is to adjust height based on usefull
-                    # estimated area in the window
-                    new_height = int(default_layout['height-fraction'][c][r] * height)
-                    dockwidget.setMinimumHeight(new_height)
-                    dockwidget.setMaximumHeight(new_height)
-                    dockwidget.updateGeometry()
-
-            custom_layout_timer = QTimer(self)
-            custom_layout_timer.timeout.connect(self.layout_fix_timer)
-            custom_layout_timer.setSingleShot(True)
-            custom_layout_timer.start(500)
-
-    def layout_fix_timer(self):
-        """Fixes the height of docks after a new layout is set."""
-        info = self._layout_widget_info
-        for i in info:
-            dockwidget = i['widget']
-            if 'dock min width' in i:
-                dockwidget.setMinimumWidth(i['dock min width'])
-                dockwidget.setMaximumWidth(i['dock max width'])
-            if 'dock min height' in i:
-                dockwidget.setMinimumHeight(i['dock min height'])
-                dockwidget.setMaximumHeight(i['dock max height'])
-
-        self.setUpdatesEnabled(True)
-
-    def save_current_window_settings(self, prefix, section='main'):
-        """Save current window settings with *prefix* in
-        the userconfig-based configuration, under *section*"""
-        win_size = self.window_size
-
-        CONF.set(section, prefix + 'size', (win_size.width(), win_size.height()))
-        CONF.set(section, prefix + 'is_maximized', self.isMaximized())
-        CONF.set(section, prefix + 'is_fullscreen', self.isFullScreen())
-        pos = self.window_position
-        CONF.set(section, prefix + 'position', (pos.x(), pos.y()))
-        self.maximize_dockwidget(restore=True)  # Restore non-maximized layout
-        qba = self.saveState()
-        CONF.set(section, prefix + 'state', qbytearray_to_str(qba))
 
     def read_user_settings(self):
         for widget in self.widgets:

@@ -168,6 +168,9 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         layout = QVBoxLayout()
         layout.addLayout(top_layout)
         layout.addWidget(self.tree)
+        # todo: Without the sizeHint() call the minimum size is not set correctly
+        #       This needs some investigation as to why this is.
+        layout.sizeHint()
         self.setLayout(layout)
 
     def populate_ui(self, data):
