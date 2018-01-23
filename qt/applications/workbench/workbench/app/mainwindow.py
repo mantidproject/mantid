@@ -333,29 +333,31 @@ class MainWindow(QMainWindow):
             elif is_maximized:
                 self.setWindowState(Qt.WindowMaximized)
                 # Use QDesktopWidget to find full screen size if maximized
-                # This is required as self.size before initial show returns the size of the splash screen
+                # This is required to override the config file defaults
+                # self.size() returns size of splash screen at this point in execution
                 desktop = QDesktopWidget()
                 self.window_size = desktop.screenGeometry().size()
 
     def setup_default_layouts(self, window_settings=False):
         """Set or reset the layouts of the child widgets"""
+        # Slot with no args passes False instead of None
         if window_settings is not False:
             self.set_window_settings(*window_settings)
 
         # layout definition
-        logmessages = self.messagedisplay
+        log_messages = self.messagedisplay
         ipython = self.ipythonconsole
-        workspacewidget = self.workspacewidget
+        workspace_widget = self.workspacewidget
         editor = self.editor
         algorithm_selector = self.algorithm_selector
         default_layout = {
             'widgets': [
                 # column 0
-                [[workspacewidget], [algorithm_selector]],
+                [[workspace_widget], [algorithm_selector]],
                 # column 1
                 [[editor, ipython]],
                 # column 2
-                [[logmessages]]
+                [[log_messages]]
             ],
             'width-fraction': [0.25,            # column 0 width
                                0.50,            # column 1 width
@@ -437,13 +439,13 @@ class MainWindow(QMainWindow):
         """Fixes the height of docks after a new layout is set."""
         info = self._layout_widget_info
         for i in info:
-            dockwidget = i['widget']
+            dock_widget = i['widget']
             if 'dock-min-width' in i:
-                dockwidget.setMinimumWidth(i['dock-min-width'])
-                dockwidget.setMaximumWidth(i['dock-max-width'])
+                dock_widget.setMinimumWidth(i['dock-min-width'])
+                dock_widget.setMaximumWidth(i['dock-max-width'])
             if 'dock-min-height' in i:
-                dockwidget.setMinimumHeight(i['dock-min-height'])
-                dockwidget.setMaximumHeight(i['dock-max-height'])
+                dock_widget.setMinimumHeight(i['dock-min-height'])
+                dock_widget.setMaximumHeight(i['dock-max-height'])
 
         self.setUpdatesEnabled(True)
 
