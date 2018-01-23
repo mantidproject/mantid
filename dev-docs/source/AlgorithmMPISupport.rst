@@ -617,6 +617,7 @@ SaveNexusProcessed                     MasterOnly
 Scale                                  all
 SignalOverError                        all                     see ``UnaryOperation``
 SortEvents                             all
+SortTableWorkspace                     MasterOnly, Identical
 SumSpectra                             MasterOnly, Identical
 UnaryOperation                         all
 WeightedMean                           all                     see ``BinaryOperation``
