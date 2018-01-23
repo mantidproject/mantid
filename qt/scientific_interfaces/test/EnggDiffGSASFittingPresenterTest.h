@@ -27,7 +27,7 @@ public:
         .WillOnce(Return(std::vector<std::string>({filename})));
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
-        .WillOnce(Return(true));
+      .WillOnce(Return(boost::none));
 
     const std::vector<RunLabel> runLabels({RunLabel(123, 1)});
 
@@ -52,13 +52,13 @@ public:
 
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
-        .WillOnce(Return(false));
+        .WillOnce(Return(boost::make_optional<std::string>("Failure message")));
 
     EXPECT_CALL(*m_mockModelPtr, getRunLabels()).Times(0);
 
     EXPECT_CALL(
         *m_mockViewPtr,
-        userWarning("Load failed", "Load failed, see the log for more details"))
+        userWarning("Load failed", "Failure message"))
         .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
