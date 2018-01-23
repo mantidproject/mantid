@@ -5,8 +5,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/IComponent.h"
-
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <string>
@@ -57,7 +55,9 @@ public:
   /// Algorithm's version. @see Algorithm::version
   int version() const override { return (1); }
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string category() const override { return "Reflectometry"; }
+  const std::string category() const override {
+    return "ILL\\Reflectometry;Reflectometry";
+  }
   /// Algorithm's summary. @see Algorith::summary
   const std::string summary() const override {
     return "Correction of time-of-flight values and final angles, i.e. angles "
@@ -79,8 +79,11 @@ private:
   std::string m_slit2Name;
   Mantid::API::MatrixWorkspace_sptr m_ws;
   Mantid::Geometry::Instrument_const_sptr m_virtualInstrument;
+  Mantid::API::MatrixWorkspace_sptr m_virtualWorkspace;
 
   int m_numberOfMonitors{0};
+  Mantid::Kernel::V3D m_sample3D{Mantid::Kernel::V3D(
+      0.0, 0.0, 0.0)}; /// sample coordinates wavelength dependent
 
   std::map<double, size_t> m_finalAngles;
   std::map<double, size_t>::key_compare m_smallerThan =
@@ -101,10 +104,12 @@ private:
   /// Retrieve the coordinate of an instrument component
   double coordinate(Mantid::API::SpectrumInfo &spectrumInfo, size_t i,
                     Mantid::Geometry::PointingAlong direction) const;
+  /// Retrieve the coordinate of a vector
+  double coordinate(Kernel::V3D &pos,
+                    Mantid::Geometry::PointingAlong direction) const;
   /// Modify the coordinate of a Vector V3D
   void setCoordinate(Kernel::V3D &pos,
-                     Mantid::Geometry::PointingAlong direction,
-                     double value) const;
+                     Mantid::Geometry::PointingAlong direction, double value);
   /// Generalise instrument setup (origin, handedness, coordinate system)
   void virtualInstrument();
   /// Ensure slits to exist and be correctly ordered
@@ -119,8 +124,6 @@ private:
   /// Execution code
   void exec() override;
 };
-
-
 
 } // namespace Algorithms
 } // namespace Mantid

@@ -31,6 +31,8 @@ public:
   }
   static void destroySuite(GravityCorrectionTest *suite) { delete suite; }
 
+  // Functional tests
+
   void testName() {
     GravityCorrection gc0;
     TS_ASSERT_EQUALS(gc0.name(), "GravityCorrection");
@@ -60,20 +62,25 @@ public:
     TS_ASSERT(!gc6.isExecuted());
   }
 
-  void testInputWorkspace1D() {
-    Mantid::API::IAlgorithm *lAlg;
+  void testReplaceInputWS() {
+    // if OutputWorkspace should replace the InputWorkspace
+    GravityCorrection gc31;
+    runGravityCorrection(gc31, inWS1, "myOutput1");
+
     TS_ASSERT_THROWS_NOTHING(
-        lAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "LoadILLReflectometry");
-        lAlg->setRethrows(true); lAlg->setChild(true); lAlg->initialize();
-        lAlg->setProperty("Filename", file);
-        lAlg->setProperty("OutputWorkspace", "ws");
-        lAlg->setProperty("XUnit", "TimeOfFlight"); lAlg->execute();)
-    TS_ASSERT(lAlg->isExecuted());
-    Mantid::API::MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = lAlg->getProperty("OutputWorkspace"));
-    GravityCorrection gc00;
-    this->runGravityCorrection(gc00, ws, "OutputWorkspace", "slit2", "slit3");
+        Mantid::API::AnalysisDataService::Instance().addOrReplace("myOutput2",
+                                                                  inWS1));
+
+    GravityCorrection gc30;
+    TS_ASSERT_THROWS_NOTHING(gc30.initialize());
+    gc30.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(gc30.setProperty("InputWorkspace", "myOutput2"));
+    TS_ASSERT_THROWS_NOTHING(gc30.setProperty("OutputWorkspace", "myOutput2"));
+    TS_ASSERT_THROWS_NOTHING(gc30.execute());
+    TS_ASSERT(gc30.isExecuted());
+
+    CompareWorkspaces replace;
+    comparer(replace, "myOutput1", "myOutput2", "1", "1", "1");
   }
 
   void testSlitPosDiffers() {
@@ -287,6 +294,24 @@ public:
         Mantid::API::AnalysisDataService::Instance().clear());
   }
 
+  // Physics test
+
+  void testInputWorkspace1D() {
+    Mantid::API::IAlgorithm *lAlg;
+    TS_ASSERT_THROWS_NOTHING(
+        lAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
+            "LoadILLReflectometry");
+        lAlg->setRethrows(true); lAlg->setChild(true); lAlg->initialize();
+        lAlg->setProperty("Filename", file);
+        lAlg->setProperty("OutputWorkspace", "ws");
+        lAlg->setProperty("XUnit", "TimeOfFlight"); lAlg->execute();)
+    TS_ASSERT(lAlg->isExecuted());
+    Mantid::API::MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = lAlg->getProperty("OutputWorkspace"));
+    GravityCorrection gc00;
+    this->runGravityCorrection(gc00, ws, "OutputWorkspace", "slit2", "slit3");
+  }
+
   void testInputWorkspace2D() {}
 
   void testDetectorMask() {}
@@ -298,42 +323,18 @@ public:
   // Counts moved
   void testOutputThetaFinalCorrected() {
 
-    // ReferenceFrame is up:Y along:X
-
-    Mantid::Kernel::V3D source{-6., 0., 0.};
-    Mantid::Kernel::V3D slit1{-1., 0., 0.};
-    Mantid::Kernel::V3D slit2{-5., 0., 0.};
-    Mantid::Kernel::V3D monitor{-1., 0., 0.};
+    // ReferenceFrame is up:Y along beam:X
+    Mantid::Kernel::V3D source{-3., 0., 0.};
+    Mantid::Kernel::V3D slit1{-2., 0., 0.};
+    Mantid::Kernel::V3D slit2{-1., 0., 0.};
+    Mantid::Kernel::V3D monitor{-.5, 0., 0.};
     Mantid::Kernel::V3D sample{0., 0., 0.};
-    double ys = 30.;
-    double xs = 5.;
-    Mantid::Kernel::V3D detector2{xs, ys, 0.};
+    Mantid::Kernel::V3D detector1{2., 1., 0.}; // source
 
-    double tof = 0.5;
+    double tof = 80000; // micro seconds
 
-    double ySlit1 = -1. * tan(ys / xs);
-    double ySlit2 = -.5 * tan(ys / xs);
-
-    using Mantid::PhysicalConstants::g;
-    // put length of parabola instead of direct path length
-    double v0 = ySlit1 / tof;
-
-    double k = g / (2 * pow(v0, 2));
-
-    double x0 =
-        (k * (1 - pow(0.5, 2)) + (ySlit1 - ySlit2)) / (2 * k * (-1 + .5));
-    double y0 = ySlit1 + k * (-1 - x0);
-
-    double finalAngle = atan(2 * k * sqrt(y0 / k));
-
-    double v = sqrt(pow(v0, 2) * pow(cos(finalAngle), 2) +
-                    (v0 * sin(finalAngle) - (g * tof)));
-    double zDet = v * cos(finalAngle) * tof;
-
-    double t = 0.;
-    double yDet = v * sin(finalAngle) * tof - .5 * g * pow(t, 2);
-
-    Mantid::Kernel::V3D detector1{0., yDet, zDet};
+    // Mantid::Kernel::V3D detector1{};
+    Mantid::Kernel::V3D detector2{4, 30, 0.}; // calculated
 
     Mantid::API::MatrixWorkspace_sptr ws{
         WorkspaceCreationHelper::
@@ -341,8 +342,13 @@ public:
                 tof, 0.25, 4, 50, 0.02, slit1, slit2, source, monitor, sample,
                 detector1, detector2)};
 
-    // input final angle
-    TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4), 2. * 1.0405648, 1e-6);
+    // input final angle not corrected
+    //TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4),
+    //                2. * tan(detector1.getPos().X() / detector1.getPos().Y()),
+    //                1e-6);
+
+
+
     // input counts
     // error: no match for ‘operator==’ (operand types are
     // ‘Mantid::HistogramData::HistogramY’ and ‘int’)
@@ -352,8 +358,7 @@ public:
     auto res = this->runGravityCorrection(gc20, ws, "ws");
 
     // resulting final angle
-    TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(3), 2. * finalAngle,
-                    1e-6);
+    TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(3), 2. * .5, 1e-6);
     // resulting counts
     // TS_ASSERT_EQUALS(ws->y(4), 0); // counts removed
     // TS_ASSERT_EQUALS(ws->y(3), 2); // counts inserted

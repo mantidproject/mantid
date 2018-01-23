@@ -27,7 +27,7 @@ Requirements
 
 .. role:: red
 
-- The x-axis of the :literal:`InputWorkspace` must be in :red:`time-of-flight`.
+- The x-axis of the :literal:`InputWorkspace` must have units :red:`time-of-flight`, micro-seconds.
 - Those time-of-flight values, :math:`t_{\mbox{tof}}`, are valid for a neutron travel distance from source to detector and do not take gravitation into account.
 - The instrument must consist of a :red:`source`, :red:`sample`, :red:`detector` and a collimeter with its :red:`slits` or two other known locations of the neutron flight path between source and sample position.
   Please note that the slit position in beam direction is sufficiant, the horizontal position is zero and the up position will be computed.
@@ -105,9 +105,9 @@ The corrected neutron flight path is given by
 
 When neglecting gravitation :math:`g = 0 \frac{\mbox{m}}{\mbox{s}^2}`, the corrected time-of-flight values are given by
 
-.. math:: \boxed{t = \frac{x_{d}}{v_i \mbox{cos}(\theta_f)}},
+.. math:: \boxed{t = \frac{x_{d} - x_0}{v_i \mbox{cos}(\theta_f)}},
 
-where :math:`x_{d}` describes the detector :math:`x` position. Correspondingly, the corrected neutron count will be for detector position
+taking the sample centre shift into account and where :math:`x_{d}` describes the detector :math:`x` position. Correspondingly, the corrected neutron count will be for detector position
 
 .. math:: x_{d} = v_i \mbox{cos}({\theta_f}) t
 
@@ -124,7 +124,7 @@ The length :math:`s` of the parabola arc from source to sample
 
 substituting :math:`2 k x = z` results in
 
-.. math:: s_1 = \frac{1}{2k} \int_{\frac{x_1}{2k}}^{0} \sqrt(1 + z^{2}) dz
+.. math:: s_1 = \frac{1}{2k} \int_{2 k x_1}^{0} \sqrt(1 + z^{2}) dz
 
 and with
 
@@ -132,7 +132,7 @@ and with
 
 one can obtain finally
 
-.. math:: s_1 = -\frac{1}{4k} \left(x \sqrt(1+x_1^{2}) + ln | x + \sqrt(1 + x_1^{2}) | + constant \right).
+.. math:: s_1 = -\frac{1}{4k} \left((2k x_1) \sqrt(1+(2k x_1)^{2}) + ln | x + \sqrt(1 + (2k x_1)^{2}) | + constant \right).
 
 Equivalently, the solution of the more general form needed for calculating the length from sample to detector
 
@@ -140,7 +140,7 @@ Equivalently, the solution of the more general form needed for calculating the l
 
 is
 
-.. math:: s_2 = \frac{1}{2} \left( x \sqrt(a+x_2^{2}) + a \ ln | \frac{x_2}{\sqrt{a}} + \sqrt(1 + \frac{x_2^{2}}{a}) | + constant \right).
+.. math:: s_2 = \frac{1}{2} \left( (2k x_2) \sqrt(a+(2k x_2)^{2}) + a \ ln | \frac{(2k x_2)}{\sqrt{a}} + \sqrt(1 + \frac{(2k x_2)^{2}}{a}) | + constant \right).
 
 Usage
 -----
@@ -149,23 +149,6 @@ Example - GravityCorrection
 
 .. testcode:: General: workspace with instrument where the x axis is parrallel and in direction to the beam.
 
-        # A workspace with an instrument defined, each pixel has a side length of 4 mm
-        ws = CreateSampleWorkspace(WorkspaceType = 'Histogram',
-                                   NumBanks = 2,
-                                   NumMonitors = 0,
-                                   BankPixelWidth = 10,
-                                   XUnit = 'TOF',
-                                   XMin = 0,
-                                   XMax = 20000,
-                                   BinWidth = 200,
-                                   PixelSpacing = 0.008,
-                                   BankDistanceFromSample = 5,
-                                   SourceDistanceFromSample = 10)
-
-        # Add slits, check final theta angles
-
-        # Perform correction due to gravitation effects
-        wsCorrected = GravityCorrection(ws, "slit1", "slit2")
 
 Output:
 
@@ -190,4 +173,3 @@ Output:
         # Plot the workspaces
 
 .. categories::
-
