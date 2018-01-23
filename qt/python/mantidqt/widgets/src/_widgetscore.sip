@@ -5,7 +5,7 @@ using namespace MantidQt::MantidWidgets;
 %End
 
 %InitialisationCode
-qRegisterMetaType<MantidQt::MantidWidgets::Message>();
+qRegisterMetaType<Message>("Message");
 %End
 
 // ----------------------------------------------------------------------------
