@@ -47,6 +47,8 @@ operation for selective rendering of the instrument
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public QObject {
   Q_OBJECT
 public:
+  /// Invalid workspace index in detector index to workspace index lookup
+  static const size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
   /// Constructor
   InstrumentActor(const QString &wsName, bool autoscaling = true,
                   double scaleMin = 0.0, double scaleMax = 0.0);

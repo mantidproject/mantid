@@ -870,7 +870,8 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
          QString::fromStdString(componentInfo.name(index)) + "\n";
   text += "Detector ID: " + QString::number(detid) + '\n';
   QString wsIndex;
-  wsIndex = QString::number(actor.getWorkspaceIndex(index));
+  auto ws = actor.getWorkspaceIndex(index);
+  wsIndex = ws == InstrumentActor::INVALID_INDEX ? "None" : QString::number(ws);
   text += "Workspace index: " + wsIndex + '\n';
   Mantid::Kernel::V3D pos = componentInfo.position(index);
   text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
@@ -1290,6 +1291,8 @@ void DetectorPlotController::prepareDataForSinglePlot(
   const auto &actor = m_instrWidget->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
   auto wi = actor.getWorkspaceIndex(detindex);
+  if (wi == InstrumentActor::INVALID_INDEX)
+    return;
   // get the data
   const auto &XPoints = ws->points(wi);
   const auto &Y = ws->y(wi);
@@ -1326,6 +1329,10 @@ void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
   auto ass = componentInfo.detectorsInSubtree(parent);
 
   auto wi = actor.getWorkspaceIndex(detindex);
+  
+  if (wi == InstrumentActor::INVALID_INDEX)
+    return;
+  
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
 
@@ -1338,6 +1345,8 @@ void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
   for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
       auto index = actor.getWorkspaceIndex(det);
+      if (index == InstrumentActor::INVALID_INDEX)
+        continue;
       const auto &Y = ws->y(index);
       std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
                      std::plus<double>());
@@ -1396,6 +1405,8 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   auto parent = componentInfo.parent(detindex);
   auto ass = componentInfo.detectorsInSubtree(parent);
   auto wi = actor.getWorkspaceIndex(detindex);
+  if (wi == InstrumentActor::INVALID_INDEX)
+    return;
   // imin and imax give the bin integration range
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
@@ -1425,43 +1436,41 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   const auto &detectorInfo = actor.getDetectorInfo();
   for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
-      try {
-        auto id = detectorInfo.detectorIDs()[det];
-        // get the x-value for detector idet
-        double xvalue = 0;
-        auto pos = detectorInfo.position(det);
-        switch (m_tubeXUnits) {
-        case LENGTH:
-          xvalue = pos.distance(detectorInfo.position(ass[0]));
-          break;
-        case PHI:
-          xvalue = bOffsetPsi ? getPhiOffset(pos, M_PI) : getPhi(pos);
-          break;
-        case OUT_OF_PLANE_ANGLE: {
-          xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
-          break;
-        }
-        default:
-          xvalue = static_cast<double>(id);
-        }
-        auto index = actor.getWorkspaceIndex(det);
-        // get the y-value for detector idet
-        const auto &Y = ws->y(index);
-        double sum = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
-        xymap[xvalue] = sum;
-        if (err) {
-          const auto &E = ws->e(index);
-          std::vector<double> tmp(imax - imin);
-          // take squares of the errors
-          std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin,
-                         tmp.begin(), std::multiplies<double>());
-          // sum them
-          double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
-          // take sqrt
-          errmap[xvalue] = sqrt(sum);
-        }
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        continue; // Detector doesn't have a workspace index relating to it
+      auto id = detectorInfo.detectorIDs()[det];
+      // get the x-value for detector idet
+      double xvalue = 0;
+      auto pos = detectorInfo.position(det);
+      switch (m_tubeXUnits) {
+      case LENGTH:
+        xvalue = pos.distance(detectorInfo.position(ass[0]));
+        break;
+      case PHI:
+        xvalue = bOffsetPsi ? getPhiOffset(pos, M_PI) : getPhi(pos);
+        break;
+      case OUT_OF_PLANE_ANGLE: {
+        xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
+        break;
+      }
+      default:
+        xvalue = static_cast<double>(id);
+      }
+      auto index = actor.getWorkspaceIndex(det);
+      if (index == InstrumentActor::INVALID_INDEX)
+        continue;
+      // get the y-value for detector idet
+      const auto &Y = ws->y(index);
+      double sum = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
+      xymap[xvalue] = sum;
+      if (err) {
+        const auto &E = ws->e(index);
+        std::vector<double> tmp(imax - imin);
+        // take squares of the errors
+        std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin,
+                       tmp.begin(), std::multiplies<double>());
+        // sum them
+        double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
+        // take sqrt
+        errmap[xvalue] = sqrt(sum);
       }
     }
   }
