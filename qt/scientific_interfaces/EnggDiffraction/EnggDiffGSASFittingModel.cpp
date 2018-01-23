@@ -18,14 +18,14 @@ std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
   return filenameSegments[0];
 }
 
-size_t getBankID(API::MatrixWorkspace_const_sptr ws) {
+boost::optional<size_t> getBankID(API::MatrixWorkspace_const_sptr ws) {
   const static std::string bankIDPropertyName = "bankid";
   if (ws->run().hasProperty(bankIDPropertyName)) {
     const auto log = dynamic_cast<Kernel::PropertyWithValue<int> *>(
         ws->run().getLogData(bankIDPropertyName));
     return boost::lexical_cast<size_t>(log->value());
   }
-  throw std::runtime_error("Bank ID was not set in the sample logs.");
+  return boost::none;
 }
 
 } // anonymous namespace
@@ -217,15 +217,15 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) {
   const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(wsName);
 
   const auto runNumber = ws->getRunNumber();
-  size_t bank = 0;
+  const auto bankID = getBankID(ws);
 
-  try {
-    bank = getBankID(ws);
-  } catch (const std::runtime_error &e) {
-    return e.what();
+  if (!bankID) {
+    return "Bank ID was not set in the sample logs for run " +
+           std::to_string(runNumber) +
+           ". Make sure it has been focused correctly";
   }
 
-  m_focusedWorkspaceMap.add(RunLabel(runNumber, bank), ws);
+  m_focusedWorkspaceMap.add(RunLabel(runNumber, *bankID), ws);
   return "";
 }
 
