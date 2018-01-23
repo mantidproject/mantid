@@ -27,10 +27,32 @@
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/list.hpp>
 #include <boost/python/extract.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/str.hpp>
 
 #include <set>
+
+/**
+ * Convert a python object to a string or throw an exception. This will convert
+ * unicode strings in python2 via utf8.
+ */
+std::string pyObjToStr(const boost::python::object &value) {
+  boost::python::extract<std::string> extractor(value);
+
+  std::string valuestr;
+  if (extractor.check()) {
+    valuestr = extractor();
+#if PY_VERSION_HEX < 0x03000000
+  } else if (PyUnicode_Check(value.ptr())) {
+    valuestr = boost::python::extract<std::string>(
+        boost::python::str(value).encode("utf-8"))();
+#endif
+  } else {
+    throw std::invalid_argument("Failed to convert python object a string");
+  }
+  return valuestr;
+}
 
 namespace Mantid {
 namespace PythonInterface {
@@ -155,14 +177,24 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @return A shared_ptr to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
-  static WeakPtr retrieveOrKeyError(SvcType &self, const std::string &name) {
+  static WeakPtr retrieveOrKeyError(SvcType &self,
+                                    const boost::python::object &name) {
     using namespace Mantid::Kernel;
+
+    std::string namestr;
+    try {
+      namestr = pyObjToStr(name);
+    } catch (std::invalid_argument &) {
+      throw std::invalid_argument(
+          "Failed to convert property name to a string");
+    }
+
     SvcPtrType item;
     try {
-      item = self.retrieve(name);
+      item = self.retrieve(namestr);
     } catch (Exception::NotFoundError &) {
       // Translate into a Python KeyError
-      std::string err = "'" + name + "' does not exist.";
+      std::string err = "'" + namestr + "' does not exist.";
       PyErr_SetString(PyExc_KeyError, err.c_str());
       throw boost::python::error_already_set();
     }
