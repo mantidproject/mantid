@@ -437,6 +437,7 @@ void Algorithm::unlockWorkspaces() {
  *  @return true if executed successfully.
  */
 bool Algorithm::execute() {
+  Timer timer;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
     DeprecatedAlgorithm *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
@@ -460,6 +461,7 @@ bool Algorithm::execute() {
     logAlgorithmInfo();
 
   // Check all properties for validity
+  float timingInit = timer.elapsed();
   if (!validateProperties()) {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const std::vector<Property *> &props = getProperties();
@@ -477,6 +479,7 @@ bool Algorithm::execute() {
       throw std::runtime_error("Some invalid Properties found");
     }
   }
+  const float timingPropertyValidation = timer.elapsed();
 
   // ----- Check for processing groups -------------
   // default true so that it has the right value at the check below the catch
@@ -498,6 +501,9 @@ bool Algorithm::execute() {
     return false;
   }
 
+  const auto executionMode = getExecutionMode();
+
+  timingInit += timer.elapsed();
   // ----- Perform validation of the whole set of properties -------------
   if (!callProcessGroups) // for groups this is called on each workspace
                           // separately
@@ -526,6 +532,7 @@ bool Algorithm::execute() {
       }
     }
   }
+  const float timingInputValidation = timer.elapsed();
 
   if (trackingHistory()) {
     // count used for defining the algorithm execution order
@@ -549,6 +556,7 @@ bool Algorithm::execute() {
 
   // Read or write locks every input/output workspace
   this->lockWorkspaces();
+  timingInit += timer.elapsed();
 
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
@@ -558,15 +566,15 @@ bool Algorithm::execute() {
       }
 
       startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
-      // Start a timer
-      Timer timer;
       // Call the concrete algorithm's exec method
       this->exec(getExecutionMode());
       registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
-      // Get how long this algorithm took to run
-      const float duration = timer.elapsed();
+      const float timingExec = timer.elapsed();
+      // The total runtime including all init steps is used for general logging.
+      const float duration = timingInit + timingPropertyValidation +
+                             timingInputValidation + timingExec;
       // need it to throw before trying to run fillhistory() on an algorithm
       // which has failed
       if (trackingHistory() && m_history) {
@@ -584,6 +592,13 @@ bool Algorithm::execute() {
       setExecuted(true);
 
       // Log that execution has completed.
+      getLogger().debug() << "Time to validate properties: "
+                          << timingPropertyValidation << " seconds\n";
+      getLogger().debug() << "Time for other input validation: "
+                          << timingInputValidation << " seconds\n";
+      getLogger().debug() << "Time for other initialization: " << timingInit
+                          << " seconds\n";
+      getLogger().debug() << "Time to run exec: " << timingExec << " seconds\n";
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
       this->unlockWorkspaces();
