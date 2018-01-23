@@ -514,7 +514,6 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
   // find the bins inside the integration range
   size_t imin, imax;
 
-  
   getBinMinMaxIndex(wi, imin, imax);
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
