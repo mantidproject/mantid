@@ -27,6 +27,10 @@ MSDFit::MSDFit(QWidget *parent)
 
 void MSDFit::setup() {
   auto fitRangeSelector = m_uiForm->ppPlotTop->addRangeSelector("MSDRange");
+  connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
+          SLOT(xMinSelected(double)));
+  connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this,
+          SLOT(xMaxSelected(double)));
 
   auto gaussian = FunctionFactory::Instance().createFunction("MSDGauss");
   auto peters = FunctionFactory::Instance().createFunction("MSDPeters");
@@ -36,11 +40,6 @@ void MSDFit::setup() {
   addComboBoxFunctionGroup("Yi", {yi});
 
   disablePlotGuess();
-
-  connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
-          SLOT(xMinSelected(double)));
-  connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this,
-          SLOT(xMaxSelected(double)));
 
   connect(m_uiForm->dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
@@ -132,6 +131,8 @@ IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, int specMin,
   msdAlg->setProperty("Model", model);
   msdAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
   msdAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
+  msdAlg->setProperty("XStart", startX());
+  msdAlg->setProperty("XEnd", endX());
   msdAlg->setProperty("OutputWorkspace", outputWorkspaceName());
   return msdAlg;
 }
