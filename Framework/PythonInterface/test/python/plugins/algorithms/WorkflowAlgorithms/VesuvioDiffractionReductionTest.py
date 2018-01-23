@@ -13,12 +13,12 @@ class VesuvioDiffractionReductionTest(unittest.TestCase):
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        wks = VesuvioDiffractionReduction(InputFiles=['15289'],
+        wks = VesuvioDiffractionReduction(InputFiles=['27180'],
                                       InstrumentParFIle='IP0005.dat')
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], 'vesuvio15289_diffspec_red')
+        self.assertEqual(wks.getNames()[0], 'vesuvio27180_diffspec_red')
 
         red_ws = wks[0]
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
@@ -30,7 +30,7 @@ class VesuvioDiffractionReductionTest(unittest.TestCase):
         Test setting individual grouping, one spectrum per detector.
         """
 
-        wks = VesuvioDiffractionReduction(InputFiles=['15289'],
+        wks = VesuvioDiffractionReduction(InputFiles=['27180'],
                                       GroupingPolicy='Individual',
                                       InstrumentParFIle='IP0005.dat')
 
