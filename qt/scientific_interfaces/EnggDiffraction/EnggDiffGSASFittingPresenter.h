@@ -46,13 +46,13 @@ private:
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
-   @return Whether the refinement was successful
+   @return Empty string if refinement was successful, error description if not
    */
-  bool doPawleyRefinement(const int runNumber, const size_t bank,
-                          const std::string &instParamFile,
-                          const std::vector<std::string> &phaseFiles,
-                          const std::string &pathToGSASII,
-                          const std::string &GSASIIProjectFile);
+  std::string doPawleyRefinement(const int runNumber, const size_t bank,
+                                 const std::string &instParamFile,
+                                 const std::vector<std::string> &phaseFiles,
+                                 const std::string &pathToGSASII,
+                                 const std::string &GSASIIProjectFile);
 
   /**
    Perform a Rietveld refinement on a run
@@ -64,13 +64,13 @@ private:
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
-   @return Whether the refinement was successful
+   @return Empty string if refinement was successful, error description if not
    */
-  bool doRietveldRefinement(const int runNumber, const size_t bank,
-                            const std::string &instParamFile,
-                            const std::vector<std::string> &phaseFiles,
-                            const std::string &pathToGSASII,
-                            const std::string &GSASIIProjectFile);
+  std::string doRietveldRefinement(const int runNumber, const size_t bank,
+                                   const std::string &instParamFile,
+                                   const std::vector<std::string> &phaseFiles,
+                                   const std::string &pathToGSASII,
+                                   const std::string &GSASIIProjectFile);
 
   /**
    Overplot fitted peaks for a run, and display lattice parameters and Rwp in

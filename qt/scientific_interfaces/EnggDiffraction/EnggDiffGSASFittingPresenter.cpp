@@ -62,11 +62,12 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const int runNumber,
   const auto rwp = m_model->getRwp(runNumber, bank);
 
   if (!fittedPeaks || !latticeParams || !rwp) {
-    m_view->userWarning("Unexpectedly tried to plot fit results for invalid "
-                        "run, run number = " +
-                        std::to_string(runNumber) + ", bank ID = " +
-                        std::to_string(bank) +
-                        ". Please contact the development team");
+    m_view->userError("Invalid run identifier",
+                      "Unexpectedly tried to plot fit results for invalid "
+                      "run, run number = " +
+                          std::to_string(runNumber) + ", bank ID = " +
+                          std::to_string(bank) +
+                          ". Please contact the development team");
     return;
   }
 
@@ -77,7 +78,7 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const int runNumber,
   m_view->displayRwp(*rwp);
 }
 
-bool EnggDiffGSASFittingPresenter::doPawleyRefinement(
+std::string EnggDiffGSASFittingPresenter::doPawleyRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
@@ -89,7 +90,7 @@ bool EnggDiffGSASFittingPresenter::doPawleyRefinement(
                                      negativeWeight);
 }
 
-bool EnggDiffGSASFittingPresenter::doRietveldRefinement(
+std::string EnggDiffGSASFittingPresenter::doRietveldRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
@@ -110,43 +111,43 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   const auto pathToGSASII = m_view->getPathToGSASII();
   const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
 
-  bool refinementSuccessful = false;
+  std::string refinementFailure(
+      "Contact developers if you see this message");
 
   switch (refinementMethod) {
 
   case GSASRefinementMethod::PAWLEY:
-    refinementSuccessful =
+    refinementFailure =
         doPawleyRefinement(runNumber, bank, instParamFile, phaseFiles,
                            pathToGSASII, GSASIIProjectFile);
     break;
 
   case GSASRefinementMethod::RIETVELD:
-    refinementSuccessful =
+    refinementFailure =
         doRietveldRefinement(runNumber, bank, instParamFile, phaseFiles,
                              pathToGSASII, GSASIIProjectFile);
     break;
   }
 
-  if (refinementSuccessful) {
+  if (refinementFailure.empty()) {
     updatePlot(runNumber, bank);
   } else {
-    m_view->userWarning("Refinement failed, see the log for more details");
+    m_view->userWarning("Refinement failed", refinementFailure);
   }
 }
 
 void EnggDiffGSASFittingPresenter::processLoadRun() {
   const auto focusedFileNames = m_view->getFocusedFileNames();
-  bool loadSuccessful = true;
 
   for (const auto fileName : focusedFileNames) {
-    loadSuccessful &= m_model->loadFocusedRun(fileName);
-  }
+    const auto loadFailure = m_model->loadFocusedRun(fileName);
 
-  if (loadSuccessful) {
-    const auto runLabels = m_model->getRunLabels();
-    m_view->updateRunList(runLabels);
-  } else {
-    m_view->userWarning("Load failed, see the log for more details");
+    if (loadFailure.empty()) {
+      const auto runLabels = m_model->getRunLabels();
+      m_view->updateRunList(runLabels);
+    } else {
+      m_view->userWarning("Load failed", loadFailure);
+    }
   }
 }
 
@@ -166,9 +167,11 @@ void EnggDiffGSASFittingPresenter::updatePlot(const int runNumber,
                                               const size_t bank) {
   const auto focusedWSOptional = m_model->getFocusedWorkspace(runNumber, bank);
   if (!focusedWSOptional) {
-    m_view->userWarning("Tried to access invalid run, runNumber " +
-                        std::to_string(runNumber) + " and bank ID " +
-                        std::to_string(bank));
+    m_view->userError("Invalid run identifier",
+                      "Tried to access invalid run, runNumber " +
+                          std::to_string(runNumber) + " and bank ID " +
+                          std::to_string(bank) +
+                          ". Please contact the development team");
     return;
   }
   const auto focusedWS = *focusedWSOptional;

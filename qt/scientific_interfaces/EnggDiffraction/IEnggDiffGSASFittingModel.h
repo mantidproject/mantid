@@ -30,15 +30,13 @@ public:
    @param GSASIIProjectFile Location to save the .gpx project to
    @param dMin The minimum d-spacing to use for refinement
    @param negativeWeight The weight of the penalty function
-   @return Whether the refinement was successful
+   @return Empty string if refinement was successful, error description if not
    */
-  virtual bool doPawleyRefinement(const int runNumber, const size_t bank,
-                                  const std::string &instParamFile,
-                                  const std::vector<std::string> &phaseFiles,
-                                  const std::string &pathToGSASII,
-                                  const std::string &GSASIIProjectFile,
-                                  const double dMin,
-                                  const double negativeWeight) = 0;
+  virtual std::string doPawleyRefinement(
+      const int runNumber, const size_t bank, const std::string &instParamFile,
+      const std::vector<std::string> &phaseFiles,
+      const std::string &pathToGSASII, const std::string &GSASIIProjectFile,
+      const double dMin, const double negativeWeight) = 0;
   /**
    Perform a Rietveld refinement on a run
    @param runNumber The run number of the run
@@ -49,13 +47,14 @@ public:
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
-   @return Whether the refinement was successful
+   @return Empty string if refinement was successful, error description if not
    */
-  virtual bool doRietveldRefinement(const int runNumber, const size_t bank,
-                                    const std::string &instParamFile,
-                                    const std::vector<std::string> &phaseFiles,
-                                    const std::string &pathToGSASII,
-                                    const std::string &GSASIIProjectFile) = 0;
+  virtual std::string
+  doRietveldRefinement(const int runNumber, const size_t bank,
+                       const std::string &instParamFile,
+                       const std::vector<std::string> &phaseFiles,
+                       const std::string &pathToGSASII,
+                       const std::string &GSASIIProjectFile) = 0;
 
   /**
    Get the fit results for a given run
@@ -116,9 +115,9 @@ public:
   /**
    Load a focused run from a file to the model
    @param filename The name of the file to load
-   @return Whether the load was a success
+   @return Empty string if load was a success, description of error if not
    */
-  virtual bool loadFocusedRun(const std::string &filename) = 0;
+  virtual std::string loadFocusedRun(const std::string &filename) = 0;
 };
 
 } // namespace MantidQt
