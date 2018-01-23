@@ -221,6 +221,27 @@ class ITableWorkspaceTest(unittest.TestCase):
         data = table.toDict()
         self.assertEquals(data, expected_output)
 
+    def test_pickle_table_workspace(self):
+        from mantid.kernel import V3D
+        from mantid.api import ITableWorkspace
+        from mantid.simpleapi import CreateEmptyTableWorkspace
+        import pickle
+
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="int",name="index")
+        table.addColumn(type="str",name="value")
+        table.addColumn(type="V3D",name="position")
+
+        values = (1, '10', V3D(0, 0, 1))
+        table.addRow(values)
+        values = (2, '100', V3D(1, 0, 0))
+        table.addRow(values)
+
+        p = pickle.dumps(table)
+        table2 = pickle.loads(p)
+
+        self.assertEqual(table.toDict(), table2.toDict())
+
 
 if __name__ == '__main__':
     unittest.main()
