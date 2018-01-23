@@ -133,7 +133,7 @@ def _gen_required_files():
     # Generate file names of form "INSTxxxxx.nxs"
     input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
     input_files.append(calibration_map_path)
-    input_files.append(os.path.join(input_dir, "ISIS_Powder-POLARIS98533_TotalScatteringInput.nxs"))
+    input_files.append(total_scattering_input_file)
     return input_files
 
 
