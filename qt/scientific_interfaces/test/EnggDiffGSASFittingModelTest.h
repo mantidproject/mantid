@@ -50,7 +50,7 @@ public:
   void addRwpValue(const int runNumber, const size_t bank, const double rwp);
 
 private:
-  inline boost::optional<double> doGSASRefinementAlgorithm(
+  inline double doGSASRefinementAlgorithm(
       API::MatrixWorkspace_sptr inputWorkspace,
       const std::string &outputWorkspaceName,
       const std::string &latticeParamsName, const std::string &refinementMethod,
@@ -87,8 +87,7 @@ TestEnggDiffGSASFittingModel::containsFocusedRun(const int runNumber,
   return hasFocusedRun(runNumber, bank);
 }
 
-inline boost::optional<double>
-TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
+inline double TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     API::MatrixWorkspace_sptr inputWorkspace,
     const std::string &outputWorkspaceName,
     const std::string &latticeParamsName, const std::string &refinementMethod,
@@ -279,11 +278,11 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     model.addFocusedWorkspace(123, 1, ws);
 
-    bool success = false;
+    std::string failure = "Failure";
     TS_ASSERT_THROWS_NOTHING(
-        success = model.doPawleyRefinement(
+        failure = model.doPawleyRefinement(
             123, 1, "", std::vector<std::string>({}), "", "", 0, 0));
-    TS_ASSERT(success);
+    TS_ASSERT(failure.empty());
 
     const auto rwp = model.getRwp(123, 1);
     TS_ASSERT(rwp);
@@ -307,11 +306,11 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     model.addFocusedWorkspace(123, 1, ws);
 
-    bool success = false;
+    std::string failure = "Failure";
     TS_ASSERT_THROWS_NOTHING(
-        success = model.doRietveldRefinement(
+        failure = model.doRietveldRefinement(
             123, 1, "", std::vector<std::string>({}), "", ""));
-    TS_ASSERT(success);
+    TS_ASSERT(failure.empty());
 
     const auto rwp = model.getRwp(123, 1);
     TS_ASSERT(rwp);

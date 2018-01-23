@@ -83,33 +83,36 @@ std::string generateLatticeParamsName(const int runNumber, const size_t bank) {
 }
 }
 
-bool EnggDiffGSASFittingModel::doPawleyRefinement(
+std::string EnggDiffGSASFittingModel::doPawleyRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile, const double dMin,
     const double negativeWeight) {
   const auto inputWS = getFocusedWorkspace(runNumber, bank);
   if (!inputWS) {
-    return false;
+    return "Could not find focused run for run number " +
+           std::to_string(runNumber) + " and bank ID " + std::to_string(bank);
   }
   const auto outputWSName = generateFittedPeaksWSName(runNumber, bank);
   const auto latticeParamsName = generateLatticeParamsName(runNumber, bank);
 
-  const auto rwp = doGSASRefinementAlgorithm(
-      *inputWS, outputWSName, latticeParamsName, "Pawley refinement",
-      instParamFile, phaseFiles, pathToGSASII, GSASIIProjectFile, dMin,
-      negativeWeight);
+  double rwp = 0;
 
-  if (!rwp) {
-    return false;
+  try {
+    rwp = doGSASRefinementAlgorithm(*inputWS, outputWSName, latticeParamsName,
+                                    "Pawley refinement", instParamFile,
+                                    phaseFiles, pathToGSASII, GSASIIProjectFile,
+                                    dMin, negativeWeight);
+  } catch (const std::exception &e) {
+    return e.what();
   }
 
-  addFitResultsToMaps(runNumber, bank, *rwp, outputWSName, latticeParamsName);
+  addFitResultsToMaps(runNumber, bank, rwp, outputWSName, latticeParamsName);
 
-  return true;
+  return "";
 }
 
-boost::optional<double> EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
+double EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     API::MatrixWorkspace_sptr inputWorkspace,
     const std::string &outputWorkspaceName,
     const std::string &latticeParamsName, const std::string &refinementMethod,
@@ -117,52 +120,51 @@ boost::optional<double> EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile, const double dMin,
     const double negativeWeight) {
-  double rwp = -1;
-  try {
-    auto gsasAlg =
-        API::AlgorithmManager::Instance().create("GSASIIRefineFitPeaks");
-    gsasAlg->setProperty("RefinementMethod", refinementMethod);
-    gsasAlg->setProperty("InputWorkspace", inputWorkspace);
-    gsasAlg->setProperty("OutputWorkspace", outputWorkspaceName);
-    gsasAlg->setProperty("LatticeParameters", latticeParamsName);
-    gsasAlg->setProperty("InstrumentFile", instParamFile);
-    gsasAlg->setProperty("PhaseInfoFiles", phaseFiles);
-    gsasAlg->setProperty("PathToGSASII", pathToGSASII);
-    gsasAlg->setProperty("SaveGSASIIProjectFile", GSASIIProjectFile);
-    gsasAlg->setProperty("PawleyDMin", dMin);
-    gsasAlg->setProperty("PawleyNegativeWeight", negativeWeight);
-    gsasAlg->execute();
+  auto gsasAlg =
+      API::AlgorithmManager::Instance().create("GSASIIRefineFitPeaks");
+  gsasAlg->setProperty("RefinementMethod", refinementMethod);
+  gsasAlg->setProperty("InputWorkspace", inputWorkspace);
+  gsasAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+  gsasAlg->setProperty("LatticeParameters", latticeParamsName);
+  gsasAlg->setProperty("InstrumentFile", instParamFile);
+  gsasAlg->setProperty("PhaseInfoFiles", phaseFiles);
+  gsasAlg->setProperty("PathToGSASII", pathToGSASII);
+  gsasAlg->setProperty("SaveGSASIIProjectFile", GSASIIProjectFile);
+  gsasAlg->setProperty("PawleyDMin", dMin);
+  gsasAlg->setProperty("PawleyNegativeWeight", negativeWeight);
+  gsasAlg->execute();
 
-    rwp = gsasAlg->getProperty("Rwp");
-  } catch (const std::exception) {
-    return boost::none;
-  }
+  const double rwp = gsasAlg->getProperty("Rwp");
   return rwp;
 }
 
-bool EnggDiffGSASFittingModel::doRietveldRefinement(
+std::string EnggDiffGSASFittingModel::doRietveldRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
   const auto inputWS = getFocusedWorkspace(runNumber, bank);
   if (!inputWS) {
-    return false;
+    return "Could not find focused run for run number " +
+           std::to_string(runNumber) + " and bank ID " + std::to_string(bank);
   }
+
   const auto outputWSName = generateFittedPeaksWSName(runNumber, bank);
   const auto latticeParamsName = generateLatticeParamsName(runNumber, bank);
 
-  const auto rwp = doGSASRefinementAlgorithm(
-      *inputWS, outputWSName, latticeParamsName, "Rietveld refinement",
-      instParamFile, phaseFiles, pathToGSASII, GSASIIProjectFile,
-      DEFAULT_PAWLEY_DMIN, DEFAULT_PAWLEY_NEGATIVE_WEIGHT);
-
-  if (!rwp) {
-    return false;
+  double rwp = 0;
+  try {
+    rwp = doGSASRefinementAlgorithm(
+        *inputWS, outputWSName, latticeParamsName, "Rietveld refinement",
+        instParamFile, phaseFiles, pathToGSASII, GSASIIProjectFile,
+        DEFAULT_PAWLEY_DMIN, DEFAULT_PAWLEY_NEGATIVE_WEIGHT);
   }
 
-  addFitResultsToMaps(runNumber, bank, *rwp, outputWSName, latticeParamsName);
+  catch (const std::exception &e) {
+    return e.what();
+  }
+  addFitResultsToMaps(runNumber, bank, rwp, outputWSName, latticeParamsName);
 
-  return true;
+  return "";
 }
 
 boost::optional<API::MatrixWorkspace_sptr>

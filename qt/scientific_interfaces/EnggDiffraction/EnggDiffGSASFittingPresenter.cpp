@@ -78,7 +78,7 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const int runNumber,
   m_view->displayRwp(*rwp);
 }
 
-bool EnggDiffGSASFittingPresenter::doPawleyRefinement(
+std::string EnggDiffGSASFittingPresenter::doPawleyRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
@@ -90,7 +90,7 @@ bool EnggDiffGSASFittingPresenter::doPawleyRefinement(
                                      negativeWeight);
 }
 
-bool EnggDiffGSASFittingPresenter::doRietveldRefinement(
+std::string EnggDiffGSASFittingPresenter::doRietveldRefinement(
     const int runNumber, const size_t bank, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
@@ -111,28 +111,28 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   const auto pathToGSASII = m_view->getPathToGSASII();
   const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
 
-  bool refinementSuccessful = false;
+  std::string refinementFailure(
+      "Contact developers if you see this message");
 
   switch (refinementMethod) {
 
   case GSASRefinementMethod::PAWLEY:
-    refinementSuccessful =
+    refinementFailure =
         doPawleyRefinement(runNumber, bank, instParamFile, phaseFiles,
                            pathToGSASII, GSASIIProjectFile);
     break;
 
   case GSASRefinementMethod::RIETVELD:
-    refinementSuccessful =
+    refinementFailure =
         doRietveldRefinement(runNumber, bank, instParamFile, phaseFiles,
                              pathToGSASII, GSASIIProjectFile);
     break;
   }
 
-  if (refinementSuccessful) {
+  if (refinementFailure.empty()) {
     updatePlot(runNumber, bank);
   } else {
-    m_view->userWarning("Refinement failed",
-                        "Refinement failed, see the log for more details");
+    m_view->userWarning("Refinement failed", refinementFailure);
   }
 }
 
