@@ -43,7 +43,8 @@ public:
   bool hasFittedPeaksForRun(const int runNumber,
                             const size_t bank) const override;
 
-  bool loadFocusedRun(const std::string &filename) override;
+  boost::optional<std::string>
+  loadFocusedRun(const std::string &filename) override;
 
 protected:
   /// The following methods are marked as protected so that they can be exposed
