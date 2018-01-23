@@ -27,7 +27,7 @@ public:
         .WillOnce(Return(std::vector<std::string>({filename})));
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
-      .WillOnce(Return(boost::none));
+        .WillOnce(Return(""));
 
     const std::vector<std::pair<int, size_t>> runLabels(
         {std::make_pair(123, 1)});
@@ -53,7 +53,7 @@ public:
 
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
-        .WillOnce(Return(boost::make_optional<std::string>("Failure message")));
+        .WillOnce(Return("Failure message"));
 
     EXPECT_CALL(*m_mockModelPtr, getRunLabels()).Times(0);
 

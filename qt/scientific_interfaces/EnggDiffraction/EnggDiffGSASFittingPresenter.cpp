@@ -142,11 +142,11 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
   for (const auto fileName : focusedFileNames) {
     const auto loadFailure = m_model->loadFocusedRun(fileName);
 
-    if (loadFailure) {
-      m_view->userWarning("Load failed", *loadFailure);
-    } else {
+    if (loadFailure.empty()) {
       const auto runLabels = m_model->getRunLabels();
       m_view->updateRunList(runLabels);
+    } else {
+      m_view->userWarning("Load failed", loadFailure);
     }
   }
 }

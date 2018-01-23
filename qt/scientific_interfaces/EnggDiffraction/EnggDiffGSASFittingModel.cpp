@@ -203,7 +203,7 @@ bool EnggDiffGSASFittingModel::hasFocusedRun(const int runNumber,
   return m_focusedWorkspaceMap.contains(runNumber, bank);
 }
 
-boost::optional<std::string>
+std::string
 EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) {
   const auto wsName = stripWSNameFromFilename(filename);
 
@@ -213,7 +213,7 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) {
     loadAlg->setProperty("OutputWorkspace", wsName);
     loadAlg->execute();
   } catch (const std::exception &e) {
-    return boost::make_optional<std::string>(e.what());
+    return e.what();
   }
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
@@ -225,11 +225,11 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) {
   try {
     bank = getBankID(ws);
   } catch (const std::runtime_error &e) {
-    return boost::make_optional<std::string>(e.what());
+    return e.what();
   }
 
   m_focusedWorkspaceMap.add(runNumber, bank, ws);
-  return boost::none;
+  return "";
 }
 
 } // CustomInterfaces
