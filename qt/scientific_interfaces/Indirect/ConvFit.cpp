@@ -522,11 +522,6 @@ void ConvFit::newDataLoaded(const QString &wsName) {
   m_uiForm->spSpectraMax->setMaximum(maxWsIndex);
   m_uiForm->spSpectraMax->setMinimum(0);
   m_uiForm->spSpectraMax->setValue(maxWsIndex);
-
-  auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitRange");
-  const auto &xValues = inputWorkspace()->x(0);
-  rangeSelector->setMinimum(xValues.front());
-  rangeSelector->setMaximum(xValues.back());
 }
 
 void ConvFit::fitFunctionChanged() {
