@@ -124,7 +124,7 @@ void export_V3D() {
            "Calculates the length of the vector")
       .def("norm2", &V3D::norm2, arg("self"),
            "Calculates the squared length of the vector")
-      .def("__add__", &V3D::operator+,(arg("left"), arg("right")))
+      .def("__add__", &V3D::operator+, (arg("left"), arg("right")))
       .def("__iadd__", &V3D::operator+=, return_self<>(),
            (arg("self"), arg("other")))
       .def("__sub__",
