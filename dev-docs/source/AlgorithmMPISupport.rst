@@ -500,6 +500,7 @@ CloneWorkspace                         all
 Comment                                all
 CompareWorkspace                       MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used, with ``ExecutionMode::MasterOnly`` the workspaces always compare equal on non-master ranks
 CompressEvents                         all
+ConvertDiffCal                         MasterOnly, Identical
 ConvertToHistogram                     all
 ConvertToPointData                     all
 ConvertUnits                           all                     ``AlignBins`` not supported; for indirect energy mode the number of resulting bins is in general inconsistent across MPI ranks
@@ -529,8 +530,10 @@ Load                                   all                     actual supported 
 LoadAscii2                             Identical               see ``IFileLoader``
 LoadAscii                              Identical               see ``IFileLoader``
 LoadBBY                                Identical               see ``IFileLoader``
+LoadCalFile                            Identical
 LoadCanSAS1D                           Identical               see ``IFileLoader``
 LoadDaveGrp                            Identical               see ``IFileLoader``
+LoadDiffCal                            Identical
 LoadEmptyInstrument                    Identical               see ``IFileLoader``
 LoadEventNexus                         Distributed             storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
 LoadEventPreNexus2                     Identical               see ``IFileLoader``
