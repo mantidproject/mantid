@@ -9,6 +9,7 @@ from SANSUtility import (AddOperation, transfer_special_sample_logs,
                          bundle_added_event_data_as_group, WorkspaceType,
                          get_workspace_type, getFileAndName)
 from shutil import copyfile
+import numpy as np
 
 sanslog = Logger("SANS")
 _NO_INDIVIDUAL_PERIODS = -1
@@ -307,7 +308,7 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
         # but hopefully not longer than two weeks!
         for i in range(len(timeArray)-1):
         # cal time dif in seconds
-            timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
+            timeDif = (timeArray[i+1]-timeArray[i]) / np.timedelta64(1, 's')
             if timeDif > 172800:
                 sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
                                 ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")

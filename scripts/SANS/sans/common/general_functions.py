@@ -7,6 +7,7 @@ from math import (acos, sqrt, degrees)
 import re
 from copy import deepcopy
 import json
+import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
 from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARMOR, ZOOM, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
@@ -47,7 +48,7 @@ def get_log_value(run, log_name, log_type):
             output = log_type(run.getLogData(log_name).value[0])
         else:
             # Get the first entry which is past the start time log
-            start_time = run.startTime()
+            start_time = run.startTime().to_datetime64()
             times = log_property.times
             values = log_property.value
 
@@ -213,8 +214,8 @@ def get_charge_and_time(workspace):
     run = workspace.getRun()
     charges = run.getLogData('proton_charge')
     total_charge = sum(charges.value)
-    time_passed = (charges.times[-1] - charges.times[0]).total_microseconds()
-    time_passed /= 1e6
+    time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1,'us')) # microseconds
+    time_passed = float(time_passed) / 1e6
     return total_charge, time_passed
 
 
