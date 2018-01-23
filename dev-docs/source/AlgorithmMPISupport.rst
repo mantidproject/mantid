@@ -593,7 +593,7 @@ PolynomialCorrection                   all                     see ``UnaryOperat
 Q1D2                                   all                     not all optional normalization inputs are supported
 Power                                  all                     see ``UnaryOperation``
 PowerLawCorrection                     all                     see ``UnaryOperation``
-Rebin                                  all                     min and max bin boundaries must be given explicitly
+Rebin                                  all
 RebinToWorkspace                       all                     ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
 RemovePromptPulse                      all
 ReplaceSpecialValues                   all                     see ``UnaryOperation``
