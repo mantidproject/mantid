@@ -223,8 +223,6 @@ class ITableWorkspaceTest(unittest.TestCase):
 
     def test_pickle_table_workspace(self):
         from mantid.kernel import V3D
-        from mantid.api import ITableWorkspace
-        from mantid.simpleapi import CreateEmptyTableWorkspace
         import pickle
 
         table = WorkspaceFactory.createTable()

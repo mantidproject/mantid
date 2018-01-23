@@ -12,9 +12,6 @@
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidPythonInterface/kernel/Policies/AsType.h"
-
 #include <boost/preprocessor/list/for_each.hpp>
 #include <boost/preprocessor/tuple/to_list.hpp>
 #include <boost/python/class.hpp>
@@ -477,10 +474,10 @@ bpl::dict toDict(const ITableWorkspace &self) {
   return result;
 }
 
+/** Constructor function for ITableWorkspaces */
 ITableWorkspace_sptr makeTableWorkspace() {
    return WorkspaceFactory::Instance().createTable();
  }
-
 
 
 class ITableWorkspacePickleSuite : public boost::python::pickle_suite {
@@ -492,6 +489,10 @@ public:
     return data;
   }
 
+  /** Write the meta data from a table workspace to a python dict
+   *
+   * @param ws :: the workspace to load data into
+   */
   static dict writeMetaData(const ITableWorkspace &ws) {
     list columnTypes;
     list columnNames;
@@ -514,6 +515,14 @@ public:
     readData(ws, state);
   }
 
+  /** Read the meta data from a python dict into the table workspace
+   *
+   * This will read information relating to the column names and data
+   * types to be stored in the new table
+   *
+   * @param ws :: the workspace to load data into
+   * @param state :: the pickled state of the table
+   */
   static void readMetaData(ITableWorkspace& ws, const dict& state) {
       const auto& metaData = state["meta_data"];
       const auto& columnNames = metaData["column_names"]; 
@@ -529,6 +538,11 @@ public:
       }
   }
 
+  /** Read the data from a python dict into the table workspace
+   *
+   * @param ws :: the workspace to load data into
+   * @param state :: the pickled state of the table
+   */
   static void readData(ITableWorkspace& ws, const dict& state) {
       const auto& data = state["data"];
       const auto& names = ws.getColumnNames();
@@ -559,7 +573,7 @@ void export_ITableWorkspace() {
       "rows return dicts. This object does support the idom 'for row in ";
   iTableWorkspace_docstring += "ITableWorkspace'.";
 
-  class_<ITableWorkspace, bases<Workspace>, ITableWorkspace_sptr, boost::noncopyable>("ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
+  class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>("ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
       .def_pickle(ITableWorkspacePickleSuite())
       .def("__init__", make_constructor(&makeTableWorkspace))
       .def("addColumn", &addColumnSimple,
