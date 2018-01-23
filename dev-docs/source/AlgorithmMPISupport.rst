@@ -584,10 +584,12 @@ Minus                                  all                     see ``BinaryOpera
 MoveInstrumentComponent                all
 Multiply                               all                     see ``BinaryOperation``
 OneMinusExponentialCor                 all                     see ``UnaryOperation``
-Q1D2                                   all                     not all optional normalization inputs are supported
+PDDetermineCharacterizations           all
+PDLoadCharacterizations                Identical
 Plus                                   all                     see ``BinaryOperation``
 PoissonErrors                          all                     see ``BinaryOperation``
 PolynomialCorrection                   all                     see ``UnaryOperation``
+Q1D2                                   all                     not all optional normalization inputs are supported
 Power                                  all                     see ``UnaryOperation``
 PowerLawCorrection                     all                     see ``UnaryOperation``
 Rebin                                  all                     min and max bin boundaries must be given explicitly
