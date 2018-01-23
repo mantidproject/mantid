@@ -30,7 +30,7 @@ from qtpy.QtWidgets import qApp, QApplication, QLabel, QMainWindow
 from six import reraise, text_type
 
 # local imports
-from workbench.plotting.propertiesdialog import LabelEditor
+from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 
 
@@ -201,23 +201,24 @@ class FigureManagerWorkbench(FigureManagerBase):
         canvas = self.canvas
         figure = canvas.figure
         try:
-            ax = figure.get_axes()[0]
+            axes = figure.get_axes()[0]
         except IndexError:
             return
 
-        def show_label_editor(target):
-            editor = LabelEditor(canvas, target)
-            # Qt has 0,0 at top left, mpl at bottom right. QDialogs
-            # have no parent so coordinates are relative to desktop
+        def move_and_show(editor):
             editor.move(event.x, figure.bbox.height - event.y + self.window.y())
             editor.exec_()
 
-        if ax.title.contains(event)[0]:
-            show_label_editor(ax.title)
-        elif ax.xaxis.label.contains(event)[0]:
-            show_label_editor(ax.xaxis.label)
-        elif ax.yaxis.label.contains(event)[0]:
-            show_label_editor(ax.yaxis.label)
+        if axes.title.contains(event)[0]:
+            move_and_show(LabelEditor(canvas, axes.title))
+        elif axes.xaxis.label.contains(event)[0]:
+            move_and_show(LabelEditor(canvas, axes.xaxis.label))
+        elif axes.yaxis.label.contains(event)[0]:
+            move_and_show(LabelEditor(canvas, axes.yaxis.label))
+        elif axes.xaxis.contains(event)[0]:
+            move_and_show(XAxisEditor(canvas, axes))
+        elif axes.yaxis.contains(event)[0]:
+            move_and_show(YAxisEditor(canvas, axes))
 
 
 class Show(object):
@@ -297,14 +298,14 @@ if __name__ == '__main__':
     if hasattr(Qt, 'AA_EnableHighDpiScaling'):
         qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
-    x = np.linspace(0, 2*np.pi, 100)
+    x = np.linspace(0, 10*np.pi, 1000)
     cx, sx = np.cos(x), np.sin(x)
     fig_mgr_1 = new_figure_manager(1)
     fig1 = fig_mgr_1.canvas.figure
     ax = fig1.add_subplot(111)
     ax.set_title("Test title")
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
+    ax.set_xlabel("$\mu s$")
+    ax.set_ylabel("Counts")
 
     ax.plot(x, cx)
     fig1.show()
