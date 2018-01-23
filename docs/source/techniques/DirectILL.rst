@@ -36,7 +36,7 @@ This document tries to give an overview on how the algorithms work together via 
 Instrument specific defaults and recommendations
 ################################################
 
-Some algorithm properties have the word 'AUTO' in their default value. This means that the default will be chosen according to the instrument by reading the actual default from the instrument parameters. The documentation of the algoritms which have these types of properties includes tables showing the defaults for supported ILL instruments.
+Some algorithm properties have the word 'AUTO' in their default value. This means that the default will be chosen according to the instrument by reading the actual default from the instrument parameters. The documentation of the algorithms which have these types of properties includes tables showing the defaults for supported ILL instruments.
 
 Reduction basics
 ================

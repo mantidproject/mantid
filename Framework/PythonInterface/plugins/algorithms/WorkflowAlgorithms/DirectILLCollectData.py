@@ -426,7 +426,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='A single-valued workspace holding the a previously determined ' +
+            doc='A single-valued workspace holding a previously determined ' +
                 'incident energy.')
         self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_WS, PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(name=common.PROP_FLAT_BKG,

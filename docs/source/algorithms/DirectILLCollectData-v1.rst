@@ -9,7 +9,7 @@
 Description
 -----------
 
-An initial step of the reduction workflow for the direct geometry TOF spectrometers at ILL. It reads and merges NeXus data files, normalizes data to monitor, subtracts a flat background, and adjust the TOF scale to conform to Mantid standards. More information on how this algorithm interacts with the rest of the ILL's TOF reduction suite can be found :ref:`here <DirectILL>`. The workflow of this algorithm is shown in the diagram below:
+An initial step of the reduction workflow for the direct geometry TOF spectrometers at ILL. It reads and merges NeXus data files, normalizes data to monitor, subtracts a flat background, and adjusts the TOF scale to conform to Mantid standards. More information on how this algorithm interacts with the rest of the ILL's TOF reduction suite can be found :ref:`here <DirectILL>`. The workflow of this algorithm is shown in the diagram below:
 
 .. diagram:: DirectILLCollectData-v1_wkflw.dot
 
@@ -71,7 +71,7 @@ Incident energy
 
 The incident energy and the nominal TOF channel are needed to adjust the TOF axis to conform to the standard Mantid notation.
 
-The incident energy written in the data files of IN4 and IN6 and accessible via the `Ei` sample log may be inaccurate. To ensure a correct value is used for the TOF axis adjustment, the value can be calibrated using :ref:`GetEiMonDet <algm-GetEiMonDet>`. The operation is controlled by *IncidentEnergyCalibration*. Elastic peak position are needed for the calculation which can be supplied by *EPPWorkspace*, otherwise :ref:`FindEPP <algm-FindEPP>` is used.
+The incident energy written in the data files of IN4 and IN6 and accessible via the `Ei` sample log may be inaccurate. To ensure a correct value is used for the TOF axis adjustment, the value can be calibrated using :ref:`GetEiMonDet <algm-GetEiMonDet>`. The operation is controlled by *IncidentEnergyCalibration*. Elastic peak positions are needed for the calculation which can be supplied by *EPPWorkspace*, otherwise :ref:`FindEPP <algm-FindEPP>` is used.
 
 The calibrated energy can be retrieved as a single-value workspace using the *OutputIncidentEnergyWorkspace* property. This workspace can be passed to further calls to :ref:`DirectILLCollectData <algm-DirectILLCollectData>` to force a common `Ei` and thus a common TOF axis between the datasets. This is needed for, e.g., empty container subtraction.
 
