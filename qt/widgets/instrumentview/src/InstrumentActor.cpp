@@ -177,7 +177,8 @@ void InstrumentActor::setUpWorkspace(
   }
 
   const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
-  m_detIndex2WsIndex.resize(sharedWorkspace->componentInfo().size());
+  m_detIndex2WsIndex.resize(sharedWorkspace->componentInfo().size(),
+                            INVALID_INDEX);
   for (size_t wi = 0; wi < spectrumInfo.size(); wi++) {
     const auto &specDef = spectrumInfo.spectrumDefinition(wi);
     for (auto info : specDef)
@@ -418,7 +419,7 @@ InstrumentActor::getComponentID(size_t pickID) const {
 }
 
 /** Retrieve the workspace index corresponding to a particular detector
- *  @param id The detector id
+ *  @param index The detector index
  *  @returns  The workspace index containing data for this detector
  *  @throws Exception::NotFoundError If the detector is not represented in the
  * workspace
@@ -446,7 +447,9 @@ void InstrumentActor::setIntegrationRange(const double &xmin,
  *  @return The signal
  */
 double InstrumentActor::getIntegratedCounts(size_t index) const {
-  size_t i = getWorkspaceIndex(index);
+  auto i = getWorkspaceIndex(index);
+  if (i == INVALID_INDEX)
+    return -1.0;
   return m_specIntegrs.at(i);
 }
 
@@ -497,6 +500,11 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
 
   bool isDataEmpty = dets.empty();
 
+  auto wi = getWorkspaceIndex(dets[0]);
+
+  if (wi == INVALID_INDEX)
+    isDataEmpty = true;
+
   if (isDataEmpty) {
     x.clear();
     y.clear();
@@ -505,7 +513,8 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
 
   // find the bins inside the integration range
   size_t imin, imax;
-  auto wi = getWorkspaceIndex(dets[0]);
+
+  
   getBinMinMaxIndex(wi, imin, imax);
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
@@ -515,6 +524,8 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
   // sum the spectra
   for (auto det : dets) {
     auto index = getWorkspaceIndex(det);
+    if (index == INVALID_INDEX)
+      continue;
     const auto &Y = ws->y(index);
     std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
                    std::plus<double>());
@@ -554,19 +565,17 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
   size_t nSpec = 0; // number of actual spectra to add
   // fill in the temp workspace with the data from the detectors
   for (auto det : dets) {
-    try {
-      size_t index = getWorkspaceIndex(det);
-      dws->setHistogram(nSpec, ws->histogram(index));
-      double xmin = dws->x(nSpec).front();
-      double xmax = dws->x(nSpec).back();
-      if (xmin < xStart)
-        xStart = xmin;
-      if (xmax > xEnd)
-        xEnd = xmax;
-      ++nSpec;
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      continue; // Detector doesn't have a workspace index relating to it
-    }
+    auto index = getWorkspaceIndex(det);
+    if (index == INVALID_INDEX)
+      continue;
+    dws->setHistogram(nSpec, ws->histogram(index));
+    double xmin = dws->x(nSpec).front();
+    double xmax = dws->x(nSpec).back();
+    if (xmin < xStart)
+      xStart = xmin;
+    if (xmax > xEnd)
+      xEnd = xmax;
+    ++nSpec;
   }
 
   if (nSpec == 0) {
@@ -1145,9 +1154,12 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
   calculateIntegratedSpectra(*workspace);
   std::set<size_t> monitorIndices;
 
-  for (auto monitor : m_monitors)
-    monitorIndices.emplace(getWorkspaceIndex(monitor));
-
+  for (auto monitor : m_monitors) {
+    auto index = getWorkspaceIndex(monitor);
+    if (index == INVALID_INDEX)
+      continue;
+    monitorIndices.emplace(index);
+  }
   // check that there is at least 1 non-monitor spectrum
   if (monitorIndices.size() == m_specIntegrs.size()) {
     // there are only monitors - cannot skip them
@@ -1201,8 +1213,12 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
   std::vector<size_t> wsIndices;
   wsIndices.reserve(indices.size());
-  for (auto det : indices)
-    wsIndices.push_back(getWorkspaceIndex(det));
+  for (auto det : indices) {
+    auto index = getWorkspaceIndex(det);
+    if (index == INVALID_INDEX)
+      continue;
+    wsIndices.push_back(index);
+  }
   if (!indices.empty()) {
     m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, wsIndices);
     auto workspace = getWorkspace();
