@@ -36,7 +36,11 @@
 /**
  * Convert a python object to a string or throw an exception. This will convert
  * unicode strings in python2 via utf8.
- */
+ *
+ * THIS IS DUPLICATED FROM
+ * MantidPythonInterface/kernel/Converters/PyObjectToString
+*/
+namespace { // anonymous
 std::string pyObjToStr(const boost::python::object &value) {
   boost::python::extract<std::string> extractor(value);
 
@@ -53,6 +57,7 @@ std::string pyObjToStr(const boost::python::object &value) {
   }
   return valuestr;
 }
+} // anonymous namespace
 
 namespace Mantid {
 namespace PythonInterface {
@@ -130,9 +135,14 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param name The name to assign to this in the service
    * @param item A boost.python wrapped SvcHeldType object
    */
-  static void addItem(SvcType &self, const std::string &name,
+  static void addItem(SvcType &self, const boost::python::object &name,
                       const boost::python::object &item) {
-    self.add(name, extractCppValue(item));
+    try {
+      std::string namestr = pyObjToStr(name);
+      self.add(namestr, extractCppValue(item));
+    } catch (std::invalid_argument &) {
+      throw std::invalid_argument("Failed to convert name to a string");
+    }
   }
 
   /**
@@ -142,9 +152,14 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param name The name to assign to this in the service
    * @param item A boost.python wrapped SvcHeldType object
    */
-  static void addOrReplaceItem(SvcType &self, const std::string &name,
+  static void addOrReplaceItem(SvcType &self, const boost::python::object &name,
                                const boost::python::object &item) {
-    self.addOrReplace(name, extractCppValue(item));
+    try {
+      std::string namestr = pyObjToStr(name);
+      self.addOrReplace(namestr, extractCppValue(item));
+    } catch (std::invalid_argument &) {
+      throw std::invalid_argument("Failed to convert name to a string");
+    }
   }
 
   /**
@@ -185,8 +200,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
     try {
       namestr = pyObjToStr(name);
     } catch (std::invalid_argument &) {
-      throw std::invalid_argument(
-          "Failed to convert property name to a string");
+      throw std::invalid_argument("Failed to convert name to a string");
     }
 
     SvcPtrType item;
