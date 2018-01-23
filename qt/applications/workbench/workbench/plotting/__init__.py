@@ -1,4 +1,4 @@
-#  This file is part of the mantidqt package
+#  This file is part of the mantid workbench.
 #
 #  Copyright (C) 2017 mantidproject
 #
@@ -10,22 +10,7 @@
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
+#  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import (absolute_import, unicode_literals)
-
-# std imports
-
-# 3rd party imports
-
-# local imports
-from mantidqt.utils.qt import import_qtlib
-
-# Constants
-PLACEHOLDER_FORMAT = 'valid range: {}-{}'
-
-
-WorkspaceTreeWidget = import_qtlib('_widgetscore', 'mantidqt.widgets.workspacewidget',
-                                   'WorkspaceTreeWidgetSimple')

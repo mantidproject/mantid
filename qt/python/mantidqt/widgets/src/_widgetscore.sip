@@ -218,4 +218,8 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 public:
   WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb /Transfer/,
                             QWidget *parent /TransferThis/ = nullptr);
+
+signals:
+  void plotSpectrumClicked(const QStringList & workspaceName);
+  void plotSpectrumWithErrorsClicked(const QStringList & workspaceName);
 };

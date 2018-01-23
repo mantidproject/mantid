@@ -27,6 +27,7 @@ import sys
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
+MPL_BACKEND = 'module://workbench.plotting.backend_workbench'
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
@@ -42,7 +43,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
+from qtpy.QtCore import (QByteArray, QEventLoop,
                          QPoint, QSize, Qt)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDockWidget, QFileDialog, QMainWindow,
@@ -51,8 +52,6 @@ from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
-if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
 
 # -----------------------------------------------------------------------------
@@ -60,7 +59,6 @@ if hasattr(Qt, 'AA_EnableHighDpiScaling'):
 # titles and hold on to a reference to it. Required to be performed early so
 # that the splash screen can be displayed
 # -----------------------------------------------------------------------------
-
 def qapplication():
     """Either return a reference to an existing application instance
     or create a new one
@@ -112,6 +110,8 @@ class MainWindow(QMainWindow):
 
         qapp = QApplication.instance()
         qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
         self.setWindowTitle("Mantid Workbench")
 
@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
         self.editor.register_plugin()
         self.widgets.append(self.editor)
 
-        self.set_splash("Loading Workspace Widget")
+        self.set_splash("Loading workspace widget")
         from workbench.plugins.workspacewidget import WorkspaceWidget
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
@@ -406,13 +406,28 @@ def start_workbench(app):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
     """
+    # The ordering here is very delicate. Test thoroughly when
+    # changing anything!
     main_window = MainWindow()
-    main_window.setup()
 
-    preloaded_packages = ('mantid',)
-    for name in preloaded_packages:
-        main_window.set_splash('Preloading ' + name)
-        importlib.import_module(name)
+    # Load matplotlib as early as possible.
+    # Setup our custom backend and monkey patch in custom current figure manager
+    main_window.set_splash('Preloading matplotlib')
+    mpl = importlib.import_module('matplotlib')
+    # Replace vanilla Gcf with our custom instance
+    _pylab_helpers = importlib.import_module('matplotlib._pylab_helpers')
+    currentfigure = importlib.import_module('workbench.plotting.currentfigure')
+    setattr(_pylab_helpers, 'Gcf', getattr(currentfigure, 'CurrentFigure'))
+    # Set up out custom matplotlib backend early. It must be done on
+    # the main thread
+    mpl.use(MPL_BACKEND)
+
+    # Setup widget layouts etc. mantid cannot be imported before this
+    # or the log messages don't get through
+    main_window.setup()
+    # start mantid
+    main_window.set_splash('Preloading mantid')
+    importlib.import_module('mantid')
 
     main_window.show()
     if main_window.splash:

@@ -90,6 +90,8 @@ public:
 
   MantidQt::MantidWidgets::StringList
   getSelectedWorkspaceNames() const override;
+  // Horrible second function to get a return value as QStringList directly
+  QStringList getSelectedWorkspaceNamesAsQList() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const override;
 
   bool askUserYesNo(const std::string &caption,
