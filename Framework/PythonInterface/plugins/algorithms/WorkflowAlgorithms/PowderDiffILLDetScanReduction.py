@@ -2,11 +2,11 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
     FloatArrayProperty, StringListValidator
-from mantid.api import PythonAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty
+from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty
 from mantid.simpleapi import *
 
 
-class PowderDiffILLDetScanReduction(PythonAlgorithm):
+class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
     _progress = None
 
     def category(self):
@@ -115,8 +115,8 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
 
         self._progress.report('Finishing up...')
 
-        GroupWorkspaces(output_workspaces, output_workspace_name)
-        self.setProperty('OutputWorkspace', output_workspace_name)
+        output_workspace = GroupWorkspaces(output_workspaces, output_workspace_name)
+        self.setProperty('OutputWorkspace', output_workspace)
 
     def _load(self):
         """
