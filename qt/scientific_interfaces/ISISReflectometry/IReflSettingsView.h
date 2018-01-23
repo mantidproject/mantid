@@ -88,7 +88,9 @@ public:
   /// Set default values for settings
   virtual void setExpDefaults(ExperimentOptionDefaults defaults) = 0;
   virtual void setInstDefaults(InstrumentOptionDefaults defaults) = 0;
-  virtual void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors, std::vector<MissingInstrumentParameterValue> const& missingValues) = 0;
+  virtual void showOptionLoadErrors(
+      std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
+      std::vector<MissingInstrumentParameterValue> const &missingValues) = 0;
 
   /// Sets status of whether polarisation corrections should be enabled/disabled
   virtual void setIsPolCorrEnabled(bool enable) const = 0;

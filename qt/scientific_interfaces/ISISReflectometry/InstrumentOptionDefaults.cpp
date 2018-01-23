@@ -26,7 +26,8 @@ std::ostream &operator<<(std::ostream &os,
      << ",\n LambdaMax: " << defaults.LambdaMax
      << ",\n I0MonitorIndex: " << defaults.I0MonitorIndex;
   if (defaults.ProcessingInstructions)
-    os << ",\n ProcessingInstructions: '" << defaults.ProcessingInstructions.value();
+    os << ",\n ProcessingInstructions: '"
+       << defaults.ProcessingInstructions.value();
   os << "',\n DetectorCorrectionType: '" << defaults.DetectorCorrectionType
      << "' }" << std::endl;
   return os;

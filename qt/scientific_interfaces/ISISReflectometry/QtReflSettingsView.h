@@ -109,7 +109,10 @@ public:
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
 
-  void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &errors, std::vector<MissingInstrumentParameterValue> const& missingValues) override;
+  void showOptionLoadErrors(
+      std::vector<InstrumentParameterTypeMissmatch> const &errors,
+      std::vector<MissingInstrumentParameterValue> const &missingValues)
+      override;
 
 public slots:
   /// Request presenter to obtain default values for settings
