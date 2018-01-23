@@ -292,6 +292,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
                      self.do_clear_peak_integration_canvas)
 
+        self.connect(self.ui.comboBox_viewRawDataMasks, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.evt_change_roi)
+
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
                      self.do_add_k_shift_vector)
@@ -415,6 +418,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_ptCountType.addItem('Time')
         self.ui.comboBox_ptCountType.addItem('Monitor')
         self.ui.comboBox_ptCountType.addItem('Absolute')
+
+        self.ui.comboBox_viewRawDataMasks.addItem('')
 
         # tab
         self.ui.tabWidget.setCurrentIndex(0)
@@ -868,8 +873,9 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         lower_left_c, upper_right_c = self.ui.graphicsView_detector2dPlot.get_roi()
-        # at the very beginning, the lower left and upper right are same
-        if lower_left_c[0] == upper_right_c[0] or lower_left_c[1] == upper_right_c[1]:
+        # at the very beginning, the lower left and upper right are same: force to integer
+        if int(lower_left_c[0]) == int(upper_right_c[0]) \
+                or int(lower_left_c[1]) == int(upper_right_c[1]):
             return
 
         status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
@@ -1143,10 +1149,10 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_del_roi(self):
-        """ Delete ROI
+        """ Remove the current ROI
         :return:
         """
-        self.ui.graphicsView_detector2dPlot.remove_roi()
+        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(0)
 
         return
 
@@ -1880,7 +1886,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_mask_pt_2d(self):
-        """ Mask a Pt and re-plot
+        """ Mask a Pt and re-plot with current selected ROI or others
         :return:
         """
         # TODO FIXME ASAP - This breaks if trying to mask detector with a loaded ROI/Mask workspace
@@ -1896,24 +1902,34 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
             return
 
-        # get the mask
-        status, ret_obj = self._myControl.get_region_of_interest(exp, scan)
-        if status is False:
-            # unable to get region of interest
-            self.pop_one_button_dialog(ret_obj)
-            return
-        else:
-            corner1, corner2 = ret_obj
+        #
+        roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
+        if roi_name  == '':
+            # new ROI
+            # get the mask
+            status, ret_obj = self._myControl.get_region_of_interest(exp, scan)
+            if status is False:
+                # unable to get region of interest
+                self.pop_one_button_dialog(ret_obj)
+                return
+            else:
+                corner1, corner2 = ret_obj
 
-        # create mask workspace
-        status, error = self._myControl.generate_mask_workspace(exp, scan, corner1, corner2)
-        if status is False:
-            self.pop_one_button_dialog(error)
-            return
+            # create mask workspace
+            status, error = self._myControl.generate_mask_workspace(exp, scan, corner1, corner2)
+            if status is False:
+                self.pop_one_button_dialog(error)
+                return
+
+            roi_name = None
+
+        else:
+            # previously saved ROI
+            pass
 
         # re-load data file and mask
         self._myControl.load_spice_xml_file(exp, scan, pt)
-        self._myControl.apply_mask(exp, scan, pt)
+        self._myControl.apply_mask(exp, scan, pt, roi_name=roi_name)
 
         # plot
         self._plot_raw_xml_2d(exp, scan, pt)
@@ -3260,6 +3276,52 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def evt_change_roi(self):
+        """ handing event of ROI selected in combobox is changed
+        :return:
+        """
+        curr_roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
+        print ('[DB...BAT] Change ROI is caught for ROI "{0}" of type {1}'
+               ''.format(curr_roi_name, type(curr_roi_name)))
+        if len(curr_roi_name) == 0:
+            # set to no ROI
+            self.ui.graphicsView_detector2dPlot.remove_roi()
+            # re-plot
+            self.do_plot_pt_raw()
+
+        else:
+            # set to another ROI
+            roi_exist, roi = self._myControl.get_region_of_interest(exp_number=None, scan_number=None,
+                                                                    roi_name=curr_roi_name)
+            if not roi_exist:
+                self.pop_one_button_dialog('ROI {0} does not exist.  Coding is wrong!'.format(curr_roi_name))
+                return
+
+            # remove current ROI from GUI from detector view plot
+            # self.ui.graphicsView_detector2dPlot.remove_roi()
+            # add a new ROI on
+            self.ui.graphicsView_detector2dPlot.set_roi(roi[0], roi[1], plot=True)
+        # END-IF-ELSE
+
+        return
+
+    def evt_new_roi(self, lower_left_x, lower_left_y, upper_right_x, upper_right_y):
+        """
+        handling event that a new ROI is defined
+        :param lower_left_x:
+        :param lower_left_y:
+        :param upper_right_x:
+        :param upper_right_y:
+        :return:
+        """
+        # a new ROI is defined so combo box is set to item 0
+        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(0)
+
+        self.ui.lineEdit_message.setText('New selected ROI: ({0}, {1}), ({2}, {3})'
+                                         ''.format(lower_left_x, lower_left_y, upper_right_x, upper_right_y))
+
+        return
+
     def evt_show_survey(self):
         """
         Show survey result
@@ -3480,7 +3542,11 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_viewRawDataMasks.addItem(roi_name)
         self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count() - 1)
 
+        # set ROI to controller
+        self._myControl.set_roi_by_name(roi_name, lower_left_corner, upper_right_corner)
+
         # plot ROI on 2D plot
+        self.ui.graphicsView_detector2dPlot.remove_roi()
         self.ui.graphicsView_detector2dPlot.set_roi(lower_left_corner, upper_right_corner)
 
         return
@@ -3793,6 +3859,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=x_max, y_min=0, y_max=y_max,
                                                         hold_prev_image=False)
+        # FIXME TODO - ASAP This is not always correct!  There is no flag to set to turn off the ROI in myControl!
+        # FIXME TODO - ASAP A mechanism shall be invented to deal with this!
         status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
         if status:
             self.ui.graphicsView_detector2dPlot.add_roi(roi[0], roi[1])
