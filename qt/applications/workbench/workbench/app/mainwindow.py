@@ -218,7 +218,7 @@ class MainWindow(QMainWindow):
 
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
-                                               on_triggered=self.setup_default_layouts,
+                                               on_triggered=self.prep_window_for_reset,
                                                shortcut="Shift+F10",
                                                shortcut_context=Qt.ApplicationShortcut)
         self.view_menu_actions = [action_restore_default, None] + self.create_widget_actions()
@@ -258,13 +258,16 @@ class MainWindow(QMainWindow):
         self.window_size = desktop.screenGeometry().size()
         self.setup_default_layouts()
 
+    def prep_window_for_reset(self):
+        """Function to reset all dock widgets to a state where they can be
+        ordered by setup_default_layout"""
+        for widget in self.widgets:
+            widget.dockwidget.setFloating(False)  # Bring back any floating windows
+            self.addDockWidget(Qt.LeftDockWidgetArea, widget.dockwidget)  # Un-tabify all widgets
+        self.setup_default_layouts()
+
     def setup_default_layouts(self):
         """Set or reset the layouts of the child widgets"""
-
-        # When restoring default layout dock all widgets first
-        for w in self.widgets:
-            w.dockwidget.setFloating(False)
-
         # layout definition
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
