@@ -491,6 +491,7 @@ Supported Algorithms
 ====================================== ======================= ========
 Algorithm                              Supported modes         Comments
 ====================================== ======================= ========
+AlignDetectors                         all                     with ``StorageMode::Distributed`` this touches only detectors that have spectra on this rank, i.e., the modified instrument is not in an identical state on all ranks
 BinaryOperation                        all                     not supported if ``AllowDifferentNumberSpectra`` is enabled
 CalculateChiSquared                    MasterOnly, Identical   see ``IFittingAlgorithm``
 CalculateCostFunction                  MasterOnly, Identical   see ``IFittingAlgorithm``
