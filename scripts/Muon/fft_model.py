@@ -12,29 +12,29 @@ class FFTWrapper(object):
     This keeps the main FFT class simple.
     """
     def __init__(self,FFT):
-        self.name="FFT"
-        self.model=FFT
+        self.name = "FFT"
+        self.model = FFT
 
     def loadData(self,inputs):
         """
         store the data in the wrapper for later
         """
         if "phaseTable" in inputs:
-            self.phaseTable=inputs["phaseTable"]
+            self.phaseTable = inputs["phaseTable"]
         else:
-            self.phaseTable=None
+            self.phaseTable = None
         if "preRe" in inputs:
-            self.preRe=inputs["preRe"]
+            self.preRe = inputs["preRe"]
         else:
-            self.preRe=None
+            self.preRe = None
         if "preIm" in inputs:
-            self.preIm=inputs["preIm"]
+            self.preIm = inputs["preIm"]
         else:
-            self.preIm=None
+            self.preIm = None
         if "FFT" in inputs:
-            self.FFT=inputs["FFT"]
+            self.FFT = inputs["FFT"]
         else:
-            self.FFT=None
+            self.FFT = None
         self.model.setRun(inputs["Run"])
 
     def execute(self):
@@ -69,7 +69,7 @@ class FFTModel(object):
     the analysis.
     """
     def __init__(self):
-        self.name="FFT"
+        self.name = "FFT"
 
     def setRun(self,run):
         self.runName=run
@@ -78,19 +78,19 @@ class FFTModel(object):
         """
         PaddingAndApodization alg on the data
         """
-        preAlg=mantid.AlgorithmManager.create("PaddingAndApodization")
+        preAlg = mantid.AlgorithmManager.create("PaddingAndApodization")
         preAlg.initialize()
         preAlg.setChild(True)
         for name,value in iteritems(preInputs):
             preAlg.setProperty(name,value)
         preAlg.execute()
-        mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"],preAlg.getProperty("OutputWorkspace").value)
+        mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"], preAlg.getProperty("OutputWorkspace").value)
 
     def FFTAlg(self,FFTInputs):
         """
         Use the FFT alg
         """
-        alg=mantid.AlgorithmManager.create("FFT")
+        alg = mantid.AlgorithmManager.create("FFT")
         alg.initialize()
         alg.setChild(True)
         for name,value in iteritems(FFTInputs):
@@ -98,7 +98,7 @@ class FFTModel(object):
         alg.execute()
         mantid.AnalysisDataService.addOrReplace(FFTInputs["OutputWorkspace"],alg.getProperty("OutputWorkspace").value)
 
-        ws=alg.getPropertyValue("OutputWorkspace")
+        ws = alg.getPropertyValue("OutputWorkspace")
         group = mantid.AnalysisDataService.retrieve(self.runName)
         group.add(ws)
 
@@ -106,7 +106,7 @@ class FFTModel(object):
         """
         generates a phase table from CalMuonDetectorPhases
         """
-        alg=mantid.AlgorithmManager.create("CalMuonDetectorPhases")
+        alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         alg.initialize()
         alg.setChild(True)
 
@@ -124,7 +124,7 @@ class FFTModel(object):
         do the phaseQuad algorithm
         groups data into a single set
         """
-        phaseQuad=mantid.AlgorithmManager.create("PhaseQuad")
+        phaseQuad = mantid.AlgorithmManager.create("PhaseQuad")
         phaseQuad.initialize()
         phaseQuad.setChild(False)
         print (self.runName)
