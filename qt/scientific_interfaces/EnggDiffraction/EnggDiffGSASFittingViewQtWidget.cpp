@@ -7,7 +7,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
+EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
+    boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider)
+    : m_userMessageProvider(userMessageProvider) {
   setupUI();
 
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
@@ -180,10 +182,15 @@ void EnggDiffGSASFittingViewQtWidget::updateRunList(
   }
 }
 
+void EnggDiffGSASFittingViewQtWidget::userError(
+    const std::string &errorTitle, const std::string &errorDescription) const {
+  m_userMessageProvider->userError(errorTitle, errorDescription);
+}
+
 void EnggDiffGSASFittingViewQtWidget::userWarning(
+    const std::string &warningTitle,
     const std::string &warningDescription) const {
-  (void)warningDescription;
-  throw std::runtime_error("userWarning not yet implemented");
+  m_userMessageProvider->userWarning(warningTitle, warningDescription);
 }
 
 } // CustomInterfaces

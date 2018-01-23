@@ -37,7 +37,7 @@ public:
         .WillOnce(Return(runLabels));
     EXPECT_CALL(*m_mockViewPtr, updateRunList(runLabels)).Times(1);
 
-    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_, testing::_)).Times(0);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -57,8 +57,9 @@ public:
 
     EXPECT_CALL(*m_mockModelPtr, getRunLabels()).Times(0);
 
-    EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Load failed, see the log for more details"))
+    EXPECT_CALL(
+        *m_mockViewPtr,
+        userWarning("Load failed", "Load failed, see the log for more details"))
         .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
@@ -80,7 +81,7 @@ public:
         .WillOnce(Return(sampleWorkspace));
 
     EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
-    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_, testing::_)).Times(0);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
     assertMocksUsedCorrectly();
@@ -97,10 +98,10 @@ public:
         .Times(1)
         .WillOnce(Return(boost::none));
 
-    EXPECT_CALL(
-        *m_mockViewPtr,
-        userWarning(
-            "Tried to access invalid run, runNumber 123 and bank ID 1"));
+    EXPECT_CALL(*m_mockViewPtr,
+                userError("Invalid run identifier",
+                          "Tried to access invalid run, runNumber 123 and "
+                          "bank ID 1. Please contact the development team"));
 
     EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(0);
 
@@ -143,7 +144,7 @@ public:
 
     EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
     EXPECT_CALL(*m_mockViewPtr, plotCurve(testing::_)).Times(2);
-    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_, testing::_)).Times(0);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
     assertMocksUsedCorrectly();
@@ -186,7 +187,8 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Refinement failed, see the log for more details"));
+                userWarning("Refinement failed",
+                            "Refinement failed, see the log for more details"));
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -238,7 +240,8 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Refinement failed, see the log for more details"));
+                userWarning("Refinement failed",
+                            "Refinement failed, see the log for more details"));
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -261,15 +264,15 @@ private:
   }
 
   void assertMocksUsedCorrectly() {
-    if (m_mockViewPtr) {
-      delete m_mockViewPtr;
-    }
     TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(m_mockModelPtr));
     TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(m_mockViewPtr));
+    if (m_mockViewPtr) {
+      delete m_mockViewPtr;
+    }
   }
 };
 
