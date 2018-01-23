@@ -41,8 +41,7 @@ public:
 
   bool hasFittedPeaksForRun(const RunLabel &runLabel) const override;
 
-  boost::optional<std::string>
-  loadFocusedRun(const std::string &filename) override;
+  std::string loadFocusedRun(const std::string &filename) override;
 
 protected:
   /// The following methods are marked as protected so that they can be exposed

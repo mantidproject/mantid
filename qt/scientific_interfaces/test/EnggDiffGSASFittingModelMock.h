@@ -44,8 +44,7 @@ public:
 
   MOCK_CONST_METHOD1(hasFittedPeaksForRun, bool(const RunLabel &runLabel));
 
-  MOCK_METHOD1(loadFocusedRun,
-               boost::optional<std::string>(const std::string &filename));
+  MOCK_METHOD1(loadFocusedRun, std::string(const std::string &filename));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
