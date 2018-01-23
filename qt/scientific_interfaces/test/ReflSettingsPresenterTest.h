@@ -468,7 +468,7 @@ public:
   }
 
   void expectNoOptionLoadErrors(MockSettingsView &mockView) {
-    EXPECT_CALL(mockView, showOptionLoadError(_)).Times(0);
+    EXPECT_CALL(mockView, showOptionLoadErrors(_,_)).Times(0);
   }
 
   void testInstrumentDefaults() {

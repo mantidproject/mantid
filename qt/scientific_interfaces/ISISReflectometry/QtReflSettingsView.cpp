@@ -2,6 +2,7 @@
 #include "ReflSettingsPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include <QMessageBox>
+#include <boost/algorithm/string/join.hpp>
 #include "MantidKernel/System.h"
 
 namespace MantidQt {
@@ -170,6 +171,27 @@ void QtReflSettingsView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
+void QtReflSettingsView::setText(QLineEdit &lineEdit,
+                                 boost::optional<double> value) {
+  if (value)
+    setText(lineEdit, value.value());
+  else
+    setText(lineEdit, "");
+}
+
+void QtReflSettingsView::setText(QLineEdit &lineEdit,
+                                 boost::optional<int> value) {
+  if (value)
+    setText(lineEdit, value.value());
+  else
+    setText(lineEdit, "");
+}
+
+void QtReflSettingsView::setText(QLineEdit &lineEdit,
+                                 boost::optional<std::string> const &text) {
+  setText(lineEdit, text.value_or(""));
+}
+
 void QtReflSettingsView::setText(QLineEdit &lineEdit, double value) {
   auto valueAsString = QString::number(value);
   lineEdit.setText(valueAsString);
@@ -244,18 +266,25 @@ std::string QtReflSettingsView::getText(QComboBox const &box) const {
   return box.currentText().toStdString();
 }
 
-void QtReflSettingsView::showOptionLoadError(
-    AccumulatedTypeErrors const &errors) {
-  auto message =
-      QString("Unable to retrieve default values for the following parameters "
-              "because:\n");
-  for (auto &error : errors)
-    message += "'" + QString::fromStdString(error.parameterName()) +
-               "' should hold an " +
-               QString::fromStdString(error.expectedType()) +
-               " value but does not.";
-  QMessageBox::warning(this, "Failed to load default from parameter file",
-                       message);
+void QtReflSettingsView::showOptionLoadErrors(
+    std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
+    std::vector<MissingInstrumentParameterValue> const &missingValues) {
+  auto message = QString(
+      "Unable to retrieve default values for the following parameters:\n");
+
+  for (auto &typeError : typeErrors)
+    message += QString::fromStdString(typeError.parameterName()) +
+               " should hold an " +
+               QString::fromStdString(typeError.expectedType()) +
+               " value but does not.\n";
+
+  auto missingParams = boost::algorithm::join(missingValues, ", ");
+  message += QString::fromStdString(missingParams) +
+             QString(missingParams.size() == 1 ? " is" : " are") +
+             " not set in the instrument parameter file but should be.\n";
+
+  QMessageBox::warning(
+      this, "Failed to load one or more defaults from parameter file", message);
 }
 
 /** Returns global options for 'Stitch1DMany'

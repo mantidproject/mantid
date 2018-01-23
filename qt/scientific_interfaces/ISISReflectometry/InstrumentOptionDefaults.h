@@ -2,6 +2,7 @@
 #define MANTID_ISISREFLECTOMETRY_INSTRUMENTOPTIONDEFAULTS_H
 #include <string>
 #include "MantidGeometry/Instrument.h"
+#include <boost/optional.hpp>
 #include <ostream>
 #include "DllConfig.h"
 
@@ -17,7 +18,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentOptionDefaults {
   double LambdaMin;
   double LambdaMax;
   int I0MonitorIndex;
-  std::string ProcessingInstructions;
+  boost::optional<std::string> ProcessingInstructions;
   std::string DetectorCorrectionType;
 };
 

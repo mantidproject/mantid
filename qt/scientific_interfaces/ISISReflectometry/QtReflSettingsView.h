@@ -109,7 +109,7 @@ public:
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
 
-  void showOptionLoadError(AccumulatedTypeErrors const &errors) override;
+  void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &errors, std::vector<MissingInstrumentParameterValue> const& missingValues) override;
 
 public slots:
   /// Request presenter to obtain default values for settings
@@ -130,6 +130,9 @@ private:
   void setText(QLineEdit &lineEdit, int value);
   void setText(QLineEdit &lineEdit, double value);
   void setText(QLineEdit &lineEdit, std::string const &value);
+  void setText(QLineEdit &lineEdit, boost::optional<int> value);
+  void setText(QLineEdit &lineEdit, boost::optional<double> value);
+  void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
   void setChecked(QCheckBox &checkBox, bool checked);
   std::string getText(QLineEdit const &lineEdit) const;
   std::string getText(QComboBox const &box) const;

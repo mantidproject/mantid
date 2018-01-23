@@ -51,7 +51,7 @@ private:
   std::string m_originalMessage;
 };
 
-using AccumulatedTypeErrors = std::vector<InstrumentParameterTypeMissmatch>;
+using MissingInstrumentParameterValue = std::string;
 
 template <typename T>
 std::vector<T>

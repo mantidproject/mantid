@@ -11,6 +11,7 @@
 #include "GetInstrumentParameter.h"
 #include "ExperimentOptionDefaults.h"
 #include "InstrumentOptionDefaults.h"
+#include <type_traits>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -272,11 +273,9 @@ void ReflSettingsPresenter::createStitchHints() {
 }
 
 template <typename T>
-T firstFromParameterFileOr(Instrument_const_sptr instrument,
-                           std::string const &parameterName,
-                           T ifEmptyOrWrongType) {
-  return first(getInstrumentParameter<T>(instrument, parameterName))
-      .value_or(ifEmptyOrWrongType);
+boost::optional<T> firstFromParameterFile(Instrument_const_sptr instrument,
+                                          std::string const &parameterName) {
+  return first(getInstrumentParameter<T>(instrument, parameterName));
 }
 
 class InstrumentParameters {
@@ -284,27 +283,59 @@ public:
   explicit InstrumentParameters(Instrument_const_sptr instrument)
       : m_instrument(std::move(instrument)) {}
 
-  template <typename T> T valueOrDefault(std::string const &parameterName) {
-    return valueOr(parameterName, T());
+  template <typename T> T valueOrEmpty(std::string const &parameterName) {
+    static_assert(!std::is_arithmetic<T>::value, "Use valueOrZero instead.");
+    return valueFromFileOrDefaultConstruct<T>(parameterName);
+  }
+
+  template <typename T> T valueOrZero(std::string const &parameterName) {
+    static_assert(std::is_arithmetic<T>::value, "Use valueOrEmpty instead.");
+    return valueFromFileOrDefaultConstruct<T>(parameterName);
   }
 
   template <typename T>
-  T valueOr(std::string const &parameterName, T defaultValue) {
-    try {
-      return firstFromParameterFileOr(m_instrument, parameterName,
-                                      defaultValue);
-    } catch (InstrumentParameterTypeMissmatch const &ex) {
-      m_errors.emplace_back(ex);
-      return defaultValue;
+  boost::optional<T> optional(std::string const &parameterName) {
+    return valueFromFile<T>(parameterName);
+  }
+
+  template <typename T> T mandatory(std::string const &parameterName) {
+    if (auto value = firstFromParameterFile<T>(m_instrument, parameterName)) {
+      return value.get();
+    } else {
+      m_missingValueErrors.emplace_back(parameterName);
+      return T();
     }
   }
 
-  AccumulatedTypeErrors const &typeErrors() const { return m_errors; }
-  bool hasAccumulatedErrors() const { return !m_errors.empty(); }
+  std::vector<InstrumentParameterTypeMissmatch> const &typeErrors() const {
+    return m_typeErrors;
+  }
+  bool hasTypeErrors() const { return !m_typeErrors.empty(); }
+
+  std::vector<MissingInstrumentParameterValue> const &missingValues() const {
+    return m_missingValueErrors;
+  }
+  bool hasMissingValues() const { return !m_missingValueErrors.empty(); }
 
 private:
+  template <typename T>
+  T valueFromFileOrDefaultConstruct(std::string const &parameterName) {
+    return valueFromFile<T>(parameterName).value_or(T());
+  }
+
+  template <typename T>
+  boost::optional<T> valueFromFile(std::string const &parameterName) {
+    try {
+      return firstFromParameterFile<T>(m_instrument, parameterName);
+    } catch (InstrumentParameterTypeMissmatch const &ex) {
+      m_typeErrors.emplace_back(ex);
+      return boost::none;
+    }
+  }
+
   Instrument_const_sptr m_instrument;
-  AccumulatedTypeErrors m_errors;
+  std::vector<InstrumentParameterTypeMissmatch> m_typeErrors;
+  std::vector<MissingInstrumentParameterValue> m_missingValueErrors;
 };
 
 /** Fills experiment settings with default values
@@ -314,32 +345,40 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto instrument = createEmptyInstrument(m_currentInstrumentName);
   auto parameters = InstrumentParameters(instrument);
 
-  auto experimentDefaults = ExperimentOptionDefaults();
+  auto defaults = ExperimentOptionDefaults();
 
-  experimentDefaults.AnalysisMode = parameters.valueOr<std::string>(
-      "AnalysisMode", alg->getPropertyValue("AnalysisMode"));
-  experimentDefaults.PolarizationAnalysis =
-      alg->getPropertyValue("PolarizationAnalysis");
-  experimentDefaults.CRho = parameters.valueOrDefault<std::string>("crho");
-  experimentDefaults.CAlpha = parameters.valueOrDefault<std::string>("calpha");
-  experimentDefaults.CAp = parameters.valueOrDefault<std::string>("cAp");
-  experimentDefaults.CPp = parameters.valueOrDefault<std::string>("cPp");
-  experimentDefaults.MomentumTransferStep =
-      parameters.valueOrDefault<double>("dQ/Q");
-  experimentDefaults.ScaleFactor = parameters.valueOrDefault<double>("Scale");
-  experimentDefaults.StitchParams =
-      parameters.valueOrDefault<std::string>("Params");
+  defaults.AnalysisMode = parameters.optional<std::string>("AnalysisMode")
+                              .value_or(alg->getPropertyValue("AnalysisMode"));
+  defaults.PolarizationAnalysis =
+      parameters.optional<std::string>("PolarizationAnalysis")
+          .value_or(alg->getPropertyValue("PolarizationAnalysis"));
+
+  defaults.CRho = parameters.optional<std::string>("crho").value_or("1");
+  defaults.CAlpha = parameters.optional<std::string>("calpha").value_or("1");
+  defaults.CAp = parameters.optional<std::string>("cAp").value_or("1");
+  defaults.CPp = parameters.optional<std::string>("cPp").value_or("1");
+
+  defaults.MomentumTransferStep = parameters.optional<double>("dQ/Q");
+  defaults.ScaleFactor = parameters.optional<double>("Scale");
+  defaults.StitchParams = parameters.optional<std::string>("Params");
 
   if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
-    experimentDefaults.TransRunStartOverlap =
-        parameters.valueOrDefault<double>("TransRunStartOverlap");
-    experimentDefaults.TransRunEndOverlap =
-        parameters.valueOrDefault<double>("TransRunEndOverlap");
+    defaults.TransRunStartOverlap =
+        parameters.optional<double>("TransRunStartOverlap");
+    defaults.TransRunEndOverlap =
+        parameters.optional<double>("TransRunEndOverlap");
+  } else {
+    defaults.TransRunStartOverlap =
+        parameters.mandatory<double>("TransRunStartOverlap");
+    defaults.TransRunEndOverlap =
+        parameters.mandatory<double>("TransRunEndOverlap");
   }
-  m_view->setExpDefaults(std::move(experimentDefaults));
 
-  if (parameters.hasAccumulatedErrors()) {
-    m_view->showOptionLoadError(parameters.typeErrors());
+  m_view->setExpDefaults(std::move(defaults));
+
+  if (parameters.hasTypeErrors() || parameters.hasMissingValues()) {
+    m_view->showOptionLoadErrors(parameters.typeErrors(),
+                                 parameters.missingValues());
   }
 }
 
@@ -349,41 +388,34 @@ void ReflSettingsPresenter::getInstDefaults() {
   auto alg = createReductionAlg();
   auto instrument = createEmptyInstrument(m_currentInstrumentName);
   auto parameters = InstrumentParameters(instrument);
+  auto defaults = InstrumentOptionDefaults();
 
-  auto instrumentDefaults = InstrumentOptionDefaults();
+  defaults.NormalizeByIntegratedMonitors =
+      parameters.optional<bool>("IntegratedMonitors")
+          .value_or(boost::lexical_cast<bool>(
+              alg->getPropertyValue("NormalizeByIntegratedMonitors")));
+  defaults.MonitorIntegralMin =
+      parameters.mandatory<double>("MonitorIntegralMin");
+  defaults.MonitorIntegralMax =
+      parameters.mandatory<double>("MonitorIntegralMax");
+  defaults.MonitorBackgroundMin =
+      parameters.mandatory<double>("MonitorBackgroundMin");
+  defaults.MonitorBackgroundMax =
+      parameters.mandatory<double>("MonitorBackgroundMax");
+  defaults.LambdaMin = parameters.mandatory<double>("LambdaMin");
+  defaults.LambdaMax = parameters.mandatory<double>("LambdaMax");
+  defaults.I0MonitorIndex = parameters.mandatory<int>("I0MonitorIndex");
+  defaults.ProcessingInstructions =
+      parameters.optional<std::string>("ProcessingInstructions");
+  defaults.DetectorCorrectionType =
+      parameters.optional<std::string>("DetectorCorrectionType")
+          .value_or(alg->getPropertyValue("DetectorCorrectionType"));
 
-  instrumentDefaults.NormalizeByIntegratedMonitors = parameters.valueOr<bool>(
-      "IntegratedMonitors", boost::lexical_cast<bool>(alg->getPropertyValue(
-                                "NormalizeByIntegratedMonitors")));
-  instrumentDefaults.MonitorIntegralMin =
-      parameters.valueOrDefault<double>("MonitorIntegralMin");
+  m_view->setInstDefaults(std::move(defaults));
 
-  instrumentDefaults.MonitorIntegralMax =
-      parameters.valueOrDefault<double>("MonitorIntegralMax");
-
-  instrumentDefaults.MonitorBackgroundMin =
-      parameters.valueOrDefault<double>("MonitorBackgroundMin");
-
-  instrumentDefaults.MonitorBackgroundMax =
-      parameters.valueOrDefault<double>("MonitorBackgroundMax");
-
-  instrumentDefaults.LambdaMin = parameters.valueOrDefault<double>("LambdaMin");
-  instrumentDefaults.LambdaMax = parameters.valueOrDefault<double>("LambdaMax");
-
-  instrumentDefaults.I0MonitorIndex =
-      parameters.valueOrDefault<int>("I0MonitorIndex");
-
-  instrumentDefaults.ProcessingInstructions =
-      parameters.valueOrDefault<std::string>("ProcessingInstructions");
-
-  instrumentDefaults.DetectorCorrectionType = parameters.valueOr<std::string>(
-      "DetectorCorrectionType",
-      alg->getPropertyValue("DetectorCorrectionType"));
-
-  m_view->setInstDefaults(std::move(instrumentDefaults));
-
-  if (parameters.hasAccumulatedErrors()) {
-    m_view->showOptionLoadError(parameters.typeErrors());
+  if (parameters.hasTypeErrors() || parameters.hasMissingValues()) {
+    m_view->showOptionLoadErrors(parameters.typeErrors(),
+                                 parameters.missingValues());
   }
 }
 

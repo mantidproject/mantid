@@ -3,9 +3,11 @@
 #include <string>
 #include <ostream>
 #include "DllConfig.h"
+#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 struct MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults {
   std::string AnalysisMode;
   std::string PolarizationAnalysis;
@@ -13,11 +15,11 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults {
   std::string CAlpha;
   std::string CAp;
   std::string CPp;
-  double TransRunStartOverlap;
-  double TransRunEndOverlap;
-  double MomentumTransferStep;
-  double ScaleFactor;
-  std::string StitchParams;
+  boost::optional<double> TransRunStartOverlap;
+  boost::optional<double> TransRunEndOverlap;
+  boost::optional<double> MomentumTransferStep;
+  boost::optional<double> ScaleFactor;
+  boost::optional<std::string> StitchParams;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool

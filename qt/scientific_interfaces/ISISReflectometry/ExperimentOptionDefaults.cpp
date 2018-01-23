@@ -19,12 +19,18 @@ std::ostream &operator<<(std::ostream &os,
   os << "{ AnalysisMode: '" << defaults.AnalysisMode
      << ", \nPolarizationAnalysis: '" << defaults.PolarizationAnalysis
      << "',\nCRho: '" << defaults.CRho << "',\nCAlpha: '" << defaults.CAlpha
-     << "',\nCAp: '" << defaults.CAp << "', \nCPp: '" << defaults.CPp
-     << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap
-     << ",\nTransRunEndOverlap: " << defaults.TransRunEndOverlap
-     << ",\nMomentumTransferStep: " << defaults.MomentumTransferStep
-     << ",\nScaleFactor: " << defaults.ScaleFactor << ", \nStitchParams: '"
-     << defaults.StitchParams << "' }" << std::endl;
+     << "',\nCAp: '" << defaults.CAp << "', \nCPp: '" << defaults.CPp;
+  if (defaults.TransRunStartOverlap)
+    os << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap.value();
+  if (defaults.TransRunEndOverlap)
+    os << ",\nTransRunEndOverlap: " << defaults.TransRunEndOverlap.value();
+  if (defaults.MomentumTransferStep)
+    os << ",\nMomentumTransferStep: " << defaults.MomentumTransferStep.value();
+  if (defaults.ScaleFactor)
+    os << ",\nScaleFactor: " << defaults.ScaleFactor.value();
+  if (defaults.StitchParams)
+    os << ", \nStitchParams: '" << defaults.StitchParams.value();
+  os << "' }" << std::endl;
   return os;
 }
 }
