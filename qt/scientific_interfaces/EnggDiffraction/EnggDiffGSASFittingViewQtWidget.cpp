@@ -10,7 +10,7 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
   setupUI();
 
-  auto model = std::make_unique<EnggDiffGSASFittingModel>();
+  auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
   m_presenter.reset(new EnggDiffGSASFittingPresenter(std::move(model), this));
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
