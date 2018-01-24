@@ -47,7 +47,7 @@ void setupBasisAxes(const Mantid::Kernel::V3D &zaxis,
 std::vector<Mantid::Kernel::V3D>
 retrievePanelCorners(const Mantid::Geometry::ComponentInfo &componentInfo,
                      size_t rootIndex) {
-  auto panel = componentInfo.structuredPanel(rootIndex);
+  auto panel = componentInfo.quadrilateralComponent(rootIndex);
   return {componentInfo.position(panel.bottomLeft),
           componentInfo.position(panel.bottomRight),
           componentInfo.position(panel.topRight),

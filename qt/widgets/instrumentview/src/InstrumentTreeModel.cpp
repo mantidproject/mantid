@@ -22,7 +22,7 @@ InstrumentTreeModel::InstrumentTreeModel(const InstrumentWidget *instrWidget,
                                          QObject *parent)
     : QAbstractItemModel(parent), m_instrWidget(instrWidget) {
   const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().getComponentInfo();
+      m_instrWidget->getInstrumentActor().componentInfo();
   m_componentIndices.resize(componentInfo.size());
   std::iota(m_componentIndices.begin(), m_componentIndices.end(), 0);
 }
@@ -43,7 +43,7 @@ int InstrumentTreeModel::columnCount(const QModelIndex &parent) const {
     return 1;
 
   const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().getComponentInfo();
+      m_instrWidget->getInstrumentActor().componentInfo();
   auto index = extractIndex(parent);
   if (componentInfo.children(index).size() > 0)
     return 1;
@@ -60,7 +60,7 @@ QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const {
     return QVariant();
 
   const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().getComponentInfo();
+      m_instrWidget->getInstrumentActor().componentInfo();
 
   if (!index.isValid()) // not valid has to return the root node
     return QString::fromStdString(componentInfo.name(componentInfo.root()));
@@ -96,7 +96,7 @@ QVariant InstrumentTreeModel::headerData(int section,
 QModelIndex InstrumentTreeModel::index(int row, int column,
                                        const QModelIndex &parent) const {
   const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().getComponentInfo();
+      m_instrWidget->getInstrumentActor().componentInfo();
   if (!parent.isValid()) { // invalid parent, has to be the root node i.e
                            // instrument
     return createIndex(row, column, &m_componentIndices[componentInfo.root()]);
@@ -120,7 +120,7 @@ QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const {
     return QModelIndex();
 
   const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().getComponentInfo();
+      m_instrWidget->getInstrumentActor().componentInfo();
   auto compIndex = extractIndex(index);
 
   if (compIndex == componentInfo.root())
@@ -152,7 +152,7 @@ int InstrumentTreeModel::rowCount(const QModelIndex &parent) const {
     return 1;
 
   const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().getComponentInfo();
+      m_instrWidget->getInstrumentActor().componentInfo();
   auto index = extractIndex(parent);
   const auto &children = componentInfo.children(index);
   if (children.size() > 0)

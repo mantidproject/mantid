@@ -114,9 +114,19 @@ ComponentInfo::children(size_t componentIndex) const {
 
 size_t ComponentInfo::size() const { return m_componentInfo->size(); }
 
-ComponentInfo::StructuredPanel
-ComponentInfo::structuredPanel(const size_t componentIndex) const {
-  StructuredPanel corners;
+size_t ComponentInfo::numberOfDetectorsInSubtree(size_t componentIndex) const {
+  return m_componentInfo->numberOfDetectorsInSubtree(componentIndex);
+}
+
+ComponentInfo::QuadrilateralComponent
+ComponentInfo::quadrilateralComponent(const size_t componentIndex) const {
+  auto type = componentType(componentIndex);
+  if (!(type == Beamline::ComponentType::Structured ||
+        type == Beamline::ComponentType::Rectangular))
+    throw std::runtime_error("ComponentType is not Structured or Rectangular "
+                             "in ComponentInfo::quadrilateralComponent.");
+
+  QuadrilateralComponent corners;
   auto innerRangeComp =
       m_componentInfo->componentRangeInSubtree(componentIndex);
   // nSubComponents, subtract off self hence -1. nSubComponents = number of
@@ -294,7 +304,7 @@ void ComponentInfo::growBoundingBoxAsRectuangularBank(
     std::map<size_t, size_t> &mutableDetExclusions,
     IteratorT &mutableIterator) const {
 
-  auto panel = structuredPanel(index);
+  auto panel = quadrilateralComponent(index);
   mutableBB.grow(componentBoundingBox(panel.bottomLeft, reference));
   mutableBB.grow(componentBoundingBox(panel.topRight, reference));
   mutableBB.grow(componentBoundingBox(panel.topLeft, reference));

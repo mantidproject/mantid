@@ -87,7 +87,7 @@ private:
       const std::map<size_t, size_t> &detectorExclusions) const;
 
 public:
-  struct StructuredPanel {
+  struct QuadrilateralComponent {
     size_t topLeft;
     size_t bottomLeft;
     size_t bottomRight;
@@ -112,7 +112,9 @@ public:
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
-  StructuredPanel structuredPanel(const size_t componentIndex) const;
+  size_t numberOfDetectorsInSubtree(size_t componentIndex) const;
+  QuadrilateralComponent
+  quadrilateralComponent(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent *id) const;
   size_t indexOfAny(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;

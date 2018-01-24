@@ -70,8 +70,8 @@ public:
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   /// Get the associated data workspace
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
-  const Mantid::Geometry::ComponentInfo &getComponentInfo() const;
-  const Mantid::Geometry::DetectorInfo &getDetectorInfo() const;
+  const Mantid::Geometry::ComponentInfo &componentInfo() const;
+  const Mantid::Geometry::DetectorInfo &detectorInfo() const;
   /// Get the mask displayed but not yet applied as a MatrxWorkspace
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   getMaskMatrixWorkspace() const;
@@ -106,8 +106,6 @@ public:
 
   /// Get colormap scale autoscaling status.
   bool autoscaling() const { return m_autoscaling; }
-
-  void showVolumeRender(bool on);
 
   /// Set the integration range.
   void setIntegrationRange(const double &xmin, const double &xmax);
@@ -208,6 +206,9 @@ private:
   void setUpWorkspace(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
       double scaleMin, double scaleMax);
+  void setupPhysicalInstrument();
+  const Mantid::Geometry::ComponentInfo &getComponentInfo() const;
+  const Mantid::Geometry::DetectorInfo &getDetectorInfo() const;
   void resetColors();
   void loadSettings();
   void saveSettings();
@@ -258,8 +259,6 @@ private:
   bool m_autoscaling;
   /// Flag to show the guide and other components. Loaded and saved in settings.
   bool m_showGuides;
-  /// Flag to enable intensity based transparency.
-  bool m_volumeRender;
   /// Color map scale type: linear or log
   GraphOptions::ScaleType m_scaleType;
   /// Position to refer to when detector not found
@@ -282,6 +281,9 @@ private:
   // Two display lists for normal rendering and picking
   mutable GLuint m_displayListId[2];
   mutable bool m_useDisplayList[2];
+  bool m_isPhysicalInstrument;
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
+  std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
 };
 
 } // MantidWidgets
