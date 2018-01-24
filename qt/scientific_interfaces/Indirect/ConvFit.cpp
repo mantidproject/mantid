@@ -186,7 +186,6 @@ void ConvFit::addFunctionGroupToComboBox(
 IFunction_sptr ConvFit::fitFunction() const {
   CompositeFunction_sptr comp(new CompositeFunction);
   auto modelFunction = model();
-  modelFunction->applyTies();
 
   if (!(modelFunction &&
         AnalysisDataService::Instance().doesExist("__ConvFit_Resolution")))
@@ -212,6 +211,7 @@ IFunction_sptr ConvFit::fitFunction() const {
 
   conv->addFunction(modelFunction);
   comp->addFunction(conv);
+  comp->applyTies();
   return comp;
 }
 
@@ -223,7 +223,7 @@ ConvFit::functionNameChanges(IFunction_sptr model) const {
   QString prefixPrefix = "f1.";
   int backIndex = backgroundIndex();
 
-  if (backIndex > 0)
+  if (backIndex != -1)
     prefixPrefix += "f1.";
 
   QString prefixSuffix = "";
