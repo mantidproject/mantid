@@ -172,9 +172,8 @@ class PythonFileInterpreter(QWidget):
             editor.setText(default_content)
         if filename is not None:
             editor.setFileName(filename)
-            editor.setModified(False)
-        else:
-            editor.setModified(True)
+        # Default content does not count as a modification
+        editor.setModified(False)
 
         editor.enableAutoCompletion(CodeEditor.AcsAll)
 

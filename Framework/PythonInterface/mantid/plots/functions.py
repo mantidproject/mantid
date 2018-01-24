@@ -45,7 +45,7 @@ def getAxesLabels(workspace):
     Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
     All other elements in the tuple are labels for axes.
     Some of them are latex formatted already.
-    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace` 
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
     '''
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
         axes = ['Intensity']
@@ -101,7 +101,11 @@ def _getWkspIndexDistAndLabel(workspace, **kwargs):
 
     # create a label if it isn't already specified
     if 'label' not in kwargs:
-        kwargs['label'] = 'spec {0}'.format(specNum)
+        wsName = workspace.name()
+        if wsName:
+            kwargs['label'] = '{0}: spec {1}'.format(wsName, specNum)
+        else:
+            kwargs['label'] = 'spec {0}'.format(specNum)
 
     (distribution, kwargs) = _getDistribution(workspace, **kwargs)
 
@@ -542,7 +546,7 @@ def _pcolorpieces(axes, workspace, distribution, *args,**kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the matrix workspace is a histogram.
     :param pcolortype: this keyword allows the plotting to be one of pcolormesh or
-        pcolorfast if there is "mesh" or "fast" in the value of the keyword, or 
+        pcolorfast if there is "mesh" or "fast" in the value of the keyword, or
         pcolor by default
     Note: the return is the pcolor, pcolormesh, or pcolorfast of the last spectrum
     '''
@@ -560,7 +564,7 @@ def _pcolorpieces(axes, workspace, distribution, *args,**kwargs):
         if kwargs['norm'].vmin==None:
             kwargs['norm'].vmin=mini
         if kwargs['norm'].vmax==None:
-            kwargs['norm'].vmax=maxi    
+            kwargs['norm'].vmax=maxi
     for xi,yi,zi in zip(x,y,z):
         XX,YY=numpy.meshgrid(xi,yi,indexing='ij')
         if 'mesh' in pcolortype.lower():
@@ -570,7 +574,7 @@ def _pcolorpieces(axes, workspace, distribution, *args,**kwargs):
         else:
             cm=axes.pcolor(XX,YY,zi.reshape(-1,1),**kwargs)
     return cm
-    
+
 
 def pcolor(axes, workspace, *args, **kwargs):
     '''

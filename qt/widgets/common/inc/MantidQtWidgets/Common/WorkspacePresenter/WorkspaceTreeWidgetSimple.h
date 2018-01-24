@@ -58,12 +58,18 @@ public:
   // Context Menu Handlers
   void popupContextMenu() override;
 
+signals:
+  void plotSpectrumClicked(const QStringList &workspaceName);
+  void plotSpectrumWithErrorsClicked(const QStringList &workspaceName);
+  void plotColorfillClicked(const QStringList &workspaceName);
+
+private slots:
+  void onPlotSpectrumClicked();
+  void onPlotSpectrumWithErrorsClicked();
+  void onPlotColorfillClicked();
+
 private:
-  void addMatrixWorkspaceMenuItems(
-      QMenu *menu,
-      const Mantid::API::MatrixWorkspace_const_sptr &matrixWS) const;
-  void addWorkspaceGroupMenuItems(QMenu *menu) const;
-  void addTableWorkspaceMenuItems(QMenu *menu) const;
+  QAction *m_plotSpectrum, *m_plotSpectrumWithErrs, *m_plotColorfill;
 };
 }
 }
