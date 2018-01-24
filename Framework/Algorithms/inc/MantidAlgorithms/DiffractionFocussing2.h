@@ -121,10 +121,6 @@ private:
   /// Shared pointer to the event workspace
   DataObjects::EventWorkspace_const_sptr m_eventW;
 
-  // This map does not need to be ordered, just a lookup for udet
-  /// typedef for the storage of the UDET-group mapping
-  typedef std::map<detid_t, int> udet2groupmap;
-
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
   typedef std::map<int, boost::shared_ptr<MantidVec>> group2vectormap;
