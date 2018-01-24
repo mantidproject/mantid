@@ -160,13 +160,13 @@ public:
   void traverseInPostOrder(BinaryTreeWidgetItem *node,
                            QList<BinaryTreeWidgetItem *> &expression);
 
-  /// Called when the data in the model is changed
+/// Called when the data in the model is changed
 #if QT_VERSION < 0x050000
   void dataChanged(const QModelIndex &topLeft,
                    const QModelIndex &bottomRight) override;
 #else
-  void dataChanged(const QModelIndex &topLeft,
-                   const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int> ()) override;
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                   const QVector<int> &roles = QVector<int>()) override;
 #endif
 
 signals:
