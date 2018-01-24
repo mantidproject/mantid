@@ -54,7 +54,7 @@ public:
         m_missingValueErrors.emplace_back(parameterName);
         return T();
       }
-    } catch (InstrumentParameterTypeMissmatch const& ex) {
+    } catch (InstrumentParameterTypeMissmatch const &ex) {
       m_typeErrors.emplace_back(ex);
       return T();
     }
