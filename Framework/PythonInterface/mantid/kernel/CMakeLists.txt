@@ -70,6 +70,7 @@ create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
 set ( SRC_FILES
   src/NdArray.cpp
   src/Converters/CloneToNumpy.cpp
+  src/Converters/DateAndTime.cpp
   src/Converters/NDArrayToVector.cpp
   src/Converters/NDArrayTypeIndex.cpp
   src/Converters/NumpyFunctions.cpp
@@ -92,6 +93,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/NdArray.h
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/CloneToNumpy.h
+  ${HEADER_DIR}/kernel/Converters/DateAndTime.h
   ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NumpyFunctions.h

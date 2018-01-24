@@ -44,7 +44,7 @@ Algorithms
 - New algorithm :ref:`CropWorkspaceRagged <algm-CropWorkspaceRagged>` will crop each spectrum with a different x-range
 - :ref:`LoadLamp <algm-LoadLamp>` is a new algorithm to load processed HDF5 files produced by LAMP program at ILL.
 - :ref:`SaveNexus <algm-SaveNexus>` will no longer crash when passed a ``PeaksWorkspace`` with integrated peaks that have missing radius information.
-- :ref:`SaveReflections <algm-LoadLamp>` is a new algorithm to save PeaksWorkspaces to Fullprof, Jana, GSAS, and SHELX text formats. 
+- :ref:`SaveReflections <algm-LoadLamp>` is a new algorithm to save PeaksWorkspaces to Fullprof, Jana, GSAS, and SHELX text formats.
 
 Fitting
 -------
@@ -54,6 +54,7 @@ Fitting
 Core Functionality
 ------------------
 
+- :class:`mantid.kernel.FloatTimeSeriesProperty` now returns :class:`numpy.datetime64` for the log times.
 - The duration reported by a running algorithm now includes time spent for validation of properties and inputs. This fixes a discrepancy between observed and reported timings if validation is expensive, e.g., when checking if a file exists. More detailed timing information is now available when setting the log level to ``debug``.
 - Fixed an issue where certain isotopes could not be accessed using the `Atom` classes, e.g Si28.
 - Added new functionality to ``datasearch.searcharchive`` :ref:`property <Properties File>` to only search the default facility
