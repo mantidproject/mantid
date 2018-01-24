@@ -122,6 +122,129 @@ Save Options
 |       |                          | data reduction considerably. It is recommended to have this option enabled.             |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 
+Run Summation
+-------------
+
+.. image:: ../images/sans_isis_v2_add_runs_tab.png
+   :align: right
+   :width: 800px
+
+.. _Run_Summation:
+
+The Run Summation tab is used to perform addition of two or more run files, saving the output to a
+single file. The user builds a list of multiple histogram or event files (but not mixed) before
+pressing the sum button to produce a single output file in the mantid output directory.
+
+Runs To Sum
+^^^^^^^^^^^^
+
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **1** | **Run Query Box**         | This box is used to add runs to the summation table below. The user can enter one or    |
+|       |                           | more comma separated run numbers and press **Add** or the enter key to search for runs  |
+|       |                           | with a matching number.                                                                 |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **2** | **Run Summation List**    | This list contains the files to be summed.                                              |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **3** | **Browse**                | This button is used to select one or more nexus files to be added to the summation      |
+|       |                           | table.                                                                                  |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **4** | **Manage Directories**    | Opens the 'Manage User Directories' window allowing the user to add/remove directories  |
+|       |                           | from the mantid search path and to set the 'Output Folder' where the summation result   |
+|       |                           | will be saved.                                                                          |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **5** | **Remove**                | Removes an entry from the summation table. Note, this does not delete the file itself,  |
+|       |                           | it just removes it from the list of files to be summed.                                 |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **6** | **Remove All**            | Removes all entries from the summation table. As above, this will only remove the       |
+|       |                           | entries from the table, not the files themselves.                                       |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+
+Histogram Binning
+^^^^^^^^^^^^^^^^^
+
+This panel allows the user to specify the binning parameters to be applied when summing event data.
+There are three different ways to add files containing event data [#no-effect-when-non-event]_.
+
+Custom Binning
+""""""""""""""
+
+If this option is chosen a line edit field becomes available which the user can use to set the
+preferred binning boundaries. The format of this input is identical to the format required by the
+:doc:`Rebin Algorithm <../algorithms/Rebin-v1>`.
+
+    A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be
+    followed by a comma and more widths and last boundary pairs. Optionally this can also be a single
+    number, which is the bin width. In this case, the boundary of binning will be determined by minimum
+    and maximum TOF values among all events, or previous binning boundary, in case of event Workspace,
+    or non-event Workspace, respectively. Negative width values indicate logarithmic binning.
+
+Use Binning From Monitors
+"""""""""""""""""""""""""
+
+If this option is chosen the binning is taken from the monitors.
+
+Save As Event Data
+""""""""""""""""""
+
+If this option is chosen, the output file will contain event data. The output is not an event
+workspace but rather a group workspace, which contains two child event workspaces, one for the
+added event data and one for the added monitor data.
+
+With **'Overlay Event Workspaces' Disabled** the event data from the files is added using the event
+the :doc:`Plus Algorithm <../algorithms/Plus-v1>`. Timestamps of the events and of the logs are not
+changed as indicated in the image below.
+
+.. figure:: ../images/sans_isis_v2_add_tabs_no_overlay.png
+   :align: center
+   :width: 600px
+
+   Simple addition of event data
+
+With **'Overlay Event Workspaces' Enabled** and **no Additional Time Shifts** specified, the event data of
+the different files is shifted on top of each other.
+
+In the case of two workspaces the time difference between them is determined by the difference
+between their first entry in the proton charge log. This time difference is then applied to all
+timestamps of the second workspace. The second workspace is essentially laid on the first. The same
+principle applies if more than two workspaces are involved as this is a pairwise operation. The
+working principle is illustrated below:
+
+.. figure:: ../images/sans_isis_v2_add_tabs_overlay.png
+   :align: center
+   :width: 600px
+
+   Adding two workspaces by overlaying them
+
+Note that the underlying mechanism for time shifting is provided by the
+:doc:`ChangeTimeZero Algorithm <../algorithms/ChangeTimeZero-v1>`. Using this option will result in a
+change to the history of the underlying data.
+
+With **'Overlay Event Workspaces' Enabled** you can specify **Additional Time Shifts**.
+Additional time shifts are specified as a comma separated list of numbers where each shift is the
+time to shift by in seconds. The list should contain exactly *N-1* entries where *N* is the number of
+runs to be summed.
+
+Similar to the case above the workspaces are overlaid. This specified time shift is in addition to
+the actual overlay operation. A positive time shift will shift the second workspace into the future,
+whereas a negative time shift causes a shift into the past. This allows the user to fine tune the
+overlay mechanism. Both situations are illustrated below.
+
+.. figure:: ../images/sans_isis_v2_add_tabs_pos_time_shift.png
+   :align: center
+   :width: 500px
+
+   Overlaid workspaces with a positive time shift (into the future).
+
+.. figure:: ../images/sans_isis_v2_add_tabs_neg_time_shift.png
+   :align: center
+   :width: 500px
+
+   Overlaid workspaces with a negative time shift (into the past).
+
+Just as above, using this option means that the history of the underlying data will be changed.
+
+.. [#no-effect-when-non-event] These options have no effect when adding non-event data files.
+
 Settings
 --------
 
@@ -179,7 +302,7 @@ General
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
 | **4** | **Merge fit custom q range** | Describes the q region which should be used to determine the merge parameters.               |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **5** | **Merge custom q range**     | Describes the q region in which the merged data should be used. Outside of this region the   |                            
+| **5** | **Merge custom q range**     | Describes the q region in which the merged data should be used. Outside of this region the   |
 |       |                              | uncombined **HAB** or **LAB** data is used.                                                  |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
 
@@ -656,7 +779,7 @@ finder.
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **2** | **Centre Position HAB**  | The centre position of the high angle bank. The first coordinate is horizontal          |
 |       |                          | and the second vertical. These boxes are populated by the user file and the values here |
-|       |                          | are used by the reduction.                                                              | 
+|       |                          | are used by the reduction.                                                              |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **3** | **Minimum radius limit** | The minimum radius of the region used to ascertain centre position.                     |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
@@ -669,7 +792,7 @@ finder.
 |       |                          | conclude its search.                                                                    |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **7** | **Left/Right**           | Controls whether the beam centre finder searches for the centre in the                  |
-|       |                          | left/right direction.                                                                   |   
+|       |                          | left/right direction.                                                                   |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **8** | **Up/Down**              | Controls whether the beam centre finder searches for the centre in the                  |
 |       |                          | up/down direction.                                                                      |
