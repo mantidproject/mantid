@@ -8,6 +8,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 
 class AbstractTreeModel;
 
@@ -16,8 +17,9 @@ namespace MantidWidgets {
 class HintStrategy;
 namespace DataProcessor {
 // Forward dec
-class Command;
+
 class DataProcessorPresenter;
+class TreeManager;
 
 /** @class DataProcessorView
 
@@ -56,7 +58,7 @@ public:
   virtual void addActions(std::vector<std::unique_ptr<Command>> commands) = 0;
 
   // Connect the model
-  virtual void showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;
+  virtual void showTable(TreeManager *manager) = 0;
 
   // Dialog/Prompt methods
   virtual QString requestNotebookPath() = 0;

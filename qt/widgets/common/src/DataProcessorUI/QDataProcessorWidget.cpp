@@ -210,8 +210,8 @@ Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
 void QDataProcessorWidget::showTable(
-    boost::shared_ptr<AbstractTreeModel> model) {
-  m_model = model;
+    TreeManager *manager) {
+  m_model = manager->getModel();
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
@@ -232,6 +232,7 @@ void QDataProcessorWidget::showTable(
   //     "QTreeView {font-size:11pt;} QTreeView::item "
   //     "{border-color: lightGray; border-style: solid; border-width: 0.5px; background-color: none;}"
   //       "QTreeView::item:selected {background-color: lightBlue; color: black}");
+  
   ui.viewTable->setAlternatingRowColors(false);
   ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable, m_model));
   ui.viewTable->setItemDelegateForColumn(m_column, new HintingLineEditFactory(m_strategy, m_model));
