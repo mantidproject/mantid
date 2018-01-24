@@ -25,9 +25,10 @@ const char *storedLineColor(size_t index) {
     // cycle the color
     index = index % colors.size();
   }
+  // cppcheck-suppress CastIntegerToAddressAtReturn
   return colors[index];
 }
-}
+} // namespace
 
 namespace MantidQt {
 using Widgets::MplCpp::Axes;
@@ -188,5 +189,5 @@ void MiniPlot::mouseReleaseEvent(QMouseEvent *evt) {
     evt->accept();
   }
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
