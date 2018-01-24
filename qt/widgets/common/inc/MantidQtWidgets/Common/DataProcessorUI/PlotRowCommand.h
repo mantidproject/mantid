@@ -49,6 +49,7 @@ public:
                    "the selected runs");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }

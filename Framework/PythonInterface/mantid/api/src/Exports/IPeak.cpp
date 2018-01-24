@@ -1,9 +1,9 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include <boost/optional.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include <boost/optional.hpp>
 
 using Mantid::Geometry::IPeak;
 using namespace boost::python;
@@ -40,7 +40,7 @@ void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame,
 void setGoniometerMatrix(IPeak &self, const object &data) {
   self.setGoniometerMatrix(Converters::PyObjectToMatrix(data)());
 }
-}
+} // namespace
 
 void export_IPeak() {
   register_ptr_to_python<IPeak *>();
@@ -125,18 +125,26 @@ void export_IPeak() {
            "microseconds) of the neutrons for this "
            "peak")
       .def("getInitialEnergy", &IPeak::getInitialEnergy, arg("self"),
-           "Get the initial (incident) neutron energy")
+           "Get the initial (incident) neutron energy in meV.")
       .def("getFinalEnergy", &IPeak::getFinalEnergy, arg("self"),
-           "Get the final neutron energy")
+           "Get the final neutron energy in meV.")
+      .def("getEnergyTransfer", &IPeak::getEnergyTransfer, arg("self"),
+           "Get the initial neutron energy minus the final neutron energy in "
+           "meV."
+           "\n\n.. versionadded:: 3.12.0")
       .def("setInitialEnergy", &IPeak::setInitialEnergy,
            (arg("self"), arg("initial_energy")),
-           "Set the initial (incident) neutron energy")
+           "Set the initial (incident) neutron energy in meV.")
       .def("setFinalEnergy", &IPeak::setFinalEnergy,
-           (arg("self"), arg("final_energy")), "Set the final neutron energy")
+           (arg("self"), arg("final_energy")),
+           "Set the final neutron energy in meV.")
       .def("getIntensity", &IPeak::getIntensity, arg("self"),
            "Return the integrated peak intensity")
       .def("getSigmaIntensity", &IPeak::getSigmaIntensity, arg("self"),
            "Return the error on the integrated peak intensity")
+      .def("getIntensityOverSigma", &IPeak::getIntensityOverSigma, arg("self"),
+           "Return the error on the integrated peak intensity divided by the "
+           "error in intensity.\n\n.. versionadded:: 3.12.0")
       .def("setIntensity", &IPeak::setIntensity,
            (arg("self"), arg("intensity")), "Set the integrated peak intensity")
       .def("setSigmaIntensity", &IPeak::setSigmaIntensity,

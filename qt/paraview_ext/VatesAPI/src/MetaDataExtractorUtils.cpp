@@ -1,5 +1,4 @@
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
-#include <qwt_double_interval.h>
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"

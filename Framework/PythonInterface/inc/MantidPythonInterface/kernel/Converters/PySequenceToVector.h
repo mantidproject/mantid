@@ -50,7 +50,7 @@ template <typename CType> struct ExtractCType {
  */
 template <> struct ExtractCType<std::string> {
   /**
-   * Uses boost lexical cast to convert the type to a string
+   * Forces a Python string conversion before calling extract
    * @param value A pointer to the Python object
    * @return The value as a C type
    */
@@ -67,37 +67,45 @@ namespace Converters {
  * type is defined by the template type
  */
 template <typename DestElementType> struct DLLExport PySequenceToVector {
-  PySequenceToVector(const boost::python::object &value) : m_obj(value.ptr()) {
-    check(value);
-  }
+  // Alias definitions
+  using TypedVector = std::vector<DestElementType>;
+
+  PySequenceToVector(const boost::python::object &value) : m_obj(value.ptr()) {}
 
   /**
    * Converts the Python object to a C++ vector
    * @return A std::vector<ElementType> containing the values
    * from the Python sequence
    */
-  inline const std::vector<DestElementType> operator()() {
-    Py_ssize_t length = PySequence_Size(m_obj);
-    std::vector<DestElementType> cvector(length);
-    if (length == 0)
-      return cvector;
-    ExtractCType<DestElementType> elementConverter;
-    for (Py_ssize_t i = 0; i < length; ++i) {
-      DestElementType element = elementConverter(PySequence_GetItem(m_obj, i));
-      cvector[i] = element;
-    }
+  inline const TypedVector operator()() {
+    TypedVector cvector(PySequence_Size(m_obj));
+    copyTo(cvector);
     return cvector;
   }
 
-private:
-  inline void check(const boost::python::object &obj) {
-    if (!PySequence_Check(obj.ptr())) {
-      throw std::invalid_argument(
-          std::string(
-              "PySequenceToVector expects Python sequence type, found ") +
-          obj.ptr()->ob_type->tp_name);
+  /**
+   * Fill the container with data from the array
+   * @param dest A vector<DestElementType> that receives the data
+   */
+  inline void copyTo(TypedVector &dest) {
+    throwIfSizeMismatched(dest);
+    ExtractCType<DestElementType> elementConverter;
+    auto length = static_cast<size_t>(PySequence_Size(m_obj));
+    for (size_t i = 0; i < length; ++i) {
+      dest[i] = elementConverter(PySequence_GetItem(m_obj, i));
     }
   }
+
+private:
+  inline void throwIfSizeMismatched(const TypedVector &dest) const {
+    auto length = static_cast<size_t>(PySequence_Size(m_obj));
+    if (length != dest.size()) {
+      throw std::invalid_argument(
+          "Length mismatch between python list & C array. python=" +
+          std::to_string(length) + ", C=" + std::to_string(dest.size()));
+    }
+  }
+
   /// Python object to convert
   PyObject *m_obj;
 };

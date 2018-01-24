@@ -3,8 +3,9 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ParseNumerics.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
@@ -71,12 +72,6 @@ void ReflDataProcessorPresenter::process() {
   // Check if any input non-event workspaces exist in ADS
   if (!proceedIfWSTypeInADS(m_selectedData, false))
     return;
-
-  // Get global settings
-  this->setPreprocessingOptions(
-      m_mainPresenter->getPreprocessingOptionsAsString());
-  m_processingOptions = m_mainPresenter->getProcessingOptions();
-  this->setPostprocessingOptions(m_mainPresenter->getPostprocessingOptions());
 
   // Get time slicing type
   auto timeSlicingType = m_mainPresenter->getTimeSlicingType();
@@ -421,7 +416,7 @@ void ReflDataProcessorPresenter::parseLogValue(const QString &inputStr,
                                                std::vector<double> &startTimes,
                                                std::vector<double> &stopTimes) {
 
-  auto strMap = fromStdStringMap(parseKeyValueString(inputStr.toStdString()));
+  auto strMap = parseKeyValueQString(inputStr);
   QString timeSlicing = strMap.at("Slicing");
   logFilter = strMap.at("LogFilter");
 
