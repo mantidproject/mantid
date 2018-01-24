@@ -73,7 +73,7 @@ public:
    {
        painter->save();
        painter->setPen(QColor(Qt::black));
-       if (m_model->isProcessed(index.row())){
+       if (m_model->isProcessed(index.row(), index.parent())){
           painter->fillRect(option.rect, Qt::green);
        }
        painter->drawRect(option.rect);
