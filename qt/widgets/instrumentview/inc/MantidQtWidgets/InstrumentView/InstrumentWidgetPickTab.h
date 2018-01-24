@@ -28,7 +28,7 @@ class ProjectionSurface;
 class ComponentInfoController;
 class MiniPlotController;
 class MiniPlot;
-class MiniPlotCurveData;
+struct MiniPlotCurveData;
 
 /**
 * Implements the Pick tab in InstrumentWidget.
