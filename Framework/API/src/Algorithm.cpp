@@ -501,8 +501,6 @@ bool Algorithm::execute() {
     return false;
   }
 
-  const auto executionMode = getExecutionMode();
-
   timingInit += timer.elapsed();
   // ----- Perform validation of the whole set of properties -------------
   if (!callProcessGroups) // for groups this is called on each workspace
