@@ -19,6 +19,7 @@ our custom window.
 """
 
 # std imports
+import math
 
 # 3rd party imports
 from mantid.api import MatrixWorkspace
@@ -31,11 +32,14 @@ import matplotlib.pyplot as plt
 # -----------------------------------------------------------------------------
 PROJECTION = 'mantid'
 DEFAULT_COLORMAP = 'viridis'
+# See https://matplotlib.org/api/_as_gen/matplotlib.figure.SubplotParams.html#matplotlib.figure.SubplotParams
+SUBPLOT_WSPACE = 0.5
+SUBPLOT_HSPACE = 0.5
+
 
 # -----------------------------------------------------------------------------
 # Functions
 # -----------------------------------------------------------------------------
-
 def raise_if_not_sequence(seq, seq_name):
     accepted_types = [list, tuple]
     if type(seq) not in accepted_types:
@@ -83,7 +87,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
     else:
         kw, nums = 'wkspIndex', wksp_indices
     # create figure
-    fig = plt.figure()
+    fig = plt.subplot()
     # we may be overwriting an active figure so clear everything
     fig.clf()
     ax = fig.add_subplot(111, projection=PROJECTION)
@@ -111,14 +115,46 @@ def pcolormesh(workspaces):
     """
     # check inputs
     _validate_pcolormesh_inputs(workspaces)
-    # # we may be overwriting an active figure so clear everything
-    fig = plt.figure()
-    fig.clf()
-    nrows, ncols = 1, 1
-    ax = fig.add_subplot(1, nrows, ncols, projection=PROJECTION)
-    pcm = ax.pcolormesh(workspaces[0], cmap=DEFAULT_COLORMAP)
-    fig.colorbar(pcm, ax=ax)
-    ax.set_title(workspaces[0].name())
+
+    # create a subplot of the appropriate number of dimensions
+    # extend in number of columns if the number of plottables is not a square number
+    workspaces_len = len(workspaces)
+    square_side_len = int(math.ceil(math.sqrt(workspaces_len)))
+    nrows, ncols = square_side_len, square_side_len
+    if square_side_len*square_side_len != workspaces_len:
+        # not a square number - square_side_len x square_side_len
+        # will be large enough but we could end up with an empty
+        # row so chop that off
+        if workspaces_len <= (nrows-1)*ncols:
+            nrows -= 1
+
+    fig, axes = plt.subplots(nrows, ncols, subplot_kw=dict(projection=PROJECTION))
+    row_idx, col_idx = 0, 0
+    for subplot_idx in range(nrows*ncols):
+        ax = axes[row_idx][col_idx]
+        if subplot_idx < workspaces_len:
+            ws = workspaces[subplot_idx]
+            ax.set_title(ws.name())
+            pcm = ax.pcolormesh(ws, cmap=DEFAULT_COLORMAP)
+            xticks = ax.get_xticklabels()
+            map(lambda lbl: lbl.set_rotation(45), xticks)
+            xvals, yvals = ax.get_xlim(), ax.get_ylim()
+            xrange = xvals[1] - xvals[0]
+            yrange = yvals[1] - yvals[0]
+            # Set the aspect ratios and colarbar size
+            ax.set_aspect(aspect=xrange / yrange, adjustable='box')
+            if col_idx < ncols - 1:
+                col_idx += 1
+            else:
+                row_idx += 1
+                col_idx = 0
+        else:
+            # nothing here
+            ax.axis('off')
+
+    # Adjust locations to ensure the plots don't overlap
+    fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
+    fig.colorbar(pcm, ax=axes.ravel().tolist(), pad=0.06)
     fig.canvas.draw()
     fig.show()
     return fig
