@@ -52,7 +52,7 @@ class MessageDisplay : QWidget, Configurable {
 
 public:
   MessageDisplay(QWidget *parent = 0);
-  void attachLoggingChannel();
+  void attachLoggingChannel(int logLevel = -1);
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);

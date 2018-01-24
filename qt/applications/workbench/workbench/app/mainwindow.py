@@ -181,7 +181,6 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         self.setup_layout()
-        self.read_user_settings()
         self.create_actions()
         self.populate_menus()
 
@@ -324,10 +323,6 @@ class MainWindow(QMainWindow):
                     # Raise front widget per row
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
-
-    def read_user_settings(self):
-        for widget in self.widgets:
-            widget.read_user_settings(CONF.qsettings)
 
     # ----------------------- Slots ---------------------------------
     def open_file(self):
