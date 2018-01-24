@@ -326,6 +326,9 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
+        # Close editors
+        self.editor.app_closing()
+
         # Close all open plots
         # We don't want this at module scope here
         import matplotlib.pyplot as plt  #noqa

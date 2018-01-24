@@ -64,6 +64,9 @@ class MultiFileEditor(PluginWidget):
 
     # ----------- Plugin API --------------------
 
+    def app_closing(self):
+        self.editors.close_all()
+
     def get_plugin_title(self):
         return "Editor"
 
@@ -75,6 +78,7 @@ class MultiFileEditor(PluginWidget):
         # menus
         add_actions(self.main.editor_menu, self.editor_actions)
 
+
     # ----------- Plugin Behaviour --------------------
 
     def open_file_in_new_tab(self, filepath):
@@ -82,3 +86,4 @@ class MultiFileEditor(PluginWidget):
 
     def save_current_file(self):
         self.editors.save_current_file()
+
