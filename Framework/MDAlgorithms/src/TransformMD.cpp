@@ -157,31 +157,30 @@ void TransformMD::exec() {
     // Recalculate all the values since the dimensions changed.
     histo->cacheValues();
     // Expect first 3 dimensions to be -1 for changing conventions
-    for (double s : m_scaling) if (s < 0) {
-      signal_t *signals = histo->getSignalArray();
-      signal_t *errorsSq = histo->getErrorSquaredArray();
+    for (double s : m_scaling)
+      if (s < 0) {
+        signal_t *signals = histo->getSignalArray();
+        signal_t *errorsSq = histo->getErrorSquaredArray();
 
-      size_t nPoints = 1;
-      size_t d4 = 1;
-      size_t nd = histo->getNumDims();
-      for (size_t i = 0; i < nd; i++) {
-        if (m_scaling[i] < 0.0) {
-          Geometry::IMDDimension_const_sptr dim = histo->getDimension(i);
-          // Find the extents
-          nPoints *=
-              static_cast<size_t>(dim->getNBins());
+        size_t nPoints = 1;
+        size_t d4 = 1;
+        size_t nd = histo->getNumDims();
+        for (size_t i = 0; i < nd; i++) {
+          if (m_scaling[i] < 0.0) {
+            Geometry::IMDDimension_const_sptr dim = histo->getDimension(i);
+            // Find the extents
+            nPoints *= static_cast<size_t>(dim->getNBins());
+          } else {
+            break;
+          }
         }
-        else {
-          break;
+        d4 = histo->getNPoints() / nPoints;
+
+        for (size_t i = 0; i < d4; i++) {
+          this->reverse(signals + i * nPoints, nPoints);
+          this->reverse(errorsSq + i * nPoints, nPoints);
         }
       }
-      d4 = histo->getNPoints() / nPoints;
-
-      for (size_t i = 0; i < d4; i++) {
-        this->reverse(signals + i * nPoints, nPoints);
-        this->reverse(errorsSq + i * nPoints, nPoints);
-      }
-    }
 
     this->setProperty("OutputWorkspace", histo);
   } else if (event) {
