@@ -590,13 +590,16 @@ bool Algorithm::execute() {
       setExecuted(true);
 
       // Log that execution has completed.
-      getLogger().debug() << "Time to validate properties: "
-                          << timingPropertyValidation << " seconds\n";
-      getLogger().debug() << "Time for other input validation: "
-                          << timingInputValidation << " seconds\n";
-      getLogger().debug() << "Time for other initialization: " << timingInit
-                          << " seconds\n";
-      getLogger().debug() << "Time to run exec: " << timingExec << " seconds\n";
+      getLogger().debug() << "Time to validate properties: " +
+                                 std::to_string(timingPropertyValidation) +
+                                 " seconds\n";
+      getLogger().debug() << "Time for other input validation: " +
+                                 std::to_string(timingInputValidation) +
+                                 " seconds\n";
+      getLogger().debug() << "Time for other initialization: " +
+                                 std::to_string(timingInit) + " seconds\n";
+      getLogger().debug() << "Time to run exec: " + std::to_string(timingExec) +
+                                 " seconds\n";
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
       this->unlockWorkspaces();
