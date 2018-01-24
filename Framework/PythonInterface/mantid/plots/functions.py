@@ -140,7 +140,9 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
         x = points_from_boundaries(x)
-
+    y=numpy.ma.masked_invalid(y)
+    if dy is not None:
+        dy=numpy.ma.masked_invalid(dy)
     return (x,y,dy,dx)
 
 
@@ -195,6 +197,7 @@ def _getMatrix2DData(workspace, distribution,histogram2D=False):
             if len(y)==z.shape[0]+1:
                 y=points_from_boundaries(y)
     y = numpy.tile(y,x.shape[1]).reshape(x.shape[1],x.shape[0]).transpose()
+    z=numpy.ma.masked_invalid(z)
     return (x,y,z)
 
 
@@ -242,6 +245,7 @@ def _getUnevenData(workspace, distribution):
                 zvals = zvals / (xvals[1:] - xvals[0:-1])
         else:
             xvals=boundaries_from_points(xvals)
+        zvals=numpy.ma.masked_invalid(zvals)
         z.append(zvals)
         x.append(xvals)
         y.append([yvals[index],yvals[index+1]])
@@ -309,8 +313,10 @@ def _getMDData(workspace,normalization,withError=False):
             err2/=(nev*nev)
         err=numpy.sqrt(err2)
     data=data.squeeze().T
+    data=numpy.ma.masked_invalid(data)
     if err is not None:
         err=err.squeeze().T
+        err=numpy.ma.masked_invalid(err)       
     return (dimarrays,data,err)
 
 
