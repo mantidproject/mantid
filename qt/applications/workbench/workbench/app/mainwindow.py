@@ -53,12 +53,12 @@ plugins.setup_library_paths()
 if hasattr(Qt, 'AA_EnableHighDpiScaling'):
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
-
 # -----------------------------------------------------------------------------
 # Create the application instance early, set the application name for window
 # titles and hold on to a reference to it. Required to be performed early so
 # that the splash screen can be displayed
 # -----------------------------------------------------------------------------
+
 
 def qapplication():
     """Either return a reference to an existing application instance
@@ -94,6 +94,7 @@ QApplication.processEvents(QEventLoop.AllEvents)
 # -----------------------------------------------------------------------------
 from mantidqt.py3compat import qbytearray_to_str  # noqa
 from mantidqt.utils.qt import add_actions, create_action  # noqa
+from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 from workbench.config.main import CONF  # noqa
 from workbench.external.mantid import prepare_mantid_env  # noqa
 
@@ -201,19 +202,25 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         # --- general application menu options --
         # file menu
-        action_open = create_action(self, "Open File",
+        action_open = create_action(self, "Open",
                                     on_triggered=self.open_file,
                                     shortcut="Ctrl+O",
-                                    shortcut_context=Qt.ApplicationShortcut)
-        action_save = create_action(self, "Save File",
+                                    shortcut_context=Qt.ApplicationShortcut,
+                                    icon_name="fa.folder-open")
+        action_save = create_action(self, "Save",
                                     on_triggered=self.save_file,
                                     shortcut="Ctrl+S",
-                                    shortcut_context=Qt.ApplicationShortcut)
+                                    shortcut_context=Qt.ApplicationShortcut,
+                                    icon_name="fa.save")
+        action_manage_directories = create_action(self, "Manage User Directories",
+                                                  on_triggered=self.open_manage_directories,
+                                                  icon_name="fa.folder")
 
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut)
-        self.file_menu_actions = [action_open, action_save, None, action_quit]
+                                    shortcut_context=Qt.ApplicationShortcut,
+                                    icon_name="fa.power-off")
+        self.file_menu_actions = [action_open, action_save, action_manage_directories, None, action_quit]
 
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
@@ -335,6 +342,9 @@ class MainWindow(QMainWindow):
     def save_file(self):
         # todo: how should this interact with project saving and workspaces when they are implemented?
         self.editor.save_current_file()
+
+    def open_manage_directories(self):
+        ManageUserDirectories(self).exec_()
 
 
 def initialize():
