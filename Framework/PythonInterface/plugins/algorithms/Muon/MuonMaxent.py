@@ -195,16 +195,25 @@ class MuonMaxent(PythonAlgorithm):
 		else:
 			filePHASE=np.zeros([POINTS_ngroups])
 			pt=self.getProperty("InputPhaseTable").value
-                        names=pt.getColumnNames()
-                        if 'phase' not in str(names) or 'phi' not in str(names):
-                             
+			names=pt.getColumnNames()
+			phaseLabel= None
+			IDLabel= None
+			for name in names:
+				if name.lower()=="phi" or name.lower()=="phase":
+					phaseLabel=name
+				if name.lower()=="detid" or name.lower()=="spectrum number":
+					IDLabel=name
+			if phaseLabel is None:
+				raise ValueError("Phase/phi are not labelled in the phase table")
+			if IDLabel is None:
+				raise ValueError("Spectrum number/DetID are not labelled in the phase table")
 
 			if(len(pt)==POINTS_ngroups): # phase table for grouped data, or when not grouping
 				for r in pt:
-					filePHASE[r["Spectrum number"]-1]=r["Phase"] # sign of phase now OK for Mantid 3.12 onwards
+					filePHASE[r[IDLabel]-1]=r[phaseLabel] # sign of phase now OK for Mantid 3.12 onwards
 			elif (len(pt)==POINTS_nhists): # phase table for ungrouped data. Pick a representative detector for each group (the last one)
 				for r in pt:
-					filePHASE[GROUPING_group[r["Spectrum number"]-1]]=r["Phase"]
+					filePHASE[GROUPING_group[r[IDLabel]-1]]=r[phaseLabel]
 		#
 		# debugging
 		if not self.getProperty("PhaseConvergenceTable").isDefault:
