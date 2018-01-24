@@ -189,6 +189,7 @@ void DiffractionFocussing2::exec() {
 
     // This is the output spectrum
     auto &outSpec = out->getSpectrum(outWorkspaceIndex);
+    outSpec.setSpectrumNo(group);
 
     // Get the references to Y and E output and rebin
     // TODO can only be changed once rebin implemented in HistogramData
@@ -210,6 +211,7 @@ void DiffractionFocussing2::exec() {
       auto &Xin = inSpec.x();
       auto &Yin = inSpec.y();
       auto &Ein = inSpec.e();
+      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
 
       try {
         // TODO This should be implemented in Histogram as rebin
@@ -314,10 +316,6 @@ void DiffractionFocussing2::exec() {
     PARALLEL_END_INTERUPT_REGION
   } // end of loop for groups
   PARALLEL_CHECK_INTERUPT_REGION
-
-  out->setIndexInfo(Indexing::group(m_matrixInputW->indexInfo(),
-                                    std::move(m_validGroups),
-                                    std::move(m_wsIndices)));
 
   setProperty("OutputWorkspace", out);
 
