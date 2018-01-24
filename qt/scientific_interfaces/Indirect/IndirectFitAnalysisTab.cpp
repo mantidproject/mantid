@@ -908,7 +908,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
@@ -941,9 +941,13 @@ void IndirectFitAnalysisTab::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
 void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   disconnect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
              this, SLOT(plotGuess()));
+  m_functionNameChanges = functionNameChanges(model());
+  auto function = fitFunction();
+  if (!m_functionNameChanges.isEmpty())
+    function = updateFunctionTies(function, m_functionNameChanges);
 
   setAlgorithmProperty(fitAlgorithm, "InputWorkspace", fitWorkspace());
-  setAlgorithmProperty(fitAlgorithm, "Function", fitFunction()->asString());
+  setAlgorithmProperty(fitAlgorithm, "Function", function->asString());
   setAlgorithmProperty(fitAlgorithm, "StartX", m_fitPropertyBrowser->startX());
   setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
   setAlgorithmProperty(fitAlgorithm, "Minimizer",
@@ -954,7 +958,6 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
 
-  m_functionNameChanges = functionNameChanges(model());
   m_fitFunction = m_fitPropertyBrowser->getFittingFunction()->clone();
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -962,6 +965,36 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(clearBatchRunnerSlots()));
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Updates the ties in the specified function, using the specified parameter
+ * name changes.
+ *
+ * @param function            The function whose ties to update.
+ * @param functionNameChanges The changes in parameter names.
+ * @return                    The specified function after updating ties.
+ */
+IFunction_sptr IndirectFitAnalysisTab::updateFunctionTies(
+    IFunction_sptr function,
+    const QHash<QString, QString> &functionNameChanges) const {
+  const auto tieMap = m_fitPropertyBrowser->getTies();
+  QStringList ties;
+  for (const auto &tieKey : tieMap.keys()) {
+    QString parameter = tieKey;
+    QString expression = tieMap[tieKey];
+
+    if (functionNameChanges.contains(parameter))
+      parameter = functionNameChanges[parameter];
+    if (functionNameChanges.contains(expression))
+      expression = functionNameChanges[expression];
+    ties.push_back(parameter + "=" + expression);
+  }
+
+  function->clearTies();
+  function->addTies(ties.join(",").toStdString());
+  function->applyTies();
+  return function;
 }
 
 /**

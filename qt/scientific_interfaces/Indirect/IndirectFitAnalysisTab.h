@@ -226,6 +226,9 @@ private:
   virtual void enablePlotGuess() = 0;
   QSet<QString> parameterNames();
   void updateParametersFromTable(const std::string &paramWSName);
+  Mantid::API::IFunction_sptr
+  updateFunctionTies(Mantid::API::IFunction_sptr function,
+                     const QHash<QString, QString> &functionNameChanges) const;
 
   Mantid::API::IFunction_sptr m_fitFunction;
   QHash<size_t, QHash<QString, double>> m_parameterValues;
