@@ -12,6 +12,8 @@
 #include <QSettings>
 #include <QWhatsThis>
 #include <QWidget>
+#include <QStyledItemDelegate> 
+#include <QPainter>
 
 namespace {
 const QString DataProcessorSettingsGroup =
@@ -22,6 +24,28 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 using namespace Mantid::API;
+
+class GridDelegate : public QStyledItemDelegate
+{
+public:
+   explicit GridDelegate(QObject * parent = 0, boost::shared_ptr<AbstractTreeModel> model = 0) : QStyledItemDelegate(parent), m_model(model) { };
+
+   void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
+   {
+       painter->save();
+       painter->setPen(QColor(Qt::black));
+       if (m_model->isProcessed(index.row())){
+          painter->fillRect(option.rect, Qt::green);
+       }
+       painter->drawRect(option.rect);
+       painter->restore();
+
+       QStyledItemDelegate::paint(painter, option, index);
+   }
+
+protected:
+  boost::shared_ptr<AbstractTreeModel> m_model;
+};
 
 /** Constructor
 * @param presenter :: [input] A unique ptr to the presenter
@@ -128,11 +152,6 @@ void QDataProcessorWidget::createTable() {
 #endif
   ui.viewTable->setHeader(header);
 
-  ui.viewTable->setStyleSheet(
-      "QTreeView {font-size:11pt;} QTreeView::item "
-      "{border-color: lightGray; border-style: solid; border-width: 0.5px;} "
-      "QTreeView::item:selected {background-color: lightBlue; color: black}");
-
   // Re-emit a signal when the instrument changes
   connect(ui.comboProcessInstrument, SIGNAL(currentIndexChanged(int)), this,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)));
@@ -205,7 +224,18 @@ void QDataProcessorWidget::showTable(
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
+  
+  //ui.viewTable->setProperty("processed", false);
 
+  //ui.viewTable-> setStyleSheet("QTreeView::item {background-color: green}");
+  // ui.viewTable->setStyleSheet(
+  //     "QTreeView {font-size:11pt;} QTreeView::item "
+  //     "{border-color: lightGray; border-style: solid; border-width: 0.5px; background-color: none;}"
+  //       "QTreeView::item:selected {background-color: lightBlue; color: black}");
+  ui.viewTable->setAlternatingRowColors(false);
+  ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable, m_model));
+  ui.viewTable->setItemDelegateForColumn(m_column, new HintingLineEditFactory(m_strategy, m_model));
+  
   // Hide the Hidden Options column
   ui.viewTable->hideColumn(m_model->columnCount() - 1);
 }
@@ -234,6 +264,7 @@ void QDataProcessorWidget::rowsUpdated(const QModelIndex &parent, int start,
   }
 
   m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
+  ui.viewTable->update();
 }
 
 /**
@@ -256,6 +287,7 @@ void QDataProcessorWidget::rowDataUpdated(const QModelIndex &topLeft,
   }
 
   m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
+  ui.viewTable->update();
 }
 
 /**
@@ -453,10 +485,12 @@ column.
 @param hintStrategy : The hinting strategy to use
 @param column : The index of the 'Options' column
 */
-void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy,
+void QDataProcessorWidget::setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                                                   int column) {
-  ui.viewTable->setItemDelegateForColumn(
-      column, new HintingLineEditFactory(hintStrategy));
+  // ui.viewTable->setItemDelegateForColumn(
+  //     column, new HintingLineEditFactory(hintStrategy, m_model));
+  m_strategy = hintStrategy;
+  m_column = column;
 }
 
 /**

@@ -1,7 +1,26 @@
 #ifndef MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 #define MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 
+#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/HintingLineEditFactory.h"
+
+#include <QClipboard>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QSettings>
+#include <QWhatsThis>
+#include <QWidget>
+#include <QStyledItemDelegate> 
+#include <QPainter>
+
 #include <QStyledItemDelegate>
+#include <QPainter>
+#include <QWidget>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
@@ -36,8 +55,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class HintingLineEditFactory : public QStyledItemDelegate {
 public:
-  HintingLineEditFactory(HintStrategy *hintStrategy)
-      : m_strategy(hintStrategy){};
+  HintingLineEditFactory(HintStrategy *hintStrategy, boost::shared_ptr<MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel> model = 0)
+      : m_strategy(hintStrategy), m_model(model){};
+  
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override {
     Q_UNUSED(option);
@@ -49,8 +69,22 @@ public:
     return editor;
   }
 
+   void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
+   {
+       painter->save();
+       painter->setPen(QColor(Qt::black));
+       if (m_model->isProcessed(index.row())){
+          painter->fillRect(option.rect, Qt::green);
+       }
+       painter->drawRect(option.rect);
+       painter->restore();
+
+       QStyledItemDelegate::paint(painter, option, index);
+   }
+
 protected:
   boost::scoped_ptr<HintStrategy> m_strategy;
+  boost::shared_ptr<MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel> m_model;
 };
 }
 }

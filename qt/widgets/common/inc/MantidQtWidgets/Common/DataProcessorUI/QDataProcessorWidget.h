@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
+#include "MantidQtWidgets/Common/HintStrategy.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -170,6 +171,8 @@ private:
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
   boost::shared_ptr<AbstractTreeModel> m_model;
+  // the hint strategy
+  MantidQt::MantidWidgets::HintStrategy *m_strategy;
   // Command adapters
   std::vector<std::unique_ptr<QtCommandAdapter>> m_commands;
   // the interface (uses actions owned by m_commands)
@@ -179,6 +182,8 @@ private:
   // the context menu
   QMenu *m_contextMenu;
   QSignalMapper *m_openMap;
+  // options column
+  int m_column;
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);

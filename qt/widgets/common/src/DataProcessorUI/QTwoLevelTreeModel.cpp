@@ -63,10 +63,10 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
       return QString::fromStdString(
           m_tWS->String(row.first, index.column() + 1));
     }
-    if (role == Qt::BackgroundRole && row.second) {
-      // Highlight if this row is processed
-      return QColor("#00b300");
-    }
+    // if (role == Qt::BackgroundRole && row.second) {
+    //   // Highlight if this row is processed
+    //   return QColor("#00b300");
+    // }
   }
 
   return QVariant();
