@@ -7,7 +7,9 @@
 // See https://docs.scipy.org/doc/numpy/reference/c-api.array.html#miscellaneous
 #define PY_ARRAY_UNIQUE_SYMBOL MPLCPP_ARRAY_API
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+GCC_DIAG_OFF(cast-qual)
 #include <numpy/arrayobject.h>
+GCC_DIAG_ON(cast-qual)
 
 #include <algorithm>
 #include <type_traits>
