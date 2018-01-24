@@ -461,7 +461,8 @@ bool Algorithm::execute() {
     logAlgorithmInfo();
 
   // Check all properties for validity
-  float timingInit = timer.elapsed();
+  constexpr bool resetTimer{true};
+  float timingInit = timer.elapsed(resetTimer);
   if (!validateProperties()) {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const std::vector<Property *> &props = getProperties();
@@ -479,7 +480,7 @@ bool Algorithm::execute() {
       throw std::runtime_error("Some invalid Properties found");
     }
   }
-  const float timingPropertyValidation = timer.elapsed();
+  const float timingPropertyValidation = timer.elapsed(resetTimer);
 
   // ----- Check for processing groups -------------
   // default true so that it has the right value at the check below the catch
@@ -501,7 +502,7 @@ bool Algorithm::execute() {
     return false;
   }
 
-  timingInit += timer.elapsed();
+  timingInit += timer.elapsed(resetTimer);
   // ----- Perform validation of the whole set of properties -------------
   if (!callProcessGroups) // for groups this is called on each workspace
                           // separately
@@ -530,7 +531,7 @@ bool Algorithm::execute() {
       }
     }
   }
-  const float timingInputValidation = timer.elapsed();
+  const float timingInputValidation = timer.elapsed(resetTimer);
 
   if (trackingHistory()) {
     // count used for defining the algorithm execution order
@@ -554,7 +555,7 @@ bool Algorithm::execute() {
 
   // Read or write locks every input/output workspace
   this->lockWorkspaces();
-  timingInit += timer.elapsed();
+  timingInit += timer.elapsed(resetTimer);
 
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
@@ -569,7 +570,7 @@ bool Algorithm::execute() {
       registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
-      const float timingExec = timer.elapsed();
+      const float timingExec = timer.elapsed(resetTimer);
       // The total runtime including all init steps is used for general logging.
       const float duration = timingInit + timingPropertyValidation +
                              timingInputValidation + timingExec;
