@@ -78,6 +78,8 @@ private:
   void parseAndAddSource();
   /// Parse sample
   void parseAndAddSample();
+  /// Parse monitors
+  void parseMonitors();
 };
 
 } // namespace NexusGeometry

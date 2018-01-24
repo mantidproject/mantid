@@ -33,8 +33,8 @@ InstrumentGeometryAbstraction::InstrumentGeometryAbstraction(
 
 /// Adds component to instrument
 Geometry::IComponent *
-InstrumentGeometryAbstraction::addComponent(std::string &compName,
-                                            Eigen::Vector3d &position) {
+InstrumentGeometryAbstraction::addComponent(const std::string &compName,
+                                            const Eigen::Vector3d &position) {
   Geometry::IComponent *component(new Geometry::ObjCompAssembly(compName));
   component->setPos(position(0), position(1), position(2));
   this->instrument_sptr->add(component);
@@ -42,8 +42,9 @@ InstrumentGeometryAbstraction::addComponent(std::string &compName,
 }
 
 /// Adds detector to instrument
-void InstrumentGeometryAbstraction::addDetector(std::string &detName, int detId,
-                                                Eigen::Vector3d &position,
+void InstrumentGeometryAbstraction::addDetector(const std::string &detName,
+                                                int detId,
+                                                const Eigen::Vector3d &position,
                                                 objectHolder &shape) {
   auto *detector(new Geometry::Detector(
       detName, detId, const_cast<Geometry::IComponent *>(
@@ -56,20 +57,35 @@ void InstrumentGeometryAbstraction::addDetector(std::string &detName, int detId,
   this->instrument_sptr->markAsDetectorIncomplete(detector);
 }
 
+void InstrumentGeometryAbstraction::addMonitor(const std::string &detName,
+                                               int detId,
+                                               const Eigen::Vector3d &position,
+                                               objectHolder &shape) {
+  auto *detector(new Geometry::Detector(
+      detName, detId, const_cast<Geometry::IComponent *>(
+                          this->instrument_sptr->getBaseComponent())));
+  detector->setPos(position(0), position(1), position(2));
+
+  detector->setShape(shape);
+
+  this->instrument_sptr->add(detector);
+  this->instrument_sptr->markAsMonitor(detector);
+}
+
 /// Sorts detectors
 void InstrumentGeometryAbstraction::sortDetectors() {
   this->instrument_sptr->markAsDetectorFinalize();
 }
 
 /// Add sample
-void InstrumentGeometryAbstraction::addSample(std::string &sampleName,
-                                              Eigen::Vector3d &position) {
+void InstrumentGeometryAbstraction::addSample(const std::string &sampleName,
+                                              const Eigen::Vector3d &position) {
   auto *sample(this->addComponent(sampleName, position));
   this->instrument_sptr->markAsSamplePos(sample);
 }
 /// Add source
-void InstrumentGeometryAbstraction::addSource(std::string &sourceName,
-                                              Eigen::Vector3d &position) {
+void InstrumentGeometryAbstraction::addSource(const std::string &sourceName,
+                                              const Eigen::Vector3d &position) {
   auto *source(this->addComponent(sourceName, position));
   this->instrument_sptr->markAsSource(source);
 }

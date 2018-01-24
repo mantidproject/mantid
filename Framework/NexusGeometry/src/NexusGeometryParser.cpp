@@ -28,7 +28,9 @@ const H5std_string NX_CLASS = "NX_class";
 const H5std_string NX_ENTRY = "NXentry";
 const H5std_string NX_INSTRUMENT = "NXinstrument";
 const H5std_string NX_DETECTOR = "NXdetector";
+const H5std_string NX_MONITOR = "NXmonitor";
 const H5std_string DETECTOR_IDS = "detector_number";
+const H5std_string DETECTOR_ID = "detector_id";
 const H5std_string X_PIXEL_OFFSET = "x_pixel_offset";
 const H5std_string Y_PIXEL_OFFSET = "y_pixel_offset";
 const H5std_string Z_PIXEL_OFFSET = "z_pixel_offset";
@@ -109,7 +111,8 @@ ParsingErrors NexusGeometryParser::parseNexusGeometry() {
     // Parse source and sample and add to instrument
     this->parseAndAddSource();
     this->parseAndAddSample();
-  } catch (H5::Exception &ex) {
+    this->parseMonitors();
+  } catch (H5::Exception &) {
     this->exitStatus = UNKNOWN_ERROR;
   }
 
@@ -417,9 +420,11 @@ void NexusGeometryParser::parseNexusCylinder(Group &shapeGroup) {
 void NexusGeometryParser::parseAndAddSource() {
   H5std_string sourcePath = "raw_data_1/instrument/source";
   Group sourceGroup = this->rootGroup.openGroup(sourcePath);
-  // auto sourceName = this->get1DStringDataset("/name");
-  // auto defaultPos = Eigen::Vector3d(0.0,0.0,0.0);
-  // TODO incomplete
+  auto sourceName = this->get1DStringDataset("name", sourceGroup);
+  auto sourceTransformations = this->getTransformations(sourceGroup);
+  auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0); // HACK
+  this->iBuilder_sptr->addSource(sourceName,
+                                 sourceTransformations * defaultPos);
 }
 // Parse sample and add to instrument
 void NexusGeometryParser::parseAndAddSample() {
@@ -430,6 +435,28 @@ void NexusGeometryParser::parseAndAddSample() {
   auto samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
 
   this->iBuilder_sptr->addSample(sampleName, samplePos);
+}
+
+void NexusGeometryParser::parseMonitors() {
+  std::vector<Group> rawDataGroupPaths =
+      this->openSubGroups(this->rootGroup, NX_ENTRY);
+
+  // Open all instrument groups within rawDataGroups
+  for (std::vector<Group>::iterator iter = rawDataGroupPaths.begin();
+       iter != rawDataGroupPaths.end(); ++iter) {
+    std::vector<Group> instrumentGroups =
+        this->openSubGroups(*iter, NX_INSTRUMENT);
+    for (auto &inst : instrumentGroups) {
+      std::vector<Group> monitorGroups = this->openSubGroups(inst, NX_MONITOR);
+      for (auto &monitor : monitorGroups) {
+
+        int detectorId = get1DDataset<int>(DETECTOR_ID, monitor)[0];
+
+        this->iBuilder_sptr->addMonitor(std::to_string(detectorId), detectorId,
+                                        Eigen::Vector3d{0, 0, 0}, this->shape);
+      }
+    }
+  }
 }
 } // namespace NexusGeometry
 } // namespace Mantid

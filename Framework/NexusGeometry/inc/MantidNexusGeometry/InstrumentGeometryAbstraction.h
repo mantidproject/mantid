@@ -23,17 +23,22 @@ public:
   /// Constructor creates the instrument
   InstrumentGeometryAbstraction(const std::string &instrumentName);
   /// Adds component to instrument
-  Geometry::IComponent *addComponent(std::string &compName,
-                                     Eigen::Vector3d &position);
+  Geometry::IComponent *addComponent(const std::string &compName,
+                                     const Eigen::Vector3d &position);
   /// Adds detector to instrument
-  void addDetector(std::string &detName, int detId, Eigen::Vector3d &position,
-                   objectHolder &shape);
+  void addDetector(const std::string &detName, int detId,
+                   const Eigen::Vector3d &position, objectHolder &shape);
+  /// Adds detector to instrument
+  void addMonitor(const std::string &detName, int detId,
+                  const Eigen::Vector3d &position, objectHolder &shape);
   /// Sorts detectors
   void sortDetectors();
   /// Add sample
-  void addSample(std::string &sampleName, Eigen::Vector3d &position);
+  void addSample(const std::string &sampleName,
+                 const Eigen::Vector3d &position);
   /// Add source
-  void addSource(std::string &sourceName, Eigen::Vector3d &position);
+  void addSource(const std::string &sourceName,
+                 const Eigen::Vector3d &position);
   /// Returns underlying instrument
   Geometry::Instrument_sptr _unAbstractInstrument() {
     return this->instrument_sptr;

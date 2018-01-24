@@ -30,7 +30,7 @@ public:
   void testAddComponent() {
     InstrumentGeometryAbstraction iGeoAbstract(this->iTestName);
     TS_ASSERT_THROWS_NOTHING(
-        auto comp = iGeoAbstract.addComponent(this->cTestName, this->testPos1));
+        iGeoAbstract.addComponent(this->cTestName, this->testPos1));
     auto iVisitor =
         Geometry::InstrumentVisitor(iGeoAbstract._unAbstractInstrument());
     iVisitor.walkInstrument();

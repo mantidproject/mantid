@@ -51,17 +51,16 @@ public:
   extractBeamline() {
     auto instrument = extractInstrument();
     Geometry::ParameterMap pmap;
-    return {std::move(std::get<0>(instrument->makeBeamline(pmap))),
-            std::move(std::get<1>(instrument->makeBeamline(pmap)))};
+    auto beamline = instrument->makeBeamline(pmap);
+    return {std::move(std::get<0>(beamline)), std::move(std::get<1>(beamline))};
   }
 
   void test_basic_instrument_information() {
     auto beamline = extractBeamline();
     auto componentInfo = std::move(beamline.first);
     auto detectorInfo = std::move(beamline.second);
-    TSM_ASSERT_EQUALS(
-        "Detectors + 1 monitor", detectorInfo->size(),
-        128 * 2 + 1); // TODO, currently NOT counting monitor. Needs fixing.
+    TSM_ASSERT_EQUALS("Detectors + 1 monitor", detectorInfo->size(),
+                      128 * 2 + 1);
     TSM_ASSERT_EQUALS(
         "Detectors + 3 non-detector components", componentInfo->size(),
         detectorInfo->size() +
