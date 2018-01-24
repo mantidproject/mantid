@@ -211,25 +211,23 @@ class FigureManagerWorkbench(FigureManagerBase):
         # which are outside of the axes so event.inaxes is no use.
         canvas = self.canvas
         figure = canvas.figure
-        try:
-            axes = figure.get_axes()[0]
-        except IndexError:
-            return
+        axes = figure.get_axes()
 
         def move_and_show(editor):
             editor.move(event.x, figure.bbox.height - event.y + self.window.y())
             editor.exec_()
 
-        if axes.title.contains(event)[0]:
-            move_and_show(LabelEditor(canvas, axes.title))
-        elif axes.xaxis.label.contains(event)[0]:
-            move_and_show(LabelEditor(canvas, axes.xaxis.label))
-        elif axes.yaxis.label.contains(event)[0]:
-            move_and_show(LabelEditor(canvas, axes.yaxis.label))
-        elif axes.xaxis.contains(event)[0]:
-            move_and_show(XAxisEditor(canvas, axes))
-        elif axes.yaxis.contains(event)[0]:
-            move_and_show(YAxisEditor(canvas, axes))
+        for ax in axes:
+            if ax.title.contains(event)[0]:
+                move_and_show(LabelEditor(canvas, ax.title))
+            elif ax.xaxis.label.contains(event)[0]:
+                move_and_show(LabelEditor(canvas, ax.xaxis.label))
+            elif ax.yaxis.label.contains(event)[0]:
+                move_and_show(LabelEditor(canvas, ax.yaxis.label))
+            elif ax.xaxis.contains(event)[0]:
+                move_and_show(XAxisEditor(canvas, ax))
+            elif ax.yaxis.contains(event)[0]:
+                move_and_show(YAxisEditor(canvas, ax))
 
 
 class Show(object):
