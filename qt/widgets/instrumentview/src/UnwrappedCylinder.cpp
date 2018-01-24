@@ -39,7 +39,7 @@ void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
                                Mantid::Kernel::Quat &R) const {
   // direction in which to look
   Mantid::Kernel::V3D eye;
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
   // rotation from the global axes to those where
   // the z axis points to the detector
   Mantid::Kernel::Quat R1;
