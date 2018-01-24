@@ -236,6 +236,17 @@ QString IndirectFitPropertyBrowser::backgroundName() const {
 }
 
 /**
+ * @return  A map from parameter name to a tie expression.
+ */
+QHash<QString, QString> IndirectFitPropertyBrowser::getTies() const {
+  const auto tieProperties = getHandler()->getTies();
+  QHash<QString, QString> ties;
+  for (const auto parameter : tieProperties.keys())
+    ties[parameter] = m_stringManager->value(tieProperties[parameter]);
+  return ties;
+}
+
+/**
  * @param functionName  The name of the function.
  * @return              The number of custom functions, with the specified name,
  *                      included in the selected model.
@@ -598,7 +609,7 @@ void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
   m_optionalProperties[optionProperty] = settingProperty;
   m_customSettings[optionKey] = optionProperty;
   m_customSettings[settingKey] = settingProperty;
-
+  
   if (enabled)
     optionProperty->addSubProperty(settingProperty);
 }

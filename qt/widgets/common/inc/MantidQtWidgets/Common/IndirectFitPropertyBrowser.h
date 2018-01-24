@@ -32,6 +32,8 @@ public:
 
   QString backgroundName() const;
 
+  QHash<QString, QString> getTies() const;
+
   size_t numberOfCustomFunctions(const std::string &functionName) const;
 
   double parameterValue(const std::string &functionName,
