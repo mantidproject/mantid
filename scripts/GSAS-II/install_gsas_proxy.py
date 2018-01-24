@@ -54,17 +54,23 @@ def install_package(package_name):
 
 
 def install_gsasii(install_directory, revision_number):
-    print("Downloading GSAS mini-SVN kit")
-    if not os.path.exists(install_directory):
-        os.makedirs(install_directory)
-    proxy_zip_file = os.path.join(install_directory, GSAS_PROXY_FILE_NAME)
-    download_zip_file(target_location=proxy_zip_file)
-
-    print("Extracting GSAS proxy installation")
     gsas_home_dir = os.path.join(install_directory, GSAS_HOME_DIR_NAME)
-    unzip_file(zip_file_name=proxy_zip_file, target_directory=gsas_home_dir)
 
-    os.remove(proxy_zip_file)
+    if not os.path.exists(gsas_home_dir):
+        # This is the first time installing GSAS-II, so we have to make a home directory and download the SVN kit
+        print("Downloading GSAS mini-SVN kit")
+
+        if not os.path.exists(install_directory):
+            os.makedirs(install_directory)
+
+        proxy_zip_file = os.path.join(install_directory, GSAS_PROXY_FILE_NAME)
+        download_zip_file(target_location=proxy_zip_file)
+
+        print("Extracting GSAS proxy installation")
+        gsas_home_dir = os.path.join(install_directory, GSAS_HOME_DIR_NAME)
+        unzip_file(zip_file_name=proxy_zip_file, target_directory=gsas_home_dir)
+
+        os.remove(proxy_zip_file)
 
     print("Downloading correct version of bootstrap.py")
     bootstrap_file_name = os.path.join(gsas_home_dir, "GSASII", "bootstrap.py")

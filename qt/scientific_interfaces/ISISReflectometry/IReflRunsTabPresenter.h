@@ -1,6 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H
 
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -37,6 +39,7 @@ public:
   virtual ~IReflRunsTabPresenter(){};
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  virtual void settingsChanged(int group) = 0;
 
   enum Flag {
     SearchFlag,

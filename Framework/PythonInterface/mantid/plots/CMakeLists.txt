@@ -1,6 +1,6 @@
 set ( PY_FILES
   __init__.py
-  _functions.py
+  functions.py
 )
 
 

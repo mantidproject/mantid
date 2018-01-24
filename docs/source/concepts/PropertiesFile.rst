@@ -87,8 +87,14 @@ Directory Properties
 |                                      | that Mantid requires to function correctly.       |                                     |
 |                                      | **WARNING:** Do not alter the default value.      |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
-| ``plugins.directory``                | The path to the directory that contains the       | ``../Plugins``                      |
+| ``framework.plugins.directory``      | The path to the directory that contains the       | ``../plugins``                      |
 |                                      | Mantid plugin libraries                           |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``framework.plugins.exclude``        | A list of substrings to allow libraries to be     | ``Qt4;Qt5``                         |
+|                                      | skipped                                           |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``mantidqt.plugins.directory``       | The path to the directory containing the          | ``../plugins/qtX``                  |
+|                                      | Mantid Qt-based plugin libraries                  |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``requiredpythonscript.directories`` | A list of directories containing Python scripts   | N/A                                 |
 |                                      | that Mantid requires to function correctly.       |                                     |

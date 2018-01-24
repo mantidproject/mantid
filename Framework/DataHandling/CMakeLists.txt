@@ -113,6 +113,7 @@ set ( SRC_FILES
 	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
+	src/MaskSpectra.cpp
 	src/MergeLogs.cpp
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
@@ -287,6 +288,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
+	inc/MantidDataHandling/MaskSpectra.h
 	inc/MantidDataHandling/MergeLogs.h
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
@@ -459,6 +461,7 @@ set ( TEST_FILES
 	LoadVulcanCalFileTest.h
 	MaskDetectorsInShapeTest.h
 	MaskDetectorsTest.h
+	MaskSpectraTest.h
 	MergeLogsTest.h
 	ModifyDetectorDotDatFileTest.h
 	MoveInstrumentComponentTest.h

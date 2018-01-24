@@ -2,6 +2,8 @@ set ( SRC_FILES
 	EnggDiffFittingModel.cpp
 	EnggDiffFittingPresenter.cpp
 	EnggDiffFittingViewQtWidget.cpp
+	EnggDiffGSASFittingModel.cpp
+	EnggDiffGSASFittingPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
 )
@@ -14,13 +16,20 @@ set ( INC_FILES
 	EnggDiffFittingPresWorker.h
 	EnggDiffFittingPresenter.h
 	EnggDiffFittingViewQtWidget.h
+	EnggDiffGSASFittingModel.h
+	EnggDiffGSASFittingPresenter.h
+	EnggDiffGSASRefinementMethod.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
 	IEnggDiffFittingModel.h
 	IEnggDiffFittingPresenter.h
+	IEnggDiffGSASFittingModel.h
+	IEnggDiffGSASFittingPresenter.h
+	IEnggDiffGSASFittingView.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
+	RunMap.h
 )
 
 set ( MOC_FILES

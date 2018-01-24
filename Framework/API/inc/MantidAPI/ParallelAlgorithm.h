@@ -7,25 +7,23 @@
 namespace Mantid {
 namespace API {
 
-/** Base class for algorithms that treat all spectra independently, i.e., we can
-  trivially parallelize over the spectra without changes. The assumption is that
-  we have one input and one output workspace. The storage mode is just
-  propagated from input to output. When a specific algorithm is determined to be
-  trivially parallel (this is a manual process), the only required change to add
-  MPI support is to inherit from this class instead of Algorithm. Inheriting
-  from ParallelAlgorithm instead of from Algorithm provides the necessary
-  overriden method(s) to allow running an algorithm with MPI. This works under
-  the following conditions:
-  1. The algorithm must have a single input and a single output workspace.
-  2. No output files may be written since filenames would clash.
-  Algorithms that do not modify spectra in a workspace may also use this base
-  class to support MPI. For example, modifications of the instrument are handled
-  in a identical manner on all MPI ranks, without requiring changes to the
-  algorithm, other than setting the correct execution mode via the overloads
-  provided by ParallelAlgorithm.
+/** Base class for algorithms that can run in parallel on all MPI ranks but not
+  in a distributed fashion. A prime example are most `Load` algorithms, which,
+  since they read input data from a file have no automatic way of doing so in a
+  distributed manner. Creating an actual distributed workspace
+  (Parallel::StorageMode::Distributed) would require a manual implementation
+  taking care of setting up a workspace and partitioning it correctly.
+
+  When a specific algorithm is determined to be parallel (this is a manual
+  process), the only required change to add MPI support is to inherit from this
+  class instead of Algorithm. The algorithm will then support
+  Parallel::ExecutionMode::MasterOnly and Parallel::ExecutionMode::Identical,
+  provided that the mode can uniquely be determined from its input workspaces.
+  If there are no inputs it defaults to Parallel::ExecutionMode::Identical.
 
   @author Simon Heybrock
   @date 2017
+
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -48,7 +46,7 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL ParallelAlgorithm : public Algorithm {
+class MANTID_API_DLL ParallelAlgorithm : public API::Algorithm {
 protected:
   Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes)
