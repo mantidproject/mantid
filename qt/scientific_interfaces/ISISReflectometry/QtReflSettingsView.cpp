@@ -176,7 +176,7 @@ void QtReflSettingsView::setSelected(QComboBox &box, std::string const &str) {
 void QtReflSettingsView::setText(QLineEdit &lineEdit,
                                  boost::optional<double> value) {
   if (value)
-    setText(lineEdit, value.value());
+    setText(lineEdit, value.get());
   else
     setText(lineEdit, "");
 }
@@ -184,14 +184,14 @@ void QtReflSettingsView::setText(QLineEdit &lineEdit,
 void QtReflSettingsView::setText(QLineEdit &lineEdit,
                                  boost::optional<int> value) {
   if (value)
-    setText(lineEdit, value.value());
+    setText(lineEdit, value.get());
   else
     setText(lineEdit, "");
 }
 
 void QtReflSettingsView::setText(QLineEdit &lineEdit,
                                  boost::optional<std::string> const &text) {
-  setText(lineEdit, text.value_or(""));
+  setText(lineEdit, value_or(text, ""));
 }
 
 void QtReflSettingsView::setText(QLineEdit &lineEdit, double value) {

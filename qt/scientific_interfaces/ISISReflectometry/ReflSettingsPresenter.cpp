@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include "InstrumentParameters.h"
+#include "ValueOr.h"
 #include "ExperimentOptionDefaults.h"
 #include "InstrumentOptionDefaults.h"
 #include <type_traits>
@@ -279,24 +280,25 @@ void ReflSettingsPresenter::getExpDefaults() {
 
   auto defaults = ExperimentOptionDefaults();
 
-  defaults.AnalysisMode = parameters.optional<std::string>("AnalysisMode")
-                              .value_or(alg->getPropertyValue("AnalysisMode"));
+  defaults.AnalysisMode =
+      value_or(parameters.optional<std::string>("AnalysisMode"),
+               alg->getPropertyValue("AnalysisMode"));
   defaults.PolarizationAnalysis =
-      parameters.optional<std::string>("PolarizationAnalysis")
-          .value_or(alg->getPropertyValue("PolarizationAnalysis"));
+      value_or(parameters.optional<std::string>("PolarizationAnalysis"),
+               alg->getPropertyValue("PolarizationAnalysis"));
 
   defaults.SummationType =
-      parameters.optional<std::string>("SummationType")
-          .value_or(alg->getPropertyValue("SummationType"));
+      value_or(parameters.optional<std::string>("SummationType"),
+               alg->getPropertyValue("SummationType"));
 
   defaults.ReductionType =
-      parameters.optional<std::string>("ReductionType")
-          .value_or(alg->getPropertyValue("ReductionType"));
+      value_or(parameters.optional<std::string>("ReductionType"),
+               alg->getPropertyValue("ReductionType"));
 
-  defaults.CRho = parameters.optional<std::string>("crho").value_or("1");
-  defaults.CAlpha = parameters.optional<std::string>("calpha").value_or("1");
-  defaults.CAp = parameters.optional<std::string>("cAp").value_or("1");
-  defaults.CPp = parameters.optional<std::string>("cPp").value_or("1");
+  defaults.CRho = value_or(parameters.optional<std::string>("crho"), "1");
+  defaults.CAlpha = value_or(parameters.optional<std::string>("calpha"), "1");
+  defaults.CAp = value_or(parameters.optional<std::string>("cAp"), "1");
+  defaults.CPp = value_or(parameters.optional<std::string>("cPp"), "1");
 
   defaults.MomentumTransferStep = parameters.optional<double>("dQ/Q");
   defaults.ScaleFactor = parameters.optional<double>("Scale");
@@ -331,9 +333,9 @@ void ReflSettingsPresenter::getInstDefaults() {
   auto defaults = InstrumentOptionDefaults();
 
   defaults.NormalizeByIntegratedMonitors =
-      parameters.optional<bool>("IntegratedMonitors")
-          .value_or(boost::lexical_cast<bool>(
-              alg->getPropertyValue("NormalizeByIntegratedMonitors")));
+      value_or(parameters.optional<bool>("IntegratedMonitors"),
+               boost::lexical_cast<bool>(
+                   alg->getPropertyValue("NormalizeByIntegratedMonitors")));
   defaults.MonitorIntegralMin =
       parameters.mandatory<double>("MonitorIntegralMin");
   defaults.MonitorIntegralMax =
@@ -347,13 +349,12 @@ void ReflSettingsPresenter::getInstDefaults() {
   defaults.I0MonitorIndex = parameters.mandatory<int>("I0MonitorIndex");
   defaults.ProcessingInstructions =
       parameters.optional<std::string>("ProcessingInstructions");
-  defaults.CorrectDetectors =
-      parameters.optional<bool>("CorrectDetectors")
-          .value_or(boost::lexical_cast<bool>(
-              alg->getPropertyValue("CorrectDetectors")));
+  defaults.CorrectDetectors = value_or(
+      parameters.optional<bool>("CorrectDetectors"),
+      boost::lexical_cast<bool>(alg->getPropertyValue("CorrectDetectors")));
   defaults.DetectorCorrectionType =
-      parameters.optional<std::string>("DetectorCorrectionType")
-          .value_or(alg->getPropertyValue("DetectorCorrectionType"));
+      value_or(parameters.optional<std::string>("DetectorCorrectionType"),
+               alg->getPropertyValue("DetectorCorrectionType"));
 
   m_view->setInstDefaults(std::move(defaults));
 

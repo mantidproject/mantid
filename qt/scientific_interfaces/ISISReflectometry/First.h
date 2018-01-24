@@ -9,9 +9,8 @@ namespace CustomInterfaces {
 template <typename T> boost::optional<T> first(std::vector<T> const &values) {
   if (values.size() > 0)
     return boost::optional<T>(values[0]);
-  else {
+  else
     return boost::none;
-  }
 }
 }
 }

@@ -4,6 +4,7 @@
 #include <boost/optional.hpp>
 #include "GetInstrumentParameter.h"
 #include "First.h"
+#include "ValueOr.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,17 +34,17 @@ public:
 
   template <typename T> T valueOrEmpty(std::string const &parameterName) {
     static_assert(!std::is_arithmetic<T>::value, "Use valueOrZero instead.");
-    return valueFromFileOrDefaultConstruct<T>(parameterName);
+    return fromFileOrDefaultConstruct<T>(parameterName);
   }
 
   template <typename T> T valueOrZero(std::string const &parameterName) {
     static_assert(std::is_arithmetic<T>::value, "Use valueOrEmpty instead.");
-    return valueFromFileOrDefaultConstruct<T>(parameterName);
+    return fromFileOrDefaultConstruct<T>(parameterName);
   }
 
   template <typename T>
   boost::optional<T> optional(std::string const &parameterName) {
-    return valueFromFile<T>(parameterName);
+    return fromFile<T>(parameterName);
   }
 
   template <typename T> T mandatory(std::string const &parameterName) {
@@ -67,12 +68,12 @@ public:
 
 private:
   template <typename T>
-  T valueFromFileOrDefaultConstruct(std::string const &parameterName) {
-    return valueFromFile<T>(parameterName).value_or(T());
+  T fromFileOrDefaultConstruct(std::string const &parameterName) {
+    return value_or(fromFile<T>(parameterName), T());
   }
 
   template <typename T>
-  boost::optional<T> valueFromFile(std::string const &parameterName) {
+  boost::optional<T> fromFile(std::string const &parameterName) {
     try {
       return firstFromParameterFile<T>(m_instrument, parameterName);
     } catch (InstrumentParameterTypeMissmatch const &ex) {

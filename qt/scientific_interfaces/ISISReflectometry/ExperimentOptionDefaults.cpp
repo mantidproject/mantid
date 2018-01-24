@@ -1,4 +1,6 @@
 #include "ExperimentOptionDefaults.h"
+#include "ValueOr.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 bool operator==(const ExperimentOptionDefaults &lhs,
@@ -25,15 +27,15 @@ std::ostream &operator<<(std::ostream &os,
      << "',\nSummationType: '" << defaults.SummationType
      << "', \nReductionType: '" << defaults.ReductionType;
   if (defaults.TransRunStartOverlap)
-    os << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap.value();
+    os << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap.get();
   if (defaults.TransRunEndOverlap)
-    os << ",\nTransRunEndOverlap: " << defaults.TransRunEndOverlap.value();
+    os << ",\nTransRunEndOverlap: " << defaults.TransRunEndOverlap.get();
   if (defaults.MomentumTransferStep)
-    os << ",\nMomentumTransferStep: " << defaults.MomentumTransferStep.value();
+    os << ",\nMomentumTransferStep: " << defaults.MomentumTransferStep.get();
   if (defaults.ScaleFactor)
-    os << ",\nScaleFactor: " << defaults.ScaleFactor.value();
+    os << ",\nScaleFactor: " << defaults.ScaleFactor.get();
   if (defaults.StitchParams)
-    os << ", \nStitchParams: '" << defaults.StitchParams.value();
+    os << ", \nStitchParams: '" << defaults.StitchParams.get();
   os << "' }" << std::endl;
   return os;
 }

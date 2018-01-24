@@ -1,4 +1,6 @@
 #include "InstrumentOptionDefaults.h"
+#include "ValueOr.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 bool operator==(InstrumentOptionDefaults const &lhs,
@@ -29,7 +31,7 @@ std::ostream &operator<<(std::ostream &os,
      << (defaults.CorrectDetectors ? "true" : "false");
   if (defaults.ProcessingInstructions)
     os << ",\n ProcessingInstructions: '"
-       << defaults.ProcessingInstructions.value() << "'";
+       << defaults.ProcessingInstructions.get() << "'";
   os << ",\n DetectorCorrectionType: '" << defaults.DetectorCorrectionType
      << "' }" << std::endl;
   return os;
