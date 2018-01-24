@@ -103,12 +103,12 @@ class PlotsFunctionsTest(unittest.TestCase):
         index, dist, kwargs = funcs._getWkspIndexDistAndLabel(self.ws2d_histo,specNum=2)
         self.assertEqual(index,1)
         self.assertTrue(dist)
-        self.assertEqual(kwargs['label'],'ws2d_histo - spec 2')
+        self.assertEqual(kwargs['label'],'ws2d_histo: spec 2')
         #get info from default spectrum in the 1d case
         index, dist, kwargs = funcs._getWkspIndexDistAndLabel(self.ws1d_point)
         self.assertEqual(index,0)
         self.assertFalse(dist)
-        self.assertEqual(kwargs['label'],'ws1d_point - spec 1')
+        self.assertEqual(kwargs['label'],'ws1d_point: spec 1')
 
     def test_getAxesLabels(self):
         axs=funcs.getAxesLabels(self.ws2d_histo)
@@ -277,6 +277,7 @@ class PlotsFunctionsTest(unittest.TestCase):
         funcs.tripcolor(ax,self.ws2d_histo,vmin=0)
         funcs.pcolormesh(ax,self.ws_MD_2d)
         funcs.pcolorfast(ax,self.ws2d_point_uneven,vmin=-1)
+
 
 if __name__ == '__main__':
     unittest.main()
