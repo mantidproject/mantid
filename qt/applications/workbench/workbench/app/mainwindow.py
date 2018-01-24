@@ -324,6 +324,15 @@ class MainWindow(QMainWindow):
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
 
+    # ----------------------- Events ---------------------------------
+    def closeEvent(self, event):
+        # Close all open plots
+        # We don't want this at module scope here
+        import matplotlib.pyplot as plt  #noqa
+        plt.close('all')
+
+        event.accept()
+
     # ----------------------- Slots ---------------------------------
     def open_file(self):
         # todo: when more file types are added this should
