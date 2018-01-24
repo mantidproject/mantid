@@ -8,10 +8,10 @@
 
   <parameter name="MonitorBackgroundMax">
     <value val="8.5"/>
-  </parameter>
-
+  </parameter>  
+  
   <parameter name="MonitorIntegralMin">
-    <value val="4.0"/>
+    <value val="4.0"/> 
   </parameter>
 
   <parameter name="MonitorIntegralMax">
@@ -33,7 +33,7 @@
     <value val="3"/>
   </parameter>
 
-  <parameter name="I0MonitorIndex" type="int">
+  <parameter name="I0MonitorIndex">
     <value val="1"/>
   </parameter>
 

@@ -36,7 +36,7 @@
     <value val="4"/>
   </parameter>
 
-  <parameter name="I0MonitorIndex" type="int">
+  <parameter name="I0MonitorIndex">
     <value val="1"/>
   </parameter>
 
@@ -47,7 +47,7 @@
   <parameter name="LambdaMax">
     <value val="14.0"/>
   </parameter>
-
+  
   <parameter name="TransRunStartOverlap"> <!-- in wavelength -->
     <value val="10"/>
   </parameter>
@@ -55,6 +55,6 @@
   <parameter name="TransRunEndOverlap"> <!-- in wavelength -->
     <value val="12"/>
   </parameter>
-
+  
 </component-link>
 </parameter-file>

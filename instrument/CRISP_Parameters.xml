@@ -32,7 +32,7 @@
     <value val="1"/>
   </parameter>
 
-  <parameter name="I0MonitorIndex" type="int">
+  <parameter name="I0MonitorIndex">
     <value val="1"/>
   </parameter>
 
