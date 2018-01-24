@@ -633,7 +633,8 @@ void DiffractionFocussing2::determineRebinParameters() {
  */
 size_t DiffractionFocussing2::setupGroupToWSIndices() {
   // set up the mapping of group to input workspace index
-  this->m_wsIndices.reserve(this->nGroups + 1);
+  std::vector<std::vector<std::size_t>> wsIndices;
+  wsIndices.reserve(this->nGroups + 1);
   size_t nHist_st = static_cast<size_t>(nHist);
   for (size_t wi = 0; wi < nHist_st; wi++) {
     // wi is the workspace index (of the input)
@@ -642,28 +643,24 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
       continue;
 
     // resize the ws_indices if it is not big enough
-    if (this->m_wsIndices.size() < static_cast<size_t>(group + 1)) {
-      this->m_wsIndices.resize(group + 1);
+    if (wsIndices.size() < static_cast<size_t>(group + 1)) {
+      wsIndices.resize(group + 1);
     }
 
     // Also record a list of workspace indices
-    this->m_wsIndices[group].push_back(wi);
+    wsIndices[group].push_back(wi);
   }
 
   // initialize a vector of the valid group numbers
-  this->m_validGroups.reserve(nGroups);
   size_t totalHistProcess = 0;
-  for (size_t i = 0; i < this->m_wsIndices.size(); i++) {
-    if (!(this->m_wsIndices[i].empty())) {
-      this->m_validGroups.push_back(static_cast<int>(i));
-      totalHistProcess += this->m_wsIndices[i].size();
-    }
+  for (const auto &item : group2xvector) {
+    const auto group = item.first;
+    m_validGroups.push_back(group);
+    totalHistProcess += wsIndices[group].size();
   }
 
-  m_wsIndices.erase(
-      std::remove_if(m_wsIndices.begin(), m_wsIndices.end(),
-                     [](const std::vector<size_t> &v) { return v.empty(); }),
-      m_wsIndices.end());
+  for (const auto &group : m_validGroups)
+    m_wsIndices.push_back(std::move(wsIndices[static_cast<int>(group)]));
 
   return totalHistProcess;
 }
