@@ -171,8 +171,7 @@ void DiffractionFocussing2::exec() {
   // is irrelevant
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
-  std::unique_ptr<Progress> prog = make_unique<API::Progress>(
-      this, 0.2, 1.0, static_cast<int>(totalHistProcess) + nGroups);
+  Progress prog(this, 0.2, 1.0, static_cast<int>(totalHistProcess) + nGroups);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
   for (int outWorkspaceIndex = 0;
@@ -182,13 +181,11 @@ void DiffractionFocussing2::exec() {
     int group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
 
     // Get the group
-    auto it = group2xvector.find(group);
-    auto dif = std::distance(group2xvector.begin(), it);
-    auto &Xout = it->second;
+    auto &Xout = group2xvector.at(group);
 
     // Assign the new X axis only once (i.e when this group is encountered the
     // first time)
-    out->setBinEdges(static_cast<int64_t>(dif), Xout);
+    out->setBinEdges(outWorkspaceIndex, Xout);
 
     // This is the output spectrum
     auto &outSpec = out->getSpectrum(outWorkspaceIndex);
@@ -281,7 +278,7 @@ void DiffractionFocussing2::exec() {
         VectorHelper::rebin(limits, weights_default, emptyVec, Xout.rawData(),
                             groupWgt, EOutDummy, true, true);
       }
-      prog->report();
+      prog.report();
     } // end of loop for input spectra
 
     // Calculate the bin widths
@@ -313,7 +310,7 @@ void DiffractionFocussing2::exec() {
       val *= static_cast<double>(groupSize);
     });
 
-    prog->report();
+    prog.report();
     PARALLEL_END_INTERUPT_REGION
   } // end of loop for groups
   PARALLEL_CHECK_INTERUPT_REGION
