@@ -46,7 +46,7 @@ void IqtFit::setup() {
 
   // Add custom settings
   addBoolCustomSetting("ConstrainIntensities", "Constrain Intensities");
-  addBoolCustomSetting("ConstrainBeta", "Constrain Beta Over All Q");
+  addBoolCustomSetting("ConstrainBeta", "Make Beta Global");
   setCustomSettingEnabled("ConstrainBeta", false);
 
   // Set available background options
@@ -145,7 +145,7 @@ std::string IqtFit::createSingleFitOutputName() const {
 std::string IqtFit::createSequentialFitOutputName() const {
   const auto minSpectrum = std::to_string(minimumSpectrum());
   const auto maxSpectrum = std::to_string(maximumSpectrum());
-  return constructBaseName() + minSpectrum + maxSpectrum;
+  return constructBaseName() + minSpectrum + "_to_" + maxSpectrum;
 }
 
 IAlgorithm_sptr IqtFit::singleFitAlgorithm() const {
