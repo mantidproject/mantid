@@ -51,8 +51,6 @@ private:
   std::string m_originalMessage;
 };
 
-using MissingInstrumentParameterValue = std::string;
-
 template <typename T>
 std::vector<T>
 getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,

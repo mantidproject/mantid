@@ -1,6 +1,7 @@
 set ( SRC_FILES
     MeasurementItem.cpp
     InstrumentOptionDefaults.cpp
+    InstrumentParameters.cpp
     ExperimentOptionDefaults.cpp
     QtReflEventTabView.cpp
     QtReflEventView.cpp
@@ -33,6 +34,7 @@ set ( SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
     DllConfig.h
+    InstrumentParameters.h
     IReflEventPresenter.h
     IReflEventTabPresenter.h
     IReflEventView.h

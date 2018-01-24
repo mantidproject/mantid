@@ -7,6 +7,7 @@
 #include "ExperimentOptionDefaults.h"
 #include "InstrumentOptionDefaults.h"
 #include "GetInstrumentParameter.h"
+#include "InstrumentParameters.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

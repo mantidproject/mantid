@@ -266,22 +266,45 @@ std::string QtReflSettingsView::getText(QComboBox const &box) const {
   return box.currentText().toStdString();
 }
 
+QString QtReflSettingsView::messageFor(
+    InstrumentParameterTypeMissmatch const &typeError) const {
+  return QString::fromStdString(typeError.parameterName()) +
+         " should hold an " + QString::fromStdString(typeError.expectedType()) +
+         " value but does not.\n";
+}
+
+template <typename T, typename StringConverter>
+std::string toCsv(std::vector<T> const &values, StringConverter toString) {
+  std::vector<std::string> valuesAsStrings;
+  valuesAsStrings.reserve(values.size());
+  std::transform(values.cbegin(), values.cend(),
+                 std::back_inserter(valuesAsStrings), toString);
+  return boost::algorithm::join(valuesAsStrings, ", ");
+}
+
+QString QtReflSettingsView::messageFor(
+    std::vector<MissingInstrumentParameterValue> const &missingValues) const {
+  auto missingNamesCsv =
+      toCsv(missingValues,
+            [](const MissingInstrumentParameterValue &missingValue)
+                -> std::string { return missingValue.parameterName(); });
+
+  return QString::fromStdString(missingNamesCsv) +
+         QString(missingValues.size() == 1 ? " is" : " are") +
+         " not set in the instrument parameter file but should be.\n";
+}
+
 void QtReflSettingsView::showOptionLoadErrors(
     std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
     std::vector<MissingInstrumentParameterValue> const &missingValues) {
   auto message = QString(
       "Unable to retrieve default values for the following parameters:\n");
 
-  for (auto &typeError : typeErrors)
-    message += QString::fromStdString(typeError.parameterName()) +
-               " should hold an " +
-               QString::fromStdString(typeError.expectedType()) +
-               " value but does not.\n";
+  if (!missingValues.empty())
+    message += messageFor(missingValues);
 
-  auto missingParams = boost::algorithm::join(missingValues, ", ");
-  message += QString::fromStdString(missingParams) +
-             QString(missingParams.size() == 1 ? " is" : " are") +
-             " not set in the instrument parameter file but should be.\n";
+  for (auto &typeError : typeErrors)
+    message += messageFor(typeError);
 
   QMessageBox::warning(
       this, "Failed to load one or more defaults from parameter file", message);

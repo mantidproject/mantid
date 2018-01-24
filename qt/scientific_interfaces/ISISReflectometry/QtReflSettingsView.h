@@ -124,6 +124,9 @@ public slots:
   void setReductionTypeEnabled(bool enable) override;
   void setDetectorCorrectionEnabled(bool enable) override;
   void notifySettingsChanged();
+  QString messageFor(
+      std::vector<MissingInstrumentParameterValue> const &missingValues) const;
+  QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
 
 private:
   /// Initialise the interface

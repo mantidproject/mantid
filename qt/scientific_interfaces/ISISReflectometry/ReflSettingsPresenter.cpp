@@ -7,8 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
-#include "First.h"
-#include "GetInstrumentParameter.h"
+#include "InstrumentParameters.h"
 #include "ExperimentOptionDefaults.h"
 #include "InstrumentOptionDefaults.h"
 #include <type_traits>
@@ -271,73 +270,6 @@ void ReflSettingsPresenter::createStitchHints() {
 
   m_view->createStitchHints(strategy.createHints());
 }
-
-template <typename T>
-boost::optional<T> firstFromParameterFile(Instrument_const_sptr instrument,
-                                          std::string const &parameterName) {
-  return first(getInstrumentParameter<T>(instrument, parameterName));
-}
-
-class InstrumentParameters {
-public:
-  explicit InstrumentParameters(Instrument_const_sptr instrument)
-      : m_instrument(std::move(instrument)) {}
-
-  template <typename T> T valueOrEmpty(std::string const &parameterName) {
-    static_assert(!std::is_arithmetic<T>::value, "Use valueOrZero instead.");
-    return valueFromFileOrDefaultConstruct<T>(parameterName);
-  }
-
-  template <typename T> T valueOrZero(std::string const &parameterName) {
-    static_assert(std::is_arithmetic<T>::value, "Use valueOrEmpty instead.");
-    return valueFromFileOrDefaultConstruct<T>(parameterName);
-  }
-
-  template <typename T>
-  boost::optional<T> optional(std::string const &parameterName) {
-    return valueFromFile<T>(parameterName);
-  }
-
-  template <typename T> T mandatory(std::string const &parameterName) {
-    if (auto value = firstFromParameterFile<T>(m_instrument, parameterName)) {
-      return value.get();
-    } else {
-      m_missingValueErrors.emplace_back(parameterName);
-      return T();
-    }
-  }
-
-  std::vector<InstrumentParameterTypeMissmatch> const &typeErrors() const {
-    return m_typeErrors;
-  }
-  bool hasTypeErrors() const { return !m_typeErrors.empty(); }
-
-  std::vector<MissingInstrumentParameterValue> const &missingValues() const {
-    return m_missingValueErrors;
-  }
-  bool hasMissingValues() const { return !m_missingValueErrors.empty(); }
-
-private:
-  template <typename T>
-  T valueFromFileOrDefaultConstruct(std::string const &parameterName) {
-    return valueFromFile<T>(parameterName).value_or(T());
-  }
-
-  template <typename T>
-  boost::optional<T> valueFromFile(std::string const &parameterName) {
-    try {
-      return firstFromParameterFile<T>(m_instrument, parameterName);
-    } catch (InstrumentParameterTypeMissmatch const &ex) {
-      m_typeErrors.emplace_back(ex);
-      return boost::none;
-    }
-  }
-
-  Instrument_const_sptr m_instrument;
-  std::vector<InstrumentParameterTypeMissmatch> m_typeErrors;
-  std::vector<MissingInstrumentParameterValue> m_missingValueErrors;
-};
-
 /** Fills experiment settings with default values
 */
 void ReflSettingsPresenter::getExpDefaults() {
