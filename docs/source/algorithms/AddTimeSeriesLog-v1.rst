@@ -26,24 +26,25 @@ Usage
 
 .. testcode:: AddTimeSeriesLogEx
 
+    import numpy as np
     ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
 
-    AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:00:00", Value=100) 
+    AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:00:00", Value=100)
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:30:00", Value=15)
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:50:00", Value=100.2)
 
     log = ws.getRun().getLogData("my_log")
     print("my_log has {} entries".format(log.size()))
-    for i in range(log.size()):
-      print("\t{}\t{:.6f}".format(log.times[i], log.value[i]))
+    for time, value in zip(log.times, log.value):
+      print("\t{}\t{:.6f}".format(time.astype(np.dtype('M8[s]')), value))
 
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:00:00", Value=12, Type="int", DeleteExisting=True)
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:50:00", Value=34, Type="int")
 
     log = ws.getRun().getLogData("my_log")
     print("my_log now has {} entries".format(log.size()))
-    for i in range(log.size()):
-      print("\t{}\t{}".format(log.times[i], log.value[i]))
+    for time, value in zip(log.times, log.value):
+      print("\t{}\t{}".format(time.astype(np.dtype('M8[s]')), value))
 
 Output:
 
@@ -61,6 +62,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-
-  
-

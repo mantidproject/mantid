@@ -46,3 +46,6 @@ class WorkspaceWidget(PluginWidget):
 
     def get_plugin_title(self):
         return "Workspaces"
+
+    def read_user_settings(self, _):
+        pass
