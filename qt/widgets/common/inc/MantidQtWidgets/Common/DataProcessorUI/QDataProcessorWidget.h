@@ -1,7 +1,6 @@
 #ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_
 
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
@@ -72,7 +71,7 @@ public:
   void addActions(std::vector<std::unique_ptr<Command>> commands) override;
 
   // Connect the model
-  void showTable(TreeManager *model) override;
+  void showTable(boost::shared_ptr<AbstractTreeModel> model) override;
 
   // Dialog/Prompt methods
   QString requestNotebookPath() override;

@@ -5,7 +5,6 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include <map>
 #include <memory>
 #include <set>
@@ -16,6 +15,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
+class Command;
 class WhiteList;
 
 /** @class TreeManager
