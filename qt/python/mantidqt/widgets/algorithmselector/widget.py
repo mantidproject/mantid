@@ -170,6 +170,9 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         layout.addLayout(top_layout)
         layout.addWidget(self.tree)
         layout.addWidget(AlgorithmProgressWidget())
+        # todo: Without the sizeHint() call the minimum size is not set correctly
+        #       This needs some investigation as to why this is.
+        layout.sizeHint()
         self.setLayout(layout)
 
     def populate_ui(self, data):

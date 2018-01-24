@@ -53,16 +53,20 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
+  /// ID tags for supported instruments.
+  enum class Supported { D17, Figaro };
+
   void init() override;
   void exec() override;
 
   void initWorkspace(const std::vector<std::vector<int>> &monitorsData);
   void initNames(NeXus::NXEntry &entry);
+  void initPixelWidth();
   void loadDataDetails(NeXus::NXEntry &entry);
   double doubleFromRun(const std::string &entryName) const;
   std::vector<double> getXValues();
   void convertTofToWavelength();
-  double fitReflectometryPeak();
+  double reflectometryPeak();
   void loadData(NeXus::NXEntry &entry,
                 const std::vector<std::vector<int>> &monitorsData,
                 const std::vector<double> &xVals);
@@ -72,32 +76,37 @@ private:
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void loadInstrument();
   double peakOffsetAngle();
-  std::pair<double, double> detectorAndBraggAngles();
+  double detectorRotation();
   void placeDetector();
+  void placeSample();
   void placeSource();
-
+  double collimationAngle() const;
+  double detectorAngle() const;
+  double offsetAngle(const double peakCentre, const double detectorCentre,
+                     const double detectorDistance) const;
   double sampleDetectorDistance() const;
+  double sampleHorizontalOffset() const;
   double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
-  /* Values parsed from the nexus file */
-  std::string m_instrumentName; ///< Name of the instrument
+  Supported m_instrument{Supported::D17}; ///< Name of the instrument
   size_t m_acqMode{1}; ///< Acquisition mode (1 TOF (default), 0 monochromatic)
   size_t m_numberOfChannels{0};
   double m_tofDelay{0.0};
-  // number of tubes (always 1) times number of pixels per tube
   size_t m_numberOfHistograms{0};
   double m_channelWidth{0.0};
-  std::string m_detectorDistance;
+  std::string m_detectorDistanceName;
   std::string m_detectorAngleName;
   std::string m_sampleAngleName;
   std::string m_offsetName;
   std::string m_offsetFrom;
   std::string m_chopper1Name;
   std::string m_chopper2Name;
-  double m_detectorDistanceValue{0.0};
-  double m_pixelCentre{0.0};
+  double m_detectorAngle{0.0};
+  double m_detectorDistance{0.0};
+  const static double PIXEL_CENTER;
   double m_pixelWidth{0.0};
+  double m_sampleZOffset{0.0};
   Mantid::DataHandling::LoadHelper m_loader;
 };
 

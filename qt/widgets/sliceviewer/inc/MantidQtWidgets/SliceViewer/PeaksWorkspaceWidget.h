@@ -20,7 +20,7 @@ public:
                        const std::string &coordinateSystem,
                        PeakViewColor defaultForegroundPeakViewColor,
                        PeakViewColor defaultBackgroundPeakViewColor,
-                       const bool canAddPeaks, PeaksViewer *parent);
+                       PeaksViewer *parent);
 
   std::set<QString> getShownColumns();
   void setShownColumns(const std::set<QString> &cols);
