@@ -285,6 +285,14 @@ void ReflSettingsPresenter::getExpDefaults() {
       parameters.optional<std::string>("PolarizationAnalysis")
           .value_or(alg->getPropertyValue("PolarizationAnalysis"));
 
+  defaults.SummationType =
+      parameters.optional<std::string>("SummationType")
+          .value_or(alg->getPropertyValue("SummationType"));
+
+  defaults.ReductionType =
+      parameters.optional<std::string>("ReductionType")
+          .value_or(alg->getPropertyValue("ReductionType"));
+
   defaults.CRho = parameters.optional<std::string>("crho").value_or("1");
   defaults.CAlpha = parameters.optional<std::string>("calpha").value_or("1");
   defaults.CAp = parameters.optional<std::string>("cAp").value_or("1");

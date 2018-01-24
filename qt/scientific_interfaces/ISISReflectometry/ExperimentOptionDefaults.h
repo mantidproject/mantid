@@ -11,6 +11,8 @@ namespace CustomInterfaces {
 struct MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults {
   std::string AnalysisMode;
   std::string PolarizationAnalysis;
+  std::string SummationType;
+  std::string ReductionType;
   std::string CRho;
   std::string CAlpha;
   std::string CAp;

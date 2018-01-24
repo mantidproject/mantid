@@ -151,6 +151,8 @@ void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
 */
 void QtReflSettingsView::setExpDefaults(ExperimentOptionDefaults defaults) {
   setSelected(*m_ui.analysisModeComboBox, defaults.AnalysisMode);
+  setSelected(*m_ui.reductionTypeComboBox, defaults.ReductionType);
+  setSelected(*m_ui.summationTypeComboBox, defaults.SummationType);
   setText(*m_ui.startOverlapEdit, defaults.TransRunStartOverlap);
   setText(*m_ui.endOverlapEdit, defaults.TransRunEndOverlap);
   setSelected(*m_ui.polCorrComboBox, defaults.PolarizationAnalysis);
