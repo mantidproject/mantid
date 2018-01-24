@@ -128,7 +128,8 @@ def pcolormesh(workspaces):
         if workspaces_len <= (nrows-1)*ncols:
             nrows -= 1
 
-    fig, axes = plt.subplots(nrows, ncols, subplot_kw=dict(projection=PROJECTION))
+    fig, axes = plt.subplots(nrows, ncols, squeeze=False,
+                             subplot_kw=dict(projection=PROJECTION))
     row_idx, col_idx = 0, 0
     for subplot_idx in range(nrows*ncols):
         ax = axes[row_idx][col_idx]
@@ -138,11 +139,6 @@ def pcolormesh(workspaces):
             pcm = ax.pcolormesh(ws, cmap=DEFAULT_COLORMAP)
             xticks = ax.get_xticklabels()
             map(lambda lbl: lbl.set_rotation(45), xticks)
-            xvals, yvals = ax.get_xlim(), ax.get_ylim()
-            xrange = xvals[1] - xvals[0]
-            yrange = yvals[1] - yvals[0]
-            # Set the aspect ratios and colarbar size
-            ax.set_aspect(aspect=xrange / yrange, adjustable='box')
             if col_idx < ncols - 1:
                 col_idx += 1
             else:
