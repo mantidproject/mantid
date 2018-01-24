@@ -677,9 +677,9 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
     auto &comm = m_indexInfo->communicator();
     std::vector<double> extrema(comm.size());
     Parallel::all_gather(comm, xmin, extrema);
-    xmin = *std::min(extrema.begin(), extrema.end());
+    xmin = *std::min_element(extrema.begin(), extrema.end());
     Parallel::all_gather(comm, xmax, extrema);
-    xmax = *std::max(extrema.begin(), extrema.end());
+    xmax = *std::max_element(extrema.begin(), extrema.end());
   }
 }
 
