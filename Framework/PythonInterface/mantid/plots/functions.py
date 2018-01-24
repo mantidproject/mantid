@@ -103,7 +103,7 @@ def _getWkspIndexDistAndLabel(workspace, **kwargs):
     if 'label' not in kwargs:
         wsName = workspace.name()
         if wsName:
-            kwargs['label'] = '{0} - spec {1}'.format(wsName, specNum)
+            kwargs['label'] = '{0}: spec {1}'.format(wsName, specNum)
         else:
             kwargs['label'] = 'spec {0}'.format(specNum)
 
