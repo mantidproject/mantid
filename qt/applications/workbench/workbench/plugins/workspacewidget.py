@@ -20,7 +20,8 @@ from __future__ import (absolute_import, unicode_literals)
 import functools
 
 # third-party library imports
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import Logger
 from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
 from mantidqt.widgets.workspacewidget.plotselectiondialog import get_plot_selection
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
@@ -31,13 +32,37 @@ from workbench.plugins.base import PluginWidget
 from workbench.plotting.functions import pcolormesh, plot
 
 
-def _workspaces_from_names(names):
-    """Convert a list of workspace names to a list of workspace handles
+LOGGER = Logger(b"workspacewidget")
 
-    :param names: List of names of workspaces
+
+def _workspaces_from_names(names):
+    """
+    Convert a list of workspace names to a list of MatrixWorkspace handles. Any WorkspaceGroup
+    encountered is flattened and its members inserted into the list at this point
+
+    Flattens any workspace groups with the list, preserving the order of the remaining elements
+    :param names: A list of workspace names
+    :return: A list where each element is a single MatrixWorkspace
     """
     ads = AnalysisDataService.Instance()
-    return [ads[name.encode('utf-8')] for name in names]
+    flat = []
+    for name in names:
+        try:
+            ws = ads[name.encode('utf-8')]
+        except KeyError:
+            LOGGER.warning("Skipping {} as it does not exist".format(name))
+            continue
+
+        if isinstance(ws, MatrixWorkspace):
+            flat.append(ws)
+        elif isinstance(ws, WorkspaceGroup):
+            group_len = len(ws)
+            for i in range(group_len):
+                flat.append(ws[i])
+        else:
+            LOGGER.warning("{} it is not a MatrixWorkspace or WorkspaceGroup.".format(name))
+
+    return flat
 
 
 class WorkspaceWidget(PluginWidget):

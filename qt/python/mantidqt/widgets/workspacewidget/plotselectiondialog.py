@@ -19,8 +19,6 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # 3rd party imports
-from mantid.api import MatrixWorkspace, WorkspaceGroup
-from mantid.kernel import Logger
 import qtawesome as qta
 from qtpy.QtWidgets import QDialogButtonBox
 
@@ -31,9 +29,6 @@ from mantidqt.utils.qt import load_ui
 RANGE_SPECIFIER = '-'
 PLACEHOLDER_FORMAT = 'valid range: {}' + RANGE_SPECIFIER + '{}'
 RED_ASTERISK = None
-
-# Globals
-LOGGER = Logger(b"plotselectiondialog")
 
 
 def red_asterisk():
@@ -172,21 +167,20 @@ def get_plot_selection(workspaces, parent_widget):
     dialog will only be shown in the case where all workspaces
     have more than 1 spectrum
 
-    :param workspaces: A list of workspaces that will be plotted
+    :param workspaces: A list of MatrixWorkspaces that will be plotted
     :param parent_widget: A parent_widget to use for the input selection dialog
     :returns: Either a PlotSelection object containing the details of workspaces to plot or None indicating
     the request was cancelled
     """
-    flat_list = flatten(workspaces)
-    single_spectra_ws = [wksp.getNumberHistograms() for wksp in flat_list if wksp.getNumberHistograms() == 1]
+    single_spectra_ws = [wksp.getNumberHistograms() for wksp in workspaces if wksp.getNumberHistograms() == 1]
     if len(single_spectra_ws) > 0:
         # At least 1 workspace contains only a single spectrum so this is all
         # that is possible to plot for all of them
-        selection = PlotSelection(flat_list)
+        selection = PlotSelection(workspaces)
         selection.wksp_indices = [0]
         return selection
     else:
-        selection_dlg = PlotSelectionDialog(flat_list, parent=parent_widget)
+        selection_dlg = PlotSelectionDialog(workspaces, parent=parent_widget)
         res = selection_dlg.exec_()
         if res == PlotSelectionDialog.Rejected:
             # cancelled
@@ -196,26 +190,6 @@ def get_plot_selection(workspaces, parent_widget):
             # the dialog should guarantee that only 1 of spectrum/indices is supplied
             assert user_selection.spectra is None or user_selection.wksp_indices is None
             return user_selection
-
-
-def flatten(workspaces):
-    """
-    Flattens any workspace groups with the list, preserving the order of the remaining elements
-    :param workspaces: A list containing workspace handles
-    :return: A list where each element is a single MatrixWorkspace
-    """
-    flat = []
-    for ws in workspaces:
-        if isinstance(ws, MatrixWorkspace):
-            flat.append(ws)
-        elif isinstance(ws, WorkspaceGroup):
-            group_len = len(ws)
-            for i in range(group_len):
-                flat.append(ws[i])
-        else:
-            LOGGER.warning("Attempting to plot item that is not a MatrixWorkspace or WorkspaceGroup")
-
-    return flat
 
 
 def parse_selection_str(txt, min_val, max_val):
