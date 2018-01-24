@@ -22,6 +22,7 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+#include "MantidKernel/System.h"
 #include <boost/python/object.hpp>
 
 namespace Mantid {
@@ -32,7 +33,7 @@ namespace Converters {
  * Convert a python object to a string or throw an exception. This will convert
  * unicode strings in python2 via utf8.
  */
-std::string pyObjToStr(const boost::python::object &value);
+DLLExport std::string pyObjToStr(const boost::python::object &value);
 
 } // namespace Converters
 } // namespace PythonInterface

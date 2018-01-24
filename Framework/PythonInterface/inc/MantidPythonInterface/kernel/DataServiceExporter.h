@@ -24,6 +24,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidKernel/Exception.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
@@ -32,32 +33,6 @@
 #include <boost/python/str.hpp>
 
 #include <set>
-
-/**
- * Convert a python object to a string or throw an exception. This will convert
- * unicode strings in python2 via utf8.
- *
- * THIS IS DUPLICATED FROM
- * MantidPythonInterface/kernel/Converters/PyObjectToString
-*/
-namespace { // anonymous
-std::string pyObjToStr(const boost::python::object &value) {
-  boost::python::extract<std::string> extractor(value);
-
-  std::string valuestr;
-  if (extractor.check()) {
-    valuestr = extractor();
-#if PY_VERSION_HEX < 0x03000000
-  } else if (PyUnicode_Check(value.ptr())) {
-    valuestr = boost::python::extract<std::string>(
-        boost::python::str(value).encode("utf-8"))();
-#endif
-  } else {
-    throw std::invalid_argument("Failed to convert python object a string");
-  }
-  return valuestr;
-}
-} // anonymous namespace
 
 namespace Mantid {
 namespace PythonInterface {
@@ -138,7 +113,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
   static void addItem(SvcType &self, const boost::python::object &name,
                       const boost::python::object &item) {
     try {
-      std::string namestr = pyObjToStr(name);
+      std::string namestr = PythonInterface::Converters::pyObjToStr(name);
       self.add(namestr, extractCppValue(item));
     } catch (std::invalid_argument &) {
       throw std::invalid_argument("Failed to convert name to a string");
@@ -155,7 +130,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
   static void addOrReplaceItem(SvcType &self, const boost::python::object &name,
                                const boost::python::object &item) {
     try {
-      std::string namestr = pyObjToStr(name);
+      std::string namestr = PythonInterface::Converters::pyObjToStr(name);
       self.addOrReplace(namestr, extractCppValue(item));
     } catch (std::invalid_argument &) {
       throw std::invalid_argument("Failed to convert name to a string");
@@ -198,7 +173,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
 
     std::string namestr;
     try {
-      namestr = pyObjToStr(name);
+      namestr = PythonInterface::Converters::pyObjToStr(name);
     } catch (std::invalid_argument &) {
       throw std::invalid_argument("Failed to convert name to a string");
     }
