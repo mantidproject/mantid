@@ -643,7 +643,6 @@ void InstrumentActor::resetColors() {
   auto sharedWorkspace = getWorkspace();
   const auto &compInfo = componentInfo();
   const auto &detInfo = detectorInfo();
-  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
   auto color = m_colorMap.rgb(qwtInterval, 0);
   m_colors.assign(compInfo.size(),
                   GLColor(qRed(color), qGreen(color), qBlue(color), 1));
