@@ -52,12 +52,12 @@ from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 # Pre-application setup
 plugins.setup_library_paths()
 
+
 # -----------------------------------------------------------------------------
 # Create the application instance early, set the application name for window
 # titles and hold on to a reference to it. Required to be performed early so
 # that the splash screen can be displayed
 # -----------------------------------------------------------------------------
-
 def qapplication():
     """Either return a reference to an existing application instance
     or create a new one
