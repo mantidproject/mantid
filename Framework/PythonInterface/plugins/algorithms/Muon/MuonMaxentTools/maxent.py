@@ -70,6 +70,9 @@ def MAXENT(datum,sigma,flat,base,itermax,sumfix,SAVETIME_ngo,MAXPAGE_n,MAXPAGE_f
 			b=1./(cnorm*2.*test)
 		else:
 			test=0.
+                if( math.isnan(a) or math.isnan(b) or math.isnan(c)):
+		    mylog.debug("aa={} b={} c={}".format(a,b,c))
+                    raise ValueError("invalid value: a={} b={} c={}".format(a,b,c))
 		mylog.debug("a={} b={} c={}".format(a,b,c))
 		xi[:,0]=MAXPAGE_f*c*cgrad
 		xi[:,1]=MAXPAGE_f*(a*sgrad-b*cgrad)

@@ -63,6 +63,7 @@ set ( TEST_PY_FILES
   MedianBinWidthTest.py
   MergeCalFilesTest.py
   MuscatSofQWTest.py
+  MuonMaxEntTest.py
   NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
   RetrieveRunInfoTest.py
