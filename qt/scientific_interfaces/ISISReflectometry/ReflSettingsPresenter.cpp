@@ -347,6 +347,10 @@ void ReflSettingsPresenter::getInstDefaults() {
   defaults.I0MonitorIndex = parameters.mandatory<int>("I0MonitorIndex");
   defaults.ProcessingInstructions =
       parameters.optional<std::string>("ProcessingInstructions");
+  defaults.CorrectDetectors =
+      parameters.optional<bool>("CorrectDetectors")
+          .value_or(boost::lexical_cast<bool>(
+              alg->getPropertyValue("CorrectDetectors")));
   defaults.DetectorCorrectionType =
       parameters.optional<std::string>("DetectorCorrectionType")
           .value_or(alg->getPropertyValue("DetectorCorrectionType"));

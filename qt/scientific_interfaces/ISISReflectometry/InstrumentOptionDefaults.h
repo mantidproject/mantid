@@ -19,6 +19,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentOptionDefaults {
   double LambdaMax;
   int I0MonitorIndex;
   boost::optional<std::string> ProcessingInstructions;
+  bool CorrectDetectors;
   std::string DetectorCorrectionType;
 };
 

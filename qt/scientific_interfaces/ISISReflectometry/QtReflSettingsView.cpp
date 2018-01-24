@@ -229,6 +229,7 @@ void QtReflSettingsView::setInstDefaults(InstrumentOptionDefaults defaults) {
   setSelected(*m_ui.detectorCorrectionTypeComboBox,
               defaults.DetectorCorrectionType);
   setText(*m_ui.procInstEdit, defaults.ProcessingInstructions);
+  setChecked(*m_ui.correctDetectorsCheckBox, defaults.CorrectDetectors);
 }
 
 void QtReflSettingsView::setDetectorCorrectionEnabled(bool enabled) {
