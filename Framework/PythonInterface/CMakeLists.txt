@@ -25,7 +25,6 @@ if ( CMAKE_COMPILER_IS_GNUCXX AND Boost_MAJOR_VERSION EQUAL "1" AND
   # this definition:   https://github.com/boostorg/python/issues/131
   add_definitions ( -DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY )
 endif ()
-
 set ( PYTHON_DEPS ${MPI_CXX_LIBRARIES} )
 
 ####################################################################################
