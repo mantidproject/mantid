@@ -91,10 +91,12 @@ public:
   MOCK_CONST_METHOD0(getTOF, double());
   MOCK_CONST_METHOD0(getInitialEnergy, double());
   MOCK_CONST_METHOD0(getFinalEnergy, double());
+  MOCK_CONST_METHOD0(getEnergyTransfer, double());
   MOCK_METHOD1(setInitialEnergy, void(double m_InitialEnergy));
   MOCK_METHOD1(setFinalEnergy, void(double m_FinalEnergy));
   MOCK_CONST_METHOD0(getIntensity, double());
   MOCK_CONST_METHOD0(getSigmaIntensity, double());
+  MOCK_CONST_METHOD0(getIntensityOverSigma, double());
   MOCK_METHOD1(setIntensity, void(double m_Intensity));
   MOCK_METHOD1(setSigmaIntensity, void(double m_SigmaIntensity));
   MOCK_CONST_METHOD0(getBinCount, double());

@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHMS_SORTEVENTS_H_
 #define MANTID_ALGORITHMS_SORTEVENTS_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -39,7 +39,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SortEvents : public API::ParallelAlgorithm {
+class DLLExport SortEvents : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SortEvents"; }

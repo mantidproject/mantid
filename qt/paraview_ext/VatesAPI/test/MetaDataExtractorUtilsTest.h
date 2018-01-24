@@ -14,7 +14,6 @@
 #include <gtest/gtest.h>
 #include "MockObjects.h"
 
-#include <qwt_double_interval.h>
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"

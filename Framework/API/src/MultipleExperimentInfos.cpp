@@ -1,5 +1,6 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/System.h"
 
 #include <boost/make_shared.hpp>
@@ -96,6 +97,19 @@ void MultipleExperimentInfos::copyExperimentInfos(
     auto copy(boost::make_shared<ExperimentInfo>(*expInfo));
     m_expInfos.push_back(copy);
   }
+}
+
+//-----------------------------------------------------------------------------------------------
+/* Does this class have any oriented lattice associated with it?
+* Returns true if any experiment info sample has an oriented lattice attached
+*/
+bool MultipleExperimentInfos::hasOrientedLattice() const {
+  for (uint16_t i = 0; i < getNumExperimentInfo(); i++) {
+    if (getExperimentInfo(i)->sample().hasOrientedLattice()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 const std::string MultipleExperimentInfos::toString() const {

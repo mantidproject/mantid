@@ -363,24 +363,6 @@ void CompositePeaksPresenter::zoomToPeak(
 }
 
 /**
- * Sort the peaks workspace.
- * @param peaksWS : Peaks list to sort.
- * @param columnToSortBy : Column to sort by.
- * @param sortedAscending : Direction of the sort. True for Ascending.
- */
-void CompositePeaksPresenter::sortPeaksWorkspace(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS,
-    const std::string &columnToSortBy, const bool sortedAscending) {
-  auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
-  auto subjectPresenter = *iterator;
-  subjectPresenter->sortPeaksWorkspace(columnToSortBy, sortedAscending);
-  // We want to zoom out now, because any currently selected peak will be wrong.
-  m_zoomablePlottingWidget->resetView();
-  m_zoomedPeakIndex = -1;
-  m_zoomedPresenter.reset();
-}
-
-/**
  * Set the peaks size on the current projection using the supplied fraction.
  * @param fraction of the view width to use as the peak radius.
  */
@@ -709,30 +691,6 @@ bool CompositePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
     result |= (*it)->deletePeaksIn(box);
   }
   return result;
-}
-
-bool CompositePeaksPresenter::hasPeakAddModeFor(
-    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
-  bool hasMode = false;
-  if (auto temp = target.lock()) {
-    auto it = this->getPresenterIteratorFromWorkspace(temp);
-    if (it != m_subjects.end()) {
-      hasMode = (*it)->hasPeakAddMode();
-    }
-  }
-  return hasMode;
-}
-
-bool CompositePeaksPresenter::hasPeakAddMode() const {
-  if (useDefault()) {
-    return m_default->hasPeakAddMode();
-  }
-  // Forward the request onwards
-  bool hasMode = false;
-  for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
-    hasMode |= (*it)->hasPeakAddMode();
-  }
-  return hasMode;
 }
 
 bool CompositePeaksPresenter::addPeakAt(double plotCoordsPointX,

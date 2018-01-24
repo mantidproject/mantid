@@ -2,6 +2,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 #include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
@@ -155,6 +156,19 @@ void SpectrumView::renderWorkspace(
 }
 
 /**
+ * Renders a new workspace on the spectrum viewer.
+ *
+ * @param wsName The name of the matrix workspace to render
+ */
+void SpectrumView::renderWorkspace(const QString &wsName) {
+  Mantid::API::MatrixWorkspace_const_sptr wksp =
+      Mantid::API::AnalysisDataService::Instance()
+          .retrieveWS<const Mantid::API::MatrixWorkspace>(wsName.toStdString());
+
+  renderWorkspace(wksp);
+}
+
+/**
  * Setup the various handlers (energy-mode, slider, range) for UI controls.
  */
 void SpectrumView::updateHandlers() {
@@ -246,6 +260,15 @@ void SpectrumView::respondToTabCloseReqest(int tab) {
   if (m_spectrumDisplay.size() == 1) {
     m_ui->imageTabs->setTabsClosable(false);
   }
+}
+
+void SpectrumView::selectData(int spectrumNumber, double dataVal) {
+  auto index = m_ui->imageTabs->currentIndex();
+  auto y = static_cast<double>(spectrumNumber - 1);
+  auto x = dataVal;
+  m_spectrumDisplay.at(index)->setHGraph(y);
+  m_spectrumDisplay.at(index)->setVGraph(x);
+  m_spectrumDisplay.at(index)->showInfoList(x, y);
 }
 
 /**
