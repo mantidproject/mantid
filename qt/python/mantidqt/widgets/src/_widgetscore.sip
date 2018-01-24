@@ -5,7 +5,7 @@ using namespace MantidQt::MantidWidgets;
 %End
 
 %InitialisationCode
-qRegisterMetaType<MantidQt::MantidWidgets::Message>();
+qRegisterMetaType<Message>("Message");
 %End
 
 // ----------------------------------------------------------------------------
@@ -181,8 +181,6 @@ public:
 // WorkspaceWidget and dependencies
 // ---------------------------------
 
-
-
 class MantidDisplayBase /Abstract/ {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
@@ -223,4 +221,16 @@ signals:
   void plotSpectrumClicked(const QStringList & workspaceName);
   void plotSpectrumWithErrorsClicked(const QStringList & workspaceName);
   void plotColorfillClicked(const QStringList &workspaceName);
+};
+
+// ---------------------------------
+// Manage User Directories
+// ---------------------------------
+
+class ManageUserDirectories : QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+%End
+public:
+  ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
 };

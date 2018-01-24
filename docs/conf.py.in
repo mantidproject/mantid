@@ -103,8 +103,10 @@ except NameError:
 # TODO: remove this workaround once minimal required numpy is set to 1.14.0
 import numpy as np
 
-if np.version.full_version >= '1.14.0':
+try:
     np.set_printoptions(legacy='1.13')
+except TypeError:
+    pass
 """.format(mantid_config_reset)
 
 # Run this after each test group has executed
