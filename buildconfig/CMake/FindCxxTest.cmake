@@ -108,7 +108,7 @@ include ( PrecompiledHeaderCommands )
 macro(CXXTEST_ADD_TEST _cxxtest_testname)
     # add additional include if requested
     if(CXXTEST_EXTRA_HEADER_INCLUDE)
-      set(_cxxtest_include  --include ${_test_dir}/${CXXTEST_EXTRA_HEADER_INCLUDE})
+      set(_cxxtest_include  --include ${CXXTEST_EXTRA_HEADER_INCLUDE})
     endif()
     # output directory
     set (_cxxtest_output_dir ${CMAKE_CURRENT_BINARY_DIR})
@@ -151,6 +151,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
       set (_cxxtest_h_files ${part} ${_cxxtest_h_files})
     endforeach (part ${ARGN})
 
+    set ( _test_dir ${CMAKE_CURRENT_SOURCE_DIR} )
     if( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.h )
       ADD_PRECOMPILED_HEADER( ${_test_dir}/PrecompiledHeader.h ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir} ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.cpp _cxxtest_cpp_files _cxxtest_h_files)
     ENDIF ()

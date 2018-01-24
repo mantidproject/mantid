@@ -8,7 +8,7 @@ set (TEST_HEADERS
 )
 
 # CXXTEST_EXTRA_HEADER_INCLUDE passes this file to the --include argument
-set (CXXTEST_EXTRA_HEADER_INCLUDE GlobalInitialization.h)
+set (CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/GlobalInitialization.h)
 
 include_directories (SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR}
                      ${GTEST_INCLUDE_DIR})

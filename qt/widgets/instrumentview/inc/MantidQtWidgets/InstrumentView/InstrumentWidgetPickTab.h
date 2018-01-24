@@ -211,7 +211,7 @@ public:
   };
 
   DetectorPlotController(InstrumentWidgetPickTab *tab,
-                         InstrumentWidget *instrWidget, OneCurvePlot *plot);
+                         InstrumentWidget *instrWidget/*, OneCurvePlot *plot*/);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(QList<int> detIDs);
@@ -251,7 +251,7 @@ private:
 
   InstrumentWidgetPickTab *m_tab;
   InstrumentWidget *m_instrWidget;
-  OneCurvePlot *m_plot;
+  //OneCurvePlot *m_plot;
 
   PlotType m_plotType;
   bool m_enabled;
