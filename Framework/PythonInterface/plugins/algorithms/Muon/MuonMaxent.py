@@ -195,6 +195,10 @@ class MuonMaxent(PythonAlgorithm):
 		else:
 			filePHASE=np.zeros([POINTS_ngroups])
 			pt=self.getProperty("InputPhaseTable").value
+                        names=pt.getColumnNames()
+                        if 'phase' not in str(names) or 'phi' not in str(names):
+                             
+
 			if(len(pt)==POINTS_ngroups): # phase table for grouped data, or when not grouping
 				for r in pt:
 					filePHASE[r["Spectrum number"]-1]=r["Phase"] # sign of phase now OK for Mantid 3.12 onwards
