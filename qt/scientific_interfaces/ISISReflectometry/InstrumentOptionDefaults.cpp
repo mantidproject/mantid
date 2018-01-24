@@ -16,7 +16,7 @@ bool operator==(InstrumentOptionDefaults const &lhs,
 
 std::ostream &operator<<(std::ostream &os,
                          InstrumentOptionDefaults const &defaults) {
-  os << "{ NormalizeByIntegratedMonitors: "
+  os << "InstrumentOptionDefaults: { NormalizeByIntegratedMonitors: "
      << (defaults.NormalizeByIntegratedMonitors ? "true" : "false")
      << ",\n MonitorIntegralMin: " << defaults.MonitorIntegralMin
      << ",\n MonitorIntegralMax: " << defaults.MonitorIntegralMax
@@ -24,11 +24,13 @@ std::ostream &operator<<(std::ostream &os,
      << ",\n MonitorBackgroundMax: " << defaults.MonitorBackgroundMax
      << ",\n LambdaMin: " << defaults.LambdaMin
      << ",\n LambdaMax: " << defaults.LambdaMax
-     << ",\n I0MonitorIndex: " << defaults.I0MonitorIndex;
+     << ",\n I0MonitorIndex: " << defaults.I0MonitorIndex
+     << ",\n CorrectDetectors: "
+     << (defaults.CorrectDetectors ? "true" : "false");
   if (defaults.ProcessingInstructions)
     os << ",\n ProcessingInstructions: '"
-       << defaults.ProcessingInstructions.value();
-  os << "',\n DetectorCorrectionType: '" << defaults.DetectorCorrectionType
+       << defaults.ProcessingInstructions.value() << "'";
+  os << ",\n DetectorCorrectionType: '" << defaults.DetectorCorrectionType
      << "' }" << std::endl;
   return os;
 }

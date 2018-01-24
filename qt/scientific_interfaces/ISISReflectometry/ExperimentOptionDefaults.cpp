@@ -11,15 +11,19 @@ bool operator==(const ExperimentOptionDefaults &lhs,
          lhs.TransRunEndOverlap == rhs.TransRunEndOverlap &&
          lhs.MomentumTransferStep == rhs.MomentumTransferStep &&
          lhs.ScaleFactor == rhs.ScaleFactor &&
+         lhs.ReductionType == rhs.ReductionType &&
+         lhs.SummationType == rhs.SummationType &&
          lhs.StitchParams == rhs.StitchParams;
 }
 
 std::ostream &operator<<(std::ostream &os,
                          ExperimentOptionDefaults const &defaults) {
-  os << "{ AnalysisMode: '" << defaults.AnalysisMode
+  os << "ExperimentOptionDefaults: { AnalysisMode: '" << defaults.AnalysisMode
      << ", \nPolarizationAnalysis: '" << defaults.PolarizationAnalysis
      << "',\nCRho: '" << defaults.CRho << "',\nCAlpha: '" << defaults.CAlpha
-     << "',\nCAp: '" << defaults.CAp << "', \nCPp: '" << defaults.CPp;
+     << "',\nCAp: '" << defaults.CAp << "', \nCPp: '" << defaults.CPp
+     << "',\nSummationType: '" << defaults.SummationType
+     << "', \nReductionType: '" << defaults.ReductionType;
   if (defaults.TransRunStartOverlap)
     os << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap.value();
   if (defaults.TransRunEndOverlap)

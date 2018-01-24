@@ -444,6 +444,7 @@ public:
   void testExperimentDefaults() {
     NiceMock<MockSettingsView> mockView;
     auto presenter = makeReflSettingsPresenter(&mockView);
+    expectNoOptionLoadErrors(mockView);
     MockMainWindowPresenter mainPresenter;
 
     // Set instrument to 'POLREF'
@@ -461,6 +462,8 @@ public:
     fromIDFOrReductionAlg.CPp = "0.972762,0.001828,-0.000261,0.0";
     fromIDFOrReductionAlg.TransRunStartOverlap = 10.0;
     fromIDFOrReductionAlg.TransRunEndOverlap = 12.0;
+    fromIDFOrReductionAlg.SummationType = "SumInLambda";
+    fromIDFOrReductionAlg.ReductionType = "Normal";
 
     EXPECT_CALL(mockView, setExpDefaults(fromIDFOrReductionAlg)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
@@ -469,6 +472,10 @@ public:
 
   void expectNoOptionLoadErrors(MockSettingsView &mockView) {
     EXPECT_CALL(mockView, showOptionLoadErrors(_, _)).Times(0);
+  }
+
+  void expectOptionLoadErrors(MockSettingsView &mockView) {
+    EXPECT_CALL(mockView, showOptionLoadErrors(_, _)).Times(AtLeast(1));
   }
 
   void testInstrumentDefaults() {
@@ -480,7 +487,7 @@ public:
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
-    expectNoOptionLoadErrors(mockView);
+    expectOptionLoadErrors(mockView);
 
     presenter.setInstrumentName("INTER");
     auto fromIDFOrReductionAlg = InstrumentOptionDefaults();
@@ -492,8 +499,10 @@ public:
     fromIDFOrReductionAlg.MonitorBackgroundMax = 18.0;
     fromIDFOrReductionAlg.LambdaMin = 1.5;
     fromIDFOrReductionAlg.LambdaMax = 17.0;
-    fromIDFOrReductionAlg.I0MonitorIndex = 2.0;
+    // TODO: Change the value below when updating the IDF for 3.12.
+    fromIDFOrReductionAlg.I0MonitorIndex = 0.0;
     fromIDFOrReductionAlg.DetectorCorrectionType = "VerticalShift";
+    fromIDFOrReductionAlg.CorrectDetectors = true;
 
     EXPECT_CALL(mockView, setInstDefaults(fromIDFOrReductionAlg)).Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
