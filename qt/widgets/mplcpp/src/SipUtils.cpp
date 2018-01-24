@@ -66,7 +66,6 @@ void *SipUtils::unwrap(PyObject *obj_ptr) {
   return wrapper->u.cppPtr;
 #endif
 }
-
 }
 }
 }

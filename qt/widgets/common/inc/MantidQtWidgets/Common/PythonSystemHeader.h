@@ -6,10 +6,11 @@
 // and this clashes with the Qt macro.
 // We temporarily undefined it while we include the Python headers
 #if defined(slots)
-// There is no way to save the "value" of a macro for later so we just have to live with
+// There is no way to save the "value" of a macro for later so we just have to
+// live with
 // knowing what then definition is from qobjectdefs.h
-# define MTD_SLOTS_UNDEFINED_HERE
-# undef slots
+#define MTD_SLOTS_UNDEFINED_HERE
+#undef slots
 #endif
 
 //  This file serves as a wrapper around <Python.h> which allows it to be
@@ -26,8 +27,8 @@
 
 // Reinstate Qt slots macro
 #if defined(MTD_SLOTS_UNDEFINED_HERE)
-# define slots
-# undef MTD_SLOTS_UNDEFINED_HERE
+#define slots
+#undef MTD_SLOTS_UNDEFINED_HERE
 #endif
 
 // Macros for 2/3 compatability
