@@ -196,10 +196,10 @@ void Projection3D::setWireframe(bool on) { m_wireframe = on; }
 /** This seems to be called when the user has selected a rectangle
 * using the mouse.
 *
-* @param dets :: returns a list of detector Indices selected.
+* @param detIndices :: returns a list of detector Indices selected.
 */
-void Projection3D::getSelectedDetectors(std::vector<size_t> &dets) {
-  dets.clear();
+void Projection3D::getSelectedDetectors(std::vector<size_t> &detIndices) {
+  detIndices.clear();
   if (!hasSelection())
     return;
   double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -219,7 +219,7 @@ void Projection3D::getSelectedDetectors(std::vector<size_t> &dets) {
     m_viewport.transform(pos);
     if (pos.X() >= xLeft && pos.X() <= xRight && pos.Y() >= yBottom &&
         pos.Y() <= yTop) {
-      dets.push_back(i);
+      detIndices.push_back(i);
     }
   }
 }
@@ -230,7 +230,7 @@ void Projection3D::getSelectedDetectors(std::vector<size_t> &dets) {
 *
 * @param dets :: returns a list of detector Indices to mask.
 */
-void Projection3D::getMaskedDetectors(std::vector<size_t> &dets) const {
+void Projection3D::getMaskedDetectors(std::vector<size_t> &detIndices) const {
   // find the layer of visible detectors
   QList<QPoint> pixels = m_maskShapes.getMaskedPixels();
   double zmin = 1.0;
@@ -255,7 +255,7 @@ void Projection3D::getMaskedDetectors(std::vector<size_t> &dets) const {
   }
 
   // find masked detector in that layer
-  dets.clear();
+  detIndices.clear();
   if (m_maskShapes.isEmpty())
     return;
   size_t ndet = m_instrActor->ndetectors();
@@ -268,7 +268,7 @@ void Projection3D::getMaskedDetectors(std::vector<size_t> &dets) const {
     if (pos.Z() < zmin || pos.Z() > zmax)
       continue;
     if (m_maskShapes.isMasked(pos.X(), pos.Y())) {
-      dets.push_back(i);
+      detIndices.push_back(i);
     }
   }
 }

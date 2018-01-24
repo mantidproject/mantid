@@ -255,7 +255,7 @@ void UnwrappedSurface::componentSelected(size_t componentIndex) {
   }
 }
 
-void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &dets) {
+void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &detIndices) {
   if (m_selectRect.isNull()) {
     return;
   }
@@ -314,19 +314,20 @@ void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &dets) {
     UnwrappedDetector &udet = m_unwrappedDetectors[i];
     if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom &&
         udet.v <= vtop) {
-      dets.push_back(udet.detIndex);
+      detIndices.push_back(udet.detIndex);
     }
   }
 }
 
-void UnwrappedSurface::getMaskedDetectors(std::vector<size_t> &dets) const {
-  dets.clear();
+void UnwrappedSurface::getMaskedDetectors(
+    std::vector<size_t> &detIndices) const {
+  detIndices.clear();
   if (m_maskShapes.isEmpty())
     return;
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
     if (m_maskShapes.isMasked(udet.u, udet.v)) {
-      dets.push_back(udet.detIndex);
+      detIndices.push_back(udet.detIndex);
     }
   }
 }

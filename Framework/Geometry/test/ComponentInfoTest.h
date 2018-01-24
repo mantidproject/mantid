@@ -106,13 +106,13 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
   auto names = boost::make_shared<std::vector<std::string>>(1);
   using Mantid::Beamline::ComponentType;
-  auto isStructuredBank =
+  auto componentType =
       boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
   auto children = boost::make_shared<std::vector<std::vector<size_t>>>(1);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
       parentIndices, children, positions, rotations, scaleFactors,
-      isStructuredBank, names, -1, -1);
+      componentType, names, -1, -1);
 }
 } // namespace
 
@@ -667,7 +667,7 @@ public:
       }
     }
 
-    auto panel = componentInfo->structuredPanel(structuredIndex);
+    auto panel = componentInfo->quadrilateralComponent(structuredIndex);
     TS_ASSERT_EQUALS(panel.nX, 4);
     TS_ASSERT_EQUALS(panel.nY, 4);
     TS_ASSERT_EQUALS(panel.bottomLeft, 0);

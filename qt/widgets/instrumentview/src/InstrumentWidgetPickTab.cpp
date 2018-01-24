@@ -54,20 +54,19 @@ namespace MantidWidgets {
 using namespace boost::math;
 
 namespace {
+// Get the phi angle between the detector with reference to the origin
+// Makes assumptions about beam direction. Legacy code and not robust.
 double getPhi(const Mantid::Kernel::V3D &pos) {
   return std::atan2(pos[1], pos[0]);
 }
 
+// Calculate the phi angle between detector and beam, and then offset.
+// Makes assumptions about beam direction. Legacy code and not robust.
 double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
   double avgPos = getPhi(pos);
   return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
 } // namespace
-
-/// to be used in std::transform
-struct Sqrt {
-  double operator()(double x) { return sqrt(x); }
-};
 
 /**
 * Constructor.
@@ -1200,7 +1199,7 @@ void DetectorPlotController::plotTube(size_t detindex) {
   const auto &componentInfo = actor.getComponentInfo();
 
   if (componentInfo.hasParent(detindex) &&
-      componentInfo.detectorsInSubtree(detindex).size() > 0) {
+      componentInfo.numberOfDetectorsInSubtree(detindex) > 0) {
     if (m_plotType == TubeSum) // plot sums over detectors vs time bins
     {
       plotTubeSums(detindex);
@@ -1363,7 +1362,8 @@ void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
   }
 
   if (err)
-    std::transform(err->begin(), err->end(), err->begin(), Sqrt());
+    std::transform(err->begin(), err->end(), err->begin(),
+                   [](double val) { return sqrt(val); });
 }
 
 /**

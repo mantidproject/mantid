@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
@@ -47,6 +48,14 @@ size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
 }
 
 GLColor defaultDetectorColor() { return GLColor(200, 200, 200, 1); }
+
+bool isPhysicalView() {
+  std::string view = Mantid::Kernel::ConfigService::Instance().getString(
+      "instrument.view.geometry");
+
+  return boost::iequals("Default", view) || boost::iequals("Physical", view);
+}
+
 } // namespace
 
 double InstrumentActor::m_tolerance = 0.00001;
@@ -70,9 +79,9 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
                                  double scaleMin, double scaleMax)
     : m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           wsName.toStdString())),
-      m_ragged(true), m_autoscaling(autoscaling), m_volumeRender(false),
-      m_defaultPos(), m_maskedColor(100, 100, 100),
-      m_failedColor(200, 200, 200) {
+      m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(),
+      m_maskedColor(100, 100, 100), m_failedColor(200, 200, 200),
+      m_isPhysicalInstrument(false) {
   // settings
   loadSettings();
 
@@ -81,17 +90,16 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   if (!sharedWorkspace)
     throw std::logic_error(
         "InstrumentActor passed a workspace that isn't a MatrixWorkspace");
+  setupPhysicalInstrument();
 
-  const auto &componentInfo = sharedWorkspace->componentInfo();
-  const auto &detectorInfo = sharedWorkspace->detectorInfo();
-  for (size_t i = 0; i < componentInfo.size(); ++i) {
-    if (!componentInfo.isDetector(i))
+  for (size_t i = 0; i < componentInfo().size(); ++i) {
+    if (!componentInfo().isDetector(i))
       m_components.push_back(i);
-    else if (detectorInfo.isMonitor(i))
+    else if (detectorInfo().isMonitor(i))
       m_monitors.push_back(i);
   }
 
-  m_isCompVisible.assign(componentInfo.size(), true);
+  m_isCompVisible.assign(componentInfo().size(), true);
   setupPickColors();
 
   // set up the color map
@@ -104,11 +112,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   setUpWorkspace(sharedWorkspace, scaleMin, scaleMax);
 
   // If the instrument is empty, maybe only having the sample and source
-  auto nelements = componentInfo.size();
-  if ((nelements == 0) || (nelements == 1 && (componentInfo.hasSource() ||
-                                              componentInfo.hasSample())) ||
-      (nelements == 2 && componentInfo.hasSource() &&
-       componentInfo.hasSample())) {
+  if (detectorInfo().size() == 0) {
     QMessageBox::warning(nullptr, "MantidPlot - Warning",
                          "This instrument appears to contain no detectors",
                          "OK");
@@ -177,8 +181,7 @@ void InstrumentActor::setUpWorkspace(
   }
 
   const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
-  m_detIndex2WsIndex.resize(sharedWorkspace->componentInfo().size(),
-                            INVALID_INDEX);
+  m_detIndex2WsIndex.resize(componentInfo().size(), INVALID_INDEX);
   for (size_t wi = 0; wi < spectrumInfo.size(); wi++) {
     const auto &specDef = spectrumInfo.spectrumDefinition(wi);
     for (auto info : specDef)
@@ -201,10 +204,25 @@ void InstrumentActor::setUpWorkspace(
   m_ragged = !wsValidator.isValid(sharedWorkspace).empty();
 }
 
+void InstrumentActor::setupPhysicalInstrument() {
+  auto sharedWorkspace = getWorkspace();
+  Mantid::Kernel::ReadLock _lock(*sharedWorkspace);
+
+  if (isPhysicalView()) {
+    auto instr = sharedWorkspace->getInstrument()->getPhysicalInstrument();
+    if (instr) {
+      m_isPhysicalInstrument = true;
+      auto infos = InstrumentVisitor::makeWrappers(*instr);
+      m_physicalComponentInfo = std::move(infos.first);
+      m_physicalDetectorInfo = std::move(infos.second);
+    }
+  }
+}
+
 void InstrumentActor::setComponentVisible(size_t componentIndex) {
   setChildVisibility(false);
-  const auto &componentInfo = getComponentInfo();
-  auto children = componentInfo.componentsInSubtree(componentIndex);
+  const auto &compInfo = componentInfo();
+  auto children = compInfo.componentsInSubtree(componentIndex);
   m_isCompVisible[componentIndex] = true;
   for (auto child : children)
     m_isCompVisible[child] = true;
@@ -237,8 +255,8 @@ MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const {
 
 void InstrumentActor::getBoundingBox(Mantid::Kernel::V3D &minBound,
                                      Mantid::Kernel::V3D &maxBound) const {
-  const auto &componentInfo = getComponentInfo();
-  auto bb = componentInfo.boundingBox(componentInfo.root());
+  const auto &compInfo = componentInfo();
+  auto bb = compInfo.boundingBox(compInfo.root());
   minBound = bb.minPoint();
   maxBound = bb.maxPoint();
 }
@@ -355,30 +373,18 @@ void InstrumentActor::clearMasks() {
 std::vector<size_t> InstrumentActor::getMonitors() const { return m_monitors; }
 
 Instrument_const_sptr InstrumentActor::getInstrument() const {
-  Instrument_const_sptr retval;
-
-  // Look to see if we have set the property in the properties file
-  // to define our 'default' view
-  std::string view = Mantid::Kernel::ConfigService::Instance().getString(
-      "instrument.view.geometry");
-
   auto sharedWorkspace = getWorkspace();
   Mantid::Kernel::ReadLock _lock(*sharedWorkspace);
 
-  if (boost::iequals("Default", view) || boost::iequals("Physical", view)) {
+  if (isPhysicalView()) {
     // First see if there is a 'physical' instrument available. Use it if there
     // is.
-    retval = sharedWorkspace->getInstrument()->getPhysicalInstrument();
-  } else if (boost::iequals("Neutronic", view)) {
-    retval = sharedWorkspace->getInstrument();
+    auto instr = sharedWorkspace->getInstrument()->getPhysicalInstrument();
+    if (instr)
+      return instr;
   }
 
-  if (!retval) {
-    // Otherwise get hold of the 'main' instrument and use that
-    retval = sharedWorkspace->getInstrument();
-  }
-
-  return retval;
+  return sharedWorkspace->getInstrument();
 }
 
 const MantidColorMap &InstrumentActor::getColorMap() const {
@@ -386,12 +392,12 @@ const MantidColorMap &InstrumentActor::getColorMap() const {
 }
 
 size_t InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
-  const auto &detectorInfo = getDetectorInfo();
-  return detectorInfo.indexOf(detID);
+  const auto &detInfo = detectorInfo();
+  return detInfo.indexOf(detID);
 }
 
 Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
-  const auto &detInfo = getDetectorInfo();
+  const auto &detInfo = detectorInfo();
   if (pickID < detInfo.size()) {
     return detInfo.detectorIDs()[pickID];
   }
@@ -401,6 +407,7 @@ Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
 QList<Mantid::detid_t>
 InstrumentActor::getDetIDs(const std::vector<size_t> &dets) const {
   QList<Mantid::detid_t> detIDs;
+  detIDs.reserve(dets.size());
   for (auto det : dets)
     detIDs.append(getDetID(det));
   return detIDs;
@@ -412,9 +419,9 @@ InstrumentActor::getDetIDs(const std::vector<size_t> &dets) const {
 Mantid::Geometry::ComponentID
 InstrumentActor::getComponentID(size_t pickID) const {
   auto compID = Mantid::Geometry::ComponentID();
-  const auto &componentInfo = getComponentInfo();
-  if (pickID < componentInfo.size())
-    compID = componentInfo.componentID(pickID)->getComponentID();
+  const auto &compInfo = componentInfo();
+  if (pickID < compInfo.size())
+    compID = compInfo.componentID(pickID)->getComponentID();
   return compID;
 }
 
@@ -634,37 +641,32 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
 void InstrumentActor::resetColors() {
   QwtDoubleInterval qwtInterval(m_DataMinScaleValue, m_DataMaxScaleValue);
   auto sharedWorkspace = getWorkspace();
-  const auto &componentInfo = sharedWorkspace->componentInfo();
-  const auto &detectorInfo = sharedWorkspace->detectorInfo();
+  const auto &compInfo = componentInfo();
+  const auto &detInfo = detectorInfo();
   const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
   auto color = m_colorMap.rgb(qwtInterval, 0);
-  m_colors.assign(componentInfo.size(),
+  m_colors.assign(compInfo.size(),
                   GLColor(qRed(color), qGreen(color), qBlue(color), 1));
+  auto invalidColor = GLColor(100, 100, 100, 1);
 
   IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
-  const auto &detectorIDs = detectorInfo.detectorIDs();
-  for (size_t wi = 0; wi < m_specIntegrs.size(); ++wi) {
-    const auto &specDef = spectrumInfo.spectrumDefinition(wi);
-    bool masked = false;
+  const auto &detectorIDs = detInfo.detectorIDs();
+  for (size_t det = 0; det < detInfo.size(); ++det) {
+    auto masked = false;
 
-    for (const auto &det : specDef) {
-      auto detIndex = det.first;
-
-      if (mask)
-        masked = mask->isMasked(detectorIDs[detIndex]);
-
-      if (detectorInfo.isMasked(detIndex) || masked) {
-        m_colors[detIndex] = m_maskedColor;
-        continue;
-      } else {
-        auto integratedValue = m_specIntegrs[wi];
+    if (mask)
+      masked = mask->isMasked(detectorIDs[det]);
+    if (detInfo.isMasked(det) || masked)
+      m_colors[det] = m_maskedColor;
+    else {
+      auto integratedValue = getIntegratedCounts(det);
+      if (integratedValue > -1) {
         auto color = m_colorMap.rgb(qwtInterval, integratedValue);
-        m_colors[detIndex] = GLColor(
+        m_colors[det] = GLColor(
             qRed(color), qGreen(color), qBlue(color),
             static_cast<int>(255 * (integratedValue / m_DataMaxScaleValue)));
-        continue;
-      }
-      continue;
+      } else
+        m_colors[det] = invalidColor;
     }
   }
 
@@ -721,14 +723,13 @@ void InstrumentActor::draw(bool picking) const {
 }
 
 void InstrumentActor::doDraw(bool picking) const {
-  const auto &componentInfo = getComponentInfo();
-  for (size_t i = 0; i < componentInfo.size(); ++i) {
-    if ((!componentInfo.isDetector(i) && !m_showGuides) ||
-        componentInfo.componentType(i) ==
-            Beamline::ComponentType::OutlineComposite)
+  const auto &compInfo = componentInfo();
+  for (size_t i = 0; i < compInfo.size(); ++i) {
+    if ((!compInfo.isDetector(i) && !m_showGuides) ||
+        compInfo.componentType(i) == Beamline::ComponentType::OutlineComposite)
       continue;
 
-    if (componentInfo.hasValidShape(i)) {
+    if (compInfo.hasValidShape(i)) {
       if (m_isCompVisible[i]) {
         if (picking)
           m_pickColors[i].paint();
@@ -736,12 +737,12 @@ void InstrumentActor::doDraw(bool picking) const {
           m_colors[i].paint();
         glPushMatrix();
         // Translate
-        auto pos = componentInfo.position(i);
+        auto pos = compInfo.position(i);
         if (!pos.nullVector())
           glTranslated(pos[0], pos[1], pos[2]);
 
         // Rotate
-        auto rot = componentInfo.rotation(i);
+        auto rot = compInfo.rotation(i);
         if (!rot.isNull()) {
           double deg, ax0, ax1, ax2;
           rot.getAngleAxis(deg, ax0, ax1, ax2);
@@ -749,16 +750,11 @@ void InstrumentActor::doDraw(bool picking) const {
         }
 
         // Scale
-        auto scale = componentInfo.scaleFactor(i);
+        auto scale = compInfo.scaleFactor(i);
         if (scale != Kernel::V3D(1, 1, 1))
           glScaled(scale[0], scale[1], scale[2]);
 
-        if (m_volumeRender) {
-          glEnable(GL_BLEND);
-          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        }
-
-        componentInfo.shape(i).draw();
+        compInfo.shape(i).draw();
         glPopMatrix();
       }
     }
@@ -778,10 +774,10 @@ void InstrumentActor::loadColorMap(const QString &fname, bool reset_colors) {
 
 //------------------------------------------------------------------------------
 void InstrumentActor::setupPickColors() {
-  const auto &componentInfo = getComponentInfo();
-  m_pickColors.resize(componentInfo.size());
+  const auto &compInfo = componentInfo();
+  m_pickColors.resize(compInfo.size());
 
-  for (size_t i = 0; i < componentInfo.size(); ++i) {
+  for (size_t i = 0; i < compInfo.size(); ++i) {
     m_pickColors[i] = makePickColor(i);
   }
 }
@@ -793,7 +789,7 @@ void InstrumentActor::setupPickColors() {
  * @return the real-space position of the detector
  */
 const Mantid::Kernel::V3D InstrumentActor::getDetPos(size_t pickID) const {
-  const auto &detInfo = getDetectorInfo();
+  const auto &detInfo = detectorInfo();
   if (pickID < detInfo.size()) {
     return detInfo.position(pickID);
   }
@@ -801,7 +797,7 @@ const Mantid::Kernel::V3D InstrumentActor::getDetPos(size_t pickID) const {
 }
 
 const std::vector<Mantid::detid_t> &InstrumentActor::getAllDetIDs() const {
-  const auto &detInfo = getDetectorInfo();
+  const auto &detInfo = detectorInfo();
   return detInfo.detectorIDs();
 }
 
@@ -869,7 +865,7 @@ bool InstrumentActor::wholeRange() const {
          m_BinMaxValue == m_WkspBinMaxValue;
 }
 
-size_t InstrumentActor::ndetectors() const { return getDetectorInfo().size(); }
+size_t InstrumentActor::ndetectors() const { return detectorInfo().size(); }
 
 /**
  * Set autoscaling of the y axis. If autoscaling is on the minValue() and
@@ -887,11 +883,6 @@ void InstrumentActor::setAutoscaling(bool on) {
     // setIntegrationRange(m_DataMinValue,m_DataMaxValue);
     resetColors();
   }
-}
-
-void InstrumentActor::showVolumeRender(bool on) {
-  m_volumeRender = on;
-  resetColors();
 }
 
 /**
@@ -1231,9 +1222,9 @@ bool InstrumentActor::hasBinMask() const { return !m_maskBinsData.isEmpty(); }
 
 QString InstrumentActor::getParameterInfo(size_t index) const {
   auto instr = getInstrument();
-  const auto &componentInfo = getComponentInfo();
+  const auto &compInfo = componentInfo();
 
-  auto compID = componentInfo.componentID(index);
+  auto compID = compInfo.componentID(index);
   auto comp = instr->getComponentByID(compID);
 
   QString text = "";
@@ -1293,8 +1284,8 @@ std::string InstrumentActor::getDefaultView() const {
 }
 
 std::string InstrumentActor::getInstrumentName() const {
-  const auto &componentInfo = getComponentInfo();
-  return componentInfo.name(componentInfo.root());
+  const auto &compInfo = componentInfo();
+  return compInfo.name(compInfo.root());
 }
 
 std::vector<std::string>
@@ -1336,13 +1327,12 @@ void InstrumentActor::loadFromProject(const std::string &lines) {
   }
 }
 
-const Mantid::Geometry::ComponentInfo &
-InstrumentActor::getComponentInfo() const {
-  return getWorkspace()->componentInfo();
+const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
+  return getComponentInfo();
 }
 
-const Mantid::Geometry::DetectorInfo &InstrumentActor::getDetectorInfo() const {
-  return getWorkspace()->detectorInfo();
+const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
+  return getDetectorInfo();
 }
 
 void InstrumentActor::invalidateDisplayLists() const {
@@ -1368,6 +1358,21 @@ size_t InstrumentActor::decodePickColor(const QRgb &c) {
   return decodePickColorRGB(static_cast<unsigned char>(qRed(c)),
                             static_cast<unsigned char>(qGreen(c)),
                             static_cast<unsigned char>(qBlue(c)));
+}
+
+const Mantid::Geometry::ComponentInfo &
+InstrumentActor::getComponentInfo() const {
+  if (m_isPhysicalInstrument)
+    return *m_physicalComponentInfo;
+  else
+    return getWorkspace()->componentInfo();
+}
+
+const Mantid::Geometry::DetectorInfo &InstrumentActor::getDetectorInfo() const {
+  if (m_isPhysicalInstrument)
+    return *m_physicalDetectorInfo;
+  else
+    return getWorkspace()->detectorInfo();
 }
 
 } // namespace MantidWidgets

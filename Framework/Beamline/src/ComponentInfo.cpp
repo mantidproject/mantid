@@ -94,9 +94,12 @@ ComponentInfo::ComponentInfo(
                                 "of names as number of components");
   }
 
-  size_t assemTotalSize = 1; // initialize with root
-  for (const auto &assem : *m_children)
-    assemTotalSize += assem.size();
+  // Calculate total size of all assemblies
+  auto assemTotalSize = std::accumulate(
+      m_children->begin(), m_children->end(), static_cast<size_t>(1),
+      [](size_t size, const std::vector<size_t> &assem) {
+        return size += assem.size();
+      });
 
   if (assemTotalSize != m_size) {
     throw std::invalid_argument("ComponentInfo should be provided an "
@@ -153,19 +156,21 @@ ComponentInfo::componentsInSubtree(const size_t componentIndex) const {
 
 const std::vector<size_t> &
 ComponentInfo::children(const size_t componentIndex) const {
-  static std::vector<size_t> emptyVec;
+  static const std::vector<size_t> emptyVec;
 
-  if (!isDetector(componentIndex)) {
-    auto numDets = m_assemblySortedDetectorIndices->size();
-    auto index = componentIndex - numDets;
-
-    return (*m_children)[index];
-  }
+  if (!isDetector(componentIndex))
+    return (*m_children)[compOffsetIndex(componentIndex)];
 
   return emptyVec;
 }
 
 size_t ComponentInfo::size() const { return m_size; }
+
+size_t
+ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) const {
+  auto range = detectorRangeInSubtree(componentIndex);
+  return std::distance(range.begin(), range.end());
+}
 
 Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   checkNoTimeDependence();

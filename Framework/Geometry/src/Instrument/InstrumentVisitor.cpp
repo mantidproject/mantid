@@ -205,6 +205,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
+  // Generic components are not assemblies and do not therefore have children.
   m_children->emplace_back(std::vector<size_t>());
   return componentIndex;
 }
