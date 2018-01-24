@@ -149,9 +149,12 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
   QT4_LINK_LIBS
     Qt4::QtOpenGL
     Qwt5
+  #QT5_LINK_LIBS
+  #  Qt5::OpenGL
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
+    MantidQtWidgetsMplCpp
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
