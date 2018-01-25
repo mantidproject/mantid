@@ -16,7 +16,7 @@
 #include <QSettings>
 #include <QWhatsThis>
 #include <QWidget>
-#include <QStyledItemDelegate> 
+#include <QStyledItemDelegate>
 #include <QPainter>
 
 #include <QStyledItemDelegate>
@@ -56,9 +56,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class HintingLineEditFactory : public QStyledItemDelegate {
 public:
-  HintingLineEditFactory(HintStrategy *hintStrategy, DataProcessor::TreeManager *manager = 0)
+  HintingLineEditFactory(HintStrategy *hintStrategy,
+                         DataProcessor::TreeManager *manager = 0)
       : m_strategy(hintStrategy), m_manager(manager){};
-  
+
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override {
     Q_UNUSED(option);
@@ -70,18 +71,18 @@ public:
     return editor;
   }
 
-   void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
-   {
-       painter->save();
-       painter->setPen(QColor(Qt::black));
-       if (m_manager->isProcessed(index.row(), index.parent().row())){
-          painter->fillRect(option.rect, Qt::green);
-       }
-       painter->drawRect(option.rect);
-       painter->restore();
+  void paint(QPainter *painter, const QStyleOptionViewItem &option,
+             const QModelIndex &index) const {
+    painter->save();
+    painter->setPen(QColor(Qt::black));
+    if (m_manager->isProcessed(index.row(), index.parent().row())) {
+      painter->fillRect(option.rect, Qt::green);
+    }
+    painter->drawRect(option.rect);
+    painter->restore();
 
-       QStyledItemDelegate::paint(painter, option, index);
-   }
+    QStyledItemDelegate::paint(painter, option, index);
+  }
 
 protected:
   boost::scoped_ptr<HintStrategy> m_strategy;

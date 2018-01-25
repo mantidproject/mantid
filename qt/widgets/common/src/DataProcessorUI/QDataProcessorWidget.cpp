@@ -186,8 +186,7 @@ void QDataProcessorWidget::setModel(QString const &name) {
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
-void QDataProcessorWidget::showTable(
-    TreeManager *model) {
+void QDataProcessorWidget::showTable(TreeManager *model) {
   m_model = model->getModel();
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
@@ -201,17 +200,19 @@ void QDataProcessorWidget::showTable(
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
-  
-  //ui.viewTable->setProperty("processed", false);
 
-  //ui.viewTable-> setStyleSheet("QTreeView::item {background-color: green}");
+  // ui.viewTable->setProperty("processed", false);
+
+  // ui.viewTable-> setStyleSheet("QTreeView::item {background-color: green}");
   // ui.viewTable->setStyleSheet(
   //     "QTreeView {font-size:11pt;} QTreeView::item "
-  //     "{border-color: lightGray; border-style: solid; border-width: 0.5px; background-color: none;}"
-  //       "QTreeView::item:selected {background-color: lightBlue; color: black}");
+  //     "{border-color: lightGray; border-style: solid; border-width: 0.5px;
+  //     background-color: none;}"
+  //       "QTreeView::item:selected {background-color: lightBlue; color:
+  //       black}");
   ui.viewTable->setAlternatingRowColors(false);
   ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable, model));
-  
+
   // Hide the Hidden Options column
   ui.viewTable->hideColumn(m_model->columnCount() - 1);
 }
@@ -461,8 +462,9 @@ column.
 @param hintStrategy : The hinting strategy to use
 @param column : The index of the 'Options' column
 */
-void QDataProcessorWidget::setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
-                                                  int column, TreeManager *manager) {
+void QDataProcessorWidget::setOptionsHintStrategy(
+    MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column,
+    TreeManager *manager) {
   ui.viewTable->setItemDelegateForColumn(
       column, new HintingLineEditFactory(hintStrategy, manager));
 }
