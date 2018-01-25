@@ -31,7 +31,7 @@ private:
   void processStart();
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> m_model;
-  
+
   IEnggDiffMultiRunFittingWidgetView *m_view;
 
   bool m_viewHasClosed;
