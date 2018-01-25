@@ -18,7 +18,7 @@ GCC_DIAG_ON(conversion)
 
 #include <ctime>
 
-namespace ISISKafkaTesting {
+namespace KafkaTesting {
 
 // -----------------------------------------------------------------------------
 // Mock broker to inject fake subscribers
@@ -122,7 +122,7 @@ public:
   }
 };
 
-void fakeReceiveAnEventMessage(std::string *buffer, int32_t nextPeriod) {
+void fakeReceiveAnISISEventMessage(std::string *buffer, int32_t nextPeriod) {
   flatbuffers::FlatBufferBuilder builder;
   std::vector<uint32_t> spec = {5, 4, 3, 2, 1, 2};
   std::vector<uint32_t> tof = {11000, 10000, 9000, 8000, 7000, 6000};
@@ -206,7 +206,7 @@ public:
                       std::string &topic) override {
     assert(message);
 
-    fakeReceiveAnEventMessage(message, m_nextPeriod);
+    fakeReceiveAnISISEventMessage(message, m_nextPeriod);
     m_nextPeriod = ((m_nextPeriod + 1) % m_nperiods);
 
     UNUSED_ARG(offset);
@@ -354,7 +354,7 @@ public:
                                   m_nperiods);
       break;
     default:
-      fakeReceiveAnEventMessage(buffer, 0);
+      fakeReceiveAnISISEventMessage(buffer, 0);
     }
     topic = "topic_name";
     offset = m_nextOffset;
@@ -441,6 +441,6 @@ private:
   // These match the detector numbers in HRPDTEST_Definition.xml
   std::vector<int32_t> m_detid = {1001, 1002, 1100, 901000, 10100};
 };
-} // namespace ISISKafkaTesting
+} // namespace KafkaTesting
 
 #endif // MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTESTMOCKS_H_
