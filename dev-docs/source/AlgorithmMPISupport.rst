@@ -526,7 +526,10 @@ FilterByLogValue                       all
 FilterByTime                           all
 FilterEventsByLogValuePreNexus         Identical               see ``IFileLoader``
 FindDetectorsInShape                   all
+FindPeakBackground                     MasterOnly, Identical
+FindPeaks                              MasterOnly, Identical
 Fit                                    MasterOnly, Identical   see ``IFittingAlgorithm``
+GeneratePythonScript                   MasterOnly
 GroupWorkspaces                        all                     grouping workspaces with mixed ``StorageMode`` is not supported
 IFileLoader                            Identical               implicitly adds support for many load-algorithms inheriting from this
 IFittingAlgorithm                      MasterOnly, Identical   implicitly adds support for several fit-algorithms inheriting from this
@@ -622,10 +625,13 @@ SANSStitch                             MasterOnly, Identical
 SaveNexus                              MasterOnly
 SaveNexusProcessed                     MasterOnly
 Scale                                  all
+SetUncertainties                       MasterOnly, Identical
 SignalOverError                        all                     see ``UnaryOperation``
 SNSPowderReduction                     Distributed
 SortEvents                             all
 SortTableWorkspace                     MasterOnly, Identical
+StripPeaks                             MasterOnly, Identical
+StripVanadiumPeaks2                    MasterOnly, Identical
 SumSpectra                             MasterOnly, Identical
 UnaryOperation                         all
 WeightedMean                           all                     see ``BinaryOperation``
