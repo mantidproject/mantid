@@ -260,6 +260,37 @@ public:
     TS_ASSERT(!decoder->isCapturing());
   }
 
+  void test_No_Exception_When_Event_Message_Without_Facility_Data_Is_Processed() {
+    using namespace ::testing;
+    using namespace KafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::DataObjects::EventWorkspace;
+
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
+      .Times(Exactly(3))
+      .WillOnce(Return(new FakeEventSubscriber))
+      .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+      .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    startCapturing(*decoder, 2);
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isCapturing());
+
+    // Check we did process the event message and extract the events
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
+    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TSM_ASSERT(
+      "Expected an EventWorkspace from extractData(). Found something else",
+      eventWksp);
+
+    TSM_ASSERT_EQUALS("Expected 3 events from the event message",
+                      3, eventWksp->getNumberEvents());
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
