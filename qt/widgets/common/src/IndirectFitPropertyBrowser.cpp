@@ -239,11 +239,40 @@ QString IndirectFitPropertyBrowser::backgroundName() const {
  * @return  A map from parameter name to a tie expression.
  */
 QHash<QString, QString> IndirectFitPropertyBrowser::getTies() const {
-  const auto tieProperties = getHandler()->getTies();
   QHash<QString, QString> ties;
-  for (const auto parameter : tieProperties.keys())
-    ties[parameter] = m_stringManager->value(tieProperties[parameter]);
+  getCompositeTies(getHandler(), ties);
   return ties;
+}
+
+/**
+ * @param handler A property handler, holding a composite function whose ties to
+ *                retrieve.
+ * @param ties    The map in which to store the tie expression under the tied
+ *                parameter.
+ */
+void IndirectFitPropertyBrowser::getCompositeTies(
+    PropertyHandler *handler, QHash<QString, QString> &ties) const {
+  for (size_t i = 0u; i < handler->cfun()->nFunctions(); ++i) {
+    auto nextHandler = handler->getHandler(i);
+    if (nextHandler->cfun())
+      getCompositeTies(nextHandler, ties);
+    else
+      getTies(nextHandler, ties);
+  }
+}
+
+/**
+ * @param handler A property handler, holding a function whose ties to
+ *                retrieve.
+ * @param ties    The map in which to store the tie expression under the tied
+ *                parameter.
+ */
+void IndirectFitPropertyBrowser::getTies(PropertyHandler *handler,
+                                         QHash<QString, QString> &ties) const {
+  const auto prefix = handler->functionPrefix() + ".";
+  auto tieProperties = handler->getTies();
+  for (const auto parameter : tieProperties.keys())
+    ties[prefix + parameter] = m_stringManager->value(tieProperties[parameter]);
 }
 
 /**
@@ -609,7 +638,7 @@ void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
   m_optionalProperties[optionProperty] = settingProperty;
   m_customSettings[optionKey] = optionProperty;
   m_customSettings[settingKey] = settingProperty;
-  
+
   if (enabled)
     optionProperty->addSubProperty(settingProperty);
 }
