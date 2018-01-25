@@ -143,6 +143,22 @@ void fakeReceiveAnISISEventMessage(std::string *buffer, int32_t nextPeriod) {
                  builder.GetSize());
 }
 
+void fakeReceiveAnEventMessage(std::string *buffer) {
+  flatbuffers::FlatBufferBuilder builder;
+  std::vector<uint32_t> spec = {5, 4, 3};
+  std::vector<uint32_t> tof = {11000, 10000, 9000};
+  uint64_t frameTime = 1;
+
+  auto messageFlatbuf = CreateEventMessage(
+      builder, builder.CreateString("KafkaTesting"), 0, frameTime,
+      builder.CreateVector(tof), builder.CreateVector(spec));
+  FinishEventMessageBuffer(builder, messageFlatbuf);
+
+  // Copy to provided buffer
+  buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
+                 builder.GetSize());
+}
+
 void fakeReceiveASampleEnvMessage(std::string *buffer) {
   flatbuffers::FlatBufferBuilder builder;
   // Sample environment log
@@ -234,6 +250,58 @@ public:
 private:
   const int32_t m_nperiods;
   int32_t m_nextPeriod;
+};
+
+// ---------------------------------------------------------------------------------------
+// Fake non-institution-specific event stream to provide event and sample
+// environment data
+// ---------------------------------------------------------------------------------------
+class FakeEventSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
+public:
+  void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void consumeMessage(std::string *message, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
+    assert(message);
+
+    switch (m_nextOffset) {
+    case 0:
+      fakeReceiveARunStartMessage(message, 1000, "2016-08-31T12:07:42",
+                                  "HRPDTEST", 1);
+      break;
+    case 2:
+      fakeReceiveARunStopMessage(message, m_stopTime);
+      break;
+    default:
+      fakeReceiveAnEventMessage(message);
+    }
+    m_nextOffset++;
+
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
+  }
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
+
+private:
+  std::string m_topicName = "topic_name";
+  int m_nextOffset = 0;
+  std::string m_stopTime = "2016-08-31T12:07:52";
 };
 
 // -----------------------------------------------------------------------------
