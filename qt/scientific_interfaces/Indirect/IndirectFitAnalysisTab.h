@@ -7,21 +7,12 @@
 
 #include <boost/variant.hpp>
 
-namespace Ui {
-class IqtFit;
-class ConvFit;
-class MSDFit;
-class JumpFit;
-} // namespace Ui
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
 class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
-  using FitTab =
-      boost::variant<Ui::IqtFit *, Ui::ConvFit *, Ui::MSDFit *, Ui::JumpFit *>;
 
 public:
   /// Constructor
@@ -126,7 +117,15 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr fitWorkspace() const;
 
 protected:
-  void addPropertyBrowserToUI(FitTab tab);
+  /**
+   * Adds a fit property browser to the specified Indirect Fit Analysis Tab.
+   *
+   * @param tab The indirect fit analysis tab to add the fit property browser
+   *            to.
+   */
+  template <typename FitTab> void addPropertyBrowserToUI(FitTab tab) {
+    tab->properties->addWidget(m_fitPropertyBrowser);
+  }
 
   void setDefaultPropertyValue(const QString &propertyName,
                                const double &propertyValue);

@@ -112,18 +112,6 @@ bool equivalentFunctions(IFunction_const_sptr func1,
 
   return zeroFunction(func1)->asString() == zeroFunction(func2)->asString();
 }
-
-class WidgetAdder : public boost::static_visitor<> {
-public:
-  explicit WidgetAdder(QWidget *widget) : m_widget(widget) {}
-
-  template <typename Form> void operator()(Form form) const {
-    form->properties->addWidget(m_widget);
-  }
-
-private:
-  QWidget *m_widget;
-};
 } // namespace
 
 namespace MantidQt {
@@ -169,15 +157,6 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updatePlotGuess()));
-}
-
-/**
- * Adds a fit property browser to the specified Indirect Fit Analysis Tab.
- *
- * @param tab The indirect fit analysis tab to add the fit property browser to.
- */
-void IndirectFitAnalysisTab::addPropertyBrowserToUI(FitTab tab) {
-  boost::apply_visitor(WidgetAdder(m_fitPropertyBrowser), tab);
 }
 
 /**
@@ -945,7 +924,8 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   auto function = fitFunction();
   if (!m_functionNameChanges.isEmpty())
     function = updateFunctionTies(function, m_functionNameChanges);
-
+  function->applyTies();
+  
   setAlgorithmProperty(fitAlgorithm, "InputWorkspace", fitWorkspace());
   setAlgorithmProperty(fitAlgorithm, "Function", function->asString());
   setAlgorithmProperty(fitAlgorithm, "StartX", m_fitPropertyBrowser->startX());
@@ -979,21 +959,25 @@ IFunction_sptr IndirectFitAnalysisTab::updateFunctionTies(
     IFunction_sptr function,
     const QHash<QString, QString> &functionNameChanges) const {
   const auto tieMap = m_fitPropertyBrowser->getTies();
+  const auto priorNames = functionNameChanges.keys();
+  
   QStringList ties;
   for (const auto &tieKey : tieMap.keys()) {
     QString parameter = tieKey;
     QString expression = tieMap[tieKey];
 
-    if (functionNameChanges.contains(parameter))
-      parameter = functionNameChanges[parameter];
-    if (functionNameChanges.contains(expression))
-      expression = functionNameChanges[expression];
+    for (const auto &priorName : priorNames) {
+      const auto &newName = functionNameChanges[priorName];
+      if (priorName == parameter)
+        parameter = newName;
+      if (expression.contains(priorName))
+        expression.replace(priorName, newName);
+    }
     ties.push_back(parameter + "=" + expression);
   }
 
   function->clearTies();
   function->addTies(ties.join(",").toStdString());
-  function->applyTies();
   return function;
 }
 
