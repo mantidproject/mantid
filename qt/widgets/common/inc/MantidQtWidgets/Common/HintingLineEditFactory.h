@@ -1,27 +1,8 @@
 #ifndef MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 #define MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/HintingLineEditFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
-
-#include <QClipboard>
-#include <QFileDialog>
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QSettings>
-#include <QWhatsThis>
-#include <QWidget>
 #include <QStyledItemDelegate>
 #include <QPainter>
-
-#include <QStyledItemDelegate>
-#include <QPainter>
-#include <QWidget>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"

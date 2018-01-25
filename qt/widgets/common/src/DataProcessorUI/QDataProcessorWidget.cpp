@@ -201,15 +201,6 @@ void QDataProcessorWidget::showTable(TreeManager *model) {
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
 
-  // ui.viewTable->setProperty("processed", false);
-
-  // ui.viewTable-> setStyleSheet("QTreeView::item {background-color: green}");
-  // ui.viewTable->setStyleSheet(
-  //     "QTreeView {font-size:11pt;} QTreeView::item "
-  //     "{border-color: lightGray; border-style: solid; border-width: 0.5px;
-  //     background-color: none;}"
-  //       "QTreeView::item:selected {background-color: lightBlue; color:
-  //       black}");
   ui.viewTable->setAlternatingRowColors(false);
   ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable, model));
 

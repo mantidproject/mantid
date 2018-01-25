@@ -613,7 +613,7 @@ public:
 
     // We don't the view we will handle yet, so none of the methods below
     // should be called
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(0);
     // Constructor
     auto presenter = makeDefaultPresenterNoThread();
@@ -651,7 +651,7 @@ public:
         "ReflectometryReductionOneAuto", "Stitch1DMany"};
 
     // Expect that the autocompletion hints are populated
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7))
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7, _))
         .Times(Exactly(1));
     // Now accept the views
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -671,8 +671,6 @@ public:
     EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(Exactly(1));
     // Expect that the list of settings is populated
     EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
-    // Expect that the list of tables is populated
-    EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(Exactly(1));
     // Expect that the layout containing pre-processing, processing and
     // post-processing options is created
     EXPECT_CALL(mockDataProcessorView, enableGrouping()).Times(Exactly(0));
@@ -683,7 +681,7 @@ public:
         "ReflectometryReductionOneAuto", "Stitch1DMany"};
 
     // Expect that the autocompletion hints are populated
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7))
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7, _))
         .Times(Exactly(1));
     // Now accept the views
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1576,11 +1574,11 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
-  std::unique_ptr<GenericDataProcessorPresenter> makeDefaultPresenter() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-  }
+//   std::unique_ptr<GenericDataProcessorPresenter> makeDefaultPresenter() {
+//     return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+//         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
+//         createReflectometryProcessor(), createReflectometryPostprocessor());
+//   }
 
   std::unique_ptr<GenericDataProcessorPresenter> makeNonPostProcessPresenter() {
     return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
@@ -2974,7 +2972,7 @@ public:
 
     // We don't know the view we will handle yet, so none of the methods below
     // should be called
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _, _)).Times(0);
     // Constructor (no pre-processing)
 
     GenericDataProcessorPresenterNoThread presenter(
@@ -2995,7 +2993,7 @@ public:
     // Expect that the list of settings is populated
     EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
     // Expect that the autocompletion hints are populated
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7))
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7, _))
         .Times(Exactly(1));
     // Now accept the views
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
