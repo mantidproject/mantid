@@ -6,8 +6,6 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
-#include "MantidQtWidgets/Common/HintStrategy.h"
 
 #include <gmock/gmock.h>
 
