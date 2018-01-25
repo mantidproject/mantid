@@ -18,6 +18,10 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
   }
   switch (notif) {
 
+  case IEnggDiffMultiRunFittingWidgetPresenter::AddFittedPeaks:
+    processAddFittedPeaks();
+    break;
+
   case IEnggDiffMultiRunFittingWidgetPresenter::AddFocusedRun:
     processAddFocusedRun();
     break;
@@ -30,6 +34,13 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
     processStart();
     break;
   }
+}
+
+void EnggDiffMultiRunFittingWidgetPresenter::processAddFittedPeaks() {
+  const auto ws = m_view->getFittedPeaksWorkspaceToAdd();
+  const auto bankID = m_view->getFittedPeaksBankIDToAdd();
+  const auto runNumber = m_view->getFittedPeaksRunNumberToAdd();
+  m_model->addFittedPeaks(runNumber, bankID, ws);
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processAddFocusedRun() {

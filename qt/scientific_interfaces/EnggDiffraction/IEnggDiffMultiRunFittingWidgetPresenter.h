@@ -11,9 +11,10 @@ public:
   // User actions, triggered by the (passive) view,
   // which need handling in implementation
   enum Notification {
-    AddFocusedRun, ///< The view has been passed a focused run to add
-    ShutDown,      ///< Shut down the widget
-    Start,         ///< Start and set up the interface
+    AddFittedPeaks, /// The view has been passed a fitted peaks workspace to add
+    AddFocusedRun,  ///< The view has been passed a focused run to add
+    ShutDown,       ///< Shut down the widget
+    Start,          ///< Start and set up the interface
   };
 
   /**
