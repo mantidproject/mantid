@@ -88,6 +88,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
         kw, nums = 'wkspIndex', wksp_indices
     # create figure
     fig = plt.figure()
+    fig.clf()
     ax = fig.add_subplot(111, projection=PROJECTION)
     plot_fn = ax.errorbar if errors else ax.plot
     for ws in workspaces:

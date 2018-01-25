@@ -18,19 +18,76 @@
 
 # std imports
 import functools
+import sys
 
 # 3rdparty imports
 import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
-from qtpy.QtCore import Qt, QObject, Signal
+from qtpy.QtCore import Qt, QMetaObject, QObject, QThread, Signal, Slot
 from qtpy.QtWidgets import QApplication, QLabel, QMainWindow
-from six import text_type
+from six import reraise, text_type
 
 # local imports
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
+
+
+qApp = QApplication.instance()
+
+
+class QAppThreadCall(QObject):
+    """
+    Wraps a callable object and forces any calls made to it to be executed
+    on the same thread as the qApp object.
+    """
+
+    def __init__(self, callee):
+        QObject.__init__(self)
+        self.moveToThread(qApp.thread())
+        self.callee = callee
+        # Help should then give the correct doc
+        self.__call__.__func__.__doc__ = callee.__doc__
+        self._args = None
+        self._kwargs = None
+        self._result = None
+        self._exc_info = None
+
+    def __call__(self, *args, **kwargs):
+        """
+        If the current thread is the qApp thread then this
+        performs a straight call to the wrapped callable_obj. Otherwise
+        it invokes the do_call method as a slot via a
+        BlockingQueuedConnection.
+        """
+        if QThread.currentThread() == qApp.thread():
+            return self.callee(*args, **kwargs)
+        else:
+            self._store_function_args(*args, **kwargs)
+            QMetaObject.invokeMethod(self, "on_call",
+                                     Qt.BlockingQueuedConnection)
+            if self._exc_info is not None:
+                reraise(*self._exc_info)
+            return self._result
+
+    @Slot()
+    def on_call(self):
+        """Perform a call to a GUI function across a
+        thread and return the result
+        """
+        try:
+            self._result = \
+                self.callee(*self._args, **self._kwargs)
+        except Exception: # pylint: disable=broad-except
+            self._exc_info = sys.exc_info()
+
+    def _store_function_args(self, *args, **kwargs):
+        self._args = args
+        self._kwargs = kwargs
+        # Reset return value and exception
+        self._result = None
+        self._exc_info = None
 
 
 class MainWindow(QMainWindow):
@@ -55,12 +112,16 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
-    sig_show_requested = Signal()
-    sig_destroy_requested = Signal()
 
     def __init__(self, canvas, num):
         QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
+        # Patch show/destroy to be thread aware
+        self._destroy_orig = self.destroy
+        self.destroy = QAppThreadCall(self._destroy_orig)
+        self._show_orig = self.show
+        self.show = QAppThreadCall(self._show_orig)
+
         self.canvas = canvas
         self.window = MainWindow()
         self.window.closing.connect(canvas.close_event)
@@ -122,10 +183,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self.window.raise_()
 
-        # Connect show/destroy signals
-        self.sig_show_requested.connect(self._show_impl, type=Qt.BlockingQueuedConnection)
-        self.sig_destroy_requested.connect(self._destroy_impl, type=Qt.BlockingQueuedConnection)
-
     def full_screen_toggle(self):
         if self.window.isFullScreen():
             self.window.showNormal()
@@ -153,14 +210,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.resize(width, height + self._status_and_tool_height)
 
     def show(self):  # noqa
-        """Queue a request in the event loop just in case
-        the call comes from a non-GUI thread"""
-        self.sig_show_requested.emit()
-
-    def _show_impl(self):
         self.window.show()
         self.window.activateWindow()
         self.window.raise_()
+
+        # Hack to ensure the canvas is up to date
+        self.canvas.draw_idle()
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -168,9 +223,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             return
         if self.window._destroying:
             return
-        self.sig_destroy_requested.emit()
-
-    def _destroy_impl(self):
         self.window._destroying = True
         self.window.destroyed.connect(self._widgetclosed)
         if self.toolbar:
