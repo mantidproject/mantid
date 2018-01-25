@@ -596,6 +596,7 @@ PolynomialCorrection                   all                     see ``UnaryOperat
 Q1D2                                   all                     not all optional normalization inputs are supported
 Power                                  all                     see ``UnaryOperation``
 PowerLawCorrection                     all                     see ``UnaryOperation``
+RealFFT                                MasterOnly, Identical
 Rebin                                  all
 RebinToWorkspace                       all                     ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
 RemovePromptPulse                      all
