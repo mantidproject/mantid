@@ -541,7 +541,7 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
     alg->setProperty("CanFrontThickness", canFrontThickness);
 
     const auto canBackThickness = m_uiForm.spFlatCanBackThickness->value();
-    alg->setProperty("SampleThickness", canBackThickness);
+    alg->setProperty("CanBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
     const auto canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
     alg->setProperty("CanOuterRadius", canOuterRadius);

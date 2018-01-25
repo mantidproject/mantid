@@ -2,6 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.simpleapi import CreateWorkspace,DeleteWorkspace
+import matplotlib
+matplotlib.use('AGG')
 import mantid.plots
 import matplotlib.pyplot as plt
 import numpy as np

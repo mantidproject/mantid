@@ -48,7 +48,7 @@ const QString QPeaksTableModel::H = "h";
 const QString QPeaksTableModel::K = "k";
 const QString QPeaksTableModel::L = "l";
 const QString QPeaksTableModel::WAVELENGTH("Wavelength");
-const QString QPeaksTableModel::ENERGY("delta E");
+const QString QPeaksTableModel::ENERGY_TRANSFER("delta E");
 const QString QPeaksTableModel::INITIAL_ENERGY("E_i");
 const QString QPeaksTableModel::FINAL_ENERGY("E_f");
 const QString QPeaksTableModel::TOF("TOF");
@@ -71,7 +71,7 @@ const int QPeaksTableModel::COL_L(4);
 const int QPeaksTableModel::COL_WAVELENGTH(5);
 const int QPeaksTableModel::COL_INITIAL_ENERGY(6);
 const int QPeaksTableModel::COL_FINAL_ENERGY(7);
-const int QPeaksTableModel::COL_ENERGY(8);
+const int QPeaksTableModel::COL_ENERGY_TRANSFER(8);
 const int QPeaksTableModel::COL_TOF(9);
 const int QPeaksTableModel::COL_DSPACING(10);
 const int QPeaksTableModel::COL_INT(11);
@@ -104,7 +104,7 @@ int QPeaksTableModel::numCharacters(const int column) const {
     return 3 + m_hklPrec;
   else if (column == COL_WAVELENGTH)
     return 6;
-  else if (column == COL_ENERGY)
+  else if (column == COL_ENERGY_TRANSFER)
     return 6;
   else if (column == COL_INITIAL_ENERGY)
     return 6;
@@ -151,7 +151,7 @@ QPeaksTableModel::QPeaksTableModel(
                      {5, WAVELENGTH},
                      {6, INITIAL_ENERGY},
                      {7, FINAL_ENERGY},
-                     {8, ENERGY},
+                     {8, ENERGY_TRANSFER},
                      {9, TOF},
                      {10, DSPACING},
                      {11, INT},
@@ -179,7 +179,7 @@ QPeaksTableModel::QPeaksTableModel(
       [](const IPeak &peak) { return QVariant(peak.getWavelength()); },
       [](const IPeak &peak) { return QVariant(peak.getInitialEnergy()); },
       [](const IPeak &peak) { return QVariant(peak.getFinalEnergy()); },
-      [](const IPeak &peak) { return QVariant(peak.getEnergy()); },
+      [](const IPeak &peak) { return QVariant(peak.getEnergyTransfer()); },
       [](const IPeak &peak) { return QVariant(peak.getTOF()); },
       [](const IPeak &peak) { return QVariant(peak.getDSpacing()); },
       [](const IPeak &peak) { return QVariant(peak.getIntensity()); },
@@ -219,7 +219,7 @@ QPeaksTableModel::QPeaksTableModel(
         return QString::number(peak.getFinalEnergy(), 'f', 4);
       },
       [](const IPeak &peak) {
-        return QString::number(peak.getEnergy(), 'f', 4);
+        return QString::number(peak.getEnergyTransfer(), 'f', 4);
       },
       [](const IPeak &peak) { return QString::number(peak.getTOF(), 'f', 1); },
       [](const IPeak &peak) {
@@ -371,7 +371,7 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
       else
         showEnergy = true;
       if (!showEnergy)
-        result.push_back(COL_ENERGY);
+        result.push_back(COL_ENERGY_TRANSFER);
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     // Unable to fetch instrument info, so continue without it.

@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
-from mantid.kernel import time_duration, DateAndTime
+from mantid.kernel import DateAndTime
 import inspect
 import math
 import os
@@ -307,8 +307,7 @@ def getChargeAndTime(ws_event):
     r = ws_event.getRun()
     charges = r.getLogData('proton_charge')
     total_charge = sum(charges.value)
-    time_passed = (charges.times[-1] - charges.times[0]).total_microseconds()
-    time_passed /= 1e6
+    time_passed = (charges.times[-1] - charges.times[0]) / np.timedelta64(1, 's')
     return total_charge, time_passed
 
 
@@ -1096,7 +1095,7 @@ class OverlayWorkspaces(object):
         time_1 = self._get_time_from_proton_charge_log(ws1)
         time_2 = self._get_time_from_proton_charge_log(ws2)
 
-        return time_duration.total_nanoseconds(time_1- time_2)/1e9
+        return float((time_1 - time_2) / np.timedelta64(1, 's'))
 
     def _get_time_from_proton_charge_log(self, ws):
         times = ws.getRun().getProperty("proton_charge").times
@@ -1163,9 +1162,8 @@ def transfer_special_sample_logs(from_ws, to_ws):
 
             prop = run_to.getProperty(time_series_name)
             prop.clear()
-            for index in range(0, len(times)):
-                prop.addValue(times[index],
-                              type_map[time_series_name](values[index]))
+            for time, value in zip(times, values):
+                prop.addValue(time, type_map[time_series_name](value))
 
     alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
     alg_log.initialize()
@@ -1392,6 +1390,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         return times_lhs_corrected, values_lhs_corrected, times_rhs_corrected, values_rhs_corrected
 
     def _find_start_time_index(self, time_series, start_time):
+        start_time = start_time.to_datetime64()
         index = 0
         for element in time_series:
             if element > start_time or element == start_time:
@@ -1407,9 +1406,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         @param values: the values array
         @param type_converter: a type converter
         '''
-        for index in range(0, len(times)):
-            prop.addValue(times[index],
-                          type_converter(values[index]))
+        for time, value in zip(times, values):
+            prop.addValue(time, type_converter(value))
 
 
 def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
