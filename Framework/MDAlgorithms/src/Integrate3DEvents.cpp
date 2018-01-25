@@ -192,8 +192,6 @@ Integrate3DEvents::integrateWeakPeak(
       correctForDetectorEdges(rValues, params.E1Vectors, center, abcRadii,
                               abcBackgroundInnerRadii, abcBackgroundOuterRadii);
 
-
-
   if (!isPeakOnDetector)
     return shape;
 
