@@ -26,9 +26,6 @@ public:
   MOCK_CONST_METHOD2(getFocusedRun,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
                          const int runNumber, const size_t bank));
-
-  MOCK_CONST_METHOD0(getFocusedWorkspaceToAdd,
-                     Mantid::API::MatrixWorkspace_sptr());
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

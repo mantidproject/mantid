@@ -23,6 +23,13 @@ public:
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
                          const int runNumber, const size_t bank));
 
+  MOCK_CONST_METHOD0(getFittedPeaksWorkspaceToAdd,
+                     Mantid::API::MatrixWorkspace_sptr());
+
+  MOCK_CONST_METHOD0(getFittedPeaksBankIDToAdd, size_t());
+
+  MOCK_CONST_METHOD0(getFittedPeaksRunNumberToAdd, int());
+
   MOCK_CONST_METHOD2(getFocusedRun,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
                          const int runNumber, const size_t bank));

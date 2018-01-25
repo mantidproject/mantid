@@ -36,6 +36,26 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_addFittedPeaks() {
+    auto presenter = setUpPresenter();
+    const API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksWorkspaceToAdd())
+        .Times(1)
+        .WillOnce(Return(ws));
+    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksBankIDToAdd())
+        .Times(1)
+        .WillOnce(Return(1));
+    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksRunNumberToAdd())
+        .Times(1)
+        .WillOnce(Return(123));
+    EXPECT_CALL(*m_mockModelPtr, addFittedPeaks(123, 1, ws));
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::AddFittedPeaks);
+    assertMocksUsedCorrectly();
+  }
+
 private:
   MockEnggDiffMultiRunFittingWidgetModel *m_mockModelPtr;
   MockEnggDiffMultiRunFittingWidgetView *m_mockViewPtr;
