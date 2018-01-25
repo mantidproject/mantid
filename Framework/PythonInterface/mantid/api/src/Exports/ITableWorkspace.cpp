@@ -527,8 +527,8 @@ public:
     const auto &columnNames = metaData["column_names"];
     const auto &columnTypes = metaData["column_types"];
 
-    const ssize_t numColumns = len(columnNames);
-    for (ssize_t colIndex = 0; colIndex < numColumns; ++colIndex) {
+    const bpl::ssize_t numColumns = len(columnNames);
+    for (bpl::ssize_t colIndex = 0; colIndex < numColumns; ++colIndex) {
       const auto &key = columnNames[colIndex];
       const auto &value = columnTypes[colIndex];
       const auto &name = extract<std::string>(key);
@@ -550,7 +550,7 @@ public:
       return;
     }
 
-    ssize_t numRows = len(data[names[0]]);
+    bpl::ssize_t numRows = len(data[names[0]]);
     for (int rowIndex = 0; rowIndex < numRows; ++rowIndex) {
       ws.appendRow();
       for (const auto &name : names) {
