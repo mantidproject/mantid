@@ -11,8 +11,9 @@ public:
   // User actions, triggered by the (passive) view,
   // which need handling in implementation
   enum Notification {
-    ShutDown, ///< Shut down the widget
-    Start,    ///< Start and set up the interface
+    AddFocusedRun, ///< The view has been passed a focused run to add
+    ShutDown,      ///< Shut down the widget
+    Start,         ///< Start and set up the interface
   };
 
   /**
