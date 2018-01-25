@@ -13,9 +13,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringContainsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -92,14 +92,16 @@ void ConvolutionFitSequential::init() {
   auto boundedV = boost::make_shared<BoundedValidator<int>>();
   boundedV->setLower(0);
 
-  declareProperty("SpecMin", 0, boundedV, "The first spectrum to be used in "
-                                          "the fit. Spectra values can not be "
-                                          "negative",
+  declareProperty("SpecMin", 0, boundedV,
+                  "The first spectrum to be used in "
+                  "the fit. Spectra values can not be "
+                  "negative",
                   Direction::Input);
 
-  declareProperty("SpecMax", 0, boundedV, "The final spectrum to be used in "
-                                          "the fit. Spectra values can not be "
-                                          "negative",
+  declareProperty("SpecMax", 0, boundedV,
+                  "The final spectrum to be used in "
+                  "the fit. Spectra values can not be "
+                  "negative",
                   Direction::Input);
 
   declareProperty(
@@ -175,8 +177,8 @@ void ConvolutionFitSequential::exec() {
 
   // Log information to result log
   m_log.information("Input files: " + inputWs->getName());
-  m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" +
-                    LorentzNum);
+  m_log.information("Fit type: Delta=" + usingDelta +
+                    "; Lorentzians=" + LorentzNum);
   m_log.information("Background type: " + backType);
 
   // Output workspace name
@@ -373,9 +375,8 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Check whether to extract members into their own workspaces.
-  if (doExtractMembers) {
+  if (doExtractMembers)
     extractMembers(inputWs, groupWs, outputWsName + "_Members");
-  }
 
   setProperty("OutputWorkspace", resultWs);
 }
@@ -624,133 +625,11 @@ void ConvolutionFitSequential::calculateEISF(
 void ConvolutionFitSequential::extractMembers(
     MatrixWorkspace_sptr inputWs, WorkspaceGroup_const_sptr resultGroupWs,
     const std::string &outputWsName) {
-  // Get Q values from the input workspace.
-  auto getQs = createChildAlgorithm("GetQsInQENSData", -1.0, -1.0, false);
-  getQs->setProperty("InputWorkspace", inputWs);
-  getQs->executeAsChildAlg();
-  std::vector<double> qValues = getQs->getProperty("Qvalues");
-
-  // Get the delta function property and number of lorentzians from
-  // the first workspace in the result GroupWorkspace.
-  MatrixWorkspace_sptr firstSpectraWs =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(resultGroupWs->getItem(0));
-  Axis *axis = firstSpectraWs->getAxis(1);
-  const Run run = firstSpectraWs->run();
-  std::string delta = run.getProperty("delta_function")->value();
-  std::string lorentziansStr = run.getProperty("lorentzians")->value();
-  int lorentzians = boost::lexical_cast<int>(lorentziansStr);
-  m_log.information("Lorentzians = " + lorentziansStr + " ; Delta = " + delta);
-
-  // Retrieve all axis labels.
-  std::vector<std::string> params = {};
-  for (size_t i = 0; i < axis->length(); i++) {
-    params.push_back(axis->label(i));
-  }
-
-  // First four axis labels are always members.
-  std::vector<std::string> members =
-      std::vector<std::string>(params.begin(), params.begin() + 4);
-
-  // Check whether a delta function member was a member in
-  // the convolution fitting.
-  if (delta == "true") {
-    members.push_back("Delta");
-  }
-
-  // Add each lorentzian member.
-  for (int i = 1; i <= lorentzians; i++) {
-    members.push_back("Lorentzian" + std::to_string(i));
-  }
-
-  // Check whether the number of found members is equal to
-  // the number of parameters (valid input workspace).
-  if (members.size() != params.size()) {
-    throw std::runtime_error("Number of members is incorrect.");
-  }
-
-  // Extract the members from each workspace into their respective
-  // workspace - these are stored in the memberWorkspaces vector.
-  size_t resultSize = resultGroupWs->size();
-  if (qValues.size() < resultSize) {
-    throw std::runtime_error("Couldn't extract Q-Values from InputWorkspace.");
-  }
-
-  std::vector<std::string> memberWorkspaces = {};
-  for (size_t i = 0; i < resultSize; i++) {
-    extractMembersFrom(resultGroupWs->getItem(i), outputWsName, members, i == 0,
-                       memberWorkspaces);
-  }
-
-  // Update the y-axis of each created member workspace - set to
-  // the Q values from the QENS data.
-  auto qAxis = NumericAxis(resultSize);
-  for (size_t j = 0; j < resultSize; j++) {
-    qAxis.setValue(j, qValues[j]);
-  }
-
-  for (auto &memberWsName : memberWorkspaces) {
-    auto memberWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        memberWsName);
-    memberWs->replaceAxis(1, new NumericAxis(qAxis));
-    memberWs->setYUnitLabel("MomentumTransfer");
-  }
-
-  // Group member workspace
-  auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
-  groupAlg->setProperty("InputWorkspaces", memberWorkspaces);
-  groupAlg->setProperty("OutputWorkspace", outputWsName);
-  groupAlg->execute();
-}
-
-/*
- * Extracts the specified members, from the specified fit result workspace, into
- * output workspaces (one for each member), with the specified prefix. The names
- * of the member workspaces are appended to the specified vector.
- *
- * @param resultWs          Workspace containing result of the fit, from which
- *                          to extract members.
- * @param outputWsName      The prefix of the output member workspaces.
- *                          Format: outputWsName + NameOfMember
- * @param members           The list (vector) of members to extract from the
- *                          result workspace.
- * @param createMemberWs    If True, create a new workspace for each member.
- *                          Else, append to existing workspace.
- * @param memberWorkspaces  The list (vector) of member workspaces to append
- *                          output workspace names to.
- */
-void ConvolutionFitSequential::extractMembersFrom(
-    Mantid::API::Workspace_sptr resultWs, const std::string &outputWsName,
-    const std::vector<std::string> &members, bool createMemberWs,
-    std::vector<std::string> &memberWorkspaces) {
-  // Iterate over all the members in the fit
-  for (size_t i = 0; i < members.size(); i++) {
-    std::string memberWsName = outputWsName + "_" + members[i];
-    std::string extractedWsName = "__temp";
-
-    // Extract spectra from the result workspace
-    auto extractAlg = createChildAlgorithm("ExtractSpectra", -1.0, -1.0, false);
-    extractAlg->setProperty("InputWorkspace", resultWs);
-    extractAlg->setProperty("OutputWorkspace", extractedWsName);
-    extractAlg->setProperty("StartWorkspaceIndex", boost::numeric_cast<int>(i));
-    extractAlg->setProperty("EndWorkspaceIndex", boost::numeric_cast<int>(i));
-    extractAlg->executeAsChildAlg();
-
-    MatrixWorkspace_sptr memberWs = extractAlg->getProperty("OutputWorkspace");
-
-    // Check whether to append the spectra to an existing output workspace
-    if (createMemberWs) {
-      memberWorkspaces.push_back(memberWsName);
-    } else {
-      auto appendAlg = createChildAlgorithm("AppendSpectra", -1.0, -1.0, false);
-      appendAlg->setProperty("InputWorkspace1", memberWsName);
-      appendAlg->setProperty("InputWorkspace2", memberWs);
-      appendAlg->setProperty("OutputWorkspace", memberWsName);
-      appendAlg->executeAsChildAlg();
-      memberWs = appendAlg->getProperty("OutputWorkspace");
-    }
-
-    AnalysisDataService::Instance().addOrReplace(memberWsName, memberWs);
-  }
+  auto extractMembersAlg =
+      AlgorithmManager::Instance().create("ExtractQENSMembers");
+  extractMembersAlg->setProperty("InputWorkspace", inputWs);
+  extractMembersAlg->setProperty("ResultWorkspace", resultGroupWs);
+  extractMembersAlg->setProperty("OutputWorkspace", outputWsName);
 }
 
 /**

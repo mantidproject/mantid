@@ -58,11 +58,6 @@ private:
   void extractMembers(Mantid::API::MatrixWorkspace_sptr inputWs,
                       Mantid::API::WorkspaceGroup_const_sptr resultGroupWs,
                       const std::string &outputWsName);
-  void extractMembersFrom(Mantid::API::Workspace_sptr resultWs,
-                          const std::string &outputWsName,
-                          const std::vector<std::string> &members,
-                          bool createMemberWs,
-                          std::vector<std::string> &memberWorkspaces);
 };
 
 } // namespace Algorithms
