@@ -77,7 +77,6 @@ MeshObject &MeshObject::operator=(const MeshObject &A) {
   return *this;
 }
 
-/// Destructor in .cpp so we can forward declare Rule class.
 MeshObject::~MeshObject() = default;
 
 /*
@@ -446,6 +445,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
 {
   MeshObject scaledObject;
   std::vector<V3D> scaledVertices;
+  scaledVertices.reserve(m_vertices.size());
   for (size_t i = 0; i < m_vertices.size(); ++i) {
     scaledVertices.push_back(V3D(scaleFactor.X() * m_vertices[i].X(),
                                  scaleFactor.Y() * m_vertices[i].Y(),
