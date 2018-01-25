@@ -613,7 +613,8 @@ public:
 
     // We don't the view we will handle yet, so none of the methods below
     // should be called
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _, _))
+        .Times(0);
     EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(0);
     // Constructor
     auto presenter = makeDefaultPresenterNoThread();
@@ -1573,12 +1574,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
-
-//   std::unique_ptr<GenericDataProcessorPresenter> makeDefaultPresenter() {
-//     return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-//         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-//         createReflectometryProcessor(), createReflectometryPostprocessor());
-//   }
 
   std::unique_ptr<GenericDataProcessorPresenter> makeNonPostProcessPresenter() {
     return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
@@ -2972,7 +2967,8 @@ public:
 
     // We don't know the view we will handle yet, so none of the methods below
     // should be called
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _, _))
+        .Times(0);
     // Constructor (no pre-processing)
 
     GenericDataProcessorPresenterNoThread presenter(
