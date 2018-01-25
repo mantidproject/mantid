@@ -210,7 +210,11 @@ IFunction_sptr ConvFit::fitFunction() const {
   }
 
   conv->addFunction(modelFunction);
-  comp->addFunction(conv);
+
+  if (backgroundFunction)
+    comp->addFunction(conv);
+  else
+    comp = conv;
   comp->applyTies();
   return comp;
 }
@@ -232,11 +236,13 @@ ConvFit::functionNameChanges(IFunction_sptr model) const {
     prefixSuffix = "f1.";
 
   if (compositeModel) {
+    int offset = backIndex < 0 ? 0 : 1;
+    backIndex = backIndex < 0 ? 0 : backIndex;
     addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix, 0,
                            backIndex, 0, changes);
     addFunctionNameChanges(
         compositeModel, prefixPrefix, prefixSuffix, backIndex,
-        static_cast<int>(compositeModel->nFunctions()), 1, changes);
+        static_cast<int>(compositeModel->nFunctions()), offset, changes);
   } else
     addFunctionNameChanges(model, "", prefixPrefix + prefixSuffix, changes);
   return changes;
@@ -258,7 +264,7 @@ void ConvFit::addFunctionNameChanges(
     const QString &prefixSuffix, int fromIndex, int toIndex, int offset,
     QHash<QString, QString> &functionNameChanges) const {
 
-  for (int i = fromIndex > 0 ? 0 : fromIndex; i < toIndex; ++i) {
+  for (int i = fromIndex; i < toIndex; ++i) {
     const auto &functionPrefix = "f" + QString::number(i) + ".";
     const auto &offsetPrefix = "f" + QString::number(i + offset) + ".";
     const auto &function = model->getFunction(static_cast<size_t>(i));
