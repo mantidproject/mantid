@@ -18,6 +18,10 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
   }
   switch (notif) {
 
+  case IEnggDiffMultiRunFittingWidgetPresenter::AddFocusedRun:
+    processAddFocusedRun();
+    break;
+
   case IEnggDiffMultiRunFittingWidgetPresenter::ShutDown:
     processShutDown();
     break;
@@ -26,6 +30,13 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
     processStart();
     break;
   }
+}
+
+void EnggDiffMultiRunFittingWidgetPresenter::processAddFocusedRun() {
+  const auto ws = m_view->getFocusedWorkspaceToAdd();
+  const auto bankID = m_view->getFocusedRunBankIDToAdd();
+  const auto runNumber = m_view->getFocusedRunNumberToAdd();
+  m_model->addFocusedRun(runNumber, bankID, ws);
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processShutDown() {

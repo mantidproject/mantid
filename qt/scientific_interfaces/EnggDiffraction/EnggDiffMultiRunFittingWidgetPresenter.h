@@ -25,7 +25,7 @@ public:
   notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) override;
 
 private:
-
+  void processAddFocusedRun();
   void processShutDown();
   void processStart();
 
