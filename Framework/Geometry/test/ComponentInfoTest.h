@@ -651,24 +651,38 @@ public:
                      detectorPos);
   }
 
-  void test_StructuredPanel_for_single_rectangular_bank() {
+  void test_throws_if_ComponentType_is_not_Quadrilateral() {
     auto instrument =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
     const auto &componentInfo = std::get<0>(wrappers);
 
-    // find structured panel
-    size_t structuredIndex = 0;
-    for (size_t i = componentInfo->root(); i > 0; --i) {
-      if (componentInfo->componentType(i) ==
-              Mantid::Beamline::ComponentType::Structured ||
-          componentInfo->componentType(i) ==
-              Mantid::Beamline::ComponentType::Rectangular) {
-        structuredIndex = i;
-        break;
-      }
-    }
+    // find quadrilateral component
+    size_t structuredIndex = componentInfo->root() - 3;
+    // Does not throw for valid index
+    TS_ASSERT_THROWS_NOTHING(
+        componentInfo->quadrilateralComponent(structuredIndex));
+    // Throws for other non quadrilateral component
+    TS_ASSERT_THROWS(
+        componentInfo->quadrilateralComponent(componentInfo->root() - 1),
+        std::runtime_error);
+    // Throws for root
+    TS_ASSERT_THROWS(
+        componentInfo->quadrilateralComponent(componentInfo->root()),
+        std::runtime_error);
+    // Throws for detector
+    TS_ASSERT_THROWS(componentInfo->quadrilateralComponent(0),
+                     std::runtime_error);
+  }
 
+  void test_QuadrilateralComponent_for_single_rectangular_bank() {
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    // find quadrilateral component
+    size_t structuredIndex = componentInfo->root() - 3;
     auto panel = componentInfo->quadrilateralComponent(structuredIndex);
     TS_ASSERT_EQUALS(panel.nX, 4);
     TS_ASSERT_EQUALS(panel.nY, 4);

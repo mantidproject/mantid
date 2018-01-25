@@ -138,7 +138,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
     glShadeModel(GL_FLAT);
   }
 
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
   for (const auto &udet : m_unwrappedDetectors) {
     if (!componentInfo.hasValidShape(udet.detIndex))
       continue;
@@ -182,7 +182,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
           componentInfo.scaleFactor(udet.detIndex);
       glScaled(scaleFactor[0], scaleFactor[1], scaleFactor[2]);
 
-      m_instrActor->getComponentInfo().shape(udet.detIndex).draw();
+      m_instrActor->componentInfo().shape(udet.detIndex).draw();
 
       glPopMatrix();
     }
@@ -235,7 +235,7 @@ bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,
 * @param id :: ComponentID to zoom to.
 */
 void UnwrappedSurface::componentSelected(size_t componentIndex) {
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
   if (componentInfo.isDetector(componentIndex)) {
     const auto &udet = m_unwrappedDetectors[componentIndex];
     zoom(getArea(udet, m_width_max, m_height_max));
@@ -595,7 +595,7 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
   Mantid::Kernel::Quat R;
   this->rotate(udet, R);
 
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
   const auto &bbox = componentInfo.shape(udet.detIndex).getBoundingBox();
   auto scale = componentInfo.scaleFactor(udet.detIndex);
 

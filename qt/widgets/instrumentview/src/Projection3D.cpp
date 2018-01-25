@@ -279,7 +279,7 @@ void Projection3D::getMaskedDetectors(std::vector<size_t> &detIndices) const {
 */
 void Projection3D::componentSelected(size_t componentIndex) {
 
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
 
   if (componentIndex == componentInfo.root()) {
     m_viewport.reset();

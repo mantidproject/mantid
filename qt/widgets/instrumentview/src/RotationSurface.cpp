@@ -73,7 +73,7 @@ void RotationSurface::init() {
   m_u_min = -DBL_MAX;
   m_u_max = DBL_MAX;
 
-  const auto &detectorInfo = m_instrActor->getDetectorInfo();
+  const auto &detectorInfo = m_instrActor->detectorInfo();
   // Set if one of the threads in the following loop
   // throws an exception
   bool exceptionThrown = false;
@@ -186,7 +186,7 @@ void RotationSurface::findUVBounds() {
   m_v_max = -DBL_MAX;
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (!m_instrActor->getComponentInfo().hasValidShape(udet.detIndex))
+    if (!m_instrActor->componentInfo().hasValidShape(udet.detIndex))
       continue;
     if (udet.u < m_u_min)
       m_u_min = udet.u;
@@ -217,7 +217,7 @@ void RotationSurface::findAndCorrectUGap() {
   }
 
   for (const auto &udet : m_unwrappedDetectors) {
-    if (!m_instrActor->getComponentInfo().hasValidShape(udet.detIndex))
+    if (!m_instrActor->componentInfo().hasValidShape(udet.detIndex))
       continue;
     double u = udet.u;
     int i = int((u - m_u_min) / bin_width);
@@ -254,7 +254,7 @@ void RotationSurface::findAndCorrectUGap() {
     }
 
     for (auto &udet : m_unwrappedDetectors) {
-      if (!m_instrActor->getComponentInfo().hasValidShape(udet.detIndex))
+      if (!m_instrActor->componentInfo().hasValidShape(udet.detIndex))
         continue;
       double &u = udet.u;
       u = applyUCorrection(u);

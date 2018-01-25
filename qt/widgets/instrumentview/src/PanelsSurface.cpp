@@ -142,7 +142,7 @@ void PanelsSurface::project(const Mantid::Kernel::V3D &, double &, double &,
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet,
                            Mantid::Kernel::Quat &R) const {
-  const auto &detectorInfo = m_instrActor->getDetectorInfo();
+  const auto &detectorInfo = m_instrActor->detectorInfo();
   int index = m_detector2bankMap[udet.detIndex];
   FlatBankInfo &info = *m_flatBanks[index];
   R = info.rotation * detectorInfo.rotation(udet.detIndex);
@@ -176,7 +176,7 @@ void PanelsSurface::addFlatBankOfDetectors(
   info->endDetectorIndex = detectors.back();
 
   // keep reference position on the bank's plane
-  const auto &detectorInfo = m_instrActor->getDetectorInfo();
+  const auto &detectorInfo = m_instrActor->detectorInfo();
   auto pos0 = detectorInfo.position(detectors[0]);
   auto pos1 = detectorInfo.position(detectors[1]) - pos0;
 
@@ -203,7 +203,7 @@ void PanelsSurface::addFlatBankOfDetectors(
 void PanelsSurface::processStructured(const std::vector<size_t> &children,
                                       size_t rootIndex) {
   int index = m_flatBanks.size();
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
   auto corners = retrievePanelCorners(componentInfo, rootIndex);
   auto normal = calculatePanelNormal(corners);
   // save bank info
@@ -234,11 +234,11 @@ PanelsSurface::processUnstructured(const std::vector<size_t> &children,
                                    size_t rootIndex,
                                    std::vector<bool> &visited) {
   Mantid::Kernel::V3D normal;
-  const auto &detectorInfo = m_instrActor->getDetectorInfo();
+  const auto &detectorInfo = m_instrActor->detectorInfo();
   Mantid::Kernel::V3D pos0;
   Mantid::Kernel::V3D x, y;
   bool normalFound = false;
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
   std::vector<size_t> detectors;
   detectors.reserve(children.size());
   for (auto child : children) {
@@ -282,7 +282,7 @@ boost::optional<std::pair<std::vector<size_t>, Mantid::Kernel::V3D>>
 PanelsSurface::findFlatPanels(size_t rootIndex,
                               const std::vector<size_t> &children,
                               std::vector<bool> &visited) {
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
   auto parentIndex = componentInfo.parent(rootIndex);
   auto componentType = componentInfo.componentType(parentIndex);
   if (componentType == Mantid::Beamline::ComponentType::Rectangular ||
@@ -304,7 +304,7 @@ PanelsSurface::findFlatPanels(size_t rootIndex,
 }
 
 void PanelsSurface::constructFromComponentInfo() {
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
   std::vector<bool> visited(componentInfo.size(), false);
 
   for (size_t i = 0; i < componentInfo.size() - 1; ++i) {
@@ -356,7 +356,7 @@ PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
 void PanelsSurface::addDetector(size_t detIndex,
                                 const Mantid::Kernel::V3D &refPos, int index,
                                 Mantid::Kernel::Quat &rotation) {
-  const auto &detectorInfo = m_instrActor->getDetectorInfo();
+  const auto &detectorInfo = m_instrActor->detectorInfo();
 
   Mantid::Kernel::V3D pos = detectorInfo.position(detIndex);
   m_detector2bankMap[detIndex] = index;

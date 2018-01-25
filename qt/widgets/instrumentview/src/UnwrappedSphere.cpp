@@ -44,7 +44,7 @@ void UnwrappedSphere::rotate(const UnwrappedDetector &udet,
   Mantid::Kernel::Quat R1;
   // direction in which to look: from sample to detector
   Mantid::Kernel::V3D eye;
-  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->componentInfo();
   eye = m_pos - componentInfo.position(udet.detIndex);
   if (!eye.nullVector()) {
     InstrumentActor::rotateToLookAt(eye, m_zaxis, R1);
