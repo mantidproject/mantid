@@ -89,7 +89,7 @@ set_target_properties ( ICat PROPERTIES OUTPUT_NAME MantidICat
                                         COMPILE_DEFINITIONS IN_MANTID_ICAT )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-#  set_target_properties ( ICat PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties ( ICat PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 endif () 
 
 # Add to the 'Framework' group in VS

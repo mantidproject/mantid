@@ -122,7 +122,7 @@ add_library ( WorkflowAlgorithms ${SRC_FILES} ${INC_FILES})
 set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflowAlgorithms )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-#  set_target_properties ( WorkflowAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties ( WorkflowAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 endif ()
 
 # Add to the 'Framework' group in VS

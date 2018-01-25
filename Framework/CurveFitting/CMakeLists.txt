@@ -482,7 +482,7 @@ set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting
                                      COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-#  set_target_properties ( CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties ( CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 endif () 
 
 # Add to the 'Framework' group in VS
