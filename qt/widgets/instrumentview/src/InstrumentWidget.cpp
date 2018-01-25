@@ -401,7 +401,7 @@ void InstrumentWidget::setSurfaceType(int type) {
     // If anything throws during surface creation, store error message here
     QString errorMessage;
     try {
-      const auto &componentInfo = m_instrumentActor->getComponentInfo();
+      const auto &componentInfo = m_instrumentActor->componentInfo();
       if (!componentInfo.hasSample()) {
         throw InstrumentHasNoSampleError();
       }

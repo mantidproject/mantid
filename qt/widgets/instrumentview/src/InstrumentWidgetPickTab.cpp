@@ -829,7 +829,7 @@ void ComponentInfoController::displayInfo(size_t pickID) {
   }
 
   const auto &actor = m_instrWidget->getInstrumentActor();
-  const auto &componentInfo = actor.getComponentInfo();
+  const auto &componentInfo = actor.componentInfo();
   QString text = "";
   if (componentInfo.isDetector(pickID)) {
     text += displayDetectorInfo(pickID);
@@ -862,7 +862,7 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
 
   // collect info about selected detector and add it to text
   const auto &actor = m_instrWidget->getInstrumentActor();
-  const auto &componentInfo = actor.getComponentInfo();
+  const auto &componentInfo = actor.componentInfo();
   auto detid = actor.getDetID(index);
 
   text = "Selected detector: " +
@@ -908,7 +908,7 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
 QString ComponentInfoController::displayNonDetectorInfo(
     Mantid::Geometry::ComponentID compID) {
   const auto &actor = m_instrWidget->getInstrumentActor();
-  const auto &componentInfo = actor.getComponentInfo();
+  const auto &componentInfo = actor.componentInfo();
   auto component = componentInfo.indexOf(compID);
   QString text = "Selected component: ";
   text += QString::fromStdString(componentInfo.name(component)) + '\n';
@@ -1100,7 +1100,7 @@ void DetectorPlotController::setPlotData(size_t pickID) {
   }
 
   const auto &actor = m_instrWidget->getInstrumentActor();
-  const auto &componentInfo = actor.getComponentInfo();
+  const auto &componentInfo = actor.componentInfo();
   if (componentInfo.isDetector(pickID)) {
     if (m_plotType == Single) {
       m_currentDetID = actor.getDetID(pickID);
@@ -1196,7 +1196,7 @@ void DetectorPlotController::plotSingle(size_t detindex) {
 */
 void DetectorPlotController::plotTube(size_t detindex) {
   const auto &actor = m_instrWidget->getInstrumentActor();
-  const auto &componentInfo = actor.getComponentInfo();
+  const auto &componentInfo = actor.componentInfo();
 
   if (componentInfo.hasParent(detindex) &&
       componentInfo.numberOfDetectorsInSubtree(detindex) > 0) {
@@ -1229,7 +1229,7 @@ void DetectorPlotController::plotTubeSums(size_t detindex) {
     return;
   }
   const auto &actor = m_instrWidget->getInstrumentActor();
-  const auto &componentInfo = actor.getComponentInfo();
+  const auto &componentInfo = actor.componentInfo();
   auto parent = componentInfo.parent(detindex);
   auto detid = actor.getDetID(detindex);
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
@@ -1254,7 +1254,7 @@ void DetectorPlotController::plotTubeSums(size_t detindex) {
 */
 void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
   const auto &actor = m_instrWidget->getInstrumentActor();
-  const auto &componentInfo = actor.getComponentInfo();
+  const auto &componentInfo = actor.componentInfo();
   std::vector<double> x, y;
   prepareDataForIntegralsPlot(detindex, x, y);
   if (x.empty() || y.empty()) {
@@ -1323,7 +1323,7 @@ void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
                                                     std::vector<double> *err) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto ws = actor.getWorkspace();
-  const auto &componentInfo = actor.getComponentInfo();
+  const auto &componentInfo = actor.componentInfo();
   auto parent = componentInfo.parent(detindex);
   auto ass = componentInfo.detectorsInSubtree(parent);
 
@@ -1394,7 +1394,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   return;
 
   const auto &actor = m_instrWidget->getInstrumentActor();
-  const auto &componentInfo = actor.getComponentInfo();
+  const auto &componentInfo = actor.componentInfo();
   Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
 
   // Does the instrument definition specify that psi should be offset.
@@ -1411,7 +1411,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
 
-  auto samplePos = actor.getComponentInfo().samplePosition();
+  auto samplePos = actor.componentInfo().samplePosition();
 
   auto n = ass.size();
   if (n == 0) {
@@ -1433,7 +1433,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
 
   auto normal = componentInfo.position(ass[1]) - componentInfo.position(ass[0]);
   normal.normalize();
-  const auto &detectorInfo = actor.getDetectorInfo();
+  const auto &detectorInfo = actor.detectorInfo();
   for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
       auto id = detectorInfo.detectorIDs()[det];

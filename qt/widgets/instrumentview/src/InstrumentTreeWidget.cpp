@@ -36,7 +36,7 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex &index,
                                                   double &zmax, double &xmin,
                                                   double &ymin, double &zmin) {
   const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().getComponentInfo();
+      m_instrWidget->getInstrumentActor().componentInfo();
   auto compIndex = InstrumentTreeModel::extractIndex(index);
   auto bb = componentInfo.boundingBox(compIndex);
 
