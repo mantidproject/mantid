@@ -28,6 +28,7 @@
 #include <QMessageBox>
 #include <QSettings>
 
+#include <limits>
 #include <numeric>
 
 using namespace Mantid::Kernel::Exception;
@@ -58,6 +59,8 @@ bool isPhysicalView() {
 
 } // namespace
 
+const size_t InstrumentActor::INVALID_INDEX =
+    std::numeric_limits<size_t>::max();
 double InstrumentActor::m_tolerance = 0.00001;
 
 /**
@@ -407,7 +410,7 @@ Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
 QList<Mantid::detid_t>
 InstrumentActor::getDetIDs(const std::vector<size_t> &dets) const {
   QList<Mantid::detid_t> detIDs;
-  detIDs.reserve(dets.size());
+  detIDs.reserve(static_cast<int>(dets.size()));
   for (auto det : dets)
     detIDs.append(getDetID(det));
   return detIDs;
