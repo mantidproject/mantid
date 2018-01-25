@@ -3,6 +3,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GridDelegate.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 
 #include <QClipboard>
@@ -12,8 +13,6 @@
 #include <QSettings>
 #include <QWhatsThis>
 #include <QWidget>
-#include <QStyledItemDelegate> 
-#include <QPainter>
 
 namespace {
 const QString DataProcessorSettingsGroup =
@@ -24,28 +23,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 using namespace Mantid::API;
-
-class GridDelegate : public QStyledItemDelegate
-{
-public:
-   explicit GridDelegate(QObject * parent = 0, TreeManager *model = 0) : QStyledItemDelegate(parent), m_model(model) { };
-
-   void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
-   {
-       painter->save();
-       painter->setPen(QColor(Qt::black));
-       if (m_model->isProcessed(index.row(), index.parent().row())){
-          painter->fillRect(option.rect, Qt::green);
-       }
-       painter->drawRect(option.rect);
-       painter->restore();
-
-       QStyledItemDelegate::paint(painter, option, index);
-   }
-
-protected:
-  TreeManager *m_model;
-};
 
 /** Constructor
 * @param presenter :: [input] A unique ptr to the presenter

@@ -50,10 +50,6 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
       // Return the group name only in the first column
       return QString::fromStdString(group.first);
     }
-    // if (role == Qt::BackgroundRole && group.second) {
-    //   // Highlight if this group is processed
-    //   return QColor("#00b300");
-    // }
   } else {
     // Index corresponds to a row
     auto pIndex = parent(index);
@@ -63,10 +59,6 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
       return QString::fromStdString(
           m_tWS->String(row.first, index.column() + 1));
     }
-    // if (role == Qt::BackgroundRole && row.second) {
-    //   // Highlight if this row is processed
-    //   return QColor("#00b300");
-    // }
   }
 
   return QVariant();
