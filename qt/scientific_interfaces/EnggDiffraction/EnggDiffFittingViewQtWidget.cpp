@@ -387,7 +387,7 @@ bool EnggDiffFittingViewQtWidget::peakPickerEnabled() const {
   return m_peakPicker->isEnabled();
 }
 
-void EnggDiffFittingViewQtWidget::setZoomTool(bool enabled) {
+void EnggDiffFittingViewQtWidget::setZoomTool(const bool enabled) {
   m_zoomTool->setEnabled(enabled);
 }
 

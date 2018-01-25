@@ -6,6 +6,7 @@
 #include "IEnggDiffGSASFittingView.h"
 
 #include <qwt_plot_curve.h>
+#include <qwt_plot_zoomer.h>
 
 #include "ui_EnggDiffractionQtTabGSAS.h"
 
@@ -26,6 +27,8 @@ public:
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 
   void displayRwp(const double rwp) const override;
+
+  void setZoomToolEnabled(const bool enabled);
 
   std::vector<std::string> getFocusedFileNames() const override;
 
@@ -69,6 +72,8 @@ private:
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
   Ui::EnggDiffractionQtTabGSAS m_ui;
+
+  QwtPlotZoomer *m_zoomTool = nullptr;
 
   void setFocusedRunFileNames(const QStringList &filenames);
 

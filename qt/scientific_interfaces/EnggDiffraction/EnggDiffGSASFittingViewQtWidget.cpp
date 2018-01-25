@@ -107,6 +107,8 @@ void EnggDiffGSASFittingViewQtWidget::plotCurve(
   }
 
   m_ui.plotArea->replot();
+  m_zoomTool->setZoomBase();
+  setZoomToolEnabled(true);
 }
 
 void EnggDiffGSASFittingViewQtWidget::resetCanvas() {
@@ -120,6 +122,7 @@ void EnggDiffGSASFittingViewQtWidget::resetCanvas() {
   if (m_focusedRunCurves.size() > 0) {
     m_focusedRunCurves.clear();
   }
+  m_zoomTool->setZoomBase(true);
 }
 
 void EnggDiffGSASFittingViewQtWidget::selectRun() {
@@ -164,6 +167,17 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
           SLOT(loadFocusedRun()));
   connect(m_ui.listWidget_runLabels, SIGNAL(itemSelectionChanged()), this,
           SLOT(selectRun()));
+
+  m_zoomTool =
+      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
+                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                        QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
+  m_zoomTool->setRubberBandPen(QPen(Qt::black));
+  setZoomToolEnabled(false);
+}
+
+void EnggDiffGSASFittingViewQtWidget::setZoomToolEnabled(const bool enabled) {
+  m_zoomTool->setEnabled(enabled);
 }
 
 bool EnggDiffGSASFittingViewQtWidget::showRefinementResultsSelected() const {
