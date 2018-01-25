@@ -28,13 +28,13 @@ using namespace Mantid::API;
 class GridDelegate : public QStyledItemDelegate
 {
 public:
-   explicit GridDelegate(QObject * parent = 0, boost::shared_ptr<AbstractTreeModel> model = 0) : QStyledItemDelegate(parent), m_model(model) { };
+   explicit GridDelegate(QObject * parent = 0, TreeManager *model = 0) : QStyledItemDelegate(parent), m_model(model) { };
 
    void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
    {
        painter->save();
        painter->setPen(QColor(Qt::black));
-       if (m_model->isProcessed(index.row(), index.parent())){
+       if (m_model->isProcessed(index.row(), index.parent().row())){
           painter->fillRect(option.rect, Qt::green);
        }
        painter->drawRect(option.rect);
@@ -44,7 +44,7 @@ public:
    }
 
 protected:
-  boost::shared_ptr<AbstractTreeModel> m_model;
+  TreeManager *m_model;
 };
 
 /** Constructor
@@ -210,8 +210,8 @@ Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
 void QDataProcessorWidget::showTable(
-    boost::shared_ptr<AbstractTreeModel> model) {
-  m_model = model;
+    TreeManager *model) {
+  m_model = model->getModel();
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
@@ -233,8 +233,7 @@ void QDataProcessorWidget::showTable(
   //     "{border-color: lightGray; border-style: solid; border-width: 0.5px; background-color: none;}"
   //       "QTreeView::item:selected {background-color: lightBlue; color: black}");
   ui.viewTable->setAlternatingRowColors(false);
-  ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable, m_model));
-  ui.viewTable->setItemDelegateForColumn(m_column, new HintingLineEditFactory(m_strategy, m_model));
+  ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable, model));
   
   // Hide the Hidden Options column
   ui.viewTable->hideColumn(m_model->columnCount() - 1);
@@ -486,11 +485,9 @@ column.
 @param column : The index of the 'Options' column
 */
 void QDataProcessorWidget::setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
-                                                  int column) {
-  // ui.viewTable->setItemDelegateForColumn(
-  //     column, new HintingLineEditFactory(hintStrategy, m_model));
-  m_strategy = hintStrategy;
-  m_column = column;
+                                                  int column, TreeManager *manager) {
+  ui.viewTable->setItemDelegateForColumn(
+      column, new HintingLineEditFactory(hintStrategy, manager));
 }
 
 /**

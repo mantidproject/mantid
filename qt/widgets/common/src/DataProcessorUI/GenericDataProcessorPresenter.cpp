@@ -253,7 +253,7 @@ void GenericDataProcessorPresenter::acceptViews(
       AlgorithmManager::Instance().create(m_processor.name().toStdString());
   m_view->setOptionsHintStrategy(
       new AlgorithmHintStrategy(alg, toStdStringSet(m_processor.blacklist())),
-      static_cast<int>(m_whitelist.size()) - 2);
+      static_cast<int>(m_whitelist.size()) - 2, m_manager.get());
 
   // Start with a blank table
   newTable();
@@ -1062,7 +1062,7 @@ void GenericDataProcessorPresenter::newTable() {
 
   m_manager->newTable(m_whitelist);
   m_wsName.clear();
-  m_view->showTable(m_manager->getModel());
+  m_view->showTable(m_manager.get());
 
   m_tableDirty = false;
 }
@@ -1100,7 +1100,7 @@ void GenericDataProcessorPresenter::openTable() {
     m_manager->isValidModel(newTable, m_whitelist.size());
     m_manager->newTable(newTable, m_whitelist);
     m_wsName = toOpen;
-    m_view->showTable(m_manager->getModel());
+    m_view->showTable(m_manager.get());
     m_tableDirty = false;
   } catch (std::runtime_error &e) {
     m_view->giveUserCritical(
@@ -1248,7 +1248,7 @@ void GenericDataProcessorPresenter::transfer(
     const std::vector<std::map<QString, QString>> &runs) {
 
   m_manager->transfer(runs, m_whitelist);
-  m_view->showTable(m_manager->getModel());
+  m_view->showTable(m_manager.get());
 }
 
 /**

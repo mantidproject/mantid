@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -71,7 +72,7 @@ public:
   void addActions(std::vector<std::unique_ptr<Command>> commands) override;
 
   // Connect the model
-  void showTable(boost::shared_ptr<AbstractTreeModel> model) override;
+  void showTable(TreeManager *model) override;
 
   // Dialog/Prompt methods
   QString requestNotebookPath() override;
@@ -116,7 +117,7 @@ public:
                          const QString &defaultInstrument) override;
   void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
-                         int column) override;
+                         int column, TreeManager * manager) override;
   void setClipboard(const QString &text) override;
 
   // Transfer runs
@@ -171,8 +172,6 @@ private:
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
   boost::shared_ptr<AbstractTreeModel> m_model;
-  // the hint strategy
-  MantidQt::MantidWidgets::HintStrategy *m_strategy;
   // Command adapters
   std::vector<std::unique_ptr<QtCommandAdapter>> m_commands;
   // the interface (uses actions owned by m_commands)
@@ -182,8 +181,6 @@ private:
   // the context menu
   QMenu *m_contextMenu;
   QSignalMapper *m_openMap;
-  // options column
-  int m_column;
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);

@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 
 #include <QClipboard>
 #include <QFileDialog>
@@ -55,8 +56,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class HintingLineEditFactory : public QStyledItemDelegate {
 public:
-  HintingLineEditFactory(HintStrategy *hintStrategy, boost::shared_ptr<MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel> model = 0)
-      : m_strategy(hintStrategy), m_model(model){};
+  HintingLineEditFactory(HintStrategy *hintStrategy, DataProcessor::TreeManager *manager = 0)
+      : m_strategy(hintStrategy), m_manager(manager){};
   
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override {
@@ -73,7 +74,7 @@ public:
    {
        painter->save();
        painter->setPen(QColor(Qt::black));
-       if (m_model->isProcessed(index.row(), index.parent())){
+       if (m_manager->isProcessed(index.row(), index.parent().row())){
           painter->fillRect(option.rect, Qt::green);
        }
        painter->drawRect(option.rect);
@@ -84,7 +85,7 @@ public:
 
 protected:
   boost::scoped_ptr<HintStrategy> m_strategy;
-  boost::shared_ptr<MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel> m_model;
+  DataProcessor::TreeManager *m_manager;
 };
 }
 }
