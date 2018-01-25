@@ -4,6 +4,7 @@ import unittest
 from mantid.kernel import DateAndTime
 import numpy
 from numpy import timedelta64, datetime64
+from distutils.version import LooseVersion
 
 
 class DateAndTimeTest(unittest.TestCase):
@@ -31,7 +32,7 @@ class DateAndTimeTest(unittest.TestCase):
         self.assertEquals(dt, dt_np)
 
     def test_convert_from_np(self):
-        if numpy.__version__.startswith('1.7.'):
+        if LooseVersion(numpy.__version__) < LooseVersion('1.9'):
             dt_np = datetime64('2000-01-01T00:00Z')
         else: # newer numpy only uses UTC and warns on specifying timezones
             dt_np = datetime64('2000-01-01T00:00')
