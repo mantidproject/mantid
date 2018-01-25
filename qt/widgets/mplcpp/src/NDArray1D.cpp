@@ -9,7 +9,9 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 // clang-format off
 GCC_DIAG_OFF(cast-qual)
+GCC_DIAG_OFF(pedantic)
 #include <numpy/arrayobject.h>
+GCC_DIAG_ON(pedantic)
 GCC_DIAG_ON(cast-qual)
 // clang-format on
 
