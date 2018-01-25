@@ -96,9 +96,6 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 }
 } // End of anonymous namespace
 
-// Constructor
-SaveGSS::SaveGSS() : Mantid::API::Algorithm() {}
-
 // Initialise the algorithm
 void SaveGSS::init() {
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(

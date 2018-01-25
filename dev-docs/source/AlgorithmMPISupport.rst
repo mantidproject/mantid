@@ -589,7 +589,9 @@ MaskDetectorsInShape                   all
 MaskSpectra                            all
 Minus                                  all                     see ``BinaryOperation``
 MoveInstrumentComponent                all
+MultipleScatteringCylinderAbsorption   all
 Multiply                               all                     see ``BinaryOperation``
+NormaliseByCurrent                     all
 OneMinusExponentialCor                 all                     see ``UnaryOperation``
 PDDetermineCharacterizations           all
 PDLoadCharacterizations                Identical
@@ -603,6 +605,7 @@ RealFFT                                MasterOnly, Identical
 Rebin                                  all
 RebinToWorkspace                       all                     ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
 RemovePromptPulse                      all
+RenameWorkspace                        all
 ReplaceSpecialValues                   all                     see ``UnaryOperation``
 RotateInstrumentComponent              all
 SANSCalculateTransmission              MasterOnly, Identical
@@ -622,9 +625,12 @@ SANSScale                              all
 SANSSingleReduction                    all
 SANSSliceEvent                         all
 SANSStitch                             MasterOnly, Identical
+SaveFocusedXYE                         MasterOnly
+SaveGSS                                MasterOnly
 SaveNexus                              MasterOnly
 SaveNexusProcessed                     MasterOnly
 Scale                                  all
+SetSampleMaterial                      all
 SetUncertainties                       MasterOnly, Identical
 SignalOverError                        all                     see ``UnaryOperation``
 SNSPowderReduction                     Distributed
