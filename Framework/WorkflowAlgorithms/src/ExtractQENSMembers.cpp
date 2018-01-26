@@ -1,6 +1,7 @@
 #include "MantidWorkflowAlgorithms/ExtractQENSMembers.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/NumericAxis.h"
 
 #include <boost/numeric/conversion/cast.hpp>
 
@@ -66,6 +67,7 @@ void ExtractQENSMembers::exec() {
     appendToMembers(
         boost::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(i)),
         memberWorkspaces);
+  setNumericAxis(memberWorkspaces, qValues, 1);
 
   std::string outputWSName = getProperty("OutputWorkspace");
   auto workspaceNames =
@@ -177,6 +179,13 @@ std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::createMembersWorkspaces(
   return memberWorkspaces;
 }
 
+/**
+ * Appends the n-th spectra in the specified result workspace to the n-th
+ * specified member workspace.
+ *
+ * @param resultWS  The result workspace.
+ * @param members   A vector containing the member workspaces.
+ */
 void ExtractQENSMembers::appendToMembers(
     MatrixWorkspace_sptr resultWS,
     const std::vector<Mantid::API::MatrixWorkspace_sptr> &members) {
@@ -184,14 +193,54 @@ void ExtractQENSMembers::appendToMembers(
     appendSpectra(members[i], extractSpectrum(resultWS, i));
 }
 
+/**
+ * Creates and sets a numeric axis, filled with the specified values, on each of
+ * the specified workspaces at the specified axis index.
+ *
+ * @param workspaces  The workspaces whose axis to set.
+ * @param values      The values used to create the numeric axis.
+ * @param axisIndex   The index of the axis to set.
+ */
+void ExtractQENSMembers::setNumericAxis(
+    const std::vector<MatrixWorkspace_sptr> &workspaces,
+    const std::vector<double> &values, size_t axisIndex) const {
+  auto qAxis = NumericAxis(workspaces.size());
+  for (size_t i = 0u; i < workspaces.size(); ++i)
+    qAxis.setValue(i, values[i]);
+
+  for (auto &workspace : workspaces) {
+    workspace->replaceAxis(axisIndex, new NumericAxis(qAxis));
+    workspace->setYUnitLabel("MomentumTransfer");
+  }
+}
+
+/**
+ * Adds the specified member workspaces to the analysis data service.
+ *
+ * @param members           The name of the members; corresponds to each member
+ *                          workspace.
+ * @param memberWorkspaces  The member workspaces.
+ * @param outputWSName      The name of the output workspace; used as a prefix.
+ * @return                  A vector containing the names of the added
+ *                          workspaces.
+ */
 std::vector<std::string> ExtractQENSMembers::addMembersToADS(
     const std::vector<std::string> &members,
     const std::vector<Mantid::API::MatrixWorkspace_sptr> &memberWorkspaces,
     const std::string &outputWSName) {
+  std::unordered_map<std::string, size_t> nameCounts;
   std::vector<std::string> workspaceNames;
   workspaceNames.reserve(members.size());
+
   for (size_t i = 0u; i < members.size(); ++i) {
-    const auto name = outputWSName + "_" + members[i];
+    std::string count = "";
+
+    if (nameCounts.find(members[i]) == nameCounts.end())
+      nameCounts[members[i]] = 1;
+    else
+      count = std::to_string(++nameCounts[members[i]]);
+
+    const auto name = outputWSName + "_" + members[i] + count;
     AnalysisDataService::Instance().addOrReplace(name, memberWorkspaces[i]);
     workspaceNames.emplace_back(name);
   }

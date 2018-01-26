@@ -66,6 +66,10 @@ private:
       Mantid::API::MatrixWorkspace_sptr resultWS,
       const std::vector<Mantid::API::MatrixWorkspace_sptr> &members);
 
+  void setNumericAxis(const std::vector<MatrixWorkspace_sptr> &workspaces,
+                      const std::vector<double> &values,
+                      size_t axisIndex) const;
+
   std::vector<std::string> addMembersToADS(
       const std::vector<std::string> &members,
       const std::vector<Mantid::API::MatrixWorkspace_sptr> &memberWorkspaces,
