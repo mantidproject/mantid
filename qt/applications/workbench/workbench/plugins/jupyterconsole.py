@@ -25,6 +25,13 @@ from qtpy.QtWidgets import QVBoxLayout
 # local package imports
 from workbench.plugins.base import PluginWidget
 
+# should we share this with plugins.editor?
+STARTUP_CODE = """from __future__ import (absolute_import, division, print_function, unicode_literals)
+from mantid.simpleapi import *
+import matplotlib.pyplot as plt
+import numpy as np
+"""
+
 
 class JupyterConsole(PluginWidget):
     """Provides an in-process Jupyter Qt-based console"""
@@ -33,7 +40,7 @@ class JupyterConsole(PluginWidget):
         super(JupyterConsole, self).__init__(parent)
 
         # layout
-        self.console = InProcessJupyterConsole(self)
+        self.console = InProcessJupyterConsole(self, startup_code=STARTUP_CODE)
         layout = QVBoxLayout()
         layout.addWidget(self.console)
         self.setLayout(layout)

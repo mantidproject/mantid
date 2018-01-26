@@ -107,7 +107,7 @@ class PythonCodeExecution(QObject):
     sig_exec_error = Signal(object)
     sig_exec_progress = Signal(int)
 
-    def __init__(self):
+    def __init__(self, startup_code=None):
         """Initialize the object"""
         super(PythonCodeExecution, self).__init__()
 
@@ -115,6 +115,9 @@ class PythonCodeExecution(QObject):
         self._task = None
 
         self.reset_context()
+
+        if startup_code:
+            self.execute(startup_code)
 
     @property
     def globals_ns(self):

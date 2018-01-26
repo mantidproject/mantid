@@ -42,9 +42,20 @@ class InProcessJupyterConsole(RichJupyterWidget):
         """
         A constructor matching that of RichJupyterWidget
         :param args: Positional arguments passed directly to RichJupyterWidget
-        :param kwargs: Keyword arguments passed directly to RichJupyterWidget
+        :param kwargs: Keyword arguments. The following keywords are understood by this widget:
+
+          - startup_code: A code snippet to run on startup. It is also added to the banner to inform the user.
+
+        the rest are passed to RichJupyterWidget
         """
+        startup_code = kwargs.pop("startup_code", "")
         super(InProcessJupyterConsole, self).__init__(*args, **kwargs)
+
+        # adjust startup banner accordingly
+        if startup_code:
+            self.banner += "\n" + \
+                "The following code has been executed at startup:\n" + \
+                startup_code
 
         # create an in-process kernel
         kernel_manager = QtInProcessKernelManager()
@@ -56,9 +67,11 @@ class InProcessJupyterConsole(RichJupyterWidget):
         shell = kernel.shell
         shell.run_code = async_wrapper(shell.run_code, shell)
 
-        # attach channels and start kenel
+        # attach channels, start kenel and run any startup code
         kernel_client = kernel_manager.client()
         kernel_client.start_channels()
+        if startup_code:
+            shell.ex(startup_code)
 
         self.kernel_manager = kernel_manager
         self.kernel_client = kernel_client
