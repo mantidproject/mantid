@@ -44,7 +44,7 @@ class TeixeiraWater(IFunction1D):
         length = length**2
 
         xvals = np.array(xvals)
-        hwhm = xvals * xvals * length / (tau * (1 + xvals * xvals * length))
+        hwhm = xvals * xvals * length / (tau * (6 + xvals * xvals * length))
 
         return hwhm
 
