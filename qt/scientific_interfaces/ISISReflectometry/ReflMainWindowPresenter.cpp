@@ -4,6 +4,7 @@
 #include "IReflEventTabPresenter.h"
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include <iostream>
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -53,9 +54,17 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
   case Flag::ConfirmReductionResumedFlag:
     m_isProcessing = true;
     break;
+  case Flag::HelpPressed:
+    showHelp();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
+}
+
+void ReflMainWindowPresenter::showHelp() {
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("ISIS Reflectometry"));
 }
 
 void ReflMainWindowPresenter::settingsChanged(int group) {
