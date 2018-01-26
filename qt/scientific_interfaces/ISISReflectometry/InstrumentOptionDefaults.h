@@ -3,6 +3,7 @@
 #include <string>
 #include "MantidGeometry/Instrument.h"
 #include <boost/optional.hpp>
+#include <boost/variant.hpp>
 #include <ostream>
 #include "DllConfig.h"
 
@@ -17,7 +18,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentOptionDefaults {
   double MonitorBackgroundMax;
   double LambdaMin;
   double LambdaMax;
-  int I0MonitorIndex;
+  boost::variant<int, double> I0MonitorIndex;
   boost::optional<std::string> ProcessingInstructions;
   bool CorrectDetectors;
   std::string DetectorCorrectionType;

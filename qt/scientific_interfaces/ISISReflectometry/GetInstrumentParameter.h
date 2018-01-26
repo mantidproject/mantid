@@ -2,6 +2,7 @@
 #define MANTID_ISISREFLECTOMETRY_GETINSTRUMENTPARAMETER_H
 #include <string>
 #include <vector>
+#include <boost/variant.hpp>
 #include "MantidGeometry/Instrument.h"
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -51,10 +52,30 @@ private:
   std::string m_originalMessage;
 };
 
+template <typename T1, typename T2, typename... Ts>
+class InstrumentParameter<boost::variant<T1, T2, Ts...>> {
+public:
+  static boost::variant<std::vector<T1>, std::vector<T2>, std::vector<Ts>...>
+  get(Mantid::Geometry::Instrument_const_sptr instrument,
+      std::string const &parameterName) {
+    try {
+      return InstrumentParameter<T1>::get(instrument, parameterName);
+    } catch (InstrumentParameterTypeMissmatch const &t1ex) {
+      try {
+        return InstrumentParameter<T2, Ts...>::get(instrument, parameterName);
+      } catch (InstrumentParameterTypeMissmatch const &t2ex) {
+        throw InstrumentParameterTypeMissmatch(parameterName, t1ex.expectedType() + " or a " + t2ex.expectedType(), t2ex);
+      }
+    }
+  }
+};
+
 template <typename T>
-std::vector<T>
-getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
-                       std::string const &parameterName) {
+auto getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
+                            std::string const &parameterName)
+    -> decltype(InstrumentParameter<T>::get(
+        std::declval<Mantid::Geometry::Instrument_const_sptr>(),
+        std::declval<std::string const &>())) {
   return InstrumentParameter<T>::get(instrument, parameterName);
 }
 }

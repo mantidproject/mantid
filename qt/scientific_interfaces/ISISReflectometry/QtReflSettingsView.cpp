@@ -214,6 +214,22 @@ void QtReflSettingsView::setChecked(QCheckBox &checkBox, bool checked) {
   checkBox.setCheckState(checkedAsCheckState);
 }
 
+class SetI0MonIndex : public boost::static_visitor<> {
+public:
+  SetI0MonIndex(QLineEdit &I0MonIndexEdit) : m_I0monIndexEdit(I0MonIndexEdit) {}
+
+  void operator()(int index) const {
+    m_I0monIndexEdit.setText(QString::number(index));
+  }
+
+  void operator()(double index) const {
+    this->operator()(static_cast<int>(index));
+  }
+
+private:
+  QLineEdit &m_I0monIndexEdit;
+};
+
 /* Sets default values for all instrument settings given a list of default
 * values.
 */
@@ -225,7 +241,8 @@ void QtReflSettingsView::setInstDefaults(InstrumentOptionDefaults defaults) {
   setText(*m_ui.monBgMaxEdit, defaults.MonitorBackgroundMax);
   setText(*m_ui.lamMinEdit, defaults.LambdaMin);
   setText(*m_ui.lamMaxEdit, defaults.LambdaMax);
-  setText(*m_ui.I0MonIndexEdit, defaults.I0MonitorIndex);
+  boost::apply_visitor(SetI0MonIndex(*m_ui.I0MonIndexEdit),
+                       defaults.I0MonitorIndex);
   setSelected(*m_ui.detectorCorrectionTypeComboBox,
               defaults.DetectorCorrectionType);
   setText(*m_ui.procInstEdit, defaults.ProcessingInstructions);

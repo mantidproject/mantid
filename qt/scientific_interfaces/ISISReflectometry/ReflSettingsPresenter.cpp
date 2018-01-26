@@ -306,14 +306,14 @@ void ReflSettingsPresenter::getExpDefaults() {
 
   if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
     defaults.TransRunStartOverlap =
-        parameters.optional<double>("TransRunStartOverlap");
-    defaults.TransRunEndOverlap =
-        parameters.optional<double>("TransRunEndOverlap");
-  } else {
-    defaults.TransRunStartOverlap =
         parameters.mandatory<double>("TransRunStartOverlap");
     defaults.TransRunEndOverlap =
         parameters.mandatory<double>("TransRunEndOverlap");
+  } else {
+    defaults.TransRunStartOverlap =
+        parameters.optional<double>("TransRunStartOverlap");
+    defaults.TransRunEndOverlap =
+        parameters.optional<double>("TransRunEndOverlap");
   }
 
   m_view->setExpDefaults(std::move(defaults));
@@ -334,8 +334,7 @@ void ReflSettingsPresenter::getInstDefaults() {
 
   defaults.NormalizeByIntegratedMonitors =
       value_or(parameters.optional<bool>("IntegratedMonitors"),
-               boost::lexical_cast<bool>(
-                   alg->getPropertyValue("NormalizeByIntegratedMonitors")));
+               alg->getProperty("NormalizeByIntegratedMonitors"));
   defaults.MonitorIntegralMin =
       parameters.mandatory<double>("MonitorIntegralMin");
   defaults.MonitorIntegralMax =
@@ -346,12 +345,13 @@ void ReflSettingsPresenter::getInstDefaults() {
       parameters.mandatory<double>("MonitorBackgroundMax");
   defaults.LambdaMin = parameters.mandatory<double>("LambdaMin");
   defaults.LambdaMax = parameters.mandatory<double>("LambdaMax");
-  defaults.I0MonitorIndex = parameters.mandatory<int>("I0MonitorIndex");
+  defaults.I0MonitorIndex =
+      parameters.mandatory<boost::variant<int, double>>("I0MonitorIndex");
   defaults.ProcessingInstructions =
       parameters.optional<std::string>("ProcessingInstructions");
-  defaults.CorrectDetectors = value_or(
-      parameters.optional<bool>("CorrectDetectors"),
-      boost::lexical_cast<bool>(alg->getPropertyValue("CorrectDetectors")));
+  defaults.CorrectDetectors =
+      value_or(parameters.optional<bool>("CorrectDetectors"),
+               alg->getProperty("CorrectDetectors"));
   defaults.DetectorCorrectionType =
       value_or(parameters.optional<std::string>("DetectorCorrectionType"),
                alg->getPropertyValue("DetectorCorrectionType"));
