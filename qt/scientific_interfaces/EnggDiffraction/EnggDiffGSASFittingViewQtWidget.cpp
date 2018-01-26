@@ -106,9 +106,9 @@ void EnggDiffGSASFittingViewQtWidget::plotCurve(
     auto *curve = curves[i].get();
     QwtPlotCurve *plotCurve = new QwtPlotCurve();
 
-    m_focusedRunCurves.push_back(plotCurve);
     m_focusedRunCurves[i]->setData(*curve);
     m_focusedRunCurves[i]->attach(m_ui.plotArea);
+    m_focusedRunCurves.push_back(plotCurve);
   }
 
   m_ui.plotArea->replot();
