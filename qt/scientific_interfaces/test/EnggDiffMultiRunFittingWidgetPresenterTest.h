@@ -56,6 +56,58 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_getFittedPeaksValid() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksBankIDToReturn())
+        .Times(1)
+        .WillOnce(Return(1));
+    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksRunNumberToReturn())
+        .Times(1)
+        .WillOnce(Return(123));
+
+    const API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1))
+        .Times(1)
+        .WillOnce(Return(boost::make_optional<API::MatrixWorkspace_sptr>(ws)));
+    EXPECT_CALL(*m_mockViewPtr, setFittedPeaksWorkspaceToReturn(ws));
+    EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::GetFittedPeaks);
+
+    assertMocksUsedCorrectly();
+  }
+
+  void test_getFittedPeaksInvalid() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksBankIDToReturn())
+        .Times(1)
+        .WillOnce(Return(1));
+    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksRunNumberToReturn())
+        .Times(1)
+        .WillOnce(Return(123));
+
+    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1))
+        .Times(1)
+        .WillOnce(Return(boost::none));
+
+    EXPECT_CALL(*m_mockViewPtr,
+                userError("Invalid fitted peaks run identifier",
+                          "Could not find a fitted peaks workspace with run "
+                          "number 123 and bank ID 1. Please contact the "
+                          "development team with this message"))
+        .Times(1);
+    EXPECT_CALL(*m_mockViewPtr, setFittedPeaksWorkspaceToReturn(testing::_))
+        .Times(0);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::GetFittedPeaks);
+
+    assertMocksUsedCorrectly();
+  }
+
 private:
   MockEnggDiffMultiRunFittingWidgetModel *m_mockModelPtr;
   MockEnggDiffMultiRunFittingWidgetView *m_mockViewPtr;

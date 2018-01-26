@@ -27,6 +27,7 @@ public:
 private:
   void processAddFittedPeaks();
   void processAddFocusedRun();
+  void processGetFittedPeaks();
   void processShutDown();
   void processStart();
 

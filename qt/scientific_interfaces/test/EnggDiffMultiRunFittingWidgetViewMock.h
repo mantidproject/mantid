@@ -28,7 +28,11 @@ public:
 
   MOCK_CONST_METHOD0(getFittedPeaksBankIDToAdd, size_t());
 
+  MOCK_CONST_METHOD0(getFittedPeaksBankIDToReturn, size_t());
+
   MOCK_CONST_METHOD0(getFittedPeaksRunNumberToAdd, int());
+
+  MOCK_CONST_METHOD0(getFittedPeaksRunNumberToReturn, int());
 
   MOCK_CONST_METHOD2(getFocusedRun,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
@@ -40,6 +44,12 @@ public:
   MOCK_CONST_METHOD0(getFocusedRunBankIDToAdd, size_t());
 
   MOCK_CONST_METHOD0(getFocusedRunNumberToAdd, int());
+
+  MOCK_METHOD1(setFittedPeaksWorkspaceToReturn,
+               void(const Mantid::API::MatrixWorkspace_sptr ws));
+
+  MOCK_METHOD2(userError, void(const std::string &errorTitle,
+                               const std::string &errorDescription));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

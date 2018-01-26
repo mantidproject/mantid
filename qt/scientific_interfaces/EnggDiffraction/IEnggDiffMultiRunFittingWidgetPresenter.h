@@ -13,6 +13,7 @@ public:
   enum Notification {
     AddFittedPeaks, /// The view has been passed a fitted peaks workspace to add
     AddFocusedRun,  ///< The view has been passed a focused run to add
+    GetFittedPeaks, ///< The view has been asked for a fitted peaks workspace
     ShutDown,       ///< Shut down the widget
     Start,          ///< Start and set up the interface
   };

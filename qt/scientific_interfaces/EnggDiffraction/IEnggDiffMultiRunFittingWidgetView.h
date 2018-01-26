@@ -42,16 +42,6 @@ public:
   virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFittedPeaks(const int runNumber, const size_t bank) const = 0;
 
-  /**
-   Get focused workspace corresponding to a given run and bank, if that run has
-   been loaded into the widget
-   @param runNumber The run number of the run
-   @param bank The bank ID of the run
-   @return The workspace, or empty optional if that run has not been loaded in
-  */
-  virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
-  getFocusedRun(const int runNumber, const size_t bank) const = 0;
-
   /// Get the fitted peaks workspace which has been passed to the view to be
   /// loaded into the widget, in order to pass it to the model
   virtual Mantid::API::MatrixWorkspace_sptr
@@ -61,9 +51,25 @@ public:
   /// view
   virtual size_t getFittedPeaksBankIDToAdd() const = 0;
 
+  /// Get the bank ID requested when getFittedPeaks is run
+  virtual size_t getFittedPeaksBankIDToReturn() const = 0;
+
+  /// Get the run number requested when getFittedPeaks is run
+  virtual int getFittedPeaksRunNumberToReturn() const = 0;
+
   /// Get the run number of the fitted peaks workspace which has been passed to
   /// the view
   virtual int getFittedPeaksRunNumberToAdd() const = 0;
+
+  /**
+   Get focused workspace corresponding to a given run and bank, if that run has
+   been loaded into the widget
+   @param runNumber The run number of the run
+   @param bank The bank ID of the run
+   @return The workspace, or empty optional if that run has not been loaded in
+  */
+  virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
+  getFocusedRun(const int runNumber, const size_t bank) const = 0;
 
   /// Get the focused run which has been passed to the view to be loaded into
   /// the widget, in order to pass it to the model
@@ -75,6 +81,19 @@ public:
 
   /// Get the run number of the focused run which has been passed to the view
   virtual int getFocusedRunNumberToAdd() const = 0;
+
+  /// Set the the fitted peaks workspace to be returned when getFittedPeaks is
+  /// run on the widget
+  virtual void setFittedPeaksWorkspaceToReturn(
+      const Mantid::API::MatrixWorkspace_sptr ws) = 0;
+
+  /**
+   Display an error message to the user
+   @param errorTitle Title of the error
+   @param errorDescription Longer description of the error
+  */
+  virtual void userError(const std::string &errorTitle,
+                         const std::string &errorDescription) = 0;
 };
 
 } // CustomInterfaces
