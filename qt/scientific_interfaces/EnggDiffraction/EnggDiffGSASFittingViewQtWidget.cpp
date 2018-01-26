@@ -129,8 +129,14 @@ void EnggDiffGSASFittingViewQtWidget::resetCanvas() {
     curve->detach();
   }
   m_focusedRunCurves.clear();
-  m_zoomTool->setZoomBase(true);
+  resetPlotZoomLevel();
 }
+
+  void EnggDiffGSASFittingViewQtWidget::resetPlotZoomLevel(){
+    m_ui.plotArea->setAxisAutoScale(QwtPlot::xBottom);
+    m_ui.plotArea->setAxisAutoScale(QwtPlot::yLeft);
+    m_zoomTool->setZoomBase(true);
+  }
 
 void EnggDiffGSASFittingViewQtWidget::selectRun() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);

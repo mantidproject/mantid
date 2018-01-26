@@ -52,6 +52,8 @@ public:
 
   void resetCanvas() override;
 
+  void resetPlotZoomLevel();
+
   void setEnabled(const bool enabled);
 
   bool showRefinementResultsSelected() const override;
