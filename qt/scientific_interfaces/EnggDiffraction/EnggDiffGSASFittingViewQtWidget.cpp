@@ -18,10 +18,11 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
 EnggDiffGSASFittingViewQtWidget::~EnggDiffGSASFittingViewQtWidget() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::ShutDown);
 
-  for (auto curves : m_focusedRunCurves) {
+  for (auto &curves : m_focusedRunCurves) {
     curves->detach();
-    delete curves;
   }
+
+  m_focusedRunCurves.clear();
 }
 
 void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
@@ -104,11 +105,11 @@ void EnggDiffGSASFittingViewQtWidget::plotCurve(
 
   for (size_t i = 0; i < curves.size(); ++i) {
     auto *curve = curves[i].get();
-    QwtPlotCurve *plotCurve = new QwtPlotCurve();
+    auto plotCurve = std::make_unique<QwtPlotCurve>();
 
     plotCurve->setData(*curve);
     plotCurve->attach(m_ui.plotArea);
-    m_focusedRunCurves.push_back(plotCurve);
+    m_focusedRunCurves.push_back(std::move(plotCurve));
   }
 
   m_ui.plotArea->replot();
@@ -117,16 +118,10 @@ void EnggDiffGSASFittingViewQtWidget::plotCurve(
 }
 
 void EnggDiffGSASFittingViewQtWidget::resetCanvas() {
-  for (auto curve : m_focusedRunCurves) {
-    if (curve) {
-      curve->detach();
-      delete curve;
-    }
+  for (auto &curve : m_focusedRunCurves) {
+    curve->detach();
   }
-
-  if (m_focusedRunCurves.size() > 0) {
-    m_focusedRunCurves.clear();
-  }
+  m_focusedRunCurves.clear();
   m_zoomTool->setZoomBase(true);
 }
 

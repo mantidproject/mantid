@@ -67,7 +67,7 @@ private slots:
   void selectRun();
 
 private:
-  std::vector<QwtPlotCurve *> m_focusedRunCurves;
+  std::vector<std::unique_ptr<QwtPlotCurve>> m_focusedRunCurves;
 
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
