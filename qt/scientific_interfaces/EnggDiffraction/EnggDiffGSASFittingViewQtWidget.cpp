@@ -10,15 +10,16 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
   setupUI();
 
-  m_zoomTool.reset(
-      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-                        QwtPicker::AlwaysOff, m_ui.plotArea->canvas()));
+  m_zoomTool = std::make_unique<QwtPlotZoomer>(
+      QwtPlot::xBottom, QwtPlot::yLeft,
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+      QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
   m_zoomTool->setRubberBandPen(QPen(Qt::black));
   setZoomToolEnabled(false);
 
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
-  m_presenter.reset(new EnggDiffGSASFittingPresenter(std::move(model), this));
+  m_presenter =
+      std::make_unique<EnggDiffGSASFittingPresenter>(std::move(model), this);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
 
@@ -132,11 +133,11 @@ void EnggDiffGSASFittingViewQtWidget::resetCanvas() {
   resetPlotZoomLevel();
 }
 
-  void EnggDiffGSASFittingViewQtWidget::resetPlotZoomLevel(){
-    m_ui.plotArea->setAxisAutoScale(QwtPlot::xBottom);
-    m_ui.plotArea->setAxisAutoScale(QwtPlot::yLeft);
-    m_zoomTool->setZoomBase(true);
-  }
+void EnggDiffGSASFittingViewQtWidget::resetPlotZoomLevel() {
+  m_ui.plotArea->setAxisAutoScale(QwtPlot::xBottom);
+  m_ui.plotArea->setAxisAutoScale(QwtPlot::yLeft);
+  m_zoomTool->setZoomBase(true);
+}
 
 void EnggDiffGSASFittingViewQtWidget::selectRun() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
