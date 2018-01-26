@@ -487,7 +487,7 @@ public:
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
-    expectOptionLoadErrors(mockView);
+    expectNoOptionLoadErrors(mockView);
 
     presenter.setInstrumentName("INTER");
     auto fromIDFOrReductionAlg = InstrumentOptionDefaults();
@@ -499,8 +499,7 @@ public:
     fromIDFOrReductionAlg.MonitorBackgroundMax = 18.0;
     fromIDFOrReductionAlg.LambdaMin = 1.5;
     fromIDFOrReductionAlg.LambdaMax = 17.0;
-    // TODO: Change the value below when updating the IDF for 3.12.
-    fromIDFOrReductionAlg.I0MonitorIndex = 0.0;
+    fromIDFOrReductionAlg.I0MonitorIndex = 2.0;
     fromIDFOrReductionAlg.DetectorCorrectionType = "VerticalShift";
     fromIDFOrReductionAlg.CorrectDetectors = true;
 
