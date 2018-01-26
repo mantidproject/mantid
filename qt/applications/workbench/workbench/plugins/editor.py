@@ -64,6 +64,9 @@ class MultiFileEditor(PluginWidget):
 
     # ----------- Plugin API --------------------
 
+    def app_closing(self):
+        self.editors.close_all()
+
     def get_plugin_title(self):
         return "Editor"
 

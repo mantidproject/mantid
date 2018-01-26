@@ -54,7 +54,6 @@ set ( UI_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog
 include_directories ( inc inc/MantidQtWidgets/Plugins/AlgorithmDialogs )
 
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
-  QT_VERSION 4
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
@@ -70,6 +69,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
     ${OPENGL_LIBRARIES}
   QT4_LINK_LIBS
     Qt4::QtOpenGL
+  QT5_LINK_LIBS
+    Qt5::OpenGL
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
   OSX_INSTALL_RPATH

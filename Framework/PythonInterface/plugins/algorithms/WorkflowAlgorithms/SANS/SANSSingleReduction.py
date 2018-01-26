@@ -4,7 +4,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import (ReductionMode, DataType, ISISReductionMode)
@@ -14,7 +14,7 @@ from sans.algorithm_detail.single_execution import (run_core_reduction, get_fina
 from sans.algorithm_detail.bundles import ReductionSettingBundle
 
 
-class SANSSingleReduction(DataProcessorAlgorithm):
+class SANSSingleReduction(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Reduction'
 
@@ -312,6 +312,9 @@ class SANSSingleReduction(DataProcessorAlgorithm):
         # HAB or LAB anywhere which means that in the future there could be other detectors of relevance. Here we
         # reference HAB and LAB directly since we currently don't want to rely on dynamic properties. See also in PyInit
         for reduction_mode, output_workspace in list(reduction_mode_vs_output_workspaces.items()):
+            # In an MPI reduction output_workspace is produced on the master rank, skip others.
+            if output_workspace is None:
+                continue
             if reduction_mode is ReductionMode.Merged:
                 self.setProperty("OutputWorkspaceMerged", output_workspace)
             elif reduction_mode is ISISReductionMode.LAB:
