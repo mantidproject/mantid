@@ -98,8 +98,7 @@ public:
                 userError("Invalid fitted peaks run identifier",
                           "Could not find a fitted peaks workspace with run "
                           "number 123 and bank ID 1. Please contact the "
-                          "development team with this message"))
-        .Times(1);
+                          "development team with this message")).Times(1);
     EXPECT_CALL(*m_mockViewPtr, setFittedPeaksWorkspaceToReturn(testing::_))
         .Times(0);
 
@@ -150,8 +149,7 @@ public:
                 userError("Invalid focused run identifier",
                           "Could not find a focused run with run "
                           "number 123 and bank ID 1. Please contact the "
-                          "development team with this message"))
-        .Times(1);
+                          "development team with this message")).Times(1);
     EXPECT_CALL(*m_mockViewPtr, setFocusedRunWorkspaceToReturn(testing::_))
         .Times(0);
 
