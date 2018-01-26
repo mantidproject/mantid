@@ -1,14 +1,20 @@
-#ifndef MANTID_ALGORITHMS_COMMENT_H_
-#define MANTID_ALGORITHMS_COMMENT_H_
+#ifndef MANTID_ALGORITHMS_CLEARMASKEDSPECTRA_H_
+#define MANTID_ALGORITHMS_CLEARMASKEDSPECTRA_H_
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/DistributedAlgorithm.h"
+
 namespace Mantid {
 namespace Algorithms {
 
-/** Comment : Adds a note into the history record of a workspace
+/** Clear counts (or events, if applicable) on all spectra that are fully
+  masked.  A spectrum is fully masked if all of its associated detectors are
+  masked, e.g., from a call to `MaskInstrument`.
 
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  @author Simon Heybrock
+  @date 2017
+
+  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -29,7 +35,8 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Comment : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL ClearMaskedSpectra
+    : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -44,4 +51,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_COMMENT_H_ */
+#endif /* MANTID_ALGORITHMS_CLEARMASKEDSPECTRA_H_ */
