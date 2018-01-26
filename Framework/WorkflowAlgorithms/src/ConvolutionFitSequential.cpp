@@ -244,6 +244,9 @@ void ConvolutionFitSequential::exec() {
   deleter->executeAsChildAlg();
   deleteProgress.report("Deleting PlotPeak Output");
 
+  deleter->setProperty("Workspace", tempFitWsName);
+  deleter->executeAsChildAlg();
+
   deleter->setProperty("WorkSpace", outputWsName + "_Parameters");
   deleter->executeAsChildAlg();
   deleteProgress.report("Deleting PlotPeak Output");
