@@ -26,6 +26,10 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
     processAddFocusedRun();
     break;
 
+  case IEnggDiffMultiRunFittingWidgetPresenter::GetFittedPeaks:
+    processGetFittedPeaks();
+    break;
+
   case IEnggDiffMultiRunFittingWidgetPresenter::ShutDown:
     processShutDown();
     break;
@@ -48,6 +52,23 @@ void EnggDiffMultiRunFittingWidgetPresenter::processAddFocusedRun() {
   const auto bankID = m_view->getFocusedRunBankIDToAdd();
   const auto runNumber = m_view->getFocusedRunNumberToAdd();
   m_model->addFocusedRun(runNumber, bankID, ws);
+}
+
+void EnggDiffMultiRunFittingWidgetPresenter::processGetFittedPeaks() {
+  const auto bankID = m_view->getFittedPeaksBankIDToReturn();
+  const auto runNumber = m_view->getFittedPeaksRunNumberToReturn();
+  const auto ws = m_model->getFittedPeaks(runNumber, bankID);
+
+  if (!ws) {
+    m_view->userError(
+        "Invalid fitted peaks run identifier",
+        "Could not find a fitted peaks workspace with run number " +
+            std::to_string(runNumber) + " and bank ID " +
+            std::to_string(bankID) +
+            ". Please contact the development team with this message");
+    return;
+  }
+  m_view->setFittedPeaksWorkspaceToReturn(*ws);
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processShutDown() {
