@@ -73,7 +73,7 @@ private:
 
   Ui::EnggDiffractionQtTabGSAS m_ui;
 
-  QwtPlotZoomer *m_zoomTool = nullptr;
+  std::unique_ptr<QwtPlotZoomer> m_zoomTool;
 
   void setFocusedRunFileNames(const QStringList &filenames);
 

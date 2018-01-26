@@ -10,6 +10,13 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
   setupUI();
 
+  m_zoomTool.reset(
+      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
+                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                        QwtPicker::AlwaysOff, m_ui.plotArea->canvas()));
+  m_zoomTool->setRubberBandPen(QPen(Qt::black));
+  setZoomToolEnabled(false);
+
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
   m_presenter.reset(new EnggDiffGSASFittingPresenter(std::move(model), this));
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
@@ -167,13 +174,6 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
           SLOT(loadFocusedRun()));
   connect(m_ui.listWidget_runLabels, SIGNAL(itemSelectionChanged()), this,
           SLOT(selectRun()));
-
-  m_zoomTool =
-      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-                        QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
-  m_zoomTool->setRubberBandPen(QPen(Qt::black));
-  setZoomToolEnabled(false);
 }
 
 void EnggDiffGSASFittingViewQtWidget::setZoomToolEnabled(const bool enabled) {
