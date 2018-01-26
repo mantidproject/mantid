@@ -1,14 +1,21 @@
 import numpy as np
+from scipy.spatial import KDTree
 import fractional_indexing as indexing
+
 from mantid.kernel import Direction
 from mantid.api import (IPeaksWorkspaceProperty,
                         ITableWorkspaceProperty, PythonAlgorithm, AlgorithmFactory)
-from mantid.simpleapi import CreateEmptyTableWorkspace
+from mantid.simpleapi import CreateEmptyTableWorkspace, RenameWorkspace
 
 
 class IndexSatellitePeaks(PythonAlgorithm):
 
     def PyInit(self):
+        self.declareProperty(IPeaksWorkspaceProperty(name="MainPeaks",
+                                                     defaultValue="",
+                                                     direction=Direction.Input),
+                             doc="Main integer HKL peaks. Q vectors will be calculated relative to these peaks.")
+
         self.declareProperty(IPeaksWorkspaceProperty(name="SatellitePeaks",
                                                      defaultValue="",
                                                      direction=Direction.Input),
@@ -24,20 +31,28 @@ class IndexSatellitePeaks(PythonAlgorithm):
 
         self.declareProperty('Tolerance', 0.3, direction=Direction.Input,
                              doc="Tolerance on the noise of the q vectors")
+
         self.declareProperty('NumOfQs', 1, direction=Direction.Input,
                              doc="Number of independant q vectors")
+
+        self.declareProperty('ClusterThreshold', 1.5, direction=Direction.Input,
+                             doc="Threshold for automaticallty deciding on the number of q vectors to use. If NumOfQs found is set then this \
+                             is property is ignored.")
 
     def PyExec(self):
         tolerance = self.getProperty("Tolerance").value
         k = self.getProperty("NumOfQs").value
+        nuclear = self.getProperty("MainPeaks").value
         satellites = self.getProperty("SatellitePeaks").value
+        cluster_threshold = self.getProperty("ClusterThreshold").value
+
         n_trunc_decimals = int(np.ceil(abs(np.log10(tolerance))))
 
-        hkls = indexing.get_hkls(satellites)
-        qs = np.round(hkls) - hkls
+        nuclear_hkls = indexing.get_hkls(nuclear)
+        sats_hkls = indexing.get_hkls(satellites)
 
-        clusters, k = indexing.cluster_qs(qs, k=k)
-
+        qs = indexing.find_q_vectors(nuclear_hkls, sats_hkls)
+        clusters, k = indexing.cluster_qs(qs, k=k, threshold=cluster_threshold)
         qs = indexing.average_clusters(qs, clusters)
         qs = indexing.trunc_decimals(qs, n_trunc_decimals)
         qs = indexing.sort_vectors_by_norm(qs)
@@ -47,15 +62,22 @@ class IndexSatellitePeaks(PythonAlgorithm):
         indicies = indexing.index_q_vectors(qs, tolerance)
         ndim = indicies.shape[1] + 3
 
+        hkls = indexing.find_nearest_integer_peaks(nuclear_hkls, sats_hkls)
+
         hklm = np.zeros((hkls.shape[0], ndim))
         hklm[:, :3] = np.round(hkls)
 
-        for i, index in enumerate(set(clusters)):
-            view = hklm[clusters == index]
-            view[:, 3:] = indicies[i]
-            hklm[clusters == index] = view
+        raw_qs = hkls - sats_hkls
+        peak_map = KDTree(qs)
+        hkls = []
+        for i, q in enumerate(raw_qs):
+            distance, index = peak_map.query(q, k=1)
+            hklm[i, 3:] = indicies[index]
 
         indexed = self.create_indexed_workspace(satellites, ndim, hklm)
+
+        name = self.getPropertyValue("OutputWorkspace")
+        RenameWorkspace(indexed, name)
         self.setProperty("OutputWorkspace", indexed)
 
     def create_indexed_workspace(self, fractional_peaks, ndim, hklm):

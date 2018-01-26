@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.cluster.hierarchy as hcluster
 from scipy.cluster.vq import kmeans2
-import scipy
+from scipy.spatial import KDTree
 
 
 def find_bases(qs, tolerance):
@@ -81,7 +81,7 @@ def round_to_nearest_reflection(qs, reflections, tolerance):
     :param tolerance: the radius to search for neighbouring reflections in.
     :returns: ndarray of q values rounded to the nearest predicted reflection
     """
-    kdtree = scipy.spatial.KDTree(reflections)
+    kdtree = KDTree(reflections)
 
     for i, q in enumerate(qs):
         result = kdtree.query_ball_point(q, r=tolerance)
@@ -159,6 +159,47 @@ def cluster_qs(qs, k=None, threshold=1.5):
     else:
         clusters = hcluster.fclusterdata(qs, threshold, criterion="distance")
     return clusters, len(set(clusters))
+
+
+def find_q_vectors(nuclear_hkls, sats_hkls):
+    """Find the q vector between the nuclear HKLs and the satellite peaks
+
+    Given a list of HKL positions and a list of fractional HKL positions of
+    satellite peaks, find the difference between each satellite and its nearest
+    integer HKL.
+
+    :param nuclear_hkls: the positions of integer HKL peaks.
+    :param sats_hkl: the positions of fractional "satellite" HKL peaks.
+    :returns: np.ndarray -- array of q vectors.
+    """
+    peak_map = KDTree(nuclear_hkls)
+    qs = []
+    for sat in sats_hkls:
+        distance, index = peak_map.query(sat, k=1)
+        if distance > 2:
+            # peak to far away from satellite ignore
+            continue
+        nearest_peak = nuclear_hkls[index]
+        qs.append(sat - nearest_peak)
+    return np.array(qs)
+
+
+def find_nearest_integer_peaks(nuclear_hkls, sat_hkls):
+    """Find the nearest integer peak for each fractional peak
+    
+    This will perform a spatial search to find the intger peak which is nearest the fractional satellite peak.
+
+    :param nuclear_hkls: the hkl poistions of each of the nuclear peaks.
+    :param sat_hkls: the fractional hkl position of the satellite peaks.
+    :returns: np.ndarray -- 2D array of HKL integer values for each fractional peak
+    """
+    peak_map = KDTree(nuclear_hkls)
+    hkls = []
+    for sat in sat_hkls:
+        distance, index = peak_map.query(sat, k=1)
+        nearest_peak = nuclear_hkls[index]
+        hkls.append(nearest_peak)
+    return np.array(hkls)
 
 
 def average_clusters(qs, clusters):
