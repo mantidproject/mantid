@@ -7,13 +7,12 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     std::unique_ptr<IEnggDiffGSASFittingModel> model,
-    std::unique_ptr<IEnggDiffGSASFittingView> view)
-    : m_model(std::move(model)), m_view(std::move(view)),
-      m_viewHasClosed(false) {}
+    IEnggDiffGSASFittingView *view)
+    : m_model(std::move(model)), m_view(view), m_viewHasClosed(false) {}
 
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     EnggDiffGSASFittingPresenter &&other)
-    : m_model(std::move(other.m_model)), m_view(std::move(other.m_view)),
+    : m_model(std::move(other.m_model)), m_view(other.m_view),
       m_viewHasClosed(other.m_viewHasClosed) {}
 
 EnggDiffGSASFittingPresenter &EnggDiffGSASFittingPresenter::
@@ -136,8 +135,12 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
 }
 
 void EnggDiffGSASFittingPresenter::processLoadRun() {
-  const auto focusedFileName = m_view->getFocusedFileName();
-  const auto loadSuccessful = m_model->loadFocusedRun(focusedFileName);
+  const auto focusedFileNames = m_view->getFocusedFileNames();
+  bool loadSuccessful = true;
+
+  for (const auto fileName : focusedFileNames) {
+    loadSuccessful &= m_model->loadFocusedRun(fileName);
+  }
 
   if (loadSuccessful) {
     const auto runLabels = m_model->getRunLabels();
