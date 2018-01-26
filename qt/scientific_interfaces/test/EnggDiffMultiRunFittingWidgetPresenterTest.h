@@ -108,6 +108,58 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_getFocusedRunValid() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockViewPtr, getFocusedRunBankIDToReturn())
+        .Times(1)
+        .WillOnce(Return(1));
+    EXPECT_CALL(*m_mockViewPtr, getFocusedRunNumberToReturn())
+        .Times(1)
+        .WillOnce(Return(123));
+
+    const API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1))
+        .Times(1)
+        .WillOnce(Return(boost::make_optional<API::MatrixWorkspace_sptr>(ws)));
+    EXPECT_CALL(*m_mockViewPtr, setFocusedRunWorkspaceToReturn(ws));
+    EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::GetFocusedRun);
+
+    assertMocksUsedCorrectly();
+  }
+
+  void test_getFocusedRunInvalid() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockViewPtr, getFocusedRunBankIDToReturn())
+        .Times(1)
+        .WillOnce(Return(1));
+    EXPECT_CALL(*m_mockViewPtr, getFocusedRunNumberToReturn())
+        .Times(1)
+        .WillOnce(Return(123));
+
+    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1))
+        .Times(1)
+        .WillOnce(Return(boost::none));
+
+    EXPECT_CALL(*m_mockViewPtr,
+                userError("Invalid focused run identifier",
+                          "Could not find a focused run with run "
+                          "number 123 and bank ID 1. Please contact the "
+                          "development team with this message"))
+        .Times(1);
+    EXPECT_CALL(*m_mockViewPtr, setFocusedRunWorkspaceToReturn(testing::_))
+        .Times(0);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::GetFocusedRun);
+
+    assertMocksUsedCorrectly();
+  }
+
 private:
   MockEnggDiffMultiRunFittingWidgetModel *m_mockModelPtr;
   MockEnggDiffMultiRunFittingWidgetView *m_mockViewPtr;

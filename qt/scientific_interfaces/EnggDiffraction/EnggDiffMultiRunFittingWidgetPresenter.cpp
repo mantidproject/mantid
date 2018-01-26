@@ -30,6 +30,10 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
     processGetFittedPeaks();
     break;
 
+  case IEnggDiffMultiRunFittingWidgetPresenter::GetFocusedRun:
+    processGetFocusedRun();
+    break;
+
   case IEnggDiffMultiRunFittingWidgetPresenter::ShutDown:
     processShutDown();
     break;
@@ -69,6 +73,23 @@ void EnggDiffMultiRunFittingWidgetPresenter::processGetFittedPeaks() {
     return;
   }
   m_view->setFittedPeaksWorkspaceToReturn(*ws);
+}
+
+void EnggDiffMultiRunFittingWidgetPresenter::processGetFocusedRun() {
+  const auto bankID = m_view->getFocusedRunBankIDToReturn();
+  const auto runNumber = m_view->getFocusedRunNumberToReturn();
+  const auto ws = m_model->getFocusedRun(runNumber, bankID);
+
+  if (!ws) {
+    m_view->userError(
+        "Invalid focused run identifier",
+        "Could not find a focused run with run number " +
+            std::to_string(runNumber) + " and bank ID " +
+            std::to_string(bankID) +
+            ". Please contact the development team with this message");
+    return;
+  }
+  m_view->setFocusedRunWorkspaceToReturn(*ws);
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processShutDown() {
