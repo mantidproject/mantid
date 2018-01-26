@@ -115,7 +115,7 @@ class PythonFileInterpreter(QWidget):
         self._setup_editor(content, filename)
 
         self._presenter = PythonFileInterpreterPresenter(self,
-                                                         PythonCodeExecution())
+                                                         PythonCodeExecution(content))
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
@@ -190,6 +190,9 @@ class PythonFileInterpreterPresenter(QObject):
         self._code_start_offset = 0
         self._is_executing = False
         self._error_formatter = ErrorFormatter()
+
+        # If startup code was executed then populate autocomplete
+        self.view.editor.updateCompletionAPI(self.model.generate_calltips())
 
         # connect signals
         self.model.sig_exec_success.connect(self._on_exec_success)
