@@ -64,7 +64,9 @@ public:
       try {
         return InstrumentParameter<T2, Ts...>::get(instrument, parameterName);
       } catch (InstrumentParameterTypeMissmatch const &t2ex) {
-        throw InstrumentParameterTypeMissmatch(parameterName, t1ex.expectedType() + " or a " + t2ex.expectedType(), t2ex);
+        throw InstrumentParameterTypeMissmatch(
+            parameterName, t1ex.expectedType() + " or a " + t2ex.expectedType(),
+            t2ex);
       }
     }
   }
