@@ -168,6 +168,8 @@ size_t ComponentInfo::size() const { return m_size; }
 
 size_t
 ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) const {
+  if (isDetector(componentIndex))
+    return 0;
   auto range = detectorRangeInSubtree(componentIndex);
   return std::distance(range.begin(), range.end());
 }

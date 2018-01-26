@@ -648,6 +648,9 @@ public:
 
     // Sub assembly which contains 2 detectors at root-1
     TS_ASSERT_EQUALS(compInfo.numberOfDetectorsInSubtree(root - 1), 2);
+
+    // Should return zero for a detector
+    TS_ASSERT_EQUALS(compInfo.numberOfDetectorsInSubtree(0), 0);
   }
 
   void test_component_indexes() {
