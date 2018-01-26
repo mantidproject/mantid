@@ -30,23 +30,20 @@ from qtpy.QtWidgets import QVBoxLayout
 from workbench.plugins.base import PluginWidget
 
 DEFAULT_BANNER_PARTS = [
-    'Python {}, numpy {}, matplotlib {}\n'.format(sys.version.split('\n')[0].strip(), np_version, mpl_version),
-    'Type "copyright", "credits" or "license" for more information.\n\n',
     'IPython {version} -- An enhanced Interactive Python.\n'.format(
         version=ipy_release.version,
         ),
-    quick_guide
+    quick_guide,
+    '\nPython {}, numpy {}, matplotlib {}\n'.format(sys.version.split('\n')[0].strip(), np_version, mpl_version),
+    'Type "copyright", "credits" or "license" for more information.\n',
 ]
 
 BANNER = ''.join(DEFAULT_BANNER_PARTS)
 
 # should we share this with plugins.editor?
 STARTUP_CODE = """from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 from mantid.simpleapi import *
-
 import matplotlib.pyplot as plt
-
 import numpy as np
 """
 
