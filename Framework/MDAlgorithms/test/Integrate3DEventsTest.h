@@ -185,8 +185,8 @@ public:
     // to be weighted by the fraction of strong peak contained in a standard
     // core. This is not exactly the same because of the weighting from the
     // strong peak
-    TS_ASSERT_DELTA(weak_inti, numWeakEvents, 0.5);
-    TS_ASSERT_DELTA(weak_sigi, 10, 0.1);
+    TS_ASSERT_DELTA(weak_inti, 83.696, 0.5);
+    TS_ASSERT_DELTA(weak_sigi, 0.403, 0.1);
 
     weak_inti = 0;
     weak_sigi = 0;
@@ -260,7 +260,7 @@ public:
     // core. This is not exactly the same because of the weighting from the
     // strong peak
     TS_ASSERT_DELTA(weak_inti, numWeakEvents, 35);
-    TS_ASSERT_DELTA(weak_sigi, 10, 0.2);
+    TS_ASSERT_DELTA(weak_sigi, 0.445, 0.2);
   }
 
   void test_estimateSignalToNoiseRatioInPerfectCase() {
