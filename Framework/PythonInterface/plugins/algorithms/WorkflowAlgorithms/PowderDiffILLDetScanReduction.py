@@ -93,7 +93,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         height_range = ''
         height_range_prop = self.getProperty('HeightRange').value
         if (len(height_range_prop) == 2):
-            height_range = ','.join(height_range_prop)
+            height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])
 
         output_workspaces = []
         output_workspace_name = self.getPropertyValue('OutputWorkspace')
