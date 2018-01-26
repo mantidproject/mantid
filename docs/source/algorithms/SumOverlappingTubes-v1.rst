@@ -37,7 +37,7 @@ In this case the x-axis is the true scattering angle of a pixel, so the Debye-Sc
 1D Option
 +++++++++
 
-This is effectively the 2DStraight option, with a single bin in the y-axis. For this case only the HeightAxis option can be given as a minimum and maximum.
+This is the same as the 2D option, with a single bin in the y-axis.
 
 Instrument Parameters
 +++++++++++++++++++++
