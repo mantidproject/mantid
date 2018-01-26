@@ -17,8 +17,9 @@ class IndexSatellitePeaksTest(unittest.TestCase):
 
     def test_exec(self):
         expected_values = np.array([-1, -1, 1, 1])
+        nuclear_peaks = Load("WISH_peak_hkl_small.nxs")
         peaks = Load("refine_satellites_fixed_q_test.nxs")
-        indexed_peaks = IndexSatellitePeaks(peaks, tolerance=0.1, NumOfQs=2)
+        indexed_peaks = IndexSatellitePeaks(nuclear_peaks, peaks, tolerance=0.1, NumOfQs=2)
         index_values = np.array(indexed_peaks.column("m1"))
 
         npt.assert_array_equal(index_values, expected_values)
