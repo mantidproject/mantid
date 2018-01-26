@@ -612,9 +612,8 @@ void ConvolutionFitSequential::calculateEISF(
 
 /*
  * Extracts the convolution fit members from the specified result group
- *workspace,
- * given the specified input workspace used for the fit, each into a workspace,
- * stored inside a group workspace of the specified name.
+ * workspace, given the specified input workspace used for the fit, each into a
+ * workspace, stored inside a group workspace of the specified name.
  *
  * @param inputWs       The input workspace used in the convolution fit.
  * @param resultGroupWs The result group workspace produced by the convolution
