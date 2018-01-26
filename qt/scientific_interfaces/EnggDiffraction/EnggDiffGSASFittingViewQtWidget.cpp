@@ -32,12 +32,12 @@ void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
 
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
     const Mantid::API::ITableWorkspace_sptr latticeParams) const {
-  (void)latticeParams;
+  UNUSED_ARG(latticeParams);
   throw std::runtime_error("displayLatticeParams not yet implemented");
 }
 
 void EnggDiffGSASFittingViewQtWidget::displayRwp(const double rwp) const {
-  (void)rwp;
+  UNUSED_ARG(rwp);
   throw std::runtime_error("displayRwp not yet implemented");
 }
 
@@ -196,7 +196,7 @@ void EnggDiffGSASFittingViewQtWidget::updateRunList(
 
 void EnggDiffGSASFittingViewQtWidget::userWarning(
     const std::string &warningDescription) const {
-  (void)warningDescription;
+  UNUSED_ARG(warningDescription);
   throw std::runtime_error("userWarning not yet implemented");
 }
 
