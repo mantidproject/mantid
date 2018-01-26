@@ -265,8 +265,7 @@ void ReflSettingsPresenter::createStitchHints() {
   // The algorithm
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Stitch1DMany");
   // The blacklist
-  std::set<std::string> blacklist = {"InputWorkspaces", "OutputWorkspace",
-                                     "OutputWorkspace"};
+  std::set<std::string> blacklist{"InputWorkspaces", "OutputWorkspace"};
   AlgorithmHintStrategy strategy(alg, blacklist);
 
   m_view->createStitchHints(strategy.createHints());
