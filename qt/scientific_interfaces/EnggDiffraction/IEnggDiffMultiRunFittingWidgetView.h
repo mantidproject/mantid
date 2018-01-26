@@ -79,12 +79,23 @@ public:
   /// Get the bank ID of the focused run which has been passed to the view
   virtual size_t getFocusedRunBankIDToAdd() const = 0;
 
+  /// Get the bank ID requested when getFocusedRun is run
+  virtual size_t getFocusedRunBankIDToReturn() const = 0;
+
   /// Get the run number of the focused run which has been passed to the view
   virtual int getFocusedRunNumberToAdd() const = 0;
 
-  /// Set the the fitted peaks workspace to be returned when getFittedPeaks is
+  // Get the run number requested when getFocusedRun is run
+  virtual int getFocusedRunNumberToReturn() const = 0;
+
+  /// Set the fitted peaks workspace to be returned when getFittedPeaks is
   /// run on the widget
   virtual void setFittedPeaksWorkspaceToReturn(
+      const Mantid::API::MatrixWorkspace_sptr ws) = 0;
+
+  /// Set the focused run workspace to be return when getFocusedRun is run on
+  /// the widget
+  virtual void setFocusedRunWorkspaceToReturn(
       const Mantid::API::MatrixWorkspace_sptr ws) = 0;
 
   /**

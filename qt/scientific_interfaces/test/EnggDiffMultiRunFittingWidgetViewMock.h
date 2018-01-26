@@ -43,9 +43,16 @@ public:
 
   MOCK_CONST_METHOD0(getFocusedRunBankIDToAdd, size_t());
 
+  MOCK_CONST_METHOD0(getFocusedRunBankIDToReturn, size_t());
+
   MOCK_CONST_METHOD0(getFocusedRunNumberToAdd, int());
 
+  MOCK_CONST_METHOD0(getFocusedRunNumberToReturn, int());
+
   MOCK_METHOD1(setFittedPeaksWorkspaceToReturn,
+               void(const Mantid::API::MatrixWorkspace_sptr ws));
+
+  MOCK_METHOD1(setFocusedRunWorkspaceToReturn,
                void(const Mantid::API::MatrixWorkspace_sptr ws));
 
   MOCK_METHOD2(userError, void(const std::string &errorTitle,
