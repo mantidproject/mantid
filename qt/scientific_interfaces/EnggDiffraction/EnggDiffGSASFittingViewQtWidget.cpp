@@ -87,6 +87,11 @@ EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const {
   const auto currentItemLabel =
       m_ui.listWidget_runLabels->currentItem()->text();
   const auto pieces = currentItemLabel.split("_");
+  if (pieces.size() != 2) {
+    throw std::runtime_error(
+        "Unexpected run label: \"" + currentItemLabel.toStdString() +
+        "\". Please contact the development team with this message");
+  }
   return std::make_pair(pieces[0].toInt(), pieces[1].toUInt());
 }
 
