@@ -50,6 +50,8 @@ class CWSCDReductionControl(object):
     """ Controlling class for reactor-based single crystal diffraction reduction
     """
 
+    RESERVED_ROI_NAME = '__temp_roi__'
+
     def __init__(self, instrument_name=None):
         """ init
         """
@@ -91,6 +93,7 @@ class CWSCDReductionControl(object):
         self._mySpiceTableDict = {}
         # Container for loaded raw pt workspace
         self._myRawDataWSDict = dict()
+        self._myRawDataMasked = dict()
         # Container for PeakWorkspaces for calculating UB matrix
         # self._myUBPeakWSDict = dict()
         # Container for UB  matrix
@@ -242,7 +245,7 @@ class CWSCDReductionControl(object):
         # get raw workspace for counts
         raw_pt_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
 
-        if roi_name is None:
+        if roi_name is '__temp_roi__':
             # a new ROI to create mask workspace
             # get workspaces' names by standard naming scheme
             mask_ws_name = get_mask_ws_name(exp_number, scan_number)
@@ -259,6 +262,8 @@ class CWSCDReductionControl(object):
 
         # mask detectors
         mantidsimple.MaskDetectors(Workspace=raw_pt_ws_name, MaskedWorkspace=mask_ws_name)
+        # record
+        self._myRawDataMasked[(exp_number, scan_number, pt_number)] = roi_name
 
         return
 
@@ -372,15 +377,24 @@ class CWSCDReductionControl(object):
 
         return True, ub_matrix
 
-    def does_raw_loaded(self, exp_no, scan_no, pt_no):
+    def does_raw_loaded(self, exp_no, scan_no, pt_no, roi_name):
         """
         Check whether the raw Workspace2D for a Pt. exists
         :param exp_no:
         :param scan_no:
         :param pt_no:
+        :param roi_name:
         :return:
         """
-        return (exp_no, scan_no, pt_no) in self._myRawDataWSDict
+        # check inputs... TODO ASAP blabla
+
+        loaded = (exp_no, scan_no, pt_no) in self._myRawDataWSDict
+        if loaded:
+            curr_roi = self._myRawDataMasked[(exp_no, scan_no, pt_no)]
+            if roi_name != curr_roi:
+                loaded = False
+
+        return loaded
 
     def does_spice_loaded(self, exp_no, scan_no):
         """ Check whether a SPICE file has been loaded
@@ -1124,7 +1138,11 @@ class CWSCDReductionControl(object):
         mantidsimple.InvertMask(InputWorkspace=mask_ws_name,
                                 OutputWorkspace=mask_ws_name)
 
-        return True, mask_ws_name
+        # register
+        roi_name = self.RESERVED_ROI_NAME
+        self._maskWorkspaceDict[roi_name] = mask_ws_name
+
+        return True, roi_name
 
     def get_working_directory(self):
         """
@@ -1235,6 +1253,16 @@ class CWSCDReductionControl(object):
             p_key = (exp_number, scan_number, pt_number)
 
         return p_key in self._myPeakInfoDict
+
+    def has_roi_generated(self, roi_name):
+        """
+
+        :param roi_name:
+        :return:
+        """
+        # TODO CHECK ASAP blabla
+
+        return roi_name in self._maskWorkspaceDict
 
     def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
         """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
@@ -1569,6 +1597,8 @@ class CWSCDReductionControl(object):
         assert AnalysisDataService.doesExist(pt_ws_name), 'Unable to locate workspace {0}.'.format(pt_ws_name)
         raw_matrix_ws = AnalysisDataService.retrieve(pt_ws_name)
         self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
+        # clear the mask/ROI information
+        self._myRawDataMasked[(exp_no, scan_no, pt_no)] = None
 
         return True, pt_ws_name
 
@@ -2617,15 +2647,15 @@ class CWSCDReductionControl(object):
 
         return
 
-    def save_roi(self, tag, region_of_interest):
+    def save_roi(self, roi_name, region_of_interest):
         """
         Save region of interest to controller for future use
-        :param tag:
+        :param roi_name:
         :param region_of_interest: a 2-tuple for 2-tuple as lower-left and upper-right corners of the region
         :return:
         """
         # check
-        assert isinstance(tag, str), 'Tag {0} must be a string {1}'.format(tag, type(tag))
+        assert isinstance(roi_name, str), 'Tag {0} must be a string {1}'.format(roi_name, type(roi_name))
         assert len(region_of_interest) == 2,\
             'Size of ROI must be 2 but not {0}'.format(len(region_of_interest))
         assert len(region_of_interest[0]) == 2,\
@@ -2633,12 +2663,14 @@ class CWSCDReductionControl(object):
         assert len(region_of_interest[1]) == 2,\
             'Size of ROI[1] must be 2 but not {0}'.format(len(region_of_interest[1]))
 
-        # example:  ret_value = self._roiDict[exp_number]
-        self._roiDict[tag] = region_of_interest
+        # save ROI to ROI dictionary
+        self._roiDict[roi_name] = region_of_interest
 
-        # save another value
-        self._maskWorkspaceDict[tag] = self._currMaskWSName
-        print ('[DB...BAT] Line MASK/ROI workspace {0} to tag {1}'.format(self._currMaskWSName, tag))
+        # if ROI already been used to mask detectors, then need to change mask workspace dictionary
+        if self.RESERVED_ROI_NAME in self._maskWorkspaceDict:
+            self._maskWorkspaceDict[roi_name] = self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
+            del self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
+        # END-IF
 
         return
 

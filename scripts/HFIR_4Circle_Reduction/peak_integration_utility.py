@@ -465,7 +465,7 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
                                peak_radius, peak_centre,
                                merge_peaks=True,
                                normalization='', mask_ws_name=None,
-                               scale_factor=1):
+                               scale_factor=1.):
 
     """ Integrate the peak in a single scan with merged Pt.
     :param merged_scan_workspace_name: MDEventWorkspace with merged Pts.
@@ -505,6 +505,7 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
         norm_by_mon = True
 
     # integrate peak of a scan
+    print ('[DB....BAT] Peak integration scale factor: {0}'.format(scale_factor))
     mantidsimple.IntegratePeaksCWSD(InputWorkspace=merged_scan_workspace_name,
                                     OutputWorkspace=integrated_peak_ws_name,
                                     PeakRadius=peak_radius,

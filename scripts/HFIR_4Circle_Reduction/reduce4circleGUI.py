@@ -164,9 +164,9 @@ class MainWindow(QtGui.QMainWindow):
                      self.show_scan_pt_list)
         self.connect(self.ui.pushButton_showSPICEinRaw, QtCore.SIGNAL('clicked()'),
                      self.do_show_spice_file_raw)
-        self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
-                     self.do_add_roi)
-        self.connect(self.ui.pushButton_cancelROI, QtCore.SIGNAL('clicked()'),
+        self.connect(self.ui.pushButton_switchROIMode, QtCore.SIGNAL('clicked()'),
+                     self.do_switch_roi_mode)
+        self.connect(self.ui.pushButton_removeROICanvas, QtCore.SIGNAL('clicked()'),
                      self.do_del_roi)
         self.connect(self.ui.pushButton_nextScanNumber, QtCore.SIGNAL('clicked()'),
                      self.do_plot_next_scan)
@@ -295,6 +295,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.comboBox_viewRawDataMasks, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.evt_change_roi)
 
+        # TODO ASAP2 Link:
+        # self.ui.comboBox_mergePeakNormType to lineEdit_scaleFactor
+
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
                      self.do_add_k_shift_vector)
@@ -343,6 +346,7 @@ class MainWindow(QtGui.QMainWindow):
         self._dataAccessMode = 'Download'
         self._surveyTableFlag = True
         self._ubPeakTableFlag = True
+        self._isROIApplied = False
 
         # set the detector geometry
         self.do_set_detector_size()
@@ -723,21 +727,21 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_add_roi(self):
+    def do_switch_roi_mode(self):
         """ Add region of interest to 2D image
         :return:
         """
         # set the button to next mode
-        if str(self.ui.pushButton_addROI.text()) == 'Edit ROI':
+        if str(self.ui.pushButton_switchROIMode.text()) == 'Edit ROI':
             # enter adding ROI mode
             self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=True)
             # rename the button
-            self.ui.pushButton_addROI.setText('Quit ROI')
+            self.ui.pushButton_switchROIMode.setText('Quit ROI')
         else:
             # quit editing ROI mode
             self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=False)
             # rename the button
-            self.ui.pushButton_addROI.setText('Edit ROI')
+            self.ui.pushButton_switchROIMode.setText('Edit ROI')
         # END-IF-ELSE
 
         return
@@ -1152,7 +1156,22 @@ class MainWindow(QtGui.QMainWindow):
         """ Remove the current ROI
         :return:
         """
-        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(0)
+        # check whether there is mask on detector view
+        if self.ui.graphicsView_detector2dPlot.is_roi_selection_drawn():
+            self.ui.graphicsView_detector2dPlot.remove_roi()
+
+        # need to draw again?
+        if self._isROIApplied:
+            re_plot = True
+        else:
+            re_plot = False
+
+        # need to reset combo box index
+        curr_index = self.ui.comboBox_viewRawDataMasks.currentIndex()
+        if curr_index != 0:
+            self.ui.comboBox_viewRawDataMasks.setCurrentIndex(0)
+        elif re_plot:
+            self.do_plot_pt_raw()
 
         return
 
@@ -1617,9 +1636,13 @@ class MainWindow(QtGui.QMainWindow):
         num_pt_bg_left = ret_obj[0]
         num_pt_bg_right = ret_obj[1]
 
+        # scale factor:
+        scale_factor = float(self.ui.lineEdit_scaleFactor.text())
+
+        # TODO ASAP Do not use import * from multi_thread_... and Test!
         self._myIntegratePeaksThread = IntegratePeaksThread(self, exp_number, scan_number_list,
                                                             mask_det, selected_mask, norm_type,
-                                                            num_pt_bg_left, num_pt_bg_right)
+                                                            num_pt_bg_left, num_pt_bg_right, scale_factor=scale_factor)
         self._myIntegratePeaksThread.start()
 
         return
@@ -1721,8 +1744,17 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
             return
 
-        # Call to plot 2D
-        self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
+        if self.ui.checkBox_autoMask.isChecked():
+            roi_index = self.ui.comboBox_viewRawDataMasks.currentIndex()
+            if roi_index == 0:
+                roi_name = None
+            else:
+                roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText())
+        else:
+            # if auto-mask flag is off, then no need to mask data
+            roi_name = None
+
+        self.load_plot_raw_data(exp_no, scan_no, pt_no, roi_name=roi_name)
 
         return
 
@@ -1762,7 +1794,9 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_rawDataPtNo.setText('%d' % pt_no)
 
         # Plot
-        self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
+        self.do_plot_pt_raw()
+
+        # self.load_plot_raw_data(exp_no, scan_no, pt_no)
 
         return
 
@@ -1771,15 +1805,13 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # get current exp number, scan number and pt number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_run,
-                                                        self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_run])
         if status is False:
             error_msg = ret_obj
             self.pop_one_button_dialog(error_msg)
             return
 
-        exp_number, scan_number, pt_number = ret_obj
+        scan_number = ret_obj[0]
 
         # get next scan
         scan_number -= 1
@@ -1788,15 +1820,18 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # plot
-        try:
-            self._plot_raw_xml_2d(exp_number, scan_number, pt_number)
-        except RuntimeError as err:
-            error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
-            self.pop_one_button_dialog(error_msg)
-            return
+        # try:
+        #     self.load_plot_raw_data(exp_number, scan_number, pt_number)
+        # except RuntimeError as err:
+        #     error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
+        #     self.pop_one_button_dialog(error_msg)
+        #     return
 
         # update line edits
         self.ui.lineEdit_run.setText(str(scan_number))
+
+        #
+        self.do_plot_pt_raw()
 
         return
 
@@ -1807,7 +1842,7 @@ class MainWindow(QtGui.QMainWindow):
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_run,
                                                         self.ui.lineEdit_rawDataPtNo])
-        if status is True:
+        if status:
             exp_no = ret_obj[0]
             scan_no = ret_obj[1]
             pt_no = ret_obj[2]
@@ -1830,7 +1865,9 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_rawDataPtNo.setText('%d' % pt_no)
 
         # Plot
-        self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
+        self.do_plot_pt_raw()
+
+        # self.load_plot_raw_data(exp_no, scan_no, pt_no)
 
         return
 
@@ -1839,26 +1876,26 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # get current exp number, scan number and pt number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_run,
-                                                        self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_run])
         if status is False:
             error_msg = ret_obj
             self.pop_one_button_dialog(error_msg)
             return
 
-        exp_number, scan_number, pt_number = ret_obj
+        scan_number = ret_obj[0]
 
         # get next scan
         scan_number += 1
 
+        self.do_plot_pt_raw()
+
         # plot
-        try:
-            self._plot_raw_xml_2d(exp_number, scan_number, pt_number)
-        except RuntimeError as err:
-            error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
-            self.pop_one_button_dialog(error_msg)
-            return
+        # try:
+        #     self.load_plot_raw_data(exp_number, scan_number, pt_number)
+        # except RuntimeError as err:
+        #     error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
+        #     self.pop_one_button_dialog(error_msg)
+        #     return
 
         # update line edits
         self.ui.lineEdit_run.setText(str(scan_number))
@@ -1889,9 +1926,6 @@ class MainWindow(QtGui.QMainWindow):
         """ Mask a Pt and re-plot with current selected ROI or others
         :return:
         """
-        # TODO FIXME ASAP - This breaks if trying to mask detector with a loaded ROI/Mask workspace
-        # TODO Solution : Read tag and then find out whether there is already a workspace assigned to it!
-
         # get experiment, scan
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run,
                                                         self.ui.lineEdit_rawDataPtNo],
@@ -1902,37 +1936,32 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
             return
 
-        #
-        roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
-        if roi_name  == '':
-            # new ROI
-            # get the mask
-            status, ret_obj = self._myControl.get_region_of_interest(exp, scan)
-            if status is False:
-                # unable to get region of interest
-                self.pop_one_button_dialog(ret_obj)
-                return
-            else:
-                corner1, corner2 = ret_obj
+        roi_index = self.ui.comboBox_viewRawDataMasks.currentIndex()
+        if roi_index == 0:
+            # still in edit phase
+            # get mask from detector view
+            lower_left_corner, upper_right_corner = self.ui.graphicsView_detector2dPlot.get_roi()
 
             # create mask workspace
-            status, error = self._myControl.generate_mask_workspace(exp, scan, corner1, corner2)
+            status, ret_str = self._myControl.generate_mask_workspace(exp, scan, lower_left_corner, upper_right_corner)
             if status is False:
-                self.pop_one_button_dialog(error)
+                self.pop_one_button_dialog(ret_str)
                 return
-
-            roi_name = None
+            else:
+                roi_name = ret_str
 
         else:
             # previously saved ROI
-            pass
-
-        # re-load data file and mask
-        self._myControl.load_spice_xml_file(exp, scan, pt)
-        self._myControl.apply_mask(exp, scan, pt, roi_name=roi_name)
+            # TODO TEST ASAP ASAP2
+            roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
+            if self._myControl.has_roi_generated(roi_name) is False:
+                roi_start, roi_end = self._myControl.get_region_of_interest(roi_name)
+                self._myControl.generate_mask_workspace(exp, scan,
+                                                        roi_start=roi_start, roi_end=roi_end, mask_tag=roi_name)
+        # END-IF-ELSE
 
         # plot
-        self._plot_raw_xml_2d(exp, scan, pt)
+        self.load_plot_raw_data(exp, scan, pt, roi_name=roi_name)
 
         return
 
@@ -2349,12 +2378,15 @@ class MainWindow(QtGui.QMainWindow):
         # return if cancelled
         if not ok:
             return
+        roi_name = str(roi_name)
 
         # get current ROI
-        status, roi = self._myControl.get_region_of_interest(exp_number=exp_number, scan_number=scan_number)
-        assert status, str(roi)
-        roi_name = str(roi_name)
-        self._myControl.save_roi(roi_name, roi)
+        # status, roi = self._myControl.get_region_of_interest(exp_number=exp_number, scan_number=scan_number)
+        # assert status, str(roi)
+        # roi_name = str(roi_name)
+        ll_corner, ur_corner = self.ui.graphicsView_detector2dPlot.get_roi()
+
+        self._myControl.save_roi(roi_name, (ll_corner, ur_corner))
 
         # set it to combo-box
         self.ui.comboBox_maskNames1.addItem(roi_name)
@@ -3291,16 +3323,18 @@ class MainWindow(QtGui.QMainWindow):
 
         else:
             # set to another ROI
-            roi_exist, roi = self._myControl.get_region_of_interest(exp_number=None, scan_number=None,
-                                                                    roi_name=curr_roi_name)
-            if not roi_exist:
-                self.pop_one_button_dialog('ROI {0} does not exist.  Coding is wrong!'.format(curr_roi_name))
-                return
-
-            # remove current ROI from GUI from detector view plot
-            # self.ui.graphicsView_detector2dPlot.remove_roi()
-            # add a new ROI on
-            self.ui.graphicsView_detector2dPlot.set_roi(roi[0], roi[1], plot=True)
+            print ('Need to re-write!')
+            self.do_plot_pt_raw()
+            # roi_exist, roi = self._myControl.get_region_of_interest(exp_number=None, scan_number=None,
+            #                                                         roi_name=curr_roi_name)
+            # if not roi_exist:
+            #     self.pop_one_button_dialog('ROI {0} does not exist.  Coding is wrong!'.format(curr_roi_name))
+            #     return
+            #
+            # # remove current ROI from GUI from detector view plot
+            # # self.ui.graphicsView_detector2dPlot.remove_roi()
+            # # add a new ROI on
+            # self.ui.graphicsView_detector2dPlot.set_roi(roi[0], roi[1], plot=True)
         # END-IF-ELSE
 
         return
@@ -3811,16 +3845,28 @@ class MainWindow(QtGui.QMainWindow):
 
         return True, (a, b, c, alpha, beta, gamma)
 
-    def _plot_raw_xml_2d(self, exp_no, scan_no, pt_no):
-        """ Plot raw workspace from XML file for a measurement/pt.
+    def load_spice_file(self, exp_number, scan_number, overwrite):
         """
+        load spice file
+        :param exp_number:
+        :param scan_number:
+        :param overwrite:
+        :return:
+        """
+        # TODO ASAP check inputs... blabla
+        # blabla
+
         # Check and load SPICE table file
-        does_exist = self._myControl.does_spice_loaded(exp_no, scan_no)
-        if does_exist is False:
+        load_spice = False
+        if not overwrite:
+            load_spice = not self._myControl.does_spice_loaded(exp_number, scan_number)
+
+        # load if necessary
+        if load_spice:
             # Download data
-            status, error_message = self._myControl.download_spice_file(exp_no, scan_no, over_write=False)
-            if status is True:
-                status, error_message = self._myControl.load_spice_scan_file(exp_no, scan_no)
+            status, error_message = self._myControl.download_spice_file(exp_number, scan_number, over_write=False)
+            if status:
+                status, error_message = self._myControl.load_spice_scan_file(exp_number, scan_number)
                 if status is False and self._allowDownload is False:
                     self.pop_one_button_dialog(error_message)
                     return
@@ -3829,46 +3875,28 @@ class MainWindow(QtGui.QMainWindow):
                 return
         # END-IF(does_exist)
 
-        # Load Data for Pt's xml file
-        does_exist = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no)
+        return
 
-        if does_exist is False:
-            # Check whether needs to download
-            status, error_message = self._myControl.download_spice_xml_file(scan_no, pt_no, exp_no=exp_no)
-            if status is False:
-                self.pop_one_button_dialog(error_message)
-                return
-            # Load SPICE xml file
-            status, error_message = self._myControl.load_spice_xml_file(exp_no, scan_no, pt_no)
-            if status is False:
-                self.pop_one_button_dialog(error_message)
-                return
+    def load_plot_raw_data(self, exp_no, scan_no, pt_no, roi_name=None):
+        """ Plot raw workspace from XML file for a measurement/pt.
+        """
+        # TODO ASAP : check inputs... blabla
+        # blabla
 
-        # Convert a list of vector to 2D numpy array for imshow()
+        does_loaded = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no, roi_name)
+        if not does_loaded:
+            # check and load SPICE file if necessary
+            self.load_spice_file(exp_no, scan_no, overwrite=False)
+            # load Pt xml
+            self._myControl.load_spice_xml_file(exp_no, scan_no, pt_no)
+            # mask detector if required
+            if roi_name is not None:
+                self._myControl.apply_mask(exp_no, scan_no, pt_no, roi_name=roi_name)
+        # END-IF
+
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
-        # raw_det_data = numpy.rot90(raw_det_data, 1)
-        self.ui.graphicsView_detector2dPlot.clear_canvas()
-        # get the configuration of detector from GUI
-        #  FIXME/TODO/ISSUE/NOW/TODAY - use the detector size wrong!
-        if 0:
-            ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
-            x_max, y_max = ret_obj
-        else:
-            x_max, y_max = 256, 256
-
-        self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=x_max, y_min=0, y_max=y_max,
-                                                        hold_prev_image=False)
-        # FIXME TODO - ASAP This is not always correct!  There is no flag to set to turn off the ROI in myControl!
-        # FIXME TODO - ASAP A mechanism shall be invented to deal with this!
-        status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
-        if status:
-            self.ui.graphicsView_detector2dPlot.add_roi(roi[0], roi[1])
-        else:
-            error_msg = roi
-            # self.pop_one_button_dialog(error_msg)
-            self._show_message('[Error] %s' % error_msg)
-        # END-IF
+        self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data)
 
         # Information
         info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,
