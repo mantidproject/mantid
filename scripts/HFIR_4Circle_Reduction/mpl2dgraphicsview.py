@@ -36,6 +36,9 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         self._myImageIndex = 0
         self._myImageDict = dict()
 
+        # current 2D plot
+        self._2dPlot = None
+
         return
 
     @property
@@ -58,7 +61,7 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         :param y_tick_label:
         :return:
         """
-        self._myCanvas.add_2d_plot(array2d, x_min, x_max, y_min, y_max, hold_prev_image, y_tick_label)
+        self._2dPlot = self._myCanvas.add_2d_plot(array2d, x_min, x_max, y_min, y_max, hold_prev_image, y_tick_label)
 
         return
 
@@ -96,6 +99,17 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         :return:
         """
         # There is no operation that is defined now
+        return
+
+    def remove_last_plot(self):
+        """
+
+        :return:
+        """
+        if self._2dPlot is not None:
+            self._2dPlot.remove()
+            self._2dPlot = None
+
         return
 
     @property

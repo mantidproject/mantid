@@ -37,6 +37,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         # class status variables
         self._roiSelectMode = False
         # region of interest. None or 2 tuple of 2-tuple for upper left corner and lower right corner
+        # mouse positions as start and end
         self._roiStart = None
         self._roiEnd = None
 
@@ -54,24 +55,24 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return
 
-    def add_roi(self, roi_start, roi_end):
-        """ Add region of interest
-        :param roi_start:
-        :param roi_end:
-        :return:
-        """
-        # check
-        assert isinstance(roi_start, tuple) and len(roi_start) == 2
-        assert isinstance(roi_end, tuple) and len(roi_end) == 2
-
-        # set
-        self._roiStart = roi_start
-        self._roiEnd = roi_end
-
-        # plot
-        self.plot_roi()
-
-        return
+    # def add_roi(self, roi_start, roi_end):
+    #     """ Add region of interest
+    #     :param roi_start:
+    #     :param roi_end:
+    #     :return:
+    #     """
+    #     # check
+    #     assert isinstance(roi_start, tuple) and len(roi_start) == 2
+    #     assert isinstance(roi_end, tuple) and len(roi_end) == 2
+    #
+    #     # set
+    #     self._roiStart = roi_start
+    #     self._roiEnd = roi_end
+    #
+    #     # plot
+    #     self.plot_roi()
+    #
+    #     return
 
     def clear_canvas(self):
         """
@@ -80,6 +81,11 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         """
         # clear the current record
         self._myPolygon = None
+
+        # reset mouse selection ROI
+        # set
+        self._roiStart = None
+        self._roiEnd = None
 
         # call base class
         super(Detector2DView, self).clear_canvas()
@@ -91,16 +97,18 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         Enter or leave the region of interest (ROI) selection mode
         :return:
         """
-        assert isinstance(state, bool)
+        assert isinstance(state, bool), 'blabla'
 
         # set
         self._roiSelectMode = state
 
         if state:
             # new in add-ROI mode
+            self.remove_roi()
+        else:
+            # reset roi start and roi end
             self._roiStart = None
             self._roiEnd = None
-            self._myPolygon = None
 
         # # reset _myPolygen
         # if state is False:
@@ -169,6 +177,15 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return message
 
+    def is_roi_selection_drawn(self):
+        """
+        whether ROI is drawn
+        :return:
+        """
+        is_draw = not (self._myPolygon is None)
+
+        return is_draw
+
     def get_roi(self):
         """
         :return: A list for polygon0
@@ -177,10 +194,61 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         assert self._roiEnd is not None
 
         # rio start is upper left, roi end is lower right
-        lower_left = (self._roiStart[0], self._roiEnd[1])
-        upper_right = (self._roiEnd[0], self._roiStart[1])
+        lower_left_x = min(self._roiStart[0], self._roiEnd[0])
+        lower_left_y = min(self._roiStart[1], self._roiEnd[1])
+        lower_left = lower_left_x, lower_left_y
+
+        # ROI upper right
+        upper_right_x = max(self._roiStart[0], self._roiEnd[0])
+        upper_right_y = max(self._roiStart[1], self._roiEnd[1])
+        upper_right = upper_right_x, upper_right_y
 
         return lower_left, upper_right
+
+    def plot_detector_counts(self, raw_det_data):
+        """
+
+        :param raw_det_data:
+        :param x_limits:
+        :param y_limits:
+        :return:
+        """
+        # clear previous data
+        # self.remove_last_plot()
+
+
+        # raw_det_data = numpy.rot90(raw_det_data, 1)
+        # self.ui.graphicsView_detector2dPlot.clear_canvas()
+
+
+        #
+        # # get the configuration of detector from GUI
+        # #  FIXME/TODO/ISSUE/NOW/TODAY - use the detector size wrong!
+        # if 0:
+        #     ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
+        #     x_max, y_max = ret_obj
+        # else:
+        #     x_max, y_max = 256, 256
+
+        # self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data, (0, x_max), (0, y_max))
+        # # FIXME TODO - ASAP This is not always correct!  There is no flag to set to turn off the ROI in myControl!
+        # # FIXME TODO - ASAP A mechanism shall be invented to deal with this!
+        # status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
+        # if status:
+        #     self.ui.graphicsView_detector2dPlot.set_roi(roi[0], roi[1], plot=True)
+        # else:
+        #     error_msg = roi
+        #     # self.pop_one_button_dialog(error_msg)
+        #     self._show_message('[Error] %s' % error_msg)
+        # # END-IF
+
+        x_min = 0
+        x_max = raw_det_data.shape[0]
+        y_min = 0
+        y_max = raw_det_data.shape[1]
+
+        self.add_plot_2d(raw_det_data, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
+                         hold_prev_image=False)
 
     def plot_roi(self):
         """ Plot region of interest (as rectangular) to the canvas from the region set from
@@ -405,8 +473,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         # plot the new polygon
         self.plot_roi()
 
-        # update
-        if self._myPolygon is not None:
-            self._myParentWindow.do_apply_roi()
+        # # update: no need to do this!
+        # if self._myPolygon is not None:
+        #     self._myParentWindow.do_apply_roi()
 
         return

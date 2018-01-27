@@ -177,6 +177,8 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         file_format = '(%s,2f8.2,i4,6f8.5)' % first_3_terms_foramt
     else:
         file_format = '(%s,2f8.2,i4)' % first_3_terms_foramt
+    # TODO ASAP ASAP2: add (3i4,2f8.2,i4) to (3i4,2f18.5,i4)
+
     # wave length
     lambda_line = '%.4f  0  0' % wave_length
 

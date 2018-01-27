@@ -913,6 +913,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('K-Index', 'int'),
                   ('Select', 'checkbox')]
 
+    """
+    in scans processing tab, the column name of corrected will be changed to 'F2;'Error' will be modified to 'F2 Error'
+In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
+    """
+
     def __init__(self, parent):
         """
         Initialization
