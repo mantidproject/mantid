@@ -22,34 +22,6 @@ class QMouseEvent;
 class QsciAPIs;
 
 /**
- * A small wrapper around a QStringList to manage a command history
- */
-struct EXPORT_OPT_MANTIDQT_COMMON CommandHistory {
-  /// Default constructor
-  CommandHistory() : m_commands(), m_hist_maxsize(1000), m_current(0) {}
-  /// Add a block of lines
-  void addCode(QString block);
-  /// Add a command.
-  void add(QString command);
-  /// Is there a previous command
-  bool hasPrevious() const;
-  /// Get the item pointed to by the current index and move it up one
-  QString getPrevious() const;
-  /// Is there a command next on the stack
-  bool hasNext() const;
-  /// Get the item pointed to by the current index and move it down one
-  QString getNext() const;
-
-private:
-  /// Store a list of command strings
-  QStringList m_commands;
-  /// History size
-  int m_hist_maxsize;
-  /// Index "pointer"
-  mutable int m_current;
-};
-
-/**
     This class provides an area to write scripts. It inherits from QScintilla to
    use
     functionality such as auto-indent and if supported, syntax highlighting.
@@ -96,7 +68,7 @@ public:
   };
 
 public:
-  /// Constructor
+  ScriptEditor(const QString &lexerName, QWidget *parent = nullptr);
   ScriptEditor(QWidget *parent = nullptr, QsciLexer *lexer = nullptr,
                const QString &settingsGroup = "");
   /// Destructor
@@ -115,8 +87,10 @@ public:
   void setLexer(QsciLexer *) override;
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
-  /// Enable the auto complete
-  void enableAutoCompletion();
+  /// Enable the auto complete. Default is for backwards compatability
+  /// with existing code
+  void
+  enableAutoCompletion(AutoCompletionSource source = QsciScintilla::AcsAPIs);
   /// Disable the auto complete
   void disableAutoCompletion();
 
@@ -130,11 +104,8 @@ public:
   void keyPressEvent(QKeyEvent *event) override;
   /// The current filename
   inline QString fileName() const { return m_filename; }
-  /**
-   * Set a new file name
-   * @param filename :: The new filename
-   */
-  inline void setFileName(const QString &filename) { m_filename = filename; }
+  /// Set a new file name
+  void setFileName(const QString &filename);
 
   /// Override so that ctrl + mouse wheel will zoom in and out
   void wheelEvent(QWheelEvent *e) override;
@@ -155,7 +126,7 @@ public slots:
   /// Set the marker state
   void setMarkerState(bool enabled);
   /// Update the progress marker
-  void updateProgressMarker(int lineno, bool error);
+  void updateProgressMarker(int lineno, bool error = false);
   /// Mark the progress arrow as an error
   void markExecutingLineAsError();
   /// Refresh the autocomplete information base on a new set of keywords
@@ -177,6 +148,8 @@ signals:
   void textZoomedIn();
   /// Emitted when a zoom out is requested
   void textZoomedOut();
+  /// Notify that the filename has been modified
+  void fileNameChanged(const QString &fileName);
 
 protected:
   /// Write to the given device

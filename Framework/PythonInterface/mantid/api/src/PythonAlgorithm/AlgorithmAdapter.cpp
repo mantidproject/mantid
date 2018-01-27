@@ -4,6 +4,9 @@
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
@@ -310,7 +313,13 @@ template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::exec() {
 //-----------------------------------------------------------------------------------------------------------------------------
 /// API::Algorithm as base
 template class AlgorithmAdapter<API::Algorithm>;
+template class AlgorithmAdapter<API::SerialAlgorithm>;
+template class AlgorithmAdapter<API::ParallelAlgorithm>;
+template class AlgorithmAdapter<API::DistributedAlgorithm>;
 /// API::DataProcesstor as base
 template class AlgorithmAdapter<API::DataProcessorAlgorithm>;
+template class AlgorithmAdapter<API::SerialDataProcessorAlgorithm>;
+template class AlgorithmAdapter<API::ParallelDataProcessorAlgorithm>;
+template class AlgorithmAdapter<API::DistributedDataProcessorAlgorithm>;
 }
 }

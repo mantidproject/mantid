@@ -89,7 +89,7 @@ public:
   /// Label for wavelength column
   static const QString WAVELENGTH;
   /// Label for change in energy column
-  static const QString ENERGY;
+  static const QString ENERGY_TRANSFER;
   /// Label for initial energy column
   static const QString INITIAL_ENERGY;
   /// Label for final energy column
@@ -134,7 +134,7 @@ private:
   /// Index for wavelength column
   static const int COL_WAVELENGTH;
   /// Index for change in energy column
-  static const int COL_ENERGY;
+  static const int COL_ENERGY_TRANSFER;
   /// Index for initial energy column
   static const int COL_INITIAL_ENERGY;
   /// Index for final energy column

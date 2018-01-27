@@ -51,7 +51,7 @@ Unit of input splitters
 How to generate input workspace containing splitters
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-There are two ways to generate 
+There are two ways to generate
 
 Algorithm :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>`
 creates both the :ref:`SplittersWorkspace <SplittersWorkspace>` and
@@ -181,6 +181,7 @@ Output:
 
 .. testcode:: FilterEventNoCorrection
 
+    import numpy as np
     ws = Load(Filename='CNCS_7860_event.nxs')
 
     # create TableWorkspace
@@ -209,7 +210,7 @@ Output:
         tmpws = mtd[name]
         print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
         split_log = tmpws.run().getProperty('splitter')
-        print('event splitter log: entry 0 and entry 1 are {0} and {1}.'.format(split_log.times[0], split_log.times[1]))
+        print('event splitter log: entry 0 and entry 1 are {0} and {1}.'.format(split_log.times[0].astype(np.dtype('M8[s]')), split_log.times[1].astype(np.dtype('M8[s]'))))
 
 
 Output:
@@ -217,13 +218,13 @@ Output:
 .. testoutput:: FilterEventNoCorrection
 
     workspace tempsplitws3_a has 77580 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:10:17 .
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37 and 2010-03-25T16:10:17.
     workspace tempsplitws3_b has 0 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:11:57 .
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37 and 2010-03-25T16:11:57.
     workspace tempsplitws3_c has 0 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:15:17 .
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37 and 2010-03-25T16:15:17.
     workspace tempsplitws3_unfiltered has 34686 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:10:17 .
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37 and 2010-03-25T16:10:17.
 
 
 **Example - Filtering event by pulse time**

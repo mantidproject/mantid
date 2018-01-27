@@ -23,8 +23,47 @@ except ImportError:
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
+from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file)
+
+from sans.gui_logic.models.run_summation import RunSummation
+from sans.gui_logic.models.run_selection import RunSelection
+from sans.gui_logic.models.run_finder import SummableRunFinder
+from sans.gui_logic.models.summation_settings import SummationSettings
+from sans.gui_logic.models.binning_type import BinningType
+
+from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
+from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
+from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+from ui.sans_isis.work_handler import WorkHandler
+
+DEFAULT_BIN_SETTINGS = \
+    '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
+
+
+class RunSelectorPresenterFactory(object):
+    def __init__(self, title, run_finder):
+        self._title = title
+        self._run_finder = run_finder
+
+    def __call__(self,
+                 run_selector_view,
+                 on_selection_change,
+                 parent_view):
+        return RunSelectorPresenter(self._title,
+                                    RunSelection(on_selection_change),
+                                    self._run_finder,
+                                    run_selector_view,
+                                    parent_view)
+
+
+def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
+    summation_settings = SummationSettings(BinningType.Custom)
+    summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
+    return SummationSettingsPresenter(summation_settings,
+                                      summation_settings_view,
+                                      parent_view)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -130,6 +169,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def set_current_page(self, index):
         self.main_stacked_widget.setCurrentIndex(index)
 
+    def _setup_add_runs_page(self):
+        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(WorkHandler()),
+                                                       RunSelectorPresenterFactory('Runs To Sum',
+                                                                                   SummableRunFinder(SANSFileInformationFactory())),
+                                                       _make_run_summation_settings_presenter,
+                                                       self.add_runs_page, self)
+
     def setup_layout(self):
         """
         Do further setup that could not be done in the designer.
@@ -149,6 +195,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         runs_icon = QtGui.QIcon(runs_icon_path)
         _ = QtGui.QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
+        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
+        add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
+        _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
+
         settings_icon_path = os.path.join(path, "icons", "settings.png")
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
@@ -159,6 +209,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
+
+        self._setup_add_runs_page()
 
         # --------------------------------------------------------------------------------------------------------------
         # Main Tab
@@ -217,7 +269,23 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Q Resolution
         self.q_resolution_moderator_file_push_button.clicked.connect(self._on_load_moderator_file)
 
+        self.plot_results_checkbox.stateChanged.connect(self._on_plot_results_toggled)
+        self.use_optimizations_checkbox.stateChanged.connect(self._on_use_optimisations_changed)
+
+        self.output_mode_memory_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_file_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_both_radio_button.toggled.connect(self._on_output_mode_changed)
+
         return True
+
+    def _on_output_mode_changed(self, state):
+        self.data_processor_table.settingsChanged()
+
+    def _on_use_optimisations_changed(self, state):
+        self.data_processor_table.settingsChanged()
+
+    def _on_plot_results_toggled(self, state):
+        self.data_processor_table.settingsChanged()
 
     def create_data_table(self, show_periods):
         # Delete an already existing table

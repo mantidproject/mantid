@@ -15,6 +15,7 @@ using namespace Mantid::API;
 namespace {
 void run_create(const Parallel::Communicator &comm,
                 const std::string &storageMode) {
+  using namespace Parallel;
   auto alg = ParallelTestHelpers::create<Algorithms::CreateWorkspace>(comm);
   std::vector<double> dataEYX(2000);
   int nspec = 1000;
@@ -25,23 +26,26 @@ void run_create(const Parallel::Communicator &comm,
   alg->setProperty("ParallelStorageMode", storageMode);
   alg->execute();
   MatrixWorkspace_const_sptr ws = alg->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(ws->storageMode(), Parallel::fromString(storageMode));
-  switch (ws->storageMode()) {
-  case Parallel::StorageMode::Cloned: {
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nspec);
-    break;
-  }
-  case Parallel::StorageMode::Distributed: {
-    int remainder = nspec % comm.size() > comm.rank() ? 1 : 0;
-    size_t expected = nspec / comm.size() + remainder;
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), expected);
-    break;
-  }
-  case Parallel::StorageMode::MasterOnly: {
-    size_t expected = comm.rank() == 0 ? nspec : 0;
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), expected);
-    break;
-  }
+  if (comm.rank() == 0 || fromString(storageMode) != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(ws->storageMode(), fromString(storageMode));
+    switch (ws->storageMode()) {
+    case Parallel::StorageMode::Cloned: {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nspec);
+      break;
+    }
+    case Parallel::StorageMode::Distributed: {
+      int remainder = nspec % comm.size() > comm.rank() ? 1 : 0;
+      size_t expected = nspec / comm.size() + remainder;
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), expected);
+      break;
+    }
+    case Parallel::StorageMode::MasterOnly: {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nspec);
+      break;
+    }
+    }
+  } else {
+    TS_ASSERT_EQUALS(ws, nullptr);
   }
 }
 }
