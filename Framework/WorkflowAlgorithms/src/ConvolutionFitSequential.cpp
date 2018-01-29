@@ -165,6 +165,7 @@ void ConvolutionFitSequential::exec() {
   const auto functionValues = findValuesFromFunction(function);
   const auto LorentzNum = functionValues[0];
   const auto funcName = functionValues[1];
+  std::vector<std::string> convolvedMembers;
 
   // Check if a delta function is being used
   auto delta = false;
@@ -173,6 +174,15 @@ void ConvolutionFitSequential::exec() {
   if (pos != std::string::npos) {
     delta = true;
     usingDelta = "true";
+    convolvedMembers.emplace_back("Delta Function");
+  }
+
+  if (LorentzNum == "0") {
+    convolvedMembers.emplace_back(funcName);
+  } else {
+    convolvedMembers.emplace_back("Lorentzian1");
+    if (LorentzNum == "2")
+      convolvedMembers.emplace_back("Lorentzian2");
   }
 
   // Log information to result log
@@ -377,9 +387,15 @@ void ConvolutionFitSequential::exec() {
     renamerProg.report("Renaming group workspaces");
   }
 
+  for (auto workspace : *groupWs) {
+    auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    matrixWS->getAxis(0);
+  }
+
   // Check whether to extract members into their own workspaces.
   if (doExtractMembers)
-    extractMembers(inputWs, groupWs, outputWsName + "_Members");
+    extractMembers(inputWs, groupWs, convolvedMembers,
+                   outputWsName + "_Members");
 
   setProperty("OutputWorkspace", resultWs);
 }
@@ -625,13 +641,17 @@ void ConvolutionFitSequential::calculateEISF(
  *                      member workspaces.
  */
 void ConvolutionFitSequential::extractMembers(
-    MatrixWorkspace_sptr inputWs, WorkspaceGroup_const_sptr resultGroupWs,
+    MatrixWorkspace_sptr inputWs, WorkspaceGroup_sptr resultGroupWs,
+    const std::vector<std::string> &convolvedMembers,
     const std::string &outputWsName) {
   auto extractMembersAlg =
       AlgorithmManager::Instance().create("ExtractQENSMembers");
   extractMembersAlg->setProperty("InputWorkspace", inputWs);
   extractMembersAlg->setProperty("ResultWorkspace", resultGroupWs);
   extractMembersAlg->setProperty("OutputWorkspace", outputWsName);
+  extractMembersAlg->setProperty("RenameConvolvedMembers", true);
+  extractMembersAlg->setProperty("ConvolvedMembers", convolvedMembers);
+  extractMembersAlg->execute();
 }
 
 /**

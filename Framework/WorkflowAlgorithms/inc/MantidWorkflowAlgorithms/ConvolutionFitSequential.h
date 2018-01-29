@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_
 #define MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -56,7 +56,8 @@ private:
   std::string convertBackToShort(const std::string &);
   std::string convertFuncToShort(const std::string &);
   void extractMembers(Mantid::API::MatrixWorkspace_sptr inputWs,
-                      Mantid::API::WorkspaceGroup_const_sptr resultGroupWs,
+                      Mantid::API::WorkspaceGroup_sptr resultGroupWs,
+                      const std::vector<std::string> &convolvedMembers,
                       const std::string &outputWsName);
 };
 
