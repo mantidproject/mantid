@@ -1114,7 +1114,7 @@ IAlgorithm_sptr IndirectFitAnalysisTab::extractSpectraAlgorithm(
   extractSpectraAlg->setProperty("StartWorkspaceIndex", startIndex);
   extractSpectraAlg->setProperty("XMin", startX);
   extractSpectraAlg->setProperty("XMax", endX);
-  extractSpectraAlg->setProperty("EndWorkspaceIndex", startIndex);
+  extractSpectraAlg->setProperty("EndWorkspaceIndex", endIndex);
   extractSpectraAlg->setProperty("OutputWorkspace", "__extracted");
   return extractSpectraAlg;
 }
@@ -1171,9 +1171,8 @@ IAlgorithm_sptr IndirectFitAnalysisTab::cropWorkspaceAlgorithm(
 MatrixWorkspace_sptr
 IndirectFitAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
                                              size_t wsIndex) {
-  const auto spectrum = selectedSpectrum();
   auto cropWorkspaceAlg = cropWorkspaceAlgorithm(inputWorkspace(), startX(),
-                                                 endX(), spectrum, spectrum);
+                                                 endX(), wsIndex, wsIndex);
   cropWorkspaceAlg->execute();
 
   MatrixWorkspace_sptr croppedWS =
