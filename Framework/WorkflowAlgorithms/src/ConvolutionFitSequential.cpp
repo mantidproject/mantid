@@ -647,7 +647,8 @@ void ConvolutionFitSequential::extractMembers(
   extractMembersAlg->setProperty("InputWorkspace", inputWs);
   extractMembersAlg->setProperty("ResultWorkspace", resultGroupWs);
   extractMembersAlg->setProperty("OutputWorkspace", outputWsName);
-  extractMembersAlg->setProperty("RenameConvolvedMembers", true);
+  extractMembersAlg->setProperty("RenameConvolvedMembers",
+                                 getProperty("ConvolveMembers"));
   extractMembersAlg->setProperty("ConvolvedMembers", convolvedMembers);
   extractMembersAlg->execute();
 }
