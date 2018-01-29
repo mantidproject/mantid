@@ -1,13 +1,14 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODEL_H_
 #define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODEL_H_
 
+#include "DllConfig.h"
 #include "IEnggDiffMultiRunFittingWidgetModel.h"
 #include "RunMap.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class EnggDiffMultiRunFittingWidgetModel
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingWidgetModel
     : public IEnggDiffMultiRunFittingWidgetModel {
 public:
   void addFittedPeaks(const int runNumber, const size_t bank,
@@ -23,7 +24,7 @@ public:
   getFocusedRun(const int runNumber, const size_t bank) const override;
 
 private:
-  static const size_t MAX_BANKS = 2;
+  static constexpr size_t MAX_BANKS = 2;
 
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedWorkspaceMap;
