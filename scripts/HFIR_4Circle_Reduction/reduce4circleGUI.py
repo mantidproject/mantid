@@ -18,7 +18,7 @@ import HFIR_4Circle_Reduction.guiutility as gutil
 import HFIR_4Circle_Reduction.peakprocesshelper as peak_util
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
 from HFIR_4Circle_Reduction import plot3dwindow
-from HFIR_4Circle_Reduction.multi_threads_helpers import *
+import HFIR_4Circle_Reduction.multi_threads_helpers as thread_pool
 import HFIR_4Circle_Reduction.optimizelatticewindow as ol_window
 from HFIR_4Circle_Reduction import viewspicedialog
 from HFIR_4Circle_Reduction import peak_integration_utility
@@ -295,8 +295,8 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.comboBox_viewRawDataMasks, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.evt_change_roi)
 
-        # TODO ASAP2 Link:
-        # self.ui.comboBox_mergePeakNormType to lineEdit_scaleFactor
+        self.connect(self.ui.comboBox_mergePeakNormType, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.evt_change_norm_type)
 
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
@@ -1639,10 +1639,12 @@ class MainWindow(QtGui.QMainWindow):
         # scale factor:
         scale_factor = float(self.ui.lineEdit_scaleFactor.text())
 
-        # TODO ASAP Do not use import * from multi_thread_... and Test!
-        self._myIntegratePeaksThread = IntegratePeaksThread(self, exp_number, scan_number_list,
-                                                            mask_det, selected_mask, norm_type,
-                                                            num_pt_bg_left, num_pt_bg_right, scale_factor=scale_factor)
+        # initialize a thread and start
+        self._myIntegratePeaksThread = \
+            thread_pool.IntegratePeaksThread(self, exp_number, scan_number_list,
+                                             mask_det, selected_mask, norm_type,
+                                             num_pt_bg_left, num_pt_bg_right,
+                                             scale_factor=scale_factor)
         self._myIntegratePeaksThread.start()
 
         return
@@ -1755,6 +1757,26 @@ class MainWindow(QtGui.QMainWindow):
             roi_name = None
 
         self.load_plot_raw_data(exp_no, scan_no, pt_no, roi_name=roi_name)
+
+        return
+
+    def evt_change_norm_type(self):
+        """
+        handling the event that the detector counts normalization method is changed
+        :return:
+        """
+        # read the current normalization type
+        new_norm_type = str(self.ui.comboBox_mergePeakNormType.currentText())
+
+        # set the scale factor according to new norm type
+        if new_norm_type == 'time':
+            scale_factor = 1.
+        elif new_norm_type == 'monitor':
+            scale_factor = 1000.
+        else:
+            scale_factor = 1.
+
+        self.ui.comboBox_mergePeakNormType.setText('{0}'.format(scale_factor))
 
         return
 
@@ -1952,7 +1974,7 @@ class MainWindow(QtGui.QMainWindow):
 
         else:
             # previously saved ROI
-            # TODO TEST ASAP ASAP2
+            # TODO TEST NOW
             roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
             if self._myControl.has_roi_generated(roi_name) is False:
                 roi_start, roi_end = self._myControl.get_region_of_interest(roi_name)
@@ -3853,8 +3875,11 @@ class MainWindow(QtGui.QMainWindow):
         :param overwrite:
         :return:
         """
-        # TODO ASAP check inputs... blabla
-        # blabla
+        # check inputs
+        assert isinstance(exp_number, int), 'Exp number {0} must be an integer but not of type {1}' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not of type {1}' \
+                                             ''.format(scan_number, type(scan_number))
 
         # Check and load SPICE table file
         load_spice = False
@@ -3880,9 +3905,15 @@ class MainWindow(QtGui.QMainWindow):
     def load_plot_raw_data(self, exp_no, scan_no, pt_no, roi_name=None):
         """ Plot raw workspace from XML file for a measurement/pt.
         """
-        # TODO ASAP : check inputs... blabla
-        # blabla
+        # check inputs
+        assert isinstance(exp_no, int), 'Exp number {0} must be an integer but not of type {1}' \
+                                        ''.format(exp_no, type(exp_no))
+        assert isinstance(scan_no, int), 'Scan number {0} must be an integer but not of type {1}' \
+                                         ''.format(scan_no, type(scan_no))
+        assert isinstance(pt_no, int), 'Pt number {0} must be an integer but not of type {1}' \
+                                       ''.format(pt_no, type(pt_no))
 
+        # check data loaded with mask information
         does_loaded = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no, roi_name)
         if not does_loaded:
             # check and load SPICE file if necessary
