@@ -415,7 +415,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 rawWS = mtd[rawWSName]
                 mergedWS = MergeRuns(InputWorkspace=[mergedWS, rawWS],
                                      OutputWorkspace=mergedWSName,
-                                     EnableLoggign=self._subalgLogging)
+                                     EnableLogging=self._subalgLogging)
                 if i == 0:
                     self._cleanup.cleanup(firstWSName)
                 self._cleanup.cleanup(rawWS)
