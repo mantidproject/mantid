@@ -16,6 +16,15 @@ firstFromParameterFile(Mantid::Geometry::Instrument_const_sptr instrument,
   return first(getInstrumentParameter<T>(instrument, parameterName));
 }
 
+template <typename... Ts>
+boost::optional<boost::variant<Ts...>> firstFromParameterFileVariant(
+    Mantid::Geometry::Instrument_const_sptr instrument,
+    std::string const &parameterName) {
+  auto values =
+      getInstrumentParameter<boost::variant<Ts...>>(instrument, parameterName);
+  return boost::apply_visitor(FirstVisitor<Ts...>(), values);
+}
+
 class MissingInstrumentParameterValue {
 public:
   explicit MissingInstrumentParameterValue(std::string const &parameterName)
@@ -47,14 +56,34 @@ public:
     return fromFile<T>(parameterName);
   }
 
+  template <typename Default, typename T>
+  T handleMandatoryIfMissing(boost::optional<T> const &value,
+                             std::string const &parameterName) {
+    if (value)
+      return value.get();
+    else {
+      m_missingValueErrors.emplace_back(parameterName);
+      return Default();
+    }
+  }
+
   template <typename T> T mandatory(std::string const &parameterName) {
     try {
-      if (auto value = firstFromParameterFile<T>(m_instrument, parameterName)) {
-        return value.get();
-      } else {
-        m_missingValueErrors.emplace_back(parameterName);
-        return T();
-      }
+      return handleMandatoryIfMissing<T>(
+          firstFromParameterFile<T>(m_instrument, parameterName),
+          parameterName);
+    } catch (InstrumentParameterTypeMissmatch const &ex) {
+      m_typeErrors.emplace_back(ex);
+      return T();
+    }
+  }
+
+  template <typename T, typename... Ts>
+  boost::variant<T, Ts...> mandatoryVariant(std::string const &parameterName) {
+    try {
+      return handleMandatoryIfMissing<T>(
+          firstFromParameterFileVariant<T, Ts...>(m_instrument, parameterName),
+          parameterName);
     } catch (InstrumentParameterTypeMissmatch const &ex) {
       m_typeErrors.emplace_back(ex);
       return T();

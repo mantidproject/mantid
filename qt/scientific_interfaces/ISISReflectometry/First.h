@@ -26,12 +26,6 @@ public:
       return boost::none;
   }
 };
-
-template <typename... Ts>
-boost::optional<boost::variant<Ts...>>
-first(boost::variant<std::vector<Ts>...> const &values) {
-  return boost::apply_visitor(FirstVisitor<Ts...>(), values);
-}
 }
 }
 #endif // MANTID_ISISREFLECTOMETRY_FIRST_H
