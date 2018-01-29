@@ -92,16 +92,14 @@ void ConvolutionFitSequential::init() {
   auto boundedV = boost::make_shared<BoundedValidator<int>>();
   boundedV->setLower(0);
 
-  declareProperty("SpecMin", 0, boundedV,
-                  "The first spectrum to be used in "
-                  "the fit. Spectra values can not be "
-                  "negative",
+  declareProperty("SpecMin", 0, boundedV, "The first spectrum to be used in "
+                                          "the fit. Spectra values can not be "
+                                          "negative",
                   Direction::Input);
 
-  declareProperty("SpecMax", 0, boundedV,
-                  "The final spectrum to be used in "
-                  "the fit. Spectra values can not be "
-                  "negative",
+  declareProperty("SpecMax", 0, boundedV, "The final spectrum to be used in "
+                                          "the fit. Spectra values can not be "
+                                          "negative",
                   Direction::Input);
 
   declareProperty(
@@ -187,8 +185,8 @@ void ConvolutionFitSequential::exec() {
 
   // Log information to result log
   m_log.information("Input files: " + inputWs->getName());
-  m_log.information("Fit type: Delta=" + usingDelta +
-                    "; Lorentzians=" + LorentzNum);
+  m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" +
+                    LorentzNum);
   m_log.information("Background type: " + backType);
 
   // Output workspace name
