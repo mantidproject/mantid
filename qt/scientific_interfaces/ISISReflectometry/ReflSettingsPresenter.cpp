@@ -345,7 +345,7 @@ void ReflSettingsPresenter::getInstDefaults() {
   defaults.LambdaMin = parameters.mandatory<double>("LambdaMin");
   defaults.LambdaMax = parameters.mandatory<double>("LambdaMax");
   defaults.I0MonitorIndex =
-      parameters.mandatoryVariant<int, double>("I0MonitorIndex");
+      parameters.mandatory<boost::variant<int, double>>("I0MonitorIndex");
   defaults.ProcessingInstructions =
       parameters.optional<std::string>("ProcessingInstructions");
   defaults.CorrectDetectors =
