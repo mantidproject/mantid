@@ -54,9 +54,11 @@ public:
     // validator used in the algorithm.
     AnalysisDataService::Instance().add("testWS", testWS);
 
-    testWS->getInstrument()->getParameterMap()->addBool(
-        testWS->getInstrument()->getBaseComponent(), "mirror_detector_angles",
-        mirrorOutput);
+    auto parameterMap = testWS->getInstrument()->getParameterMap();
+    parameterMap->addBool(testWS->getInstrument()->getBaseComponent(),
+                          "mirror_detector_angles", mirrorOutput);
+    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
+                            "detector_for_height_axis", "tube-1");
     return testWS;
   }
 
@@ -85,6 +87,10 @@ public:
     // This has to be added to the ADS so that it can be used with the string
     // validator used in the algorithm.
     AnalysisDataService::Instance().add("testWS", testWS);
+
+    auto parameterMap = testWS->getInstrument()->getParameterMap();
+    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
+                            "detector_for_height_axis", "tube-1");
 
     return testWS;
   }
@@ -160,15 +166,16 @@ public:
     }
   }
 
-  void test_normal_operation_with_component_specified() {
+  void
+  test_normal_operation_with_component_specified_in_instrument_parameters() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
     SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     verifySuccessCase();
@@ -184,8 +191,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
@@ -212,6 +219,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
     alg.setProperty("HeightAxis", "0.0, 0.003, 0.027");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -229,8 +237,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "-90.0, 22.5, 0.0");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     verifySuccessCase();
@@ -242,13 +250,17 @@ public:
   void test_non_existent_component() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
+    auto parameterMap = testWS->getInstrument()->getParameterMap();
+    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
+                            "detector_for_height_axis", "not_a_component");
+
     SumOverlappingTubes alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "not_a_component");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
                             std::string(e.what()),
                             "Component not_a_component could not be found.");
@@ -263,12 +275,13 @@ public:
     alg.setChild(true);
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
     alg.setProperty("HeightAxis", "0.003");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
                             std::string(e.what()),
                             "Height binning must have start, step and end "
-                            "values (except for 1DStraight option).");
+                            "values (except for 1D option).");
     AnalysisDataService::Instance().remove("testWS");
   }
 
@@ -280,12 +293,13 @@ public:
     alg.setChild(true);
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
     alg.setProperty("HeightAxis", "0.003");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
                             std::string(e.what()),
                             "Height binning must have start, step and end "
-                            "values (except for 1DStraight option).");
+                            "values (except for 1D option).");
     AnalysisDataService::Instance().remove("testWS");
   }
 
@@ -297,8 +311,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     verifySuccessCase(6.0);
@@ -315,8 +329,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -341,9 +355,9 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
     alg.setProperty("CropNegativeScatteringAngles", true);
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -390,8 +404,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -435,8 +449,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("ScatteringAngleTolerance", "0.3");
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -462,8 +476,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
@@ -488,8 +502,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
@@ -536,7 +550,7 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  MatrixWorkspace_sptr do_straight_option(bool oneDimensional = false,
+  MatrixWorkspace_sptr do_standard_option(bool oneDimensional = false,
                                           bool explicitHeightAxis = false) {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
@@ -547,13 +561,9 @@ public:
     alg.setProperty("ScatteringAngleBinning", "22.5");
     if (explicitHeightAxis)
       alg.setProperty("HeightAxis", "0.0, 0.0135");
-    else
-      alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("Normalise", false);
     if (oneDimensional)
-      alg.setProperty("OutputType", "1DStraight");
-    else
-      alg.setProperty("OutputType", "2DStraight");
+      alg.setProperty("OutputType", "1D");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -568,8 +578,8 @@ public:
     return outWS;
   }
 
-  void test_normal_operation_with_2d_straight_option() {
-    auto outWS = do_straight_option();
+  void test_normal_operation_with_2d_option() {
+    auto outWS = do_standard_option();
 
     verifyHeightAxis(outWS);
 
@@ -593,8 +603,8 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void test_normal_operation_with_1d_straight_option() {
-    auto outWS = do_straight_option(true);
+  void test_normal_operation_with_1d_option() {
+    auto outWS = do_standard_option(true);
 
     const auto &yAxis = outWS->getAxis(1);
     TS_ASSERT_EQUALS(yAxis->length(), 1)
@@ -619,8 +629,8 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void test_normal_operation_with_1d_straight_option_with_height_range() {
-    auto outWS = do_straight_option(true, true);
+  void test_normal_operation_with_1d_option_with_height_range() {
+    auto outWS = do_standard_option(true, true);
 
     const auto &yAxis = outWS->getAxis(1);
     TS_ASSERT_EQUALS(yAxis->length(), 1)
@@ -640,6 +650,32 @@ public:
     // An analytic comparison is a little harder for this case, do a quick check
     // of an arbitary value
     TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 10.0009720239, 1e-6)
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void test_normal_operation_with_2d_option_with_height_range() {
+    auto outWS = do_standard_option(false, true);
+
+    const auto &yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(yAxis->length(), 5)
+    for (size_t i = 0; i < 5; ++i)
+      TS_ASSERT_DELTA(yAxis->getValue(i), 0.003 * double(i), 1e-6)
+
+    double totalCounts = 0.0;
+    for (size_t i = 0; i < N_TUBES; ++i) {
+      auto counts = outWS->getSpectrum(0).y()[i];
+      // Tolerance on error is quite large, due to repeated rounding
+      TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.1)
+      totalCounts += counts;
+    }
+
+    TS_ASSERT_DELTA(totalCounts, 10.0, 1e-6)
+
+    // An analytic comparison is a little harder for this case, do a quick check
+    // of an arbitary value
+    TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 2.0, 1e-6)
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
