@@ -5,6 +5,8 @@
 
 #include <boost/optional.hpp>
 
+#include <vector>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -51,6 +53,9 @@ public:
   */
   virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const int runNumber, const size_t bank) const = 0;
+
+  /// Get run numbers and bank IDs of all focused runs loaded into the model
+  virtual std::vector<std::pair<int, size_t>> getAllWorkspaceLabels() const = 0;
 };
 
 } // namespace MantidQt

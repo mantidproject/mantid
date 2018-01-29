@@ -42,6 +42,29 @@ public:
     TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFocusedRun(456, 2));
     TS_ASSERT(!retrievedWS);
   }
+
+  void test_getWorkspaceLabels() {
+    EnggDiffMultiRunFittingWidgetModel model;
+
+    Mantid::API::MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
+
+    model.addFocusedRun(123, 1, ws);
+    model.addFocusedRun(456, 2, ws);
+    model.addFocusedRun(123, 2, ws);
+
+    std::vector<std::pair<int, size_t>> workspaceLabels;
+
+    TS_ASSERT_THROWS_NOTHING(workspaceLabels = model.getAllWorkspaceLabels());
+
+    TS_ASSERT_EQUALS(workspaceLabels.size(), 3);
+    TS_ASSERT_EQUALS(workspaceLabels[0].first, 123);
+    TS_ASSERT_EQUALS(workspaceLabels[0].second, 1);
+    TS_ASSERT_EQUALS(workspaceLabels[1].first, 123);
+    TS_ASSERT_EQUALS(workspaceLabels[1].second, 2);
+    TS_ASSERT_EQUALS(workspaceLabels[2].first, 456);
+    TS_ASSERT_EQUALS(workspaceLabels[2].second, 2);
+  }
 };
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODELTEST_H_

@@ -23,6 +23,8 @@ public:
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const int runNumber, const size_t bank) const override;
 
+  std::vector<std::pair<int, size_t>> getAllWorkspaceLabels() const override;
+
 private:
   static constexpr size_t MAX_BANKS = 2;
 

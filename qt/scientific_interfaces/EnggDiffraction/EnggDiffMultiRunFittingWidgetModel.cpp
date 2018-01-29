@@ -33,5 +33,10 @@ EnggDiffMultiRunFittingWidgetModel::getFocusedRun(const int runNumber,
   return boost::none;
 }
 
+std::vector<std::pair<int, size_t>>
+EnggDiffMultiRunFittingWidgetModel::getAllWorkspaceLabels() const {
+  return m_focusedWorkspaceMap.getRunNumbersAndBankIDs();
+}
+
 } // namespace MantidQt
 } // namespace CustomInterfaces
