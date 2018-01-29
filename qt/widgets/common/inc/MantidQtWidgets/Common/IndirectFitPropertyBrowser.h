@@ -134,6 +134,8 @@ protected slots:
 
   void updatePlotGuess();
 
+  void browserVisibilityChanged(bool isVisible);
+
 signals:
   void customBoolChanged(const QString &settingName, bool value);
 
@@ -144,6 +146,8 @@ signals:
   void fitScheduled();
 
   void sequentialFitScheduled();
+
+  void browserClosed();
 
 protected:
   void addWorkspaceIndexToBrowser() override {}

@@ -179,6 +179,8 @@ void IndirectFitPropertyBrowser::init() {
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   connect(this, SIGNAL(functionChanged()), this, SLOT(updatePlotGuess()));
+  connect(this, SIGNAL(visibilityChanged(bool)), this,
+          SLOT(browserVisibilityChanged(bool)));
 
   initLayout(w);
 }
@@ -962,6 +964,16 @@ QString IndirectFitPropertyBrowser::enumValue(QtProperty *prop) const {
     return "";
   const auto selectedIndex = m_enumManager->value(prop);
   return values[selectedIndex];
+}
+
+/**
+ * Called when the browser visibility has changed.
+ *
+ * @param isVisible True if the browser is visible, false otherwise.
+ */
+void IndirectFitPropertyBrowser::browserVisibilityChanged(bool isVisible) {
+  if (!isVisible)
+    emit browserClosed();
 }
 
 } // namespace MantidWidgets
