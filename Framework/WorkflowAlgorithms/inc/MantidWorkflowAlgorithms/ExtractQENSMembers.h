@@ -55,9 +55,9 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   extractSpectrum(Mantid::API::MatrixWorkspace_sptr inputWS, size_t spectrum);
 
-  Mantid::API::MatrixWorkspace_sptr ExtractQENSMembers::appendSpectra(
-      Mantid::API::MatrixWorkspace_sptr inputWS,
-      Mantid::API::MatrixWorkspace_sptr spectraWorkspace);
+  Mantid::API::MatrixWorkspace_sptr
+  appendSpectra(Mantid::API::MatrixWorkspace_sptr inputWS,
+                Mantid::API::MatrixWorkspace_sptr spectraWorkspace);
 
   Mantid::API::WorkspaceGroup_sptr
   groupWorkspaces(const std::vector<std::string> &workspaceNames);
