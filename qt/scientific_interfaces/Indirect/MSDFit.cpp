@@ -305,8 +305,7 @@ void MSDFit::saveClicked() {
  * Handles mantid plotting
  */
 void MSDFit::plotClicked() {
-  IndirectFitAnalysisTab::plotResult(outputWorkspaceName() + "_Workspaces",
-                                     "All");
+  IndirectFitAnalysisTab::plotResult(outputWorkspaceName(), "All");
 }
 
 } // namespace IDA
