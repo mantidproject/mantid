@@ -160,11 +160,6 @@ protected:
   std::vector<double> computeOutput(Mantid::API::IFunction_const_sptr func,
                                     const std::vector<double> &dataX);
 
-  Mantid::API::IAlgorithm_sptr
-  createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
-                           const std::vector<double> &dataX,
-                           const std::vector<double> &dataY);
-
   void updatePlotOptions(QComboBox *cbPlotType);
 
   virtual void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
@@ -180,6 +175,8 @@ signals:
   void parameterChanged(const Mantid::API::IFunction *);
 
 protected slots:
+  void clearGuessWindowPlot();
+
   void setSelectedSpectrum(int spectrum) override;
 
   virtual void startXChanged(double startX) = 0;
@@ -210,6 +207,8 @@ protected slots:
 
   void updatePlotGuess();
 
+  void plotGuessInWindow();
+
   virtual void updatePlotOptions() = 0;
 
   void emitFunctionChanged();
@@ -229,6 +228,28 @@ private:
   updateFunctionTies(Mantid::API::IFunction_sptr function,
                      const QHash<QString, QString> &functionNameChanges) const;
 
+  void
+  ensureAppendCompatibility(Mantid::API::MatrixWorkspace_sptr inputWS,
+                            Mantid::API::MatrixWorkspace_sptr spectraWS) const;
+
+  Mantid::API::IAlgorithm_sptr
+  createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
+                           const std::vector<double> &dataX,
+                           const std::vector<double> &dataY) const;
+  Mantid::API::IAlgorithm_sptr
+  extractSpectraAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
+                          int startIndex, int endIndex, double startX,
+                          double endX) const;
+  Mantid::API::IAlgorithm_sptr
+  appendSpectraAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
+                         Mantid::API::MatrixWorkspace_sptr spectraWS) const;
+  Mantid::API::IAlgorithm_sptr
+  cropWorkspaceAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
+                         double startX, double endX, int startIndex,
+                         int endIndex) const;
+  Mantid::API::IAlgorithm_sptr
+  deleteWorkspaceAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace) const;
+
   Mantid::API::IFunction_sptr m_fitFunction;
   QHash<size_t, QHash<QString, double>> m_parameterValues;
   QHash<QString, double> m_defaultPropertyValues;
@@ -237,6 +258,7 @@ private:
 
   std::string m_outputFitName;
   bool m_appendResults;
+  Mantid::API::MatrixWorkspace_sptr m_guessWorkspaceInWindow;
 };
 
 } // namespace IDA

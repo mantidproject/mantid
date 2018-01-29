@@ -5,7 +5,10 @@
 #include "ui_MSDFit.h"
 
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+
+#include "MantidKernel/make_unique.h"
 
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 
@@ -124,7 +127,7 @@ namespace IDA {
  * @param parent :: the parent widget (an IndirectDataAnalysis object).
  */
 IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
-    : IndirectDataAnalysisTab(parent) {
+    : IndirectDataAnalysisTab(parent), m_guessWorkspaceInWindow(nullptr) {
   m_fitPropertyBrowser = new MantidWidgets::IndirectFitPropertyBrowser(parent);
   m_fitPropertyBrowser->init();
 
@@ -157,6 +160,11 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updatePlotGuess()));
+
+  connect(m_fitPropertyBrowser, SIGNAL(plotGuess()), this,
+          SLOT(plotGuessInWindow()));
+  connect(m_fitPropertyBrowser, SIGNAL(browserClosed()), this,
+          SLOT(clearGuessWindowPlot()));
 }
 
 /**
@@ -925,7 +933,7 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   if (!m_functionNameChanges.isEmpty())
     function = updateFunctionTies(function, m_functionNameChanges);
   function->applyTies();
-  
+
   setAlgorithmProperty(fitAlgorithm, "InputWorkspace", fitWorkspace());
   setAlgorithmProperty(fitAlgorithm, "Function", function->asString());
   setAlgorithmProperty(fitAlgorithm, "StartX", m_fitPropertyBrowser->startX());
@@ -960,7 +968,7 @@ IFunction_sptr IndirectFitAnalysisTab::updateFunctionTies(
     const QHash<QString, QString> &functionNameChanges) const {
   const auto tieMap = m_fitPropertyBrowser->getTies();
   const auto priorNames = functionNameChanges.keys();
-  
+
   QStringList ties;
   for (const auto &tieKey : tieMap.keys()) {
     QString parameter = tieKey;
@@ -971,7 +979,7 @@ IFunction_sptr IndirectFitAnalysisTab::updateFunctionTies(
       if (priorName == parameter)
         parameter = newName;
       if (expression.contains(priorName))
-        expression.replace(priorName, newName);
+        expression = expression.replace(priorName, newName);
     }
     ties.push_back(parameter + "=" + expression);
   }
@@ -1043,6 +1051,115 @@ void IndirectFitAnalysisTab::updatePlotGuess() {
   plotGuess();
 }
 
+/**
+ * Clears the guess window plot and deletes the associated workspace.
+ */
+void IndirectFitAnalysisTab::clearGuessWindowPlot() {
+  if (m_guessWorkspaceInWindow) {
+    deleteWorkspaceAlgorithm(m_guessWorkspaceInWindow)->execute();
+    m_guessWorkspaceInWindow.reset();
+  }
+}
+
+void IndirectFitAnalysisTab::plotGuessInWindow() {
+  clearGuessWindowPlot();
+  auto guessFunction = fitFunction();
+  auto inputWS = inputWorkspace();
+
+  if (inputWS && guessFunction) {
+    auto guessWorkspace =
+        createGuessWorkspace(guessFunction, selectedSpectrum());
+    ensureAppendCompatibility(inputWS, guessWorkspace);
+
+    const auto spectrum = selectedSpectrum();
+
+    auto extractAlg =
+        extractSpectraAlgorithm(inputWS, spectrum, spectrum, startX(), endX());
+    extractAlg->execute();
+    MatrixWorkspace_sptr extracted = extractAlg->getProperty("OutputWorkspace");
+    auto appendAlg = appendSpectraAlgorithm(extracted, guessWorkspace);
+    appendAlg->execute();
+
+    m_guessWorkspaceInWindow = appendAlg->getProperty("OutputWorkspace");
+    const std::string guessWSName =
+        "__" + createSingleFitOutputName() + "_guess_ws";
+    AnalysisDataService::Instance().addOrReplace(guessWSName,
+                                                 m_guessWorkspaceInWindow);
+
+    auto axis = Mantid::Kernel::make_unique<TextAxis>(2);
+    axis->setLabel(0, "Sample");
+    axis->setLabel(1, "Guess");
+    m_guessWorkspaceInWindow->replaceAxis(1, axis.release());
+
+    plotSpectrum(QString::fromStdString(guessWSName), 0, 1);
+  }
+}
+
+void IndirectFitAnalysisTab::ensureAppendCompatibility(
+    MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr spectraWS) const {
+  spectraWS->setInstrument(inputWS->getInstrument());
+  spectraWS->replaceAxis(0, inputWS->getAxis(0)->clone(spectraWS.get()));
+  spectraWS->setDistribution(inputWS->isDistribution());
+}
+
+IAlgorithm_sptr IndirectFitAnalysisTab::extractSpectraAlgorithm(
+    MatrixWorkspace_sptr inputWS, int startIndex, int endIndex, double startX,
+    double endX) const {
+  IAlgorithm_sptr extractSpectraAlg =
+      AlgorithmManager::Instance().create("ExtractSpectra");
+  extractSpectraAlg->initialize();
+  extractSpectraAlg->setChild(true);
+  extractSpectraAlg->setLogging(false);
+  extractSpectraAlg->setProperty("InputWorkspace", inputWS);
+  extractSpectraAlg->setProperty("StartWorkspaceIndex", startIndex);
+  extractSpectraAlg->setProperty("XMin", startX);
+  extractSpectraAlg->setProperty("XMax", endX);
+  extractSpectraAlg->setProperty("EndWorkspaceIndex", startIndex);
+  extractSpectraAlg->setProperty("OutputWorkspace", "__extracted");
+  return extractSpectraAlg;
+}
+
+IAlgorithm_sptr IndirectFitAnalysisTab::appendSpectraAlgorithm(
+    MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr spectraWS) const {
+  IAlgorithm_sptr appendSpectraAlg =
+      AlgorithmManager::Instance().create("AppendSpectra");
+  appendSpectraAlg->initialize();
+  appendSpectraAlg->setChild(true);
+  appendSpectraAlg->setLogging(false);
+  appendSpectraAlg->setProperty("InputWorkspace1", inputWS);
+  appendSpectraAlg->setProperty("InputWorkspace2", spectraWS);
+  appendSpectraAlg->setProperty("OutputWorkspace", "__appended");
+  return appendSpectraAlg;
+}
+
+IAlgorithm_sptr IndirectFitAnalysisTab::deleteWorkspaceAlgorithm(
+    MatrixWorkspace_sptr workspace) const {
+  IAlgorithm_sptr deleteWorkspaceAlg =
+      AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleteWorkspaceAlg->initialize();
+  deleteWorkspaceAlg->setChild(true);
+  deleteWorkspaceAlg->setLogging(false);
+  deleteWorkspaceAlg->setProperty("Workspace", workspace);
+  return deleteWorkspaceAlg;
+}
+
+IAlgorithm_sptr IndirectFitAnalysisTab::cropWorkspaceAlgorithm(
+    MatrixWorkspace_sptr inputWS, double startX, double endX, int startIndex,
+    int endIndex) const {
+  IAlgorithm_sptr cropWorkspaceAlg =
+      AlgorithmManager::Instance().create("CropWorkspace");
+  cropWorkspaceAlg->initialize();
+  cropWorkspaceAlg->setChild(true);
+  cropWorkspaceAlg->setLogging(false);
+  cropWorkspaceAlg->setProperty("InputWorkspace", inputWS);
+  cropWorkspaceAlg->setProperty("XMin", startX);
+  cropWorkspaceAlg->setProperty("XMax", endX);
+  cropWorkspaceAlg->setProperty("StartWorkspaceIndex", startIndex);
+  cropWorkspaceAlg->setProperty("EndWorkspaceIndex", endIndex);
+  cropWorkspaceAlg->setProperty("OutputWorkspace", "__cropped");
+  return cropWorkspaceAlg;
+}
+
 /*
  * Creates a guess workspace, for approximating a fit with the specified
  * function on the input workspace.
@@ -1054,22 +1171,20 @@ void IndirectFitAnalysisTab::updatePlotGuess() {
 MatrixWorkspace_sptr
 IndirectFitAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
                                              size_t wsIndex) {
-  const auto inputWS = inputWorkspace();
-  const auto binIndexLow = inputWS->binIndexOf(startX());
-  const auto binIndexHigh = inputWS->binIndexOf(endX());
-  const auto nData = binIndexHigh - binIndexLow;
+  const auto spectrum = selectedSpectrum();
+  auto cropWorkspaceAlg = cropWorkspaceAlgorithm(inputWorkspace(), startX(),
+                                                 endX(), spectrum, spectrum);
+  cropWorkspaceAlg->execute();
 
-  const auto &xPoints = inputWS->points(wsIndex);
-  std::vector<double> dataX(nData);
-  std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
-            dataX.begin());
-  const auto dataY = computeOutput(func, dataX);
+  MatrixWorkspace_sptr croppedWS =
+      cropWorkspaceAlg->getProperty("OutputWorkspace");
+  const auto dataY = computeOutput(func, croppedWS->points(0).rawData());
 
   if (dataY.empty())
     return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
   IAlgorithm_sptr createWsAlg =
-      createWorkspaceAlgorithm("__GuessAnon", 1, dataX, dataY);
+      createWorkspaceAlgorithm("__GuessAnon", 1, croppedWS->dataX(0), dataY);
   createWsAlg->execute();
   return createWsAlg->getProperty("OutputWorkspace");
 }
@@ -1113,7 +1228,7 @@ IndirectFitAnalysisTab::computeOutput(IFunction_const_sptr func,
  */
 IAlgorithm_sptr IndirectFitAnalysisTab::createWorkspaceAlgorithm(
     const std::string &workspaceName, int numSpec,
-    const std::vector<double> &dataX, const std::vector<double> &dataY) {
+    const std::vector<double> &dataX, const std::vector<double> &dataY) const {
   IAlgorithm_sptr createWsAlg =
       AlgorithmManager::Instance().create("CreateWorkspace");
   createWsAlg->initialize();
