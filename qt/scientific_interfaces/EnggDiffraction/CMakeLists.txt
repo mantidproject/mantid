@@ -49,6 +49,7 @@ set ( MOC_FILES
 )
 
 set ( UI_FILES
+   EnggDiffMultiRunFittingQtWidget.ui
    EnggDiffractionQtGUI.ui
    EnggDiffractionQtTabCalib.ui
    EnggDiffractionQtTabFocus.ui
