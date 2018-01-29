@@ -103,6 +103,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws, monWS = self._extractMonitors(ws)
 
+        self._rawOutput(ws)
+
         if beamPosWS is None:
             beamPosWS = self._findLine(ws)
         self._outputBeamPosition(beamPosWS)
@@ -262,10 +264,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return croppedWS
 
-    def _convertToWavelength(self, ws):
+    def _convertToWavelength(self, ws, suffix=''):
         """Convert the X units of ws to wavelength."""
         # TODO ws may already be in wavelength. In that case this step can be omitted.
-        wavelengthWSName = self._names.withSuffix('in_wavelength')
+        wavelengthWSName = self._names.withSuffix(suffix + 'in_wavelength')
         wavelengthWS = ConvertUnits(
             InputWorkspace=ws,
             OutputWorkspace=wavelengthWSName,
@@ -275,6 +277,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return wavelengthWS
 
+    def _rawOutput(self, ws):
+        return self._convertToWavelength(ws, 'raw_')
+
     def _extractMonitors(self, ws):
         """Extract monitor spectra from ws to another workspace."""
         detWSName = self._names.withSuffix('detectors')
@@ -283,7 +288,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                         DetectorWorkspace=detWSName,
                         MonitorWorkspace=monWSName,
                         EnableLogging=self._subalgLogging)
-        if mtd.doesExist(detWSName)  is None:
+        if mtd.doesExist(detWSName) is None:
             raise RuntimeError('No detectors in the input data.')
         detWS = mtd[detWSName]
         monWS = mtd[monWSName] if mtd.doesExist(monWSName) else None
@@ -415,7 +420,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 rawWS = mtd[rawWSName]
                 mergedWS = MergeRuns(InputWorkspace=[mergedWS, rawWS],
                                      OutputWorkspace=mergedWSName,
-                                     EnableLoggign=self._subalgLogging)
+                                     EnableLogging=self._subalgLogging)
                 if i == 0:
                     self._cleanup.cleanup(firstWSName)
                 self._cleanup.cleanup(rawWS)
