@@ -58,12 +58,12 @@ From the main MantidPlot menu, select
 
 View->Algorithms
 
-Algorithms can take care of error propagation. For more details it is recommended to check the documentation. Arithmetic operations propagate errors (Plus, Minus, ...). As well in Python.
+Algorithms can take care of error propagation. For more details it is recommended to check the corresponding documentation, click on the ? sign in the left lower corner of the specific algorithm graphical user interface. Arithmetic operations propagate errors (Plus, Minus, ...). As well in Python.
 
 Input validation
 ----------------
 
-Some algorithm have requirements that will be checked before execution, e.g. units, common binning, etc.
+Some algorithms have requirements that will be checked before execution, e.g. units, common binning, etc.
 This way, the user will be quickly and early guided to correct inputs rather than motivated reading error messages.
 
 Results Log
