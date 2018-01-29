@@ -10,7 +10,7 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
   setupUI();
 
-  m_zoomTool = std::make_unique<QwtPlotZoomer>(
+  m_zoomTool = Mantid::Kernel::make_unique<QwtPlotZoomer>(
       QwtPlot::xBottom, QwtPlot::yLeft,
       QwtPicker::DragSelection | QwtPicker::CornerToCorner,
       QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
@@ -18,8 +18,8 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget() {
   setZoomToolEnabled(false);
 
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
-  m_presenter =
-      std::make_unique<EnggDiffGSASFittingPresenter>(std::move(model), this);
+  m_presenter = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
+      std::move(model), this);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
 
@@ -113,7 +113,7 @@ void EnggDiffGSASFittingViewQtWidget::plotCurve(
 
   for (size_t i = 0; i < curves.size(); ++i) {
     auto *curve = curves[i].get();
-    auto plotCurve = std::make_unique<QwtPlotCurve>();
+    auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
 
     plotCurve->setData(*curve);
     plotCurve->attach(m_ui.plotArea);
