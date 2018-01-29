@@ -75,9 +75,6 @@ class IndexSatellitePeaks(PythonAlgorithm):
             hklm[i, 3:] = indicies[index]
 
         indexed = self.create_indexed_workspace(satellites, ndim, hklm)
-
-        name = self.getPropertyValue("OutputWorkspace")
-        RenameWorkspace(indexed, name)
         self.setProperty("OutputWorkspace", indexed)
 
     def create_indexed_workspace(self, fractional_peaks, ndim, hklm):
@@ -96,7 +93,8 @@ class IndexSatellitePeaks(PythonAlgorithm):
         # Create table with the number of columns we need
         types = ['int', 'long64', 'double', 'double', 'double', 'double',  'double', 'double',
                  'double', 'double', 'double', 'float', 'str', 'float', 'float', 'V3D', 'V3D']
-        indexed = CreateEmptyTableWorkspace()
+        name = self.getPropertyValue("OutputWorkspace")
+        indexed = CreateEmptyTableWorkspace(name)
         names = fractional_peaks.getColumnNames()
 
         # Insert the extra columns for the addtional indicies
