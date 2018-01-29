@@ -16,7 +16,7 @@ template <typename T> boost::optional<T> first(std::vector<T> const &values) {
 
 template <typename... Ts>
 class FirstVisitor
-    : boost::static_visitor<boost::optional<boost::variant<Ts...>>> {
+    : public boost::static_visitor<boost::optional<boost::variant<Ts...>>> {
 public:
   template <typename T>
   boost::optional<boost::variant<Ts...>>
@@ -28,7 +28,6 @@ public:
       return boost::none;
   }
 };
-
 }
 }
 #endif // MANTID_ISISREFLECTOMETRY_FIRST_H
