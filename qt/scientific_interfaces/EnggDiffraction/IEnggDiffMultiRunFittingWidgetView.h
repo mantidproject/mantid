@@ -85,7 +85,7 @@ public:
   /// Get the run number of the focused run which has been passed to the view
   virtual int getFocusedRunNumberToAdd() const = 0;
 
-  // Get the run number requested when getFocusedRun is run
+  /// Get the run number requested when getFocusedRun is run
   virtual int getFocusedRunNumberToReturn() const = 0;
 
   /// Set the fitted peaks workspace to be returned when getFittedPeaks is

@@ -7,7 +7,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-EnggDiffMultiRunFittingViewQtWidget::EnggDiffMultiRunFittingViewQtWidget() {
+EnggDiffMultiRunFittingViewQtWidget::EnggDiffMultiRunFittingViewQtWidget(
+    boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider)
+    : m_userMessageProvider(userMessageProvider) {
   m_ui.setupUi(this);
 
   auto model =
@@ -107,6 +109,11 @@ void EnggDiffMultiRunFittingViewQtWidget::setFittedPeaksWorkspaceToReturn(
 void EnggDiffMultiRunFittingViewQtWidget::setFocusedRunWorkspaceToReturn(
     const Mantid::API::MatrixWorkspace_sptr ws) {
   m_focusedWorkspaceToReturn = ws;
+}
+
+void EnggDiffMultiRunFittingViewQtWidget::userError(
+    const std::string &errorTitle, const std::string &errorDescription) {
+  m_userMessageProvider->userError(errorTitle, errorDescription);
 }
 
 } // CustomInterfaces

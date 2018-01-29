@@ -4,6 +4,7 @@
 #include "DllConfig.h"
 #include "IEnggDiffMultiRunFittingWidgetPresenter.h"
 #include "IEnggDiffMultiRunFittingWidgetView.h"
+#include "IEnggDiffractionUserMsg.h"
 #include "ui_EnggDiffMultiRunFittingQtWidget.h"
 
 namespace MantidQt {
@@ -15,7 +16,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingViewQtWidget
   Q_OBJECT
 
 public:
-  EnggDiffMultiRunFittingViewQtWidget();
+  EnggDiffMultiRunFittingViewQtWidget(
+      boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider);
 
   void addFittedPeaks(const int runNumber, const size_t bank,
                       const Mantid::API::MatrixWorkspace_sptr ws) override;
@@ -80,15 +82,16 @@ private:
   int m_focusedRunNumberToAdd;
 
   mutable int m_focusedRunNumberToReturn;
-  
+
   Mantid::API::MatrixWorkspace_sptr m_focusedWorkspaceToAdd;
 
-  boost::optional<Mantid::API::MatrixWorkspace_sptr>
-      m_focusedWorkspaceToReturn;
+  boost::optional<Mantid::API::MatrixWorkspace_sptr> m_focusedWorkspaceToReturn;
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_presenter;
 
   Ui::EnggDiffMultiRunFittingWidget m_ui;
+
+  boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
 };
 
 } // CustomInterfaces
