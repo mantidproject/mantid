@@ -4,6 +4,9 @@ set ( SRC_FILES
 	EnggDiffFittingViewQtWidget.cpp
 	EnggDiffGSASFittingModel.cpp
 	EnggDiffGSASFittingPresenter.cpp
+	EnggDiffMultiRunFittingWidgetModel.cpp
+	EnggDiffMultiRunFittingViewQtWidget.cpp
+	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
 )
@@ -19,6 +22,9 @@ set ( INC_FILES
 	EnggDiffGSASFittingModel.h
 	EnggDiffGSASFittingPresenter.h
 	EnggDiffGSASRefinementMethod.h
+	EnggDiffMultiRunFittingWidgetModel.h
+	EnggDiffMultiRunFittingViewQtWidget.h
+	EnggDiffMultiRunFittingWidgetPresenter.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
@@ -27,6 +33,9 @@ set ( INC_FILES
 	IEnggDiffGSASFittingModel.h
 	IEnggDiffGSASFittingPresenter.h
 	IEnggDiffGSASFittingView.h
+	IEnggDiffMultiRunFittingWidgetModel.h
+	IEnggDiffMultiRunFittingWidgetPresenter.h
+	IEnggDiffMultiRunFittingWidgetView.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
 	RunMap.h
@@ -36,12 +45,14 @@ set ( MOC_FILES
     EnggDiffFittingPresenter.h
     EnggDiffFittingPresWorker.h
     EnggDiffFittingViewQtWidget.h
+    EnggDiffMultiRunFittingViewQtWidget.h
     EnggDiffractionPresenter.h
     EnggDiffractionPresWorker.h
     EnggDiffractionViewQtGUI.h
 )
 
 set ( UI_FILES
+   EnggDiffMultiRunFittingQtWidget.ui
    EnggDiffractionQtGUI.ui
    EnggDiffractionQtTabCalib.ui
    EnggDiffractionQtTabFocus.ui
