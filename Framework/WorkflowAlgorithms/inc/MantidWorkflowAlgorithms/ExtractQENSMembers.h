@@ -48,6 +48,10 @@ private:
   getAxisLabels(Mantid::API::MatrixWorkspace_sptr workspace,
                 size_t axisIndex) const;
 
+  std::vector<std::string>
+  renameConvolvedMembers(const std::vector<std::string> &members,
+                         const std::vector<std::string> &newNames) const;
+
   Mantid::API::MatrixWorkspace_sptr
   extractSpectrum(Mantid::API::MatrixWorkspace_sptr inputWS, size_t spectrum);
 
@@ -62,13 +66,12 @@ private:
   createMembersWorkspaces(Mantid::API::MatrixWorkspace_sptr initialWS,
                           const std::vector<std::string> &members);
 
-  void appendToMembers(
-      Mantid::API::MatrixWorkspace_sptr resultWS,
-      const std::vector<Mantid::API::MatrixWorkspace_sptr> &members);
+  void appendToMembers(Mantid::API::MatrixWorkspace_sptr resultWS,
+                       std::vector<Mantid::API::MatrixWorkspace_sptr> &members);
 
-  void setNumericAxis(const std::vector<MatrixWorkspace_sptr> &workspaces,
-                      const std::vector<double> &values,
-                      size_t axisIndex) const;
+  void setNumericAxis(
+      const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+      const std::vector<double> &values, size_t axisIndex) const;
 
   std::vector<std::string> addMembersToADS(
       const std::vector<std::string> &members,

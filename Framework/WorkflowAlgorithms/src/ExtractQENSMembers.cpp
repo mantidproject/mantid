@@ -3,6 +3,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
 
+#include "MantidKernel/ArrayProperty.h"
+
 #include <boost/numeric/conversion/cast.hpp>
 
 namespace {
@@ -48,6 +50,14 @@ void ExtractQENSMembers::init() {
   declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "ResultWorkspace", "", Direction::Input),
                   "The result group workspace produced in a QENS fit.");
+  declareProperty("RenameConvolvedMembers", false,
+                  "If true, renames the n-th 'Convolution' member, to the n-th "
+                  "supplied name in the ConvolvedMembers property.");
+  declareProperty(make_unique<ArrayProperty<std::string>>("ConvolvedMembers"),
+                  "A list of the names of the members which were convolved "
+                  "before being output by the fit routine. These must be "
+                  "provided in the same order as originally provided to the "
+                  "fit.");
   declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace group, containing the fit members.");
@@ -58,12 +68,16 @@ void ExtractQENSMembers::exec() {
   WorkspaceGroup_sptr resultWS = getProperty("ResultWorkspace");
   MatrixWorkspace_sptr initialWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(0));
-  auto qValues = getQValues(getProperty("InputWorkspace"));
-  auto members =
-      getAxisLabels(boost::dynamic_pointer_cast<MatrixWorkspace>(initialWS), 1);
+  auto qValues = getQValues(inputWS);
+  auto members = getAxisLabels(initialWS, 1);
+
+  bool renameConvolved = getProperty("RenameConvolvedMembers");
+  if (renameConvolved)
+    members = renameConvolvedMembers(members, getProperty("ConvolvedMembers"));
+
   auto memberWorkspaces = createMembersWorkspaces(initialWS, members);
 
-  for (size_t i = 1u; i < resultWS->size(); ++i)
+  for (auto i = 1u; i < resultWS->size(); ++i)
     appendToMembers(
         boost::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(i)),
         memberWorkspaces);
@@ -104,9 +118,33 @@ ExtractQENSMembers::getAxisLabels(MatrixWorkspace_sptr workspace,
   std::vector<std::string> labels;
   labels.reserve(axis->length());
 
-  for (size_t i = 0u; i < axis->length(); ++i)
+  for (auto i = 0u; i < axis->length(); ++i)
     labels.emplace_back(axis->label(i));
   return labels;
+}
+
+/**
+ * Renames the convolved members in the specified vector of members, to the
+ * respective names in the specified new names vector.
+ *
+ * @param members   A vector of the members.
+ * @param newNames  The names to use in renaming.
+ * @return          A vector of the members, with the convolved members renamed.
+ */
+std::vector<std::string> ExtractQENSMembers::renameConvolvedMembers(
+    const std::vector<std::string> &members,
+    const std::vector<std::string> &newNames) const {
+  std::vector<std::string> newMembers;
+  newMembers.reserve(members.size());
+  auto index = 0u;
+
+  for (const auto &member : members) {
+    if (member == "Convolution" && index < newNames.size())
+      newMembers.emplace_back(newNames[index++]);
+    else
+      newMembers.emplace_back(member);
+  }
+  return newMembers;
 }
 
 /**
@@ -126,6 +164,7 @@ ExtractQENSMembers::extractSpectrum(MatrixWorkspace_sptr inputWS,
                           boost::numeric_cast<int>(spectrum));
   extractAlg->setProperty("EndWorkspaceIndex",
                           boost::numeric_cast<int>(spectrum));
+  extractAlg->executeAsChildAlg();
   return extractAlg->getProperty("OutputWorkspace");
 }
 
@@ -174,8 +213,8 @@ std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::createMembersWorkspaces(
     MatrixWorkspace_sptr initialWS, const std::vector<std::string> &members) {
   std::vector<MatrixWorkspace_sptr> memberWorkspaces;
   memberWorkspaces.reserve(members.size());
-  for (size_t i = 0u; i < members.size(); ++i)
-    memberWorkspaces.push_back(extractSpectrum(initialWS, i));
+  for (auto i = 0u; i < members.size(); ++i)
+    memberWorkspaces.emplace_back(extractSpectrum(initialWS, i));
   return memberWorkspaces;
 }
 
@@ -188,9 +227,9 @@ std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::createMembersWorkspaces(
  */
 void ExtractQENSMembers::appendToMembers(
     MatrixWorkspace_sptr resultWS,
-    const std::vector<Mantid::API::MatrixWorkspace_sptr> &members) {
-  for (size_t i = 0u; i < members.size(); ++i)
-    appendSpectra(members[i], extractSpectrum(resultWS, i));
+    std::vector<Mantid::API::MatrixWorkspace_sptr> &members) {
+  for (auto i = 0u; i < members.size(); ++i)
+    members[i] = appendSpectra(members[i], extractSpectrum(resultWS, i));
 }
 
 /**
@@ -204,8 +243,8 @@ void ExtractQENSMembers::appendToMembers(
 void ExtractQENSMembers::setNumericAxis(
     const std::vector<MatrixWorkspace_sptr> &workspaces,
     const std::vector<double> &values, size_t axisIndex) const {
-  auto qAxis = NumericAxis(workspaces.size());
-  for (size_t i = 0u; i < workspaces.size(); ++i)
+  auto qAxis = NumericAxis(values.size());
+  for (auto i = 0u; i < values.size(); ++i)
     qAxis.setValue(i, values[i]);
 
   for (auto &workspace : workspaces) {
@@ -232,7 +271,7 @@ std::vector<std::string> ExtractQENSMembers::addMembersToADS(
   std::vector<std::string> workspaceNames;
   workspaceNames.reserve(members.size());
 
-  for (size_t i = 0u; i < members.size(); ++i) {
+  for (auto i = 0u; i < members.size(); ++i) {
     std::string count = "";
 
     if (nameCounts.find(members[i]) == nameCounts.end())
