@@ -155,7 +155,7 @@ protected:
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
 
   Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(Mantid::API::IFunction_const_sptr func, size_t wsIndex);
+  createGuessWorkspace(Mantid::API::IFunction_const_sptr func, int wsIndex);
 
   std::vector<double> computeOutput(Mantid::API::IFunction_const_sptr func,
                                     const std::vector<double> &dataX);
