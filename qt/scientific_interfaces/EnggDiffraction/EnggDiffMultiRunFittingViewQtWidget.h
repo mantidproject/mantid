@@ -58,6 +58,9 @@ public:
   void setFocusedRunWorkspaceToReturn(
       const Mantid::API::MatrixWorkspace_sptr ws) override;
 
+  void
+  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) override;
+
   void userError(const std::string &errorTitle,
                  const std::string &errorDescription) override;
 

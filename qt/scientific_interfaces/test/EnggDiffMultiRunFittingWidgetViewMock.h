@@ -55,6 +55,10 @@ public:
   MOCK_METHOD1(setFocusedRunWorkspaceToReturn,
                void(const Mantid::API::MatrixWorkspace_sptr ws));
 
+  MOCK_METHOD1(
+      updateRunList,
+      void(const std::vector<std::pair<int, size_t>> &workspaceLabels));
+
   MOCK_METHOD2(userError, void(const std::string &errorTitle,
                                const std::string &errorDescription));
 };

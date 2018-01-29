@@ -98,6 +98,11 @@ public:
   virtual void setFocusedRunWorkspaceToReturn(
       const Mantid::API::MatrixWorkspace_sptr ws) = 0;
 
+  /// Update the focused run list with run numbers and bank IDs of all runs
+  /// loaded into the widget
+  virtual void
+  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) = 0;
+
   /**
    Display an error message to the user
    @param errorTitle Title of the error

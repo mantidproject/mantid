@@ -32,6 +32,13 @@ public:
         .WillOnce(Return(123));
     EXPECT_CALL(*m_mockModelPtr, addFocusedRun(123, 1, ws));
 
+    const std::vector<std::pair<int, size_t>> workspaceLabels(
+        {std::make_pair(123, 1)});
+    EXPECT_CALL(*m_mockModelPtr, getAllWorkspaceLabels())
+        .Times(1)
+        .WillOnce(Return(workspaceLabels));
+    EXPECT_CALL(*m_mockViewPtr, updateRunList(workspaceLabels)).Times(1);
+
     presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::AddFocusedRun);
     assertMocksUsedCorrectly();
   }
@@ -98,7 +105,8 @@ public:
                 userError("Invalid fitted peaks run identifier",
                           "Could not find a fitted peaks workspace with run "
                           "number 123 and bank ID 1. Please contact the "
-                          "development team with this message")).Times(1);
+                          "development team with this message"))
+        .Times(1);
     EXPECT_CALL(*m_mockViewPtr, setFittedPeaksWorkspaceToReturn(testing::_))
         .Times(0);
 
@@ -149,7 +157,8 @@ public:
                 userError("Invalid focused run identifier",
                           "Could not find a focused run with run "
                           "number 123 and bank ID 1. Please contact the "
-                          "development team with this message")).Times(1);
+                          "development team with this message"))
+        .Times(1);
     EXPECT_CALL(*m_mockViewPtr, setFocusedRunWorkspaceToReturn(testing::_))
         .Times(0);
 

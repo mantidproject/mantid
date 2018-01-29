@@ -111,6 +111,16 @@ void EnggDiffMultiRunFittingViewQtWidget::setFocusedRunWorkspaceToReturn(
   m_focusedWorkspaceToReturn = ws;
 }
 
+void EnggDiffMultiRunFittingViewQtWidget::updateRunList(
+    const std::vector<std::pair<int, size_t>> &runLabels) {
+  m_ui.listWidget_runLabels->clear();
+  for (const auto &runLabel : runLabels) {
+    const auto labelStr = QString::number(runLabel.first) + tr("_") +
+                          QString::number(runLabel.second);
+    m_ui.listWidget_runLabels->addItem(labelStr);
+  }
+}
+
 void EnggDiffMultiRunFittingViewQtWidget::userError(
     const std::string &errorTitle, const std::string &errorDescription) {
   m_userMessageProvider->userError(errorTitle, errorDescription);

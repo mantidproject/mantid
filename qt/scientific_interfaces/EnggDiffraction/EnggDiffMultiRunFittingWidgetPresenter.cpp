@@ -56,6 +56,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::processAddFocusedRun() {
   const auto bankID = m_view->getFocusedRunBankIDToAdd();
   const auto runNumber = m_view->getFocusedRunNumberToAdd();
   m_model->addFocusedRun(runNumber, bankID, ws);
+  m_view->updateRunList(m_model->getAllWorkspaceLabels());
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processGetFittedPeaks() {
