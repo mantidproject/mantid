@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty, MatrixWorkspaceProperty,
                         MultipleFileProperty, PropertyMode)
-from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, FloatBoundedValidator, IntBoundedValidator, Property,
+from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, IntBoundedValidator, Property,
                            StringListValidator)
 from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertToDistribution, ConvertUnits, CreateEmptyTableWorkspace,
                               CropWorkspace, Divide, ExtractMonitors, Fit, GroupDetectors, Integration, LoadILLReflectometry, MergeRuns,
@@ -102,7 +102,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         ws, beamPosWS = self._inputWS()
 
         ws, monWS = self._extractMonitors(ws)
-        
+
         if beamPosWS is None:
             beamPosWS = self._findLine(ws)
         self._outputBeamPosition(beamPosWS)
