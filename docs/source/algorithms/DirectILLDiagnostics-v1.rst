@@ -52,6 +52,9 @@ Defaul mask
 
 The default mask file is defined by the 'Workflow.MaskFile' instrument parameter.
 
+Currently, there is a default mask available for ILL's IN5 instrument which masks 8 pixels at both ends of every detector tube.
+
+
 Diagnostics reporting
 #####################
 
@@ -67,6 +70,21 @@ The optional *OutputReportWorkspace* property returns a table workspace summariz
 The columns can be plotted to get an overview of the diagnostics.
 
 Additionally, a string listing the masked and diagnosed detectors can be accessed via the *OutputReport* property.
+
+ILL's instrument specific defaults
+----------------------------------
+
+The following settings are used when the :literal:`AUTO` keyword is encountered:
+
++------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| Property               | IN4                       | IN5                      | IN6                       | Ohters                    |
++========================+===========================+==========================+===========================+===========================+
+| ElasticPeakDiagnostics | Peak Diagnostics ON       | Peak Diagnostics OFF     | Peak Diagnostics ON       | Peak Diagnostics ON       |
++------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| BkgDiagnostics         | Bkg Diagnostics ON        | Bkg Diagnostics OFF      | Bkg Diagnostics ON        | Bkg Diagnostics ON        |
++------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
+| BeamStopDiagnostics    | Beam Stop Diagnostics OFF | Beam Stop Diagnostics ON | Beam Stop Diagnostics OFF | Beam Stop Diagnostics OFF |
++------------------------+---------------------------+--------------------------+---------------------------+---------------------------+
 
 Usage
 -----

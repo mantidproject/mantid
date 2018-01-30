@@ -65,11 +65,11 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
             validator=inputWorkspaceValidator,
             optional=PropertyMode.Optional,
             direction=Direction.Input),
-            doc='Input workspace.')
+            doc='A workspace for which to simulate the self shielding.')
         self.declareProperty(MatrixWorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                      defaultValue='',
                                                      direction=Direction.Output),
-                             doc='The output corrections workspace.')
+                             doc='A workspace containing the self shielding correction factors.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=common.CLEANUP_ON,
                              validator=StringListValidator([

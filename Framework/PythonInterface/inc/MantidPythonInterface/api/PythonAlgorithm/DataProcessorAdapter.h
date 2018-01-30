@@ -41,10 +41,9 @@ namespace PythonInterface {
  * It also provides access to the protected methods on DataProcessorAlgorithm
  * from the type exported to Python
  */
+template <class Base>
 class DataProcessorAdapter
-    : public AlgorithmAdapter<API::DataProcessorAlgorithm> {
-  typedef AlgorithmAdapter<API::DataProcessorAlgorithm> SuperClass;
-
+    : public AlgorithmAdapter<API::GenericDataProcessorAlgorithm<Base>> {
 public:
   /// A constructor that looks like a Python __init__ method
   DataProcessorAdapter(PyObject *self);

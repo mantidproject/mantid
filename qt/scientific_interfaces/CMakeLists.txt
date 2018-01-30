@@ -30,6 +30,7 @@ set ( TEST_FILES
   test/ALCLatestFileFinderTest.h
   test/ALCPeakFittingModelTest.h
   test/ALCPeakFittingPresenterTest.h
+  test/EnggDiffGSASFittingModelTest.h
   test/EnggDiffGSASFittingPresenterTest.h
   test/EnggDiffFittingModelTest.h
   test/EnggDiffFittingPresenterTest.h
@@ -53,6 +54,7 @@ set ( TEST_FILES
   test/ReflSaveTabPresenterTest.h
   test/ReflSettingsPresenterTest.h
   test/ReflSettingsTabPresenterTest.h
+  test/RunMapTest.h
   test/UserInputValidatorTest.h
 )
 
