@@ -172,7 +172,7 @@ void ConvolutionFitSequential::exec() {
   if (pos != std::string::npos) {
     delta = true;
     usingDelta = "true";
-    convolvedMembers.emplace_back("Delta Function");
+    convolvedMembers.emplace_back("DeltaFunction");
   }
 
   if (LorentzNum == "0") {
