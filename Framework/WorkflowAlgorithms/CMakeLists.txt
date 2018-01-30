@@ -91,6 +91,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	ConvolutionFitSequentialTest.h
+	ExtractQENSMembersTest.h
 	IMuonAsymmetryCalculatorTest.h
 	LoadEventAndCompressTest.h
 	MuonProcessTest.h
