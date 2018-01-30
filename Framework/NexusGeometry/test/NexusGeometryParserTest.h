@@ -66,10 +66,19 @@ public:
                       componentInfo->size(), detectorInfo->size() + 3);
   }
 
-  void test_simple_translation() {
+  void test_source_is_where_expected() {
     auto beamline = extractBeamline();
     auto componentInfo = std::move(beamline.first);
-    auto detectorInfo = std::move(beamline.second);
+
+    auto sourcePosition =
+        Kernel::toVector3d(componentInfo->position(componentInfo->source()));
+
+    TS_ASSERT(sourcePosition.isApprox(Eigen::Vector3d(
+        0, 0, -34.281))); // Check against fixed position in file
+  }
+
+  void test_simple_translation() {
+    auto detectorInfo = extractDetectorInfo();
     // First pixel in bank 2
     auto det0Position = Kernel::toVector3d(
         detectorInfo->position(detectorInfo->indexOf(1100000)));
@@ -81,19 +90,6 @@ public:
                                                   // z defaults to 0
     auto expectedDet0Position = offset + (magnitude * unitVector);
     TS_ASSERT(det0Position.isApprox(expectedDet0Position));
-
-    auto sourcePosition =
-        Kernel::toVector3d(componentInfo->position(componentInfo->source()));
-    TS_ASSERT(sourcePosition.isApprox(Eigen::Vector3d(0, 0, -34.281)));
-
-    const size_t monitorIndex = 0;
-    TS_ASSERT(detectorInfo->isMonitor(monitorIndex));
-    TSM_ASSERT("Monitor has no shape",
-               !componentInfo->hasValidShape(monitorIndex));
-    const auto &det1Shape = componentInfo->shape(1);
-    const auto &det2Shape = componentInfo->shape(2);
-    TSM_ASSERT_EQUALS("Pixel shapes should be the same within bank", &det1Shape,
-                      &det2Shape);
   }
 
   void test_complex_translation() {
@@ -121,6 +117,27 @@ public:
     affine *= Eigen::Translation3d(magnitude * unitVectorTranslation);
     auto expectedPosition = affine * offset;
     TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-3));
+  }
+
+  void test_shape() {
+
+    auto beamline = extractBeamline();
+    auto componentInfo = std::move(beamline.first);
+    auto detectorInfo = std::move(beamline.second);
+    const size_t monitorIndex = 0; // Fixed in file
+    TS_ASSERT(detectorInfo->isMonitor(monitorIndex));
+    TSM_ASSERT("Monitor has no shape",
+               !componentInfo->hasValidShape(monitorIndex));
+    const auto &det1Shape = componentInfo->shape(1);
+    const auto &det2Shape = componentInfo->shape(2);
+    TSM_ASSERT_EQUALS("Pixel shapes should be the same within bank", &det1Shape,
+                      &det2Shape);
+
+    auto shapeBB = det1Shape.getBoundingBox();
+    TS_ASSERT_DELTA(shapeBB.xMax() - shapeBB.xMin(), 0.03125 - (-0.03125),
+                    1e-9); // Cylinder length fixed in file
+    TS_ASSERT_DELTA(shapeBB.yMax() - shapeBB.yMin(), 2 * 0.00405,
+                    1e-9); // Cylinder radius fixed in file
   }
 
 private:
