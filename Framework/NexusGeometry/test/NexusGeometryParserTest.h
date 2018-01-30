@@ -61,16 +61,16 @@ public:
     auto detectorInfo = std::move(beamline.second);
     TSM_ASSERT_EQUALS("Detectors + 1 monitor", detectorInfo->size(),
                       128 * 2 + 1);
-    TSM_ASSERT_EQUALS(
-        "Detectors + 3 non-detector components", componentInfo->size(),
-        detectorInfo->size() +
-            3); // TODO, currently NOT counting source + sample + root!
+    TSM_ASSERT_EQUALS("Detectors + 3 non-detector components",
+                      componentInfo->size(), detectorInfo->size() + 3);
   }
 
   void test_simple_translation() {
-    auto detectorInfo = extractDetectorInfo();
+    auto beamline = extractBeamline();
+    auto componentInfo = std::move(beamline.first);
+    auto detectorInfo = std::move(beamline.second);
     // First pixel in bank 2
-    auto det0Postion = Kernel::toVector3d(
+    auto det0Position = Kernel::toVector3d(
         detectorInfo->position(detectorInfo->indexOf(1100000)));
     Eigen::Vector3d unitVector(0, 0,
                                1); // Fixed in file location vector attribute
@@ -78,8 +78,12 @@ public:
     Eigen::Vector3d offset(-0.498, -0.200, 0.00); // All offsets for pixel x,
                                                   // and y specified separately,
                                                   // z defaults to 0
-    auto expectedPosition = offset + (magnitude * unitVector);
-    TS_ASSERT(det0Postion.isApprox(expectedPosition));
+    auto expectedDet0Position = offset + (magnitude * unitVector);
+    TS_ASSERT(det0Position.isApprox(expectedDet0Position));
+
+    auto sourcePosition =
+        Kernel::toVector3d(componentInfo->position(componentInfo->source()));
+    TS_ASSERT(sourcePosition.isApprox(Eigen::Vector3d(0, 0, -34.281)));
   }
 
   void test_complex_translation() {
@@ -100,11 +104,11 @@ public:
                                                   // and y specified separately,
                                                   // z defaults to 0
     auto affine = Eigen::Transform<double, 3, Eigen::Affine>::Identity();
-    // Tranlsation of bank
-    affine *= Eigen::Translation3d(magnitude * unitVectorTranslation);
     // Rotation of bank
     affine *= Eigen::Quaterniond(
         Eigen::AngleAxisd(rotation * M_PI / 180, rotationAxis));
+    // Tranlsation of bank
+    affine *= Eigen::Translation3d(magnitude * unitVectorTranslation);
     auto expectedPosition = affine * offset;
     TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-3));
   }

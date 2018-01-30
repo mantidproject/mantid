@@ -422,7 +422,7 @@ void NexusGeometryParser::parseAndAddSource() {
   Group sourceGroup = this->rootGroup.openGroup(sourcePath);
   auto sourceName = this->get1DStringDataset("name", sourceGroup);
   auto sourceTransformations = this->getTransformations(sourceGroup);
-  auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0); // HACK
+  auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
   this->iBuilder_sptr->addSource(sourceName,
                                  sourceTransformations * defaultPos);
 }
