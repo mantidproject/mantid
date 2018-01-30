@@ -22,9 +22,9 @@ public:
     auto presenter = setUpPresenter();
     const auto filename = "Valid filename";
 
-    EXPECT_CALL(*m_mockViewPtr, getFocusedFileNames())
+    EXPECT_CALL(*m_mockViewPtr, getFocusedFileName())
         .Times(1)
-        .WillOnce(Return(std::vector<std::string>({filename})));
+        .WillOnce(Return(filename));
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
         .WillOnce(Return(true));
@@ -47,9 +47,9 @@ public:
     auto presenter = setUpPresenter();
     const auto filename = "Invalid filename";
 
-    EXPECT_CALL(*m_mockViewPtr, getFocusedFileNames())
+    EXPECT_CALL(*m_mockViewPtr, getFocusedFileName())
         .Times(1)
-        .WillOnce(Return(std::vector<std::string>({filename})));
+        .WillOnce(Return(filename));
 
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
@@ -253,17 +253,17 @@ private:
         testing::NiceMock<MockEnggDiffGSASFittingModel>>();
     m_mockModelPtr = mockModel.get();
 
-    m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();
+    auto mockView = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffGSASFittingView>>();
+    m_mockViewPtr = mockView.get();
 
     std::unique_ptr<EnggDiffGSASFittingPresenter> pres_uptr(
-        new EnggDiffGSASFittingPresenter(std::move(mockModel), m_mockViewPtr));
+        new EnggDiffGSASFittingPresenter(std::move(mockModel),
+                                         std::move(mockView)));
     return pres_uptr;
   }
 
   void assertMocksUsedCorrectly() {
-    if (m_mockViewPtr) {
-      delete m_mockViewPtr;
-    }
     TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(m_mockModelPtr));
