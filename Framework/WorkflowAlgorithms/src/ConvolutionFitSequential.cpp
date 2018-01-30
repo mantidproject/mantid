@@ -639,7 +639,7 @@ void ConvolutionFitSequential::extractMembers(
     MatrixWorkspace_sptr inputWs, WorkspaceGroup_sptr resultGroupWs,
     const std::vector<std::string> &convolvedMembers,
     const std::string &outputWsName) {
-  bool convolved = getProperty("ConvolveMembers");
+  bool convolved = getProperty("Convolve");
   auto extractMembersAlg =
       AlgorithmManager::Instance().create("ExtractQENSMembers");
   extractMembersAlg->setProperty("InputWorkspace", inputWs);
