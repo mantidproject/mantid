@@ -153,7 +153,7 @@ void ConvFit::setup() {
           SLOT(plotCurrentPreview()));
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
           SLOT(plotGuess()));
-
+  
   connect(this, SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(parameterUpdated(const Mantid::API::IFunction *)));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
@@ -403,11 +403,10 @@ void ConvFit::algorithmComplete(bool error) {
   }
 
   std::string outputPrefix = outputWorkspaceName();
+  const std::string paramWsName = outputPrefix + "_Parameters";
+  IndirectFitAnalysisTab::fitAlgorithmComplete(paramWsName);
 
   const auto resultName = outputPrefix + "_Result";
-  MatrixWorkspace_sptr resultWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
-
   // Name for GroupWorkspace
   const auto groupName = outputPrefix + "_Workspaces";
   // Add Sample logs for ResolutionFiles
@@ -434,9 +433,6 @@ void ConvFit::algorithmComplete(bool error) {
     }
   }
   m_batchAlgoRunner->executeBatchAsync();
-
-  const std::string paramWsName = outputPrefix + "_Parameters";
-  IndirectFitAnalysisTab::fitAlgorithmComplete(paramWsName);
 
   m_uiForm->pbSave->setEnabled(true);
   m_uiForm->pbPlot->setEnabled(true);
