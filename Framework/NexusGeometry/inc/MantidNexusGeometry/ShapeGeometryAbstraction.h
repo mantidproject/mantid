@@ -24,11 +24,11 @@ typedef boost::shared_ptr<Geometry::Surface> surfaceHolder;
 class DLLExport ShapeGeometryAbstraction
     : public ShapeAbstractCreator<ShapeGeometryAbstraction, objectHolder> {
 public:
-  objectHolder createCylinder(Eigen::Matrix<double, 3, 3> &pointsDef);
+  objectHolder createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef);
 
 private:
-  objectHolder createShape(std::map<int, surfaceHolder> &surfaces,
-                           std::string &algebra,
+  objectHolder createShape(const std::map<int, surfaceHolder> &surfaces,
+                           const std::string &algebra,
                            std::vector<double> &boundingBox);
 };
 }

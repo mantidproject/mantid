@@ -39,7 +39,6 @@ public:
   ParsingErrors parseNexusGeometry();
 
 private:
-  objectHolder shape = objectHolder();
   shapeAbsCreator sAbsCreator = shapeAbsCreator();
   H5::H5File nexusFile;
   H5::Group rootGroup;
@@ -71,9 +70,9 @@ private:
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
   parsePixelShape(H5::Group &detectorGroup);
   /// Parse shape - choose what type shape
-  void parseNexusShape(H5::Group &detectorGroup);
+  objectHolder parseNexusShape(H5::Group &detectorGroup);
   /// Parse cylinder nexus geometry
-  void parseNexusCylinder(H5::Group &shapeGroup);
+  objectHolder parseNexusCylinder(H5::Group &shapeGroup);
   /// Parse source
   void parseAndAddSource();
   /// Parse sample

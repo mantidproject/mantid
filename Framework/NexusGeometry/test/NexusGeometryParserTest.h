@@ -10,6 +10,7 @@
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include <string>
 
@@ -84,6 +85,15 @@ public:
     auto sourcePosition =
         Kernel::toVector3d(componentInfo->position(componentInfo->source()));
     TS_ASSERT(sourcePosition.isApprox(Eigen::Vector3d(0, 0, -34.281)));
+
+    const size_t monitorIndex = 0;
+    TS_ASSERT(detectorInfo->isMonitor(monitorIndex));
+    TSM_ASSERT("Monitor has no shape",
+               !componentInfo->hasValidShape(monitorIndex));
+    const auto &det1Shape = componentInfo->shape(1);
+    const auto &det2Shape = componentInfo->shape(2);
+    TSM_ASSERT_EQUALS("Pixel shapes should be the same within bank", &det1Shape,
+                      &det2Shape);
   }
 
   void test_complex_translation() {

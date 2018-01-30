@@ -95,15 +95,15 @@ ParsingErrors NexusGeometryParser::parseNexusGeometry() {
       Pixels detectorPixels = transforms * pixelOffsets;
       // Get the pixel detIds
       std::vector<int> detectorIds = this->getDetectorIds(*iter);
-      // Force call of shape
-      this->parseNexusShape(*iter);
+      // Extract shape
+      auto shape = this->parseNexusShape(*iter);
 
       for (size_t i = 0; i < detectorIds.size(); ++i) {
         int index = static_cast<int>(i);
         std::string name = std::to_string(index);
         Eigen::Vector3d detPos = detectorPixels.col(index);
         this->iBuilder_sptr->addDetector(name, detectorIds[index], detPos,
-                                         this->shape);
+                                         shape);
       }
     }
     // Sort the detectors
@@ -375,12 +375,13 @@ NexusGeometryParser::getTransformations(Group &detectorGroup) {
 }
 
 /// Choose what shape type to parse
-void NexusGeometryParser::parseNexusShape(Group &detectorGroup) {
+objectHolder NexusGeometryParser::parseNexusShape(Group &detectorGroup) {
   Group shapeGroup;
   try {
     shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
   } catch (...) {
-    // Placeholder - no group pixel_shape
+    // TODO. Current assumption. Can we have pixels without specifying a shape?
+    return objectHolder(nullptr);
   }
 
   H5std_string shapeType;
@@ -393,12 +394,15 @@ void NexusGeometryParser::parseNexusShape(Group &detectorGroup) {
   }
   // Give shape group to correct shape parser
   if (shapeType == NX_CYLINDER) {
-    this->parseNexusCylinder(shapeGroup);
+    return this->parseNexusCylinder(shapeGroup);
+  } else {
+    throw std::runtime_error(
+        "Shape type not recognised by NexusGeometryParser");
   }
 }
 
 // Parse cylinder nexus geometry
-void NexusGeometryParser::parseNexusCylinder(Group &shapeGroup) {
+objectHolder NexusGeometryParser::parseNexusCylinder(Group &shapeGroup) {
   H5std_string pointsToVertices = "cylinder";
   std::vector<int> cPoints =
       this->get1DDataset<int>(pointsToVertices, shapeGroup);
@@ -413,7 +417,7 @@ void NexusGeometryParser::parseNexusCylinder(Group &shapeGroup) {
   for (int i = 0; i < 3; ++i) {
     vSorted.col(cPoints[i]) = vertices.col(i);
   }
-  this->shape = this->sAbsCreator.createCylinder(vSorted);
+  return this->sAbsCreator.createCylinder(vSorted);
 }
 
 // Parse source and add to instrument
@@ -452,8 +456,9 @@ void NexusGeometryParser::parseMonitors() {
 
         int detectorId = get1DDataset<int>(DETECTOR_ID, monitor)[0];
 
+        objectHolder monitorShape(nullptr); // HACK
         this->iBuilder_sptr->addMonitor(std::to_string(detectorId), detectorId,
-                                        Eigen::Vector3d{0, 0, 0}, this->shape);
+                                        Eigen::Vector3d{0, 0, 0}, monitorShape);
       }
     }
   }
