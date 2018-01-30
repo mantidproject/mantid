@@ -53,6 +53,7 @@ set ( UI_FILES
    EnggDiffractionQtTabPreproc.ui
    EnggDiffractionQtTabFitting.ui
    EnggDiffractionQtTabSettings.ui
+   EnggDiffMultiRunFittingWidget.ui
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
