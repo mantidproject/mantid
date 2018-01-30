@@ -10,7 +10,7 @@ EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
     boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider)
     : m_presenter(presenter), m_userMessageProvider(messageProvider) {
   setupUI();
-  
+
   m_zoomTool = Mantid::Kernel::make_unique<QwtPlotZoomer>(
       QwtPlot::xBottom, QwtPlot::yLeft,
       QwtPicker::DragSelection | QwtPicker::CornerToCorner,
