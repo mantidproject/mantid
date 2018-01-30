@@ -62,6 +62,33 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_extraction_rename_convolved() {
+    std::string runName = "irs26173";
+    std::string runSample = "graphite002";
+    std::string fileName = runName + "_" + runSample;
+
+    std::string outputName = "Extracted";
+    std::vector<std::string> original = {"MemberA", "MemberB", "MemberC",
+                                         "MemberD"};
+    std::vector<std::string> members = {"MemberA", "Convolution", "Convolution",
+                                        "MemberD"};
+    std::vector<std::string> convolved = {"MemberB", "MemberC"};
+
+    auto inputWS = loadWorkspace(fileName + "_red.nxs");
+    const auto numSpectra = inputWS->getNumberHistograms();
+    const auto &dataX = inputWS->dataX(0);
+    auto resultGroup = createResultGroup(members, dataX, numSpectra);
+
+    WorkspaceGroup_sptr membersWorkspace =
+        extractMembers(inputWS, resultGroup, convolved, outputName);
+    membersWorkspace->sortByName();
+
+    checkMembersOutput(membersWorkspace, original, outputName, numSpectra,
+                       dataX);
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   void checkMembersOutput(WorkspaceGroup_sptr membersWorkspace,
                           const std::vector<std::string> &members,
@@ -99,7 +126,8 @@ private:
     auto extractAlgorithm = extractMembersAlgorithm(
         inputWs, resultGroupWs, convolvedMembers, outputWsName);
     extractAlgorithm->execute();
-    return extractAlgorithm->getProperty("OutputWorkspace");
+    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        outputWsName);
   }
 
   IAlgorithm_sptr
