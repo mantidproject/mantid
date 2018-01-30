@@ -385,11 +385,6 @@ void ConvolutionFitSequential::exec() {
     renamerProg.report("Renaming group workspaces");
   }
 
-  for (auto workspace : *groupWs) {
-    auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    matrixWS->getAxis(0);
-  }
-
   // Check whether to extract members into their own workspaces.
   if (doExtractMembers)
     extractMembers(inputWs, groupWs, convolvedMembers,
