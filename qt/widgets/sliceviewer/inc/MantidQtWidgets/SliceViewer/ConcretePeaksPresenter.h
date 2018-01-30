@@ -45,8 +45,6 @@ public:
   std::string getTransformName() const override;
   void setShown(const bool shown) override;
   PeakBoundingBox getBoundingBox(const int) const override;
-  void sortPeaksWorkspace(const std::string &byColumnName,
-                          const bool ascending) override;
   void setPeakSizeOnProjection(const double fraction) override;
   void setPeakSizeIntoProjection(const double fraction) override;
   double getPeakSizeOnProjection() const override;
@@ -61,7 +59,6 @@ public:
   void peakEditMode(EditMode mode) override;
   bool deletePeaksIn(PeakBoundingBox plotCoordsBox) override;
   bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) override;
-  bool hasPeakAddMode() const override;
 
 private:
   /// Peak overlay view.
@@ -84,8 +81,6 @@ private:
   bool m_isHidden;
   /// Flag to indicate the current edit mode.
   EditMode m_editMode;
-  /// Can we add to this peaks workspace
-  bool m_hasAddPeaksMode;
   /// Configure peak transformations
   bool configureMappingTransform();
   /// Hide all views

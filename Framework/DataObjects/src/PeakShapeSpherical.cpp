@@ -53,13 +53,10 @@ std::string PeakShapeSpherical::toJSON() const {
   Json::Value root;
   PeakShapeBase::buildCommon(root);
   root["radius"] = Json::Value(m_radius);
-  // Check that there is an inner radius before writing
-  if (m_backgroundInnerRadius.is_initialized()) {
+
+  if (m_backgroundInnerRadius && m_backgroundOuterRadius) {
     root["background_outer_radius"] =
         Json::Value(m_backgroundOuterRadius.get());
-  }
-  // Check that there is an outer radius before writing
-  if (m_backgroundOuterRadius.is_initialized()) {
     root["background_inner_radius"] =
         Json::Value(m_backgroundInnerRadius.get());
   }

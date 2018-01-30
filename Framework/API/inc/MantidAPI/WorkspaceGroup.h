@@ -53,7 +53,8 @@ class Algorithm;
 class MANTID_API_DLL WorkspaceGroup : public Workspace {
 public:
   /// Default constructor.
-  WorkspaceGroup();
+  WorkspaceGroup(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   /// Destructor
   ~WorkspaceGroup() override;
   /// Return a string ID of the class

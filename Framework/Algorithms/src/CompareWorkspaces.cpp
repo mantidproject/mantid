@@ -15,6 +15,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/Unit.h"
+#include "MantidParallel/Communicator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -1194,6 +1195,13 @@ Parallel::ExecutionMode CompareWorkspaces::getParallelExecutionMode(
       return getCorrespondingExecutionMode(StorageMode::MasterOnly);
   }
   return ExecutionMode::Invalid;
+}
+
+void CompareWorkspaces::execMasterOnly() {
+  if (communicator().rank() == 0)
+    exec();
+  else
+    setProperty("Result", true);
 }
 
 } // namespace Algorithms

@@ -12,7 +12,8 @@ from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, 
                                RangeStepType, FitType)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
 from sans.test_helper.mock_objects import (create_mock_view)
-from sans.test_helper.common import (remove_file, save_to_csv)
+from sans.test_helper.common import (remove_file)
+from sans.common.enums import BatchReductionEntry
 
 
 if sys.version_info.major == 3:
@@ -20,20 +21,21 @@ if sys.version_info.major == 3:
 else:
     import mock
 
+BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SampleScatter: 1, BatchReductionEntry.SampleTransmission: 2,
+                              BatchReductionEntry.SampleDirect: 3, BatchReductionEntry.Output: 'test_file',
+                              BatchReductionEntry.UserFile: 'user_test_file'},
+                             {BatchReductionEntry.SampleScatter: 1, BatchReductionEntry.CanScatter: 2,
+                              BatchReductionEntry.Output: 'test_file2'}]
 
-BATCH_FILE_TEST_CONTENT_1 = "# MANTID_BATCH_FILE add more text here\n" \
-                            "sample_sans,1,sample_trans,2,sample_direct_beam,3," \
-                            "output_as,test_file,user_file,user_test_file\n" \
-                            "sample_sans,1,can_sans,2,output_as,test_file2\n"
+BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
+                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
+                              BatchReductionEntry.Output: 'test_file', BatchReductionEntry.UserFile: 'user_test_file'},
+                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
 
-
-BATCH_FILE_TEST_CONTENT_2 = "# MANTID_BATCH_FILE add more text here\n" \
-                            "sample_sans,SANS2D00022024,sample_trans,SANS2D00022048," \
-                            "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
-                            "sample_sans,SANS2D00022024,output_as,test_file2\n"
-
-BATCH_FILE_TEST_CONTENT_3 = "# MANTID_BATCH_FILE add more text here\n" \
-                            "sample_sans,1p3,output_as,test_file\n"
+BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SampleScatter: '1',
+                              BatchReductionEntry.SampleScatterPeriod: '3',
+                              BatchReductionEntry.Output: 'test_file'}]
 
 
 class MultiPeriodMock(object):
@@ -53,6 +55,13 @@ class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
         config.setFacility("ISIS")
         config.setString("default.instrument", "SANS2D")
+        patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.BatchCsvParser')
+        self.addCleanup(patcher.stop)
+        self.BatchCsvParserMock = patcher.start()
+
+        self.os_patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.os')
+        self.addCleanup(self.os_patcher.stop)
+        self.osMock = self.os_patcher.start()
 
     def test_that_will_load_user_file(self):
         # Setup presenter and mock view
@@ -137,6 +146,7 @@ class RunTabPresenterTest(unittest.TestCase):
         remove_file(user_file_path)
 
     def test_fails_silently_when_user_file_does_not_exist(self):
+        self.os_patcher.stop()
         view, _, _ = create_mock_view("non_existent_user_file")
 
         presenter = RunTabPresenter(SANSFacility.ISIS)
@@ -148,6 +158,7 @@ class RunTabPresenterTest(unittest.TestCase):
         except:  # noqa
             has_raised = True
         self.assertFalse(has_raised)
+        self.os_patcher.start()
 
     def do_test_that_loads_batch_file_and_places_it_into_table(self, use_multi_period):
         # Arrange
@@ -198,8 +209,8 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Assert
-        self.assertTrue(view.add_row.call_count == 1)
-        self.assertTrue(view.set_multi_period_view_mode.call_count == 1)
+        self.assertEqual(view.add_row.call_count, 1)
+        self.assertEqual(view.set_multi_period_view_mode.call_count, 1)
 
         expected_row = "SampleScatter:1,ssp:3,SampleTrans:,stp:,SampleDirect:,sdp:," \
                        "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file"
@@ -208,6 +219,7 @@ class RunTabPresenterTest(unittest.TestCase):
         view.add_row.assert_has_calls(calls)
 
     def test_fails_silently_when_batch_file_does_not_exist(self):
+        self.os_patcher.stop()
         presenter = RunTabPresenter(SANSFacility.ISIS)
         user_file_path = create_user_file(sample_user_file)
         view, settings_diagnostic_tab, masking_table = create_mock_view(user_file_path, "non_existent_batch_file")
@@ -222,6 +234,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Clean up
         self._remove_files(user_file_path=user_file_path)
+        self.os_patcher.start()
 
     def test_that_gets_states_from_view(self):
         # Arrange
@@ -310,10 +323,8 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def test_that_returns_none_when_index_does_not_exist(self):
         # Arrange
-        batch_file_path = save_to_csv(BATCH_FILE_TEST_CONTENT_2)
-        user_file_path = create_user_file(sample_user_file)
+        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
         view, _, _ = create_mock_view(user_file_path, batch_file_path)
-        presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
         presenter.on_user_file_load()
         presenter.on_batch_file_load()
@@ -441,9 +452,11 @@ class RunTabPresenterTest(unittest.TestCase):
             if PropertyManagerDataService.doesExist(element):
                 PropertyManagerDataService.remove(element)
 
-    @staticmethod
-    def _get_files_and_mock_presenter(content, is_multi_period=True, row_user_file_path = ""):
-        batch_file_path = save_to_csv(content)
+    def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path = ""):
+        batch_parser = mock.MagicMock()
+        batch_parser.parse_batch_file = mock.MagicMock(return_value=content)
+        self.BatchCsvParserMock.return_value = batch_parser
+        batch_file_path = 'batch_file_path'
         user_file_path = create_user_file(sample_user_file)
         view, _, _ = create_mock_view(user_file_path, batch_file_path, row_user_file_path)
         # We just use the sample_user_file since it exists.

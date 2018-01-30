@@ -12,6 +12,89 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
+namespace { // unnamed namespace
+            /** Update the given options with user-specified options from the
+             * given row. Options are pre-processed where applicable.
+             * If values already exist in the map they are overwritten.
+             * @param options : a map of property name to option value to update
+             * @param data : the row data to get option values from
+             * @param allowInsertions : if true, allow new keys to be inserted;
+             * otherwise, only allow updating of keys that already exist
+             */
+void updateRowOptions(OptionsMap &options, const RowData *data,
+                      const WhiteList &whitelist, const bool allowInsertions) {
+  // Loop through all columns (excluding the Options and Hidden options
+  // columns)
+  auto columnIt = whitelist.cbegin();
+  auto columnValueIt = data->constBegin();
+  for (; columnIt != whitelist.cend() - 2; ++columnIt, ++columnValueIt) {
+    auto column = *columnIt;
+    auto &propertyName = column.algorithmProperty();
+
+    if (allowInsertions || options.find(propertyName) != options.end()) {
+      // Get the value from this column
+      auto columnValue = *columnValueIt;
+
+      // If no value, nothing to do
+      if (!columnValue.isEmpty())
+        options[propertyName] = columnValue;
+    }
+  }
+}
+
+/** Update the given options with user-specified options from the
+ * Options column. If values already exist in the map they are overwritten.
+ * @param options : a map of property name to option value to update
+ * @param data : the data for this row
+ * @param allowInsertions : if true, allow new keys to be inserted;
+ * otherwise, only allow updating of keys that already exist
+ */
+void updateUserOptions(OptionsMap &options, const RowData *data,
+                       const WhiteList &whitelist, const bool allowInsertions) {
+  auto userOptions =
+      parseKeyValueQString(data->at(static_cast<int>(whitelist.size()) - 2));
+  for (auto &kvp : userOptions) {
+    if (allowInsertions || options.find(kvp.first) != options.end())
+      options[kvp.first] = kvp.second;
+  }
+}
+
+/** Update the given options with options from the Hidden Options
+ * column. If values already exist in the map they are overwritten.
+ * @param options : a map of property name to option value to update
+ * @param data : the data for this row
+ * @param allowInsertions : if true, allow new keys to be inserted;
+ * otherwise, only allow updating of keys that already exist
+ */
+void updateHiddenOptions(OptionsMap &options, const RowData *data,
+                         const bool allowInsertions) {
+  const auto hiddenOptions = parseKeyValueQString(data->back());
+  for (auto &kvp : hiddenOptions) {
+    if (allowInsertions || options.find(kvp.first) != options.end())
+      options[kvp.first] = kvp.second;
+  }
+}
+
+/** Update the given options with the output properties.
+ * If values already exist in the map they are overwritten.
+ * @param options : a map of property name to option value to update
+ * @param data : the data for this row
+ */
+void updateOutputOptions(OptionsMap &options, const RowData *data,
+                         const WhiteList &whitelist, const bool allowInsertions,
+                         const std::vector<QString> &outputPropertyNames,
+                         const std::vector<QString> &outputNamePrefixes) {
+  // Set the properties for the output workspace names
+  for (auto i = 0u; i < outputPropertyNames.size(); i++) {
+    const auto propertyName = outputPropertyNames[i];
+    if (allowInsertions || options.find(propertyName) != options.end()) {
+      options[propertyName] =
+          getReducedWorkspaceName(*data, whitelist, outputNamePrefixes[i]);
+    }
+  }
+}
+} // unnamed namespace
+
 /** Parses individual values from a string containing a list of
  * values that should be preprocesed
  * @param inputStr : the input string. Multiple runs may be separated by '+' or
@@ -89,6 +172,38 @@ QString getReducedWorkspaceName(const QStringList &data,
   auto wsname = prefix;
   wsname += names.join("_");
   return wsname;
+}
+
+/** Get the algorithm property values for the main processing algorithm.  This
+ * consolidates values from the global options as well as the data processor
+ * table columns and the Options/HiddenOptions columns.
+ *
+ * @param data [in] : the row data to get option values for
+ * @param globalOptions [in] : default property values from the global settings
+ * @param whitelist [in] : the list of columns
+ * @param allowInsertions [in] : if true, allow values to be inserted into the
+ * map if they do not exist; otherwise, only update existing values
+ * @param outputProperties [in] : the list of output property names
+ * @param prefixes [in] : the list of prefixes to apply to output workspace
+ * names
+ * @return : a map of property names to value
+ */
+OptionsMap getCanonicalOptions(const RowData *data,
+                               const OptionsMap &globalOptions,
+                               const WhiteList &whitelist,
+                               const bool allowInsertions,
+                               const std::vector<QString> &outputProperties,
+                               const std::vector<QString> &prefixes) {
+  // Compile all of the options into a single map - add them in reverse
+  // order of precedence. Latter items are overwritten, or added if they
+  // do not yet exist in the map if allowInsertions is true.
+  OptionsMap options = globalOptions;
+  updateHiddenOptions(options, data, allowInsertions);
+  updateUserOptions(options, data, whitelist, allowInsertions);
+  updateRowOptions(options, data, whitelist, allowInsertions);
+  updateOutputOptions(options, data, whitelist, allowInsertions,
+                      outputProperties, prefixes);
+  return options;
 }
 }
 }
