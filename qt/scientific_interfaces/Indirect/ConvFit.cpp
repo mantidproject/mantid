@@ -153,7 +153,7 @@ void ConvFit::setup() {
           SLOT(plotCurrentPreview()));
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
           SLOT(plotGuess()));
-  
+
   connect(this, SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(parameterUpdated(const Mantid::API::IFunction *)));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
