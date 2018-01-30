@@ -9,6 +9,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_zoomer.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -49,9 +50,13 @@ private slots:
 private:
   void cleanUpPlot();
 
+  void resetPlotZoomLevel();
+
   void setupUI();
 
   std::vector<std::unique_ptr<QwtPlotCurve>> m_focusedRunCurves;
+
+  std::unique_ptr<QwtPlotZoomer> m_zoomTool;
 
   boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_presenter;
 

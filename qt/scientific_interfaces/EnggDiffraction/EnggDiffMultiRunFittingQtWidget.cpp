@@ -10,6 +10,13 @@ EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
     boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider)
     : m_presenter(presenter), m_userMessageProvider(messageProvider) {
   setupUI();
+  
+  m_zoomTool = Mantid::Kernel::make_unique<QwtPlotZoomer>(
+      QwtPlot::xBottom, QwtPlot::yLeft,
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+      QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
+  m_zoomTool->setRubberBandPen(QPen(Qt::black));
+  m_zoomTool->setEnabled(false);
 }
 
 EnggDiffMultiRunFittingQtWidget::~EnggDiffMultiRunFittingQtWidget() {
@@ -52,6 +59,8 @@ void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
     m_focusedRunCurves.push_back(std::move(plotCurve));
   }
   m_ui.plotArea->replot();
+  m_zoomTool->setZoomBase();
+  m_zoomTool->setEnabled(true);
 }
 
 void EnggDiffMultiRunFittingQtWidget::processSelectRun() {
@@ -61,6 +70,13 @@ void EnggDiffMultiRunFittingQtWidget::processSelectRun() {
 void EnggDiffMultiRunFittingQtWidget::resetCanvas() {
   cleanUpPlot();
   m_ui.plotArea->replot();
+  resetPlotZoomLevel();
+}
+
+void EnggDiffMultiRunFittingQtWidget::resetPlotZoomLevel() {
+  m_ui.plotArea->setAxisAutoScale(QwtPlot::xBottom);
+  m_ui.plotArea->setAxisAutoScale(QwtPlot::yLeft);
+  m_zoomTool->setZoomBase(true);
 }
 
 void EnggDiffMultiRunFittingQtWidget::setupUI() {
