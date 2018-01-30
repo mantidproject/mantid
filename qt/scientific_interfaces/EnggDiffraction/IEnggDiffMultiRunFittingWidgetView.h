@@ -16,7 +16,7 @@ public:
   virtual ~IEnggDiffMultiRunFittingWidgetView() = default;
 
   /// Get run number and bank ID of the run currently selected in the list
-  virtual std::pair<int, size_t> getSelectedRunLabel() = 0;
+  virtual std::pair<int, size_t> getSelectedRunLabel() const = 0;
 
   /// Plot a Qwt curve representing a fitted peaks workspace to the canvas
   virtual void

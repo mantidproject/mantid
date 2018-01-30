@@ -4,7 +4,8 @@
 #include "DllConfig.h"
 #include "IEnggDiffMultiRunFittingWidgetPresenter.h"
 #include "IEnggDiffMultiRunFittingWidgetView.h"
-#include "ui_EnggDiffMultiRunFittingQtWidget.h"
+#include "IEnggDiffractionUserMsg.h"
+#include "ui_EnggDiffMultiRunFittingWidget.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -18,12 +19,26 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingQtWidget
 
 public:
   EnggDiffMultiRunFittingQtWidget(
-      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter);
+      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter,
+      boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider);
 
-  std::pair<int, size_t> getSelectedRunLabel() override;
+  std::pair<int, size_t> getSelectedRunLabel() const override;
+
+  void plotFittedPeaks(
+      const std::vector<boost::shared_ptr<QwtData>> &curve) override;
+
+  void
+  plotFocusedRun(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
+
+  void resetCanvas() override;
+
+  bool showFitResultsSelected() const override;
 
   void
   updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) override;
+
+  void userError(const std::string &errorTitle,
+                 const std::string &errorDescription) override;
 
 private slots:
   void processSelectRun();
@@ -34,6 +49,8 @@ private:
   boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_presenter;
 
   Ui::EnggDiffMultiRunFittingWidget m_ui;
+
+  boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
 };
 
 } // CustomInterfaces
