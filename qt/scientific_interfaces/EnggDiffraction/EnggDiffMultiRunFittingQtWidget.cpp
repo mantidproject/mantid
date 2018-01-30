@@ -1,5 +1,7 @@
 #include "EnggDiffMultiRunFittingQtWidget.h"
 
+#include "MantidKernel/make_unique.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -8,6 +10,17 @@ EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
     boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider)
     : m_presenter(presenter), m_userMessageProvider(messageProvider) {
   setupUI();
+}
+
+EnggDiffMultiRunFittingQtWidget::~EnggDiffMultiRunFittingQtWidget() {
+  cleanUpPlot();
+}
+
+void EnggDiffMultiRunFittingQtWidget::cleanUpPlot() {
+  for (auto &curve : m_focusedRunCurves) {
+    curve->detach();
+  }
+  m_focusedRunCurves.clear();
 }
 
 std::pair<int, size_t>
@@ -29,13 +42,26 @@ void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
 }
 
 void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
-    const std::vector<boost::shared_ptr<QwtData>> &curve) {}
+    const std::vector<boost::shared_ptr<QwtData>> &curves) {
+  for (size_t i = 0; i < curves.size(); ++i) {
+    auto *curve = curves[i].get();
+    auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
+
+    plotCurve->setData(*curve);
+    plotCurve->attach(m_ui.plotArea);
+    m_focusedRunCurves.push_back(std::move(plotCurve));
+  }
+  m_ui.plotArea->replot();
+}
 
 void EnggDiffMultiRunFittingQtWidget::processSelectRun() {
   m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
 }
 
-void EnggDiffMultiRunFittingQtWidget::resetCanvas() {}
+void EnggDiffMultiRunFittingQtWidget::resetCanvas() {
+  cleanUpPlot();
+  m_ui.plotArea->replot();
+}
 
 void EnggDiffMultiRunFittingQtWidget::setupUI() {
   m_ui.setupUi(this);

@@ -8,6 +8,7 @@
 #include "ui_EnggDiffMultiRunFittingWidget.h"
 
 #include <boost/shared_ptr.hpp>
+#include <qwt_plot_curve.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -21,6 +22,8 @@ public:
   EnggDiffMultiRunFittingQtWidget(
       boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter,
       boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider);
+
+  ~EnggDiffMultiRunFittingQtWidget() override;
 
   std::pair<int, size_t> getSelectedRunLabel() const override;
 
@@ -44,7 +47,11 @@ private slots:
   void processSelectRun();
 
 private:
+  void cleanUpPlot();
+
   void setupUI();
+
+  std::vector<std::unique_ptr<QwtPlotCurve>> m_focusedRunCurves;
 
   boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_presenter;
 
