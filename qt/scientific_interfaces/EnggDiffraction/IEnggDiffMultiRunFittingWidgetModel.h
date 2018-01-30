@@ -32,6 +32,9 @@ public:
   virtual void addFocusedRun(const int runNumber, const size_t bank,
                              const Mantid::API::MatrixWorkspace_sptr ws) = 0;
 
+  /// Get run numbers and bank IDs of all runs loaded into the model
+  virtual std::vector<std::pair<int, size_t>> getAllWorkspaceLabels() const = 0; 
+  
   /**
    Get fitted peaks workspace corresponding to a given run and bank, if a fit
    has been done on that run

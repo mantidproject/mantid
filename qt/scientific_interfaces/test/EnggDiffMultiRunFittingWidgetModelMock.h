@@ -19,6 +19,9 @@ public:
   MOCK_METHOD3(addFocusedRun, void(const int runNumber, const size_t bank,
                                    const Mantid::API::MatrixWorkspace_sptr ws));
 
+  MOCK_CONST_METHOD0(getAllWorkspaceLabels,
+                     std::vector<std::pair<int, size_t>>());
+
   MOCK_CONST_METHOD2(getFittedPeaks,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
                          const int runNumber, const size_t bank));

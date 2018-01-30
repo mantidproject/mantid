@@ -17,24 +17,30 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingWidgetPresenter
 public:
   EnggDiffMultiRunFittingWidgetPresenter(
       std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> model,
-      IEnggDiffMultiRunFittingWidgetView *view);
+      std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> view);
 
-  ~EnggDiffMultiRunFittingWidgetPresenter() override;
+  void addFittedPeaks(const int runNumber, const size_t bank,
+                      const Mantid::API::MatrixWorkspace_sptr ws) override;
+
+  void addFocusedRun(const int runNumber, const size_t bank,
+                     const Mantid::API::MatrixWorkspace_sptr ws) override;
+
+  boost::optional<Mantid::API::MatrixWorkspace_sptr>
+  getFittedPeaks(const int runNumber, const size_t bank) const override;
+
+  boost::optional<Mantid::API::MatrixWorkspace_sptr>
+  getFocusedRun(const int runNumber, const size_t bank) const override;
 
   void
   notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) override;
 
 private:
-  void processAddFittedPeaks();
-  void processAddFocusedRun();
-  void processGetFittedPeaks();
-  void processGetFocusedRun();
   void processShutDown();
   void processStart();
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> m_model;
 
-  IEnggDiffMultiRunFittingWidgetView *m_view;
+  std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> m_view;
 
   bool m_viewHasClosed;
 };

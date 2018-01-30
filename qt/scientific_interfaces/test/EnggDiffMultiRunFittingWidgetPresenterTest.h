@@ -16,145 +16,50 @@ using testing::Return;
 
 class EnggDiffMultiRunFittingWidgetPresenterTest : public CxxTest::TestSuite {
 public:
-  void test_addFocusedWorkspace() {
-    auto presenter = setUpPresenter();
-    const API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-
-    EXPECT_CALL(*m_mockViewPtr, getFocusedWorkspaceToAdd())
-        .Times(1)
-        .WillOnce(Return(ws));
-    EXPECT_CALL(*m_mockViewPtr, getFocusedRunBankIDToAdd())
-        .Times(1)
-        .WillOnce(Return(1));
-    EXPECT_CALL(*m_mockViewPtr, getFocusedRunNumberToAdd())
-        .Times(1)
-        .WillOnce(Return(123));
-    EXPECT_CALL(*m_mockModelPtr, addFocusedRun(123, 1, ws));
-
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::AddFocusedRun);
-    assertMocksUsedCorrectly();
-  }
-
   void test_addFittedPeaks() {
     auto presenter = setUpPresenter();
     const API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksWorkspaceToAdd())
-        .Times(1)
-        .WillOnce(Return(ws));
-    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksBankIDToAdd())
-        .Times(1)
-        .WillOnce(Return(1));
-    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksRunNumberToAdd())
-        .Times(1)
-        .WillOnce(Return(123));
-    EXPECT_CALL(*m_mockModelPtr, addFittedPeaks(123, 1, ws));
+    EXPECT_CALL(*m_mockModelPtr, addFittedPeaks(123, 1, ws)).Times(1);
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::AddFittedPeaks);
+    presenter->addFittedPeaks(123, 1, ws);
     assertMocksUsedCorrectly();
   }
 
-  void test_getFittedPeaksValid() {
+  void test_addFocusedRun() {
     auto presenter = setUpPresenter();
-
-    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksBankIDToReturn())
-        .Times(1)
-        .WillOnce(Return(1));
-    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksRunNumberToReturn())
-        .Times(1)
-        .WillOnce(Return(123));
-
     const API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, addFocusedRun(123, 1, ws)).Times(1);
+
+    const std::vector<std::pair<int, size_t>> workspaceLabels(
+        {std::make_pair(123, 1)});
+    EXPECT_CALL(*m_mockModelPtr, getAllWorkspaceLabels())
         .Times(1)
-        .WillOnce(Return(boost::make_optional<API::MatrixWorkspace_sptr>(ws)));
-    EXPECT_CALL(*m_mockViewPtr, setFittedPeaksWorkspaceToReturn(ws));
-    EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
+        .WillOnce(Return(workspaceLabels));
+    EXPECT_CALL(*m_mockViewPtr, updateRunList(workspaceLabels));
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::GetFittedPeaks);
-
+    presenter->addFocusedRun(123, 1, ws);
     assertMocksUsedCorrectly();
   }
 
-  void test_getFittedPeaksInvalid() {
+  void test_getFittedPeaks() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksBankIDToReturn())
-        .Times(1)
-        .WillOnce(Return(1));
-    EXPECT_CALL(*m_mockViewPtr, getFittedPeaksRunNumberToReturn())
-        .Times(1)
-        .WillOnce(Return(123));
+    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1)).Times(1);
 
-    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1))
-        .Times(1)
-        .WillOnce(Return(boost::none));
-
-    EXPECT_CALL(*m_mockViewPtr,
-                userError("Invalid fitted peaks run identifier",
-                          "Could not find a fitted peaks workspace with run "
-                          "number 123 and bank ID 1. Please contact the "
-                          "development team with this message")).Times(1);
-    EXPECT_CALL(*m_mockViewPtr, setFittedPeaksWorkspaceToReturn(testing::_))
-        .Times(0);
-
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::GetFittedPeaks);
-
+    presenter->getFittedPeaks(123, 1);
     assertMocksUsedCorrectly();
   }
 
-  void test_getFocusedRunValid() {
+  void test_getFocsedRun() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockViewPtr, getFocusedRunBankIDToReturn())
-        .Times(1)
-        .WillOnce(Return(1));
-    EXPECT_CALL(*m_mockViewPtr, getFocusedRunNumberToReturn())
-        .Times(1)
-        .WillOnce(Return(123));
+    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1)).Times(1);
 
-    const API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-
-    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1))
-        .Times(1)
-        .WillOnce(Return(boost::make_optional<API::MatrixWorkspace_sptr>(ws)));
-    EXPECT_CALL(*m_mockViewPtr, setFocusedRunWorkspaceToReturn(ws));
-    EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
-
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::GetFocusedRun);
-
-    assertMocksUsedCorrectly();
-  }
-
-  void test_getFocusedRunInvalid() {
-    auto presenter = setUpPresenter();
-
-    EXPECT_CALL(*m_mockViewPtr, getFocusedRunBankIDToReturn())
-        .Times(1)
-        .WillOnce(Return(1));
-    EXPECT_CALL(*m_mockViewPtr, getFocusedRunNumberToReturn())
-        .Times(1)
-        .WillOnce(Return(123));
-
-    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1))
-        .Times(1)
-        .WillOnce(Return(boost::none));
-
-    EXPECT_CALL(*m_mockViewPtr,
-                userError("Invalid focused run identifier",
-                          "Could not find a focused run with run "
-                          "number 123 and bank ID 1. Please contact the "
-                          "development team with this message")).Times(1);
-    EXPECT_CALL(*m_mockViewPtr, setFocusedRunWorkspaceToReturn(testing::_))
-        .Times(0);
-
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::GetFocusedRun);
-
+    presenter->getFocusedRun(123, 1);
     assertMocksUsedCorrectly();
   }
 
@@ -167,19 +72,17 @@ private:
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetModel>>();
     m_mockModelPtr = mockModel.get();
 
-    m_mockViewPtr =
-        new testing::NiceMock<MockEnggDiffMultiRunFittingWidgetView>();
+    auto mockView = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffMultiRunFittingWidgetView>>();
+    m_mockViewPtr = mockView.get();
 
     std::unique_ptr<EnggDiffMultiRunFittingWidgetPresenter> pres_uptr(
         new EnggDiffMultiRunFittingWidgetPresenter(std::move(mockModel),
-                                                   m_mockViewPtr));
+                                                   std::move(mockView)));
     return pres_uptr;
   }
 
   void assertMocksUsedCorrectly() {
-    if (m_mockViewPtr) {
-      delete m_mockViewPtr;
-    }
     TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(m_mockModelPtr));
