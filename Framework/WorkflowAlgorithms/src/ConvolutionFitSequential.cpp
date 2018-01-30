@@ -92,14 +92,16 @@ void ConvolutionFitSequential::init() {
   auto boundedV = boost::make_shared<BoundedValidator<int>>();
   boundedV->setLower(0);
 
-  declareProperty("SpecMin", 0, boundedV, "The first spectrum to be used in "
-                                          "the fit. Spectra values can not be "
-                                          "negative",
+  declareProperty("SpecMin", 0, boundedV,
+                  "The first spectrum to be used in "
+                  "the fit. Spectra values can not be "
+                  "negative",
                   Direction::Input);
 
-  declareProperty("SpecMax", 0, boundedV, "The final spectrum to be used in "
-                                          "the fit. Spectra values can not be "
-                                          "negative",
+  declareProperty("SpecMax", 0, boundedV,
+                  "The final spectrum to be used in "
+                  "the fit. Spectra values can not be "
+                  "negative",
                   Direction::Input);
 
   declareProperty(
@@ -185,8 +187,8 @@ void ConvolutionFitSequential::exec() {
 
   // Log information to result log
   m_log.information("Input files: " + inputWs->getName());
-  m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" +
-                    LorentzNum);
+  m_log.information("Fit type: Delta=" + usingDelta +
+                    "; Lorentzians=" + LorentzNum);
   m_log.information("Background type: " + backType);
 
   // Output workspace name
@@ -637,13 +639,13 @@ void ConvolutionFitSequential::extractMembers(
     MatrixWorkspace_sptr inputWs, WorkspaceGroup_sptr resultGroupWs,
     const std::vector<std::string> &convolvedMembers,
     const std::string &outputWsName) {
+  bool convolved = getProperty("ConvolveMembers");
   auto extractMembersAlg =
       AlgorithmManager::Instance().create("ExtractQENSMembers");
   extractMembersAlg->setProperty("InputWorkspace", inputWs);
   extractMembersAlg->setProperty("ResultWorkspace", resultGroupWs);
   extractMembersAlg->setProperty("OutputWorkspace", outputWsName);
-  extractMembersAlg->setProperty("RenameConvolvedMembers",
-                                 getProperty("ConvolveMembers"));
+  extractMembersAlg->setProperty("RenameConvolvedMembers", convolved);
   extractMembersAlg->setProperty("ConvolvedMembers", convolvedMembers);
   extractMembersAlg->execute();
 }
