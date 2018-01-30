@@ -35,8 +35,16 @@ public:
   notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) override;
 
 private:
+  void processSelectRun();
   void processShutDown();
   void processStart();
+
+  /// Display fitted peaks and any other fit information for a certain run
+  void displayFitResults(const int runNumber, const size_t bank);
+
+  /// Update the plot area with a focused run, and its fitted peaks if available
+  /// and requested
+  void updatePlot(const int runNumber, const size_t bank);
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> m_model;
 

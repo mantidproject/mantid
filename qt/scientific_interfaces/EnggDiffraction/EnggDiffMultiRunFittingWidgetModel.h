@@ -26,6 +26,9 @@ public:
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const int runNumber, const size_t bank) const override;
 
+  bool hasFittedPeaksForRun(const int runNumber,
+                            const size_t bank) const override;
+
 private:
   static constexpr size_t MAX_BANKS = 2;
 

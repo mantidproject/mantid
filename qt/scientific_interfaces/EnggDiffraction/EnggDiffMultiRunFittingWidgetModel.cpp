@@ -38,5 +38,10 @@ EnggDiffMultiRunFittingWidgetModel::getFocusedRun(const int runNumber,
   return boost::none;
 }
 
+bool EnggDiffMultiRunFittingWidgetModel::hasFittedPeaksForRun(
+    const int runNumber, const size_t bank) const {
+  return m_fittedPeaksMap.contains(runNumber, bank);
+}
+
 } // namespace MantidQt
 } // namespace CustomInterfaces

@@ -20,9 +20,17 @@ public:
   EnggDiffMultiRunFittingQtWidget(
       boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter);
 
-  void updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) override;
+  std::pair<int, size_t> getSelectedRunLabel() override;
+
+  void
+  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) override;
+
+private slots:
+  void processSelectRun();
 
 private:
+  void setupUI();
+
   boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_presenter;
 
   Ui::EnggDiffMultiRunFittingWidget m_ui;

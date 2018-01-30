@@ -1,5 +1,7 @@
 #include "EnggDiffMultiRunFittingWidgetPresenter.h"
 
+#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -21,6 +23,22 @@ void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(
   m_view->updateRunList(m_model->getAllWorkspaceLabels());
 }
 
+void EnggDiffMultiRunFittingWidgetPresenter::displayFitResults(
+    const int runNumber, const size_t bank) {
+  const auto fittedPeaks = m_model->getFittedPeaks(runNumber, bank);
+  if (!fittedPeaks) {
+    m_view->userError("Invalid fitted peaks run identifer",
+                      "Unexpectedly tried to plot fit results for invalid "
+                      "run, run number = " +
+                          std::to_string(runNumber) + ", bank ID = " +
+                          std::to_string(bank) +
+                          ". Please contact the development team");
+    return;
+  }
+  const auto plottablePeaks = API::QwtHelper::curveDataFromWs(*fittedPeaks);
+  m_view->plotFittedPeaks(plottablePeaks);
+}
+
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
 EnggDiffMultiRunFittingWidgetPresenter::getFittedPeaks(
     const int runNumber, const size_t bank) const {
@@ -40,6 +58,10 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
   }
   switch (notif) {
 
+  case IEnggDiffMultiRunFittingWidgetPresenter::SelectRun:
+    processSelectRun();
+    break;
+
   case IEnggDiffMultiRunFittingWidgetPresenter::ShutDown:
     processShutDown();
     break;
@@ -50,11 +72,42 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
   }
 }
 
+void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {
+  const auto selectedRunLabel = m_view->getSelectedRunLabel();
+  const auto runNumber = selectedRunLabel.first;
+  const auto bank = selectedRunLabel.second;
+  updatePlot(runNumber, bank);
+}
+
 void EnggDiffMultiRunFittingWidgetPresenter::processShutDown() {
   m_viewHasClosed = true;
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processStart() {}
+
+void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(const int runNumber,
+                                                        const size_t bank) {
+  const auto focusedRun = m_model->getFocusedRun(runNumber, bank);
+
+  if (!focusedRun) {
+    m_view->userError(
+        "Invalid focused run identifier",
+        "Tried to access invalid run, run number " + std::to_string(runNumber) +
+            " and bank ID " + std::to_string(bank) +
+            ". Please contact the development team with this message");
+    return;
+  }
+
+  const auto plottableCurve = API::QwtHelper::curveDataFromWs(*focusedRun);
+
+  m_view->resetCanvas();
+  m_view->plotFocusedRun(plottableCurve);
+
+  if (m_model->hasFittedPeaksForRun(runNumber, bank) &&
+      m_view->showFitResultsSelected()) {
+    displayFitResults(runNumber, bank);
+  }
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

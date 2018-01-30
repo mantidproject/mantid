@@ -12,8 +12,23 @@ class MockEnggDiffMultiRunFittingWidgetView
     : public MantidQt::CustomInterfaces::IEnggDiffMultiRunFittingWidgetView {
 
 public:
+  MOCK_METHOD0(getSelectedRunLabel, std::pair<int, size_t>());
+
+  MOCK_METHOD1(plotFittedPeaks,
+               void(const std::vector<boost::shared_ptr<QwtData>> &curve));
+
+  MOCK_METHOD1(plotFocusedRun,
+               void(const std::vector<boost::shared_ptr<QwtData>> &curve));
+
+  MOCK_METHOD0(resetCanvas, void());
+
+  MOCK_CONST_METHOD0(showFitResultsSelected, bool());
+
   MOCK_METHOD1(updateRunList,
                void(const std::vector<std::pair<int, size_t>> &runLabels));
+
+  MOCK_METHOD2(userError, void(const std::string &errorTitle,
+                               const std::string &errorDescription));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

@@ -6,6 +6,7 @@
 #include "EnggDiffMultiRunFittingWidgetViewMock.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -54,12 +55,92 @@ public:
     assertMocksUsedCorrectly();
   }
 
-  void test_getFocsedRun() {
+  void test_getFocusedRun() {
     auto presenter = setUpPresenter();
 
     EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1)).Times(1);
 
     presenter->getFocusedRun(123, 1);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_selectRunValidNoFittedPeaks() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(std::make_pair(123, 1)));
+
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1))
+        .Times(1)
+        .WillOnce(Return(sampleWorkspace));
+
+    EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, plotFocusedRun(testing::_)).Times(1);
+
+    EXPECT_CALL(*m_mockModelPtr, hasFittedPeaksForRun(123, 1))
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockViewPtr, plotFittedPeaks(testing::_)).Times(0);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_selectRunInvalid() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(std::make_pair(123, 1)));
+    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1))
+        .Times(1)
+        .WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_mockViewPtr,
+                userError("Invalid focused run identifier",
+                          "Tried to access invalid run, run number 123 and "
+                          "bank ID 1. Please contact the development team with "
+                          "this message"))
+        .Times(1);
+    EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(0);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_selectRunValidWithFittedPeaks() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(std::make_pair(123, 1)));
+
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1))
+        .Times(1)
+        .WillOnce(Return(sampleWorkspace));
+
+    EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, plotFocusedRun(testing::_)).Times(1);
+
+    EXPECT_CALL(*m_mockModelPtr, hasFittedPeaksForRun(123, 1))
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockViewPtr, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1))
+        .Times(1)
+        .WillOnce(Return(sampleWorkspace));
+    EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, plotFittedPeaks(testing::_)).Times(1);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
     assertMocksUsedCorrectly();
   }
 
