@@ -62,6 +62,11 @@ protected:
   scaleAlgorithm(const std::string &workspaceToScale,
                  const std::string &outputName, double scaleFactor);
 
+  void enablePlotResult() override;
+  void disablePlotResult() override;
+  void enableSaveResult() override;
+  void disableSaveResult() override;
+
 private:
   std::map<std::string, size_t>
   findAxisLabelsWithSubstrings(Mantid::API::TextAxis *axis,

@@ -29,6 +29,10 @@ protected:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   QHash<QString, QString>
   functionNameChanges(Mantid::API::IFunction_sptr model) const override;
+  void enablePlotResult() override;
+  void disablePlotResult() override;
+  void enableSaveResult() override;
+  void disableSaveResult() override;
 
 private:
   void setup() override;

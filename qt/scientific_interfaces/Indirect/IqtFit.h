@@ -41,6 +41,10 @@ protected:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
                         int maxIterations) const override;
+  void enablePlotResult() override;
+  void disablePlotResult() override;
+  void enableSaveResult() override;
+  void disableSaveResult() override;
 
 protected slots:
   void newDataLoaded(const QString wsName);

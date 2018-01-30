@@ -160,6 +160,8 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updatePlotGuess()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updateResultOptions()));
 
   connect(m_fitPropertyBrowser, SIGNAL(plotGuess()), this,
           SLOT(plotGuessInWindow()));
@@ -646,6 +648,8 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(
     updateParametersFromTable(paramWSName);
 
   updatePreviewPlots();
+  enablePlotResult();
+  enableSaveResult();
 
   connect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
           this, SLOT(plotGuess()));
@@ -708,6 +712,8 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
   setInputWorkspace(inputWs);
+  disablePlotResult();
+  disableSaveResult();
   m_defaultPropertyValues = createDefaultValues();
   m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
   setPreviewPlotWorkspace(inputWs);
@@ -895,7 +901,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
@@ -995,9 +1001,20 @@ IFunction_sptr IndirectFitAnalysisTab::updateFunctionTies(
  * @param cbPlotType  The combo box.
  */
 void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
-  cbPlotType->clear();
-  auto parameters = model()->getParameterNames();
+  setPlotOptions(
+      cbPlotType,
+      m_fitPropertyBrowser->compositeFunction()->getParameterNames());
+}
 
+/**
+ * Fills the specified combo box, with the specified parameters.
+ *
+ * @param cbPlotType  The combo box.
+ * @param parameters  The parameters.
+ */
+void IndirectFitAnalysisTab::setPlotOptions(
+    QComboBox *cbPlotType, const std::vector<std::string> &parameters) {
+  cbPlotType->clear();
   QSet<QString> plotOptions;
 
   for (const auto parameter : parameters) {
@@ -1014,6 +1031,20 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
   plotList.append(plotOptions.toList());
 
   cbPlotType->addItems(plotList);
+}
+
+/**
+ * Updates whether the options for plotting and saving fit results are
+ * enabled/disabled.
+ */
+void IndirectFitAnalysisTab::updateResultOptions() {
+  if (previousFitModelSelected()) {
+    enablePlotResult();
+    enableSaveResult();
+  } else {
+    disablePlotResult();
+    disableSaveResult();
+  }
 }
 
 /*

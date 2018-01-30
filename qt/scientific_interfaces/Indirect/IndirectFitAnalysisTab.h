@@ -162,12 +162,20 @@ protected:
 
   void updatePlotOptions(QComboBox *cbPlotType);
 
+  void setPlotOptions(QComboBox *cbPlotType,
+                      const std::vector<std::string> &parameters);
+
   virtual void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
                                 int maxIterations) const;
 
   virtual std::string createSequentialFitOutputName() const;
 
   virtual std::string createSingleFitOutputName() const = 0;
+
+  virtual void enablePlotResult() = 0;
+  virtual void disablePlotResult() = 0;
+  virtual void enableSaveResult() = 0;
+  virtual void disableSaveResult() = 0;
 
 signals:
   void functionChanged();
@@ -214,6 +222,8 @@ protected slots:
   void emitFunctionChanged();
 
   void emitParameterChanged(const Mantid::API::IFunction *);
+
+  void updateResultOptions();
 
 private:
   /// Overidden by child class.

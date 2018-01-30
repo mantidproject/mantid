@@ -193,6 +193,26 @@ void IqtFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
+void IqtFit::enablePlotResult() {
+  m_uiForm->pbPlot->setEnabled(true);
+  m_uiForm->pbPlot->blockSignals(false);
+}
+
+void IqtFit::disablePlotResult() {
+  m_uiForm->pbPlot->setEnabled(false);
+  m_uiForm->pbPlot->blockSignals(true);
+}
+
+void IqtFit::enableSaveResult() {
+  m_uiForm->pbSave->setEnabled(true);
+  m_uiForm->pbSave->blockSignals(false);
+}
+
+void IqtFit::disableSaveResult() {
+  m_uiForm->pbSave->setEnabled(false);
+  m_uiForm->pbSave->blockSignals(true);
+}
+
 /**
  * Plot workspace based on user input
  */

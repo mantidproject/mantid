@@ -433,9 +433,6 @@ void ConvFit::algorithmComplete(bool error) {
     }
   }
   m_batchAlgoRunner->executeBatchAsync();
-
-  m_uiForm->pbSave->setEnabled(true);
-  m_uiForm->pbPlot->setEnabled(true);
 }
 
 /**
@@ -723,8 +720,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -824,6 +821,26 @@ void ConvFit::disablePlotGuess() {
 void ConvFit::enablePlotGuess() {
   m_uiForm->ckPlotGuess->setEnabled(true);
   m_uiForm->ckPlotGuess->blockSignals(false);
+}
+
+void ConvFit::enablePlotResult() {
+  m_uiForm->pbPlot->setEnabled(true);
+  m_uiForm->pbPlot->blockSignals(false);
+}
+
+void ConvFit::disablePlotResult() {
+  m_uiForm->pbPlot->setEnabled(false);
+  m_uiForm->pbPlot->blockSignals(true);
+}
+
+void ConvFit::enableSaveResult() {
+  m_uiForm->pbSave->setEnabled(true);
+  m_uiForm->pbSave->blockSignals(false);
+}
+
+void ConvFit::disableSaveResult() {
+  m_uiForm->pbSave->setEnabled(false);
+  m_uiForm->pbSave->blockSignals(true);
 }
 
 /**

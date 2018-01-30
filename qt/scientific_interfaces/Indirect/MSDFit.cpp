@@ -211,6 +211,26 @@ void MSDFit::plotGuess() {
 
 void MSDFit::updatePlotOptions() {}
 
+void MSDFit::enablePlotResult() {
+  m_uiForm->pbPlot->setEnabled(true);
+  m_uiForm->pbPlot->blockSignals(false);
+}
+
+void MSDFit::disablePlotResult() {
+  m_uiForm->pbPlot->setEnabled(false);
+  m_uiForm->pbPlot->blockSignals(true);
+}
+
+void MSDFit::enableSaveResult() {
+  m_uiForm->pbSave->setEnabled(true);
+  m_uiForm->pbSave->blockSignals(false);
+}
+
+void MSDFit::disableSaveResult() {
+  m_uiForm->pbSave->setEnabled(false);
+  m_uiForm->pbSave->blockSignals(true);
+}
+
 /**
  * Called when new data has been loaded by the data selector.
  *

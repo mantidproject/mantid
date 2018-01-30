@@ -349,6 +349,26 @@ IAlgorithm_sptr JumpFit::scaleAlgorithm(const std::string &workspaceToScale,
 
 void JumpFit::updatePlotOptions() {}
 
+void JumpFit::enablePlotResult() {
+  m_uiForm->pbPlot->setEnabled(true);
+  m_uiForm->pbPlot->blockSignals(false);
+}
+
+void JumpFit::disablePlotResult() {
+  m_uiForm->pbPlot->setEnabled(false);
+  m_uiForm->pbPlot->blockSignals(true);
+}
+
+void JumpFit::enableSaveResult() {
+  m_uiForm->pbSave->setEnabled(true);
+  m_uiForm->pbSave->blockSignals(false);
+}
+
+void JumpFit::disableSaveResult() {
+  m_uiForm->pbSave->setEnabled(false);
+  m_uiForm->pbSave->blockSignals(true);
+}
+
 /**
  * Handles mantid plotting
  */

@@ -42,6 +42,10 @@ protected:
   std::string constructBaseName() const;
   Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
+  void enablePlotResult() override;
+  void disablePlotResult() override;
+  void enableSaveResult() override;
+  void disableSaveResult() override;
 
 private:
   void disablePlotGuess() override;
