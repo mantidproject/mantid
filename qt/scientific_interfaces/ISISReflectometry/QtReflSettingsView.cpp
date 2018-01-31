@@ -112,7 +112,10 @@ void QtReflSettingsView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.momentumTransferStepEdit, "MomentumTransferStep",
                         alg);
   registerSettingWidget(*m_ui.scaleFactorEdit, "ScaleFactor", alg);
-  registerSettingWidget(static_cast<QLineEdit&>(*m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget()), "Params", alg);
+  registerSettingWidget(
+      static_cast<QLineEdit &>(
+          *m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget()),
+      "Params", alg);
 }
 
 void QtReflSettingsView::notifySettingsChanged() {

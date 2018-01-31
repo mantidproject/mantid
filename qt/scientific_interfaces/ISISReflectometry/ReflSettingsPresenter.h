@@ -64,6 +64,7 @@ public:
 
   void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) override;
   Mantid::API::IAlgorithm_sptr createReductionAlg() override;
+
 private:
   void createStitchHints();
   void getExpDefaults();

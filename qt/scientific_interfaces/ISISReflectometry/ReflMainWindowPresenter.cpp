@@ -63,8 +63,8 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
 }
 
 void ReflMainWindowPresenter::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("ISIS Reflectometry"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("ISIS Reflectometry"));
 }
 
 void ReflMainWindowPresenter::settingsChanged(int group) {
