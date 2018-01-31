@@ -182,6 +182,7 @@ IFunction_sptr IndirectFitAnalysisTab::background() const {
  *          the background removed.
  */
 IFunction_sptr IndirectFitAnalysisTab::model() const {
+  m_fitPropertyBrowser->compositeFunction()->applyTies();
   auto model = m_fitPropertyBrowser->compositeFunction()->clone();
   auto compositeModel = boost::dynamic_pointer_cast<CompositeFunction>(model);
 
