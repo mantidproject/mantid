@@ -48,16 +48,20 @@ public:
   void test_getFittedPeaks() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1)).Times(1);
+    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1))
+        .Times(1)
+        .WillOnce(Return(boost::none));
 
     presenter->getFittedPeaks(123, 1);
     assertMocksUsedCorrectly();
   }
 
-  void test_getFocsedRun() {
+  void test_getFocusedRun() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1)).Times(1);
+    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1))
+        .Times(1)
+        .WillOnce(Return(boost::none));
 
     presenter->getFocusedRun(123, 1);
     assertMocksUsedCorrectly();
