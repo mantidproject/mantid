@@ -8,7 +8,12 @@
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidAPI/Sample.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include <fstream>
+#include <iostream>
+#include <iomanip>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cmath>
@@ -70,6 +75,8 @@ void SaveLauenorm::init() {
 void SaveLauenorm::exec() {
 
   std::string filename = getProperty("Filename");
+  Poco::Path path(filename);
+  std::string basename = path.getBaseName(); // Filename minus extension
   ws = getProperty("InputWorkspace");
   double scaleFactor = getProperty("ScalePeaks");
   double dMin = getProperty("MinDSpacing");
@@ -79,7 +86,7 @@ void SaveLauenorm::exec() {
   double minIsigI = getProperty("MinIsigI");
   double minIntensity = getProperty("MinIntensity");
   int widthBorder = getProperty("WidthBorder");
-  bool LaueScaleFormat = getProperty("LaueScaleFormat");
+  bool newFormat = getProperty("LaueScaleFormat");
 
   // sequenceNo and run number
   int sequenceNo = 0;
@@ -116,6 +123,27 @@ void SaveLauenorm::exec() {
   // scaleDet scales intensity and sigI for detector banks
   bool scaleDet = getProperty("UseDetScale");
   auto inst = ws->getInstrument();
+  OrientedLattice lattice;
+  if (newFormat) {
+  type = "RunNumber";
+  if (!ws->sample().hasOrientedLattice()) {
+
+    const std::string fft("FindUBUsingIndexedPeaks");
+    API::IAlgorithm_sptr findUB = this->createChildAlgorithm(fft);
+    findUB->initialize();
+    findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", ws);
+    findUB->executeAsChildAlg();
+
+    if (!ws->sample().hasOrientedLattice()) {
+      g_log.notice(std::string("Could not find UB for ") +
+                   std::string(ws->getName()));
+      throw std::invalid_argument(std::string("Could not find UB for ") +
+                                  std::string(ws->getName()));
+    }
+  } 
+  lattice = ws->sample().getOrientedLattice();
+}
+
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
 
@@ -139,7 +167,7 @@ void SaveLauenorm::exec() {
     bankName.erase(remove_if(bankName.begin(), bankName.end(),
                              not1(std::ptr_fun(::isdigit))),
                    bankName.end());
-    if (type.compare(0, 2, "Ru") != 0) {
+    if (type.compare(0, 2, "Ba") == 0) {
       Strings::convert(bankName, sequence);
     }
     // Do not use peaks from these banks
@@ -174,14 +202,87 @@ void SaveLauenorm::exec() {
       ss.clear();
       ss << std::setw(3) << std::setfill('0') << sequenceNo;
 
-      Poco::Path path(filename);
-      std::string basename = path.getBaseName(); // Filename minus extension
       // Chop off filename
       path.makeParent();
       path.append(basename + ss.str());
       Poco::File fileobj(path);
       out.open(path.toString().c_str(), std::ios::out);
-    }
+  std::cout << basename<<" open\n";
+  if (newFormat) {
+  out << "TITL\n";
+  out << basename << "\n";
+  out << "CRYS " << basename.substr(0,6) << "\n";
+  out << "CELL "
+      << std::setw(11) << std::setprecision(4) << lattice.a() << std::setw(12)
+      << std::setprecision(4) << lattice.b() << std::setw(12) << std::setprecision(4)
+      << lattice.c() << std::setw(12) << std::setprecision(4) << lattice.alpha()
+      << std::setw(12) << std::setprecision(4) << lattice.beta() << std::setw(12)
+      << std::setprecision(4) << lattice.gamma() 
+      << "\n";
+  out << "SYST    1   1   0   0" << "\n";
+  out << "RAST      0.050" << "\n";
+  out << "IBOX   1  1   1   1   1" << "\n";
+        Goniometer gon(p.getGoniometerMatrix());
+        std::vector<double> angles = gon.getEulerAngles("yzy");
+
+        double phi = angles[2];
+        double chi = angles[1];
+        double omega = angles[0];
+
+  out << "PHIS " 
+      << std::setw(11) << std::setprecision(4) << phi << std::setw(12)
+      << std::setprecision(4) << chi << std::setw(12) << std::setprecision(4)
+      << omega << "\n";
+  out << "LAMS      ";
+  if (wlMax != EMPTY_DBL() ) {
+  out << (wlMin+wlMax)/2 << "  " << wlMin << "  " << wlMax << "\n";
+  }
+  else {
+  out << "0.0 0.0 0.0\n";
+  }
+  out << "DMIN      ";
+  if (dMin != EMPTY_DBL() ) {
+  out << dMin << "\n";
+  }
+  else {
+  out << "0.0\n";
+  }
+  out << "RADI     59.000" << "\n";
+  out << "SPIN      0.000" << "\n";
+  out << "XC_S     0.23000    0.23000    0.24000    0.26000    0.26000    0.22000" << "\n";
+  out << "YC_S     0.09000    0.11000    0.09000    0.11000    0.11000    0.09000" << "\n";
+  out << "WC_S     3.79368    3.80879    3.78424    3.80775    3.80466    3.82321" << "\n";
+  out << "DELT       0.4000" << "\n";
+  out << "TWIS    -2.33700   -4.30406   -5.62749   -0.10663   -0.99198    3.61740" << "\n";
+  out << "TILT    -4.79623    0.37310   -3.58647    0.53322   -1.06657   -3.66751" << "\n";
+  out << "BULG    45.40230   56.51379   34.71940   31.53628   36.29953   42.53154" << "\n";
+  out << "CTOF     61.067" << "\n";
+  out << "YSCA     0.99748    0.99738    0.99696    0.99726    0.99758    0.99716" << "\n";
+  out << "CRAT     0.99494    0.99720    1.00672    1.01395    1.01970    1.02644" << "\n";
+  out << "MINI          " ;
+  if (minIntensity != EMPTY_DBL() ) {
+  out << minIntensity << "\n";
+  }
+  else {
+  out << "0.0\n";
+  }
+  out << "MULT" << "\n";
+  out << "   1670    175     40     12      8      5      0      0      0      0" << "\n";
+  out << "      0      0      0      0      0      0      0      0      0      0" << "\n";
+  out << "      0" << "\n";
+  out << "LAMH" << "\n";
+  out << "     401     383     389     391     282     158      89      53" << "\n";
+  out << "      38      21      19      11      11       6       6       0" << "\n";
+  out << "VERS    2" << "\n";
+  out << "PACK        0" << "\n";
+  out << "NSPT     1910     240       0       0    1605" << "\n";
+  out << "NODH" << "\n";
+  out << "       6      23      63     124     243     356" << "\n";
+  out << "     571     775    1076    1312    1499    1605" << "\n";
+  out << "INTF        0" << "\n";
+  out << "REFLECTION DATA   " << ws->getNumberPeaks() << " REFLECTIONS" << "\n";
+  }
+}
     // h k l lambda theta intensity and  sig(intensity)  in format
     // (3I5,2F10.5,2I10)
     // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
@@ -191,10 +292,28 @@ void SaveLauenorm::exec() {
     out << std::setw(5) << Utils::round(qSign * p.getH()) << std::setw(5)
         << Utils::round(qSign * p.getK()) << std::setw(5)
         << Utils::round(qSign * p.getL());
+    if (newFormat) {
+      // Convert to mm from centre
+      out << std::setw(10) << std::fixed << std::setprecision(5)
+          << (p.getCol() - 127.5) * 150.0 / 256.0;
+      out << std::setw(10) << std::fixed << std::setprecision(5)
+          << (p.getRow() - 127.5) * 150.0 / 256.0;
+    }
     out << std::setw(10) << std::fixed << std::setprecision(5) << lambda;
-    // Assume that want theta not two-theta
-    out << std::setw(10) << std::fixed << std::setprecision(5)
-        << 0.5 * scattering;
+    if (newFormat) {
+      // mult nodal ovlp close h2 k2 l2 nidx lambda2 ipoint
+      out << " 1 0 0 0 0 0 0 0 0 0 ";
+    }
+
+    if (newFormat) {
+      // Dmin threshold squared for next harmonic
+      out << std::setw(10) << std::fixed << std::setprecision(5)
+          << dsp * dsp * 0.25;
+    } else {
+      // Assume that want theta not two-theta
+      out << std::setw(10) << std::fixed << std::setprecision(5)
+          << 0.5 * scattering;
+    }
 
     // SHELX can read data without the space between the l and intensity
     if (p.getDetectorID() != -1) {
@@ -203,13 +322,36 @@ void SaveLauenorm::exec() {
         g_log.warning() << "Scaled intensity, " << ckIntensity
                         << " is too large for format.  Decrease ScalePeaks.\n";
       out << std::setw(10) << Utils::round(ckIntensity);
+      if (newFormat) {
+        // mult nodal ovlp close h2 k2 l2 nidx lambda2 ipoint
+        out << " 0 0 0 0 0 ";
+      }
 
       out << std::setw(10) << Utils::round(scaleFactor * sigI);
+      if (newFormat) {
+        // mult nodal ovlp close h2 k2 l2 nidx lambda2 ipoint
+        out << " 0 0 0 0 0 ";
+        out << std::setw(10) << Utils::round(ckIntensity);
+        out << " 0 0 0 0 0 ";
+        out << std::setw(10) << Utils::round(scaleFactor * sigI);
+        out << " 0 0 0 0 0 * ";
+      }
     } else {
       // This is data from LoadLauenorm which is already corrected
       out << std::setw(10) << Utils::round(intensity);
-
+      if (newFormat) {
+        // 5 more films (dummy)
+        out << " 0 0 0 0 0 ";
+      }
       out << std::setw(10) << Utils::round(sigI);
+      if (newFormat) {
+        // 5 more films (dummy)
+        out << " 0 0 0 0 0 ";
+        out << std::setw(10) << Utils::round(intensity);
+        out << " 0 0 0 0 0 ";
+        out << std::setw(10) << Utils::round(sigI);
+        out << " 0 0 0 0 0 * ";
+      }
     }
 
     out << '\n';
