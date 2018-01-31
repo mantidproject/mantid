@@ -37,23 +37,23 @@ Usage
   convolve = True  # Convolve the fitted model components with the resolution
   minimizer = "Levenberg-Marquardt"
   maxIt = 500
+  output_ws_name = "irs26176_graphite002"
 
   # Run ConvolutionFitSequential algorithm
-  result_ws = ConvolutionFitSequential(InputWorkspace=sample,
-      Function=function, PassWSIndexToFunction=True, BackgroundType=bgType,
-      StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
-      Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
-
-  output_ws_name = result_ws.getName().rsplit('_')[0]
+  result_ws = ConvolutionFitSequential(InputWorkspace=sample, Function=function,
+                                       PassWSIndexToFunction=True, BackgroundType=bgType,
+                                       StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
+                                       Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt,
+                                       OutputWorkspace=output_ws_name)
 
   # Extract members from the output of the ConvolutionFitSequential algorithm
-  members_ws = ExtractMembers(InputWorkspace=sample, ResultWorkspace=output_ws_name + "_Workspaces",
-      RenameConvolvedMembers=True, ConvolvedMembers=["Lorentzian"])
+  members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=output_ws_name + "_Workspaces",
+                                  RenameConvolvedMembers=True, ConvolvedMembers=["Lorentzian"])
 
   for member_ws in members_ws:
       print(member_ws.getName())
 
-.. testcleanup:: ExtractQvalues
+.. testcleanup:: ExExtractQENSMembers
 
   DeleteWorkspace(output_ws_name + "_Workspaces")
   DeleteWorkspace(output_ws_name + "_Parameters")
@@ -66,11 +66,11 @@ Output:
 
 .. testoutput:: ExExtractQENSMembers
 
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Data
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Calc
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Fit
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Resolution
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Lorentzian
+  irs26176_graphite002_Members_Data
+  irs26176_graphite002_Members_Calc
+  irs26176_graphite002_Members_Fit
+  irs26176_graphite002_Members_Resolution
+  irs26176_graphite002_Members_Lorentzian
 
 .. testcode:: ExExtractQENSMembersProperty
 
@@ -93,14 +93,17 @@ Output:
   convolve = True  # Convolve the fitted model components with the resolution
   minimizer = "Levenberg-Marquardt"
   maxIt = 500
+  output
+
+  output_ws_name = "irs26176_graphite002"
 
   # Run ConvolutionFitSequential algorithm with ExtractMembers property
-  result_ws = ConvolutionFitSequential(InputWorkspace=sample,
-      Function=function, PassWSIndexToFunction=True, BackgroundType=bgType,
-      StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
-      Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt, ExtractMembers=True)
+  result_ws = ConvolutionFitSequential(InputWorkspace=sample, Function=function,
+                                       PassWSIndexToFunction=True, BackgroundType=bgType,
+                                       StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
+                                       Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt,
+                                       ExtractMembers=True, OutputWorkspace=output_ws_name)
 
-  output_ws_name = result_ws.getName().rsplit('_')[0]
   members_ws = mtd[output_ws_name + "_Members"]
 
   for member_ws in members_ws:
@@ -117,8 +120,8 @@ Output:
 
 .. testoutput:: ExExtractQENSMembersProperty
 
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Data
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Calc
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Fit
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Resolution
-  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Lorentzian
+  irs26176_graphite002_Members_Data
+  irs26176_graphite002_Members_Calc
+  irs26176_graphite002_Members_Fit
+  irs26176_graphite002_Members_Resolution
+  irs26176_graphite002_Members_Lorentzian
