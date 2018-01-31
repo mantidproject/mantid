@@ -14,6 +14,11 @@ template <typename T> boost::optional<T> first(std::vector<T> const &values) {
     return boost::none;
 }
 
+/**
+ * Operates on a variant<vector<Ts>...> extracting the first element and
+ * returning it as a optional<variant<T>> where the optional is empty if
+ * the vector held by the variant<vector<T>> held no values.
+ */
 template <typename... Ts>
 class FirstVisitor
     : public boost::static_visitor<boost::optional<boost::variant<Ts...>>> {

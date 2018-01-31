@@ -52,6 +52,17 @@ private:
   std::string m_originalMessage;
 };
 
+/**
+ * Get's a parameter which may hold a value of one of two different types.
+ * Tries the type T1 and then T2.
+ *
+ * Returns a variant containing an empty vector of T2 in the
+ * if the parameter does not exist in the file.
+ *
+ * Throws a InstrumentParameterTypeMissmatch in the event that the
+ * parameter is not any of the specified types. The expected type string will
+ * be a the two types separated by " or a " e.g. "int or a string".
+ */
 template <typename T1, typename T2>
 class InstrumentParameter<boost::variant<T1, T2>> {
 public:
@@ -72,6 +83,18 @@ public:
   }
 };
 
+/**
+ * Get's a parameter which may hold a value of one of 3 or more types.
+ * Tries the types in the left to right order as specified.
+ *
+ * Returns a variant containing an empty vector of the last type in the
+ * list if the parameter
+ * does not exist in the file.
+ *
+ * Throws a InstrumentParameterTypeMissmatch in the event that the
+ * parameter is not any of the specified types. The expected type string will
+ * be a list of possible types separated by " or a ".
+ */
 template <typename T1, typename T2, typename T3, typename... Ts>
 class InstrumentParameter<boost::variant<T1, T2, T3, Ts...>> {
 public:

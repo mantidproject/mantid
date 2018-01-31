@@ -78,6 +78,18 @@ public:
     }
   }
 
+  /**
+   * Tries to get the value of a property which may hold a value of any of the
+   * specified types.
+   *
+   * Will try the types in the order specified from left to right.
+   * Returns a variant containing a default constructed value of the first type
+   * and records the parameter as missing in the event that the property is not
+   * in the file.
+   *
+   * If the property is in the file but is not one of the specified types a type
+   * missmatch error will be recorded.
+   */
   template <typename T, typename... Ts>
   boost::variant<T, Ts...> mandatoryVariant(std::string const &parameterName) {
     try {
