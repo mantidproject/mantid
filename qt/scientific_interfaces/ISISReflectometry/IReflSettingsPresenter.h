@@ -3,6 +3,7 @@
 
 #include "IReflSettingsTabPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidAPI/Algorithm.h"
 
 #include <string>
 
@@ -44,6 +45,7 @@ public:
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const = 0;
   /// Processing
+  virtual Mantid::API::IAlgorithm_sptr createReductionAlg() = 0;
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getReductionOptions() const = 0;
   /// Post-processing

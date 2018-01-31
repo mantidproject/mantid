@@ -4,6 +4,7 @@
 #include "DllConfig.h"
 #include <map>
 #include <vector>
+#include "MantidAPI/Algorithm.h"
 
 namespace MantidQt {
 
@@ -94,6 +95,7 @@ public:
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) = 0;
   virtual void setDetectorCorrectionEnabled(bool enable) = 0;
+
 };
 }
 }

@@ -63,7 +63,7 @@ public:
   std::string getTransmissionRuns() const override;
 
   void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) override;
-
+  Mantid::API::IAlgorithm_sptr createReductionAlg() override;
 private:
   void createStitchHints();
   void getExpDefaults();
@@ -72,7 +72,6 @@ private:
   bool hasReductionTypes(const std::string &reductionType) const;
   void handleSummationTypeChange();
   static QString asAlgorithmPropertyBool(bool value);
-  Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
   MantidWidgets::DataProcessor::OptionsQMap transmissionOptionsMap() const;
