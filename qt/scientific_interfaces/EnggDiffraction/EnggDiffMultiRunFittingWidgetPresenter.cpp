@@ -7,8 +7,8 @@ namespace CustomInterfaces {
 
 EnggDiffMultiRunFittingWidgetPresenter::EnggDiffMultiRunFittingWidgetPresenter(
     std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> model,
-    std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> view)
-    : m_model(std::move(model)), m_view(std::move(view)) {}
+    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> view)
+    : m_model(std::move(model)), m_view(view) {}
 
 void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
     const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {

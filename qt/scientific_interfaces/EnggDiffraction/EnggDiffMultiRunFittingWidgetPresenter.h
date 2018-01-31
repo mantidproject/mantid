@@ -17,7 +17,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingWidgetPresenter
 public:
   EnggDiffMultiRunFittingWidgetPresenter(
       std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> model,
-      std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> view);
+      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> view);
 
   void addFittedPeaks(const RunLabel &runLabel,
                       const Mantid::API::MatrixWorkspace_sptr ws) override;
@@ -46,7 +46,7 @@ private:
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> m_model;
 
-  std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> m_view;
+  boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> m_view;
 };
 
 } // namespace CustomInterfaces
