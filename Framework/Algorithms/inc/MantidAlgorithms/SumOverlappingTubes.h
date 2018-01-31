@@ -44,7 +44,6 @@ public:
            "scattering angle. Detector scans with overlapping tubes are "
            "supported.";
   }
-  std::map<std::string, std::string> validateInputs() override;
   int version() const override { return 1; }
 
 private:
@@ -67,7 +66,7 @@ private:
 
   void getInputParameters();
   void getScatteringAngleBinning();
-  void getHeightAxis();
+  void getHeightAxis(const std::string &componentName);
   std::vector<std::vector<double>>
   performBinning(API::MatrixWorkspace_sptr &outputWS);
 

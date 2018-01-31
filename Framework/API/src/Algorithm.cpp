@@ -502,10 +502,15 @@ bool Algorithm::execute() {
     return false;
   }
 
+  const auto executionMode = getExecutionMode();
+
   timingInit += timer.elapsed(resetTimer);
   // ----- Perform validation of the whole set of properties -------------
-  if (!callProcessGroups) // for groups this is called on each workspace
-                          // separately
+  if ((!callProcessGroups) &&
+      (executionMode != Parallel::ExecutionMode::MasterOnly ||
+       communicator().rank() ==
+           0)) // for groups this is called on each workspace
+               // separately
   {
     std::map<std::string, std::string> errors = this->validateInputs();
     if (!errors.empty()) {
@@ -566,7 +571,7 @@ bool Algorithm::execute() {
 
       startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
       // Call the concrete algorithm's exec method
-      this->exec(getExecutionMode());
+      this->exec(executionMode);
       registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
@@ -1773,6 +1778,9 @@ Parallel::ExecutionMode Algorithm::getExecutionMode() const {
     getLogger().error() << error << "\n";
     throw(std::runtime_error(error));
   }
+  getLogger().information() << "MPI Rank " << communicator().rank()
+                            << " running with "
+                            << Parallel::toString(executionMode) << '\n';
   return executionMode;
 }
 
@@ -1792,6 +1800,11 @@ Algorithm::getInputWorkspaceStorageModes() const {
     else if (!wsProp->isOptional())
       map.emplace(prop.name(), Parallel::StorageMode::MasterOnly);
   }
+  getLogger().information()
+      << "Input workspaces for determining execution mode:\n";
+  for (const auto &item : map)
+    getLogger().information() << "  " << item.first << " --- "
+                              << Parallel::toString(item.second) << '\n';
   return map;
 }
 
