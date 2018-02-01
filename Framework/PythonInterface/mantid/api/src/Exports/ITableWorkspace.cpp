@@ -1,3 +1,4 @@
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
@@ -476,7 +477,9 @@ bpl::dict toDict(const ITableWorkspace &self) {
 
 /** Constructor function for ITableWorkspaces */
 ITableWorkspace_sptr makeTableWorkspace() {
-  return WorkspaceFactory::Instance().createTable();
+  const auto ws = WorkspaceFactory::Instance().createTable();
+  Mantid::API::AnalysisDataService::Instance().add(ws->getName(), ws);
+  return ws;
 }
 
 class ITableWorkspacePickleSuite : public boost::python::pickle_suite {
@@ -487,6 +490,13 @@ public:
     data["meta_data"] = writeMetaData(ws);
     return data;
   }
+
+  static void setstate(ITableWorkspace &ws, dict state) {
+    readMetaData(ws, state);
+    readData(ws, state);
+  }
+
+private:
 
   /** Write the meta data from a table workspace to a python dict
    *
@@ -507,11 +517,6 @@ public:
     metaData["column_names"] = columnNames;
     metaData["column_types"] = columnTypes;
     return metaData;
-  }
-
-  static void setstate(ITableWorkspace &ws, dict state) {
-    readMetaData(ws, state);
-    readData(ws, state);
   }
 
   /** Read the meta data from a python dict into the table workspace
