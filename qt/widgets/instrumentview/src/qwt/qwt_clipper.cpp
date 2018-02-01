@@ -43,7 +43,7 @@ enum Edge { Left, Top, Right, Bottom, NEdges };
 
 class QwtPolygonClipper : public QRect {
 public:
-  QwtPolygonClipper(const QRect &r);
+  explicit QwtPolygonClipper(const QRect &r);
 
   QwtPolygon clipPolygon(const QwtPolygon &) const;
 
@@ -57,7 +57,7 @@ private:
 
 class QwtPolygonClipperF : public QwtDoubleRect {
 public:
-  QwtPolygonClipperF(const QwtDoubleRect &r);
+  explicit QwtPolygonClipperF(const QwtDoubleRect &r);
   QwtPolygonF clipPolygon(const QwtPolygonF &) const;
 
 private:

@@ -25,7 +25,7 @@ public:
     Other
   };
 
-  QwtScaleTransformation(Type type);
+  explicit QwtScaleTransformation(Type type);
   virtual ~QwtScaleTransformation();
 
   virtual double xForm(double x, double s1, double s2, double p1,

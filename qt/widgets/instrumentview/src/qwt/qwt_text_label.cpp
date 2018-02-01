@@ -17,7 +17,7 @@
 
 class QwtTextLabel::PrivateData {
 public:
-  PrivateData() : indent(4), margin(0) {}
+  PrivateData() : indent(4), margin(0), text() {}
 
   int indent;
   int margin;

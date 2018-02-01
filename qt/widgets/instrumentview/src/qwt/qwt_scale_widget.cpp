@@ -22,7 +22,9 @@
 
 class QwtScaleWidget::PrivateData {
 public:
-  PrivateData() : scaleDraw(NULL) { colorBar.colorMap = NULL; }
+  PrivateData() : scaleDraw(NULL), borderDist{0, 0}, minBorderDist{0, 0}, scaleLength(0), margin(0),
+    penWidth(0), titleOffset(0), spacing(0), title()
+  { colorBar.colorMap = NULL; }
 
   ~PrivateData() {
     delete scaleDraw;

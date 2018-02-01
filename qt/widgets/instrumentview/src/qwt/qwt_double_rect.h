@@ -58,7 +58,7 @@ class QWT_EXPORT QwtDoublePoint {
 public:
   QwtDoublePoint();
   QwtDoublePoint(double x, double y);
-  QwtDoublePoint(const QPoint &);
+  explicit QwtDoublePoint(const QPoint &);
 
   QPoint toPoint() const;
 
@@ -100,7 +100,7 @@ class QWT_EXPORT QwtDoubleSize {
 public:
   QwtDoubleSize();
   QwtDoubleSize(double width, double height);
-  QwtDoubleSize(const QSize &);
+  explicit QwtDoubleSize(const QSize &);
 
   bool isNull() const;
   bool isEmpty() const;
@@ -143,7 +143,7 @@ public:
   QwtDoubleRect(double left, double top, double width, double height);
   QwtDoubleRect(const QwtDoublePoint &, const QwtDoubleSize &);
 
-  QwtDoubleRect(const QRect &);
+  explicit QwtDoubleRect(const QRect &);
   QRect toRect() const;
 
   bool isNull() const;

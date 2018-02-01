@@ -109,7 +109,7 @@ public:
   */
   enum Mode { FixedColors, ScaledColors };
 
-  QwtLinearColorMap(QwtColorMap::Format = QwtColorMap::RGB);
+  explicit QwtLinearColorMap(QwtColorMap::Format = QwtColorMap::RGB);
   QwtLinearColorMap(const QColor &from, const QColor &to,
                     QwtColorMap::Format = QwtColorMap::RGB);
 
@@ -147,7 +147,7 @@ private:
 */
 class QWT_EXPORT QwtAlphaColorMap : public QwtColorMap {
 public:
-  QwtAlphaColorMap(const QColor & = QColor(Qt::gray));
+  explicit QwtAlphaColorMap(const QColor & = QColor(Qt::gray));
   QwtAlphaColorMap(const QwtAlphaColorMap &);
 
   virtual ~QwtAlphaColorMap();

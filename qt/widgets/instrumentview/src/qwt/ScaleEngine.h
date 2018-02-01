@@ -40,11 +40,11 @@ class ScaleTransformation : public QwtScaleTransformation {
 public:
   enum Type { Linear, Log10, Power };
 
-  ScaleTransformation(const ScaleEngine *engine)
+  explicit ScaleTransformation(const ScaleEngine *engine)
       : QwtScaleTransformation(Other), d_engine(engine){};
   double xForm(double x, double, double, double p1, double p2) const override;
-  double invXForm(double x, double s1, double s2, double p1,
-                  double p2) const override;
+  double invXForm(double p, double p1, double p2, double s1,
+                  double s2) const override;
   QwtScaleTransformation *copy() const override;
   ~ScaleTransformation() override;
 

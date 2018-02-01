@@ -161,8 +161,6 @@ public:
   virtual void textMargins(const QFont &, const QString &, int &left,
                            int &right, int &top, int &bottom) const;
 
-private:
-  QString taggedText(const QString &, int flags) const;
 };
 
 #endif // !QT_NO_RICHTEXT

@@ -99,15 +99,16 @@ QwtScaleMap::~QwtScaleMap() { delete d_transformation; }
 
 //! Assignment operator
 QwtScaleMap &QwtScaleMap::operator=(const QwtScaleMap &other) {
-  d_s1 = other.d_s1;
-  d_s2 = other.d_s2;
-  d_p1 = other.d_p1;
-  d_p2 = other.d_p2;
-  d_cnv = other.d_cnv;
+  if (&other != this) {
+    d_s1 = other.d_s1;
+    d_s2 = other.d_s2;
+    d_p1 = other.d_p1;
+    d_p2 = other.d_p2;
+    d_cnv = other.d_cnv;
 
-  delete d_transformation;
-  d_transformation = other.d_transformation->copy();
-
+    delete d_transformation;
+    d_transformation = other.d_transformation->copy();
+  }
   return *this;
 }
 

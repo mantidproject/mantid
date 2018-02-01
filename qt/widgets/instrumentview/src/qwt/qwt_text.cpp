@@ -55,7 +55,7 @@ QwtTextEngineDict::QwtTextEngineDict() {
 
 QwtTextEngineDict::~QwtTextEngineDict() {
   for (EngineMap::const_iterator it = d_map.begin(); it != d_map.end(); ++it) {
-    QwtTextEngine *textEngine = (QwtTextEngine *)engine(it);
+    QwtTextEngine *textEngine = const_cast<QwtTextEngine *>(engine(it));
     delete textEngine;
   }
 }
@@ -69,7 +69,7 @@ QwtTextEngineDict::textEngine(const QString &text,
       if (it.key() != QwtText::PlainText) {
         const QwtTextEngine *e = engine(it);
         if (e && e->mightRender(text))
-          return (QwtTextEngine *)e;
+          return e;
       }
     }
   }

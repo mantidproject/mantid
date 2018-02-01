@@ -35,7 +35,7 @@ public:
 private:
   class ColorStop {
   public:
-    ColorStop() : pos(0.0), rgb(0){};
+    ColorStop() : pos(0.0), rgb(0), r(), g(), b() {};
 
     ColorStop(double p, const QColor &c) : pos(p), rgb(c.rgb()) {
       r = qRed(rgb);
