@@ -52,6 +52,12 @@ private:
   QwtArray<ColorStop> _stops;
 };
 
+#if defined(__GNUC__)
+#if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6)
+#pragma GCC diagnostic push
+#endif
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
 void QwtLinearColorMap::ColorStops::insert(double pos, const QColor &color) {
   // Lookups need to be very fast, insertions are not so important.
   // Anyway, a balanced tree is what we need here. TODO ...
@@ -62,20 +68,12 @@ void QwtLinearColorMap::ColorStops::insert(double pos, const QColor &color) {
   int index;
   if (_stops.size() == 0) {
     index = 0;
-#if QT_VERSION < 0x040000
-    _stops.resize(1, QGArray::SpeedOptim);
-#else
     _stops.resize(1);
-#endif
   } else {
     index = findUpper(pos);
     if (index == (int)_stops.size() ||
         qwtAbs(_stops[index].pos - pos) >= 0.001) {
-#if QT_VERSION < 0x040000
-      _stops.resize(_stops.size() + 1, QGArray::SpeedOptim);
-#else
       _stops.resize(_stops.size() + 1);
-#endif
       for (int i = _stops.size() - 1; i > index; i--)
         _stops[i] = _stops[i - 1];
     }
@@ -83,6 +81,11 @@ void QwtLinearColorMap::ColorStops::insert(double pos, const QColor &color) {
 
   _stops[index] = ColorStop(pos, color);
 }
+#if defined(__GNUC__)
+#if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6)
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 inline QwtArray<double> QwtLinearColorMap::ColorStops::stops() const {
   QwtArray<double> positions(_stops.size());
