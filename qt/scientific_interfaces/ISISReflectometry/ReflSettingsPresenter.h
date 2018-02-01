@@ -63,6 +63,8 @@ public:
   std::string getTransmissionRuns() const override;
 
   void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) override;
+  void onReductionPaused() override;
+  void onReductionResumed() override;
 
 private:
   void createStitchHints();

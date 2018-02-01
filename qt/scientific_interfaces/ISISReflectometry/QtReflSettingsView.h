@@ -108,6 +108,8 @@ public:
   /// Creates hints for 'Stitch1DMany'
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
+  void disableAll() override;
+  void enableAll() override;
 
   void showOptionLoadErrors(
       std::vector<InstrumentParameterTypeMissmatch> const &errors,

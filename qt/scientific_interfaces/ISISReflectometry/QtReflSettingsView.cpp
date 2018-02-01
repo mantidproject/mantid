@@ -89,6 +89,16 @@ void QtReflSettingsView::connectInstrumentSettingsChangeListeners() {
   connectSettingsChange(m_ui.summationTypeComboBox);
 }
 
+void QtReflSettingsView::disableAll() {
+  m_ui.instSettingsGroup->setEnabled(false);
+  m_ui.expSettingsGroup->setEnabled(false);
+}
+
+void QtReflSettingsView::enableAll() {
+  m_ui.instSettingsGroup->setEnabled(true);
+  m_ui.expSettingsGroup->setEnabled(true);
+}
+
 void QtReflSettingsView::connectExperimentSettingsChangeListeners() {
   connectSettingsChange(m_ui.expSettingsGroup);
   connectSettingsChange(m_ui.analysisModeComboBox);

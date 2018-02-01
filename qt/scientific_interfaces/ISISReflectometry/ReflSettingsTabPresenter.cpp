@@ -51,6 +51,16 @@ void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
     presenter->setInstrumentName(instName);
 }
 
+void ReflSettingsTabPresenter::onReductionResumed() {
+  for(auto presenter : m_settingsPresenters)
+    presenter->onReductionResumed();
+}
+
+void ReflSettingsTabPresenter::onReductionPaused() {
+  for(auto presenter : m_settingsPresenters)
+    presenter->onReductionPaused();
+}
+
 /** Returns values passed for 'Transmission run(s)'
 *
 * @param group :: The group from which to get the values

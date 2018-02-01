@@ -48,14 +48,26 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
 
   switch (flag) {
   case Flag::ConfirmReductionPausedFlag:
-    m_isProcessing = false;
+    onReductionPaused();
     break;
   case Flag::ConfirmReductionResumedFlag:
-    m_isProcessing = true;
+    onReductionResumed();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
+}
+
+void ReflMainWindowPresenter::onReductionPaused() {
+  m_isProcessing = false;
+  m_savePresenter->onReductionPaused();
+  m_settingsPresenter->onReductionPaused();
+}
+
+void ReflMainWindowPresenter::onReductionResumed() {
+  m_isProcessing = true;
+  m_settingsPresenter->onReductionResumed();
+  m_savePresenter->onReductionResumed();
 }
 
 void ReflMainWindowPresenter::settingsChanged(int group) {
