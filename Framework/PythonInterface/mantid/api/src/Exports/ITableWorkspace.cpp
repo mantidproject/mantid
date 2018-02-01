@@ -1,5 +1,5 @@
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -497,7 +497,6 @@ public:
   }
 
 private:
-
   /** Write the meta data from a table workspace to a python dict
    *
    * @param ws :: the workspace to load data into
