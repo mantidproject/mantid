@@ -35,6 +35,8 @@ set_target_properties ( Beamline PROPERTIES OUTPUT_NAME MantidBeamline
                                  COMPILE_DEFINITIONS IN_MANTID_BEAMLINE
                                  INSTALL_RPATH "@loader_path/../MacOS" )
 
+target_include_directories( Beamline SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Beamline PROPERTY FOLDER "MantidFramework" )
 

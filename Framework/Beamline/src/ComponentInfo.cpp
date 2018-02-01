@@ -265,10 +265,8 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index,
   auto transform = Eigen::Matrix3d(rotDelta);
 
   for (const auto &subDetIndex : detectorRange) {
-    auto newPos =
-        transform *
-            (m_detectorInfo->position({subDetIndex, timeIndex}) - compPos) +
-        compPos;
+    auto oldPos = m_detectorInfo->position({subDetIndex, timeIndex});
+    auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * m_detectorInfo->rotation({subDetIndex, timeIndex});
     m_detectorInfo->setPosition({subDetIndex, timeIndex}, newPos);
     m_detectorInfo->setRotation({subDetIndex, timeIndex}, newRot);
