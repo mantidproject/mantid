@@ -18,24 +18,6 @@
 #include "qwt_painter.h"
 #include "qwt_text_engine.h"
 
-static QString taggedRichText(const QString &text, int flags) {
-  QString richText = text;
-
-  // By default QSimpleRichText is Qt::AlignLeft
-  if (flags & Qt::AlignJustify) {
-    richText.prepend(QString::fromLatin1("<div align=\"justify\">"));
-    richText.append(QString::fromLatin1("</div>"));
-  } else if (flags & Qt::AlignRight) {
-    richText.prepend(QString::fromLatin1("<div align=\"right\">"));
-    richText.append(QString::fromLatin1("</div>"));
-  } else if (flags & Qt::AlignHCenter) {
-    richText.prepend(QString::fromLatin1("<div align=\"center\">"));
-    richText.append(QString::fromLatin1("</div>"));
-  }
-
-  return richText;
-}
-
 #if QT_VERSION < 0x040000
 
 #include <qsimplerichtext.h>
@@ -133,7 +115,7 @@ private:
 
     int row = 0;
     for (row = 0; row < img.height(); row++) {
-      const QRgb *line = (const QRgb *)img.scanLine(row);
+      const QRgb *line = reinterpret_cast<const QRgb *>(img.scanLine(row));
 
       const int w = pm.width();
       for (int col = 0; col < w; col++) {
