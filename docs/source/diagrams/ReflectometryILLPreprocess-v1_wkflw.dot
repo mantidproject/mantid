@@ -45,9 +45,9 @@ digraph ReflectometryILLPreprocess {
 
   subgraph decisions {
     $decision_style
-    input1            [label="Input BeamPosition?"]
-    input2            [label="Input BraggAngle?"]
-    input3            [label="Input BeamCentre?"]
+    table             [label="Input BeamPosition?"]
+    angle             [label="Input BraggAngle?"]
+    peak              [label="Input BeamCentre?"]
     next_file         [label="Next input file?"]
     checkBeamPosExists[label="BeamPosition input?"]
     checkWater        [label="WaterReference input?"]
@@ -59,12 +59,13 @@ digraph ReflectometryILLPreprocess {
     foreground        [label="Summation method?"]
   }
 
-  beamCentre          -> input1
-  braggAngle          -> input2
-  inputBeamPosition   -> input3
-  input1              -> load
-  input2              -> load
-  input3              -> load
+  beamCentre          -> peak
+  braggAngle          -> angle
+  inputBeamPosition   -> table
+  peak                -> table           [label="No"]
+  peak                -> load            [label="Yes"]
+  angle               -> load            [label="Yes"]
+  table               -> load            [label="Yes"]
   run                 -> load
   load                -> next_file
   load                -> outBeamPos
