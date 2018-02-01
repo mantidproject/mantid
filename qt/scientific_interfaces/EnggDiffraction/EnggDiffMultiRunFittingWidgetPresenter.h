@@ -31,13 +31,7 @@ public:
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const int runNumber, const size_t bank) const override;
 
-  void
-  notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) override;
-
 private:
-  void processShutDown();
-  void processStart();
-
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> m_model;
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> m_view;
