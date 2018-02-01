@@ -1,9 +1,10 @@
 #include "MantidQtWidgets/InstrumentView/ColorMapWidget.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
-#include "MantidQtWidgets/LegacyQwt/PowerScaleEngine.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
+
+#include "qwt/MantidColorMap.h"
+#include "qwt/PowerScaleEngine.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -12,8 +13,8 @@
 #include <QLineEdit>
 #include <QMouseEvent>
 #include <QApplication>
-#include <qwt_scale_widget.h>
-#include <qwt_scale_engine.h>
+#include "qwt/qwt_scale_widget.h"
+#include "qwt/qwt_scale_engine.h"
 #include <QLabel>
 
 namespace MantidQt {

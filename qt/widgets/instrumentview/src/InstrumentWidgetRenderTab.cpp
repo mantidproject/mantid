@@ -19,8 +19,8 @@
 #include <QSignalMapper>
 #include <QToolTip>
 
-#include <qwt_scale_widget.h>
-#include <qwt_scale_engine.h>
+#include "qwt/qwt_scale_widget.h"
+#include "qwt/qwt_scale_engine.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"

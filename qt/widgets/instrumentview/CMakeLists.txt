@@ -127,11 +127,40 @@ set ( UI_FILES
   inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui
 )
 
+set (QWT_SRC_FILES
+  src/qwt/MantidColorMap.cpp
+  src/qwt/PowerScaleEngine.cpp
+  src/qwt/ScaleEngine.cpp
+  src/qwt/qwt_abstract_scale.cpp
+  src/qwt/qwt_abstract_scale_draw.cpp
+  src/qwt/qwt_clipper.cpp
+  src/qwt/qwt_color_map.cpp
+  src/qwt/qwt_double_interval.cpp
+  src/qwt/qwt_double_rect.cpp
+  src/qwt/qwt_layout_metrics.cpp
+  src/qwt/qwt_math.cpp
+  src/qwt/qwt_painter.cpp
+  src/qwt/qwt_paint_buffer.cpp
+  src/qwt/qwt_scale_div.cpp
+  src/qwt/qwt_scale_draw.cpp
+  src/qwt/qwt_scale_engine.cpp
+  src/qwt/qwt_scale_map.cpp
+  src/qwt/qwt_scale_widget.cpp
+  src/qwt/qwt_text.cpp
+  src/qwt/qwt_text_engine.cpp
+  src/qwt/qwt_text_label.cpp
+)
+
+set (QWT_MOC_FILES
+  src/qwt/qwt_text_label.h
+  src/qwt/qwt_scale_widget.h
+)
+
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
   QT_VERSION 4
-  SRC ${SRC_FILES}
-  MOC ${MOC_FILES}
+  SRC ${SRC_FILES} ${QWT_SRC_FILES}
+  MOC ${MOC_FILES} ${QWT_MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS
@@ -148,12 +177,10 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     ${OPENGL_LIBRARIES}
   QT4_LINK_LIBS
     Qt4::QtOpenGL
-    Qwt5
   #QT5_LINK_LIBS
   #  Qt5::OpenGL
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-    MantidQtWidgetsLegacyQwt
     MantidQtWidgetsMplCpp
 )
 
