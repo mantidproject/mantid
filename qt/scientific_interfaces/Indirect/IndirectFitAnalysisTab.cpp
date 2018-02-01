@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 
 #include <QString>
+#include <QtCore>
 
 #include <algorithm>
 
@@ -142,9 +143,6 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(updateGuessPlots()));
-  connect(m_fitPropertyBrowser,
-          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-          SLOT(updatePlotGuessInWindow()));
 
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
           SLOT(startXChanged(double)));
@@ -152,8 +150,6 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SLOT(endXChanged(double)));
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
           SLOT(updateGuessPlots()));
-  connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
-          SLOT(updatePlotGuessInWindow()));
 
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateParameterValues()));
@@ -165,8 +161,6 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateGuessPlots()));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(clearGuessWindowPlot()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateResultOptions()));
 
@@ -1076,12 +1070,30 @@ void IndirectFitAnalysisTab::updateGuessPlots() {
  */
 void IndirectFitAnalysisTab::updateGuessPlots(IFunction_sptr guessFunction) {
   if (inputWorkspace() && guessFunction) {
-    auto guessWS = createGuessWorkspace(fitFunction(), selectedSpectrum());
+    m_createGuessRunner.addCallback([&]() {
+      auto guessWS = createGuessWorkspace(fitFunction(), selectedSpectrum());
 
-    if (guessWS->x(0).size() >= 2) {
-      updatePlotGuess(guessWS);
-      updatePlotGuessInWindow(guessWS);
-    }
+      if (guessWS->x(0).size() >= 2)
+        return guessWS;
+      else
+        return MatrixWorkspace_sptr(nullptr);
+    });
+
+    connect(&m_createGuessRunner, SIGNAL(finished()), this,
+            SLOT(guessWorkspaceCreated()));
+  }
+}
+
+void IndirectFitAnalysisTab::guessWorkspaceCreated() {
+  disconnect(&m_createGuessRunner, SIGNAL(finished()), this,
+             SLOT(guessWorkspaceCreated()));
+
+  auto guessWS = m_createGuessRunner.result();
+  if (guessWS) {
+    updatePlotGuess(guessWS);
+
+    m_plotWindowGuessRunner.addCallback(
+        [&, guessWS]() { updatePlotGuessInWindow(guessWS); });
   }
 }
 

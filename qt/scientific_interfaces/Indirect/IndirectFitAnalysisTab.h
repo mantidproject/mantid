@@ -5,11 +5,67 @@
 
 #include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
 
-#include <boost/variant.hpp>
+#include <boost/optional.hpp>
+
+#include <QtCore>
+
+#include <memory>
+#include <type_traits>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+class QtLazyAsyncRunnerBase : public QObject {
+  Q_OBJECT
+protected slots:
+  void currentFinishedBase() { currentFinished(); }
+
+signals:
+  void finishedLazy();
+  void finished();
+
+protected:
+  virtual void currentFinished() = 0;
+};
+
+template <typename Callback>
+class QtLazyAsyncRunner : public QtLazyAsyncRunnerBase {
+public:
+  using ReturnType = typename std::result_of<Callback()>::type;
+
+  QtLazyAsyncRunner() {
+    connect(&m_current, SIGNAL(finished()), this, SLOT(currentFinishedBase()));
+  }
+
+  void addCallback(Callback &&callback) {
+    if (m_next.is_initialized())
+      m_next = boost::none;
+
+    if (m_current.isFinished())
+      m_current.setFuture(QtConcurrent::run(callback));
+    else
+      m_next = std::forward<Callback>(callback);
+  }
+
+  bool isFinished() const { return m_current.isFinished(); }
+
+  ReturnType result() const { return m_current.result(); }
+
+protected:
+  void currentFinished() override {
+    if (m_next.is_initialized()) {
+      m_current.setFuture(QtConcurrent::run(*m_next));
+      m_next = boost::none;
+      emit finished();
+    } else
+      emit finishedLazy();
+  }
+
+private:
+  QFutureWatcher<ReturnType> m_current;
+  boost::optional<Callback> m_next;
+};
 
 class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
@@ -240,6 +296,8 @@ protected slots:
 
   void plotGuessInWindow();
 
+  void guessWorkspaceCreated();
+
   virtual void updatePlotOptions() = 0;
 
   void emitFunctionChanged();
@@ -292,6 +350,10 @@ private:
   std::string m_outputFitName;
   bool m_appendResults;
   Mantid::API::MatrixWorkspace_sptr m_inputAndGuessWorkspace;
+
+  QtLazyAsyncRunner<std::function<Mantid::API::MatrixWorkspace_sptr()>>
+      m_createGuessRunner;
+  QtLazyAsyncRunner<std::function<void()>> m_plotWindowGuessRunner;
 };
 
 } // namespace IDA
