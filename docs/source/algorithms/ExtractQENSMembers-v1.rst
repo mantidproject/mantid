@@ -47,7 +47,7 @@ Usage
                                        OutputWorkspace=output_ws_name)
 
   # Extract members from the output of the ConvolutionFitSequential algorithm
-  members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=output_ws_name + "_Workspaces",
+  members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=output_ws_name + "_conv_1LFixF_s0_to_9",
                                   RenameConvolvedMembers=True, ConvolvedMembers=["Lorentzian"])
 
   for member_ws in members_ws:
@@ -93,8 +93,6 @@ Output:
   convolve = True  # Convolve the fitted model components with the resolution
   minimizer = "Levenberg-Marquardt"
   maxIt = 500
-  output
-
   output_ws_name = "irs26176_graphite002"
 
   # Run ConvolutionFitSequential algorithm with ExtractMembers property
