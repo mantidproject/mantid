@@ -10,10 +10,7 @@ EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     IEnggDiffGSASFittingView *view,
     boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget)
     : m_model(std::move(model)), m_multiRunWidget(multiRunWidget), m_view(view),
-      m_viewHasClosed(false) {
-  auto addMultiRunWidget = m_multiRunWidget->getWidgetAdder();
-  (*addMultiRunWidget)(*m_view);
-}
+      m_viewHasClosed(false) {}
 
 EnggDiffGSASFittingPresenter::~EnggDiffGSASFittingPresenter() {}
 
@@ -145,7 +142,10 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
   }
 }
 
-void EnggDiffGSASFittingPresenter::processStart() {}
+void EnggDiffGSASFittingPresenter::processStart() {
+  auto addMultiRunWidget = m_multiRunWidget->getWidgetAdder();
+  (*addMultiRunWidget)(*m_view);
+}
 
 void EnggDiffGSASFittingPresenter::processShutDown() { m_viewHasClosed = true; }
 
