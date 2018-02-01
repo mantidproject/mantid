@@ -273,8 +273,8 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index,
   }
 
   for (const auto &subCompIndex : componentRangeInSubtree(componentIndex)) {
-    auto newPos =
-        transform * (position({subCompIndex, timeIndex}) - compPos) + compPos;
+    auto oldPos = position({subCompIndex, timeIndex});
+    auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * rotation({subCompIndex, timeIndex});
     const size_t childCompIndexOffset = compOffsetIndex(subCompIndex);
     m_positions.access()[linearIndex({childCompIndexOffset, timeIndex})] =
