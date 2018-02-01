@@ -213,7 +213,7 @@ public:
   MOCK_METHOD1(acceptTabPresenter, void(IReflSettingsTabPresenter *));
   MOCK_METHOD1(setInstrumentName, void(const std::string &));
   void notify(IReflSettingsPresenter::Flag flag) override { UNUSED_ARG(flag); }
-  IAlgorithm_sptr createReductionAlg() {
+  IAlgorithm_sptr createReductionAlg() override {
     return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
   }
   ~MockSettingsPresenter() override{};
