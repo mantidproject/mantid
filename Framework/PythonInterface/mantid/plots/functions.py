@@ -774,3 +774,46 @@ def tricontourf(axes, workspace, *args, **kwargs):
     y = y[condition]
     z = z[condition]
     return axes.tricontourf(x, y, z, *args, **kwargs)
+
+
+def _extract_3d_data(workspace):
+    """
+    Extracts the X, Y, Z data from a workspace
+    :param workspace: The workspace to extract the data from
+    :return: An X, Y, Z tuple of data arrays
+    """
+    x = workspace.extractX()
+    y = []  # spectrum axis values
+    z = workspace.extractY()
+    spectrum_axis_values = workspace.getAxis(1).extractValues()
+    bins = workspace.blocksize()
+    num_spectra = workspace.getNumberHistograms()
+    for spectra in range(num_spectra):
+        y.append(numpy.full(bins, spectrum_axis_values[spectra]))
+    return x, y, z
+
+
+def plot_wireframe(axes, workspace, *args, **kwargs):
+    """
+    :param axes:
+    :param workspace:
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    x, y, z = _extract_3d_data(workspace)
+    return axes.plot_surface(x, y, z, *args, **kwargs)
+
+
+def plot_surface(axes, workspace, *args, **kwargs):
+    """
+
+    :param axes:
+    :param workspace:
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    x, y, z = _extract_3d_data(workspace)
+    print(dir(axes))
+    return axes.plot_surface(x, y, z, *args, **kwargs)

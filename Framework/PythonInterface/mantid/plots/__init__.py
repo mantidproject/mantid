@@ -329,6 +329,20 @@ class MantidAxes(Axes):
         else:
             return Axes.tricontourf(self,*args,**kwargs)
 
+    def plot_surface(self, *args, **kwargs):
+        if self.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.functions')
+            return mantid.plots.functions.plot_surface(self, *args, **kwargs)
+        else:
+            return Axes.plot_surface(self, *args, **kwargs)
+
+    def plot_wireframe(self, *args, **kwargs):
+        if self.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.functions')
+            return mantid.plots.functions.plot_wireframe(self, *args, **kwargs)
+        else:
+            return Axes.plot_wireframe(self, *args, **kwargs)
+
 
 register_projection(MantidAxes)
 
