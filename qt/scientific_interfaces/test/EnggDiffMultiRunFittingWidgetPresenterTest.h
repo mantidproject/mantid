@@ -94,7 +94,7 @@ private:
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetView>>();
     m_mockView = mockView_uptr.get();
 
-    return std::make_unique<EnggDiffMultiRunFittingWidgetPresenter>(
+    return Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetPresenter>(
         std::move(mockModel_uptr), std::move(mockView_uptr));
   }
 
