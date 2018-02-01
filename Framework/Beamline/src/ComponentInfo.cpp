@@ -40,7 +40,9 @@ ComponentInfo::ComponentInfo(
         componentRanges,
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-    boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
+    boost::shared_ptr<std::vector<Eigen::Quaterniond,
+                                  Eigen::aligned_allocator<Eigen::Quaterniond>>>
+        rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     boost::shared_ptr<std::vector<ComponentType>> componentType,
     boost::shared_ptr<const std::vector<std::string>> names,

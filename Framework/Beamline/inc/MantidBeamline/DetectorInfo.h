@@ -5,6 +5,7 @@
 #include "MantidKernel/cow_ptr.h"
 
 #include "Eigen/Geometry"
+#include "Eigen/StdVector"
 
 namespace Mantid {
 namespace Beamline {
@@ -61,9 +62,13 @@ class MANTID_BEAMLINE_DLL DetectorInfo {
 public:
   DetectorInfo() = default;
   DetectorInfo(std::vector<Eigen::Vector3d> positions,
-               std::vector<Eigen::Quaterniond> rotations);
+               std::vector<Eigen::Quaterniond,
+                           Eigen::aligned_allocator<Eigen::Quaterniond>>
+                   rotations);
   DetectorInfo(std::vector<Eigen::Vector3d> positions,
-               std::vector<Eigen::Quaterniond> rotations,
+               std::vector<Eigen::Quaterniond,
+                           Eigen::aligned_allocator<Eigen::Quaterniond>>
+                   rotations,
                const std::vector<size_t> &monitorIndices);
 
   bool isEquivalent(const DetectorInfo &other) const;
@@ -120,7 +125,9 @@ private:
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
   Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions{nullptr};
-  Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations{nullptr};
+  Kernel::cow_ptr<std::vector<Eigen::Quaterniond,
+                              Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      m_rotations{nullptr};
 
   Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
   Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
