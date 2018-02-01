@@ -7,7 +7,6 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
-#include <vector>
 
 namespace Mantid {
 namespace Beamline {
