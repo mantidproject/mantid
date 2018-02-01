@@ -31,102 +31,101 @@ class QwtColorMap;
   a scale.
 */
 
-class QWT_EXPORT QwtScaleWidget : public QWidget
-{
-    Q_OBJECT 
+class QWT_EXPORT QwtScaleWidget : public QWidget {
+  Q_OBJECT
 
 public:
-    explicit QwtScaleWidget(QWidget *parent = NULL);
+  explicit QwtScaleWidget(QWidget *parent = NULL);
 #if QT_VERSION < 0x040000
-    explicit QwtScaleWidget(QWidget *parent, const char *name);
+  explicit QwtScaleWidget(QWidget *parent, const char *name);
 #endif
-    explicit QwtScaleWidget(QwtScaleDraw::Alignment, QWidget *parent = NULL);
-    virtual ~QwtScaleWidget();
+  explicit QwtScaleWidget(QwtScaleDraw::Alignment, QWidget *parent = NULL);
+  virtual ~QwtScaleWidget();
 
 signals:
-    //! Signal emitted, whenever the scale divison changes
-    void scaleDivChanged();
+  //! Signal emitted, whenever the scale divison changes
+  void scaleDivChanged();
 
 public:
-    void setTitle(const QString &title);
-    void setTitle(const QwtText &title);
-    QwtText title() const;
+  void setTitle(const QString &title);
+  void setTitle(const QwtText &title);
+  QwtText title() const;
 
-    void setBorderDist(int start, int end);
-    int startBorderDist() const;
-    int endBorderDist() const;
+  void setBorderDist(int start, int end);
+  int startBorderDist() const;
+  int endBorderDist() const;
 
-    void getBorderDistHint(int &start, int &end) const;
+  void getBorderDistHint(int &start, int &end) const;
 
-    void getMinBorderDist(int &start, int &end) const;
-    void setMinBorderDist(int start, int end);
+  void getMinBorderDist(int &start, int &end) const;
+  void setMinBorderDist(int start, int end);
 
-    void setMargin(int);
-    int margin() const;
+  void setMargin(int);
+  int margin() const;
 
-    void setSpacing(int td);
-    int spacing() const;
+  void setSpacing(int td);
+  int spacing() const;
 
-    void setPenWidth(int);
-    int penWidth() const;
+  void setPenWidth(int);
+  int penWidth() const;
 
-    void setScaleDiv(QwtScaleTransformation *, const QwtScaleDiv &sd);
+  void setScaleDiv(QwtScaleTransformation *, const QwtScaleDiv &sd);
 
-    void setScaleDraw(QwtScaleDraw *);
-    const QwtScaleDraw *scaleDraw() const;
-    QwtScaleDraw *scaleDraw();
+  void setScaleDraw(QwtScaleDraw *);
+  const QwtScaleDraw *scaleDraw() const;
+  QwtScaleDraw *scaleDraw();
 
 #if QT_VERSION < 0x040000
-    void setLabelAlignment(int);
+  void setLabelAlignment(int);
 #else
-    void setLabelAlignment(Qt::Alignment);
+  void setLabelAlignment(Qt::Alignment);
 #endif
-    void setLabelRotation(double rotation);
+  void setLabelRotation(double rotation);
 
-    void setColorBarEnabled(bool);
-    bool isColorBarEnabled() const;
+  void setColorBarEnabled(bool);
+  bool isColorBarEnabled() const;
 
-    void setColorBarWidth(int);
-    int colorBarWidth() const;
+  void setColorBarWidth(int);
+  int colorBarWidth() const;
 
-    void setColorMap(const QwtDoubleInterval &, const QwtColorMap &);
+  void setColorMap(const QwtDoubleInterval &, const QwtColorMap &);
 
-    QwtDoubleInterval colorBarInterval() const;
-    const QwtColorMap &colorMap() const;
+  QwtDoubleInterval colorBarInterval() const;
+  const QwtColorMap &colorMap() const;
 
-    virtual QSize sizeHint() const;
-    virtual QSize minimumSizeHint() const;
+  virtual QSize sizeHint() const;
+  virtual QSize minimumSizeHint() const;
 
-    int titleHeightForWidth(int width) const;
-    int dimForLength(int length, const QFont &scaleFont) const;
+  int titleHeightForWidth(int width) const;
+  int dimForLength(int length, const QFont &scaleFont) const;
 
-    void drawColorBar(QPainter *painter, const QRect &rect) const;
-    void drawTitle(QPainter *painter, QwtScaleDraw::Alignment,
-        const QRect &rect) const;
-        
-    void setAlignment(QwtScaleDraw::Alignment);
-    QwtScaleDraw::Alignment alignment() const;
+  void drawColorBar(QPainter *painter, const QRect &rect) const;
+  void drawTitle(QPainter *painter, QwtScaleDraw::Alignment,
+                 const QRect &rect) const;
 
-    QRect colorBarRect(const QRect&) const;
+  void setAlignment(QwtScaleDraw::Alignment);
+  QwtScaleDraw::Alignment alignment() const;
+
+  QRect colorBarRect(const QRect &) const;
 
 protected:
-    virtual void paintEvent(QPaintEvent *e);
-    virtual void resizeEvent(QResizeEvent *e);
+  virtual void paintEvent(QPaintEvent *e);
+  virtual void resizeEvent(QResizeEvent *e);
 
 #if QT_VERSION < 0x040000
-    virtual void fontChange(const QFont &oldfont);
+  virtual void fontChange(const QFont &oldfont);
 #endif
 
-    void draw(QPainter *p) const;
+  void draw(QPainter *p) const;
 
-    void scaleChange();
-    void layoutScale( bool update = true );
+  void scaleChange();
+  void layoutScale(bool update = true);
 
 private:
-    void initScale(QwtScaleDraw::Alignment);
+  void initScale(QwtScaleDraw::Alignment);
 
-    class PrivateData;
-    PrivateData *d_data;
+  class PrivateData;
+  PrivateData *d_data;
 };
 
 #endif

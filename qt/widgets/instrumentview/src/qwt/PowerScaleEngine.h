@@ -34,8 +34,7 @@
 #include "qwt_scale_map.h"
 #include "ScaleEngine.h"
 
-class PowerScaleTransformation
-    : public ScaleTransformation {
+class PowerScaleTransformation : public ScaleTransformation {
 public:
   PowerScaleTransformation(const ScaleEngine *engine)
       : ScaleTransformation(engine), nth_power(engine->nthPower()){};

@@ -2,7 +2,7 @@
  * Qwt Widget Library
  * Copyright (C) 1997   Josef Wilgen
  * Copyright (C) 2002   Uwe Rathmann
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the Qwt License, Version 1.0
  *****************************************************************************/
@@ -19,52 +19,51 @@ class QwtScaleMap;
 class QwtDoubleInterval;
 
 /*!
-  \brief An abstract base class for classes containing a scale 
+  \brief An abstract base class for classes containing a scale
 
-  QwtAbstractScale is used to provide classes with a QwtScaleDraw, 
-  and a QwtScaleDiv. The QwtScaleDiv might be set explicitely 
+  QwtAbstractScale is used to provide classes with a QwtScaleDraw,
+  and a QwtScaleDiv. The QwtScaleDiv might be set explicitely
   or calculated by a QwtScaleEngine.
 */
 
-class QWT_EXPORT QwtAbstractScale
-{
+class QWT_EXPORT QwtAbstractScale {
 public:
-    QwtAbstractScale();
-    virtual ~QwtAbstractScale();
-    
-    void setScale(double vmin, double vmax, double step = 0.0);
-    void setScale(const QwtDoubleInterval &, double step = 0.0);
-    void setScale(const QwtScaleDiv &s);
+  QwtAbstractScale();
+  virtual ~QwtAbstractScale();
 
-    void setAutoScale();
-    bool autoScale() const;
+  void setScale(double vmin, double vmax, double step = 0.0);
+  void setScale(const QwtDoubleInterval &, double step = 0.0);
+  void setScale(const QwtScaleDiv &s);
 
-    void setScaleMaxMajor( int ticks);
-    int scaleMaxMinor() const;
+  void setAutoScale();
+  bool autoScale() const;
 
-    void setScaleMaxMinor( int ticks);
-    int scaleMaxMajor() const; 
+  void setScaleMaxMajor(int ticks);
+  int scaleMaxMinor() const;
 
-    void setScaleEngine(QwtScaleEngine *);
-    const QwtScaleEngine *scaleEngine() const;
-    QwtScaleEngine *scaleEngine();
+  void setScaleMaxMinor(int ticks);
+  int scaleMaxMajor() const;
 
-    const QwtScaleMap &scaleMap() const;
-    
+  void setScaleEngine(QwtScaleEngine *);
+  const QwtScaleEngine *scaleEngine() const;
+  QwtScaleEngine *scaleEngine();
+
+  const QwtScaleMap &scaleMap() const;
+
 protected:
-    void rescale(double vmin, double vmax, double step = 0.0);
+  void rescale(double vmin, double vmax, double step = 0.0);
 
-    void setAbstractScaleDraw(QwtAbstractScaleDraw *);
-    const QwtAbstractScaleDraw *abstractScaleDraw() const;
-    QwtAbstractScaleDraw *abstractScaleDraw();
+  void setAbstractScaleDraw(QwtAbstractScaleDraw *);
+  const QwtAbstractScaleDraw *abstractScaleDraw() const;
+  QwtAbstractScaleDraw *abstractScaleDraw();
 
-    virtual void scaleChange();
+  virtual void scaleChange();
 
 private:
-    void updateScaleDraw();
+  void updateScaleDraw();
 
-    class PrivateData;
-    PrivateData *d_data;
+  class PrivateData;
+  PrivateData *d_data;
 };
 
 #endif

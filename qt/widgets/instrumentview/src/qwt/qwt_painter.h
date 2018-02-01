@@ -2,7 +2,7 @@
  * Qwt Widget Library
  * Copyright (C) 1997   Josef Wilgen
  * Copyright (C) 2002   Uwe Rathmann
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the Qwt License, Version 1.0
  *****************************************************************************/
@@ -47,103 +47,98 @@ class QTextDocument;
 
   1) Clipping to coordinate system limits (Qt3 only)
 
-  On X11 pixel coordinates are stored in shorts. Qt 
-  produces overruns when mapping QCOORDS to shorts. 
+  On X11 pixel coordinates are stored in shorts. Qt
+  produces overruns when mapping QCOORDS to shorts.
 
   2) Scaling to device metrics
 
   QPainter scales fonts, line and fill patterns to the metrics
   of the paint device. Other values like the geometries of rects, points
-  remain device independend. To enable a device independent widget 
+  remain device independend. To enable a device independent widget
   implementation, QwtPainter adds scaling of these geometries.
   (Unfortunately QPainter::scale scales both types of paintings,
    so the objects of the first type would be scaled twice).
 */
 
-class QWT_EXPORT QwtPainter
-{
+class QWT_EXPORT QwtPainter {
 public:
-    static void setMetricsMap(const QPaintDevice *layout,
-        const QPaintDevice *device);
-    static void setMetricsMap(const QwtMetricsMap &);
-    static void resetMetricsMap();
-    static const QwtMetricsMap &metricsMap();
+  static void setMetricsMap(const QPaintDevice *layout,
+                            const QPaintDevice *device);
+  static void setMetricsMap(const QwtMetricsMap &);
+  static void resetMetricsMap();
+  static const QwtMetricsMap &metricsMap();
 
-    static void setDeviceClipping(bool);
-    static bool deviceClipping();
-    static const QRect &deviceClipRect();
+  static void setDeviceClipping(bool);
+  static bool deviceClipping();
+  static const QRect &deviceClipRect();
 
-    static void setClipRect(QPainter *, const QRect &);
+  static void setClipRect(QPainter *, const QRect &);
 
-    static void drawText(QPainter *, int x, int y, 
-        const QString &);
-    static void drawText(QPainter *, const QPoint &, 
-        const QString &);
-    static void drawText(QPainter *, int x, int y, int w, int h, 
-        int flags, const QString &);
-    static void drawText(QPainter *, const QRect &, 
-        int flags, const QString &);
+  static void drawText(QPainter *, int x, int y, const QString &);
+  static void drawText(QPainter *, const QPoint &, const QString &);
+  static void drawText(QPainter *, int x, int y, int w, int h, int flags,
+                       const QString &);
+  static void drawText(QPainter *, const QRect &, int flags, const QString &);
 
 #ifndef QT_NO_RICHTEXT
 #if QT_VERSION < 0x040000
-    static void drawSimpleRichText(QPainter *, const QRect &,
-        int flags, QSimpleRichText &);
+  static void drawSimpleRichText(QPainter *, const QRect &, int flags,
+                                 QSimpleRichText &);
 #else
-    static void drawSimpleRichText(QPainter *, const QRect &,
-        int flags, QTextDocument &);
+  static void drawSimpleRichText(QPainter *, const QRect &, int flags,
+                                 QTextDocument &);
 #endif
 #endif
 
-    static void drawRect(QPainter *, int x, int y, int w, int h);
-    static void drawRect(QPainter *, const QRect &rect);
-    static void fillRect(QPainter *, const QRect &, const QBrush &); 
+  static void drawRect(QPainter *, int x, int y, int w, int h);
+  static void drawRect(QPainter *, const QRect &rect);
+  static void fillRect(QPainter *, const QRect &, const QBrush &);
 
-    static void drawEllipse(QPainter *, const QRect &);
-    static void drawPie(QPainter *, const QRect & r, int a, int alen);
+  static void drawEllipse(QPainter *, const QRect &);
+  static void drawPie(QPainter *, const QRect &r, int a, int alen);
 
-    static void drawLine(QPainter *, int x1, int y1, int x2, int y2);
-    static void drawLine(QPainter *, const QPoint &p1, const QPoint &p2);
-    static void drawPolygon(QPainter *, const QwtPolygon &pa);
-    static void drawPolyline(QPainter *, const QwtPolygon &pa);
-    static void drawPoint(QPainter *, int x, int y);
+  static void drawLine(QPainter *, int x1, int y1, int x2, int y2);
+  static void drawLine(QPainter *, const QPoint &p1, const QPoint &p2);
+  static void drawPolygon(QPainter *, const QwtPolygon &pa);
+  static void drawPolyline(QPainter *, const QwtPolygon &pa);
+  static void drawPoint(QPainter *, int x, int y);
 
 #if QT_VERSION < 0x040000
-    static void drawRoundFrame(QPainter *, const QRect &,
-        int width, const QColorGroup &cg, bool sunken);
+  static void drawRoundFrame(QPainter *, const QRect &, int width,
+                             const QColorGroup &cg, bool sunken);
 #else
-    static void drawRoundFrame(QPainter *, const QRect &,
-        int width, const QPalette &, bool sunken);
+  static void drawRoundFrame(QPainter *, const QRect &, int width,
+                             const QPalette &, bool sunken);
 #endif
-    static void drawFocusRect(QPainter *, QWidget *);
-    static void drawFocusRect(QPainter *, QWidget *, const QRect &);
+  static void drawFocusRect(QPainter *, QWidget *);
+  static void drawFocusRect(QPainter *, QWidget *, const QRect &);
 
-    static void drawColorBar(QPainter *painter, 
-        const QwtColorMap &, const QwtDoubleInterval &,
-        const QwtScaleMap &, Qt::Orientation, const QRect &);
+  static void drawColorBar(QPainter *painter, const QwtColorMap &,
+                           const QwtDoubleInterval &, const QwtScaleMap &,
+                           Qt::Orientation, const QRect &);
 
 #if QT_VERSION < 0x040000
-    static void setSVGMode(bool on);
-    static bool isSVGMode();
+  static void setSVGMode(bool on);
+  static bool isSVGMode();
 #endif
 
-    static QPen scaledPen(const QPen &);
+  static QPen scaledPen(const QPen &);
 
 private:
-    static void drawColoredArc(QPainter *, const QRect &,
-        int peak, int arc, int intervall, const QColor &c1, const QColor &c2);
+  static void drawColoredArc(QPainter *, const QRect &, int peak, int arc,
+                             int intervall, const QColor &c1, const QColor &c2);
 
-    static bool d_deviceClipping;
-    static QwtMetricsMap d_metricsMap;
+  static bool d_deviceClipping;
+  static QwtMetricsMap d_metricsMap;
 #if QT_VERSION < 0x040000
-    static bool d_SVGMode;
+  static bool d_SVGMode;
 #endif
 };
 
 //!  Wrapper for QPainter::drawLine()
-inline void QwtPainter::drawLine(QPainter *painter,
-    const QPoint &p1, const QPoint &p2)
-{
-    drawLine(painter, p1.x(), p1.y(), p2.x(), p2.y());
+inline void QwtPainter::drawLine(QPainter *painter, const QPoint &p1,
+                                 const QPoint &p2) {
+  drawLine(painter, p1.x(), p1.y(), p2.x(), p2.y());
 }
 
 /*!
@@ -151,9 +146,6 @@ inline void QwtPainter::drawLine(QPainter *painter,
   is enabled, otherwise it is disabled.
   \sa QwtPainter::setDeviceClipping()
 */
-inline bool QwtPainter::deviceClipping()
-{
-    return d_deviceClipping;
-}
+inline bool QwtPainter::deviceClipping() { return d_deviceClipping; }
 
 #endif

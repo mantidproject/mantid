@@ -36,8 +36,7 @@
 
 class ScaleEngine;
 
-class ScaleTransformation
-    : public QwtScaleTransformation {
+class ScaleTransformation : public QwtScaleTransformation {
 public:
   enum Type { Linear, Log10, Power };
 
