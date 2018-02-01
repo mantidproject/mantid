@@ -43,6 +43,8 @@ public:
 
   virtual bool canPlotGuess() const;
 
+  virtual bool doPlotGuess() const = 0;
+
   const std::string &outputWorkspaceName() const;
 
   void setCustomSettingEnabled(const QString &customName, bool enabled);
@@ -148,17 +150,33 @@ protected:
 
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  void plotGuess(MantidWidgets::PreviewPlot *previewPlot);
+  void updateGuessPlots(Mantid::API::IFunction_sptr guessFunction);
+
+  void updatePlotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
+  void updatePlotGuessInWindow(Mantid::API::MatrixWorkspace_sptr workspace);
+
+  Mantid::API::MatrixWorkspace_sptr createInputAndGuessWorkspace(
+      Mantid::API::MatrixWorkspace_sptr guessWorkspace);
+
+  Mantid::API::MatrixWorkspace_sptr
+  createInputAndGuessWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS,
+                               Mantid::API::MatrixWorkspace_sptr guessWorkspace,
+                               const std::string &outputName) const;
+
+  Mantid::API::MatrixWorkspace_sptr createInputAndGuessWorkspace(
+      Mantid::API::MatrixWorkspace_sptr inputWS,
+      Mantid::API::MatrixWorkspace_sptr guessWorkspace) const;
 
   virtual Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const;
 
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
 
   Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(Mantid::API::IFunction_const_sptr func, int wsIndex);
+  createGuessWorkspace(Mantid::API::IFunction_const_sptr func,
+                       int wsIndex) const;
 
   std::vector<double> computeOutput(Mantid::API::IFunction_const_sptr func,
-                                    const std::vector<double> &dataX);
+                                    const std::vector<double> &dataX) const;
 
   void updatePlotOptions(QComboBox *cbPlotType);
 
@@ -171,6 +189,9 @@ protected:
   virtual std::string createSequentialFitOutputName() const;
 
   virtual std::string createSingleFitOutputName() const = 0;
+
+  virtual void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
+  virtual void removeGuessPlot() = 0;
 
   virtual void enablePlotResult() = 0;
   virtual void disablePlotResult() = 0;
@@ -211,9 +232,11 @@ protected slots:
 
   virtual void updatePreviewPlots() = 0;
 
-  virtual void plotGuess() = 0;
+  void updateGuessPlots();
 
   void updatePlotGuess();
+
+  void updatePlotGuessInWindow();
 
   void plotGuessInWindow();
 
@@ -268,7 +291,7 @@ private:
 
   std::string m_outputFitName;
   bool m_appendResults;
-  Mantid::API::MatrixWorkspace_sptr m_guessWorkspaceInWindow;
+  Mantid::API::MatrixWorkspace_sptr m_inputAndGuessWorkspace;
 };
 
 } // namespace IDA

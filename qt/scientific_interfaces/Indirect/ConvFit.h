@@ -19,6 +19,8 @@ public:
 
   bool canPlotGuess() const override;
 
+  bool doPlotGuess() const override;
+
 protected:
   // Used in auto generating defaults for parameters
   QHash<QString, double> createDefaultValues() const override;
@@ -33,6 +35,8 @@ protected:
   void disablePlotResult() override;
   void enableSaveResult() override;
   void disableSaveResult() override;
+  void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
+  void removeGuessPlot() override;
 
 private:
   void setup() override;
@@ -47,7 +51,6 @@ protected slots:
   void extendResolutionWorkspace();
   void updatePreviewPlots() override;
   void updatePlotRange() override;
-  void plotGuess() override;
   void singleFit();
   void specMinChanged(int value);
   void specMaxChanged(int value);

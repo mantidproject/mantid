@@ -62,7 +62,12 @@ void JumpFit::setup() {
           SLOT(plotCurrentPreview()));
 
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
-          SLOT(plotGuess()));
+          SLOT(updatePlotGuess()));
+}
+
+bool JumpFit::doPlotGuess() const {
+  return m_uiForm->ckPlotGuess->isEnabled() &&
+         m_uiForm->ckPlotGuess->isChecked();
 }
 
 /**
@@ -264,17 +269,6 @@ void JumpFit::updatePlotRange() {
   IndirectDataAnalysisTab::updatePlotRange("JumpFitQ", m_uiForm->ppPlotTop);
 }
 
-void JumpFit::plotGuess() {
-  // Do nothing if there is not a sample
-  if (m_uiForm->ckPlotGuess->isEnabled() &&
-      m_uiForm->ckPlotGuess->isChecked()) {
-    IndirectFitAnalysisTab::plotGuess(m_uiForm->ppPlotTop);
-  } else {
-    m_uiForm->ppPlotTop->removeSpectrum("Guess");
-    m_uiForm->ckPlotGuess->setChecked(false);
-  }
-}
-
 std::string JumpFit::createSingleFitOutputName() const {
   auto outputName = inputWorkspace()->getName();
 
@@ -367,6 +361,15 @@ void JumpFit::enableSaveResult() {
 void JumpFit::disableSaveResult() {
   m_uiForm->pbSave->setEnabled(false);
   m_uiForm->pbSave->blockSignals(true);
+}
+
+void JumpFit::addGuessPlot(MatrixWorkspace_sptr workspace) {
+  m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);
+}
+
+void JumpFit::removeGuessPlot() {
+  m_uiForm->ppPlotTop->removeSpectrum("Guess");
+  m_uiForm->ckPlotGuess->setChecked(false);
 }
 
 /**

@@ -84,7 +84,7 @@ void IqtFit::setup() {
           SLOT(plotCurrentPreview()));
 
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
-          SLOT(plotGuess()));
+          SLOT(updatePlotGuess()));
 
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
@@ -102,6 +102,11 @@ void IqtFit::fitFunctionChanged() {
 void IqtFit::run() {
   if (validate())
     executeSequentialFit();
+}
+
+bool IqtFit::doPlotGuess() const {
+  return m_uiForm->ckPlotGuess->isEnabled() &&
+         m_uiForm->ckPlotGuess->isChecked();
 }
 
 std::string IqtFit::fitTypeString() const {
@@ -184,7 +189,7 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
   return iqtFitAlg;
 }
 
-void IqtFit::setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
+void IqtFit::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
                               int maxIterations) const {
   fitAlgorithm->setProperty("MaxIterations", static_cast<long>(maxIterations));
 }
@@ -384,18 +389,17 @@ void IqtFit::enablePlotGuess() {
   m_uiForm->ckPlotGuess->blockSignals(false);
 }
 
-void IqtFit::plotGuess() {
+void IqtFit::addGuessPlot(MatrixWorkspace_sptr workspace) {
+  m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);
+}
 
-  if (m_uiForm->ckPlotGuess->isEnabled() && m_uiForm->ckPlotGuess->isChecked())
-    IndirectFitAnalysisTab::plotGuess(m_uiForm->ppPlotTop);
-  else {
-    m_uiForm->ppPlotTop->removeSpectrum("Guess");
-    m_uiForm->ckPlotGuess->setChecked(false);
-  }
+void IqtFit::removeGuessPlot() {
+  m_uiForm->ppPlotTop->removeSpectrum("Guess");
+  m_uiForm->ckPlotGuess->setChecked(false);
 }
 
 IAlgorithm_sptr
-IqtFit::replaceInfinityAndNaN(Mantid::API::MatrixWorkspace_sptr inputWS) const {
+IqtFit::replaceInfinityAndNaN(MatrixWorkspace_sptr inputWS) const {
   auto replaceAlg = AlgorithmManager::Instance().create("ReplaceSpecialValues");
   replaceAlg->setChild(true);
   replaceAlg->initialize();

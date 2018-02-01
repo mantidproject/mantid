@@ -15,6 +15,8 @@ class DLLExport MSDFit : public IndirectFitAnalysisTab {
 public:
   MSDFit(QWidget *parent = nullptr);
 
+  bool doPlotGuess() const override;
+
 private:
   void setup() override;
   void run() override;
@@ -33,7 +35,6 @@ protected slots:
   void algorithmComplete(bool error) override;
   void updatePreviewPlots() override;
   void updatePlotRange() override;
-  void plotGuess() override;
   void updatePlotOptions() override;
 
 protected:
@@ -46,6 +47,8 @@ protected:
   void disablePlotResult() override;
   void enableSaveResult() override;
   void disableSaveResult() override;
+  void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
+  void removeGuessPlot() override;
 
 private:
   void disablePlotGuess() override;

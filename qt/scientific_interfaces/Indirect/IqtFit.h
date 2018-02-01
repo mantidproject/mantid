@@ -27,6 +27,8 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr fitWorkspace() const override;
 
+  bool doPlotGuess() const override;
+
 private:
   void setup() override;
   void run() override;
@@ -45,6 +47,8 @@ protected:
   void disablePlotResult() override;
   void enableSaveResult() override;
   void disableSaveResult() override;
+  void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
+  void removeGuessPlot() override;
 
 protected slots:
   void newDataLoaded(const QString wsName);
@@ -55,7 +59,6 @@ protected slots:
   void startXChanged(double startX) override;
   void endXChanged(double endX) override;
   void singleFit();
-  void plotGuess() override;
   void algorithmComplete(bool error) override;
   void updatePlotOptions() override;
   void plotWorkspace();

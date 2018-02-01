@@ -69,6 +69,11 @@ void MSDFit::setup() {
           SLOT(plotGuess()));
 }
 
+bool MSDFit::doPlotGuess() const {
+  return m_uiForm->ckPlotGuess->isEnabled() &&
+         m_uiForm->ckPlotGuess->isChecked();
+}
+
 void MSDFit::run() {
   if (validate())
     executeSequentialFit();
@@ -199,16 +204,6 @@ void MSDFit::enablePlotGuess() {
   m_uiForm->ckPlotGuess->blockSignals(false);
 }
 
-void MSDFit::plotGuess() {
-
-  if (m_uiForm->ckPlotGuess->isEnabled() &&
-      m_uiForm->ckPlotGuess->isChecked()) {
-    IndirectFitAnalysisTab::plotGuess(m_uiForm->ppPlotTop);
-  } else {
-    m_uiForm->ppPlotTop->removeSpectrum("Guess");
-  }
-}
-
 void MSDFit::updatePlotOptions() {}
 
 void MSDFit::enablePlotResult() {
@@ -229,6 +224,15 @@ void MSDFit::enableSaveResult() {
 void MSDFit::disableSaveResult() {
   m_uiForm->pbSave->setEnabled(false);
   m_uiForm->pbSave->blockSignals(true);
+}
+
+void MSDFit::addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) {
+  m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);
+}
+
+void MSDFit::removeGuessPlot() {
+  m_uiForm->ppPlotTop->removeSpectrum("Guess");
+  m_uiForm->ckPlotGuess->setChecked(false);
 }
 
 /**

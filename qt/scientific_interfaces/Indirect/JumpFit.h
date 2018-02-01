@@ -23,6 +23,8 @@ public:
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
 
+  bool doPlotGuess() const override;
+
 protected slots:
   /// Handle when the sample input is ready
   void handleSampleInputReady(const QString &filename);
@@ -32,8 +34,6 @@ protected slots:
   void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
   /// Handles plotting results of algorithm on miniplot
   void algorithmComplete(bool error) override;
-  /// Generates the plot guess data
-  void plotGuess() override;
   /// Handles plotting and saving
   void updatePreviewPlots() override;
   void startXChanged(double startX) override;
@@ -66,6 +66,8 @@ protected:
   void disablePlotResult() override;
   void enableSaveResult() override;
   void disableSaveResult() override;
+  void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
+  void removeGuessPlot() override;
 
 private:
   std::map<std::string, size_t>

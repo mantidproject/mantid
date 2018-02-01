@@ -127,7 +127,7 @@ namespace IDA {
  * @param parent :: the parent widget (an IndirectDataAnalysis object).
  */
 IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_guessWorkspaceInWindow(nullptr) {
+    : IndirectDataAnalysisTab(parent), m_inputAndGuessWorkspace(nullptr) {
   m_fitPropertyBrowser = new MantidWidgets::IndirectFitPropertyBrowser(parent);
   m_fitPropertyBrowser->init();
 
@@ -141,14 +141,19 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SLOT(emitParameterChanged(const Mantid::API::IFunction *)));
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-          SLOT(plotGuess()));
+          SLOT(updateGuessPlots()));
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+          SLOT(updatePlotGuessInWindow()));
 
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
           SLOT(startXChanged(double)));
   connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
           SLOT(endXChanged(double)));
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
-          SLOT(plotGuess()));
+          SLOT(updateGuessPlots()));
+  connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
+          SLOT(updatePlotGuessInWindow()));
 
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateParameterValues()));
@@ -159,7 +164,9 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(updatePlotGuess()));
+          SLOT(updateGuessPlots()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(clearGuessWindowPlot()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateResultOptions()));
 
@@ -902,7 +909,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
@@ -1048,48 +1055,79 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   }
 }
 
-/*
- * Plots a guess of the fit for the specified function, in the
- * specified preview plot widget.
- *
- * @param previewPlot The preview plot widget in which to plot
- *                    the guess.
- */
-void IndirectFitAnalysisTab::plotGuess(
-    MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
-  auto guessFunction = fitFunction();
-
-  if (inputWorkspace() && guessFunction) {
-    auto guessWorkspace =
-        createGuessWorkspace(guessFunction, selectedSpectrum());
-
-    // Check whether the guess workspace has enough data points
-    // to plot
-    if (guessWorkspace->x(0).size() >= 2)
-      previewPlot->addSpectrum("Guess", guessWorkspace, 0, Qt::green);
-  }
-}
-
 /**
- * Enables or disables the plot guess feature in this indirect fit analysiss
- * tab, depending on whether the selected model is empty and whether an input
- * workspace has been set.
+ * Updates the guess plots - both in the interface and separate window.
  */
-void IndirectFitAnalysisTab::updatePlotGuess() {
+void IndirectFitAnalysisTab::updateGuessPlots() {
   if (canPlotGuess())
     enablePlotGuess();
   else
     disablePlotGuess();
-  plotGuess();
+
+  if (doPlotGuess() || m_inputAndGuessWorkspace)
+    updateGuessPlots(fitFunction());
 }
 
 /**
- * Clears the guess window plot and deletes the associated workspace.
+ * Updates the guess plots - both in the interface and separate window, using
+ * the specified function for the guess.
+ *
+ * @param guessFunction The function to use for the guess.
  */
-void IndirectFitAnalysisTab::clearGuessWindowPlot() {
-  if (m_guessWorkspaceInWindow) {
-    deleteWorkspaceAlgorithm(m_guessWorkspaceInWindow)->execute();
-    m_guessWorkspaceInWindow.reset();
+void IndirectFitAnalysisTab::updateGuessPlots(IFunction_sptr guessFunction) {
+  if (inputWorkspace() && guessFunction) {
+    auto guessWS = createGuessWorkspace(fitFunction(), selectedSpectrum());
+
+    if (guessWS->x(0).size() >= 2) {
+      updatePlotGuess(guessWS);
+      updatePlotGuessInWindow(guessWS);
+    }
+  }
+}
+
+/**
+ * Updates the guess plot within the interface.
+ */
+void IndirectFitAnalysisTab::updatePlotGuess() {
+  updatePlotGuess(createGuessWorkspace(fitFunction(), selectedSpectrum()));
+}
+
+/**
+ * Updates the guess plot within the interface, using the specified guess
+ * workspace.
+ *
+ * @parma workspace The guess workspace.
+ */
+void IndirectFitAnalysisTab::updatePlotGuess(MatrixWorkspace_sptr workspace) {
+  if (doPlotGuess())
+    addGuessPlot(workspace);
+  else
+    removeGuessPlot();
+}
+
+/**
+ * Updates the guess plot in a separate window, if one exists.
+ */
+void IndirectFitAnalysisTab::updatePlotGuessInWindow() {
+  updatePlotGuessInWindow(
+      createGuessWorkspace(fitFunction(), selectedSpectrum()));
+}
+
+/**
+ * Updates the guess plot in a separate window, if one exists, using the
+ * specified guess workspace.
+ *
+ * @param workspace The guess workspace.
+ */
+void IndirectFitAnalysisTab::updatePlotGuessInWindow(
+    MatrixWorkspace_sptr workspace) {
+  if (m_inputAndGuessWorkspace) {
+    const auto guessWSName = "__" + createSingleFitOutputName() + "_guess_ws";
+
+    if (m_inputAndGuessWorkspace->getName() == guessWSName)
+      m_inputAndGuessWorkspace = createInputAndGuessWorkspace(workspace);
+    else
+      clearGuessWindowPlot();
   }
 }
 
@@ -1098,36 +1136,82 @@ void IndirectFitAnalysisTab::clearGuessWindowPlot() {
  */
 void IndirectFitAnalysisTab::plotGuessInWindow() {
   clearGuessWindowPlot();
-  auto guessFunction = fitFunction();
-  auto inputWS = inputWorkspace();
+  auto guessWS = createGuessWorkspace(fitFunction(), selectedSpectrum());
+  m_inputAndGuessWorkspace = createInputAndGuessWorkspace(guessWS);
 
-  if (inputWS && guessFunction) {
-    auto guessWorkspace =
-        createGuessWorkspace(guessFunction, selectedSpectrum());
-    ensureAppendCompatibility(inputWS, guessWorkspace);
+  if (m_inputAndGuessWorkspace)
+    plotSpectrum(QString::fromStdString(m_inputAndGuessWorkspace->getName()), 0,
+                 1);
+}
 
-    const auto spectrum = selectedSpectrum();
-
-    auto extractAlg =
-        extractSpectraAlgorithm(inputWS, spectrum, spectrum, startX(), endX());
-    extractAlg->execute();
-    MatrixWorkspace_sptr extracted = extractAlg->getProperty("OutputWorkspace");
-    auto appendAlg = appendSpectraAlgorithm(extracted, guessWorkspace);
-    appendAlg->execute();
-
-    m_guessWorkspaceInWindow = appendAlg->getProperty("OutputWorkspace");
-    const std::string guessWSName =
-        "__" + createSingleFitOutputName() + "_guess_ws";
-    AnalysisDataService::Instance().addOrReplace(guessWSName,
-                                                 m_guessWorkspaceInWindow);
-
-    auto axis = Mantid::Kernel::make_unique<TextAxis>(2);
-    axis->setLabel(0, "Sample");
-    axis->setLabel(1, "Guess");
-    m_guessWorkspaceInWindow->replaceAxis(1, axis.release());
-
-    plotSpectrum(QString::fromStdString(guessWSName), 0, 1);
+/**
+ * Clears the guess window plot and deletes the associated workspace.
+ */
+void IndirectFitAnalysisTab::clearGuessWindowPlot() {
+  if (m_inputAndGuessWorkspace) {
+    deleteWorkspaceAlgorithm(m_inputAndGuessWorkspace)->execute();
+    m_inputAndGuessWorkspace.reset();
   }
+}
+
+/**
+ * Creates a workspace containing the input and guess data, to be used
+ * for plotting the guess in a separate window.
+ *
+ * @return  A workspace containing the input and guess data.
+ */
+MatrixWorkspace_sptr IndirectFitAnalysisTab::createInputAndGuessWorkspace(
+    MatrixWorkspace_sptr guessWorkspace) {
+  const auto guessWSName = "__" + createSingleFitOutputName() + "_guess_ws";
+  return createInputAndGuessWorkspace(inputWorkspace(), guessWorkspace,
+                                      guessWSName);
+}
+
+/**
+ * Creates a workspace containing the input and guess data, to be used
+ * for plotting the guess in a separate window, and adds it to the ADS.
+ *
+ * @param inputWS         The input workspace.
+ * @param guessWorkspace  The guess workspace.
+ * @param outputName      The name of the workspace in the ADS.
+ * @return                A workspace containing the input and guess data.
+ */
+MatrixWorkspace_sptr IndirectFitAnalysisTab::createInputAndGuessWorkspace(
+    MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr guessWorkspace,
+    const std::string &outputName) const {
+  auto inputAndGuess = createInputAndGuessWorkspace(inputWS, guessWorkspace);
+  AnalysisDataService::Instance().addOrReplace(outputName, inputAndGuess);
+  return inputAndGuess;
+}
+
+/**
+ * Creates a workspace containing the input and guess data, to be used
+ * for plotting the guess in a separate window.
+ *
+ * @param inputWS         The input workspace.
+ * @param guessWorkspace  The guess workspace.
+ * @return                A workspace containing the input and guess data.
+ */
+MatrixWorkspace_sptr IndirectFitAnalysisTab::createInputAndGuessWorkspace(
+    MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr guessWorkspace) const {
+  ensureAppendCompatibility(inputWS, guessWorkspace);
+  const auto spectrum = selectedSpectrum();
+
+  auto extractAlg =
+      extractSpectraAlgorithm(inputWS, spectrum, spectrum, startX(), endX());
+  extractAlg->execute();
+  MatrixWorkspace_sptr extracted = extractAlg->getProperty("OutputWorkspace");
+
+  auto appendAlg = appendSpectraAlgorithm(extracted, guessWorkspace);
+  appendAlg->execute();
+  MatrixWorkspace_sptr inputAndGuess =
+      appendAlg->getProperty("OutputWorkspace");
+
+  auto axis = Mantid::Kernel::make_unique<TextAxis>(2);
+  axis->setLabel(0, "Sample");
+  axis->setLabel(1, "Guess");
+  inputAndGuess->replaceAxis(1, axis.release());
+  return inputAndGuess;
 }
 
 /**
@@ -1245,7 +1329,7 @@ IAlgorithm_sptr IndirectFitAnalysisTab::cropWorkspaceAlgorithm(
  */
 MatrixWorkspace_sptr
 IndirectFitAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
-                                             int wsIndex) {
+                                             int wsIndex) const {
   auto cropWorkspaceAlg = cropWorkspaceAlgorithm(inputWorkspace(), startX(),
                                                  endX(), wsIndex, wsIndex);
   cropWorkspaceAlg->execute();
@@ -1274,7 +1358,7 @@ IndirectFitAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
  */
 std::vector<double>
 IndirectFitAnalysisTab::computeOutput(IFunction_const_sptr func,
-                                      const std::vector<double> &dataX) {
+                                      const std::vector<double> &dataX) const {
   if (dataX.empty())
     return std::vector<double>();
 

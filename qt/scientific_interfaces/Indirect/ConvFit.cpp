@@ -133,7 +133,7 @@ void ConvFit::setup() {
   connect(m_uiForm->dsResInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(extendResolutionWorkspace()));
   connect(m_uiForm->dsResInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(plotGuess()));
+          SLOT(updateGuessPlots()));
 
   connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
@@ -152,7 +152,7 @@ void ConvFit::setup() {
   connect(m_uiForm->pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
-          SLOT(plotGuess()));
+          SLOT(updatePlotGuess()));
 
   connect(this, SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(parameterUpdated(const Mantid::API::IFunction *)));
@@ -175,6 +175,11 @@ void ConvFit::run() {
 bool ConvFit::canPlotGuess() const {
   return m_uiForm->dsResInput->isValid() &&
          IndirectFitAnalysisTab::canPlotGuess();
+}
+
+bool ConvFit::doPlotGuess() const {
+  return m_uiForm->ckPlotGuess->isEnabled() &&
+         m_uiForm->ckPlotGuess->isChecked();
 }
 
 void ConvFit::addFunctionGroupToComboBox(
@@ -600,7 +605,6 @@ void ConvFit::extendResolutionWorkspace() {
       appendAlg->execute();
     }
   }
-  updatePlotGuess();
 }
 
 /**
@@ -720,8 +724,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -843,19 +847,13 @@ void ConvFit::disableSaveResult() {
   m_uiForm->pbSave->blockSignals(true);
 }
 
-/**
- * Updates the guess for the plot
- */
-void ConvFit::plotGuess() {
+void ConvFit::addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) {
+  m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);
+}
 
-  // Do nothing if there is not a sample and resolution
-  if (m_uiForm->ckPlotGuess->isEnabled() &&
-      m_uiForm->ckPlotGuess->isChecked()) {
-    IndirectFitAnalysisTab::plotGuess(m_uiForm->ppPlotTop);
-  } else {
-    m_uiForm->ppPlotTop->removeSpectrum("Guess");
-    m_uiForm->ckPlotGuess->setChecked(false);
-  }
+void ConvFit::removeGuessPlot() {
+  m_uiForm->ppPlotTop->removeSpectrum("Guess");
+  m_uiForm->ckPlotGuess->setChecked(false);
 }
 
 /**
