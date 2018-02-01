@@ -1070,7 +1070,7 @@ void IndirectFitAnalysisTab::updateGuessPlots() {
  */
 void IndirectFitAnalysisTab::updateGuessPlots(IFunction_sptr guessFunction) {
   if (inputWorkspace() && guessFunction) {
-    m_createGuessRunner.addCallback([&]() {
+    m_createGuessRunner.addCallback([this]() {
       auto guessWS = createGuessWorkspace(fitFunction(), selectedSpectrum());
 
       if (guessWS->x(0).size() >= 2)
@@ -1093,7 +1093,7 @@ void IndirectFitAnalysisTab::guessWorkspaceCreated() {
     updatePlotGuess(guessWS);
 
     m_plotWindowGuessRunner.addCallback(
-        [&, guessWS]() { updatePlotGuessInWindow(guessWS); });
+        [this, guessWS]() { updatePlotGuessInWindow(guessWS); });
   }
 }
 
