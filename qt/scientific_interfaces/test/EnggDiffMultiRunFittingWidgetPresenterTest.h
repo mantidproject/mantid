@@ -27,7 +27,7 @@ public:
     assertMocksUsedCorrectly();
   }
 
-  void test_addFocusedRun() {
+  void test_focusedRunIsAddedToModel() {
     auto presenter = setUpPresenter();
     const API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
@@ -39,6 +39,20 @@ public:
     EXPECT_CALL(*m_mockModelPtr, getAllWorkspaceLabels())
         .Times(1)
         .WillOnce(Return(workspaceLabels));
+
+    presenter->addFocusedRun(123, 1, ws);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_loadRunUpdatesView() {
+    auto presenter = setUpPresenter();
+    const API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+    const std::vector<std::pair<int, size_t>> workspaceLabels(
+        {std::make_pair(123, 1)});
+    ON_CALL(*m_mockModelPtr, getAllWorkspaceLabels())
+        .WillByDefault(Return(workspaceLabels));
     EXPECT_CALL(*m_mockViewPtr, updateRunList(workspaceLabels));
 
     presenter->addFocusedRun(123, 1, ws);
