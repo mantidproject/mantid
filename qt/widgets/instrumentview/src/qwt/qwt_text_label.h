@@ -52,14 +52,14 @@ public:
   int margin() const;
   void setMargin(int);
 
-  virtual QSize sizeHint() const;
-  virtual QSize minimumSizeHint() const;
-  virtual int heightForWidth(int) const;
+  virtual QSize sizeHint() const override;
+  virtual QSize minimumSizeHint() const override;
+  virtual int heightForWidth(int) const override;
 
   QRect textRect() const;
 
 protected:
-  virtual void paintEvent(QPaintEvent *e);
+  virtual void paintEvent(QPaintEvent *e) override;
   virtual void drawContents(QPainter *);
   virtual void drawText(QPainter *, const QRect &);
 

@@ -139,13 +139,13 @@ private:
 class QWT_EXPORT QwtLinearScaleEngine : public QwtScaleEngine {
 public:
   virtual void autoScale(int maxSteps, double &x1, double &x2,
-                         double &stepSize) const;
+                         double &stepSize) const override;
 
   virtual QwtScaleDiv divideScale(double x1, double x2, int numMajorSteps,
                                   int numMinorSteps,
-                                  double stepSize = 0.0) const;
+                                  double stepSize = 0.0) const override;
 
-  virtual QwtScaleTransformation *transformation() const;
+  virtual QwtScaleTransformation *transformation() const override;
 
 protected:
   QwtDoubleInterval align(const QwtDoubleInterval &, double stepSize) const;
@@ -175,13 +175,13 @@ private:
 class QWT_EXPORT QwtLog10ScaleEngine : public QwtScaleEngine {
 public:
   virtual void autoScale(int maxSteps, double &x1, double &x2,
-                         double &stepSize) const;
+                         double &stepSize) const override;
 
   virtual QwtScaleDiv divideScale(double x1, double x2, int numMajorSteps,
                                   int numMinorSteps,
-                                  double stepSize = 0.0) const;
+                                  double stepSize = 0.0) const override;
 
-  virtual QwtScaleTransformation *transformation() const;
+  virtual QwtScaleTransformation *transformation() const override;
 
 protected:
   QwtDoubleInterval log10(const QwtDoubleInterval &) const;

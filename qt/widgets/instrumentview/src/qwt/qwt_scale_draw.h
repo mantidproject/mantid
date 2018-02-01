@@ -46,7 +46,7 @@ public:
   int minLabelDist(const QFont &) const;
 
   int minLength(const QPen &, const QFont &) const;
-  virtual int extent(const QPen &, const QFont &) const;
+  virtual int extent(const QPen &, const QFont &) const override;
 
   void move(int x, int y);
   void move(const QPoint &);
@@ -88,9 +88,9 @@ protected:
   QMatrix labelMatrix(const QPoint &, const QSize &) const;
 #endif
 
-  virtual void drawTick(QPainter *p, double val, int len) const;
-  virtual void drawBackbone(QPainter *p) const;
-  virtual void drawLabel(QPainter *p, double val) const;
+  virtual void drawTick(QPainter *p, double val, int len) const override;
+  virtual void drawBackbone(QPainter *p) const override;
+  virtual void drawLabel(QPainter *p, double val) const override;
 
 private:
   void updateMap();

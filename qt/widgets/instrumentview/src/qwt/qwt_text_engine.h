@@ -117,18 +117,18 @@ public:
   virtual ~QwtPlainTextEngine();
 
   virtual int heightForWidth(const QFont &font, int flags, const QString &text,
-                             int width) const;
+                             int width) const override;
 
   virtual QSize textSize(const QFont &font, int flags,
-                         const QString &text) const;
+                         const QString &text) const override;
 
   virtual void draw(QPainter *painter, const QRect &rect, int flags,
-                    const QString &text) const;
+                    const QString &text) const override;
 
-  virtual bool mightRender(const QString &) const;
+  virtual bool mightRender(const QString &) const override;
 
   virtual void textMargins(const QFont &, const QString &, int &left,
-                           int &right, int &top, int &bottom) const;
+                           int &right, int &top, int &bottom) const override;
 
 private:
   class PrivateData;
@@ -148,18 +148,18 @@ public:
   QwtRichTextEngine();
 
   virtual int heightForWidth(const QFont &font, int flags, const QString &text,
-                             int width) const;
+                             int width) const override;
 
   virtual QSize textSize(const QFont &font, int flags,
-                         const QString &text) const;
+                         const QString &text) const override;
 
   virtual void draw(QPainter *painter, const QRect &rect, int flags,
-                    const QString &text) const;
+                    const QString &text) const override;
 
-  virtual bool mightRender(const QString &) const;
+  virtual bool mightRender(const QString &) const override;
 
   virtual void textMargins(const QFont &, const QString &, int &left,
-                           int &right, int &top, int &bottom) const;
+                           int &right, int &top, int &bottom) const override;
 };
 
 #endif // !QT_NO_RICHTEXT

@@ -93,8 +93,8 @@ public:
   QwtDoubleInterval colorBarInterval() const;
   const QwtColorMap &colorMap() const;
 
-  virtual QSize sizeHint() const;
-  virtual QSize minimumSizeHint() const;
+  virtual QSize sizeHint() const override;
+  virtual QSize minimumSizeHint() const override;
 
   int titleHeightForWidth(int width) const;
   int dimForLength(int length, const QFont &scaleFont) const;
@@ -109,8 +109,8 @@ public:
   QRect colorBarRect(const QRect &) const;
 
 protected:
-  virtual void paintEvent(QPaintEvent *e);
-  virtual void resizeEvent(QResizeEvent *e);
+  virtual void paintEvent(QPaintEvent *e) override;
+  virtual void resizeEvent(QResizeEvent *e) override;
 
 #if QT_VERSION < 0x040000
   virtual void fontChange(const QFont &oldfont);

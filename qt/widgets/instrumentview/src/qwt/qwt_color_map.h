@@ -119,7 +119,7 @@ public:
 
   QwtLinearColorMap &operator=(const QwtLinearColorMap &);
 
-  virtual QwtColorMap *copy() const;
+  virtual QwtColorMap *copy() const override;
 
   void setMode(Mode);
   Mode mode() const;
@@ -131,9 +131,9 @@ public:
   QColor color1() const;
   QColor color2() const;
 
-  virtual QRgb rgb(const QwtDoubleInterval &, double value) const;
+  virtual QRgb rgb(const QwtDoubleInterval &, double value) const override;
   virtual unsigned char colorIndex(const QwtDoubleInterval &,
-                                   double value) const;
+                                   double value) const override;
 
   class ColorStops;
 
@@ -154,16 +154,16 @@ public:
 
   QwtAlphaColorMap &operator=(const QwtAlphaColorMap &);
 
-  virtual QwtColorMap *copy() const;
+  virtual QwtColorMap *copy() const override;
 
   void setColor(const QColor &);
   QColor color() const;
 
-  virtual QRgb rgb(const QwtDoubleInterval &, double value) const;
+  virtual QRgb rgb(const QwtDoubleInterval &, double value) const override;
 
 private:
   virtual unsigned char colorIndex(const QwtDoubleInterval &,
-                                   double value) const;
+                                   double value) const override;
 
   class PrivateData;
   PrivateData *d_data;
