@@ -160,7 +160,6 @@ public:
 
   virtual void textMargins(const QFont &, const QString &, int &left,
                            int &right, int &top, int &bottom) const;
-
 };
 
 #endif // !QT_NO_RICHTEXT

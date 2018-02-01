@@ -68,7 +68,8 @@ QwtScaleDraw::~QwtScaleDraw() { delete d_data; }
 
 //! Assignment operator
 QwtScaleDraw &QwtScaleDraw::operator=(const QwtScaleDraw &other) {
-  static_cast<QwtAbstractScaleDraw&>(*this) = static_cast<const QwtAbstractScaleDraw &>(other);
+  static_cast<QwtAbstractScaleDraw &>(*this) =
+      static_cast<const QwtAbstractScaleDraw &>(other);
   *d_data = *other.d_data;
   return *this;
 }

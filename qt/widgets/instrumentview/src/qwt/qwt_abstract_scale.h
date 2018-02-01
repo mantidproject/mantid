@@ -29,7 +29,7 @@ class QwtDoubleInterval;
 class QWT_EXPORT QwtAbstractScale {
 public:
   QwtAbstractScale();
-  QwtAbstractScale(const QwtAbstractScale&) = delete;
+  QwtAbstractScale(const QwtAbstractScale &) = delete;
   virtual ~QwtAbstractScale();
 
   void setScale(double vmin, double vmax, double step = 0.0);

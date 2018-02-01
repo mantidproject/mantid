@@ -73,7 +73,7 @@ public:
   };
 
   explicit QwtScaleEngine();
-  QwtScaleEngine(const QwtScaleEngine&) = delete;
+  QwtScaleEngine(const QwtScaleEngine &) = delete;
   virtual ~QwtScaleEngine();
 
   void setAttribute(Attribute, bool on = true);
