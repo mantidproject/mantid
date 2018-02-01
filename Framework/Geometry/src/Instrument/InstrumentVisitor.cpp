@@ -75,15 +75,21 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(boost::make_shared<
-          std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_componentIdToIndexMap(
+          boost::make_shared<
+              std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size())),
-      m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
-      m_detectorRotations(boost::make_shared<std::vector<Eigen::Quaterniond>>(
-          m_orderedDetectorIds->size())),
+      m_rotations(boost::make_shared<
+                  std::vector<Eigen::Quaterniond,
+                              Eigen::aligned_allocator<Eigen::Quaterniond>>>()),
+      m_detectorRotations(
+          boost::make_shared<
+              std::vector<Eigen::Quaterniond,
+                          Eigen::aligned_allocator<Eigen::Quaterniond>>>(
+              m_orderedDetectorIds->size())),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr),
       m_nullShape(boost::make_shared<const CSGObject>()),
