@@ -1,0 +1,10 @@
+#ifndef MANTID_GOOGLEHISTOGRAMDATA_SLICETEST_H_
+#define MANTID_GOOGLEHISTOGRAMDATA_SLICETEST_H_
+
+#include <gtest/gtest.h>
+
+TEST(GTestTest1, equal) { ASSERT_EQ(1, 1); }
+TEST(GTestTest1, fail) { ASSERT_EQ(1, 2); }
+TEST(GTestTest2, equal) { ASSERT_EQ(1, 1); }
+
+#endif /* MANTID_GOOGLEHISTOGRAMDATA_SLICETEST_H_ */
