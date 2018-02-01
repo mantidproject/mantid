@@ -16,25 +16,28 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class QtLazyAsyncRunnerBase : public QObject {
+class DLLExport QtLazyAsyncRunnerBase : public QObject {
   Q_OBJECT
+
+signals:
+  void finished();
+  void finishedLazy();
+
 protected slots:
   void currentFinishedBase() { currentFinished(); }
 
-signals:
-  void finishedLazy();
-  void finished();
-
 protected:
+  void emitFinished() { emit finished(); };
+  void emitFinishedLazy() { emit finishedLazy(); };
   virtual void currentFinished() = 0;
 };
 
 template <typename Callback>
-class QtLazyAsyncRunner : public QtLazyAsyncRunnerBase {
+class DLLExport QtLazyAsyncRunner : public QtLazyAsyncRunnerBase {
 public:
   using ReturnType = typename std::result_of<Callback()>::type;
 
-  QtLazyAsyncRunner() {
+  explicit QtLazyAsyncRunner() : m_current(), m_next(boost::none) {
     connect(&m_current, SIGNAL(finished()), this, SLOT(currentFinishedBase()));
   }
 
@@ -57,9 +60,9 @@ protected:
     if (m_next.is_initialized()) {
       m_current.setFuture(QtConcurrent::run(*m_next));
       m_next = boost::none;
-      emit finished();
+      emitFinished();
     } else
-      emit finishedLazy();
+      emitFinishedLazy();
   }
 
 private:
