@@ -8,8 +8,7 @@ namespace CustomInterfaces {
 EnggDiffMultiRunFittingWidgetPresenter::EnggDiffMultiRunFittingWidgetPresenter(
     std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> model,
     std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> view)
-    : m_model(std::move(model)), m_view(std::move(view)),
-      m_viewHasClosed(false) {}
+    : m_model(std::move(model)), m_view(std::move(view)) {}
 
 void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
     const int runNumber, const size_t bank,
@@ -53,21 +52,9 @@ EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(const int runNumber,
 
 void EnggDiffMultiRunFittingWidgetPresenter::notify(
     IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) {
-  if (m_viewHasClosed) {
-    return;
-  }
   switch (notif) {
-
   case IEnggDiffMultiRunFittingWidgetPresenter::SelectRun:
     processSelectRun();
-    break;
-
-  case IEnggDiffMultiRunFittingWidgetPresenter::ShutDown:
-    processShutDown();
-    break;
-
-  case IEnggDiffMultiRunFittingWidgetPresenter::Start:
-    processStart();
     break;
   }
 }
@@ -78,12 +65,6 @@ void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {
   const auto bank = selectedRunLabel.second;
   updatePlot(runNumber, bank);
 }
-
-void EnggDiffMultiRunFittingWidgetPresenter::processShutDown() {
-  m_viewHasClosed = true;
-}
-
-void EnggDiffMultiRunFittingWidgetPresenter::processStart() {}
 
 void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(const int runNumber,
                                                         const size_t bank) {

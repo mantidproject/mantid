@@ -36,8 +36,6 @@ public:
 
 private:
   void processSelectRun();
-  void processShutDown();
-  void processStart();
 
   /// Display fitted peaks and any other fit information for a certain run
   void displayFitResults(const int runNumber, const size_t bank);
