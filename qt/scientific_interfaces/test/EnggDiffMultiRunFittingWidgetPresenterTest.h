@@ -21,7 +21,7 @@ public:
     const API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    EXPECT_CALL(*m_mockModelPtr, addFittedPeaks(123, 1, ws)).Times(1);
+    EXPECT_CALL(*m_mockModel, addFittedPeaks(123, 1, ws)).Times(1);
 
     presenter->addFittedPeaks(123, 1, ws);
     assertMocksUsedCorrectly();
@@ -32,11 +32,11 @@ public:
     const API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    EXPECT_CALL(*m_mockModelPtr, addFocusedRun(123, 1, ws)).Times(1);
+    EXPECT_CALL(*m_mockModel, addFocusedRun(123, 1, ws)).Times(1);
 
     const std::vector<std::pair<int, size_t>> workspaceLabels(
         {std::make_pair(123, 1)});
-    EXPECT_CALL(*m_mockModelPtr, getAllWorkspaceLabels())
+    EXPECT_CALL(*m_mockModel, getAllWorkspaceLabels())
         .Times(1)
         .WillOnce(Return(workspaceLabels));
 
@@ -51,9 +51,9 @@ public:
 
     const std::vector<std::pair<int, size_t>> workspaceLabels(
         {std::make_pair(123, 1)});
-    ON_CALL(*m_mockModelPtr, getAllWorkspaceLabels())
+    ON_CALL(*m_mockModel, getAllWorkspaceLabels())
         .WillByDefault(Return(workspaceLabels));
-    EXPECT_CALL(*m_mockViewPtr, updateRunList(workspaceLabels));
+    EXPECT_CALL(*m_mockView, updateRunList(workspaceLabels));
 
     presenter->addFocusedRun(123, 1, ws);
     assertMocksUsedCorrectly();
@@ -62,7 +62,7 @@ public:
   void test_getFittedPeaks() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1))
+    EXPECT_CALL(*m_mockModel, getFittedPeaks(123, 1))
         .Times(1)
         .WillOnce(Return(boost::none));
 
@@ -73,7 +73,7 @@ public:
   void test_getFocusedRun() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockModelPtr, getFocusedRun(123, 1))
+    EXPECT_CALL(*m_mockModel, getFocusedRun(123, 1))
         .Times(1)
         .WillOnce(Return(boost::none));
 
@@ -82,31 +82,29 @@ public:
   }
 
 private:
-  MockEnggDiffMultiRunFittingWidgetModel *m_mockModelPtr;
-  MockEnggDiffMultiRunFittingWidgetView *m_mockViewPtr;
+  MockEnggDiffMultiRunFittingWidgetModel *m_mockModel;
+  MockEnggDiffMultiRunFittingWidgetView *m_mockView;
 
   std::unique_ptr<EnggDiffMultiRunFittingWidgetPresenter> setUpPresenter() {
-    auto mockModel = Mantid::Kernel::make_unique<
+    auto mockModel_uptr = Mantid::Kernel::make_unique<
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetModel>>();
-    m_mockModelPtr = mockModel.get();
+    m_mockModel = mockModel_uptr.get();
 
-    auto mockView = Mantid::Kernel::make_unique<
+    auto mockView_uptr = Mantid::Kernel::make_unique<
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetView>>();
-    m_mockViewPtr = mockView.get();
+    m_mockView = mockView_uptr.get();
 
-    std::unique_ptr<EnggDiffMultiRunFittingWidgetPresenter> pres_uptr(
-        new EnggDiffMultiRunFittingWidgetPresenter(std::move(mockModel),
-                                                   std::move(mockView)));
-    return pres_uptr;
+    return std::make_unique<EnggDiffMultiRunFittingWidgetPresenter>(
+        std::move(mockModel_uptr), std::move(mockView_uptr));
   }
 
   void assertMocksUsedCorrectly() {
     TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(m_mockModelPtr));
+               testing::Mock::VerifyAndClearExpectations(m_mockModel));
     TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
-               testing::Mock::VerifyAndClearExpectations(m_mockViewPtr));
+               testing::Mock::VerifyAndClearExpectations(m_mockView));
   }
 };
 
