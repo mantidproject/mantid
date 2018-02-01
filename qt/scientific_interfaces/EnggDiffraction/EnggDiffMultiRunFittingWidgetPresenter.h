@@ -22,14 +22,15 @@ public:
   void addFittedPeaks(const RunLabel &runLabel,
                       const Mantid::API::MatrixWorkspace_sptr ws) override;
 
-  void addFocusedRun(const RunLabel &runLabel,
-                     const Mantid::API::MatrixWorkspace_sptr ws) override;
+  void addFocusedRun(const Mantid::API::MatrixWorkspace_sptr ws) override;
 
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFittedPeaks(const RunLabel &runLabel) const override;
 
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const override;
+
+  RunLabel getSelectedRunLabel() const override;
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
   getWidgetAdder() const override;

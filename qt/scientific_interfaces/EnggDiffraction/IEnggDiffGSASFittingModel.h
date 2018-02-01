@@ -22,6 +22,7 @@ public:
 
   /**
    Perform a Pawley refinement on a run
+   @param inputWS The workspace to run refinement on
    @param runLabel Run number and bank ID of the workspace to refine
    @param instParamFile The instrument parameter file name (.prm) to use for
    refinement
@@ -31,11 +32,12 @@ public:
    @param GSASIIProjectFile Location to save the .gpx project to
    @param dMin The minimum d-spacing to use for refinement
    @param negativeWeight The weight of the penalty function
-   @return String decription any failures that occurred (empty optional if
-   success)
+   @return Fitted peaks workspace resulting from refinement
+   @throws If GSASIIRefineFitPeaks throws
    */
-  virtual boost::optional<std::string>
-  doPawleyRefinement(const RunLabel &runLabel, const std::string &instParamFile,
+  virtual Mantid::API::MatrixWorkspace_sptr
+  doPawleyRefinement(const Mantid::API::MatrixWorkspace_sptr inputWS,
+                     const RunLabel &runLabel, const std::string &instParamFile,
                      const std::vector<std::string> &phaseFiles,
                      const std::string &pathToGSASII,
                      const std::string &GSASIIProjectFile, const double dMin,
@@ -43,6 +45,7 @@ public:
 
   /**
    Perform a Rietveld refinement on a run
+   @param inputWS The workspace to run refinement on
    @param runLabel Run number and bank ID of the workspace to refine
    @param instParamFile The instrument parameter file name (.prm) to use for
    refinement
@@ -50,33 +53,16 @@ public:
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
-   @return String decription any failures that occurred (empty optional if
-   success)
+   @return Fitted peaks workspace resulting from refinement
+   @throws If GSASIIRefineFitPeaks throws
    */
-  virtual boost::optional<std::string>
-  doRietveldRefinement(const RunLabel &runLabel,
+  virtual Mantid::API::MatrixWorkspace_sptr
+  doRietveldRefinement(const Mantid::API::MatrixWorkspace_sptr inputWS,
+                       const RunLabel &runLabel,
                        const std::string &instParamFile,
                        const std::vector<std::string> &phaseFiles,
                        const std::string &pathToGSASII,
                        const std::string &GSASIIProjectFile) = 0;
-
-  /**
-   Get the fit results for a given run
-   @param runLabel Run number and bank ID of the run
-   @return MatrixWorkspace containing the fitted peaks, or empty if the model
-   does not contain fit results for this run
-   */
-  virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
-  getFittedPeaks(const RunLabel &runLabel) const = 0;
-
-  /**
-   Get a focused run (as a MatrixWorkspace) by run label
-   @param runLabel Run number and bank ID of the run
-   @return The corresponding workspace (empty if the model does not contain this
-   run)
-   */
-  virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
-  getFocusedWorkspace(const RunLabel &runLabel) const = 0;
 
   /**
    Get refined lattice parameters for a run
@@ -88,12 +74,6 @@ public:
   getLatticeParams(const RunLabel &runLabel) const = 0;
 
   /**
-   Get run labels (ie run number and bank id) of all runs loaded into model
-   @return Vector of all run labels
-   */
-  virtual std::vector<RunLabel> getRunLabels() const = 0;
-
-  /**
    Get the weighted profile R-factor discrepancy index for goodness of fit on a
    run
    @param runLabel Run number and bank ID of the run
@@ -103,18 +83,13 @@ public:
   virtual boost::optional<double> getRwp(const RunLabel &runLabel) const = 0;
 
   /**
-   Has a fit been performed on a given run?
-   @param runLabel Run number and bank ID of the run to check
-   @return Whether the model contains the results of a fit for this run
-   */
-  virtual bool hasFittedPeaksForRun(const RunLabel &runLabel) const = 0;
-
-  /**
-   Load a focused run from a file to the model
+   Load a focused run from a file
    @param filename The name of the file to load
-   @return Empty string if load was a success, description of error if not
+   @return The loaded workspace
+   @throws If Load throws
    */
-  virtual std::string loadFocusedRun(const std::string &filename) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr
+  loadFocusedRun(const std::string &filename) const = 0;
 };
 
 } // namespace MantidQt

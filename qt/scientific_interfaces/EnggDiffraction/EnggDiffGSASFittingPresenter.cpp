@@ -34,10 +34,6 @@ void EnggDiffGSASFittingPresenter::notify(
     processLoadRun();
     break;
 
-  case IEnggDiffGSASFittingPresenter::SelectRun:
-    processSelectRun();
-    break;
-
   case IEnggDiffGSASFittingPresenter::Start:
     processStart();
     break;
@@ -49,13 +45,12 @@ void EnggDiffGSASFittingPresenter::notify(
 }
 
 void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
-  const auto fittedPeaks = m_model->getFittedPeaks(runLabel);
   const auto latticeParams = m_model->getLatticeParams(runLabel);
   const auto rwp = m_model->getRwp(runLabel);
 
-  if (!fittedPeaks || !latticeParams || !rwp) {
+  if (!latticeParams || !rwp) {
     m_view->userError("Invalid run identifier",
-                      "Unexpectedly tried to plot fit results for invalid "
+                      "Unexpectedly tried to display fit results for invalid "
                       "run, run number = " +
                           std::to_string(runLabel.runNumber) + ", bank ID = " +
                           std::to_string(runLabel.bank) +
@@ -63,35 +58,48 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
     return;
   }
 
-  const auto plottablePeaks = API::QwtHelper::curveDataFromWs(*fittedPeaks);
-  m_view->plotCurve(plottablePeaks);
-
   m_view->displayLatticeParams(*latticeParams);
   m_view->displayRwp(*rwp);
 }
 
-boost::optional<std::string> EnggDiffGSASFittingPresenter::doPawleyRefinement(
-    const RunLabel &runLabel, const std::string &instParamFile,
+Mantid::API::MatrixWorkspace_sptr
+EnggDiffGSASFittingPresenter::doPawleyRefinement(
+    const Mantid::API::MatrixWorkspace_sptr inputWS, const RunLabel &runLabel,
+    const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
   const auto dMin = m_view->getPawleyDMin();
   const auto negativeWeight = m_view->getPawleyNegativeWeight();
 
-  return m_model->doPawleyRefinement(runLabel, instParamFile, phaseFiles,
-                                     pathToGSASII, GSASIIProjectFile, dMin,
-                                     negativeWeight);
+  return m_model->doPawleyRefinement(inputWS, runLabel, instParamFile,
+                                     phaseFiles, pathToGSASII,
+                                     GSASIIProjectFile, dMin, negativeWeight);
 }
 
-boost::optional<std::string> EnggDiffGSASFittingPresenter::doRietveldRefinement(
-    const RunLabel &runLabel, const std::string &instParamFile,
+Mantid::API::MatrixWorkspace_sptr
+EnggDiffGSASFittingPresenter::doRietveldRefinement(
+    const Mantid::API::MatrixWorkspace_sptr inputWS, const RunLabel &runLabel,
+    const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
-  return m_model->doRietveldRefinement(runLabel, instParamFile, phaseFiles,
-                                       pathToGSASII, GSASIIProjectFile);
+  return m_model->doRietveldRefinement(inputWS, runLabel, instParamFile,
+                                       phaseFiles, pathToGSASII,
+                                       GSASIIProjectFile);
 }
 
 void EnggDiffGSASFittingPresenter::processDoRefinement() {
-  const auto runLabel = m_view->getSelectedRunLabel();
+  const auto runLabel = m_multiRunWidget->getSelectedRunLabel();
+  const auto inputWSOptional = m_multiRunWidget->getFocusedRun(runLabel);
+
+  if (!inputWSOptional) {
+    m_view->userError(
+        "Invalid run selected for refinement",
+        "Tried to run refinement on invalid focused run, run number " +
+            std::to_string(runLabel.runNumber) + " and bank ID " +
+            std::to_string(runLabel.bank) +
+            ". Please contact the development team with this message");
+    return;
+  }
 
   const auto refinementMethod = m_view->getRefinementMethod();
 
@@ -100,75 +108,46 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   const auto pathToGSASII = m_view->getPathToGSASII();
   const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
 
-  boost::optional<std::string> refinementFailure(boost::none);
+  try {
+    Mantid::API::MatrixWorkspace_sptr fittedPeaks;
 
-  switch (refinementMethod) {
+    switch (refinementMethod) {
 
-  case GSASRefinementMethod::PAWLEY:
-    refinementFailure = doPawleyRefinement(runLabel, instParamFile, phaseFiles,
-                                           pathToGSASII, GSASIIProjectFile);
-    break;
+    case GSASRefinementMethod::PAWLEY:
+      fittedPeaks =
+          doPawleyRefinement(*inputWSOptional, runLabel, instParamFile,
+                             phaseFiles, pathToGSASII, GSASIIProjectFile);
+      break;
 
-  case GSASRefinementMethod::RIETVELD:
-    refinementFailure = doRietveldRefinement(
-        runLabel, instParamFile, phaseFiles, pathToGSASII, GSASIIProjectFile);
-    break;
-  }
+    case GSASRefinementMethod::RIETVELD:
+      fittedPeaks =
+          doRietveldRefinement(*inputWSOptional, runLabel, instParamFile,
+                               phaseFiles, pathToGSASII, GSASIIProjectFile);
+      break;
+    }
 
-  if (refinementFailure) {
-    m_view->userWarning("Refinement failed", *refinementFailure);
-  } else {
-    updatePlot(runLabel);
+    m_multiRunWidget->addFittedPeaks(runLabel, fittedPeaks);
+  } catch (const std::runtime_error &ex) {
+    m_view->userError("Refinement failed", ex.what());
   }
 }
 
 void EnggDiffGSASFittingPresenter::processLoadRun() {
   const auto focusedFileNames = m_view->getFocusedFileNames();
 
-  for (const auto fileName : focusedFileNames) {
-    const auto loadFailure = m_model->loadFocusedRun(fileName);
-
-    if (loadFailure.empty()) {
-      const auto runLabels = m_model->getRunLabels();
-      m_view->updateRunList(runLabels);
-    } else {
-      m_view->userWarning("Load failed", loadFailure);
+  try {
+    for (const auto fileName : focusedFileNames) {
+      const auto focusedRun = m_model->loadFocusedRun(fileName);
+      m_multiRunWidget->addFocusedRun(focusedRun);
     }
+  } catch (const std::exception &ex) {
+    m_view->userWarning("Could not load file", ex.what());
   }
-}
-
-void EnggDiffGSASFittingPresenter::processSelectRun() {
-  const auto runLabel = m_view->getSelectedRunLabel();
-  updatePlot(runLabel);
 }
 
 void EnggDiffGSASFittingPresenter::processStart() {}
 
 void EnggDiffGSASFittingPresenter::processShutDown() { m_viewHasClosed = true; }
-
-void EnggDiffGSASFittingPresenter::updatePlot(const RunLabel &runLabel) {
-  const auto focusedWSOptional = m_model->getFocusedWorkspace(runLabel);
-  if (!focusedWSOptional) {
-    m_view->userError("Invalid run identifier",
-                      "Tried to access invalid run, runNumber " +
-                          std::to_string(runLabel.runNumber) + " and bank ID " +
-                          std::to_string(runLabel.bank) +
-                          ". Please contact the development team");
-    return;
-  }
-  const auto focusedWS = *focusedWSOptional;
-
-  const auto plottableCurve = API::QwtHelper::curveDataFromWs(focusedWS);
-
-  m_view->resetCanvas();
-  m_view->plotCurve(plottableCurve);
-
-  const auto showRefinementResults = m_view->showRefinementResultsSelected();
-
-  if (showRefinementResults && m_model->hasFittedPeaksForRun(runLabel)) {
-    displayFitResults(runLabel);
-  }
-}
 
 } // MantidQt
 } // CustomInterfaces

@@ -14,20 +14,21 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockEnggDiffMultiRunFittingWidgetPresenter
     : public IEnggDiffMultiRunFittingWidgetPresenter {
 public:
-  MOCK_METHOD3(addFittedPeaks,
-               void(const int runNumber, const size_t bank,
+  MOCK_METHOD2(addFittedPeaks,
+               void(const RunLabel &runLabel,
                     const Mantid::API::MatrixWorkspace_sptr ws));
 
-  MOCK_METHOD3(addFocusedRun, void(const int runNumber, const size_t bank,
-                                   const Mantid::API::MatrixWorkspace_sptr ws));
+  MOCK_METHOD1(addFocusedRun, void(const Mantid::API::MatrixWorkspace_sptr ws));
 
-  MOCK_CONST_METHOD2(getFittedPeaks,
+  MOCK_CONST_METHOD1(getFittedPeaks,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
-                         const int runNumber, const size_t bank));
+                         const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD2(getFocusedRun,
+  MOCK_CONST_METHOD1(getFocusedRun,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
-                         const int runNumber, const size_t bank));
+                         const RunLabel &runLabel));
+
+  MOCK_CONST_METHOD0(getSelectedRunLabel, RunLabel());
 
   // Must be faked so that we can return a unique_ptr out of it
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>

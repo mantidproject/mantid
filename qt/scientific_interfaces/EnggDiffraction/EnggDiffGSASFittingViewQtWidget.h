@@ -33,8 +33,6 @@ public:
 
   void displayRwp(const double rwp) const override;
 
-  void setZoomToolEnabled(const bool enabled);
-
   std::vector<std::string> getFocusedFileNames() const override;
 
   std::string getGSASIIProjectPath() const override;
@@ -51,19 +49,7 @@ public:
 
   GSASRefinementMethod getRefinementMethod() const override;
 
-  RunLabel getSelectedRunLabel() const override;
-
-  void plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
-
-  void resetCanvas() override;
-
-  void resetPlotZoomLevel();
-
   void setEnabled(const bool enabled);
-
-  bool showRefinementResultsSelected() const override;
-
-  void updateRunList(const std::vector<RunLabel> &runLabels) override;
 
   void userError(const std::string &errorTitle,
                  const std::string &errorDescription) const override;
@@ -74,18 +60,13 @@ public:
 private slots:
   void browseFocusedRun();
   void loadFocusedRun();
-  void selectRun();
 
 private:
-  std::vector<std::unique_ptr<QwtPlotCurve>> m_focusedRunCurves;
-
-  boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
-
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
   Ui::EnggDiffractionQtTabGSAS m_ui;
 
-  std::unique_ptr<QwtPlotZoomer> m_zoomTool;
+  boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
 
   void setFocusedRunFileNames(const QStringList &filenames);
 

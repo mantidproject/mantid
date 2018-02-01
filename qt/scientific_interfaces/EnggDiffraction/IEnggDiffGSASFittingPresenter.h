@@ -14,7 +14,6 @@ public:
   enum Notification {
     DoRefinement, ///< Perform a GSAS refinement on a run
     LoadRun,      ///< Load a focused run
-    SelectRun,    ///< Select a run from the list
     ShutDown,     ///< Shut down the interface
     Start,        ///< Start and setup the interface
   };

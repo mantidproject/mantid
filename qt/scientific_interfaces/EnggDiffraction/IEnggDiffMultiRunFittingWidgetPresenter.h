@@ -33,11 +33,9 @@ public:
   /**
    Add a focused run to the widget. The run should be added to the list and
    plotting it should be possible
-   @param runLabel Identifier of the workspace to add
    @param ws The workspace to add
   */
-  virtual void addFocusedRun(const RunLabel &runLabel,
-                             const Mantid::API::MatrixWorkspace_sptr ws) = 0;
+  virtual void addFocusedRun(const Mantid::API::MatrixWorkspace_sptr ws) = 0;
 
   /**
    Get fitted peaks workspace corresponding to a given run and bank, if a fit
@@ -56,6 +54,9 @@ public:
   */
   virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const = 0;
+
+  /// Get run number and bank ID of the run currently selected in the list
+  virtual RunLabel getSelectedRunLabel() const = 0;
 
   /// Get functor to add this widget to a parent
   virtual std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>

@@ -83,33 +83,6 @@ public:
    */
   virtual GSASRefinementMethod getRefinementMethod() const = 0;
 
-  /// Get the run label (run number and bank id) currently selected in the list
-  virtual RunLabel getSelectedRunLabel() const = 0;
-
-  /**
-   Plot a Qwt curve in the canvas
-   @param curve The curve to plot
-   */
-  virtual void
-  plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) = 0;
-
-  /**
-   Reset canvas to avoid multiple plotting
-   */
-  virtual void resetCanvas() = 0;
-
-  /**
-   @return Whether the user has selected to show the refinement results for
-   the current run
-  */
-  virtual bool showRefinementResultsSelected() const = 0;
-
-  /**
-   Update the run list with labels of all runs loaded into the model
-   @param runLabels Vector of run labels
-   */
-  virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
-
   /**
    Display an error to the user
    @param errorTitle Title of the error

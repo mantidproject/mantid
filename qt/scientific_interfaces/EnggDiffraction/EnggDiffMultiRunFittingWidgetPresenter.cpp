@@ -1,8 +1,49 @@
 #include "EnggDiffMultiRunFittingWidgetPresenter.h"
 #include "EnggDiffMultiRunFittingWidgetAdder.h"
 
+#include "MantidAPI/Run.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+
+#include <boost/algorithm/string.hpp>
+#include <cctype>
+
+namespace {
+
+bool isDigit(const std::string &text) {
+  return std::all_of(text.cbegin(), text.cend(), isdigit);
+}
+
+size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr ws) {
+  const static std::string bankIDName = "bankid";
+  if (ws->run().hasProperty(bankIDName)) {
+    const auto log = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(
+        ws->run().getLogData(bankIDName));
+    return boost::lexical_cast<size_t>(log->value());
+  }
+
+  // couldn't get it from sample logs - try using the old naming convention
+  const std::string name = ws->getName();
+  std::vector<std::string> chunks;
+  boost::split(chunks, name, boost::is_any_of("_"));
+  bool isNum = isDigit(chunks.back());
+  if (!chunks.empty() && isNum) {
+    try {
+      return boost::lexical_cast<size_t>(chunks.back());
+    } catch (boost::exception &) {
+      // If we get a bad cast or something goes wrong then
+      // the file is probably not what we were expecting
+      // so throw a runtime error
+      throw std::runtime_error(
+          "Failed to fit file: The data was not what is expected. "
+          "Does the file contain a focused workspace?");
+    }
+  }
+
+  throw std::runtime_error("Could not guess run number from input workspace. "
+                           "Are you sure it has been focused correctly?");
+}
+} // anonymous namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -15,11 +56,15 @@ EnggDiffMultiRunFittingWidgetPresenter::EnggDiffMultiRunFittingWidgetPresenter(
 void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
     const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
   m_model->addFittedPeaks(runLabel, ws);
+  updatePlot(runLabel);
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(
-    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
-  m_model->addFocusedRun(runLabel, ws);
+    const Mantid::API::MatrixWorkspace_sptr ws) {
+  const auto runNumber = ws->getRunNumber();
+  const auto bankID = guessBankID(ws);
+
+  m_model->addFocusedRun(RunLabel(runNumber, bankID), ws);
   m_view->updateRunList(m_model->getAllWorkspaceLabels());
 }
 
@@ -50,6 +95,10 @@ boost::optional<Mantid::API::MatrixWorkspace_sptr>
 EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(
     const RunLabel &runLabel) const {
   return m_model->getFocusedRun(runLabel);
+}
+
+RunLabel EnggDiffMultiRunFittingWidgetPresenter::getSelectedRunLabel() const {
+  return m_view->getSelectedRunLabel();
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::notify(

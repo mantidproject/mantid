@@ -5,6 +5,7 @@
 #include "EnggDiffMultiRunFittingWidgetModelMock.h"
 #include "EnggDiffMultiRunFittingWidgetViewMock.h"
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -19,6 +20,17 @@ namespace {
 API::MatrixWorkspace_sptr createSampleWorkspace() {
   return API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 }
+
+void addBankID(API::MatrixWorkspace_sptr ws, const size_t bankID) {
+  auto addLogAlg =
+      API::FrameworkManager::Instance().createAlgorithm("AddSampleLog");
+  addLogAlg->initialize();
+  addLogAlg->setProperty("Workspace", ws);
+  addLogAlg->setPropertyValue("LogName", "bankid");
+  addLogAlg->setPropertyValue("LogText", std::to_string(bankID));
+  addLogAlg->setPropertyValue("LogType", "Number");
+  addLogAlg->execute();
+}
 }
 
 class EnggDiffMultiRunFittingWidgetPresenterTest : public CxxTest::TestSuite {
@@ -30,6 +42,20 @@ public:
     const RunLabel runLabel(123, 1);
     EXPECT_CALL(*m_mockModel, addFittedPeaks(runLabel, ws)).Times(1);
 
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(ws));
+    EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
+    EXPECT_CALL(*m_mockView, plotFocusedRun(testing::_)).Times(1);
+    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockView, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockModel, getFittedPeaks(testing::_)).Times(0);
+
     presenter->addFittedPeaks(runLabel, ws);
     assertMocksUsedCorrectly();
   }
@@ -37,7 +63,8 @@ public:
   void test_focusedRunIsAddedToModel() {
     auto presenter = setUpPresenter();
     const API::MatrixWorkspace_sptr ws = createSampleWorkspace();
-    const RunLabel runLabel(123, 1);
+    addBankID(ws, 2);
+    const RunLabel runLabel(0, 2);
 
     EXPECT_CALL(*m_mockModel, addFocusedRun(runLabel, ws)).Times(1);
 
@@ -46,20 +73,23 @@ public:
         .Times(1)
         .WillOnce(Return(workspaceLabels));
 
-    presenter->addFocusedRun(runLabel, ws);
+    EXPECT_CALL(*m_mockView, updateRunList(workspaceLabels));
+    presenter->addFocusedRun(ws);
     assertMocksUsedCorrectly();
   }
 
   void test_loadRunUpdatesView() {
     auto presenter = setUpPresenter();
+    const API::MatrixWorkspace_sptr ws = createSampleWorkspace();
+    addBankID(ws, 2);
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel(0, 2);
     const std::vector<RunLabel> workspaceLabels({runLabel});
     ON_CALL(*m_mockModel, getAllWorkspaceLabels())
         .WillByDefault(Return(workspaceLabels));
     EXPECT_CALL(*m_mockView, updateRunList(workspaceLabels));
 
-    presenter->addFocusedRun(runLabel, createSampleWorkspace());
+    presenter->addFocusedRun(ws);
     assertMocksUsedCorrectly();
   }
 
