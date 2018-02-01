@@ -4,6 +4,7 @@
 #include "../EnggDiffraction/EnggDiffGSASFittingPresenter.h"
 #include "EnggDiffGSASFittingModelMock.h"
 #include "EnggDiffGSASFittingViewMock.h"
+#include "EnggDiffMultiRunFittingWidgetPresenterMock.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/make_unique.h"
@@ -245,6 +246,7 @@ public:
 private:
   MockEnggDiffGSASFittingModel *m_mockModelPtr;
   MockEnggDiffGSASFittingView *m_mockViewPtr;
+  MockEnggDiffMultiRunFittingWidgetPresenter *m_mockMultiRunWidgetPtr;
 
   std::unique_ptr<EnggDiffGSASFittingPresenter> setUpPresenter() {
     auto mockModel = Mantid::Kernel::make_unique<
@@ -253,8 +255,12 @@ private:
 
     m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();
 
-    std::unique_ptr<EnggDiffGSASFittingPresenter> pres_uptr(
-        new EnggDiffGSASFittingPresenter(std::move(mockModel), m_mockViewPtr));
+    auto mockMultiRunWidgetPresenter_sptr = boost::make_shared<
+        testing::NiceMock<MockEnggDiffMultiRunFittingWidgetPresenter>>();
+    m_mockMultiRunWidgetPtr = mockMultiRunWidgetPresenter_sptr.get();
+
+    auto pres_uptr = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
+        std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr);
     return pres_uptr;
   }
 

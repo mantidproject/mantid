@@ -1,6 +1,11 @@
 #include "EnggDiffGSASFittingViewQtWidget.h"
 #include "EnggDiffGSASFittingModel.h"
 #include "EnggDiffGSASFittingPresenter.h"
+#include "EnggDiffMultiRunFittingQtWidget.h"
+#include "EnggDiffMultiRunFittingWidgetModel.h"
+#include "EnggDiffMultiRunFittingWidgetPresenter.h"
+
+#include <boost/make_shared.hpp>
 
 #include <QFileDialog>
 
@@ -19,9 +24,17 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
   m_zoomTool->setRubberBandPen(QPen(Qt::black));
   setZoomToolEnabled(false);
 
+  auto multiRunWidgetModel =
+      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetModel>();
+  auto multiRunWidgetView =
+      boost::make_shared<EnggDiffMultiRunFittingQtWidget>();
+  auto multiRunWidgetPresenter =
+      boost::make_shared<EnggDiffMultiRunFittingWidgetPresenter>(
+          std::move(multiRunWidgetModel), multiRunWidgetView);
+
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
   m_presenter = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
-      std::move(model), this);
+      std::move(model), this, multiRunWidgetPresenter);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
 
@@ -33,6 +46,12 @@ EnggDiffGSASFittingViewQtWidget::~EnggDiffGSASFittingViewQtWidget() {
   }
 
   m_focusedRunCurves.clear();
+}
+
+void EnggDiffGSASFittingViewQtWidget::addWidget(
+    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> widget) {
+  UNUSED_ARG(widget);
+  throw std::runtime_error("addWidget not yet implemented");
 }
 
 void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {

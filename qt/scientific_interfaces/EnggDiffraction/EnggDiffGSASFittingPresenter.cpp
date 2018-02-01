@@ -7,19 +7,12 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     std::unique_ptr<IEnggDiffGSASFittingModel> model,
-    IEnggDiffGSASFittingView *view)
-    : m_model(std::move(model)), m_view(view), m_viewHasClosed(false) {}
-
-EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
-    EnggDiffGSASFittingPresenter &&other)
-    : m_model(std::move(other.m_model)), m_view(other.m_view),
-      m_viewHasClosed(other.m_viewHasClosed) {}
-
-EnggDiffGSASFittingPresenter &EnggDiffGSASFittingPresenter::
-operator=(EnggDiffGSASFittingPresenter &&other) {
-  m_model = std::move(other.m_model);
-  m_view = std::move(other.m_view);
-  return *this;
+    IEnggDiffGSASFittingView *view,
+    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget)
+    : m_model(std::move(model)), m_multiRunWidget(multiRunWidget), m_view(view),
+      m_viewHasClosed(false) {
+  auto addMultiRunWidget = m_multiRunWidget->getWidgetAdder();
+  (*addMultiRunWidget)(*m_view);
 }
 
 EnggDiffGSASFittingPresenter::~EnggDiffGSASFittingPresenter() {}

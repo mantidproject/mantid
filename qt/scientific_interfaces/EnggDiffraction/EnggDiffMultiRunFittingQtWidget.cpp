@@ -5,10 +5,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
-    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter,
-    boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider)
-    : m_presenter(presenter), m_userMessageProvider(messageProvider) {
+EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget() {
   setupUI();
 
   m_zoomTool = Mantid::Kernel::make_unique<QwtPlotZoomer>(
@@ -94,6 +91,16 @@ void EnggDiffMultiRunFittingQtWidget::resetPlotZoomLevel() {
   m_ui.plotArea->setAxisAutoScale(QwtPlot::xBottom);
   m_ui.plotArea->setAxisAutoScale(QwtPlot::yLeft);
   m_zoomTool->setZoomBase(true);
+}
+
+void EnggDiffMultiRunFittingQtWidget::setMessageProvider(
+    boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) {
+  m_userMessageProvider = messageProvider;
+}
+
+void EnggDiffMultiRunFittingQtWidget::setPresenter(
+    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) {
+  m_presenter = presenter;
 }
 
 void EnggDiffMultiRunFittingQtWidget::setupUI() {

@@ -1,5 +1,7 @@
 #include "EnggDiffMultiRunFittingWidgetPresenter.h"
+#include "EnggDiffMultiRunFittingWidgetAdder.h"
 
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
 namespace MantidQt {
@@ -14,6 +16,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
     const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
   m_model->addFittedPeaks(runLabel, ws);
 }
+
 void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(
     const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
   m_model->addFocusedRun(runLabel, ws);
@@ -29,6 +32,12 @@ void EnggDiffMultiRunFittingWidgetPresenter::displayFitResults(
     const auto plottablePeaks = API::QwtHelper::curveDataFromWs(*fittedPeaks);
     m_view->plotFittedPeaks(plottablePeaks);
   }
+}
+
+std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
+EnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
+  return Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetAdder>(
+      m_view);
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>

@@ -2,9 +2,10 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEW_H_
 
 #include "EnggDiffGSASRefinementMethod.h"
-#include "RunLabel.h"
-
+#include "IEnggDiffMultiRunFittingWidgetOwner.h"
+#include "IEnggDiffMultiRunFittingWidgetView.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "RunLabel.h"
 
 #include <string>
 #include <utility>
@@ -15,10 +16,13 @@ class QwtData;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IEnggDiffGSASFittingView {
+class IEnggDiffGSASFittingView : public IEnggDiffMultiRunFittingWidgetOwner {
 
 public:
   virtual ~IEnggDiffGSASFittingView() = default;
+
+  virtual void addWidget(boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView>
+                             widget) override = 0;
 
   /**
    Display lattice parameters to the user

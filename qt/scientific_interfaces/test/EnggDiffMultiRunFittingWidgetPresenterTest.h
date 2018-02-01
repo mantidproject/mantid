@@ -163,12 +163,14 @@ private:
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetModel>>();
     m_mockModel = mockModel_uptr.get();
 
-    auto mockView_uptr = Mantid::Kernel::make_unique<
+    auto mockView_sptr = boost::make_shared<
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetView>>();
-    m_mockView = mockView_uptr.get();
+    m_mockView = mockView_sptr.get();
 
-    return Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetPresenter>(
-        std::move(mockModel_uptr), std::move(mockView_uptr));
+    std::unique_ptr<EnggDiffMultiRunFittingWidgetPresenter> pres_uptr(
+        new EnggDiffMultiRunFittingWidgetPresenter(std::move(mockModel_uptr),
+                                                   mockView_sptr));
+    return pres_uptr;
   }
 
   void assertMocksUsedCorrectly() {

@@ -20,9 +20,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingQtWidget
   Q_OBJECT
 
 public:
-  EnggDiffMultiRunFittingQtWidget(
-      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter,
-      boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider);
+  EnggDiffMultiRunFittingQtWidget();
 
   ~EnggDiffMultiRunFittingQtWidget() override;
 
@@ -39,6 +37,12 @@ public:
   void reportPlotInvalidFocusedRun(const RunLabel &runLabel) override;
 
   void resetCanvas() override;
+
+  void setMessageProvider(
+      boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) override;
+
+  void setPresenter(boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
+                        presenter) override;
 
   bool showFitResultsSelected() const override;
 

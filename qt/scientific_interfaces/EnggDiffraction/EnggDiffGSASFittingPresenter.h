@@ -5,9 +5,11 @@
 #include "IEnggDiffGSASFittingModel.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
+#include "IEnggDiffMultiRunFittingWidgetPresenter.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace MantidQt {
@@ -18,12 +20,16 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingPresenter
     : public IEnggDiffGSASFittingPresenter {
 
 public:
-  EnggDiffGSASFittingPresenter(std::unique_ptr<IEnggDiffGSASFittingModel> model,
-                               IEnggDiffGSASFittingView *view);
+  EnggDiffGSASFittingPresenter(
+      std::unique_ptr<IEnggDiffGSASFittingModel> model,
+      IEnggDiffGSASFittingView *view,
+      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
+          multiRunWidget);
 
-  EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other);
+  EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other) = default;
 
-  EnggDiffGSASFittingPresenter &operator=(EnggDiffGSASFittingPresenter &&other);
+  EnggDiffGSASFittingPresenter &
+  operator=(EnggDiffGSASFittingPresenter &&other) = default;
 
   ~EnggDiffGSASFittingPresenter() override;
 
@@ -86,6 +92,8 @@ private:
   void updatePlot(const RunLabel &runLabel);
 
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
+
+  boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_multiRunWidget;
 
   IEnggDiffGSASFittingView *m_view;
 

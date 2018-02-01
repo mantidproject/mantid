@@ -1,11 +1,14 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_
 
+#include "IEnggDiffMultiRunFittingWidgetPresenter.h"
+#include "IEnggDiffractionUserMsg.h"
 #include "RunLabel.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 #include <qwt_data.h>
 #include <vector>
 
@@ -42,6 +45,16 @@ public:
 
   /// Clear the plot area to avoid overplotting
   virtual void resetCanvas() = 0;
+
+  /// Connect a message provider to the view.  Used to remove circular
+  /// dependency between view and presenter
+  virtual void setMessageProvider(
+      boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) = 0;
+
+  /// Connect a presenter to the view. Used to remove circular dependency
+  /// between view and presenter
+  virtual void setPresenter(
+      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) = 0;
 
   /// Get whether the user has selected to overplot fit results
   virtual bool showFitResultsSelected() const = 0;

@@ -1,6 +1,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETPRESENTER_H_
 
+#include "IEnggDiffMultiRunFittingWidgetAdder.h"
 #include "RunLabel.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -55,6 +56,10 @@ public:
   */
   virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const = 0;
+
+  /// Get functor to add this widget to a parent
+  virtual std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
+  getWidgetAdder() const = 0;
 
   /**
    * Notifications sent through the presenter when something changes

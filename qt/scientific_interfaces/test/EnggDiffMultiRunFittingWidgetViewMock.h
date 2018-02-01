@@ -10,6 +10,8 @@ using namespace MantidQt::CustomInterfaces;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
+using namespace MantidQt::CustomInterfaces;
+
 class MockEnggDiffMultiRunFittingWidgetView
     : public IEnggDiffMultiRunFittingWidgetView {
 
@@ -27,6 +29,14 @@ public:
   MOCK_METHOD1(reportPlotInvalidFocusedRun, void(const RunLabel &runLabel));
 
   MOCK_METHOD0(resetCanvas, void());
+
+  MOCK_METHOD1(
+      setMessageProvider,
+      void(boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider));
+
+  MOCK_METHOD1(setPresenter,
+               void(boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
+                        presenter));
 
   MOCK_CONST_METHOD0(showFitResultsSelected, bool());
 
