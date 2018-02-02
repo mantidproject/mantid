@@ -35,8 +35,6 @@ private:
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> m_model;
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> m_view;
-
-  bool m_viewHasClosed;
 };
 
 } // namespace CustomInterfaces
