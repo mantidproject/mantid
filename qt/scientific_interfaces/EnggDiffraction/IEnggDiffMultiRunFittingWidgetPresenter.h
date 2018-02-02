@@ -18,7 +18,9 @@ public:
   // User actions, triggered by the (passive) view,
   // which need handling in implementation
   enum class Notification {
-    SelectRun, ///< The user has selected a new run from the list
+    PlotPeaksStateChanged, ///< The user has changed whether to plot fitted
+                           ///peaks
+    SelectRun,             ///< The user has selected a new run from the list
   };
 
   /**

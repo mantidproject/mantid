@@ -189,6 +189,32 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_plotPeaksStateChangedUpdatesPlot() {
+    auto presenter = setUpPresenter();
+
+    const RunLabel runLabel(123, 1);
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(sampleWorkspace));
+
+    EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
+    EXPECT_CALL(*m_mockView, plotFocusedRun(testing::_)).Times(1);
+
+    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(false));
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
+                          PlotPeaksStateChanged);
+    assertMocksUsedCorrectly();
+  }
+
 private:
   MockEnggDiffMultiRunFittingWidgetModel *m_mockModel;
   MockEnggDiffMultiRunFittingWidgetView *m_mockView;

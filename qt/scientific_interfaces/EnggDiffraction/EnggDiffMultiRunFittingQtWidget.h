@@ -56,6 +56,7 @@ signals:
 
 private slots:
   void processSelectRun();
+  void plotFittedPeaksStateChanged();
 
 private:
   void cleanUpPlot();

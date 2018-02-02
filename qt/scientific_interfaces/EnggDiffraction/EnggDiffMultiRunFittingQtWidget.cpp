@@ -56,6 +56,11 @@ void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFocusedRun(
                 ". Please contact the development team with this message");
 }
 
+void EnggDiffMultiRunFittingQtWidget::plotFittedPeaksStateChanged() {
+  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
+                          PlotPeaksStateChanged);
+}
+
 void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
     const std::vector<boost::shared_ptr<QwtData>> &curve) {
   UNUSED_ARG(curve);
@@ -109,6 +114,8 @@ void EnggDiffMultiRunFittingQtWidget::setupUI() {
 
   connect(m_ui.listWidget_runLabels, SIGNAL(itemSelectionChanged()), this,
           SLOT(processSelectRun()));
+  connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged()), this,
+          SLOT(plotFittedPeaksStateChanged()));
 }
 
 bool EnggDiffMultiRunFittingQtWidget::showFitResultsSelected() const {

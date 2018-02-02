@@ -107,7 +107,15 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
   case Notification::SelectRun:
     processSelectRun();
     break;
+
+  case Notification::PlotPeaksStateChanged:
+    processPlotPeaksStateChanged();
+    break;
   }
+}
+
+void EnggDiffMultiRunFittingWidgetPresenter::processPlotPeaksStateChanged() {
+  updatePlot(getSelectedRunLabel());
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {
