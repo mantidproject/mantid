@@ -87,7 +87,7 @@ public:
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
-  void showTable(DataProcessor::TreeManager *manager) override{};
+  void showTable(DataProcessor::TreeManager *) override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   void emitProcessClicked() override{};
