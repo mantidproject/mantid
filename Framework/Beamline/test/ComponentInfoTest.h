@@ -640,21 +640,6 @@ public:
         std::vector<size_t>({0, 2}));
   }
 
-  void test_number_of_detectors() {
-    auto infos = makeTreeExample();
-    const auto &compInfo = *std::get<0>(infos);
-    auto root = compInfo.root();
-
-    // Tree contains 3 detectors so from the root we should see all detectors
-    TS_ASSERT_EQUALS(compInfo.numberOfDetectorsInSubtree(root), 3);
-
-    // Sub assembly which contains 2 detectors at root-1
-    TS_ASSERT_EQUALS(compInfo.numberOfDetectorsInSubtree(root - 1), 2);
-
-    // Should return 1 for a detector since the component itself is included.
-    TS_ASSERT_EQUALS(compInfo.numberOfDetectorsInSubtree(0), 1);
-  }
-
   void test_component_indexes() {
 
     auto infos = makeTreeExample();

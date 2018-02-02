@@ -114,10 +114,6 @@ ComponentInfo::children(size_t componentIndex) const {
 
 size_t ComponentInfo::size() const { return m_componentInfo->size(); }
 
-size_t ComponentInfo::numberOfDetectorsInSubtree(size_t componentIndex) const {
-  return m_componentInfo->numberOfDetectorsInSubtree(componentIndex);
-}
-
 ComponentInfo::QuadrilateralComponent
 ComponentInfo::quadrilateralComponent(const size_t componentIndex) const {
   auto type = componentType(componentIndex);

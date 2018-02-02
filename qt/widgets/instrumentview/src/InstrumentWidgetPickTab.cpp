@@ -1204,7 +1204,7 @@ void DetectorPlotController::plotTube(size_t detindex) {
   }
 
   auto parent = componentInfo.parent(detindex);
-  if (componentInfo.numberOfDetectorsInSubtree(parent) > 1) {
+  if (componentInfo.detectorsInSubtree(parent).size() > 0) {
     if (m_plotType == TubeSum) // plot sums over detectors vs time bins
     {
       plotTubeSums(detindex);
