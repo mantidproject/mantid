@@ -1,40 +1,17 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 
-#include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidGeometry/Surfaces/Cone.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
-#include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/RegexStrings.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Tolerance.h"
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/error_of_mean.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/ranlux.hpp>
-#include <boost/random/uniform_01.hpp>
 
-#include <array>
-#include <deque>
-#include <iostream>
-#include <stack>
 
 namespace Mantid {
 namespace Geometry {
