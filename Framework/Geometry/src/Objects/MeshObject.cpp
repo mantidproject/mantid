@@ -12,7 +12,6 @@
 
 #include <boost/make_shared.hpp>
 
-
 namespace Mantid {
 namespace Geometry {
 
