@@ -93,7 +93,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   if (!sharedWorkspace)
     throw std::logic_error(
         "InstrumentActor passed a workspace that isn't a MatrixWorkspace");
-  setupPhysicalInstrument();
+  setupPhysicalInstrumentIfExists();
 
   for (size_t i = 0; i < componentInfo().size(); ++i) {
     if (!componentInfo().isDetector(i))
@@ -207,18 +207,19 @@ void InstrumentActor::setUpWorkspace(
   m_ragged = !wsValidator.isValid(sharedWorkspace).empty();
 }
 
-void InstrumentActor::setupPhysicalInstrument() {
+void InstrumentActor::setupPhysicalInstrumentIfExists() {
+  if (!isPhysicalView())
+    return;
+
   auto sharedWorkspace = getWorkspace();
   Mantid::Kernel::ReadLock _lock(*sharedWorkspace);
 
-  if (isPhysicalView()) {
-    auto instr = sharedWorkspace->getInstrument()->getPhysicalInstrument();
-    if (instr) {
-      m_isPhysicalInstrument = true;
-      auto infos = InstrumentVisitor::makeWrappers(*instr);
-      m_physicalComponentInfo = std::move(infos.first);
-      m_physicalDetectorInfo = std::move(infos.second);
-    }
+  auto instr = sharedWorkspace->getInstrument()->getPhysicalInstrument();
+  if (instr) {
+    auto infos = InstrumentVisitor::makeWrappers(*instr);
+    m_physicalComponentInfo = std::move(infos.first);
+    m_physicalDetectorInfo = std::move(infos.second);
+    m_isPhysicalInstrument = true;
   }
 }
 
@@ -1329,12 +1330,26 @@ void InstrumentActor::loadFromProject(const std::string &lines) {
   }
 }
 
+/** If instrument.geometry.view is set to Default or Physical, then the physical
+ * instrument componentInfo is returned. Othewise this returns the neutronic
+ * version.
+ */
 const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
-  return getComponentInfo();
+  if (m_isPhysicalInstrument)
+    return *m_physicalComponentInfo;
+  else
+    return getWorkspace()->componentInfo();
 }
 
+/** If instrument.geometry.view is set to Default or Physical, then the physical
+* instrument detectorInfo is returned. Othewise this returns the neutronic
+* version.
+*/
 const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
-  return getDetectorInfo();
+  if (m_isPhysicalInstrument)
+    return *m_physicalDetectorInfo;
+  else
+    return getWorkspace()->detectorInfo();
 }
 
 void InstrumentActor::invalidateDisplayLists() const {
@@ -1361,21 +1376,5 @@ size_t InstrumentActor::decodePickColor(const QRgb &c) {
                             static_cast<unsigned char>(qGreen(c)),
                             static_cast<unsigned char>(qBlue(c)));
 }
-
-const Mantid::Geometry::ComponentInfo &
-InstrumentActor::getComponentInfo() const {
-  if (m_isPhysicalInstrument)
-    return *m_physicalComponentInfo;
-  else
-    return getWorkspace()->componentInfo();
-}
-
-const Mantid::Geometry::DetectorInfo &InstrumentActor::getDetectorInfo() const {
-  if (m_isPhysicalInstrument)
-    return *m_physicalDetectorInfo;
-  else
-    return getWorkspace()->detectorInfo();
-}
-
 } // namespace MantidWidgets
 } // namespace MantidQt
