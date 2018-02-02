@@ -30,8 +30,7 @@ void EnggDiffMultiRunFittingQtWidget::cleanUpPlot() {
   m_focusedRunCurves.clear();
 }
 
-std::pair<int, size_t>
-EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
+RunLabel EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
   const auto currentLabel = m_ui.listWidget_runLabels->currentItem()->text();
   const auto pieces = currentLabel.split("_");
   if (pieces.size() != 2) {
@@ -39,7 +38,7 @@ EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
         "Unexpected run label: \"" + currentLabel.toStdString() +
         "\". Please contact the development team with this message");
   }
-  return std::make_pair(pieces[0].toInt(), pieces[1].toUInt());
+  return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
 }
 
 void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
@@ -91,11 +90,11 @@ bool EnggDiffMultiRunFittingQtWidget::showFitResultsSelected() const {
 }
 
 void EnggDiffMultiRunFittingQtWidget::updateRunList(
-    const std::vector<std::pair<int, size_t>> &runLabels) {
+    const std::vector<RunLabel> &runLabels) {
   m_ui.listWidget_runLabels->clear();
   for (const auto &runLabel : runLabels) {
-    const auto labelStr = QString::number(runLabel.first) + tr("_") +
-                          QString::number(runLabel.second);
+    const auto labelStr = QString::number(runLabel.runNumber) + tr("_") +
+                          QString::number(runLabel.bank);
     m_ui.listWidget_runLabels->addItem(labelStr);
   }
 }

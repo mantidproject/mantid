@@ -26,7 +26,7 @@ public:
 
   ~EnggDiffMultiRunFittingQtWidget() override;
 
-  std::pair<int, size_t> getSelectedRunLabel() const override;
+  RunLabel getSelectedRunLabel() const override;
 
   void plotFittedPeaks(
       const std::vector<boost::shared_ptr<QwtData>> &curve) override;
@@ -38,8 +38,7 @@ public:
 
   bool showFitResultsSelected() const override;
 
-  void
-  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) override;
+  void updateRunList(const std::vector<RunLabel> &runLabels) override;
 
   void userError(const std::string &errorTitle,
                  const std::string &errorDescription) override;

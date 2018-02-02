@@ -6,13 +6,15 @@
 
 #include <gmock/gmock.h>
 
+using namespace MantidQt::CustomInterfaces;
+
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockEnggDiffMultiRunFittingWidgetView
-    : public MantidQt::CustomInterfaces::IEnggDiffMultiRunFittingWidgetView {
+    : public IEnggDiffMultiRunFittingWidgetView {
 
 public:
-  MOCK_CONST_METHOD0(getSelectedRunLabel, std::pair<int, size_t>());
+  MOCK_CONST_METHOD0(getSelectedRunLabel, RunLabel());
 
   MOCK_METHOD1(plotFittedPeaks,
                void(const std::vector<boost::shared_ptr<QwtData>> &curve));
@@ -24,9 +26,8 @@ public:
 
   MOCK_CONST_METHOD0(showFitResultsSelected, bool());
 
-  MOCK_METHOD1(updateRunList,
-               void(const std::vector<std::pair<int, size_t>> &runLabels));
-
+  MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
+  
   MOCK_METHOD2(userError, void(const std::string &errorTitle,
                                const std::string &errorDescription));
 };

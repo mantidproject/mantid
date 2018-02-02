@@ -1,6 +1,8 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_
 
+#include "RunLabel.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>
@@ -16,7 +18,7 @@ public:
   virtual ~IEnggDiffMultiRunFittingWidgetView() = default;
 
   /// Get run number and bank ID of the run currently selected in the list
-  virtual std::pair<int, size_t> getSelectedRunLabel() const = 0;
+  virtual RunLabel getSelectedRunLabel() const = 0;
 
   /// Plot a Qwt curve representing a fitted peaks workspace to the canvas
   virtual void
@@ -33,8 +35,7 @@ public:
   virtual bool showFitResultsSelected() const = 0;
 
   /// Update the list of loaded run numbers and bank IDs
-  virtual void
-  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) = 0;
+  virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
 
   /// Report an error to the user
   virtual void userError(const std::string &errorTitle,

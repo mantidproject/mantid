@@ -9,6 +9,7 @@ set ( SRC_FILES
 	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
+	RunLabel.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -38,6 +39,7 @@ set ( INC_FILES
 	IEnggDiffMultiRunFittingWidgetView.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
+	RunLabel.h
 	RunMap.h
 )
 

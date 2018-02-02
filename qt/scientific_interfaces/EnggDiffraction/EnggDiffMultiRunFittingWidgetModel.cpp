@@ -4,43 +4,41 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 void EnggDiffMultiRunFittingWidgetModel::addFittedPeaks(
-    const int runNumber, const size_t bank,
-    const Mantid::API::MatrixWorkspace_sptr ws) {
-  m_fittedPeaksMap.add(runNumber, bank, ws);
+    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
+  m_fittedPeaksMap.add(runLabel, ws);
 }
 
 void EnggDiffMultiRunFittingWidgetModel::addFocusedRun(
-    const int runNumber, const size_t bank,
-    const Mantid::API::MatrixWorkspace_sptr ws) {
-  m_focusedRunMap.add(runNumber, bank, ws);
+    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
+  m_focusedRunMap.add(runLabel, ws);
 }
 
-std::vector<std::pair<int, size_t>>
+std::vector<RunLabel>
 EnggDiffMultiRunFittingWidgetModel::getAllWorkspaceLabels() const {
-  return m_focusedRunMap.getRunNumbersAndBankIDs();
+  return m_focusedRunMap.getRunLabels();
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
-EnggDiffMultiRunFittingWidgetModel::getFittedPeaks(const int runNumber,
-                                                   const size_t bank) const {
-  if (m_fittedPeaksMap.contains(runNumber, bank)) {
-    return m_fittedPeaksMap.get(runNumber, bank);
+EnggDiffMultiRunFittingWidgetModel::getFittedPeaks(
+    const RunLabel &runLabel) const {
+  if (m_fittedPeaksMap.contains(runLabel)) {
+    return m_fittedPeaksMap.get(runLabel);
   }
   return boost::none;
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
-EnggDiffMultiRunFittingWidgetModel::getFocusedRun(const int runNumber,
-                                                  const size_t bank) const {
-  if (m_focusedRunMap.contains(runNumber, bank)) {
-    return m_focusedRunMap.get(runNumber, bank);
+EnggDiffMultiRunFittingWidgetModel::getFocusedRun(
+    const RunLabel &runLabel) const {
+  if (m_focusedRunMap.contains(runLabel)) {
+    return m_focusedRunMap.get(runLabel);
   }
   return boost::none;
 }
 
 bool EnggDiffMultiRunFittingWidgetModel::hasFittedPeaksForRun(
-    const int runNumber, const size_t bank) const {
-  return m_fittedPeaksMap.contains(runNumber, bank);
+    const RunLabel &runLabel) const {
+  return m_fittedPeaksMap.contains(runLabel);
 }
 
 } // namespace MantidQt

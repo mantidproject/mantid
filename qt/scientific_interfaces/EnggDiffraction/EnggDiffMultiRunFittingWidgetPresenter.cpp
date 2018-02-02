@@ -11,26 +11,24 @@ EnggDiffMultiRunFittingWidgetPresenter::EnggDiffMultiRunFittingWidgetPresenter(
     : m_model(std::move(model)), m_view(std::move(view)) {}
 
 void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
-    const int runNumber, const size_t bank,
-    const Mantid::API::MatrixWorkspace_sptr ws) {
-  m_model->addFittedPeaks(runNumber, bank, ws);
+    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
+  m_model->addFittedPeaks(runLabel, ws);
 }
 void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(
-    const int runNumber, const size_t bank,
-    const Mantid::API::MatrixWorkspace_sptr ws) {
-  m_model->addFocusedRun(runNumber, bank, ws);
+    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
+  m_model->addFocusedRun(runLabel, ws);
   m_view->updateRunList(m_model->getAllWorkspaceLabels());
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::displayFitResults(
-    const int runNumber, const size_t bank) {
-  const auto fittedPeaks = m_model->getFittedPeaks(runNumber, bank);
+    const RunLabel &runLabel) {
+  const auto fittedPeaks = m_model->getFittedPeaks(runLabel);
   if (!fittedPeaks) {
     m_view->userError("Invalid fitted peaks run identifer",
                       "Unexpectedly tried to plot fit results for invalid "
                       "run, run number = " +
-                          std::to_string(runNumber) + ", bank ID = " +
-                          std::to_string(bank) +
+                          std::to_string(runLabel.runNumber) + ", bank ID = " +
+                          std::to_string(runLabel.bank) +
                           ". Please contact the development team");
     return;
   }
@@ -40,14 +38,14 @@ void EnggDiffMultiRunFittingWidgetPresenter::displayFitResults(
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
 EnggDiffMultiRunFittingWidgetPresenter::getFittedPeaks(
-    const int runNumber, const size_t bank) const {
-  return m_model->getFittedPeaks(runNumber, bank);
+    const RunLabel &runLabel) const {
+  return m_model->getFittedPeaks(runLabel);
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
-EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(const int runNumber,
-                                                      const size_t bank) const {
-  return m_model->getFocusedRun(runNumber, bank);
+EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(
+    const RunLabel &runLabel) const {
+  return m_model->getFocusedRun(runLabel);
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::notify(
@@ -61,20 +59,19 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
 
 void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {
   const auto selectedRunLabel = m_view->getSelectedRunLabel();
-  const auto runNumber = selectedRunLabel.first;
-  const auto bank = selectedRunLabel.second;
-  updatePlot(runNumber, bank);
+  updatePlot(selectedRunLabel);
 }
 
-void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(const int runNumber,
-                                                        const size_t bank) {
-  const auto focusedRun = m_model->getFocusedRun(runNumber, bank);
+void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(
+    const RunLabel &runLabel) {
+  const auto focusedRun = m_model->getFocusedRun(runLabel);
 
   if (!focusedRun) {
     m_view->userError(
         "Invalid focused run identifier",
-        "Tried to access invalid run, run number " + std::to_string(runNumber) +
-            " and bank ID " + std::to_string(bank) +
+        "Tried to access invalid run, run number " +
+            std::to_string(runLabel.runNumber) + " and bank ID " +
+            std::to_string(runLabel.bank) +
             ". Please contact the development team with this message");
     return;
   }
@@ -84,9 +81,9 @@ void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(const int runNumber,
   m_view->resetCanvas();
   m_view->plotFocusedRun(plottableCurve);
 
-  if (m_model->hasFittedPeaksForRun(runNumber, bank) &&
+  if (m_model->hasFittedPeaksForRun(runLabel) &&
       m_view->showFitResultsSelected()) {
-    displayFitResults(runNumber, bank);
+    displayFitResults(runLabel);
   }
 }
 
