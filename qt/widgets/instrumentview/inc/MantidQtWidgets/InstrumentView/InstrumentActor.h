@@ -206,9 +206,7 @@ private:
   void setUpWorkspace(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
       double scaleMin, double scaleMax);
-  void setupPhysicalInstrument();
-  const Mantid::Geometry::ComponentInfo &getComponentInfo() const;
-  const Mantid::Geometry::DetectorInfo &getDetectorInfo() const;
+  void setupPhysicalInstrumentIfExists();
   void resetColors();
   void loadSettings();
   void saveSettings();

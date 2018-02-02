@@ -665,14 +665,14 @@ public:
     // Throws for other non quadrilateral component
     TS_ASSERT_THROWS(
         componentInfo->quadrilateralComponent(componentInfo->root() - 1),
-        std::runtime_error);
+        std::runtime_error &);
     // Throws for root
     TS_ASSERT_THROWS(
         componentInfo->quadrilateralComponent(componentInfo->root()),
-        std::runtime_error);
+        std::runtime_error &);
     // Throws for detector
     TS_ASSERT_THROWS(componentInfo->quadrilateralComponent(0),
-                     std::runtime_error);
+                     std::runtime_error &);
   }
 
   void test_QuadrilateralComponent_for_single_rectangular_bank() {

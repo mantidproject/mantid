@@ -1198,8 +1198,13 @@ void DetectorPlotController::plotTube(size_t detindex) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   const auto &componentInfo = actor.componentInfo();
 
-  if (componentInfo.hasParent(detindex) &&
-      componentInfo.numberOfDetectorsInSubtree(detindex) > 0) {
+  if (!componentInfo.hasParent(detindex)) {
+    m_plot->clearCurve();
+    return;
+  }
+
+  auto parent = componentInfo.parent(detindex);
+  if (componentInfo.numberOfDetectorsInSubtree(parent) > 1) {
     if (m_plotType == TubeSum) // plot sums over detectors vs time bins
     {
       plotTubeSums(detindex);
@@ -1209,8 +1214,6 @@ void DetectorPlotController::plotTube(size_t detindex) {
       assert(m_plotType == TubeIntegral);
       plotTubeIntegrals(detindex);
     }
-  } else {
-    m_plot->clearCurve();
   }
 }
 

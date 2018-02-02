@@ -170,9 +170,10 @@ size_t ComponentInfo::size() const { return m_size; }
 size_t
 ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) const {
   if (isDetector(componentIndex))
-    return 0;
-  auto range = detectorRangeInSubtree(componentIndex);
-  return std::distance(range.begin(), range.end());
+    return 1;
+  const auto rangesIndex = compOffsetIndex(componentIndex);
+  const auto range = (*m_detectorRanges)[rangesIndex];
+  return range.second - range.first;
 }
 
 Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
