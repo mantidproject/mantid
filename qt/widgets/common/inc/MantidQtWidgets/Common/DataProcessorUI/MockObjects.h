@@ -124,8 +124,8 @@ public:
   MOCK_CONST_METHOD0(resume, void());
 
   // Calls we don't care about
-  void confirmReductionPaused() const override{};
-  void confirmReductionResumed() const override{};
+  MOCK_METHOD1(confirmReductionPaused, void(int));
+  MOCK_METHOD1(confirmReductionResumed, void(int));
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {

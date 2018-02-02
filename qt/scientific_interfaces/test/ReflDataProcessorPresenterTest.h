@@ -138,6 +138,8 @@ public:
     DefaultValue<ColumnOptionsQMap>::Clear();
   }
 
+  static auto constexpr DEFAULT_GROUP_NUMBER = 1;
+
   void testProcessEventWorkspacesUniformEvenSlicing() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
@@ -153,7 +155,7 @@ public:
         .Times(1)
         .WillOnce(Return(""));
 
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
@@ -238,7 +240,7 @@ public:
         .Times(1)
         .WillOnce(Return(""));
 
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
@@ -334,7 +336,7 @@ public:
         .Times(1)
         .WillOnce(Return(""));
 
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
@@ -418,7 +420,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
@@ -509,7 +511,7 @@ public:
         .Times(1)
         .WillOnce(Return(true));
 
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
@@ -565,7 +567,7 @@ public:
         .Times(1)
         .WillOnce(Return(""));
 
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
@@ -614,7 +616,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
@@ -690,7 +692,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
@@ -765,7 +767,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
@@ -810,7 +812,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
