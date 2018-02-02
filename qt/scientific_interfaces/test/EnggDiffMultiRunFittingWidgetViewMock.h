@@ -6,14 +6,15 @@
 
 #include <gmock/gmock.h>
 
+using namespace MantidQt::CustomInterfaces;
+
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockEnggDiffMultiRunFittingWidgetView
-    : public MantidQt::CustomInterfaces::IEnggDiffMultiRunFittingWidgetView {
+    : public IEnggDiffMultiRunFittingWidgetView {
 
 public:
-  MOCK_METHOD1(updateRunList,
-               void(const std::vector<std::pair<int, size_t>> &runLabels));
+  MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

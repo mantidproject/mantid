@@ -1,6 +1,8 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_
 
+#include "RunLabel.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>
@@ -14,8 +16,7 @@ public:
   virtual ~IEnggDiffMultiRunFittingWidgetView() = default;
 
   /// Update the list of loaded run numbers and bank IDs
-  virtual void
-  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) = 0;
+  virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
 };
 
 } // CustomInterfaces

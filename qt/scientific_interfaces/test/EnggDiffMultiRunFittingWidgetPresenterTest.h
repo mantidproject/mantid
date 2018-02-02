@@ -21,9 +21,10 @@ public:
     const API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    EXPECT_CALL(*m_mockModel, addFittedPeaks(123, 1, ws)).Times(1);
+    const RunLabel runLabel(123, 1);
+    EXPECT_CALL(*m_mockModel, addFittedPeaks(runLabel, ws)).Times(1);
 
-    presenter->addFittedPeaks(123, 1, ws);
+    presenter->addFittedPeaks(runLabel, ws);
     assertMocksUsedCorrectly();
   }
 
@@ -32,15 +33,16 @@ public:
     const API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    EXPECT_CALL(*m_mockModel, addFocusedRun(123, 1, ws)).Times(1);
+    const RunLabel runLabel(123, 1);
 
-    const std::vector<std::pair<int, size_t>> workspaceLabels(
-        {std::make_pair(123, 1)});
+    EXPECT_CALL(*m_mockModel, addFocusedRun(runLabel, ws)).Times(1);
+
+    const std::vector<RunLabel> workspaceLabels({runLabel});
     EXPECT_CALL(*m_mockModel, getAllWorkspaceLabels())
         .Times(1)
         .WillOnce(Return(workspaceLabels));
 
-    presenter->addFocusedRun(123, 1, ws);
+    presenter->addFocusedRun(runLabel, ws);
     assertMocksUsedCorrectly();
   }
 
@@ -49,35 +51,37 @@ public:
     const API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    const std::vector<std::pair<int, size_t>> workspaceLabels(
-        {std::make_pair(123, 1)});
+    const RunLabel runLabel(123, 1);
+    const std::vector<RunLabel> workspaceLabels({runLabel});
     ON_CALL(*m_mockModel, getAllWorkspaceLabels())
         .WillByDefault(Return(workspaceLabels));
     EXPECT_CALL(*m_mockView, updateRunList(workspaceLabels));
 
-    presenter->addFocusedRun(123, 1, ws);
+    presenter->addFocusedRun(runLabel, ws);
     assertMocksUsedCorrectly();
   }
 
   void test_getFittedPeaks() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockModel, getFittedPeaks(123, 1))
+    const RunLabel runLabel(123, 1);
+    EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
         .Times(1)
         .WillOnce(Return(boost::none));
 
-    presenter->getFittedPeaks(123, 1);
+    presenter->getFittedPeaks(runLabel);
     assertMocksUsedCorrectly();
   }
 
   void test_getFocusedRun() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockModel, getFocusedRun(123, 1))
+    const RunLabel runLabel(123, 1);
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
         .Times(1)
         .WillOnce(Return(boost::none));
 
-    presenter->getFocusedRun(123, 1);
+    presenter->getFocusedRun(runLabel);
     assertMocksUsedCorrectly();
   }
 

@@ -9,27 +9,25 @@ EnggDiffMultiRunFittingWidgetPresenter::EnggDiffMultiRunFittingWidgetPresenter(
     : m_model(std::move(model)), m_view(std::move(view)) {}
 
 void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
-    const int runNumber, const size_t bank,
-    const Mantid::API::MatrixWorkspace_sptr ws) {
-  m_model->addFittedPeaks(runNumber, bank, ws);
+    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
+  m_model->addFittedPeaks(runLabel, ws);
 }
 void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(
-    const int runNumber, const size_t bank,
-    const Mantid::API::MatrixWorkspace_sptr ws) {
-  m_model->addFocusedRun(runNumber, bank, ws);
+    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
+  m_model->addFocusedRun(runLabel, ws);
   m_view->updateRunList(m_model->getAllWorkspaceLabels());
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
 EnggDiffMultiRunFittingWidgetPresenter::getFittedPeaks(
-    const int runNumber, const size_t bank) const {
-  return m_model->getFittedPeaks(runNumber, bank);
+    const RunLabel &runLabel) const {
+  return m_model->getFittedPeaks(runLabel);
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
-EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(const int runNumber,
-                                                      const size_t bank) const {
-  return m_model->getFocusedRun(runNumber, bank);
+EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(
+    const RunLabel &runLabel) const {
+  return m_model->getFocusedRun(runLabel);
 }
 
 } // namespace CustomInterfaces

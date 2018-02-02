@@ -25,19 +25,17 @@ namespace CustomInterfaces {
 namespace {
 Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 
-std::pair<int, size_t>
-runAndBankNumberFromListWidgetLabel(const std::string &listLabel) {
+RunLabel runLabelFromListWidgetLabel(const std::string &listLabel) {
   const size_t underscorePosition = listLabel.find_first_of("_");
   const auto runNumber = listLabel.substr(0, underscorePosition);
   const auto bank = listLabel.substr(underscorePosition + 1);
 
-  return std::pair<int, size_t>(std::atoi(runNumber.c_str()),
-                                std::atoi(bank.c_str()));
+  return RunLabel(std::atoi(runNumber.c_str()), std::atoi(bank.c_str()));
 }
 
-std::string listWidgetLabelFromRunAndBankNumber(const int runNumber,
-                                                const size_t bank) {
-  return std::to_string(runNumber) + "_" + std::to_string(bank);
+std::string listWidgetLabelFromRunLabel(const RunLabel &runLabel) {
+  return std::to_string(runLabel.runNumber) + "_" +
+         std::to_string(runLabel.bank);
 }
 
 // Remove commas at the start and end of the string,
@@ -199,13 +197,12 @@ EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) {
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
-    const std::vector<std::pair<int, size_t>> &runNumberBankPairs,
-    const std::string &expectedPeaks) {
+    const std::vector<RunLabel> &runLabels, const std::string &expectedPeaks) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffFittingWorker *worker =
-      new EnggDiffFittingWorker(this, runNumberBankPairs, expectedPeaks);
+      new EnggDiffFittingWorker(this, runLabels, expectedPeaks);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
@@ -313,13 +310,12 @@ void EnggDiffFittingPresenter::processLoad() {
     return;
   }
 
-  const auto runNoBankPairs = m_model->getRunNumbersAndBankIDs();
+  const auto runLabels = m_model->getRunLabels();
   std::vector<std::string> listWidgetLabels;
-  std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
+  std::transform(runLabels.begin(), runLabels.end(),
                  std::back_inserter(listWidgetLabels),
-                 [](const std::pair<int, size_t> &pair) {
-                   return listWidgetLabelFromRunAndBankNumber(pair.first,
-                                                              pair.second);
+                 [](const RunLabel &runLabel) {
+                   return listWidgetLabelFromRunLabel(runLabel);
                  });
   m_view->enableFittingListWidget(true);
   m_view->updateFittingListWidget(listWidgetLabels);
@@ -346,19 +342,15 @@ void EnggDiffFittingPresenter::processRemoveRun() {
   const auto workspaceLabel = m_view->getFittingListWidgetCurrentValue();
 
   if (workspaceLabel) {
-    const auto runBankPair =
-        runAndBankNumberFromListWidgetLabel(*workspaceLabel);
-    const auto bank = runBankPair.first;
-    const auto runNumber = runBankPair.second;
-    m_model->removeRun(bank, runNumber);
+    const auto runLabel = runLabelFromListWidgetLabel(*workspaceLabel);
+    m_model->removeRun(runLabel);
 
-    const auto runNoBankPairs = m_model->getRunNumbersAndBankIDs();
+    const auto runLabels = m_model->getRunLabels();
     std::vector<std::string> listWidgetLabels;
-    std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
+    std::transform(runLabels.begin(), runLabels.end(),
                    std::back_inserter(listWidgetLabels),
-                   [](const std::pair<int, size_t> &pair) {
-                     return listWidgetLabelFromRunAndBankNumber(pair.first,
-                                                                pair.second);
+                   [](const RunLabel &runLabel) {
+                     return listWidgetLabelFromRunLabel(runLabel);
                    });
     m_view->updateFittingListWidget(listWidgetLabels);
   } else {
@@ -375,21 +367,18 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
   m_view->setPeakList(normalisedPeakCentres);
 
-  const auto workspaceLabels = m_model->getRunNumbersAndBankIDs();
+  const auto runLabels = m_model->getRunLabels();
 
   g_log.debug() << "Focused files found are: " << normalisedPeakCentres << '\n';
-  for (const auto &workspaceLabel : workspaceLabels) {
-    g_log.debug() << listWidgetLabelFromRunAndBankNumber(
-                         workspaceLabel.first, workspaceLabel.second) << '\n';
+  for (const auto &runLabel : runLabels) {
+    g_log.debug() << listWidgetLabelFromRunLabel(runLabel) << '\n';
   }
 
-  if (!workspaceLabels.empty()) {
+  if (!runLabels.empty()) {
 
-    for (const auto &workspaceLabel : workspaceLabels) {
-      const int runNumber = workspaceLabel.first;
-      const size_t bank = workspaceLabel.second;
+    for (const auto &runLabel : runLabels) {
       try {
-        validateFittingInputs(m_model->getWorkspaceFilename(runNumber, bank),
+        validateFittingInputs(m_model->getWorkspaceFilename(runLabel),
                               normalisedPeakCentres);
       } catch (std::invalid_argument &ia) {
         m_view->userWarning("Error in the inputs required for fitting",
@@ -406,7 +395,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
     m_view->enableCalibrateFocusFitUserActions(false);
     m_view->enableFitAllButton(false);
 
-    startAsyncFittingWorker(workspaceLabels, normalisedPeakCentres);
+    startAsyncFittingWorker(runLabels, normalisedPeakCentres);
   } else {
     m_view->userWarning("Error in the inputs required for fitting",
                         "No runs were loaded for fitting");
@@ -422,9 +411,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
     return;
   }
 
-  int runNumber;
-  size_t bank;
-  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
+  const auto runLabel = runLabelFromListWidgetLabel(*listLabel);
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
@@ -432,7 +419,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
 
   g_log.debug() << "the expected peaks are: " << normalisedPeakCentres << '\n';
 
-  const auto filename = m_model->getWorkspaceFilename(runNumber, bank);
+  const auto filename = m_model->getWorkspaceFilename(runLabel);
   try {
     validateFittingInputs(filename, normalisedPeakCentres);
   } catch (std::invalid_argument &ia) {
@@ -453,8 +440,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   // disable GUI to avoid any double threads
   m_view->enableCalibrateFocusFitUserActions(false);
 
-  startAsyncFittingWorker({std::make_pair(runNumber, bank)},
-                          normalisedPeakCentres);
+  startAsyncFittingWorker({runLabel}, normalisedPeakCentres);
 }
 
 void EnggDiffFittingPresenter::validateFittingInputs(
@@ -485,10 +471,10 @@ void EnggDiffFittingPresenter::validateFittingInputs(
   }
 }
 
-void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
+void EnggDiffFittingPresenter::doFitting(const RunLabel &runLabel,
                                          const std::string &expectedPeaks) {
   g_log.notice() << "EnggDiffraction GUI: starting new fitting with run "
-                 << runNumber << " and bank " << bank
+                 << runLabel.runNumber << " and bank " << runLabel.bank
                  << ". This may take a few seconds... \n";
 
   m_fittingFinishedOK = false;
@@ -496,12 +482,12 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
   // load the focused workspace file to perform single peak fits
 
   // apply calibration to the focused workspace
-  m_model->setDifcTzero(runNumber, bank, currentCalibration());
+  m_model->setDifcTzero(runLabel, currentCalibration());
 
   // run the algorithm EnggFitPeaks with workspace loaded above
   // requires unit in Time of Flight
   try {
-    m_model->enggFitPeaks(runNumber, bank, expectedPeaks);
+    m_model->enggFitPeaks(runLabel, expectedPeaks);
   } catch (const std::runtime_error &exc) {
     g_log.error() << "Could not run the algorithm EnggFitPeaks successfully."
                   << exc.what();
@@ -511,13 +497,13 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
   }
 
   const auto outFilename = m_view->getCurrentInstrument() +
-                           std::to_string(runNumber) +
+                           std::to_string(runLabel.runNumber) +
                            "_Single_Peak_Fitting.csv";
   auto saveDirectory = outFilesUserDir("SinglePeakFitting");
   saveDirectory.append(outFilename);
-  m_model->saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
+  m_model->saveDiffFittingAscii(runLabel, saveDirectory.toString());
 
-  m_model->createFittedPeaksWS(runNumber, bank);
+  m_model->createFittedPeaksWS(runLabel);
   m_fittingFinishedOK = true;
 }
 
@@ -639,11 +625,9 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
 void EnggDiffFittingPresenter::updatePlot() {
   const auto listLabel = m_view->getFittingListWidgetCurrentValue();
   if (listLabel) {
-    int runNumber;
-    size_t bank;
-    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
+    const auto runLabel = runLabelFromListWidgetLabel(*listLabel);
 
-    const bool fitResultsExist = m_model->hasFittedPeaksForRun(runNumber, bank);
+    const bool fitResultsExist = m_model->hasFittedPeaksForRun(runLabel);
     const bool plotFittedPeaksEnabled = m_view->plotFittedPeaksEnabled();
 
     if (fitResultsExist) {
@@ -655,7 +639,7 @@ void EnggDiffFittingPresenter::updatePlot() {
                             "generated by a fit. Plotting focused workspace "
                             "instead.");
       }
-      const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
+      const auto ws = m_model->getFocusedWorkspace(runLabel);
       plotFocusedFile(false, ws);
     }
   }
@@ -721,17 +705,16 @@ void EnggDiffFittingPresenter::plotAlignedWorkspace(
                           "Tried to plot a focused file which does not exist");
       return;
     }
-    int runNumber;
-    size_t bank;
-    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
-    const auto ws = m_model->getAlignedWorkspace(runNumber, bank);
+
+    const auto runLabel = runLabelFromListWidgetLabel(*listLabel);
+    const auto ws = m_model->getAlignedWorkspace(runLabel);
 
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 
     if (plotFittedPeaks) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
-      auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
+      auto singlePeaksWS = m_model->getFittedPeaksWS(runLabel);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false, true,
                             generateXAxisLabel(ws->getAxis(0)->unit()));

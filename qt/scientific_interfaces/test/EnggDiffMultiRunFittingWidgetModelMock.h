@@ -6,29 +6,30 @@
 
 #include <gmock/gmock.h>
 
+using namespace MantidQt::CustomInterfaces;
+
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockEnggDiffMultiRunFittingWidgetModel
-    : public MantidQt::CustomInterfaces::IEnggDiffMultiRunFittingWidgetModel {
+    : public IEnggDiffMultiRunFittingWidgetModel {
 
 public:
-  MOCK_METHOD3(addFittedPeaks,
-               void(const int runNumber, const size_t bank,
+  MOCK_METHOD2(addFittedPeaks,
+               void(const RunLabel &runLabel,
                     const Mantid::API::MatrixWorkspace_sptr ws));
 
-  MOCK_METHOD3(addFocusedRun, void(const int runNumber, const size_t bank,
+  MOCK_METHOD2(addFocusedRun, void(const RunLabel &runLabel,
                                    const Mantid::API::MatrixWorkspace_sptr ws));
 
-  MOCK_CONST_METHOD0(getAllWorkspaceLabels,
-                     std::vector<std::pair<int, size_t>>());
+  MOCK_CONST_METHOD0(getAllWorkspaceLabels, std::vector<RunLabel>());
 
-  MOCK_CONST_METHOD2(getFittedPeaks,
+  MOCK_CONST_METHOD1(getFittedPeaks,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
-                         const int runNumber, const size_t bank));
+                         const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD2(getFocusedRun,
+  MOCK_CONST_METHOD1(getFocusedRun,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
-                         const int runNumber, const size_t bank));
+                         const RunLabel &runLabel));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
