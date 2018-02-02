@@ -452,6 +452,7 @@ Set the strategy used for generating hints for the autocompletion in the options
 column.
 @param hintStrategy : The hinting strategy to use
 @param column : The index of the 'Options' column
+@param manager : A pointer to the model manager
 */
 void QDataProcessorWidget::setOptionsHintStrategy(
     MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column,

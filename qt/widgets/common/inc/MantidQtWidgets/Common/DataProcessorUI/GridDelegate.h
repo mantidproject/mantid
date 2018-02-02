@@ -12,7 +12,7 @@ public:
       : QStyledItemDelegate(parent), m_model(model){};
 
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
-             const QModelIndex &index) const {
+             const QModelIndex &index) const override{
     painter->save();
     painter->setPen(QColor(Qt::black));
     if (m_model->isProcessed(index.row(), index.parent().row())) {
