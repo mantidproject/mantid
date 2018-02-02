@@ -114,7 +114,7 @@ void EnggDiffMultiRunFittingQtWidget::setupUI() {
 
   connect(m_ui.listWidget_runLabels, SIGNAL(itemSelectionChanged()), this,
           SLOT(processSelectRun()));
-  connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged()), this,
+  connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged(int)), this,
           SLOT(plotFittedPeaksStateChanged()));
 }
 
