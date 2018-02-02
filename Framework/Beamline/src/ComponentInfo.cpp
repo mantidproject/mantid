@@ -7,7 +7,6 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
-#include <vector>
 
 namespace Mantid {
 namespace Beamline {
@@ -40,7 +39,9 @@ ComponentInfo::ComponentInfo(
         componentRanges,
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-    boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
+    boost::shared_ptr<std::vector<Eigen::Quaterniond,
+                                  Eigen::aligned_allocator<Eigen::Quaterniond>>>
+        rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     boost::shared_ptr<std::vector<ComponentType>> componentType,
     boost::shared_ptr<const std::vector<std::string>> names,
@@ -264,18 +265,16 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index,
   auto transform = Eigen::Matrix3d(rotDelta);
 
   for (const auto &subDetIndex : detectorRange) {
-    auto newPos =
-        transform *
-            (m_detectorInfo->position({subDetIndex, timeIndex}) - compPos) +
-        compPos;
+    auto oldPos = m_detectorInfo->position({subDetIndex, timeIndex});
+    auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * m_detectorInfo->rotation({subDetIndex, timeIndex});
     m_detectorInfo->setPosition({subDetIndex, timeIndex}, newPos);
     m_detectorInfo->setRotation({subDetIndex, timeIndex}, newRot);
   }
 
   for (const auto &subCompIndex : componentRangeInSubtree(componentIndex)) {
-    auto newPos =
-        transform * (position({subCompIndex, timeIndex}) - compPos) + compPos;
+    auto oldPos = position({subCompIndex, timeIndex});
+    auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * rotation({subCompIndex, timeIndex});
     const size_t childCompIndexOffset = compOffsetIndex(subCompIndex);
     m_positions.access()[linearIndex({childCompIndexOffset, timeIndex})] =
