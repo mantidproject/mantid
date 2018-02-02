@@ -533,7 +533,7 @@ class CrystalFieldMultiSite(object):
     @ResolutionModel.setter
     def ResolutionModel(self, value):
         from .function import ResolutionModel
-        if isinstance(value, ResolutionModel):
+        if hasattr(value, 'model'):
             self._resolutionModel = value
         else:
             self._resolutionModel = ResolutionModel(value)
