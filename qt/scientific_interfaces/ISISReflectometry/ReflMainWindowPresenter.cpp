@@ -4,7 +4,6 @@
 #include "IReflEventTabPresenter.h"
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
-#include <iostream>
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
@@ -42,7 +41,6 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
 void ReflMainWindowPresenter::notifyReductionPaused(int group) {
-  std::cout << "Paused Reached Main Presenter" << std::endl;
   m_isProcessing = false;
   m_savePresenter->onAnyReductionPaused();
   m_settingsPresenter->onReductionPaused(group);
@@ -50,7 +48,6 @@ void ReflMainWindowPresenter::notifyReductionPaused(int group) {
 }
 
 void ReflMainWindowPresenter::notifyReductionResumed(int group) {
-  std::cout << "Reduce Reached Main Presenter" << std::endl;
   m_isProcessing = true;
   m_savePresenter->onAnyReductionResumed();
   m_settingsPresenter->onReductionResumed(group);

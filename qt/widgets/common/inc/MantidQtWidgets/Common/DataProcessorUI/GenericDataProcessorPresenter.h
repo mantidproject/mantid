@@ -107,13 +107,15 @@ public:
   GenericDataProcessorPresenter(
       WhiteList whitelist,
       std::map<QString, PreprocessingAlgorithm> preprocessMap,
-      ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor, int group,
+      ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
+      int group,
       std::map<QString, QString> postprocessMap = std::map<QString, QString>(),
       QString loader = "Load");
   // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
                                 ProcessingAlgorithm processor,
-                                PostprocessingAlgorithm postprocessor, int group);
+                                PostprocessingAlgorithm postprocessor,
+                                int group);
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       WhiteList whitelist,

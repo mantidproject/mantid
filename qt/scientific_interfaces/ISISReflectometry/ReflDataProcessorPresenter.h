@@ -47,8 +47,7 @@ public:
       const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
       const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
-      int group,
+      const PostprocessingAlgorithm &postprocessor, int group,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load");

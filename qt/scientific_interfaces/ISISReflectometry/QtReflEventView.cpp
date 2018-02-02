@@ -59,7 +59,7 @@ void QtReflEventView::enableAll() {
   m_ui.uniformEdit->setEnabled(true);
   m_ui.logValueEdit->setEnabled(true);
   m_ui.logValueTypeEdit->setEnabled(true);
-  for(auto* button : m_buttonList)
+  for (auto *button : m_buttonList)
     button->setEnabled(true);
 }
 
@@ -68,7 +68,7 @@ void QtReflEventView::disableAll() {
   m_ui.uniformEdit->setEnabled(false);
   m_ui.logValueEdit->setEnabled(false);
   m_ui.logValueTypeEdit->setEnabled(false);
-  for(auto* button : m_buttonList)
+  for (auto *button : m_buttonList)
     button->setEnabled(false);
 }
 

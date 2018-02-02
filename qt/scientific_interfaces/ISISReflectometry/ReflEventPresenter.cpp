@@ -32,12 +32,8 @@ std::string ReflEventPresenter::getTimeSlicingType() const {
   return m_view->getTimeSlicingType();
 }
 
-void ReflEventPresenter::onReductionPaused() {
-  m_view->enableAll();
-}
+void ReflEventPresenter::onReductionPaused() { m_view->enableAll(); }
 
-void ReflEventPresenter::onReductionResumed() {
-  m_view->disableAll();
-}
+void ReflEventPresenter::onReductionResumed() { m_view->disableAll(); }
 }
 }

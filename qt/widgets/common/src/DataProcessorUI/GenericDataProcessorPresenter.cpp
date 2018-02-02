@@ -152,7 +152,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
           std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
           std::move(processor), std::move(postprocessor), group) {}
 
-/**const
+/**
  * Delegating constructor (only whitelist specified)
  * @param whitelist : The set of properties we want to show as columns
  */
