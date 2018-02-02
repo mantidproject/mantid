@@ -91,7 +91,7 @@ private:
   /// Cache number of fitted peaks
   // mutable std::vector<size_t> m_nPeaks;
   /// Cache the list of "spectra" corresponding to physical properties
-  std::vector<int> m_physprops;
+  //std::vector<int> m_physprops;
   /// Caches of the width functions
   std::vector<std::vector<double>> m_fwhmX;
   std::vector<std::vector<double>> m_fwhmY;

@@ -60,7 +60,7 @@ void CrystalFieldControl::setAttribute(const std::string &name,
       if (m_FWHMs.size() == 1 && m_FWHMs.size() != nSpec) {
         m_FWHMs.assign(nSpec, m_FWHMs.front());
       }
-      if (attr.asVector().size() > 0) {
+      if (!m_FWHMs.empty()) {
         m_fwhmX.resize(nSpec);
         m_fwhmY.resize(nSpec);
         for (size_t i = 0; i < nSpec; ++i) {
@@ -78,7 +78,7 @@ void CrystalFieldControl::setAttribute(const std::string &name,
       }
     } else if ((name.compare(0, 5, "FWHMX") == 0 ||
                 name.compare(0, 5, "FWHMY") == 0) &&
-               attr.asVector().size() > 0) {
+               !attr.asVector().empty()) {
       m_FWHMs.clear();
     }
     API::IFunction::setAttribute(name, attr);
