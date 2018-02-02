@@ -615,9 +615,8 @@ public:
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel))
         .Times(1)
         .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
-    EXPECT_CALL(mockView,
-                setDataVector(testing::_, testing::_, testing::_, testing::_))
-        .Times(2);
+    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
+                                        testing::_)).Times(2);
 
     pres.notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
     TSM_ASSERT(
@@ -648,9 +647,8 @@ public:
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel)).Times(0);
-    EXPECT_CALL(mockView,
-                setDataVector(testing::_, testing::_, testing::_, testing::_))
-        .Times(1);
+    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
+                                        testing::_)).Times(1);
     EXPECT_CALL(mockView, userWarning("Cannot plot fitted peaks", testing::_))
         .Times(1);
 
@@ -683,9 +681,8 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel)).Times(0);
-    EXPECT_CALL(mockView,
-                setDataVector(testing::_, testing::_, testing::_, testing::_))
-        .Times(1);
+    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
+                                        testing::_)).Times(1);
 
     pres.notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
     TSM_ASSERT(
