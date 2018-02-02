@@ -158,7 +158,6 @@ set (QWT_MOC_FILES
 
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
-  QT_VERSION 4
   SRC ${SRC_FILES} ${QWT_SRC_FILES}
   MOC ${MOC_FILES} ${QWT_MOC_FILES}
   NOMOC ${INC_FILES}
@@ -177,8 +176,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     ${OPENGL_LIBRARIES}
   QT4_LINK_LIBS
     Qt4::QtOpenGL
-  #QT5_LINK_LIBS
-  #  Qt5::OpenGL
+  QT5_LINK_LIBS
+    Qt5::OpenGL
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsMplCpp

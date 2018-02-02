@@ -5,6 +5,8 @@
 
 #include <array>
 
+#include "MantidQtWidgets/Common/QtCompat.h"
+
 namespace {
 
 /// Active curve format

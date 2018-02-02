@@ -20,6 +20,8 @@
 #include <QWidget>
 #include <tuple>
 
+#include "MantidQtWidgets/Common/QtCompat.h"
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {

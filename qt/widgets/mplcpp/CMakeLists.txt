@@ -38,11 +38,9 @@ set (NOMOC_HEADERS
 
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
-  QT_VERSION 4
   SRC ${LIB_SRCS}
   MOC ${MOC_HEADERS}
   NOMOC ${NOMOC_HEADERS}
-  #UI ${UI_FILES}
   DEFS
     IN_MANTIDQT_MPLCPP
   INCLUDE_DIRS
@@ -57,10 +55,6 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
     ${OPENGL_LIBRARIES}
-  #QT4_LINK_LIBS
-  #  Qt4::QtOpenGL
-  #  Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-    #MantidQtWidgetsLegacyQwt
 )

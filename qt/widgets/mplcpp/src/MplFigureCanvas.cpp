@@ -3,6 +3,7 @@
 #include "MantidQtWidgets/MplCpp/PythonErrors.h"
 #include "MantidQtWidgets/MplCpp/SipUtils.h"
 #include "MantidQtWidgets/Common/PythonThreading.h"
+#include "MantidQtWidgets/Common/QtCompat.h"
 
 #include <QMouseEvent>
 #include <QVBoxLayout>

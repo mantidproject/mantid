@@ -9,6 +9,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
 
+class QWidget;
+
 /**
    The class inherits from QwtColorMap and implements reading a color color map
    from a file.

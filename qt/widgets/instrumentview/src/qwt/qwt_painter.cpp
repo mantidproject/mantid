@@ -32,6 +32,8 @@
 #include "qwt_scale_map.h"
 #include "qwt_painter.h"
 
+#include "MantidQtWidgets/Common/QtCompat.h"
+
 QwtMetricsMap QwtPainter::d_metricsMap;
 
 #if defined(Q_WS_X11)
