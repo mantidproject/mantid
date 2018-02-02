@@ -36,24 +36,26 @@ public:
       const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &preprocessingStep,
       const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
+      const PostprocessingAlgorithm &postprocessor, int group,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load")
       : GenericDataProcessorPresenter(whitelist, std::move(preprocessingStep),
-                                      processor, postprocessor, postprocessMap,
-                                      loader) {}
+                                      processor, postprocessor, group,
+                                      postprocessMap, loader) {}
 
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterFriend(
       const WhiteList &whitelist, const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor)
-      : GenericDataProcessorPresenter(whitelist, processor, postprocessor) {}
+      const PostprocessingAlgorithm &postprocessor, int group)
+      : GenericDataProcessorPresenter(whitelist, processor, postprocessor,
+                                      group) {}
 
   // Delegating constructor (no pre- or post-processing required)
   GenericDataProcessorPresenterFriend(const WhiteList &whitelist,
-                                      const ProcessingAlgorithm &processor)
-      : GenericDataProcessorPresenter(whitelist, processor) {}
+                                      const ProcessingAlgorithm &processor,
+                                      int group)
+      : GenericDataProcessorPresenter(whitelist, processor, group) {}
 
   // Destructor
   ~GenericDataProcessorPresenterFriend() override {}
@@ -70,19 +72,20 @@ public:
       const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &preprocessingStep,
       const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
+      const PostprocessingAlgorithm &postprocessor, int group,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load")
       : GenericDataProcessorPresenter(whitelist, std::move(preprocessingStep),
-                                      processor, postprocessor, postprocessMap,
-                                      loader) {}
+                                      processor, postprocessor, group,
+                                      postprocessMap, loader) {}
 
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterNoThread(
       const WhiteList &whitelist, const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor)
-      : GenericDataProcessorPresenter(whitelist, processor, postprocessor) {}
+      const PostprocessingAlgorithm &postprocessor, int group)
+      : GenericDataProcessorPresenter(whitelist, processor, postprocessor,
+                                      group) {}
 
   // Destructor
   ~GenericDataProcessorPresenterNoThread() override {}
@@ -403,14 +406,16 @@ private:
   std::unique_ptr<GenericDataProcessorPresenterFriend> makeDefaultPresenter() {
     return Mantid::Kernel::make_unique<GenericDataProcessorPresenterFriend>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
+        createReflectometryProcessor(), createReflectometryPostprocessor(),
+        DEFAULT_GROUP_NUMBER);
   }
 
   std::unique_ptr<GenericDataProcessorPresenterNoThread>
   makeDefaultPresenterNoThread() {
     return Mantid::Kernel::make_unique<GenericDataProcessorPresenterNoThread>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
+        createReflectometryProcessor(), createReflectometryPostprocessor(),
+        DEFAULT_GROUP_NUMBER);
   }
 
   // Expect the view's widgets to be set in a particular state according to
@@ -2919,6 +2924,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 
+  static auto constexpr DEFAULT_GROUP_NUMBER = 1;
   /// Tests the reduction when no pre-processing algorithms are given
 
   void testProcessNoPreProcessing() {
@@ -2934,7 +2940,7 @@ public:
 
     GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryProcessor(),
-        createReflectometryPostprocessor());
+        createReflectometryPostprocessor(), DEFAULT_GROUP_NUMBER);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
@@ -3060,7 +3066,8 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
     GenericDataProcessorPresenterFriend presenter(
-        createReflectometryWhiteList(), createReflectometryProcessor());
+        createReflectometryWhiteList(), createReflectometryProcessor(),
+        DEFAULT_GROUP_NUMBER);
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
     // Calls that should throw
@@ -3088,7 +3095,7 @@ public:
     GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
-        postprocesssMap);
+        DEFAULT_GROUP_NUMBER, postprocesssMap);
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     presenter.accept(&mockMainPresenter);
 
@@ -3161,7 +3168,8 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
     GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
-                                            createReflectometryProcessor());
+                                            createReflectometryProcessor(),
+                                            DEFAULT_GROUP_NUMBER);
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
     EXPECT_CALL(mockDataProcessorView,
