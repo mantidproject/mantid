@@ -50,7 +50,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(runMap.remove(polly));
     TS_ASSERT(!runMap.contains(polly));
 
-    const RunLabel invalid(456, 2);
+    const RunLabel invalid(123, 4);
     TS_ASSERT_THROWS(runMap.remove(invalid), std::invalid_argument);
   }
 
