@@ -360,9 +360,7 @@ public:
 
     auto GROUP_NUMBER = 0;
     // Expect that the main presenter is notified that data reduction is resumed
-    EXPECT_CALL(
-        mockMainPresenter,
-        notifyReductionResumed(GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter, notifyReductionResumed(GROUP_NUMBER))
         .Times(Exactly(1));
 
     presenter.confirmReductionResumed(GROUP_NUMBER);
