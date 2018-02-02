@@ -19,7 +19,7 @@ Features Removed
 
 Small Angle Scattering
 ----------------------
-
+- Grid lines are now displayed in ISIS SANS V2
 - Added the option to hide the period selection columns in the SANS GUI V2
 - BeamCentreFinder has been implemented to work with the new backend in the python script window.
 - Added functionality to specify q values between which merged data is used and outside of which pure HAB and LAB are used.
