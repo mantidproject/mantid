@@ -46,6 +46,8 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRe
 
     rwp = None
     gof = None
+    sigma = None
+    gamma = None
     gsas_proj_path = None
     _REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksRietveldFitParams.nxs"
     _GSAS_PROJ_FILE_NAME = "GSASIIRefineFitPeaksRietveldTest.gpx"
@@ -57,21 +59,25 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRe
         self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
         input_ws = Load(Filename=self.input_ws_path())
 
-        self.gof, self.rwp, _ = GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
-                                                     InputWorkspace=input_ws,
-                                                     PhaseInfoFile=self.phase_file_path(),
-                                                     InstrumentFile=self.inst_param_file_path(),
-                                                     PathToGSASII=self.path_to_gsas(),
-                                                     SaveGSASIIProjectFile=self.gsas_proj_path,
-                                                     MuteGSASII=True,
-                                                     LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
+        self.gof, self.rwp, self.sigma, self.gamma, _ = \
+            GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
+                                 InputWorkspace=input_ws,
+                                 PhaseInfoFile=self.phase_file_path(),
+                                 InstrumentFile=self.inst_param_file_path(),
+                                 PathToGSASII=self.path_to_gsas(),
+                                 SaveGSASIIProjectFile=self.gsas_proj_path,
+                                 MuteGSASII=True,
+                                 LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
+                                 RefineGamma=True, RefineSigma=True)
 
     def skipTests(self):
         return not self.path_to_gsas()
 
     def validate(self):
-        self.assertAlmostEqual(self.gof, 3.57776, delta=1e-6)
-        self.assertAlmostEqual(self.rwp, 77.754994, delta=1e-6)
+        self.assertAlmostEqual(self.gof, 3.577591, delta=1e-6)
+        self.assertAlmostEqual(self.rwp, 77.755127, delta=1e-6)
+        self.assertAlmostEqual(self.sigma, 854.803116, delta=1e-6)
+        self.assertAlmostEqual(self.gamma, -72.871060, delta=1e-6)
         return self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._REFERENCE_FILE_NAME)
 
     def cleanup(self):
