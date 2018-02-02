@@ -71,6 +71,9 @@ public:
    */
   virtual void
   notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) = 0;
+
+  /// Get whether the user has selected to show fit results
+  virtual bool showFitResultsSelected() const = 0;
 };
 
 } // namespace CustomInterfaces

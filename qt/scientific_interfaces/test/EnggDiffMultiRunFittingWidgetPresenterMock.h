@@ -37,6 +37,8 @@ public:
   MOCK_METHOD1(
       notify,
       void(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif));
+
+  MOCK_CONST_METHOD0(showFitResultsSelected, bool());
 };
 
 std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>

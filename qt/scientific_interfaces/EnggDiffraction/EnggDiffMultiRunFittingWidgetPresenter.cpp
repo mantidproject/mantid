@@ -115,6 +115,10 @@ void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {
   updatePlot(selectedRunLabel);
 }
 
+bool EnggDiffMultiRunFittingWidgetPresenter::showFitResultsSelected() const {
+  return m_view->showFitResultsSelected();
+}
+
 void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(
     const RunLabel &runLabel) {
   const auto focusedRun = m_model->getFocusedRun(runLabel);

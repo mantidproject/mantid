@@ -167,6 +167,74 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_selectValidRunFitResultsRequested() {
+    auto presenter = setUpPresenter();
+    const RunLabel runLabel(123, 1);
+
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+
+    const double rwp = 50;
+    EXPECT_CALL(*m_mockModelPtr, getRwp(runLabel))
+        .Times(1)
+        .WillOnce(Return(rwp));
+
+    const auto latticeParams =
+        Mantid::API::WorkspaceFactory::Instance().createTable();
+    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
+        .Times(1)
+        .WillOnce(Return(latticeParams));
+
+    EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, displayRwp(rwp)).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, displayLatticeParams(latticeParams)).Times(1);
+
+    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_selectRunInvalid() {
+    auto presenter = setUpPresenter();
+    const RunLabel runLabel(123, 1);
+
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+
+    EXPECT_CALL(*m_mockModelPtr, getRwp(runLabel))
+        .Times(1)
+        .WillOnce(Return(50));
+    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
+        .Times(1)
+        .WillOnce(Return(boost::none));
+
+    EXPECT_CALL(*m_mockViewPtr, userError("Invalid run label",
+                                          "Tried to display fit results "
+                                          "for run number 123 and bank ID 1. "
+                                          "Please contact the development "
+                                          "team with this message"));
+
+    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_selectRunFitResultsNotRequested() {
+    auto presenter = setUpPresenter();
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel()).Times(0);
+    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    assertMocksUsedCorrectly();
+  }
+
 private:
   MockEnggDiffGSASFittingModel *m_mockModelPtr;
   MockEnggDiffGSASFittingView *m_mockViewPtr;

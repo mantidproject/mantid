@@ -14,6 +14,8 @@ public:
   enum Notification {
     DoRefinement, ///< Perform a GSAS refinement on a run
     LoadRun,      ///< Load a focused run
+    SelectRun,    ///< The user has selected a different run in the multi-run
+                  /// widget
     ShutDown,     ///< Shut down the interface
     Start,        ///< Start and setup the interface
   };

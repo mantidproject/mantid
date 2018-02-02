@@ -77,6 +77,7 @@ void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
 }
 
 void EnggDiffMultiRunFittingQtWidget::processSelectRun() {
+  emit runSelected();
   m_presenter->notify(
       IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
 }

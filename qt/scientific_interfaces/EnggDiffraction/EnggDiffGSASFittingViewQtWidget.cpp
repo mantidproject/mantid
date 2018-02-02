@@ -15,17 +15,17 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider)
     : m_userMessageProvider(userMessageProvider) {
-  setupUI();
 
   auto multiRunWidgetModel =
       Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetModel>();
-  auto multiRunWidgetView =
-      boost::make_shared<EnggDiffMultiRunFittingQtWidget>();
+  m_multiRunWidgetView = boost::make_shared<EnggDiffMultiRunFittingQtWidget>();
   auto multiRunWidgetPresenter =
       boost::make_shared<EnggDiffMultiRunFittingWidgetPresenter>(
-          std::move(multiRunWidgetModel), multiRunWidgetView);
-  multiRunWidgetView->setPresenter(multiRunWidgetPresenter);
-  multiRunWidgetView->setMessageProvider(m_userMessageProvider);
+          std::move(multiRunWidgetModel), m_multiRunWidgetView);
+  m_multiRunWidgetView->setPresenter(multiRunWidgetPresenter);
+  m_multiRunWidgetView->setMessageProvider(m_userMessageProvider);
+
+  setupUI();
 
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
   m_presenter = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
@@ -105,6 +105,11 @@ void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
 }
 
+void EnggDiffGSASFittingViewQtWidget::selectRun() {
+  userWarning("EnggDiffGSASFittingViewQtWidget::selectRun", "");
+  m_presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+}
+
 void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
   m_ui.lineEdit_runFile->setEnabled(enabled);
   m_ui.pushButton_browseRunFile->setEnabled(enabled);
@@ -139,6 +144,9 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
           SLOT(browseFocusedRun()));
   connect(m_ui.pushButton_loadRun, SIGNAL(clicked()), this,
           SLOT(loadFocusedRun()));
+
+  connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
+          SLOT(selectRun()));
 }
 
 void EnggDiffGSASFittingViewQtWidget::userError(

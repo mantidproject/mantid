@@ -182,6 +182,13 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_showFitResultsSelected() {
+    auto presenter = setUpPresenter();
+    EXPECT_CALL(*m_mockView, showFitResultsSelected()).Times(1);
+    presenter->showFitResultsSelected();
+    assertMocksUsedCorrectly();
+  }
+
 private:
   MockEnggDiffMultiRunFittingWidgetModel *m_mockModel;
   MockEnggDiffMultiRunFittingWidgetView *m_mockView;

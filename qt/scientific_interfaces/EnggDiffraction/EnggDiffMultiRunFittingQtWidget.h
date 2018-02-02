@@ -51,6 +51,9 @@ public:
   void userError(const std::string &errorTitle,
                  const std::string &errorDescription) override;
 
+signals:
+  void runSelected();
+
 private slots:
   void processSelectRun();
 

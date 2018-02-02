@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEWQTWIDGET_H_
 
 #include "DllConfig.h"
+#include "EnggDiffMultiRunFittingQtWidget.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
 #include "IEnggDiffractionUserMsg.h"
@@ -60,8 +61,11 @@ public:
 private slots:
   void browseFocusedRun();
   void loadFocusedRun();
+  void selectRun();
 
 private:
+  boost::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
+
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
   Ui::EnggDiffractionQtTabGSAS m_ui;

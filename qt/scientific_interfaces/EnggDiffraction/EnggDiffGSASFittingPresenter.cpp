@@ -31,6 +31,10 @@ void EnggDiffGSASFittingPresenter::notify(
     processLoadRun();
     break;
 
+  case IEnggDiffGSASFittingPresenter::SelectRun:
+    processSelectRun();
+    break;
+
   case IEnggDiffGSASFittingPresenter::Start:
     processStart();
     break;
@@ -139,6 +143,26 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
     }
   } catch (const std::exception &ex) {
     m_view->userWarning("Could not load file", ex.what());
+  }
+}
+
+void EnggDiffGSASFittingPresenter::processSelectRun() {
+  if (m_multiRunWidget->showFitResultsSelected()) {
+    const auto runLabel = m_multiRunWidget->getSelectedRunLabel();
+    const auto rwp = m_model->getRwp(runLabel);
+    const auto latticeParams = m_model->getLatticeParams(runLabel);
+
+    if (!rwp || !latticeParams) {
+      m_view->userError(
+          "Invalid run label",
+          "Tried to display fit results for run number " +
+              std::to_string(runLabel.runNumber) + " and bank ID " +
+              std::to_string(runLabel.bank) +
+              ". Please contact the development team with this message");
+      return;
+    }
+    m_view->displayRwp(*rwp);
+    m_view->displayLatticeParams(*latticeParams);
   }
 }
 
