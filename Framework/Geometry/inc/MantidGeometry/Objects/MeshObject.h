@@ -34,7 +34,7 @@ class vtkGeometryCacheWriter;
 \brief Triangular Mesh Object
 \version 1.0
 \date Dec 2017
-\author S. Ansell
+\author Karl Palmen
 
 Mesh Object of Traingles
 
@@ -80,7 +80,7 @@ public:
     }
   }
 
-  void initialize(const std::vector<int> &faces,
+  void initialize(const std::vector<size_t> &faces,
                   const std::vector<Mantid::Kernel::V3D> &vertices);
 
   void setID(const std::string &id) override { m_id = id; }
@@ -202,7 +202,7 @@ private:
   boost::shared_ptr<vtkGeometryCacheWriter> m_vtk_cache_writer;
 
   /// Contents
-  std::vector<int> m_triangles;
+  std::vector<size_t> m_triangles;
   std::vector<Kernel::V3D> m_vertices;
 };
 

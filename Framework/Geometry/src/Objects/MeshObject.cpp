@@ -61,7 +61,7 @@ MeshObject::~MeshObject() = default;
  * as seen from outside.
  * @param vertices :: Vertex positions
  */
-void MeshObject::initialize(const std::vector<int> &faces,
+void MeshObject::initialize(const std::vector<size_t> &faces,
                             const std::vector<V3D> &vertices) {
   if (m_vertices.size() == 0) {
     m_vertices = vertices;
@@ -674,7 +674,7 @@ int *MeshObject::getTriangles() const {
   if (nFaceCorners > 0) {
     faces = new int[static_cast<std::size_t>(nFaceCorners)];
     for (size_t i = 0; i < nFaceCorners; ++i) {
-      faces[i] = m_triangles[i];
+      faces[i] = static_cast<int>(m_triangles[i]);
     }
   }
   return faces;

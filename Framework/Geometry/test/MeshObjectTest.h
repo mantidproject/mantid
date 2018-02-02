@@ -64,7 +64,7 @@ public:
     vertices.push_back(V3D(0, 1, 0));
     vertices.push_back(V3D(0, 0, 1));
 
-    std::vector<int> triangles;
+    std::vector<size_t> triangles;
     // face
     triangles.push_back(1);
     triangles.push_back(2);
@@ -824,7 +824,7 @@ private:
     vertices.push_back(centre + V3D(max, min, min));
     vertices.push_back(centre + V3D(min, min, min));
 
-    std::vector<int> triangles;
+    std::vector<size_t> triangles;
     // top face of cube - z max
     triangles.push_back(0);
     triangles.push_back(1);
@@ -897,7 +897,7 @@ private:
     vertices.push_back(V3D(0, -u, 0));
     vertices.push_back(V3D(0, 0, -u));
 
-    std::vector<int> triangles;
+    std::vector<size_t> triangles;
     // +++ face
     triangles.push_back(0);
     triangles.push_back(1);
@@ -957,7 +957,7 @@ private:
     vertices.push_back(V3D(1, 2, 1));
     vertices.push_back(V3D(0, 2, 1));
 
-    std::vector<int> triangles;
+    std::vector<size_t> triangles;
     // z min
     triangles.push_back(0);
     triangles.push_back(5);
