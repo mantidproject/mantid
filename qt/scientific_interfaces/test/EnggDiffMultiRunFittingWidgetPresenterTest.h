@@ -127,8 +127,7 @@ public:
                 userError("Invalid focused run identifier",
                           "Tried to access invalid run, run number 123 and "
                           "bank ID 1. Please contact the development team with "
-                          "this message"))
-        .Times(1);
+                          "this message")).Times(1);
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(0);
 
     presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);

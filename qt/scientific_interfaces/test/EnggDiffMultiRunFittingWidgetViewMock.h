@@ -27,7 +27,7 @@ public:
   MOCK_CONST_METHOD0(showFitResultsSelected, bool());
 
   MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
-  
+
   MOCK_METHOD2(userError, void(const std::string &errorTitle,
                                const std::string &errorDescription));
 };
