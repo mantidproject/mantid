@@ -110,6 +110,11 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
         if output_msg is not None:
             self.setProperty('OutputMessage', output_msg)
+            
+        # copy X Erros from output_ws to output_tof_ws
+        dx = output_ws.readDx(0)
+        for ws in output_tof_ws:
+            ws.setDx(0, dx)
 
         self.setProperty('OutputWorkspace', output_ws)
         self.setProperty('IQLambdaWorkspace', output_tof_ws)
@@ -228,7 +233,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         self.setProperty('OutputWorkspace', output_frame1)
         self.setProperty('IQLambdaWorkspace', ws_frame1+'_wl')
         self.setProperty('IQLambdaWorkspace', output_tof_frame1)
-
+        
         self.declareProperty(MatrixWorkspaceProperty('OutputFrame2', ws_frame2,
                                                      direction = Direction.Output))
         self.declareProperty(WorkspaceGroupProperty('OutputTOFFrame2', ws_frame2+'_wl',
@@ -236,6 +241,15 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         self.setProperty('OutputFrame2', output_frame2)
         self.setProperty('OutputTOFFrame2', output_tof_frame2)
 
+        # copy X Erros from output_ws to output_tof_ws
+        # TODO: Test this
+        dx = output_frame1.readDx(0)
+        for ws in output_tof_frame1:
+            ws.setDx(0, dx)
+        dx = output_frame2.readDx(0)
+        for ws in output_tof_frame2:
+            ws.setDx(0, dx)
+            
         self.setProperty('OutputMessage', 'Performed radial averaging for two frames')
 
     #pylint: disable=too-many-arguments

@@ -163,8 +163,10 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 x_bins[i] + (abs(x_bins[i] - x_bins[i + 1]) / 2.0)
                 for i in range(len(x_bins) - 1)
             ]
+
             # Values to np arrays
             x = np.array(x)
+            dx = ws.readDx(0)
             y = ws.readY(0)
             e = ws.readE(0)
             
@@ -173,6 +175,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
             d[name] = {
                 'x': x,
+                'dx': dx,
                 'y': y,
                 'e': e,
                 'f': interpolate.interp1d(x, y, kind='quadratic'),
@@ -216,12 +219,14 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
         for _, v in self.data.items():
             x = v['x']
+            dx = v['dx']
             y = v['y']
             e = v['e']
 
             #
             # Getting rid of values where y <= 0
             x_trimmed = x[y > 0]
+            dx_trimmed = dx[y > 0]
             e_trimmed = e[y > 0]
             y_trimmed = y[y > 0]
 
@@ -231,10 +236,12 @@ class SANSWLNormCorrection(PythonAlgorithm):
             # discard aditional points
             if self.discard_end_global > 0:
                 x_trimmed = x_trimmed[start_pos:-self.discard_end_global]
+                dx_trimmed = dx_trimmed[start_pos:-self.discard_end_global]
                 y_trimmed = y_trimmed[start_pos:-self.discard_end_global]
                 e_trimmed = e_trimmed[start_pos:-self.discard_end_global]
             else:
                 x_trimmed = x_trimmed[start_pos:]
+                dx_trimmed = dx_trimmed[start_pos:]
                 y_trimmed = y_trimmed[start_pos:]
                 e_trimmed = e_trimmed[start_pos:]
             #
@@ -242,12 +249,15 @@ class SANSWLNormCorrection(PythonAlgorithm):
             e_qrange = e[(x >= q_min) & (x <= q_max)]
             y_qrange = y[(x >= q_min) & (x <= q_max)]
             x_qrange = x[(x >= q_min) & (x <= q_max)]
+            dx_qrange = dx[(x >= q_min) & (x <= q_max)]
 
             v.update({
                 'x_qrange': x_qrange,
+                'dx_qrange': dx_qrange,
                 'y_qrange': y_qrange,
                 'e_qrange': e_qrange,
                 'x_trimmed': x_trimmed,
+                'dx_trimmed': dx_trimmed,
                 'y_trimmed': y_trimmed,
                 'e_trimmed': e_trimmed,
             })
@@ -388,6 +398,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 DataX=list(v['x' + suffix]),
                 DataY=list(v['y' + suffix + '_fit']),
                 UnitX="Q")
+            mtd[ws_name].setDx(0,v['dx' + suffix])  # add x error
             out_ws_list.append(ws_name)
         prefix = self.getProperty("OutputWorkspacePrefix").value
         GroupWorkspaces(
@@ -409,23 +420,31 @@ class SANSWLNormCorrection(PythonAlgorithm):
         (non negative and without the ends) and calculates de average in Y
         '''
         x = np.array([])
+        dx = np.array([])
         for _, v in self.data.items():
             x = np.append(x, v['x_trimmed'])
+            dx = np.append(dx, v['dx_trimmed'])
         x = np.unique(x)
+        dx = np.unique(dx)
+        
 
+        
         y = np.array([])
         for xi in x:
             yi = np.array([])
             for _, v in self.data.items():
                 yi = np.append(yi, v['y_trimmed_fit'][v['x_trimmed'] == xi])
             y = np.append(y, np.average(yi))
+            
+        out_ws_name = self.getProperty("OutputWorkspacePrefix").value + "_trimmed_fit_averaged"
 
         CreateWorkspace(
-            OutputWorkspace=self.getProperty("OutputWorkspacePrefix").value +
-            "_trimmed_fit_averaged",
+            OutputWorkspace=out_ws_name,
             DataX=list(x),
             DataY=list(y),
             UnitX="Q")
+        
+        mtd[out_ws_name].setDx(0,dx)  # add x error
 
     def _create_table_ws(self):
         '''
