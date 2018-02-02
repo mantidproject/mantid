@@ -112,7 +112,6 @@ public:
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
-  size_t numberOfDetectorsInSubtree(size_t componentIndex) const;
   QuadrilateralComponent
   quadrilateralComponent(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent *id) const;
