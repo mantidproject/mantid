@@ -60,13 +60,11 @@ public:
     assertMocksUsedCorrectly();
   }
 
-  void test_focusedRunIsAddedToModel() {
+  void test_addFocusedRun() {
     auto presenter = setUpPresenter();
     const API::MatrixWorkspace_sptr ws = createSampleWorkspace();
     addBankID(ws, 2);
     const RunLabel runLabel(0, 2);
-
-    EXPECT_CALL(*m_mockModel, addFocusedRun(runLabel, ws)).Times(1);
 
     const std::vector<RunLabel> workspaceLabels({runLabel});
     EXPECT_CALL(*m_mockModel, getAllWorkspaceLabels())
