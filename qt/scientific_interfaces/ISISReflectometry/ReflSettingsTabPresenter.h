@@ -49,8 +49,8 @@ public:
   void setInstrumentName(const std::string &instName) override;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void settingsChanged(int group) override;
-  void onReductionPaused() override;
-  void onReductionResumed() override;
+  void onReductionPaused(int group) override;
+  void onReductionResumed(int group) override;
   void
   passSelfToChildren(std::vector<IReflSettingsPresenter *> const &children);
 

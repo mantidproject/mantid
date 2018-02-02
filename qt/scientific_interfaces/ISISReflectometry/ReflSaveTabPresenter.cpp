@@ -41,9 +41,9 @@ void ReflSaveTabPresenter::acceptMainPresenter(
   m_mainPresenter = mainPresenter;
 }
 
-void ReflSaveTabPresenter::onReductionPaused() { populateWorkspaceList(); }
+void ReflSaveTabPresenter::onAnyReductionPaused() { populateWorkspaceList(); }
 
-void ReflSaveTabPresenter::onReductionResumed() {}
+void ReflSaveTabPresenter::onAnyReductionResumed() {}
 
 void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
   switch (flag) {

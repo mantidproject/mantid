@@ -52,8 +52,8 @@ public:
   virtual void setInstrumentName(const std::string &instName) = 0;
   virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
   virtual void settingsChanged(int group) = 0;
-  virtual void onReductionPaused() = 0;
-  virtual void onReductionResumed() = 0;
+  virtual void onReductionPaused(int group) = 0;
+  virtual void onReductionResumed(int group) = 0;
 };
 }
 }

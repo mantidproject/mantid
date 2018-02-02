@@ -52,7 +52,7 @@ void QtReflRunsTabView::initLayout() {
 
   QDataProcessorWidget *qDataProcessorWidget_1 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessor::DataProcessorPresenter>(
-          presenterFactory.create()),
+          presenterFactory.create(0)),
       this);
   ui.toolbox->addItem(qDataProcessorWidget_1, "Group 1");
   connect(qDataProcessorWidget_1,
@@ -61,7 +61,7 @@ void QtReflRunsTabView::initLayout() {
 
   QDataProcessorWidget *qDataProcessorWidget_2 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessor::DataProcessorPresenter>(
-          presenterFactory.create()),
+          presenterFactory.create(1)),
       this);
   ui.toolbox->addItem(qDataProcessorWidget_2, "Group 2");
   connect(qDataProcessorWidget_2,

@@ -48,8 +48,8 @@ public:
 
   /// Tell the presenter something happened
   virtual void notify(IReflSaveTabPresenter::Flag flag) = 0;
-  virtual void onReductionPaused() = 0;
-  virtual void onReductionResumed() = 0;
+  virtual void onAnyReductionPaused() = 0;
+  virtual void onAnyReductionResumed() = 0;
 };
 }
 }

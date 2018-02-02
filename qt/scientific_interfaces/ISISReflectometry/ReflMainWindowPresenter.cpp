@@ -41,33 +41,20 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
-/**
-Used by the view to tell the presenter something has changed
-*/
-void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
-
-  switch (flag) {
-  case Flag::ConfirmReductionPausedFlag:
-    onReductionPaused();
-    break;
-  case Flag::ConfirmReductionResumedFlag:
-    onReductionResumed();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
-}
-
-void ReflMainWindowPresenter::onReductionPaused() {
+void ReflMainWindowPresenter::notifyReductionPaused(int group) {
+  std::cout << "Paused Reached Main Presenter" << std::endl;
   m_isProcessing = false;
-  m_savePresenter->onReductionPaused();
-  m_settingsPresenter->onReductionPaused();
+  m_savePresenter->onAnyReductionPaused();
+  m_settingsPresenter->onReductionPaused(group);
+  m_eventPresenter->onReductionPaused(group);
 }
 
-void ReflMainWindowPresenter::onReductionResumed() {
+void ReflMainWindowPresenter::notifyReductionResumed(int group) {
+  std::cout << "Reduce Reached Main Presenter" << std::endl;
   m_isProcessing = true;
-  m_settingsPresenter->onReductionResumed();
-  m_savePresenter->onReductionResumed();
+  m_savePresenter->onAnyReductionResumed();
+  m_settingsPresenter->onReductionResumed(group);
+  m_eventPresenter->onReductionResumed(group);
 }
 
 void ReflMainWindowPresenter::settingsChanged(int group) {

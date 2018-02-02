@@ -84,7 +84,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
     ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
-    std::map<QString, QString> postprocessMap, QString loader)
+    int group, std::map<QString, QString> postprocessMap, QString loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(std::move(loader)),
       m_postprocessing(postprocessor.name().isEmpty()
@@ -92,11 +92,12 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                            : PostprocessingStep(QString(),
                                                 std::move(postprocessor),
                                                 std::move(postprocessMap))),
+
       m_preprocessing(ColumnOptionsMap(), std::move(preprocessMap)),
-      m_whitelist(std::move(whitelist)), m_processor(std::move(processor)),
-      m_progressReporter(nullptr), m_promptUser(true), m_tableDirty(false),
-      m_pauseReduction(false), m_reductionPaused(true),
-      m_nextActionFlag(ReductionFlag::StopReduceFlag) {
+      m_group(group), m_whitelist(std::move(whitelist)),
+      m_processor(std::move(processor)), m_progressReporter(nullptr),
+      m_promptUser(true), m_tableDirty(false), m_pauseReduction(false),
+      m_reductionPaused(true), m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -146,20 +147,20 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist, ProcessingAlgorithm processor,
-    PostprocessingAlgorithm postprocessor)
+    PostprocessingAlgorithm postprocessor, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
-          std::move(processor), std::move(postprocessor)) {}
+          std::move(processor), std::move(postprocessor), group) {}
 
-/**
+/**const
  * Delegating constructor (only whitelist specified)
  * @param whitelist : The set of properties we want to show as columns
  */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    WhiteList whitelist)
+    WhiteList whitelist, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
-          ProcessingAlgorithm(), PostprocessingAlgorithm()) {}
+          ProcessingAlgorithm(), PostprocessingAlgorithm(), group) {}
 
 /**
 * Delegating constructor (no post-processing needed)
@@ -171,10 +172,10 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
-    ProcessingAlgorithm processor)
+    ProcessingAlgorithm processor, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::move(preprocessMap), std::move(processor),
-          PostprocessingAlgorithm()) {}
+          PostprocessingAlgorithm(), group) {}
 
 /**
 * Delegating constructor (no pre-processing needed, no post-processing needed)
@@ -183,10 +184,10 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    WhiteList whitelist, ProcessingAlgorithm processor)
+    WhiteList whitelist, ProcessingAlgorithm processor, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
-          std::move(processor), PostprocessingAlgorithm()) {}
+          std::move(processor), PostprocessingAlgorithm(), group) {}
 
 /**
 * Destructor
@@ -386,7 +387,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
   if (m_pauseReduction) {
     // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused();
+    m_mainPresenter->confirmReductionPaused(m_group);
     m_reductionPaused = true;
     return;
   }
@@ -432,7 +433,7 @@ void GenericDataProcessorPresenter::nextGroup() {
 
   if (m_pauseReduction) {
     // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused();
+    m_mainPresenter->confirmReductionPaused(m_group);
     m_reductionPaused = true;
     return;
   }
@@ -491,7 +492,7 @@ void GenericDataProcessorPresenter::endReduction() {
 
   pause();
   m_reductionPaused = true;
-  m_mainPresenter->confirmReductionPaused();
+  m_mainPresenter->confirmReductionPaused(m_group);
 }
 
 /**
@@ -1455,7 +1456,7 @@ void GenericDataProcessorPresenter::resume() {
 
   m_pauseReduction = false;
   m_reductionPaused = false;
-  m_mainPresenter->confirmReductionResumed();
+  m_mainPresenter->confirmReductionResumed(m_group);
 
   doNextAction();
 }

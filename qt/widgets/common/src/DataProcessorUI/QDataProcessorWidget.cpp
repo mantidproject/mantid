@@ -42,9 +42,10 @@ QDataProcessorWidget::QDataProcessorWidget(
  * @param parent :: [input] The parent of this view
  */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
-                                           QWidget *parent)
+                                           QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist),
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
+                                                                     group),
           parent) {}
 
 /** Delegating constructor
@@ -54,10 +55,10 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
-                                           QWidget *parent)
+                                           QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
-                                                                     algorithm),
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+              whitelist, algorithm, group),
           parent) {}
 
 /** Delegating constructor: pre-processing, no post-processing
@@ -69,10 +70,10 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const PreprocessMap &preprocessMap,
                                            const ProcessingAlgorithm &algorithm,
-                                           QWidget *parent)
+                                           QWidget *parent, int group)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, preprocessMap.asMap(), algorithm),
+              whitelist, preprocessMap.asMap(), algorithm, group),
           parent) {}
 
 /** Delegating constructor: no pre-processing, post-processing
@@ -83,10 +84,10 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 */
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const ProcessingAlgorithm &algorithm,
-    const PostprocessingAlgorithm &postprocessor, QWidget *parent)
+    const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, algorithm, postprocessor),
+              whitelist, algorithm, postprocessor, group),
           parent) {}
 
 /** Delegating constructor: pre-processing, post-processing
@@ -99,10 +100,11 @@ QDataProcessorWidget::QDataProcessorWidget(
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const PreprocessMap &preprocessMap,
     const ProcessingAlgorithm &algorithm,
-    const PostprocessingAlgorithm &postprocessor, QWidget *parent)
+    const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, preprocessMap.asMap(), algorithm, postprocessor),
+              whitelist, preprocessMap.asMap(), algorithm, postprocessor,
+              group),
           parent) {}
 
 /** Destructor
