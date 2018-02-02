@@ -16,6 +16,18 @@ ISIS Reflectometry Interface
 New features
 ############
 
+- Two new boxes have been added to the settings tab of the ISIS Reflectometry interface, 'ReductionType' and 'SummationType' which are passed to the corresponding parameters of :ref:`algm-ReflectometryReductionOneAuto`.
+- The ISIS Reflectometry interface now has a checkbox 'CorrectDetectors' which maps to the corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
+- The 'Get Defaults' button now looks for values for the following additional properties in the IDF:
+  - AnalysisMode
+  - PolarizationAnalysis
+  - TransRunStartOverlap
+  - TransRunEndOverlap
+  - IntegratedMonitors
+  - DetectorCorrectionType
+  - CorrectDetectors
+  - SummationType
+  - ReductionType
 
 Improvements
 ############
@@ -32,6 +44,15 @@ Bug fixes
 
 - Fixed some bugs where transmission runs entered on the Settings tab were not being found, whether entered as a run number to load or as the name of an existing workspace in the ADS.
 - The Python code generated when you tick `Output Notebook` has been changed so that all algorithm property values are enclosed in quotes. Unquoted values were causing failures in some algorithms. A bug has also been fixed in setting the legend location for the 4th (stitched) plot, which is shown when post-processing is performed.
+- If any of the mandatory parameters listed below are missing when pressing 'Get Default' a warning is shown rather than a crash.
+  - MonitorIntegralMax
+  - MonitorIntegralMin
+  - MonitorBackgroundMin,
+  - MonitorBackgroundMax,
+  - LambdaMin,
+  - LambdaMax,
+  - I0MonitorIndex
+  - TransRunStartOverlap and TransRunEndOverlap if on SURF or CRISP.
 
 
 Algorithms
@@ -42,8 +63,6 @@ New features
 
 - The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
 - The new algorithm :ref:`algm-MRInspectData` takes in raw event data and determines reduction parameters.
-- Two new boxes have been added to the settings tab of the ISIS Reflectometry interface, 'ReductionType' and 'SummationType' which are passed to the corresponding parameters of :ref:`algm-ReflectometryReductionOneAuto`.
-- The ISIS Reflectometry interface now has a checkbox 'CorrectDetectors' which maps to the corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
 
 
 Improvements
