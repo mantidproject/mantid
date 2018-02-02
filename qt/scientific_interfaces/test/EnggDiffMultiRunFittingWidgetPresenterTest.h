@@ -215,6 +215,33 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_removeRun() {
+    auto presenter = setUpPresenter();
+    const RunLabel runLabel(123, 1);
+    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+    EXPECT_CALL(*m_mockModel, removeRun(runLabel));
+    presenter->notify(
+        IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_removeRunDoesNothingWhenNoRunSelected() {
+    auto presenter = setUpPresenter();
+    const RunLabel runLabel(123, 1);
+    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockModel, removeRun(testing::_)).Times(0);
+    presenter->notify(
+        IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
+    assertMocksUsedCorrectly();
+  }
+
 private:
   MockEnggDiffMultiRunFittingWidgetModel *m_mockModel;
   MockEnggDiffMultiRunFittingWidgetView *m_mockView;

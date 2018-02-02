@@ -19,7 +19,8 @@ public:
   // which need handling in implementation
   enum class Notification {
     PlotPeaksStateChanged, ///< The user has changed whether to plot fitted
-                           ///peaks
+                           /// peaks
+    RemoveRun,             ///< Remove a run from the list
     SelectRun,             ///< The user has selected a new run from the list
   };
 

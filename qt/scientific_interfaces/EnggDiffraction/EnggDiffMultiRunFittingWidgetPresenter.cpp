@@ -104,18 +104,29 @@ RunLabel EnggDiffMultiRunFittingWidgetPresenter::getSelectedRunLabel() const {
 void EnggDiffMultiRunFittingWidgetPresenter::notify(
     IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) {
   switch (notif) {
-  case Notification::SelectRun:
-    processSelectRun();
-    break;
-
   case Notification::PlotPeaksStateChanged:
     processPlotPeaksStateChanged();
+    break;
+
+  case Notification::RemoveRun:
+    processRemoveRun();
+    break;
+
+  case Notification::SelectRun:
+    processSelectRun();
     break;
   }
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processPlotPeaksStateChanged() {
   updatePlot(getSelectedRunLabel());
+}
+
+void EnggDiffMultiRunFittingWidgetPresenter::processRemoveRun() {
+  if (m_view->hasSelectedRunLabel()) {
+    const auto selectedRunLabel = m_view->getSelectedRunLabel();
+    m_model->removeRun(selectedRunLabel);
+  }
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {

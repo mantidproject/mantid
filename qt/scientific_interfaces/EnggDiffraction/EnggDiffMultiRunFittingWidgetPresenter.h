@@ -41,8 +41,9 @@ public:
   bool showFitResultsSelected() const override;
 
 private:
-  void processSelectRun();
   void processPlotPeaksStateChanged();
+  void processRemoveRun();
+  void processSelectRun();
 
   /// Display fitted peaks and any other fit information for a certain run
   void displayFitResults(const RunLabel &runLabel);

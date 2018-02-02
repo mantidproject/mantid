@@ -56,6 +56,10 @@ void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFocusedRun(
                 ". Please contact the development team with this message");
 }
 
+bool EnggDiffMultiRunFittingQtWidget::hasSelectedRunLabel() const {
+  return m_ui.listWidget_runLabels->selectedItems().size() != 0;
+}
+
 void EnggDiffMultiRunFittingQtWidget::plotFittedPeaksStateChanged() {
   m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
                           PlotPeaksStateChanged);
@@ -79,6 +83,12 @@ void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
   m_ui.plotArea->replot();
   m_zoomTool->setZoomBase();
   m_zoomTool->setEnabled(true);
+}
+
+void EnggDiffMultiRunFittingQtWidget::processRemoveRun() {
+  emit removeRunClicked();
+  m_presenter->notify(
+      IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
 }
 
 void EnggDiffMultiRunFittingQtWidget::processSelectRun() {
@@ -116,6 +126,8 @@ void EnggDiffMultiRunFittingQtWidget::setupUI() {
           SLOT(processSelectRun()));
   connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged(int)), this,
           SLOT(plotFittedPeaksStateChanged()));
+  connect(m_ui.pushButton_removeRun, SIGNAL(clicked()), this,
+          SLOT(processRemoveRun()));
 }
 
 bool EnggDiffMultiRunFittingQtWidget::showFitResultsSelected() const {

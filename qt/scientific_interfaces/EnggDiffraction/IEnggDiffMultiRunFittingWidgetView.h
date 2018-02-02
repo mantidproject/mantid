@@ -22,6 +22,9 @@ public:
   /// Get run number and bank ID of the run currently selected in the list
   virtual RunLabel getSelectedRunLabel() const = 0;
 
+  /// Get whether the user has selected a run from the list
+  virtual bool hasSelectedRunLabel() const = 0;
+
   /// Plot a Qwt curve representing a fitted peaks workspace to the canvas
   virtual void
   plotFittedPeaks(const std::vector<boost::shared_ptr<QwtData>> &curve) = 0;

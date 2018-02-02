@@ -16,6 +16,8 @@ class MockEnggDiffMultiRunFittingWidgetView
     : public IEnggDiffMultiRunFittingWidgetView {
 
 public:
+  MOCK_CONST_METHOD0(hasSelectedRunLabel, bool());
+
   MOCK_CONST_METHOD0(getSelectedRunLabel, RunLabel());
 
   MOCK_METHOD1(plotFittedPeaks,

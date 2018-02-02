@@ -26,6 +26,8 @@ public:
 
   RunLabel getSelectedRunLabel() const override;
 
+  bool hasSelectedRunLabel() const override;
+
   void plotFittedPeaks(
       const std::vector<boost::shared_ptr<QwtData>> &curve) override;
 
@@ -52,11 +54,13 @@ public:
                  const std::string &errorDescription) override;
 
 signals:
+  void removeRunClicked();
   void runSelected();
 
 private slots:
   void processSelectRun();
   void plotFittedPeaksStateChanged();
+  void processRemoveRun();
 
 private:
   void cleanUpPlot();
