@@ -257,6 +257,9 @@ class CWSCDReductionControl(object):
                 ))
         else:
             # an existing mask
+            if roi_name not in self._maskWorkspaceDict:
+                raise RuntimeError('ROI {0} is not in mask workspace dictionary.  Current keys are {1}'
+                                   ''.format(roi_name, self._maskWorkspaceDict.keys()))
             mask_ws_name = self._maskWorkspaceDict[roi_name]
         # END-IF
 
@@ -1533,7 +1536,14 @@ class CWSCDReductionControl(object):
 
             # Download SPICE file if necessary
             if os.path.exists(spice_file_name) is False:
-                self.download_spice_file(exp_no, scan_no, over_write=True)
+                file_available, download_result = self.download_spice_file(exp_no, scan_no, over_write=True)
+            else:
+                file_available = True
+                download_result = None
+
+            if not file_available:
+                raise IOError('SPICE file for Exp {0} Scan {1} cannot be found at {2} or downloaded ({3})'
+                              ''.format(exp_no, scan_no, spice_file_name, download_result))
 
             try:
                 spice_table_ws, info_matrix_ws = mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
