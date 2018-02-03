@@ -271,8 +271,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
   for (auto &ws : m_workspaceList) {
     // loop over spectra
     const auto &specInfo = ws->spectrumInfo();
-    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
-    for (int64_t i = 0; i < int64_t(specInfo.size()); ++i) {
+    for (size_t i = 0; i < specInfo.size(); ++i) {
       if (specInfo.isMonitor(i))
         continue;
 
