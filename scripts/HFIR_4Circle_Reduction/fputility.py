@@ -233,6 +233,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         # peak intensity and sigma
         try:
             part3 = '%8.2f%8.2f%4d' % (peak_dict['intensity'], peak_dict['sigma'], 1)
+            # TODO ASAP ASAP2 - 18.5,i4
         except TypeError as type_err:
             raise RuntimeError('In writing Fullprof file, unable to convert intensity {0} and/or sigma {1} to '
                                'floats. FYI: {2}'.format(peak_dict['intensity'], peak_dict['sigma'], type_err))

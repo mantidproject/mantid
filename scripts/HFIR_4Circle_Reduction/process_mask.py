@@ -7,7 +7,6 @@ from mantid.api import AnalysisDataService as ADS
 
 # This module is still in development
 
-
 def parse_mask(xml_name):
 
     # get root and 'Data' ndoe
@@ -99,6 +98,94 @@ def get_region_of_interest(mask_ws_name):
     return lower_left_corner, upper_right_corner
 
 
-if __name__ == '__main__':
-    xml_name = 'temp_mask_635_61.xml'
-    parse_mask(xml_name)
+# TODO FIXME ASAP ASAP2: fill in all blabla
+class RegionOfInterest(object):
+    """
+    a class to manage region of interest used in application including mask workspace and ROI information
+    """
+    def __init__(self, roi_name):
+        """
+        blabla
+        :param roi_name:
+        """
+        assert isinstance(roi_name, str), 'blabla'
+
+        self._roiName = roi_name
+        self._maskWorkspaceName = None
+        self._lowerLeftCorner = None
+        self._upperRightCorner = None
+
+        return
+
+    @property
+    def mask_workspace(self):
+        """
+        blabla
+        :return:
+        """
+        return self._maskWorkspaceName
+
+    @property
+    def lower_left_corner(self):
+        """
+        blabla
+        :return:
+        """
+        if self._lowerLeftCorner is None:
+            raise RuntimeError('lower left not set')
+
+        return self._lowerLeftCorner
+
+    @property
+    def upper_right_corner(self):
+        """
+        blabla
+        :return:
+        """
+        if self._upperRightCorner is None:
+            raise RuntimeError('upper right not set')
+
+        return self._upperRightCorner
+
+    def set_mask_workspace_name(self, ws_name):
+        """
+        blabla
+        :param ws_name:
+        :return:
+        """
+        assert isinstance(ws_name, str), 'blabla'
+
+        # check workspace existing and type
+        # later blabla
+
+        self._maskWorkspaceName = ws_name
+
+        return
+
+    def set_roi_positions(self, lower_left_corner, upper_right_corner):
+        """
+
+        :param lower_left_corner:
+        :param upper_right_corner:
+        :return:
+        """
+        # check input type and size
+        # blabla
+        assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2
+        assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2
+
+        ll_x = int(lower_left_corner[0])
+        ll_y = int(lower_left_corner[1])
+        ur_x = int(upper_right_corner[0])
+        ur_y = int(upper_right_corner[1])
+        if ll_x == ur_x or ll_y == ur_y:
+            err_msg = 'Lower left corner ({0}, {1}) and upper right corner are in a line ({2}, {3})' \
+              ''.format(ll_x, ll_y, ur_x, ur_y)
+            raise RuntimeError(err_msg)
+
+        self._lowerLeftCorner = min(ll_x, ur_x), min(ll_y, ur_y)
+        self._upperRightCorner = max(ll_x, ur_x), max(ll_y, ur_y)
+
+        return
+
+

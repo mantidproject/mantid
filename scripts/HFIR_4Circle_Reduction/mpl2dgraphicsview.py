@@ -63,7 +63,7 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         """
         self._2dPlot = self._myCanvas.add_2d_plot(array2d, x_min, x_max, y_min, y_max, hold_prev_image, y_tick_label)
 
-        return
+        return self._2dPlot
 
     def add_image(self, imagefilename):
         """ Add an image to canvas from an image file
@@ -200,7 +200,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         :param x_max:
         :param y_min:
         :param y_max:
-        :param hold_prev: hold previous image
+        :param hold_prev: hold previous image.  If False, all 2D image and polygon patches will be removed
         :param yticklabels: list of string for y ticks
         :return:
         """
@@ -246,6 +246,19 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self._imagePlotDict[self._currIndex] = img_plot
 
         return self._currIndex
+
+    def add_patch(self, patch):
+        """
+        add an artist patch such as polygon
+        :param patch:
+        :return:
+        """
+        self.axes.add_artist(patch)
+
+        # Flush...
+        self._flush()
+
+        return
 
     def addImage(self, imagefilename):
         """ Add an image by file

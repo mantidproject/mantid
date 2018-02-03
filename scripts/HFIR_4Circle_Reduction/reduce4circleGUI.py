@@ -175,8 +175,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_prev_scan)
         self.connect(self.ui.pushButton_maskScanPt, QtCore.SIGNAL('clicked()'),
                      self.do_mask_pt_2d)
-        self.connect(self.ui.pushButton_saveMask, QtCore.SIGNAL('clicked()'),
-                     self.do_save_roi)
         self.connect(self.ui.pushButton_integrateROI, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_roi)
         self.connect(self.ui.pushButton_exportMaskToFile, QtCore.SIGNAL('clicked()'),
@@ -293,11 +291,8 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
                      self.do_clear_peak_integration_canvas)
 
-        self.connect(self.ui.comboBox_viewRawDataMasks, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.evt_change_roi)
-
-        self.connect(self.ui.comboBox_mergePeakNormType, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.evt_change_norm_type)
+        self.ui.comboBox_viewRawDataMasks.currentIndexChanged.connect(self.evt_change_roi)
+        self.ui.comboBox_mergePeakNormType.currentIndexChanged.connect(self.evt_change_norm_type)
 
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
@@ -361,6 +356,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # QSettings
         self.load_settings()
+
+        # mutex interlock
+        self._roiComboBoxMutex = False
 
         return
 
@@ -450,6 +448,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # background points
         self.ui.lineEdit_backgroundPts.setText('1, 1')
+        self.ui.lineEdit_scaleFactor.setText('1.')
 
         # about pre-processed data
         self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
@@ -733,16 +732,16 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # set the button to next mode
-        if str(self.ui.pushButton_switchROIMode.text()) == 'Edit ROI':
+        if str(self.ui.pushButton_switchROIMode.text()) == 'Enter ROI-Edit Mode':
             # enter adding ROI mode
             self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=True)
             # rename the button
-            self.ui.pushButton_switchROIMode.setText('Quit ROI')
+            self.ui.pushButton_switchROIMode.setText('Quit ROI-Edit Mode')
         else:
             # quit editing ROI mode
             self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=False)
             # rename the button
-            self.ui.pushButton_switchROIMode.setText('Edit ROI')
+            self.ui.pushButton_switchROIMode.setText('Enter ROI-Edit Mode')
         # END-IF-ELSE
 
         return
@@ -870,28 +869,6 @@ class MainWindow(QtGui.QMainWindow):
         for row_index in selected_row_numbers:
             self.ui.tableWidget_mergeScans.set_k_shift_index(row_index, k_index)
             # scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
-
-        return
-
-    def do_apply_roi(self):
-        """ Save current selection of region of interest
-        :return:
-        """
-        lower_left_c, upper_right_c = self.ui.graphicsView_detector2dPlot.get_roi()
-        # at the very beginning, the lower left and upper right are same: force to integer
-        if int(lower_left_c[0]) == int(upper_right_c[0]) \
-                or int(lower_left_c[1]) == int(upper_right_c[1]):
-            return
-
-        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
-        assert status, str(par_val_list)
-        exp_number = par_val_list[0]
-        scan_number = par_val_list[1]
-
-        try:
-            self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
-        except AssertionError as ass_err:
-            self.pop_one_button_dialog('[ERROR] Unable to set ROI due to {0}.'.format(ass_err))
 
         return
 
@@ -1761,38 +1738,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def evt_change_norm_type(self):
-        """
-        handling the event that the detector counts normalization method is changed
-        :return:
-        """
-        # read the current normalization type
-        new_norm_type = str(self.ui.comboBox_mergePeakNormType.currentText())
-
-        # set the scale factor according to new norm type
-        if new_norm_type == 'time':
-            scale_factor = 1.
-        elif new_norm_type == 'monitor':
-            scale_factor = 1000.
-        else:
-            scale_factor = 1.
-
-        self.ui.comboBox_mergePeakNormType.setText('{0}'.format(scale_factor))
-
-        return
-
-    def evt_change_normalization(self):
-        """
-        Integrate Pt. vs integrated intensity of detectors of that Pt. if it is not calculated before
-        and then plot pt vs. integrated intensity on
-        :return:
-        """
-        # integrate any how
-        # self.do_integrate_per_pt()
-        self.do_integrate_single_scan()
-
-        return
-
     def do_plot_prev_pt_raw(self):
         """ Plot the Pt.
         """
@@ -1946,9 +1891,42 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_mask_pt_2d(self):
-        """ Mask a Pt and re-plot with current selected ROI or others
+        """ Save current in-edit ROI Mask a Pt and re-plot with current selected ROI or others
         :return:
         """
+        # # get the experiment and scan value
+        # status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
+        # if not status:
+        #     raise RuntimeError('Experiment number and Scan number must be given!')
+        # exp_number = par_val_list[0]
+        # scan_number = par_val_list[1]
+
+        # get the user specified name from ...
+        roi_name, ok = QtGui.QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
+
+        # return if cancelled
+        if not ok:
+            return
+        roi_name = str(roi_name)
+
+        # TODO : It is better to warn user if the given ROI is used already
+        pass
+
+        # get current ROI
+        ll_corner, ur_corner = self.ui.graphicsView_detector2dPlot.get_roi()
+
+        # set ROI
+        self._myControl.set_roi(roi_name, ll_corner, ur_corner)
+
+        # set it to combo-box
+        self._roiComboBoxMutex = True
+        self.ui.comboBox_maskNames1.addItem(roi_name)
+        self.ui.comboBox_maskNames2.addItem(roi_name)
+        self.ui.comboBox_maskNamesSurvey.addItem(roi_name)
+        self.ui.comboBox_viewRawDataMasks.addItem(roi_name)
+        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count()-1)
+        self._roiComboBoxMutex = False
+
         # get experiment, scan
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run,
                                                         self.ui.lineEdit_rawDataPtNo],
@@ -1959,32 +1937,40 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
             return
 
-        roi_index = self.ui.comboBox_viewRawDataMasks.currentIndex()
-        if roi_index == 0:
-            # still in edit phase
-            # get mask from detector view
-            lower_left_corner, upper_right_corner = self.ui.graphicsView_detector2dPlot.get_roi()
-
-            # create mask workspace
-            status, ret_str = self._myControl.generate_mask_workspace(exp, scan, lower_left_corner, upper_right_corner)
-            if status is False:
-                self.pop_one_button_dialog(ret_str)
-                return
-            else:
-                roi_name = ret_str
-
-        else:
+        # roi_index = self.ui.comboBox_viewRawDataMasks.currentIndex()
+        # if roi_index == 0:
+        #     # still in edit phase
+        #     # get mask from detector view
+        #     lower_left_corner, upper_right_corner = self.ui.graphicsView_detector2dPlot.get_roi()
+        #
+        #     # create mask workspace
+        #     status, ret_str = self._myControl.generate_mask_workspace(exp, scan, lower_left_corner, upper_right_corner)
+        #     if status is False:
+        #         self.pop_one_button_dialog(ret_str)
+        #         return
+        #     else:
+        #         roi_name = ret_str
+        #
+        # else:
+        if True:
             # previously saved ROI
             # TODO TEST NOW
-            roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
+            # roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
             if self._myControl.has_roi_generated(roi_name) is False:
                 roi_start, roi_end = self._myControl.get_region_of_interest(roi_name)
-                self._myControl.generate_mask_workspace(exp, scan,
-                                                        roi_start=roi_start, roi_end=roi_end, mask_tag=roi_name)
+                status, mask_ws_name = self._myControl.generate_mask_workspace(exp, scan,
+                                                                               roi_start=roi_start, roi_end=roi_end,
+                                                                               mask_tag=roi_name)
+                if status:
+                    self._myControl.set_roi_workspace(roi_name, mask_ws_name)
+
         # END-IF-ELSE
 
         # plot
         self.load_plot_raw_data(exp, scan, pt, roi_name=roi_name)
+
+        # switch ROI edit mode
+        self.do_switch_roi_mode()
 
         return
 
@@ -2379,44 +2365,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # set the flag right
         self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
-
-        return
-
-    def do_save_roi(self):
-        """
-        Save region of interest to a specific name and reflects in combo boxes for future use,
-        especially used as a general ROI for multiple scans
-        :return:
-        """
-        # get the experiment and scan value
-        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
-        if not status:
-            raise RuntimeError('Experiment number and Scan number must be given!')
-        exp_number = par_val_list[0]
-        scan_number = par_val_list[1]
-
-        # get the user specified name from ...
-        roi_name, ok = QtGui.QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
-
-        # return if cancelled
-        if not ok:
-            return
-        roi_name = str(roi_name)
-
-        # get current ROI
-        # status, roi = self._myControl.get_region_of_interest(exp_number=exp_number, scan_number=scan_number)
-        # assert status, str(roi)
-        # roi_name = str(roi_name)
-        ll_corner, ur_corner = self.ui.graphicsView_detector2dPlot.get_roi()
-
-        self._myControl.save_roi(roi_name, (ll_corner, ur_corner))
-
-        # set it to combo-box
-        self.ui.comboBox_maskNames1.addItem(roi_name)
-        self.ui.comboBox_maskNames2.addItem(roi_name)
-        self.ui.comboBox_maskNamesSurvey.addItem(roi_name)
-        self.ui.comboBox_viewRawDataMasks.addItem(roi_name)
-        self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count()-1)
 
         return
 
@@ -3331,33 +3279,67 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def evt_change_norm_type(self):
+        """
+        handling the event that the detector counts normalization method is changed
+        :return:
+        """
+        # read the current normalization type
+        new_norm_type = str(self.ui.comboBox_mergePeakNormType.currentText()).lower()
+        print ('[DB...BAT] Change Norm Type is Triggered.  Type: {0}'.format(new_norm_type))
+
+        # set the scale factor according to new norm type
+        if new_norm_type.count('time') > 0:
+            scale_factor = 1.
+        elif new_norm_type.count('monitor') > 0:
+            scale_factor = 1000.
+        else:
+            scale_factor = 1.
+
+        self.ui.lineEdit_scaleFactor.setText('{0}'.format(scale_factor))
+
+        return
+
+    def evt_change_normalization(self):
+        """
+        Integrate Pt. vs integrated intensity of detectors of that Pt. if it is not calculated before
+        and then plot pt vs. integrated intensity on
+        :return:
+        """
+        # integrate any how
+        # self.do_integrate_per_pt()
+        self.do_integrate_single_scan()
+
+        return
+
     def evt_change_roi(self):
         """ handing event of ROI selected in combobox is changed
         :return:
         """
+        if self._roiComboBoxMutex:
+            return
+
+        # get target ROI name
         curr_roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
-        print ('[DB...BAT] Change ROI is caught for ROI "{0}" of type {1}'
-               ''.format(curr_roi_name, type(curr_roi_name)))
+
+        # set to 'no ROI', i.e., removing ROI and plot data without mask
+        self.ui.graphicsView_detector2dPlot.remove_roi()
+
         if len(curr_roi_name) == 0:
-            # set to no ROI
-            self.ui.graphicsView_detector2dPlot.remove_roi()
             # re-plot
             self.do_plot_pt_raw()
 
         else:
             # set to another ROI
-            print ('Need to re-write!')
             self.do_plot_pt_raw()
-            # roi_exist, roi = self._myControl.get_region_of_interest(exp_number=None, scan_number=None,
-            #                                                         roi_name=curr_roi_name)
-            # if not roi_exist:
-            #     self.pop_one_button_dialog('ROI {0} does not exist.  Coding is wrong!'.format(curr_roi_name))
-            #     return
-            #
-            # # remove current ROI from GUI from detector view plot
-            # # self.ui.graphicsView_detector2dPlot.remove_roi()
-            # # add a new ROI on
-            # self.ui.graphicsView_detector2dPlot.set_roi(roi[0], roi[1], plot=True)
+
+            if self.ui.graphicsView_detector2dPlot.is_roi_selection_drawn is False:
+                # shall apply ROI/rectangular to 2D plot
+                lower_left, upper_right = self._myControl.get_region_of_interest(curr_roi_name)
+                self.ui.graphicsView_detector2dPlot.set_roi(lower_left, upper_right)
+                self.ui.graphicsView_detector2dPlot.plot_roi()
+            # END-IF
+
         # END-IF-ELSE
 
         return
@@ -3600,7 +3582,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_viewRawDataMasks.setCurrentIndex(self.ui.comboBox_viewRawDataMasks.count() - 1)
 
         # set ROI to controller
-        self._myControl.set_roi_by_name(roi_name, lower_left_corner, upper_right_corner)
+        self._myControl.set_roi(roi_name, lower_left_corner, upper_right_corner)
 
         # plot ROI on 2D plot
         self.ui.graphicsView_detector2dPlot.remove_roi()
@@ -3904,7 +3886,13 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def load_plot_raw_data(self, exp_no, scan_no, pt_no, roi_name=None):
-        """ Plot raw workspace from XML file for a measurement/pt.
+        """
+        Plot raw workspace from XML file for a measurement/pt.
+        :param exp_no:
+        :param scan_no:
+        :param pt_no:
+        :param roi_name: string (mask loaded data) or None (do nothing)
+        :return:
         """
         # check inputs
         assert isinstance(exp_no, int), 'Exp number {0} must be an integer but not of type {1}' \

@@ -902,8 +902,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
     TableSetup = [('Scan', 'int'),
                   ('Status', 'str'),
                   ('Intensity', 'float'),
-                  ('Corrected', 'float'),  # Lorenzian corrected
-                  ('Error', 'float'),
+                  ('F2', 'float'),  # Lorenzian corrected
+                  ('F2 Error', 'float'),
                   ('Integrate', 'str'),  # integration type, Gaussian fit / simple summation
                   ('Mask', 'str'),  # '' for no mask
                   ('HKL', 'str'),
@@ -1365,7 +1365,8 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         # set up column index
         self._colIndexScan = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
         self._colIndexIntensity = self.TableSetup.index(('Intensity', 'float'))
-        self._colIndexCorrInt = self.TableSetup.index(('Corrected', 'float'))
+        self._colIndexCorrInt = self.TableSetup.index(('F2', 'float'))
+        self._colIndexErrorBar = self.TableSetup.index(('F2 Error', 'float'))
         self._colIndexMask = self.TableSetup.index(('Mask', 'str'))
         self._colIndexIntType = self.TableSetup.index(('Integrate', 'str'))
         self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
@@ -1376,7 +1377,6 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         self._colIndexMotorStep = ProcessTableWidget.TableSetup.index(('Motor Step', 'str'))
         self._colIndexWaveLength = self.TableSetup.index(('Wavelength', 'float'))
         self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
-        self._colIndexErrorBar = self.TableSetup.index(('Error', 'float'))
         # self._colIndexWorkspace = self.TableSetup.index(('Workspace', 'str'))
 
         return

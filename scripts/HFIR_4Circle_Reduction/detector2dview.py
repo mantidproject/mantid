@@ -177,14 +177,16 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return message
 
+    @property
     def is_roi_selection_drawn(self):
         """
         whether ROI is drawn
         :return:
         """
-        is_draw = not (self._myPolygon is None)
+        is_drawn = not (self._myPolygon is None)
+        print ('[DB...BAT] Polygon: {0} ... is drawn? {1}'.format(self._myPolygon, is_drawn))
 
-        return is_draw
+        return is_drawn
 
     def get_roi(self):
         """
@@ -207,56 +209,33 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
     def plot_detector_counts(self, raw_det_data):
         """
-
+        plot detector counts as 2D plot
         :param raw_det_data:
-        :param x_limits:
-        :param y_limits:
         :return:
         """
-        # clear previous data
-        # self.remove_last_plot()
-
-
-        # raw_det_data = numpy.rot90(raw_det_data, 1)
-        # self.ui.graphicsView_detector2dPlot.clear_canvas()
-
-
-        #
-        # # get the configuration of detector from GUI
-        # #  FIXME/TODO/ISSUE/NOW/TODAY - use the detector size wrong!
-        # if 0:
-        #     ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
-        #     x_max, y_max = ret_obj
-        # else:
-        #     x_max, y_max = 256, 256
-
-        # self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data, (0, x_max), (0, y_max))
-        # # FIXME TODO - ASAP This is not always correct!  There is no flag to set to turn off the ROI in myControl!
-        # # FIXME TODO - ASAP A mechanism shall be invented to deal with this!
-        # status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
-        # if status:
-        #     self.ui.graphicsView_detector2dPlot.set_roi(roi[0], roi[1], plot=True)
-        # else:
-        #     error_msg = roi
-        #     # self.pop_one_button_dialog(error_msg)
-        #     self._show_message('[Error] %s' % error_msg)
-        # # END-IF
-
         x_min = 0
         x_max = raw_det_data.shape[0]
         y_min = 0
         y_max = raw_det_data.shape[1]
 
-        self.add_plot_2d(raw_det_data, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
-                         hold_prev_image=False)
+        count_plot = self.add_plot_2d(raw_det_data, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
+                                      hold_prev_image=False)
+
+        if self._myPolygon is not None:
+            print ('[DB...BAT...] Add PATCH')
+            self._myCanvas.add_patch(self._myPolygon)
+        else:
+            print ('[DB...BAT...] NO PATCH')
+
+        print ('[DB...BAT...AFTER]  ROI Rect: {0}.  2D plot: {1}'.format(self._myPolygon, count_plot))
 
     def plot_roi(self):
         """ Plot region of interest (as rectangular) to the canvas from the region set from
         :return:
         """
         # check
-        assert self._roiStart is not None
-        assert self._roiEnd is not None
+        assert self._roiStart is not None, 'blabla'
+        assert self._roiEnd is not None, 'blabla'
 
         # create a vertex list of a rectangular
         vertex_array = np.ndarray(shape=(4, 2))
