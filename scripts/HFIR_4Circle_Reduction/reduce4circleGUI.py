@@ -14,6 +14,7 @@ import time
 import datetime
 import random
 import numpy
+from HFIR_4Circle_Reduction import reduce4circleControl as r4c
 import HFIR_4Circle_Reduction.guiutility as gutil
 import HFIR_4Circle_Reduction.peakprocesshelper as peak_util
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
