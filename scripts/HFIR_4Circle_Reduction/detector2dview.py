@@ -184,9 +184,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         is_drawn = not (self._myPolygon is None)
-        print ('[DB...BAT] Polygon: {0} ... is drawn? {1}'.format(self._myPolygon, is_drawn))
 
-        return is_drawn
+        return is_draw
 
     def get_roi(self):
         """
@@ -228,6 +227,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             print ('[DB...BAT...] NO PATCH')
 
         print ('[DB...BAT...AFTER]  ROI Rect: {0}.  2D plot: {1}'.format(self._myPolygon, count_plot))
+
+        return
 
     def plot_roi(self):
         """ Plot region of interest (as rectangular) to the canvas from the region set from

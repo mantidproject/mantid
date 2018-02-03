@@ -243,18 +243,6 @@ class CWSCDReductionControl(object):
         # get raw workspace for counts
         raw_pt_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
 
-        # if roi_name is '__temp_roi__':
-        #     # a new ROI to create mask workspace
-        #     # get workspaces' names by standard naming scheme
-        #     mask_ws_name = get_mask_ws_name(exp_number, scan_number)
-        #
-        #     # check workspace existing
-        #     if AnalysisDataService.doesExist(raw_pt_ws_name) is False:
-        #         raise RuntimeError('Raw data workspace for exp %d scan %d pt %d does not exist.' % (
-        #             exp_number, scan_number, pt_number
-        #         ))
-        # else:
-
         # an existing mask
         if roi_name not in self._roiDict:
             raise RuntimeError('ROI {0} is not in mask workspace dictionary.  Current keys are {1}'
@@ -931,6 +919,7 @@ class CWSCDReductionControl(object):
 
         return self._refinedUBTup[1], self._refinedUBTup[2], self._refinedUBTup[3]
 
+<<<<<<< HEAD
     def get_region_of_interest(self, roi_name):
         """ Get region of interest
         :param roi_name: name of the ROI
@@ -946,6 +935,44 @@ class CWSCDReductionControl(object):
         # check...
         lower_left_corner = self._roiDict[roi_name].lower_left_corner
         upper_right_corner = self._roiDict[roi_name].upper_right_corner
+=======
+    def get_region_of_interest(self, exp_number, scan_number, roi_name=None):
+        """ Get region of interest
+        :param exp_number: if ROI name is given, it doesn't matter
+        :param scan_number: if ROI name is given, it doesn't matter
+        :param roi_name: name of the ROI
+        :return: region of interest
+        """
+        assert isinstance(roi_name, str) or roi_name is None,\
+            'ROI name {0} must be a string or None but not a {1}.'.format(roi_name, type(roi_name))
+
+        if roi_name is not None and roi_name in self._roiDict:
+            # ROI
+            ret_status = True
+            ret_value = self._roiDict[roi_name]
+
+        else:
+            # check
+            assert isinstance(exp_number, int), 'Experiment number {0} must be an integer.'.format(exp_number)
+            assert isinstance(scan_number,
+                              int) or scan_number is None, 'Scan number {0} must be either an integer or None.' \
+                                                           ''.format(scan_number)
+
+            if (exp_number, scan_number) in self._roiDict:
+                # able to find region of interest for this scan
+                ret_status = True
+                ret_value = self._roiDict[(exp_number, scan_number)]
+
+            elif exp_number in self._roiDict:
+                # able to find region of interest for this experiment
+                ret_status = True
+                ret_value = self._roiDict[exp_number]
+            else:
+                # region of interest of experiment is not defined
+                ret_status = False
+                ret_value = 'Unable to find ROI for experiment %d. Existing includes %s.' % (exp_number,
+                                                                                             str(self._roiDict.keys()))
+>>>>>>> 2dad807c0db92b63e23265d59a9965c6bf0b83d3
 
         if lower_left_corner is None or upper_right_corner is None:
             raise RuntimeError('ROI positions not set')
@@ -1110,6 +1137,11 @@ class CWSCDReductionControl(object):
             mask_ws_name = str(mask_tag)
 
         # record it
+<<<<<<< HEAD
+=======
+        self._currMaskWSName = mask_ws_name
+
+>>>>>>> 2dad807c0db92b63e23265d59a9965c6bf0b83d3
         if self._refWorkspaceForMask is None:
             return False, 'There is no reference workspace. Plot a Pt. first!'
         elif AnalysisDataService.doesExist(self._refWorkspaceForMask) is False:
@@ -1121,7 +1153,18 @@ class CWSCDReductionControl(object):
         mantidsimple.InvertMask(InputWorkspace=mask_ws_name,
                                 OutputWorkspace=mask_ws_name)
 
-        return True, mask_ws_name
+        # register
+        roi_name = self.RESERVED_ROI_NAME
+        self._maskWorkspaceDict[roi_name] = mask_ws_name
+
+        return True, roi_name
+
+    def get_working_directory(self):
+        """
+        get working directory
+        :return:
+        """
+        return self._workDir
 
     def get_working_directory(self):
         """
@@ -1240,6 +1283,7 @@ class CWSCDReductionControl(object):
         :return:
         """
         # TODO CHECK ASAP blabla
+<<<<<<< HEAD
         has = True
         if roi_name not in self._roiDict:
             has = False
@@ -1247,6 +1291,10 @@ class CWSCDReductionControl(object):
             has = False
 
         return has
+=======
+
+        return roi_name in self._maskWorkspaceDict
+>>>>>>> 2dad807c0db92b63e23265d59a9965c6bf0b83d3
 
     def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
         """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
@@ -1786,11 +1834,19 @@ class CWSCDReductionControl(object):
                               InputFile=mask_file_name,
                               OutputWorkspace=mask_tag)
         # record
+<<<<<<< HEAD
         self.set_roi_workspace(roi_name=mask_tag, mask_ws_name=mask_tag)
 
         # find out the range of the ROI in (Low left, upper right) mode
         roi_range = process_mask.get_region_of_interest(mask_tag)
         self.set_roi(mask_tag, roi_range[0], roi_range[1])
+=======
+        self._currMaskWSName = mask_tag
+        self._maskWorkspaceDict[mask_tag] = mask_tag
+
+        # find out the range of the ROI in (Low left, upper right) mode
+        roi_range = process_mask.get_region_of_interest(mask_tag)
+>>>>>>> 2dad807c0db92b63e23265d59a9965c6bf0b83d3
 
         return roi_range
 
@@ -2074,6 +2130,7 @@ class CWSCDReductionControl(object):
         :return:
         """
         # Check
+<<<<<<< HEAD
         assert isinstance(roi_name, str), 'blabla'
         # assert len(region_of_interest) == 2,\
         #     'Size of ROI must be 2 but not {0}'.format(len(region_of_interest))
@@ -2101,6 +2158,58 @@ class CWSCDReductionControl(object):
             self._roiDict[roi_name] = process_mask.RegionOfInterest(roi_name)
 
         self._roiDict[roi_name].set_mask_workspace_name(mask_ws_name)
+=======
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}' \
+                                             ''.format(scan_number, type(scan_number))
+        assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2
+        assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2
+
+        ll_x = int(lower_left_corner[0])
+        ll_y = int(lower_left_corner[1])
+        ur_x = int(upper_right_corner[0])
+        ur_y = int(upper_right_corner[1])
+        if ll_x >= ur_x or ll_y >= ur_y:
+            err_msg = 'Lower left corner ({0}, {1}) and upper right corner are in a line ({2}, {3})' \
+                      ''.format(ll_x, ll_y, ur_x, ur_y)
+            raise RuntimeError(err_msg)
+
+        # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
+        # then it is better and easier to support client to search this ROI by experiment number
+        # and only the latest is saved by this key
+        self._roiDict[(exp_number, scan_number)] = ((ll_x, ll_y), (ur_x, ur_y))
+        self._roiDict[exp_number] = ((ll_x, ll_y), (ur_x, ur_y))
+>>>>>>> 2dad807c0db92b63e23265d59a9965c6bf0b83d3
+
+        return
+
+    def set_roi_by_name(self, roi_name, lower_left_corner, upper_right_corner):
+        """
+        Set region of interest and record it by user-specified ROI name
+        :param roi_name:
+        :param lower_left_corner:
+        :param upper_right_corner:
+        :return:
+        """
+        assert isinstance(roi_name, str), 'ROI name {0} must be an integer but not a {1}' \
+                                         ''.format(roi_name, type(roi_name))
+        assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2
+        assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2
+
+        ll_x = int(lower_left_corner[0])
+        ll_y = int(lower_left_corner[1])
+        ur_x = int(upper_right_corner[0])
+        ur_y = int(upper_right_corner[1])
+        if ll_x >= ur_x or ll_y >= ur_y:
+            err_msg = 'Lower left corner ({0}, {1}) and upper right corner are in a line ({2}, {3})' \
+                      ''.format(ll_x, ll_y, ur_x, ur_y)
+            raise RuntimeError(err_msg)
+
+        # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
+        # then it is better and easier to support client to search this ROI by experiment number
+        # and only the latest is saved by this key
+        self._roiDict[roi_name] = ((ll_x, ll_y), (ur_x, ur_y))
 
         return
 
@@ -2614,6 +2723,7 @@ class CWSCDReductionControl(object):
 
         return
 
+<<<<<<< HEAD
     # def save_roi(self, roi_name, region_of_interest):
     #     """
     #     Save region of interest to controller for future use
@@ -2665,6 +2775,64 @@ class CWSCDReductionControl(object):
             mask_ws_name = self.check_generate_mask_workspace(exp_number=exp_number, scan_number=scan_number,
                                                               mask_tag=tag, check_throw=True)
 
+=======
+    def save_roi(self, roi_name, region_of_interest):
+        """
+        Save region of interest to controller for future use
+        :param roi_name:
+        :param region_of_interest: a 2-tuple for 2-tuple as lower-left and upper-right corners of the region
+        :return:
+        """
+        # check
+        assert isinstance(roi_name, str), 'Tag {0} must be a string {1}'.format(roi_name, type(roi_name))
+        assert len(region_of_interest) == 2,\
+            'Size of ROI must be 2 but not {0}'.format(len(region_of_interest))
+        assert len(region_of_interest[0]) == 2,\
+            'Size of ROI[0] must be 2 but not {0}'.format(len(region_of_interest[0]))
+        assert len(region_of_interest[1]) == 2,\
+            'Size of ROI[1] must be 2 but not {0}'.format(len(region_of_interest[1]))
+
+        # save ROI to ROI dictionary
+        self._roiDict[roi_name] = region_of_interest
+
+        # if ROI already been used to mask detectors, then need to change mask workspace dictionary
+        if self.RESERVED_ROI_NAME in self._maskWorkspaceDict:
+            self._maskWorkspaceDict[roi_name] = self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
+            del self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
+        # END-IF
+
+        return
+
+    def save_roi_to_file(self, exp_number, scan_number, tag, file_name):
+        """
+        save ROI to file
+        Notice: the saved file is a mask file which masks the detectors out of ROI
+        :param exp_number:
+        :param scan_number:
+        :param tag:
+        :param file_name:
+        :return:
+        """
+        # check input
+        # assert isinstance(exp_number, int), 'Experiment number {0} shall be an integer but not a {1}' \
+        #                                     ''.format(exp_number, type(exp_number))
+        # assert isinstance(scan_number, int), 'Scan number {0} shall be an integer but not a {1}' \
+        #                                      ''.format(scan_number, type(scan_number))
+        assert isinstance(tag, str), 'Tag {0} shall be a string but not a {1}'.format(tag, type(tag))
+        assert isinstance(file_name, str), 'File name {0} shall be a string but not a {1}' \
+                                           ''.format(file_name, type(file_name))
+
+        # get mask workspace name
+        if tag in self._maskWorkspaceDict:
+            mask_ws_name = self._maskWorkspaceDict[tag]
+            if AnalysisDataService.doesExist(mask_ws_name) is None:
+                raise RuntimeError('Mask workspace {0} of tag {1} does not exist in ADS.'
+                                   ''.format(mask_ws_name, tag))
+        else:
+            mask_ws_name = self.check_generate_mask_workspace(exp_number=exp_number, scan_number=scan_number,
+                                                              mask_tag=tag, check_throw=True)
+
+>>>>>>> 2dad807c0db92b63e23265d59a9965c6bf0b83d3
         # save
         mantidsimple.SaveMask(InputWorkspace=mask_ws_name, OutputFile=file_name)
 
