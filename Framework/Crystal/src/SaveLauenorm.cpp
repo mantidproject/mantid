@@ -8,7 +8,6 @@
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include <fstream>
@@ -272,7 +271,8 @@ void SaveLauenorm::exec() {
             << std::setw(12) << std::setprecision(4) << lattice.alpha()
             << std::setw(12) << std::setprecision(4) << lattice.beta()
             << std::setw(12) << std::setprecision(4) << lattice.gamma() << "\n";
-        out << "SYST    1   1   0   0"
+        std::vector<int> systemNo = crystalSystem(lattice);
+        out << "SYST    " << systemNo[0] << "   " << systemNo[1] << "   0   0"
             << "\n";
         out << "RAST      0.050"
             << "\n";
@@ -470,6 +470,41 @@ void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
     nRows = static_cast<int>(grandchildren.size());
     nCols = static_cast<int>(children.size());
   }
+}
+std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice) {
+  std::vector<int> systemVec;
+  int alpha = static_cast<int>(lattice.alpha() + 0.5);
+  int beta = static_cast<int>(lattice.beta() + 0.5);
+  int gamma = static_cast<int>(lattice.gamma() + 0.5);
+  int a = static_cast<int>(lattice.a() * 1000 + 0.5);
+  int b = static_cast<int>(lattice.b() * 1000 + 0.5);
+  int c = static_cast<int>(lattice.c() * 1000 + 0.5);
+  if (alpha == 90 && beta == 90 && gamma == 90) {
+    if (a == b && a == c) {
+      systemVec.push_back(7); // cubic I,F
+      systemVec.push_back(1); // P
+    } else if (a == b) {
+      systemVec.push_back(4); // tetragonal I
+      systemVec.push_back(1); // P
+    } else {
+      systemVec.push_back(3); // orthorhombic I,A,B,C,F
+      systemVec.push_back(1); // P
+    }
+  } else if (alpha == 90 && beta == 90 && gamma == 120 && a == b) {
+    systemVec.push_back(6); // hexagonal
+    systemVec.push_back(1); // P
+  } else if ((alpha == 90 && beta == 90) || (alpha == 90 && gamma == 90) ||
+             (beta == 90 && gamma == 90)) {
+    systemVec.push_back(2); // monoclinic I,A,B,C
+    systemVec.push_back(1); // P
+  } else if (alpha == 90 && beta == 90 && gamma != 90 && a == b && a == c) {
+    systemVec.push_back(5); // rhombohedral R
+    systemVec.push_back(1); // P
+  } else {
+    systemVec.push_back(1); // triclinic
+    systemVec.push_back(1); // P
+  }
+  return systemVec;
 }
 
 } // namespace Mantid

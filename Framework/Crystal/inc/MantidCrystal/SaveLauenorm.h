@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -18,14 +19,18 @@ namespace Crystal {
 class DLLExport SaveLauenorm : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override { return "SaveLauenorm"; };
+  const std::string name() const override {
+    return "SaveLauenorm";
+  };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Save a PeaksWorkspace to a ASCII file for each detector.";
   }
 
   /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override {
+    return 1;
+  };
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Crystal\\DataHandling;DataHandling\\Text";
@@ -39,6 +44,7 @@ private:
 
   DataObjects::PeaksWorkspace_sptr ws;
   void sizeBanks(std::string bankName, int &nCols, int &nRows);
+  std::vector<int> crystalSystem(Geometry::OrientedLattice lattice);
 };
 
 } // namespace Mantid
