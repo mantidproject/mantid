@@ -21,7 +21,7 @@ Usage
   from __future__ import print_function
 
   # Load sample and resolution files
-  sample = Load('irs26176_graphite002_red.nxs')
+  sample = Load('irs26176_graphite002_red.nxs', OutputWorkspace='irs26176_graphite002_red')
   resolution = Load('irs26173_graphite002_red.nxs')
 
   # Set up fit algorithm parameters
@@ -37,7 +37,7 @@ Usage
   convolve = True  # Convolve the fitted model components with the resolution
   minimizer = "Levenberg-Marquardt"
   maxIt = 500
-  output_ws_name = "irs26176_graphite002"
+  output_ws_name = "irs26176_graphite002_conv_1LFixF_s0_to_9"
 
   # Run ConvolutionFitSequential algorithm
   result_ws = ConvolutionFitSequential(InputWorkspace=sample, Function=function,
@@ -66,18 +66,18 @@ Output:
 
 .. testoutput:: ExExtractQENSMembers
 
-  irs26176_graphite002_Members_Data
-  irs26176_graphite002_Members_Calc
-  irs26176_graphite002_Members_Fit
-  irs26176_graphite002_Members_Resolution
-  irs26176_graphite002_Members_Lorentzian
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Data
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Calc
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Diff
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_LinearBackground
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Lorentzian1
 
 .. testcode:: ExExtractQENSMembersProperty
 
   from __future__ import print_function
 
   # Load sample and resolution files
-  sample = Load('irs26176_graphite002_red.nxs')
+  sample = Load('irs26176_graphite002_red.nxs', OutputWorkspace='irs26176_graphite002_red')
   resolution = Load('irs26173_graphite002_red.nxs')
 
   # Set up fit algorithm parameters
@@ -93,7 +93,7 @@ Output:
   convolve = True  # Convolve the fitted model components with the resolution
   minimizer = "Levenberg-Marquardt"
   maxIt = 500
-  output_ws_name = "irs26176_graphite002"
+  output_ws_name = "irs26176_graphite002_conv_1LFixF_s0_to_9"
 
   # Run ConvolutionFitSequential algorithm with ExtractMembers property
   result_ws = ConvolutionFitSequential(InputWorkspace=sample, Function=function,
@@ -118,8 +118,8 @@ Output:
 
 .. testoutput:: ExExtractQENSMembersProperty
 
-  irs26176_graphite002_Members_Data
-  irs26176_graphite002_Members_Calc
-  irs26176_graphite002_Members_Fit
-  irs26176_graphite002_Members_Resolution
-  irs26176_graphite002_Members_Lorentzian
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Data
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Calc
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Diff
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_LinearBackground
+  irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Lorentzian1
