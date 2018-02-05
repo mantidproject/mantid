@@ -23,6 +23,7 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
+auto const DEFAULT_GROUP_NUMBER = 0;
 
 // Use this if you need the Test class to be a friend of the data processor
 // presenter
@@ -1170,6 +1171,16 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 
+  void expectNotifiedReductionPaused(MockMainPresenter &mockMainPresenter) {
+    EXPECT_CALL(mockMainPresenter,
+                confirmReductionPaused(DEFAULT_GROUP_NUMBER));
+  }
+
+  void expectNotifiedReductionResumed(MockMainPresenter &mockMainPresenter) {
+    EXPECT_CALL(mockMainPresenter,
+                confirmReductionPaused(DEFAULT_GROUP_NUMBER));
+  }
+
   void testProcess() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
@@ -1195,6 +1206,7 @@ public:
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
+    expectNotifiedReductionResumed(mockMainPresenter);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -2924,7 +2936,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 
-  static auto constexpr DEFAULT_GROUP_NUMBER = 1;
   /// Tests the reduction when no pre-processing algorithms are given
 
   void testProcessNoPreProcessing() {
@@ -3182,5 +3193,4 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 };
-
 #endif /* MANTID_MANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERTEST_H */
