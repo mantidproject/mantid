@@ -27,18 +27,19 @@ where :math:`N_A` is Avogadro's constant, :math:`k_B` is Boltzmann's constant, :
 crystal field Hamiltonian. :math:`g_J` is the Landé g-factor, :math:`\mu_B` is the Bohr magneton and the moment operator 
 is defined as :math:`\mathbf{J} = \hat{J}_x B_x + \hat{J}_y B_y + \hat{J}_z B_z` where :math:`\hat{J}_x`, :math:`\hat{J}_y`,
 and :math:`\hat{J}_z` are the angular momentum operators in Cartesian coordinates, with :math:`z` defined to 
-be along the quantisation axis of the crystal field (which is usually defined to be the highest symmetry rotation axis). 
+be along the quantisation axis of the crystal fied (which is usually defined to be the highest symmetry rotation axis). 
 :math:`B_x`, :math:`B_y`, and :math:`B_z` are the components of the unit vector pointing in the direction of the applied 
 magnetic field in this coordinate system.
 
-Finally, in order to account for the effect of any exchange interactions in the system which will shift the susceptibility curve
-up or down (analogous to the Curie-Weiss temperature), the actual magnetic susceptibility calculated by this function is:
+Finally, in order to account for the effect of any exchange interactions in the system which will shift the susceptiblity curve
+up or down (analogous to the Curie-Weiss temperature), and any residual (background) susceptibility in the sample (perhaps from
+an impurity), the actual magnetic susceptibility calculated by this function is:
 
-.. math:: \chi^{\mathrm{eff}} = \frac{\chi(T)}{1 - \lambda \chi(T)}
+.. math:: \chi^{\mathrm{eff}} = \frac{\chi(T)}{1 - \lambda \chi(T)} + \chi_0
 
-where :math:`\lambda` parameterises an effective exchange interaction and :math:`\chi` is the bare (paramagnetic Crystal Field)
-susceptibility. A negative :math:`\lambda` indicates overall antiferromagnetic interactions, whilst a positive :math:`\lambda`
-corresponds to overall ferromagnetic interactions.
+where :math:`\lambda` parameterises an effective exchange interaction with :math:`\chi` the bare (paramagnetic Crystal Field)
+susceptibility, and :math:`\chi_0` the residual susceptibility. A negative :math:`\lambda` indicates overall antiferromagnetic
+interactions, whilst a positive :math:`\lambda` corresponds to overall ferromagnetic interactions.
 
 Example
 -------

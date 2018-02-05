@@ -101,10 +101,10 @@ class CrystalFieldMultiSite(object):
                 self.function.fixParameter(param)
 
     def _setMandatoryArguments(self, kwargs):
-        if 'Temperatures' in kwargs:
-            self.Temperatures = kwargs.pop('Temperatures')
-            if 'FWHM' in kwargs:
-                self.FWHM = kwargs.pop('FWHM')
+        if 'Temperatures' in kwargs or 'Temperature' in kwargs:
+            self.Temperatures = kwargs.pop('Temperatures') if 'Temperatures' in kwargs else kwargs.pop('Temperature')
+            if 'FWHM' in kwargs or 'FWHMs' in kwargs:
+                self.FWHM = kwargs.pop('FWHMs') if 'FWHMs' in kwargs else kwargs.pop('FWHM')
             elif 'ResolutionModel' in kwargs:
                 self.ResolutionModel = kwargs.pop('ResolutionModel')
             else:
@@ -509,15 +509,23 @@ class CrystalFieldMultiSite(object):
         self.function.setAttributeValue('Temperatures', value)
 
     @property
-    def FWHM(self):
+    def Temperature(self):
+        return list(self.function.getAttributeValue("Temperatures"))
+
+    @Temperature.setter
+    def Temperatures(self, value):
+        self.function.setAttributeValue('Temperatures', value)
+
+    @property
+    def FWHMs(self):
         fwhm = self.function.getAttributeValue('FWHMs')
         nDatasets = len(self.Temperatures)
         if len(fwhm) != nDatasets:
             return list(fwhm) * nDatasets
         return list(fwhm)
 
-    @FWHM.setter
-    def FWHM(self, value):
+    @FWHMs.setter
+    def FWHMs(self, value):
         if islistlike(value):
             if len(value) != len(self.Temperatures):
                 value = [value[0]] * len(self.Temperatures)
@@ -525,6 +533,14 @@ class CrystalFieldMultiSite(object):
             value = [value] * len(self.Temperatures)
         self.function.setAttributeValue('FWHMs', value)
         self._resolutionModel = None
+
+    @property
+    def FWHM(self):
+        return self.FWHMs
+
+    @FWHM.setter
+    def FWHM(self, value):
+        self.FWHMs = value
 
     @property
     def ResolutionModel(self):

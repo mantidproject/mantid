@@ -148,6 +148,17 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     m_nOwnParams = m_source->nParams();
     m_fwhmX.resize(nSpec);
     m_fwhmY.resize(nSpec);
+    std::vector<double> new_fwhm = getAttribute("FWHMs").asVector();
+    const auto nWidths = new_fwhm.size();
+    if (nWidths != nSpec) {
+      new_fwhm.resize(nSpec);
+      if (nWidths > nSpec) {
+        for (size_t iSpec = nWidths; iSpec < nSpec; ++iSpec) {
+          new_fwhm[iSpec] = new_fwhm[0];
+        }
+      }
+    }
+    FunctionGenerator::setAttribute("FWHMs", Attribute(new_fwhm));
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       const auto suffix = std::to_string(iSpec);
       declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));

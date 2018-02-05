@@ -406,9 +406,11 @@ means that the intensity of `cf1` should be twice that of `cf2`.
 
 Alternatively, you can create a `CrystalFieldMultiSite` object directly. This takes Ions, Symmetries, Temperatures and peak widths as lists::
 
+    from CrystalField import CrystalFieldMultiSite
     cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1])
 
-To access parameters of a CrystalFieldMultiSite object, prefix with the ion index::
+Note that `Temperature` and `FWHM` (without plural) can also be used in place of the equivalent plural parameters.
+To access parameters of a CrystalFieldMultiSite object, prefix them with the ion index::
 
     cfms['ion0.B40'] = -0.031
     cfms['ion1.B20'] = 0.37737
@@ -419,7 +421,7 @@ Parameters can be set when creating the object by passing in a dictionary using 
 
     cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1],
                                  parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
-                                               'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
+                                             'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
 
 A background can also be set this way, or using `cfms.background.` It can be passed as a string, a Function object(s), or a 
 CompositeFunction object::
@@ -433,7 +435,7 @@ CompositeFunction object::
     cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHMs=[1.0],
                                    Background= Gaussian(PeakCentre=1) + LinearBackground())
 
-Ties and constraints are set similiarly to `CrystalField` objects. `f` prefixes have been changed to be more descriptive::
+Ties and constraints are set similarly to `CrystalField` objects. `f` prefixes have been changed to be more descriptive::
 
     cfms = CrystalFieldMultiSite(Ions=['Ce','Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
                                    Background=FlatBackground(), BackgroundPeak=Gaussian(Height=10, Sigma=0.3),
@@ -444,8 +446,11 @@ Ties and constraints are set similiarly to `CrystalField` objects. `f` prefixes 
     cfms.constraints('ion0.sp0.pk1.FWHM < 2.2')
     cfms.ties({'ion0.sp1.pk2.FWHM': '2*ion0.sp1.pk1.FWHM', 'ion1.sp1.pk3.FWHM': '2*ion1.sp1.pk2.FWHM'})
 
-When fitting, all parameters are assumed to be free. Parameters must be fixed explicitly. Fitting example::
+Parameters which are not allowed by the specified symmetry will be fixed to be zero, but unlike for the single-site case,
+all other parameters are assumed to be free (in the single-site case, parameters which are unset are assumed to be fixed
+to be zero). For the multi-site case, parameters must be fixed explicitly. For example::
 
+    params = {'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787, 'ion1.B42':-0.11611, 'ion1.B44':-0.12544}
     cf = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0, 50.0],
                                     FWHMs=[1.0, 1.0], ToleranceIntensity=6.0, ToleranceEnergy=1.0,  FixAllPeaks=True,
                                    parameters=params)
@@ -624,7 +629,7 @@ The result of the ``calculate()`` method can be put directly into a ``CrystalFie
 to calculate a spectrum or as the starting parameters in a fit::
 
     cf = CrystalField('Yb', 'C2', Temperature=5, FWHM=10, **cif_pc_model.calculate())
-    plot(**cf.getSpectrum())
+    plot(*cf.getSpectrum())
     fit = CrystalFieldFit(cf, InputWorkspace=ws)
     fit.fit()
 
@@ -646,12 +651,14 @@ susceptibility, and magnetisation. The calculated values can be invoked using th
 
 To calculate the heat capacity use::
 
+    import matplotlib.pyplot as plt
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, Temperature=44.0)
     Cv = cf.getHeatCapacity()       # Calculates Cv(T) for 1<T<300K in 1K steps  (default)
-    pyplot.plot(*Cv)                # Returns a tuple of (x, y) values
+    plt.plot(*Cv)                   # Returns a tuple of (x, y) values
 
     T = np.arange(1,900,5)
     Cv = cf.getHeatCapacity(T)      # Calculates Cv(T) for specified values of T (1 to 900K in 5K steps here)
-    pyplot.plot(T, Cv[1])
+    plt.plot(T, Cv[1])
 
     # Temperatures from a single spectrum workspace
     ws = CreateWorkspace(T, T, T)
@@ -736,22 +743,26 @@ class as the `PhysicalProperty` attribute of `CrystalField`, either as a keyword
 
 or separately after construction::
 
-    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+    params = {'B20':0.37737, 'B22':3.9770, 'B40':-0.031787, 'B42':-0.11611, 'B44':-0.12544}
+    cf = CrystalField('Ce', 'C2v', **params)
     cf.PhysicalProperty = PhysicalProperties('Cv')
     fitcv = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fitcv.fit()
 
     # Fits a susceptibility dataset. Data is the volume susceptibility in SI units
+    cf = CrystalField('Ce', 'C2v', **params)
     cf.PhysicalProperty = PhysicalProperties('susc', Hdir='powder', Unit='SI')
     fit_chi = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fit_chi.fit()
 
     # Fits a magnetisation dataset. Data is in emu/mol, and was measured at 5K with the field || [111].
+    cf = CrystalField('Ce', 'C2v', **params)
     cf.PhysicalProperty = PhysicalProperties('M(H)', Temperature=5, Hdir=[1, 1, 1], Unit='cgs')
     fit_mag = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fit_mag.fit()
 
     # Fits a magnetisation vs temperature dataset. Data is in Am^2/mol, measured with a 0.1T field || [110]
+    cf = CrystalField('Ce', 'C2v', **params)
     cf.PhysicalProperty = PhysicalProperties('M(T)', Hmag=0.1, Hdir=[1, 1, 0], Unit='SI')
     fit_moment = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fit_moment.fit()
@@ -790,7 +801,7 @@ properties should be a list. E.g.::
 
 Note that `PhysicalProperty` requires the type of physical property (either `'Cv'` or `'Cp'` or `'heatcap'` for
 heat capacity; `'susc'` or `'chi'` for susceptibility; `'mag'` or `'M(H)'` for magnetic moment vs applied field;
-or `'mom'` or `'M(T)'` for moment vs temperature) as the first argument. subsequent arguments are optional, and
+or `'mom'` or `'M(T)'` for moment vs temperature) as the first argument. Subsequent arguments are optional, and
 are in the following order::
 
     PhysicalProperties('Cp')  # No further parameters required for heat capacity
