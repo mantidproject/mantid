@@ -6,9 +6,12 @@ from mantid.api import AnalysisDataService as ADS
 
 
 # This module is still in development
-
 def parse_mask(xml_name):
-
+    """
+    parse mask XML file
+    :param xml_name:
+    :return:
+    """
     # get root and 'Data' ndoe
     tree = ET.parse(xml_name)
     root = tree.getroot()
@@ -156,7 +159,12 @@ class RegionOfInterest(object):
                                          ''.format(ws_name, type(ws_name))
 
         # check workspace existing and type
-        # TODO - check with ADS for existence of workspace and type too
+        if ADS.doesExist(ws_name) is False:
+            raise RuntimeError('Workspace {0} does not exist in ADS.')
+        workspace = ADS.retrieve(ws_name)
+        if workspace.id() != 'MaskWorkspace':
+            raise RuntimeError('Workspace {0} is not a MaskWorkspace but a {1}'
+                               ''.format(ws_name, workspace.id()))
 
         self._maskWorkspaceName = ws_name
 
@@ -164,7 +172,7 @@ class RegionOfInterest(object):
 
     def set_roi_positions(self, lower_left_corner, upper_right_corner):
         """
-
+        blabla
         :param lower_left_corner:
         :param upper_right_corner:
         :return:

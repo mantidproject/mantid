@@ -1938,8 +1938,6 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # previously saved ROI
-        # TODO TEST NOW
-        # roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText()).strip()
         if self._myControl.has_roi_generated(roi_name) is False:
             roi_start, roi_end = self._myControl.get_region_of_interest(roi_name)
             status, mask_ws_name = self._myControl.generate_mask_workspace(exp, scan,

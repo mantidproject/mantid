@@ -235,6 +235,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         # check
+        # TODO FIXME - Fill blabla
         assert self._roiStart is not None, 'blabla'
         assert self._roiEnd is not None, 'blabla'
 
