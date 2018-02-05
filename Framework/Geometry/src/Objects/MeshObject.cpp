@@ -26,9 +26,9 @@ MeshObject::MeshObject() {} // Should never be called
 
 MeshObject::MeshObject(const std::vector<size_t> &faces,
                        const std::vector<V3D> &vertices)
-    : m_boundingBox(), m_object_number(0),
-     m_id(), m_material(), m_triangles(faces), m_vertices(vertices) {
-    m_handler = boost::make_shared<CacheGeometryHandler>(this);
+    : m_boundingBox(), m_object_number(0), m_id(), m_material(),
+      m_triangles(faces), m_vertices(vertices) {
+  m_handler = boost::make_shared<CacheGeometryHandler>(this);
 }
 
 /**
@@ -704,9 +704,9 @@ void MeshObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
 /** Getter for the shape xml
 @return the shape xml.
 */
-std::string MeshObject::getShapeXML() const { 
+std::string MeshObject::getShapeXML() const {
   throw std::runtime_error("getShapeXML not available for MeshObject");
-  }
+}
 
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid

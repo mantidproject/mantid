@@ -51,8 +51,7 @@ public:
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
-boost::shared_ptr<MeshObject> createCube(const double size,
-  const V3D &centre) {
+boost::shared_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   /**
   * Create cube of side length size with specified centre,
   * parellel to axes and non-negative vertex coordinates.
@@ -114,7 +113,7 @@ boost::shared_ptr<MeshObject> createCube(const double size,
   triangles.push_back(2);
 
   boost::shared_ptr<MeshObject> retVal =
-    boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
+      boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
 }
 
@@ -177,7 +176,7 @@ boost::shared_ptr<MeshObject> createOctahedron() {
   triangles.push_back(5);
 
   boost::shared_ptr<MeshObject> retVal =
-    boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
+      boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
 }
 
@@ -266,10 +265,9 @@ boost::shared_ptr<MeshObject> createLShape() {
   triangles.push_back(6);
 
   boost::shared_ptr<MeshObject> retVal =
-    boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
+      boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
 }
-
 }
 
 class MeshObjectTest : public CxxTest::TestSuite {
@@ -357,7 +355,7 @@ public:
     TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
         original.getGeometryHandler()));
 
-    auto lhs = createOctahedron(); 
+    auto lhs = createOctahedron();
     *lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
     objType = -1;
@@ -1012,7 +1010,6 @@ public:
     TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, -0.5)), M_PI * 2.0 / 3.0,
                     satol);
   }
-
 };
 
 // -----------------------------------------------------------------------------
