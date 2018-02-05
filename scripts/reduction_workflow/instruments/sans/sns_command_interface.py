@@ -25,6 +25,7 @@ from .hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScat
 from .hfir_command_interface import NoSensitivityCorrection, DivideByThickness  # noqa: F401
 
 from .hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii  # noqa: F401
+from .hfir_command_interface import SetWedges  # noqa: F401
 
 from .hfir_command_interface import DirectBeamTransmission, TransmissionDarkCurrent  # noqa: F401
 from .hfir_command_interface import ThetaDependentTransmission  # noqa: F401

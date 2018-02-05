@@ -4,15 +4,27 @@ from __future__ import absolute_import, division, print_function
 
 from collections import OrderedDict
 from itertools import cycle
+from configparser import ConfigParser
+import os.path
 
 import numpy as np
-import scipy.optimize as optimize
-from scipy import interpolate
+from scipy import interpolate, optimize
 
-from mantid.api import *
-from mantid.kernel import *
-from mantid.kernel import Direction
-from mantid.simpleapi import *
+# from mantid.api import *
+# from mantid.kernel import *
+# from mantid.kernel import Direction
+# from mantid.simpleapi import *
+
+from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
+    FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
+    ITableWorkspace, MatrixWorkspace, WorkspaceGroupProperty
+
+from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
+    FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
+    PropertyManagerDataService, StringListValidator, Property
+
+from mantid import config, logger
+
 '''
 
 
@@ -31,9 +43,24 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
     def PyInit(self):
         # In
+        
+        self.declareProperty(
+            FileProperty(
+                name="ConfigurationFile",
+                defaultValue="",
+                action=FileAction.OptionalLoad,
+                extensions=[".ini"],
+            ),
+            doc="Name of the configuration file"
+        )
+        
         self.declareProperty(
             WorkspaceGroupProperty(
-                "InputWorkspaces", "", direction=Direction.Input),
+                "InputWorkspaces",
+                "",
+                direction=Direction.Input,
+                optional=PropertyMode.Optional,
+            ),
             doc="I(q, wavelength) non-scaled workspaces.")
 
         self.declareProperty(
@@ -90,14 +117,6 @@ class SANSWLNormCorrection(PythonAlgorithm):
             "Optional Prefix for the output I(q, wavelength) scaled workspaces"
         )
 
-        # Out
-        self.declareProperty(
-            ITableWorkspaceProperty(
-                'OutputWorkspaceTable',
-                'out_table',
-                optional=PropertyMode.Optional,
-                direction=Direction.Output),
-            doc='Table workspace of fit parameters')
 
     def _setup(self):
         '''
@@ -126,8 +145,24 @@ class SANSWLNormCorrection(PythonAlgorithm):
         self.b_list = None if len(
             self.getProperty('BList').value) == 0 else cycle(
                 self.getProperty('BList').value)
+        
+        self.output_prefix = self.getProperty('OutputWorkspacePrefix').value
+            
+            
 
-        self.out_ws_table_name = self.getPropertyValue("OutputWorkspaceTable")
+    def _parse_config_file(self):
+        
+        file_name = self.getProperty('ConfigurationFile').value
+        file_name = '/home/rhf/Documents/SANS/EQSANS/2018-01-01-ChangwooWlNorm/conf.ini'
+        if os.path.exists(file_name):
+            parser = ConfigParser()
+            parser.read(file_name)
+            parser.optionxform = str # case sensitive
+#             for k, v in parser.items('DEFAULT'):
+#                 if 
+#                 
+            dict(parser.items('DEFAULT'))
+
 
     def validateInputs(self):
         '''
@@ -400,10 +435,10 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 UnitX="Q")
             mtd[ws_name].setDx(0,v['dx' + suffix])  # add x error
             out_ws_list.append(ws_name)
-        prefix = self.getProperty("OutputWorkspacePrefix").value
+        
         GroupWorkspaces(
             InputWorkspaces=out_ws_list,
-            OutputWorkspace=prefix + suffix + '_fit')
+            OutputWorkspace=self.output_prefix + suffix + '_fit')
 
     def _create_grouped_wss(self):
         '''
@@ -436,7 +471,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 yi = np.append(yi, v['y_trimmed_fit'][v['x_trimmed'] == xi])
             y = np.append(y, np.average(yi))
             
-        out_ws_name = self.getProperty("OutputWorkspacePrefix").value + "_trimmed_fit_averaged"
+        out_ws_name = self.output_prefix "_trimmed_fit_averaged"
 
         CreateWorkspace(
             OutputWorkspace=out_ws_name,
@@ -450,8 +485,11 @@ class SANSWLNormCorrection(PythonAlgorithm):
         '''
         '''
         # Workspace Table
-        outws = CreateEmptyTableWorkspace(
-            OutputWorkspace=self.out_ws_table_name)
+        
+        
+        ws_table_name = self.output_prefix + "_table"        
+        
+        outws = CreateEmptyTableWorkspace(OutputWorkspace=ws_table_name)
         columns = ["IQCurve", "K", "KError", "B", "BError", "GoodnessOfFit",
                    "WavelengthMin", "WavelengthMax", "WavelengthAverage"]
 
@@ -513,7 +551,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
             })
             logger.debug("%s" % row)
             outws.addRow(row)
-        self.setProperty("OutputWorkspaceTable", outws)
+        
 
     def PyExec(self):
 
