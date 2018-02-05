@@ -44,11 +44,9 @@ Please note the different meaning of
 
 Several workspaces can be combined to a :literal:`GroupWorkspace` which may be the preferred output for workflow algorithms.
 
-TODO: image, explanation
-
 :literal:`TableWorkspaces` descibe their content by column names and contain reduction specific data, e.g. fit results of peak positions
 
-TODO: image, explanation
+.. figure:: /images/Workspace4.png
 
 ==========
 Algorithms
@@ -160,4 +158,4 @@ taken from a bespoke algorithm or auto reduction.
 
 These interfaces do not support GroupWorkspaces as input.
 
-TODO: image, explanation? - source/interfaces/IndirectDataAnalysis.rst
+.. figure:: /images/interface.png
