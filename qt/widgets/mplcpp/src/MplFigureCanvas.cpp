@@ -493,6 +493,37 @@ void MplFigureCanvas::setLabel(const Axes::Label type, const char *label) {
 }
 
 /**
+ * Set the font size of the tick labels
+ * @param axis Enumeration defining the axis
+ * @param size The new font size
+ */
+void MplFigureCanvas::setTickLabelFontSize(const Axes::Scale axis, double size) {
+  const char* xAxis = "x";
+  const char* yAxis = "y";
+  const char* bothAxes = "both";
+  const char* whichAxis = bothAxes;
+  if (axis == Axes::Scale::X) {
+    whichAxis = xAxis;
+  } else if (axis == Axes::Scale::Y) {
+    whichAxis = yAxis;
+  }
+  ScopedPythonGIL gil;
+  auto axes = m_pydata->gca();
+  auto methodName = Py_BuildValue("s", "tick_params");
+  auto method = PyObject_GetAttr(axes.get(), methodName);
+  auto args = Py_BuildValue("(s)", whichAxis);
+  auto kwargs = Py_BuildValue("{s:d}", "labelsize", size);
+  auto result = PyObject_Call(method, args, kwargs);
+  if (!result)
+    throw PythonError();
+  detail::decref(result);
+  detail::decref(kwargs);
+  detail::decref(args);
+  detail::decref(method);
+  detail::decref(methodName);
+}
+
+/**
  * Set the scale type on an axis. Redraw is called if requested
  * @param axis Enumeration defining the axis
  * @param scaleType The type of scale

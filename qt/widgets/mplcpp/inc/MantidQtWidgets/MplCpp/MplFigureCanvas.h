@@ -107,6 +107,7 @@ public:
   inline void setLabel(const Axes::Label type, const QString &label) {
     setLabel(type, label.toAscii().constData());
   }
+  void setTickLabelFontSize(const Axes::Scale axis, double size);
   ///@}
 
   ///@{

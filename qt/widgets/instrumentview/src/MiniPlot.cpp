@@ -46,6 +46,7 @@ MiniPlot::MiniPlot(QWidget *parent)
       m_xunit() {
   setCanvasFaceColor("white");
   toggleZoomMode();
+  setTickLabelFontSize(Axes::Scale::Both, 9.0);
 }
 
 /**
