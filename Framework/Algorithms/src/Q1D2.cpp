@@ -11,6 +11,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -18,6 +20,9 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidParallel/Communicator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -28,6 +33,7 @@ DECLARE_ALGORITHM(Q1D2)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 Q1D2::Q1D2() : API::Algorithm(), m_dataWS(), m_doSolidAngle(false) {}
 
@@ -263,6 +269,40 @@ void Q1D2::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  if (communicator().size() > 1) {
+    int tag = 0;
+    auto size = static_cast<int>(YOut.size());
+    if (communicator().rank() == 0) {
+      for (int rank = 1; rank < communicator().size(); ++rank) {
+        HistogramData::HistogramY y(YOut.size());
+        HistogramData::HistogramE e2(YOut.size());
+        communicator().recv(rank, tag, &y[0], size);
+        YOut += y;
+        communicator().recv(rank, tag, &e2[0], size);
+        EOutTo2 += e2;
+        communicator().recv(rank, tag, &y[0], size);
+        normSum += y;
+        communicator().recv(rank, tag, &e2[0], size);
+        normError2 += e2;
+        int detCount;
+        communicator().recv(rank, tag, detCount);
+        std::vector<detid_t> detIds(detCount);
+        communicator().recv(rank, tag, detIds.data(), detCount);
+        outputWS->getSpectrum(0).addDetectorIDs(detIds);
+      }
+    } else {
+      communicator().send(0, tag, YOut.rawData().data(), size);
+      communicator().send(0, tag, EOutTo2.rawData().data(), size);
+      communicator().send(0, tag, normSum.rawData().data(), size);
+      communicator().send(0, tag, normError2.rawData().data(), size);
+      const auto detIdSet = outputWS->getSpectrum(0).getDetectorIDs();
+      std::vector<detid_t> detIds(detIdSet.begin(), detIdSet.end());
+      auto size = static_cast<int>(detIds.size());
+      communicator().send(0, tag, size);
+      communicator().send(0, tag, detIds.data(), size);
+    }
+  }
+
   if (useQResolution) {
     // The number of Q (x)_ values is N, while the number of DeltaQ values is
     // N-1,
@@ -281,7 +321,7 @@ void Q1D2::exec() {
   }
 
   bool doOutputParts = getProperty("OutputParts");
-  if (doOutputParts) {
+  if (doOutputParts && communicator().rank() == 0) {
     MatrixWorkspace_sptr ws_sumOfCounts =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfCounts->setSharedX(0, outputWS->sharedX(0));
@@ -298,13 +338,17 @@ void Q1D2::exec() {
     ws_sumOfNormFactors->setFrequencyVariances(0, normError2);
 
     helper.outputParts(this, ws_sumOfCounts, ws_sumOfNormFactors);
+  } else if (doOutputParts) {
+    helper.outputParts(this, nullptr, nullptr);
   }
 
   progress.report("Normalizing I(Q)");
   // finally divide the number of counts in each output Q bin by its weighting
   normalize(normSum, normError2, YOut, EOutTo2);
 
-  setProperty("OutputWorkspace", outputWS);
+  if (communicator().rank() == 0) {
+    setProperty("OutputWorkspace", outputWS);
+  }
 }
 
 /** Creates the output workspace, its size, units, etc.
@@ -316,24 +360,26 @@ API::MatrixWorkspace_sptr
 Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   // Calculate the output binning
   HistogramData::BinEdges XOut(0);
-  size_t sizeOut = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(
+  static_cast<void>(VectorHelper::createAxisFromRebinParams(
       binParams, XOut.mutableRawData()));
 
-  // Now create the output workspace
-  MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create(m_dataWS, 1, sizeOut, sizeOut - 1);
+  // Create output workspace. On all but rank 0 this is a temporary workspace.
+  Indexing::IndexInfo indexInfo(1, communicator().rank() == 0
+                                       ? Parallel::StorageMode::MasterOnly
+                                       : Parallel::StorageMode::Cloned,
+                                communicator());
+  indexInfo.setSpectrumDefinitions(std::vector<SpectrumDefinition>(1));
+  auto outputWS = create<MatrixWorkspace>(*m_dataWS, indexInfo, XOut);
   outputWS->getAxis(0)->unit() =
       UnitFactory::Instance().create("MomentumTransfer");
   outputWS->setYUnitLabel("1/cm");
 
-  // Set the X vector for the output workspace
-  outputWS->setBinEdges(0, XOut);
   outputWS->setDistribution(true);
 
   outputWS->getSpectrum(0).clearDetectorIDs();
   outputWS->getSpectrum(0).setSpectrumNo(1);
 
-  return outputWS;
+  return std::move(outputWS);
 }
 
 /** Calculate the normalization term for each output bin
@@ -662,6 +708,29 @@ void Q1D2::normalize(const HistogramData::HistogramY &normSum,
     errors[k] =
         std::sqrt(errors[k] / (c * c) + normError2[k] * aOverc * aOverc);
   }
+}
+
+namespace {
+void checkStorageMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes,
+    const std::string &name) {
+  if (storageModes.count(name) &&
+      storageModes.at(name) != Parallel::StorageMode::Cloned)
+    throw std::runtime_error(name + " must have " +
+                             Parallel::toString(Parallel::StorageMode::Cloned));
+}
+}
+
+Parallel::ExecutionMode Q1D2::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  if (storageModes.count("PixelAdj") || storageModes.count("WavePixelAdj") ||
+      storageModes.count("QResolution"))
+    throw std::runtime_error(
+        "Using in PixelAdj, WavePixelAdj, or QResolution in an MPI run of " +
+        name() + " is currently not supported.");
+  checkStorageMode(storageModes, "WavelengthAdj");
+  return Parallel::getCorrespondingExecutionMode(
+      storageModes.at("DetBankWorkspace"));
 }
 
 } // namespace Algorithms

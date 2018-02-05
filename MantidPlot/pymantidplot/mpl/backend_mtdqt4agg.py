@@ -96,12 +96,15 @@ class ThreadAwareFigureManagerQT(FigureManagerQT):
         FigureManagerQT.__init__(self, canvas, num)
         self._destroy_orig = self.destroy
         self.destroy = QAppThreadCall(self._destroy_orig)
+        self._show_orig = self.show
+        self.show = QAppThreadCall(self._show_orig)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Wrap the required functions
+# Patch known functions
+# ----------------------------------------------------------------------------------------------------------------------
 show = QAppThreadCall(show)
-# Use our figure manager
+
 FigureManager = ThreadAwareFigureManagerQT
 
 if MPL_HAVE_GIVEN_FIG_METHOD:

@@ -47,8 +47,8 @@ class PythonFileInterpreterTest(unittest.TestCase):
         self.assertTrue("Status: Idle", w.status.currentMessage())
 
     def test_constructor_populates_editor_with_content(self):
-        w = PythonFileInterpreter(content='my funky code')
-        self.assertEqual('my funky code', w.editor.text())
+        w = PythonFileInterpreter(content='# my funky code')
+        self.assertEqual('# my funky code', w.editor.text())
 
     def test_constructor_respects_filename(self):
         w = PythonFileInterpreter(filename='test.py')

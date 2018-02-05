@@ -147,11 +147,6 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   inti = peak - ratio * backgrd;
   sigi = sqrt(peak + ratio * ratio * backgrd);
 
-  if (inti < 0) {
-    inti = 0;
-    sigi = 0;
-  }
-
   // compute the fraction of peak within the standard core
   const auto total = (core + peak) - ratio * backgrd;
   const auto frac = std::min(1.0, std::abs(inti / total));
@@ -186,9 +181,9 @@ Integrate3DEvents::integrateWeakPeak(
   const auto &events = *result;
 
   const auto &directions = shape->directions();
-  const auto &abcBackgroundInnerRadii = shape->abcRadiiBackgroundInner();
-  const auto &abcBackgroundOuterRadii = shape->abcRadiiBackgroundOuter();
-  const auto &abcRadii = shape->abcRadii();
+  auto abcBackgroundInnerRadii = shape->abcRadiiBackgroundInner();
+  auto abcBackgroundOuterRadii = shape->abcRadiiBackgroundOuter();
+  auto abcRadii = shape->abcRadii();
 
   const auto max_sigma = std::get<2>(libPeak);
   auto rValues = calculateRadiusFactors(params, max_sigma);
@@ -214,7 +209,6 @@ Integrate3DEvents::integrateWeakPeak(
   const auto fracError = std::get<1>(libPeak);
 
   inti = peak_w_back - ratio * backgrd;
-  sigi = inti + ratio * ratio * backgrd;
 
   // correct for fractional intensity
   sigi = sigi / pow(inti, 2);
@@ -223,12 +217,17 @@ Integrate3DEvents::integrateWeakPeak(
   inti = inti * frac;
   sigi = sqrt(sigi) * inti;
 
-  if (inti < 0) {
-    inti = 0;
-    sigi = 0;
+  // scale integration shape by fractional amount
+  for (size_t i = 0; i < abcRadii.size(); ++i) {
+    abcRadii[i] *= frac;
+    abcBackgroundInnerRadii[i] *= frac;
+    abcBackgroundOuterRadii[i] *= frac;
   }
 
-  return shape;
+  return boost::make_shared<const PeakShapeEllipsoid>(
+      shape->directions(), abcRadii, abcBackgroundInnerRadii,
+      abcBackgroundOuterRadii, Mantid::Kernel::QLab,
+      "IntegrateEllipsoidsTwoStep");
 }
 
 double Integrate3DEvents::estimateSignalToNoiseRatio(
@@ -277,9 +276,10 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   double peak_w_back = numInEllipsoid(events, eigen_vectors, peakRadii);
 
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
-  double inti = peak_w_back - ratio * backgrd;
+  auto inti = peak_w_back - ratio * backgrd;
+  auto sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
 
-  return inti / std::max(1.0, (ratio * backgrd));
+  return inti / sigi;
 }
 
 const std::vector<std::pair<double, V3D>> *

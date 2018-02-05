@@ -60,6 +60,7 @@ public:
   size_t localSize() const;
 
   SpectrumNumber spectrumNumber(const size_t index) const;
+  const std::vector<SpectrumNumber> &globalSpectrumNumbers() const;
 
   SpectrumIndexSet makeIndexSet() const;
   SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max) const;
