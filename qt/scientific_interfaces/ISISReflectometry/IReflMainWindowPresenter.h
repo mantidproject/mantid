@@ -2,6 +2,7 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <string>
 
@@ -42,6 +43,9 @@ public:
 
   enum class Flag { ConfirmReductionPausedFlag, ConfirmReductionResumedFlag };
   virtual void notify(Flag flag) = 0;
+
+  virtual void completedReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group) = 0;
 
   /// Pre-processing
   virtual std::string getTransmissionRuns(int group) const = 0;

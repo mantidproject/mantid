@@ -85,6 +85,8 @@ public:
 
   void settingsChanged(int group) override;
 
+  void completedReductionSuccessfully(MantidWidgets::DataProcessor::GroupData const &group) override;
+
 private:
   /// Check for Settings Tab null pointer
   void checkSettingsPtrValid(IReflSettingsTabPresenter *pointer) const;

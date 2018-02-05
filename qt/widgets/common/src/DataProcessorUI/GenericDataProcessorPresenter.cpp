@@ -417,6 +417,7 @@ void GenericDataProcessorPresenter::nextRow() {
     // single row
     if (!isProcessed(groupIndex) && m_groupData.size() > 1) {
       startAsyncGroupReduceThread(m_groupData, groupIndex);
+      completedReductionSuccessfully(m_groupData);
       return;
     }
   }
@@ -424,6 +425,9 @@ void GenericDataProcessorPresenter::nextRow() {
   // Row / group skipped, perform next action
   doNextAction();
 }
+
+void GenericDataProcessorPresenter::completedReductionSuccessfully(
+    GroupData const &) {}
 
 /**
 Process a new group
@@ -436,9 +440,6 @@ void GenericDataProcessorPresenter::nextGroup() {
     m_reductionPaused = true;
     return;
   }
-
-  // Clear group data from any previously processed groups
-  m_groupData.clear();
 
   if (!m_group_queue.empty()) {
     // Set next action flag
@@ -458,6 +459,8 @@ void GenericDataProcessorPresenter::nextGroup() {
       saveNotebook(m_selectedData);
     endReduction();
   }
+  // Clear group data from any previously processed groups
+  m_groupData.clear();
 }
 
 /*

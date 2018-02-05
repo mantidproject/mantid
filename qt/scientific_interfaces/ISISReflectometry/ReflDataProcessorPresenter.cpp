@@ -266,6 +266,11 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   return errors;
 }
 
+void ReflDataProcessorPresenter::completedReductionSuccessfully(
+    MantidWidgets::DataProcessor::GroupData const &groupData) {
+  m_mainPresenter->completedReductionSuccessfully(groupData);
+}
+
 /** Processes a group of non-event workspaces
 *
 * @param groupID :: An integer number indicating the id of this group

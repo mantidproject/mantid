@@ -38,6 +38,7 @@ namespace DataProcessor {
 using RowData = QStringList;
 using GroupData = std::map<int, RowData>;
 using TreeData = std::map<int, GroupData>;
+bool canPostprocess(GroupData const& group);
 }
 }
 }

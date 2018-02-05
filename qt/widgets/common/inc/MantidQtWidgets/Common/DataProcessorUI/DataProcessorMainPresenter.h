@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <QSet>
 #include <QString>
@@ -74,6 +75,7 @@ public:
   /// Handle data reduction paused/resumed confirmation
   virtual void confirmReductionPaused() const {}
   virtual void confirmReductionResumed() const {}
+  virtual void completedReductionSuccessfully(GroupData const&) {};
 };
 }
 }

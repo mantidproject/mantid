@@ -49,6 +49,7 @@ public:
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflSaveTabPresenter::Flag flag) override;
+  void completedReductionSuccessfully(MantidWidgets::DataProcessor::GroupData const& group) override;
 
 private:
   /// Adds all workspace names to the list of workspaces

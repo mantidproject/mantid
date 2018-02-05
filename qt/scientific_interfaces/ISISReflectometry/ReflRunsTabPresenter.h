@@ -5,6 +5,7 @@
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
@@ -86,6 +87,7 @@ public:
   void confirmReductionPaused() const override;
   void confirmReductionResumed() const override;
   void settingsChanged(int group) override;
+  void completedReductionSuccessfully(MantidWidgets::DataProcessor::GroupData const& group) override;
 
 private:
   /// The search model

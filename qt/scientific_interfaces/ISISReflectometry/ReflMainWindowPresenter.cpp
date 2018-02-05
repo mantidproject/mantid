@@ -41,6 +41,10 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
+void ReflMainWindowPresenter::completedReductionSuccessfully(GroupData const &group) {
+  m_savePresenter->completedReductionSuccessfully(group);
+}
+
 /**
 Used by the view to tell the presenter something has changed
 */

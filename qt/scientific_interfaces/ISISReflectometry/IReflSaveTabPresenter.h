@@ -1,5 +1,6 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSAVETABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSAVETABPRESENTER_H
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -45,6 +46,9 @@ public:
     saveWorkspacesFlag,
     suggestSaveDirFlag
   };
+
+  virtual void completedReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group) = 0;
 
   /// Tell the presenter something happened
   virtual void notify(IReflSaveTabPresenter::Flag flag) = 0;

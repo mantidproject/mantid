@@ -59,6 +59,7 @@ public:
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
 
+  void completedReductionSuccessfully(GroupData const& groupData) override;
 private:
   // Process selected rows
   void process() override;

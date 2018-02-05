@@ -159,6 +159,11 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
+void ReflRunsTabPresenter::completedReductionSuccessfully(
+    GroupData const &group) {
+  m_mainPresenter->completedReductionSuccessfully(group);
+}
+
 /** Pushes the list of commands (actions) */
 void ReflRunsTabPresenter::pushCommands() {
 
