@@ -439,6 +439,8 @@ void SaveLauenorm::exec() {
 
     out << '\n';
   }
+  out << "END-OF-REFLECTION-DATA\n";
+  out << "HARMONICS DATA    0 REFLECTIONS\n";
   out << "END-OF-FILE\n";
   out.flush();
   out.close();
