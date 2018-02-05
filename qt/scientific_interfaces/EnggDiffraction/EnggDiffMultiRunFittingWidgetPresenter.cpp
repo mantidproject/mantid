@@ -1,6 +1,7 @@
 #include "EnggDiffMultiRunFittingWidgetPresenter.h"
 #include "EnggDiffMultiRunFittingWidgetAdder.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
@@ -108,6 +109,10 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
     processPlotPeaksStateChanged();
     break;
 
+  case Notification::PlotToSeparateWindow:
+    processPlotToSeparateWindow();
+    break;
+
   case Notification::RemoveRun:
     processRemoveRun();
     break;
@@ -120,6 +125,47 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
 
 void EnggDiffMultiRunFittingWidgetPresenter::processPlotPeaksStateChanged() {
   updatePlot(getSelectedRunLabel());
+}
+
+void EnggDiffMultiRunFittingWidgetPresenter::processPlotToSeparateWindow() {
+  if (!m_view->hasSelectedRunLabel()) {
+    m_view->userError("Please select a run to plot",
+                      "Cannot plot to separate window without selecting a "
+                      "run from the list");
+    return;
+  }
+  const auto runLabel = m_view->getSelectedRunLabel();
+  const auto focusedRun = m_model->getFocusedRun(runLabel);
+
+  if (!focusedRun) {
+    m_view->userError(
+        "Invalid focused run identifier",
+        "Tried to access invalid run, run number " +
+            std::to_string(runLabel.runNumber) + " and bank ID " +
+            std::to_string(runLabel.bank) +
+            ". Please contact the development team with this message");
+    return;
+  }
+
+  const auto focusedRunName = (*focusedRun)->getName();
+
+  auto &ADS = Mantid::API::AnalysisDataService::Instance();
+
+  if (!ADS.doesExist(focusedRunName)) {
+    ADS.add(focusedRunName, *focusedRun);
+  }
+
+  std::string fittedPeaksName = "";
+  if (showFitResultsSelected() && m_model->hasFittedPeaksForRun(runLabel)) {
+    const auto fittedPeaks = m_model->getFittedPeaks(runLabel);
+    fittedPeaksName = (*fittedPeaks)->getName();
+
+    if (!ADS.doesExist(fittedPeaksName)) {
+      ADS.add(fittedPeaksName, *fittedPeaks);
+    }
+  }
+
+  m_view->plotToSeparateWindow(focusedRunName, fittedPeaksName);
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processRemoveRun() {

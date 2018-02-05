@@ -33,6 +33,12 @@ public:
   virtual void
   plotFocusedRun(const std::vector<boost::shared_ptr<QwtData>> &curve) = 0;
 
+  /// Plot focused run and fitted peaks to a separate window
+  /// Leave fittedPeaksName blank to not plot it
+  /// Both workspaces should exist in the ADS
+  virtual void plotToSeparateWindow(const std::string &focusedRunName,
+                                    const std::string &fittedPeaksName) = 0;
+
   /**
    Show an error that the user has tried to plot an invalid fitted peaks
    workspace

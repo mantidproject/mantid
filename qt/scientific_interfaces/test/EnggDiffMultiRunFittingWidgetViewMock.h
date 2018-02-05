@@ -26,6 +26,9 @@ public:
   MOCK_METHOD1(plotFocusedRun,
                void(const std::vector<boost::shared_ptr<QwtData>> &curve));
 
+  MOCK_METHOD2(plotToSeparateWindow, void(const std::string &focusedRunName,
+                                          const std::string &fittedPeaksName));
+
   MOCK_METHOD1(reportPlotInvalidFittedPeaks, void(const RunLabel &runLabel));
 
   MOCK_METHOD1(reportPlotInvalidFocusedRun, void(const RunLabel &runLabel));

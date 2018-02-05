@@ -13,11 +13,7 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockEnggDiffGSASFittingView : public IEnggDiffGSASFittingView {
 
 public:
-  MOCK_METHOD1(
-      addWidget,
-      void(boost::shared_ptr<
-           MantidQt::CustomInterfaces::IEnggDiffMultiRunFittingWidgetView>
-               widget));
+  MOCK_METHOD1(addWidget, void(IEnggDiffMultiRunFittingWidgetView *widget));
 
   MOCK_CONST_METHOD1(displayLatticeParams,
                      void(const Mantid::API::ITableWorkspace_sptr));

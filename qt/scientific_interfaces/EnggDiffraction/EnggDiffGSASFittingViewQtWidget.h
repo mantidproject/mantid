@@ -5,6 +5,7 @@
 #include "EnggDiffMultiRunFittingQtWidget.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
+#include "IEnggDiffractionPythonRunner.h"
 #include "IEnggDiffractionUserMsg.h"
 
 #include <qwt_plot_curve.h>
@@ -22,7 +23,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
 
 public:
   EnggDiffGSASFittingViewQtWidget(
-      boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider);
+      boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
+      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
 
   ~EnggDiffGSASFittingViewQtWidget() override;
 

@@ -5,7 +5,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget() {
+EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
+    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner)
+    : m_pythonRunner(pythonRunner) {
   setupUI();
 
   m_zoomTool = Mantid::Kernel::make_unique<QwtPlotZoomer>(
@@ -71,6 +73,11 @@ void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
   throw std::runtime_error("plotFittedPeaks not yet implemented");
 }
 
+void EnggDiffMultiRunFittingQtWidget::processPlotToSeparateWindow() {
+  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
+                          PlotToSeparateWindow);
+}
+
 void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
     const std::vector<boost::shared_ptr<QwtData>> &curves) {
   for (const auto &curve : curves) {
@@ -83,6 +90,39 @@ void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
   m_ui.plotArea->replot();
   m_zoomTool->setZoomBase();
   m_zoomTool->setEnabled(true);
+}
+
+void EnggDiffMultiRunFittingQtWidget::plotToSeparateWindow(
+    const std::string &focusedRunName, const std::string &fittedPeaksName) {
+
+  std::string plotCode = "ws1 = \"" + focusedRunName + "\"\n";
+
+  plotCode += "workspaceToPlot = \"engg_gui_separate_plot_ws\"\n"
+
+              "if (mtd.doesExist(workspaceToPlot)):\n"
+              "    DeleteWorkspace(workspaceToPlot)\n"
+
+              "ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=0, "
+              "OutputWorkspace=workspaceToPlot)\n"
+
+              "spectra_to_plot = [0]\n";
+
+  if (!fittedPeaksName.empty()) {
+    plotCode += "ws2 = \"" + fittedPeaksName + "\"\n";
+    plotCode +=
+        "ws2_spectrum = ExtractSingleSpectrum(InputWorkspace=ws2, "
+        "WorkspaceIndex=0, StoreInADS=False)\n"
+
+        "AppendSpectra(InputWorkspace1=workspaceToPlot, "
+        "InputWorkspace2=ws2_spectrum, OutputWorkspace=workspaceToPlot)\n"
+
+        "spectra_to_plot = [0, 1]\n";
+  }
+
+  plotCode +=
+      "plot = plotSpectrum(workspaceToPlot, spectra_to_plot).activeLayer()\n"
+      "plot.setTitle(\"Engg GUI Fitting Workspaces\")\n";
+  m_pythonRunner->enggRunPythonCode(plotCode);
 }
 
 void EnggDiffMultiRunFittingQtWidget::processRemoveRun() {
@@ -128,6 +168,8 @@ void EnggDiffMultiRunFittingQtWidget::setupUI() {
           SLOT(plotFittedPeaksStateChanged()));
   connect(m_ui.pushButton_removeRun, SIGNAL(clicked()), this,
           SLOT(processRemoveRun()));
+  connect(m_ui.pushButton_plotToSeparateWindow, SIGNAL(clicked()), this,
+	  SLOT(processPlotToSeparateWindow()));
 }
 
 bool EnggDiffMultiRunFittingQtWidget::showFitResultsSelected() const {

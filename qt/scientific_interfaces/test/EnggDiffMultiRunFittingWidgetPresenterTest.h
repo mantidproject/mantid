@@ -242,6 +242,111 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_plotToSeparateWindowDoesNothingWhenNoRunSelected() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockView, userError("Please select a run to plot",
+                                       "Cannot plot to separate window without "
+                                       "selecting a run from the list"))
+        .Times(1);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
+                          PlotToSeparateWindow);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_plotToSeparateWindowValidFocusedRunNoFittedPeaks() {
+    auto presenter = setUpPresenter();
+    const RunLabel runLabel(123, 1);
+
+    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    const auto wsName = "SampleWorkspace";
+
+    auto &ADS = API::AnalysisDataService::Instance();
+    ADS.add(wsName, *sampleWorkspace);
+
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(sampleWorkspace));
+
+    EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
+
+    EXPECT_CALL(*m_mockView, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(false));
+
+    EXPECT_CALL(*m_mockView, plotToSeparateWindow(wsName, "")).Times(1);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
+                          PlotToSeparateWindow);
+    assertMocksUsedCorrectly();
+
+    ADS.remove(wsName);
+  }
+
+  void test_plotToSeparateWindowWithFittedPeaks() {
+    auto presenter = setUpPresenter();
+    const RunLabel runLabel(123, 1);
+
+    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    const auto wsName = "SampleWorkspace";
+    auto &ADS = API::AnalysisDataService::Instance();
+    ADS.add(wsName, *sampleWorkspace);
+
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(sampleWorkspace));
+
+    EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
+
+    EXPECT_CALL(*m_mockView, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(true));
+
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleFittedPeaks(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    const auto fittedPeaksName = "SampleFittedPeaks";
+    ADS.add(fittedPeaksName, *sampleFittedPeaks);
+    EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
+        .Times(1)
+        .WillOnce(Return(sampleFittedPeaks));
+
+    EXPECT_CALL(*m_mockView, plotToSeparateWindow(wsName, fittedPeaksName))
+        .Times(1);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
+                          PlotToSeparateWindow);
+    assertMocksUsedCorrectly();
+
+    ADS.remove(wsName);
+    ADS.remove(fittedPeaksName);
+  }
+
 private:
   MockEnggDiffMultiRunFittingWidgetModel *m_mockModel;
   MockEnggDiffMultiRunFittingWidgetView *m_mockView;
@@ -251,14 +356,10 @@ private:
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetModel>>();
     m_mockModel = mockModel_uptr.get();
 
-    auto mockView_sptr = boost::make_shared<
-        testing::NiceMock<MockEnggDiffMultiRunFittingWidgetView>>();
-    m_mockView = mockView_sptr.get();
+    m_mockView = new testing::NiceMock<MockEnggDiffMultiRunFittingWidgetView>();
 
-    std::unique_ptr<EnggDiffMultiRunFittingWidgetPresenter> pres_uptr(
-        new EnggDiffMultiRunFittingWidgetPresenter(std::move(mockModel_uptr),
-                                                   mockView_sptr));
-    return pres_uptr;
+    return Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetPresenter>(
+        std::move(mockModel_uptr), m_mockView);
   }
 
   void assertMocksUsedCorrectly() {
@@ -268,6 +369,9 @@ private:
     TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(m_mockView));
+    if (m_mockView) {
+      delete m_mockView;
+    }
   }
 };
 

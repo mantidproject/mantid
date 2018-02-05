@@ -42,6 +42,7 @@ public:
 
 private:
   void processPlotPeaksStateChanged();
+  void processPlotToSeparateWindow();
   void processRemoveRun();
   void processSelectRun();
 

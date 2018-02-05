@@ -4,6 +4,7 @@
 #include "DllConfig.h"
 #include "IEnggDiffMultiRunFittingWidgetPresenter.h"
 #include "IEnggDiffMultiRunFittingWidgetView.h"
+#include "IEnggDiffractionPythonRunner.h"
 #include "IEnggDiffractionUserMsg.h"
 #include "ui_EnggDiffMultiRunFittingWidget.h"
 
@@ -20,7 +21,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingQtWidget
   Q_OBJECT
 
 public:
-  EnggDiffMultiRunFittingQtWidget();
+  EnggDiffMultiRunFittingQtWidget(
+      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
 
   ~EnggDiffMultiRunFittingQtWidget() override;
 
@@ -33,6 +35,9 @@ public:
 
   void
   plotFocusedRun(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
+
+  void plotToSeparateWindow(const std::string &focusedRunName,
+                            const std::string &fittedPeaksName) override;
 
   void reportPlotInvalidFittedPeaks(const RunLabel &runLabel) override;
 
@@ -60,6 +65,7 @@ signals:
 private slots:
   void processSelectRun();
   void plotFittedPeaksStateChanged();
+  void processPlotToSeparateWindow();
   void processRemoveRun();
 
 private:
@@ -74,6 +80,8 @@ private:
   std::unique_ptr<QwtPlotZoomer> m_zoomTool;
 
   boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_presenter;
+
+  boost::shared_ptr<IEnggDiffractionPythonRunner> m_pythonRunner;
 
   Ui::EnggDiffMultiRunFittingWidget m_ui;
 

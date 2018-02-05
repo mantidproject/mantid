@@ -13,13 +13,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
-    boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider)
+    boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
+    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner)
     : m_userMessageProvider(userMessageProvider) {
 
   auto multiRunWidgetModel =
       Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetModel>();
   m_multiRunWidgetView =
-      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingQtWidget>();
+      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingQtWidget>(
+          pythonRunner);
 
   auto multiRunWidgetPresenter =
       boost::make_shared<EnggDiffMultiRunFittingWidgetPresenter>(
@@ -109,7 +111,6 @@ void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
 }
 
 void EnggDiffGSASFittingViewQtWidget::selectRun() {
-  userWarning("EnggDiffGSASFittingViewQtWidget::selectRun", "");
   m_presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
 }
 
