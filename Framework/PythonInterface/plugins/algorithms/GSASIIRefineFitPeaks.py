@@ -51,6 +51,15 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return ("Perform Rietveld or Pawley refinement of lattice parameters on a diffraction spectrum "
                 "using GSAS-II scriptable API")
 
+    def validateInputs(self):
+        x_min = self.getProperty(self.PROP_XMIN).value
+        x_max = self.getProperty(self.PROP_XMAX).value
+
+        if x_max <= x_min:
+            return {self.PROP_XMAX: "{} must be greater than {}".format(self.PROP_XMAX, self.PROP_XMIN)}
+
+        return {}
+
     def PyInit(self):
         self.declareProperty(name=self.PROP_REFINEMENT_METHOD, defaultValue=self.REFINEMENT_METHODS[0],
                              validator=StringListValidator(self.REFINEMENT_METHODS), direction=Direction.Input,
