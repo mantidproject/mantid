@@ -9,9 +9,8 @@ Welcome to MantidPlot part 1!
 **Topics:**
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :glob:
    :titlesonly:
 
    *
-
