@@ -64,6 +64,7 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
 void ReflSaveTabPresenter::completedReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group) {
   std::cout << "Reduced group with size " << group.size() << std::endl;
+
 }
 
 /** Fills the 'List of Workspaces' widget with the names of all available

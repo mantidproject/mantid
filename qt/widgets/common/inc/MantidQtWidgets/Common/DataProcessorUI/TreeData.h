@@ -26,6 +26,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
+#include <QStringList>
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"

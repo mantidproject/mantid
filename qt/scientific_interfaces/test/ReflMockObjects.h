@@ -21,6 +21,7 @@
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
@@ -235,6 +236,8 @@ public:
 
 class MockSaveTabPresenter : public IReflSaveTabPresenter {
 public:
+  MOCK_METHOD1(completedReductionSuccessfully,
+               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &));
   void notify(IReflSaveTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
@@ -250,6 +253,8 @@ public:
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
+  MOCK_METHOD1(completedReductionSuccessfully,
+               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &));
   MOCK_METHOD1(notify, void(IReflMainWindowPresenter::Flag));
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
