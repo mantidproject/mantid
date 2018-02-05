@@ -50,6 +50,229 @@ public:
   MOCK_CONST_METHOD0(max, double());
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
+
+boost::shared_ptr<MeshObject> createCube(const double size,
+  const V3D &centre) {
+  /**
+  * Create cube of side length size with specified centre,
+  * parellel to axes and non-negative vertex coordinates.
+  */
+  double min = 0.0 - 0.5 * size;
+  double max = 0.5 * size;
+  std::vector<V3D> vertices;
+  vertices.push_back(centre + V3D(max, max, max));
+  vertices.push_back(centre + V3D(min, max, max));
+  vertices.push_back(centre + V3D(max, min, max));
+  vertices.push_back(centre + V3D(min, min, max));
+  vertices.push_back(centre + V3D(max, max, min));
+  vertices.push_back(centre + V3D(min, max, min));
+  vertices.push_back(centre + V3D(max, min, min));
+  vertices.push_back(centre + V3D(min, min, min));
+
+  std::vector<size_t> triangles;
+  // top face of cube - z max
+  triangles.push_back(0);
+  triangles.push_back(1);
+  triangles.push_back(2);
+  triangles.push_back(2);
+  triangles.push_back(1);
+  triangles.push_back(3);
+  // right face of cube - x max
+  triangles.push_back(0);
+  triangles.push_back(2);
+  triangles.push_back(4);
+  triangles.push_back(4);
+  triangles.push_back(2);
+  triangles.push_back(6);
+  // back face of cube - y max
+  triangles.push_back(0);
+  triangles.push_back(4);
+  triangles.push_back(1);
+  triangles.push_back(1);
+  triangles.push_back(4);
+  triangles.push_back(5);
+  // bottom face of cube - z min
+  triangles.push_back(7);
+  triangles.push_back(5);
+  triangles.push_back(6);
+  triangles.push_back(6);
+  triangles.push_back(5);
+  triangles.push_back(4);
+  // left face of cube - x min
+  triangles.push_back(7);
+  triangles.push_back(3);
+  triangles.push_back(5);
+  triangles.push_back(5);
+  triangles.push_back(3);
+  triangles.push_back(1);
+  // front fact of cube - y min
+  triangles.push_back(7);
+  triangles.push_back(6);
+  triangles.push_back(3);
+  triangles.push_back(3);
+  triangles.push_back(6);
+  triangles.push_back(2);
+
+  boost::shared_ptr<MeshObject> retVal =
+    boost::shared_ptr<MeshObject>(new MeshObject);
+  retVal->initialize(triangles, vertices);
+  return retVal;
+}
+
+boost::shared_ptr<MeshObject> createCube(const double size) {
+  /**
+  * Create cube of side length size with vertex at origin,
+  * parellel to axes and non-negative vertex coordinates.
+  */
+  return createCube(size, V3D(0.5 * size, 0.5 * size, 0.5 * size));
+}
+
+boost::shared_ptr<MeshObject> createOctahedron() {
+  /**
+  * Create octahedron with vertices on the axes at -1 & +1.
+  */
+  // The octahedron is made slightly bigger than this to
+  // ensure interior points are not rounded to be outside
+  // Opposite vertices have indices differing by 3.
+  double u = 1.0000000001;
+  std::vector<V3D> vertices;
+  vertices.push_back(V3D(u, 0, 0));
+  vertices.push_back(V3D(0, u, 0));
+  vertices.push_back(V3D(0, 0, u));
+  vertices.push_back(V3D(-u, 0, 0));
+  vertices.push_back(V3D(0, -u, 0));
+  vertices.push_back(V3D(0, 0, -u));
+
+  std::vector<size_t> triangles;
+  // +++ face
+  triangles.push_back(0);
+  triangles.push_back(1);
+  triangles.push_back(2);
+  //++- face
+  triangles.push_back(0);
+  triangles.push_back(5);
+  triangles.push_back(1);
+  // +-- face
+  triangles.push_back(0);
+  triangles.push_back(4);
+  triangles.push_back(5);
+  // +-+ face
+  triangles.push_back(0);
+  triangles.push_back(2);
+  triangles.push_back(4);
+  // --- face
+  triangles.push_back(3);
+  triangles.push_back(5);
+  triangles.push_back(4);
+  // --+ face
+  triangles.push_back(3);
+  triangles.push_back(4);
+  triangles.push_back(2);
+  // -++ face
+  triangles.push_back(3);
+  triangles.push_back(2);
+  triangles.push_back(1);
+  // -+- face
+  triangles.push_back(3);
+  triangles.push_back(1);
+  triangles.push_back(5);
+
+  boost::shared_ptr<MeshObject> retVal =
+    boost::shared_ptr<MeshObject>(new MeshObject);
+  retVal->initialize(triangles, vertices);
+  return retVal;
+}
+
+boost::shared_ptr<MeshObject> createLShape() {
+  /**
+  * Create an L shape with vertices at
+  * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
+  *  where Z = 0 or 1.
+  */
+  std::vector<V3D> vertices;
+  vertices.push_back(V3D(0, 0, 0));
+  vertices.push_back(V3D(2, 0, 0));
+  vertices.push_back(V3D(2, 1, 0));
+  vertices.push_back(V3D(1, 1, 0));
+  vertices.push_back(V3D(1, 2, 0));
+  vertices.push_back(V3D(0, 2, 0));
+  vertices.push_back(V3D(0, 0, 1));
+  vertices.push_back(V3D(2, 0, 1));
+  vertices.push_back(V3D(2, 1, 1));
+  vertices.push_back(V3D(1, 1, 1));
+  vertices.push_back(V3D(1, 2, 1));
+  vertices.push_back(V3D(0, 2, 1));
+
+  std::vector<size_t> triangles;
+  // z min
+  triangles.push_back(0);
+  triangles.push_back(5);
+  triangles.push_back(1);
+  triangles.push_back(1);
+  triangles.push_back(3);
+  triangles.push_back(2);
+  triangles.push_back(3);
+  triangles.push_back(5);
+  triangles.push_back(4);
+  // z max
+  triangles.push_back(6);
+  triangles.push_back(7);
+  triangles.push_back(11);
+  triangles.push_back(11);
+  triangles.push_back(9);
+  triangles.push_back(10);
+  triangles.push_back(9);
+  triangles.push_back(7);
+  triangles.push_back(8);
+  // y min
+  triangles.push_back(0);
+  triangles.push_back(1);
+  triangles.push_back(6);
+  triangles.push_back(6);
+  triangles.push_back(1);
+  triangles.push_back(7);
+  // x max
+  triangles.push_back(1);
+  triangles.push_back(2);
+  triangles.push_back(7);
+  triangles.push_back(7);
+  triangles.push_back(2);
+  triangles.push_back(8);
+  // y mid
+  triangles.push_back(2);
+  triangles.push_back(3);
+  triangles.push_back(8);
+  triangles.push_back(8);
+  triangles.push_back(3);
+  triangles.push_back(9);
+  // x mid
+  triangles.push_back(3);
+  triangles.push_back(4);
+  triangles.push_back(9);
+  triangles.push_back(9);
+  triangles.push_back(4);
+  triangles.push_back(10);
+  // y max
+  triangles.push_back(4);
+  triangles.push_back(5);
+  triangles.push_back(10);
+  triangles.push_back(10);
+  triangles.push_back(5);
+  triangles.push_back(11);
+  // x min
+  triangles.push_back(5);
+  triangles.push_back(0);
+  triangles.push_back(11);
+  triangles.push_back(11);
+  triangles.push_back(0);
+  triangles.push_back(6);
+
+  boost::shared_ptr<MeshObject> retVal =
+    boost::shared_ptr<MeshObject>(new MeshObject);
+  retVal->initialize(triangles, vertices);
+  return retVal;
+}
+
 }
 
 class MeshObjectTest : public CxxTest::TestSuite {
@@ -805,228 +1028,6 @@ public:
                     satol);
   }
 
-private:
-  boost::shared_ptr<MeshObject> createCube(const double size,
-                                           const V3D &centre) {
-    /**
-    * Create cube of side length size with specified centre,
-    * parellel to axes and non-negative vertex coordinates.
-    */
-    double min = 0.0 - 0.5 * size;
-    double max = 0.5 * size;
-    std::vector<V3D> vertices;
-    vertices.push_back(centre + V3D(max, max, max));
-    vertices.push_back(centre + V3D(min, max, max));
-    vertices.push_back(centre + V3D(max, min, max));
-    vertices.push_back(centre + V3D(min, min, max));
-    vertices.push_back(centre + V3D(max, max, min));
-    vertices.push_back(centre + V3D(min, max, min));
-    vertices.push_back(centre + V3D(max, min, min));
-    vertices.push_back(centre + V3D(min, min, min));
-
-    std::vector<size_t> triangles;
-    // top face of cube - z max
-    triangles.push_back(0);
-    triangles.push_back(1);
-    triangles.push_back(2);
-    triangles.push_back(2);
-    triangles.push_back(1);
-    triangles.push_back(3);
-    // right face of cube - x max
-    triangles.push_back(0);
-    triangles.push_back(2);
-    triangles.push_back(4);
-    triangles.push_back(4);
-    triangles.push_back(2);
-    triangles.push_back(6);
-    // back face of cube - y max
-    triangles.push_back(0);
-    triangles.push_back(4);
-    triangles.push_back(1);
-    triangles.push_back(1);
-    triangles.push_back(4);
-    triangles.push_back(5);
-    // bottom face of cube - z min
-    triangles.push_back(7);
-    triangles.push_back(5);
-    triangles.push_back(6);
-    triangles.push_back(6);
-    triangles.push_back(5);
-    triangles.push_back(4);
-    // left face of cube - x min
-    triangles.push_back(7);
-    triangles.push_back(3);
-    triangles.push_back(5);
-    triangles.push_back(5);
-    triangles.push_back(3);
-    triangles.push_back(1);
-    // front fact of cube - y min
-    triangles.push_back(7);
-    triangles.push_back(6);
-    triangles.push_back(3);
-    triangles.push_back(3);
-    triangles.push_back(6);
-    triangles.push_back(2);
-
-    boost::shared_ptr<MeshObject> retVal =
-        boost::shared_ptr<MeshObject>(new MeshObject);
-    retVal->initialize(triangles, vertices);
-    return retVal;
-  }
-
-  boost::shared_ptr<MeshObject> createCube(const double size) {
-    /**
-    * Create cube of side length size with vertex at origin,
-    * parellel to axes and non-negative vertex coordinates.
-    */
-    return createCube(size, V3D(0.5 * size, 0.5 * size, 0.5 * size));
-  }
-
-  boost::shared_ptr<MeshObject> createOctahedron() {
-    /**
-    * Create octahedron with vertices on the axes at -1 & +1.
-    */
-    // The octahedron is made slightly bigger than this to
-    // ensure interior points are not rounded to be outside
-    // Opposite vertices have indices differing by 3.
-    double u = 1.0000000001;
-    std::vector<V3D> vertices;
-    vertices.push_back(V3D(u, 0, 0));
-    vertices.push_back(V3D(0, u, 0));
-    vertices.push_back(V3D(0, 0, u));
-    vertices.push_back(V3D(-u, 0, 0));
-    vertices.push_back(V3D(0, -u, 0));
-    vertices.push_back(V3D(0, 0, -u));
-
-    std::vector<size_t> triangles;
-    // +++ face
-    triangles.push_back(0);
-    triangles.push_back(1);
-    triangles.push_back(2);
-    //++- face
-    triangles.push_back(0);
-    triangles.push_back(5);
-    triangles.push_back(1);
-    // +-- face
-    triangles.push_back(0);
-    triangles.push_back(4);
-    triangles.push_back(5);
-    // +-+ face
-    triangles.push_back(0);
-    triangles.push_back(2);
-    triangles.push_back(4);
-    // --- face
-    triangles.push_back(3);
-    triangles.push_back(5);
-    triangles.push_back(4);
-    // --+ face
-    triangles.push_back(3);
-    triangles.push_back(4);
-    triangles.push_back(2);
-    // -++ face
-    triangles.push_back(3);
-    triangles.push_back(2);
-    triangles.push_back(1);
-    // -+- face
-    triangles.push_back(3);
-    triangles.push_back(1);
-    triangles.push_back(5);
-
-    boost::shared_ptr<MeshObject> retVal =
-        boost::shared_ptr<MeshObject>(new MeshObject);
-    retVal->initialize(triangles, vertices);
-    return retVal;
-  }
-
-  boost::shared_ptr<MeshObject> createLShape() {
-    /**
-    * Create an L shape with vertices at
-    * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
-    *  where Z = 0 or 1.
-    */
-    std::vector<V3D> vertices;
-    vertices.push_back(V3D(0, 0, 0));
-    vertices.push_back(V3D(2, 0, 0));
-    vertices.push_back(V3D(2, 1, 0));
-    vertices.push_back(V3D(1, 1, 0));
-    vertices.push_back(V3D(1, 2, 0));
-    vertices.push_back(V3D(0, 2, 0));
-    vertices.push_back(V3D(0, 0, 1));
-    vertices.push_back(V3D(2, 0, 1));
-    vertices.push_back(V3D(2, 1, 1));
-    vertices.push_back(V3D(1, 1, 1));
-    vertices.push_back(V3D(1, 2, 1));
-    vertices.push_back(V3D(0, 2, 1));
-
-    std::vector<size_t> triangles;
-    // z min
-    triangles.push_back(0);
-    triangles.push_back(5);
-    triangles.push_back(1);
-    triangles.push_back(1);
-    triangles.push_back(3);
-    triangles.push_back(2);
-    triangles.push_back(3);
-    triangles.push_back(5);
-    triangles.push_back(4);
-    // z max
-    triangles.push_back(6);
-    triangles.push_back(7);
-    triangles.push_back(11);
-    triangles.push_back(11);
-    triangles.push_back(9);
-    triangles.push_back(10);
-    triangles.push_back(9);
-    triangles.push_back(7);
-    triangles.push_back(8);
-    // y min
-    triangles.push_back(0);
-    triangles.push_back(1);
-    triangles.push_back(6);
-    triangles.push_back(6);
-    triangles.push_back(1);
-    triangles.push_back(7);
-    // x max
-    triangles.push_back(1);
-    triangles.push_back(2);
-    triangles.push_back(7);
-    triangles.push_back(7);
-    triangles.push_back(2);
-    triangles.push_back(8);
-    // y mid
-    triangles.push_back(2);
-    triangles.push_back(3);
-    triangles.push_back(8);
-    triangles.push_back(8);
-    triangles.push_back(3);
-    triangles.push_back(9);
-    // x mid
-    triangles.push_back(3);
-    triangles.push_back(4);
-    triangles.push_back(9);
-    triangles.push_back(9);
-    triangles.push_back(4);
-    triangles.push_back(10);
-    // y max
-    triangles.push_back(4);
-    triangles.push_back(5);
-    triangles.push_back(10);
-    triangles.push_back(10);
-    triangles.push_back(5);
-    triangles.push_back(11);
-    // x min
-    triangles.push_back(5);
-    triangles.push_back(0);
-    triangles.push_back(11);
-    triangles.push_back(11);
-    triangles.push_back(0);
-    triangles.push_back(6);
-
-    boost::shared_ptr<MeshObject> retVal =
-        boost::shared_ptr<MeshObject>(new MeshObject);
-    retVal->initialize(triangles, vertices);
-    return retVal;
-  }
 };
 
 // -----------------------------------------------------------------------------
@@ -1058,26 +1059,6 @@ public:
     for (size_t i = 0; i < npoints; ++i) {
       dummy = lShape->generatePointInObject(rng, maxAttempts);
     }
-  }
-
-  boost::shared_ptr<MeshObject> createOctahedron() {
-    /**
-    * Create octahedron with vertices on the axes at -1 & +1.
-    */
-    boost::shared_ptr<MeshObject> retVal =
-        boost::shared_ptr<MeshObject>(new MeshObject);
-    return retVal;
-  }
-
-  boost::shared_ptr<MeshObject> createLShape() {
-    /**
-    * Create an L shape with vertices at
-    * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
-    *  where Z = 0 or 1.
-    */
-    boost::shared_ptr<MeshObject> retVal =
-        boost::shared_ptr<MeshObject>(new MeshObject);
-    return retVal;
   }
 
 private:
