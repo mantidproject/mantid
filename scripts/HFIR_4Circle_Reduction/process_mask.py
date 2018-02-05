@@ -98,17 +98,16 @@ def get_region_of_interest(mask_ws_name):
     return lower_left_corner, upper_right_corner
 
 
-# TODO FIXME ASAP ASAP2: fill in all blabla
 class RegionOfInterest(object):
     """
     a class to manage region of interest used in application including mask workspace and ROI information
     """
     def __init__(self, roi_name):
         """
-        blabla
+        initialization with unchangeable ROI name
         :param roi_name:
         """
-        assert isinstance(roi_name, str), 'blabla'
+        assert isinstance(roi_name, str), 'ROI name must be a string'
 
         self._roiName = roi_name
         self._maskWorkspaceName = None
@@ -120,7 +119,7 @@ class RegionOfInterest(object):
     @property
     def mask_workspace(self):
         """
-        blabla
+        get name of mask workspace
         :return:
         """
         return self._maskWorkspaceName
@@ -128,8 +127,8 @@ class RegionOfInterest(object):
     @property
     def lower_left_corner(self):
         """
-        blabla
-        :return:
+        get lower left corner position
+        :return: 2-tuple
         """
         if self._lowerLeftCorner is None:
             raise RuntimeError('lower left not set')
@@ -139,8 +138,8 @@ class RegionOfInterest(object):
     @property
     def upper_right_corner(self):
         """
-        blabla
-        :return:
+        get upper right corner position
+        :return: 2-tuple
         """
         if self._upperRightCorner is None:
             raise RuntimeError('upper right not set')
@@ -149,14 +148,15 @@ class RegionOfInterest(object):
 
     def set_mask_workspace_name(self, ws_name):
         """
-        blabla
+        set mask workspace name to this instance
         :param ws_name:
         :return:
         """
-        assert isinstance(ws_name, str), 'blabla'
+        assert isinstance(ws_name, str), 'Mask workspace name {0} must be a string but not a {1}' \
+                                         ''.format(ws_name, type(ws_name))
 
         # check workspace existing and type
-        # later blabla
+        # TODO - check with ADS for existence of workspace and type too
 
         self._maskWorkspaceName = ws_name
 
@@ -170,9 +170,10 @@ class RegionOfInterest(object):
         :return:
         """
         # check input type and size
-        # blabla
-        assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2
-        assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2
+        assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2,\
+            'Lower left corner {0} must be a 2-tuple.'.format(lower_left_corner)
+        assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2,\
+            'Upper right corner {0} must be a 2-tuple'.format(upper_right_corner)
 
         ll_x = int(lower_left_corner[0])
         ll_y = int(lower_left_corner[1])
