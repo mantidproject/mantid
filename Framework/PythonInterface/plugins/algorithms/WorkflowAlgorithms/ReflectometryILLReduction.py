@@ -2,7 +2,8 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode,
+                        WorkspaceUnitValidator)
 from mantid.kernel import (Direction, StringListValidator)
 from mantid.simpleapi import (ConvertUnits, Divide, RebinToWorkspace)
 import ReflectometryILL_common as common
@@ -54,15 +55,16 @@ class ReflectometryILLReduction(DataProcessorAlgorithm):
     def PyInit(self):
         """Initialize the input and output properties of the algorithm."""
         self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS, defaultValue='',
+                                                     validator=WorkspaceUnitValidator("Wavelength"),
                                                      direction=Direction.Input),
-                             doc='A prepared input workspace.')
+                             doc='The pre-processed input workspace in units wavelength.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS, defaultValue='',
                                                      direction=Direction.Output),
                              doc='The reduced output workspace')
         self.declareProperty(Prop.SUBALG_LOGGING,
                              defaultValue=SubalgLogging.OFF,
                              validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
-                             doc='Enable or disalbe child algorithm logging.')
+                             doc='Enable or disable child algorithm logging.')
         self.declareProperty(Prop.CLEANUP,
                              defaultValue=common.WSCleanup.ON,
                              validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
