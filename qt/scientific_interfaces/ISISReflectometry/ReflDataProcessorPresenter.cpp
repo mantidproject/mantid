@@ -25,6 +25,7 @@ namespace CustomInterfaces {
 * @param processor : A ProcessingAlgorithm
 * @param postprocessor : A PostprocessingAlgorithm
 * workspaces
+* @param group : The zero-based index of this presenter within the tab.
 * @param postprocessMap : A map containing instructions for post-processing.
 * This map links column name to properties of the post-processing algorithm
 * @param loader : The algorithm responsible for loading data

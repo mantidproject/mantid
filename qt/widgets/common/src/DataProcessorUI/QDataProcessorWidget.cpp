@@ -40,6 +40,8 @@ QDataProcessorWidget::QDataProcessorWidget(
 /** Delegating constructor
  * @param whitelist :: [input] The white list
  * @param parent :: [input] The parent of this view
+ * @param group :: [input] The zero based index of this widget within the parent
+ * presenter (reflectometry).
  */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            QWidget *parent, int group)
@@ -52,6 +54,8 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 * @param whitelist :: [input] The white list
 * @param algorithm :: [input] The processing algorithm
 * @param parent :: [input] The parent of this view
+* @param group :: [input] The zero based index of this widget within the parent
+* presenter (reflectometry).
 */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
@@ -66,6 +70,8 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 * @param preprocessMap :: [input] Pre-processing instructions as a map
 * @param algorithm :: [input] The processing algorithm
 * @param parent :: [input] The parent of this view
+* @param group :: [input] The zero based index of this widget within the parent
+* presenter (reflectometry).
 */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const PreprocessMap &preprocessMap,
@@ -81,6 +87,8 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 * @param algorithm :: [input] The processing algorithm
 * @param postprocessor :: [input] The post-processing algorithm
 * @param parent :: [input] The parent of this view
+* @param group :: [input] The zero based index of this widget within the parent
+* presenter (reflectometry).
 */
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const ProcessingAlgorithm &algorithm,
@@ -96,6 +104,8 @@ QDataProcessorWidget::QDataProcessorWidget(
 * @param algorithm :: [input] The processing algorithm
 * @param postprocessor :: [input] The post-processing algorithm
 * @param parent :: [input] The parent of this view
+* @param group :: [input] The zero based index of this widget within the parent
+* presenter (reflectometry).
 */
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const PreprocessMap &preprocessMap,

@@ -76,6 +76,8 @@ namespace DataProcessor {
 * @param processor : A ProcessingAlgorithm
 * @param postprocessor : A PostprocessingAlgorithm
 * workspaces
+* @param group : The zero based index of this presenter within the tab
+* (reflectometry).
 * @param postprocessMap : A map containing instructions for post-processing.
 * This map links column name to properties of the post-processing algorithm
 * @param loader : The algorithm responsible for loading data
@@ -144,6 +146,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * @param processor : A ProcessingAlgorithm
 * @param postprocessor : A PostprocessingAlgorithm
 * workspaces
+* @param group : The zero based index of this presenter within the tab
+* (reflectometry).
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist, ProcessingAlgorithm processor,
@@ -155,6 +159,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 /**
  * Delegating constructor (only whitelist specified)
  * @param whitelist : The set of properties we want to show as columns
+ * @param group : The zero based index of this presenter within the tab
+ * (reflectometry)
  */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist, int group)
@@ -168,6 +174,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * @param preprocessMap : A map containing instructions for pre-processing
 * @param processor : A ProcessingAlgorithm
 * workspaces
+* @param group : The zero based index of this presenter within the tab
+* (reflectometry)
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist,
@@ -182,6 +190,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * @param whitelist : The set of properties we want to show as columns
 * @param processor : A ProcessingAlgorithm
 * workspaces
+* @param group : The zero based index of this presenter within the tab
+* (reflectometry)
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist, ProcessingAlgorithm processor, int group)
