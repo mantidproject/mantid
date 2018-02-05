@@ -16,13 +16,13 @@ class EnggDiffMultiRunFittingWidgetAdder
     : public IEnggDiffMultiRunFittingWidgetAdder {
 public:
   EnggDiffMultiRunFittingWidgetAdder(
-      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> widget);
+      IEnggDiffMultiRunFittingWidgetView *widget);
 
   /// Add the widget to an owner
   void operator()(IEnggDiffMultiRunFittingWidgetOwner &owner) override;
 
 private:
-  boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> m_widget;
+  IEnggDiffMultiRunFittingWidgetView *m_widget;
 };
 
 } // CustomInterfaces

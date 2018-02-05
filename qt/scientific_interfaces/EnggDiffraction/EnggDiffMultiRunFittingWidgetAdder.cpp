@@ -5,7 +5,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffMultiRunFittingWidgetAdder::EnggDiffMultiRunFittingWidgetAdder(
-    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> widget)
+    IEnggDiffMultiRunFittingWidgetView *widget)
     : m_widget(widget) {}
 
 void EnggDiffMultiRunFittingWidgetAdder::
