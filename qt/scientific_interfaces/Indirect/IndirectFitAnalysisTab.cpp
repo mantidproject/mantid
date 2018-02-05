@@ -1070,30 +1070,13 @@ void IndirectFitAnalysisTab::updateGuessPlots() {
  */
 void IndirectFitAnalysisTab::updateGuessPlots(IFunction_sptr guessFunction) {
   if (inputWorkspace() && guessFunction) {
-    m_createGuessRunner.addCallback([this]() {
-      auto guessWS = createGuessWorkspace(fitFunction(), selectedSpectrum());
+    auto guessWS = createGuessWorkspace(fitFunction(), selectedSpectrum());
 
-      if (guessWS->x(0).size() >= 2)
-        return guessWS;
-      else
-        return MatrixWorkspace_sptr(nullptr);
-    });
-
-    connect(&m_createGuessRunner, SIGNAL(finished()), this,
-            SLOT(guessWorkspaceCreated()));
-  }
-}
-
-void IndirectFitAnalysisTab::guessWorkspaceCreated() {
-  disconnect(&m_createGuessRunner, SIGNAL(finished()), this,
-             SLOT(guessWorkspaceCreated()));
-
-  auto guessWS = m_createGuessRunner.result();
-  if (guessWS) {
-    updatePlotGuess(guessWS);
-
-    m_plotWindowGuessRunner.addCallback(
+    if (guessWS->x(0).size() >= 2) {
+      updatePlotGuess(guessWS);
+      m_plotWindowGuessRunner.addCallback(
         [this, guessWS]() { updatePlotGuessInWindow(guessWS); });
+    }
   }
 }
 
@@ -1136,10 +1119,9 @@ void IndirectFitAnalysisTab::updatePlotGuessInWindow(
   if (m_inputAndGuessWorkspace) {
     const auto guessWSName = "__" + createSingleFitOutputName() + "_guess_ws";
 
-    if (m_inputAndGuessWorkspace->getName() == guessWSName)
-      m_inputAndGuessWorkspace = createInputAndGuessWorkspace(workspace);
-    else
+    if (m_inputAndGuessWorkspace->getName() != guessWSName)
       clearGuessWindowPlot();
+    m_inputAndGuessWorkspace = createInputAndGuessWorkspace(workspace);
   }
 }
 

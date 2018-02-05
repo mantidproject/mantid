@@ -27,8 +27,6 @@ protected slots:
   void currentFinishedBase() { currentFinished(); }
 
 protected:
-  void emitFinished() { emit finished(); };
-  void emitFinishedLazy() { emit finishedLazy(); };
   virtual void currentFinished() = 0;
 };
 
@@ -37,7 +35,8 @@ class DLLExport QtLazyAsyncRunner : public QtLazyAsyncRunnerBase {
 public:
   using ReturnType = typename std::result_of<Callback()>::type;
 
-  explicit QtLazyAsyncRunner() : m_current(), m_next(boost::none) {
+  explicit QtLazyAsyncRunner()
+      : m_current(), m_next(boost::none), m_initialized(false) {
     connect(&m_current, SIGNAL(finished()), this, SLOT(currentFinishedBase()));
   }
 
@@ -45,10 +44,11 @@ public:
     if (m_next.is_initialized())
       m_next = boost::none;
 
-    if (m_current.isFinished())
+    if (m_current.isFinished() || !m_initialized)
       m_current.setFuture(QtConcurrent::run(callback));
     else
       m_next = std::forward<Callback>(callback);
+    m_initialized = true;
   }
 
   bool isFinished() const { return m_current.isFinished(); }
@@ -60,14 +60,15 @@ protected:
     if (m_next.is_initialized()) {
       m_current.setFuture(QtConcurrent::run(*m_next));
       m_next = boost::none;
-      emitFinished();
+      emit finished();
     } else
-      emitFinishedLazy();
+      emit finishedLazy();
   }
 
 private:
   QFutureWatcher<ReturnType> m_current;
   boost::optional<Callback> m_next;
+  bool m_initialized;
 };
 
 class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
@@ -298,8 +299,6 @@ protected slots:
   void updatePlotGuessInWindow();
 
   void plotGuessInWindow();
-
-  void guessWorkspaceCreated();
 
   virtual void updatePlotOptions() = 0;
 
