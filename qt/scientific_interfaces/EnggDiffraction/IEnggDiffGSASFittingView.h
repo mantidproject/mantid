@@ -21,8 +21,8 @@ class IEnggDiffGSASFittingView : public IEnggDiffMultiRunFittingWidgetOwner {
 public:
   virtual ~IEnggDiffGSASFittingView() = default;
 
-  virtual void
-  addWidget(IEnggDiffMultiRunFittingWidgetView *widget) override = 0;
+  virtual void addWidget(boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView>
+                             widget) override = 0;
 
   /**
    Display lattice parameters to the user

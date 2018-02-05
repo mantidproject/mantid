@@ -26,7 +26,8 @@ public:
 
   ~EnggDiffGSASFittingViewQtWidget() override;
 
-  void addWidget(IEnggDiffMultiRunFittingWidgetView *widget) override;
+  void addWidget(
+      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> widget) override;
 
   void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;

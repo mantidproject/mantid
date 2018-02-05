@@ -12,7 +12,8 @@ class IEnggDiffMultiRunFittingWidgetView;
 class IEnggDiffMultiRunFittingWidgetOwner {
 public:
   /// Add a multi-run widget to the owner
-  virtual void addWidget(IEnggDiffMultiRunFittingWidgetView *widget) = 0;
+  virtual void
+  addWidget(boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> widget) = 0;
 };
 
 } // CustomInterfaces
