@@ -18,10 +18,13 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
 
   auto multiRunWidgetModel =
       Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetModel>();
-  m_multiRunWidgetView = boost::make_shared<EnggDiffMultiRunFittingQtWidget>();
+  m_multiRunWidgetView =
+      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingQtWidget>();
+
   auto multiRunWidgetPresenter =
       boost::make_shared<EnggDiffMultiRunFittingWidgetPresenter>(
-          std::move(multiRunWidgetModel), m_multiRunWidgetView);
+          std::move(multiRunWidgetModel), m_multiRunWidgetView.get());
+
   m_multiRunWidgetView->setPresenter(multiRunWidgetPresenter);
   m_multiRunWidgetView->setMessageProvider(m_userMessageProvider);
 
@@ -38,8 +41,8 @@ EnggDiffGSASFittingViewQtWidget::~EnggDiffGSASFittingViewQtWidget() {
 }
 
 void EnggDiffGSASFittingViewQtWidget::addWidget(
-    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> widget) {
-  QWidget *qWidget = dynamic_cast<QWidget *>(widget.get());
+    IEnggDiffMultiRunFittingWidgetView *widget) {
+  QWidget *qWidget = dynamic_cast<QWidget *>(widget);
   m_ui.gridLayout_multiRunWidget->addWidget(qWidget, 0, 0);
 }
 

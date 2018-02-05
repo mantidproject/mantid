@@ -3,8 +3,6 @@
 
 #include "IEnggDiffMultiRunFittingWidgetAdder.h"
 
-#include <boost/shared_ptr.hpp>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -16,13 +14,13 @@ class EnggDiffMultiRunFittingWidgetAdder
     : public IEnggDiffMultiRunFittingWidgetAdder {
 public:
   EnggDiffMultiRunFittingWidgetAdder(
-      IEnggDiffMultiRunFittingWidgetView *widget);
+      IEnggDiffMultiRunFittingWidgetView &widget);
 
   /// Add the widget to an owner
   void operator()(IEnggDiffMultiRunFittingWidgetOwner &owner) override;
 
 private:
-  IEnggDiffMultiRunFittingWidgetView *m_widget;
+  IEnggDiffMultiRunFittingWidgetView &m_widget;
 };
 
 } // CustomInterfaces

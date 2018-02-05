@@ -5,7 +5,6 @@
 #include "IEnggDiffMultiRunFittingWidgetOwner.h"
 #include "IEnggDiffMultiRunFittingWidgetView.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "RunLabel.h"
 
 #include <string>
 #include <utility>
@@ -21,8 +20,8 @@ class IEnggDiffGSASFittingView : public IEnggDiffMultiRunFittingWidgetOwner {
 public:
   virtual ~IEnggDiffGSASFittingView() = default;
 
-  virtual void
-  addWidget(IEnggDiffMultiRunFittingWidgetView *widget) override = 0;
+  virtual void addWidget(std::<IEnggDiffMultiRunFittingWidgetView>
+                             widget) override = 0;
 
   /**
    Display lattice parameters to the user
@@ -38,8 +37,8 @@ public:
   virtual void displayRwp(const double rwp) const = 0;
 
   /**
-   Get the names of the focused run files the user has requested to load
-   @return Vector of filenames to load
+   Get the name of the focused run file the user has requested to load
+   @return Filename to load
    */
   virtual std::vector<std::string> getFocusedFileNames() const = 0;
 
@@ -82,7 +81,7 @@ public:
    @return Refinement method
    */
   virtual GSASRefinementMethod getRefinementMethod() const = 0;
-
+  
   /**
    Display an error to the user
    @param errorTitle Title of the error

@@ -50,7 +50,7 @@ namespace CustomInterfaces {
 
 EnggDiffMultiRunFittingWidgetPresenter::EnggDiffMultiRunFittingWidgetPresenter(
     std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> model,
-    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetView> view)
+    IEnggDiffMultiRunFittingWidgetView *view)
     : m_model(std::move(model)), m_view(view) {}
 
 void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
