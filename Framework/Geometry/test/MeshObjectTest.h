@@ -114,8 +114,7 @@ boost::shared_ptr<MeshObject> createCube(const double size,
   triangles.push_back(2);
 
   boost::shared_ptr<MeshObject> retVal =
-    boost::shared_ptr<MeshObject>(new MeshObject);
-  retVal->initialize(triangles, vertices);
+    boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
 }
 
@@ -178,8 +177,7 @@ boost::shared_ptr<MeshObject> createOctahedron() {
   triangles.push_back(5);
 
   boost::shared_ptr<MeshObject> retVal =
-    boost::shared_ptr<MeshObject>(new MeshObject);
-  retVal->initialize(triangles, vertices);
+    boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
 }
 
@@ -268,8 +266,7 @@ boost::shared_ptr<MeshObject> createLShape() {
   triangles.push_back(6);
 
   boost::shared_ptr<MeshObject> retVal =
-    boost::shared_ptr<MeshObject>(new MeshObject);
-  retVal->initialize(triangles, vertices);
+    boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
 }
 
@@ -278,8 +275,7 @@ boost::shared_ptr<MeshObject> createLShape() {
 class MeshObjectTest : public CxxTest::TestSuite {
 
 public:
-  void testInitialize() {
-    MeshObject obj;
+  void testConstructor() {
 
     std::vector<V3D> vertices;
     vertices.push_back(V3D(0, 0, 0));
@@ -305,40 +301,31 @@ public:
     triangles.push_back(3);
     triangles.push_back(2);
 
-    // Test initialize works first time
-    TS_ASSERT_THROWS_NOTHING(obj.initialize(triangles, vertices));
-    // but connot be done again
-    TS_ASSERT_THROWS_ANYTHING(obj.initialize(triangles, vertices));
+    TS_ASSERT_THROWS_NOTHING(auto obj = MeshObject(triangles, vertices));
   }
 
   void testClone() {
-    MeshObject blank;
-
-    // Test unitialized object cannot be cloned
-    TS_ASSERT_THROWS_ANYTHING(blank.clone());
-
-    // and an initialized object can be cloned
     IObject_sptr geom_obj = createOctahedron();
     TS_ASSERT_THROWS_NOTHING(geom_obj->clone());
   }
 
   void testDefaultObjectHasEmptyMaterial() {
-    MeshObject obj;
+    auto obj = createOctahedron();
 
     TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
-                     obj.material().numberDensity(), 1e-12);
+                     obj->material().numberDensity(), 1e-12);
   }
 
   void testObjectSetMaterialReplacesExisting() {
     using Mantid::Kernel::Material;
-    MeshObject obj;
+    auto obj = createOctahedron();
 
     TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
-                     obj.material().numberDensity(), 1e-12);
-    obj.setMaterial(
+                     obj->material().numberDensity(), 1e-12);
+    obj->setMaterial(
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0));
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-                     obj.material().numberDensity(), 1e-12);
+                     obj->material().numberDensity(), 1e-12);
   }
 
   void testCopyConstructorGivesObjectWithSameAttributes() {
@@ -370,21 +357,19 @@ public:
     TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
         original.getGeometryHandler()));
 
-    MeshObject lhs; // initialize
-    lhs = original; // assign
+    auto lhs = createOctahedron(); 
+    *lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
     objType = -1;
-    lhs.GetObjectGeom(objType, pts, radius, height);
+    lhs->GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS("sp-1", lhs.id());
+    TS_ASSERT_EQUALS("sp-1", lhs->id());
     TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
-        lhs.getGeometryHandler()));
+        lhs->getGeometryHandler()));
   }
 
   void testHasValidShape() {
-    auto empty_obj = new MeshObject();
     auto geom_obj = createCube(1.0);
-    TS_ASSERT(!empty_obj->hasValidShape());
     TS_ASSERT(geom_obj->hasValidShape());
   }
 
@@ -1053,7 +1038,7 @@ public:
     }
   }
 
-  void test_Point_Inside_NonConvex_Solid() {
+  void test_generatePointInside_NonConvex_Solid() {
     const size_t maxAttempts(500);
     V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
@@ -1062,7 +1047,7 @@ public:
   }
 
 private:
-  const size_t npoints = 20000;
+  const size_t npoints = 6000;
   Mantid::Kernel::MersenneTwister rng;
   IObject_sptr octahedron;
   IObject_sptr lShape;

@@ -22,11 +22,14 @@ using Kernel::Quat;
 /**
 *  Default constuctor
 */
-MeshObject::MeshObject() : MeshObject("") {}
+MeshObject::MeshObject() {} // Should never be called
 
-MeshObject::MeshObject(const std::string &string)
-    : m_boundingBox(), m_object_number(0), m_handler(), m_string(string),
-      m_id(), m_material(), m_triangles(), m_vertices() {}
+MeshObject::MeshObject(const std::vector<size_t> &faces,
+                       const std::vector<V3D> &vertices)
+    : m_boundingBox(), m_object_number(0),
+     m_id(), m_material(), m_triangles(faces), m_vertices(vertices) {
+    m_handler = boost::make_shared<CacheGeometryHandler>(this);
+}
 
 /**
 * Copy constructor
@@ -54,23 +57,6 @@ MeshObject &MeshObject::operator=(const MeshObject &A) {
 }
 
 MeshObject::~MeshObject() = default;
-
-/*
- * Initialise with vectors.
- * @param faces :: Triangles specified by vertex index in anticlockwise order
- * as seen from outside.
- * @param vertices :: Vertex positions
- */
-void MeshObject::initialize(const std::vector<size_t> &faces,
-                            const std::vector<V3D> &vertices) {
-  if (m_vertices.size() == 0) {
-    m_vertices = vertices;
-    m_triangles = faces;
-    m_handler = boost::make_shared<CacheGeometryHandler>(this);
-  } else {
-    throw std::runtime_error("MeshObject already initialized");
-  }
-}
 
 /**
  * @param material The new Material that the object is composed from
@@ -419,7 +405,6 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
                               const Kernel::V3D &scaleFactor) const
 
 {
-  MeshObject scaledObject;
   std::vector<V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
   for (size_t i = 0; i < m_vertices.size(); ++i) {
@@ -427,7 +412,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
                                  scaleFactor.Y() * m_vertices[i].Y(),
                                  scaleFactor.Z() * m_vertices[i].Z()));
   }
-  scaledObject.initialize(m_triangles, scaledVertices);
+  MeshObject scaledObject(m_triangles, scaledVertices);
   return scaledObject.solidAngle(observer);
 }
 

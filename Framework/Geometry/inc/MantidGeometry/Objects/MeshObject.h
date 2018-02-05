@@ -62,10 +62,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
-  /// Default constructor
-  MeshObject();
-  /// Constructor from string.
-  MeshObject(const std::string &shapeXML);
+  /// Main constructor
+  MeshObject(const std::vector<size_t> &faces,
+    const std::vector<Mantid::Kernel::V3D> &vertices);
+
   /// Copy constructor
   MeshObject(const MeshObject &);
   /// Assignment operator
@@ -80,9 +80,6 @@ public:
       throw("Unintialised MeshObject cannot be copied");
     }
   }
-
-  void initialize(const std::vector<size_t> &faces,
-                  const std::vector<Mantid::Kernel::V3D> &vertices);
 
   void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
@@ -161,6 +158,8 @@ public:
   void updateGeometryHandler();
 
 private:
+  /// Default constructor - should never be called
+  MeshObject();
   /// Get intersections
   void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
                         std::vector<Kernel::V3D> &intersectionPoints,
