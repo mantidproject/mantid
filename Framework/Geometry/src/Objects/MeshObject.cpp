@@ -101,14 +101,14 @@ bool MeshObject::hasValidShape() const {
 }
 
 /**
-* Determines whether Pt is within the object or on the surface
-* @param Pt :: Point to be tested
+* Determines whether point is within the object or on the surface
+* @param point :: Point to be tested
 * @returns 1 if true and 0 if false
 */
-bool MeshObject::isValid(const Kernel::V3D &Pt) const {
+bool MeshObject::isValid(const Kernel::V3D &point) const {
 
   BoundingBox bb = getBoundingBox();
-  if (!bb.isPointInside(Pt)) {
+  if (!bb.isPointInside(point)) {
     return false;
   }
 
@@ -116,7 +116,7 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
   std::vector<V3D> intesectionPoints;
   std::vector<int> entryExitFlags;
 
-  getIntersections(Pt, direction, intesectionPoints, entryExitFlags);
+  getIntersections(point, direction, intesectionPoints, entryExitFlags);
 
   if (intesectionPoints.size() == 0) {
     return false;
@@ -124,17 +124,17 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
 
   // True if point is on surface
   for (size_t i = 0; i < intesectionPoints.size(); ++i) {
-    if (Pt.distance(intesectionPoints[i]) < M_TOLERANCE) {
+    if (point.distance(intesectionPoints[i]) < M_TOLERANCE) {
       return true;
     }
   }
 
   // Look for nearest point then check its entry-exit flag
-  double nearestPointDistance = Pt.distance(intesectionPoints[0]);
+  double nearestPointDistance = point.distance(intesectionPoints[0]);
   size_t nearestPointIndex = 0;
   for (size_t i = 1; i < intesectionPoints.size(); ++i) {
-    if (Pt.distance(intesectionPoints[i]) < nearestPointDistance) {
-      nearestPointDistance = Pt.distance(intesectionPoints[i]);
+    if (point.distance(intesectionPoints[i]) < nearestPointDistance) {
+      nearestPointDistance = point.distance(intesectionPoints[i]);
       nearestPointIndex = i;
     }
   }
@@ -142,14 +142,14 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
 }
 
 /**
-* Determines wither Pt is on the surface.
-* @param Pt :: Point to check
+* Determines wither point is on the surface.
+* @param point :: Point to check
 * @returns 1 if the point is on the surface
 */
-bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
+bool MeshObject::isOnSide(const Kernel::V3D &point) const {
 
   BoundingBox bb = getBoundingBox();
-  if (!bb.isPointInside(Pt)) {
+  if (!bb.isPointInside(point)) {
     return false;
   }
 
@@ -163,7 +163,7 @@ bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
     std::vector<V3D> intesectionPoints;
     std::vector<int> entryExitFlags;
 
-    getIntersections(Pt, directions[i], intesectionPoints, entryExitFlags);
+    getIntersections(point, directions[i], intesectionPoints, entryExitFlags);
 
     if (intesectionPoints.size() == 0) {
       return false;
@@ -171,7 +171,7 @@ bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
 
     size_t k = intesectionPoints.size();
     for (size_t i = 0; i < k; ++i) {
-      if (Pt.distance(intesectionPoints[i]) < M_TOLERANCE) {
+      if (point.distance(intesectionPoints[i]) < M_TOLERANCE) {
         return true;
       }
     }
@@ -345,17 +345,17 @@ double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
 
 /**
 * Calculate if a point PT is a valid point on the track
-* @param Pt :: Point to calculate from.
+* @param point :: Point to calculate from.
 * @param uVec :: Unit vector of the track
 * @retval 0 :: Not valid / double valid
 * @retval 1 :: Entry point
 * @retval -1 :: Exit Point
 */
-int MeshObject::calcValidType(const Kernel::V3D &Pt,
+int MeshObject::calcValidType(const Kernel::V3D &point,
                               const Kernel::V3D &uVec) const {
   const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
-  const Kernel::V3D testA(Pt - shift);
-  const Kernel::V3D testB(Pt + shift);
+  const Kernel::V3D testA(point - shift);
+  const Kernel::V3D testB(point + shift);
   const int flagA = isValid(testA);
   const int flagB = isValid(testB);
   if (!(flagA ^ flagB))
@@ -692,10 +692,10 @@ int MeshObject::numberOfVertices() const {
 */
 double *MeshObject::getVertices() const {
   double *points = nullptr;
-  size_t nPts = m_vertices.size();
-  if (nPts > 0) {
-    points = new double[static_cast<std::size_t>(nPts) * 3];
-    for (size_t i = 0; i < nPts; ++i) {
+  size_t nPoints = m_vertices.size();
+  if (nPoints > 0) {
+    points = new double[static_cast<std::size_t>(nPoints) * 3];
+    for (size_t i = 0; i < nPoints; ++i) {
       V3D pnt = m_vertices[i];
       points[i * 3 + 0] = pnt.X();
       points[i * 3 + 1] = pnt.Y();
@@ -719,7 +719,9 @@ void MeshObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
 /** Getter for the shape xml
 @return the shape xml.
 */
-std::string MeshObject::getShapeXML() const { return ""; }
+std::string MeshObject::getShapeXML() const { 
+  throw std::runtime_error("getShapeXML not available for MeshObject");
+  }
 
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid

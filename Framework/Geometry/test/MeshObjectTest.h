@@ -888,6 +888,7 @@ private:
     */
     // The octahedron is made slightly bigger than this to
     // ensure interior points are not rounded to be outside
+    // Opposite vertices have indices differing by 3.
     double u = 1.0000000001;
     std::vector<V3D> vertices;
     vertices.push_back(V3D(u, 0, 0));

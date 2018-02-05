@@ -36,7 +36,8 @@ class vtkGeometryCacheWriter;
 \date Dec 2017
 \author Karl Palmen
 
-Mesh Object of Traingles
+Mesh Object of Triangles assumed to form one or more 
+non-intersecting closed surfaces enclosing separate volumes.
 
 Copyright &copy; 2017-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
