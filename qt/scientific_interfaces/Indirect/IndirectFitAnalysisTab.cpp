@@ -1075,7 +1075,7 @@ void IndirectFitAnalysisTab::updateGuessPlots(IFunction_sptr guessFunction) {
     if (guessWS->x(0).size() >= 2) {
       updatePlotGuess(guessWS);
       m_plotWindowGuessRunner.addCallback(
-        [this, guessWS]() { updatePlotGuessInWindow(guessWS); });
+          [this, guessWS]() { updatePlotGuessInWindow(guessWS); });
     }
   }
 }
