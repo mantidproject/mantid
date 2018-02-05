@@ -7,18 +7,18 @@ Crystal Field Python Interface
   :local:
 
 The python facilities for Crystal Field calculations are available in Mantid from module `CrystalField`.
-There are two main classes the module provides: `CrystalFiled` that defines various properties of a crystal
-field and `CrystalFieldFit` that manages the fitting process.
+The module provides two main classes: `CrystalField` defines various properties of a crystal field and
+`CrystalFieldFit` manages the fitting process.
 
 
 Setting up crystal field parameters
 -----------------------------------
 
 A crystal field computation starts with creating an instance of the `CrystalField` class. The constructor
-has two mandatory arguments: `Ion` - a symbolic name of the ion, and `Symmetry` - a name of the symmetry group
-of the field. The rest of the parameters are optional.
+has two mandatory arguments: `Ion` - the symbolic name of the ion, and `Symmetry` - the name of the point symmetry
+group of the field. The rest of the parameters are optional.
 
-Possible values for the `Ion` argument::
+Possible values for the `Ion` argument are::
 
  Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb
 
@@ -30,7 +30,7 @@ or half-integer value, e.g. `Ion=S2` or `Ion=S1.5`. In these cases, the g-factor
 The prefix letter can also be `J` instead of `S`, and lower case letters are also supported. (e.g. `Ion=j1`,
 `Ion=s2.5` and `Ion=J0.5` are all valid).
  
-Allowed values for `Symmetry`::
+Allowed values for `Symmetry` are::
 
   C1, Ci, C2, Cs, C2h, C2v, D2, D2h, C4, S4, C4h, D4, C4v, D2d, D4h, C3,
   S6, D3, C3v, D3d, C6, C3h, C6h, D6, C6v, D3h, D6h, T, Td, Th, O, Oh
@@ -41,7 +41,7 @@ The minimum code to create a crystal field object is::
   cf = CrystalField('Ce', 'C2v')
   
 Names of the crystal field parameters have the form `Bnn` and `IBnn` where `nn` are two digits between 0 and 6.
-The `Bnn` is a real and the `IBnn` is an imaginary part of a complex parameter. If a parameter isn't set explicitly
+`Bnn` is the real and `IBnn` is the imaginary part of a complex parameter. If a parameter isn't set explicitly
 its default value is 0. To set a parameter pass it to the `CrystalField` constructor as a keyword argument, e.g.::
 
   cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770)
@@ -58,7 +58,7 @@ Which can also be used to query the value of a parameter::
 Calculating the Eigensystem
 ---------------------------
 
-`CrystalField` class has methods to calculate the Hamiltonian and its eigensystem::
+The `CrystalField` class has methods to calculate the Hamiltonian and its eigensystem::
 
   # Calculate and return the Hamiltonian matrix as a 2D numpy array.
   h = cf.getHamiltonian()
@@ -91,7 +91,7 @@ Knowing the temperature allows us to calculate a peak list: a list of transition
 
   print cf.getPeakList()
   
-The output is::
+Which produces the output::
 
  [[  0.00000000e+00   2.44006198e+01   4.24977124e+01   1.80970926e+01 -2.44006198e+01]
   [  2.16711565e+02   8.83098530e+01   5.04430056e+00   1.71153708e-01  1.41609425e-01]]
@@ -112,9 +112,9 @@ The new output::
  [[   0.           24.40061976   42.49771237]
   [ 216.71156467   88.30985303    5.04430056]]
   
-To calculate a spectrum we need to define a shape of each peak (peak profile function) and its default width (`FWHM`).
+To calculate a spectrum we need to define the shape of each peak (peak profile function) and its default width (`FWHM`).
 The width can be set either via a keyword argument or a property with name `FWHM`. If the peak shape isn't set the default
-of Lorentzian is assumed. To set a different shape use the `PeakShape` property::
+of `Lorentzian` is assumed. To set a different shape use the `PeakShape` property::
 
   cf.PeakShape = 'Gaussian'
   cf.FWHM = 0.9
@@ -128,8 +128,9 @@ After the peak shape is defined a spectrum can be calculated::
   
 The output is a tuple of two 1d numpy arrays (x, y) that can be used with `matplotlib` to plot::
 
-  pyplot.plot(*sp)
-  pyplot.show()
+  import matplotlib.pyplot as plt
+  plt.plot(*sp)
+  plt.show()
   
 .. image:: /images/CrystalFieldSpectrum1.png
    :height: 300
@@ -170,7 +171,13 @@ Plotting in MantidPlot
 ----------------------
 
 To plot a spectrum using MantidPlot's graphing facilities `CrystalField` has method `plot`. It has the same arguments as `getSpectrum`
-and opens a window with a plot.
+and opens a window with a plot, e.g.::
+
+  cf.plot()
+
+In addition to plotting, the `plot` method creates a workspace named `CrystalField_<Ion>` with the plot data. Subsequent calls to `plot` 
+for the same `CrystalField` object will use the same plot window as created by the first call unless this window has been closed in the 
+mean time.
 
 
 Adding a Background
@@ -194,7 +201,7 @@ Setting Ties and Constraints
 ----------------------------
 
 Setting ties and constraints are done by calling the `ties` and `constraints` methods of the `CrystalField` class or its components.
-To `Bnn` parameters are tied by the `CrystalField` class directly specifying the tied parameter as a keyword argument::
+The `Bnn` parameters are tied by the `CrystalField` class directly specifying the tied parameter as a keyword argument::
 
   cf.ties(B20=1.0, B40='B20/2')
   
@@ -238,14 +245,16 @@ which is equivalent to::
 Setting Resolution Model
 ------------------------
 
-Resolution model here is a way to constrain widths of the peaks to realistic numbers which agree with a measured or
+A resolution model is a way to constrain the widths of the peaks to realistic numbers which agree with a measured or
 calculated instrument resolution function. A model is a function that returns a FWHM for a peak centre. The Crystal
-Field python interface defines helper class `ResolutionModel` to help define and set resolution models.
+Field python interface defines the helper class `ResolutionModel` to help define and set resolution models.
 
 To construct an instance of `ResolutionModel` one needs to provide up to four input parameters. The first parameter, `model`, is
-mandatory and can be either of the two
+mandatory and can be either of:
 
-1. A tuple containing two arrays (lists) of real numbers which will be interpreted as tabulated values of the model function. The first element of the tuple is a list of increasing values for peak centres, and the second element is a list of corresponding widths. Values between the tabulated peak positions will be linearly interpolated.
+1. A tuple containing two arrays (lists) of real numbers which will be interpreted as tabulated values of the model function. 
+   The first element of the tuple is a list of increasing values for peak centres, and the second element is a list of corresponding
+   widths. Values between the tabulated peak positions will be linearly interpolated.
 
 2. A python function that takes a :class:`numpy.ndarray` of peak positions and returns a numpy array of widths.
 
@@ -254,21 +263,38 @@ function. `xstart` and `xend` define the interval of interpolation which must in
 :math:`10^{-4}` and defines an approximate desired accuracy of the approximation. The interval will be split until the largest error of the interpolation
 is smaller than `accuracy`. Note that subdivision cannot go on to infinity as the number of points is limited by the class member `ResolutionModel.max_model_size`.
 
-Example of setting a resolution model::
+Example of setting a resolution model using a tuple of two arrays::
 
+    from CrystalField import CrystalField, ResolutionModel
     rm = ResolutionModel(([1, 2, 3, ...., 100], [0.1, 0.3, 0.35, ..., 2.1]))
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
 
-    ...
+Or using an arbitrary function `my_func`::
 
-    rm = ResolutionModel(my_func, xstart=0.0, xend=120.0, accuracy=0.01)
+    def my_func(en):
+        return (25-en)**(1.5) / 200 + 0.1
+
+    rm = ResolutionModel(my_func, xstart=0.0, xend=24.0, accuracy=0.01)
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
 
-When a resolution model is set the peak width will be constrained to have a value close to the model. The degree of deviation is controlled by the
-`FWHMVariation` parameter. It has the default of 0.1 and is an absolute maximum difference a width can have. If set to 0 the widths will be fixed
-to their calculated values (depending on the instant values of their peak centres). For example::
+Finally, the :ref:`PyChop` interface may be used to generate the resolution function for a particular spectrometer::
 
-    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm, FWHMVariation=0.001)
+    from PyChop import PyChop2
+    marires = PyChop2('MARI')
+    marires.setChopper('S')
+    marires.setFrequency(250)
+    marires.setEi(30)
+    rm = ResolutionModel(marires.getResolution, xstart=0.0, xend=29.0, accuracy=0.01)
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
+
+When a resolution model is set, the peak width will be constrained to have a value close to the model. The degree of deviation is controlled by the
+`FWHMVariation` parameter. It has the default of 0.1 and is the maximum difference from the value given by the resolution model a width can have. 
+If set to 0 the widths will be fixed to their calculated values (depending on the instant values of their peak centres). For example::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm, FWHMVariation=0.1)
+
+will allow the peak widths to vary between :math:`\Delta(E)-0.1` and :math:`\Delta(E)+0.1` where :math:`\Delta(E)` is the value of the 
+resolution model at the peak position :math:`E`.
 
 
 
@@ -311,22 +337,22 @@ The resolution model also needs to be initialised from a list::
     # or
 
     rm = ResolutionModel([func0, func1], 0, 100, accuracy = 0.01)
-
+    cf.ResolutionModel = rm
 
 To calculate a spectrum call the same method `getSpectrum` but pass the spectrum index as its first parameter::
 
-  # Calculate second spectrum, use the generated x-values
-  sp = cf.getSpectrum(1)
+    # Calculate second spectrum, use the generated x-values
+    sp = cf.getSpectrum(1)
 
-  # Calculate third spectrum, use a list for x-values
-  x = [0, 1, 2, 3, ...]
-  sp = cf.getSpectrum(2, x)
-  
-  # Calculate second spectrum, use the first spectrum of a workspace
-  sp = cf.getSpectrum(1, ws)
-  
-  # Calculate first spectrum, use the i-th spectrum of a workspace
-  sp = cf.getSpectrum(0, ws, i)
+    # Calculate third spectrum, use a list for x-values
+    x = [0, 1, 2, 3, ...]
+    sp = cf.getSpectrum(2, x)
+    
+    # Calculate second spectrum, use the first spectrum of a workspace
+    sp = cf.getSpectrum(1, ws)
+    
+    # Calculate first spectrum, use the i-th spectrum of a workspace
+    sp = cf.getSpectrum(0, ws, i)
 
 Note that the attributes `Temperature`, `FWHM`, `peaks` and `background` may be set separately from the constructor, e.g.::
 

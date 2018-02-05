@@ -227,8 +227,6 @@ class CrystalField(object):
         self._peakList = None
 
         # Spectra
-        self._dirty_spectra = True
-        self._spectra = {}
         self._plot_window = {}
 
         # self._setDefaultTies()
@@ -352,7 +350,6 @@ class CrystalField(object):
         self.crystalFieldFunction.setAttributeValue('Ion', value)
         self._dirty_eigensystem = True
         self._dirty_peaks = True
-        self._dirty_spectra = True
 
     @property
     def Symmetry(self):
@@ -379,7 +376,6 @@ class CrystalField(object):
         self.crystalFieldFunction.setAttributeValue('Symmetry', value)
         self._dirty_eigensystem = True
         self._dirty_peaks = True
-        self._dirty_spectra = True
 
     @property
     def ToleranceEnergy(self):
@@ -391,7 +387,6 @@ class CrystalField(object):
         """Set energy tolerance"""
         self.crystalFieldFunction.setAttributeValue('ToleranceEnergy', float(value))
         self._dirty_peaks = True
-        self._dirty_spectra = True
 
     @property
     def ToleranceIntensity(self):
@@ -403,7 +398,6 @@ class CrystalField(object):
         """Set intensity tolerance"""
         self.crystalFieldFunction.setAttributeValue('ToleranceIntensity', float(value))
         self._dirty_peaks = True
-        self._dirty_spectra = True
 
     @property
     def IntensityScaling(self):
@@ -433,7 +427,6 @@ class CrystalField(object):
                 self.crystalFieldFunction.setParameter(paramName, value[i])
 
         self._dirty_peaks = True
-        self._dirty_spectra = True
 
     @property
     def Temperature(self):
@@ -456,7 +449,6 @@ class CrystalField(object):
                 return
             self.crystalFieldFunction.setAttributeValue('Temperature', float(value))
         self._dirty_peaks = True
-        self._dirty_spectra = True
 
     @property
     def FWHM(self):
@@ -480,7 +472,6 @@ class CrystalField(object):
             if islistlike(value):
                 raise ValueError('FWHM is expected to be a single floating point value')
             self.crystalFieldFunction.setAttributeValue('FWHM', float(value))
-        self._dirty_spectra = True
         # If both FWHM and ResolutionModel is set, may cause runtime errors
         self._resolutionModel = None
         if self._isMultiSpectrum:
@@ -502,13 +493,11 @@ class CrystalField(object):
     @FWHMVariation.setter
     def FWHMVariation(self, value):
         self.crystalFieldFunction.setAttributeValue('FWHMVariation', float(value))
-        self._dirty_spectra = True
 
     def __getitem__(self, item):
         return self.crystalFieldFunction.getParameterValue(item)
 
     def __setitem__(self, key, value):
-        self._dirty_spectra = True
         self.crystalFieldFunction.setParameter(key, value)
 
     @property
@@ -722,10 +711,6 @@ class CrystalField(object):
         @param ws_index:  An index of a spectrum from workspace to use.
         @return: A tuple of (x, y) arrays
         """
-        if self._dirty_spectra:
-            self._spectra = {}
-            self._dirty_spectra = False
-
         wksp = workspace
         # Allow to call getSpectrum with a workspace as the first argument.
         if not isinstance(i, int):
@@ -748,16 +733,12 @@ class CrystalField(object):
             return self._calcSpectrum(i, wksp, ws_index)
 
         if xArray is None:
-            if i in self._spectra:
-                return self._spectra[i]
-            else:
-                x_min, x_max = self.calc_xmin_xmax(i)
-                xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
+            x_min, x_max = self.calc_xmin_xmax(i)
+            xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
 
         yArray = np.zeros_like(xArray)
         wksp = makeWorkspace(xArray, yArray)
-        self._spectra[i] = self._calcSpectrum(i, wksp, 0)
-        return self._spectra[i]
+        return self._calcSpectrum(i, wksp, 0)
 
     def getHeatCapacity(self, workspace=None, ws_index=0):
         """
