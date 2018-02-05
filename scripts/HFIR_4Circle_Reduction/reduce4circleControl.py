@@ -1124,7 +1124,13 @@ class CWSCDReductionControl(object):
                            ll_corner=roi_start,
                            ur_corner=roi_end)
 
-        # load the mask workspace
+        # check reference workspace for mask workspace
+        if self._refWorkspaceForMask is None:
+            return False, 'There is no reference workspace. Plot a Pt. first!'
+        elif AnalysisDataService.doesExist(self._refWorkspaceForMask) is False:
+            return False, 'Previous reference workspace has been deleted. Plot a Pt. first'
+
+        # get the name of the mask workspace to be loaded to
         if mask_tag is None:
             # use default name
             mask_ws_name = get_mask_ws_name(exp_number, scan_number)
@@ -1132,13 +1138,7 @@ class CWSCDReductionControl(object):
             # use given name
             mask_ws_name = str(mask_tag)
 
-        # record it
-        self._currMaskWSName = mask_ws_name
-
-        if self._refWorkspaceForMask is None:
-            return False, 'There is no reference workspace. Plot a Pt. first!'
-        elif AnalysisDataService.doesExist(self._refWorkspaceForMask) is False:
-            return False, 'Previous reference workspace has been deleted. Plot a Pt. first'
+        # load the mask workspace
         mantidsimple.LoadMask(Instrument='HB3A',
                               InputFile=mask_file_name,
                               OutputWorkspace=mask_ws_name,
@@ -1147,10 +1147,9 @@ class CWSCDReductionControl(object):
                                 OutputWorkspace=mask_ws_name)
 
         # register
-        roi_name = self.RESERVED_ROI_NAME
-        self._maskWorkspaceDict[roi_name] = mask_ws_name
+        self._roiDict[mask_tag].set_mask_workspace_name(mask_ws_name)
 
-        return True, roi_name
+        return True, mask_tag
 
     def get_working_directory(self):
         """
@@ -3011,6 +3010,7 @@ class CWSCDReductionControl(object):
                 col_2theta_index = col_name_list.index('2theta')
                 m1_col_index = col_name_list.index('m1')
                 time_col_index = col_name_list.index('time')
+                det_count_col_index = col_name_list.index('detector')
                 # optional as T-Sample
                 if 'tsample' in col_name_list:
                     tsample_col_index = col_name_list.index('tsample')
@@ -3025,12 +3025,12 @@ class CWSCDReductionControl(object):
                 two_theta = m1 = -1
 
                 for i_row in range(num_rows):
-                    det_count = spice_table_ws.cell(i_row, 5)
+                    det_count = spice_table_ws.cell(i_row, det_count_col_index)
+                    count_time = spice_table_ws.cell(i_row, time_col_index)
+                    # normalize max count to count time
+                    det_count = float(det_count)/count_time
                     if det_count > max_count:
                         max_count = det_count
-                        count_time = spice_table_ws.cell(i_row, time_col_index)
-                        # normalize max count to count time
-                        max_count = int(max_count / float(count_time))
                         max_row = i_row
                         max_h = spice_table_ws.cell(i_row, h_col_index)
                         max_k = spice_table_ws.cell(i_row, k_col_index)

@@ -1135,7 +1135,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # check whether there is mask on detector view
-        if self.ui.graphicsView_detector2dPlot.is_roi_selection_drawn():
+        if self.ui.graphicsView_detector2dPlot.is_roi_selection_drawn:
             self.ui.graphicsView_detector2dPlot.remove_roi()
 
         # need to draw again?

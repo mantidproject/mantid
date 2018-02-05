@@ -185,7 +185,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         """
         is_drawn = not (self._myPolygon is None)
 
-        return is_draw
+        return is_drawn
 
     def get_roi(self):
         """
