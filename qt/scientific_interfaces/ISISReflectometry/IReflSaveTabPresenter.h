@@ -47,8 +47,14 @@ public:
     suggestSaveDirFlag
   };
 
-  virtual void completedReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group) = 0;
+  virtual void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) = 0;
+
+
+  virtual void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::vector<std::string> const &workspaceName) = 0;
 
   /// Tell the presenter something happened
   virtual void notify(IReflSaveTabPresenter::Flag flag) = 0;

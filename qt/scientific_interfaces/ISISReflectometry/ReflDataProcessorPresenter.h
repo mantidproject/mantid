@@ -59,7 +59,12 @@ public:
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
 
-  void completedReductionSuccessfully(GroupData const& groupData) override;
+  void completedRowReductionSuccessfully(
+      GroupData const &groupData,
+      std::vector<std::string> const &workspaceName) override;
+  void completedGroupReductionSuccessfully(
+      GroupData const &groupData, std::string const &workspaceName) override;
+
 private:
   // Process selected rows
   void process() override;

@@ -44,8 +44,13 @@ public:
   enum class Flag { ConfirmReductionPausedFlag, ConfirmReductionResumedFlag };
   virtual void notify(Flag flag) = 0;
 
-  virtual void completedReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group) = 0;
+  virtual void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::vector<std::string> const &workspaceName) = 0;
+
+  virtual void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) = 0;
 
   /// Pre-processing
   virtual std::string getTransmissionRuns(int group) const = 0;

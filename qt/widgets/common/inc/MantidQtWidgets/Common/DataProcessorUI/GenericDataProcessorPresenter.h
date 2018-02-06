@@ -213,7 +213,12 @@ protected:
   // Plotting
   virtual void plotRow();
   virtual void plotGroup();
-  virtual void completedReductionSuccessfully(GroupData const& groupData);
+  virtual void
+  completedRowReductionSuccessfully(GroupData const &groupData,
+                                    std::vector<std::string> const &workspaceName);
+  virtual void
+  completedGroupReductionSuccessfully(GroupData const &groupData,
+                                      std::string const &workspaceName);
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData);
@@ -223,7 +228,6 @@ protected slots:
   void threadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
-
 
 private:
   void applyDefaultOptions(std::map<QString, QVariant> &options);

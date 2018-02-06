@@ -61,10 +61,21 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
   }
 }
 
-void ReflSaveTabPresenter::completedReductionSuccessfully(
-    MantidWidgets::DataProcessor::GroupData const &group) {
-  std::cout << "Reduced group with size " << group.size() << std::endl;
+void ReflSaveTabPresenter::completedGroupReductionSuccessfully(
+    MantidWidgets::DataProcessor::GroupData const &group,
+    std::string const &workspaceName) {
 
+  std::cout << "** Reduced group with size " << group.size() << std::endl;
+  std::cout << "   Saving workspace " << workspaceName << std::endl;
+}
+
+void ReflSaveTabPresenter::completedRowReductionSuccessfully(
+    MantidWidgets::DataProcessor::GroupData const &group,
+    std::vector<std::string> const &workspaceNames) {
+
+  std::cout << "** Reduced row in group with size " << group.size() << std::endl;
+  for (auto &&workspaceName : workspaceNames)
+    std::cout << "   Saving workspace " << workspaceName << std::endl;
 }
 
 /** Fills the 'List of Workspaces' widget with the names of all available

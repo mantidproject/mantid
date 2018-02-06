@@ -41,8 +41,14 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
-void ReflMainWindowPresenter::completedReductionSuccessfully(GroupData const &group) {
-  m_savePresenter->completedReductionSuccessfully(group);
+void ReflMainWindowPresenter::completedGroupReductionSuccessfully(
+    GroupData const &group, std::string const &workspaceName) {
+  m_savePresenter->completedGroupReductionSuccessfully(group, workspaceName);
+}
+
+void ReflMainWindowPresenter::completedRowReductionSuccessfully(
+    GroupData const &group, std::vector<std::string> const &workspaceNames) {
+  m_savePresenter->completedRowReductionSuccessfully(group, workspaceNames);
 }
 
 /**

@@ -266,9 +266,16 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   return errors;
 }
 
-void ReflDataProcessorPresenter::completedReductionSuccessfully(
-    MantidWidgets::DataProcessor::GroupData const &groupData) {
-  m_mainPresenter->completedReductionSuccessfully(groupData);
+void ReflDataProcessorPresenter::completedGroupReductionSuccessfully(
+    MantidWidgets::DataProcessor::GroupData const &groupData,
+    std::string const &workspaceName) {
+  m_mainPresenter->completedGroupReductionSuccessfully(groupData, workspaceName);
+}
+
+void ReflDataProcessorPresenter::completedRowReductionSuccessfully(
+    MantidWidgets::DataProcessor::GroupData const &groupData,
+    std::vector<std::string> const &workspaceNames) {
+  m_mainPresenter->completedRowReductionSuccessfully(groupData, workspaceNames);
 }
 
 /** Processes a group of non-event workspaces

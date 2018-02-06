@@ -406,8 +406,19 @@ void GenericDataProcessorPresenter::nextRow() {
     // Skip reducing rows that are already processed
     if (!isProcessed(m_rowItem.first, groupIndex)) {
       startAsyncRowReduceThread(&m_rowItem, groupIndex);
-      return;
+
+      auto prefixes = m_processor.prefixes();
+      std::vector<std::string> workspaceNames;
+      workspaceNames.reserve(prefixes.size());
+      std::transform(prefixes.cbegin(), prefixes.cend(),
+                     std::back_inserter(workspaceNames),
+                     [this](QString const &prefix) -> std::string {
+                       return getReducedWorkspaceName(m_rowItem.second, prefix)
+                           .toStdString();
+                     });
+      completedRowReductionSuccessfully(m_groupData, workspaceNames);
     }
+    return;
   } else {
     m_group_queue.pop();
     // Set next action flag
@@ -415,19 +426,27 @@ void GenericDataProcessorPresenter::nextRow() {
 
     // Skip post-processing groups that are already processed or only contain a
     // single row
-    if (!isProcessed(groupIndex) && m_groupData.size() > 1) {
-      startAsyncGroupReduceThread(m_groupData, groupIndex);
-      completedReductionSuccessfully(m_groupData);
-      return;
+    if (!isProcessed(groupIndex)) {
+      if (m_groupData.size() > 1) {
+        startAsyncGroupReduceThread(m_groupData, groupIndex);
+        auto postprocessedWorkspace =
+            getPostprocessedWorkspaceName(m_groupData).toStdString();
+        completedGroupReductionSuccessfully(m_groupData,
+                                            postprocessedWorkspace);
+        return;
+      }
     }
-  }
 
-  // Row / group skipped, perform next action
-  doNextAction();
+    // Row / group skipped, perform next action
+    doNextAction();
+  }
 }
 
-void GenericDataProcessorPresenter::completedReductionSuccessfully(
-    GroupData const &) {}
+void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
+    GroupData const &, std::string const &) {}
+
+void GenericDataProcessorPresenter::completedRowReductionSuccessfully(
+    GroupData const &, std::vector<std::string> const &) {}
 
 /**
 Process a new group
@@ -449,12 +468,26 @@ void GenericDataProcessorPresenter::nextGroup() {
     m_rowItem = rqueue.front();
     rqueue.pop();
     // Skip reducing rows that are already processed
-    if (!isProcessed(m_rowItem.first, m_group_queue.front().first))
+    if (!isProcessed(m_rowItem.first, m_group_queue.front().first)) {
       startAsyncRowReduceThread(&m_rowItem, m_group_queue.front().first);
-    else
+
+      auto prefixes = m_processor.prefixes();
+      auto workspaceNames = std::vector<std::string>();
+      workspaceNames.reserve(prefixes.size());
+      std::transform(prefixes.cbegin(), prefixes.cend(),
+                     std::back_inserter(workspaceNames),
+                     [this](QString const &prefix) -> std::string {
+                       return getReducedWorkspaceName(m_rowItem.second, prefix)
+                           .toStdString();
+                     });
+      completedRowReductionSuccessfully(m_groupData, workspaceNames);
+
+    } else {
       doNextAction();
+    }
   } else {
-    // If "Output Notebook" checkbox is checked then create an ipython notebook
+    // If "Output Notebook" checkbox is checked then create an ipython
+    // notebook
     if (m_view->getEnableNotebook())
       saveNotebook(m_selectedData);
     endReduction();
@@ -588,8 +621,10 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   auto const outputName =
       preprocessingListToString(runs, preprocessor.prefix());
 
-  /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
-  * but that doesn't preserve history nicely, so we'll just take care of tidying
+  /* Ideally, this should be executed as a child algorithm to keep the ADS
+  * tidy,
+  * but that doesn't preserve history nicely, so we'll just take care of
+  * tidying
   * up in the event of failure.
   */
   IAlgorithm_sptr alg =
@@ -627,12 +662,14 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
       alg->execute();
 
       if (runIt != --runs.end()) {
-        // After the first execution we replace the LHS with the previous output
+        // After the first execution we replace the LHS with the previous
+        // output
         setAlgorithmProperty(alg.get(), preprocessor.lhsProperty(), outputName);
       }
     }
   } catch (...) {
-    // If we're unable to create the full workspace, discard the partial version
+    // If we're unable to create the full workspace, discard the partial
+    // version
     removeWorkspace(outputName);
     // We've tidied up, now re-throw.
     throw;
@@ -1017,7 +1054,8 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     pause();
     break;
   }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // Not having a 'default' case is deliberate. gcc issues a warning if
+  // there's
   // a flag we aren't handling.
 }
 
@@ -1366,7 +1404,8 @@ void GenericDataProcessorPresenter::plotWorkspaces(
 void GenericDataProcessorPresenter::showOptionsDialog() {
   auto options =
       new QtDataProcessorOptionsDialog(m_view, m_view->getPresenter());
-  // By default the dialog is only destroyed when ReflMainView is and so they'll
+  // By default the dialog is only destroyed when ReflMainView is and so
+  // they'll
   // stack up.
   // This way, they'll be deallocated as soon as they've been closed.
   options->setAttribute(Qt::WA_DeleteOnClose, true);

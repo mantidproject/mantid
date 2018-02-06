@@ -49,7 +49,12 @@ public:
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflSaveTabPresenter::Flag flag) override;
-  void completedReductionSuccessfully(MantidWidgets::DataProcessor::GroupData const& group) override;
+  void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) override;
+  void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::vector<std::string> const &workspaceNames) override;
 
 private:
   /// Adds all workspace names to the list of workspaces
