@@ -44,11 +44,9 @@ Please note the different meaning of
 
 Several workspaces can be combined to a :literal:`GroupWorkspace` which may be the preferred output for workflow algorithms.
 
-TODO: image, explanation
-
 :literal:`TableWorkspaces` descibe their content by column names and contain reduction specific data, e.g. fit results of peak positions
 
-TODO: image, explanation
+.. figure:: /images/Workspace4.png
 
 ==========
 Algorithms
@@ -58,12 +56,12 @@ From the main MantidPlot menu, select
 
 View->Algorithms
 
-Algorithms can take care of error propagation. For more details it is recommended to check the documentation. Arithmetic operations propagate errors (Plus, Minus, ...). As well in Python.
+Algorithms can take care of error propagation. For more details it is recommended to check the corresponding documentation, click on the ? sign in the left lower corner of the specific algorithm graphical user interface. Arithmetic operations propagate errors (Plus, Minus, ...). As well in Python.
 
 Input validation
 ----------------
 
-Some algorithm have requirements that will be checked before execution, e.g. units, common binning, etc.
+Some algorithms have requirements that will be checked before execution, e.g. units, common binning, etc.
 This way, the user will be quickly and early guided to correct inputs rather than motivated reading error messages.
 
 Results Log
@@ -160,4 +158,4 @@ taken from a bespoke algorithm or auto reduction.
 
 These interfaces do not support GroupWorkspaces as input.
 
-TODO: image, explanation? - source/interfaces/IndirectDataAnalysis.rst
+.. figure:: /images/interface.png
