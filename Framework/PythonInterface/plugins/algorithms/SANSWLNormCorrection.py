@@ -124,6 +124,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
         Sets the properties as method properties
         '''
         
+        self.config_file  = self.getProperty('ConfigurationFile').value
+        # Let's replace the input properties with those from the conf file
         self._parse_config_file()
 
         self.input_wss = self.getProperty('InputWorkspaces').value
@@ -160,13 +162,14 @@ class SANSWLNormCorrection(PythonAlgorithm):
         Note the Key in the files must be a valid property
         '''
         
-        file_name = self.getProperty('ConfigurationFile').value
-        if os.path.exists(file_name):
-            parser = RawConfigParser()
-            parser.optionxform = lambda option: option # case sensitive
-            parser.read(file_name)
-            
-            for k, v in parser.items('DEFAULT'):
+        self.parser = None
+        if os.path.exists(self.config_file):
+            logger.information("Using configuration file: {}.".format(self.config_file))
+            self.parser = RawConfigParser()
+            self.parser.optionxform = lambda option: option # case sensitive
+            self.parser.read(self.config_file)
+            for k, v in self.parser.items('DEFAULT'):
+                logger.information("Using property {} = {} from the conf file.".format(k, v))
                 self.setProperty(k, v)
                     
 
@@ -495,13 +498,13 @@ class SANSWLNormCorrection(PythonAlgorithm):
         
         ws_table_name = self.output_prefix + "_table"        
         
-        outws = CreateEmptyTableWorkspace(OutputWorkspace=ws_table_name)
+        ws_table = CreateEmptyTableWorkspace(OutputWorkspace=ws_table_name)
         columns = ["IQCurve", "K", "KError", "B", "BError", "GoodnessOfFit",
                    "WavelengthMin", "WavelengthMax", "WavelengthAverage"]
 
-        outws.addColumn(type="str", name=columns[0])
+        ws_table.addColumn(type="str", name=columns[0])
         for col in columns[1:]:
-            outws.addColumn(type="double", name=col)
+            ws_table.addColumn(type="double", name=col)
 
         for name, v in self.data.items():
             if v['plsq'] is None and v['cov'] is None:
@@ -556,8 +559,56 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 "WavelengthAverage": (v['wl_max'] + v['wl_min']) / 2.0, 
             })
             logger.debug("%s" % row)
-            outws.addRow(row)
+            ws_table.addRow(row)
+        self._save_config_file(ws_table)
+        self._save_ws_table_as_csv(ws_table)
+
+            
+    def _save_config_file(self, ws_table):
+        '''
+        Writes a new configuration file with the new K and B values
+        '''
+
+        self.parser['DEFAULT']['KList'] = ",".join(str(e) for e in ws_table.column("K"))
+        self.parser['DEFAULT']['BList'] = ",".join(str(e) for e in ws_table.column("B"))
+                        
         
+        pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
+        if pm.has_key("OutputDirectory"):
+            output_directory = pm["OutputDirectory"].value
+        else:
+            output_directory = ''
+        
+        conf_file_new_name = self.output_prefix + "_config.ini"
+        conf_file_new_path = os.path.join(output_directory, conf_file_new_name)
+        
+        logger.notice("New conf file saved as: {}".format(conf_file_new_path))
+        
+        with open(conf_file_new_path, 'w') as f:
+            self.parser.write(f)
+    
+    def _save_ws_table_as_csv(self, ws_table):
+        import csv
+        
+        pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
+        if pm.has_key("OutputDirectory"):
+            output_directory = pm["OutputDirectory"].value
+        else:
+            output_directory = ''
+        
+        ws_table_file_name = self.output_prefix + "_table.csv"
+        ws_table_file_path = os.path.join(output_directory, ws_table_file_name)
+        
+        logger.notice("WS Table saved as: {}".format(ws_table_file_path))
+        
+        with open(ws_table_file_path, 'w') as f:
+            dict_writer = csv.DictWriter(f, ws_table.keys())
+            dict_writer.writeheader()
+            dict_writer.writerows(
+                [ ws_table.row(i) for i in range(ws_table.rowCount())]
+            )
+            
+            
 
     def PyExec(self):
 
