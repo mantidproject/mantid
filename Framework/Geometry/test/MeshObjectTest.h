@@ -51,7 +51,7 @@ public:
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
-boost::shared_ptr<MeshObject> createCube(const double size, const V3D &centre) {
+std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   /**
   * Create cube of side length size with specified centre,
   * parellel to axes and non-negative vertex coordinates.
@@ -112,12 +112,12 @@ boost::shared_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   triangles.push_back(6);
   triangles.push_back(2);
 
-  boost::shared_ptr<MeshObject> retVal =
-      boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
+  std::unique_ptr<MeshObject> retVal =
+      std::unique_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
 }
 
-boost::shared_ptr<MeshObject> createCube(const double size) {
+std::unique_ptr<MeshObject> createCube(const double size) {
   /**
   * Create cube of side length size with vertex at origin,
   * parellel to axes and non-negative vertex coordinates.
@@ -125,7 +125,7 @@ boost::shared_ptr<MeshObject> createCube(const double size) {
   return createCube(size, V3D(0.5 * size, 0.5 * size, 0.5 * size));
 }
 
-boost::shared_ptr<MeshObject> createOctahedron() {
+std::unique_ptr<MeshObject> createOctahedron() {
   /**
   * Create octahedron with vertices on the axes at -1 & +1.
   */
@@ -175,12 +175,12 @@ boost::shared_ptr<MeshObject> createOctahedron() {
   triangles.push_back(1);
   triangles.push_back(5);
 
-  boost::shared_ptr<MeshObject> retVal =
-      boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
+  std::unique_ptr<MeshObject> retVal =
+      std::unique_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
 }
 
-boost::shared_ptr<MeshObject> createLShape() {
+std::unique_ptr<MeshObject> createLShape() {
   /**
   * Create an L shape with vertices at
   * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
@@ -264,8 +264,8 @@ boost::shared_ptr<MeshObject> createLShape() {
   triangles.push_back(0);
   triangles.push_back(6);
 
-  boost::shared_ptr<MeshObject> retVal =
-      boost::shared_ptr<MeshObject>(new MeshObject(triangles, vertices));
+  std::unique_ptr<MeshObject> retVal =
+      std::unique_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
 }
 }
@@ -303,7 +303,7 @@ public:
   }
 
   void testClone() {
-    IObject_sptr geom_obj = createOctahedron();
+    auto geom_obj = createOctahedron();
     TS_ASSERT_THROWS_NOTHING(geom_obj->clone());
   }
 
@@ -415,71 +415,71 @@ public:
 
   void testInterceptCubeX() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCube(4.0);
+    auto geom_obj = createCube(4.0);
     Track track(V3D(-10, 1, 1), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(
         Link(V3D(0, 1, 1), V3D(4, 1, 1), 14.0, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
+    checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testInterceptCubeXY() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCube(4.0);
+    auto geom_obj = createCube(4.0);
     Track track(V3D(-8, -6, 1), V3D(0.8, 0.6, 0));
 
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(
         Link(V3D(0, 0, 1), V3D(4, 3, 1), 15.0, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
+    checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testInterceptCubeMiss() {
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
-    IObject_sptr geom_obj = createCube(4.0);
+    auto geom_obj = createCube(4.0);
     Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
 
-    checkTrackIntercept(geom_obj, track, expectedResults);
+    checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testInterceptOctahedronX() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createOctahedron();
+    auto geom_obj = createOctahedron();
     Track track(V3D(-10, 0.2, 0.2), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(
         Link(V3D(-0.6, 0.2, 0.2), V3D(0.6, 0.2, 0.2), 10.6, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
+    checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testInterceptOctahedronXthroughEdge() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createOctahedron();
+    auto geom_obj = createOctahedron();
     Track track(V3D(-10, 0.2, 0.0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(
         Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 10.8, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
+    checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testInterceptOctahedronXthroughVertex() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createOctahedron();
+    auto geom_obj = createOctahedron();
     Track track(V3D(-10, 0.0, 0.0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(
         Link(V3D(-1.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), 11.0, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
+    checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testInterceptLShapeTwoPass() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createLShape();
+    auto geom_obj = createLShape();
     Track track(V3D(0, 2.5, 0.5), V3D(0.707, -0.707, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -487,17 +487,17 @@ public:
         Link(V3D(0.5, 2, 0.5), V3D(1, 1.5, 0.5), 1.4142135, *geom_obj));
     expectedResults.push_back(
         Link(V3D(1.5, 1, 0.5), V3D(2, 0.5, 0.5), 2.828427, *geom_obj));
-    checkTrackIntercept(geom_obj, track, expectedResults);
+    checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testInterceptLShapeMiss() {
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
-    IObject_sptr geom_obj = createLShape();
+    auto geom_obj = createLShape();
     // Passes through convex hull of L-Shape
     Track track(V3D(1.1, 1.1, -1), V3D(0, 0, 1));
 
-    checkTrackIntercept(geom_obj, track, expectedResults);
+    checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testTrackTwoIsolatedCubes()
@@ -505,9 +505,9 @@ public:
   Test a track going through two objects
   */
   {
-    IObject_sptr object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
+    auto object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
 
-    IObject_sptr object2 = createCube(2.0, V3D(5.5, 0.0, 0.0));
+    auto object2 = createCube(2.0, V3D(5.5, 0.0, 0.0));
 
     Track TL(Kernel::V3D(-5, 0, 0), Kernel::V3D(1, 0, 0));
 
@@ -527,9 +527,9 @@ public:
   Test a track going through two objects
   */
   {
-    IObject_sptr object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
+    auto object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
 
-    IObject_sptr object2 = createCube(4.0, V3D(3.0, 0.0, 0.0));
+    auto object2 = createCube(4.0, V3D(3.0, 0.0, 0.0));
 
     Track TL(Kernel::V3D(-5, 0, 0), Kernel::V3D(1, 0, 0));
 
@@ -562,7 +562,7 @@ public:
     TS_ASSERT_EQUALS(index, expectedResults.size());
   }
 
-  void checkTrackIntercept(IObject_sptr obj, Track &track,
+  void checkTrackIntercept(IObject_uptr obj, Track &track,
                            const std::vector<Link> &expectedResults) {
     int unitCount = obj->interceptSurface(track);
     TS_ASSERT_EQUALS(unitCount, expectedResults.size());
@@ -570,7 +570,7 @@ public:
   }
 
   void testIsOnSideCube() {
-    IObject_sptr geom_obj = createCube(1.0);
+    auto geom_obj = createCube(1.0);
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.5, 0.5)), false); // centre
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.1, 0.5)), false);
@@ -619,7 +619,7 @@ public:
   }
 
   void testIsValidCube() {
-    IObject_sptr geom_obj = createCube(1.0);
+    auto geom_obj = createCube(1.0);
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.5, 0.5)), true); // centre
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.1, 0.5)), true);
@@ -668,7 +668,7 @@ public:
   }
 
   void testIsOnSideOctahedron() {
-    IObject_sptr geom_obj = createOctahedron();
+    auto geom_obj = createOctahedron();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.0, 0.0, 0.0)), false); // centre
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.2, 0.2)), false);
@@ -701,7 +701,7 @@ public:
   }
 
   void testIsValidOctahedron() {
-    IObject_sptr geom_obj = createOctahedron();
+    auto geom_obj = createOctahedron();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.0, 0.0, 0.0)), true); // centre
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.2, 0.2)), true);
@@ -734,7 +734,7 @@ public:
   }
 
   void testIsOnSideLShape() {
-    IObject_sptr geom_obj = createLShape();
+    auto geom_obj = createLShape();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.5, 0.5)), false);
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.5, 0.5, 0.5)), false);
@@ -762,7 +762,7 @@ public:
   }
 
   void testIsValidLShape() {
-    IObject_sptr geom_obj = createLShape();
+    auto geom_obj = createLShape();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.5, 0.5)), true);
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.5, 0.5, 0.5)), true);
@@ -1046,8 +1046,8 @@ public:
 private:
   const size_t npoints = 6000;
   Mantid::Kernel::MersenneTwister rng;
-  IObject_sptr octahedron;
-  IObject_sptr lShape;
+  IObject_uptr octahedron;
+  IObject_uptr lShape;
 };
 
 #endif // MANTID_TESTMESHOBJECT__

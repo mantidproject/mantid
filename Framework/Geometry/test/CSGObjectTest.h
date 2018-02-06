@@ -140,7 +140,7 @@ public:
   }
 
   void testIsOnSideCappedCylinder() {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 0, 0)), false); // origin
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 2.9, 0)), false);
@@ -174,7 +174,7 @@ public:
   }
 
   void testIsValidCappedCylinder() {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 0, 0)), true); // origin
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 2.9, 0)), true);
@@ -287,7 +287,7 @@ public:
   }
 
   void testCalcValidTypeCappedCylinder() {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // entry on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(1, 0, 0)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(-1, 0, 0)),
@@ -362,7 +362,7 @@ public:
 
   void testInterceptSurfaceCappedCylinderY() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
 
@@ -372,7 +372,7 @@ public:
 
   void testInterceptSurfaceCappedCylinderX() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -384,7 +384,7 @@ public:
   void testInterceptSurfaceCappedCylinderMiss() {
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -957,7 +957,7 @@ public:
   Test bounding box for a object capped cylinder
   */
   {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     double xmax, ymax, zmax, xmin, ymin, zmin;
     xmax = ymax = zmax = 100;
     xmin = ymin = zmin = -100;

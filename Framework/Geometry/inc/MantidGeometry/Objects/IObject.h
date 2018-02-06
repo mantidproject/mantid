@@ -114,6 +114,10 @@ public:
 typedef boost::shared_ptr<IObject> IObject_sptr;
 /// Typdef for a shared pointer to a const object
 typedef boost::shared_ptr<const IObject> IObject_const_sptr;
+/// Typdef for a unique pointer
+typedef std::unique_ptr<IObject> IObject_uptr;
+/// Typdef for a unique pointer to a const object
+typedef std::unique_ptr<const IObject> IObject_const_uptr;
 
 } // namespace Geometry
 } // namespace Mantid
