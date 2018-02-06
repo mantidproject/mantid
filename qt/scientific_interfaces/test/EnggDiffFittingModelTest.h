@@ -13,9 +13,6 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-// Lets us have pairs inside assertion macros
-typedef std::pair<int, size_t> RunBankPair;
-
 using namespace Mantid;
 using namespace MantidQt::CustomInterfaces;
 
@@ -25,26 +22,26 @@ namespace {
 // This means we can test the workspace maps without having to run Load
 class EnggDiffFittingModelAddWSExposed : public EnggDiffFittingModel {
 public:
-  void addWorkspace(const int runNumber, const size_t bank,
+  void addWorkspace(const RunLabel &runLabel,
                     Mantid::API::MatrixWorkspace_sptr ws);
 
-  void addFitParams(const int runNumber, const size_t bank,
+  void addFitParams(const RunLabel &runLabel,
                     Mantid::API::ITableWorkspace_sptr ws);
 
   void mergeTablesExposed(API::ITableWorkspace_sptr tableToCopy,
                           API::ITableWorkspace_sptr targetTable);
 };
 
-inline void EnggDiffFittingModelAddWSExposed::addWorkspace(
-    const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
-  addFocusedWorkspace(runNumber, bank, ws,
-                      std::to_string(runNumber) + "_" + std::to_string(bank));
+inline void
+EnggDiffFittingModelAddWSExposed::addWorkspace(const RunLabel &runLabel,
+                                               API::MatrixWorkspace_sptr ws) {
+  addFocusedWorkspace(runLabel, ws, std::to_string(runLabel.runNumber) + "_" +
+                                        std::to_string(runLabel.bank));
 }
 
 inline void EnggDiffFittingModelAddWSExposed::addFitParams(
-    const int runNumber, const size_t bank,
-    Mantid::API::ITableWorkspace_sptr ws) {
-  addFitResults(runNumber, bank, ws);
+    const RunLabel &runLabel, Mantid::API::ITableWorkspace_sptr ws) {
+  addFitResults(runLabel, ws);
 }
 
 inline void EnggDiffFittingModelAddWSExposed::mergeTablesExposed(
@@ -53,11 +50,11 @@ inline void EnggDiffFittingModelAddWSExposed::mergeTablesExposed(
   mergeTables(tableToCopy, targetTable);
 }
 
-void addSampleWorkspaceToModel(const int runNumber, const int bank,
+void addSampleWorkspaceToModel(const RunLabel &runLabel,
                                EnggDiffFittingModelAddWSExposed &model) {
   API::MatrixWorkspace_sptr ws =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-  model.addWorkspace(runNumber, bank, ws);
+  model.addWorkspace(runLabel, ws);
 }
 
 API::ITableWorkspace_sptr createFitParamsTable() {
@@ -143,10 +140,10 @@ public:
     auto model = EnggDiffFittingModelAddWSExposed();
     API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-    const int runNumber = 100;
-    const int bank = 1;
-    TS_ASSERT_THROWS_NOTHING(model.addWorkspace(runNumber, bank, ws));
-    const auto retrievedWS = model.getFocusedWorkspace(runNumber, bank);
+
+    const RunLabel runLabel(100, 1);
+    TS_ASSERT_THROWS_NOTHING(model.addWorkspace(runLabel, ws));
+    const auto retrievedWS = model.getFocusedWorkspace(runLabel);
 
     TS_ASSERT(retrievedWS != nullptr);
     TS_ASSERT_EQUALS(ws, retrievedWS);
@@ -155,18 +152,18 @@ public:
   void test_getRunNumbersAndBankIDs() {
     auto model = EnggDiffFittingModelAddWSExposed();
 
-    addSampleWorkspaceToModel(123, 1, model);
-    addSampleWorkspaceToModel(456, 2, model);
-    addSampleWorkspaceToModel(789, 1, model);
-    addSampleWorkspaceToModel(123, 2, model);
+    addSampleWorkspaceToModel(RunLabel(123, 1), model);
+    addSampleWorkspaceToModel(RunLabel(456, 2), model);
+    addSampleWorkspaceToModel(RunLabel(789, 1), model);
+    addSampleWorkspaceToModel(RunLabel(123, 2), model);
 
-    const auto runNoBankPairs = model.getRunNumbersAndBankIDs();
+    const auto runLabels = model.getRunLabels();
 
-    TS_ASSERT_EQUALS(runNoBankPairs.size(), 4);
-    TS_ASSERT_EQUALS(runNoBankPairs[0], RunBankPair(123, 1));
-    TS_ASSERT_EQUALS(runNoBankPairs[1], RunBankPair(123, 2));
-    TS_ASSERT_EQUALS(runNoBankPairs[2], RunBankPair(456, 2));
-    TS_ASSERT_EQUALS(runNoBankPairs[3], RunBankPair(789, 1));
+    TS_ASSERT_EQUALS(runLabels.size(), 4);
+    TS_ASSERT_EQUALS(runLabels[0], RunLabel(123, 1));
+    TS_ASSERT_EQUALS(runLabels[1], RunLabel(123, 2));
+    TS_ASSERT_EQUALS(runLabels[2], RunLabel(456, 2));
+    TS_ASSERT_EQUALS(runLabels[3], RunLabel(789, 1));
   }
 
   void test_loadWorkspaces() {
@@ -174,19 +171,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
     API::MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
+        ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_LABEL));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(ws->getRunNumber(), FOCUSED_WS_RUN_NUMBER);
+    TS_ASSERT_EQUALS(ws->getRunNumber(), FOCUSED_WS_RUN_LABEL.runNumber);
   }
 
   void test_setDifcTzero() {
     auto model = EnggDiffFittingModel();
     TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
 
-    TS_ASSERT_THROWS_NOTHING(
-        model.setDifcTzero(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK,
-                           std::vector<GSASCalibrationParms>()));
-    auto ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK);
+    TS_ASSERT_THROWS_NOTHING(model.setDifcTzero(
+        FOCUSED_WS_RUN_LABEL, std::vector<GSASCalibrationParms>()));
+    auto ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_LABEL);
     auto run = ws->run();
     TS_ASSERT(run.hasProperty("difa"));
     TS_ASSERT(run.hasProperty("difc"));
@@ -198,27 +194,25 @@ public:
 
     const auto fitParams = createFitParamsTable();
     TS_ASSERT_THROWS_NOTHING(
-        model.addFitParams(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK, fitParams));
+        model.addFitParams(FOCUSED_WS_RUN_LABEL, fitParams));
     TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
 
-    TS_ASSERT_THROWS_NOTHING(
-        model.setDifcTzero(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK,
-                           std::vector<GSASCalibrationParms>()));
-    TS_ASSERT_THROWS_NOTHING(
-        model.createFittedPeaksWS(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
+    TS_ASSERT_THROWS_NOTHING(model.setDifcTzero(
+        FOCUSED_WS_RUN_LABEL, std::vector<GSASCalibrationParms>()));
+    TS_ASSERT_THROWS_NOTHING(model.createFittedPeaksWS(FOCUSED_WS_RUN_LABEL));
 
     API::MatrixWorkspace_sptr fittedPeaksWS;
-    TS_ASSERT_THROWS_NOTHING(fittedPeaksWS = model.getFittedPeaksWS(
-                                 FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
+    TS_ASSERT_THROWS_NOTHING(fittedPeaksWS =
+                                 model.getFittedPeaksWS(FOCUSED_WS_RUN_LABEL));
     TS_ASSERT_EQUALS(fittedPeaksWS->getNumberHistograms(), 4);
   }
 
   void test_getNumFocusedWorkspaces() {
     auto model = EnggDiffFittingModelAddWSExposed();
 
-    addSampleWorkspaceToModel(123, 1, model);
-    addSampleWorkspaceToModel(456, 2, model);
-    addSampleWorkspaceToModel(789, 1, model);
+    addSampleWorkspaceToModel(RunLabel(123, 1), model);
+    addSampleWorkspaceToModel(RunLabel(456, 2), model);
+    addSampleWorkspaceToModel(RunLabel(789, 1), model);
 
     TS_ASSERT_EQUALS(model.getNumFocusedWorkspaces(), 3);
   }
@@ -269,30 +263,31 @@ public:
   void test_removeRun() {
     auto model = EnggDiffFittingModelAddWSExposed();
 
-    addSampleWorkspaceToModel(123, 1, model);
-    addSampleWorkspaceToModel(456, 2, model);
-    addSampleWorkspaceToModel(789, 1, model);
+    const RunLabel label1(123, 1);
+    addSampleWorkspaceToModel(label1, model);
+    const RunLabel label2(456, 2);
+    addSampleWorkspaceToModel(label2, model);
+    const RunLabel label3(789, 1);
+    addSampleWorkspaceToModel(label3, model);
 
-    model.removeRun(123, 1);
+    model.removeRun(label1);
 
-    const auto runBankPairs = model.getRunNumbersAndBankIDs();
-    TS_ASSERT_EQUALS(runBankPairs.size(), 2);
+    const auto runLabels = model.getRunLabels();
+    TS_ASSERT_EQUALS(runLabels.size(), 2);
 
-    TS_ASSERT_EQUALS(runBankPairs[0], RunBankPair(456, 2));
-    TS_ASSERT_EQUALS(runBankPairs[1], RunBankPair(789, 1));
+    TS_ASSERT_EQUALS(runLabels[0], label2);
+    TS_ASSERT_EQUALS(runLabels[1], label3);
   }
 
 private:
   const static std::string FOCUSED_WS_FILENAME;
-  const static int FOCUSED_WS_RUN_NUMBER;
-  const static size_t FOCUSED_WS_BANK;
+  const static RunLabel FOCUSED_WS_RUN_LABEL;
 };
 
 const std::string EnggDiffFittingModelTest::FOCUSED_WS_FILENAME =
     "ENGINX_277208_focused_bank_2.nxs";
 
-const int EnggDiffFittingModelTest::FOCUSED_WS_RUN_NUMBER = 277208;
-
-const size_t EnggDiffFittingModelTest::FOCUSED_WS_BANK = 2;
+const RunLabel EnggDiffFittingModelTest::FOCUSED_WS_RUN_LABEL =
+    RunLabel(277208, 2);
 
 #endif

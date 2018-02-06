@@ -82,6 +82,7 @@ class IPeakTest(unittest.TestCase):
         self._peak.setQSampleFrame(q_sample)
 
         q_lab = np.dot(self._peak.getQLabFrame(), rotation)
+        npt.assert_allclose(self._peak.getGoniometerMatrix(), rotation)
         npt.assert_allclose(self._peak.getQSampleFrame(), q_sample, atol=self._tolerance)
         npt.assert_allclose(q_lab, q_sample, atol=self._tolerance)
 

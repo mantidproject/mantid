@@ -172,7 +172,7 @@ void export_Run() {
            (const Mantid::Geometry::Goniometer &(Run::*)() const) &
                Run::getGoniometer,
            arg("self"), return_value_policy<reference_existing_object>(),
-           "Get the oriented lattice for this sample")
+           "Return the Goniometer object associated with this run.")
 
       .def("addProperty", &addProperty,
            (arg("self"), arg("name"), arg("value"), arg("replace")),

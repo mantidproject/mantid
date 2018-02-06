@@ -89,7 +89,8 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
                                  SaveGSASIIProjectFile=self._get_gsas_proj_filename(),
                                  MuteGSASII=True,
                                  LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
-                                 ResidualsTable=self._RESIDUALS_TBL_NAME)
+                                 ResidualsTable=self._RESIDUALS_TBL_NAME,
+                                 XMin=10000, XMax=40000)
 
     def skipTests(self):
         # Skip this test, as it's just a wrapper for the Rietveld and Pawley tests

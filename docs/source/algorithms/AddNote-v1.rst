@@ -33,7 +33,8 @@ Usage
 	log = ws.getRun().getLogData("my_log")
 	print("my_log has {} entries".format(log.size()))
 	for time, value in zip(log.times, log.value):
-		print("\t{}\t{}".format(time.astype(np.dtype('M8[s]')), value))
+		ts = np.datetime_as_string(time.astype(np.dtype('M8[s]')), timezone='UTC')
+		print("\t{}\t{}".format(ts, value))
 
 	AddNote(ws, Name="my_log", Time="2014-01-01T00:00:00", Value="New Initial", DeleteExisting=True)
 	AddNote(ws, Name="my_log", Time="2014-01-01T00:30:00", Value="New Final")
@@ -41,7 +42,8 @@ Usage
 	log = ws.getRun().getLogData("my_log")
 	print("my_log now has {} entries".format(log.size()))
 	for time, value in zip(log.times, log.value):
-		print("\t{}\t{}".format(time.astype(np.dtype('M8[s]')), value))
+		ts = np.datetime_as_string(time.astype(np.dtype('M8[s]')), timezone='UTC')
+		print("\t{}\t{}".format(ts, value))
 
 Output:
 
@@ -49,11 +51,11 @@ Output:
     :options: +NORMALIZE_WHITESPACE
 
 	my_log has 3 entries
-            2014-01-01T00:00:00     Initial
-            2014-01-01T00:30:30     Second
-            2014-01-01T00:50:00     Final
+            2014-01-01T00:00:00Z     Initial
+            2014-01-01T00:30:30Z     Second
+            2014-01-01T00:50:00Z     Final
     my_log now has 2 entries
-            2014-01-01T00:00:00     New Initial
-            2014-01-01T00:30:00     New Final
+            2014-01-01T00:00:00Z     New Initial
+            2014-01-01T00:30:00Z     New Final
 
 .. categories::

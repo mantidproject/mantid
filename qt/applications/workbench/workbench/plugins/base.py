@@ -37,6 +37,9 @@ class PluginWidget(QWidget):
 
 # ----------------- Plugin API --------------------
 
+    def app_closing(self):
+        raise NotImplementedError()
+
     def get_plugin_title(self):
         raise NotImplementedError()
 

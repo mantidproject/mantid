@@ -34,12 +34,13 @@ add_library ( Beamline ${SRC_FILES} ${INC_FILES} )
 set_target_properties ( Beamline PROPERTIES OUTPUT_NAME MantidBeamline
                                  COMPILE_DEFINITIONS IN_MANTID_BEAMLINE
                                  INSTALL_RPATH "@loader_path/../MacOS" )
-target_include_directories( Beamline SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIR} )
+
+target_include_directories( Beamline SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Beamline PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Beamline LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( Beamline LINK_PUBLIC Eigen3::Eigen LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
                         ${GSL_LIBRARIES} ${MANTIDLIBS} )
 
 # Add the unit tests directory

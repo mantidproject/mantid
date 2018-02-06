@@ -4,7 +4,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, StringListValidator)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import DetectorType
@@ -12,7 +12,7 @@ from sans.common.general_functions import (create_unmanaged_algorithm, append_to
 from sans.algorithm_detail.crop_helper import get_component_name
 
 
-class SANSCrop(DataProcessorAlgorithm):
+class SANSCrop(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Crop'
 
