@@ -309,7 +309,9 @@ void IqtFit::updatePreviewPlots() {
 }
 
 void IqtFit::updatePlotRange() {
-  IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm->ppPlotTop);
+  auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("IqtFitRange");
+  const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
+  rangeSelector->setRange(range.first, range.second);
 }
 
 QHash<QString, double> IqtFit::createDefaultValues() const {

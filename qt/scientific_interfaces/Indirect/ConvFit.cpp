@@ -51,7 +51,7 @@ void ConvFit::setup() {
   backRangeSelector->setVisible(false);
   backRangeSelector->setColour(Qt::darkGreen);
   backRangeSelector->setRange(0.0, 1.0);
-
+  
   auto hwhmRangeSelector = m_uiForm->ppPlotTop->addRangeSelector("ConvFitHWHM");
   hwhmRangeSelector->setColour(Qt::red);
 
@@ -820,7 +820,9 @@ void ConvFit::updatePreviewPlots() {
 }
 
 void ConvFit::updatePlotRange() {
-  IndirectDataAnalysisTab::updatePlotRange("ConvFitRange", m_uiForm->ppPlotTop);
+  auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitRange");
+  const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
+  rangeSelector->setRange(range.first, range.second);
 }
 
 void ConvFit::disablePlotGuess() {

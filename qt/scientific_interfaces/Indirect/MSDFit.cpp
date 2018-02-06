@@ -191,7 +191,9 @@ void MSDFit::updatePreviewPlots() {
 }
 
 void MSDFit::updatePlotRange() {
-  IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm->ppPlotTop);
+  auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("MSDRange");
+  const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
+  rangeSelector->setRange(range.first, range.second);
 }
 
 void MSDFit::disablePlotGuess() {
