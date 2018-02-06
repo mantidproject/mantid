@@ -48,7 +48,8 @@ Usage
 
   # Extract members from the output of the ConvolutionFitSequential algorithm
   members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=output_ws_name,
-                                  RenameConvolvedMembers=True, ConvolvedMembers=["Lorentzian"])
+                                  RenameConvolvedMembers=True, ConvolvedMembers=["Lorentzian"],
+                                  OutputWorkspace=output_ws_name+"_Members")
 
   for member_ws in members_ws:
       print(member_ws.getName())
@@ -57,7 +58,7 @@ Usage
 
   DeleteWorkspace(output_ws_name + "_Workspaces")
   DeleteWorkspace(output_ws_name + "_Parameters")
-  DeleteWorkspace(members_ws)
+  DeleteWorkspace(output_ws_name + "_Members")
   DeleteWorkspace(result_ws)
   DeleteWorkspace(sample)
   DeleteWorkspace(resolution)
@@ -111,7 +112,7 @@ Output:
 
   DeleteWorkspace(output_ws_name + "_Workspaces")
   DeleteWorkspace(output_ws_name + "_Parameters")
-  DeleteWorkspace(members_ws)
+  DeleteWorkspace(output_ws_name + "_Members")
   DeleteWorkspace(result_ws)
   DeleteWorkspace(sample)
   DeleteWorkspace(resolution)
