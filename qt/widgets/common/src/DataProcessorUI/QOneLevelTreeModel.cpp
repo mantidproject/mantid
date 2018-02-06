@@ -1,6 +1,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -21,7 +22,17 @@ QOneLevelTreeModel::QOneLevelTreeModel(ITableWorkspace_sptr tableWorkspace,
         "Invalid table workspace. Table workspace must "
         "have the same number of columns as the white list");
 
-  m_rows = std::vector<bool>(tableWorkspace->rowCount(), false);
+  // Create vector for caching row data
+  for (size_t i = 0; i < tableWorkspace->rowCount(); ++i)
+    m_rows.emplace_back(std::make_shared<RowData>(columnCount()));
+
+  // Update cached row data from the table
+  updateAllRowData();
+
+  // This ensures the cached row data is updated when the table changes
+  connect(this, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+          this,
+          SLOT(tableDataUpdated(const QModelIndex &, const QModelIndex &)));
 }
 
 QOneLevelTreeModel::~QOneLevelTreeModel() {}
@@ -29,7 +40,7 @@ QOneLevelTreeModel::~QOneLevelTreeModel() {}
 /** Returns data for specified index
 * @param index : The index
 * @param role : The role
-* @return : The data associated with the given index
+* @return : The data associated with the given index as a list of strings
 */
 QVariant QOneLevelTreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
@@ -42,7 +53,7 @@ QVariant QOneLevelTreeModel::data(const QModelIndex &index, int role) const {
     return QString::fromStdString(m_tWS->String(index.row(), index.column()));
   } else if (role == Qt::BackgroundRole) {
     // Highlight if the process status for this row is set
-    if (m_rows.at(index.row()))
+    if (m_rows.at(index.row())->isProcessed())
       return QColor("#00b300");
   }
 
@@ -63,6 +74,25 @@ QVariant QOneLevelTreeModel::headerData(int section,
     return m_whitelist.name(section);
 
   return QVariant();
+}
+
+/** Returns row data struct (which includes metadata about the row)
+ * for specified index
+* @param index : The index
+* @param role : The role
+* @return : The data associated with the given index as a RowData class
+*/
+RowData_sptr QOneLevelTreeModel::rowData(const QModelIndex &index) {
+  RowData_sptr result;
+
+  // Return a null ptr if the index is invalid
+  if (!index.isValid())
+    return result;
+
+  if (parent(index).isValid())
+    return result;
+
+  return m_rows.at(index.row());
 }
 
 /** Returns the index of an element specified by its row, column and parent
@@ -97,7 +127,7 @@ bool QOneLevelTreeModel::isProcessed(int position,
                                 "within the range of the number of rows in "
                                 "this model");
 
-  return m_rows[position];
+  return m_rows[position]->isProcessed();
 }
 
 /** Returns the parent of a given index
@@ -134,7 +164,7 @@ bool QOneLevelTreeModel::insertRows(int position, int count,
   // Update the table workspace and row process status vector
   for (int pos = position; pos < position + count; pos++) {
     m_tWS->insertRow(position);
-    m_rows.insert(m_rows.begin() + position, false);
+    m_rows.insert(m_rows.begin() + position, std::make_shared<RowData>(columnCount()));
   }
 
   endInsertRows();
@@ -230,7 +260,7 @@ bool QOneLevelTreeModel::setProcessed(bool processed, int position,
   if (position < 0 || position >= rowCount())
     return false;
 
-  m_rows[position] = processed;
+  m_rows[position]->setProcessed(processed);
 
   return true;
 }
@@ -244,6 +274,27 @@ ITableWorkspace_sptr QOneLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
+/** Update all cached row data from the table data
+ */
+void QOneLevelTreeModel::updateAllRowData() {
+  // Loop through all rows
+  for (int row = 0; row < rowCount(); ++row) {
+    auto rowData = m_rows[row];
+    // Loop through all columns and update the value in the row data
+    for (int col = 0; col < columnCount(); ++col) {
+      auto value = data(index(row, col)).toString();
+      rowData->setValue(col, value);
+    }
+  }
+}
+
+/** Called when the data in the table has changed. Updates the
+ * table values in the cached RowData
+ */
+void QOneLevelTreeModel::tableDataUpdated(const QModelIndex &,
+                                          const QModelIndex &) {
+  updateAllRowData();
+}
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

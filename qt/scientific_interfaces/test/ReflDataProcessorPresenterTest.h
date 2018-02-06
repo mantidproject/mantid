@@ -629,12 +629,6 @@ public:
 
     // The following code sets up the desired workspaces without having to
     // process any runs to obtain them
-    presenter->addNumSlicesEntry(0, 0, 3);
-    presenter->addNumSlicesEntry(0, 1, 3);
-    presenter->addNumSlicesEntry(0, 2, 3);
-    presenter->addNumSlicesEntry(1, 0, 3);
-    presenter->addNumSlicesEntry(1, 1, 3);
-    presenter->addNumSlicesEntry(1, 2, 3);
     presenter->addNumGroupSlicesEntry(0, 3);
     presenter->addNumGroupSlicesEntry(1, 3);
 
@@ -705,12 +699,6 @@ public:
 
     // The following code sets up the desired workspaces without having to
     // process any runs to obtain them
-    presenter->addNumSlicesEntry(0, 0, 3);
-    presenter->addNumSlicesEntry(0, 1, 3);
-    presenter->addNumSlicesEntry(0, 2, 3);
-    presenter->addNumSlicesEntry(1, 0, 3);
-    presenter->addNumSlicesEntry(1, 1, 3);
-    presenter->addNumSlicesEntry(1, 2, 3);
     presenter->addNumGroupSlicesEntry(0, 3);
     presenter->addNumGroupSlicesEntry(1, 3);
 
@@ -778,7 +766,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
-    presenter->addNumSlicesEntry(0, 0, 1);
     presenter->addNumGroupSlicesEntry(0, 1);
     createSampleEventWS("13460");
 
@@ -823,8 +810,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
-    presenter->addNumSlicesEntry(0, 0, 1);
-    presenter->addNumSlicesEntry(0, 1, 1);
     presenter->addNumGroupSlicesEntry(0, 1);
     createSampleEventWS("13460");
     createSampleEventWS("13462");

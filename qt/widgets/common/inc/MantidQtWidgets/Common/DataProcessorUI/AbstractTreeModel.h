@@ -11,6 +11,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
+class RowData;
+using RowData_sptr = std::shared_ptr<RowData>;
+
 /** AbstractTreeModel is a base class for several tree model
 implementations for processing table data. Full function implementation is
 provided for functions common to all data processing tree models, while
@@ -57,6 +60,8 @@ public:
   // Set the 'processed' status of a data item
   virtual bool setProcessed(bool processed, int position,
                             const QModelIndex &parent = QModelIndex()) = 0;
+  // Get the row metadata
+  virtual RowData_sptr rowData(const QModelIndex &index) = 0;
 
 protected:
   /// Collection of data for viewing.

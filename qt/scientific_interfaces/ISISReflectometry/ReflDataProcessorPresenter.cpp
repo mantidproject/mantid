@@ -244,7 +244,6 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     }
 
     size_t numSlices = startTimes.size();
-    addNumSlicesEntry(groupID, rowID, numSlices);
 
     // Get a list of workspace-name properties. These will need to be updated
     // with the slice suffix for each slice.
@@ -255,6 +254,10 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     workspaceProperties.insert(workspaceProperties.end(),
                                outputProperties.begin(),
                                outputProperties.end());
+
+    // Clear slices from any previous reduction because they will be
+    // recreated
+    rowData->clearSlices();
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
@@ -636,8 +639,8 @@ QString ReflDataProcessorPresenter::takeSlice(const QString &runName,
 /** Plots any currently selected rows */
 void ReflDataProcessorPresenter::plotRow() {
 
-  const auto items = m_manager->selectedData();
-  if (items.size() == 0)
+  const auto selectedData = m_manager->selectedData();
+  if (selectedData.size() == 0)
     return;
 
   // If slicing values are empty plot normally
@@ -652,16 +655,22 @@ void ReflDataProcessorPresenter::plotRow() {
   QOrderedSet<QString> workspaces;
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
+  // Get the property name for the default output workspace so we
+  // can find the reduced workspace name for each slice
+  const auto outputPropertyName = m_processor.defaultOutputPropertyName();
 
-  for (const auto &item : items) {
+  for (const auto &selectedItem : selectedData) {
 
-    for (const auto &run : item.second) {
+    auto groupData = selectedItem.second;
 
-      const size_t numSlices = m_numSlicesMap.at(item.first).at(run.first);
-      const auto wsName = getReducedWorkspaceName(run.second, "IvsQ_");
+    for (const auto &rowItem : groupData) {
+      auto rowData = rowItem.second;
+      const size_t numSlices = rowData->numberOfSlices();
 
       for (size_t slice = 0; slice < numSlices; slice++) {
-        const auto sliceName = wsName + "_slice_" + QString::number(slice);
+        auto sliceData = rowData->getSlice(slice);
+        const auto sliceName =
+            sliceData->preprocessedOptionValue(outputPropertyName);
         if (workspaceExists(sliceName))
           workspaces.insert(sliceName, nullptr);
         else
@@ -676,31 +685,11 @@ void ReflDataProcessorPresenter::plotRow() {
   plotWorkspaces(workspaces);
 }
 
-/** This method returns, for a given set of rows, i.e. a group of runs, the name
-* of the output (post-processed) workspace
-*
-* @param groupData : The data in a given group
-* @param prefix : A prefix to be appended to the generated ws name
-* @param index : The index of the slice
-* @returns : The name of the workspace
-*/
-QString ReflDataProcessorPresenter::getPostprocessedWorkspaceName(
-    const GroupData &groupData, const QString &prefix, size_t index) {
-
-  QStringList outputNames;
-
-  for (const auto &data : groupData) {
-    outputNames.append(getReducedWorkspaceName(data.second) + "_slice_" +
-                       QString::number(index));
-  }
-  return prefix + outputNames.join("_");
-}
-
 /** Plots any currently selected groups */
 void ReflDataProcessorPresenter::plotGroup() {
 
-  const auto items = m_manager->selectedData();
-  if (items.size() == 0)
+  const auto selectedData = m_manager->selectedData();
+  if (selectedData.size() == 0)
     return;
 
   // If slicing values are empty plot normally
@@ -715,22 +704,28 @@ void ReflDataProcessorPresenter::plotGroup() {
   // Set of workspaces not found in the ADS
   QSet<QString> notFound;
 
-  for (const auto &item : items) {
+  for (const auto &selectedItem : selectedData) {
+    auto groupIndex = selectedItem.first;
+    auto groupData = selectedItem.second;
+    // Only consider multi-row groups
+    if (groupData.size() < 2)
+      continue;
+    // We should always have a record of the number of slices for this group
+    if (m_numGroupSlicesMap.count(groupIndex) < 1)
+      throw std::runtime_error("Invalid group data for group " +
+                               std::to_string(groupIndex));
 
-    if (item.second.size() > 1) {
+    size_t numSlices = m_numGroupSlicesMap.at(groupIndex);
 
-      size_t numSlices = m_numGroupSlicesMap.at(item.first);
+    for (size_t slice = 0; slice < numSlices; slice++) {
 
-      for (size_t slice = 0; slice < numSlices; slice++) {
+      const auto wsName = m_postprocessing->getPostprocessedWorkspaceName(
+          m_processor.defaultInputPropertyName(), groupData, slice);
 
-        const auto wsName =
-            getPostprocessedWorkspaceName(item.second, "IvsQ_", slice);
-
-        if (workspaceExists(wsName))
-          workspaces.insert(wsName, nullptr);
-        else
-          notFound.insert(wsName);
-      }
+      if (workspaceExists(wsName))
+        workspaces.insert(wsName, nullptr);
+      else
+        notFound.insert(wsName);
     }
   }
 
@@ -794,17 +789,6 @@ bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
 
   // No input workspaces of type found, proceed with reduction automatically
   return true;
-}
-
-/** Add entry for the number of slices for a row in a group
-*
-* @param groupID :: The ID of the group
-* @param rowID :: The ID of the row in group
-* @param numSlices :: Number of slices
-*/
-void ReflDataProcessorPresenter::addNumSlicesEntry(int groupID, int rowID,
-                                                   size_t numSlices) {
-  m_numSlicesMap[groupID][rowID] = numSlices;
 }
 
 /** Add entry for the number of slices for all rows in a group

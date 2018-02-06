@@ -314,17 +314,14 @@ std::set<int> OneLevelTreeManager::getRowsToProcess(bool shouldPrompt) const {
 */
 TreeData OneLevelTreeManager::constructTreeData(std::set<int> rows) {
 
-  // Return data in the format: map<int, set<vector<string>>>, where:
+  // Return data in the format: map<int, set<RowData_sptr>>, where:
   // int -> row index
-  // set<vector<string>> -> set of vectors storing the data. Each set is a row
-  // and each element in the vector is a column
+  // set<RowData_sptr> -> set of vectors storing the data. Each set is a row
+  // and each element is the row data containing column values and metadata
   TreeData tree;
+  const int columnNotUsed = 0; // dummy value required to create index
   for (const auto &row : rows) {
-
-    QStringList data;
-    for (int i = 0; i < m_model->columnCount(); i++)
-      data.append(m_model->data(m_model->index(row, i)).toString());
-    tree[row][row] = std::make_shared<RowData>(std::move(data));
+    tree[row][row] = m_model->rowData(m_model->index(row, columnNotUsed));
   }
   return tree;
 }

@@ -19,10 +19,14 @@ public:
   PostprocessingStep(QString options, PostprocessingAlgorithm algorithm,
                      std::map<QString, QString> map);
 
-  void postProcessGroup(const QString &processorPrefix,
+  void postProcessGroup(const QString &rowInputWSPropertyName,
+                        const QString &rowOutputWSPropertyName,
                         const WhiteList &whitelist, const GroupData &groupData);
-  QString getPostprocessedWorkspaceName(const WhiteList &whitelist,
+  QString getPostprocessedWorkspaceName(const QString &rowOutputPropertyName,
                                         const GroupData &groupData);
+  QString getPostprocessedWorkspaceName(const QString &rowOutputPropertyName,
+                                        const GroupData &groupData,
+                                        const size_t sliceIndex);
   QString m_options;
   PostprocessingAlgorithm m_algorithm;
   std::map<QString, QString> m_map;

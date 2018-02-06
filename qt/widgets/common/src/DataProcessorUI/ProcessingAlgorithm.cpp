@@ -96,6 +96,14 @@ QString ProcessingAlgorithm::defaultOutputPropertyName() const {
   return m_outputProperties[0];
 }
 
+/** Returns the default input ws property. This is just the first
+ * property declared by the algorithm. Algorithm properties are
+ * extracted in order, so this is the first in our list.
+ */
+QString ProcessingAlgorithm::defaultInputPropertyName() const {
+  return m_inputProperties[0];
+}
+
 /** Returns the list of input property names
  */
 std::vector<QString> ProcessingAlgorithm::inputProperties() const {

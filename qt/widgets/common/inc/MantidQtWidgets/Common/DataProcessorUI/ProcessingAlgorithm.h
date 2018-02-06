@@ -60,6 +60,8 @@ public:
   QString defaultOutputPrefix() const;
   // The default output ws property
   QString defaultOutputPropertyName() const;
+  // The default input ws property
+  QString defaultInputPropertyName() const;
   // The input properties
   std::vector<QString> inputProperties() const;
   // The output properties

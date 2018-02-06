@@ -54,8 +54,6 @@ public:
   ~ReflDataProcessorPresenter() override;
 
   // The following methods are public for testing purposes only
-  // Add entry for the number of slices for a row in a group
-  void addNumSlicesEntry(int groupID, int rowID, size_t numSlices);
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
 private:
@@ -69,9 +67,6 @@ private:
   // Loads a run from disk
   QString loadRun(const QString &run, const QString &instrument,
                   const QString &prefix, const QString &loader, bool &runFound);
-  // Get the name of a post-processed workspace
-  QString getPostprocessedWorkspaceName(const GroupData &groupData,
-                                        const QString &prefix, size_t index);
   // Loads a group of runs
   bool loadGroup(const GroupData &group);
   // Process a group of runs which are event workspaces
@@ -114,7 +109,6 @@ private:
       const MantidQt::MantidWidgets::DataProcessor::TreeData &data,
       const bool findEventWS);
 
-  std::map<int, std::map<int, size_t>> m_numSlicesMap;
   std::map<int, size_t> m_numGroupSlicesMap;
 };
 }

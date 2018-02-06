@@ -419,9 +419,30 @@ private:
         DEFAULT_GROUP_NUMBER);
   }
 
-  // Utility to create a row data class from a string list
+  // Utility to create a row data class from a string list of simple inputs
+  // (does not support multiple input runs or transmission runs, or entries
+  // in the options/hidden columns). Assumes input workspaces are prefixed
+  // with TOF_ and transmission runs with TRANS_
   RowData_sptr makeRowData(const QStringList &list) {
-    return std::make_shared<RowData>(list);
+    // Set the row values
+    auto rowData = std::make_shared<RowData>(list);
+    // Set the options (simply based on the row values)
+    rowData->setOptions({{"InputWorkspace", list[0]},
+                         {"ThetaIn", list[1]},
+                         {"FirstTransmissionRun", list[2]},
+                         {"MomentumTransferMin", list[3]},
+                         {"MomemtumTransferMax", list[4]},
+                         {"MomentumTransferStep", list[5]},
+                         {"ScaleFactor", list[6]}});
+    // Set the preprocessed options based on the input options
+    auto options = rowData->options();
+    // Add the prefixes for preprocessed run values
+    if (!list[0].isEmpty())
+      options["InputWorkspace"] = "TOF_" + list[0];
+    if (!list[2].isEmpty())
+      options["InputWorkspace"] = "TRANS_" + list[2];
+    rowData->setPreprocessedOptions(options);
+    return rowData;
   }
 
   // Expect the view's widgets to be set in a particular state according to

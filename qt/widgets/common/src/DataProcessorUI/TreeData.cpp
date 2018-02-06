@@ -4,13 +4,19 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 // Constructors
-RowData::RowData() {}
+RowData::RowData(const int columnCount)
+  : m_isProcessed{false} {
+  // Create a list of empty column values of the required length
+  for (int i = 0; i < columnCount; ++i)
+    m_data.append("");
+}
 
-RowData::RowData(QStringList data) : m_data(std::move(data)) {}
+RowData::RowData(QStringList data)
+    : m_data(std::move(data)), m_isProcessed{false} {}
 
 RowData::RowData(const RowData *src)
     : m_data(src->m_data), m_options(src->m_options),
-      m_preprocessedOptions(src->m_preprocessedOptions) {}
+      m_preprocessedOptions(src->m_preprocessedOptions), m_isProcessed{false} {}
 
 // Iterators
 
@@ -48,8 +54,16 @@ QString RowData::value(const int i) {
  * @param value [in] : the new value
  */
 void RowData::setValue(const int i, const QString &value) {
-  if (m_data.size() > i)
+  // Set the row value
+  if (m_data.size() > i) {
     m_data[i] = value;
+  }
+
+  // Also update the value in any child slices
+  if (m_slices.size() > 0) {
+    for (auto &slice : m_slices)
+      slice->setValue(i, value);
+  }
 }
 
 /** Get the original input options for the main reduction
@@ -100,7 +114,8 @@ bool RowData::hasPreprocessedOption(const QString &name) const {
   return m_preprocessedOptions.find(name) != m_preprocessedOptions.end();
 }
 
-/** Get the value for the given property
+/** Get the value for the given property as it was entered by the user
+ * i.e. before any preprocessing
  * @param name [in] : the property name to get
  * @return : the value, or an empty string if the property
  * doesn't exist
@@ -109,12 +124,49 @@ QString RowData::optionValue(const QString &name) const {
   return hasOption(name) ? m_options.at(name) : "";
 }
 
+/** Get the value for the given property for the given slice
+ * @param name [in] : the property name to get
+ * @param sliceIndex [in] : the index of the slice
+ * @return : the value, or an empty string if the property
+ * doesn't exist
+ */
+QString RowData::optionValue(const QString &name,
+                             const size_t sliceIndex) const {
+  if (sliceIndex >= m_slices.size())
+    throw std::runtime_error("Attempted to access an invalid slice");
+
+  return m_slices[sliceIndex]->optionValue(name);
+}
+
+/** Get the value for the given property after any preprocessing of
+ * user input
+ * @param name [in] : the property name to get
+ * @return : the value, or an empty string if the property
+ * doesn't exist
+ */
+QString RowData::preprocessedOptionValue(const QString &name) const {
+  return hasOption(name) ? m_preprocessedOptions.at(name) : "";
+}
+
 /** Set the value for the given property
  * @param name [in] : the property to set
  * @param value [in] : the value
  */
 void RowData::setOptionValue(const QString &name, const QString &value) {
   m_options[name] = value;
+}
+
+/** Get the number of slices for this row
+ * @return : the number of slices
+ */
+size_t RowData::numberOfSlices() const { return m_slices.size(); }
+
+/** Check whether a slice exists in this row
+ * @param sliceIndex [in] : the index of the slice
+ * @return : true if the slice exists
+ */
+bool RowData::hasSlice(const size_t sliceIndex) {
+  return (sliceIndex < m_slices.size());
 }
 
 /** Get a child slice
@@ -141,11 +193,17 @@ RowData_sptr RowData::addSlice(const QString &sliceSuffix,
                                std::vector<QString> &workspaceProperties) {
   // Create a copy
   auto sliceData = std::make_shared<RowData>(this);
-  // Override the workspace name in options
   for (auto const &propertyName : workspaceProperties) {
+    // Override the workspace names in the preprocessed options with the slice
+    // suffix
     if (hasPreprocessedOption(propertyName)) {
       auto const sliceName = m_preprocessedOptions[propertyName] + sliceSuffix;
       sliceData->m_preprocessedOptions[propertyName] = sliceName;
+    }
+    // Same for the un-preprocessed options
+    if (hasOption(propertyName)) {
+      auto const sliceName = m_options[propertyName] + sliceSuffix;
+      sliceData->m_options[propertyName] = sliceName;
     }
   }
   // Add to list of slices
@@ -153,6 +211,10 @@ RowData_sptr RowData::addSlice(const QString &sliceSuffix,
 
   return sliceData;
 }
+
+/** Clear all child slices for this row
+ */
+void RowData::clearSlices() { m_slices.clear(); }
 }
 }
 }

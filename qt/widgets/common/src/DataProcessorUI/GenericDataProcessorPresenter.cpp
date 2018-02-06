@@ -579,9 +579,12 @@ Post-processes the workspaces created by the given rows together.
 */
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
-  if (hasPostprocessing())
-    m_postprocessing->postProcessGroup(m_processor.defaultOutputPrefix(),
+  if (hasPostprocessing()) {
+    // The name is based on the default input WS names of the individual rows
+    m_postprocessing->postProcessGroup(m_processor.defaultInputPropertyName(),
+                                       m_processor.defaultOutputPropertyName(),
                                        m_whitelist, groupData);
+  }
 }
 
 /**
@@ -675,8 +678,8 @@ QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
   if (!hasPostprocessing())
     throw std::runtime_error("Attempted to get postprocessing workspace but no "
                              "postprocessing is specified.");
-  return m_postprocessing->getPostprocessedWorkspaceName(m_whitelist,
-                                                         groupData);
+  return m_postprocessing->getPostprocessedWorkspaceName(
+      m_processor.defaultInputPropertyName(), groupData);
 }
 
 /** Loads a run found from disk or AnalysisDataService

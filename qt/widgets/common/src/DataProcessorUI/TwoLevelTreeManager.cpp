@@ -424,21 +424,16 @@ int TwoLevelTreeManager::numRowsInGroup(int group) const {
 */
 TreeData TwoLevelTreeManager::constructTreeData(ChildItems rows) {
   TreeData tree;
+  const int columnNotUsed = 0; // dummy value required to create index
   // Return row data in the format: map<int, set<vector<string>>>, where:
   // int -> group index
   // set<vector<string>> -> set of vectors storing the data. Each set is a row
   // and each element in the vector is a column
   for (const auto &item : rows) {
-
     int group = item.first;
-
     for (const auto &row : item.second) {
-      QStringList data;
-      for (int i = 0; i < m_model->columnCount(); i++)
-        data.append(
-            m_model->data(m_model->index(row, i, m_model->index(group, 0)))
-                .toString());
-      tree[group][row] = std::make_shared<RowData>(std::move(data));
+      tree[group][row] = m_model->rowData(
+          m_model->index(row, columnNotUsed, m_model->index(group, 0)));
     }
   }
   return tree;

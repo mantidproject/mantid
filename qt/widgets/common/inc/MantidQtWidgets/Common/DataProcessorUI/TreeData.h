@@ -50,7 +50,8 @@ using RowData_sptr = std::shared_ptr<RowData>;
 class DLLExport RowData {
 public:
   // Constructors
-  RowData();
+  RowData() = delete;
+  RowData(const int columnCount);
   RowData(QStringList data);
   RowData(const RowData *src);
 
@@ -85,13 +86,28 @@ public:
   bool hasOption(const QString &name) const;
   /// Return a property value
   QString optionValue(const QString &name) const;
+  /// Return a property value
+  QString optionValue(const QString &name, const size_t sliceIndex) const;
+  /// Return a preprocessed property value
+  QString preprocessedOptionValue(const QString &name) const;
   /// Set a property value
   void setOptionValue(const QString &name, const QString &value);
+  /// Get the number of slices for this row
+  size_t numberOfSlices() const;
+  /// Check whether a slice exists by index
+  bool hasSlice(const size_t sliceIndex);
   /// Get a child slice
   RowData_sptr getSlice(const size_t sliceIndex);
   /// Add a child slice
   RowData_sptr addSlice(const QString &sliceSuffix,
                         std::vector<QString> &workspaceProperties);
+  /// Clear all slices from the row
+  void clearSlices();
+
+  /// Whether the row has been processed
+  bool isProcessed() const { return m_isProcessed; }
+  /// Set whether the row has been processed
+  void setProcessed(const bool isProcessed) { m_isProcessed = isProcessed; }
 
 private:
   /// Check if a preprocessed property exists
@@ -107,6 +123,8 @@ private:
   /// For sliced event data the original row gets split into multiple
   /// slices
   std::vector<RowData_sptr> m_slices;
+  /// Whether the row has been processed
+  bool m_isProcessed;
 };
 
 using GroupData = std::map<int, RowData_sptr>;
