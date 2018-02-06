@@ -58,6 +58,15 @@ H5::DataType readDataType(const H5::Group &group,
   return group.openDataSet(bankNames.front() + "/" + name).getDataType();
 }
 
+template <class T> class ThreadWaiter {
+public:
+  ThreadWaiter(T &thread) : m_thread(thread) {}
+  ~ThreadWaiter() { m_thread.wait(); }
+
+private:
+  T &m_thread;
+};
+
 template <class TimeOffsetType>
 void load(const Chunker &chunker, NXEventDataSource<TimeOffsetType> &dataSource,
           EventParser<TimeOffsetType> &dataSink) {
@@ -65,6 +74,9 @@ void load(const Chunker &chunker, NXEventDataSource<TimeOffsetType> &dataSource,
   const auto &ranges = chunker.makeLoadRanges();
   std::vector<int32_t> event_id(2 * chunkSize);
   std::vector<TimeOffsetType> event_time_offset(2 * chunkSize);
+  // Wait for thread completion before exit. Wrapped in struct in case of
+  // exceptions.
+  ThreadWaiter<EventParser<TimeOffsetType>> threadCleanup(dataSink);
 
   int64_t previousBank = -1;
   size_t bufferOffset{0};
@@ -88,7 +100,6 @@ void load(const Chunker &chunker, NXEventDataSource<TimeOffsetType> &dataSource,
                         event_time_offset.data() + bufferOffset, range);
     bufferOffset = (bufferOffset + chunkSize) % (2 * chunkSize);
   }
-  dataSink.wait();
 }
 
 template <class TimeOffsetType>

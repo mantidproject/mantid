@@ -38,8 +38,7 @@ private:
 
   /**
    Perform a Pawley refinement on a run
-   @param runNumber The run number of the run
-   @param bank The bank ID of the run
+   @param runLabel Run number and bank ID of the workspace to refine
    @param instParamFile The instrument parameter file name (.prm) to use for
    refinement
    @param phaseFiles Vector of file paths to phases to use in refinement
@@ -48,7 +47,7 @@ private:
    @param GSASIIProjectFile Location to save the .gpx project to
    @return Whether the refinement was successful
    */
-  bool doPawleyRefinement(const int runNumber, const size_t bank,
+  bool doPawleyRefinement(const RunLabel &runLabel,
                           const std::string &instParamFile,
                           const std::vector<std::string> &phaseFiles,
                           const std::string &pathToGSASII,
@@ -56,8 +55,7 @@ private:
 
   /**
    Perform a Rietveld refinement on a run
-   @param runNumber The run number of the run
-   @param bank The bank ID of the run
+   @param runLabel Run number and bank ID of the workspace to refine
    @param instParamFile The instrument parameter file name (.prm) to use for
    refinement
    @param phaseFiles Vector of file paths to phases to use in refinement
@@ -66,7 +64,7 @@ private:
    @param GSASIIProjectFile Location to save the .gpx project to
    @return Whether the refinement was successful
    */
-  bool doRietveldRefinement(const int runNumber, const size_t bank,
+  bool doRietveldRefinement(const RunLabel &runLabel,
                             const std::string &instParamFile,
                             const std::vector<std::string> &phaseFiles,
                             const std::string &pathToGSASII,
@@ -75,18 +73,16 @@ private:
   /**
    Overplot fitted peaks for a run, and display lattice parameters and Rwp in
    the view
-   @param runNumber The run number of the run
-   @param bank The bank ID of the run
+   @param runLabel Run number and bank ID of the run to display
   */
-  void displayFitResults(const int runNumber, const size_t bank);
+  void displayFitResults(const RunLabel &runLabel);
 
   /**
    Update the view with the data from a run, and refinement results if they are
    available and the user has selected to show them
-   @param runNumber Run number of the run
-   @param bank Bank ID of the run
+   @param runLabel Run number and bank ID of the run
   */
-  void updatePlot(const int runNumber, const size_t bank);
+  void updatePlot(const RunLabel &runLabel);
 
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 

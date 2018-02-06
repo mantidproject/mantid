@@ -169,7 +169,7 @@ Example Input:
 
 .. code-block:: python
 
-   sample_obj = SampleDetails(thickness=1.0, ...)
+   sample_obj = SampleDetails(width=1.0, ...)
 
 .. _set_material_sample_details_isis-powder-diffraction-ref:
 

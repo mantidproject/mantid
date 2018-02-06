@@ -4,9 +4,12 @@
 #include "DllConfig.h"
 #include <map>
 #include <vector>
+#include "ExperimentOptionDefaults.h"
+#include "InstrumentOptionDefaults.h"
+#include "GetInstrumentParameter.h"
+#include "InstrumentParameters.h"
 
 namespace MantidQt {
-
 namespace CustomInterfaces {
 
 class IReflSettingsPresenter;
@@ -84,9 +87,11 @@ public:
   virtual bool detectorCorrectionEnabled() const = 0;
 
   /// Set default values for settings
-  virtual void setExpDefaults(const std::vector<std::string> &) const = 0;
-  virtual void setInstDefaults(const std::vector<double> &,
-                               const std::vector<std::string> &) const = 0;
+  virtual void setExpDefaults(ExperimentOptionDefaults defaults) = 0;
+  virtual void setInstDefaults(InstrumentOptionDefaults defaults) = 0;
+  virtual void showOptionLoadErrors(
+      std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
+      std::vector<MissingInstrumentParameterValue> const &missingValues) = 0;
 
   /// Sets status of whether polarisation corrections should be enabled/disabled
   virtual void setIsPolCorrEnabled(bool enable) const = 0;

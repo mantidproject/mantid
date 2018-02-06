@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.25
+Version:        1.26
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -50,6 +50,7 @@ Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
 Requires: python-qt5-devel
 Requires: python-QtPy
+Requires: python2-QtAwesome
 Requires: python-devel
 Requires: python-setuptools
 Requires: python-ipython >= 1.1
@@ -111,6 +112,7 @@ Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
 Requires: python-qt5-devel
 Requires: python3-QtPy
+%{?fedora:Requires: python3-QtAwesome}
 Requires: python3-numpy
 Requires: python3-scipy
 Requires: python3-sphinx
@@ -147,6 +149,9 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Mon Jan 22 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added qtawesome
 
 * Tue Dec 05 2017 Peter Peterson <petersonpf@ornl.gov>
 - Added cmake3-gui for rhel

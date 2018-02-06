@@ -43,6 +43,8 @@ public:
 };
 
 class MockPeaksWorkspace : public PeaksWorkspace {
+  using Mantid::DataObjects::PeaksWorkspace::addPeak;
+
 public:
   MOCK_METHOD1(setInstrument,
                void(const Mantid::Geometry::Instrument_const_sptr &inst));

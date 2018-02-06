@@ -229,11 +229,10 @@ void SetSampleMaterial::exec() {
   mat.reset(new Material(builder.build()));
 
   // calculate derived values
-  double bcoh_avg = mat->cohScatterLength();          // <b>
-  double btot_sq_avg = mat->totalScatterLengthSqrd(); // <b^2>
-  double normalizedLaue =
-      (btot_sq_avg - bcoh_avg * bcoh_avg) / (bcoh_avg * bcoh_avg);
-  if (btot_sq_avg == bcoh_avg * bcoh_avg)
+  const double bcoh_avg_sq = mat->cohScatterLengthSqrd();   // <b>
+  const double btot_sq_avg = mat->totalScatterLengthSqrd(); // <b^2>
+  double normalizedLaue = (btot_sq_avg - bcoh_avg_sq) / bcoh_avg_sq;
+  if (btot_sq_avg == bcoh_avg_sq)
     normalizedLaue = 0.;
 
   // set the material but leave the geometry unchanged
@@ -259,9 +258,9 @@ void SetSampleMaterial::exec() {
                       << "    Absorption " << mat->absorbXSection()
                       << " barns\n"
                       << "PDF terms\n"
-                      << "    <b>^2 = " << (bcoh_avg * bcoh_avg) << "\n"
-                      << "    <b^2> = " << btot_sq_avg << "\n"
-                      << "    L     = " << normalizedLaue << "\n";
+                      << "    <b_coh>^2 = " << bcoh_avg_sq << "\n"
+                      << "    <b_tot^2> = " << btot_sq_avg << "\n"
+                      << "    L         = " << normalizedLaue << "\n";
 
   if (isEmpty(rho)) {
     g_log.information("Unknown value for number density");

@@ -109,9 +109,16 @@ size_t IndexInfo::globalSize() const {
   return m_spectrumNumberTranslator->globalSize();
 }
 
-/// Returns the spectrum number for given index.
+/// Returns the spectrum number for given *local* index, i.e., spectrum numbers
+/// for spectra in this partition.
 SpectrumNumber IndexInfo::spectrumNumber(const size_t index) const {
   return m_spectrumNumberTranslator->spectrumNumber(index);
+}
+
+/// Returns a reference to the *global* vector of spectrum numbers, i.e., the
+/// spectrum numbers of spectra across all partitions.
+const std::vector<SpectrumNumber> &IndexInfo::spectrumNumbers() const {
+  return m_spectrumNumberTranslator->globalSpectrumNumbers();
 }
 
 /// Set a spectrum number for each index.
