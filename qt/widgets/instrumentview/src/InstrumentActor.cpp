@@ -596,7 +596,7 @@ void InstrumentActor::sumDetectorsRagged(QList<int> &dets,
         Mantid::API::AnalysisDataService::Instance().retrieve(outName));
     Mantid::API::AnalysisDataService::Instance().remove(outName);
 
-    const auto &X = ws->x(0);
+    const auto &X = ws->points(0);
     const auto &Y = ws->y(0);
     x.assign(X.begin(), X.end());
     y.assign(Y.begin(), Y.end());
