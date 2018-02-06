@@ -68,7 +68,7 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   vertices.push_back(centre + V3D(max, min, min));
   vertices.push_back(centre + V3D(min, min, min));
 
-  std::vector<size_t> triangles;
+  std::vector<uint16_t> triangles;
   // top face of cube - z max
   triangles.push_back(0);
   triangles.push_back(1);
@@ -141,7 +141,7 @@ std::unique_ptr<MeshObject> createOctahedron() {
   vertices.push_back(V3D(0, -u, 0));
   vertices.push_back(V3D(0, 0, -u));
 
-  std::vector<size_t> triangles;
+  std::vector<uint16_t> triangles;
   // +++ face
   triangles.push_back(0);
   triangles.push_back(1);
@@ -200,7 +200,7 @@ std::unique_ptr<MeshObject> createLShape() {
   vertices.push_back(V3D(1, 2, 1));
   vertices.push_back(V3D(0, 2, 1));
 
-  std::vector<size_t> triangles;
+  std::vector<uint16_t> triangles;
   // z min
   triangles.push_back(0);
   triangles.push_back(5);
@@ -281,7 +281,7 @@ public:
     vertices.push_back(V3D(0, 1, 0));
     vertices.push_back(V3D(0, 0, 1));
 
-    std::vector<size_t> triangles;
+    std::vector<uint16_t> triangles;
     // face
     triangles.push_back(1);
     triangles.push_back(2);
@@ -305,6 +305,12 @@ public:
   void testClone() {
     auto geom_obj = createOctahedron();
     TS_ASSERT_THROWS_NOTHING(geom_obj->clone());
+  }
+
+  void testTooManyVertices() {
+    auto tooManyVertices = std::vector<V3D>(70000);
+    auto triangles = std::vector<uint16_t>(1000);
+    TS_ASSERT_THROWS_ANYTHING(auto obj = MeshObject(triangles, tooManyVertices));
   }
 
   void testDefaultObjectHasEmptyMaterial() {

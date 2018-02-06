@@ -24,10 +24,16 @@ using Kernel::Quat;
 */
 MeshObject::MeshObject() {} // Should never be called
 
-MeshObject::MeshObject(const std::vector<size_t> &faces,
+MeshObject::MeshObject(const std::vector<uint16_t> &faces,
                        const std::vector<V3D> &vertices)
     : m_boundingBox(), m_object_number(0), m_id(), m_material(),
       m_triangles(faces), m_vertices(vertices) {
+
+  if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
+    throw std::invalid_argument("Too many vertices (" + 
+      std::to_string(m_vertices.size()) + 
+      "). MeshObject cannot have more than 65535 vertices.");
+  }
   m_handler = boost::make_shared<CacheGeometryHandler>(this);
 }
 
@@ -89,7 +95,7 @@ bool MeshObject::hasValidShape() const {
 /**
 * Determines whether point is within the object or on the surface
 * @param point :: Point to be tested
-* @returns 1 if true and 0 if false
+* @returns true if point is within object or on surface
 */
 bool MeshObject::isValid(const Kernel::V3D &point) const {
 
@@ -130,7 +136,7 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
 /**
 * Determines wither point is on the surface.
 * @param point :: Point to check
-* @returns 1 if the point is on the surface
+* @returns true if the point is on the surface
 */
 bool MeshObject::isOnSide(const Kernel::V3D &point) const {
 

@@ -38,6 +38,7 @@ class vtkGeometryCacheWriter;
 
 Mesh Object of Triangles assumed to form one or more
 non-intersecting closed surfaces enclosing separate volumes.
+The number of vertices is limited to 65535.
 
 Copyright &copy; 2017-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -63,7 +64,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
   /// Main constructor
-  MeshObject(const std::vector<size_t> &faces,
+  MeshObject(const std::vector<uint16_t> &faces,
              const std::vector<Mantid::Kernel::V3D> &vertices);
 
   /// Copy constructor
@@ -202,7 +203,8 @@ private:
   boost::shared_ptr<vtkGeometryCacheWriter> m_vtk_cache_writer;
 
   /// Contents
-  std::vector<size_t> m_triangles;
+  /// Triangles are specified by indices into a list of vertices.
+  std::vector<uint16_t> m_triangles;
   std::vector<Kernel::V3D> m_vertices;
 };
 
