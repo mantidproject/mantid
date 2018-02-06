@@ -4,7 +4,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         IEventWorkspace, Progress)
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -13,7 +13,7 @@ from sans.common.general_functions import (create_child_algorithm, append_to_san
 from sans.common.enums import (DetectorType, DataType)
 
 
-class SANSReductionCore(DataProcessorAlgorithm):
+class SANSReductionCore(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Reduction'
 

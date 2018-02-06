@@ -64,14 +64,15 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRe
                                                      PathToGSASII=self.path_to_gsas(),
                                                      SaveGSASIIProjectFile=self.gsas_proj_path,
                                                      MuteGSASII=True,
-                                                     LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
+                                                     LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
+                                                     XMin=10000, XMax=40000)
 
     def skipTests(self):
         return not self.path_to_gsas()
 
     def validate(self):
-        self.assertAlmostEqual(self.gof, 3.57776, delta=1e-6)
-        self.assertAlmostEqual(self.rwp, 77.754994, delta=1e-6)
+        self.assertAlmostEqual(self.gof, 4.184228, delta=1e-6)
+        self.assertAlmostEqual(self.rwp, 73.963305, delta=1e-6)
         return self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._REFERENCE_FILE_NAME)
 
     def cleanup(self):

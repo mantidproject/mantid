@@ -52,7 +52,7 @@ class MessageDisplay : QWidget, Configurable {
 
 public:
   MessageDisplay(QWidget *parent = 0);
-  void attachLoggingChannel();
+  void attachLoggingChannel(int logLevel = -1);
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);
@@ -216,6 +216,11 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 public:
   WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb /Transfer/,
                             QWidget *parent /TransferThis/ = nullptr);
+
+signals:
+  void plotSpectrumClicked(const QStringList & workspaceName);
+  void plotSpectrumWithErrorsClicked(const QStringList & workspaceName);
+  void plotColorfillClicked(const QStringList &workspaceName);
 };
 
 // ---------------------------------

@@ -116,8 +116,11 @@ struct DLLExport TypedPropertyValueHandler<
    */
   void set(Kernel::IPropertyManager *alg, const std::string &name,
            const boost::python::object &value) const override {
-    alg->setProperty<HeldType>(
-        name, boost::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
+    if (value == boost::python::object())
+      alg->setProperty<HeldType>(name, boost::shared_ptr<T>(nullptr));
+    else
+      alg->setProperty<HeldType>(
+          name, boost::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
   }
 
   /**

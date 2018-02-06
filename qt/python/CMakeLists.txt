@@ -79,6 +79,8 @@ endif ()
     mantidqt/widgets/codeeditor/test/test_interpreter.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
 
+    mantidqt/widgets/workspacewidget/test/test_plotselectiondialog.py
+
     mantidqt/widgets/test/test_algorithmselector.py
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py

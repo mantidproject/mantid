@@ -36,7 +36,8 @@ Usage
     log = ws.getRun().getLogData("my_log")
     print("my_log has {} entries".format(log.size()))
     for time, value in zip(log.times, log.value):
-      print("\t{}\t{:.6f}".format(time.astype(np.dtype('M8[s]')), value))
+      ts = np.datetime_as_string(time.astype(np.dtype('M8[s]')), timezone='UTC')
+      print("\t{}\t{:.6f}".format(ts, value))
 
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:00:00", Value=12, Type="int", DeleteExisting=True)
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:50:00", Value=34, Type="int")
@@ -44,7 +45,9 @@ Usage
     log = ws.getRun().getLogData("my_log")
     print("my_log now has {} entries".format(log.size()))
     for time, value in zip(log.times, log.value):
-      print("\t{}\t{}".format(time.astype(np.dtype('M8[s]')), value))
+      ts = np.datetime_as_string(time.astype(np.dtype('M8[s]')), timezone='UTC')
+      print("\t{}\t{:.6f}".format(ts, value))
+
 
 Output:
 
@@ -52,12 +55,12 @@ Output:
     :options: +NORMALIZE_WHITESPACE
 
     my_log has 3 entries
-            2010-01-01T00:00:00     100.000000
-            2010-01-01T00:30:00     15.000000
-            2010-01-01T00:50:00     100.200000
+        2010-01-01T00:00:00Z     100.000000
+        2010-01-01T00:30:00Z     15.000000
+        2010-01-01T00:50:00Z     100.200000
     my_log now has 2 entries
-            2010-01-01T00:00:00     12
-            2010-01-01T00:50:00     34
+        2010-01-01T00:00:00Z     12.000000
+        2010-01-01T00:50:00Z     34.000000
 
 .. categories::
 

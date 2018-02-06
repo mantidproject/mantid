@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, StringListValidator, PropertyManagerProperty, CompositeValidator)
 
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -16,7 +16,7 @@ from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 
 
-class SANSCreateWavelengthAndPixelAdjustment(DataProcessorAlgorithm):
+class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Adjust'
 

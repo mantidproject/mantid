@@ -76,6 +76,7 @@ set ( SRC_FILES
   src/Converters/NumpyFunctions.cpp
   src/Converters/PyArrayType.cpp
   src/Converters/PyObjectToMatrix.cpp
+  src/Converters/PyObjectToString.cpp
   src/Converters/PyObjectToV3D.cpp
   src/Converters/PyObjectToVMD.cpp
   src/Converters/WrapWithNumpy.cpp
@@ -103,6 +104,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/VectorToNDArray.h
   ${HEADER_DIR}/kernel/Converters/PyArrayType.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
+  ${HEADER_DIR}/kernel/Converters/PyObjectToString.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToVMD.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
