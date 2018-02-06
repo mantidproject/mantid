@@ -551,8 +551,7 @@ void ConvFit::fitFunctionChanged() {
 
   // ConvolutionFitSequential requires the last functions to be the ones
   // provided as custom groups in the interface.
-  auto modelFunction = boost::dynamic_pointer_cast<CompositeFunction>(model());
-  if (modelFunction)
+  if (model())
     moveCustomFunctionsToEnd();
 }
 

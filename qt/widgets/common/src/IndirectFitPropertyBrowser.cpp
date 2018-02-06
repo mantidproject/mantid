@@ -444,11 +444,11 @@ void IndirectFitPropertyBrowser::setBackgroundOptions(
  * model.
  */
 void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
-  blockSignals(true);
 
   if (compositeFunction()->nFunctions() == 0)
     return;
 
+  blockSignals(true);
   for (auto &handlerProperty : m_orderedFunctionGroups) {
     auto &handlers = m_functionHandlers[handlerProperty];
 
