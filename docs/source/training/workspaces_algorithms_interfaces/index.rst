@@ -13,5 +13,7 @@ This section contains details about workspaces, algorithms and interfaces in Man
    :glob:
    :titlesonly:
 
-   *
+   Workspaces
+   Algorithms
+   Interfaces
 

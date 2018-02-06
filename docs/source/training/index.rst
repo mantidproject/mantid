@@ -35,8 +35,8 @@ This is only a short introduction, more complete training courses are available 
    :titlesonly:
 
    Introduction <introduction/index>
-   MantidPlot 1 <mantid_plot_1/index>
-   MantidPlot 2 <mantid_plot_2/index>
+   MantidPlot Basics <mantidplot_basics/index>
+   MantidPlot, Algorithms and Workspaces <workspaces_algorithms_interfaces/index>
    Python and Mantid <python_and_mantid/index>
 
 

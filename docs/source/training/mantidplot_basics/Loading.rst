@@ -13,7 +13,7 @@ Mantid is equipped with functionality to load many different types of files into
 This will open the **Load Dialog**, where one can browse to the file, and click **Run**.
 If the directory containing the file is added to the ``datasearch.directories`` (see the ...), it is enough to type in the run number.
 
-.. image:: ../../images/training/load-dialog.png
+.. image:: /images/Training/MantidPlotBasics/load-dialog.png
   :alt: Load dialog
   :align: center
 
