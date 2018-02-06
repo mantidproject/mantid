@@ -16,7 +16,7 @@ from sans.gui_logic.models.diagnostics_page_model import run_integral
 
 
 # -----------------------------------------------
-# Tests for the SANSReductionCore algorithm
+# Tests for the SANSDiagnosticPage
 # -----------------------------------------------
 class SANSDiagnosticPageTest(unittest.TestCase):
     def _compare_workspace(self, workspace, reference_file_name):
@@ -28,7 +28,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         load_alg.execute()
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
 
-        # Save the workspace out and reload it again. This makes equalizes it with the reference workspace
+        # Save the workspace out and reload it again. This equalizes it with the reference workspace
         f_name = os.path.join(mantid.config.getString('defaultsave.directory'),
                               'SANS_temp_single_core_reduction_testout.nxs')
 
@@ -120,7 +120,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
 
         # Evaluate it up to a defined point
-        reference_file_name = "LARMOR_ws_diagnostic_referance.nxs"
+        reference_file_name = "LARMOR_ws_diagnostic_reference.nxs"
         self._compare_workspace(output_workspaces[0], reference_file_name)
 
 

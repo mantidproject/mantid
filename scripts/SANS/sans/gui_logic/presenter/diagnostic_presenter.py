@@ -64,10 +64,10 @@ class DiagnosticsPagePresenter(object):
         self._view.user_file_name = user_file
 
     def on_horizontal_clicked(self):
-        file = self._view.run_input
+        input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
-        state = self._create_state(state_model_with_view_update, file, period, self._facility)
+        state = self._create_state(state_model_with_view_update, input_file, period, self._facility)
         mask = self._view.horizontal_mask
         range = self._view.horizontal_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
@@ -76,10 +76,10 @@ class DiagnosticsPagePresenter(object):
                                    detector, state)
 
     def on_vertical_clicked(self):
-        file = self._view.run_input
+        input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
-        state = self._create_state(state_model_with_view_update, file, period, self._facility)
+        state = self._create_state(state_model_with_view_update, input_file, period, self._facility)
         mask = self._view.vertical_mask
         range = self._view.vertical_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
@@ -88,10 +88,10 @@ class DiagnosticsPagePresenter(object):
                                    detector, state)
 
     def on_time_clicked(self):
-        file = self._view.run_input
+        input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
-        state = self._create_state(state_model_with_view_update, file, period, self._facility)
+        state = self._create_state(state_model_with_view_update, input_file, period, self._facility)
         mask = self._view.time_mask
         range = self._view.time_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)

@@ -17,8 +17,8 @@ except (Exception, Warning):
     mantidplot = None
 
 
-def run_integral(range, mask, integral, detector, state):
-    ranges = parse_range(range)
+def run_integral(integral_ranges, mask, integral, detector, state):
+    ranges = parse_range(integral_ranges)
     input_workspaces = load_workspace(state)
 
     is_multi_range = len (ranges) > 1
@@ -43,9 +43,9 @@ def run_integral(range, mask, integral, detector, state):
 
 
 def integrate_ranges(ranges, integral, mask, detector, input_workspace_name, input_workspace, x_dim, y_dim, is_multi_range):
-    for range in ranges:
-        output_workspace = generate_output_workspace_name(range, integral, mask, detector, input_workspace_name)
-        output_workspace = run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_dim)
+    for integral_range in ranges:
+        output_workspace = generate_output_workspace_name(integral_range, integral, mask, detector, input_workspace_name)
+        output_workspace = run_algorithm(input_workspace, integral_range, integral, output_workspace, x_dim, y_dim)
 
         if is_multi_range:
             add_to_group(output_workspace, input_workspace_name + '_ranges')

@@ -259,10 +259,7 @@ class RunTabPresenter(object):
                                    " to the Mantid search directories! See here for more details: {}".format(str(e)))
 
     def on_data_changed(self):
-        # # 1. Populate the selected instrument and the correct detector selection
-        # self._setup_instrument_specific_settings()
-
-        # 2. Perform calls on child presenters
+        # 1. Perform calls on child presenters
         self._masking_table_presenter.on_update_rows()
         self._settings_diagnostic_tab_presenter.on_update_rows()
         self._beam_centre_presenter.on_update_rows()

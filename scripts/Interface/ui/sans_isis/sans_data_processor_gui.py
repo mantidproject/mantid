@@ -278,7 +278,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.data_processor_table.accept(self._main_presenter)
 
         # Set the list of available instruments in the widget and the default instrument
-        instrument_name = config.getString("default.instrument")#SANSInstrument.to_string(self.instrument)
+        instrument_name = config.getString("default.instrument")
         instrument_name_enum = get_instrument(instrument_name)
         self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_name)
 
