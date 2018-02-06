@@ -65,6 +65,7 @@ protected slots:
   void updatePlotOptions() override;
   void fitFunctionChanged();
   void parameterUpdated(const Mantid::API::IFunction *function);
+  void sampleLogsAdded();
 
 private:
   void fwhmChanged(double fwhm);

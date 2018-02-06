@@ -407,10 +407,7 @@ void ConvFit::algorithmComplete(bool error) {
     return;
   }
 
-  std::string outputPrefix = outputWorkspaceName();
-  const std::string paramWsName = outputPrefix + "_Parameters";
-  IndirectFitAnalysisTab::fitAlgorithmComplete(paramWsName);
-
+  const auto outputPrefix = outputWorkspaceName();
   const auto resultName = outputPrefix + "_Result";
   // Name for GroupWorkspace
   const auto groupName = outputPrefix + "_Workspaces";
@@ -437,7 +434,16 @@ void ConvFit::algorithmComplete(bool error) {
                                "Number");
     }
   }
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(sampleLogsAdded()));
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void ConvFit::sampleLogsAdded() {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(sampleLogsAdded()));
+  IndirectFitAnalysisTab::fitAlgorithmComplete(outputWorkspaceName() +
+                                               "_Parameters");
 }
 
 /**

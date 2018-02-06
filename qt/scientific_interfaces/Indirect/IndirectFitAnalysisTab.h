@@ -286,8 +286,6 @@ protected slots:
 
   void newInputDataLoaded(const QString &wsName);
 
-  void clearBatchRunnerSlots();
-
   void updateParameterValues();
 
   virtual void updatePreviewPlots() = 0;

@@ -516,12 +516,19 @@ void IndirectFitAnalysisTab::addOptionalDoubleSetting(
  * Sets the selected spectrum for this indirect fit analysis tab.
  */
 void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
-  disablePlotGuess();
+  disconnect(m_fitPropertyBrowser,
+             SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+             SLOT(updateGuessPlots()));
+
   m_fitPropertyBrowser->setWorkspaceIndex(spectrum);
   IndirectDataAnalysisTab::setSelectedSpectrum(spectrum);
   updateParameterValues();
   updatePreviewPlots();
-  updatePlotGuess();
+  updateGuessPlots();
+
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+          SLOT(updateGuessPlots()));
 }
 
 /**
@@ -656,7 +663,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(
   connect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
           this, SLOT(plotGuess()));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(clearBatchRunnerSlots()));
+             SLOT(algorithmComplete(bool)));
 }
 
 /**
@@ -725,13 +732,6 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   updatePreviewPlots();
   updatePlotRange();
   m_fitPropertyBrowser->setWorkspaceName(wsName);
-}
-
-/*
- * Clears all slots connected to the batch runners signals.
- */
-void IndirectFitAnalysisTab::clearBatchRunnerSlots() {
-  m_batchAlgoRunner->disconnect();
 }
 
 /**
@@ -958,8 +958,6 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(clearBatchRunnerSlots()));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -1121,7 +1119,8 @@ void IndirectFitAnalysisTab::updatePlotGuessInWindow(
 
     if (m_inputAndGuessWorkspace->getName() != guessWSName)
       clearGuessWindowPlot();
-    m_inputAndGuessWorkspace = createInputAndGuessWorkspace(workspace);
+    else
+      m_inputAndGuessWorkspace = createInputAndGuessWorkspace(workspace);
   }
 }
 
