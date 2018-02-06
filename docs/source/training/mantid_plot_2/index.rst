@@ -1,10 +1,10 @@
-.. _MantidPlot2:
+.. _TrainingWorkspacesAlgorithmsInterfaces:
 
-==============
- Mantid Plot 2 
-==============
+=======================================
+ Workspaces, Algorithms and Interfaces
+=======================================
 
-Welcome to MantidPlot part 2!
+This section contains details about workspaces, algorithms and interfaces in Mantid.
 
 **Topics:**
 

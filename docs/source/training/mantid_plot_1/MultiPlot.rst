@@ -13,13 +13,13 @@ Plotting multiple curves
     - 1D: this will simply overplot all the spectra on the same x-axis
     - Waterfall: this will visually offset the axes to give the waterfall effect
 
-    .. image:: ../../images/training/Waterfall.png
+    .. image:: /images/Training/MantidPlotBasics/Waterfall.png
       :alt: Waterfall plot
       :align: center
 
     - Tiled: this will plot each 1D spectrum individually on a separate canvas, and tile the canvases in one layer.
 
-    .. image:: ../../images/training/Tile.png
+    .. image:: /images/Training/MantidPlotBasics/Tile.png
       :alt: Tiled plot
       :align: center
 

@@ -1,4 +1,4 @@
-.. _PythonAndMantid:
+.. _TrainingPythonAndMantid:
 
 ==================
  Python and Mantid

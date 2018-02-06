@@ -7,7 +7,7 @@ Instrument Viewer
 Instrument viewer is a widget that shows the 3D instrument geometry together with the detector data.
 To access it, right click on the workspace name in the workspace dock widget, and click **Show instrument** from the context menu.
 
-.. image:: ../../images/training/IN5_Instrument_View.png
+.. image:: /images/Training/MantidPlotBasics/IN5_Instrument_View.png
   :alt: IN5 Instrument View
   :align: center
 

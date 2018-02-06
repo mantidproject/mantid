@@ -1,15 +1,15 @@
 .. _GettingHelp:
 
-==============
- Getting Help
-==============
+============================================
+ Getting Help and the Mantid User Community
+============================================
 
 CS Group
 --------
 
-Antti Soininen, Gagik Vardanyan, Verena Reimund and Ian Bush are the active Mantid developers, and Miguel Gonzalez the scientific lead for the Mantid adoption project at the ILL. We can all help you with any problems with Mantid, please email or drop by the CS office at any time (Room 221, ILL 4). We are in close contact with the wider development team for any problems we may not know the answer to.
+Antti Soininen, Gagik Vardanyan, Verena Reimund and Ian Bush are the active Mantid developers, and Miguel Gonzalez the scientific lead for the Mantid adoption project at the ILL. We can all help you with any problems with Mantid, please email, phone or drop by the CS office at any time (Room 221, ILL 4). We are in close contact with the wider development team for any problems we may not be able to answer straight away.
 
-.. figure:: /images/Training/ILL_CS_group.jpg
+.. figure:: /images/Training/Introduction/ILL_CS_group.jpg
    :align: center
    :width: 700
 
@@ -22,7 +22,7 @@ See the `Mantid Documentation <https://www.mantidproject.org/Documentation>`__ w
 
 Some of this documentation is also available off-line in Mantid, via Help -> Mantid Plot.
 
-.. figure:: /images/Training/MantidPlot_help.png
+.. figure:: /images/Training/Introduction/MantidPlot_help.png
    :align: center
    :width: 600
 
@@ -33,9 +33,14 @@ Please report any bugs you find, so that we can keep improving Mantid. The easie
 
 There is also an option to report bugs in Mantid, via Help -> Report a Bug, but please only use this for minor bugs. This link allows bugs to be posted on the forums. Alternatively you can use the `contact form <https://www.mantidproject.org/Contact>`__ or email mantid-help@mantidproject.org.
 
-.. figure:: /images/Training/Mantid_report_a_bug.png
+.. figure:: /images/Training/Introduction/Mantid_report_a_bug.png
    :align: center
    :width: 600
+
+Mantid User Meetings
+--------------------
+
+There are Mantid user meetings arranged approximately once a year, for instrument scientists and facility users to meet and discuss the direction of the Mantid project. The location switches between the partner facilities, with the next of these tentatively planned for January 2019 at the ILL.
 
 User Forums
 -----------

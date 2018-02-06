@@ -6,7 +6,7 @@
 
 Mantid is equipped with functionality to load many different types of files into workspaces. This service is provided by the :ref:`Load <algm-Load>` generic algorithm, that can be easily accessed by the **Load** button, and then clicking **File** item in the menu.
 
-.. image:: ../../images/training/load-button.png
+.. image:: /images/Training/MantidPlotBasics/load-button.png
   :alt: Load button
   :align: center
 

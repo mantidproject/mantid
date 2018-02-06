@@ -14,7 +14,7 @@ A :literal:`MatrixWorkspace` contains the following values holding measured or d
 - Y: counts or frequencies
 - E: corresponding error values (variances, standard deviations)
 
-.. figure:: /images/Workspaces1.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Workspaces1.png
    :align: center
 
 A sub-group of the MatrixWorkspace is a Workspace2D consisting of two-dimensional data.
@@ -31,7 +31,7 @@ It may contain:
 
 For exanmple, a spectra-detector mapping table can be opened by right click on workspace 592724 and select 'Show Detectors':
 
-.. figure:: /images/Workspaces3.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Workspaces3.png
    :align: center
 
 and informs about each detector position (R, theta, phi) and if it is a monitor or not.
@@ -44,12 +44,12 @@ Please note the different meaning of
 
 Several workspaces can be combined to a :literal:`GroupWorkspace` which may be the preferred output for workflow algorithms.
 
-.. figure:: /images/GroupWorkspace.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/GroupWorkspace.png
    :align: center
 
 :literal:`TableWorkspaces` descibe their content by column names and contain, for instance, fit results of peak positions
 
-.. figure:: /images/Workspace4.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Workspace4.png
    :align: center
 
 ==========
@@ -75,27 +75,27 @@ Supports the following log levels:
 
 Error:
 
-.. figure:: /images/Algorithms7.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Algorithms7.png
    :align: center
 
 Warning:
 
-.. figure:: /images/Algorithms6.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Algorithms6.png
    :align: center
 
 Notice:
 
-.. figure:: /images/Algorithms5.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Algorithms5.png
    :align: center
 
 Information:
 
-.. figure:: /images/Algorithms3.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Algorithms3.png
    :align: center
 
 Debug:
 
-.. figure:: /images/Algorithms2.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Algorithms2.png
    :align: center
 
 History
@@ -105,7 +105,7 @@ Mantid keeps the entire history of all algorithms applied to workspaces. Not onl
 
 - Right click on workspace 592724 and select 'Show History'. This will open up the Algorihm History window. In the left-hand side Algorithms panel click on the arrow in front of LoadILLReflectometry v.1:
 
-.. figure:: /images/History1.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/History1.png
    :align: center
 
 To replay the history do:
@@ -140,7 +140,7 @@ From the main MantidPlot menu, select
 File->Save->Nexus
 File->Export Ascii
 
-.. figure:: /images/Saving1.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Saving1.png
    :align: center
 
 In line 2, the spectrum number is given.
@@ -164,7 +164,8 @@ taken from a bespoke algorithm or auto reduction.
 
 These interfaces do not support GroupWorkspaces as input.
 
-.. figure:: /images/interface.png
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Interface.png
+   :align: center
 
 Additional information can be available, for example for this interface:
 A technical report from Sanghamitra Mukhopadhyay (status 2014, RAL-TR-2014-005)

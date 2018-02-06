@@ -1,10 +1,10 @@
-.. _MantidPlot1:
+.. _TrainingMantidPlotBasics:
 
-=============
- MantidPlot 1
-=============
+===================
+ MantidPlot Basics
+===================
 
-Welcome to MantidPlot part 1!
+This section contains a basic introduction to MantidPlot.
 
 **Topics:**
 

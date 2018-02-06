@@ -12,7 +12,7 @@ To inspect the data in a workspace, one can open the matrix view in one of the f
 
 * Double click the workspace name.
 
-.. image:: ../../images/training/WorkspaceMatrixAnnotated.png
+.. image:: /images/Training/MantidPlotBasics/WorkspaceMatrixAnnotated.png
   :alt: Workspace Matrix View
   :align: center
 

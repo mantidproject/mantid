@@ -13,7 +13,7 @@ To plot a single spectrum
 * Right click on the workspace name, click **Plot Spectrum**, type in the workspace index and click OK. One can use **Plot Spectrum With Errors** to plot also the errors.
 * In the workspace matrix view right click on the leftmost column of the table (the one containing the workspace indices) at the row desired. Then select Plot Spectrum (values only or values + errors).
 
-.. image:: ../../images/training/IN16B_1D.png
+.. image:: /images/Training/MantidPlotBasics/IN16B_1D.png
   :alt: IN16B 1D
   :align: center
 
