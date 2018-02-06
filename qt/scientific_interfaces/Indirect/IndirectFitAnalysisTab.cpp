@@ -657,6 +657,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(
     updateParametersFromTable(paramWSName);
 
   updatePreviewPlots();
+  updatePlotRange();
   enablePlotResult();
   enableSaveResult();
 
