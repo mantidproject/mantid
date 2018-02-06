@@ -155,7 +155,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             ys = outWS.readY(i)
             numpy.testing.assert_equal(ys, 1.0)
 
-
     def testWavelengthRange(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
         args = {
@@ -201,6 +200,20 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         xs = outWS.readX(0)
         self.assertAlmostEquals(xs[0], 2.0, places=2)
         self.assertAlmostEquals(xs[-1], 4.0, places=1)
+
+    def testRawOutputWorkspace(self):
+        outWSName = 'ReflectometryILLPreprocess_test_RawOutputWorkspace_outWS'
+        rawWSName = 'ReflectometryILLPreprocess_test_RawOutputWorkspace_rawWS'
+        args = {
+            'Run': 'ILL/D17/317370.nxs',
+            'OutputWorkspace': outWSName,
+            'RawOutputWorkspace': rawWSName,
+            'rethrow': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        #assertRaisesNothing(rawWS=alg.getProperty('RawOutputWorkspace').value)
+        #self.assertEquals(rawWS.getAxis().getUnit(), 'TOF')
 
 
 if __name__ == "__main__":
