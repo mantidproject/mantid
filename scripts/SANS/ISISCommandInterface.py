@@ -511,9 +511,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             if group_name[-2] == "_":
                 group_name = group_name[:-2]
             _group_workspaces(slices, group_name)
-            retWSname =  group_name
+            retWSname_merged = group_name
         else:
-            retWSname = _merge_workspaces(retWSname_front, retWSname_rear, rAnds)
+            retWSname_merged = _merge_workspaces(retWSname_front, retWSname_rear, rAnds)
+
+        retWSname = retWSname_merged
     elif fitRequired:
         # Get fit paramters
         scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
@@ -538,11 +540,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     # applying scale and shift on the front detector reduced data
     if reduce_front_flag:
-        frontWS = mtd[retWSname_front]
-        buffer = Scale(InputWorkspace=frontWS, Operation="Add", Factor=shift)
-        frontWS = Scale(InputWorkspace=buffer, Operation="Multiply", Factor=scale)
-        RenameWorkspace(InputWorkspace=frontWS, OutputWorkspace=retWSname_front)
-        DeleteWorkspace(buffer)
+        Scale(InputWorkspace=retWSname_front, OutputWorkspace=retWSname_front, Operation="Add", Factor=shift)
+        Scale(InputWorkspace=retWSname_front, OutputWorkspace=retWSname_front, Operation="Multiply", Factor=scale)
 
     # finished calculating cross section so can restore these value
     ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
