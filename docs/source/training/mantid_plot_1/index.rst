@@ -13,4 +13,9 @@ Welcome to MantidPlot part 1!
    :glob:
    :titlesonly:
 
-   *
+   Loading
+   MatrixView
+   Plotting1D
+   MultiPlot
+   Plotting2D
+   InstrumentViewer
