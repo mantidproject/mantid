@@ -96,6 +96,7 @@ public:
   size_t globalSize() const;
 
   SpectrumNumber spectrumNumber(const size_t index) const;
+  const std::vector<SpectrumNumber> &spectrumNumbers() const;
 
   void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers);
   void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max);

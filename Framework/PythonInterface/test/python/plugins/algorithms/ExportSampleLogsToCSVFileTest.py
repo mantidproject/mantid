@@ -6,6 +6,7 @@ import mantid.kernel as kernel
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 import os
+from distutils.version import LooseVersion
 from six.moves import range
 
 
@@ -300,7 +301,8 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         dtimesec = 0.0010
         timefluc = 0.0001
         runstart = '2014-02-15T13:34:03'
-        if numpy.__version__.startswith('1.7.'): # older numpy assumes local timezone
+        # older numpy assumes local timezone
+        if LooseVersion(numpy.__version__) < LooseVersion('1.9'):
             runstart = runstart + 'Z'
         runstart = datetime64(runstart, 'us') # microsecond needed for deltas
 

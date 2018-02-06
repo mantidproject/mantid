@@ -210,7 +210,9 @@ Output:
         tmpws = mtd[name]
         print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
         split_log = tmpws.run().getProperty('splitter')
-        print('event splitter log: entry 0 and entry 1 are {0} and {1}.'.format(split_log.times[0].astype(np.dtype('M8[s]')), split_log.times[1].astype(np.dtype('M8[s]'))))
+        entry_0 = np.datetime_as_string(split_log.times[0].astype(np.dtype('M8[s]')), timezone='UTC')
+        entry_1 = np.datetime_as_string(split_log.times[1].astype(np.dtype('M8[s]')), timezone='UTC')
+        print('event splitter log: entry 0 and entry 1 are {0} and {1}.'.format(entry_0, entry_1))
 
 
 Output:
@@ -218,13 +220,13 @@ Output:
 .. testoutput:: FilterEventNoCorrection
 
     workspace tempsplitws3_a has 77580 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37 and 2010-03-25T16:10:17.
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:10:17Z.
     workspace tempsplitws3_b has 0 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37 and 2010-03-25T16:11:57.
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:11:57Z.
     workspace tempsplitws3_c has 0 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37 and 2010-03-25T16:15:17.
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:15:17Z.
     workspace tempsplitws3_unfiltered has 34686 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37 and 2010-03-25T16:10:17.
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:10:17Z.
 
 
 **Example - Filtering event by pulse time**

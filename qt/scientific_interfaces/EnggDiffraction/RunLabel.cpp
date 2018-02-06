@@ -10,5 +10,9 @@ bool operator==(const RunLabel &lhs, const RunLabel &rhs) {
   return lhs.bank == rhs.bank && lhs.runNumber == rhs.runNumber;
 }
 
+bool operator!=(const RunLabel &lhs, const RunLabel &rhs) {
+  return !(lhs == rhs);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

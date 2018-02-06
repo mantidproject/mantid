@@ -861,11 +861,15 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     auto ws = m_ws->getSingleHeldWorkspace();
     m_file->close();
     try {
-      ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames);
+      ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames,
+                                event_id_is_spec);
+      g_log.information() << "Used ParallelEventLoader.\n";
       loaded = true;
       shortest_tof = 0.0;
       longest_tof = 1e10;
     } catch (const std::runtime_error &) {
+      g_log.warning()
+          << "ParallelEventLoader failed, falling back to default loader.\n";
     }
     safeOpenFile(m_filename);
   }
@@ -1680,8 +1684,6 @@ bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
   if (m_ws->nPeriods() != 1)
     return false;
   if (haveWeights)
-    return false;
-  if (event_id_is_spec)
     return false;
   if (oldNeXusFileNames)
     return false;

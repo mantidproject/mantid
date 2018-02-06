@@ -64,9 +64,9 @@ file_names = {
 general_params = {
     "spline_coefficient": 70,
     "focused_bin_widths": [
-        -0.0005,  # Bank 1
-        -0.0005,  # Bank 2
-        -0.001    # Bank 3
+        -0.0003,  # Bank 1
+        -0.0007,  # Bank 2
+        -0.0012   # Bank 3
     ],
     "mode": "coupled"
 }

@@ -118,11 +118,11 @@ def mask_with_mask_files(mask_info, workspace):
         load_options = {"Instrument": idf_path,
                         "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
+        dummy_params = {"OutputWorkspace": EMPTY_NAME}
+        mask_alg = create_unmanaged_algorithm("MaskInstrument", **dummy_params)
+        clear_alg = create_unmanaged_algorithm("ClearMaskedSpectra", **dummy_params)
 
         # Masker
-        mask_name = "MaskDetectors"
-        mask_options = {"ForceInstrumentMasking": True}
-        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
         for mask_file in mask_files:
             mask_file = find_full_file_path(mask_file)
 
@@ -130,11 +130,21 @@ def mask_with_mask_files(mask_info, workspace):
             load_alg.setProperty("InputFile", mask_file)
             load_alg.execute()
             masking_workspace = load_alg.getProperty("OutputWorkspace").value
-            # Mask the detector ids on the original workspace
-            mask_alg.setProperty("Workspace", workspace)
-            mask_alg.setProperty("MaskedWorkspace", masking_workspace)
+            # Could use MaskDetectors directly with masking_workspace but it does not
+            # support MPI. Use a three step approach via a, b, and c instead.
+            # a) Extract detectors to mask from MaskWorkspace
+            det_ids = masking_workspace.getMaskedDetectors()
+            # b) Mask the detector ids on the instrument
+            mask_alg.setProperty("InputWorkspace", workspace)
+            mask_alg.setProperty("OutputWorkspace", workspace)
+            mask_alg.setProperty("DetectorIDs", det_ids)
             mask_alg.execute()
-            workspace = mask_alg.getProperty("Workspace").value
+            workspace = mask_alg.getProperty("OutputWorkspace").value
+        # c) Clear data in all spectra associated with masked detectors
+        clear_alg.setProperty("InputWorkspace", workspace)
+        clear_alg.setProperty("OutputWorkspace", workspace)
+        clear_alg.execute()
+        workspace = clear_alg.getProperty("OutputWorkspace").value
     return workspace
 
 
@@ -243,12 +253,15 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
 
     # Perform the masking
     if total_spectra:
-        mask_name = "MaskDetectors"
-        mask_options = {"Workspace": workspace,
-                        "SpectraList": total_spectra}
+        mask_name = "MaskSpectra"
+        mask_options = {"InputWorkspace": workspace,
+                        "InputWorkspaceIndexType": "SpectrumNumber",
+                        "OutputWorkspace": "__dummy"}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+        mask_alg.setProperty("InputWorkspaceIndexSet", list(set(total_spectra)))
+        mask_alg.setProperty("OutputWorkspace", workspace)
         mask_alg.execute()
-        workspace = mask_alg.getProperty("Workspace").value
+        workspace = mask_alg.getProperty("OutputWorkspace").value
     return workspace
 
 

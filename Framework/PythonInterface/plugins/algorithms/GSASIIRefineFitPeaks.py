@@ -31,6 +31,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     PROP_REFINEMENT_METHOD = "RefinementMethod"
     PROP_SUPPRESS_GSAS_OUTPUT = "MuteGSASII"
     PROP_WORKSPACE_INDEX = "WorkspaceIndex"
+    PROP_XMAX = "XMax"
+    PROP_XMIN = "XMin"
 
     DEFAULT_REFINEMENT_PARAMS = {"set":
                                  {"Background": {"no.coeffs": 3,
@@ -49,6 +51,15 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return ("Perform Rietveld or Pawley refinement of lattice parameters on a diffraction spectrum "
                 "using GSAS-II scriptable API")
 
+    def validateInputs(self):
+        x_min = self.getProperty(self.PROP_XMIN).value
+        x_max = self.getProperty(self.PROP_XMAX).value
+
+        if x_max <= x_min:
+            return {self.PROP_XMAX: "{} must be greater than {}".format(self.PROP_XMAX, self.PROP_XMIN)}
+
+        return {}
+
     def PyInit(self):
         self.declareProperty(name=self.PROP_REFINEMENT_METHOD, defaultValue=self.REFINEMENT_METHODS[0],
                              validator=StringListValidator(self.REFINEMENT_METHODS), direction=Direction.Input,
@@ -65,6 +76,13 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                           extensions=[".cif"]), doc="Location of the phase file")
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_GSASII, defaultValue="", action=FileAction.Directory),
                              doc="Path to the directory containing GSASII executable on the user's machine")
+
+        self.declareProperty(name=self.PROP_XMIN, defaultValue=0.0, direction=Direction.Input,
+                             doc="Minimum x value to use for refinement, in the same units as the input workspace. " +
+                                 "Leave blank to refine in the range 0.0 to {}".format(self.PROP_XMAX))
+        self.declareProperty(name=self.PROP_XMAX, defaultValue=0.0, direction=Direction.Input,
+                             doc="Maximum x value to use for refinement, in the same units as the input workspace. " +
+                                 "Leave blank to refine in the range {} to the end of the range".format(self.PROP_XMIN))
 
         self.declareProperty(name=self.PROP_OUT_GOF, defaultValue=0.0, direction=Direction.Output,
                              doc="Goodness of fit value (Chi squared)")
@@ -119,6 +137,17 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         table.addRow([float(lattice_params[param]) for param in self.LATTICE_TABLE_PARAMS])
         return table
+
+    def _create_refinement_params_dict(self):
+        refinement_params = self.DEFAULT_REFINEMENT_PARAMS
+
+        x_max = self.getProperty(self.PROP_XMAX).value
+
+        if x_max:
+            x_min = self.getProperty(self.PROP_XMIN).value
+            refinement_params["set"].update({"Limits": [x_min, x_max]})
+
+        return refinement_params
 
     def _extract_spectrum_from_workspace(self):
         """
@@ -182,7 +211,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         if do_pawley:
             self._set_pawley_phase_parameters(phase)
 
-        gsas_proj.set_refinement(refinement=self.DEFAULT_REFINEMENT_PARAMS)
+        gsas_proj.set_refinement(refinement=self._create_refinement_params_dict())
         gsas_proj.do_refinements([{}])
 
         residuals = gsas_proj.values()[2]["data"]["Rvals"]
