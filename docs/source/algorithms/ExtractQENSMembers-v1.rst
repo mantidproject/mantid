@@ -47,7 +47,7 @@ Usage
                                        OutputWorkspace=output_ws_name)
 
   # Extract members from the output of the ConvolutionFitSequential algorithm
-  members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=output_ws_name + "_conv_1LFixF_s0_to_9",
+  members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=output_ws_name,
                                   RenameConvolvedMembers=True, ConvolvedMembers=["Lorentzian"])
 
   for member_ws in members_ws:
