@@ -172,12 +172,15 @@ void EnggDiffMultiRunFittingWidgetPresenter::processRemoveRun() {
   if (m_view->hasSelectedRunLabel()) {
     const auto selectedRunLabel = m_view->getSelectedRunLabel();
     m_model->removeRun(selectedRunLabel);
+    m_view->updateRunList(m_model->getAllWorkspaceLabels());
   }
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {
-  const auto selectedRunLabel = m_view->getSelectedRunLabel();
-  updatePlot(selectedRunLabel);
+  if (m_view->hasSelectedRunLabel()) {
+    const auto selectedRunLabel = m_view->getSelectedRunLabel();
+    updatePlot(selectedRunLabel);
+  }
 }
 
 bool EnggDiffMultiRunFittingWidgetPresenter::showFitResultsSelected() const {

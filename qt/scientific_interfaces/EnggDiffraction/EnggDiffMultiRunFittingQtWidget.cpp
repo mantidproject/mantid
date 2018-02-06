@@ -169,7 +169,7 @@ void EnggDiffMultiRunFittingQtWidget::setupUI() {
   connect(m_ui.pushButton_removeRun, SIGNAL(clicked()), this,
           SLOT(processRemoveRun()));
   connect(m_ui.pushButton_plotToSeparateWindow, SIGNAL(clicked()), this,
-	  SLOT(processPlotToSeparateWindow()));
+          SLOT(processPlotToSeparateWindow()));
 }
 
 bool EnggDiffMultiRunFittingQtWidget::showFitResultsSelected() const {

@@ -118,6 +118,10 @@ public:
   void test_selectValidRunWithoutFittedPeaks() {
     auto presenter = setUpPresenter();
 
+    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(true));
+
     const RunLabel runLabel(123, 1);
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
@@ -143,6 +147,10 @@ public:
   void test_selectRunInvalid() {
     auto presenter = setUpPresenter();
 
+    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(true));
+
     const RunLabel runLabel(123, 1);
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
@@ -160,6 +168,10 @@ public:
 
   void test_selectValidRunWithFittedPeaks() {
     auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(true));
 
     const RunLabel runLabel(123, 1);
     ON_CALL(*m_mockView, getSelectedRunLabel()).WillByDefault(Return(runLabel));
@@ -179,6 +191,16 @@ public:
 
     presenter->notify(
         IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_selectRunDoesNothingWhenNoRunSelected() {
+    auto presenter = setUpPresenter();
+    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(0);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
     assertMocksUsedCorrectly();
   }
 
