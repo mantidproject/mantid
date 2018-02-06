@@ -1116,7 +1116,7 @@ void IndirectFitAnalysisTab::updatePlotGuessInWindow() {
 void IndirectFitAnalysisTab::updatePlotGuessInWindow(
     MatrixWorkspace_sptr workspace) {
   if (m_inputAndGuessWorkspace) {
-    const auto guessWSName = "__" + createSingleFitOutputName() + "_guess_ws";
+    const auto guessWSName = "__" + inputWorkspace()->getName() + "_guess_ws";
 
     if (m_inputAndGuessWorkspace->getName() != guessWSName)
       clearGuessWindowPlot();
@@ -1156,7 +1156,7 @@ void IndirectFitAnalysisTab::clearGuessWindowPlot() {
  */
 MatrixWorkspace_sptr IndirectFitAnalysisTab::createInputAndGuessWorkspace(
     MatrixWorkspace_sptr guessWorkspace) {
-  const auto guessWSName = "__" + createSingleFitOutputName() + "_guess_ws";
+  const auto guessWSName = "__" + inputWorkspace()->getName() + "_guess_ws";
   return createInputAndGuessWorkspace(inputWorkspace(), guessWorkspace,
                                       guessWSName);
 }
