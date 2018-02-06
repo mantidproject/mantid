@@ -51,7 +51,7 @@ void ConvFit::setup() {
   backRangeSelector->setVisible(false);
   backRangeSelector->setColour(Qt::darkGreen);
   backRangeSelector->setRange(0.0, 1.0);
-  
+
   auto hwhmRangeSelector = m_uiForm->ppPlotTop->addRangeSelector("ConvFitHWHM");
   hwhmRangeSelector->setColour(Qt::red);
 
