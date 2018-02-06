@@ -147,6 +147,29 @@ If mutable access is desired instead, you can use writable wrappers:
    ys[13] = 2018.
    es[13] = math.sqrt(2018.)
 
+The entire X, Y and E data can be accessed as 2D numpy arrays:
+
+.. code-block:: python
+
+   xs = run.extractX()
+   ys = run.extractY()
+   es = run.extractE()
+   print(ys.ndim)
+   print(xs.shape)
+   print(ys.shape)
+
+Access to metadata such as sample logs is possible:
+
+.. code-block:: python
+
+   # Read-only
+   logs = run.run()
+   print(logs.getProperty('sample.temperature').value)
+   # For writable access, use mutableRun
+   logs = run.mutableRun()
+   replace = True
+   logs.addProperty('sample.pressure', 23., replace)
+
 
 Replaying workspace history
 ###########################
@@ -155,7 +178,17 @@ Every Mantid workspace has a history associated with it. The history stores all 
 
 To view the history of a workspace in MantidPlot, right click on the entry withing the workspace list and select Show History. A window detailing the history will appear.
 
-The two buttons, Script to File and Script to Clipboard allow you to save the corresponding Python script to a file or to the operating system's clipboard from where you can paste it to, for example, MantidPlot's Script Window.
+.. figure:: /images/Training/UsingMantidFromPython/AlgorithmHistory.png
+   :align: center
+
+The two buttons, Script to File and Script to Clipboard allow you to save the corresponding Python script to a file or to the operating system's clipboard from where you can paste it to, for example, MantidPlot's Script Window. The resulting script from the above history would look like this:
+
+.. code-block:: python
+
+   LoadILLReflectometry(Filename='/net4/serdon/illdata/171/figaro/internalUse/rawdata/592724.nxs', OutputWorkspace='592724', XUnit='TimeOfFlight')
+   GravityCorrection(InputWorkspace='592724', OutputWorkspace='592724_gc', FirstSlitName='slit3')
+   Logarithm(InputWorkspace='592724_gc', OutputWorkspace='592724_gc')
+   ConvertUnits(InputWorkspace='592724_gc', OutputWorkspace='592724_gc', Target='Wavelength', ConvertFromPointData=False)
 
 
 Extending Mantid with new algorithms
