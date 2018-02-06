@@ -45,10 +45,12 @@ Please note the different meaning of
 Several workspaces can be combined to a :literal:`GroupWorkspace` which may be the preferred output for workflow algorithms.
 
 .. figure:: /images/GroupWorkspace.png
+   :align: center
 
-:literal:`TableWorkspaces` descibe their content by column names and contain reduction specific data, e.g. fit results of peak positions
+:literal:`TableWorkspaces` descibe their content by column names and contain, for instance, fit results of peak positions
 
 .. figure:: /images/Workspace4.png
+   :align: center
 
 ==========
 Algorithms
@@ -149,6 +151,8 @@ Interfaces
 
 Main MantidPlot menu -> Interfaces -> Indirect -> Indirect Data Analysis
 
+From the concept page:
+
 The Indirect Data Analysis interface is a collection of tools within MantidPlot
 for analysing reduced data from indirect geometry spectrometers.
 
@@ -161,3 +165,6 @@ taken from a bespoke algorithm or auto reduction.
 These interfaces do not support GroupWorkspaces as input.
 
 .. figure:: /images/interface.png
+
+Additional information can be available, for example for this interface:
+A technical report from Sanghamitra Mukhopadhyay (status 2014, RAL-TR-2014-005)
