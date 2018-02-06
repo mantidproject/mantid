@@ -80,7 +80,7 @@ set ( TEST_PY_FILES
       )
 
 # Additional tests
-add_subdirectory(test/illplot)
+add_subdirectory(test/directtools)
 add_subdirectory(test/Muon)
 add_subdirectory(test/SANS)
 
