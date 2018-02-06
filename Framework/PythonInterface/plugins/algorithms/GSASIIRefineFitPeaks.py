@@ -84,7 +84,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.declareProperty(name=self.PROP_XMAX, defaultValue=0.0, direction=Direction.Input,
                              doc="Maximum x value to use for refinement, in the same units as the input workspace. " +
                                  "Leave blank to refine in the range {} to the end of the range".format(self.PROP_XMIN))
-        
+
         self.declareProperty(WorkspaceProperty(name=self.PROP_OUT_FITTED_PEAKS_WS, defaultValue="",
                                                direction=Direction.Output), doc="Workspace with fitted peaks")
         self.declareProperty(ITableWorkspaceProperty(name=self.PROP_OUT_RESIDUALS, direction=Direction.Output,
