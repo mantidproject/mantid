@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 # pylint: disable=no-init
 
 from __future__ import absolute_import, division, print_function
 
 from collections import OrderedDict
 from itertools import cycle
-from configparser import ConfigParser
+from configparser import ConfigParser, RawConfigParser
 import os.path
 
 import numpy as np
@@ -122,6 +123,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
         '''
         Sets the properties as method properties
         '''
+        
+        self._parse_config_file()
 
         self.input_wss = self.getProperty('InputWorkspaces').value
         self.input_ws_reference = self.getProperty(
@@ -151,18 +154,21 @@ class SANSWLNormCorrection(PythonAlgorithm):
             
 
     def _parse_config_file(self):
+        '''
+        Parses the config file and set's the input properties as
+        the values in the file
+        Note the Key in the files must be a valid property
+        '''
         
         file_name = self.getProperty('ConfigurationFile').value
-        file_name = '/home/rhf/Documents/SANS/EQSANS/2018-01-01-ChangwooWlNorm/conf.ini'
         if os.path.exists(file_name):
-            parser = ConfigParser()
+            parser = RawConfigParser()
+            parser.optionxform = lambda option: option # case sensitive
             parser.read(file_name)
-            parser.optionxform = str # case sensitive
-#             for k, v in parser.items('DEFAULT'):
-#                 if 
-#                 
-            dict(parser.items('DEFAULT'))
-
+            
+            for k, v in parser.items('DEFAULT'):
+                self.setProperty(k, v)
+                    
 
     def validateInputs(self):
         '''
@@ -471,7 +477,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 yi = np.append(yi, v['y_trimmed_fit'][v['x_trimmed'] == xi])
             y = np.append(y, np.average(yi))
             
-        out_ws_name = self.output_prefix "_trimmed_fit_averaged"
+        out_ws_name = self.output_prefix + "_trimmed_fit_averaged"
 
         CreateWorkspace(
             OutputWorkspace=out_ws_name,
