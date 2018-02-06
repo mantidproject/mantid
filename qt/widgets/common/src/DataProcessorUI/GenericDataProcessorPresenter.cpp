@@ -63,6 +63,10 @@ bool workspaceExists(QString const &workspaceName) {
 void removeWorkspace(QString const &workspaceName) {
   AnalysisDataService::Instance().remove(workspaceName.toStdString());
 }
+
+template <typename T> void pop_front(std::vector<T> &queue) {
+  queue.erase(queue.begin());
+}
 }
 
 namespace MantidQt {
@@ -334,7 +338,7 @@ void GenericDataProcessorPresenter::process() {
     for (const auto &row : group.second) {
 
       // Add all row items to queue
-      rowQueue.push(row);
+      rowQueue.emplace_back(row);
 
       // Set group as unprocessed if settings have changed or the expected
       // output workspaces cannot be found
@@ -345,7 +349,7 @@ void GenericDataProcessorPresenter::process() {
       if (!isProcessed(row.first, group.first))
         maxProgress++;
     }
-    m_group_queue.emplace(group.first, rowQueue);
+    m_group_queue.emplace_back(group.first, rowQueue);
   }
 
   // Create progress reporter bar
@@ -402,25 +406,14 @@ void GenericDataProcessorPresenter::nextRow() {
     m_nextActionFlag = ReductionFlag::ReduceRowFlag;
     // Reduce next row
     m_rowItem = rqueue.front();
-    rqueue.pop();
+    pop_front(rqueue);
     // Skip reducing rows that are already processed
     if (!isProcessed(m_rowItem.first, groupIndex)) {
       startAsyncRowReduceThread(&m_rowItem, groupIndex);
-
-      auto prefixes = m_processor.prefixes();
-      std::vector<std::string> workspaceNames;
-      workspaceNames.reserve(prefixes.size());
-      std::transform(prefixes.cbegin(), prefixes.cend(),
-                     std::back_inserter(workspaceNames),
-                     [this](QString const &prefix) -> std::string {
-                       return getReducedWorkspaceName(m_rowItem.second, prefix)
-                           .toStdString();
-                     });
-      completedRowReductionSuccessfully(m_groupData, workspaceNames);
     }
     return;
   } else {
-    m_group_queue.pop();
+    pop_front(m_group_queue);
     // Set next action flag
     m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
 
@@ -429,10 +422,6 @@ void GenericDataProcessorPresenter::nextRow() {
     if (!isProcessed(groupIndex)) {
       if (m_groupData.size() > 1) {
         startAsyncGroupReduceThread(m_groupData, groupIndex);
-        auto postprocessedWorkspace =
-            getPostprocessedWorkspaceName(m_groupData).toStdString();
-        completedGroupReductionSuccessfully(m_groupData,
-                                            postprocessedWorkspace);
         return;
       }
     }
@@ -466,22 +455,15 @@ void GenericDataProcessorPresenter::nextGroup() {
     // Reduce first row
     auto &rqueue = m_group_queue.front().second;
     m_rowItem = rqueue.front();
-    rqueue.pop();
+    // Clear group data from any previously processed groups
+    m_groupData.clear();
+    for (auto &&row : rqueue)
+      m_groupData[row.first] = row.second;
+    pop_front(rqueue);
+
     // Skip reducing rows that are already processed
     if (!isProcessed(m_rowItem.first, m_group_queue.front().first)) {
       startAsyncRowReduceThread(&m_rowItem, m_group_queue.front().first);
-
-      auto prefixes = m_processor.prefixes();
-      auto workspaceNames = std::vector<std::string>();
-      workspaceNames.reserve(prefixes.size());
-      std::transform(prefixes.cbegin(), prefixes.cend(),
-                     std::back_inserter(workspaceNames),
-                     [this](QString const &prefix) -> std::string {
-                       return getReducedWorkspaceName(m_rowItem.second, prefix)
-                           .toStdString();
-                     });
-      completedRowReductionSuccessfully(m_groupData, workspaceNames);
-
     } else {
       doNextAction();
     }
@@ -492,8 +474,6 @@ void GenericDataProcessorPresenter::nextGroup() {
       saveNotebook(m_selectedData);
     endReduction();
   }
-  // Clear group data from any previously processed groups
-  m_groupData.clear();
 }
 
 /*
@@ -504,6 +484,10 @@ void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
 
   auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
       this, rowItem, groupIndex);
+
+  connect(worker, SIGNAL(finished(int)), this, SLOT(rowThreadFinished(int)));
+  connect(worker, SIGNAL(reductionErrorSignal(QString)), this,
+          SLOT(reductionError(QString)), Qt::QueuedConnection);
   m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
@@ -516,6 +500,9 @@ void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
 
   auto *worker = new GenericDataProcessorPresenterGroupReducerWorker(
       this, groupData, groupIndex);
+  connect(worker, SIGNAL(finished(int)), this, SLOT(groupThreadFinished(int)));
+  connect(worker, SIGNAL(reductionErrorSignal(QString)), this,
+          SLOT(reductionError(QString)), Qt::QueuedConnection);
   m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
@@ -551,6 +538,27 @@ void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
     m_progressReporter->clear();
     endReduction();
   }
+}
+
+void GenericDataProcessorPresenter::groupThreadFinished(const int exitCode) {
+
+  auto postprocessedWorkspace =
+      getPostprocessedWorkspaceName(m_groupData).toStdString();
+  completedGroupReductionSuccessfully(m_groupData, postprocessedWorkspace);
+  threadFinished(exitCode);
+}
+
+void GenericDataProcessorPresenter::rowThreadFinished(const int exitCode) {
+  auto prefixes = m_processor.prefixes();
+  std::vector<std::string> workspaceNames;
+  workspaceNames.reserve(prefixes.size());
+  std::transform(
+      prefixes.cbegin(), prefixes.cend(), std::back_inserter(workspaceNames),
+      [this](QString const &prefix) -> std::string {
+        return getReducedWorkspaceName(m_rowItem.second, prefix).toStdString();
+      });
+  completedRowReductionSuccessfully(m_groupData, workspaceNames);
+  threadFinished(exitCode);
 }
 
 /**
