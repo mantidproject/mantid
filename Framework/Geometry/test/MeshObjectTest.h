@@ -112,8 +112,9 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   triangles.push_back(6);
   triangles.push_back(2);
 
+  // Use efficient constructor
   std::unique_ptr<MeshObject> retVal =
-      std::unique_ptr<MeshObject>(new MeshObject(triangles, vertices));
+      std::unique_ptr<MeshObject>(new MeshObject(std::move(triangles), std::move(vertices)));
   return retVal;
 }
 
@@ -175,6 +176,7 @@ std::unique_ptr<MeshObject> createOctahedron() {
   triangles.push_back(1);
   triangles.push_back(5);
 
+  // Use flexible constructor
   std::unique_ptr<MeshObject> retVal =
       std::unique_ptr<MeshObject>(new MeshObject(triangles, vertices));
   return retVal;
@@ -264,8 +266,9 @@ std::unique_ptr<MeshObject> createLShape() {
   triangles.push_back(0);
   triangles.push_back(6);
 
+  // Use efficient constructor
   std::unique_ptr<MeshObject> retVal =
-      std::unique_ptr<MeshObject>(new MeshObject(triangles, vertices));
+      std::unique_ptr<MeshObject>(new MeshObject(std::move(triangles), std::move(vertices)));
   return retVal;
 }
 }
@@ -299,7 +302,11 @@ public:
     triangles.push_back(3);
     triangles.push_back(2);
 
-    TS_ASSERT_THROWS_NOTHING(auto obj = MeshObject(triangles, vertices));
+    // Test flexible constructor
+    TS_ASSERT_THROWS_NOTHING(auto obj1 = MeshObject(triangles, vertices));
+    // Test eficient constructor
+    TS_ASSERT_THROWS_NOTHING(auto obj2 = MeshObject(std::move(triangles), std::move(vertices)));
+
   }
 
   void testClone() {

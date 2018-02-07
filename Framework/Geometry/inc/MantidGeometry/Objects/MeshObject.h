@@ -63,9 +63,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
-  /// Main constructor
+  /// Flexible constructor
   MeshObject(const std::vector<uint16_t> &faces,
-             const std::vector<Mantid::Kernel::V3D> &vertices);
+    const std::vector<Mantid::Kernel::V3D> &vertices);
+  // Efficient constructor
+  MeshObject(std::vector<uint16_t> &&faces,
+    std::vector<Mantid::Kernel::V3D> &&vertices);
 
   /// Copy constructor
   MeshObject(const MeshObject &);
@@ -161,6 +164,8 @@ public:
 private:
   /// Default constructor - should never be called
   MeshObject();
+  // Setup object, called only in constructor
+  void setup();
   /// Get intersections
   void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
                         std::vector<Kernel::V3D> &intersectionPoints,

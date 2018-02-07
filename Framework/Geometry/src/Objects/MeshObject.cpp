@@ -24,18 +24,24 @@ using Kernel::Quat;
 */
 MeshObject::MeshObject() {} // Should never be called
 
+                            // Flexible constructor
 MeshObject::MeshObject(const std::vector<uint16_t> &faces,
-                       const std::vector<V3D> &vertices)
-    : m_boundingBox(), m_object_number(0), m_id(), m_material(),
-      m_triangles(faces), m_vertices(vertices) {
+  const std::vector<V3D> &vertices)
+  : m_boundingBox(), m_object_number(0), m_id(), m_material(),
+  m_triangles(faces), m_vertices(vertices) {
 
-  if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
-    throw std::invalid_argument("Too many vertices (" + 
-      std::to_string(m_vertices.size()) + 
-      "). MeshObject cannot have more than 65535 vertices.");
-  }
-  m_handler = boost::make_shared<CacheGeometryHandler>(this);
+  setup();
 }
+
+// Efficient constructor
+MeshObject::MeshObject(std::vector<uint16_t> &&faces,
+  std::vector<V3D> &&vertices)
+  : m_boundingBox(), m_object_number(0), m_id(), m_material(),
+  m_triangles(std::move(faces)), m_vertices(std::move(vertices)) {
+
+  setup();
+}
+
 
 /**
 * Copy constructor
@@ -63,6 +69,18 @@ MeshObject &MeshObject::operator=(const MeshObject &A) {
 }
 
 MeshObject::~MeshObject() = default;
+
+
+// Do things that need to be done in constructor
+void MeshObject::setup() {
+
+  if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
+    throw std::invalid_argument("Too many vertices (" +
+      std::to_string(m_vertices.size()) +
+      "). MeshObject cannot have more than 65535 vertices.");
+  }
+  m_handler = boost::make_shared<CacheGeometryHandler>(this);
+}
 
 /**
  * @param material The new Material that the object is composed from
