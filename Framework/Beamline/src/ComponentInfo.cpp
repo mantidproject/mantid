@@ -246,9 +246,10 @@ void ComponentInfo::doSetPosition(const std::pair<size_t, size_t> &index,
         m_detectorInfo->position({subIndex, timeIndex}) + offset);
   }
 
+  auto &accessPos = m_positions.access();
   for (const auto &subIndex : componentRangeInSubtree(componentIndex)) {
     size_t offsetIndex = compOffsetIndex(subIndex);
-    m_positions.access()[offsetIndex] += offset;
+    accessPos[offsetIndex] += offset;
   }
 }
 
@@ -272,15 +273,16 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index,
     m_detectorInfo->setRotation({subDetIndex, timeIndex}, newRot);
   }
 
+  auto &accessPos = m_positions.access();
+  auto &accessRot = m_rotations.access();
   for (const auto &subCompIndex : componentRangeInSubtree(componentIndex)) {
     auto oldPos = position({subCompIndex, timeIndex});
     auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * rotation({subCompIndex, timeIndex});
     const size_t childCompIndexOffset = compOffsetIndex(subCompIndex);
-    m_positions.access()[linearIndex({childCompIndexOffset, timeIndex})] =
-        newPos;
-    m_rotations.access()[linearIndex({childCompIndexOffset, timeIndex})] =
-        newRot.normalized();
+    auto childIndex = linearIndex({childCompIndexOffset, timeIndex});
+    accessPos[childIndex] = newPos;
+    accessRot[childIndex] = newRot.normalized();
   }
 }
 
