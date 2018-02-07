@@ -58,8 +58,7 @@ public:
 
   bool showRefinementResultsSelected() const override;
 
-  void
-  updateRunList(const std::vector<RunLabel> &runLabels) override;
+  void updateRunList(const std::vector<RunLabel> &runLabels) override;
 
   void userWarning(const std::string &warningDescription) const override;
 
