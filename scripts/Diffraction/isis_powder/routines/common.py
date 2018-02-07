@@ -372,6 +372,14 @@ def run_normalise_by_current(ws):
     return ws
 
 
+def runs_overlap(run_string1, run_string2):
+    """
+    Get whether two runs, specified using the usual run string format (eg 123-125 referring to 123, 124 and 125)
+    contain any individual runs in common
+    """
+    return len(set(generate_run_numbers(run_string1)).intersection(generate_run_numbers(run_string2))) > 0
+
+
 def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):
     """
     Returns a splined vanadium workspace from the focused vanadium bank list.
