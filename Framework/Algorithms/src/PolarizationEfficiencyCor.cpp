@@ -56,6 +56,27 @@ void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws,
   }
 }
 
+/**
+ * Calculate the corrected intensities and error estimates.
+ * @param corrected an output vector for R00, R01, R10 and R11
+ * @param errors an output vector for the error estimates
+ * @param ppy intensity I00
+ * @param ppyE error of ppy
+ * @param pmy intensity I01
+ * @param pmyE error of pmy
+ * @param mpy intensity I10
+ * @param mpyE error of mpy
+ * @param mmy intensity I11
+ * @param mmyE error of mmy
+ * @param f1 polarizer efficiency
+ * @param f1E error of f1
+ * @param f2 analyzer efficiency
+ * @param f2E error of f2
+ * @param p1 polarizer flipper efficiency
+ * @param p1E error of p1
+ * @param p2 analyzer flipper efficiency
+ * @param p2E error of p2
+ */
 void fourInputsCorrectedAndErrors(Eigen::Vector4d &corrected, Eigen::Vector4d &errors, const double ppy, const double ppyE, const double pmy, const double pmyE, const double mpy, const double mpyE, const double mmy, const double mmyE, const double f1, const double f1E, const double f2, const double f2E, const double p1, const double p1E, const double p2, const double p2E) {
   using namespace boost::math;
   // Note that f1 and f2 correspond to 1-F1 and 1-F2 in [Wildes, 1999].
