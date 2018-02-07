@@ -56,6 +56,64 @@ void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws,
   }
 }
 
+void fourInputsCorrectedAndErrors(Eigen::Vector4d &corrected, Eigen::Vector4d &errors, const double ppy, const double ppyE, const double pmy, const double pmyE, const double mpy, const double mpyE, const double mmy, const double mmyE, const double f1, const double f1E, const double f2, const double f2E, const double p1, const double p1E, const double p2, const double p2E) {
+  using namespace boost::math;
+  // Note that f1 and f2 correspond to 1-F1 and 1-F2 in [Wildes, 1999].
+  // These are inverted forms of the efficiency matrices.
+  const auto diag1 = 1. / f1;
+  const auto off1 = (f1 - 1.) / f1;
+  Eigen::Matrix4d F1m;
+  F1m << 1., 0., 0., 0., 0., 1., 0., 0., off1, 0., diag1, 0., 0., off1, 0.,
+      diag1;
+  const auto diag2 = 1. / f2;
+  const auto off2 = (f2 - 1.) / f2;
+  Eigen::Matrix4d F2m;
+  F2m << 1., 0., 0., 0., off2, diag2, 0., 0., 0., 0., 1., 0., 0., 0., off2,
+      diag2;
+  const auto diag3 = (p1 - 1.) / (2. * p1 - 1.);
+  const auto off3 = p1 / (2. * p1 - 1);
+  Eigen::Matrix4d P1m;
+  P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3,
+      0, diag3;
+  const auto diag4 = (p2 - 1.) / (2. * p2 - 1.);
+  const auto off4 = p2 / (2. * p2 - 1.);
+  Eigen::Matrix4d P2m;
+  P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0.,
+      0., off4, diag4;
+  const Eigen::Vector4d intensities(ppy, pmy, mpy, mmy);
+  const auto FProduct = F2m * F1m;
+  const auto PProduct = P2m * P1m;
+  const auto PFProduct = PProduct * FProduct;
+  corrected = PFProduct * intensities;
+  // The error matrices here are element-wise algebraic derivatives of
+  // the matrices above, multiplied by the error.
+  const auto elemE1 = -1. / pow<2>(f1) * f1E;
+  Eigen::Matrix4d F1Em;
+  F1Em << 0., 0., 0., 0., 0., 0., 0., 0., -elemE1, 0., elemE1, 0., 0.,
+      -elemE1, 0., elemE1;
+  const auto elemE2 = -1. / pow<2>(f2) * f2E;
+  Eigen::Matrix4d F2Em;
+  F2Em << 0., 0., 0., 0., -elemE2, elemE2, 0., 0., 0., 0., 0., 0., 0., 0.,
+      -elemE2, elemE2;
+  const auto elemE3 = 1. / pow<2>(2. * p1 - 1.) * p1E;
+  Eigen::Matrix4d P1Em;
+  P1Em << elemE3, 0., -elemE3, 0., 0., elemE3, 0., -elemE3, -elemE3, 0.,
+      elemE3, 0., 0., -elemE3, 0., elemE3;
+  const auto elemE4 = 1. / pow<2>(2. * p2 - 1.) * p2E;
+  Eigen::Matrix4d P2Em;
+  P2Em << elemE4, -elemE4, 0., 0., -elemE4, elemE4, 0., 0., 0., 0., elemE4,
+      -elemE4, 0., 0., -elemE4, elemE4;
+  const Eigen::Vector4d yErrors(ppyE, pmyE, mpyE, mmyE);
+  const auto e1 = (P2Em * P1m * FProduct * intensities).array();
+  const auto e2 = (P2m * P1Em * FProduct * intensities).array();
+  const auto e3 = (PProduct * F2Em * F1m * intensities).array();
+  const auto e4 = (PProduct * F2m * F1Em * intensities).array();
+  const auto sqPFProduct = (PFProduct.array() * PFProduct.array()).matrix();
+  const auto sqErrors = (yErrors.array() * yErrors.array()).matrix();
+  const auto e5 = (sqPFProduct * sqErrors).array();
+  errors = (e1 * e1 + e2 * e2 + e3 * e3 + e4 * e4 + e5).sqrt();
+}
+
 /**
  * Estimate errors for I01 in the two inputs case.
  * @param i00 intensity of 00 flipper configuration
@@ -726,6 +784,14 @@ PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs,
   outputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mpWS);
   outputs.pmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
   outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
+  const auto F1 = efficiencies.F1->y();
+  const auto F1E = efficiencies.F1->e();
+  const auto F2 = efficiencies.F2->y();
+  const auto F2E = efficiencies.F2->e();
+  const auto P1 = efficiencies.P1->y();
+  const auto P1E = efficiencies.P1->e();
+  const auto P2 = efficiencies.P2->y();
+  const auto P2E = efficiencies.P2->e();
   const size_t nHisto = inputs.mmWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &mmY = inputs.mmWS->y(wsIndex);
@@ -745,78 +811,17 @@ PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs,
     auto &ppYOut = outputs.ppWS->mutableY(wsIndex);
     auto &ppEOut = outputs.ppWS->mutableE(wsIndex);
     for (size_t binIndex = 0; binIndex < mmY.size(); ++binIndex) {
-      // Note that F1 and F2 correspond to 1-F1 and 1-F2 in [Wildes, 1999].
-      const auto F1 = efficiencies.F1->y()[binIndex];
-      const auto F2 = efficiencies.F2->y()[binIndex];
-      const auto P1 = efficiencies.P1->y()[binIndex];
-      const auto P2 = efficiencies.P2->y()[binIndex];
-      // These are inverted forms of the efficiency matrices.
-      const auto diag1 = 1. / F1;
-      const auto off1 = (F1 - 1.) / F1;
-      Eigen::Matrix4d F1m;
-      F1m << 1., 0., 0., 0., 0., 1., 0., 0., off1, 0., diag1, 0., 0., off1, 0.,
-          diag1;
-      const auto diag2 = 1. / F2;
-      const auto off2 = (F2 - 1.) / F2;
-      Eigen::Matrix4d F2m;
-      F2m << 1., 0., 0., 0., off2, diag2, 0., 0., 0., 0., 1., 0., 0., 0., off2,
-          diag2;
-      const auto diag3 = (P1 - 1.) / (2. * P1 - 1.);
-      const auto off3 = P1 / (2. * P1 - 1);
-      Eigen::Matrix4d P1m;
-      P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3,
-          0, diag3;
-      const auto diag4 = (P2 - 1.) / (2. * P2 - 1.);
-      const auto off4 = P2 / (2. * P2 - 1.);
-      Eigen::Matrix4d P2m;
-      P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0.,
-          0., off4, diag4;
-      const Eigen::Vector4d intensities(ppY[binIndex], pmY[binIndex],
-                                        mpY[binIndex], mmY[binIndex]);
-      const auto FProduct = F2m * F1m;
-      const auto PProduct = P2m * P1m;
-      const auto PFProduct = PProduct * FProduct;
-      const auto corrected = PFProduct * intensities;
+      Eigen::Vector4d corrected;
+      Eigen::Vector4d errors;
+      fourInputsCorrectedAndErrors(corrected, errors, ppY[binIndex], ppE[binIndex], pmY[binIndex], pmE[binIndex], mpY[binIndex], mpE[binIndex], mmY[binIndex], mmE[binIndex], F1[binIndex], F1E[binIndex], F2[binIndex], F2E[binIndex], P1[binIndex], P1E[binIndex], P2[binIndex], P2E[binIndex]);
       ppYOut[binIndex] = corrected[0];
       pmYOut[binIndex] = corrected[1];
       mpYOut[binIndex] = corrected[2];
       mmYOut[binIndex] = corrected[3];
-      const auto F1E = efficiencies.F1->e()[binIndex];
-      const auto F2E = efficiencies.F2->e()[binIndex];
-      const auto P1E = efficiencies.P1->e()[binIndex];
-      const auto P2E = efficiencies.P2->e()[binIndex];
-      // The error matrices here are element-wise algebraic derivatives of
-      // the matrices above, multiplied by the error.
-      const auto elemE1 = -1. / pow<2>(F1) * F1E;
-      Eigen::Matrix4d F1Em;
-      F1Em << 0., 0., 0., 0., 0., 0., 0., 0., -elemE1, 0., elemE1, 0., 0.,
-          -elemE1, 0., elemE1;
-      const auto elemE2 = -1. / pow<2>(F2) * F2E;
-      Eigen::Matrix4d F2Em;
-      F2Em << 0., 0., 0., 0., -elemE2, elemE2, 0., 0., 0., 0., 0., 0., 0., 0.,
-          -elemE2, elemE2;
-      const auto elemE3 = 1. / pow<2>(2. * P1 - 1.) * P1E;
-      Eigen::Matrix4d P1Em;
-      P1Em << elemE3, 0., -elemE3, 0., 0., elemE3, 0., -elemE3, -elemE3, 0.,
-          elemE3, 0., 0., -elemE3, 0., elemE3;
-      const auto elemE4 = 1. / pow<2>(2. * P2 - 1.) * P2E;
-      Eigen::Matrix4d P2Em;
-      P2Em << elemE4, -elemE4, 0., 0., -elemE4, elemE4, 0., 0., 0., 0., elemE4,
-          -elemE4, 0., 0., -elemE4, elemE4;
-      const Eigen::Vector4d errors(ppE[binIndex], pmE[binIndex], mpE[binIndex],
-                                   mmE[binIndex]);
-      const auto e1 = (P2Em * P1m * FProduct * intensities).array();
-      const auto e2 = (P2m * P1Em * FProduct * intensities).array();
-      const auto e3 = (PProduct * F2Em * F1m * intensities).array();
-      const auto e4 = (PProduct * F2m * F1Em * intensities).array();
-      const auto sqPFProduct = (PFProduct.array() * PFProduct.array()).matrix();
-      const auto sqErrors = (errors.array() * errors.array()).matrix();
-      const auto e5 = (sqPFProduct * sqErrors).array();
-      const auto errorSum = (e1 * e1 + e2 * e2 + e3 * e3 + e4 * e4 + e5).sqrt();
-      ppEOut[binIndex] = errorSum[0];
-      pmEOut[binIndex] = errorSum[1];
-      mpEOut[binIndex] = errorSum[2];
-      mmEOut[binIndex] = errorSum[3];
+      ppEOut[binIndex] = errors[0];
+      pmEOut[binIndex] = errors[1];
+      mpEOut[binIndex] = errors[2];
+      mmEOut[binIndex] = errors[3];
     }
   }
   return outputs;
