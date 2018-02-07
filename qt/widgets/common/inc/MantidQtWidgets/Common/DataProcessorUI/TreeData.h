@@ -33,13 +33,15 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "MantidQtWidgets/Common/DllOption.h"
+
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 using RowData = QStringList;
 using GroupData = std::map<int, RowData>;
 using TreeData = std::map<int, GroupData>;
-bool canPostprocess(GroupData const& group);
+EXPORT_OPT_MANTIDQT_COMMON bool canPostprocess(GroupData const &group);
 }
 }
 }
