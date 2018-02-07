@@ -1068,8 +1068,9 @@ private:
     const auto f2Error = (P2 * P1 * dF2 * F1 * y).array();
     const auto f1Error = (P2 * P1 * F2 * dF1 * y).array();
     const auto inverted = (P2 * P1 * F2 * F1).array();
-    const auto yError = ((inverted * inverted).matrix() *
-                         (e.array() * e.array()).matrix()).array();
+    const auto yError =
+        ((inverted * inverted).matrix() * (e.array() * e.array()).matrix())
+            .array();
     return (p2Error * p2Error + p1Error * p1Error + f2Error * f2Error +
             f1Error * f1Error + yError)
         .sqrt()
@@ -1107,8 +1108,9 @@ private:
     const auto p1Error = (dP1 * F1 * y).array();
     const auto f1Error = (P1 * dF1 * y).array();
     const auto inverted = (P1 * F1).array();
-    const auto yError = ((inverted * inverted).matrix() *
-                         (e.array() * e.array()).matrix()).array();
+    const auto yError =
+        ((inverted * inverted).matrix() * (e.array() * e.array()).matrix())
+            .array();
     return (p1Error * p1Error + f1Error * f1Error + yError).sqrt().matrix();
   }
 

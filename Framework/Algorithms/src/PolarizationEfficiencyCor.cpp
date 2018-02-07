@@ -10,8 +10,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
-#include <boost/math/special_functions/pow.hpp>
 #include <Eigen/Dense>
+#include <boost/math/special_functions/pow.hpp>
 
 namespace {
 /// Property names.
@@ -20,7 +20,7 @@ static const std::string FLIPPERS{"Flippers"};
 static const std::string EFFICIENCIES{"Efficiencies"};
 static const std::string INPUT_WS{"InputWorkspaces"};
 static const std::string OUTPUT_WS{"OutputWorkspace"};
-}
+} // namespace Prop
 
 /// Flipper configurations.
 namespace Flippers {
@@ -30,7 +30,7 @@ static const std::string OffOn{"01"};
 static const std::string On{"1"};
 static const std::string OnOff{"10"};
 static const std::string OnOn{"11"};
-}
+} // namespace Flippers
 
 /**
  * Parse a flipper configuration string.
@@ -77,7 +77,12 @@ void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws,
  * @param p2 analyzer flipper efficiency
  * @param p2E error of p2
  */
-void fourInputsCorrectedAndErrors(Eigen::Vector4d &corrected, Eigen::Vector4d &errors, const double ppy, const double ppyE, const double pmy, const double pmyE, const double mpy, const double mpyE, const double mmy, const double mmyE, const double f1, const double f1E, const double f2, const double f2E, const double p1, const double p1E, const double p2, const double p2E) {
+void fourInputsCorrectedAndErrors(
+    Eigen::Vector4d &corrected, Eigen::Vector4d &errors, const double ppy,
+    const double ppyE, const double pmy, const double pmyE, const double mpy,
+    const double mpyE, const double mmy, const double mmyE, const double f1,
+    const double f1E, const double f2, const double f2E, const double p1,
+    const double p1E, const double p2, const double p2E) {
   using namespace boost::math;
   // Note that f1 and f2 correspond to 1-F1 and 1-F2 in [Wildes, 1999].
   // These are inverted forms of the efficiency matrices.
@@ -94,13 +99,13 @@ void fourInputsCorrectedAndErrors(Eigen::Vector4d &corrected, Eigen::Vector4d &e
   const auto diag3 = (p1 - 1.) / (2. * p1 - 1.);
   const auto off3 = p1 / (2. * p1 - 1);
   Eigen::Matrix4d P1m;
-  P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3,
-      0, diag3;
+  P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3, 0,
+      diag3;
   const auto diag4 = (p2 - 1.) / (2. * p2 - 1.);
   const auto off4 = p2 / (2. * p2 - 1.);
   Eigen::Matrix4d P2m;
-  P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0.,
-      0., off4, diag4;
+  P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0., 0.,
+      off4, diag4;
   const Eigen::Vector4d intensities(ppy, pmy, mpy, mmy);
   const auto FProduct = F2m * F1m;
   const auto PProduct = P2m * P1m;
@@ -110,16 +115,16 @@ void fourInputsCorrectedAndErrors(Eigen::Vector4d &corrected, Eigen::Vector4d &e
   // the matrices above, multiplied by the error.
   const auto elemE1 = -1. / pow<2>(f1) * f1E;
   Eigen::Matrix4d F1Em;
-  F1Em << 0., 0., 0., 0., 0., 0., 0., 0., -elemE1, 0., elemE1, 0., 0.,
-      -elemE1, 0., elemE1;
+  F1Em << 0., 0., 0., 0., 0., 0., 0., 0., -elemE1, 0., elemE1, 0., 0., -elemE1,
+      0., elemE1;
   const auto elemE2 = -1. / pow<2>(f2) * f2E;
   Eigen::Matrix4d F2Em;
   F2Em << 0., 0., 0., 0., -elemE2, elemE2, 0., 0., 0., 0., 0., 0., 0., 0.,
       -elemE2, elemE2;
   const auto elemE3 = 1. / pow<2>(2. * p1 - 1.) * p1E;
   Eigen::Matrix4d P1Em;
-  P1Em << elemE3, 0., -elemE3, 0., 0., elemE3, 0., -elemE3, -elemE3, 0.,
-      elemE3, 0., 0., -elemE3, 0., elemE3;
+  P1Em << elemE3, 0., -elemE3, 0., 0., elemE3, 0., -elemE3, -elemE3, 0., elemE3,
+      0., 0., -elemE3, 0., elemE3;
   const auto elemE4 = 1. / pow<2>(2. * p2 - 1.) * p2E;
   Eigen::Matrix4d P2Em;
   P2Em << elemE4, -elemE4, 0., 0., -elemE4, elemE4, 0., 0., 0., 0., elemE4,
@@ -151,7 +156,12 @@ void fourInputsCorrectedAndErrors(Eigen::Vector4d &corrected, Eigen::Vector4d &e
  * @param f2E error of f2
  * @return the error estimate
  */
-double twoInputsErrorEstimate01(const double i00, const double e00, const double i11, const double e11, const double p1, const double p1E, const double p2, const double p2E, const double f1, const double f1E, const double f2, const double f2E) {
+double twoInputsErrorEstimate01(const double i00, const double e00,
+                                const double i11, const double e11,
+                                const double p1, const double p1E,
+                                const double p2, const double p2E,
+                                const double f1, const double f1E,
+                                const double f2, const double f2E) {
   using namespace boost::math;
   // Derivatives of the equation which solves the I01 intensities
   // with respect to i00, i11, f1, etc.
@@ -172,12 +182,11 @@ double twoInputsErrorEstimate01(const double i00, const double e00, const double
          ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) *
          (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
           f1 * i00 * (-1. + 2. * p1) *
-              (-f2 * pow<2>(1. - 2. * p2) +
-               pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
+              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
+               (-1. + p2) * p2))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
                f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 +
-                    f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) -
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) -
       (i00 * (-1. + 2. * p1) *
        (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
         (-1. + p2) * p2)) /
@@ -189,12 +198,11 @@ double twoInputsErrorEstimate01(const double i00, const double e00, const double
           p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) *
          (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
           f1 * i00 * (-1. + 2. * p1) *
-              (-f2 * pow<2>(1. - 2. * p2) +
-               pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
+              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
+               (-1. + p2) * p2))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
                f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 +
-                    f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
       (-f1 * i00 * (-1. + 2. * p1) *
            (-pow<2>(1. - 2. * p2) + 2 * f2 * pow<2>(1. - 2. * p2)) +
        i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
@@ -204,8 +212,8 @@ double twoInputsErrorEstimate01(const double i00, const double e00, const double
   const auto pmdp1 =
       -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
           f1 * i00 * (-1. + 2. * p1) *
-              (-f2 * pow<2>(1. - 2. * p2) +
-               pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) *
+              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
+               (-1. + p2) * p2)) *
          (f2 * p1 * (1. - 2. * p2) +
           f1 * f2 * (-1. + 2. * p1) * (-1. + 2. * p2) +
           f2 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
@@ -213,8 +221,7 @@ double twoInputsErrorEstimate01(const double i00, const double e00, const double
               ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
                f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 +
-                    f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
       (f2 * i11 * p1 * (1. - 2. * p2) +
        f2 * i11 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
        2. * f1 * i00 *
@@ -226,19 +233,19 @@ double twoInputsErrorEstimate01(const double i00, const double e00, const double
   const auto pmdp2 =
       -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
           f1 * i00 * (-1. + 2. * p1) *
-              (-f2 * pow<2>(1. - 2. * p2) +
-               pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) *
+              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
+               (-1. + p2) * p2)) *
          (f2 * (2. - 2. * p1) * p1 +
-          f1 * (-1. + 2. * p1) * (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
-                                  f2 * (-1. + 2. * p2)))) /
+          f1 * (-1. + 2. * p1) *
+              (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
+               f2 * (-1. + 2. * p2)))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
                f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 +
-                    f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
       (f2 * i11 * (2. - 2. * p1) * p1 -
        f1 * i00 * (-1. + 2. * p1) *
-           (-1. + 4. * f2 * (1. - 2. * p2) -
-            4. * pow<2>(f2) * (1. - 2. * p2) + 2. * p2)) /
+           (-1. + 4. * f2 * (1. - 2. * p2) - 4. * pow<2>(f2) * (1. - 2. * p2) +
+            2. * p2)) /
           (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
            f1 * (-1. + 2. * p1) *
                ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
@@ -269,7 +276,12 @@ double twoInputsErrorEstimate01(const double i00, const double e00, const double
  * @param f2E error of f2
  * @return the error estimate
  */
-double twoInputsErrorEstimate10(const double i00, const double e00, const double i11, const double e11, const double p1, const double p1E, const double p2, const double p2E, const double f1, const double f1E, const double f2, const double f2E) {
+double twoInputsErrorEstimate10(const double i00, const double e00,
+                                const double i11, const double e11,
+                                const double p1, const double p1E,
+                                const double p2, const double p2E,
+                                const double f1, const double f1E,
+                                const double f2, const double f2E) {
   using namespace boost::math;
   // Derivatives of the equation which solves the I10 intensities
   // with respect to i00, i11, f1, etc.
@@ -277,13 +289,11 @@ double twoInputsErrorEstimate10(const double i00, const double e00, const double
   const auto b = -1. + 2. * p1;
   const auto c = -1. + 2. * p2;
   const auto d = -1. + p2;
-  const auto mpdi00 =
-      (-pow<2>(f1) * f2 * pow<2>(b) * c + f1 * f2 * pow<2>(b) * c +
-       f2 * p1 * a) /
-      (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
-  const auto mpdi11 =
-      -((f1 * b * d * p2) /
-        (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c)));
+  const auto mpdi00 = (-pow<2>(f1) * f2 * pow<2>(b) * c +
+                       f1 * f2 * pow<2>(b) * c + f2 * p1 * a) /
+                      (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+  const auto mpdi11 = -((f1 * b * d * p2) /
+                        (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c)));
   const auto mpdf1 =
       -(((-1. + 2. * p1) *
          ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) *
@@ -294,8 +304,7 @@ double twoInputsErrorEstimate10(const double i00, const double e00, const double
                f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2)))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
                f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 +
-                    f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
       (-2. * f1 * f2 * i00 * pow<2>(1. - 2. * p1) * (-1. + 2. * p2) +
        (-1. + 2. * p1) * (-i11 * (-1. + p2) * p2 +
                           f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2))) /
@@ -340,7 +349,7 @@ double twoInputsErrorEstimate10(const double i00, const double e00, const double
   const auto e10_P2 = pow<2>(mpdp2 * p2E);
   return std::sqrt(e10_I00 + e10_I11 + e10_F1 + e10_F2 + e10_P1 + e10_P2);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -530,19 +539,19 @@ void PolarizationEfficiencyCor::checkConsistentX(
   // Compare everything to F1 efficiency.
   const auto &F1x = efficiencies.F1->x();
   // A local helper function to check a HistogramX against F1.
-  auto checkX =
-      [&F1x](const HistogramData::HistogramX &x, const std::string &tag) {
-        if (x.size() != F1x.size()) {
-          throw std::runtime_error(
-              "Mismatch of histogram lengths between F1 and " + tag + '.');
-        }
-        for (size_t i = 0; i != x.size(); ++i) {
-          if (x[i] != F1x[i]) {
-            throw std::runtime_error("Mismatch of X data between F1 and " +
-                                     tag + '.');
-          }
-        }
-      };
+  auto checkX = [&F1x](const HistogramData::HistogramX &x,
+                       const std::string &tag) {
+    if (x.size() != F1x.size()) {
+      throw std::runtime_error("Mismatch of histogram lengths between F1 and " +
+                               tag + '.');
+    }
+    for (size_t i = 0; i != x.size(); ++i) {
+      if (x[i] != F1x[i]) {
+        throw std::runtime_error("Mismatch of X data between F1 and " + tag +
+                                 '.');
+      }
+    }
+  };
   const auto &F2x = efficiencies.F2->x();
   checkX(F2x, "F2");
   const auto &P1x = efficiencies.P1->x();
@@ -834,7 +843,12 @@ PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs,
     for (size_t binIndex = 0; binIndex < mmY.size(); ++binIndex) {
       Eigen::Vector4d corrected;
       Eigen::Vector4d errors;
-      fourInputsCorrectedAndErrors(corrected, errors, ppY[binIndex], ppE[binIndex], pmY[binIndex], pmE[binIndex], mpY[binIndex], mpE[binIndex], mmY[binIndex], mmE[binIndex], F1[binIndex], F1E[binIndex], F2[binIndex], F2E[binIndex], P1[binIndex], P1E[binIndex], P2[binIndex], P2E[binIndex]);
+      fourInputsCorrectedAndErrors(corrected, errors, ppY[binIndex],
+                                   ppE[binIndex], pmY[binIndex], pmE[binIndex],
+                                   mpY[binIndex], mpE[binIndex], mmY[binIndex],
+                                   mmE[binIndex], F1[binIndex], F1E[binIndex],
+                                   F2[binIndex], F2E[binIndex], P1[binIndex],
+                                   P1E[binIndex], P2[binIndex], P2E[binIndex]);
       ppYOut[binIndex] = corrected[0];
       pmYOut[binIndex] = corrected[1];
       mpYOut[binIndex] = corrected[2];
@@ -889,8 +903,8 @@ PolarizationEfficiencyCor::mapInputsToDirections(
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationEfficiencyCor::threeInputsSolve01(WorkspaceMap &inputs,
-                                        const EfficiencyMap &efficiencies) {
+void PolarizationEfficiencyCor::threeInputsSolve01(
+    WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace Mantid::DataObjects;
   inputs.pmWS = create<Workspace2D>(*inputs.mpWS);
   const auto &F1 = efficiencies.F1->y();
@@ -926,8 +940,8 @@ void PolarizationEfficiencyCor::threeInputsSolve01(WorkspaceMap &inputs,
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationEfficiencyCor::threeInputsSolve10(WorkspaceMap &inputs,
-                                        const EfficiencyMap &efficiencies) {
+void PolarizationEfficiencyCor::threeInputsSolve10(
+    WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   inputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
   const auto &F1 = efficiencies.F1->y();
   const auto &F2 = efficiencies.F2->y();
@@ -962,7 +976,9 @@ void PolarizationEfficiencyCor::threeInputsSolve10(WorkspaceMap &inputs,
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationEfficiencyCor::twoInputsSolve01And10(WorkspaceMap &fullInputs, const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+void PolarizationEfficiencyCor::twoInputsSolve01And10(
+    WorkspaceMap &fullInputs, const WorkspaceMap &inputs,
+    const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   const auto &F1 = efficiencies.F1->y();
   const auto &F1E = efficiencies.F1->e();
@@ -999,13 +1015,17 @@ void PolarizationEfficiencyCor::twoInputsSolve01And10(WorkspaceMap &fullInputs, 
           (f2 * i11 * p1 * a -
            f1 * i00 * b * (-f2 * pow<2>(c) + pow<2>(f2 * c) + d * p2)) /
           divisor;
-      E01[binIndex] = twoInputsErrorEstimate01(i00, E00[binIndex], i11, E11[binIndex], p1, P1E[binIndex], p2, P2E[binIndex], f1, F1E[binIndex], f2, F2E[binIndex]);
+      E01[binIndex] = twoInputsErrorEstimate01(
+          i00, E00[binIndex], i11, E11[binIndex], p1, P1E[binIndex], p2,
+          P2E[binIndex], f1, F1E[binIndex], f2, F2E[binIndex]);
       // Case: 10
       I10[binIndex] =
           (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
            f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) /
           divisor;
-      E10[binIndex] = twoInputsErrorEstimate10(i00, E00[binIndex], i11, E11[binIndex], p1, P1E[binIndex], p2, P2E[binIndex], f1, F1E[binIndex], f2, F2E[binIndex]);
+      E10[binIndex] = twoInputsErrorEstimate10(
+          i00, E00[binIndex], i11, E11[binIndex], p1, P1E[binIndex], p2,
+          P2E[binIndex], f1, F1E[binIndex], f2, F2E[binIndex]);
     }
   }
 }
