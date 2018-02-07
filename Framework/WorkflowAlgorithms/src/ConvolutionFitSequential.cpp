@@ -175,12 +175,13 @@ void ConvolutionFitSequential::exec() {
     convolvedMembers.emplace_back("DeltaFunction");
   }
 
-  if (LorentzNum == "0") {
+  if (LorentzNum == "0")
     convolvedMembers.emplace_back(funcName);
-  } else {
+  else if (LorentzNum == "1")
+    convolvedMembers.emplace_back("Lorentzian");
+  else {
     convolvedMembers.emplace_back("Lorentzian1");
-    if (LorentzNum == "2")
-      convolvedMembers.emplace_back("Lorentzian2");
+    convolvedMembers.emplace_back("Lorentzian2");
   }
 
   // Log information to result log
