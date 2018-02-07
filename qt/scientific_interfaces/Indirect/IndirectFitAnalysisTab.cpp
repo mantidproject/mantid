@@ -513,6 +513,18 @@ void IndirectFitAnalysisTab::addOptionalDoubleSetting(
 }
 
 /**
+ * Sets whether a setting with a specified key affects the fitting function.
+ *
+ * @param settingKey      The key of the setting.
+ * @param changesFunction Boolean specifying whether the setting affects the
+ *                        fitting function.
+ */
+void IndirectFitAnalysisTab::setCustomSettingChangesFunction(
+    const QString &settingKey, bool changesFunction) {
+  
+}
+
+/**
  * Sets the selected spectrum for this indirect fit analysis tab.
  */
 void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
@@ -1069,7 +1081,7 @@ void IndirectFitAnalysisTab::updateGuessPlots() {
  */
 void IndirectFitAnalysisTab::updateGuessPlots(IFunction_sptr guessFunction) {
   if (inputWorkspace() && guessFunction) {
-    auto guessWS = createGuessWorkspace(fitFunction(), selectedSpectrum());
+    auto guessWS = createGuessWorkspace(guessFunction, selectedSpectrum());
 
     if (guessWS->x(0).size() >= 2) {
       updatePlotGuess(guessWS);

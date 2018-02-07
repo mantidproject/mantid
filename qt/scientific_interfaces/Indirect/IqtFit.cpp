@@ -192,7 +192,13 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
 }
 
 IFunction_sptr IqtFit::fitFunction() const {
-  auto function = IndirectFitAnalysisTab::fitFunction()->clone();
+  auto function = IndirectFitAnalysisTab::fitFunction();
+
+  if (!function)
+    return CompositeFunction_sptr(new CompositeFunction);
+  else
+    function = function->clone();
+
   const bool constrainIntensities = boolSettingValue("ConstrainIntensities");
 
   if (constrainIntensities) {
