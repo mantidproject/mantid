@@ -1884,6 +1884,8 @@ public:
     AnalysisDataService::Instance().addOrReplace("00", m_ws00);
     m_ws01 = m_ws00->clone();
     AnalysisDataService::Instance().addOrReplace("01", m_ws01);
+    m_ws10 = m_ws00->clone();
+    AnalysisDataService::Instance().addOrReplace("10", m_ws10);
     m_ws11 = m_ws00->clone();
     AnalysisDataService::Instance().addOrReplace("11", m_ws11);
     auto loadEff = AlgorithmManager::Instance().createUnmanaged(
@@ -1902,9 +1904,39 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_Performance() {
+  void test_DirectBeamPerformance() {
     using namespace Mantid::API;
-    for (int i = 0; i < 10000; ++i) {
+    for (int i = 0; i < 3000; ++i) {
+      PolarizationEfficiencyCor correction;
+      correction.setChild(true);
+      correction.setRethrows(true);
+      correction.initialize();
+      correction.setProperty("InputWorkspaces", "00");
+      correction.setProperty("OutputWorkspace", "output");
+      correction.setProperty("Flippers", "0");
+      correction.setProperty("Efficiencies", m_effWS);
+      TS_ASSERT_THROWS_NOTHING(correction.execute())
+    }
+  }
+
+  void test_ThreeInputsPerformanceMissing01() {
+    using namespace Mantid::API;
+    for (int i = 0; i < 3000; ++i) {
+      PolarizationEfficiencyCor correction;
+      correction.setChild(true);
+      correction.setRethrows(true);
+      correction.initialize();
+      correction.setProperty("InputWorkspaces", "00, 10, 11");
+      correction.setProperty("OutputWorkspace", "output");
+      correction.setProperty("Flippers", "00, 10, 11");
+      correction.setProperty("Efficiencies", m_effWS);
+      TS_ASSERT_THROWS_NOTHING(correction.execute())
+    }
+  }
+
+  void test_ThreeInputsPerformanceMissing10() {
+    using namespace Mantid::API;
+    for (int i = 0; i < 3000; ++i) {
       PolarizationEfficiencyCor correction;
       correction.setChild(true);
       correction.setRethrows(true);
@@ -1913,7 +1945,37 @@ public:
       correction.setProperty("OutputWorkspace", "output");
       correction.setProperty("Flippers", "00, 01, 11");
       correction.setProperty("Efficiencies", m_effWS);
-      correction.execute();
+      TS_ASSERT_THROWS_NOTHING(correction.execute())
+    }
+  }
+
+  void test_TwoInputsNoAnalyzerPerformance() {
+    using namespace Mantid::API;
+    for (int i = 0; i < 3000; ++i) {
+      PolarizationEfficiencyCor correction;
+      correction.setChild(true);
+      correction.setRethrows(true);
+      correction.initialize();
+      correction.setProperty("InputWorkspaces", "00, 11");
+      correction.setProperty("OutputWorkspace", "output");
+      correction.setProperty("Flippers", "0, 1");
+      correction.setProperty("Efficiencies", m_effWS);
+      TS_ASSERT_THROWS_NOTHING(correction.execute())
+    }
+  }
+
+  void test_TwoInputsPerformance() {
+    using namespace Mantid::API;
+    for (int i = 0; i < 3000; ++i) {
+      PolarizationEfficiencyCor correction;
+      correction.setChild(true);
+      correction.setRethrows(true);
+      correction.initialize();
+      correction.setProperty("InputWorkspaces", "00, 11");
+      correction.setProperty("OutputWorkspace", "output");
+      correction.setProperty("Flippers", "00, 11");
+      correction.setProperty("Efficiencies", m_effWS);
+      TS_ASSERT_THROWS_NOTHING(correction.execute())
     }
   }
 
@@ -1921,6 +1983,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_effWS;
   Mantid::API::MatrixWorkspace_sptr m_ws00;
   Mantid::API::MatrixWorkspace_sptr m_ws01;
+  Mantid::API::MatrixWorkspace_sptr m_ws10;
   Mantid::API::MatrixWorkspace_sptr m_ws11;
 };
 
