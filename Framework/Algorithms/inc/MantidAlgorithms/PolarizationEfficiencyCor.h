@@ -82,9 +82,13 @@ private:
                                const EfficiencyMap &efficiencies);
   API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs);
   WorkspaceMap mapInputsToDirections(const std::vector<std::string> &flippers);
-  void threeInputsSolve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
-  void threeInputsSolve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
-  void twoInputsSolve01And10(WorkspaceMap &fullInputs, const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  void threeInputsSolve01(WorkspaceMap &inputs,
+                          const EfficiencyMap &efficiencies);
+  void threeInputsSolve10(WorkspaceMap &inputs,
+                          const EfficiencyMap &efficiencies);
+  void twoInputsSolve01And10(WorkspaceMap &fullInputs,
+                             const WorkspaceMap &inputs,
+                             const EfficiencyMap &efficiencies);
 };
 
 } // namespace Algorithms
