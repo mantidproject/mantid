@@ -2,9 +2,12 @@ set ( SRC_FILES
 	EnggDiffFittingModel.cpp
 	EnggDiffFittingPresenter.cpp
 	EnggDiffFittingViewQtWidget.cpp
+	EnggDiffGSASFittingModel.cpp
 	EnggDiffGSASFittingPresenter.cpp
+	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
+	RunLabel.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -15,8 +18,10 @@ set ( INC_FILES
 	EnggDiffFittingPresWorker.h
 	EnggDiffFittingPresenter.h
 	EnggDiffFittingViewQtWidget.h
+	EnggDiffGSASFittingModel.h
 	EnggDiffGSASFittingPresenter.h
 	EnggDiffGSASRefinementMethod.h
+	EnggDiffMultiRunFittingWidgetPresenter.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
@@ -25,8 +30,12 @@ set ( INC_FILES
 	IEnggDiffGSASFittingModel.h
 	IEnggDiffGSASFittingPresenter.h
 	IEnggDiffGSASFittingView.h
+	IEnggDiffMultiRunFittingWidgetModel.h
+	IEnggDiffMultiRunFittingWidgetPresenter.h
+	IEnggDiffMultiRunFittingWidgetView.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
+	RunLabel.h
 	RunMap.h
 )
 

@@ -76,7 +76,7 @@
         <item row="2" column="0">
          <widget class="QLabel" name="startOverlapLabel">
           <property name="text">
-           <string>StartOverlap</string>
+           <string>TransRunStartOverlap</string>
           </property>
          </widget>
         </item>
@@ -92,7 +92,7 @@
            </size>
           </property>
           <property name="text">
-           <string>EndOverlap</string>
+           <string>TransRunEndOverlap</string>
           </property>
          </widget>
         </item>
