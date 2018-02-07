@@ -8,6 +8,11 @@ From the main MantidPlot menu, select
 
 View->Algorithms
 
+For example, ILL reduction workflows can be easily found
+
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Algorithms8.png
+   :align: center
+
 Algorithms can take care of error propagation. For more details it is recommended to check the corresponding documentation, click on the ? sign in the left lower corner of the specific algorithm graphical user interface. Arithmetic operations propagate errors (Plus, Minus, ...). As well in Python.
 
 Input validation
@@ -15,6 +20,9 @@ Input validation
 
 Some algorithms have requirements that will be checked before execution, e.g. units, common binning, etc.
 This way, the user will be quickly and early guided to correct inputs rather than motivated reading error messages.
+
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Algorithms0.png
+   :align: center
 
 Results Log
 -----------
@@ -45,6 +53,8 @@ Debug:
 
 .. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Algorithms2.png
    :align: center
+
+The default log level is notice and can be changed by: right click on Result log window and select 'Log level'
 
 History
 -------

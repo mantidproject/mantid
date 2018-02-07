@@ -16,4 +16,5 @@ This section contains details about workspaces, algorithms and interfaces in Man
    Workspaces
    Algorithms
    Interfaces
+   Project
 

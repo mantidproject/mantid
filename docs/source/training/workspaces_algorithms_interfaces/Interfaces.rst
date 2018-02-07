@@ -4,24 +4,13 @@
 Interfaces
 ==========
 
-Main MantidPlot menu -> Interfaces -> Indirect -> Indirect Data Analysis
+Good for exploration (e.g. analysis)
 
-From the concept page:
+Existing interface for ILL Indirect Data Redution (ILL must be your default facility!)
 
-The Indirect Data Analysis interface is a collection of tools within MantidPlot
-for analysing reduced data from indirect geometry spectrometers.
-
-The majority of the functions used within this interface can be used with both
-reduced files (*_red.nxs*) and workspaces (*_red*) created using the Indirect Data
-Reduction interface or using :math:`S(Q, \omega)` files (*_sqw.nxs*) and
-workspaces (*_sqw*) created using either the Indirect Data Reduction interface or
-taken from a bespoke algorithm or auto reduction.
-
-These interfaces do not support GroupWorkspaces as input.
+Main MantidPlot menu -> Interfaces -> Indirect -> Indirect Data Reduction
 
 .. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Interface.png
    :align: center
 
-Additional information can be available, for example for this interface:
-A technical report from Sanghamitra Mukhopadhyay (status 2014, RAL-TR-2014-005)
 

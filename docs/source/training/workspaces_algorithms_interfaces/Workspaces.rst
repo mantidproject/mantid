@@ -12,10 +12,18 @@ A :literal:`MatrixWorkspace` contains the following values holding measured or d
 
 - X: bin boundaries or points
 - Y: counts or frequencies
-- E: corresponding error values (variances, standard deviations)
+- E: corresponding error values
+- Dx: X error data 
 
 .. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Workspaces1.png
    :align: center
+
+Please note that 1D plots will draw the Y data normalised by bin width (default) and at bin centre position.
+A right click inside the plot and select 'Normalization' in order to change this behaviour, e.g. switching the normalization off.
+
+Create a new MatrixWorkspace:
+
+Main menu -> File -> New -> Matrix
 
 A sub-group of the MatrixWorkspace is a Workspace2D consisting of two-dimensional data.
 
@@ -38,18 +46,22 @@ and informs about each detector position (R, theta, phi) and if it is a monitor 
 
 Please note the different meaning of
 
-- Workspace indices: start counting from 0.
+- Workspace indices: start counting from 0, used within Python.
 - Spectrum numbers: unique identifier of a spectrum. Multiple detectors can contribute to a spectrum.
 - Detector IDs: unique identifier of a detector. Set by the instrument definition file (IDF), e.g. monitors have detector IDs 100000 and 100001.
-
-Several workspaces can be combined to a :literal:`GroupWorkspace` which may be the preferred output for workflow algorithms.
-
-.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/GroupWorkspace.png
-   :align: center
 
 :literal:`TableWorkspaces` descibe their content by column names and contain, for instance, fit results of peak positions
 
 .. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/Workspace4.png
+   :align: center
+
+Create a new table workspace:
+
+Main menu -> File -> New -> Table
+
+Several workspaces can be combined to a :literal:`GroupWorkspace` which may be the preferred output for workflow algorithms.
+
+.. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/GroupWorkspace.png
    :align: center
 
 Saving Workspaces
@@ -58,6 +70,7 @@ Saving Workspaces
 Right click on workspace and `SaveNexus`
 
 Via executing algorithms:
+
 - SaveNexusProcessed (SaveNexus)
 - SaveAscii
 - SaveILLCosmosAscii
