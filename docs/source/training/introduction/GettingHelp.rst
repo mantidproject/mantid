@@ -1,4 +1,4 @@
-.. _GettingHelp:
+.. _TrainingGettingHelp:
 
 ============================================
  Getting Help and the Mantid User Community

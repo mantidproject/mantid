@@ -1,4 +1,4 @@
-.. _DownloadingAndInstalling:
+.. _TrainingDownloadingAndInstalling:
 
 ===========================
  Downloading and Installing

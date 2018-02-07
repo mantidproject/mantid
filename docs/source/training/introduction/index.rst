@@ -17,5 +17,6 @@ Topics
    MantidOverview
    DownloadingAndInstalling
    GettingHelp
+   NeXusTools
 
 |
