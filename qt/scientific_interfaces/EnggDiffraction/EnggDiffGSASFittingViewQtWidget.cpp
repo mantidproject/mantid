@@ -91,8 +91,7 @@ EnggDiffGSASFittingViewQtWidget::getRefinementMethod() const {
   throw std::runtime_error("getRefinementMethod not yet implemented");
 }
 
-std::pair<int, size_t>
-EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const {
+RunLabel EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const {
   const auto currentItemLabel =
       m_ui.listWidget_runLabels->currentItem()->text();
   const auto pieces = currentItemLabel.split("_");
@@ -101,7 +100,7 @@ EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const {
         "Unexpected run label: \"" + currentItemLabel.toStdString() +
         "\". Please contact the development team with this message");
   }
-  return std::make_pair(pieces[0].toInt(), pieces[1].toUInt());
+  return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
 }
 
 void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
@@ -192,11 +191,11 @@ bool EnggDiffGSASFittingViewQtWidget::showRefinementResultsSelected() const {
 }
 
 void EnggDiffGSASFittingViewQtWidget::updateRunList(
-    const std::vector<std::pair<int, size_t>> &runLabels) {
+    const std::vector<RunLabel> &runLabels) {
   m_ui.listWidget_runLabels->clear();
   for (const auto &runLabel : runLabels) {
-    const auto labelStr = QString::number(runLabel.first) + tr("_") +
-                          QString::number(runLabel.second);
+    const auto labelStr = QString::number(runLabel.runNumber) + tr("_") +
+                          QString::number(runLabel.bank);
     m_ui.listWidget_runLabels->addItem(labelStr);
   }
 }

@@ -46,7 +46,7 @@ public:
 
   GSASRefinementMethod getRefinementMethod() const override;
 
-  std::pair<int, size_t> getSelectedRunLabel() const override;
+  RunLabel getSelectedRunLabel() const override;
 
   void plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
 
@@ -59,7 +59,7 @@ public:
   bool showRefinementResultsSelected() const override;
 
   void
-  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) override;
+  updateRunList(const std::vector<RunLabel> &runLabels) override;
 
   void userWarning(const std::string &warningDescription) const override;
 

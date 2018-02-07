@@ -2,6 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEW_H_
 
 #include "EnggDiffGSASRefinementMethod.h"
+#include "RunLabel.h"
+
 #include "MantidAPI/ITableWorkspace.h"
 
 #include <string>
