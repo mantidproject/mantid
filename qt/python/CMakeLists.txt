@@ -63,6 +63,7 @@ endif ()
 
   # ctest targets
   set ( PYTHON_TEST_FILES
+    mantidqt/test/test_algorithm_observer.py
     mantidqt/test/test_import.py
 
     mantidqt/utils/test/test_async.py
@@ -77,6 +78,8 @@ endif ()
     mantidqt/widgets/codeeditor/test/test_execution.py
     mantidqt/widgets/codeeditor/test/test_interpreter.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
+
+    mantidqt/widgets/workspacewidget/test/test_plotselectiondialog.py
 
     mantidqt/widgets/test/test_algorithmselector.py
     mantidqt/widgets/test/test_jupyterconsole.py

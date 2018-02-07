@@ -41,11 +41,11 @@ namespace MantidWidgets {
  * at the group containing the values
  */
 void MessageDisplay::readSettings(const QSettings &storage) {
-  ConfigService::Instance().setFilterChannelLogLevel(
-      m_filterChannelName,
-      storage.value("MessageDisplayPriority", Message::Priority::PRIO_NOTICE)
-          .toInt(),
-      true);
+  const int logLevel = storage.value("MessageDisplayPriority", 0).toInt();
+  if (logLevel > 0) {
+    ConfigService::Instance().setFilterChannelLogLevel(m_filterChannelName,
+                                                       logLevel, true);
+  }
 }
 
 /**
@@ -92,8 +92,10 @@ MessageDisplay::~MessageDisplay() {
 /**
  * Attaches the Mantid logging framework. Starts the ConfigService if
  * required
+ * @param logLevel If > 0 then set the filter channel level to this. A
+ * number =< 0 uses the channel
  */
-void MessageDisplay::attachLoggingChannel() {
+void MessageDisplay::attachLoggingChannel(int logLevel) {
   // Setup logging. ConfigService needs to be started
   auto &configSvc = ConfigService::Instance();
   auto &rootLogger = Poco::Logger::root();
@@ -109,7 +111,9 @@ void MessageDisplay::attachLoggingChannel() {
   configSvc.registerLoggingFilterChannel(m_filterChannelName, m_filterChannel);
   connect(m_logChannel, SIGNAL(messageReceived(const Message &)), this,
           SLOT(append(const Message &)));
-
+  if (logLevel > 0) {
+    configSvc.setFilterChannelLogLevel(m_filterChannelName, logLevel, true);
+  }
   ++ATTACH_COUNT;
 }
 

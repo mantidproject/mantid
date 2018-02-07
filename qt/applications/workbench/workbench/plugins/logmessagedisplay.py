@@ -27,6 +27,9 @@ from qtpy.QtWidgets import QHBoxLayout
 # local imports
 from workbench.plugins.base import PluginWidget
 
+# Default logs at notice
+DEFAULT_LOG_PRIORITY = 5
+
 
 class LogMessageDisplay(PluginWidget):
 
@@ -53,7 +56,7 @@ class LogMessageDisplay(PluginWidget):
         self.display.readSettings(qsettings)
 
     def register_plugin(self, menu=None):
-        self.display.attachLoggingChannel()
+        self.display.attachLoggingChannel(DEFAULT_LOG_PRIORITY)
         self._capture_stdout_and_stderr()
         self.main.add_dockwidget(self)
 

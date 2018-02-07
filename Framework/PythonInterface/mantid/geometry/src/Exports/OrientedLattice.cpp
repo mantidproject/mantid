@@ -45,8 +45,8 @@ Mantid::Kernel::V3D hklFromQ(OrientedLattice &self, const object &vec) {
 
 void export_OrientedLattice() {
   /// return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::MatrixToNumpy<Converters::WrapReadOnly>>
-      return_readonly_numpy;
+  typedef return_value_policy<Policies::MatrixRefToNumpy<
+      Converters::WrapReadOnly>> return_readonly_numpy;
 
   class_<OrientedLattice, bases<UnitCell>>(
       "OrientedLattice",

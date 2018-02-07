@@ -77,11 +77,8 @@ public:
    */
   virtual GSASRefinementMethod getRefinementMethod() const = 0;
 
-  /**
-   Get the run label (run number and bank id) currently selected in the list
-   @return Run label as a pair
-   */
-  virtual std::pair<int, size_t> getSelectedRunLabel() const = 0;
+  /// Get the run label (run number and bank id) currently selected in the list
+  virtual RunLabel getSelectedRunLabel() const = 0;
 
   /**
    Plot a Qwt curve in the canvas
@@ -103,10 +100,9 @@ public:
 
   /**
    Update the run list with labels of all runs loaded into the model
-   @param runLabels Vector of run labels (as pairs)
+   @param runLabels Vector of run labels
    */
-  virtual void
-  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) = 0;
+  virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
 
   /**
    Display a warning to the user

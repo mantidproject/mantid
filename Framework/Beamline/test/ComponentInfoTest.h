@@ -6,6 +6,7 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
 #include <boost/make_shared.hpp>
 #include <numeric>
 #include <string>
@@ -16,7 +17,8 @@ using namespace Mantid::Beamline;
 namespace {
 
 using PosVec = std::vector<Eigen::Vector3d>;
-using RotVec = std::vector<Eigen::Quaterniond>;
+using RotVec = std::vector<Eigen::Quaterniond,
+                           Eigen::aligned_allocator<Eigen::Quaterniond>>;
 using StrVec = std::vector<std::string>;
 
 /*

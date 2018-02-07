@@ -29,8 +29,7 @@ public:
         .Times(1)
         .WillOnce(Return(true));
 
-    const std::vector<std::pair<int, size_t>> runLabels(
-        {std::make_pair(123, 1)});
+    const std::vector<RunLabel> runLabels({RunLabel(123, 1)});
 
     EXPECT_CALL(*m_mockModelPtr, getRunLabels())
         .Times(1)
@@ -67,7 +66,7 @@ public:
 
   void test_selectValidRun() {
     auto presenter = setUpPresenter();
-    const std::pair<int, size_t> selectedRunLabel = std::make_pair(123, 1);
+    const RunLabel selectedRunLabel(123, 1);
     EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(selectedRunLabel));
@@ -75,7 +74,7 @@ public:
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
 
-    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(selectedRunLabel))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
 
@@ -88,12 +87,12 @@ public:
 
   void test_selectInvalidRun() {
     auto presenter = setUpPresenter();
-    const std::pair<int, size_t> selectedRunLabel = std::make_pair(123, 1);
+    const RunLabel selectedRunLabel(123, 1);
     EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(selectedRunLabel));
 
-    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(selectedRunLabel))
         .Times(1)
         .WillOnce(Return(boost::none));
 
@@ -110,36 +109,38 @@ public:
 
   void test_selectValidRunPlotFitResults() {
     auto presenter = setUpPresenter();
-    const std::pair<int, size_t> selectedRunLabel = std::make_pair(123, 1);
+    const RunLabel selectedRunLabel(123, 1);
     EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(selectedRunLabel));
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(selectedRunLabel))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
     EXPECT_CALL(*m_mockViewPtr, showRefinementResultsSelected())
         .Times(1)
         .WillOnce(Return(true));
-    EXPECT_CALL(*m_mockModelPtr, hasFittedPeaksForRun(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, hasFittedPeaksForRun(selectedRunLabel))
         .Times(1)
         .WillOnce(Return(true));
 
-    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(selectedRunLabel))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
 
     const boost::optional<Mantid::API::ITableWorkspace_sptr> emptyTableWS(
         Mantid::API::WorkspaceFactory::Instance().createTable());
 
-    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(123, 1))
+    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(selectedRunLabel))
         .Times(1)
         .WillOnce(Return(emptyTableWS));
 
     const boost::optional<double> rwp = 50.0;
-    EXPECT_CALL(*m_mockModelPtr, getRwp(123, 1)).Times(1).WillOnce(Return(rwp));
+    EXPECT_CALL(*m_mockModelPtr, getRwp(selectedRunLabel))
+        .Times(1)
+        .WillOnce(Return(rwp));
 
     EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
     EXPECT_CALL(*m_mockViewPtr, plotCurve(testing::_)).Times(2);
@@ -152,9 +153,7 @@ public:
   void test_doRietveldRefinement() {
     auto presenter = setUpPresenter();
 
-    const int runNumber = 123;
-    const size_t bank = 1;
-    const auto runLabel = std::make_pair(runNumber, bank);
+    const RunLabel runLabel(123, 1);
     const auto refinementMethod = GSASRefinementMethod::RIETVELD;
     const auto instParams = "Instrument file";
     const std::vector<std::string> phaseFiles({"phase1", "phase2"});
@@ -181,7 +180,7 @@ public:
         .WillOnce(Return(GSASIIProjectFile));
 
     EXPECT_CALL(*m_mockModelPtr,
-                doRietveldRefinement(runNumber, bank, instParams, phaseFiles,
+                doRietveldRefinement(runLabel, instParams, phaseFiles,
                                      pathToGSASII, GSASIIProjectFile))
         .Times(1)
         .WillOnce(Return(false));
@@ -195,9 +194,7 @@ public:
   void test_doPawleyRefinement() {
     auto presenter = setUpPresenter();
 
-    const int runNumber = 123;
-    const size_t bank = 1;
-    const auto runLabel = std::make_pair(runNumber, bank);
+    const RunLabel runLabel(123, 1);
     const auto refinementMethod = GSASRefinementMethod::PAWLEY;
     const auto instParams = "Instrument file";
     const std::vector<std::string> phaseFiles({"phase1", "phase2"});
@@ -232,7 +229,7 @@ public:
         .WillOnce(Return(negativeWeight));
 
     EXPECT_CALL(*m_mockModelPtr,
-                doPawleyRefinement(runNumber, bank, instParams, phaseFiles,
+                doPawleyRefinement(runLabel, instParams, phaseFiles,
                                    pathToGSASII, GSASIIProjectFile, dmin,
                                    negativeWeight))
         .Times(1)
