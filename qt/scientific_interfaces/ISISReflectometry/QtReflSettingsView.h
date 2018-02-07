@@ -4,6 +4,8 @@
 #include "IReflSettingsView.h"
 #include "ui_ReflSettingsWidget.h"
 #include <memory>
+#include "ExperimentOptionDefaults.h"
+#include "InstrumentOptionDefaults.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -95,9 +97,8 @@ public:
   /// Set the status of whether polarisation corrections should be enabled
   void setIsPolCorrEnabled(bool enable) const override;
   /// Set default values for experiment and instrument settings
-  void setExpDefaults(const std::vector<std::string> &) const override;
-  void setInstDefaults(const std::vector<double> &,
-                       const std::vector<std::string> &) const override;
+  void setExpDefaults(ExperimentOptionDefaults defaults) override;
+  void setInstDefaults(InstrumentOptionDefaults defaults) override;
   /// Check if experiment settings are enabled
   bool experimentSettingsEnabled() const override;
   /// Check if instrument settings are enabled
@@ -108,20 +109,39 @@ public:
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
 
+  void showOptionLoadErrors(
+      std::vector<InstrumentParameterTypeMissmatch> const &errors,
+      std::vector<MissingInstrumentParameterValue> const &missingValues)
+      override;
+
 public slots:
   /// Request presenter to obtain default values for settings
   void requestExpDefaults() const;
   void requestInstDefaults() const;
   void summationTypeChanged(int reductionTypeIndex);
   /// Sets enabled status for polarisation corrections and parameters
-  void setReductionTypeEnabled(bool enable) override;
   void setPolarisationOptionsEnabled(bool enable) override;
+  void setReductionTypeEnabled(bool enable) override;
   void setDetectorCorrectionEnabled(bool enable) override;
   void notifySettingsChanged();
+  QString messageFor(
+      std::vector<MissingInstrumentParameterValue> const &missingValues) const;
+  QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
 
 private:
   /// Initialise the interface
   void initLayout();
+  QLineEdit &stitchOptionsLineEdit() const;
+  void setSelected(QComboBox &box, std::string const &str);
+  void setText(QLineEdit &lineEdit, int value);
+  void setText(QLineEdit &lineEdit, double value);
+  void setText(QLineEdit &lineEdit, std::string const &value);
+  void setText(QLineEdit &lineEdit, boost::optional<int> value);
+  void setText(QLineEdit &lineEdit, boost::optional<double> value);
+  void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
+  void setChecked(QCheckBox &checkBox, bool checked);
+  std::string getText(QLineEdit const &lineEdit) const;
+  std::string getText(QComboBox const &box) const;
   void connectChangeListeners();
   void connectExperimentSettingsChangeListeners();
   void connectInstrumentSettingsChangeListeners();

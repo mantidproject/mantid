@@ -594,7 +594,7 @@ public:
     p.setInitialEnergy(initialEnergy);
     p.setFinalEnergy(finalEnergy);
 
-    TS_ASSERT_EQUALS(p.getEnergy(), initialEnergy - finalEnergy);
+    TS_ASSERT_EQUALS(p.getEnergyTransfer(), initialEnergy - finalEnergy);
   }
 
 private:

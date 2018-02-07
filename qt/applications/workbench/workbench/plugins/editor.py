@@ -33,8 +33,12 @@ DEFAULT_CONTENT = """# The following line helps with future compatibility with P
 # print must now be used as a function, e.g print('Hello','World')
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-# Import all mantid algorithms
+# import mantid algorithms, numpy and matplotlib
 from mantid.simpleapi import *
+
+import matplotlib.pyplot as plt
+
+import numpy as np
 """
 
 
@@ -63,6 +67,9 @@ class MultiFileEditor(PluginWidget):
         self.editor_actions = [self.run_action, self.abort_action]
 
     # ----------- Plugin API --------------------
+
+    def app_closing(self):
+        self.editors.close_all()
 
     def get_plugin_title(self):
         return "Editor"
