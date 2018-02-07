@@ -3,33 +3,24 @@
 
 from __future__ import absolute_import, division, print_function
 
-from collections import OrderedDict
-from itertools import cycle
-from configparser import ConfigParser, RawConfigParser
+import csv
 import os.path
+from collections import OrderedDict
+from configparser import RawConfigParser
+from itertools import cycle
 
 import numpy as np
 from scipy import interpolate, optimize
 
-# from mantid.api import *
-# from mantid.kernel import *
-# from mantid.kernel import Direction
-# from mantid.simpleapi import *
-
-from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
-    FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
-    ITableWorkspace, MatrixWorkspace, WorkspaceGroupProperty
-
-from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
-    FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
-    PropertyManagerDataService, StringListValidator, Property
-
-from mantid import config, logger
-
-'''
-
-
-'''
+from mantid import logger
+from mantid.api import (AlgorithmFactory, FileAction, FileProperty,
+                        PropertyMode, PythonAlgorithm, WorkspaceGroupProperty,
+                        WorkspaceProperty, Progress, mtd)
+from mantid.kernel import (Direction, FloatArrayProperty, Property,
+                           PropertyManagerDataService)
+from mantid.simpleapi import (CreateWorkspace, GroupWorkspaces,
+                              CreateEmptyTableWorkspace)
+from reduction_workflow.command_interface import ReductionSingleton
 
 
 class SANSWLNormCorrection(PythonAlgorithm):
@@ -44,7 +35,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
     def PyInit(self):
         # In
-        
+
         self.declareProperty(
             FileProperty(
                 name="ConfigurationFile",
@@ -54,7 +45,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
             ),
             doc="Name of the configuration file"
         )
-        
+
         self.declareProperty(
             WorkspaceGroupProperty(
                 "InputWorkspaces",
@@ -101,14 +92,14 @@ class SANSWLNormCorrection(PythonAlgorithm):
         self.declareProperty(
             FloatArrayProperty("KList", [], direction=Direction.Input),
             "List of K values (or single value). Must be the same length has data -1" +
-            r"Default b value for I_{scaled}(Q) = K*I(Q)+b.")
-
-
+            r"Default b value for I_{scaled}(Q) = K*I(Q)+b."
+        )
 
         self.declareProperty(
             FloatArrayProperty("BList", [], direction=Direction.Input),
             " List of B values (or single value). Must be the same length has data -1" +
-            r"Default b value for I_{scaled}(Q) = K*I(Q)+b.")
+            r"Default b value for I_{scaled}(Q) = K*I(Q)+b."
+        )
 
         self.declareProperty(
             name="OutputWorkspacePrefix",
@@ -118,12 +109,11 @@ class SANSWLNormCorrection(PythonAlgorithm):
             "Optional Prefix for the output I(q, wavelength) scaled workspaces"
         )
 
-
     def _setup(self):
         '''
         Sets the properties as method properties
         '''
-        
+
         self.config_file  = self.getProperty('ConfigurationFile').value
         # Let's replace the input properties with those from the conf file
         self._parse_config_file()
@@ -150,10 +140,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
         self.b_list = None if len(
             self.getProperty('BList').value) == 0 else cycle(
                 self.getProperty('BList').value)
-        
+
         self.output_prefix = self.getProperty('OutputWorkspacePrefix').value
-            
-            
 
     def _parse_config_file(self):
         '''
@@ -161,7 +149,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
         the values in the file
         Note the Key in the files must be a valid property
         '''
-        
+
         self.parser = None
         if os.path.exists(self.config_file):
             logger.information("Using configuration file: {}.".format(self.config_file))
@@ -171,7 +159,6 @@ class SANSWLNormCorrection(PythonAlgorithm):
             for k, v in self.parser.items('DEFAULT'):
                 logger.information("Using property {} = {} from the conf file.".format(k, v))
                 self.setProperty(k, v)
-                    
 
     def validateInputs(self):
         '''
@@ -213,7 +200,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
             dx = ws.readDx(0)
             y = ws.readY(0)
             e = ws.readE(0)
-            
+
             wl_min = ws.getRun().getProperty("wavelength_min").value
             wl_max = ws.getRun().getProperty("wavelength_max").value
 
@@ -311,7 +298,6 @@ class SANSWLNormCorrection(PythonAlgorithm):
         """
         k and p are mutually exclusive (they cannot be both None)
         """
-        #         logger.debug('_residuals with p = %s (K=%s, B=%s, X=[%s,%s])' % (p, k, b, x.min(), x.max()))
 
         if k is not None:
             b = p[0]
@@ -321,13 +307,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
             k, b = p
 
         residual = f_target(x) - (k * f_to_optimise(x) - b)
-
         # with error
         # residual = 1.0 / sigma * ( f_target(x) - (k * f_to_optimise(x) - b) )
-
-        logger.debug('_residuals with K=%s, B=%s, residual=%s' %
-                     (k, b, np.average(residual)))
-
         return residual
 
     @staticmethod
@@ -338,7 +319,6 @@ class SANSWLNormCorrection(PythonAlgorithm):
             k = p[0]
         else:
             k, b = p
-        logger.debug('_peval with p=%s K=%s B=%s' % (p, k, b))
         return k * f(x) - b
 
     @property
@@ -381,8 +361,6 @@ class SANSWLNormCorrection(PythonAlgorithm):
                     ([0.1, 0.1]
                      if k is None and b is None else [0.1]),  # guess
                     args=(
-                        # _residuals(p, x, sigma, f_target, f_to_optimise,
-                        # k=None, b=None):
                         ws_values['x_qrange'],
                         ws_values['e_qrange'],
                         # reference interpolation function
@@ -444,7 +422,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 UnitX="Q")
             mtd[ws_name].setDx(0,v['dx' + suffix])  # add x error
             out_ws_list.append(ws_name)
-        
+
         GroupWorkspaces(
             InputWorkspaces=out_ws_list,
             OutputWorkspace=self.output_prefix + suffix + '_fit')
@@ -470,16 +448,14 @@ class SANSWLNormCorrection(PythonAlgorithm):
             dx = np.append(dx, v['dx_trimmed'])
         x = np.unique(x)
         dx = np.unique(dx)
-        
 
-        
         y = np.array([])
         for xi in x:
             yi = np.array([])
             for _, v in self.data.items():
                 yi = np.append(yi, v['y_trimmed_fit'][v['x_trimmed'] == xi])
             y = np.append(y, np.average(yi))
-            
+
         out_ws_name = self.output_prefix + "_trimmed_fit_averaged"
 
         CreateWorkspace(
@@ -487,17 +463,16 @@ class SANSWLNormCorrection(PythonAlgorithm):
             DataX=list(x),
             DataY=list(y),
             UnitX="Q")
-        
+
         mtd[out_ws_name].setDx(0,dx)  # add x error
 
     def _create_table_ws(self):
         '''
+        Creates a summary Table WS
         '''
-        # Workspace Table
-        
-        
-        ws_table_name = self.output_prefix + "_table"        
-        
+
+        ws_table_name = self.output_prefix + "_table"
+
         ws_table = CreateEmptyTableWorkspace(OutputWorkspace=ws_table_name)
         columns = ["IQCurve", "K", "KError", "B", "BError", "GoodnessOfFit",
                    "WavelengthMin", "WavelengthMax", "WavelengthAverage"]
@@ -550,20 +525,19 @@ class SANSWLNormCorrection(PythonAlgorithm):
                         "KError": errors[0],
                         "B": b,
                         "BError": 0,
-                        
+
                     }
                 row.update({"GoodnessOfFit": v['r_squared'],})
             row.update({
                 "WavelengthMin": v['wl_min'],
                 "WavelengthMax": v['wl_max'],
-                "WavelengthAverage": (v['wl_max'] + v['wl_min']) / 2.0, 
+                "WavelengthAverage": (v['wl_max'] + v['wl_min']) / 2.0,
             })
             logger.debug("%s" % row)
             ws_table.addRow(row)
         self._save_config_file(ws_table)
         self._save_ws_table_as_csv(ws_table)
 
-            
     def _save_config_file(self, ws_table):
         '''
         Writes a new configuration file with the new K and B values
@@ -571,44 +545,40 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
         self.parser['DEFAULT']['KList'] = ",".join(str(e) for e in ws_table.column("K"))
         self.parser['DEFAULT']['BList'] = ",".join(str(e) for e in ws_table.column("B"))
-                        
-        
+
         pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
         if pm.has_key("OutputDirectory"):
             output_directory = pm["OutputDirectory"].value
         else:
             output_directory = ''
-        
+
         conf_file_new_name = self.output_prefix + "_config.ini"
         conf_file_new_path = os.path.join(output_directory, conf_file_new_name)
-        
+
         logger.notice("New conf file saved as: {}".format(conf_file_new_path))
-        
+
         with open(conf_file_new_path, 'w') as f:
             self.parser.write(f)
-    
+
     def _save_ws_table_as_csv(self, ws_table):
-        import csv
-        
+
         pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
         if pm.has_key("OutputDirectory"):
             output_directory = pm["OutputDirectory"].value
         else:
             output_directory = ''
-        
+
         ws_table_file_name = self.output_prefix + "_table.csv"
         ws_table_file_path = os.path.join(output_directory, ws_table_file_name)
-        
+
         logger.notice("WS Table saved as: {}".format(ws_table_file_path))
-        
+
         with open(ws_table_file_path, 'w') as f:
             dict_writer = csv.DictWriter(f, ws_table.keys())
             dict_writer.writeheader()
             dict_writer.writerows(
                 [ ws_table.row(i) for i in range(ws_table.rowCount())]
             )
-            
-            
 
     def PyExec(self):
 
