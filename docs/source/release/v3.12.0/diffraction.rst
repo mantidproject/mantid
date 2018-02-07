@@ -32,6 +32,7 @@ Powder Diffraction
 - Using grouping files with only one bank was enabled in ISIS Powder, and related errors to do with mismatched number of parameters were made more readable
 - It is now possible to set beam parameters (height and width) using instrument_object.set_beam_parameters(height=123, width=456).
 - The ``mode`` parameter for POLARIS in ISIS Powder now behaves as described in the documentation - it persists through function calls and is case insensitive
+- For instruments in ISIS Powder, offset files may now be specified by an absolute path. The default behaviour of assuming they live in calibration/label has been retained
 
 Engineering Diffraction
 -----------------------
