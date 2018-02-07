@@ -547,7 +547,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
         self.parser['DEFAULT']['BList'] = ",".join(str(e) for e in ws_table.column("B"))
 
         pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
-        if pm.has_key("OutputDirectory"):
+        if "OutputDirectory" in pm:
             output_directory = pm["OutputDirectory"].value
         else:
             output_directory = ''
@@ -563,7 +563,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
     def _save_ws_table_as_csv(self, ws_table):
 
         pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
-        if pm.has_key("OutputDirectory"):
+        if "OutputDirectory" in pm:
             output_directory = pm["OutputDirectory"].value
         else:
             output_directory = ''
