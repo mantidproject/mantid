@@ -45,7 +45,6 @@ void QtReflSettingsView::initLayout() {
           SLOT(summationTypeChanged(int)));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
-
   connectChangeListeners();
 }
 

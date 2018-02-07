@@ -81,6 +81,7 @@ public:
   /// Sets the 'List of logged parameters' widget
   void setParametersList(const std::vector<std::string> &) const override;
 
+  std::string getAutosavePrefixInput() const override;
 public slots:
   /// Populate the 'List of workspaces' widget
   void populateListOfWorkspaces() const;
@@ -93,6 +94,8 @@ public slots:
   /// Suggest a save directory
   void suggestSaveDir() const;
 
+  void onAutosaveChanged(bool enabled);
+  void onAutosavePrefixesChanged(QString const& prefixesInput);
 private:
   /// Initialize the interface
   void initLayout();

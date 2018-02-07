@@ -5,6 +5,7 @@
 #include "IReflSaveTabPresenter.h"
 #include <vector>
 #include <string>
+#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -66,9 +67,26 @@ private:
   /// Suggest a save directory
   void suggestSaveDir();
   /// Save selected workspaces to a directory
-  void saveWorkspaces();
+  void saveSelectedWorkspaces();
+  /// Save specified workspaces to a directory
+  void saveWorkspaces(std::vector<std::string> const &workspaceNames);
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
+
+  bool isWhitelisted(std::vector<std::string> const &prefixWhitelist,
+                     std::string const &workspaceName) const;
+  std::vector<std::string>
+  filterByWhitelist(std::vector<std::string> const &prefixWhitelist,
+                    std::vector<std::string> workspaceNames) const;
+  void autoSaveWorkspaces(std::vector<std::string> const &prefixWhitelist,
+                          std::vector<std::string> const &workspaceNames);
+
+  void enableAutosave();
+  void disableAutosave();
+  void updateAutosavePrefixes();
+
+  std::vector<std::string>
+  parseAutosavePrefixes(std::string const &prefixesInput);
 
   /// The view
   IReflSaveTabView *m_view;
@@ -78,6 +96,8 @@ private:
   std::vector<std::string> m_saveAlgs;
   /// Extensions used for each save algorithm
   std::vector<std::string> m_saveExts;
+
+  boost::optional<std::vector<std::string>> m_autosavePrefixWhiteList;
 };
 }
 }

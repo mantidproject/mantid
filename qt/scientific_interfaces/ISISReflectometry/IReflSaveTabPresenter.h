@@ -44,7 +44,10 @@ public:
     filterWorkspaceListFlag,
     workspaceParamsFlag,
     saveWorkspacesFlag,
-    suggestSaveDirFlag
+    suggestSaveDirFlag,
+    autosaveEnabled,
+    autosaveDisabled,
+    autosavePrefixesChanged
   };
 
   virtual void completedGroupReductionSuccessfully(

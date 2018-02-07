@@ -64,6 +64,7 @@ public:
   virtual void clearParametersList() const = 0;
   virtual void setWorkspaceList(const std::vector<std::string> &) const = 0;
   virtual void setParametersList(const std::vector<std::string> &) const = 0;
+  virtual std::string getAutosavePrefixInput() const = 0;
 };
 }
 }

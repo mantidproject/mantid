@@ -11,6 +11,8 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
 namespace MantidQt {
@@ -53,29 +55,110 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
     populateParametersList();
     break;
   case saveWorkspacesFlag:
-    saveWorkspaces();
+    saveSelectedWorkspaces();
     break;
   case suggestSaveDirFlag:
     suggestSaveDir();
     break;
+  case autosaveDisabled:
+    disableAutosave();
+    break;
+  case autosaveEnabled:
+    enableAutosave();
+    break;
+  case autosavePrefixesChanged:
+    updateAutosavePrefixes();
+    break;
   }
+}
+
+namespace {
+template <typename InputIterator>
+bool starts_with_any_of(InputIterator begin, InputIterator end,
+                        std::string const &name) {
+  for (auto current = begin; current != end; ++current)
+    if (boost::algorithm::starts_with(name, *current)) {
+      std::cout << name << " starts with " << *current << std::endl;
+      return true;
+    } else {
+      std::cout << name << " does not start with " << *current << std::endl;
+    }
+  return false;
+}
+}
+
+std::vector<std::string>
+ReflSaveTabPresenter::parseAutosavePrefixes(std::string const &prefixesInput) {
+  auto prefixes = std::vector<std::string>();
+  if (!prefixesInput.empty()) {
+    boost::split(prefixes, prefixesInput, boost::is_any_of(","));
+    return prefixes;
+  } else {
+    return prefixes;
+  }
+}
+
+void ReflSaveTabPresenter::enableAutosave() {
+  std::cout << "** Enabling Autosave" << std::endl;
+  updateAutosavePrefixes();
+}
+
+void ReflSaveTabPresenter::disableAutosave() {
+  std::cout << "** Disabling Autosave" << std::endl;
+  m_autosavePrefixWhiteList = boost::none;
+}
+
+void ReflSaveTabPresenter::updateAutosavePrefixes() {
+  m_autosavePrefixWhiteList =
+      parseAutosavePrefixes(m_view->getAutosavePrefixInput());
+  for (auto &&prefix : m_autosavePrefixWhiteList.get())
+    std::cout << "   Prefix '" << prefix << "'" << std::endl;
+}
+
+bool ReflSaveTabPresenter::isWhitelisted(
+    std::vector<std::string> const &prefixWhitelist,
+    std::string const &workspaceName) const {
+  return starts_with_any_of(prefixWhitelist.cbegin(), prefixWhitelist.cend(),
+                            workspaceName);
+}
+
+std::vector<std::string> ReflSaveTabPresenter::filterByWhitelist(
+    std::vector<std::string> const &prefixWhitelist,
+    std::vector<std::string> workspaceNames) const {
+  workspaceNames.erase(
+      std::remove_if(
+          workspaceNames.begin(), workspaceNames.end(),
+          [this, &prefixWhitelist](std::string const &workspaceName) -> bool {
+            return !isWhitelisted(prefixWhitelist, workspaceName);
+          }),
+      workspaceNames.end());
+  return workspaceNames;
+}
+
+void ReflSaveTabPresenter::autoSaveWorkspaces(
+    std::vector<std::string> const &prefixWhitelist,
+    std::vector<std::string> const &workspaceNames) {
+  auto workspacesToSave = filterByWhitelist(prefixWhitelist, workspaceNames);
+  //  if (!workspacesToSave.empty())
+  //    saveWorkspaces(workspaceNames);
+  for (auto &&ws : workspaceNames)
+    std::cout << "** Saving " << ws << std::endl;
 }
 
 void ReflSaveTabPresenter::completedGroupReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
-  std::cout << "** Reduced group with size " << group.size() << std::endl;
-  std::cout << "   Saving workspace " << workspaceName << std::endl;
+  if (m_autosavePrefixWhiteList)
+    autoSaveWorkspaces(m_autosavePrefixWhiteList.get(),
+                       std::vector<std::string>({workspaceName}));
 }
 
 void ReflSaveTabPresenter::completedRowReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::vector<std::string> const &workspaceNames) {
-  std::cout << "** Reduced row in group with size " << group.size()
-            << std::endl;
-  if (!MantidWidgets::DataProcessor::canPostprocess(group))
-    for (auto &&workspaceName : workspaceNames)
-      std::cout << "   Saving workspace " << workspaceName << std::endl;
+  if (!MantidWidgets::DataProcessor::canPostprocess(group) &&
+      m_autosavePrefixWhiteList)
+    autoSaveWorkspaces(m_autosavePrefixWhiteList.get(), workspaceNames);
 }
 
 /** Fills the 'List of Workspaces' widget with the names of all available
@@ -138,9 +221,9 @@ void ReflSaveTabPresenter::populateParametersList() {
   m_view->setParametersList(logs);
 }
 
-/** Saves selected workspaces
-*/
-void ReflSaveTabPresenter::saveWorkspaces() {
+/** Saves workspaces with the names specified. */
+void ReflSaveTabPresenter::saveWorkspaces(
+    std::vector<std::string> const &workspaceNames) {
   // Check that save directory is valid
   std::string saveDir = m_view->getSavePath();
   if (saveDir.empty() || Poco::File(saveDir).isDirectory() == false) {
@@ -150,17 +233,9 @@ void ReflSaveTabPresenter::saveWorkspaces() {
     return;
   }
 
-  // Check that at least one workspace has been selected for saving
-  auto wsNames = m_view->getSelectedWorkspaces();
-  if (wsNames.empty()) {
-    m_mainPresenter->giveUserCritical("No workspaces selected. You must select "
-                                      "the workspaces to save.",
-                                      "No workspaces selected");
-  }
-
   // Obtain workspace titles
-  std::vector<std::string> wsTitles(wsNames.size());
-  std::transform(wsNames.begin(), wsNames.end(), wsTitles.begin(),
+  std::vector<std::string> wsTitles(workspaceNames.size());
+  std::transform(workspaceNames.begin(), workspaceNames.end(), wsTitles.begin(),
                  [](std::string s) {
                    return AnalysisDataService::Instance()
                        .retrieveWS<MatrixWorkspace>(s)
@@ -178,7 +253,7 @@ void ReflSaveTabPresenter::saveWorkspaces() {
   std::string extension = m_saveExts[formatIndex];
   IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
 
-  for (size_t i = 0; i < wsNames.size(); i++) {
+  for (size_t i = 0; i < workspaceNames.size(); i++) {
     // Add any additional algorithm-specific properties and execute
     if (algName != "SaveANSTOAscii") {
       if (titleCheck)
@@ -190,7 +265,7 @@ void ReflSaveTabPresenter::saveWorkspaces() {
     }
 
     auto path = Poco::Path(saveDir);
-    auto wsName = wsNames[i];
+    auto wsName = workspaceNames[i];
     path.append(prefix + wsName + extension);
     saveAlg->setProperty("Separator", separator);
     saveAlg->setProperty("Filename", path.toString());
@@ -198,6 +273,19 @@ void ReflSaveTabPresenter::saveWorkspaces() {
         "InputWorkspace",
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     saveAlg->execute();
+  }
+}
+
+/** Saves selected workspaces */
+void ReflSaveTabPresenter::saveSelectedWorkspaces() {
+  // Check that at least one workspace has been selected for saving
+  auto workspaceNames = m_view->getSelectedWorkspaces();
+  if (workspaceNames.empty()) {
+    m_mainPresenter->giveUserCritical("No workspaces selected. You must select "
+                                      "the workspaces to save.",
+                                      "No workspaces selected");
+  } else {
+    saveWorkspaces(workspaceNames);
   }
 }
 

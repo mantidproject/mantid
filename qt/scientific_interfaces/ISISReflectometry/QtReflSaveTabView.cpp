@@ -32,10 +32,29 @@ void QtReflSaveTabView::initLayout() {
           SLOT(filterWorkspaceList()));
   connect(m_ui.listOfWorkspaces, SIGNAL(itemDoubleClicked(QListWidgetItem *)),
           this, SLOT(requestWorkspaceParams()));
+  connect(m_ui.autosaveGroup, SIGNAL(clicked(bool)), this,
+          SLOT(onAutosaveChanged(bool)));
+  connect(m_ui.autosavePrefixesEdit, SIGNAL(textChanged(const QString &)), this,
+          SLOT(onAutosavePrefixesChanged(const QString &)));
 
   m_presenter.reset(new ReflSaveTabPresenter(this));
   populateListOfWorkspaces();
   suggestSaveDir();
+}
+
+std::string QtReflSaveTabView::getAutosavePrefixInput() const {
+  return m_ui.autosavePrefixesEdit->text().toStdString();
+}
+
+void QtReflSaveTabView::onAutosaveChanged(bool enabled) {
+  if (enabled)
+    m_presenter->notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
+  else
+    m_presenter->notify(IReflSaveTabPresenter::Flag::autosaveDisabled);
+}
+
+void QtReflSaveTabView::onAutosavePrefixesChanged(QString const &prefixes) {
+  m_presenter->notify(IReflSaveTabPresenter::Flag::autosavePrefixesChanged);
 }
 
 /** Returns the presenter managing this view
