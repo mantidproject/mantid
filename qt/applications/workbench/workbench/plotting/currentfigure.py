@@ -119,6 +119,8 @@ class CurrentFigure(object):
         """
         Return the manager of the active figure, or *None*.
         """
+        if cls._active is not None:
+            cls._active.canvas.figure.clf()
         return cls._active
 
     @classmethod

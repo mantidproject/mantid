@@ -23,15 +23,71 @@ import sys
 # 3rdparty imports
 import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
-from qtpy.QtCore import Qt, QMetaObject, QThread, Signal
-from qtpy.QtWidgets import qApp, QApplication, QLabel, QMainWindow
+from qtpy.QtCore import Qt, QMetaObject, QObject, QThread, Signal, Slot
+from qtpy.QtWidgets import QApplication, QLabel, QMainWindow
 from six import reraise, text_type
 
 # local imports
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
+
+
+qApp = QApplication.instance()
+
+
+class QAppThreadCall(QObject):
+    """
+    Wraps a callable object and forces any calls made to it to be executed
+    on the same thread as the qApp object.
+    """
+
+    def __init__(self, callee):
+        QObject.__init__(self)
+        self.moveToThread(qApp.thread())
+        self.callee = callee
+        # Help should then give the correct doc
+        self.__call__.__func__.__doc__ = callee.__doc__
+        self._args = None
+        self._kwargs = None
+        self._result = None
+        self._exc_info = None
+
+    def __call__(self, *args, **kwargs):
+        """
+        If the current thread is the qApp thread then this
+        performs a straight call to the wrapped callable_obj. Otherwise
+        it invokes the do_call method as a slot via a
+        BlockingQueuedConnection.
+        """
+        if QThread.currentThread() == qApp.thread():
+            return self.callee(*args, **kwargs)
+        else:
+            self._store_function_args(*args, **kwargs)
+            QMetaObject.invokeMethod(self, "on_call",
+                                     Qt.BlockingQueuedConnection)
+            if self._exc_info is not None:
+                reraise(*self._exc_info)
+            return self._result
+
+    @Slot()
+    def on_call(self):
+        """Perform a call to a GUI function across a
+        thread and return the result
+        """
+        try:
+            self._result = \
+                self.callee(*self._args, **self._kwargs)
+        except Exception: # pylint: disable=broad-except
+            self._exc_info = sys.exc_info()
+
+    def _store_function_args(self, *args, **kwargs):
+        self._args = args
+        self._kwargs = kwargs
+        # Reset return value and exception
+        self._result = None
+        self._exc_info = None
 
 
 class MainWindow(QMainWindow):
@@ -42,7 +98,7 @@ class MainWindow(QMainWindow):
         QMainWindow.closeEvent(self, event)
 
 
-class FigureManagerWorkbench(FigureManagerBase):
+class FigureManagerWorkbench(FigureManagerBase, QObject):
     """
     Attributes
     ----------
@@ -58,8 +114,14 @@ class FigureManagerWorkbench(FigureManagerBase):
     """
 
     def __init__(self, canvas, num):
+        QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
-        self._destroy_exc = None
+        # Patch show/destroy to be thread aware
+        self._destroy_orig = self.destroy
+        self.destroy = QAppThreadCall(self._destroy_orig)
+        self._show_orig = self.show
+        self.show = QAppThreadCall(self._show_orig)
+
         self.canvas = canvas
         self.window = MainWindow()
         self.window.closing.connect(canvas.close_event)
@@ -147,10 +209,13 @@ class FigureManagerWorkbench(FigureManagerBase):
         'set the canvas size in pixels'
         self.window.resize(width, height + self._status_and_tool_height)
 
-    def show(self):
+    def show(self):  # noqa
         self.window.show()
         self.window.activateWindow()
         self.window.raise_()
+
+        # Hack to ensure the canvas is up to date
+        self.canvas.draw_idle()
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -158,17 +223,11 @@ class FigureManagerWorkbench(FigureManagerBase):
             return
         if self.window._destroying:
             return
-        if QThread.currentThread() == qApp.thread():
-            # direct call
-            self._destroy_impl()
-        else:
-            # dispatch through event loop to we end up on the main thread
-            QMetaObject.invokeMethod(self, "_destroy_impl",
-                                     Qt.BlockingQueuedConnection)
-            if self._destroy_exc is not None:
-                exc_info = self._destroy_exc
-                self._destroy_exc = None
-                reraise(*exc_info)
+        self.window._destroying = True
+        self.window.destroyed.connect(self._widgetclosed)
+        if self.toolbar:
+            self.toolbar.destroy()
+        self.window.close()
 
     def grid_toggle(self):
         """
@@ -185,16 +244,6 @@ class FigureManagerWorkbench(FigureManagerBase):
         Mark this figure as held
         """
         self.toolbar.hold()
-
-    def _destroy_impl(self):
-        self.window._destroying = True
-        self.window.destroyed.connect(self._widgetclosed)
-        try:
-            if self.toolbar:
-                self.toolbar.destroy()
-            self.window.close()
-        except BaseException:  # noqa
-            self._destroy_exc = sys.exc_info()
 
     def get_window_title(self):
         return text_type(self.window.windowTitle())
@@ -230,49 +279,6 @@ class FigureManagerWorkbench(FigureManagerBase):
                 move_and_show(YAxisEditor(canvas, ax))
 
 
-class Show(object):
-
-    def __call__(self, block=None):
-        """
-        Show all figures.
-
-        block is ignored as calling mainloop does nothing anyway
-        since the event loop is already running
-        """
-        managers = Gcf.get_all_fig_managers()
-        if not managers:
-            return
-
-        for manager in managers:
-            manager.show()
-
-        # I'm not sure if we need to do this...
-
-        # # Hack: determine at runtime whether we are
-        # # inside ipython in pylab mode.
-        # from matplotlib import pyplot
-        # try:
-        #     ipython_pylab = not pyplot.show._needmain
-        #     # IPython versions >= 0.10 tack the _needmain
-        #     # attribute onto pyplot.show, and always set
-        #     # it to False, when in %pylab mode.
-        #     ipython_pylab = ipython_pylab and get_backend() != 'WebAgg'
-        #     # TODO: The above is a hack to get the WebAgg backend
-        #     # working with ipython's `%pylab` mode until proper
-        #     # integration is implemented.
-        # except AttributeError:
-        #     ipython_pylab = False
-        #
-        # # Leave the following as a separate step in case we
-        # # want to control this behavior with an rcParam.
-        # if ipython_pylab:
-        #     return
-
-    def mainloop(self):
-        # we have already started the event loop
-        pass
-
-
 # -----------------------------------------------------------------------------
 # Figure control
 # -----------------------------------------------------------------------------
@@ -294,9 +300,6 @@ def new_figure_manager_given_figure(num, figure):
     canvas = FigureCanvasQTAgg(figure)
     manager = FigureManagerWorkbench(canvas, num)
     return manager
-
-
-show = Show()
 
 
 if __name__ == '__main__':

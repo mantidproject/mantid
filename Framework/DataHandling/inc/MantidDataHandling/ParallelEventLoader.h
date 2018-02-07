@@ -45,7 +45,8 @@ class MANTID_DATAHANDLING_DLL ParallelEventLoader {
 public:
   static void load(DataObjects::EventWorkspace &ws, const std::string &filename,
                    const std::string &groupName,
-                   const std::vector<std::string> &bankNames);
+                   const std::vector<std::string> &bankNames,
+                   const bool eventIDIsSpectrumNumber);
 };
 
 } // namespace DataHandling

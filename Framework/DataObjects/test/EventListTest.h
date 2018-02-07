@@ -5,6 +5,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Unit.h"
@@ -2764,6 +2765,12 @@ public:
     // Coarse vector, 1000 bins.
     for (double i = 0; i < 100000; i += 100)
       coarseX.push_back(i);
+
+    // Create FrameworkManager such that the effect of config option
+    // `MultiThreaded.MaxCores` is visible: The FrameworkManager sets the TBB
+    // thread count according to this value if applicable. TBB threading is used
+    // when sorting events.
+    Mantid::API::FrameworkManager::Instance();
   }
 
   EventList el_random, el_random_source, el_sorted, el_sorted_original,

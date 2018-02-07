@@ -5,11 +5,11 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
 #include <boost/shared_ptr.hpp>
 #include <cstddef>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -99,10 +99,14 @@ private:
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_detectorPositions;
 
   /// Rotations for non-detectors
-  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
+  boost::shared_ptr<std::vector<Eigen::Quaterniond,
+                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      m_rotations;
 
   /// Rotations for detectors
-  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_detectorRotations;
+  boost::shared_ptr<std::vector<Eigen::Quaterniond,
+                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      m_detectorRotations;
 
   /// Monitor indexes for detectors
   boost::shared_ptr<std::vector<size_t>> m_monitorIndices;

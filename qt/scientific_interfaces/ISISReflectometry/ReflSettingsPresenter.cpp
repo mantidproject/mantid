@@ -7,6 +7,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+#include "InstrumentParameters.h"
+#include "ValueOr.h"
+#include "ExperimentOptionDefaults.h"
+#include "InstrumentOptionDefaults.h"
+#include <type_traits>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -260,75 +265,102 @@ void ReflSettingsPresenter::createStitchHints() {
   // The algorithm
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Stitch1DMany");
   // The blacklist
-  std::set<std::string> blacklist = {"InputWorkspaces", "OutputWorkspace",
-                                     "OutputWorkspace"};
+  std::set<std::string> blacklist{"InputWorkspaces", "OutputWorkspace"};
   AlgorithmHintStrategy strategy(alg, blacklist);
 
   m_view->createStitchHints(strategy.createHints());
 }
-
 /** Fills experiment settings with default values
 */
 void ReflSettingsPresenter::getExpDefaults() {
-  // Algorithm and instrument
   auto alg = createReductionAlg();
-  auto inst = createEmptyInstrument(m_currentInstrumentName);
+  auto instrument = createEmptyInstrument(m_currentInstrumentName);
+  auto parameters = InstrumentParameters(instrument);
 
-  // Collect all default values and set them in view
-  std::vector<std::string> defaults(8);
-  defaults[0] = alg->getPropertyValue("AnalysisMode");
-  defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
+  auto defaults = ExperimentOptionDefaults();
 
-  auto cRho = inst->getStringParameter("crho");
-  if (!cRho.empty())
-    defaults[2] = cRho[0];
+  defaults.AnalysisMode =
+      value_or(parameters.optional<std::string>("AnalysisMode"),
+               alg->getPropertyValue("AnalysisMode"));
+  defaults.PolarizationAnalysis =
+      value_or(parameters.optional<std::string>("PolarizationAnalysis"),
+               alg->getPropertyValue("PolarizationAnalysis"));
 
-  auto cAlpha = inst->getStringParameter("calpha");
-  if (!cAlpha.empty())
-    defaults[3] = cAlpha[0];
+  defaults.SummationType =
+      value_or(parameters.optional<std::string>("SummationType"),
+               alg->getPropertyValue("SummationType"));
 
-  auto cAp = inst->getStringParameter("cAp");
-  if (!cAp.empty())
-    defaults[4] = cAp[0];
+  defaults.ReductionType =
+      value_or(parameters.optional<std::string>("ReductionType"),
+               alg->getPropertyValue("ReductionType"));
 
-  auto cPp = inst->getStringParameter("cPp");
-  if (!cPp.empty())
-    defaults[5] = cPp[0];
+  defaults.CRho = value_or(parameters.optional<std::string>("crho"), "1");
+  defaults.CAlpha = value_or(parameters.optional<std::string>("calpha"), "1");
+  defaults.CAp = value_or(parameters.optional<std::string>("cAp"), "1");
+  defaults.CPp = value_or(parameters.optional<std::string>("cPp"), "1");
+
+  defaults.MomentumTransferStep = parameters.optional<double>("dQ/Q");
+  defaults.ScaleFactor = parameters.optional<double>("Scale");
+  defaults.StitchParams = parameters.optional<std::string>("Stitch1DMany");
 
   if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
-    defaults[6] = boost::lexical_cast<std::string>(
-        inst->getNumberParameter("TransRunStartOverlap")[0]);
-
-    defaults[7] = boost::lexical_cast<std::string>(
-        inst->getNumberParameter("TransRunEndOverlap")[0]);
+    defaults.TransRunStartOverlap =
+        parameters.mandatory<double>("TransRunStartOverlap");
+    defaults.TransRunEndOverlap =
+        parameters.mandatory<double>("TransRunEndOverlap");
+  } else {
+    defaults.TransRunStartOverlap =
+        parameters.optional<double>("TransRunStartOverlap");
+    defaults.TransRunEndOverlap =
+        parameters.optional<double>("TransRunEndOverlap");
   }
 
-  m_view->setExpDefaults(defaults);
+  m_view->setExpDefaults(std::move(defaults));
+
+  if (parameters.hasTypeErrors() || parameters.hasMissingValues()) {
+    m_view->showOptionLoadErrors(parameters.typeErrors(),
+                                 parameters.missingValues());
+  }
 }
 
 /** Fills instrument settings with default values
 */
 void ReflSettingsPresenter::getInstDefaults() {
-  // Algorithm and instrument
   auto alg = createReductionAlg();
-  auto inst = createEmptyInstrument(m_currentInstrumentName);
+  auto instrument = createEmptyInstrument(m_currentInstrumentName);
+  auto parameters = InstrumentParameters(instrument);
+  auto defaults = InstrumentOptionDefaults();
 
-  // Collect all default values
-  std::vector<double> defaults_double(8);
-  defaults_double[0] = boost::lexical_cast<double>(
-      alg->getPropertyValue("NormalizeByIntegratedMonitors"));
-  defaults_double[1] = inst->getNumberParameter("MonitorIntegralMin")[0];
-  defaults_double[2] = inst->getNumberParameter("MonitorIntegralMax")[0];
-  defaults_double[3] = inst->getNumberParameter("MonitorBackgroundMin")[0];
-  defaults_double[4] = inst->getNumberParameter("MonitorBackgroundMax")[0];
-  defaults_double[5] = inst->getNumberParameter("LambdaMin")[0];
-  defaults_double[6] = inst->getNumberParameter("LambdaMax")[0];
-  defaults_double[7] = inst->getNumberParameter("I0MonitorIndex")[0];
+  defaults.NormalizeByIntegratedMonitors =
+      value_or(parameters.optional<bool>("IntegratedMonitors"),
+               alg->getProperty("NormalizeByIntegratedMonitors"));
+  defaults.MonitorIntegralMin =
+      parameters.mandatory<double>("MonitorIntegralMin");
+  defaults.MonitorIntegralMax =
+      parameters.mandatory<double>("MonitorIntegralMax");
+  defaults.MonitorBackgroundMin =
+      parameters.mandatory<double>("MonitorBackgroundMin");
+  defaults.MonitorBackgroundMax =
+      parameters.mandatory<double>("MonitorBackgroundMax");
+  defaults.LambdaMin = parameters.mandatory<double>("LambdaMin");
+  defaults.LambdaMax = parameters.mandatory<double>("LambdaMax");
+  defaults.I0MonitorIndex =
+      parameters.mandatoryVariant<int, double>("I0MonitorIndex");
+  defaults.ProcessingInstructions =
+      parameters.optional<std::string>("ProcessingInstructions");
+  defaults.CorrectDetectors =
+      value_or(parameters.optional<bool>("CorrectDetectors"),
+               alg->getProperty("CorrectDetectors"));
+  defaults.DetectorCorrectionType =
+      value_or(parameters.optional<std::string>("DetectorCorrectionType"),
+               alg->getPropertyValue("DetectorCorrectionType"));
 
-  std::vector<std::string> defaults_str(1);
-  defaults_str[0] = alg->getPropertyValue("DetectorCorrectionType");
+  m_view->setInstDefaults(std::move(defaults));
 
-  m_view->setInstDefaults(defaults_double, defaults_str);
+  if (parameters.hasTypeErrors() || parameters.hasMissingValues()) {
+    m_view->showOptionLoadErrors(parameters.typeErrors(),
+                                 parameters.missingValues());
+  }
 }
 
 /** Generates and returns an instance of the ReflectometryReductionOneAuto

@@ -2,6 +2,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
+from distutils.version import LooseVersion
 import numpy as np
 import os
 from six.moves import range # pylint: disable=redefined-builtin
@@ -179,7 +180,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             localtimediff = np.timedelta64(0, 's')
 
         epoch = '1990-01-01T00:00'
-        if np.__version__.startswith('1.7.'):
+        # older numpy assumes local timezone
+        if LooseVersion(np.__version__) < LooseVersion('1.9'):
             epoch = epoch+'Z'
         return np.datetime64(epoch) + localtimediff
 

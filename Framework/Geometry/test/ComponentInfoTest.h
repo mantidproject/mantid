@@ -100,8 +100,9 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
 
   auto positions =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, position);
-  auto rotations =
-      boost::make_shared<std::vector<Eigen::Quaterniond>>(1, rotation);
+  auto rotations = boost::make_shared<std::vector<
+      Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
+      1, rotation);
   auto scaleFactors =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
   auto names = boost::make_shared<std::vector<std::string>>(1);
@@ -148,7 +149,8 @@ public:
                                        // ok as not being tested here
 
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
-    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
+    auto rotations = boost::make_shared<std::vector<
+        Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(2);
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto names = boost::make_shared<std::vector<std::string>>(2);
     using Mantid::Beamline::ComponentType;
