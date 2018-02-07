@@ -580,8 +580,8 @@ Post-processes the workspaces created by the given rows together.
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
   if (hasPostprocessing())
-    m_postprocessing->postProcessGroup(m_processor.prefix(0), m_whitelist,
-                                       groupData);
+    m_postprocessing->postProcessGroup(m_processor.defaultOutputPrefix(),
+                                       m_whitelist, groupData);
 }
 
 /**
@@ -1304,8 +1304,8 @@ void GenericDataProcessorPresenter::plotRow() {
 
     for (const auto &run : item.second) {
 
-      auto const wsName =
-          getReducedWorkspaceName(run.second, m_processor.prefix(0));
+      auto const wsName = getReducedWorkspaceName(
+          run.second, m_processor.defaultOutputPrefix());
 
       if (workspaceExists(wsName))
         workspaces.insert(wsName, nullptr);

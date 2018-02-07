@@ -303,7 +303,7 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
     // The reduced ws name without prefix (for example 'TOF_13460_13462')
     auto suffix = getReducedWorkspaceName(row.second, whitelist);
     // The reduced ws name: 'IvsQ_TOF_13460_13462'
-    inputNames.append(processor.prefix(0) + suffix);
+    inputNames.append(processor.defaultOutputPrefix() + suffix);
     // Add the suffix (i.e. 'TOF_13460_13462') to the output ws name
     outputName.append(suffix);
   }
