@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/InstrumentWidgetMaskTab.cpp
 	src/InstrumentWidgetPickTab.cpp
 	src/InstrumentWidgetRenderTab.cpp
+        src/InstrumentRenderer.cpp
 	src/InstrumentWidgetTab.cpp
 	src/InstrumentWidgetTreeTab.cpp
 	src/MantidGLWidget.cpp
@@ -73,6 +74,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
+        inc/MantidQtWidgets/InstrumentView/InstrumentRenderer.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h

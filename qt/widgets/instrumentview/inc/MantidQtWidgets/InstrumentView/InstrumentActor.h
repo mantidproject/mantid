@@ -21,9 +21,7 @@ class MatrixWorkspace;
 class IMaskWorkspace;
 }
 namespace Geometry {
-class IObjComponent;
 class Instrument;
-class IDetector;
 class ComponentInfo;
 class DetectorInfo;
 }
@@ -31,6 +29,8 @@ class DetectorInfo;
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+class InstrumentRenderer;
 
 /**
 \class  InstrumentActor
@@ -158,9 +158,6 @@ public:
   /// Update the detector colors to match the integrated counts within the
   /// current integration range.
   void updateColors();
-  /// Invalidate the OpenGL display lists to force full re-drawing of the
-  /// instrument and creation of new lists.
-  void invalidateDisplayLists() const; //{ m_scene.invalidateDisplayList(); }
   /// Toggle display of the guide and other non-detector instrument components
   void showGuides(bool);
   /// Get the guide visibility status
@@ -178,10 +175,6 @@ public:
                              const Mantid::Kernel::V3D &up,
                              Mantid::Kernel::Quat &R);
 
-  /// Convert a "pick ID" to a colour to put into the pick image.
-  static GLColor makePickColor(size_t pickID);
-  /// Decode a pick colour and return corresponding "pick ID"
-  static size_t decodePickColor(const QRgb &c);
   /* Masking */
 
   void initMaskHelper() const;
@@ -198,11 +191,12 @@ public:
   /// Save the state of the actor to a Mantid project file.
   std::string saveToProject() const;
 
+  const std::vector<size_t> &components() const { return m_components; }
+
 signals:
   void colorMapChanged();
 
 private:
-  void doDraw(bool picking) const;
   void setUpWorkspace(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
       double scaleMin, double scaleMax);
@@ -224,8 +218,6 @@ private:
                           std::vector<double> &x, std::vector<double> &y,
                           size_t size) const;
 
-  void setupPickColors();
-
   boost::shared_ptr<Mantid::API::IMaskWorkspace>
   getMaskWorkspaceIfExists() const;
 
@@ -236,8 +228,6 @@ private:
   mutable boost::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
   /// A helper object that keeps bin masking data.
   mutable MaskBinsData m_maskBinsData;
-  /// The colormap
-  MantidColorMap m_colorMap;
   QString m_currentColorMapFilename;
   /// integrated spectra
   std::vector<double> m_specIntegrs;
@@ -263,25 +253,18 @@ private:
   const Mantid::Kernel::V3D m_defaultPos;
 
   /// Colors in order of component info
-  std::vector<GLColor> m_colors;
   std::vector<size_t> m_monitors;
   std::vector<size_t> m_components;
-  /// Colour of a masked detector
-  GLColor m_maskedColor;
-  /// Colour of a "failed" detector
-  GLColor m_failedColor;
 
   static double m_tolerance;
 
-  std::vector<GLColor> m_pickColors;
   std::vector<bool> m_isCompVisible;
   std::vector<size_t> m_detIndex2WsIndex;
-  // Two display lists for normal rendering and picking
-  mutable GLuint m_displayListId[2];
-  mutable bool m_useDisplayList[2];
+
   bool m_isPhysicalInstrument;
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
+  std::unique_ptr<InstrumentRenderer> m_renderer;
 };
 
 } // MantidWidgets

@@ -48,7 +48,7 @@ Projection3D::Projection3D(const InstrumentActor *rootActor, int winWidth,
   m_viewport.setProjection(minBounds, maxBounds);
 
   changeColorMap();
-  rootActor->invalidateDisplayLists();
+  // rootActor->invalidateDisplayLists();
 
   // create and connect the move input controller
   InputController3DMove *moveController = new InputController3DMove(this);
