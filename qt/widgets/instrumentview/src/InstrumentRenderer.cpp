@@ -71,9 +71,15 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
                               bool showGuides, bool picking) {
   const auto &compInfo = m_actor.componentInfo();
   for (size_t i = 0; i < compInfo.size(); ++i) {
-    if ((!compInfo.isDetector(i) && !showGuides) ||
-        compInfo.componentType(i) ==
-            Mantid::Beamline::ComponentType::OutlineComposite)
+    if (compInfo.componentType(compInfo.parent(i)) ==
+        Mantid::Beamline::ComponentType::Rectangular)
+      continue;
+
+    if (compInfo.componentType(compInfo.parent(i)) ==
+        Mantid::Beamline::ComponentType::OutlineComposite)
+      continue;
+
+    if ((!compInfo.isDetector(i) && !showGuides))
       continue;
 
     if (compInfo.hasValidShape(i)) {

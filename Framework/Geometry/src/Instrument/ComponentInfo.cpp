@@ -459,7 +459,8 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
     const auto compFlag = componentType(index);
     if (hasSource() && index == source()) {
       ++compIterator;
-    } else if (compFlag == Beamline::ComponentType::Rectangular) {
+    } else if (compFlag == Beamline::ComponentType::Rectangular ||
+               compFlag == Beamline::ComponentType::Structured) {
       growBoundingBoxAsRectuangularBank(index, reference, absoluteBB,
                                         detExclusions, compIterator);
     } else if (compFlag == Beamline::ComponentType::OutlineComposite) {
