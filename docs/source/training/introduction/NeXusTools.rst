@@ -15,7 +15,7 @@ Presently at the ILL, only files in **.nxs** format produced by the following in
 * D17, FIGARO
 * D11, D22, D33
 
-With the right tools it is quite easy to access and modify the contents of these files, without requiring Mantid to load them.
+With the right tools it is quite easy to access and modify the contents of these files, without requiring Mantid to load them. The following tools can also be used to explore data saved by Mantid.
 
 HDFView
 -------

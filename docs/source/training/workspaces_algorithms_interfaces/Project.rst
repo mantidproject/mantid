@@ -4,7 +4,7 @@
 Project
 =======
 
-A mantid session can be saved as a project for saving the work process (workspaces and its histories).
+A mantid session can be saved as a project for saving the work process (workspaces, histories, plots etc.).
 
 Main menu -> View -> Project
 

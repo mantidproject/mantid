@@ -67,13 +67,16 @@ Several workspaces can be combined to a :literal:`GroupWorkspace` which may be t
 Saving Workspaces
 -----------------
 
-Right click on workspace and `SaveNexus`
+The recommended way is to save as a Mantid NeXus file, as this will preserve extra information such as the instrument and workspaces history.
+
+To do this right click on workspace and :code:`SaveNexus`.
 
 Via executing algorithms:
 
-- SaveNexusProcessed (SaveNexus)
-- SaveAscii
-- SaveILLCosmosAscii
+- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` (SaveNexus)
+- :ref:`SaveAscii <algm-SaveAscii>`
+- :ref:`SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`
+- ...
 
 From the main MantidPlot menu, select
 File->Save->Nexus

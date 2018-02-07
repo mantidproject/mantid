@@ -66,19 +66,4 @@ Mantid keeps the entire history of all algorithms applied to workspaces. Not onl
 .. figure:: /images/Training/WorkspacesAlgorithmsInterfaces/History1.png
    :align: center
 
-To replay the history do:
-
-- From the main MantidPlot menu select View->Script Window, this opens the 'MantidPlot: Python Window'
-- Go back to Algorithm History window and press the 'Script to Clipboard' button and close the Algorithm History window
-- Flip to the script window ('MantidPlot: Python Window') and paste what was copied to the clipboard into the script window
-- Delete the 592724 workspace from the Algorithms panel
-- To recreate the work you have just done script window execute the script via Execute->Execute All on the script window.
-
-Content Clipboard (Python):
-
-.. code-block:: python
-
-   LoadILLReflectometry(Filename='/net4/serdon/illdata/171/figaro/internalUse/rawdata/592724.nxs', OutputWorkspace='592724', XUnit='TimeOfFlight')
-   GravityCorrection(InputWorkspace='592724', OutputWorkspace='592724_gc', FirstSlitName='slit3')
-   Logarithm(InputWorkspace='592724_gc', OutputWorkspace='592724_gc')
-   ConvertUnits(InputWorkspace='592724_gc', OutputWorkspace='592724_gc', Target='Wavelength', ConvertFromPointData=False)
+More information is given on this in the :ref:`TrainingPythonAndMantid` section.
