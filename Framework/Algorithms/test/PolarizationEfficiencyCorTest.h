@@ -1881,12 +1881,11 @@ public:
     crop->setProperty("XMin", 0.);
     crop->execute();
     m_ws00 = crop->getProperty("OutputWorkspace");
+    AnalysisDataService::Instance().addOrReplace("00", m_ws00);
     m_ws01 = m_ws00->clone();
+    AnalysisDataService::Instance().addOrReplace("01", m_ws01);
     m_ws11 = m_ws00->clone();
-    m_group = boost::make_shared<WorkspaceGroup>();
-    m_group->addWorkspace(boost::dynamic_pointer_cast<Workspace>(m_ws00));
-    m_group->addWorkspace(boost::dynamic_pointer_cast<Workspace>(m_ws01));
-    m_group->addWorkspace(boost::dynamic_pointer_cast<Workspace>(m_ws11));
+    AnalysisDataService::Instance().addOrReplace("11", m_ws11);
     auto loadEff = AlgorithmManager::Instance().createUnmanaged(
         "LoadILLPolarizationFactors");
     loadEff->setChild(true);
@@ -1910,7 +1909,7 @@ public:
       correction.setChild(true);
       correction.setRethrows(true);
       correction.initialize();
-      correction.setProperty("InputWorkspace", m_group);
+      correction.setProperty("InputWorkspaces", "00, 01, 11");
       correction.setProperty("OutputWorkspace", "output");
       correction.setProperty("Flippers", "00, 01, 11");
       correction.setProperty("Efficiencies", m_effWS);
@@ -1920,7 +1919,6 @@ public:
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_effWS;
-  Mantid::API::WorkspaceGroup_sptr m_group;
   Mantid::API::MatrixWorkspace_sptr m_ws00;
   Mantid::API::MatrixWorkspace_sptr m_ws01;
   Mantid::API::MatrixWorkspace_sptr m_ws11;
