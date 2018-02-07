@@ -13,6 +13,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 using namespace Mantid::API;
 
 namespace {
@@ -187,6 +189,48 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
                          outputName + "_Parameters");
   iqtFitAlg->setProperty("OutputWorkspaceGroup", outputName + "_Workspaces");
   return iqtFitAlg;
+}
+
+IFunction_sptr IqtFit::fitFunction() const {
+  auto function = IndirectFitAnalysisTab::fitFunction()->clone();
+  const bool constrainIntensities = boolSettingValue("ConstrainIntensities");
+
+  if (constrainIntensities) {
+    const auto intensityTie = createIntensityTie(function);
+
+    if (!intensityTie.empty())
+      function->addTies(intensityTie);
+  }
+  return function;
+}
+
+std::string IqtFit::createIntensityTie(IFunction_sptr function) const {
+  std::string tieString = "1";
+  auto backgroundFunction = background();
+
+  if (backgroundFunction)
+    tieString += "-f" + std::to_string(backgroundIndex()) + ".A0";
+
+  const auto intensityParameters = getParameters(function, "Height");
+
+  if (intensityParameters.empty())
+    return "";
+
+  for (auto i = 1u; i < intensityParameters.size(); ++i)
+    tieString += "-" + intensityParameters[i];
+  return intensityParameters[0] + "=" + tieString;
+}
+
+std::vector<std::string>
+IqtFit::getParameters(IFunction_sptr function,
+                      const std::string &shortParameterName) const {
+  std::vector<std::string> parameters;
+
+  for (const auto &longName : function->getParameterNames()) {
+    if (boost::algorithm::ends_with(longName, shortParameterName))
+      parameters.push_back(longName);
+  }
+  return parameters;
 }
 
 void IqtFit::setMaxIterations(IAlgorithm_sptr fitAlgorithm,

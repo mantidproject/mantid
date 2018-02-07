@@ -25,6 +25,8 @@ class DLLExport IqtFit : public IndirectFitAnalysisTab {
 public:
   IqtFit(QWidget *parent = nullptr);
 
+  Mantid::API::IFunction_sptr fitFunction() const override;
+
   Mantid::API::MatrixWorkspace_sptr fitWorkspace() const override;
 
   bool doPlotGuess() const override;
@@ -69,6 +71,11 @@ private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
 
+  std::string
+  createIntensityTie(Mantid::API::IFunction_sptr function) const;
+  std::vector<std::string>
+  getParameters(Mantid::API::IFunction_sptr function,
+                const std::string &shortParameterName) const;
   std::string constructBaseName() const;
   std::string fitTypeString() const;
   Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
