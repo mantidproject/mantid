@@ -5,7 +5,7 @@ using namespace MantidQt::MantidWidgets;
 %End
 
 %InitialisationCode
-qRegisterMetaType<MantidQt::MantidWidgets::Message>();
+qRegisterMetaType<Message>("Message");
 %End
 
 // ----------------------------------------------------------------------------
@@ -52,7 +52,7 @@ class MessageDisplay : QWidget, Configurable {
 
 public:
   MessageDisplay(QWidget *parent = 0);
-  void attachLoggingChannel();
+  void attachLoggingChannel(int logLevel = -1);
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);
@@ -181,8 +181,6 @@ public:
 // WorkspaceWidget and dependencies
 // ---------------------------------
 
-
-
 class MantidDisplayBase /Abstract/ {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
@@ -218,4 +216,21 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 public:
   WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb /Transfer/,
                             QWidget *parent /TransferThis/ = nullptr);
+
+signals:
+  void plotSpectrumClicked(const QStringList & workspaceName);
+  void plotSpectrumWithErrorsClicked(const QStringList & workspaceName);
+  void plotColorfillClicked(const QStringList &workspaceName);
+};
+
+// ---------------------------------
+// Manage User Directories
+// ---------------------------------
+
+class ManageUserDirectories : QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+%End
+public:
+  ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
 };

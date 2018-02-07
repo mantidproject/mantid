@@ -120,7 +120,7 @@ if (ENABLE_MANTIDPLOT)
 endif()
 
 if ( ENABLE_WORKBENCH )
-  find_package ( Qt5 COMPONENTS Core Gui Widgets REQUIRED )
+  find_package ( Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED )
   if ( Qt5_FOUND )
     message ( STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}" )
   endif()

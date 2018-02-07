@@ -355,6 +355,7 @@ QGroupBox::title {
           </item>
          </layout>
         </widget>
+        <widget class="AddRunsPage" name="add_runs_page"/>
         <widget class="QWidget" name="settings_page">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
@@ -1970,6 +1971,12 @@ QGroupBox::title {
    <class>MaskingTable</class>
    <extends>QWidget</extends>
    <header>ui.sans_isis.masking_table</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AddRunsPage</class>
+   <extends>QWidget</extends>
+   <header>ui.sans_isis.add_runs_page</header>
    <container>1</container>
   </customwidget>
   <customwidget>

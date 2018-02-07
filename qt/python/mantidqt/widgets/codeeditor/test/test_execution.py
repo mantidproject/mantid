@@ -65,6 +65,10 @@ class PythonCodeExecutionTest(unittest.TestCase):
         executor.reset_context()
         self.assertEqual(0, len(executor.globals_ns))
 
+    def test_startup_code_executed_by_default(self):
+        executor = PythonCodeExecution(startup_code="x=100")
+        self.assertEqual(100, executor.globals_ns['x'])
+
     # ---------------------------------------------------------------------------
     # Successful execution tests
     # ---------------------------------------------------------------------------

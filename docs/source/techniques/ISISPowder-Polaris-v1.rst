@@ -617,11 +617,11 @@ On POLARIS this is set to the following TOF windows:
 ..  code-block:: python
 
   focused_cropping_values = [
-      (1500, 19900),  # Bank 1
-      (1500, 19900),  # Bank 2
-      (1500, 19900),  # Bank 3
-      (1500, 19900),  # Bank 4
-      (1500, 19900),  # Bank 5
+      (700,  30000),  # Bank 1
+      (1200, 24900),  # Bank 2
+      (1100, 19950),  # Bank 3
+      (1100, 19950),  # Bank 4
+      (1100, 19950),  # Bank 5
       ]
 
 .. _grouping_file_name_polaris_isis-powder-diffraction-ref:
