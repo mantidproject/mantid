@@ -163,6 +163,9 @@ public:
                                 const QString &optionName, bool enabled = false,
                                 double defaultValue = 0);
 
+  void setCustomSettingChangesFunction(const QString &settingKey,
+                                       bool changesFunction);
+
   QHash<QString, double> fitParameterValues() const;
 
   virtual QHash<QString, double> createDefaultValues() const;

@@ -115,6 +115,8 @@ void ConvFit::setup() {
   addBoolCustomSetting("ExtractMembers", "Extract Members");
   addOptionalDoubleSetting("TempCorrection", "Temp. Correction",
                            "UseTempCorrection", "Use Temp. Correction");
+  setCustomSettingChangesFunction("TempCorrection", true);
+  setCustomSettingChangesFunction("UseTempCorrection", true);
 
   // Instrument resolution
   m_properties["InstrumentResolution"] =

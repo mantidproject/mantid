@@ -109,6 +109,9 @@ public:
                           QtProperty *settingProperty, const QString &optionKey,
                           const QString &optionName, bool enabled = false);
 
+  void setCustomSettingChangesFunction(const QString &settingKey,
+                                       bool changesFunction);
+
   void updateParameterValues(const QHash<QString, double> &parameterValues);
 
   void updateParameterValues(PropertyHandler *functionHandler,
@@ -128,6 +131,10 @@ protected slots:
 
   void intChanged(QtProperty *prop) override;
 
+  void doubleChanged(QtProperty *prop) override;
+
+  void customChanged(const QString &settingName);
+
   void clear() override;
 
   void clearAllCustomFunctions();
@@ -142,6 +149,10 @@ signals:
   void customIntChanged(const QString &settingName, int value);
 
   void customEnumChanged(const QString &settingName, const QString &value);
+
+  void customDoubleChanged(const QString &settingName, double value);
+
+  void customSettingChanged(const QString &settingName);
 
   void fitScheduled();
 
@@ -177,6 +188,7 @@ private:
   QtProperty *m_functionsInComboBox;
   QSet<QtProperty *> m_functionsAsCheckBox;
   QSet<QtProperty *> m_functionsAsSpinner;
+  QSet<QString> m_functionChangingSettings;
   QHash<QString, QtProperty *> m_customSettings;
   QtProperty *m_backgroundSelection;
   PropertyHandler *m_backgroundHandler;

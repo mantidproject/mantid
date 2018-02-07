@@ -521,7 +521,8 @@ void IndirectFitAnalysisTab::addOptionalDoubleSetting(
  */
 void IndirectFitAnalysisTab::setCustomSettingChangesFunction(
     const QString &settingKey, bool changesFunction) {
-  
+  m_fitPropertyBrowser->setCustomSettingChangesFunction(settingKey,
+                                                        changesFunction);
 }
 
 /**

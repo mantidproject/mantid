@@ -181,6 +181,8 @@ void IndirectFitPropertyBrowser::init() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(updatePlotGuess()));
   connect(this, SIGNAL(visibilityChanged(bool)), this,
           SLOT(browserVisibilityChanged(bool)));
+  connect(this, SIGNAL(customSettingChanged(const QString &)), this,
+          SLOT(customChanged(const QString &)));
 
   initLayout(w);
 }
@@ -649,6 +651,21 @@ void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
 }
 
 /**
+ * Sets whether a setting with a specified key affects the fitting function.
+ *
+ * @param settingKey      The key of the setting.
+ * @param changesFunction Boolean specifying whether the setting affects the
+ *                        fitting function.
+ */
+void IndirectFitPropertyBrowser::setCustomSettingChangesFunction(
+    const QString &settingKey, bool changesFunction) {
+  if (changesFunction)
+    m_functionChangingSettings.insert(settingKey);
+  else
+    m_functionChangingSettings.remove(settingKey);
+}
+
+/**
  * Adds a check-box with the specified name, to this fit property browser, which
  * when checked adds the specified functions to the mode and when unchecked,
  * removes them.
@@ -911,6 +928,7 @@ void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
     setBackground(enumValue(prop).toStdString());
   } else if (m_customSettings.values().contains(prop)) {
     emit customEnumChanged(prop->propertyName(), enumValue(prop));
+    emit customSettingChanged(prop->propertyName());
   }
   FitPropertyBrowser::enumChanged(prop);
 }
@@ -937,6 +955,7 @@ void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
       clearCustomFunctions(prop);
   } else if (m_customSettings.values().contains(prop)) {
     emit customBoolChanged(propertyName, m_boolManager->value(prop));
+    emit customSettingChanged(propertyName);
   }
   FitPropertyBrowser::boolChanged(prop);
 }
@@ -953,8 +972,32 @@ void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
     addCustomFunctions(prop, prop->propertyName(), m_intManager->value(prop));
   } else if (m_customSettings.values().contains(prop)) {
     emit customIntChanged(prop->propertyName(), m_intManager->value(prop));
+    emit customSettingChanged(prop->propertyName());
   }
   FitPropertyBrowser::intChanged(prop);
+}
+
+/**
+ * Called when a double value changes in this indirect fit property browser.
+ *
+ * @param prop  The property containing the double value which was changed.
+ */
+void IndirectFitPropertyBrowser::doubleChanged(QtProperty *prop) {
+  if (m_customSettings.values().contains(prop)) {
+    emit customDoubleChanged(prop->propertyName(),
+                             m_doubleManager->value(prop));
+    emit customSettingChanged(prop->propertyName());
+  }
+}
+
+/**
+ * Called when a custom setting changes in this indirect fit property browser.
+ *
+ * @param settingName The name of the custom setting which changed.
+ */
+void IndirectFitPropertyBrowser::customChanged(const QString &settingName) {
+  if (m_functionChangingSettings.contains(settingName))
+    emit functionChanged();
 }
 
 /**
