@@ -31,12 +31,14 @@ void run_StorageMode_Cloned(const Parallel::Communicator &comm) {
 void run_StorageMode_Distributed(const Parallel::Communicator &comm) {
   IndexInfo i(47, Parallel::StorageMode::Distributed, comm);
   TS_ASSERT_EQUALS(i.globalSize(), 47);
+  TS_ASSERT_EQUALS(i.spectrumNumbers().size(), 47);
   size_t expectedSize = 0;
   for (size_t globalIndex = 0; globalIndex < i.globalSize(); ++globalIndex) {
+    SpectrumNumber specNum = static_cast<int>(globalIndex) + 1;
+    TS_ASSERT_EQUALS(i.spectrumNumbers()[globalIndex], specNum);
     // Current default is RoundRobinPartitioner
     if (static_cast<int>(globalIndex) % comm.size() == comm.rank()) {
-      TS_ASSERT_EQUALS(i.spectrumNumber(expectedSize),
-                       static_cast<int>(globalIndex) + 1);
+      TS_ASSERT_EQUALS(i.spectrumNumber(expectedSize), specNum);
       ++expectedSize;
     }
   }
@@ -94,6 +96,47 @@ void run_construct_from_parent_StorageMode_Distributed(
   }
   TS_ASSERT_EQUALS(i.size(), expectedSize);
 }
+
+IndexInfo makeIndexInfo(const Parallel::Communicator &comm) {
+  IndexInfo i(666, Parallel::StorageMode::Distributed, comm);
+  std::vector<SpectrumDefinition> specDefs(i.size());
+  size_t current = 0;
+  for (size_t spec = 0; spec < 200; ++spec) {
+    if (i.isOnThisPartition(GlobalSpectrumIndex(spec))) {
+      if (spec > 42)
+        specDefs[current].add(spec + 1);
+      ++current;
+    }
+  }
+  i.setSpectrumDefinitions(specDefs);
+  return i;
+}
+
+void run_globalSpectrumIndicesFromDetectorIndices_Distributed(
+    const Parallel::Communicator &comm) {
+  const auto &i = makeIndexInfo(comm);
+  // Out of order
+  std::vector<size_t> detectorIndices{100, 101, 102, 200, 199};
+  const auto &indices =
+      i.globalSpectrumIndicesFromDetectorIndices(detectorIndices);
+  TS_ASSERT_EQUALS(indices.size(), 5);
+  TS_ASSERT_EQUALS(indices[0], 99);
+  TS_ASSERT_EQUALS(indices[1], 100);
+  TS_ASSERT_EQUALS(indices[2], 101);
+  TS_ASSERT_EQUALS(indices[3], 198);
+  TS_ASSERT_EQUALS(indices[4], 199);
+}
+
+void run_globalSpectrumIndicesFromDetectorIndices_missing(
+    const Parallel::Communicator &comm) {
+  const auto &i = makeIndexInfo(comm);
+  // No spectrum maps to 17
+  std::vector<size_t> detectorIndices{100, 101, 102, 200, 199, 17};
+  TS_ASSERT_THROWS_EQUALS(
+      i.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
+      const std::runtime_error &e, std::string(e.what()),
+      "Some of the requested detectors do not have a corresponding spectrum");
+}
 }
 
 class IndexInfoTest : public CxxTest::TestSuite {
@@ -122,6 +165,9 @@ public:
     TS_ASSERT_EQUALS(info.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(info.spectrumNumber(2), 1);
+    TS_ASSERT_EQUALS(info.spectrumNumbers()[0], 3);
+    TS_ASSERT_EQUALS(info.spectrumNumbers()[1], 2);
+    TS_ASSERT_EQUALS(info.spectrumNumbers()[2], 1);
   }
 
   void test_construct_from_parent_reorder() {
@@ -363,6 +409,14 @@ public:
 
   void test_construct_from_parent_StorageMode_Distributed() {
     runParallel(run_construct_from_parent_StorageMode_Distributed);
+  }
+
+  void test_globalSpectrumIndicesFromDetectorIndices_Distributed() {
+    runParallel(run_globalSpectrumIndicesFromDetectorIndices_Distributed);
+  }
+
+  void test_globalSpectrumIndicesFromDetectorIndices_missing() {
+    runParallel(run_globalSpectrumIndicesFromDetectorIndices_missing);
   }
 
 private:

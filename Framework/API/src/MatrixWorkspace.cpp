@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
@@ -1618,6 +1619,11 @@ void MatrixWorkspace::clearMDMasking() {
 Mantid::Kernel::SpecialCoordinateSystem
 MatrixWorkspace::getSpecialCoordinateSystem() const {
   return Mantid::Kernel::None;
+}
+
+// Check if this class has an oriented lattice on a sample object
+bool MatrixWorkspace::hasOrientedLattice() const {
+  return Mantid::API::ExperimentInfo::sample().hasOrientedLattice();
 }
 
 /**

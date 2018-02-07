@@ -6,10 +6,12 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -1954,6 +1956,27 @@ public:
       }
       ++count;
     }
+  }
+
+  void test_hasOrientedLattice() {
+    // create a workspace without an oriented lattice (or sample)
+    boost::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
+    TSM_ASSERT_EQUALS(
+        "A newly created workspace should not have an oriented lattice",
+        ws->hasOrientedLattice(), false);
+
+    // add an oriented lattice
+    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
+    ws->mutableSample().setOrientedLattice(latt);
+    delete latt;
+    TSM_ASSERT_EQUALS("A workspace with an oriented lattice should report true",
+                      ws->hasOrientedLattice(), true);
+
+    // remove it again
+    ws->mutableSample().clearOrientedLattice();
+    TSM_ASSERT_EQUALS(
+        "workspace with it's oriented lattice cleared should report false",
+        ws->hasOrientedLattice(), false);
   }
 
 private:

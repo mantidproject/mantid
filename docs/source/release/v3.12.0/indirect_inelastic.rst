@@ -14,6 +14,7 @@ New
 Improved
 ########
 
+- :ref:`algm-ApplyPaalmanPingsCorrection` now accepts a corrections group containing only an :math:`A_{s,s}` and an :math:`A_{c,c}` workspace (produced by :ref:`algm-CalculateMonteCarloAbsorption`).
 - :ref:`BASISReduction  <algm-BASISReduction>` now permits the user to exclude a contiguous time segment from the reduction process.
 - :ref:`BASISReduction <algm-BASISReduction>` option *noMonitorNorm* changed to *MonitorNorm*.
 - :ref:`BASISReduction <algm-BASISReduction>` now contains log entry *asString* storing the options passed to to the algorithm.
@@ -60,6 +61,7 @@ Bugfixes
 - In the IqtFit interface, the 'AO' parameter now defaults to 0.
 - The mini preview plot now updates correctly in the Indirect Data Analysis interfaces, when the fit function is changed; when changed to a function that wasn't used in the most recent fit, will plot only the sample, else will plot the sample, fit and difference.
 - Plotting individual parameters of the fit in the interface ('Plot Options'), will no longer produce an error in the ConvFit interface, when plotting 'FWHM'.
+- In the Calculate Paalman Pings tab of the Indirect Correction interface the container back thickness is now set correctly.
 
 Data Reduction Interfaces
 -------------------------
@@ -88,6 +90,8 @@ New
 
 Improved
 ########
+- The Apply Paalman Pings interface has been renamed to Apply Absorption Correction.
+- The Apply Absorption Correction interface no longer requires workspaces to be in units of wavelength (this is done within :ref:`algm-ApplyPaalmanPingsCorrection`).
 
 Bugfixes
 ########

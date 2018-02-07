@@ -5,7 +5,7 @@
 #include <Poco/Message.h>
 
 namespace MantidQt {
-namespace API {
+namespace MantidWidgets {
 
 /**
  * Creates a QtSignalChannel. This channel receives
@@ -36,8 +36,8 @@ void QtSignalChannel::setSource(const QString &source) { m_source = source; }
  */
 void QtSignalChannel::log(const Poco::Message &msg) {
   if (m_source.isEmpty() || this->source() == msg.getSource().c_str()) {
-    emit messageReceived(API::Message(
-        QString::fromStdString(msg.getText() + "\n"), msg.getPriority()));
+    emit messageReceived(Message(QString::fromStdString(msg.getText() + "\n"),
+                                 msg.getPriority()));
   }
 }
 

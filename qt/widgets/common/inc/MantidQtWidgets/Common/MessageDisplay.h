@@ -6,10 +6,11 @@
 //----------------------------------
 #include "DllOption.h"
 #include "MantidKernel/FilterChannel.h"
+#include "MantidQtWidgets/Common/Configurable.h"
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/QtSignalChannel.h"
 
-#include <QMap>
+#include <QHash>
 #include <QTextCharFormat>
 #include <QTextCursor>
 #include <QWidget>
@@ -19,17 +20,14 @@
 //----------------------------------------------------------
 class QAction;
 class QActionGroup;
+class QPlainTextEdit;
 class QPoint;
+class QSettings;
 class QShowEvent;
 class QSignalMapper;
-class QPlainTextEdit;
 
 namespace MantidQt {
 namespace MantidWidgets {
-using API::Message; // So that the slots work
-                    //----------------------------------------------------------
-                    // Forward declarations
-                    //----------------------------------------------------------
 
 /** @class MessageDisplay
  * Provides a widget for display messages in a text box
@@ -37,24 +35,26 @@ using API::Message; // So that the slots work
  * a message is a framework Poco message or a simple string.
  * It can connect to the Mantid logging framework if required
  */
-class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget,
+                                                  public Configurable {
   Q_OBJECT
   Q_PROPERTY(QString source READ source WRITE setSource)
 
 public:
-  /// Controls whether the display is allowed to set the log levels
-  enum LogLevelControl { EnableLogLevelControl = 0, DisableLogLevelControl };
+  // Configurable interface
+  void readSettings(const QSettings &storage) override;
+  void writeSettings(QSettings *storage) override;
 
+public:
   /// Default constructor with optional parent
   MessageDisplay(QWidget *parent = nullptr);
-  /// Constructor specifying if whether control over the global log level is
-  /// allowed
-  MessageDisplay(LogLevelControl logLevelControl, QWidget *parent = nullptr);
+  MessageDisplay(const MessageDisplay &) = delete;
+  MessageDisplay &operator=(const MessageDisplay &) = delete;
   /// Destructor
   ~MessageDisplay() override;
 
   // Setup logging framework connections
-  void attachLoggingChannel();
+  void attachLoggingChannel(int logLevel = 0);
   /// If set, only Mantid log messages from this source are emitted
   void setSource(const QString &source);
   /// Get the current source are emitted
@@ -98,10 +98,9 @@ private slots:
   /// Provide a custom context menu
   void showContextMenu(const QPoint &event);
   /// Set the global logging level
-  void setGlobalLogLevel(int priority);
+  void setLogLevel(int priority);
 
 private:
-  Q_DISABLE_COPY(MessageDisplay)
   /// Setup the actions
   void initActions();
   /// Initialize the text formats
@@ -109,27 +108,24 @@ private:
   /// Set the properties of the text display
   void setupTextArea();
   /// Return format for given log level
-  QTextCharFormat format(const API::Message::Priority priority) const;
+  QTextCharFormat format(const Message::Priority priority) const;
 
-  /// Are we allowed to affect the log level
-  LogLevelControl m_logLevelControl;
   /// A reference to the log channel
-  API::QtSignalChannel *m_logChannel;
+  QtSignalChannel *m_logChannel;
   /// A reference to the log channel
   Poco::FilterChannel *m_filterChannel;
   /// The actual widget holding the text
   QPlainTextEdit *m_textDisplay;
   /// Map priority to text formatting
-  QMap<API::Message::Priority, QTextCharFormat> m_formats;
+  QHash<Message::Priority, QTextCharFormat> m_formats;
   /// Mutually exclusive log actions
   QActionGroup *m_loglevels;
   /// Map action signal to log level parameter
   QSignalMapper *m_logLevelMapping;
   /// Log level actions
   QAction *m_error, *m_warning, *m_notice, *m_information, *m_debug;
-
-  // the name of the fliter channel
-  const std::string m_FilterChannelName = "MessageDisplayPriority";
+  /// Name of the filter channel registered with Poco
+  std::string m_filterChannelName;
 };
 }
 }

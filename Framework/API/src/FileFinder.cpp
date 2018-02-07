@@ -2,14 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FileFinder.h"
-#include "MantidAPI/IArchiveSearch.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IArchiveSearch.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Strings.h"
 
 #include <Poco/Path.h>
@@ -56,11 +56,7 @@ const std::string FileFinderImpl::ALLOWED_SUFFIX = "-add";
  */
 FileFinderImpl::FileFinderImpl() {
   // Make sure plugins are loaded
-  std::string libpath =
-      Kernel::ConfigService::Instance().getString("plugins.directory");
-  if (!libpath.empty()) {
-    Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-  }
+  FrameworkManager::Instance().loadPlugins();
 
 // determine from Mantid property how sensitive Mantid should be
 #ifdef _WIN32

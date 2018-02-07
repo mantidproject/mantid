@@ -39,6 +39,8 @@ calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 unsplined_van_path = os.path.join(calibration_dir, unsplined_van_rel_path)
 
+total_scattering_input_file = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_TotalScatteringInput.nxs")
+
 
 class CreateVanadiumTest(stresstesting.MantidStressTest):
 
@@ -72,6 +74,7 @@ class FocusTest(stresstesting.MantidStressTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
+    tolerance = 1e-11
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -101,20 +104,20 @@ class TotalScatteringTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         # Load Focused ws
-        mantid.LoadNexus(Filename="ISIS_Powder-POLARIS98533_FocusSempty.nxs", OutputWorkspace='98533-Results-TOF-Grp')
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
         self.pdf_output = run_total_scattering('98533', False)
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 51
-        expected_peak_values = [0.0187231,
-                                0.0583586,
-                                0.2241280,
-                                0.2752230,
-                                1.0252800]
+        # After rebin this is at X index 37
+        expected_peak_values = [0.0002294,
+                                0.0606328,
+                                0.2007917,
+                                0.1436630,
+                                0.9823244]
         for index, ws in enumerate(self.pdf_output):
-            self.assertAlmostEqual(ws.dataY(0)[51], expected_peak_values[index], places=3)
+            self.assertAlmostEqual(ws.dataY(0)[37], expected_peak_values[index], places=3)
 
 
 def run_total_scattering(run_number, merge_banks):
@@ -130,6 +133,7 @@ def _gen_required_files():
     # Generate file names of form "INSTxxxxx.nxs"
     input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
     input_files.append(calibration_map_path)
+    input_files.append(total_scattering_input_file)
     return input_files
 
 
