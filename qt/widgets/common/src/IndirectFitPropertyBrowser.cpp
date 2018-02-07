@@ -200,10 +200,13 @@ IFunction_sptr IndirectFitPropertyBrowser::background() const {
  *          is selected.
  */
 int IndirectFitPropertyBrowser::backgroundIndex() const {
-  if (m_backgroundHandler != nullptr)
-    return m_backgroundHandler->functionPrefix().right(1).toInt();
-  else
-    return -1;
+  if (m_backgroundHandler != nullptr) {
+    const auto prefix = m_backgroundHandler->functionPrefix();
+
+    if (!prefix.endsWith("-1"))
+      return prefix.right(1).toInt();
+  }
+  return -1;
 }
 
 /**
@@ -875,11 +878,11 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
     }
   }
 
-  if (handler == m_backgroundHandler)
-    m_enumManager->setValue(m_backgroundSelection, 0);
-
   if (handler->parentHandler() != nullptr)
     FitPropertyBrowser::removeFunction(handler);
+
+  if (handler == m_backgroundHandler)
+    m_enumManager->setValue(m_backgroundSelection, 0);
 }
 
 /**
