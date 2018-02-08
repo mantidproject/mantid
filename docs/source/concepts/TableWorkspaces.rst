@@ -117,6 +117,11 @@ Table Workspace Properties
     print("Column count: {}".format(tableWS.columnCount()))
     print("Column names: {}".format(tableWS.getColumnNames()))
     columnValuesList = tableWS.column(0)
+
+    # convert table to dictionary
+    data = tableWS.toDict()
+    print("Detector names: {}".format(data['Detector Name']))
+
     # To remove a column
     tableWS.removeColumn("Detector Name")
 
@@ -128,6 +133,26 @@ Table Workspace Properties
     Detector Position: [9,0,0], Detector Name: Detector 1, Detector ID: 1
     Column count: 3
     Column names: ['Detector ID', 'Detector Name', 'Detector Position']
+    Detector names: ['Detector 1', 'Detector 2', 'Detector 3', '', 'new Detector 1', 'new Detector 2']
+
+
+Converting To Pandas DataFrames
+###############################
+
+Table workspaces can be easily converted to a pandas :class:`~pandas.DataFrame` using the following code snippet.
+
+.. code-block:: python
+
+    import pandas as pd
+    df = pd.DataFrame(table.toDict())
+
+If only a subset of the data from the table is required, or you're working with an existing :class:`~pandas.DataFrame` and want to append columns from the Table workspace this can be achieved as follows.
+
+.. code-block:: python
+
+    df = pd.DataFrame()
+    for col in tableWS.columnNames():
+        df[col] = tableWS[col]
 
 Working with Table Workspaces in C++
 ------------------------------------
