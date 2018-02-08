@@ -107,6 +107,8 @@ public:
 
   const std::string &outputWorkspaceName() const;
 
+  void setConvolveMembers(bool convolveMembers);
+
   void setCustomSettingEnabled(const QString &customName, bool enabled);
 
   void moveCustomFunctionsToEnd();

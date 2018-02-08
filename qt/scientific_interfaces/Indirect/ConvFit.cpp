@@ -39,6 +39,7 @@ void ConvFit::setup() {
   setMinimumSpectrum(0);
   setMaximumSpectrum(0);
   setDefaultPeakType("Lorentzian");
+  setConvolveMembers(true);
 
   auto fitRangeSelector = m_uiForm->ppPlotTop->addRangeSelector("ConvFitRange");
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,

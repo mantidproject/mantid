@@ -373,6 +373,15 @@ void IndirectFitPropertyBrowser::setBackground(
 }
 
 /**
+ * Sets whether fit members should be convolved with the resolution after a fit.
+ *
+ * @param convolveMembers If true, members are to be convolved.
+ */
+void IndirectFitPropertyBrowser::setConvolveMembers(bool convolveMembers) {
+  m_boolManager->setValue(m_convolveMembers, convolveMembers);
+}
+
+/**
  * Sets whether the custom setting with the specified name is enabled.
  *
  * @param settingName The name of the custom setting.

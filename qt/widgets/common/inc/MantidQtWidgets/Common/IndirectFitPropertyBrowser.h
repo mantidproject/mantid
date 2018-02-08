@@ -52,6 +52,8 @@ public:
 
   void setBackground(const std::string &backgroundName);
 
+  void setConvolveMembers(bool convolveMembers);
+
   void setCustomSettingEnabled(const QString &customName, bool enabled);
 
   void moveCustomFunctionsToEnd();

@@ -293,6 +293,15 @@ const std::string &IndirectFitAnalysisTab::outputWorkspaceName() const {
 }
 
 /**
+ * Sets whether fit members should be convolved with the resolution after a fit.
+ *
+ * @param convolveMembers If true, members are to be convolved.
+ */
+void IndirectFitAnalysisTab::setConvolveMembers(bool convolveMembers) {
+  m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
+}
+
+/**
  * Sets whether the custom setting with the specified name is enabled.
  *
  * @param settingName The name of the custom setting.
