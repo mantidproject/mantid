@@ -971,6 +971,7 @@ void PolarizationEfficiencyCor::threeInputsSolve10(
 /**
  * Solve in-place the 01 and 10 flipper configurations from the assumption that
  * for the corrected intensities R01 = R10 = 0.
+ * @param fullInputs a set of output workspaces
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
