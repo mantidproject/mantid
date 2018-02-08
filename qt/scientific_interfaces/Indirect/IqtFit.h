@@ -60,12 +60,14 @@ protected slots:
   void specMaxChanged(int value);
   void startXChanged(double startX) override;
   void endXChanged(double endX) override;
+  void backgroundSelectorChanged(double val);
   void singleFit();
   void algorithmComplete(bool error) override;
   void updatePlotOptions() override;
   void plotWorkspace();
   void saveResult();
   void fitFunctionChanged();
+  void parameterUpdated(const Mantid::API::IFunction *function);
 
 private:
   void disablePlotGuess() override;

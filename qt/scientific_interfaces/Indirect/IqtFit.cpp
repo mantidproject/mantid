@@ -60,6 +60,14 @@ void IqtFit::setup() {
   connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this,
           SLOT(xMaxSelected(double)));
 
+  auto backRangeSelector = m_uiForm->ppPlotTop->addRangeSelector(
+      "IqtFitBackRange", MantidWidgets::RangeSelector::YSINGLE);
+  backRangeSelector->setVisible(false);
+  backRangeSelector->setColour(Qt::darkGreen);
+  backRangeSelector->setRange(0.0, 1.0);
+  connect(backRangeSelector, SIGNAL(minValueChanged(double)), this,
+          SLOT(backgroundSelectorChanged(double)));
+
   // Signal/slot ui connections
   connect(m_uiForm->dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
@@ -88,10 +96,19 @@ void IqtFit::setup() {
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
           SLOT(updatePlotGuess()));
 
+  connect(this, SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+          SLOT(parameterUpdated(const Mantid::API::IFunction *)));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
 void IqtFit::fitFunctionChanged() {
+  auto backRangeSelector =
+      m_uiForm->ppPlotTop->getRangeSelector("IqtFitBackRange");
+
+  if (backgroundName() == "None")
+    backRangeSelector->setVisible(false);
+  else
+    backRangeSelector->setVisible(true);
 
   if (numberOfCustomFunctions("StretchExp") > 0) {
     setCustomSettingEnabled("ConstrainBeta", true);
@@ -349,6 +366,23 @@ void IqtFit::newDataLoaded(const QString wsName) {
   m_uiForm->spSpectraMax->setMaximum(maxWsIndex);
   m_uiForm->spSpectraMax->setMinimum(0);
   m_uiForm->spSpectraMax->setValue(maxWsIndex);
+}
+
+void IqtFit::backgroundSelectorChanged(double val) {
+  setDefaultPropertyValue("A0", val);
+  setParameterValue("LinearBackground", "A0", val);
+  setParameterValue("FlatBackground", "A0", val);
+}
+
+void IqtFit::parameterUpdated(const Mantid::API::IFunction *function) {
+
+  if (background() && function->asString() == background()->asString()) {
+    auto rangeSelector =
+        m_uiForm->ppPlotTop->getRangeSelector("IqtFitBackRange");
+    rangeSelector->blockSignals(true);
+    rangeSelector->setMinimum(function->getParameter("A0"));
+    rangeSelector->blockSignals(false);
+  }
 }
 
 void IqtFit::updatePreviewPlots() {
