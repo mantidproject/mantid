@@ -1,9 +1,13 @@
 #ifndef MANTID_KERNEL_USAGESERVICE_H_
 #define MANTID_KERNEL_USAGESERVICE_H_
 
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 
+#ifndef Q_MOC_RUN
+#include <boost/date_time/posix_time/posix_time.hpp>
+#endif
 #include <json/value.h>
 
 #include <Poco/ActiveMethod.h>
@@ -85,7 +89,7 @@ public:
   void flush();
   void shutdown();
   /// gets the uptime of this mantid instance
-  std::string getStartTime();
+  Types::Core::time_duration getUpTime();
 
 protected:
   /// Constructor
@@ -133,7 +137,7 @@ private:
   bool m_isEnabled;
   mutable std::mutex m_mutex;
   std::string m_application;
-  std::string m_startTime;
+  Types::Core::DateAndTime m_startTime;
 
   /// Async method for sending startup notifications
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_startupActiveMethod;

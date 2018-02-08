@@ -15,7 +15,6 @@ set ( SRC_FILES
 	src/ConfigService.cpp
 	src/ConfigObserver.cpp
 	src/ConfigPropertyObserver.cpp
-	src/CrashService.cpp
 	src/DateAndTime.cpp
 	src/DataItem.cpp
 	src/DateAndTimeHelpers.cpp
@@ -30,6 +29,7 @@ set ( SRC_FILES
 	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
 	src/EqualBinsChecker.cpp
+	src/ErrorReporter.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
 	src/FileDescriptor.cpp
@@ -167,7 +167,6 @@ set ( INC_FILES
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ConfigObserver.h
 	inc/MantidKernel/ConfigPropertyObserver.h
-	inc/MantidKernel/CrashService.h
   inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
@@ -186,6 +185,7 @@ set ( INC_FILES
 	inc/MantidKernel/EmptyValues.h
 	inc/MantidKernel/EnabledWhenProperty.h
 	inc/MantidKernel/EnvironmentHistory.h
+	inc/MantidKernel/ErrorReporter.h
 	inc/MantidKernel/EqualBinsChecker.h
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
@@ -342,7 +342,6 @@ set ( TEST_FILES
 	ConfigServiceTest.h
 	ConfigObserverTest.h
 	ConfigPropertyObserverTest.h
-	CrashServiceTest.h
 	CowPtrTest.h
 	DataServiceTest.h
 	DateAndTimeHelpersTest.h
@@ -358,6 +357,7 @@ set ( TEST_FILES
 	EigenConversionHelpersTest.h
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
+	ErrorReporterTest.h
 	EqualBinsCheckerTest.h
 	FacilitiesTest.h
 	FileDescriptorTest.h

@@ -1,15 +1,19 @@
-#ifndef MANTID_KERNEL_CRASHSERVICE_H_
-#define MANTID_KERNEL_CRASHSERVICE_H_
+#ifndef MANTID_KERNEL_ERRORSERVICE_H_
+#define MANTID_KERNEL_ERRORSERVICE_H_
 
+#ifndef Q_MOC_RUN
+#include <boost/date_time/posix_time/posix_time.hpp>
+#endif
 #include <string>
 #include <Poco/ActiveMethod.h>
 
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
 namespace Kernel {
 
-/** CrashReporter : The Crash reporter is responsible for sending crash reports
+/** ErrorReporter : The error reporter is responsible for sending error reports
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -33,26 +37,26 @@ namespace Kernel {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */  
 
-class MANTID_KERNEL_DLL CrashServiceImpl {  
+class MANTID_KERNEL_DLL ErrorReporter {  
     public:
-    CrashServiceImpl(std::string application);
-    CrashServiceImpl(std::string application, std::string startTime);
-    void sendCrashReport();
+    ErrorReporter(std::string application);
+    ErrorReporter(std::string application, Types::Core::time_duration startTime);
+    void sendErrorReport();
 
     protected:
-    virtual std::string generateCrashMessage();
+    virtual std::string generateErrorMessage();
     virtual int sendReport(const std::string &message,
                                  const std::string &url);
     
     private:
-    int sendCrashAsyncImpl(const std::string &message);
+    int sendErrorAsyncImpl(const std::string &message);
     const std::string m_application;
-    const std::string m_startTime;
+    Types::Core::time_duration m_upTime;
     /// Async method for sending startup notifications
-    Poco::ActiveMethod<int, std::string, CrashServiceImpl> m_crashActiveMethod;
+    Poco::ActiveMethod<int, std::string, ErrorReporter> m_errorActiveMethod;
 };
 
 } // namespace Kernel
 } // namespace Mantid
 
-#endif /* MANTID_KERNEL_CRASHSERVICE_H_ */
+#endif /* MANTID_KERNEL_ERRORSERVICE_H_ */

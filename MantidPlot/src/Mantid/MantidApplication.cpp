@@ -5,7 +5,7 @@
 #include "MantidQtWidgets/Common/MantidDialog.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/CrashService.h"
+#include "MantidKernel/ErrorReporter.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
 
@@ -42,8 +42,8 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
     int reportingEnabled = 0;
     int retVal = Mantid::Kernel::ConfigService::Instance().getValue("usagereports.enabled", reportingEnabled);
     if (reportingEnabled && retVal == 1){
-      Mantid::Kernel::CrashServiceImpl crashService("mantidplot", Mantid::Kernel::UsageService::Instance().getStartTime());
-      crashService.sendCrashReport();
+      Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime());
+      errorReporter.sendErrorReport();
     }
       
     if (MantidQt::API::MantidDialog::handle(receiver, e))

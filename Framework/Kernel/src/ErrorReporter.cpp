@@ -1,4 +1,4 @@
-#include "MantidKernel/CrashService.h"
+#include "MantidKernel/ErrorReporter.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -18,33 +18,36 @@ namespace Kernel {
 
 namespace {
 /// static logger
-Logger g_log("CrashServiceImpl");
+Logger g_log("ErrorReporter");
 }
-const std::string CRASH_URL("http://crashreports.mantidproject.org/api/crash");
+const std::string ERROR_URL("http://errorreports.mantidproject.org/api/error");
 // const std::string STARTUP_URL(
 //    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
 // http://posttestserver.com/data/
 
 //----------------------------------------------------------------------------------------------
-// Constructor for CrashServiceImpl
-CrashServiceImpl::CrashServiceImpl(std::string application)
-    : m_application(application), m_startTime(""), m_crashActiveMethod(this, &CrashServiceImpl::sendCrashAsyncImpl) {}
+// Constructor for ErrorReporter
+ErrorReporter::ErrorReporter(std::string application)
+    : m_application(application), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl) {
+      Types::Core::time_duration upTime(0,0,0,0);
+      m_upTime = upTime;
+    }
 
-CrashServiceImpl::CrashServiceImpl(std::string application, std::string startTime)
-    : m_application(application), m_startTime(startTime), m_crashActiveMethod(this, &CrashServiceImpl::sendCrashAsyncImpl) {}
+ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration startTime)
+    : m_application(application), m_upTime(startTime), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl) {}
 
-void CrashServiceImpl::sendCrashReport() {
+void ErrorReporter::sendErrorReport() {
   try {
-    std::string message = this->generateCrashMessage();
+    std::string message = this->generateErrorMessage();
 
     // send the report
-    Poco::ActiveResult<int> result = m_crashActiveMethod(message);
+    Poco::ActiveResult<int> result = m_errorActiveMethod(message);
   } catch (std::exception &ex) {
-    g_log.debug() << "Send crash report failure. " << ex.what() << '\n';
+    g_log.debug() << "Send error report failure. " << ex.what() << '\n';
   }
 }
 
-std::string CrashServiceImpl::generateCrashMessage() {
+std::string ErrorReporter::generateErrorMessage() {
     ::Json::Value message;
 
     // username
@@ -74,7 +77,7 @@ std::string CrashServiceImpl::generateCrashMessage() {
   message["dateTime"] =
       Types::Core::DateAndTime::getCurrentTime().toISO8601String();
 
-  message["startTime"] = m_startTime;
+  message["upTime"] = to_iso_string(m_upTime);
 
   message["application"] = m_application;
 
@@ -84,11 +87,11 @@ std::string CrashServiceImpl::generateCrashMessage() {
   return writer.write(message);
 }
 
-int CrashServiceImpl::sendCrashAsyncImpl(const std::string &message) {
-  return this->sendReport(message, CRASH_URL);
+int ErrorReporter::sendErrorAsyncImpl(const std::string &message) {
+  return this->sendReport(message, ERROR_URL);
 }
 
-int CrashServiceImpl::sendReport(const std::string &message,
+int ErrorReporter::sendReport(const std::string &message,
                                  const std::string &url) {
   int status = -1;
   try {

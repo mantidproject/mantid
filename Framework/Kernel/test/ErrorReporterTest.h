@@ -1,22 +1,21 @@
-#ifndef MANTID_API_CRASHSERVICETEST_H_
-#define MANTID_API_CRASHSERVICETEST_H_
+#ifndef MANTID_API_ERRORSERVICETEST_H_
+#define MANTID_API_ERRORSERVICETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/CrashService.h"
+#include "MantidKernel/ErrorReporter.h"
 #include <algorithm>
 #include <json/json.h>
 
-using Mantid::Kernel::CrashServiceImpl;
+using Mantid::Kernel::ErrorReporter;
 
-class TestableCrashService : public CrashServiceImpl {
+class TestableErrorReporter : public ErrorReporter {
 public:
-  //TestableCrashService() : CrashServiceImpl() {}
-  using CrashServiceImpl::CrashServiceImpl;
+  using ErrorReporter::ErrorReporter;
 
-  /// generates the message body for a crash message
-  std::string generateCrashMessage() override {
-    return CrashServiceImpl::generateCrashMessage();
+  /// generates the message body for a error message
+  std::string generateErrorMessage() override {
+    return ErrorReporter::generateErrorMessage();
   }
 
 protected:
@@ -29,17 +28,18 @@ protected:
   }
 };
 
-class CrashServiceTest : public CxxTest::TestSuite {
+class ErrorReporterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CrashServiceTest *createSuite() { return new CrashServiceTest(); }
-  static void destroySuite(CrashServiceTest *suite) { delete suite; }
+  static ErrorReporterTest *createSuite() { return new ErrorReporterTest(); }
+  static void destroySuite(ErrorReporterTest *suite) { delete suite; }
 
-  void test_crashMessage() {
+  void test_errorMessage() {
     std::string name = "My testing application name";
-    TestableCrashService crashService(name);
-    std::string message = crashService.generateCrashMessage();
+    Mantid::Types::Core::time_duration upTime(5,0,7,0);
+    TestableErrorReporter errorService(name, upTime);
+    std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
     ::Json::Value root;
@@ -47,7 +47,7 @@ public:
     auto members = root.getMemberNames();
     std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
-        "osArch",   "osName",      "osReadable", "osVersion",  "uid", "facility"};
+        "osArch",   "osName",      "osReadable", "osVersion",  "uid", "facility", "upTime"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) !=
@@ -55,6 +55,7 @@ public:
     }
 
     TS_ASSERT_EQUALS(root["application"].asString(), name);
+    TS_ASSERT_EQUALS(root["upTime"].asString(), to_iso_string(upTime));
   }
 };
 
