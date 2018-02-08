@@ -347,10 +347,10 @@ class MantidAxes3D(Axes3D):
 
     name = 'mantid3d'
 
-    def plot_surface(self, *args, **kwargs):
+    def plot(self, *args, **kwargs):
         '''
         If the **mantid3d** projection is chosen, it can be
-        used the same as :py:meth:`matplotlib.axes.Axes3D.plot_surface` for arrays,
+        used the same as :py:meth:`matplotlib.axes.Axes3D.plot` for arrays,
         or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
 
@@ -360,17 +360,42 @@ class MantidAxes3D(Axes3D):
             ...
 
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
-            ax.plot_surface(workspace) #for workspaces
-            ax.plot_surface(x,y,z)     #for arrays
+            ax.plot(workspace) #for workspaces
+            ax.plot(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.functions.plot_surface`
+        For keywords related to workspaces, see :func:`mantid.plots.functions.plot3D`
         '''
         if mantid.plots.functions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')
-            return mantid.plots.functions.plot_surface(self, *args, **kwargs)
+            return mantid.plots.functions.plot3D(self, *args, **kwargs)
         else:
-            return Axes3D.plot_surface(self, *args, **kwargs)
+            return Axes3D.plot(self, *args, **kwargs)
+
+    def scatter(self, *args, **kwargs):
+        '''
+        If the **mantid3d** projection is chosen, it can be
+        used the same as :py:meth:`matplotlib.axes.Axes3D.scatter` for arrays,
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
+        or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
+
+            import matplotlib.pyplot as plt
+            from mantid import plots
+
+            ...
+
+            fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
+            ax.scatter(workspace) #for workspaces
+            ax.scatter(x,y,z)     #for arrays
+            fig.show()
+
+        For keywords related to workspaces, see :func:`mantid.plots.functions.scatter`
+        '''
+        if mantid.plots.functions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.functions')
+            return mantid.plots.functions.scatter(self, *args, **kwargs)
+        else:
+            return Axes3D.scatter(self, *args, **kwargs)
 
     def plot_wireframe(self, *args, **kwargs):
         '''
@@ -396,6 +421,106 @@ class MantidAxes3D(Axes3D):
             return mantid.plots.functions.plot_wireframe(self, *args, **kwargs)
         else:
             return Axes3D.plot_wireframe(self, *args, **kwargs)
+
+    def plot_surface(self, *args, **kwargs):
+        '''
+        If the **mantid3d** projection is chosen, it can be
+        used the same as :py:meth:`matplotlib.axes.Axes3D.plot_surface` for arrays,
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
+        or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
+
+            import matplotlib.pyplot as plt
+            from mantid import plots
+
+            ...
+
+            fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
+            ax.plot_surface(workspace) #for workspaces
+            ax.plot_surface(x,y,z)     #for arrays
+            fig.show()
+
+        For keywords related to workspaces, see :func:`mantid.plots.functions.plot_surface`
+        '''
+        if mantid.plots.functions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.functions')
+            return mantid.plots.functions.plot_surface(self, *args, **kwargs)
+        else:
+            return Axes3D.plot_surface(self, *args, **kwargs)
+
+    def plot_trisurf(self, *args, **kwargs):
+        '''
+        If the **mantid3d** projection is chosen, it can be
+        used the same as :py:meth:`matplotlib.axes.Axes3D.plot_trisurf` for arrays,
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
+        or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
+
+            import matplotlib.pyplot as plt
+            from mantid import plots
+
+            ...
+
+            fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
+            ax.plot_trisurf(workspace) #for workspaces
+            ax.plot_trisurf(x,y,z)     #for arrays
+            fig.show()
+
+        For keywords related to workspaces, see :func:`mantid.plots.functions.plot_trisurf`
+        '''
+        if mantid.plots.functions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.functions')
+            return mantid.plots.functions.plot_trisurf(self, *args, **kwargs)
+        else:
+            return Axes3D.plot_trisurf(self, *args, **kwargs)
+
+    def contour(self, *args, **kwargs):
+        '''
+        If the **mantid3d** projection is chosen, it can be
+        used the same as :py:meth:`matplotlib.axes.Axes3D.contour` for arrays,
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
+        or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
+
+            import matplotlib.pyplot as plt
+            from mantid import plots
+
+            ...
+
+            fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
+            ax.contour(workspace) #for workspaces
+            ax.contour(x,y,z)     #for arrays
+            fig.show()
+
+        For keywords related to workspaces, see :func:`mantid.plots.functions.contour`
+        '''
+        if mantid.plots.functions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.functions')
+            return mantid.plots.functions.contour(self, *args, **kwargs)
+        else:
+            return Axes3D.contour(self, *args, **kwargs)
+
+    def contourf(self, *args, **kwargs):
+        '''
+        If the **mantid3d** projection is chosen, it can be
+        used the same as :py:meth:`matplotlib.axes.Axes3D.contourf` for arrays,
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
+        or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
+
+            import matplotlib.pyplot as plt
+            from mantid import plots
+
+            ...
+
+            fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
+            ax.contourf(workspace) #for workspaces
+            ax.contourf(x,y,z)     #for arrays
+            fig.show()
+
+        For keywords related to workspaces, see :func:`mantid.plots.functions.contourf`
+        '''
+        if mantid.plots.functions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.functions')
+            return mantid.plots.functions.contourf(self, *args, **kwargs)
+        else:
+            return Axes3D.contourf(self, *args, **kwargs)
 
 
 register_projection(MantidAxes)
