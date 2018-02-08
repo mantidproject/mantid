@@ -823,8 +823,10 @@ void ConvFit::updatePreviewPlots() {
 
 void ConvFit::updatePlotRange() {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitRange");
-  const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
-  rangeSelector->setRange(range.first, range.second);
+  if (m_uiForm->ppPlotTop->hasCurve("Sample")) {
+    const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
+    rangeSelector->setRange(range.first, range.second);
+  }
 }
 
 void ConvFit::disablePlotGuess() {

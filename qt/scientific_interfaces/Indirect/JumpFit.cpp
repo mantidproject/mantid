@@ -267,8 +267,10 @@ void JumpFit::updatePreviewPlots() {
 
 void JumpFit::updatePlotRange() {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("JumpFitQ");
-  const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
-  rangeSelector->setRange(range.first, range.second);
+  if (m_uiForm->ppPlotTop->hasCurve("Sample")) {
+    const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
+    rangeSelector->setRange(range.first, range.second);
+  }
 }
 
 std::string JumpFit::createSingleFitOutputName() const {
