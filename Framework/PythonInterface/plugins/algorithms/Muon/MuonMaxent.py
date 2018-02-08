@@ -134,7 +134,7 @@ class MuonMaxent(PythonAlgorithm):
                 optional=PropertyMode.Optional),
             doc="Convergence of phases (optional)")
 
-    def checkRValues(self,rg9,rg0,xv):
+    def checkRValues(self,rg9,rg0,xv,mylog):
         if(rg9 - rg0 < 4):
             raise ValueError("Data too short after trimming")
         if(rg0 > 0 or rg9 < len(xv)):
@@ -199,7 +199,7 @@ class MuonMaxent(PythonAlgorithm):
                 RUNDATA_frames = 1000000
         return SENSE_taud,RUNDATA_frames
 
-    def getPhase(self,FLAGS_fixphase,POINTS_ngroups,POINTS_nhists):
+    def getPhase(self,FLAGS_fixphase,POINTS_ngroups,POINTS_nhists,mylog):
         filePHASE = None
         if(self.getProperty("InputPhaseTable").isDefault):
             if(FLAGS_fixphase and POINTS_ngroups > 2):
@@ -251,7 +251,7 @@ class MuonMaxent(PythonAlgorithm):
             rg9 = rg9 - 1
         while(rg9 > rg0 and abs((2 * xv[rg0 + 1] - xv[rg0] - xv[rg0 + 2]) / (xv[rg0 + 2] - xv[rg0])) > 0.001):
             rg0 = rg0 + 1
-        self.checkRValues(rg9,rg0,xv)
+        self.checkRValues(rg9,rg0,xv,mylog)
         RUNDATA_res = (ws.readX(0)[rg9 - 1] - ws.readX(0)[rg0]) / (
             rg9 - rg0 - 1.0)  # assume linear!
         mylog.notice("resolution {0} us".format(RUNDATA_res))
@@ -350,7 +350,7 @@ class MuonMaxent(PythonAlgorithm):
         # load Phase Table (previously done in BACK.for)
         # default being to distribute phases uniformly over 2pi, will work for
         # 2 groups F,B
-        filePHASE=self.getPhase(FLAGS_fixphase,POINTS_ngroups,POINTS_nhists)
+        filePHASE=self.getPhase(FLAGS_fixphase,POINTS_ngroups,POINTS_nhists,mylog)
         #
         # debugging
         if not self.getProperty("PhaseConvergenceTable").isDefault:
