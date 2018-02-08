@@ -65,8 +65,9 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
 
         return self._path_to_gsas
 
-    def phase_file_path(self):
-        return mantid.FileFinder.getFullPath(self._PHASE_FILENAME)
+    def phase_file_paths(self):
+        return mantid.FileFinder.getFullPath(self._PHASE_FILENAME_1) + "," + \
+               mantid.FileFinder.getFullPath(self._PHASE_FILENAME_2)
 
     def remove_all_gsas_files(self, gsas_filename_without_extension):
         for filename in os.listdir(self._TEMP_DIR):
@@ -108,7 +109,7 @@ class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
         return not self.path_to_gsas()
 
     def _get_expected_rwp(self):
-        return 76.452880
+        return 72.811546
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksRietveldFitParams.nxs"
@@ -126,7 +127,7 @@ class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
         return not self.path_to_gsas()
 
     def _get_expected_rwp(self):
-        return 77.761226
+        return 73.989128
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksPawleyFitParams.nxs"
