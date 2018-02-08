@@ -1010,7 +1010,7 @@ void IndirectFitPropertyBrowser::doubleChanged(QtProperty *prop) {
 /**
  * Called when a custom setting changes in this indirect fit property browser.
  *
- * @param property The custom setting property which was changed.
+ * @param prop The custom setting property which was changed.
  */
 void IndirectFitPropertyBrowser::customChanged(QtProperty *prop) {
   if (m_functionChangingSettings.contains(prop))
