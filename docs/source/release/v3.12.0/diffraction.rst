@@ -40,6 +40,7 @@ Engineering Diffraction
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` has been re-integrated with the
   latest version of GSAS-II, allowing Rietveld and Pawley refinement
   within Mantid.
+  + Fitted peaks are now output as a Mantid workspace
 - Usability improvements in the GUI:
 
   + The "Invalid RB number" popup window in the GUI has been replaced with a more user-friendly message

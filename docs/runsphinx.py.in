@@ -24,13 +24,6 @@ BUILD_DIR = "@CMAKE_BINARY_DIR@"
 # Main
 ###############################################################################
 
-try:
-    # If MantidPlot is available make sure calls are in the appropriate thread
-    runner = threadsafe_call
-except NameError:
-    def runner(fn, argv):
-        return fn(argv)
-
 def main(sysarg):
     """
     Execute the Sphinx build.
@@ -93,7 +86,7 @@ def main(sysarg):
     except AttributeError:
         pass
     try:
-        return_value = runner(sphinx.cmdline.main, argv)
+        return_value = sphinx.cmdline.main(argv)
     finally:
         try:
             from qtconsole import pygments_highlighter

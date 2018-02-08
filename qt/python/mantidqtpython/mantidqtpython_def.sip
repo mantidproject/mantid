@@ -581,42 +581,43 @@ private:
     PeaksPresenter();
     PeaksPresenter(const MantidQt::SliceViewer::PeaksPresenter&);
 public:
+    virtual void setForegroundColor(const QColor) = 0;
 %Docstring
 void PeaksPresenter::setForegroundColor(const QColor color)
-------------------------------------------------------
+-----------------------------------------------------------
     Sets the Foreground color of the peaks workspace as displayed in the peaks overlay.
 
     Args:
         color :: color to change foreground to
 %End
-    virtual void setForegroundColor(const QColor) = 0;
+    virtual void setBackgroundColor(const QColor) = 0;
 %Docstring
 void PeaksPresenter::setBackgroundColor(const QColor color)
-------------------------------------------------------
+-----------------------------------------------------------
     Sets the Background color of the peaks workspace as displayed in the peaks overlay.
 
     Args:
         color :: color to change background to
 %End
-    virtual void setBackgroundColor(const QColor) = 0;
+    virtual void showBackgroundRadius(const bool shown) = 0;
 %Docstring
 void PeaksPresenter::showBackgroundRadius(const bool shown)
-------------------------------------------------------
+-----------------------------------------------------------
     Toggle the background radius on and off.
 
     Args:
         shown :: True to show the background radius, otherwise false.
 %End
-    virtual void showBackgroundRadius(const bool shown) = 0;
+    virtual void setShown(const bool shown) = 0;
 %Docstring
 void PeaksPresenter::setShown(const bool shown)
-------------------------------------------------------
+-----------------------------------------------
     Toggle the overplotted state of this PeaksWorkspace in the PeaksOverlay
 
     Args:
         shown :: True to show. False to hide.
 %End
-    virtual void setShown(const bool shown) = 0;
+    virtual void zoomToPeak(const int index) = 0;
 %Docstring
 void PeaksPresenter::zoomToPeak(const int index)
 ------------------------------------------------------
@@ -625,7 +626,6 @@ void PeaksPresenter::zoomToPeak(const int index)
     Args:
         index :: Index into the peaks workspace (0 based) to zoom to.
 %End
-    virtual void zoomToPeak(const int index) = 0;
 };
 
 /***************************************************************************/
