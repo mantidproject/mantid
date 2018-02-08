@@ -156,6 +156,9 @@ public:
   MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD0(clearParametersList, void());
   MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
+  MOCK_CONST_METHOD0(getAutosavePrefixInput, std::string());
+  MOCK_METHOD0(disallowAutosave, void());
+
 
   // Calls we don't care about
   IReflSaveTabPresenter *getPresenter() const override { return nullptr; }

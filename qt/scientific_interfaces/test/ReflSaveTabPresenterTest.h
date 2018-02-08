@@ -168,30 +168,30 @@ public:
     createWS(wsNames[2]);
 
     EXPECT_CALL(mockView, getSavePath())
-        .Times(Exactly(1))
-        .WillOnce(Return(savePath));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(savePath));
     EXPECT_CALL(mockView, getTitleCheck())
-        .Times(Exactly(1))
-        .WillOnce(Return(false));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
     EXPECT_CALL(mockView, getSelectedParameters())
-        .Times(Exactly(1))
-        .WillOnce(Return(std::vector<std::string>()));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(std::vector<std::string>()));
     EXPECT_CALL(mockView, getQResolutionCheck())
-        .Times(Exactly(1))
-        .WillOnce(Return(false));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
     EXPECT_CALL(mockView, getSeparator())
-        .Times(Exactly(1))
-        .WillOnce(Return("comma"));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return("comma"));
     EXPECT_CALL(mockView, getPrefix()).Times(Exactly(1)).WillOnce(Return(""));
     EXPECT_CALL(mockView, getFileFormatIndex())
-        .Times(Exactly(1))
-        .WillOnce(Return(0));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(0));
     EXPECT_CALL(mockView, getSelectedWorkspaces())
-        .Times(Exactly(1))
-        .WillOnce(Return(wsNames));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(wsNames));
     presenter.notify(IReflSaveTabPresenter::saveWorkspacesFlag);
-    for (auto it = wsNames.begin(); it != wsNames.end(); it++) {
-      Poco::File(savePath + *it + ".dat").remove();
+    for (auto const& workspaceName : wsNames) {
+      Poco::File(savePath + workspaceName + ".dat").remove();
     }
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));

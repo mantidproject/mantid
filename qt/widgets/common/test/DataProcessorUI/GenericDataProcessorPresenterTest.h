@@ -96,9 +96,9 @@ private:
       m_manager->setProcessed(true, rowItem->first, groupIndex);
     } catch (std::exception &ex) {
       reductionError(QString(ex.what()));
-      threadFinished(1);
+      rowThreadFinished(1);
     }
-    threadFinished(0);
+    rowThreadFinished(0);
   }
 
   // non-async group reduce
@@ -110,9 +110,9 @@ private:
         m_manager->setProcessed(true, groupIndex);
     } catch (std::exception &ex) {
       reductionError(QString(ex.what()));
-      threadFinished(1);
+      groupThreadFinished(1);
     }
-    threadFinished(0);
+    groupThreadFinished(0);
   }
 
   // Overriden non-async methods have same implementation as parent class
