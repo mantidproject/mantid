@@ -74,15 +74,11 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
 
 namespace {
 template <typename InputIterator>
-bool starts_with_any_of(InputIterator begin, InputIterator end,
-                        std::string const &name) {
+bool startsWithAnyOf(InputIterator begin, InputIterator end,
+                     std::string const &name) {
   for (auto current = begin; current != end; ++current)
-    if (boost::algorithm::starts_with(name, *current)) {
-      std::cout << name << " starts with " << *current << std::endl;
+    if (boost::algorithm::starts_with(name, *current))
       return true;
-    } else {
-      std::cout << name << " does not start with " << *current << std::endl;
-    }
   return false;
 }
 }
@@ -99,27 +95,28 @@ ReflSaveTabPresenter::parseAutosavePrefixes(std::string const &prefixesInput) {
 }
 
 void ReflSaveTabPresenter::enableAutosave() {
-  std::cout << "** Enabling Autosave" << std::endl;
-  updateAutosavePrefixes();
+  if (isValidSaveDirectory(m_view->getSavePath()))
+    updateAutosavePrefixes();
+  else {
+    warnInvalidSaveDirectory();
+    m_view->disallowAutosave();
+  }
 }
 
 void ReflSaveTabPresenter::disableAutosave() {
-  std::cout << "** Disabling Autosave" << std::endl;
   m_autosavePrefixWhiteList = boost::none;
 }
 
 void ReflSaveTabPresenter::updateAutosavePrefixes() {
   m_autosavePrefixWhiteList =
       parseAutosavePrefixes(m_view->getAutosavePrefixInput());
-  for (auto &&prefix : m_autosavePrefixWhiteList.get())
-    std::cout << "   Prefix '" << prefix << "'" << std::endl;
 }
 
 bool ReflSaveTabPresenter::isWhitelisted(
     std::vector<std::string> const &prefixWhitelist,
     std::string const &workspaceName) const {
-  return starts_with_any_of(prefixWhitelist.cbegin(), prefixWhitelist.cend(),
-                            workspaceName);
+  return startsWithAnyOf(prefixWhitelist.cbegin(), prefixWhitelist.cend(),
+                         workspaceName);
 }
 
 std::vector<std::string> ReflSaveTabPresenter::filterByWhitelist(
@@ -139,10 +136,13 @@ void ReflSaveTabPresenter::autoSaveWorkspaces(
     std::vector<std::string> const &prefixWhitelist,
     std::vector<std::string> const &workspaceNames) {
   auto workspacesToSave = filterByWhitelist(prefixWhitelist, workspaceNames);
-  //  if (!workspacesToSave.empty())
-  //    saveWorkspaces(workspaceNames);
-  for (auto &&ws : workspaceNames)
-    std::cout << "** Saving " << ws << std::endl;
+  if (!workspacesToSave.empty())
+    saveWorkspaces(workspaceNames, std::vector<std::string>());
+
+  //std::cout << "** Begin Saving" << std::endl;
+  //for (auto &&ws : workspacesToSave)
+  //  std::cout << "** Saving " << ws << std::endl;
+  //std::cout << "** End Saving" << std::endl;
 }
 
 void ReflSaveTabPresenter::completedGroupReductionSuccessfully(
@@ -221,59 +221,87 @@ void ReflSaveTabPresenter::populateParametersList() {
   m_view->setParametersList(logs);
 }
 
-/** Saves workspaces with the names specified. */
-void ReflSaveTabPresenter::saveWorkspaces(
-    std::vector<std::string> const &workspaceNames) {
-  // Check that save directory is valid
-  std::string saveDir = m_view->getSavePath();
-  if (saveDir.empty() || Poco::File(saveDir).isDirectory() == false) {
-    m_mainPresenter->giveUserCritical("Directory specified doesn't exist or "
-                                      "was invalid for your operating system",
-                                      "Invalid directory");
-    return;
-  }
+bool ReflSaveTabPresenter::isValidSaveDirectory(std::string const &directory) {
+  auto file = Poco::File(directory);
+  return !directory.empty() && file.exists() && file.isDirectory();
+}
 
-  // Obtain workspace titles
-  std::vector<std::string> wsTitles(workspaceNames.size());
-  std::transform(workspaceNames.begin(), workspaceNames.end(), wsTitles.begin(),
-                 [](std::string s) {
+void ReflSaveTabPresenter::warn(std::string const &message,
+                                std::string const &title) {
+  m_mainPresenter->giveUserCritical(message, title);
+}
+
+std::vector<std::string>
+titles(std::vector<std::string> const &workspaceNames) {
+  auto workspaceTitles = std::vector<std::string>();
+  workspaceTitles.reserve(workspaceNames.size());
+  std::transform(workspaceNames.begin(), workspaceNames.end(),
+                 std::back_inserter(workspaceTitles), [](std::string s) {
                    return AnalysisDataService::Instance()
                        .retrieveWS<MatrixWorkspace>(s)
                        ->getTitle();
                  });
+  return workspaceTitles;
+}
 
-  // Create the appropriate save algorithm
-  bool titleCheck = m_view->getTitleCheck();
-  auto selectedParameters = m_view->getSelectedParameters();
-  bool qResolutionCheck = m_view->getQResolutionCheck();
-  std::string separator = m_view->getSeparator();
-  std::string prefix = m_view->getPrefix();
-  int formatIndex = m_view->getFileFormatIndex();
-  std::string algName = m_saveAlgs[formatIndex];
-  std::string extension = m_saveExts[formatIndex];
-  IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
+void ReflSaveTabPresenter::warnInvalidSaveDirectory() {
+  warn("Directory specified doesn't exist or "
+       "was invalid for your operating system",
+       "Invalid directory");
+}
 
-  for (size_t i = 0; i < workspaceNames.size(); i++) {
-    // Add any additional algorithm-specific properties and execute
-    if (algName != "SaveANSTOAscii") {
-      if (titleCheck)
-        saveAlg->setProperty("Title", wsTitles[i]);
-      saveAlg->setProperty("LogList", selectedParameters);
+void ReflSaveTabPresenter::saveWorkspaces(
+    std::vector<std::string> const &workspaceNames,
+    std::vector<std::string> const &logParameters) {
+  if (isValidSaveDirectory(m_view->getSavePath())) {
+    auto workspaceTitles = titles(workspaceNames);
+
+    // Create the appropriate save algorithm
+    bool titleCheck = m_view->getTitleCheck();
+    bool qResolutionCheck = m_view->getQResolutionCheck();
+    std::string separator = m_view->getSeparator();
+    std::string prefix = m_view->getPrefix();
+    int formatIndex = m_view->getFileFormatIndex();
+    std::string algName = m_saveAlgs[formatIndex];
+    std::string extension = m_saveExts[formatIndex];
+    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
+    auto saveDir = m_view->getSavePath();
+
+    auto titleIt = workspaceTitles.cbegin();
+    auto nameIt = workspaceNames.cbegin();
+    for (; titleIt != workspaceTitles.cend() && nameIt != workspaceNames.cend();
+         ++titleIt, ++nameIt) {
+      auto &name = *nameIt;
+      auto &title = *titleIt;
+      // Add any additional algorithm-specific properties and execute
+      if (algName != "SaveANSTOAscii") {
+        if (titleCheck)
+          saveAlg->setProperty("Title", title);
+        saveAlg->setProperty("LogList", logParameters);
+      }
+      if (algName == "SaveReflCustomAscii") {
+        saveAlg->setProperty("WriteDeltaQ", qResolutionCheck);
+      }
+
+      auto path = Poco::Path(saveDir);
+      path.append(prefix + name + extension);
+      saveAlg->setProperty("Separator", separator);
+      saveAlg->setProperty("Filename", path.toString());
+      saveAlg->setProperty(
+          "InputWorkspace",
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
+      saveAlg->execute();
     }
-    if (algName == "SaveReflCustomAscii") {
-      saveAlg->setProperty("WriteDeltaQ", qResolutionCheck);
-    }
-
-    auto path = Poco::Path(saveDir);
-    auto wsName = workspaceNames[i];
-    path.append(prefix + wsName + extension);
-    saveAlg->setProperty("Separator", separator);
-    saveAlg->setProperty("Filename", path.toString());
-    saveAlg->setProperty(
-        "InputWorkspace",
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
-    saveAlg->execute();
+  } else {
+    warnInvalidSaveDirectory();
   }
+}
+
+/** Saves workspaces with the names specified. */
+void ReflSaveTabPresenter::saveWorkspaces(
+    std::vector<std::string> const &workspaceNames) {
+  auto selectedLogParameters = m_view->getSelectedParameters();
+  saveWorkspaces(workspaceNames, selectedLogParameters);
 }
 
 /** Saves selected workspaces */

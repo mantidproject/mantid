@@ -5,6 +5,7 @@
 #include "IReflSaveTabPresenter.h"
 #include <vector>
 #include <string>
+#include <MantidKernel/ConfigPropertyObserver.h>
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -58,6 +59,9 @@ public:
       std::vector<std::string> const &workspaceNames) override;
 
 private:
+  bool isValidSaveDirectory(std::string const &directory);
+  void warnInvalidSaveDirectory();
+  void warn(std::string const &message, std::string const &title);
   /// Adds all workspace names to the list of workspaces
   void populateWorkspaceList();
   /// Adds all workspace params to the list of logged parameters
@@ -70,6 +74,8 @@ private:
   void saveSelectedWorkspaces();
   /// Save specified workspaces to a directory
   void saveWorkspaces(std::vector<std::string> const &workspaceNames);
+  void saveWorkspaces(std::vector<std::string> const &workspaceNames,
+                      std::vector<std::string> const &logParameters);
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
 

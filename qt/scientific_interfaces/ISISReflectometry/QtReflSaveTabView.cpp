@@ -152,6 +152,10 @@ bool QtReflSaveTabView::getQResolutionCheck() const {
   return m_ui.qResolutionCheckBox->isChecked();
 }
 
+void QtReflSaveTabView::disallowAutosave() {
+  m_ui.autosaveGroup->setChecked(false);
+}
+
 /** Returns the separator type
 * @return :: The separator
 */

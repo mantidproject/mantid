@@ -81,6 +81,8 @@ public:
   /// Sets the 'List of logged parameters' widget
   void setParametersList(const std::vector<std::string> &) const override;
 
+  void disallowAutosave() override;
+
   std::string getAutosavePrefixInput() const override;
 public slots:
   /// Populate the 'List of workspaces' widget
