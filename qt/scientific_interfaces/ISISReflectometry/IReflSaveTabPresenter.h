@@ -54,7 +54,6 @@ public:
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) = 0;
 
-
   virtual void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::vector<std::string> const &workspaceName) = 0;

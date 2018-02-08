@@ -139,10 +139,10 @@ void ReflSaveTabPresenter::autoSaveWorkspaces(
   if (!workspacesToSave.empty())
     saveWorkspaces(workspaceNames, std::vector<std::string>());
 
-  //std::cout << "** Begin Saving" << std::endl;
-  //for (auto &&ws : workspacesToSave)
+  // std::cout << "** Begin Saving" << std::endl;
+  // for (auto &&ws : workspacesToSave)
   //  std::cout << "** Saving " << ws << std::endl;
-  //std::cout << "** End Saving" << std::endl;
+  // std::cout << "** End Saving" << std::endl;
 }
 
 void ReflSaveTabPresenter::completedGroupReductionSuccessfully(

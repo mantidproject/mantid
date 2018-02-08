@@ -269,7 +269,8 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 void ReflDataProcessorPresenter::completedGroupReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &groupData,
     std::string const &workspaceName) {
-  m_mainPresenter->completedGroupReductionSuccessfully(groupData, workspaceName);
+  m_mainPresenter->completedGroupReductionSuccessfully(groupData,
+                                                       workspaceName);
 }
 
 void ReflDataProcessorPresenter::completedRowReductionSuccessfully(

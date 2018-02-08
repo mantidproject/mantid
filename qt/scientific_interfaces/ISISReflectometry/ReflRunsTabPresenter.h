@@ -92,7 +92,7 @@ public:
       std::string const &) override;
   void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
-      std::vector<std::string> const & workspaceNames) override;
+      std::vector<std::string> const &workspaceNames) override;
 
 private:
   /// The search model

@@ -97,7 +97,8 @@ public slots:
   void suggestSaveDir() const;
 
   void onAutosaveChanged(bool enabled);
-  void onAutosavePrefixesChanged(QString const& prefixesInput);
+  void onAutosavePrefixesChanged(QString const &prefixesInput);
+
 private:
   /// Initialize the interface
   void initLayout();

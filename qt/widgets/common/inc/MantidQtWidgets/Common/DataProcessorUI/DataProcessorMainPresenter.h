@@ -75,8 +75,11 @@ public:
   /// Handle data reduction paused/resumed confirmation
   virtual void confirmReductionPaused() const {}
   virtual void confirmReductionResumed() const {}
-  virtual void completedGroupReductionSuccessfully(GroupData const&, std::string const&) {};
-  virtual void completedRowReductionSuccessfully(GroupData const&, std::vector<std::string> const&) {};
+  virtual void completedGroupReductionSuccessfully(GroupData const &,
+                                                   std::string const &){};
+  virtual void
+  completedRowReductionSuccessfully(GroupData const &,
+                                    std::vector<std::string> const &){};
 };
 }
 }

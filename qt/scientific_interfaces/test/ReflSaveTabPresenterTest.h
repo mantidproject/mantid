@@ -190,7 +190,7 @@ public:
         .Times(AtLeast(1))
         .WillRepeatedly(Return(wsNames));
     presenter.notify(IReflSaveTabPresenter::saveWorkspacesFlag);
-    for (auto const& workspaceName : wsNames) {
+    for (auto const &workspaceName : wsNames) {
       Poco::File(savePath + workspaceName + ".dat").remove();
     }
     AnalysisDataService::Instance().clear();
