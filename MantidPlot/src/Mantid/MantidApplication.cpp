@@ -6,6 +6,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidKernel/CrashService.h"
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -36,6 +37,14 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   try {
     res = QApplication::notify(receiver, event);
   } catch (std::exception &e) {
+
+    int reportingEnabled = 0;
+    int retVal = Mantid::Kernel::ConfigService::Instance().getValue("usagereports.enabled", reportingEnabled);
+    if (reportingEnabled && retVal == 1){
+      Mantid::Kernel::CrashServiceImpl crashService("mantidplot");
+      crashService.sendCrashReport();
+    }
+      
     if (MantidQt::API::MantidDialog::handle(receiver, e))
       return true; // stops event propagation
 
