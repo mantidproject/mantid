@@ -174,7 +174,7 @@ class MuonMaxent(PythonAlgorithm):
                     GROUPING_group[hh - 1] = g
         return GROUPING_group,POINTS_ngroups
 
-    def doDeadTimes(self,POINTS_ngroups,GROUPING_group,ws):
+    def doDeadTimes(self,POINTS_ngroups,GROUPING_group,ws,FLAGS_fitdead):
         RUNDATA_frames = None
         SENSE_taud = np.zeros([POINTS_ngroups])  # default zero if not provided
         tmpTaud = [[] for i in range(POINTS_ngroups)]
@@ -344,7 +344,7 @@ class MuonMaxent(PythonAlgorithm):
 #        # load dead times (note Maxent needs values per GROUP!)
 #        # standard dead time table is per detector. Take averages
 
-        SENSE_taud,RUNDATA_frames=self.doDeadTimes(POINTS_ngroups,GROUPING_group,ws)
+        SENSE_taud,RUNDATA_frames=self.doDeadTimes(POINTS_ngroups,GROUPING_group,ws,FLAGS_fitdead)
 
         # sum histograms for total counts (not necessary?)
         # load Phase Table (previously done in BACK.for)
