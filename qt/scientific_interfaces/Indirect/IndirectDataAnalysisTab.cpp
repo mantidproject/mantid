@@ -178,9 +178,10 @@ void IndirectDataAnalysisTab::plotInput(
     MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
   previewPlot->clear();
   auto inputWS = inputWorkspace();
+  auto spectrum = selectedSpectrum();
 
-  if (inputWS)
-    previewPlot->addSpectrum("Sample", inputWorkspace(), selectedSpectrum());
+  if (inputWS && inputWS->x(spectrum).size() > 1)
+    previewPlot->addSpectrum("Sample", inputWorkspace(), spectrum);
 }
 
 /**
