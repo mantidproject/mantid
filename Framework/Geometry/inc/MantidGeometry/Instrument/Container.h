@@ -104,7 +104,7 @@ public:
                      double &myradius, double &myheight) const override {
     m_shape->GetObjectGeom(type, vectors, myradius, myheight);
   }
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() override {
+  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override {
     return m_shape->getGeometryHandler();
   }
 

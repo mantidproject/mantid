@@ -2107,7 +2107,7 @@ void CSGObject::setVtkGeometryCacheReader(
 /**
 * Returns the geometry handler
 */
-boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() {
+boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
   return m_handler;

@@ -177,7 +177,7 @@ public:
   // Initialize Drawing
   void initDraw() const override;
   // Get Geometry Handler
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() override;
+  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 

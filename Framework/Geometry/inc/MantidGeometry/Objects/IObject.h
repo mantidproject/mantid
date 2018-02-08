@@ -101,9 +101,9 @@ public:
   virtual const Kernel::Material material() const = 0;
   virtual const std::string &id() const = 0;
 
-  // Non const methods (should not be any)
-  virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() = 0;
+  virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
 
+  // Non const methods (should not be any)
   virtual void setName(const int nx) = 0;
   virtual void
       setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>) = 0;
