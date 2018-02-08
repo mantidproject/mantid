@@ -983,8 +983,9 @@ void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
 void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
 
   if (m_functionsAsSpinner.contains(prop)) {
-    clearCustomFunctions(prop, false);
-    addCustomFunctions(prop, prop->propertyName(), m_intManager->value(prop));
+    auto multiples = m_intManager->value(prop);
+    clearCustomFunctions(prop, multiples == 0);
+    addCustomFunctions(prop, prop->propertyName(), multiples);
   } else if (m_customSettings.values().contains(prop)) {
     emit customIntChanged(prop->propertyName(), m_intManager->value(prop));
     emit customSettingChanged(prop);
