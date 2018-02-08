@@ -84,6 +84,8 @@ public:
   /// flushes any buffers and sends any outstanding usage reports
   void flush();
   void shutdown();
+  /// gets the uptime of this mantid instance
+  std::string getStartTime();
 
 protected:
   /// Constructor
@@ -131,6 +133,7 @@ private:
   bool m_isEnabled;
   mutable std::mutex m_mutex;
   std::string m_application;
+  std::string m_startTime;
 
   /// Async method for sending startup notifications
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_startupActiveMethod;

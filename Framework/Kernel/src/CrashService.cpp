@@ -28,9 +28,10 @@ const std::string CRASH_URL("http://crashreports.mantidproject.org/api/crash");
 //----------------------------------------------------------------------------------------------
 // Constructor for CrashServiceImpl
 CrashServiceImpl::CrashServiceImpl(std::string application)
-    : m_application(application), m_crashActiveMethod(this, &CrashServiceImpl::sendCrashAsyncImpl) {
-  
-}
+    : m_application(application), m_startTime(""), m_crashActiveMethod(this, &CrashServiceImpl::sendCrashAsyncImpl) {}
+
+CrashServiceImpl::CrashServiceImpl(std::string application, std::string startTime)
+    : m_application(application), m_startTime(startTime), m_crashActiveMethod(this, &CrashServiceImpl::sendCrashAsyncImpl) {}
 
 void CrashServiceImpl::sendCrashReport() {
   try {
@@ -72,6 +73,8 @@ std::string CrashServiceImpl::generateCrashMessage() {
 
   message["dateTime"] =
       Types::Core::DateAndTime::getCurrentTime().toISO8601String();
+
+  message["startTime"] = m_startTime;
 
   message["application"] = m_application;
 

@@ -36,6 +36,7 @@ namespace Kernel {
 class MANTID_KERNEL_DLL CrashServiceImpl {  
     public:
     CrashServiceImpl(std::string application);
+    CrashServiceImpl(std::string application, std::string startTime);
     void sendCrashReport();
 
     protected:
@@ -46,6 +47,7 @@ class MANTID_KERNEL_DLL CrashServiceImpl {
     private:
     int sendCrashAsyncImpl(const std::string &message);
     const std::string m_application;
+    const std::string m_startTime;
     /// Async method for sending startup notifications
     Poco::ActiveMethod<int, std::string, CrashServiceImpl> m_crashActiveMethod;
 };

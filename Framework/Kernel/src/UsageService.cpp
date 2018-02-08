@@ -131,6 +131,10 @@ void UsageServiceImpl::flush() {
   }
 }
 
+std::string UsageServiceImpl::getStartTime() {
+  return m_startTime;
+}
+
 void UsageServiceImpl::shutdown() {
   try {
     // stop the timer
@@ -145,8 +149,8 @@ void UsageServiceImpl::shutdown() {
 
 void UsageServiceImpl::sendStartupReport() {
   try {
+    m_startTime = Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     std::string message = this->generateStartupMessage();
-
     // send the report
     Poco::ActiveResult<int> result = m_startupActiveMethod(message);
   } catch (std::exception &ex) {
@@ -227,8 +231,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["mantidSha1"] = MantidVersion::revisionFull();
 
   // mantid version and sha1
-  message["dateTime"] =
-      Types::Core::DateAndTime::getCurrentTime().toISO8601String();
+  message["dateTime"] = m_startTime;
 
   message["application"] = m_application;
 
