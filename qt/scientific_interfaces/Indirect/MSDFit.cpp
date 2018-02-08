@@ -66,7 +66,7 @@ void MSDFit::setup() {
           SLOT(plotCurrentPreview()));
 
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
-          SLOT(plotGuess()));
+          SLOT(updatePlotGuess()));
 }
 
 bool MSDFit::doPlotGuess() const {
