@@ -1,5 +1,5 @@
 import numpy as np
-from .zft import ZFT
+from zft import ZFT
 
 
 def MODBAK(
