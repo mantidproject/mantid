@@ -109,6 +109,38 @@ class SANSWLNormCorrection(PythonAlgorithm):
             "Optional Prefix for the output I(q, wavelength) scaled workspaces"
         )
 
+        self.declareProperty(
+            FileProperty("OutputDirectory", "", action=FileAction.OptionalDirectory),
+            "Optional output directory if OutputDirectory exists in the Property Manager."
+        )
+
+    def validateInputs(self):
+        '''
+        Called before everything else to make sure the inputs are valid
+        '''
+        issues = dict()
+
+        if len(self.getProperty('BList').value) > 1 and len(
+                self.getProperty('BList').value) != len(
+                    self.getProperty('InputWorkspaces').value) - 1:
+            message = "The length of B List Parameters must be 1 or equal to the length of the input workspaces - 1"
+            issues['BList'] = message
+
+        if len(self.getProperty('KList').value) > 1 and len(
+                self.getProperty('KList').value) != len(
+                    self.getProperty('InputWorkspaces').value) - 1:
+            message = "The length of K List Parameters must be 1 or equal to the length of the input workspaces - 1"
+            issues['KList'] = message
+        try:
+            pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
+        except Exception:
+            pm = []
+
+        if "OutputDirectory" not in pm and self.getProperty("OutputDirectory").value.strip() == "":
+            issues['OutputDirectory'] = "Property Manager has no OutputDirectory."
+
+        return issues
+
     def _setup(self):
         '''
         Sets the properties as method properties
@@ -143,6 +175,13 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
         self.output_prefix = self.getProperty('OutputWorkspacePrefix').value
 
+        output_directory = self.getProperty("OutputDirectory").value.strip()
+        if len(output_directory) > 0:
+            self.output_directory = output_directory
+        else:
+            pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
+            self.output_directory = pm["OutputDirectory"].value
+
     def _parse_config_file(self):
         '''
         Parses the config file and set's the input properties as
@@ -159,26 +198,6 @@ class SANSWLNormCorrection(PythonAlgorithm):
             for k, v in self.parser.items('DEFAULT'):
                 logger.information("Using property {} = {} from the conf file.".format(k, v))
                 self.setProperty(k, v)
-
-    def validateInputs(self):
-        '''
-        Called before everything else to make sure the inputs are valid
-        '''
-        issues = dict()
-
-        if len(self.getProperty('BList').value) > 1 and len(
-                self.getProperty('BList').value) != len(
-                    self.getProperty('InputWorkspaces').value) - 1:
-            message = "The length of B List Parameters must be 1 or equal to the length of the input workspaces - 1"
-            issues['BList'] = message
-
-        if len(self.getProperty('KList').value) > 1 and len(
-                self.getProperty('KList').value) != len(
-                    self.getProperty('InputWorkspaces').value) - 1:
-            message = "The length of K List Parameters must be 1 or equal to the length of the input workspaces - 1"
-            issues['KList'] = message
-
-        return issues
 
     def _ws_to_dict(self):
         '''
@@ -546,14 +565,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
         self.parser['DEFAULT']['KList'] = ",".join(str(e) for e in ws_table.column("K"))
         self.parser['DEFAULT']['BList'] = ",".join(str(e) for e in ws_table.column("B"))
 
-        pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
-        if "OutputDirectory" in pm:
-            output_directory = pm["OutputDirectory"].value
-        else:
-            output_directory = ''
-
         conf_file_new_name = self.output_prefix + "_config.ini"
-        conf_file_new_path = os.path.join(output_directory, conf_file_new_name)
+        conf_file_new_path = os.path.join(self.output_directory, conf_file_new_name)
 
         logger.notice("New conf file saved as: {}".format(conf_file_new_path))
 
@@ -561,15 +574,12 @@ class SANSWLNormCorrection(PythonAlgorithm):
             self.parser.write(f)
 
     def _save_ws_table_as_csv(self, ws_table):
-
-        pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
-        if "OutputDirectory" in pm:
-            output_directory = pm["OutputDirectory"].value
-        else:
-            output_directory = ''
+        '''
+        Saves the table ws as csv... this may come up as an algorithm in the future (?)
+        '''
 
         ws_table_file_name = self.output_prefix + "_table.csv"
-        ws_table_file_path = os.path.join(output_directory, ws_table_file_name)
+        ws_table_file_path = os.path.join(self.output_directory, ws_table_file_name)
 
         logger.notice("WS Table saved as: {}".format(ws_table_file_path))
 
