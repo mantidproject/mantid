@@ -179,10 +179,12 @@ void IndirectFitPropertyBrowser::init() {
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   connect(this, SIGNAL(functionChanged()), this, SLOT(updatePlotGuess()));
+  connect(this, SIGNAL(workspaceNameChanged(const QString &)), this,
+          SLOT(updatePlotGuess()));
   connect(this, SIGNAL(visibilityChanged(bool)), this,
           SLOT(browserVisibilityChanged(bool)));
-  connect(this, SIGNAL(customSettingChanged(const QString &)), this,
-          SLOT(customChanged(const QString &)));
+  connect(this, SIGNAL(customSettingChanged(QtProperty *)), this,
+          SLOT(customChanged(QtProperty *)));
 
   initLayout(w);
 }
@@ -660,9 +662,9 @@ void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
 void IndirectFitPropertyBrowser::setCustomSettingChangesFunction(
     const QString &settingKey, bool changesFunction) {
   if (changesFunction)
-    m_functionChangingSettings.insert(settingKey);
+    m_functionChangingSettings.insert(m_customSettings[settingKey]);
   else
-    m_functionChangingSettings.remove(settingKey);
+    m_functionChangingSettings.remove(m_customSettings[settingKey]);
 }
 
 /**
@@ -823,9 +825,11 @@ void IndirectFitPropertyBrowser::updatePlotGuess() {
 /**
  * Clears all custom functions in the specified property.
  *
- * @param prop  The property to clear of custom functions.
+ * @param prop        The property to clear of custom functions.
+ * @param emitSignals If True, will emit Qt signals.
  */
-void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
+void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop,
+                                                      bool emitSignals) {
   blockSignals(true);
   for (const auto &functionHandler : m_functionHandlers[prop]) {
 
@@ -837,9 +841,11 @@ void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
   blockSignals(false);
   m_functionHandlers[prop].clear();
 
-  emit removePlotSignal(getHandler());
-  emit functionRemoved();
-  emit functionChanged();
+  if (emitSignals) {
+    emit removePlotSignal(getHandler());
+    emit functionRemoved();
+    emit functionChanged();
+  }
 }
 
 /**
@@ -922,13 +928,13 @@ void IndirectFitPropertyBrowser::sequentialFit() {
 void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
 
   if (prop == m_functionsInComboBox) {
-    clearCustomFunctions(prop);
+    clearCustomFunctions(prop, false);
     addCustomFunctions(prop, enumValue(prop));
   } else if (prop == m_backgroundSelection) {
     setBackground(enumValue(prop).toStdString());
   } else if (m_customSettings.values().contains(prop)) {
     emit customEnumChanged(prop->propertyName(), enumValue(prop));
-    emit customSettingChanged(prop->propertyName());
+    emit customSettingChanged(prop);
   }
   FitPropertyBrowser::enumChanged(prop);
 }
@@ -955,7 +961,7 @@ void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
       clearCustomFunctions(prop);
   } else if (m_customSettings.values().contains(prop)) {
     emit customBoolChanged(propertyName, m_boolManager->value(prop));
-    emit customSettingChanged(propertyName);
+    emit customSettingChanged(prop);
   }
   FitPropertyBrowser::boolChanged(prop);
 }
@@ -968,11 +974,11 @@ void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
 void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
 
   if (m_functionsAsSpinner.contains(prop)) {
-    clearCustomFunctions(prop);
+    clearCustomFunctions(prop, false);
     addCustomFunctions(prop, prop->propertyName(), m_intManager->value(prop));
   } else if (m_customSettings.values().contains(prop)) {
     emit customIntChanged(prop->propertyName(), m_intManager->value(prop));
-    emit customSettingChanged(prop->propertyName());
+    emit customSettingChanged(prop);
   }
   FitPropertyBrowser::intChanged(prop);
 }
@@ -986,17 +992,18 @@ void IndirectFitPropertyBrowser::doubleChanged(QtProperty *prop) {
   if (m_customSettings.values().contains(prop)) {
     emit customDoubleChanged(prop->propertyName(),
                              m_doubleManager->value(prop));
-    emit customSettingChanged(prop->propertyName());
+    emit customSettingChanged(prop);
   }
+  FitPropertyBrowser::doubleChanged(prop);
 }
 
 /**
  * Called when a custom setting changes in this indirect fit property browser.
  *
- * @param settingName The name of the custom setting which changed.
+ * @param property The custom setting property which was changed.
  */
-void IndirectFitPropertyBrowser::customChanged(const QString &settingName) {
-  if (m_functionChangingSettings.contains(settingName))
+void IndirectFitPropertyBrowser::customChanged(QtProperty *prop) {
+  if (m_functionChangingSettings.contains(prop))
     emit functionChanged();
 }
 

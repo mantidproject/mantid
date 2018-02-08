@@ -133,7 +133,7 @@ protected slots:
 
   void doubleChanged(QtProperty *prop) override;
 
-  void customChanged(const QString &settingName);
+  void customChanged(QtProperty *settingName);
 
   void clear() override;
 
@@ -152,7 +152,7 @@ signals:
 
   void customDoubleChanged(const QString &settingName, double value);
 
-  void customSettingChanged(const QString &settingName);
+  void customSettingChanged(QtProperty *settingName);
 
   void fitScheduled();
 
@@ -173,7 +173,7 @@ private:
   void addCustomFunctions(QtProperty *prop, const QString &groupName,
                           const int &multiples);
 
-  void clearCustomFunctions(QtProperty *prop);
+  void clearCustomFunctions(QtProperty *prop, bool emitSignals = true);
 
   QtProperty *
   createFunctionGroupProperty(const QString &groupName,
@@ -188,7 +188,7 @@ private:
   QtProperty *m_functionsInComboBox;
   QSet<QtProperty *> m_functionsAsCheckBox;
   QSet<QtProperty *> m_functionsAsSpinner;
-  QSet<QString> m_functionChangingSettings;
+  QSet<QtProperty *> m_functionChangingSettings;
   QHash<QString, QtProperty *> m_customSettings;
   QtProperty *m_backgroundSelection;
   PropertyHandler *m_backgroundHandler;

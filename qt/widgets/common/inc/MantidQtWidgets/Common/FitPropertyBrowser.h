@@ -307,8 +307,9 @@ protected slots:
 
   virtual void intChanged(QtProperty *prop);
 
-private slots:
   virtual void doubleChanged(QtProperty *prop);
+
+private slots:
   /// Called when one of the parameter values gets changed
   void parameterChanged(QtProperty *prop);
   void stringChanged(QtProperty *prop);
