@@ -265,13 +265,14 @@ void SaveLauenorm::exec() {
                "1.00000     1.00000\n";
         out << "OMEG     1.00000     1.00000     1.00000     1.00000     "
                "1.00000     1.00000\n";
-        out << "CELL " << std::setw(11) << std::setprecision(4) << lattice.a()
-            << std::setw(12) << std::setprecision(4) << lattice.b()
-            << std::setw(12) << std::setprecision(4) << lattice.c()
-            << std::setw(12) << std::setprecision(4) << lattice.alpha()
-            << std::setw(12) << std::setprecision(4) << lattice.beta()
-            << std::setw(12) << std::setprecision(4) << lattice.gamma() << "\n";
-        std::vector<int> systemNo = crystalSystem(lattice);
+        out << "CELL " << std::setw(11) << std::setprecision(4)
+            << 1.0 / lattice.a() << std::setw(12) << std::setprecision(4)
+            << 1.0 / lattice.b() << std::setw(12) << std::setprecision(4)
+            << 1.0 / lattice.c() << std::setw(12) << std::setprecision(4)
+            << lattice.alpha() << std::setw(12) << std::setprecision(4)
+            << lattice.beta() << std::setw(12) << std::setprecision(4)
+            << lattice.gamma() << "\n";
+        std::vector<int> systemNo = crystalSystem(lattice, peaks);
         out << "SYST    " << systemNo[0] << "   " << systemNo[1] << "   0   0"
             << "\n";
         out << "RAST      0.050"
@@ -295,13 +296,11 @@ void SaveLauenorm::exec() {
           out << "0.0 0.0 0.0\n";
         }
         out << "DMIN      ";
-        if (dMin != EMPTY_DBL()) {
-          out << dMin << "\n";
-        } else {
-          out << "0.0\n";
-        }
-        out << "RADI     59.000"
-            << "\n";
+        out << "0.0\n";
+
+        // distance from sample to detector (use first pixel) in mm
+        double L2 = 500.0;
+        out << "RADI     " << L2 << "\n";
         out << "SPIN      0.000"
             << "\n";
         out << "XC_S     0.00000     0.00000     0.00000     0.00000     "
@@ -310,7 +309,7 @@ void SaveLauenorm::exec() {
                "0.00000     0.00000\n";
         out << "WC_S     0.00000     0.00000     0.00000     0.00000     "
                "0.00000     0.00000\n";
-        out << "DELT       0.4000"
+        out << "DELT       0.0000"
             << "\n";
         out << "TWIS    0.00000     0.00000     0.00000     0.00000     "
                "0.00000     0.00000 \n";
@@ -318,8 +317,7 @@ void SaveLauenorm::exec() {
                "0.00000     0.00000 \n";
         out << "BULG    0.00000     0.00000     0.00000     0.00000     "
                "0.00000     0.00000 \n";
-        out << "CTOF     61.067"
-            << "\n";
+        out << "CTOF     " << L2 << "\n ";
         out << "YSCA     0.00000     0.00000     0.00000     0.00000     "
                "0.00000     0.00000\n";
         out << "CRAT     0.00000     0.00000     0.00000     0.00000     "
@@ -332,33 +330,21 @@ void SaveLauenorm::exec() {
         }
         out << "MULT"
             << "\n";
-        out << "   1670    175     40     12      8      5      0      0      "
-               "0      0"
-            << "\n";
-        out << "      0      0      0      0      0      0      0      0      "
-               "0      0"
-            << "\n";
-        out << "      0"
+        out << count << "    0"
             << "\n";
         out << "LAMH"
             << "\n";
-        out << "     401     383     389     391     282     158      89      "
-               "53"
-            << "\n";
-        out << "      38      21      19      11      11       6       6       "
-               "0"
+        out << count << "    0"
             << "\n";
         out << "VERS    2"
             << "\n";
         out << "PACK        0"
             << "\n";
-        out << "NSPT   " << count << "       0       0       0       0"
+        out << "NSPT   " << count << "       0"
             << "\n";
         out << "NODH"
             << "\n";
-        out << "       6      23      63     124     243     356"
-            << "\n";
-        out << "     571     775    1076    1312    1499    1605"
+        out << count << "    0"
             << "\n";
         out << "INTF        0"
             << "\n";
@@ -471,7 +457,8 @@ void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
     nCols = static_cast<int>(children.size());
   }
 }
-std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice) {
+std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice,
+                                             std::vector<Peak> peaks) {
   std::vector<int> systemVec;
   int alpha = static_cast<int>(lattice.alpha() + 0.5);
   int beta = static_cast<int>(lattice.beta() + 0.5);
@@ -482,28 +469,88 @@ std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice) {
   if (alpha == 90 && beta == 90 && gamma == 90) {
     if (a == b && a == c) {
       systemVec.push_back(7); // cubic I,F
-      systemVec.push_back(1); // P
     } else if (a == b) {
       systemVec.push_back(4); // tetragonal I
-      systemVec.push_back(1); // P
     } else {
       systemVec.push_back(3); // orthorhombic I,A,B,C,F
-      systemVec.push_back(1); // P
     }
   } else if (alpha == 90 && beta == 90 && gamma == 120 && a == b) {
     systemVec.push_back(6); // hexagonal
-    systemVec.push_back(1); // P
   } else if ((alpha == 90 && beta == 90) || (alpha == 90 && gamma == 90) ||
              (beta == 90 && gamma == 90)) {
     systemVec.push_back(2); // monoclinic I,A,B,C
-    systemVec.push_back(1); // P
   } else if (alpha == 90 && beta == 90 && gamma != 90 && a == b && a == c) {
     systemVec.push_back(5); // rhombohedral R
-    systemVec.push_back(1); // P
   } else {
     systemVec.push_back(1); // triclinic
-    systemVec.push_back(1); // P
   }
+  size_t i = 0;
+  size_t fp = 0;
+  size_t fm = 0;
+  size_t cc = 0;
+  size_t bc = 0;
+  size_t ac = 0;
+  size_t r = 0;
+  size_t total = 0;
+  for (size_t j = 0; j < peaks.size(); j++) {
+    size_t h = static_cast<size_t>(peaks[j].getH() + 0.5);
+    size_t k = static_cast<size_t>(peaks[j].getK() + 0.5);
+    size_t l = static_cast<size_t>(peaks[j].getL() + 0.5);
+    if (h + k + l == 0)
+      continue;
+    total++;
+    if ((h + k + l) % 2 == 0) {
+      i++;
+    }
+    if (h % 2 == 0 && k % 2 == 0 && l % 2 == 0) {
+      fp++;
+    }
+    if (h % 2 != 0 && k % 2 != 0 && l % 2 != 0) {
+      fm++;
+    }
+    if ((h + k) % 2 == 0) {
+      cc++;
+    }
+    if ((h + l) % 2 == 0) {
+      bc++;
+    }
+    if ((k + l) % 2 == 0) {
+      ac++;
+    }
+    if ((-h + k + l) % 3 == 0) {
+      r++;
+    }
+  }
+  int maxCen = 1;
+  size_t maxPeaks = 0;
+  if (maxPeaks < i) {
+    maxCen = 2; // I
+    maxPeaks = i;
+  }
+  if (maxPeaks < ac) {
+    maxCen = 3; // A
+    maxPeaks = ac;
+  }
+  if (maxPeaks < bc) {
+    maxCen = 4; // B
+    maxPeaks = bc;
+  }
+  if (maxPeaks < cc) {
+    maxCen = 5; // C
+    maxPeaks = cc;
+  }
+  if (maxPeaks < fp || maxPeaks < fm) {
+    maxCen = 6; // F
+    maxPeaks = std::max(fp, fm);
+  }
+  if (maxPeaks < r) {
+    maxCen = 7; // R
+    maxPeaks = r;
+  }
+  if (maxPeaks < 3 * total / 4) {
+    maxCen = 1; // P
+  }
+  systemVec.push_back(maxCen); // P
   return systemVec;
 }
 
