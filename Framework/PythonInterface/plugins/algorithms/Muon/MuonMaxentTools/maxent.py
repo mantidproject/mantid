@@ -1,9 +1,9 @@
 import numpy as np
 import math
-from .opus import OPUS
-from .tropus import TROPUS
-from .project import PROJECT
-from .move import MOVE
+from opus import OPUS
+from tropus import TROPUS
+from project import PROJECT
+from move import MOVE
 
 # translated from MAXENT.for
 """

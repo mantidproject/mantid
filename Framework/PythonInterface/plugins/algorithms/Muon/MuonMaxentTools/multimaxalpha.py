@@ -1,13 +1,13 @@
 import numpy as np
-from .input import INPUT
-from .start import START
-from .back import BACK
-from .maxent import MAXENT
-from .deadfit import DEADFIT
-from .modbak import MODBAK
-from .modamp import MODAMP
-from .modab import MODAB
-from .outspec import OUTSPEC
+from input import INPUT
+from start import START
+from back import BACK
+from maxent import MAXENT
+from deadfit import DEADFIT
+from modbak import MODBAK
+from modamp import MODAMP
+from modab import MODAB
+from outspec import OUTSPEC
 
 
 def MULTIMAX(
