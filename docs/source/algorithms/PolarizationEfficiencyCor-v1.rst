@@ -89,7 +89,7 @@ Usage
    LoadILLReflectometry(
        Filename='ILL/D17/317370.nxs',
        OutputWorkspace='reflected_beam',
-       BeamPosition='direct_beam_position',
+       DirectBeamPosition='direct_beam_position',
        XUnit='TimeOfFlight')
    # Sum pixels containing the reflected intensity
    GroupDetectors(
