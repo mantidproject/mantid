@@ -1,6 +1,8 @@
-======================
+.. _mantid.plots:
+
+====================
  :mod:`mantid.plots`
-======================
+====================
 
 The functions in this module are intended to be used with matplotlib's
 object oriented abstract program interface (API). matplotlib's
