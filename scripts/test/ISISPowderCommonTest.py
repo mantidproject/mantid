@@ -552,6 +552,7 @@ class ISISPowderCommonTest(unittest.TestCase):
 class ISISPowderMockInst(object):
     def __init__(self, file_ext=None):
         self._file_ext = file_ext
+        self._inst_prefix = "MOCK"
 
     @staticmethod
     def _get_input_batching_mode(**_):
@@ -574,7 +575,6 @@ class ISISPowderMockInst(object):
 class ISISPowderMockRunDetails(object):
     def __init__(self, file_ext):
         self.file_extension = file_ext
-        self._inst_prefix = "MOCK"
 
 if __name__ == "__main__":
     unittest.main()
