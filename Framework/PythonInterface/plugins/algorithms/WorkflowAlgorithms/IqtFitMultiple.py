@@ -64,6 +64,11 @@ class IqtFitMultiple(PythonAlgorithm):
         self.declareProperty(name='ConstrainIntensities', defaultValue=False,
                              doc="If the Intensities should be constrained during the fit")
 
+        self.declareProperty(name='ExtractMembers', defaultValue=False,
+                             doc="If true, then each member of the fit will be extracted, into their"
+                                 "own workspace. These workspaces will have a histogram for each spectrum "
+                                 "(Q-value) and will be grouped.")
+
         self.declareProperty(MatrixWorkspaceProperty('OutputResultWorkspace', '', direction=Direction.Output),
                              doc='The output workspace containing the results of the fit data')
 
@@ -108,6 +113,7 @@ class IqtFitMultiple(PythonAlgorithm):
         self._spec_min = self.getProperty('SpecMin').value
         self._spec_max = self.getProperty('SpecMax').value
         self._intensities_constrained = self.getProperty('ConstrainIntensities').value
+        self._do_extract_members = self.getProperty('ExtractMembers').value
         self._minimizer = self.getProperty('Minimizer').value
         self._max_iterations = self.getProperty('MaxIterations').value
         self._result_name = self.getPropertyValue('OutputResultWorkspace')
@@ -239,6 +245,11 @@ class IqtFitMultiple(PythonAlgorithm):
         delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
         delete_alg.setProperty("Workspace", tmp_fit_workspace)
         delete_alg.execute()
+
+        if self._do_extract_members:
+            ms.ExtractMembers(InputWorkspace=self._input_ws,
+                              ResultWorkspace=self._fit_group_name,
+                              OutputWorkspace=output_workspace + "_Members")
 
         self.setProperty('OutputResultWorkspace', result_workspace)
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
