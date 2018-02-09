@@ -6,10 +6,11 @@
 
 #include <gmock/gmock.h>
 
+using namespace MantidQt::CustomInterfaces;
+
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockEnggDiffGSASFittingView
-    : public MantidQt::CustomInterfaces::IEnggDiffGSASFittingView {
+class MockEnggDiffGSASFittingView : public IEnggDiffGSASFittingView {
 
 public:
   MOCK_CONST_METHOD1(displayLatticeParams,
@@ -27,13 +28,11 @@ public:
 
   MOCK_CONST_METHOD0(getPhaseFileNames, std::vector<std::string>());
 
-  MOCK_CONST_METHOD0(getSelectedRunLabel, std::pair<int, size_t>());
+  MOCK_CONST_METHOD0(getSelectedRunLabel, RunLabel());
 
-  MOCK_CONST_METHOD0(getSelectedRunMethod,
-                     MantidQt::CustomInterfaces::GSASRefinementMethod());
+  MOCK_CONST_METHOD0(getSelectedRunMethod, GSASRefinementMethod());
 
-  MOCK_CONST_METHOD0(getRefinementMethod,
-                     MantidQt::CustomInterfaces::GSASRefinementMethod());
+  MOCK_CONST_METHOD0(getRefinementMethod, GSASRefinementMethod());
 
   MOCK_CONST_METHOD0(getPawleyDMin, double());
 
@@ -46,8 +45,7 @@ public:
 
   MOCK_METHOD0(showRefinementResultsSelected, bool());
 
-  MOCK_METHOD1(updateRunList,
-               void(const std::vector<std::pair<int, size_t>> &runLabels));
+  MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
 
   MOCK_CONST_METHOD1(userWarning, void(const std::string &warningDescription));
 };

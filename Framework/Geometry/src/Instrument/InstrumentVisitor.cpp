@@ -81,8 +81,10 @@ InstrumentVisitor::InstrumentVisitor(
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size())),
-      m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
-      m_detectorRotations(boost::make_shared<std::vector<Eigen::Quaterniond>>(
+      m_rotations(boost::make_shared<std::vector<
+          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>()),
+      m_detectorRotations(boost::make_shared<std::vector<
+          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
           m_orderedDetectorIds->size())),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr),

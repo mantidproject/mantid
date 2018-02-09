@@ -13,7 +13,6 @@ DOC_EXT = ".rst"
 # CMake-populated variables
 ###############################################################################
 BUILDER = "@BUILDER@"
-SRC_DIR = "@SPHINX_SRC_DIR@"
 CONF_DIR = "@SPHINX_CONF_DIR@"
 SPHINX_BUILD_DIR = "@SPHINX_BUILD_DIR@"
 SCREENSHOTS_DIR = "@SCREENSHOTS_DIR@"
@@ -43,7 +42,7 @@ def main(sysarg):
     update_path()
 
     # Find test files
-    testpaths = find_test_files(SRC_DIR, opts.testinclude)
+    testpaths = find_test_files(CONF_DIR, opts.testinclude)
 
     # Update environment with screenshots path if necessary
     if SCREENSHOTS_DIR != "":
@@ -61,9 +60,11 @@ def main(sysarg):
     argv = [sys.executable,
             "-N",
             "-b", BUILDER,
-            "-d", doctree_dir,
-            "-c", CONF_DIR,
-            SRC_DIR, output_dir]
+            "-d", doctree_dir]
+    if BUILDER == 'qthelp':
+        # add a tag to differentiate between html/qthelp in conf
+        argv.extend(["-t qthelp"])
+    argv.extend([CONF_DIR, output_dir])
 
     if testpaths is not None:
         if len(testpaths) > 0:
