@@ -82,6 +82,7 @@ set ( TEST_PY_FILES
   ReflectometrySliceEventWorkspaceTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
+  SANSWLNormCorrectionTest.py
   SaveGEMMAUDParamFileTest.py
   SaveNexusPDTest.py
   SavePlot1DAsJsonTest.py

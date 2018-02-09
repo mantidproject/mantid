@@ -139,6 +139,13 @@ class SANSWLNormCorrection(PythonAlgorithm):
         if "OutputDirectory" not in pm and self.getProperty("OutputDirectory").value.strip() == "":
             issues['OutputDirectory'] = "Property Manager has no OutputDirectory."
 
+        for ws in self.getProperty('InputWorkspaces').value:
+            run = ws.getRun()
+            if not run.hasProperty('wavelength_min'):
+                issues['InputWorkspaces'] = "Input workpsace must have wavelength_min property."
+            if not run.hasProperty('wavelength_max'):
+                issues['InputWorkspaces'] = "Input workpsace must have wavelength_max property."
+
         return issues
 
     def _setup(self):
@@ -561,6 +568,9 @@ class SANSWLNormCorrection(PythonAlgorithm):
         '''
         Writes a new configuration file with the new K and B values
         '''
+        if self.parser is None:
+            self.parser = RawConfigParser()
+            self.parser.optionxform = lambda option: option # case sensitive
 
         self.parser['DEFAULT']['KList'] = ",".join(str(e) for e in ws_table.column("K"))
         self.parser['DEFAULT']['BList'] = ",".join(str(e) for e in ws_table.column("B"))
