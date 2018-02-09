@@ -132,7 +132,7 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
   const auto focusedFileNames = m_view->getFocusedFileNames();
   bool loadSuccessful = true;
 
-  for (const auto fileName : focusedFileNames) {
+  for (const auto &fileName : focusedFileNames) {
     loadSuccessful &= m_model->loadFocusedRun(fileName);
   }
 

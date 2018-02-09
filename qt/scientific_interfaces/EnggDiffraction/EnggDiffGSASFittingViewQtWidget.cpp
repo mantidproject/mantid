@@ -110,8 +110,8 @@ void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
 void EnggDiffGSASFittingViewQtWidget::plotCurve(
     const std::vector<boost::shared_ptr<QwtData>> &curves) {
 
-  for (size_t i = 0; i < curves.size(); ++i) {
-    auto *curve = curves[i].get();
+  m_focusedRunCurves.reserve(curves.size());
+  for (const auto &curve : curves) {
     auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
 
     plotCurve->setData(*curve);
