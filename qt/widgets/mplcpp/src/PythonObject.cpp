@@ -46,6 +46,20 @@ PythonObject PythonObject::getAttr(const char *name) const {
   }
 }
 
+/**
+ * @param name Name of the method
+ * @return The object returned by the method
+ * @throws A PythonError if the method does not exist
+ */
+PythonObject PythonObject::callMethod(const char *name) const {
+  auto objPtr = PyObject_CallMethod(m_ptr, PYSTR_LITERAL(name), nullptr);
+  if (objPtr)
+    return PythonObject::fromNewRef(objPtr);
+  else {
+    throw PythonError();
+  }
+}
+
 //-----------------------------------------------------------------------------
 // Utilities
 //----------------------------------------------------------------------------

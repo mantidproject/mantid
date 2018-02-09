@@ -1,4 +1,6 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
+#include "MantidQtWidgets/MplCpp/PythonErrors.h"
+#include "MantidQtWidgets/Common/PythonThreading.h"
 
 #include <QContextMenuEvent>
 #include <QVBoxLayout>
@@ -117,6 +119,11 @@ void MiniPlot::removeActiveCurve() {
   removeLine(m_storedCurveLabels.size());
   m_activeCurveLabel.clear();
   m_xunit.clear();
+  if (!m_peakLabel.isNone()) {
+    ScopedPythonGIL gil;
+    m_peakLabel.callMethod("remove");
+    m_peakLabel = PythonObject();
+  }
 }
 
 /**
@@ -139,7 +146,7 @@ void MiniPlot::removeCurve(QString label) {
  * @param label The text label to attach
  */
 void MiniPlot::addPeakLabel(double x, double y, QString label) {
-  addText(x, y, label.toAscii().constData());
+  m_peakLabel = addText(x, y, label.toAscii().constData());
 }
 
 /**

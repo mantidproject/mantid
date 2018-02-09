@@ -593,11 +593,11 @@ void MplFigureCanvas::rescaleToData(const Axes::Scale axis, bool redraw) {
  * @param y Y position in data coordinates
  * @param label The string label to attach to the canvas
  */
-void MplFigureCanvas::addText(double x, double y, const char *label) {
+PythonObject MplFigureCanvas::addText(double x, double y, const char *label) {
   ScopedPythonGIL gil;
   auto axes = m_pydata->gca();
-  detail::decref(PyObject_CallMethod(axes.get(), PYSTR_LITERAL("text"),
-                                     PYSTR_LITERAL("(ffs)"), x, y, label));
+  return PythonObject::fromNewRef(PyObject_CallMethod(
+      axes.get(), PYSTR_LITERAL("text"), PYSTR_LITERAL("(ffs)"), x, y, label));
 }
 
 /**

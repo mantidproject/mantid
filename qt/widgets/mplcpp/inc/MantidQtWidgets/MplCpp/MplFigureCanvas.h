@@ -17,6 +17,7 @@
  GNU General Public License for more details.
 */
 #include "MantidQtWidgets/MplCpp/DllOption.h"
+#include "MantidQtWidgets/MplCpp/PythonObject.h"
 #include <QWidget>
 #include <tuple>
 
@@ -119,7 +120,7 @@ public:
 
   ///@{
   ///@name Text labels
-  void addText(double x, double y, const char *label);
+  PythonObject addText(double x, double y, const char *label);
   ///@}
 
 protected:

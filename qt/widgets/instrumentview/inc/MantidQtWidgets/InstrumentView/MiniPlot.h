@@ -24,6 +24,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+using MantidQt::Widgets::MplCpp::PythonObject;
+
 /// Encapsulate the data required for a plot. Error data is optional.
 struct MiniPlotCurveData {
   QString xunit;
@@ -51,8 +53,6 @@ public:
   std::tuple<double, double> getYLimits() const;
 
   void update();
-  void setActiveCurve(std::vector<double> x, std::vector<double> y,
-                      QString xunit, QString curveLabel);
   void setActiveCurve(MiniPlotCurveData data);
   void removeActiveCurve();
   void removeCurve(QString label);
@@ -70,11 +70,14 @@ signals:
 protected:
   void contextMenuEvent(QContextMenuEvent *evt) override;
   void mouseReleaseEvent(QMouseEvent *evt) override;
+  void setActiveCurve(std::vector<double> x, std::vector<double> y,
+                      QString xunit, QString curveLabel);
 
 private:
   QString m_activeCurveLabel;
   QStringList m_storedCurveLabels;
   QString m_xunit;
+  PythonObject m_peakLabel;
 };
 }
 }

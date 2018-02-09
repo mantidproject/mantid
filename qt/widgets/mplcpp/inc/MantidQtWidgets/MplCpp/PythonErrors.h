@@ -16,6 +16,7 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 */
+#include "MantidQtWidgets/MplCpp/DllOption.h"
 #include <stdexcept>
 #include <string>
 
@@ -31,7 +32,7 @@ namespace MplCpp {
  *
  * A custom exception type to indicate a python error occurred.
  */
-class PythonError : public std::exception {
+class EXPORT_OPT_MANTIDQT_MPLCPP PythonError : public std::exception {
 public:
   explicit PythonError(bool withTrace = true);
   const char *what() const noexcept override { return m_msg.c_str(); }

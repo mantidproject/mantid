@@ -77,15 +77,17 @@ public:
 
   /// Return the raw PyObject ptr handle. Use with care
   inline PyObject *get() const { return m_ptr; }
-  /// Return the raw PyObject ptr handle. Use with care
-  inline void reset(PyObject *ptr) { m_ptr = ptr; }
   /// Call the given method and return the object
   PythonObject getAttr(const char *name) const;
+  /// Call the given method without arguments and return an object
+  PythonObject callMethod(const char *name) const;
 
 protected:
   /// Protected constructor. You cannot build directly from
   /// a raw pointer. Use one of the static creation functions
   PythonObject(PyObject *ptr) : m_ptr(ptr) {}
+  /// Reset the raw PyObject ptr handle.
+  inline void reset(PyObject *ptr) { m_ptr = ptr; }
 
 private:
   PyObject *m_ptr;
