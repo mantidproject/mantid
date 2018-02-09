@@ -49,6 +49,7 @@ void IqtFit::setup() {
   // Add custom settings
   addBoolCustomSetting("ConstrainIntensities", "Constrain Intensities");
   addBoolCustomSetting("ConstrainBeta", "Make Beta Global");
+  addBoolCustomSetting("ExtractMembers", "Extract Members");
   setCustomSettingEnabled("ConstrainBeta", false);
 
   // Set available background options
@@ -188,6 +189,7 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
   const auto outputName = outputWorkspaceName();
   const bool constrainBeta = boolSettingValue("ConstrainBeta");
   const bool constrainIntens = boolSettingValue("ConstrainIntensities");
+  const bool extractMembers = boolSettingValue("ExtractMembers");
 
   IAlgorithm_sptr iqtFitAlg;
 
@@ -201,6 +203,7 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
   iqtFitAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
   iqtFitAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
   iqtFitAlg->setProperty("ConstrainIntensities", constrainIntens);
+  iqtFitAlg->setProperty("ExtractMembers", extractMembers);
   iqtFitAlg->setProperty("OutputResultWorkspace", outputName + "_Result");
   iqtFitAlg->setProperty("OutputParameterWorkspace",
                          outputName + "_Parameters");
