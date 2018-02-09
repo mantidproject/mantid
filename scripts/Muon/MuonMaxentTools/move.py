@@ -1,6 +1,7 @@
 import math
-from chinow import CHINOW
-from dist import DIST
+
+from Muon.MuonMaxentTools.chinow import CHINOW
+from Muon.MuonMaxentTools.dist import DIST
 
 
 # variable p is used? Size of sigma

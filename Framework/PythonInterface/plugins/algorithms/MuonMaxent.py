@@ -1,8 +1,7 @@
 import numpy as np
 import math
-from MuonMaxentTools.multimaxalpha import MULTIMAX
+from Muon.MuonMaxentTools.multimaxalpha import MULTIMAX
 from mantid.api import *
-     # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 from mantid.kernel import *
 from mantid.simpleapi import *
 

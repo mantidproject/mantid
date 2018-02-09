@@ -1,7 +1,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-from zft import ZFT
+from Muon.MuonMaxentTools.zft import ZFT
 
 """
      Works with the dead time data

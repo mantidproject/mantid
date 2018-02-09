@@ -1,7 +1,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-from chosol import CHOSOL
+from Muon.MuonMaxentTools.chosol import  CHOSOL
 
 # translation of chinow.for
 """

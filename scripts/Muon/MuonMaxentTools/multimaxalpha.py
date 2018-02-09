@@ -1,13 +1,14 @@
 import numpy as np
-from input import INPUT
-from start import START
-from back import BACK
-from maxent import MAXENT
-from deadfit import DEADFIT
-from modbak import MODBAK
-from modamp import MODAMP
-from modab import MODAB
-from outspec import OUTSPEC
+
+from Muon.MuonMaxentTools.input import INPUT
+from Muon.MuonMaxentTools.start import START
+from Muon.MuonMaxentTools.back import BACK
+from Muon.MuonMaxentTools.maxent import MAXENT
+from Muon.MuonMaxentTools.deadfit import DEADFIT
+from Muon.MuonMaxentTools.modbak import MODBAK
+from Muon.MuonMaxentTools.modamp import MODAMP
+from Muon.MuonMaxentTools.modab import MODAB
+from Muon.MuonMaxentTools.outspec import OUTSPEC
 
 
 def MULTIMAX(
