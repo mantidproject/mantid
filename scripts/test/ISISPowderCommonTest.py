@@ -574,6 +574,7 @@ class ISISPowderMockInst(object):
 class ISISPowderMockRunDetails(object):
     def __init__(self, file_ext):
         self.file_extension = file_ext
+        self._inst_prefix = "MOCK"
 
 if __name__ == "__main__":
     unittest.main()
