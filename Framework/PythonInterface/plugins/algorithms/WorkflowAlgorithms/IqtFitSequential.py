@@ -202,9 +202,9 @@ class IqtFitSequential(PythonAlgorithm):
         self._transfer_sample_logs()
 
         if self._do_extract_members:
-            ms.ExtractMembers(InputWorkspace=self._input_ws,
-                              ResultWorkspace=self._fit_group_name,
-                              OutputWorkspace=output_workspace + "_Members")
+            ms.ExtractQENSMembers(InputWorkspace=self._input_ws,
+                                  ResultWorkspace=self._fit_group_name,
+                                  OutputWorkspace=output_workspace + "_Members")
 
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
