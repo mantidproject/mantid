@@ -32,7 +32,7 @@ New features
 Improvements
 ############
 
-- Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows is also disabled during processing.
+- Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows and settings is also disabled during processing.
 - Removed the 'DirectBeam' box from the settings tab of the ISIS Reflectometry interface because this is not used.
 - Properties on the Runs tab now take precedence over properties on the Settings tab.
 - Output workspace names have been improved. Names now use '+' to indicate preprocessed (i.e. summed) workspaces, rather than '_', which is used to indicate postprocessed (i.e. stitched) workspaces.
