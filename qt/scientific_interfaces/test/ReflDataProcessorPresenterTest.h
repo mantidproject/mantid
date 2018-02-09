@@ -202,7 +202,7 @@ public:
       TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex +
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
                                 "_13462_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
@@ -287,7 +287,7 @@ public:
       TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex +
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
                                 "_13462_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
@@ -383,7 +383,7 @@ public:
       TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex +
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
                                 "_13462_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
@@ -467,7 +467,7 @@ public:
       TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex +
+      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
                                 "_13462_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
       TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
