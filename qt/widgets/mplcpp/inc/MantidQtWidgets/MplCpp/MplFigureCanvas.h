@@ -120,7 +120,8 @@ public:
 
   ///@{
   ///@name Text labels
-  PythonObject addText(double x, double y, const char *label);
+  PythonObject addText(double x, double y, const char *label,
+                       const char *horizontalalignment = "left");
   ///@}
 
 protected:

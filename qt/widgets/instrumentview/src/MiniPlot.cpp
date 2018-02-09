@@ -146,7 +146,7 @@ void MiniPlot::removeCurve(QString label) {
  * @param label The text label to attach
  */
 void MiniPlot::addPeakLabel(double x, double y, QString label) {
-  m_peakLabel = addText(x, y, label.toAscii().constData());
+  m_peakLabel = addText(x, y, label.toAscii().constData(), "center");
 }
 
 /**
