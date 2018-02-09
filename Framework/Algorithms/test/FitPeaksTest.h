@@ -362,7 +362,7 @@ public:
   /** Test fit Gaussian peaks with high background
    * @brief Later_test_HighBackgroundPeaks
    */
-  void Current_test_HighBackgroundPeaks() {
+  void test_HighBackgroundPeaks() {
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -384,11 +384,17 @@ public:
         fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
 
     TS_ASSERT_THROWS_NOTHING(
-        fit_peaks_alg.setProperty("BackgroundType", "Polynomial"));
+        fit_peaks_alg.setProperty("BackgroundType", "Quadratic"));
+    //    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
+    //        "PeakCenters",
+    //        "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
+    //                       "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,"
+    //                       "1.5133,2.1401"));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
-        "PeakCenters", "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
-                       "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,"
-                       "1.5133,2.1401"));
+        "PeakCenters", "0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1."
+                       "2356, 1.5133, 2.1401"));
+    fit_peaks_alg.setProperty("StartWorkspaceIndex", 0);
+    fit_peaks_alg.setProperty("StopWorkspaceIndex", 0);
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("FitFromRight", true));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
@@ -433,7 +439,7 @@ public:
   /** Test on VULCAN's data including 2 different starting value of peak
    * profiles
     */
-  void test_multiple_peak_profiles() {
+  void Passed_test_multiple_peak_profiles() {
     // Generate input workspace
     std::string input_ws_name = loadVulcanHighAngleData();
     API::MatrixWorkspace_sptr input_ws =
@@ -455,21 +461,20 @@ public:
         fitpeaks.setProperty("InputWorkspace", input_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 5));
-    // 0.728299, 0.89198, 1.07577, 1.26145
-    // 0.6307, 0.6867, 0.728299, 0.89198, 1.07577, 1.26145
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "PeakCenters", "1.0758, 0.89198, 0.728299, 0.6867"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowLeftBoundary",
-                                                  "1.05, 0.87, 0.71, 0.67"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowRightBoundary",
-                                                  "1.15, 0.92, 0.76, 0.709"));
+        "PeakCenters", "0.6867, 0.728299, 0.89198, 1.0758"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
+        "FitWindowBoundaryList",
+        "0.67, 0.709, 0.71, 0.76, 0.87, 0.92, 1.05, 1.15"));
     TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakRanges", "0.02, 0.015, 0.01, 0.01"));
+        fitpeaks.setProperty("PeakParameterNames", peakparnames));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS2");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS2");
@@ -488,15 +493,33 @@ public:
         "PeakParametersWS2", &peak_param_ws_exist);
 
     if (peak_pos_ws_exist) {
+      // workspace for peak positions from fitted value
       TS_ASSERT_EQUALS(peak_pos_ws->getNumberHistograms(), 6);
+      HistogramData::HistogramY peak_pos_0 = peak_pos_ws->histogram(0).y();
+      HistogramData::HistogramE pos_error_0 = peak_pos_ws->histogram(0).e();
+      TS_ASSERT_DELTA(peak_pos_0[0], -4,
+                      0.0000001); // peak is out of data range
+      TS_ASSERT(pos_error_0[0] > 1E20);
+      TS_ASSERT(pos_error_0[3] < 100.);
     }
 
     if (fitted_ws_exist) {
+      // workspace for calculated peaks from fitted data
       TS_ASSERT_EQUALS(fitted_ws->getNumberHistograms(),
                        input_ws->getNumberHistograms());
     }
 
     if (peak_param_ws_exist) {
+      // workspace for calcualted peak parameters
+      TS_ASSERT_EQUALS(peak_param_ws->rowCount(), 4 * 6);
+      // check third spectrum
+      size_t iws = 2;
+      double peak_intensity_2_0 = peak_param_ws->cell<double>(iws * 4, 2);
+      TS_ASSERT_DELTA(peak_intensity_2_0, 0., 1.E-20);
+      double peak_intensity_2_2 = peak_param_ws->cell<double>(iws * 4 + 2, 2);
+      TS_ASSERT_DELTA(peak_intensity_2_2, 213.03, 0.03);
+      double peak_intensity_2_3 = peak_param_ws->cell<double>(iws * 4 + 3, 2);
+      TS_ASSERT_DELTA(peak_intensity_2_3, 1161.78, 4.0);
     }
 
     // clean

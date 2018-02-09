@@ -70,6 +70,8 @@ private:
   std::vector<double> GetExpectedPeakPositions(size_t wi);
   std::pair<double, double> GetPeakFitWindow(size_t wi, size_t ipeak);
 
+  enum EstimatePeakWidth { NoEstimation, Observation, InstrumentResolution };
+
   /// suites of method to fit peaks
   void fitPeaks();
 
@@ -100,7 +102,8 @@ private:
                        API::IPeakFunction_sptr peak_function,
                        API::IBackgroundFunction_sptr bkgd_function,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       double xmin, double xmax, bool observe_peak_width);
+                       double xmin, double xmax, bool observe_peak_width,
+                       bool estimate_background);
 
   double FitFunctionMD(API::IAlgorithm_sptr fit,
                        API::IFunction_sptr fit_function,
@@ -121,7 +124,8 @@ private:
                     std::vector<double> *vec_e);
 
   /// Reduce background
-  void ReduceBackground(const std::vector<double> &vec_x,
+  void ReduceBackground(API::IBackgroundFunction_sptr bkgd_func,
+                        const std::vector<double> &vec_x,
                         std::vector<double> *vec_y, std::vector<double> *vec_e,
                         double *a0, double *a1);
 
@@ -131,16 +135,17 @@ private:
                         const std::vector<double> &vec_e);
 
   /// Esitmate background by 'observation'
-  void EstimateBackground(size_t wi,
+  void EstimateBackground(API::MatrixWorkspace_sptr dataws, size_t wi,
                           const std::pair<double, double> &peak_window,
                           API::IBackgroundFunction_sptr bkgd_function);
   /// estimate linear background
-  void estimateLinearBackground(size_t wi, double left_window_boundary,
+  void estimateLinearBackground(API::MatrixWorkspace_sptr dataws, size_t wi,
+                                double left_window_boundary,
                                 double right_window_boundary, double &bkgd_a1,
                                 double &bkgd_a0);
 
   /// Estimate peak parameters by 'observation'
-  int EstimatePeakParameters(size_t wi,
+  int EstimatePeakParameters(API::MatrixWorkspace_sptr dataws, size_t wi,
                              const std::pair<double, double> &peak_window,
                              API::IPeakFunction_sptr peakfunction,
                              API::IBackgroundFunction_sptr bkgdfunction,
@@ -216,6 +221,8 @@ private:
   API::IPeakFunction_sptr m_peakFunction;
   /// Background function
   API::IBackgroundFunction_sptr m_bkgdFunction;
+  /// Linear background function for high backgroun fitting
+  API::IBackgroundFunction_sptr linear_background_function_;
 
   /// Minimzer
   std::string m_minimizer;
@@ -246,8 +253,13 @@ private:
   bool m_partialSpectra;
   std::vector<double> m_peakPosTolerances;
 
-  /// Flag for observing peak width
-  bool observe_peak_width_;
+  /// Flag for observing peak width: there are 3 states (1) no estimation (2)
+  /// from 'observation' (3) calculated from instrument resolution
+  bool estimate_peak_width_; // if true, estimate peak width.  otherwise, use
+                             // the previously calculated value
+  bool observe_peak_width_;  // if true, 'observe' peak width; otherwise,
+                             // calculate peak width from instrument resolution
+  EstimatePeakWidth peak_width_estimate_approach_;
 
   /// peak windows
   std::vector<std::vector<double>> m_peakWindowVector;
