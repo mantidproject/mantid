@@ -15,6 +15,8 @@ class DLLExport MSDFit : public IndirectFitAnalysisTab {
 public:
   MSDFit(QWidget *parent = nullptr);
 
+  bool doPlotGuess() const override;
+
 private:
   void setup() override;
   void run() override;
@@ -26,28 +28,36 @@ protected slots:
   void newDataLoaded(const QString wsName);
   void specMinChanged(int value);
   void specMaxChanged(int value);
-  void minChanged(double val);
-  void maxChanged(double val);
-  void updateRS(QtProperty *prop, double val);
+  void startXChanged(double startX) override;
+  void endXChanged(double endX) override;
   void saveClicked();
   void plotClicked();
   void algorithmComplete(bool error) override;
-  void modelSelection(int selected);
   void updatePreviewPlots() override;
-  void plotGuess();
+  void updatePlotRange() override;
+  void updatePlotOptions() override;
+
+protected:
+  std::string createSingleFitOutputName() const override;
+  std::string createSequentialFitOutputName() const override;
+  std::string constructBaseName() const;
+  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
+  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
+  void enablePlotResult() override;
+  void disablePlotResult() override;
+  void enableSaveResult() override;
+  void disableSaveResult() override;
+  void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
+  void removeGuessPlot() override;
 
 private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
   Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
-                                               int specMin, int specMax);
-  std::string modelToAlgorithmProperty(const QString &model);
-  Mantid::API::IFunction_sptr createFunction(const QString &modelName);
-  Mantid::API::IFunction_sptr
-  getFunction(const QString &functionName) const override;
+                                               int specMin, int specMax) const;
+  std::string modelToAlgorithmProperty(const QString &model) const;
 
-  Ui::MSDFit m_uiForm;
-  QtTreePropertyBrowser *m_msdTree;
+  std::unique_ptr<Ui::MSDFit> m_uiForm;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

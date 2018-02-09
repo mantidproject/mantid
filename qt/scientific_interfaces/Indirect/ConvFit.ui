@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>566</width>
-    <height>447</height>
+    <width>794</width>
+    <height>809</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -126,138 +126,7 @@
         <enum>QLayout::SetNoConstraint</enum>
        </property>
        <item>
-        <layout class="QVBoxLayout" name="loOptions">
-         <item>
-          <layout class="QHBoxLayout" name="loFitType">
-           <item>
-            <widget class="QLabel" name="lbFitType">
-             <property name="text">
-              <string>Fit Type:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="cbFitType">
-             <item>
-              <property name="text">
-               <string>Zero Lorentzians</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>One Lorentzian</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Two Lorentzians</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>InelasticDiffSphere</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>InelasticDiffRotDiscreteCircle</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>ElasticDiffSphere</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>ElasticDiffRotDiscreteCircle</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>StretchedExpFT</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="loBackground">
-           <item>
-            <widget class="QLabel" name="lbBackground">
-             <property name="text">
-              <string>Background</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="cbBackground">
-             <item>
-              <property name="text">
-               <string>Fixed Flat</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Fit Flat</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Fit Linear</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="loTempCorrection">
-           <item>
-            <widget class="QCheckBox" name="ckTempCorrection">
-             <property name="text">
-              <string>Temp. Correction</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="leTempCorrection">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>If set, applies the correction x*temp / 1-exp(x*temp) to the lorentzian before convolution.</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="loMiscOptions">
-           <item>
-            <widget class="QCheckBox" name="ckPlotGuess">
-             <property name="text">
-              <string>Plot Guess</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="ckTieCentres">
-             <property name="text">
-              <string>Tie Centres</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
+        <layout class="QVBoxLayout" name="loOptions"/>
        </item>
        <item>
         <layout class="QVBoxLayout" name="properties">
@@ -334,7 +203,6 @@
              <blue>255</blue>
             </color>
            </property>
-           <zorder>ppPlotTop</zorder>
           </widget>
          </item>
         </layout>
@@ -368,6 +236,26 @@
           <widget class="QPushButton" name="pbPlotPreview">
            <property name="text">
             <string>Plot Current Preview</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="ckPlotGuess">
+           <property name="text">
+            <string>Plot Guess</string>
            </property>
           </widget>
          </item>
