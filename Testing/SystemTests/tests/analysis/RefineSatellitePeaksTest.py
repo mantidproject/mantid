@@ -1,19 +1,13 @@
-from mantid.api import FileFinder
 from mantid.simpleapi import RefineSatellitePeaks, Load
 import unittest
 import stresstesting
 
 
 def load_files():
-    md_path = FileFinder.getFullPath("WISH_md_small.nxs")
-    main_peaks_path = FileFinder.getFullPath("WISH_peak_hkl_small.nxs")
-    satellite_peaks_path = FileFinder.getFullPath(
-        "WISH_peak_hkl_frac_small.nxs")
-
-    md_workspace = Load(Filename=md_path, OutputWorkspace='md_workspace')
-    main_peaks = Load(Filename=main_peaks_path,
+    md_workspace = Load(Filename="WISH_md_small.nxs", OutputWorkspace='md_workspace')
+    main_peaks = Load(Filename="WISH_peak_hkl_small.nxs",
                       OutputWorkspace='main_peaks')
-    satellite_peaks = Load(Filename=satellite_peaks_path,
+    satellite_peaks = Load(Filename="WISH_peak_hkl_frac_small.nxs",
                            OutputWorkspace='satellite_peaks')
     return md_workspace, main_peaks, satellite_peaks
 
