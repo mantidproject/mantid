@@ -17,6 +17,8 @@ list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/LARMOR)
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/INTER)
 # Reference results
 list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/SystemTests/tests/analysis/reference)
+# Doc tests
+list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/Data/DocTest)
 
 # Output to file
 # If this is changed, make sure to update the .gitignore in this directory
