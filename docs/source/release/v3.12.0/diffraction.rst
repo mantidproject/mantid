@@ -18,6 +18,11 @@ Powder Diffraction
 
   + Scripts now support creation of grouping .cal files from ceria run(s)
   + Absorption corrections enabled for all samples, not just vanadium
+- Improvements in ISIS Powder for HRPD:
+
+  + The prompt pulse is now masked out for the long window
+  + Extra TOF windows 10-50 and 180-280 now supported
+  + Default bin widths have been updated
 - 'suffix' parameter added for output filenames from all ISIS_Powder instruments
 - The ``CalibrationFile`` is now optional in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`. In this case time focussing will use :ref:`ConvertUnits <algm-ConvertUnits>` and the instrument geometry. Care must be taken to supply a ``GroupingFile`` otherwise all of the spectra will be kept separate.
 - :ref:`SaveGSS <algm-SaveGSS>` is relaxed to accept non-TOF point data workspaces as well.
