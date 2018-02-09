@@ -101,7 +101,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
 
   // The post-processing algorithm
   PostprocessingAlgorithm postprocessor(
-      "Stitch1DMany", "IvsQ_binned_",
+      "Stitch1DMany", "IvsQ_",
       std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
 
   // Post-processing instructions linking column names to properties of the

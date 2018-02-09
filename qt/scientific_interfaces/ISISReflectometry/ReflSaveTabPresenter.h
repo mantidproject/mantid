@@ -60,8 +60,11 @@ public:
 
 private:
   bool isValidSaveDirectory(std::string const &directory);
+  void onSavePathChanged();
   void warnInvalidSaveDirectory();
+  void errorInvalidSaveDirectory();
   void warn(std::string const &message, std::string const &title);
+  void error(std::string const &message, std::string const &title);
   /// Adds all workspace names to the list of workspaces
   void populateWorkspaceList();
   /// Adds all workspace params to the list of logged parameters
@@ -79,31 +82,25 @@ private:
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
 
-  bool isWhitelisted(std::vector<std::string> const &prefixWhitelist,
-                     std::string const &workspaceName) const;
+  bool prefixedByOneOf(std::vector<std::string> const &allowedPrefixes,
+                       std::string const &workspaceName) const;
   std::vector<std::string>
-  filterByWhitelist(std::vector<std::string> const &prefixWhitelist,
-                    std::vector<std::string> workspaceNames) const;
-  void autoSaveWorkspaces(std::vector<std::string> const &prefixWhitelist,
-                          std::vector<std::string> const &workspaceNames);
+  filterByPrefix(std::vector<std::string> const &allowedPrefixes,
+                 std::vector<std::string> workspaceNames) const;
 
   void enableAutosave();
   void disableAutosave();
-  void updateAutosavePrefixes();
-
-  std::vector<std::string>
-  parseAutosavePrefixes(std::string const &prefixesInput);
+  bool shouldAutosave() const;
 
   /// The view
   IReflSaveTabView *m_view;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
+  bool m_shouldAutosave;
   /// Names of possible save algorithms
   std::vector<std::string> m_saveAlgs;
   /// Extensions used for each save algorithm
   std::vector<std::string> m_saveExts;
-
-  boost::optional<std::vector<std::string>> m_autosavePrefixWhiteList;
 };
 }
 }

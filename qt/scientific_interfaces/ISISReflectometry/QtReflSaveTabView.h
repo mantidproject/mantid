@@ -82,8 +82,6 @@ public:
   void setParametersList(const std::vector<std::string> &) const override;
 
   void disallowAutosave() override;
-
-  std::string getAutosavePrefixInput() const override;
 public slots:
   /// Populate the 'List of workspaces' widget
   void populateListOfWorkspaces() const;
@@ -96,8 +94,8 @@ public slots:
   /// Suggest a save directory
   void suggestSaveDir() const;
 
-  void onAutosaveChanged(bool enabled);
-  void onAutosavePrefixesChanged(QString const &prefixesInput);
+  void onSavePathChanged();
+  void onAutosaveChanged(int state);
 
 private:
   /// Initialize the interface

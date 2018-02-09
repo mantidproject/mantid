@@ -24,7 +24,7 @@ using namespace Mantid::API;
 * @param view :: The view we are handling
 */
 ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
-    : m_view(view), m_mainPresenter() {
+    : m_view(view), m_mainPresenter(), m_shouldAutosave(false) {
 
   m_saveAlgs = {"SaveReflCustomAscii", "SaveReflThreeColumnAscii",
                 "SaveANSTOAscii", "SaveILLCosmosAscii"};
@@ -66,9 +66,8 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
   case autosaveEnabled:
     enableAutosave();
     break;
-  case autosavePrefixesChanged:
-    updateAutosavePrefixes();
-    break;
+  case savePathChanged:
+    onSavePathChanged();
   }
 }
 
@@ -83,82 +82,59 @@ bool startsWithAnyOf(InputIterator begin, InputIterator end,
 }
 }
 
-std::vector<std::string>
-ReflSaveTabPresenter::parseAutosavePrefixes(std::string const &prefixesInput) {
-  auto prefixes = std::vector<std::string>();
-  if (!prefixesInput.empty()) {
-    boost::split(prefixes, prefixesInput, boost::is_any_of(","));
-    return prefixes;
-  } else {
-    return prefixes;
-  }
-}
-
 void ReflSaveTabPresenter::enableAutosave() {
-  if (isValidSaveDirectory(m_view->getSavePath()))
-    updateAutosavePrefixes();
-  else {
-    warnInvalidSaveDirectory();
+  if (isValidSaveDirectory(m_view->getSavePath())) {
+    m_shouldAutosave = true;
+  } else {
+    m_shouldAutosave = false;
     m_view->disallowAutosave();
+    errorInvalidSaveDirectory();
   }
 }
 
-void ReflSaveTabPresenter::disableAutosave() {
-  m_autosavePrefixWhiteList = boost::none;
-}
-
-void ReflSaveTabPresenter::updateAutosavePrefixes() {
-  m_autosavePrefixWhiteList =
-      parseAutosavePrefixes(m_view->getAutosavePrefixInput());
-}
-
-bool ReflSaveTabPresenter::isWhitelisted(
-    std::vector<std::string> const &prefixWhitelist,
+bool ReflSaveTabPresenter::prefixedByOneOf(
+    std::vector<std::string> const &allowedPrefixes,
     std::string const &workspaceName) const {
-  return startsWithAnyOf(prefixWhitelist.cbegin(), prefixWhitelist.cend(),
+  return startsWithAnyOf(allowedPrefixes.cbegin(), allowedPrefixes.cend(),
                          workspaceName);
 }
 
-std::vector<std::string> ReflSaveTabPresenter::filterByWhitelist(
-    std::vector<std::string> const &prefixWhitelist,
+void ReflSaveTabPresenter::disableAutosave() { m_shouldAutosave = false; }
+
+void ReflSaveTabPresenter::onSavePathChanged() {
+  if (shouldAutosave() && !isValidSaveDirectory(m_view->getSavePath()))
+    warnInvalidSaveDirectory();
+}
+
+std::vector<std::string> ReflSaveTabPresenter::filterByPrefix(
+    std::vector<std::string> const &allowedPrefixes,
     std::vector<std::string> workspaceNames) const {
   workspaceNames.erase(
       std::remove_if(
           workspaceNames.begin(), workspaceNames.end(),
-          [this, &prefixWhitelist](std::string const &workspaceName) -> bool {
-            return !isWhitelisted(prefixWhitelist, workspaceName);
+          [this, &allowedPrefixes](std::string const &workspaceName) -> bool {
+            return !prefixedByOneOf(allowedPrefixes, workspaceName);
           }),
       workspaceNames.end());
   return workspaceNames;
 }
 
-void ReflSaveTabPresenter::autoSaveWorkspaces(
-    std::vector<std::string> const &prefixWhitelist,
-    std::vector<std::string> const &workspaceNames) {
-  auto workspacesToSave = filterByWhitelist(prefixWhitelist, workspaceNames);
-  if (!workspacesToSave.empty())
-    saveWorkspaces(workspaceNames, std::vector<std::string>());
-
-  // std::cout << "** Begin Saving" << std::endl;
-  // for (auto &&ws : workspacesToSave)
-  //  std::cout << "** Saving " << ws << std::endl;
-  // std::cout << "** End Saving" << std::endl;
-}
-
 void ReflSaveTabPresenter::completedGroupReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
-  if (m_autosavePrefixWhiteList)
-    autoSaveWorkspaces(m_autosavePrefixWhiteList.get(),
-                       std::vector<std::string>({workspaceName}));
+  UNUSED_ARG(group);
+  if (shouldAutosave())
+    saveWorkspaces(std::vector<std::string>({workspaceName}));
 }
+
+bool ReflSaveTabPresenter::shouldAutosave() const { return m_shouldAutosave; }
 
 void ReflSaveTabPresenter::completedRowReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::vector<std::string> const &workspaceNames) {
-  if (!MantidWidgets::DataProcessor::canPostprocess(group) &&
-      m_autosavePrefixWhiteList)
-    autoSaveWorkspaces(m_autosavePrefixWhiteList.get(), workspaceNames);
+  if (!MantidWidgets::DataProcessor::canPostprocess(group) && shouldAutosave())
+    saveWorkspaces(filterByPrefix(std::vector<std::string>({"IvsQ_binned_"}),
+                                  workspaceNames));
 }
 
 /** Fills the 'List of Workspaces' widget with the names of all available
@@ -226,9 +202,14 @@ bool ReflSaveTabPresenter::isValidSaveDirectory(std::string const &directory) {
   return !directory.empty() && file.exists() && file.isDirectory();
 }
 
+void ReflSaveTabPresenter::error(std::string const &message,
+                                 std::string const &title) {
+  m_mainPresenter->giveUserCritical(message, title);
+}
+
 void ReflSaveTabPresenter::warn(std::string const &message,
                                 std::string const &title) {
-  m_mainPresenter->giveUserCritical(message, title);
+  m_mainPresenter->giveUserInfo(message, title);
 }
 
 std::vector<std::string>
@@ -245,11 +226,16 @@ titles(std::vector<std::string> const &workspaceNames) {
 }
 
 void ReflSaveTabPresenter::warnInvalidSaveDirectory() {
-  warn("Directory specified doesn't exist or "
-       "was invalid for your operating system",
+  warn("You just changed the save path to a directory which "
+       "doesn't exist or could not be accessed.",
        "Invalid directory");
 }
 
+void ReflSaveTabPresenter::errorInvalidSaveDirectory() {
+  error("The save path specified doesn't exist or "
+        "could not be accessed.",
+        "Invalid directory");
+}
 void ReflSaveTabPresenter::saveWorkspaces(
     std::vector<std::string> const &workspaceNames,
     std::vector<std::string> const &logParameters) {
@@ -293,7 +279,7 @@ void ReflSaveTabPresenter::saveWorkspaces(
       saveAlg->execute();
     }
   } else {
-    warnInvalidSaveDirectory();
+    errorInvalidSaveDirectory();
   }
 }
 

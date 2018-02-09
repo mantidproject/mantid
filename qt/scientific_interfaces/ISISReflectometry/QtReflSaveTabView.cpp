@@ -32,29 +32,25 @@ void QtReflSaveTabView::initLayout() {
           SLOT(filterWorkspaceList()));
   connect(m_ui.listOfWorkspaces, SIGNAL(itemDoubleClicked(QListWidgetItem *)),
           this, SLOT(requestWorkspaceParams()));
-  connect(m_ui.autosaveGroup, SIGNAL(clicked(bool)), this,
-          SLOT(onAutosaveChanged(bool)));
-  connect(m_ui.autosavePrefixesEdit, SIGNAL(textChanged(const QString &)), this,
-          SLOT(onAutosavePrefixesChanged(const QString &)));
+  connect(m_ui.saveReductionResultsCheckBox, SIGNAL(stateChanged(int)), this,
+          SLOT(onAutosaveChanged(int)));
+  connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this,
+          SLOT(onSavePathChanged()));
 
   m_presenter.reset(new ReflSaveTabPresenter(this));
   populateListOfWorkspaces();
   suggestSaveDir();
 }
 
-std::string QtReflSaveTabView::getAutosavePrefixInput() const {
-  return m_ui.autosavePrefixesEdit->text().toStdString();
+void QtReflSaveTabView::onSavePathChanged() {
+  m_presenter->notify(IReflSaveTabPresenter::Flag::savePathChanged);
 }
 
-void QtReflSaveTabView::onAutosaveChanged(bool enabled) {
-  if (enabled)
+void QtReflSaveTabView::onAutosaveChanged(int state) {
+  if (state == Qt::CheckState::Checked)
     m_presenter->notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
   else
     m_presenter->notify(IReflSaveTabPresenter::Flag::autosaveDisabled);
-}
-
-void QtReflSaveTabView::onAutosavePrefixesChanged(QString const &prefixes) {
-  m_presenter->notify(IReflSaveTabPresenter::Flag::autosavePrefixesChanged);
 }
 
 /** Returns the presenter managing this view
@@ -153,7 +149,7 @@ bool QtReflSaveTabView::getQResolutionCheck() const {
 }
 
 void QtReflSaveTabView::disallowAutosave() {
-  m_ui.autosaveGroup->setChecked(false);
+  m_ui.saveReductionResultsCheckBox->setCheckState(Qt::CheckState::Unchecked);
 }
 
 /** Returns the separator type

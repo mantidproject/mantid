@@ -47,7 +47,7 @@ public:
     suggestSaveDirFlag,
     autosaveEnabled,
     autosaveDisabled,
-    autosavePrefixesChanged
+    savePathChanged
   };
 
   virtual void completedGroupReductionSuccessfully(

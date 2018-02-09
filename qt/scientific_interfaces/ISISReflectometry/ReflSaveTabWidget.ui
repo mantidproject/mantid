@@ -197,21 +197,21 @@
             <string>Auto Save</string>
            </property>
            <property name="checkable">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
            <property name="checked">
             <bool>false</bool>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QLabel" name="prefixesToSaveLabel">
+             <widget class="QCheckBox" name="saveReductionResultsCheckBox">
+              <property name="toolTip">
+               <string>Saves stitched workspaces for multi-row group reductions and IvsQ_binned workspaces for reductions single row reductions.</string>
+              </property>
               <property name="text">
-               <string>Prefixes To Save:</string>
+               <string>Save as ASCII on completion</string>
               </property>
              </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="autosavePrefixesEdit"/>
             </item>
            </layout>
           </widget>
