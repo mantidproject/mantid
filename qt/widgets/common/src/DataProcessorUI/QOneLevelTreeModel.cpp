@@ -40,6 +40,10 @@ QVariant QOneLevelTreeModel::data(const QModelIndex &index, int role) const {
 
   if (role == Qt::DisplayRole || role == Qt::EditRole) {
     return QString::fromStdString(m_tWS->String(index.row(), index.column()));
+  } else if (role == Qt::BackgroundRole) {
+    // Highlight if the process status for this row is set
+    if (m_rows.at(index.row()))
+      return QColor("#00b300");
   }
 
   return QVariant();

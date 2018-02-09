@@ -54,15 +54,12 @@ public:
 
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const override {
+    QStyledItemDelegate::paint(painter, option, index);
+    
     painter->save();
     painter->setPen(QColor(Qt::black));
-    if (m_manager->isProcessed(index.row(), index.parent().row())) {
-      painter->fillRect(option.rect, Qt::green);
-    }
     painter->drawRect(option.rect);
     painter->restore();
-
-    QStyledItemDelegate::paint(painter, option, index);
   }
 
 protected:
