@@ -19,98 +19,12 @@ from __future__ import (absolute_import, division, print_function)
 import numpy
 import mantid.kernel
 import mantid.api
-import mantid.plots.helperfunctions as common
+from mantid.plots.helperfunctions import *
 import matplotlib.colors
 
-
 # ================================================
-# Helper functions
+# Private 2D Helper functions
 # ================================================
-
-def _getWkspIndexDistAndLabel(workspace, **kwargs):
-    '''
-    Get workspace index, whether the workspace is a distribution,
-    and label for the spectrum
-
-    :param workspace: a Workspace2D or an EventWorkspace
-    '''
-    # get the special arguments out of kwargs
-    specNum = kwargs.pop('specNum', None)
-    wkspIndex = kwargs.pop('wkspIndex', None)
-
-    # don't worry if there is only one spectrum
-    if workspace.getNumberHistograms() == 1:
-        specNum = None
-        wkspIndex = 0
-
-    # error check input parameters
-    if (specNum is not None) and (wkspIndex is not None):
-        raise RuntimeError('Must specify only specNum or wkspIndex')
-    if (specNum is None) and (wkspIndex is None):
-        raise RuntimeError('Must specify either specNum or wkspIndex')
-
-    # convert the spectrum number to a workspace index and vice versa
-    if specNum is not None:
-        wkspIndex = workspace.getIndexFromSpectrumNumber(int(specNum))
-    else:
-        specNum = workspace.getSpectrum(wkspIndex).getSpectrumNo()
-
-    # create a label if it isn't already specified
-    if 'label' not in kwargs:
-        wsName = workspace.name()
-        if wsName:
-            kwargs['label'] = '{0}: spec {1}'.format(wsName, specNum)
-        else:
-            kwargs['label'] = 'spec {0}'.format(specNum)
-
-    (distribution, kwargs) = common.get_distribution(workspace, **kwargs)
-
-    return wkspIndex, distribution, kwargs
-
-
-def _getSpectrum(workspace, wkspIndex, distribution, withDy = False, withDx = False):
-    '''Extract a single spectrum and process the data into a frequency
-    :param workspace: a Workspace2D or an EventWorkspace
-    :param wkspIndex: workspace index
-    :param distribution: flag to divide the data by bin width. It happens only
-        when this flag is False, the workspace contains histogram data, and
-        the mantid configuration is set up to divide such workspaces by bin
-        width. The same effect can be obtained by running the
-        :ref:`algm-ConvertToDistribution` algorithm
-    :param withDy: if True, it will return the error in the "counts", otherwise None
-    :param with Dx: if True, and workspace has them, it will return errors
-        in the x coordinate, otherwise None
-    Note that for workspaces containing bin boundaries, this function will return
-    the bin centers for x.
-    To be used in 1D plots (plot, scatter, errorbar)
-    '''
-    x = workspace.readX(wkspIndex)
-    y = workspace.readY(wkspIndex)
-    dy = None
-    dx = None
-
-    if withDy:
-        dy = workspace.readE(wkspIndex)
-    if withDx and workspace.getSpectrum(wkspIndex).hasDx():
-        dx = workspace.readDx(wkspIndex)
-
-    if workspace.isHistogramData():
-        if (not distribution) and (mantid.kernel.config['graph1d.autodistribution'] == 'On'):
-            y = y / (x[1:] - x[0:-1])
-            if dy is not None:
-                dy = dy / (x[1:] - x[0:-1])
-        x = common.points_from_boundaries(x)
-    y = numpy.ma.masked_invalid(y)
-    if dy is not None:
-        dy = numpy.ma.masked_invalid(dy)
-    return x, y, dy, dx
-
-
-def _commonX(arr):
-    '''
-    Helper function to check if all rows in a 2d :class:`numpy.ndarray` are identical
-    '''
-    return numpy.all(arr == arr[0, :], axis=(1, 0))
 
 
 def _getMatrix2DData(workspace, distribution, histogram2D=False):
@@ -143,7 +57,7 @@ def _getMatrix2DData(workspace, distribution, histogram2D=False):
         else:
             x = .5*(x[:, 0:-1]+x[:, 1:])
             if len(y) == z.shape[0]+1:
-                y = common.points_from_boundaries(y)
+                y = points_from_boundaries(y)
     else:
         if histogram2D:
             if _commonX(x):
@@ -155,7 +69,7 @@ def _getMatrix2DData(workspace, distribution, histogram2D=False):
                 y = boundaries_from_points(y)
         else:
             if len(y) == z.shape[0]+1:
-                y = common.points_from_boundaries(y)
+                y = points_from_boundaries(y)
     y = numpy.tile(y, x.shape[1]).reshape(x.shape[1], x.shape[0]).transpose()
     z = numpy.ma.masked_invalid(z)
     return x, y, z
@@ -212,38 +126,11 @@ def _getUnevenData(workspace, distribution):
     return x, y, z
 
 
-def boundaries_from_points(input_array):
-    '''
-    The function tries to guess bin boundaries from bin centers
-    :param input_array: a :class:`numpy.ndarray` of bin centers
-    '''
-    assert isinstance(input_array, numpy.ndarray), 'Not a numpy array'
-    if len(input_array) == 0:
-        raise ValueError('could not extend array with no elements')
-    if len(input_array) == 1:
-        return numpy.array([input_array[0]-0.5, input_array[0]+0.5])
-    return numpy.concatenate(([(3*input_array[0]-input_array[1])*0.5],
-                             (input_array[1:]+input_array[:-1])*0.5,
-                             [(3*input_array[-1]-input_array[-2])*0.5]))
-
-
-def _getMDData1D(workspace, normalization):
-    '''
-    Function to transform data in an MDHisto workspace with exactly
-    one non-integrated dimension into arrays of bin centers, data,
-    and error, to be used in 1D plots (plot, scatter, errorbar)
-    '''
-    coordinate, data, err = common.get_md_data(workspace, normalization, withError=True)
-    assert len(coordinate) == 1, 'The workspace is not 1D'
-    coordinate = common.points_from_boundaries(coordinate[0])
-    return coordinate, data, err
-
-
 def _setLabels1D(axes, workspace):
     '''
     helper function to automatically set axes labels for 1D plots
     '''
-    labels = common.get_axes_labels(workspace)
+    labels = get_axes_labels(workspace)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[0])
 
@@ -252,7 +139,7 @@ def _setLabels2D(axes, workspace):
     '''
     helper function to automatically set axes labels for 2D plots
     '''
-    labels = common.get_axes_labels(workspace)
+    labels = get_axes_labels(workspace)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
 
@@ -286,7 +173,7 @@ def plot(axes, workspace, *args, **kwargs):
     dimension
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x, y, _) = _getMDData1D(workspace, normalization)
     else:
         (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, **kwargs)
@@ -320,7 +207,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     dimension
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x, y, dy) = _getMDData1D(workspace, normalization)
         dx = None
     else:
@@ -355,7 +242,7 @@ def scatter(axes, workspace, *args, **kwargs):
     dimension
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x, y, _) = _getMDData1D(workspace, normalization)
     else:
         (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, **kwargs)
@@ -381,10 +268,10 @@ def contour(axes, workspace, *args, **kwargs):
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
-        x, y, z = common.get_md_data2d_bin_centers(workspace, normalization)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        x, y, z = get_md_data2d_bin_centers(workspace, normalization)
     else:
-        (distribution, kwargs) = common.get_distribution(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
     return axes.contour(x, y, z, *args, **kwargs)
@@ -407,10 +294,10 @@ def contourf(axes, workspace, *args, **kwargs):
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
-        x, y, z = common.get_md_data2d_bin_centers(workspace, normalization)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        x, y, z = get_md_data2d_bin_centers(workspace, normalization)
     else:
-        (distribution, kwargs) = common.get_distribution(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
     return axes.contourf(x, y, z, *args, **kwargs)
@@ -475,11 +362,11 @@ def pcolor(axes, workspace, *args, **kwargs):
     '''
     _setLabels2D(axes, workspace)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
-        x, y, z = common.get_md_data2d_bin_bounds(workspace, normalization)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        x, y, z = get_md_data2d_bin_bounds(workspace, normalization)
     else:
         (aligned, kwargs) = _getDataUnevenFlag(workspace, **kwargs)
-        (distribution, kwargs) = common.get_distribution(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs['pcolortype'] = ''
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
@@ -506,11 +393,11 @@ def pcolorfast(axes, workspace, *args, **kwargs):
     '''
     _setLabels2D(axes, workspace)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
-        x, y, z = common.get_md_data2d_bin_bounds(workspace, normalization)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        x, y, z = get_md_data2d_bin_bounds(workspace, normalization)
     else:
         (aligned, kwargs) = _getDataUnevenFlag(workspace, **kwargs)
-        (distribution, kwargs) = common.get_distribution(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs['pcolortype'] = 'fast'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
@@ -537,11 +424,11 @@ def pcolormesh(axes, workspace, *args, **kwargs):
     '''
     _setLabels2D(axes, workspace)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
-        x, y, z = common.get_md_data2d_bin_bounds(workspace, normalization)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        x, y, z = get_md_data2d_bin_bounds(workspace, normalization)
     else:
         (aligned, kwargs) = _getDataUnevenFlag(workspace, **kwargs)
-        (distribution, kwargs) = common.get_distribution(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs['pcolortype'] = 'mesh'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
@@ -570,11 +457,11 @@ def tripcolor(axes, workspace, *args, **kwargs):
     See :meth:`matplotlib.axes.Axes.tripcolor` for more information.
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
-        x_temp, y_temp, z = common.get_md_data2d_bin_centers(workspace, normalization)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        x_temp, y_temp, z = get_md_data2d_bin_centers(workspace, normalization)
         x, y = numpy.meshgrid(x_temp, y_temp)
     else:
-        (distribution, kwargs) = common.get_distribution(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
 
@@ -601,11 +488,11 @@ def tricontour(axes, workspace, *args, **kwargs):
     See :meth:`matplotlib.axes.Axes.tricontour` for more information.
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
-        (x_temp, y_temp, z) = common.get_md_data2d_bin_centers(workspace, normalization)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (x_temp, y_temp, z) = get_md_data2d_bin_centers(workspace, normalization)
         (x, y) = numpy.meshgrid(x_temp, y_temp)
     else:
-        (distribution, kwargs) = common.get_distribution(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
     # tricontour segfaults if many z values are not finite
@@ -640,11 +527,11 @@ def tricontourf(axes, workspace, *args, **kwargs):
     See :meth:`matplotlib.axes.Axes.tricontourf` for more information.
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = common.get_normalization(workspace, **kwargs)
-        (x_temp, y_temp, z) = common.get_md_data2d_bin_centers(workspace, normalization)
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (x_temp, y_temp, z) = get_md_data2d_bin_centers(workspace, normalization)
         (x, y) = numpy.meshgrid(x_temp, y_temp)
     else:
-        (distribution, kwargs) = common.get_distribution(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
     # tricontourf segfaults if many z values are not finite

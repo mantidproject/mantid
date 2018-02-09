@@ -23,7 +23,8 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.kernel
-import mantid.plots.functions
+import mantid.plots.plotfunctions
+import mantid.plots.plotfunctions3D
 from matplotlib.axes import Axes
 from matplotlib.projections import register_projection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -69,9 +70,9 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`mantid.plots.functions.plot`.
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')
-            return mantid.plots.functions.plot(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.plot(self, *args, **kwargs)
         else:
             return Axes.plot(self, *args, **kwargs)
 
@@ -94,9 +95,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.scatter`             
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.scatter(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.scatter(self, *args, **kwargs)
         else:
             return Axes.scatter(self, *args, **kwargs)
 
@@ -119,9 +120,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.errorbar`             
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.errorbar(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.errorbar(self, *args, **kwargs)
         else:
             return Axes.errorbar(self, *args, **kwargs)
 
@@ -144,9 +145,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.pcolor`             
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.pcolor(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.pcolor(self, *args, **kwargs)
         else:
             return Axes.pcolor(self, *args, **kwargs)
 
@@ -169,9 +170,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.pcolorfast`             
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.pcolorfast(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.pcolorfast(self, *args, **kwargs)
         else:
             return Axes.pcolorfast(self, *args, **kwargs)
 
@@ -194,9 +195,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.pcolormesh`             
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.pcolormesh(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.pcolormesh(self, *args, **kwargs)
         else:
             return Axes.pcolormesh(self, *args, **kwargs)
 
@@ -219,9 +220,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.contour`             
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.contour(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.contour(self, *args, **kwargs)
         else:
             return Axes.contour(self, *args, **kwargs)
 
@@ -244,9 +245,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.contourf`             
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.contourf(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.contourf(self, *args, **kwargs)
         else:
             return Axes.contourf(self, *args, **kwargs)
 
@@ -269,9 +270,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.tripcolor`             
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.tripcolor(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.tripcolor(self, *args, **kwargs)
         else:
             return Axes.tripcolor(self, *args, **kwargs)
 
@@ -294,9 +295,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.tricontour`
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.tricontour(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.tricontour(self, *args, **kwargs)
         else:
             return Axes.tricontour(self, *args, **kwargs)
 
@@ -319,9 +320,9 @@ class MantidAxes(Axes):
         
         For keywords related to workspaces, see :func:`mantid.plots.functions.tricontourf`             
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.tricontourf(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.tricontourf(self, *args, **kwargs)
         else:
             return Axes.tricontourf(self, *args, **kwargs)
 
@@ -366,9 +367,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`mantid.plots.functions.plot3D`
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')
-            return mantid.plots.functions.plot3D(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
+            return mantid.plots.plotfunctions3D.plot3d(self, *args, **kwargs)
         else:
             return Axes3D.plot(self, *args, **kwargs)
 
@@ -391,9 +392,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`mantid.plots.functions.scatter`
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')
-            return mantid.plots.functions.scatter(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
+            return mantid.plots.plotfunctions3D.scatter(self, *args, **kwargs)
         else:
             return Axes3D.scatter(self, *args, **kwargs)
 
@@ -416,9 +417,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`mantid.plots.functions.wireframe`
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')
-            return mantid.plots.functions.plot_wireframe(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
+            return mantid.plots.plotfunctions3D.plot_wireframe(self, *args, **kwargs)
         else:
             return Axes3D.plot_wireframe(self, *args, **kwargs)
 
@@ -441,36 +442,11 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`mantid.plots.functions.plot_surface`
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')
-            return mantid.plots.functions.plot_surface(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
+            return mantid.plots.plotfunctions3D.plot_surface(self, *args, **kwargs)
         else:
             return Axes3D.plot_surface(self, *args, **kwargs)
-
-    def plot_trisurf(self, *args, **kwargs):
-        '''
-        If the **mantid3d** projection is chosen, it can be
-        used the same as :py:meth:`matplotlib.axes.Axes3D.plot_trisurf` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
-        or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-
-            import matplotlib.pyplot as plt
-            from mantid import plots
-
-            ...
-
-            fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
-            ax.plot_trisurf(workspace) #for workspaces
-            ax.plot_trisurf(x,y,z)     #for arrays
-            fig.show()
-
-        For keywords related to workspaces, see :func:`mantid.plots.functions.plot_trisurf`
-        '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')
-            return mantid.plots.functions.plot_trisurf(self, *args, **kwargs)
-        else:
-            return Axes3D.plot_trisurf(self, *args, **kwargs)
 
     def contour(self, *args, **kwargs):
         '''
@@ -491,9 +467,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`mantid.plots.functions.contour`
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')
-            return mantid.plots.functions.contour(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
+            return mantid.plots.plotfunctions3D.contour(self, *args, **kwargs)
         else:
             return Axes3D.contour(self, *args, **kwargs)
 
@@ -516,9 +492,9 @@ class MantidAxes3D(Axes3D):
 
         For keywords related to workspaces, see :func:`mantid.plots.functions.contourf`
         '''
-        if mantid.plots.functions.validate_args(*args):
-            mantid.kernel.logger.debug('using mantid.plots.functions')
-            return mantid.plots.functions.contourf(self, *args, **kwargs)
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
+            return mantid.plots.plotfunctions3D.contourf(self, *args, **kwargs)
         else:
             return Axes3D.contourf(self, *args, **kwargs)
 

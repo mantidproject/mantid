@@ -18,7 +18,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy
 
-import mantid.plots.helperfunctions as common
+from mantid.plots.helperfunctions import (get_axes_labels, get_normalization, get_distribution,
+                                          get_md_data2d_bin_centers, get_matrix2d_data, get_md_data1d,
+                                          get_wksp_index_dist_and_label, get_spectrum)
 import mantid.dataobjects
 
 
@@ -26,7 +28,7 @@ def _set_labels_3d(axes, workspace):
     """
     Helper function to automatically set axis labels for 3D plots
     """
-    labels = common.get_axes_labels(workspace)
+    labels = get_axes_labels(workspace)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
     axes.set_zlabel(labels[0])
@@ -34,12 +36,12 @@ def _set_labels_3d(axes, workspace):
 
 def _extract_3d_data(workspace, **kwargs):
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        normalization, kwargs = common.get_normalization(workspace, **kwargs)
-        x_temp, y_temp, z = common.getMDData2D_bin_centers(workspace, normalization)
+        normalization, kwargs = get_normalization(workspace, **kwargs)
+        x_temp, y_temp, z = get_md_data2d_bin_centers(workspace, normalization)
         x, y = numpy.meshgrid(x_temp, y_temp)
     else:
-        distribution, kwargs = common.get_distribution(workspace, **kwargs)
-        x, y, z = common.getMatrix2DData(workspace, distribution, histogram2D=False)
+        distribution, kwargs = get_distribution(workspace, **kwargs)
+        x, y, z = get_matrix2d_data(workspace, distribution, histogram2D=False)
     return x, y, z
 
 
@@ -51,8 +53,15 @@ def plot3d(axes, workspace, *args, **kwargs):
                       :class:`mantid.api.IMDHistoWorkspace` to extract the data from
     :param zdir: Which direction to use as z ('x', 'y' or 'z') when plotting a 2D set.
     """
-    x, y, z = _extract_3d_data(workspace, **kwargs)
-    _set_labels_3d(axes, workspace)
+    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (x, y, z) = get_md_data1d(workspace, normalization)
+    else:
+        (wksp_index, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
+        (x, z, _, _) = get_spectrum(workspace, wksp_index, distribution, withDy=False, withDx=False)
+        y_val = workspace.getAxis(1).extractValues()[wksp_index]
+        y = numpy.full(x.size, y_val)  # fill x size array with y value
+        _set_labels_3d(axes, workspace)
     return axes.plot(x, y, z, *args, **kwargs)
 
 
@@ -116,24 +125,6 @@ def plot_surface(axes, workspace, *args, **kwargs):
     x, y, z = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace)
     return axes.plot_surface(x, y, z, *args, **kwargs)
-
-
-def plot_trisurf(axes, workspace, *args, **kwargs):
-    """
-    Tri-Surface plots
-    :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` or
-                      :class:`mantid.api.IMDHistoWorkspace` to extract the data from
-    :param color:	Color of the surface patches
-    :param cmap:	A colormap for the surface patches.
-    :param norm:	An instance of Normalize to map values to colors
-    :param vmin:	Minimum value to map
-    :param vmax:	Maximum value to map
-    :param shade:	Whether to shade the facecolors
-    """
-    x, y, z = _extract_3d_data(workspace, **kwargs)
-    _set_labels_3d(axes, workspace)
-    return axes.plot_trisurf(x, y, z, *args, **kwargs)
 
 
 def contour(axes, workspace, *args, **kwargs):
