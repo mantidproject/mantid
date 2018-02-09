@@ -177,6 +177,7 @@ class IqtFitMultiple(PythonAlgorithm):
                CreateOutput=True,
                Minimizer=self._minimizer,
                MaxIterations=self._max_iterations,
+               OutputCompositeMembers=self._do_extract_members,
                **kwargs)
         fit_prog.report('Fitting complete')
 

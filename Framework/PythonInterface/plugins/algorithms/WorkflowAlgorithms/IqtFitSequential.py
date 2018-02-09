@@ -151,7 +151,8 @@ class IqtFitSequential(PythonAlgorithm):
                               StartX=self._start_x,
                               EndX=self._end_x,
                               FitType='Sequential',
-                              CreateOutput=True)
+                              CreateOutput=True,
+                              OutputCompositeMembers=self._do_extract_members)
         fit_prog.report('Fitting complete')
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
