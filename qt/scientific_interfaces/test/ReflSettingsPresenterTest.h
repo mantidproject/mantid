@@ -223,7 +223,7 @@ public:
   }
 
   void testGetIntMonCheck() {
-    MockSettingsView mockView;
+    NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
     auto presenter = makeReflSettingsPresenter(&mockView);
 
@@ -444,6 +444,7 @@ public:
   void testExperimentDefaults() {
     NiceMock<MockSettingsView> mockView;
     auto presenter = makeReflSettingsPresenter(&mockView);
+    expectNoOptionLoadErrors(mockView);
     MockMainWindowPresenter mainPresenter;
 
     // Set instrument to 'POLREF'
@@ -452,16 +453,29 @@ public:
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
 
-    std::vector<std::string> defaults = {
-        "PointDetectorAnalysis", "None",
-        "1.006831,-0.011467,0.002244,-0.000095",
-        "1.017526,-0.017183,0.003136,-0.000140",
-        "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0", "10", "12"};
+    auto fromIDFOrReductionAlg = ExperimentOptionDefaults();
+    fromIDFOrReductionAlg.AnalysisMode = "PointDetectorAnalysis";
+    fromIDFOrReductionAlg.PolarizationAnalysis = "None";
+    fromIDFOrReductionAlg.CRho = "1.006831,-0.011467,0.002244,-0.000095";
+    fromIDFOrReductionAlg.CAlpha = "1.017526,-0.017183,0.003136,-0.000140";
+    fromIDFOrReductionAlg.CAp = "0.917940,0.038265,-0.006645,0.000282";
+    fromIDFOrReductionAlg.CPp = "0.972762,0.001828,-0.000261,0.0";
+    fromIDFOrReductionAlg.TransRunStartOverlap = 10.0;
+    fromIDFOrReductionAlg.TransRunEndOverlap = 12.0;
+    fromIDFOrReductionAlg.SummationType = "SumInLambda";
+    fromIDFOrReductionAlg.ReductionType = "Normal";
 
-    EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
+    EXPECT_CALL(mockView, setExpDefaults(fromIDFOrReductionAlg)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void expectNoOptionLoadErrors(MockSettingsView &mockView) {
+    EXPECT_CALL(mockView, showOptionLoadErrors(_, _)).Times(0);
+  }
+
+  void expectOptionLoadErrors(MockSettingsView &mockView) {
+    EXPECT_CALL(mockView, showOptionLoadErrors(_, _)).Times(AtLeast(1));
   }
 
   void testInstrumentDefaults() {
@@ -473,14 +487,23 @@ public:
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
+    expectNoOptionLoadErrors(mockView);
+
     presenter.setInstrumentName("INTER");
+    auto fromIDFOrReductionAlg = InstrumentOptionDefaults();
 
-    std::vector<double> defaults_double = {1.,  4.0, 10., 17.,
-                                           18., 1.5, 17., 2.0};
-    std::vector<std::string> defaults_str = {"VerticalShift"};
+    fromIDFOrReductionAlg.NormalizeByIntegratedMonitors = true;
+    fromIDFOrReductionAlg.MonitorIntegralMin = 4.0;
+    fromIDFOrReductionAlg.MonitorIntegralMax = 10.0;
+    fromIDFOrReductionAlg.MonitorBackgroundMin = 17.0;
+    fromIDFOrReductionAlg.MonitorBackgroundMax = 18.0;
+    fromIDFOrReductionAlg.LambdaMin = 1.5;
+    fromIDFOrReductionAlg.LambdaMax = 17.0;
+    fromIDFOrReductionAlg.I0MonitorIndex = 2.0;
+    fromIDFOrReductionAlg.DetectorCorrectionType = "VerticalShift";
+    fromIDFOrReductionAlg.CorrectDetectors = true;
 
-    EXPECT_CALL(mockView, setInstDefaults(defaults_double, defaults_str))
-        .Times(1);
+    EXPECT_CALL(mockView, setInstDefaults(fromIDFOrReductionAlg)).Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
