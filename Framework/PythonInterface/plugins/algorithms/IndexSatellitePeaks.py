@@ -5,7 +5,7 @@ import fractional_indexing as indexing
 from mantid.kernel import Direction
 from mantid.api import (IPeaksWorkspaceProperty,
                         ITableWorkspaceProperty, PythonAlgorithm, AlgorithmFactory)
-from mantid.simpleapi import CreateEmptyTableWorkspace, RenameWorkspace
+from mantid.simpleapi import CreateEmptyTableWorkspace
 
 
 class IndexSatellitePeaks(PythonAlgorithm):

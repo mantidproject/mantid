@@ -186,7 +186,7 @@ def find_q_vectors(nuclear_hkls, sats_hkls):
 
 def find_nearest_integer_peaks(nuclear_hkls, sat_hkls):
     """Find the nearest integer peak for each fractional peak
-    
+
     This will perform a spatial search to find the intger peak which is nearest the fractional satellite peak.
 
     :param nuclear_hkls: the hkl poistions of each of the nuclear peaks.
