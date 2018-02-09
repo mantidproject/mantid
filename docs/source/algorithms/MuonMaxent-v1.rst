@@ -43,7 +43,7 @@ Usage
 .. testcode::
 
   # load data
-  Load(Filename=r'\\isis\inst$\ndxmusr\instrument\data\cycle_08_5\MUSR00022725.nxs', OutputWorkspace='MUSR00022725')
+  Load(Filename='MUSR00022725.nxs', OutputWorkspace='MUSR00022725')
   # estimate phases
   CalMuonDetectorPhases(InputWorkspace='MUSR00022725', FirstGoodData=0.10000000000000001, LastGoodData=16, DetectorTable='phases', DataFitted='fitted', ForwardSpectra='9-16,57-64', BackwardSpectra='25-32,41-48')
   MuonMaxent(InputWorkspace='MUSR00022725', InputPhaseTable='phases', Npts='16384', OuterIterations='9', InnerIterations='12', DefaultLevel=0.11, Factor=1.03, OutputWorkspace='freq', OutputPhaseTable='phasesOut', ReconstructedSpectra='time')

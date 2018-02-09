@@ -1,4 +1,5 @@
 
+from __future__ import (absolute_import, division, print_function)
 # exactly as-is (will need to write to Mantid workspaces instead)
 
 

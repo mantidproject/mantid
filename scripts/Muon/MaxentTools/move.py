@@ -1,7 +1,9 @@
+
+from __future__ import (absolute_import, division, print_function)
 import math
 
-from Muon.MuonMaxentTools.chinow import CHINOW
-from Muon.MuonMaxentTools.dist import DIST
+from Muon.MaxentTools.chinow import CHINOW
+from Muon.MaxentTools.dist import DIST
 
 
 # variable p is used? Size of sigma

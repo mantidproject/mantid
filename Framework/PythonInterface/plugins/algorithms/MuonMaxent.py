@@ -1,6 +1,7 @@
+from __future__ import (absolute_import, division,print_function)
 import numpy as np
 import math
-from Muon.MuonMaxentTools.multimaxalpha import MULTIMAX
+from Muon.MaxentTools.multimaxalpha import MULTIMAX
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *

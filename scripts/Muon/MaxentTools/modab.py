@@ -1,7 +1,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-from Muon.MuonMaxentTools.zft import ZFT
+from Muon.MaxentTools.zft import ZFT
 
 # translation of modab.for
 # P unused apart from passing to ZFT which doesn't use it

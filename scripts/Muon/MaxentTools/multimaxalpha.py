@@ -1,14 +1,16 @@
+
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
-from Muon.MuonMaxentTools.input import INPUT
-from Muon.MuonMaxentTools.start import START
-from Muon.MuonMaxentTools.back import BACK
-from Muon.MuonMaxentTools.maxent import MAXENT
-from Muon.MuonMaxentTools.deadfit import DEADFIT
-from Muon.MuonMaxentTools.modbak import MODBAK
-from Muon.MuonMaxentTools.modamp import MODAMP
-from Muon.MuonMaxentTools.modab import MODAB
-from Muon.MuonMaxentTools.outspec import OUTSPEC
+from Muon.MaxentTools.input import INPUT
+from Muon.MaxentTools.start import START
+from Muon.MaxentTools.back import BACK
+from Muon.MaxentTools.maxent import MAXENT
+from Muon.MaxentTools.deadfit import DEADFIT
+from Muon.MaxentTools.modbak import MODBAK
+from Muon.MaxentTools.modamp import MODAMP
+from Muon.MaxentTools.modab import MODAB
+from Muon.MaxentTools.outspec import OUTSPEC
 
 
 def MULTIMAX(

@@ -1,5 +1,7 @@
+
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
-from zft import ZFT
+from Muon.MaxentTools.zft import ZFT
 
 
 def OUTSPEC(
@@ -37,7 +39,7 @@ def OUTSPEC(
         if(len(ibads8) > 10):
             mylog.warning("... lots of baddies in group {:2d}".format(j))
     mylog.debug("contribs to chi**2 from each group:" + str(chi))
-    nphalf = npts / 2
+    nphalf =int( npts / 2)
     tmp1 = np.where(np.less_equal(sigma[nphalf:, ], 1.E3), guess[nphalf:,:]/sigma[nphalf:,:]**2, 0.0)
     sum = np.sum(tmp1)
     nsum = np.count_nonzero(tmp1)
