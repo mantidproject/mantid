@@ -129,6 +129,16 @@ Table Workspace Properties
     Column count: 3
     Column names: ['Detector ID', 'Detector Name', 'Detector Position']
 
+Pickling Workspaces
+###################
+
+A TableWorkspace may be `pickled <https://docs.python.org/2/library/pickle.html/>` and de-pickled in python. Users should prefer using cPickle over pickle, and make sure that the protocol option is set to the HIGHEST_PROTOCOL to ensure that the serialization/deserialization process is as fast as possible.
+
+.. code-block:: python   
+
+  import cPickle as pickle
+  pickled = pickle.dumps(ws2d, pickle.HIGHEST_PROTOCOL)
+
 Working with Table Workspaces in C++
 ------------------------------------
 

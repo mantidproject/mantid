@@ -55,6 +55,9 @@ PyObject *func_PyArray_IterNew(PyArrayObject *arr);
 /// equivalent to macro PyArray_NewFromDescr
 PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims,
                                          Py_intptr_t *dims);
+PyArrayObject *func_PyArray_NewFromDescr(const std::string &datadescr,
+                                         const int ndims, Py_intptr_t *dims);
+PyArray_Descr *func_PyArray_Descr(const std::string &datadescr);
 }
 }
 }

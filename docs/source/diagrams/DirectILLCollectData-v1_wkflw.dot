@@ -27,11 +27,10 @@ digraph DirectILLCollectData {
     FindEPP [label="FindEPP \n or \n CreateEPP"]
     FindEPPAgain [label="FindEPP \n or \n CreateEPP"]
     IntegrateMonitor [label="Integrate monitor"]
-    LoadILLTOF [label="LoadILLTOF"]
-    MergeRuns [label="MergeRuns"]
+    LoadAndMerge [label="LoadAndMerge"]
     Normalize [label="Normalise to monitor/time"]
-    ScaleAfterNormalization [label="Scale"]
-    ScaleBkg [label="Scale"]
+    ScaleAfterNormalization [label="Multiply"]
+    ScaleBkg [label="Multiply"]
     SubtractBkgDetector [label="Subtract flat background"]
     SubtractBkgMonitor [label="Subtract flat background"]
   }
@@ -40,6 +39,7 @@ digraph DirectILLCollectData {
     $value_style
     detectors [label="Detector workspace"]
     monitors [label="Monitor workspace"]
+    normalisationScaling [label="'scaling_after_monitor_normalisation'\nsample log"]
   }
 
   subgraph decisions {
@@ -51,9 +51,8 @@ digraph DirectILLCollectData {
   }
 
   inputFileGiven -> inputFile [label="yes"]
-  inputFile -> LoadILLTOF
-  LoadILLTOF -> MergeRuns
-  MergeRuns -> ExtractMonitors
+  inputFile -> LoadAndMerge
+  LoadAndMerge -> ExtractMonitors
   inputFileGiven -> inputWS [label="no"]
   inputWS -> ExtractMonitors
   ExtractMonitors -> monitors
@@ -64,6 +63,7 @@ digraph DirectILLCollectData {
   detectors -> Normalize
   detectors -> CorrectTOFAxisRaw
   Normalize -> ScaleAfterNormalization
+  normalisationScaling -> ScaleAfterNormalization
   ScaleAfterNormalization -> inputBkgGiven
   inputBkgGiven -> CalculateFlatBackground [label="no"]
   CalculateFlatBackground -> outputBkg

@@ -24,6 +24,7 @@ from importlib import import_module
 import os.path as osp
 
 # 3rd-party modules
+import qtawesome as qta
 from qtpy import QT_VERSION
 from qtpy.uic import loadUi, loadUiType
 from qtpy.QtWidgets import QAction, QMenu
@@ -105,7 +106,7 @@ def widget_updates_disabled(widget):
 
 
 def create_action(parent, text, on_triggered=None, shortcut=None,
-                  shortcut_context=None):
+                  shortcut_context=None, icon_name=None):
     """Create a QAction based on the give properties
 
     :param parent: The parent object
@@ -114,6 +115,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
     :param shortcut: An optional shortcut
     :param shortcut_context: An optional context for the supplied shortcut.
     Only applies if a shortcut has been given
+    :param icon_name: The name of the qt awesome uri for an icon.
     :return: A new QAction object
     """
     action = QAction(text, parent)
@@ -123,6 +125,8 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
         action.setShortcut(shortcut)
         if shortcut_context is not None:
             action.setShortcutContext(shortcut_context)
+    if icon_name is not None:
+        action.setIcon(qta.icon(icon_name))
 
     return action
 
@@ -135,7 +139,9 @@ def add_actions(target, actions):
     :raises ValueError: If one of the actions is not an instance of QMenu/QAction
     """
     for action in actions:
-        if isinstance(action, QMenu):
+        if action is None:
+            target.addSeparator()
+        elif isinstance(action, QMenu):
             target.addMenu(action)
         elif isinstance(action, QAction):
             target.addAction(action)

@@ -27,26 +27,6 @@ namespace SliceViewer {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("PeaksPresenter");
-
-/**
- * Determine if we can add peaks a peaks workspace.
- * @param peaksWS : To possibly add to
- * @param frame : Frame of base MDWorkspace
- * @return True only if we can add to the peaks workspace.
- */
-bool canAddPeaksTo(IPeaksWorkspace const *const peaksWS,
-                   Mantid::Kernel::SpecialCoordinateSystem frame) {
-  /*
-   - PeaksWS Must have an oriented lattice, otherwise we can't add a
-   self-consistent peak.
-   - PeaksWS Must not be integrated, because we have no concept of radius until
-   each individual peak is integrated.
-   - The MDWorkspace must be in the HKL frame otherwise we cannot interpret plot
-   cursor coordinates.
-   */
-  return peaksWS->sample().hasOrientedLattice() &&
-         !peaksWS->hasIntegratedPeaks() && frame == Mantid::Kernel::HKL;
-}
 }
 
 /**
@@ -155,9 +135,7 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
       m_owningPresenter(nullptr), m_isHidden(false),
-      m_editMode(SliceViewer::None),
-      m_hasAddPeaksMode(
-          canAddPeaksTo(peaksWS.get(), m_transform->getCoordinateSystem())) {
+      m_editMode(SliceViewer::None) {
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
   this->initialize();
@@ -423,31 +401,6 @@ ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const {
   return m_viewPeaks->getBoundingBox(peakIndex);
 }
 
-void ConcretePeaksPresenter::sortPeaksWorkspace(const std::string &byColumnName,
-                                                const bool ascending) {
-  Mantid::API::IPeaksWorkspace_sptr peaksWS =
-      boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
-
-  // Sort the Peaks in-place.
-  Mantid::API::IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("SortPeaksWorkspace");
-  alg->setChild(true);
-  alg->setRethrows(true);
-  alg->initialize();
-  alg->setProperty("InputWorkspace", peaksWS);
-  alg->setPropertyValue("OutputWorkspace", "SortedPeaksWorkspace");
-  alg->setProperty("OutputWorkspace", peaksWS);
-  alg->setProperty("SortAscending", ascending);
-  alg->setPropertyValue("ColumnNameToSortBy", byColumnName);
-  alg->execute();
-
-  // Reproduce the views.
-  this->produceViews();
-
-  // Give the new views the current slice point.
-  m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(), m_viewablePeaks);
-}
-
 void ConcretePeaksPresenter::setPeakSizeOnProjection(const double fraction) {
   m_viewPeaks->changeOccupancyInView(fraction);
   m_viewPeaks->updateView();
@@ -563,26 +516,13 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
                                        double plotCoordsPointY) {
   V3D plotCoordsPoint(plotCoordsPointX, plotCoordsPointY,
                       m_slicePoint.slicePoint());
-  V3D hkl = m_transform->transformBack(plotCoordsPoint);
+  V3D position = m_transform->transformBack(plotCoordsPoint);
 
   Mantid::API::IPeaksWorkspace_sptr peaksWS =
       boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
 
-  Mantid::API::IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("AddPeakHKL");
-  alg->setChild(true);
-  alg->setRethrows(true);
-  alg->initialize();
-  alg->setProperty("Workspace", peaksWS);
-  alg->setProperty("HKL", std::vector<double>(hkl));
-
-  // Execute the algorithm
-  try {
-    alg->execute();
-  } catch (...) {
-    g_log.warning("ConcretePeaksPresenter: Could not add the peak. Make sure "
-                  "that it is added within a valid workspace region");
-  }
+  const auto frame = m_transform->getCoordinateSystem();
+  peaksWS->addPeak(position, frame);
 
   // Reproduce the views. Proxy representations recreated for all peaks.
   this->produceViews();
@@ -594,11 +534,7 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
   // Upstream controls need to be regenerated.
   this->informOwnerUpdate();
 
-  return alg->isExecuted();
-}
-
-bool ConcretePeaksPresenter::hasPeakAddMode() const {
-  return m_hasAddPeaksMode;
+  return true;
 }
 
 std::vector<size_t>

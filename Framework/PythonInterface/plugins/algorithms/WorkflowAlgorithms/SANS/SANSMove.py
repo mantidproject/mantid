@@ -5,7 +5,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from sans.algorithm_detail.move_workspaces import SANSMoveFactory
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -46,7 +46,7 @@ def get_detector_for_component(move_info, component):
     return selected_detector
 
 
-class SANSMove(DataProcessorAlgorithm):
+class SANSMove(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Move'
 
