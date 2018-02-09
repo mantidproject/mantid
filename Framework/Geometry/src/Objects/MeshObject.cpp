@@ -650,24 +650,6 @@ void MeshObject::updateGeometryHandler() {
 }
 
 /**
-* set vtkGeometryCache writer
-*/
-void MeshObject::setVtkGeometryCacheWriter(
-    boost::shared_ptr<vtkGeometryCacheWriter> writer) {
-  m_vtk_cache_writer = writer;
-  updateGeometryHandler();
-}
-
-/**
-* set vtkGeometryCache reader
-*/
-void MeshObject::setVtkGeometryCacheReader(
-    boost::shared_ptr<vtkGeometryCacheReader> reader) {
-  m_vtk_cache_reader = reader;
-  updateGeometryHandler();
-}
-
-/**
 * Output functions for rendering, may also be used internally
 */
 int MeshObject::numberOfTriangles() const {

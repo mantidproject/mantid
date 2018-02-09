@@ -104,10 +104,6 @@ public:
   virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
 
   // Non const methods (should not be any)
-  virtual void
-      setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>) = 0;
-  virtual void
-      setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>) = 0;
   virtual void setMaterial(const Kernel::Material &material) = 0;
   virtual void setID(const std::string &id) = 0;
 };

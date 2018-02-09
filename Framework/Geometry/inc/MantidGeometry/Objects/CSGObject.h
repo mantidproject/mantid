@@ -183,10 +183,10 @@ public:
 
   /// set vtkGeometryCache writer
   void setVtkGeometryCacheWriter(
-      boost::shared_ptr<vtkGeometryCacheWriter>) override;
+      boost::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
   void setVtkGeometryCacheReader(
-      boost::shared_ptr<vtkGeometryCacheReader>) override;
+      boost::shared_ptr<vtkGeometryCacheReader>);
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                      double &myradius, double &myheight) const override;
   /// Getter for the shape xml

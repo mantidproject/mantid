@@ -111,14 +111,6 @@ public:
 
   void draw() const override { m_shape->draw(); }
   void initDraw() const override { m_shape->initDraw(); }
-  void setVtkGeometryCacheReader(
-      boost::shared_ptr<vtkGeometryCacheReader> reader) override {
-    m_shape->setVtkGeometryCacheReader(reader);
-  }
-  void setVtkGeometryCacheWriter(
-      boost::shared_ptr<vtkGeometryCacheWriter> writer) override {
-    m_shape->setVtkGeometryCacheWriter(writer);
-  }
 
   void setMaterial(const Kernel::Material &material) override {
     m_shape->setMaterial(material);

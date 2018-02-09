@@ -2471,7 +2471,10 @@ void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) {
       new Mantid::Geometry::vtkGeometryCacheReader(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
-    ((*objItr).second)->setVtkGeometryCacheReader(reader);
+    // caching only applies to CSGObject
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+      csgObj->setVtkGeometryCacheReader(reader);
+    }
   }
 }
 
@@ -2510,7 +2513,10 @@ InstrumentDefinitionParser::writeAndApplyCache(
       new Mantid::Geometry::vtkGeometryCacheWriter(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
-    ((*objItr).second)->setVtkGeometryCacheWriter(writer);
+    // caching only applies to CSGObject
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+      csgObj->setVtkGeometryCacheWriter(writer);
+    }
   }
   writer->write();
   return cachingOption;
