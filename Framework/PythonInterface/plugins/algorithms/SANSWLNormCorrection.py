@@ -139,12 +139,13 @@ class SANSWLNormCorrection(PythonAlgorithm):
         if "OutputDirectory" not in pm and self.getProperty("OutputDirectory").value.strip() == "":
             issues['OutputDirectory'] = "Property Manager has no OutputDirectory."
 
-        for ws in self.getProperty('InputWorkspaces').value:
-            run = ws.getRun()
-            if not run.hasProperty('wavelength_min'):
-                issues['InputWorkspaces'] = "Input workpsace must have wavelength_min property."
-            if not run.hasProperty('wavelength_max'):
-                issues['InputWorkspaces'] = "Input workpsace must have wavelength_max property."
+        if self.getProperty('InputWorkspaces').value is not None:
+            for ws in self.getProperty('InputWorkspaces').value:
+                run = ws.getRun()
+                if not run.hasProperty('wavelength_min'):
+                    issues['InputWorkspaces'] = "Input workpsace must have wavelength_min property."
+                if not run.hasProperty('wavelength_max'):
+                    issues['InputWorkspaces'] = "Input workpsace must have wavelength_max property."
 
         return issues
 
