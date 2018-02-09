@@ -268,10 +268,10 @@ void SaveLauenorm::exec() {
         out << "CELL " << std::setw(11) << std::setprecision(4)
             << 1.0 / lattice.a() << std::setw(12) << std::setprecision(4)
             << 1.0 / lattice.b() << std::setw(12) << std::setprecision(4)
-            << 1.0 / lattice.c() << std::setw(12) << std::setprecision(4)
-            << lattice.alpha() << std::setw(12) << std::setprecision(4)
-            << lattice.beta() << std::setw(12) << std::setprecision(4)
-            << lattice.gamma() << "\n";
+            << 1.0 / lattice.c() << std::setw(9)
+            << static_cast<int>(lattice.alpha() + 0.5) << std::setw(9)
+            << static_cast<int>(lattice.beta() + 0.5) << std::setw(9)
+            << static_cast<int>(lattice.gamma() + 0.5) << "\n";
         std::vector<int> systemNo = crystalSystem(lattice, peaks);
         out << "SYST    " << systemNo[0] << "   " << systemNo[1] << "   0   0"
             << "\n";
@@ -291,16 +291,21 @@ void SaveLauenorm::exec() {
             << std::setprecision(4) << omega << "\n";
         out << "LAMS      ";
         if (wlMax != EMPTY_DBL()) {
-          out << (wlMin + wlMax) / 2 << "  " << wlMin << "  " << wlMax << "\n";
+          out << std::setprecision(1) << std::fixed << (wlMin + wlMax) / 2
+              << " " << wlMin << " " << wlMax << "\n";
         } else {
-          out << "0.0 0.0 0.0\n";
+          out << "3.0 2.0 4.0\n";
         }
         out << "DMIN      ";
-        out << "0.0\n";
+        if (dMin != EMPTY_DBL()) {
+          out << std::setprecision(2) << std::fixed << dMin << "\n";
+        } else {
+          out << "1.75\n";
+        }
 
         // distance from sample to detector (use first pixel) in mm
         double L2 = 500.0;
-        out << "RADI     " << L2 << "\n";
+        out << "RADI     " << std::setprecision(0) << std::fixed << L2 << "\n";
         out << "SPIN      0.000"
             << "\n";
         out << "XC_S     0.00000     0.00000     0.00000     0.00000     "
@@ -317,7 +322,7 @@ void SaveLauenorm::exec() {
                "0.00000     0.00000 \n";
         out << "BULG    0.00000     0.00000     0.00000     0.00000     "
                "0.00000     0.00000 \n";
-        out << "CTOF     " << L2 << "\n ";
+        out << "CTOF     " << L2 << "\n";
         out << "YSCA     0.00000     0.00000     0.00000     0.00000     "
                "0.00000     0.00000\n";
         out << "CRAT     0.00000     0.00000     0.00000     0.00000     "
@@ -328,24 +333,25 @@ void SaveLauenorm::exec() {
         } else {
           out << "0.0\n";
         }
-        out << "MULT"
-            << "\n";
-        out << count << "    0"
-            << "\n";
-        out << "LAMH"
-            << "\n";
-        out << count << "    0"
-            << "\n";
-        out << "VERS    2"
+        out << "MULT  ";
+        out << count << "     0      0      0      0      0      0      0      "
+                        "0      0\n";
+        out << "      0      0      0      0      0      0      0      0      "
+               "0      0\n";
+        out << "      0 \n";
+        out << "LAMH  " << count
+            << "     0      0      0      0      0      0      0      0      "
+               "0\n";
+        out << "      0      0      0      0      0      0\n";
+        out << "VERS  1"
             << "\n";
         out << "PACK        0"
             << "\n";
-        out << "NSPT   " << count << "       0"
+        out << "NSPT   " << count << "      0      0      0      0"
             << "\n";
-        out << "NODH"
-            << "\n";
-        out << count << "    0"
-            << "\n";
+        out << "NODH " << count
+            << "    0      0      0      0      0      0      0      0      0\n"
+            << "      0      0\n";
         out << "INTF        0"
             << "\n";
         out << "REFLECTION DATA   " << count << " REFLECTIONS"
