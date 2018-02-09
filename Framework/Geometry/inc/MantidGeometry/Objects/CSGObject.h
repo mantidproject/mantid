@@ -79,7 +79,7 @@ public:
 
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
-  void setID(const std::string &id) override { m_id = id; }
+  void setID(const std::string &id) { m_id = id; }
   const std::string &id() const override { return m_id; }
 
   void setName(const int nx) { ObjNum = nx; } ///< Set Name

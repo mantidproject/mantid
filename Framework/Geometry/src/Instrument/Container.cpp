@@ -121,5 +121,15 @@ void Container::setSampleShape(const std::string &sampleShapeXML) {
   m_sampleShapeXML = sampleShapeXML;
 }
 
+/**
+ * Set the ID of the shape, if it is a CSG Object
+   @param ID a string identifying to object
+ */
+void Container::setID(const std::string& id) {
+  if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(m_shape)) {
+    csgObj->setID(id);
+  }
+}
+
 } // namespace Geometry
 } // namespace Mantid

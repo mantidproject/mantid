@@ -84,8 +84,6 @@ public:
       throw("Unintialised MeshObject cannot be copied");
     }
   }
-
-  void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
 
   int getName() const override { return m_object_number; }      ///< Get Name

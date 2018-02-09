@@ -342,14 +342,12 @@ public:
   void testCopyConstructorGivesObjectWithSameAttributes() {
     auto original_ptr = createCube(1.0);
     auto &original = dynamic_cast<MeshObject &>(*original_ptr);
-    original.setID("sp-1");
     TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
         original.getGeometryHandler()));
 
     MeshObject copy(original);
     // The copy should be a primitive object with a CacheGeometryHandler
 
-    TS_ASSERT_EQUALS("sp-1", copy.id());
     TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
         copy.getGeometryHandler()));
     TS_ASSERT_EQUALS(copy.getName(), original.getName());
@@ -360,7 +358,6 @@ public:
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
     auto original_ptr = createCube(1.0);
     auto &original = dynamic_cast<MeshObject &>(*original_ptr);
-    original.setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
@@ -374,7 +371,6 @@ public:
     objType = -1;
     lhs->GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS("sp-1", lhs->id());
     TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
         lhs->getGeometryHandler()));
   }

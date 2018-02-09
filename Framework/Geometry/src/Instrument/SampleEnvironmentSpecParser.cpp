@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 #include "MantidKernel/MaterialXMLParser.h"
 #include "MantidKernel/make_unique.h"
@@ -222,7 +223,10 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
   }
   ShapeFactory factory;
   auto comp = factory.createShape(geometry);
-  comp->setID(element->getAttribute("id"));
+  // If CSGObject set ID
+  if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(comp)) {
+    csgObj->setID(element->getAttribute("id"));
+  }
   auto materialID = element->getAttribute("material");
   auto iter = m_materials.find(materialID);
   if (iter != m_materials.end()) {

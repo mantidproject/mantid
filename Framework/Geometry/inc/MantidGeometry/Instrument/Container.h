@@ -118,7 +118,7 @@ public:
   const Kernel::Material material() const override {
     return m_shape->material();
   }
-  void setID(const std::string &id) override { m_shape->setID(id); }
+  void setID(const std::string &id);
   const std::string &id() const override { return m_shape->id(); }
 
 private:

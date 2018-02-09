@@ -59,7 +59,11 @@ public:
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
-    sampleShape->setID("mysample");
+    // We expect sampleShape to be a CSGObject
+    TS_ASSERT(boost::dynamic_pointer_cast<::Mantid::Geometry::CSGObject>(sampleShape));
+    if (auto csgObj = boost::dynamic_pointer_cast<::Mantid::Geometry::CSGObject>(sampleShape)) {
+      csgObj->setID("mysample");
+    }
     Material alum("Al", getNeutronAtom(13), 2.6989);
     sampleShape->setMaterial(alum);
     inputWS->mutableSample().setShape(sampleShape);

@@ -105,7 +105,6 @@ public:
 
   // Non const methods (should not be any)
   virtual void setMaterial(const Kernel::Material &material) = 0;
-  virtual void setID(const std::string &id) = 0;
 };
 
 /// Typdef for a shared pointer
