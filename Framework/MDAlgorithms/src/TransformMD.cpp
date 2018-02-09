@@ -37,23 +37,23 @@ const std::string TransformMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void TransformMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace> >(
                       "InputWorkspace", "", Direction::Input),
                   "Any input MDWorkspace.");
 
   std::vector<double> defaultScaling(1, 1.0);
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Scaling", defaultScaling),
+      Kernel::make_unique<ArrayProperty<double> >("Scaling", defaultScaling),
       "Scaling value multiplying each coordinate. Default "
       "1.\nEither a single value or a list for each dimension.");
 
   std::vector<double> defaultOffset(1, 0.0);
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Offset", defaultOffset),
+      Kernel::make_unique<ArrayProperty<double> >("Offset", defaultOffset),
       "Offset value to add to each coordinate. Default 0.\nEither "
       "a single value or a list for each dimension.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace> >(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDWorkspace.");
 }
@@ -161,6 +161,7 @@ void TransformMD::exec() {
       if (s < 0) {
         signal_t *signals = histo->getSignalArray();
         signal_t *errorsSq = histo->getErrorSquaredArray();
+        signal_t *numEvents = histo->getNumEventsArray();
 
         size_t nPoints = 1;
         size_t d4 = 1;
@@ -179,6 +180,7 @@ void TransformMD::exec() {
         for (size_t i = 0; i < d4; i++) {
           this->reverse(signals + i * nPoints, nPoints);
           this->reverse(errorsSq + i * nPoints, nPoints);
+          this->reverse(numEvents + i * nPoints, nPoints);
         }
       }
 
