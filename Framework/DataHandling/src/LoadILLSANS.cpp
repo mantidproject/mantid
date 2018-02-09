@@ -644,6 +644,12 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     // wavelength
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
+
+    // The TOF Azimuthal average needs this. Otherwise the test fails
+    runDetails.addProperty("wavelength_min", m_defaultBinning[0], "Angstrom",
+                           true);
+    runDetails.addProperty("wavelength_max", m_defaultBinning[1], "Angstrom",
+                           true);
   }
   // Add a log called timer with the value of duration
   const double duration = entry.getFloat("duration");
