@@ -25,6 +25,8 @@ Improvements
 - Properties on the Runs tab now take precedence over properties on the Settings tab.
 - Output workspace names have been improved. Names now use '+' to indicate preprocessed (i.e. summed) workspaces, rather than '_', which is used to indicate postprocessed (i.e. stitched) workspaces.
 - The Python code generated when you tick `Output Notebook` has been improved to support special characters (e.g. `+`) in workspace names. Output workspaces are now set using the output properties of the algorithm rather than by variable assignment. This avoids the possibility of invalid characters being used in Python variable names.
+- Added a new `?` button to the ISIS Reflectometry Interface which links to the documentation page.
+- Added extra tooltips to the ISIS Reflectometry Interface.
 
 
 Bug fixes
