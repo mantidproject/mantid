@@ -66,7 +66,6 @@ public:
   IObject *clone() const override { return new Container(*this); }
 
   int getName() const override { return m_shape->getName(); }
-  void setName(const int nx) override { m_shape->setName(nx); }
 
   int interceptSurface(Geometry::Track &t) const override {
     return m_shape->interceptSurface(t);

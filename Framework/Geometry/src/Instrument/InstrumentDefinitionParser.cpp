@@ -496,7 +496,10 @@ void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(
     isTypeAssembly[typeName] = false;
 
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+    // Only CSGObjects can be combined into one shape.
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(mapTypeNameToShape[typeName])){
+       csgObj->setName(static_cast<int>(iType));
+    }
   }
 }
 
@@ -520,7 +523,10 @@ void InstrumentDefinitionParser::createShapeIfTypeIsNotAnAssembly(
     // for now try to create a geometry shape associated with every type
     // that does not contain any component elements
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+    // Name can be set only for a CSGObject.
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(mapTypeNameToShape[typeName])) {
+      csgObj->setName(static_cast<int>(iType));
+    }
   } else {
     isTypeAssembly[typeName] = true;
     if (pTypeElem->hasAttribute("outline")) {

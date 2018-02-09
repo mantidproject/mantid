@@ -104,7 +104,6 @@ public:
   virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
 
   // Non const methods (should not be any)
-  virtual void setName(const int nx) = 0;
   virtual void
       setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>) = 0;
   virtual void

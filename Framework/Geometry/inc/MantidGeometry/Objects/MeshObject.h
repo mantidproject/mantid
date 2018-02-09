@@ -88,7 +88,6 @@ public:
   void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
 
-  void setName(const int nx) override { m_object_number = nx; } ///< Set Name
   int getName() const override { return m_object_number; }      ///< Get Name
 
   void setMaterial(const Kernel::Material &material) override;
