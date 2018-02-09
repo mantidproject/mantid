@@ -44,16 +44,6 @@ fi
 $CMAKE_EXE --version
 
 ###############################################################################
-# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
-###############################################################################
-if [[ ${NODE_LABELS} == *rhel6* ]]; then
-  SCL_ON_RHEL6="scl enable mantidlibs34"
-  ON_RHEL6=true
-else
-  SCL_ON_RHEL6="eval"
-fi
-
-###############################################################################
 # Clean build if requested
 ###############################################################################
 if [[ "${CLEAN}" == "true" ]]; then
@@ -70,9 +60,9 @@ cd $BUILD_DIR
 ###############################################################################
 # Clean some artifacts
 ###############################################################################
-rm -rf $BUILD_DIR/bin
+rm -rf ${BUILD_DIR:?}/bin
 # legacy file
-rm -fr $BUILD_DIR/pylint.log
+rm -fr ${BUILD_DIR:?}/pylint.log
 
 
 ###############################################################################
@@ -84,9 +74,9 @@ BUILD_CONFIG="Release"
 # CMake configuration
 ###############################################################################
 # Generator
-if [ $(command -v ninja) ]; then
+if [ "$(command -v ninja)" ]; then
   CMAKE_GENERATOR="-G Ninja"
-elif [ $(command -v ninja-build) ]; then
+elif [ "$(command -v ninja-build)" ]; then
   CMAKE_GENERATOR="-G Ninja"
 fi
 if [ -e $BUILD_DIR/CMakeCache.txt ]; then
@@ -96,17 +86,17 @@ fi
 # Need this because some strange control sequences when using default TERM=xterm
 export TERM="linux"
 PYLINT_FORMAT="parseable"
-$SCL_ON_RHEL6 "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_MSG_TEMPLATE=\"${PYLINT_FORMAT}\" -DPYLINT_NTHREADS=$BUILD_THREADS -DPYLINT_OUTPUT_DIR=${PYLINT_OUTPUT_DIR} .."
+${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_MSG_TEMPLATE=\"${PYLINT_FORMAT}\" -DPYLINT_NTHREADS=${BUILD_THREADS:?} -DPYLINT_OUTPUT_DIR=${PYLINT_OUTPUT_DIR} ..
 
 ###############################################################################
 # Build step (we only need the framework)
 ###############################################################################
-$SCL_ON_RHEL6 "$CMAKE_EXE --build . --target Framework -- -j$BUILD_THREADS"
+$CMAKE_EXE --build . --target Framework -- -j${BUILD_THREADS:?}
 
 ###############################################################################
 # Run plint check
 ###############################################################################
-$SCL_ON_RHEL6 "$CMAKE_EXE --build . --target pylintcheck"
+$CMAKE_EXE --build . --target pylintcheck
 
 ###############################################################################
 # Archive the results
