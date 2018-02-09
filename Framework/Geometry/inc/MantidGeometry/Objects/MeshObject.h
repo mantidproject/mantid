@@ -84,9 +84,13 @@ public:
       throw("Unintialised MeshObject cannot be copied");
     }
   }
+  IObject *cloneWithMaterial(const Kernel::Material &material) const override {
+    auto obj = new MeshObject(*this); obj->setMaterial(material); return obj;
+  }
+
   const std::string &id() const override { return m_id; }
 
-  int getName() const override { return m_object_number; }      ///< Get Name
+  int getName() const override { return 0; }  
 
   void setMaterial(const Kernel::Material &material) override;
   const Kernel::Material material() const override;
@@ -179,19 +183,17 @@ private:
   /// Tolerence distance
   const double M_TOLERANCE = 0.000001;
 
-  /// Numerical identifier of object
-  int m_object_number;
-
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> m_handler;
 
   // String from which object may be defined
   std::string m_string;
 
-  /// Optional string identifier
-  std::string m_id;
   /// material composition
   std::unique_ptr<Kernel::Material> m_material;
+
+  /// string to return as ID
+  std::string m_id;
 
   /// a pointer to a class for reading from the geometry cache
   boost::shared_ptr<vtkGeometryCacheReader> m_vtk_cache_reader;

@@ -27,7 +27,7 @@ MeshObject::MeshObject() {} // Should never be called
                             // Flexible constructor
 MeshObject::MeshObject(const std::vector<uint16_t> &faces,
   const std::vector<V3D> &vertices)
-  : m_boundingBox(), m_object_number(0), m_id(), m_material(),
+  : m_boundingBox(), m_material(), m_id("MeshObject"),
   m_triangles(faces), m_vertices(vertices) {
 
   setup();
@@ -36,7 +36,7 @@ MeshObject::MeshObject(const std::vector<uint16_t> &faces,
 // Efficient constructor
 MeshObject::MeshObject(std::vector<uint16_t> &&faces,
   std::vector<V3D> &&vertices)
-  : m_boundingBox(), m_object_number(0), m_id(), m_material(),
+  : m_boundingBox(), m_material(), m_id("MeshObject"),
   m_triangles(std::move(faces)), m_vertices(std::move(vertices)) {
 
   setup();
@@ -57,10 +57,8 @@ MeshObject::MeshObject(const MeshObject &A) : MeshObject() { *this = A; }
 MeshObject &MeshObject::operator=(const MeshObject &A) {
   if (this != &A) {
     m_boundingBox = A.m_boundingBox;
-    m_object_number = A.m_object_number;
     m_string = A.m_string;
     m_handler = A.m_handler->clone();
-    m_id = A.m_id;
     m_material = Kernel::make_unique<Material>(A.material());
     m_triangles = A.m_triangles;
     m_vertices = A.m_vertices;

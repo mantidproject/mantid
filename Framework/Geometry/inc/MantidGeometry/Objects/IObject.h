@@ -60,6 +60,7 @@ public:
                             const Kernel::V3D &uVec) const = 0;
   virtual bool hasValidShape() const = 0;
   virtual IObject *clone() const = 0;
+  virtual IObject *cloneWithMaterial(const Kernel::Material &material) const = 0;
 
   virtual int getName() const = 0;
 

@@ -77,6 +77,10 @@ public:
   /// Clone
   IObject *clone() const override { return new CSGObject(*this); }
 
+  IObject *cloneWithMaterial(const Kernel::Material &material) const override {
+    auto obj = new CSGObject(*this); obj->setMaterial(material); return obj;
+  }
+
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
   void setID(const std::string &id) { m_id = id; }

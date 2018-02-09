@@ -65,6 +65,10 @@ public:
 
   IObject *clone() const override { return new Container(*this); }
 
+  IObject *cloneWithMaterial(const Kernel::Material &material) const override {
+    return m_shape->cloneWithMaterial(material);
+  }
+
   int getName() const override { return m_shape->getName(); }
 
   int interceptSurface(Geometry::Track &t) const override {
