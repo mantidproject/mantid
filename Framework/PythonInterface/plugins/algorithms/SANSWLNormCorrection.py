@@ -49,7 +49,11 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 action=FileAction.OptionalLoad,
                 extensions=[".ini"],
             ),
-            doc="Name of the configuration file"
+            doc=("Name of the configuration file. See algorith help for the file format. "
+                 "All properties in this file will have higher priortity. If the same "
+                 "property appears in the algorithm call and in the file, "
+                 "the file takes precedence.")
+
         )
 
         self.declareProperty(
@@ -59,7 +63,9 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 direction=Direction.Input,
                 optional=PropertyMode.Optional,
             ),
-            doc="I(q, wavelength) non-scaled workspaces.")
+            doc=("I(q, wavelength) non-scaled workspaces. The TOF Azimuthal Average "
+                 "should output the necessary Workspace Group.")
+        )
 
         self.declareProperty(
             WorkspaceProperty(
@@ -69,7 +75,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 optional=PropertyMode.Optional,
             ),
             doc='Reference Workspace from the InputWorkspaceGroup. \
-            If empty uses the first position from the InputWorkspaceGroup')
+            If empty uses the first position from the InputWorkspaceGroup'
+        )
 
         self.declareProperty(
             name='Qmin',
@@ -579,8 +586,10 @@ class SANSWLNormCorrection(PythonAlgorithm):
             self.parser = ConfigParser()
             self.parser.optionxform = lambda option: option # case sensitive
 
-        self.parser['DEFAULT']['KList'] = ",".join(str(e) for e in ws_table.column("K"))
-        self.parser['DEFAULT']['BList'] = ",".join(str(e) for e in ws_table.column("B"))
+        self.parser.set('DEFAULT', 'KList', 
+            ",".join(str(e) for e in ws_table.column("K")))
+        self.parser.set('DEFAULT', 'BList',
+            ",".join(str(e) for e in ws_table.column("B")))
 
         conf_file_new_name = self.output_prefix + "_config.ini"
         conf_file_new_path = os.path.join(self.output_directory, conf_file_new_name)

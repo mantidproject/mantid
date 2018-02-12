@@ -24,6 +24,36 @@ The output workspaces have the following suffixes:
 - `trimmed_fit`: The Raw data with `K` and `B` applied.
 - `trimmed_fit_averaged`:  A single `I(q)` with the raw data (with `K` and `B` applied) averaged.
 
+** Example of a configuration file: **
+
+All properties in this file will have higher priortity. If the same property appears in the algorithm call
+and in the file, the file takes precedence.
+
+.. code-block:: ini
+
+    [DEFAULT]
+
+    ## I(q, wavelength) non-scaled workspaces.[]
+    #InputWorkspaces=
+
+    ## Reference Workspace from the InputWorkspaceGroup. If empty uses the first position from the InputWorkspaceGroup
+    #InputWorkspaceReference=
+
+    #Qmin=0.02
+    #Qmax=0.05
+
+    #DiscardBeginGlobal=10
+    #DiscardEndGlobal=10
+
+    KList=1, 1.1, 1.2, 1.1, 1
+    BList=
+
+    #
+    # OutputWorkspacePrefix=out
+
+
+
+
 .. categories::
 
 .. sourcelink::
