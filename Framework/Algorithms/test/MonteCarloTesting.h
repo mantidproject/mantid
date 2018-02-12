@@ -90,9 +90,10 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   const double height(0.05), innerRadius(0.0046), outerRadius(0.005);
   const V3D centre(0, 0, -0.5 * height), upAxis(0, 0, 1);
   // Container
-  auto can = boost::make_shared<Container>(ShapeFactory().createShape(
-      annulusXML(innerRadius, outerRadius, height, upAxis)));
-  can->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
+  auto canShape = ShapeFactory().createShape(
+    annulusXML(innerRadius, outerRadius, height, upAxis));
+  canShape->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
+  auto can = boost::make_shared<Container>(canShape);
   auto environment =
       Mantid::Kernel::make_unique<SampleEnvironment>("Annulus Container", can);
   // Sample volume

@@ -52,11 +52,11 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
     const V3D axis(0.0, 1.0, 0.0);
 
     ShapeFactory shapeMaker;
-    auto can = boost::make_shared<Container>(
-        shapeMaker.createShape(ComponentCreationHelper::cappedCylinderXML(
-            radius, height, baseCentre, axis, id)));
-    can->setMaterial(Material("CanMaterial",
-                              PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+    auto canShape = shapeMaker.createShape(ComponentCreationHelper::cappedCylinderXML(
+      radius, height, baseCentre, axis, id));
+    canShape->setMaterial(Material("CanMaterial",
+      PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+    auto can = boost::make_shared<Container>(canShape);
     SampleEnvironment *env = new SampleEnvironment("can", can);
     ws->mutableSample().setEnvironment(env);
   } else if (environment == Environment::UserBeamSize) {
