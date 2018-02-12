@@ -125,8 +125,8 @@ void SphericalAbsorption::retrieveBaseProperties() {
                         static_cast<uint16_t>(0), 0.0, 0.0, sigma_s, 0.0,
                         sigma_s, sigma_atten);
     auto shape =
-        boost::shared_ptr<IObject>(m_inputWS->sample().getShape().clone());
-    shape->setMaterial(Material("SetInSphericalAbsorption", neutron, rho));
+        boost::shared_ptr<IObject>(
+          m_inputWS->sample().getShape().cloneWithMaterial(Material("SetInSphericalAbsorption", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);
   }
 
