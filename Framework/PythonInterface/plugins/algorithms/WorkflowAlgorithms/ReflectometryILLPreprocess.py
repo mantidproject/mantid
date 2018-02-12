@@ -154,11 +154,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              doc='A user-defined beam angle (unit degrees).')
         self.declareProperty(name=Prop.BEAM_CENTRE,
                              defaultValue=Property.EMPTY_DBL,
-                             doc='A workspace index corresponding to the beam centre')
+                             doc='A workspace index corresponding to the beam centre.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS,
                                                      defaultValue='',
                                                      direction=Direction.Output),
-                             doc='The preprocessed output workspace')
+                             doc='The preprocessed output workspace (unit wavelength), single histogram.')
         self.declareProperty(Prop.SUBALG_LOGGING,
                              defaultValue=SubalgLogging.OFF,
                              validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
@@ -231,7 +231,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      defaultValue='',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
-                             doc='Raw output workspace (units wavelength).')
+                             doc='Raw output workspace (unit wavelength).')
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""

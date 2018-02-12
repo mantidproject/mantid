@@ -17,10 +17,13 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'Run': 'ILL/D17/317370.nxs',
             'OutputWorkspace': outWSName,
-            'rethrow': True
+            'rethrow': True,
+            'child': True
         }
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
 
     def testFlatBackgroundSubtraction(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
@@ -86,7 +89,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in lowerExclusionIndices:
             ys = ws.dataY(i)
             ys -= 1000.0
-        # The second fittin zone is wider.
+        # The second fitting zone is wider.
         lowerBkgIndices = [35, 36]
         for i in lowerBkgIndices:
             ys = ws.dataY(i)
@@ -208,13 +211,14 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'Run': 'ILL/D17/317370.nxs',
             'OutputWorkspace': outWSName,
             'RawOutputWorkspace': rawWSName,
-            'rethrow': True
+            'rethrow': True,
+            'child': True
         }
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
-        #assertRaisesNothing(rawWS=alg.getProperty('RawOutputWorkspace').value)
-        #self.assertEquals(rawWS.getAxis().getUnit(), 'TOF')
-
+        rawWS = alg.getProperty('RawOutputWorkspace').value
+        self.assertEquals(rawWS.getNumberHistograms(), 256)
+        self.assertEquals(rawWS.getAxis(0).getUnit().caption(), 'Wavelength')
 
 if __name__ == "__main__":
     unittest.main()
