@@ -202,7 +202,7 @@ void QDataProcessorWidget::showTable(TreeManager *model) {
   ui.viewTable->setModel(m_model.get());
 
   ui.viewTable->setAlternatingRowColors(false);
-  ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable, model));
+  ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable));
 
   // Hide the Hidden Options column
   ui.viewTable->hideColumn(m_model->columnCount() - 1);
@@ -455,10 +455,9 @@ column.
 @param manager : A pointer to the model manager
 */
 void QDataProcessorWidget::setOptionsHintStrategy(
-    MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column,
-    TreeManager *manager) {
+    MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column) {
   ui.viewTable->setItemDelegateForColumn(
-      column, new HintingLineEditFactory(hintStrategy, manager));
+      column, new HintingLineEditFactory(hintStrategy));
 }
 
 /**

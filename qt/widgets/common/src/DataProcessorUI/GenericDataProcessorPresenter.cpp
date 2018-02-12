@@ -253,7 +253,7 @@ void GenericDataProcessorPresenter::acceptViews(
       AlgorithmManager::Instance().create(m_processor.name().toStdString());
   m_view->setOptionsHintStrategy(
       new AlgorithmHintStrategy(alg, toStdStringSet(m_processor.blacklist())),
-      static_cast<int>(m_whitelist.size()) - 2, m_manager.get());
+      static_cast<int>(m_whitelist.size()) - 2);
 
   // Start with a blank table
   newTable();

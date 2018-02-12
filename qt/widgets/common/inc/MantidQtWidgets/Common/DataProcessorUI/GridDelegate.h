@@ -1,4 +1,3 @@
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include <QStyledItemDelegate>
 #include <QPainter>
 
@@ -8,8 +7,8 @@ namespace DataProcessor {
 
 class GridDelegate : public QStyledItemDelegate {
 public:
-  explicit GridDelegate(QObject *parent = 0, TreeManager *model = 0)
-      : QStyledItemDelegate(parent), m_model(model){};
+  explicit GridDelegate(QObject *parent = 0)
+      : QStyledItemDelegate(parent) {};
 
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const override {
@@ -21,9 +20,6 @@ public:
     painter->drawRect(option.rect);
     painter->restore();
   }
-
-protected:
-  TreeManager *m_model;
 };
 
 } // namespace DataProcessor

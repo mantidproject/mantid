@@ -117,7 +117,7 @@ public:
                          const QString &defaultInstrument) override;
   void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
-                         int column, TreeManager *manager) override;
+                         int column) override;
   void setClipboard(const QString &text) override;
 
   // Transfer runs

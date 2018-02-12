@@ -37,9 +37,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class HintingLineEditFactory : public QStyledItemDelegate {
 public:
-  HintingLineEditFactory(HintStrategy *hintStrategy,
-                         DataProcessor::TreeManager *manager = 0)
-      : m_strategy(hintStrategy), m_manager(manager){};
+  HintingLineEditFactory(HintStrategy *hintStrategy)
+      : m_strategy(hintStrategy){};
 
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override {
@@ -64,7 +63,6 @@ public:
 
 protected:
   boost::scoped_ptr<HintStrategy> m_strategy;
-  DataProcessor::TreeManager *m_manager;
 };
 }
 }
