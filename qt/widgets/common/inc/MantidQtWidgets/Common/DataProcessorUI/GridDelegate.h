@@ -7,14 +7,13 @@ namespace DataProcessor {
 
 class GridDelegate : public QStyledItemDelegate {
 public:
-  explicit GridDelegate(QObject *parent = 0)
-      : QStyledItemDelegate(parent) {};
+  explicit GridDelegate(QObject *parent = 0) : QStyledItemDelegate(parent){};
 
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const override {
-    
+
     QStyledItemDelegate::paint(painter, option, index);
-    
+
     painter->save();
     painter->setPen(QColor(Qt::black));
     painter->drawRect(option.rect);
