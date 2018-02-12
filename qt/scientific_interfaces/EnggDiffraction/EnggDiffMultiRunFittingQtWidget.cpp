@@ -49,13 +49,12 @@ void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
 
 void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
     const std::vector<boost::shared_ptr<QwtData>> &curves) {
-  for (size_t i = 0; i < curves.size(); ++i) {
-    auto *curve = curves[i].get();
+  for (const auto &curve : curves) {
     auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
 
     plotCurve->setData(*curve);
     plotCurve->attach(m_ui.plotArea);
-    m_focusedRunCurves.push_back(std::move(plotCurve));
+    m_focusedRunCurves.emplace_back(std::move(plotCurve));
   }
   m_ui.plotArea->replot();
   m_zoomTool->setZoomBase();
