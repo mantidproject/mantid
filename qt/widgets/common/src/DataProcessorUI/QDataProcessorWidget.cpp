@@ -202,7 +202,7 @@ void QDataProcessorWidget::showTable(
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
   ui.viewTable->setStyleSheet("QTreeView {font-size:11pt;}");
-      ui.viewTable->setAlternatingRowColors(false);
+  ui.viewTable->setAlternatingRowColors(false);
   ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable));
 
   // Hide the Hidden Options column
