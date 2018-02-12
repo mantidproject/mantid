@@ -38,7 +38,6 @@ class SANSWLNormCorrection(PythonAlgorithm):
         return ("From the input Workspace Group of I(Q,Lambda) calculates: "
                 "For every Lambda: I(Q,Lambda)_{Scaled} = K * I(Q,Lambda) - B. "
                 "Averaged: I(Q)_{ScaledAveraged} = K * I(Q,Lambda) - B. ")
-                
 
     def PyInit(self):
         # In
