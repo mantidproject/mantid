@@ -115,8 +115,8 @@ class ReflectometryILLReduction(DataProcessorAlgorithm):
             return ws
         directWS = self.getProperty(Prop.DIRECT_BEAM_WS).value
         rebinnedDirectWSName = self._names.withSuffix('rebinned')
-        rebinnedDirectWS = RebinToWorkspace(WorkspaceToRebin = directWS,
-                                            WorkspaceToMatch = ws,
+        rebinnedDirectWS = RebinToWorkspace(WorkspaceToRebin=directWS,
+                                            WorkspaceToMatch=ws,
                                             OutputWorkspace=rebinnedDirectWSName,
                                             EnableLogging=self._subalgLogging)
         reflectivityWSName = self._names.withSuffix('reflectivity')

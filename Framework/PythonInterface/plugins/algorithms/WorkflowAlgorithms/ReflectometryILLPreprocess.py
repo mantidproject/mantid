@@ -8,8 +8,8 @@ from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayPrope
                            IntBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertToDistribution, ConvertUnits,
                               CreateEmptyTableWorkspace, CropWorkspace, Divide, ExtractMonitors, Fit, GroupDetectors,
-                              Integration, LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor, Scale,
-                              Transpose)
+                              Integration, LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor,
+                              RebinToWorkspace, Scale, Transpose)
 import numpy
 import os.path
 import ReflectometryILL_common as common
@@ -562,11 +562,20 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if self.getProperty(Prop.WATER_REFERENCE).isDefault:
             return ws
         waterWS = self.getProperty(Prop.WATER_REFERENCE).value
+        # input validation for InputWorkspace compatibility, but runs?
+        if waterWS.getNumberHistograms() != ws.getNumberHistograms():
+            self.log().error('Water workspace and run do not have the same number of histograms.')
+        rebinnedWaterWSName = self._names.withSuffix('water_rebinned')
+        rebinnedWaterWS = RebinToWorkspace(WorkspaceToRebin=waterWS,
+                                            WorkspaceToMatch=ws,
+                                            OutputWorkspace=rebinnedWaterWSName,
+                                            EnableLogging=self._subalgLogging)
         calibratedWSName = self._names.withSuffix('water_calibrated')
         calibratedWS = Divide(LHSWorkspace=ws,
-                              RHSWorkspace=waterWS,
+                              RHSWorkspace=rebinnedWaterWS,
                               OutputWorkspace=calibratedWSName,
                               EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(rebinnedWaterWS)
         self._cleanup.cleanup(ws)
         return calibratedWS
 

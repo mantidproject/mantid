@@ -27,13 +27,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
 
     def testFlatBackgroundSubtraction(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
-        args = {
-            'OutputWorkspace': inWSName,
-            'Function': 'Flat background',
-            'NumBanks': 1,
-        }
-        alg = create_algorithm('CreateSampleWorkspace', **args)
-        alg.execute()
+        self.create_sample_workspace(inWSName)
         # Add a peak to the sample workspace.
         ws = mtd[inWSName]
         ys = ws.dataY(49)
@@ -61,13 +55,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
 
     def testForegroundBackgroundRanges(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
-        args = {
-            'OutputWorkspace': inWSName,
-            'Function': 'Flat background',
-            'NumBanks': 1,
-        }
-        alg = create_algorithm('CreateSampleWorkspace', **args)
-        alg.execute()
+        self.create_sample_workspace(inWSName)
         ws = mtd[inWSName]
         # Add special background fitting zones around the exclude zones.
         upperBkgIndices = [26]
@@ -129,13 +117,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
 
     def testWaterReference(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
-        args = {
-            'OutputWorkspace': inWSName,
-            'Function': 'Flat background',
-            'NumBanks': 1,
-        }
-        alg = create_algorithm('CreateSampleWorkspace', **args)
-        alg.execute()
+        self.create_sample_workspace(inWSName)
         # Add a peak to the sample workspace.
         ws = mtd[inWSName]
         for i in range(ws.getNumberHistograms()):
@@ -160,13 +142,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
 
     def testWavelengthRange(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
-        args = {
-            'OutputWorkspace': inWSName,
-            'Function': 'Flat background',
-            'NumBanks': 1,
-        }
-        alg = create_algorithm('CreateSampleWorkspace', **args)
-        alg.execute()
+        self.create_sample_workspace(inWSName)
         # Check range begin only.
         args = {
             'InputWorkspace': inWSName,
@@ -219,6 +195,59 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         rawWS = alg.getProperty('RawOutputWorkspace').value
         self.assertEquals(rawWS.getNumberHistograms(), 256)
         self.assertEquals(rawWS.getAxis(0).getUnit().caption(), 'Wavelength')
+
+    def testCleanupOFF(self):
+        # test if intermediate workspaces exist:
+        # not tested: _raw- and position tables
+        # normalise_to_slits, normalise_to_monitor, '_normalised_to_time_','transposed_flat_background'
+        workspace_name_suffix = ['_cloned_for_flat_bkg_', '_cropped_', '_detectors_', '_flat_background_',
+                                 '_flat_background_subtracted_', '_foreground_grouped_', '_in_wavelength_',
+                                 '_monitors_', '_transposed_clone_', '_water_calibrated_']
+        outWSName = 'outWS'
+        inWSName = 'inWS'
+        self.create_sample_workspace(inWSName, NumMonitors=3)
+        waterName = 'water'
+        self.create_sample_workspace(waterName)
+
+        arg = {'OutputWorkspace': 'peakTable'}
+        alg = create_algorithm('CreateEmptyTableWorkspace', **arg)
+        alg.execute()
+        table = mtd['peakTable']
+        table.addColumn('double', 'PeakCentre')
+        table.addRow((3.0,))
+        args = {
+            'InputWorkspace': inWSName,
+            'BeamPosition': 'peakTable',
+            'OutputWorkspace': outWSName,
+            'Cleanup': 'Cleanup OFF',
+            'WavelengthRange': [5., 10.],
+            'WaterReference': waterName,
+            'ForegroundCentre': 31,
+            'ForegroundHalfWidth': 1,
+            'LowAngleBkgOffset': 5,
+            'LowAngleBkgWidth': 10,
+            'HighAngleBkgOffset': 5,
+            'HighAngleBkgWidth': 10,
+            'FluxNormalisation': 'Normalisation OFF',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        for i in range(len(workspace_name_suffix)):
+            wsName = outWSName + workspace_name_suffix[i]
+            self.assertTrue(mtd.doesExist(wsName), wsName)
+
+    def create_sample_workspace(self, name, NumMonitors=0):
+        args = {
+            'OutputWorkspace': name,
+            'Function': 'Flat background',
+            'NumMonitors': NumMonitors,
+            'NumBanks': 1,
+        }
+        alg = create_algorithm('CreateSampleWorkspace', **args)
+        alg.execute()
+
 
 if __name__ == "__main__":
     unittest.main()
