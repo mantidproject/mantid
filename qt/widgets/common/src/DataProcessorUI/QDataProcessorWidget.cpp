@@ -186,8 +186,9 @@ void QDataProcessorWidget::setModel(QString const &name) {
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
-void QDataProcessorWidget::showTable(TreeManager *model) {
-  m_model = model->getModel();
+void QDataProcessorWidget::showTable(
+-    boost::shared_ptr<AbstractTreeModel> model) {
+-  m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
@@ -200,7 +201,7 @@ void QDataProcessorWidget::showTable(TreeManager *model) {
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
-
+  ui.viewTable->setStyleSheet("QTreeView {font-size:11pt;}")
   ui.viewTable->setAlternatingRowColors(false);
   ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable));
 
@@ -232,7 +233,6 @@ void QDataProcessorWidget::rowsUpdated(const QModelIndex &parent, int start,
   }
 
   m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
-  ui.viewTable->update();
 }
 
 /**
@@ -255,7 +255,6 @@ void QDataProcessorWidget::rowDataUpdated(const QModelIndex &topLeft,
   }
 
   m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
-  ui.viewTable->update();
 }
 
 /**
@@ -452,7 +451,6 @@ Set the strategy used for generating hints for the autocompletion in the options
 column.
 @param hintStrategy : The hinting strategy to use
 @param column : The index of the 'Options' column
-@param manager : A pointer to the model manager
 */
 void QDataProcessorWidget::setOptionsHintStrategy(
     MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column) {

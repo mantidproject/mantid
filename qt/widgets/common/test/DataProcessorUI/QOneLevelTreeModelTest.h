@@ -220,6 +220,37 @@ public:
     TS_ASSERT_EQUALS(model.rowCount(), 3);
   }
 
+  void testHighlightFourRowTable() {
+    auto ws = fourRowTable();
+    QOneLevelTreeModel model(ws, m_whitelist);
+
+    // Non-existent row
+    TS_ASSERT_EQUALS(model.setProcessed(true, 10), false);
+    TS_ASSERT_EQUALS(model.setProcessed(true, -1), false);
+
+    // Set the 1st and 3rd rows processed
+    TS_ASSERT_EQUALS(model.setProcessed(true, 0), true);
+    TS_ASSERT_EQUALS(model.setProcessed(true, 2), true);
+
+    // Only 1st and 3rd rows are highlighted
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "#00b300");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "");
+    TS_ASSERT_EQUALS(model.data(model.index(2, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "#00b300");
+    TS_ASSERT_EQUALS(model.data(model.index(3, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "");
+  }
+
   void testIsProcessedFourRowTable() {
     auto ws = fourRowTable();
     QOneLevelTreeModel model(ws, m_whitelist);

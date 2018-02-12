@@ -61,9 +61,8 @@ public:
 
   MOCK_METHOD1(setModel, void(const QString &));
   MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
-  MOCK_METHOD3(setOptionsHintStrategy,
-               void(MantidQt::MantidWidgets::HintStrategy *, int,
-                    DataProcessor::TreeManager *));
+  MOCK_METHOD2(setOptionsHintStrategy,
+               void(MantidQt::MantidWidgets::HintStrategy *, int));
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<QString, QVariant> &));
@@ -87,7 +86,8 @@ public:
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
-  void showTable(DataProcessor::TreeManager *) override{};
+  void showTable(boost::shared_ptr<
+-      MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>) override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   void emitProcessClicked() override{};

@@ -613,7 +613,7 @@ public:
 
     // We don't the view we will handle yet, so none of the methods below
     // should be called
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _, _))
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _))
         .Times(0);
     EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(0);
     // Constructor
@@ -652,7 +652,7 @@ public:
         "ReflectometryReductionOneAuto", "Stitch1DMany"};
 
     // Expect that the autocompletion hints are populated
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7, _))
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7))
         .Times(Exactly(1));
     // Now accept the views
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -2967,7 +2967,7 @@ public:
 
     // We don't know the view we will handle yet, so none of the methods below
     // should be called
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _, _))
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _))
         .Times(0);
     // Constructor (no pre-processing)
 
@@ -2989,7 +2989,7 @@ public:
     // Expect that the list of settings is populated
     EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
     // Expect that the autocompletion hints are populated
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7, _))
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7))
         .Times(Exactly(1));
     // Now accept the views
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);

@@ -10,7 +10,6 @@
 #include <string>
 
 class AbstractTreeModel;
-class TreeManager;
 namespace MantidQt {
 namespace MantidWidgets {
 class HintStrategy;
@@ -56,7 +55,7 @@ public:
   virtual void addActions(std::vector<std::unique_ptr<Command>> commands) = 0;
 
   // Connect the model
-  virtual void showTable(TreeManager *manager) = 0;
+  virtual void showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;
 
   // Dialog/Prompt methods
   virtual QString requestNotebookPath() = 0;

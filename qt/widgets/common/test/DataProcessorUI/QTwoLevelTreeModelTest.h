@@ -627,6 +627,53 @@ public:
     TS_ASSERT_THROWS_NOTHING(model.rowCount(model.index(1, 0)));
   }
 
+  void testHighlightTable() {
+    auto ws = fourRowTable();
+    QTwoLevelTreeModel model(ws, m_whitelist);
+
+    // Non-existent row
+    TS_ASSERT_EQUALS(model.setProcessed(true, 10, model.index(0, 0)), false);
+    TS_ASSERT_EQUALS(model.setProcessed(true, -1, model.index(0, 0)), false);
+
+    // Non-existent group
+    TS_ASSERT_EQUALS(model.setProcessed(true, 10), false);
+    TS_ASSERT_EQUALS(model.setProcessed(true, -1), false);
+
+    // Set 1st row of 1st group and 2nd group processed
+    TS_ASSERT_EQUALS(model.setProcessed(true, 0, model.index(0, 0)), true);
+    TS_ASSERT_EQUALS(model.setProcessed(true, 1), true);
+
+    // Only the 1st row of 1st group and 2nd group should be highlighted
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "");
+    TS_ASSERT_EQUALS(
+        model.data(model.index(0, 0, model.index(0, 0)), Qt::BackgroundRole)
+            .toString()
+            .toStdString(),
+        "#00b300");
+    TS_ASSERT_EQUALS(
+        model.data(model.index(1, 0, model.index(0, 0)), Qt::BackgroundRole)
+            .toString()
+            .toStdString(),
+        "");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
+                         .toString()
+                         .toStdString(),
+                     "#00b300");
+    TS_ASSERT_EQUALS(
+        model.data(model.index(0, 0, model.index(1, 0)), Qt::BackgroundRole)
+            .toString()
+            .toStdString(),
+        "");
+    TS_ASSERT_EQUALS(
+        model.data(model.index(1, 0, model.index(1, 0)), Qt::BackgroundRole)
+            .toString()
+            .toStdString(),
+        "");
+}
+
   void testIsProcessed() {
     auto ws = fourRowTable();
     QTwoLevelTreeModel model(ws, m_whitelist);
