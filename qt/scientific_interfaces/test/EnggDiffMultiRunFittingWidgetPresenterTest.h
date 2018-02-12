@@ -86,7 +86,7 @@ public:
     assertMocksUsedCorrectly();
   }
 
-  void test_selectRunValidNoFittedPeaks() {
+  void test_selectValidRunWithoutFittedPeaks() {
     auto presenter = setUpPresenter();
 
     const RunLabel runLabel(123, 1);
@@ -104,9 +104,8 @@ public:
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
     EXPECT_CALL(*m_mockView, plotFocusedRun(testing::_)).Times(1);
 
-    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(false));
+    ON_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
+        .WillByDefault(Return(false));
     EXPECT_CALL(*m_mockView, plotFittedPeaks(testing::_)).Times(0);
 
     presenter->notify(
@@ -136,30 +135,20 @@ public:
     assertMocksUsedCorrectly();
   }
 
-  void test_selectRunValidWithFittedPeaks() {
+  void test_selectValidRunWithFittedPeaks() {
     auto presenter = setUpPresenter();
 
     const RunLabel runLabel(123, 1);
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(runLabel));
+    ON_CALL(*m_mockView, getSelectedRunLabel()).WillByDefault(Return(runLabel));
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(sampleWorkspace));
+    ON_CALL(*m_mockModel, getFocusedRun(runLabel))
+        .WillByDefault(Return(sampleWorkspace));
 
-    EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
-    EXPECT_CALL(*m_mockView, plotFocusedRun(testing::_)).Times(1);
-
-    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_mockView, showFitResultsSelected())
-        .Times(1)
-        .WillOnce(Return(true));
+    ON_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
+        .WillByDefault(Return(true));
+    ON_CALL(*m_mockView, showFitResultsSelected()).WillByDefault(Return(true));
     EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
