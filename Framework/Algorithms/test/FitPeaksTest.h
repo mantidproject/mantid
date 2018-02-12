@@ -58,7 +58,7 @@ public:
   /**
    * @brief test_multiPeaksMultiSpectra
    */
-  void Passed_test_multiPeaksMultiSpectra() {
+  void Bad_Constraint_test_multiPeaksMultiSpectra() {
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -273,7 +273,7 @@ public:
    * 2. no signal with event count workspace
    * @brief test_NoSignaleWorkspace2D
    */
-  void Passed_test_NoSignaleWorkspace2D() {
+  void test_NoSignaleWorkspace2D() {
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -439,7 +439,7 @@ public:
   /** Test on VULCAN's data including 2 different starting value of peak
    * profiles
     */
-  void Passed_test_multiple_peak_profiles() {
+  void test_multiple_peak_profiles() {
     // Generate input workspace
     std::string input_ws_name = loadVulcanHighAngleData();
     API::MatrixWorkspace_sptr input_ws =

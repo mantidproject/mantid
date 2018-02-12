@@ -1604,6 +1604,37 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
                  << ", width = " << peak_function->fwhm() << " in range "
                  << xmin << ", " << xmax << "\n";
 
+  /*
+  Name: Function, Value: name=Gaussian,Height=245.849,PeakCentre=1.5368,Sigma=0.0104419,constraints=(1.5245<PeakCentre<1.5409,50<Height);name=Quadratic,A0=0,A1=0,A2=0, Default?: No, Direction: InOut
+  Name: InputWorkspace, Value: ascws, Default?: No, Direction: Input
+  Name: IgnoreInvalidData, Value: 0, Default?: Yes, Direction: Input
+  Name: DomainType, Value: Simple, Default?: Yes, Direction: Input
+  Name: EvaluationType, Value: CentrePoint, Default?: Yes, Direction: Input
+  Name: PeakRadius, Value: 0, Default?: Yes, Direction: Input
+  Name: Ties, Value: , Default?: Yes, Direction: Input
+  Name: Constraints, Value: , Default?: Yes, Direction: Input
+  Name: MaxIterations, Value: 50, Default?: No, Direction: Input
+  Name: OutputStatus, Value: , Default?: Yes, Direction: Output
+  Name: OutputChi2overDoF, Value: 0, Default?: Yes, Direction: Output
+  Name: Minimizer, Value: Levenberg-Marquardt, Default?: Yes, Direction: Input
+  Name: CostFunction, Value: Least squares, Default?: Yes, Direction: InOut
+  Name: CreateOutput, Value: 0, Default?: Yes, Direction: Input
+  Name: Output, Value: ascws06, Default?: No, Direction: Input
+  Name: CalcErrors, Value: 0, Default?: Yes, Direction: Input
+  Name: OutputCompositeMembers, Value: 1, Default?: No, Direction: Input
+  Name: ConvolveMembers, Value: 0, Default?: Yes, Direction: Input
+  Name: OutputParametersOnly, Value: 0, Default?: Yes, Direction: Input
+  Name: WorkspaceIndex, Value: 0, Default?: Yes, Direction: Input
+  Name: StartX, Value: 1.440799999999905, Default?: No, Direction: Input
+  Name: EndX, Value: 1.5855999999998891, Default?: No, Direction: Input
+  Name: Normalise, Value: 0, Default?: Yes, Direction: Input
+  Name: Exclude, Value: , Default?: Yes, Direction: Input
+
+   */
+  for (size_t i = 0; i < dataws->readY(wsindex).size(); ++i)
+      g_log.notice() << dataws->readX(wsindex)[i] << "\t\t" << dataws->readY(wsindex)[i]
+                     << "\t\t" << dataws->readE(wsindex)[i] << "\n";
+
   fit->setProperty("Function", fitfunc);
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
@@ -1611,8 +1642,17 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
   fit->setProperty("StartX", xmin);
   fit->setProperty("EndX", xmax);
 
-  // TODO FIXME NOW NOW : add constraints to peak positions
-  fit.setProperty("Constraints", "0.01 < Frequency < 0.2, 0.01 < Phi < 1.0");
+  fit->setProperty("Minimizer", "Levenberg-Marquardt");
+  fit->setProperty("CostFunction", "Least squares");
+
+  double peak_center = peak_function->centre();
+  double peak_width = peak_function->fwhm();
+  std::stringstream peak_center_constraint;
+  peak_center_constraint << (peak_center - 0.5 * peak_width) << " < f0."
+                         << peak_function->getCentreParameterName() << " < "
+                         << (peak_center + 0.5 * peak_width);
+
+  fit->setProperty("Constraints", peak_center_constraint.str());
 
   // Execute fit and get result of fitting background
   // m_sstream << "FitSingleDomain: " << fit->asString() << ".\n";
@@ -1620,6 +1660,10 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
                  << fit->asString() << "\n";
 
   fit->executeAsChildAlg();
+
+  g_log.notice() << "[DB E1202] FitSingleDomain After fitting, Fit function: "
+                 << fit->asString() << "\n";
+
   if (!fit->isExecuted()) {
     g_log.error("Fitting peak SD (single domain) failed to execute.");
     throw std::runtime_error(
@@ -1763,9 +1807,7 @@ double FitPeaks::FitFunctionHighBackground(
   GetRangeData(ws_index, fit_window, &vec_x, &vec_y, &vec_e);
 
   // Reduce the background
-  double high_a0, high_a1;
-  ReduceBackground(linear_background_function_, vec_x, &vec_y, &vec_e, &high_a0,
-                   &high_a1);
+  ReduceBackground(linear_background_function_, vec_x, &vec_y, &vec_e);
 
   // Create a new workspace
   API::MatrixWorkspace_sptr reduced_bkgd_ws =
@@ -2100,8 +2142,7 @@ void FitPeaks::GetRangeData(size_t iws,
 void FitPeaks::ReduceBackground(API::IBackgroundFunction_sptr bkgd_func,
                                 const std::vector<double> &vec_x,
                                 std::vector<double> *vec_y,
-                                std::vector<double> *vec_e, double *a0,
-                                double *a1) {
+                                std::vector<double> *vec_e) {
 
   // find out all local minima
   std::vector<size_t> local_min_indices;
@@ -2213,13 +2254,9 @@ void FitPeaks::ReduceBackground(API::IBackgroundFunction_sptr bkgd_func,
   // Reduce the background from the calculated background
   for (size_t i = 0; i < vec_y->size(); ++i) {
     (*vec_y)[i] -= vector_bkgd[i];
-    double e_sq = max((*vec_y)[i], 1.0);
-    (*vec_e)[i] = std::sqrt(e_sq);
+    // double e_sq = max((*vec_y)[i], 1.0);
+    // (*vec_e)[i] = 1.0; // std::sqrt(e_sq);
   }
-
-  // TODO ASAP : debug output
-  for (size_t i = 0; i < vec_x.size(); ++i)
-    g_log.notice() << vec_x[i] << "\t\t" << (*vec_y)[i] << "\n";
 
   return;
 }
