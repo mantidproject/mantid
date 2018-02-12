@@ -124,77 +124,76 @@ public:
   }
 
   void testPassDifferentAxes() {
-    MatrixWorkspace_sptr ws6 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws6");
+      MatrixWorkspace_sptr ws6 =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws6");
 
-    Counts counts{{4, 9, 16}};
-    Points points{{0.4, 0.9, 1.1}};
-    ws6->setHistogram(3, points, counts);
+      Counts counts{{4, 9, 16}};
+      Points points{{0.4, 0.9, 1.1}};
+      ws6->setHistogram(3, points, counts);
 
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws6"});
+      m_testee.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws6"});
 
-    TS_ASSERT_THROWS_NOTHING(m_testee.execute());
-    TS_ASSERT(m_testee.isExecuted());
+      TS_ASSERT_THROWS_NOTHING(m_testee.execute());
+      TS_ASSERT(m_testee.isExecuted());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+      MatrixWorkspace_sptr out =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
 
-    TS_ASSERT(out);
-    TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
-    TS_ASSERT_EQUALS(out->blocksize(), 6);
-    TS_ASSERT(!out->isHistogramData());
-    TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
+      TS_ASSERT(out);
+      TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
+      TS_ASSERT_EQUALS(out->blocksize(), 6);
+      TS_ASSERT(!out->isHistogramData());
+      TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
 
-    auto spectrum0 = out->y(0).rawData();
-    auto error0 = out->e(0).rawData();
-    auto xaxis0 = out->x(0).rawData();
+      auto spectrum0 = out->y(0).rawData();
+      auto error0 = out->e(0).rawData();
+      auto xaxis0 = out->x(0).rawData();
 
-    TS_ASSERT_EQUALS(spectrum0[0], 2.);
-    TS_ASSERT_EQUALS(spectrum0[1], 2.);
-    TS_ASSERT_EQUALS(spectrum0[2], 2.);
-    TS_ASSERT_EQUALS(spectrum0[3], 2.);
-    TS_ASSERT_EQUALS(spectrum0[4], 2.);
-    TS_ASSERT_EQUALS(spectrum0[5], 2.);
+      TS_ASSERT_EQUALS(spectrum0[0], 2.);
+      TS_ASSERT_EQUALS(spectrum0[1], 2.);
+      TS_ASSERT_EQUALS(spectrum0[2], 2.);
+      TS_ASSERT_EQUALS(spectrum0[3], 2.);
+      TS_ASSERT_EQUALS(spectrum0[4], 2.);
+      TS_ASSERT_EQUALS(spectrum0[5], 2.);
 
-    TS_ASSERT_EQUALS(error0[0], 3.);
-    TS_ASSERT_EQUALS(error0[1], 3.);
-    TS_ASSERT_EQUALS(error0[2], 3.);
-    TS_ASSERT_EQUALS(error0[3], 3.);
-    TS_ASSERT_EQUALS(error0[4], 3.);
-    TS_ASSERT_EQUALS(error0[5], 3.);
+      TS_ASSERT_EQUALS(error0[0], 3.);
+      TS_ASSERT_EQUALS(error0[1], 3.);
+      TS_ASSERT_EQUALS(error0[2], 3.);
+      TS_ASSERT_EQUALS(error0[3], 3.);
+      TS_ASSERT_EQUALS(error0[4], 3.);
+      TS_ASSERT_EQUALS(error0[5], 3.);
 
-    TS_ASSERT_EQUALS(xaxis0[0], 1.);
-    TS_ASSERT_EQUALS(xaxis0[1], 2.);
-    TS_ASSERT_EQUALS(xaxis0[2], 3.);
-    TS_ASSERT_EQUALS(xaxis0[3], 1.);
-    TS_ASSERT_EQUALS(xaxis0[4], 2.);
-    TS_ASSERT_EQUALS(xaxis0[5], 3.);
+      TS_ASSERT_EQUALS(xaxis0[0], 1.);
+      TS_ASSERT_EQUALS(xaxis0[1], 2.);
+      TS_ASSERT_EQUALS(xaxis0[2], 3.);
+      TS_ASSERT_EQUALS(xaxis0[3], 1.);
+      TS_ASSERT_EQUALS(xaxis0[4], 2.);
+      TS_ASSERT_EQUALS(xaxis0[5], 3.);
 
-    auto spectrum3 = out->y(3).rawData();
-    auto error3 = out->e(3).rawData();
-    auto xaxis3 = out->x(3).rawData();
+      auto spectrum3 = out->y(3).rawData();
+      auto error3 = out->e(3).rawData();
+      auto xaxis3 = out->x(3).rawData();
 
-    TS_ASSERT_EQUALS(spectrum3[0], 2.);
-    TS_ASSERT_EQUALS(spectrum3[1], 2.);
-    TS_ASSERT_EQUALS(spectrum3[2], 2.);
-    TS_ASSERT_EQUALS(spectrum3[3], 4.);
-    TS_ASSERT_EQUALS(spectrum3[4], 9.);
-    TS_ASSERT_EQUALS(spectrum3[5], 16.);
+      TS_ASSERT_EQUALS(spectrum3[0], 2.);
+      TS_ASSERT_EQUALS(spectrum3[1], 2.);
+      TS_ASSERT_EQUALS(spectrum3[2], 2.);
+      TS_ASSERT_EQUALS(spectrum3[3], 4.);
+      TS_ASSERT_EQUALS(spectrum3[4], 9.);
+      TS_ASSERT_EQUALS(spectrum3[5], 16.);
 
-    TS_ASSERT_EQUALS(error3[0], 3.);
-    TS_ASSERT_EQUALS(error3[1], 3.);
-    TS_ASSERT_EQUALS(error3[2], 3.);
-    TS_ASSERT_EQUALS(error3[3], 2.);
-    TS_ASSERT_EQUALS(error3[4], 3.);
-    TS_ASSERT_EQUALS(error3[5], 4.);
+      TS_ASSERT_EQUALS(error3[0], 3.);
+      TS_ASSERT_EQUALS(error3[1], 3.);
+      TS_ASSERT_EQUALS(error3[2], 3.);
+      TS_ASSERT_EQUALS(error3[3], 2.);
+      TS_ASSERT_EQUALS(error3[4], 3.);
+      TS_ASSERT_EQUALS(error3[5], 4.);
 
-    TS_ASSERT_EQUALS(xaxis3[0], 1.);
-    TS_ASSERT_EQUALS(xaxis3[1], 2.);
-    TS_ASSERT_EQUALS(xaxis3[2], 3.);
-    TS_ASSERT_EQUALS(xaxis3[3], 0.4);
-    TS_ASSERT_EQUALS(xaxis3[4], 0.9);
-    TS_ASSERT_EQUALS(xaxis3[5], 1.1);
+      TS_ASSERT_EQUALS(xaxis3[0], 1.);
+      TS_ASSERT_EQUALS(xaxis3[1], 2.);
+      TS_ASSERT_EQUALS(xaxis3[2], 3.);
+      TS_ASSERT_EQUALS(xaxis3[3], 0.4);
+      TS_ASSERT_EQUALS(xaxis3[4], 0.9);
+      TS_ASSERT_EQUALS(xaxis3[5], 1.1);
   }
 
   void testFailWithNumLog() {
