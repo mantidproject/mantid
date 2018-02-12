@@ -567,9 +567,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             self.log().error('Water workspace and run do not have the same number of histograms.')
         rebinnedWaterWSName = self._names.withSuffix('water_rebinned')
         rebinnedWaterWS = RebinToWorkspace(WorkspaceToRebin=waterWS,
-                                            WorkspaceToMatch=ws,
-                                            OutputWorkspace=rebinnedWaterWSName,
-                                            EnableLogging=self._subalgLogging)
+                                           WorkspaceToMatch=ws,
+                                           OutputWorkspace=rebinnedWaterWSName,
+                                           EnableLogging=self._subalgLogging)
         calibratedWSName = self._names.withSuffix('water_calibrated')
         calibratedWS = Divide(LHSWorkspace=ws,
                               RHSWorkspace=rebinnedWaterWS,
