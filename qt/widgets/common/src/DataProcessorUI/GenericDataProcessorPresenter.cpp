@@ -281,9 +281,8 @@ Returns the name of the reduced workspace for a given row
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
-QString
-GenericDataProcessorPresenter::getReducedWorkspaceName(const RowData_sptr data,
-                                                       const QString &prefix) {
+QString GenericDataProcessorPresenter::getReducedWorkspaceName(
+    const RowData_sptr data, const QString &prefix) const {
   return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
       data, m_whitelist, prefix);
 }

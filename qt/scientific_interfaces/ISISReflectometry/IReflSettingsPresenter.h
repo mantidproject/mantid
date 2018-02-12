@@ -54,7 +54,6 @@ public:
   getReductionOptions() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
-  virtual std::string getTransmissionRuns(const double angle) const = 0;
   virtual void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) = 0;
 
   enum Flag {

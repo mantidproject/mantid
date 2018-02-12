@@ -86,7 +86,6 @@ public:
   MOCK_CONST_METHOD0(getEndOverlap, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
-  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
   MOCK_CONST_METHOD0(getDirectBeam, std::string());
   MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());

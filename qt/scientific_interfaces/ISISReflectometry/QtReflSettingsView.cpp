@@ -85,6 +85,11 @@ void QtReflSettingsView::connectSettingsChange(QGroupBox &edit) {
   connect(&edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
 }
 
+void QtReflSettingsView::connectSettingsChange(QTableWidget &edit) {
+  connect(&edit, SIGNAL(cellChanged(int, int)), this,
+          SLOT(notifySettingsChanged()));
+}
+
 void QtReflSettingsView::disableAll() {
   m_ui.instSettingsGroup->setEnabled(false);
   m_ui.expSettingsGroup->setEnabled(false);
@@ -130,7 +135,7 @@ void QtReflSettingsView::registerExperimentSettingsWidgets(
     Mantid::API::IAlgorithm_sptr alg) {
   connectSettingsChange(*m_ui.expSettingsGroup);
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
-  registerSettingWidget(*m_ui.transmissionRunsEdit, "FirstTransmissionRun",
+  registerSettingWidget(*m_ui.transmissionRunsTable, "FirstTransmissionRun",
                         alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);

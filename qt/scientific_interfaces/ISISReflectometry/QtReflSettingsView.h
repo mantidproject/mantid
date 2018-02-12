@@ -149,6 +149,7 @@ private:
   void connectSettingsChange(QComboBox &edit);
   void connectSettingsChange(QCheckBox &edit);
   void connectSettingsChange(QGroupBox &edit);
+  void connectSettingsChange(QTableWidget &edit);
   QLineEdit &stitchOptionsLineEdit() const;
   void setSelected(QComboBox &box, std::string const &str);
   void setText(QLineEdit &lineEdit, int value);

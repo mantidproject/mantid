@@ -73,7 +73,8 @@ public:
   }
 
   void onCallReturnDefaultTransmissionRuns(MockSettingsView &mockView) {
-    ON_CALL(mockView, getTransmissionRuns()).WillByDefault(Return(""));
+    ON_CALL(mockView, getTransmissionRuns())
+        .WillByDefault(Return(std::map<std::string, std::string>()));
   }
 
   void onCallReturnDefaultScaleFactor(MockSettingsView &mockView) {
@@ -390,9 +391,14 @@ public:
     onCallReturnDefaultSettings(mockView);
     auto presenter = makeReflSettingsPresenter(&mockView);
 
+    // Default transmission runs are specified with a single
+    // entry with an empty angle as the key
+    std::map<std::string, std::string> transmissionRunsMap = {
+        {"", "INTER00013463,INTER00013464"}};
+
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(AtLeast(1))
-        .WillOnce(Return("INTER00013463,INTER00013464"));
+        .WillOnce(Return(transmissionRunsMap));
 
     auto options = presenter.getReductionOptions();
 
@@ -618,7 +624,7 @@ public:
 
   void testDefaultTransmissionRuns() {
     MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     // Default transmission runs are specified with a single
     // entry with an empty angle as the key
@@ -637,7 +643,7 @@ public:
 
   void testTransmissionRunsForAngle() {
     MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    auto presenter = makeReflSettingsPresenter(&mockView);
 
     // Set up a table with transmission runs for 2 different angles
     std::map<std::string, std::string> transmissionRunsMap = {
