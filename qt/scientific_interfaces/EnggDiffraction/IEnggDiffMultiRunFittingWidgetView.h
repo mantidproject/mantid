@@ -6,9 +6,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>
+#include <qwt_data.h>
 #include <vector>
-
-class QwtData;
 
 namespace MantidQt {
 namespace CustomInterfaces {
