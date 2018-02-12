@@ -220,6 +220,7 @@ set ( SRC_FILES
 	src/PointByPointVCorrection.cpp
 	src/PoissonErrors.cpp
 	src/PolarizationCorrection.cpp
+	src/PolarizationEfficiencyCor.cpp
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
@@ -556,6 +557,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PointByPointVCorrection.h
 	inc/MantidAlgorithms/PoissonErrors.h
 	inc/MantidAlgorithms/PolarizationCorrection.h
+	inc/MantidAlgorithms/PolarizationEfficiencyCor.h
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
@@ -894,6 +896,7 @@ set ( TEST_FILES
 	PointByPointVCorrectionTest.h
 	PoissonErrorsTest.h
 	PolarizationCorrectionTest.h
+	PolarizationEfficiencyCorTest.h
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h

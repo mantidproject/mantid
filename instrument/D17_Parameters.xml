@@ -21,9 +21,10 @@
 			<value val="PSD.ny" />
 		</parameter>
 		
-		
-		
-		
+	<!-- Default monitor spectrum number for monitor normalisation. -->
+		<parameter name="default-incident-monitor-spectrum" type="int">
+			<value val="257" />
+		</parameter>
 
 	</component-link>
 
