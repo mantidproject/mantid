@@ -69,7 +69,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(
   if (!focusedRun) {
     m_view->userError(
         "Invalid focused run identifier",
-        "Tried to access invalid run, run number " +
+        "Tried to plot invalid run, run number " +
             std::to_string(runLabel.runNumber) + " and bank ID " +
             std::to_string(runLabel.bank) +
             ". Please contact the development team with this message");
