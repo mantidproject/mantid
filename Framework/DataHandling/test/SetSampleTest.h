@@ -89,7 +89,10 @@ public:
   void test_Setting_Material_Alone_Only_Overwrites_Material() {
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
-    sampleShape->setID("mysample");
+    TS_ASSERT(boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(sampleShape));
+    if (auto csgObj = boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(sampleShape)) {
+      csgObj->setID("mysample");
+    }
     inputWS->mutableSample().setShape(sampleShape);
 
     auto alg = createAlgorithm(inputWS);
@@ -110,9 +113,12 @@ public:
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
-    sampleShape->setID("mysample");
     Material alum("Al", getNeutronAtom(13), 2.6989);
-    sampleShape->setMaterial(alum);
+    TS_ASSERT(boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(sampleShape));
+    if (auto csgObj = boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(sampleShape)) {
+      csgObj->setID("mysample");
+      csgObj->setMaterial(alum);
+    }
     inputWS->mutableSample().setShape(sampleShape);
 
     auto alg = createAlgorithm(inputWS);

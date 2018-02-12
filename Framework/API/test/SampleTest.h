@@ -261,7 +261,10 @@ public:
                       Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
     IObject_sptr shape = Mantid::Geometry::ShapeFactory().createShape("");
-    shape->setMaterial(vanBlock);
+    TS_ASSERT(boost::dynamic_pointer_cast<CSGObject>(shape));
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(shape)) {
+      csgObj->setMaterial(vanBlock);
+    }
     sample.setShape(shape);
 
     const Material &mat = sample.getMaterial();

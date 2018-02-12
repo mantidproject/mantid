@@ -61,11 +61,11 @@ public:
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
     // We expect sampleShape to be a CSGObject
     TS_ASSERT(boost::dynamic_pointer_cast<::Mantid::Geometry::CSGObject>(sampleShape));
+    Material alum("Al", getNeutronAtom(13), 2.6989);
     if (auto csgObj = boost::dynamic_pointer_cast<::Mantid::Geometry::CSGObject>(sampleShape)) {
       csgObj->setID("mysample");
+      csgObj->setMaterial(alum);
     }
-    Material alum("Al", getNeutronAtom(13), 2.6989);
-    sampleShape->setMaterial(alum);
     inputWS->mutableSample().setShape(sampleShape);
 
     CreateSampleShape alg;

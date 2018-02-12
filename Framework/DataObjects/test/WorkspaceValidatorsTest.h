@@ -258,7 +258,10 @@ public:
           sampleVal->isValid(ws),
           "The sample is missing the following properties: shape,material");
       auto shape = ComponentCreationHelper::createSphere(0.01);
-      shape->setMaterial(Material("V", NeutronAtom(), 0.072));
+      TS_ASSERT(boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(shape));
+      if (auto csgObj = boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(shape)) {
+        csgObj->setMaterial(Material("V", NeutronAtom(), 0.072));
+      }
       ws->mutableSample().setShape(shape);
       TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");
     }
