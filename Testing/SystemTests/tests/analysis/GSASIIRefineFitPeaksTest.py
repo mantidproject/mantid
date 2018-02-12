@@ -14,8 +14,10 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
     __metaclass__ = ABCMeta
 
     fitted_peaks_ws = None
+    gamma = None
     input_ws = None
     rwp = None
+    sigma = None
     lattice_params_table = None
 
     _LATTICE_PARAM_TBL_NAME = "LatticeParameters"
@@ -81,7 +83,7 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
         if not gsas_path:
             self.fail("Could not find GSAS-II installation")
 
-        self.fitted_peaks_ws, self.lattice_params_table, self.rwp = \
+        self.fitted_peaks_ws, self.lattice_params_table, self.rwp, self.sigma, self.gamma = \
             GSASIIRefineFitPeaks(RefinementMethod=self._get_refinement_method(),
                                  InputWorkspace=self.input_ws,
                                  PhaseInfoFiles=self.phase_file_paths(),
@@ -90,7 +92,8 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
                                  SaveGSASIIProjectFile=self._get_gsas_proj_filename(),
                                  MuteGSASII=True,
                                  XMin=10000, XMax=40000,
-                                 LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
+                                 LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
+                                 RefineSigma=True, RefineGamma=True)
 
     def skipTests(self):
         # Skip this test, as it's just a wrapper for the Rietveld and Pawley tests
@@ -109,7 +112,7 @@ class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
         return not self.path_to_gsas()
 
     def _get_expected_rwp(self):
-        return 72.811546
+        return 73.9720953
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksRietveldFitParams.nxs"
@@ -127,7 +130,7 @@ class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
         return not self.path_to_gsas()
 
     def _get_expected_rwp(self):
-        return 73.989128
+        return 74.008464
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksPawleyFitParams.nxs"

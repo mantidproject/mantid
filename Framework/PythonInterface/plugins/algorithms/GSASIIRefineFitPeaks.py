@@ -21,14 +21,18 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     PROP_GSAS_PROJ_PATH = "SaveGSASIIProjectFile"
     PROP_INPUT_WORKSPACE = "InputWorkspace"
     PROP_OUT_FITTED_PEAKS_WS = "OutputWorkspace"
+    PROP_OUT_GAMMA = "Gamma"
     PROP_OUT_GROUP_RESULTS = "Results"
     PROP_OUT_LATTICE_PARAMS = "LatticeParameters"
     PROP_OUT_RWP = "Rwp"
+    PROP_OUT_SIGMA = "Sigma"
     PROP_PATH_TO_GSASII = "PathToGSASII"
     PROP_PATH_TO_INST_PARAMS = "InstrumentFile"
     PROP_PATHS_TO_PHASE_FILES = "PhaseInfoFiles"
     PROP_PAWLEY_DMIN = "PawleyDMin"
     PROP_PAWLEY_NEGATIVE_WEIGHT = "PawleyNegativeWeight"
+    PROP_REFINE_GAMMA = "RefineGamma"
+    PROP_REFINE_SIGMA = "RefineSigma"
     PROP_REFINEMENT_METHOD = "RefinementMethod"
     PROP_SUPPRESS_GSAS_OUTPUT = "MuteGSASII"
     PROP_WORKSPACE_INDEX = "WorkspaceIndex"
@@ -84,6 +88,10 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.declareProperty(name=self.PROP_XMAX, defaultValue=0.0, direction=Direction.Input,
                              doc="Maximum x value to use for refinement, in the same units as the input workspace. " +
                                  "Leave blank to refine in the range {} to the end of the range".format(self.PROP_XMIN))
+        self.declareProperty(name=self.PROP_REFINE_SIGMA, defaultValue=False, direction=Direction.Input,
+                             doc="Whether to refine the sigma-1 profile coefficient")
+        self.declareProperty(name=self.PROP_REFINE_GAMMA, defaultValue=False, direction=Direction.Input,
+                             doc="Whether to refine the gamma-1 (called 'X' in GSAS-II) profile coefficient")
 
         self.declareProperty(WorkspaceProperty(name=self.PROP_OUT_FITTED_PEAKS_WS, defaultValue="",
                                                direction=Direction.Output), doc="Workspace with fitted peaks")
@@ -92,6 +100,10 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                              doc="Table to output the lattice parameters (refined)")
         self.declareProperty(name=self.PROP_OUT_RWP, direction=Direction.Output, defaultValue=0.0,
                              doc="Weighted profile R factor (as a percentage)")
+        self.declareProperty(name=self.PROP_OUT_SIGMA, direction=Direction.Output, defaultValue=0.0,
+                             doc="Sigma-1 profile coefficient")
+        self.declareProperty(name=self.PROP_OUT_GAMMA, direction=Direction.Output, defaultValue=0.0,
+                             doc="Gamma-1 profile coefficient (called X in GSAS-II)")
         self.declareProperty(FileProperty(name=self.PROP_GSAS_PROJ_PATH, defaultValue="", action=FileAction.Save,
                                           extensions=".gpx"), doc="GSASII Project to work on")
 
@@ -128,7 +140,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                                      do_pawley=refinement_method == self.REFINEMENT_METHODS[0])
 
             self._set_output_properties(lattice_params=lattice_params, rwp=rwp,
-                                        fitted_peaks_ws=self._generate_fitted_peaks_ws(gsas_proj))
+                                        fitted_peaks_ws=self._generate_fitted_peaks_ws(gsas_proj),
+                                        gamma=gsas_proj.values()[5]["Instrument Parameters"][0]["X"][1],
+                                        sigma=gsas_proj.values()[5]["Instrument Parameters"][0]["sig-1"][1])
 
     def _build_output_lattice_table(self, lattice_params):
         table_name = self.getPropertyValue(self.PROP_OUT_LATTICE_PARAMS)
@@ -144,10 +158,20 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         refinement_params = self.DEFAULT_REFINEMENT_PARAMS
 
         x_max = self.getProperty(self.PROP_XMAX).value
-
         if x_max:
             x_min = self.getProperty(self.PROP_XMIN).value
             refinement_params["set"].update({"Limits": [x_min, x_max]})
+
+        if "Instrument Parameters" not in refinement_params["set"]:
+            refinement_params["set"]["Instrument Parameters"] = []
+
+        refine_sigma = self.getProperty(self.PROP_REFINE_SIGMA).value
+        if refine_sigma:
+            refinement_params["set"]["Instrument Parameters"].append("sig-1")
+
+        refine_gamma = self.getProperty(self.PROP_REFINE_GAMMA).value
+        if refine_gamma:
+            refinement_params["set"]["Instrument Parameters"].append("X")
 
         return refinement_params
 
@@ -252,10 +276,12 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False, IncludeHeader=False)
         return file_path
 
-    def _set_output_properties(self, fitted_peaks_ws, rwp, lattice_params):
+    def _set_output_properties(self, fitted_peaks_ws, rwp, lattice_params, sigma, gamma):
         self.setProperty(self.PROP_OUT_FITTED_PEAKS_WS, fitted_peaks_ws)
         self.setProperty(self.PROP_OUT_RWP, rwp)
         self.setProperty(self.PROP_OUT_LATTICE_PARAMS, lattice_params)
+        self.setProperty(self.PROP_OUT_GAMMA, gamma)
+        self.setProperty(self.PROP_OUT_SIGMA, sigma)
 
     def _set_pawley_phase_parameters(self, phase):
         # Note from GSAS-II doc: "you probably should clear the Histogram scale factor refinement
