@@ -168,8 +168,7 @@ void LoadHKL::exec() {
   mrun.addProperty<double>("Radius", radius, true);
   NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
                       static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
-  auto shape = boost::shared_ptr<IObject>(ws->sample().getShape().clone());
-  shape->setMaterial(Material("SetInLoadHKL", neutron, 1.0));
+  auto shape = boost::shared_ptr<IObject>(ws->sample().getShape().cloneWithMaterial(Material("SetInLoadHKL", neutron, 1.0)));
   ws->mutableSample().setShape(shape);
 
   setProperty("OutputWorkspace",

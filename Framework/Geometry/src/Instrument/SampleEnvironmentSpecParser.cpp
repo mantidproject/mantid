@@ -223,18 +223,20 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
   }
   ShapeFactory factory;
   auto comp = factory.createShape(geometry);
-  // If CSGObject set ID
-  if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(comp)) {
-    csgObj->setID(element->getAttribute("id"));
-  }
   auto materialID = element->getAttribute("material");
   auto iter = m_materials.find(materialID);
+  Kernel::Material mat;
   if (iter != m_materials.end()) {
-    comp->setMaterial(iter->second);
+    mat = iter->second;
   } else {
     throw std::runtime_error("SampleEnvironmentSpecParser::parseComponent() - "
                              "Unable to find material with id=" +
                              materialID);
+  }
+  // If CSGObject set ID and material
+  if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(comp)) {
+    csgObj->setID(element->getAttribute("id"));
+    csgObj->setMaterial(mat);
   }
   return comp;
 }

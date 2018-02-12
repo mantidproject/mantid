@@ -259,8 +259,7 @@ void SaveHKL::exec() {
                         static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
                         m_amu);
     auto shape =
-        boost::shared_ptr<IObject>(peaksW->sample().getShape().clone());
-    shape->setMaterial(Material("SetInSaveHKL", neutron, 1.0));
+        boost::shared_ptr<IObject>(peaksW->sample().getShape().cloneWithMaterial(Material("SetInSaveHKL", neutron, 1.0)));
     peaksW->mutableSample().setShape(shape);
   }
   if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())
