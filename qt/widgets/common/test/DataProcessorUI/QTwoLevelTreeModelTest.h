@@ -672,7 +672,7 @@ public:
             .toString()
             .toStdString(),
         "");
-}
+  }
 
   void testIsProcessed() {
     auto ws = fourRowTable();

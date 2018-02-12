@@ -187,8 +187,8 @@ Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
 void QDataProcessorWidget::showTable(
--    boost::shared_ptr<AbstractTreeModel> model) {
--  m_model = model;
+    -boost::shared_ptr<AbstractTreeModel> model) {
+  -m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
@@ -202,7 +202,7 @@ void QDataProcessorWidget::showTable(
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
   ui.viewTable->setStyleSheet("QTreeView {font-size:11pt;}")
-  ui.viewTable->setAlternatingRowColors(false);
+      ui.viewTable->setAlternatingRowColors(false);
   ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable));
 
   // Hide the Hidden Options column

@@ -613,8 +613,7 @@ public:
 
     // We don't the view we will handle yet, so none of the methods below
     // should be called
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _))
-        .Times(0);
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(0);
     // Constructor
     auto presenter = makeDefaultPresenterNoThread();
@@ -2967,8 +2966,7 @@ public:
 
     // We don't know the view we will handle yet, so none of the methods below
     // should be called
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _))
-        .Times(0);
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
     // Constructor (no pre-processing)
 
     GenericDataProcessorPresenterNoThread presenter(
