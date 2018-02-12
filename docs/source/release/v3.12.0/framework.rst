@@ -45,6 +45,7 @@ Algorithms
 - :ref:`LoadLamp <algm-LoadLamp>` is a new algorithm to load processed HDF5 files produced by LAMP program at ILL.
 - :ref:`SaveNexus <algm-SaveNexus>` will no longer crash when passed a ``PeaksWorkspace`` with integrated peaks that have missing radius information.
 - :ref:`SaveReflections <algm-LoadLamp>` is a new algorithm to save PeaksWorkspaces to Fullprof, Jana, GSAS, and SHELX text formats.
+- :ref:`ConjoinXRuns <algm-ConjoinXRuns>` will now accept workspaces with varying x-axes per spectrum.
 
 Fitting
 -------
@@ -81,7 +82,7 @@ In `mantid.simpleapi`, a keyword has been implemented for function-like algorith
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
 - The previously mentioned ``ConfigObserver`` and ``ConfigPropertyObserver`` classes are also exposed to python.
 - ``mantid.kernel.V3D`` vectors now support negation through the usual ``-`` operator.
-- It is now possible to `pickle <https://docs.python.org/2/library/pickle.html>`_ and de-pickle :ref:`Workspace2D <Workspace2D>` and :ref:`TableWorkspace <Table Workspaces>` in Python. This has been added to make it easier to transfer your workspaces over a network. Only these two workspace types currently supports the pickling process, and there are limitations to be aware of described :ref:`here <Workspace2D>`.  
+- It is now possible to `pickle <https://docs.python.org/2/library/pickle.html>`_ and de-pickle :ref:`Workspace2D <Workspace2D>` and :ref:`TableWorkspace <Table Workspaces>` in Python. This has been added to make it easier to transfer your workspaces over a network. Only these two workspace types currently supports the pickling process, and there are limitations to be aware of described :ref:`here <Workspace2D>`.
 - ``mantid.api.IPeak`` has three new functions:
     - ``getEnergyTransfer`` which returns the difference between the initial and final energy.
     - ``getIntensityOverSigma`` which returns the peak intensity divided by the error in intensity.
