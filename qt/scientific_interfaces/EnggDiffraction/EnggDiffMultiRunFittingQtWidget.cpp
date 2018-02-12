@@ -62,7 +62,8 @@ void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
 }
 
 void EnggDiffMultiRunFittingQtWidget::processSelectRun() {
-  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
+  m_presenter->notify(
+      IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
 }
 
 void EnggDiffMultiRunFittingQtWidget::resetCanvas() {

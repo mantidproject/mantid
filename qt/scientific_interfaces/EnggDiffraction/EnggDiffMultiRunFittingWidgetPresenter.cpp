@@ -51,7 +51,7 @@ EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(
 void EnggDiffMultiRunFittingWidgetPresenter::notify(
     IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) {
   switch (notif) {
-  case IEnggDiffMultiRunFittingWidgetPresenter::SelectRun:
+  case Notification::SelectRun:
     processSelectRun();
     break;
   }

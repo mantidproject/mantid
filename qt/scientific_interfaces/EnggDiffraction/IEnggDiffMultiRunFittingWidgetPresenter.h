@@ -16,7 +16,7 @@ public:
 
   // User actions, triggered by the (passive) view,
   // which need handling in implementation
-  enum Notification {
+  enum class Notification {
     SelectRun, ///< The user has selected a new run from the list
   };
 

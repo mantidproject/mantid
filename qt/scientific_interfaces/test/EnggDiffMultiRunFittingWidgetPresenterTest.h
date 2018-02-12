@@ -109,7 +109,8 @@ public:
         .WillOnce(Return(false));
     EXPECT_CALL(*m_mockView, plotFittedPeaks(testing::_)).Times(0);
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
+    presenter->notify(
+        IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
     assertMocksUsedCorrectly();
   }
 
@@ -125,12 +126,13 @@ public:
         .WillOnce(Return(boost::none));
     EXPECT_CALL(*m_mockView,
                 userError("Invalid focused run identifier",
-                          "Tried to access invalid run, run number 123 and "
+                          "Tried to plot invalid run, run number 123 and "
                           "bank ID 1. Please contact the development team with "
                           "this message")).Times(1);
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(0);
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
+    presenter->notify(
+        IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
     assertMocksUsedCorrectly();
   }
 
@@ -164,7 +166,8 @@ public:
     EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*m_mockView, plotFittedPeaks(testing::_)).Times(1);
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
+    presenter->notify(
+        IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
     assertMocksUsedCorrectly();
   }
 
