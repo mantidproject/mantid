@@ -17,37 +17,37 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel
 
 public:
   Mantid::API::MatrixWorkspace_sptr
-  getFocusedWorkspace(const int runNumber, const size_t bank) const override;
+  getFocusedWorkspace(const RunLabel &runLabel) const override;
 
   Mantid::API::MatrixWorkspace_sptr
-  getAlignedWorkspace(const int runNumber, const size_t bank) const override;
+  getAlignedWorkspace(const RunLabel &runLabel) const override;
 
   Mantid::API::MatrixWorkspace_sptr
-  getFittedPeaksWS(const int runNumber, const size_t bank) const override;
+  getFittedPeaksWS(const RunLabel &runLabel) const override;
 
   Mantid::API::ITableWorkspace_sptr
-  getFitResults(const int runNumber, const size_t bank) const override;
+  getFitResults(const RunLabel &runLabel) const override;
 
-  const std::string &getWorkspaceFilename(const int runNumber,
-                                          const size_t bank) const override;
+  const std::string &
+  getWorkspaceFilename(const RunLabel &runLabel) const override;
 
-  void removeRun(const int runNumber, const size_t bank) override;
+  void removeRun(const RunLabel &runLabel) override;
 
   void loadWorkspaces(const std::string &filenames) override;
 
-  std::vector<std::pair<int, size_t>> getRunNumbersAndBankIDs() const override;
+  std::vector<RunLabel> getRunLabels() const override;
 
   void
-  setDifcTzero(const int runNumber, const size_t bank,
+  setDifcTzero(const RunLabel &runLabel,
                const std::vector<GSASCalibrationParms> &calibParams) override;
 
-  void enggFitPeaks(const int runNumber, const size_t bank,
+  void enggFitPeaks(const RunLabel &runLabel,
                     const std::string &expectedPeaks) override;
 
-  void saveDiffFittingAscii(const int runNumber, const size_t bank,
+  void saveDiffFittingAscii(const RunLabel &runLabel,
                             const std::string &filename) const override;
 
-  void createFittedPeaksWS(const int runNumber, const size_t bank) override;
+  void createFittedPeaksWS(const RunLabel &runLabel) override;
 
   size_t getNumFocusedWorkspaces() const override;
 
@@ -55,15 +55,14 @@ public:
 
   void addAllFittedPeaksToADS() const override;
 
-  bool hasFittedPeaksForRun(const int runNumber,
-                            const size_t bank) const override;
+  bool hasFittedPeaksForRun(const RunLabel &runLabel) const override;
 
 protected:
-  void addFocusedWorkspace(const int runNumber, const size_t bank,
+  void addFocusedWorkspace(const RunLabel &runLabel,
                            const Mantid::API::MatrixWorkspace_sptr ws,
                            const std::string &filename);
 
-  void addFitResults(const int runNumber, const size_t bank,
+  void addFitResults(const RunLabel &runLabel,
                      const Mantid::API::ITableWorkspace_sptr ws);
 
   void mergeTables(const Mantid::API::ITableWorkspace_sptr tableToCopy,
@@ -102,8 +101,7 @@ private:
                      const int endWSIndex);
 
   void rebinToFocusedWorkspace(const std::string &wsToRebinName,
-                               const int runNumberToMatch,
-                               const size_t bankToMatch,
+                               const RunLabel &runLabelToMatch,
                                const std::string &outputWSName);
 
   void cloneWorkspace(const Mantid::API::MatrixWorkspace_sptr inputWorkspace,

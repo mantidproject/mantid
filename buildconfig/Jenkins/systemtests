@@ -17,7 +17,6 @@ else
     CMAKE_EXE=cmake
 fi
 $CMAKE_EXE --version
-echo "SHA1=${sha1}"
 
 ###############################################################################
 # Set up the location for the local object store outside of the build and
@@ -35,16 +34,6 @@ if [ -z "$EXTRA_ARGS" ]; then
 fi
 
 ###############################################################################
-# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
-###############################################################################
-if [[ ${NODE_LABELS} == *rhel6* ]]; then
-  SCL_ON_RHEL6="scl enable mantidlibs34"
-  ON_RHEL6=true
-else
-  SCL_ON_RHEL6="eval"
-fi
-
-###############################################################################
 # Create the build directory if it doesn't exist
 ###############################################################################
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
@@ -55,16 +44,16 @@ cd $WORKSPACE/build
 # We use the special flag that only creates the targets for the data
 ###############################################################################
 if [[ ! -e $WORKSPACE/build/CMakeCache.txt ]]; then
-  $SCL_ON_RHEL6 "${CMAKE_EXE} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDATA_TARGETS_ONLY=ON .."
+  ${CMAKE_EXE} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDATA_TARGETS_ONLY=ON ..
 else
-  $SCL_ON_RHEL6 "${CMAKE_EXE} ."
+  ${CMAKE_EXE} .
 fi
 
 ###############################################################################
 # Build step
 ###############################################################################
-$SCL_ON_RHEL6 "${CMAKE_EXE} --build . -- StandardTestData"
-$SCL_ON_RHEL6 "${CMAKE_EXE} --build . -- SystemTestData"
+${CMAKE_EXE} --build . -- StandardTestData
+${CMAKE_EXE} --build . -- SystemTestData
 
 ###############################################################################
 # Run the tests

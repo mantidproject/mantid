@@ -8,44 +8,41 @@
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockEnggDiffGSASFittingModel
-    : public MantidQt::CustomInterfaces::IEnggDiffGSASFittingModel {
+using namespace MantidQt::CustomInterfaces;
+
+class MockEnggDiffGSASFittingModel : public IEnggDiffGSASFittingModel {
 
 public:
-  MOCK_METHOD8(doPawleyRefinement,
-               bool(const int runNumber, const size_t bank,
-                    const std::string &instParamFile,
+  MOCK_METHOD7(doPawleyRefinement,
+               bool(const RunLabel &runLabel, const std::string &instParamFile,
                     const std::vector<std::string> &phaseFiles,
                     const std::string &pathToGSASII,
                     const std::string &GSASIIProjectFile, const double dMin,
                     const double negativeWeight));
 
-  MOCK_METHOD6(doRietveldRefinement,
-               bool(const int runNumber, const size_t bank,
-                    const std::string &instParamFile,
+  MOCK_METHOD5(doRietveldRefinement,
+               bool(const RunLabel &runLabel, const std::string &instParamFile,
                     const std::vector<std::string> &phaseFiles,
                     const std::string &pathToGSASII,
                     const std::string &GSASIIProjectFile));
 
-  MOCK_CONST_METHOD2(getFittedPeaks,
+  MOCK_CONST_METHOD1(getFittedPeaks,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
-                         const int runNumber, const size_t bank));
+                         const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD2(getFocusedWorkspace,
+  MOCK_CONST_METHOD1(getFocusedWorkspace,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
-                         const int runNumber, const size_t bank));
+                         const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD2(getLatticeParams,
+  MOCK_CONST_METHOD1(getLatticeParams,
                      boost::optional<Mantid::API::ITableWorkspace_sptr>(
-                         const int runNumber, const size_t bank));
+                         const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD0(getRunLabels, std::vector<std::pair<int, size_t>>());
+  MOCK_CONST_METHOD0(getRunLabels, std::vector<RunLabel>());
 
-  MOCK_CONST_METHOD2(getRwp, boost::optional<double>(const int runNumber,
-                                                     const size_t bank));
+  MOCK_CONST_METHOD1(getRwp, boost::optional<double>(const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD2(hasFittedPeaksForRun,
-                     bool(const int runNumber, const size_t bank));
+  MOCK_CONST_METHOD1(hasFittedPeaksForRun, bool(const RunLabel &runLabel));
 
   MOCK_METHOD1(loadFocusedRun, bool(const std::string &filename));
 };
