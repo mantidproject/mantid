@@ -116,9 +116,6 @@ public:
   void draw() const override { m_shape->draw(); }
   void initDraw() const override { m_shape->initDraw(); }
 
-  void setMaterial(const Kernel::Material &material) override {
-    m_shape->setMaterial(material);
-  }
   const Kernel::Material material() const override {
     return m_shape->material();
   }

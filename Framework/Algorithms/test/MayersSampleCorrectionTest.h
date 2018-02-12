@@ -130,12 +130,14 @@ private:
       spectrum.addDetectorID(i + 1);
     }
 
-    // Sample properties - cylinder of vanadium
+    // Sample properties - cylinder of vanadium assumed to be CSG object
     const double radius(0.0025), height(0.04);
     auto cylinder =
         createCappedCylinder(radius, height, V3D(), V3D(0., 1., 0.), "sample");
     const double numberDensity(0.07261);
-    cylinder->setMaterial(Material("V", getNeutronAtom(23), numberDensity));
+    if (auto csgObj = boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(cylinder)) {
+      csgObj->setMaterial(Material("V", getNeutronAtom(23), numberDensity));
+    }
     testWS->mutableSample().setShape(cylinder);
 
     // Move the detector to a known position

@@ -92,7 +92,6 @@ public:
 
   int getName() const override { return 0; }  
 
-  void setMaterial(const Kernel::Material &material) override;
   const Kernel::Material material() const override;
 
   /// Return whether this object has a valid shape
@@ -155,6 +154,9 @@ public:
   int *getTriangles() const;
 
   void updateGeometryHandler();
+
+  // Not yet removed
+  void setMaterial(const Kernel::Material &material);
 
 private:
   /// Default constructor - should never be called

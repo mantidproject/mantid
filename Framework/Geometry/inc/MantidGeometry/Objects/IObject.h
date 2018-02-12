@@ -103,9 +103,6 @@ public:
   virtual const std::string &id() const = 0;
 
   virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
-
-  // Non const methods (should not be any)
-  virtual void setMaterial(const Kernel::Material &material) = 0;
 };
 
 /// Typdef for a shared pointer

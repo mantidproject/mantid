@@ -89,7 +89,7 @@ public:
   void setName(const int nx) { ObjNum = nx; } ///< Set Name
   int getName() const override { return ObjNum; }      ///< Get Name
 
-  void setMaterial(const Kernel::Material &material) override;
+  void setMaterial(const Kernel::Material &material);
   const Kernel::Material material() const override;
 
   /// Return whether this object has a valid shape

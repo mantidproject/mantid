@@ -179,8 +179,7 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
     to.setThickness(from.getThickness());
     to.setWidth(from.getWidth());
   } else if (materialFlag) {
-    auto lhsObject = boost::shared_ptr<IObject>(to.getShape().clone());
-    lhsObject->setMaterial(from.getMaterial());
+    auto lhsObject = boost::shared_ptr<IObject>(to.getShape().cloneWithMaterial(from.getMaterial()));
     to.setShape(lhsObject);
   }
 
