@@ -27,6 +27,19 @@ public:
   virtual void
   plotFocusedRun(const std::vector<boost::shared_ptr<QwtData>> &curve) = 0;
 
+  /**
+   Show an error that the user has tried to plot an invalid fitted peaks
+   workspace
+   @param runLabel Label of that workspace
+   */
+  virtual void reportPlotInvalidFittedPeaks(const RunLabel &runLabel) = 0;
+
+  /**
+   Show an error that the user has tried to plot an invalid focused run
+   @param runLabel Label of that run
+   */
+  virtual void reportPlotInvalidFocusedRun(const RunLabel &runLabel) = 0;
+
   /// Clear the plot area to avoid overplotting
   virtual void resetCanvas() = 0;
 

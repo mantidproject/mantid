@@ -41,6 +41,24 @@ RunLabel EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
   return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
 }
 
+void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFittedPeaks(
+    const RunLabel &runLabel) {
+  userError("Invalid fitted peaks identifier",
+            "Tried to plot invalid fitted peaks, run number " +
+                std::to_string(runLabel.runNumber) + " and bank ID " +
+                std::to_string(runLabel.bank) +
+                ". Please contact the development team with this message");
+}
+
+void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFocusedRun(
+    const RunLabel &runLabel) {
+  userError("Invalid focused run identifier",
+            "Tried to plot invalid focused run, run number " +
+                std::to_string(runLabel.runNumber) + " and bank ID " +
+                std::to_string(runLabel.bank) +
+                ". Please contact the development team with this message");
+}
+
 void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
     const std::vector<boost::shared_ptr<QwtData>> &curve) {
   UNUSED_ARG(curve);

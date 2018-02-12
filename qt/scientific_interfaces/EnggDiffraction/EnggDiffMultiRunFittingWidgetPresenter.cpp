@@ -24,16 +24,11 @@ void EnggDiffMultiRunFittingWidgetPresenter::displayFitResults(
     const RunLabel &runLabel) {
   const auto fittedPeaks = m_model->getFittedPeaks(runLabel);
   if (!fittedPeaks) {
-    m_view->userError("Invalid fitted peaks run identifer",
-                      "Unexpectedly tried to plot fit results for invalid "
-                      "run, run number = " +
-                          std::to_string(runLabel.runNumber) + ", bank ID = " +
-                          std::to_string(runLabel.bank) +
-                          ". Please contact the development team");
-    return;
+    m_view->reportPlotInvalidFittedPeaks(runLabel);
+  } else {
+    const auto plottablePeaks = API::QwtHelper::curveDataFromWs(*fittedPeaks);
+    m_view->plotFittedPeaks(plottablePeaks);
   }
-  const auto plottablePeaks = API::QwtHelper::curveDataFromWs(*fittedPeaks);
-  m_view->plotFittedPeaks(plottablePeaks);
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
@@ -67,23 +62,17 @@ void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(
   const auto focusedRun = m_model->getFocusedRun(runLabel);
 
   if (!focusedRun) {
-    m_view->userError(
-        "Invalid focused run identifier",
-        "Tried to plot invalid run, run number " +
-            std::to_string(runLabel.runNumber) + " and bank ID " +
-            std::to_string(runLabel.bank) +
-            ". Please contact the development team with this message");
-    return;
-  }
+    m_view->reportPlotInvalidFocusedRun(runLabel);
+  } else {
+    const auto plottableCurve = API::QwtHelper::curveDataFromWs(*focusedRun);
 
-  const auto plottableCurve = API::QwtHelper::curveDataFromWs(*focusedRun);
+    m_view->resetCanvas();
+    m_view->plotFocusedRun(plottableCurve);
 
-  m_view->resetCanvas();
-  m_view->plotFocusedRun(plottableCurve);
-
-  if (m_model->hasFittedPeaksForRun(runLabel) &&
-      m_view->showFitResultsSelected()) {
-    displayFitResults(runLabel);
+    if (m_model->hasFittedPeaksForRun(runLabel) &&
+        m_view->showFitResultsSelected()) {
+      displayFitResults(runLabel);
+    }
   }
 }
 

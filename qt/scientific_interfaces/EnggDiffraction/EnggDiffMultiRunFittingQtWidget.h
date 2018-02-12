@@ -34,6 +34,10 @@ public:
   void
   plotFocusedRun(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
 
+  void reportPlotInvalidFittedPeaks(const RunLabel &runLabel) override;
+
+  void reportPlotInvalidFocusedRun(const RunLabel &runLabel) override;
+
   void resetCanvas() override;
 
   bool showFitResultsSelected() const override;

@@ -100,7 +100,7 @@ public:
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
 
-    EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockView, reportPlotInvalidFocusedRun(testing::_)).Times(0);
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
     EXPECT_CALL(*m_mockView, plotFocusedRun(testing::_)).Times(1);
 
@@ -123,11 +123,7 @@ public:
     EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
         .Times(1)
         .WillOnce(Return(boost::none));
-    EXPECT_CALL(*m_mockView,
-                userError("Invalid focused run identifier",
-                          "Tried to plot invalid run, run number 123 and "
-                          "bank ID 1. Please contact the development team with "
-                          "this message")).Times(1);
+    EXPECT_CALL(*m_mockView, reportPlotInvalidFocusedRun(runLabel)).Times(1);
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(0);
 
     presenter->notify(
@@ -152,7 +148,7 @@ public:
     EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
-    EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockView, reportPlotInvalidFittedPeaks(testing::_)).Times(0);
     EXPECT_CALL(*m_mockView, plotFittedPeaks(testing::_)).Times(1);
 
     presenter->notify(
