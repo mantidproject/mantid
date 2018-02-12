@@ -1605,7 +1605,9 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
                  << xmin << ", " << xmax << "\n";
 
   /*
-  Name: Function, Value: name=Gaussian,Height=245.849,PeakCentre=1.5368,Sigma=0.0104419,constraints=(1.5245<PeakCentre<1.5409,50<Height);name=Quadratic,A0=0,A1=0,A2=0, Default?: No, Direction: InOut
+  Name: Function, Value:
+  name=Gaussian,Height=245.849,PeakCentre=1.5368,Sigma=0.0104419,constraints=(1.5245<PeakCentre<1.5409,50<Height);name=Quadratic,A0=0,A1=0,A2=0,
+  Default?: No, Direction: InOut
   Name: InputWorkspace, Value: ascws, Default?: No, Direction: Input
   Name: IgnoreInvalidData, Value: 0, Default?: Yes, Direction: Input
   Name: DomainType, Value: Simple, Default?: Yes, Direction: Input
@@ -1632,8 +1634,9 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
 
    */
   for (size_t i = 0; i < dataws->readY(wsindex).size(); ++i)
-      g_log.notice() << dataws->readX(wsindex)[i] << "\t\t" << dataws->readY(wsindex)[i]
-                     << "\t\t" << dataws->readE(wsindex)[i] << "\n";
+    g_log.notice() << dataws->readX(wsindex)[i] << "\t\t"
+                   << dataws->readY(wsindex)[i] << "\t\t"
+                   << dataws->readE(wsindex)[i] << "\n";
 
   fit->setProperty("Function", fitfunc);
   fit->setProperty("InputWorkspace", dataws);
