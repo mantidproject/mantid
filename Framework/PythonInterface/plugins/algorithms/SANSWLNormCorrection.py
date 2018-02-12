@@ -6,21 +6,25 @@ from __future__ import absolute_import, division, print_function
 import csv
 import os.path
 from collections import OrderedDict
-from configparser import RawConfigParser
 from itertools import cycle
 
 import numpy as np
 from scipy import interpolate, optimize
 
 from mantid import logger
-from mantid.api import (AlgorithmFactory, FileAction, FileProperty,
+from mantid.api import (AlgorithmFactory, FileAction, FileProperty, Progress,
                         PropertyMode, PythonAlgorithm, WorkspaceGroupProperty,
-                        WorkspaceProperty, Progress, mtd)
+                        WorkspaceProperty, mtd)
 from mantid.kernel import (Direction, FloatArrayProperty, Property,
                            PropertyManagerDataService)
-from mantid.simpleapi import (CreateWorkspace, GroupWorkspaces,
-                              CreateEmptyTableWorkspace)
+from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateWorkspace,
+                              GroupWorkspaces)
 from reduction_workflow.command_interface import ReductionSingleton
+
+try:
+    from configparser import ConfigParser
+except:
+    from six.moves.configparser import ConfigParser
 
 
 class SANSWLNormCorrection(PythonAlgorithm):
@@ -31,7 +35,10 @@ class SANSWLNormCorrection(PythonAlgorithm):
         return "SANSWLNormCorrection"
 
     def summary(self):
-        return "From the input Workspace group calculates I(Scaled) = K * I(Original) -b "
+        return ("From the input Workspace Group of I(Q,Lambda) calculates: "
+                "For every Lambda: I(Q,Lambda)_{Scaled} = K * I(Q,Lambda) - B. "
+                "Averaged: I(Q)_{ScaledAveraged} = K * I(Q,Lambda) - B. ")
+                
 
     def PyInit(self):
         # In
@@ -200,7 +207,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
         self.parser = None
         if os.path.exists(self.config_file):
             logger.information("Using configuration file: {}.".format(self.config_file))
-            self.parser = RawConfigParser()
+            self.parser = ConfigParser()
             self.parser.optionxform = lambda option: option # case sensitive
             self.parser.read(self.config_file)
             for k, v in self.parser.items('DEFAULT'):
@@ -570,7 +577,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
         Writes a new configuration file with the new K and B values
         '''
         if self.parser is None:
-            self.parser = RawConfigParser()
+            self.parser = ConfigParser()
             self.parser.optionxform = lambda option: option # case sensitive
 
         self.parser['DEFAULT']['KList'] = ",".join(str(e) for e in ws_table.column("K"))
