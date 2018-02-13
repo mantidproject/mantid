@@ -31,10 +31,10 @@ def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
     if not singleWS:
         logs = SampleLogs(ws)
         T = numpy.mean(logs.sample.temperature)
-        wsLabel = '\\#{:06d} T = {:0.1f} K Ei = {:0.2f} meV'.format(logs.run_number, T, logs.Ei)
+        wsLabel = '\\#{:06d} $T$ = {:0.1f} K $E_i$ = {:0.2f} meV'.format(logs.run_number, T, logs.Ei)
     cutLabel = ''
     if not singleCut or not singleWidth:
-        cutLabel = quantity + ' = {:0.2f} +- {:1.2f}'.format(cut, width) + units
+        cutLabel = quantity + ' = {:0.2f} $\pm$ {:1.2f}'.format(cut, width) + ' ' + units
     labels = list()
     return wsLabel + ' ' + cutLabel
 
@@ -73,15 +73,13 @@ def _profiletitle(workspaces, scan, units, cuts, widths, figure):
     if not isinstance(widths, collections.Iterable):
         widths = [widths] * len(cuts)
     ws = workspaces[0]
-    logs = SampleLogs(ws)
-    if len(cuts) == 1:
-        title = (logs.instrument.name + ' ' + _plottingtime() + '\n'
-                 + scan + ' = {:0.2f} +- {:0.2f}'.format(cuts[0], widths[0]) + ' ' + units)
-    elif len(workspaces) == 1:
-        T = numpy.mean(logs.sample.temperature)
-        title = _singledatatitle(ws)
+    if len(workspaces) == 1:
+        title = _singledatatitle(workspaces[0])
     else:
+        logs = SampleLogs(workspaces[0])
         title = logs.instrument.name + ' ' + _plottingtime()
+    if len(cuts) == 1 and len(widths) == 1:
+        title = title + '\n' + scan + ' = {:0.2f} $\pm$ {:0.2f}'.format(cuts[0], widths[0]) + ' ' + units
     figure.suptitle(title)
 
 
@@ -97,7 +95,7 @@ def _singledatatitle(workspace):
     T = numpy.mean(logs.sample.temperature)
     title = (str(workspace) + ' ' + logs.instrument.name + ' \\#{:06d}'.format(logs.run_number) + '\n'
              + _plottingtime() + '\n'
-             + 'T = {:0.1f} K Ei = {:0.2f} meV'.format(T, logs.Ei))
+             + '$T$ = {:0.1f} K $E_i$ = {:0.2f} meV'.format(T, logs.Ei))
     return title
 
 def _SofQWtitle(workspace, figure):
@@ -144,7 +142,7 @@ def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l')
     if not isinstance(cuts, collections.Iterable):
         cuts = [cuts]
     if not isinstance(widths, collections.Iterable):
-        widths = [widths] * len(cuts)
+        widths = [widths]
     lineStyle = 'solid' if 'l' in style else 'None'
     figure, axes = subplots()
     markers = matplotlib.markers.MarkerStyle.filled_markers
@@ -171,12 +169,12 @@ def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l')
 
 def plotconstE(workspaces, E, dE, style='l'):
     """Plot line profiles at constant energy."""
-    figure, axes = plotprofiles('Horizontal', workspaces, E, dE, 'E', 'meV', style)
-    _profiletitle(workspaces, 'E', 'meV', E, dE, figure)
+    figure, axes = plotprofiles('Horizontal', workspaces, E, dE, '$E$', 'meV', style)
+    _profiletitle(workspaces, '$E$', 'meV', E, dE, figure)
     axes.legend()
-    cMin, cMax = _globalnanminmax(workspaces)
+    axes.set_xlim(xmin=0.)
     axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
-    axes.set_ylim(ymin=0., ymax=cMax / 100.)
+    axes.set_ylim(0.)
     xMin, xMax = axes.get_xlim()
     print('Auto Q-range: {}...{} \xc5-1'.format(xMin, xMax))
     return figure, axes
@@ -184,11 +182,13 @@ def plotconstE(workspaces, E, dE, style='l'):
 
 def plotconstQ(workspaces, Q, dQ, style='l'):
     """Plot line profiles at constant momentum transfer."""
-    figure, axes = plotprofiles('Vertical', workspaces, Q, dQ, 'Q', '\\AA$^{-1}$', style)
-    _profiletitle(workspaces, 'Q', '\\AA', Q, dQ, figure)
+    figure, axes = plotprofiles('Vertical', workspaces, Q, dQ, '$Q$', '\\AA$^{-1}$', style)
+    _profiletitle(workspaces, '$Q$', '\\AA$^{-1}$', Q, dQ, figure)
     axes.legend()
-    axes.set_xlim(xmin=0.)
+    axes.set_xlim(xmin=-10.)
     axes.set_xlabel('Energy (meV)')
+    cMin, cMax = _globalnanminmax(workspaces)
+    axes.set_ylim(ymin=0., ymax=cMax / 100.)
     xMin, xMax = axes.get_xlim()
     print('Auto E-range: {}...{} meV'.format(xMin, xMax))
     return figure, axes
