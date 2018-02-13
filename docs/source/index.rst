@@ -30,6 +30,7 @@ Mantid Documentation
    techniques/index
    api/index
    release/index
+   training/index
 
 
 This is the documentation for Mantid |release|.

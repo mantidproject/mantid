@@ -117,7 +117,7 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
         data_x0 = output_workspace.dataX(0)
         self.assertTrue(data_x0[0] == 1.0)
         expected_upper_bound = 5.27471197274
-        self.assertTrue(data_x0[-1] == expected_upper_bound)
+        self.assertEqual(round(data_x0[-1],11), expected_upper_bound)
 
         # Check the units part
         axis0 = output_workspace.getAxis(0)
