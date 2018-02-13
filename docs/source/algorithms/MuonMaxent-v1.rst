@@ -11,7 +11,7 @@ Description
 
 This algorithm calculates a single frequency spectrum from the time domain spectra recorded by multiple groups/detectors. 
 
-The time domian data :math:`D_k(t)`, where :math:`t` is time and :math:`k` is the spectrum number, has associated errors :math:`E_k(t)`. If the number of points chosen is greater than the number of time domain sata points then extra points are
+The time domian data :math:`D_k(t)`, where :math:`t` is time and :math:`k` is the spectrum number, has associated errors :math:`E_k(t)`. If the number of points chosen is greater than the number of time domain data points then extra points are
 added with infinite errors. The time domain data prior to :code:`FirstGoodTime` also have their errors set to infinity. The algorithm will produce the frequency spectra :math:`f(\omega)` and this is assumed to be real and positive. 
 The upper limit of the frequency spectra is determined by :code:`MaxField`. The maximum frequency, :math:`\omega_\mathrm{max}` can be less than the Nyquist limit :math:`\frac{\pi}{\delta T}` if the instrumental frequency response function for 
 :math:`\omega>\omega_\mathrm{max}` is approximatley zero. The inital estimate of the frequency spectrum is flat. 
@@ -34,7 +34,9 @@ The entropy is given by
 
 .. math:: S = - \sum_\omega f(\omega) \log\left(\frac{f(\omega)}{a}\right),
 
-where a is the :code:`DefaultLevel`. The algorithm then maximise :math:`S-\chi^2`. 
+where a is the :code:`DefaultLevel`. The algorithm maximise :math:`S-\chi^2` and it is seen from the definition of
+:code:`Factor` above that this property effectively acts a Lagrange multiplier for :math:`\chi^2`, i.e. controlling
+the value :math:`\chi^2` converges to. 
 
 
 Usage
