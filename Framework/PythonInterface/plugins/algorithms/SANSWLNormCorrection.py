@@ -74,8 +74,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 direction=Direction.Input,
                 optional=PropertyMode.Optional,
             ),
-            doc='Reference Workspace from the InputWorkspaceGroup. \
-            If empty uses the first position from the InputWorkspaceGroup'
+            doc=('Reference Workspace from the InputWorkspaceGroup. '
+                 'If empty uses the first position from the InputWorkspaceGroup')
         )
 
         self.declareProperty(
@@ -118,8 +118,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
             name="OutputWorkspacePrefix",
             defaultValue="out_ws",
             direction=Direction.Input,
-            doc=
-            "Optional Prefix for the output I(q, wavelength) scaled workspaces"
+            doc=("Optional Prefix for the output I(q, wavelength) scaled workspaces, "
+                 "table workspaces and output files.")
         )
 
         self.declareProperty(
@@ -586,7 +586,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
             self.parser = ConfigParser()
             self.parser.optionxform = lambda option: option # case sensitive
 
-        self.parser.set('DEFAULT', 'KList', 
+        self.parser.set('DEFAULT', 'KList',
             ",".join(str(e) for e in ws_table.column("K")))
         self.parser.set('DEFAULT', 'BList',
             ",".join(str(e) for e in ws_table.column("B")))

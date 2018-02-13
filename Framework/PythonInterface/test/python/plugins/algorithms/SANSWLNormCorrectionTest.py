@@ -9,7 +9,7 @@ from testhelpers import run_algorithm
 from mantid.simpleapi import (
     CreateWorkspace, GroupWorkspaces)
 from mantid.api import mtd
-from mantid.kernel import logger
+
 
 class SANSWLNormCorrectionTest(unittest.TestCase):
 
@@ -482,7 +482,6 @@ class SANSWLNormCorrectionTest(unittest.TestCase):
                                   1.14357131e+00, 1.14403827e+00, 1.45751196e+00, 1.01586918e+00,
                                   1.25239598e+00, 9.59712679e-01, 1.17348326e+00, 1.36068191e+00]),
                         out_trimmed_fit_averaged.readY(0)))
-
 
 
 if __name__ == '__main__':
