@@ -253,6 +253,8 @@ void SaveLauenorm::exec() {
       // Chop off filename
       path.makeParent();
       path.append(basename + ss.str());
+      if (newFormat)
+        path.setExtension("geasc");
       Poco::File fileobj(path);
       out.open(path.toString().c_str(), std::ios::out);
       if (newFormat) {
