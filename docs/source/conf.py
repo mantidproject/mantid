@@ -9,6 +9,7 @@ from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme # checked at cmake time
 import mantid
 from mantid.kernel import ConfigService
+from warnings import warn
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -39,6 +40,12 @@ extensions = [
     'mantiddoc.doctest',
     'matplotlib.sphinxext.plot_directive'
 ]
+try:
+    import sphinxcontrib.bibtex
+    extensions.append('sphinxcontrib.bibtex')
+except ImportError:
+    warn("WARNING: sphinxcontrib.bibtex is not installed - all citation links will be broken")
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
