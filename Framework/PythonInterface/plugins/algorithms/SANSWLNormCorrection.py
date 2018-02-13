@@ -587,9 +587,9 @@ class SANSWLNormCorrection(PythonAlgorithm):
             self.parser.optionxform = lambda option: option # case sensitive
 
         self.parser.set('DEFAULT', 'KList',
-            ",".join(str(e) for e in ws_table.column("K")))
+                        ",".join(str(e) for e in ws_table.column("K")))
         self.parser.set('DEFAULT', 'BList',
-            ",".join(str(e) for e in ws_table.column("B")))
+                        ",".join(str(e) for e in ws_table.column("B")))
 
         conf_file_new_name = self.output_prefix + "_config.ini"
         conf_file_new_path = os.path.join(self.output_directory, conf_file_new_name)
