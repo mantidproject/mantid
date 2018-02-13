@@ -1036,6 +1036,16 @@ public:
     TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, -0.5), scale), M_PI * 2.0 / 3.0,
       satol);
   }
+
+  void testOutputForRendering()
+  /* Here we test the output functions used in rendering */
+  {
+    auto geom_obj = createOctahedron();
+    TS_ASSERT_EQUALS(geom_obj->numberOfTriangles(), 8);
+    TS_ASSERT_EQUALS(geom_obj->numberOfVertices(), 6);
+    TS_ASSERT_THROWS_NOTHING(geom_obj->getTriangles());
+    TS_ASSERT_THROWS_NOTHING(geom_obj->getVertices());
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -1069,11 +1079,21 @@ public:
     }
   }
 
+  void test_output_for_rendering() {
+    const size_t numberOfRuns(50000);
+    double* vertexData;
+    int* triangleData;
+    for (size_t i = 0; i < numberOfRuns; ++i) {
+      vertexData = octahedron->getVertices();
+      triangleData = octahedron->getTriangles();
+    }
+  }
+
 private:
   const size_t npoints = 6000;
   Mantid::Kernel::MersenneTwister rng;
-  IObject_uptr octahedron;
-  IObject_uptr lShape;
+  std::unique_ptr<MeshObject> octahedron;
+  std::unique_ptr<MeshObject> lShape;
 };
 
 #endif // MANTID_TESTMESHOBJECT__
