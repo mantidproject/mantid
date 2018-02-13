@@ -618,6 +618,9 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
       entry.getFloat(instrumentNamePath + "/selector/wavelength");
   g_log.debug() << "Wavelength found in the nexus file: " << wavelength << '\n';
 
+  auto wavelength_min = 0.0;
+  auto wavelength_max = 0.0;
+
   if (wavelength <= 0) {
     g_log.debug() << "Mode = " << entry.getFloat("mode") << '\n';
     g_log.information("The wavelength present in the NeXus file <= 0.");
@@ -645,12 +648,13 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
 
-    // The TOF Azimuthal average needs this. Otherwise the test fails
-    runDetails.addProperty("wavelength_min", m_defaultBinning[0], "Angstrom",
-                           true);
-    runDetails.addProperty("wavelength_max", m_defaultBinning[1], "Angstrom",
-                           true);
+    wavelength_min = m_defaultBinning[0];
+    wavelength_max = m_defaultBinning[1];
   }
+  // The TOF Azimuthal average needs this. Otherwise the test fails
+  runDetails.addProperty("wavelength_min", wavelength_min, "Angstrom", true);
+  runDetails.addProperty("wavelength_max", wavelength_max, "Angstrom", true);
+
   // Add a log called timer with the value of duration
   const double duration = entry.getFloat("duration");
   runDetails.addProperty<double>("timer", duration);
