@@ -20,21 +20,23 @@ namespace {
 /// static logger
 Logger g_log("ErrorReporter");
 }
-const std::string ERROR_URL("http://errorreports.mantidproject.org/api/error");
+// const std::string ERROR_URL("http://errorreports.mantidproject.org/api/error");
 // const std::string STARTUP_URL(
 //    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
 // http://posttestserver.com/data/
+//const std::string ERROR_URL("http://ptsv2.com/t/mantidmat/post");
+const std::string ERROR_URL("http://localhost:8082/api/error");
 
 //----------------------------------------------------------------------------------------------
 // Constructor for ErrorReporter
 ErrorReporter::ErrorReporter(std::string application)
-    : m_application(application), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl) {
+    : m_application(application), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl) , m_exitCode("") {
       Types::Core::time_duration upTime(0,0,0,0);
       m_upTime = upTime;
     }
 
-ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration startTime)
-    : m_application(application), m_upTime(startTime), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl) {}
+ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode)
+    : m_application(application), m_upTime(startTime), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl), m_exitCode(exitCode) {}
 
 void ErrorReporter::sendErrorReport() {
   try {
@@ -82,6 +84,8 @@ std::string ErrorReporter::generateErrorMessage() {
   message["application"] = m_application;
 
   message["facility"] = ConfigService::Instance().getFacility().name();
+
+  message["exitCode"] = m_exitCode;
 
   ::Json::FastWriter writer;
   return writer.write(message);

@@ -1,9 +1,6 @@
 #ifndef MANTID_KERNEL_ERRORSERVICE_H_
 #define MANTID_KERNEL_ERRORSERVICE_H_
 
-#ifndef Q_MOC_RUN
-#include <boost/date_time/posix_time/posix_time.hpp>
-#endif
 #include <string>
 #include <Poco/ActiveMethod.h>
 
@@ -40,7 +37,7 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ErrorReporter {  
     public:
     ErrorReporter(std::string application);
-    ErrorReporter(std::string application, Types::Core::time_duration startTime);
+    ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode);
     void sendErrorReport();
 
     protected:
@@ -51,6 +48,7 @@ class MANTID_KERNEL_DLL ErrorReporter {
     private:
     int sendErrorAsyncImpl(const std::string &message);
     const std::string m_application;
+    const std::string m_exitCode;
     Types::Core::time_duration m_upTime;
     /// Async method for sending startup notifications
     Poco::ActiveMethod<int, std::string, ErrorReporter> m_errorActiveMethod;

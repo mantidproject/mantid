@@ -42,7 +42,7 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
     int reportingEnabled = 0;
     int retVal = Mantid::Kernel::ConfigService::Instance().getValue("usagereports.enabled", reportingEnabled);
     if (reportingEnabled && retVal == 1){
-      Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime());
+      Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "");
       errorReporter.sendErrorReport();
     }
       

@@ -5,9 +5,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 
-#ifndef Q_MOC_RUN
-#include <boost/date_time/posix_time/posix_time.hpp>
-#endif
 #include <json/value.h>
 
 #include <Poco/ActiveMethod.h>
