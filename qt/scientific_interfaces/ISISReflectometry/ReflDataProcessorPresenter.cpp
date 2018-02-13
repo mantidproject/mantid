@@ -219,6 +219,8 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     const auto rowData = row.second;   // data values for this row
     auto runNo = row.second->value(0); // The run number
 
+    // Work out and cache the reduced workspace name
+    rowData->setReducedName(getReducedWorkspaceName(rowData));
     // Get the algorithm input properties for this row
     OptionsMap options = getCanonicalOptions(
         rowData, getProcessingOptions(rowData), m_whitelist, true,
@@ -328,10 +330,11 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
   bool errors = false;
 
   for (auto &row : group) {
-    // Get the algorithm input properties for this row and
-    // cache it in the row data (this is done just once here as
-    // it's required by both reduceRow and saveNotebook)
+    // Work out and cache the reduced workspace name
     auto rowData = row.second;
+    rowData->setReducedName(getReducedWorkspaceName(rowData));
+    // Get the algorithm input properties for this row and cache in the row
+    // data
     OptionsMap options = getCanonicalOptions(
         rowData, getProcessingOptions(rowData), m_whitelist, true,
         m_processor.outputProperties(), m_processor.prefixes());
@@ -719,8 +722,7 @@ void ReflDataProcessorPresenter::plotGroup() {
 
     for (size_t slice = 0; slice < numSlices; slice++) {
 
-      const auto wsName = m_postprocessing->getPostprocessedWorkspaceName(
-          m_processor.defaultInputPropertyName(), groupData, slice);
+      const auto wsName = getPostprocessedWorkspaceName(groupData, slice);
 
       if (workspaceExists(wsName))
         workspaces.insert(wsName, nullptr);

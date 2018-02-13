@@ -580,8 +580,8 @@ Post-processes the workspaces created by the given rows together.
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
   if (hasPostprocessing()) {
-    // The name is based on the default input WS names of the individual rows
-    m_postprocessing->postProcessGroup(m_processor.defaultInputPropertyName(),
+    const auto outputWSName = getPostprocessedWorkspaceName(groupData);
+    m_postprocessing->postProcessGroup(outputWSName,
                                        m_processor.defaultOutputPropertyName(),
                                        m_whitelist, groupData);
   }
@@ -667,19 +667,50 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
       outputName.toStdString());
 }
 
-
 /**
 Returns the name of the reduced workspace for a given group
 @param groupData : The data in a given group
+@param sliceIndex : The index of a slice, or empty if not sliced data
 @returns : The name of the workspace
 */
 QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
-    const GroupData &groupData) {
+    const GroupData &groupData, boost::optional<size_t> sliceIndex) {
   if (!hasPostprocessing())
     throw std::runtime_error("Attempted to get postprocessing workspace but no "
                              "postprocessing is specified.");
+
+  // The postprocessed name is a bit of a random combination of
+  // input/output properties and group/column prefixes.
+  // e.g. the postprocessed name might be
+  //   IvsQ_TEST_12345_slice_0_TEST_12346_slice_0
+  // where
+  //   "IvsQ_" is the grouped workspace prefix
+  //   "TEST_" is the prefix specified in the whitelist for this column
+  //   "12345" and "12346" are the input run numbers to stitch
+  //   "_slice_0" is the slice suffix
+  // and where individual reduced workspace names would be:
+  //   IvsQ_binned_TEST_12345_slice_0
+  //   IvsQ_binned_TEST_12346_slice_0
+  // where
+  //   "IvsQ_binned_" is the prefix for the OutputWorkspaceBinned property.
+
+  // We need the property name to find the run numbers for the input
+  // workspaces (e.g. "12345 a" and "12346" in the description above).
+  auto workspaceProperty = m_processor.defaultInputPropertyName();
+
+  // We need to work out the prefix for this column (e.g. "TEST_" in the
+  // description above). We can look this up from the whitelist column
+  // that corresponds to the workspace property name
+  QString prefix = "";
+  for (auto column : m_whitelist) {
+    if (column.algorithmProperty() == workspaceProperty) {
+      prefix = column.prefix();
+      break;
+    }
+  }
+
   return m_postprocessing->getPostprocessedWorkspaceName(
-      m_processor.defaultInputPropertyName(), groupData);
+      workspaceProperty, prefix, groupData, sliceIndex);
 }
 
 /** Loads a run found from disk or AnalysisDataService

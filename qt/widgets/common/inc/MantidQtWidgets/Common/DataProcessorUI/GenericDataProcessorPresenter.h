@@ -223,7 +223,9 @@ protected:
   virtual void plotGroup();
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
   // Get the name of a post-processed workspace
-  QString getPostprocessedWorkspaceName(const GroupData &groupData);
+  QString getPostprocessedWorkspaceName(
+      const GroupData &groupData,
+      boost::optional<size_t> sliceIndex = boost::optional<size_t>());
   bool rowOutputExists(RowItem const &row) const;
   // Refl GUI Group.
   int m_group;

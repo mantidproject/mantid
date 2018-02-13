@@ -34,22 +34,8 @@ void PostprocessingStep::ensureRowSizeMatchesColumnCount(
 }
 
 QString PostprocessingStep::getPostprocessedWorkspaceName(
-    const QString &rowWSPropertyName, const GroupData &groupData) {
-  /* This method calculates, for a given set of rows, the name of the output
-  * (post-processed) workspace */
-
-  QStringList outputNames;
-
-  for (const auto &data : groupData) {
-    outputNames.append(
-        data.second->optionValue(rowWSPropertyName));
-  }
-  return m_algorithm.prefix() + outputNames.join("_");
-}
-
-QString PostprocessingStep::getPostprocessedWorkspaceName(
-    const QString &rowWSPropertyName, const GroupData &groupData,
-    const size_t sliceIndex) {
+    const QString &rowWSPropertyName, const QString &rowWSPrefix,
+    const GroupData &groupData, boost::optional<size_t> sliceIndex) {
   /* This method calculates, for a given set of rows, the name of the output
   * (post-processed) workspace for a given slice */
 
@@ -57,10 +43,16 @@ QString PostprocessingStep::getPostprocessedWorkspaceName(
 
   for (const auto &row : groupData) {
     auto rowData = row.second;
-    if (rowData->hasSlice(sliceIndex)) {
+    // If a slice index was provided, check if the slice exists (nothing to do
+    // otherwise)
+    if (sliceIndex && rowData->hasSlice(*sliceIndex)) {
       const auto sliceName =
-          rowData->optionValue(rowWSPropertyName, sliceIndex);
-      outputNames.append(sliceName);
+          rowData->optionValue(rowWSPropertyName, *sliceIndex);
+      outputNames.append(rowWSPrefix + sliceName);
+    } else if (!sliceIndex) {
+      // A slice index was not provided, so just use the row's workspace name
+      auto wsName = rowData->optionValue(rowWSPropertyName);
+      outputNames.append(rowWSPrefix + wsName);
     }
   }
   return m_algorithm.prefix() + outputNames.join("_");
@@ -68,7 +60,7 @@ QString PostprocessingStep::getPostprocessedWorkspaceName(
 
 /**
   Post-processes the workspaces created by the given rows together.
-  @param rowInputWSPropertyName : The property name for the input workspace
+  @param outputWSName : The property name for the input workspace
   used in the row reductions
   @param rowOutputWSPropertyName : The property name for the output workspace
   used in the row reductions
@@ -77,18 +69,11 @@ QString PostprocessingStep::getPostprocessedWorkspaceName(
   manager
  */
 void PostprocessingStep::postProcessGroup(
-    const QString &rowInputWSPropertyName,
-    const QString &rowOutputWSPropertyName, const WhiteList &whitelist,
-    const GroupData &groupData) {
-  // The input workspace names
+    const QString &outputWSName, const QString &rowOutputWSPropertyName,
+    const WhiteList &whitelist, const GroupData &groupData) {
+  // Go through each row and get the input ws names for postprocessing
+  // (i.e. the output workspace of each row)
   QStringList inputNames;
-
-  // The name to call the post-processed ws. Base this on input workspaces names
-  // for the individual rows.
-  auto const outputWSName =
-      getPostprocessedWorkspaceName(rowInputWSPropertyName, groupData);
-
-  // Go through each row and get the input ws names
   for (auto const &row : groupData) {
     // The name of the reduced workspace for this row from the given property
     // value. Note that we need the preprocessed names as these correspond to
