@@ -32,11 +32,11 @@ The :math:`\chi^2` value is calculated via the equation
 where :math:`F` is the :code:`Factor` and is of order 1.0 (but can be adjusted within the algorithm for a better fit). 
 The entropy is given by
 
-.. math:: S = - \sum_\omega f(\omega) \log\left(\frac{f(\omega)}{a}\right),
+.. math:: S = - \sum_\omega f(\omega) \log\left(\frac{f(\omega)}{A}\right),
 
-where a is the :code:`DefaultLevel`. The algorithm maximise :math:`S-\chi^2` and it is seen from the definition of
-:code:`Factor` above that this property effectively acts a Lagrange multiplier for :math:`\chi^2`, i.e. controlling
-the value :math:`\chi^2` converges to. 
+where :math:`A` is the :code:`DefaultLevel`; it is a parameter of the entropy function. It has a number of names in the literature, one of which
+is default-value since the maximum entropy solution with no data is :math:`f(\omega)=A` for all :math:`\omega`. The algorithm maximises
+:math:`S-\chi^2` and it is seen from the definition of :code:`Factor` above that this algorithm property acts a Lagrange multiplier, i.e. controlling the value :math:`\chi^2` converges to.
 
 
 Usage

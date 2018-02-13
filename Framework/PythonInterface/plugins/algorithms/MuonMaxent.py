@@ -95,11 +95,11 @@ class MuonMaxent(PythonAlgorithm):
             "DefaultLevel",
             0.1,
             validator=valid,
-            doc="Default Level, magic number chitarget?")
+            doc="Default Level")
         self.declareProperty(
             "Factor",
             1.04,
-            doc="Sigma looseness factor, magic number A?",
+            doc="Used to control the value chi-squared converge to",
             direction=Direction.InOut)
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace",
