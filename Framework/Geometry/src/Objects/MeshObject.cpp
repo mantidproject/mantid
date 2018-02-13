@@ -49,13 +49,14 @@ MeshObject::MeshObject(std::vector<uint16_t> &&faces,
 * Copy constructor
 * @param A :: The object to initialise this copy from
 */
-MeshObject::MeshObject(const MeshObject &A) : MeshObject() { *this = A; }
+//MeshObject::MeshObject(const MeshObject &A) : MeshObject() { *this = A; }
 
 /**
 * Assignment operator
 * @param A :: Object to copy
 * @return *this
 */
+/*
 MeshObject &MeshObject::operator=(const MeshObject &A) {
   if (this != &A) {
     m_boundingBox = A.m_boundingBox;
@@ -67,6 +68,7 @@ MeshObject &MeshObject::operator=(const MeshObject &A) {
   }
   return *this;
 }
+*/
 
 MeshObject::~MeshObject() = default;
 

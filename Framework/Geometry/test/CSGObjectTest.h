@@ -139,6 +139,17 @@ public:
     geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
   }
 
+  void testCloneWithMaterial() {
+    using Mantid::Kernel::Material;
+    auto testMaterial = Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+    auto geom_obj = createUnitCube();
+    TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
+    auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
+      cloned_obj->material().numberDensity(), 1e-12);
+  }
+
+
   void testIsOnSideCappedCylinder() {
     auto geom_obj = createCappedCylinder();
     // inside

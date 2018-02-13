@@ -303,9 +303,9 @@ public:
     triangles.push_back(2);
 
     // Test flexible constructor
-    TS_ASSERT_THROWS_NOTHING(auto obj1 = MeshObject(triangles, vertices, Mantid::Kernel::Material()));
+    TS_ASSERT_THROWS_NOTHING(MeshObject(triangles, vertices, Mantid::Kernel::Material()));
     // Test eficient constructor
-    TS_ASSERT_THROWS_NOTHING(auto obj2 = MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
+    TS_ASSERT_THROWS_NOTHING(MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
 
   }
 
@@ -317,7 +317,7 @@ public:
   void testTooManyVertices() {
     auto tooManyVertices = std::vector<V3D>(70000);
     auto triangles = std::vector<uint16_t>(1000);
-    TS_ASSERT_THROWS_ANYTHING(auto obj = MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
+    TS_ASSERT_THROWS_ANYTHING(MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
   }
 
   void testMaterial() {
@@ -349,49 +349,23 @@ public:
     auto testMaterial = Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
 
     // Test material through flexible constructor
-    auto obj1 = MeshObject(triangles, vertices, testMaterial);
+    auto obj1 = std::make_unique<MeshObject>(triangles, vertices, testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-      obj1.material().numberDensity(), 1e-12);
+      obj1->material().numberDensity(), 1e-12);
     // Test material through efficient constructor
-    auto obj2 = MeshObject(std::move(triangles), std::move(vertices), testMaterial);
+    auto obj2 = std::make_unique<MeshObject>(std::move(triangles), std::move(vertices), testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-      obj2.material().numberDensity(), 1e-12);
+      obj2->material().numberDensity(), 1e-12);
   }
 
-  void testCopyConstructorGivesObjectWithSameAttributes() {
-    auto original_ptr = createCube(1.0);
-    auto &original = dynamic_cast<MeshObject &>(*original_ptr);
-    TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
-        original.getGeometryHandler()));
-
-    MeshObject copy(original);
-    // The copy should be a primitive object with a CacheGeometryHandler
-
-    TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
-        copy.getGeometryHandler()));
-    TS_ASSERT_EQUALS(copy.getName(), original.getName());
-    TS_ASSERT_EQUALS(copy.numberOfVertices(), original.numberOfVertices());
-    TS_ASSERT_EQUALS(copy.numberOfTriangles(), original.numberOfTriangles());
-  }
-
-  void testAssignmentOperatorGivesObjectWithSameAttributes() {
-    auto original_ptr = createCube(1.0);
-    auto &original = dynamic_cast<MeshObject &>(*original_ptr);
-    int objType(-1);
-    double radius(-1.0), height(-1.0);
-    std::vector<V3D> pts;
-    original.GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
-        original.getGeometryHandler()));
-
-    auto lhs = createOctahedron();
-    *lhs = original; // assign
-    // The copy should be a primitive object with a GluGeometryHandler
-    objType = -1;
-    lhs->GetObjectGeom(objType, pts, radius, height);
-
-    TS_ASSERT(boost::dynamic_pointer_cast<CacheGeometryHandler>(
-        lhs->getGeometryHandler()));
+  void testCloneWithMaterial() {
+    using Mantid::Kernel::Material;
+    auto testMaterial = Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+    auto geom_obj = createOctahedron();
+    TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
+    auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
+      cloned_obj->material().numberDensity(), 1e-12);
   }
 
   void testHasValidShape() {

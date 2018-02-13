@@ -73,9 +73,9 @@ public:
     const Kernel::Material &material);
 
   /// Copy constructor
-  MeshObject(const MeshObject &);
+  MeshObject(const MeshObject &) = delete;
   /// Assignment operator
-  MeshObject &operator=(const MeshObject &);
+  MeshObject &operator=(const MeshObject &) = delete;
   /// Destructor
   virtual ~MeshObject();
   /// Clone
