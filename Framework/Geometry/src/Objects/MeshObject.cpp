@@ -26,20 +26,22 @@ MeshObject::MeshObject() {} // Should never be called
 
                             // Flexible constructor
 MeshObject::MeshObject(const std::vector<uint16_t> &faces,
-  const std::vector<V3D> &vertices)
+  const std::vector<V3D> &vertices,
+  const Kernel::Material &material)
   : m_boundingBox(), m_material(), m_id("MeshObject"),
   m_triangles(faces), m_vertices(vertices) {
 
-  setup();
+  setup(material);
 }
 
 // Efficient constructor
 MeshObject::MeshObject(std::vector<uint16_t> &&faces,
-  std::vector<V3D> &&vertices)
+  std::vector<V3D> &&vertices,
+  const Kernel::Material &material)
   : m_boundingBox(), m_material(), m_id("MeshObject"),
   m_triangles(std::move(faces)), m_vertices(std::move(vertices)) {
 
-  setup();
+  setup(material);
 }
 
 
@@ -70,13 +72,14 @@ MeshObject::~MeshObject() = default;
 
 
 // Do things that need to be done in constructor
-void MeshObject::setup() {
+void MeshObject::setup(const Kernel::Material &material) {
 
   if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
     throw std::invalid_argument("Too many vertices (" +
       std::to_string(m_vertices.size()) +
       "). MeshObject cannot have more than 65535 vertices.");
   }
+  m_material = Mantid::Kernel::make_unique<Material>(material);
   m_handler = boost::make_shared<CacheGeometryHandler>(this);
 }
 
@@ -434,7 +437,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
                                  scaleFactor.Y() * m_vertices[i].Y(),
                                  scaleFactor.Z() * m_vertices[i].Z()));
   }
-  MeshObject scaledObject(m_triangles, scaledVertices);
+  MeshObject scaledObject(m_triangles, scaledVertices, *m_material);
   return scaledObject.solidAngle(observer);
 }
 

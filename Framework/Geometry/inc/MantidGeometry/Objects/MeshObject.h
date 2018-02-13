@@ -65,10 +65,12 @@ class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
   /// Flexible constructor
   MeshObject(const std::vector<uint16_t> &faces,
-    const std::vector<Mantid::Kernel::V3D> &vertices);
+    const std::vector<Mantid::Kernel::V3D> &vertices,
+    const Kernel::Material &material);
   // Efficient constructor
   MeshObject(std::vector<uint16_t> &&faces,
-    std::vector<Mantid::Kernel::V3D> &&vertices);
+    std::vector<Mantid::Kernel::V3D> &&vertices,
+    const Kernel::Material &material);
 
   /// Copy constructor
   MeshObject(const MeshObject &);
@@ -162,7 +164,7 @@ private:
   /// Default constructor - should never be called
   MeshObject();
   // Setup object, called only in constructor
-  void setup();
+  void setup(const Kernel::Material &material);
   /// Get intersections
   void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
                         std::vector<Kernel::V3D> &intersectionPoints,

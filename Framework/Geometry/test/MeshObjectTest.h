@@ -114,7 +114,7 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
 
   // Use efficient constructor
   std::unique_ptr<MeshObject> retVal =
-      std::unique_ptr<MeshObject>(new MeshObject(std::move(triangles), std::move(vertices)));
+      std::unique_ptr<MeshObject>(new MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
   return retVal;
 }
 
@@ -178,7 +178,7 @@ std::unique_ptr<MeshObject> createOctahedron() {
 
   // Use flexible constructor
   std::unique_ptr<MeshObject> retVal =
-      std::unique_ptr<MeshObject>(new MeshObject(triangles, vertices));
+      std::unique_ptr<MeshObject>(new MeshObject(triangles, vertices, Mantid::Kernel::Material()));
   return retVal;
 }
 
@@ -268,7 +268,7 @@ std::unique_ptr<MeshObject> createLShape() {
 
   // Use efficient constructor
   std::unique_ptr<MeshObject> retVal =
-      std::unique_ptr<MeshObject>(new MeshObject(std::move(triangles), std::move(vertices)));
+      std::unique_ptr<MeshObject>(new MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
   return retVal;
 }
 }
@@ -303,9 +303,9 @@ public:
     triangles.push_back(2);
 
     // Test flexible constructor
-    TS_ASSERT_THROWS_NOTHING(auto obj1 = MeshObject(triangles, vertices));
+    TS_ASSERT_THROWS_NOTHING(auto obj1 = MeshObject(triangles, vertices, Mantid::Kernel::Material()));
     // Test eficient constructor
-    TS_ASSERT_THROWS_NOTHING(auto obj2 = MeshObject(std::move(triangles), std::move(vertices)));
+    TS_ASSERT_THROWS_NOTHING(auto obj2 = MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
 
   }
 
@@ -317,7 +317,7 @@ public:
   void testTooManyVertices() {
     auto tooManyVertices = std::vector<V3D>(70000);
     auto triangles = std::vector<uint16_t>(1000);
-    TS_ASSERT_THROWS_ANYTHING(auto obj = MeshObject(triangles, tooManyVertices));
+    TS_ASSERT_THROWS_ANYTHING(auto obj = MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
   }
 
   void testDefaultObjectHasEmptyMaterial() {
