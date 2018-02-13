@@ -86,9 +86,9 @@ void MeshObject::setup(const Kernel::Material &material) {
 /**
  * @param material The new Material that the object is composed from
  */
-void MeshObject::setMaterial(const Kernel::Material &material) {
-  m_material = Mantid::Kernel::make_unique<Material>(material);
-}
+//void MeshObject::setMaterial(const Kernel::Material &material) {
+//  m_material = Mantid::Kernel::make_unique<Material>(material);
+//}
 
 /**
  * @return The Material that the object is composed from

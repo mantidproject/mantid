@@ -320,23 +320,42 @@ public:
     TS_ASSERT_THROWS_ANYTHING(auto obj = MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
   }
 
-  void testDefaultObjectHasEmptyMaterial() {
-    auto obj = createOctahedron();
-
-    TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
-                     obj->material().numberDensity(), 1e-12);
-  }
-
-  void testObjectSetMaterialReplacesExisting() {
+  void testMaterial() {
     using Mantid::Kernel::Material;
-    auto obj = createOctahedron();
+    std::vector<V3D> vertices;
+    vertices.push_back(V3D(0, 0, 0));
+    vertices.push_back(V3D(1, 0, 0));
+    vertices.push_back(V3D(0, 1, 0));
+    vertices.push_back(V3D(0, 0, 1));
 
-    TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
-                     obj->material().numberDensity(), 1e-12);
-    obj->setMaterial(
-        Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0));
+    std::vector<uint16_t> triangles;
+    // face
+    triangles.push_back(1);
+    triangles.push_back(2);
+    triangles.push_back(3);
+    // face
+    triangles.push_back(2);
+    triangles.push_back(1);
+    triangles.push_back(0);
+    // face
+    triangles.push_back(3);
+    triangles.push_back(0);
+    triangles.push_back(1);
+    // face
+    triangles.push_back(0);
+    triangles.push_back(3);
+    triangles.push_back(2);
+
+    auto testMaterial = Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+
+    // Test material through flexible constructor
+    auto obj1 = MeshObject(triangles, vertices, testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-                     obj->material().numberDensity(), 1e-12);
+      obj1.material().numberDensity(), 1e-12);
+    // Test material through efficient constructor
+    auto obj2 = MeshObject(std::move(triangles), std::move(vertices), testMaterial);
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
+      obj2.material().numberDensity(), 1e-12);
   }
 
   void testCopyConstructorGivesObjectWithSameAttributes() {

@@ -80,14 +80,11 @@ public:
   virtual ~MeshObject();
   /// Clone
   IObject *clone() const override {
-    if (m_vertices.size() > 0)
-      return new MeshObject(*this);
-    else {
-      throw("Unintialised MeshObject cannot be copied");
-    }
+    return new MeshObject(m_triangles, m_vertices, *m_material);
   }
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
-    auto obj = new MeshObject(*this); obj->setMaterial(material); return obj;
+    return new MeshObject(m_triangles, m_vertices, material);
+    //auto obj = new MeshObject(*this); obj->setMaterial(material); return obj;
   }
 
   const std::string &id() const override { return m_id; }
@@ -158,7 +155,7 @@ public:
   void updateGeometryHandler();
 
   // Not yet removed
-  void setMaterial(const Kernel::Material &material);
+  //void setMaterial(const Kernel::Material &material);
 
 private:
   /// Default constructor - should never be called
