@@ -98,7 +98,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
 
         # Evaluate it up to a defined point
-        reference_file_name = "SANS2D_ws_diagnostic_referance.nxs"
+        reference_file_name = "SANS2D_ws_diagnostic_reference.nxs"
         self._compare_workspace(output_workspaces[0], reference_file_name)
 
     def test_that_produces_correct_workspace_multiperiod_LARMOR(self):
