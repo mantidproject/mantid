@@ -151,7 +151,7 @@ If only a subset of the data from the table is required, or you're working with 
 .. code-block:: python
 
     df = pd.DataFrame()
-    for col in tableWS.columnNames():
+    for col in tableWS.getColumnNames():
         df[col] = tableWS[col]
 
 Working with Table Workspaces in C++
@@ -210,23 +210,27 @@ Table rows
 Cells with the same index form a row. TableRow class represents a row.
 Use getRow(int) or getFirstRow() to access existing rows. For example:
 
-| ``std::string key;``
-| ``double value;``
-| ``TableRow row = table->getFirstRow();``
-| ``do``
-| ``{``
-| ``  row >> key >> value;``
-| ``  std::cout << "key=" << key << " value=" << value << std::endl;``
-| ``}``
-| ``while(row.next());``
+.. code-block:: c
+ 
+    std::string key;
+    double value;
+    TableRow row = table->getFirstRow();
+    do
+    {
+      row >> key >> value;
+      std::cout << "key=" << key << " value=" << value << std::endl;
+    }
+    while(row.next());
 
 TableRow can also be use for writing into a table:
 
-| ``for(int i=0; i < n; ++i)``
-| ``{``
-| ``  TableRow row = table->appendRow();``
-| ``  row << keys[i] << values[i];``
-| ``}``
+.. code-block:: c
+
+    for(int i=0; i < n; ++i)
+    {
+        TableRow row = table->appendRow();
+        row << keys[i] << values[i];
+    }
 
 Defining new column types
 #########################
