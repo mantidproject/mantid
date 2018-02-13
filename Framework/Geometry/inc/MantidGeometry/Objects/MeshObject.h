@@ -84,7 +84,6 @@ public:
   }
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
     return new MeshObject(m_triangles, m_vertices, material);
-    //auto obj = new MeshObject(*this); obj->setMaterial(material); return obj;
   }
 
   const std::string &id() const override { return m_id; }
@@ -153,9 +152,6 @@ public:
   int *getTriangles() const;
 
   void updateGeometryHandler();
-
-  // Not yet removed
-  //void setMaterial(const Kernel::Material &material);
 
 private:
   /// Default constructor - should never be called
