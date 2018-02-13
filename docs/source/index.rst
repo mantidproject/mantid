@@ -29,6 +29,8 @@ Mantid Documentation
    api/index
    plotting/index
    release/index
+   training/index
+   references
 
 
 This is the documentation for Mantid |release|.
@@ -57,3 +59,4 @@ This is the documentation for Mantid |release|.
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
 * :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`
 * :ref:`release_notes`
+* :ref:`references`
