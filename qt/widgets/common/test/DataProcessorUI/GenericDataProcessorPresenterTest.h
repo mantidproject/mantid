@@ -681,7 +681,7 @@ public:
         "ReflectometryReductionOneAuto", "Stitch1DMany"};
 
     // Expect that the autocompletion hints are populated
-    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7, _))
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7))
         .Times(Exactly(1));
     // Now accept the views
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
