@@ -56,6 +56,15 @@ def _normwslist(workspaces):
     return [_normws(ws) for ws in unnormWss]
 
 
+def _plottingtime():
+    """Return a string presenting the plotting time."""
+    return time.strftime('%d.%m.%Y %H:%M:%S')
+
+def _points(edges):
+    """Return bin centers."""
+    return (edges[:-1] + edges[1:]) / 2
+
+
 def _profiletitle(workspaces, scan, units, cuts, widths, figure):
     """Add title to line profile figure."""
     workspaces = _normwslist(workspaces)
@@ -66,15 +75,13 @@ def _profiletitle(workspaces, scan, units, cuts, widths, figure):
     ws = workspaces[0]
     logs = SampleLogs(ws)
     if len(cuts) == 1:
-        title = (logs.instrument.name + ' ' + time.strftime('%x') + ' ' + time.strftime('%X') + '\n'
+        title = (logs.instrument.name + ' ' + _plottingtime() + '\n'
                  + scan + ' = {:0.2f} +- {:0.2f}'.format(cuts[0], widths[0]) + ' ' + units)
     elif len(workspaces) == 1:
         T = numpy.mean(logs.sample.temperature)
-        title = (str(ws) + ' ' + logs.instrument.name + ' \\#{:06d}'.format(logs.run_number) + '\n'
-                 + time.strftime('%x') + ' ' + time.strftime('%X') + '\n'
-                 + 'T = {:0.1f} K Ei = {:0.2f} meV'.format(T, logs.Ei))
+        title = _singledatatitle(ws)
     else:
-        title = logs.instrument.name + ' ' + time.strftime('%x') + ' ' + time.strftime('%X')
+        title = logs.instrument.name + ' ' + _plottingtime()
     figure.suptitle(title)
 
 
@@ -83,10 +90,22 @@ def _profileytitle(axes):
     axes.set_ylabel('$S(Q,E)$')
 
 
-def _points(edges):
-    """Return bin centers."""
-    return (edges[:-1] + edges[1:]) / 2
-    
+def _singledatatitle(workspace):
+    """Return title for a single data dataset."""
+    workspace = _normws(workspace)
+    logs = SampleLogs(workspace)
+    T = numpy.mean(logs.sample.temperature)
+    title = (str(workspace) + ' ' + logs.instrument.name + ' \\#{:06d}'.format(logs.run_number) + '\n'
+             + _plottingtime() + '\n'
+             + 'T = {:0.1f} K Ei = {:0.2f} meV'.format(T, logs.Ei))
+    return title
+
+def _SofQWtitle(workspace, figure):
+    """Add title to SofQW figure."""
+    workspace = _normws(workspace)
+    title = _singledatatitle(workspace)
+    figure.suptitle(title)
+
 
 def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf, vertMax=numpy.inf):
     """Return slicing for a 2D numpy array limited by given min and max values."""
@@ -144,7 +163,7 @@ def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l')
                     if markerIndex == len(markers):
                         markerIndex = 0
                 label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
-                axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label)
+                axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
                 DeleteWorkspace(line)
     _profileytitle(axes)
     return figure, axes
@@ -156,6 +175,7 @@ def plotconstE(workspaces, E, dE, style='l'):
     _profiletitle(workspaces, 'E', 'meV', E, dE, figure)
     axes.legend()
     cMin, cMax = _globalnanminmax(workspaces)
+    axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
     axes.set_ylim(ymin=0., ymax=cMax / 100.)
     xMin, xMax = axes.get_xlim()
     print('Auto Q-range: {}...{} \xc5-1'.format(xMin, xMax))
@@ -168,28 +188,44 @@ def plotconstQ(workspaces, Q, dQ, style='l'):
     _profiletitle(workspaces, 'Q', '\\AA', Q, dQ, figure)
     axes.legend()
     axes.set_xlim(xmin=0.)
+    axes.set_xlabel('Energy (meV)')
     xMin, xMax = axes.get_xlim()
     print('Auto E-range: {}...{} meV'.format(xMin, xMax))
     return figure, axes
 
 
-def plotSofQW(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf, vertMax=numpy.inf, cMin=-numpy.inf, cMax=numpy.inf):
+def plotSofQW(workspace, QMin=None, QMax=None, EMin=None, EMax=None, cMin=0, cMax=None):
     """Plot a 2D plot with given axis limits and return the plotting layer."""
     # Accept both workspace names and actual workspaces.
     workspace = _normws(workspace)
     figure, axes = subplots()
-    cMin = cMin if cMin != -numpy.inf else None
-    cMax = cMax if cMax != numpy.inf else None
-    contours = axes.pcolor(workspace, vmin = cMin, vmax = cMax)
-    figure.colorbar(contours)
-    if horMin != -numpy.inf:
-        axes.set_xlim(left=horMin)
-    if horMax != numpy.inf:
-        axes.set_xlim(right=horMax)
-    if vertMin != -numpy.inf:
-        axes.set_ylim(bottom=vertMin)
-    if vertMax != numpy.inf:
-        axes.set_ylim(top=vertMax)
+    if QMin is None:
+        QMin = 0.
+    if QMax is None:
+        dummy, QMax = validQ(workspace)
+    if EMin is None:
+        EMin = -10.
+    if EMax is None:
+        EAxis = workspace.getAxis(1).extractValues()
+        EMax = numpy.amax(EAxis)
+    if cMin is None:
+        cMin = 0.
+    if cMax is None:
+        vertMax = EMax if EMax is not None else numpy.inf
+        dummy, cMax = nanminmax(workspace, horMin=QMin, horMax=QMax, vertMin=EMin, vertMax=vertMax)
+        cMax /= 100.
+    print('Plotting intensity range: {}...{}'.format(cMin, cMax))
+    contours = axes.pcolor(workspace, vmin=cMin, vmax=cMax, distribution=True)
+    colorbar = figure.colorbar(contours)
+    colorbar.set_label('$S(Q,E)$ (arb. units)')
+    axes.set_xlim(left=QMin)
+    axes.set_xlim(right=QMax)
+    axes.set_ylim(bottom=EMin)
+    if EMax is not None:
+        axes.set_ylim(top=EMax)
+    axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
+    axes.set_ylabel('Energy (meV)')
+    _SofQWtitle(workspace, figure)
     return figure, axes
 
 
@@ -198,13 +234,13 @@ def subplots(**kwargs):
     return pyplot.subplots(subplot_kw=mantidsubplotsetup(), **kwargs)
 
 
-def validQ(workspace, energyTransfer=0.0):
+def validQ(workspace, E=0.0):
     """Return a :math:`Q` range at given energy transfer where :math:`S(Q,E)` is defined."""
     workspace = _normws(workspace)
     vertBins = workspace.getAxis(1).extractValues()
     if len(vertBins) > workspace.getNumberHistograms:
         vertBins = _points(vertBins)
-    elasticIndex = numpy.argmin(numpy.abs(vertBins - energyTransfer))
+    elasticIndex = numpy.argmin(numpy.abs(vertBins - E))
     ys = workspace.readY(elasticIndex)
     validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
     xs = workspace.readX(elasticIndex)

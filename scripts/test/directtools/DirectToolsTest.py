@@ -118,7 +118,7 @@ class DirectTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
 
     def test_plotSofQW(self):
-        ws = CreateSampleWorkspace(NumBanks=1)
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {'workspace': 'ws'}
         testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
         kwargs = {'workspace': ws}
