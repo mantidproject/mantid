@@ -1083,6 +1083,28 @@ public:
     }
   }
 
+  void test_calcValidType() {
+    size_t sDim = 18;
+    size_t dDim = 8;
+    Track testRay;
+    int dummy;
+    for (size_t i = 0; i < sDim*sDim*sDim; ++i) {
+      testRay = create_test_ray(i, sDim, dDim);
+      dummy = octahedron->calcValidType(testRay.startPoint(),testRay.direction());
+    }
+  }
+
+  void test_interceptSurface() {
+    size_t sDim = 18;
+    size_t dDim = 8;
+    Track testRay;
+    int dummy;
+    for (size_t i = 0; i < sDim*sDim*sDim; ++i) {
+      testRay = create_test_ray(i, sDim, dDim);
+      dummy = octahedron->interceptSurface(testRay);
+    }
+  }
+
   void test_generatePointInside_Convex_Solid() {
     const size_t maxAttempts(500);
     V3D dummy;
@@ -1119,6 +1141,16 @@ public:
     index /= dimension;
     output.setZ((2.0*(index%dimension)) / (dimension - 1) - 1.0);
     return output;
+  }
+
+  Track create_test_ray(size_t index, size_t startDim, size_t dirDim) {
+    // create a test ray 
+    const V3D shift(0.01, 1.0 / 77, 1.0 / 117);
+    V3D startPoint = create_test_point(index, startDim);
+    V3D direction = create_test_point(index, dirDim);
+    direction += shift; // shift to avoid divide by zero error
+    direction.normalize();
+    return Track(startPoint, direction);
   }
 
 private:
