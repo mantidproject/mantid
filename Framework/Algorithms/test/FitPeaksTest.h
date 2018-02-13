@@ -58,7 +58,7 @@ public:
   /**
    * @brief test_multiPeaksMultiSpectra
    */
-  void Bad_Constraint_test_multiPeaksMultiSpectra() {
+  void test_multiPeaksMultiSpectra() {
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -85,6 +85,7 @@ public:
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
     fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS");
+    fitpeaks.setProperty("ConstrainPeakPositions", false);
 
     fitpeaks.execute();
 

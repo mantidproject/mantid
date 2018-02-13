@@ -226,12 +226,15 @@ void FitPeaks::init() {
                   "Minimum peak height such that all the fitted peaks with "
                   "height under this value will be excluded.");
 
+  declareProperty(
+      "ConstrainPeakPositions", true,
+      "If true peak position will be constrained by estimated positions "
+      "(highest Y value position) and "
+      "the peak width either estimted by observation or calculate.");
+
   std::string helpgrp("Additional Information");
 
   setPropertyGroup("EventNumberWorkspace", helpgrp);
-
-  //  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakRanges"),
-  //                  "List of double for each peak's range.");
 
   // additional output for reviewing
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
@@ -308,14 +311,11 @@ void FitPeaks::processInputs() {
       m_stopWorkspaceIndex = m_inputMatrixWS->getNumberHistograms() - 1;
   }
 
-  g_log.notice() << "[DB] Process inputs [2] Start/Stop ws index = "
-                 << m_startWorkspaceIndex << ", " << m_stopWorkspaceIndex
-                 << "\n";
-
   // optimizer, cost function and fitting scheme
   m_minimizer = getPropertyValue("Minimizer");
   m_costFunction = getPropertyValue("CostFunction");
   fit_peaks_from_right_ = getProperty("FitFromRight");
+  constrain_peaks_position_ = getProperty("ConstrainPeakPositions");
 
   // Peak centers, tolerance and fitting range
   ProcessInputPeakCenters();
@@ -329,14 +329,14 @@ void FitPeaks::processInputs() {
   else if (m_peakDSpacePercentage < 0)
     throw std::invalid_argument(
         "Peak D-spacing percentage cannot be negative!");
-  g_log.notice() << "[DB] DeltaD/D = " << m_peakDSpacePercentage << "\n";
+  g_log.debug() << "DeltaD/D = " << m_peakDSpacePercentage << "\n";
 
   // set up background
   m_highBackground = getProperty("HighBackground");
   m_bkgdSimga = getProperty("FindBackgroundSigma");
 
   // about peak width and other peak parameter estimating method
-  if (is_d_space_ && m_peakDSpacePercentage)
+  if (is_d_space_ && m_peakDSpacePercentage > 0)
     peak_width_estimate_approach_ = EstimatePeakWidth::InstrumentResolution;
   else if (m_peakFunction->name().compare("Gaussian") == 0)
     peak_width_estimate_approach_ = EstimatePeakWidth::Observation;
@@ -1604,35 +1604,6 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
                  << ", width = " << peak_function->fwhm() << " in range "
                  << xmin << ", " << xmax << "\n";
 
-  /*
-  Name: Function, Value:
-  name=Gaussian,Height=245.849,PeakCentre=1.5368,Sigma=0.0104419,constraints=(1.5245<PeakCentre<1.5409,50<Height);name=Quadratic,A0=0,A1=0,A2=0,
-  Default?: No, Direction: InOut
-  Name: InputWorkspace, Value: ascws, Default?: No, Direction: Input
-  Name: IgnoreInvalidData, Value: 0, Default?: Yes, Direction: Input
-  Name: DomainType, Value: Simple, Default?: Yes, Direction: Input
-  Name: EvaluationType, Value: CentrePoint, Default?: Yes, Direction: Input
-  Name: PeakRadius, Value: 0, Default?: Yes, Direction: Input
-  Name: Ties, Value: , Default?: Yes, Direction: Input
-  Name: Constraints, Value: , Default?: Yes, Direction: Input
-  Name: MaxIterations, Value: 50, Default?: No, Direction: Input
-  Name: OutputStatus, Value: , Default?: Yes, Direction: Output
-  Name: OutputChi2overDoF, Value: 0, Default?: Yes, Direction: Output
-  Name: Minimizer, Value: Levenberg-Marquardt, Default?: Yes, Direction: Input
-  Name: CostFunction, Value: Least squares, Default?: Yes, Direction: InOut
-  Name: CreateOutput, Value: 0, Default?: Yes, Direction: Input
-  Name: Output, Value: ascws06, Default?: No, Direction: Input
-  Name: CalcErrors, Value: 0, Default?: Yes, Direction: Input
-  Name: OutputCompositeMembers, Value: 1, Default?: No, Direction: Input
-  Name: ConvolveMembers, Value: 0, Default?: Yes, Direction: Input
-  Name: OutputParametersOnly, Value: 0, Default?: Yes, Direction: Input
-  Name: WorkspaceIndex, Value: 0, Default?: Yes, Direction: Input
-  Name: StartX, Value: 1.440799999999905, Default?: No, Direction: Input
-  Name: EndX, Value: 1.5855999999998891, Default?: No, Direction: Input
-  Name: Normalise, Value: 0, Default?: Yes, Direction: Input
-  Name: Exclude, Value: , Default?: Yes, Direction: Input
-
-   */
   for (size_t i = 0; i < dataws->readY(wsindex).size(); ++i)
     g_log.notice() << dataws->readX(wsindex)[i] << "\t\t"
                    << dataws->readY(wsindex)[i] << "\t\t"
@@ -1648,14 +1619,19 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
   fit->setProperty("Minimizer", "Levenberg-Marquardt");
   fit->setProperty("CostFunction", "Least squares");
 
-  double peak_center = peak_function->centre();
-  double peak_width = peak_function->fwhm();
-  std::stringstream peak_center_constraint;
-  peak_center_constraint << (peak_center - 0.5 * peak_width) << " < f0."
-                         << peak_function->getCentreParameterName() << " < "
-                         << (peak_center + 0.5 * peak_width);
+  if (constrain_peaks_position_) {
+    // set up a constraint on peak position
+    double peak_center = peak_function->centre();
+    double peak_width = peak_function->fwhm();
+    std::stringstream peak_center_constraint;
+    peak_center_constraint << (peak_center - 0.5 * peak_width) << " < f0."
+                           << peak_function->getCentreParameterName() << " < "
+                           << (peak_center + 0.5 * peak_width);
 
-  fit->setProperty("Constraints", peak_center_constraint.str());
+    // set up a constraint on peak height
+
+    fit->setProperty("Constraints", peak_center_constraint.str());
+  }
 
   // Execute fit and get result of fitting background
   // m_sstream << "FitSingleDomain: " << fit->asString() << ".\n";
@@ -2618,6 +2594,34 @@ void FitPeaks::writeFitResult(size_t wi,
   }
 
   return;
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * @brief FitPeaks::getPeakHeightParameterName
+ * @param peak_function
+ * @return
+ */
+std::string FitPeaks::GetPeakHeightParameterName(
+    API::IPeakFunction_const_sptr peak_function) {
+  std::string height_name("");
+
+  std::vector<std::string> peak_parameters = peak_function->getParameterNames();
+  for (std::vector<std::string>::iterator it = peak_parameters.begin();
+       it != peak_parameters.end(); ++it) {
+    if ((*it).compare("Height") == 0) {
+      height_name = "Height";
+      break;
+    } else if ((*it).compare("I") == 0) {
+      height_name = "I";
+      break;
+    } else if ((*it).compare("Intensity") == 0) {
+      height_name = "Intensity";
+      break;
+    }
+  }
+
+  return height_name;
 }
 
 DECLARE_ALGORITHM(FitPeaks)

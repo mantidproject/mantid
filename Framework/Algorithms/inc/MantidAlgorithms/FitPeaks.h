@@ -182,6 +182,10 @@ private:
   /// Get index of value X in a spectrum's X histogram
   size_t GetXIndex(size_t wi, double x);
 
+  /// Get the parameter name for peak height (I or height or etc)
+  std::string
+  GetPeakHeightParameterName(API::IPeakFunction_const_sptr peak_function);
+
   /// Set the workspaces and etc to output properties
   void ProcessOutputs();
 
@@ -194,8 +198,7 @@ private:
   //  /// set peak positions tolerance
   //  void setPeakPosTolerance(const std::vector<double> &peak_pos_tolerances);
 
-  //------- Workspaces
-  //-------------------------------------------------------------
+  //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
   API::MatrixWorkspace_sptr m_inputMatrixWS;
   bool is_d_space_;
@@ -254,11 +257,8 @@ private:
 
   /// Flag for observing peak width: there are 3 states (1) no estimation (2)
   /// from 'observation' (3) calculated from instrument resolution
-  bool estimate_peak_width_; // if true, estimate peak width.  otherwise, use
-                             // the previously calculated value
-  bool observe_peak_width_;  // if true, 'observe' peak width; otherwise,
-                             // calculate peak width from instrument resolution
   EstimatePeakWidth peak_width_estimate_approach_;
+  bool constrain_peaks_position_;
 
   /// peak windows
   std::vector<std::vector<double>> m_peakWindowVector;
