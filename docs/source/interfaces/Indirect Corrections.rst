@@ -174,11 +174,11 @@ Background
 The main correction to be applied to neutron scattering data is that for
 absorption both in the sample and its container, when present. For flat plate
 geometry, the corrections can be analytical and have been discussed for example
-by Carlile [1]. The situation for cylindrical geometry is more complex and
+by Carlile :cite:`carlile1974`. The situation for cylindrical geometry is more complex and
 requires numerical integration. These techniques are well known and used in
-liquid and amorphous diffraction, and are described in the ATLAS manual [2].
+liquid and amorphous diffraction, and are described in the ATLAS manual :cite:`soper1989`.
 
-The absorption corrections use the formulism of Paalman and Pings [3] and
+The absorption corrections use the formulism of Paalman and Pings :cite:`paalman1962` and
 involve the attenuation factors :math:`A_{i,j}` where :math:`i` refers to
 scattering and :math:`j` attenuation. For example, :math:`A_{s,sc}` is the
 attenuation factor for scattering in the sample and attenuation in the sample
@@ -189,11 +189,11 @@ that from the sample plus container is :math:`I_{sc} = \Sigma_{s}A_{s,sc} +
 \Sigma_{c}A_{c,sc}`, thus :math:`\Sigma_{s} = (I_{sc} - I_{c}A_{c,sc}/A_{c,c}) /
 A_{s,sc}`.
 
-References:
+.. rubric:: References
 
-1. C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
-2. A K Soper, W S Howells & A C Hannon, `RAL Report RAL-89-046 (1989) <http://wwwisis2.isis.rl.ac.uk/Disordered/Manuals/ATLAS/ATLAS%20manual%20v1.0%20Intro.pdf>`_
-3. H H Paalman & C J Pings, `J Appl Phys 33 2635 (1962) <http://dx.doi.org/10.1063/1.1729034>`_
+.. bibliography:: ../references.bib
+   :filter: docname in docnames
+
 
 Apply Paalman Pings
 -------------------
@@ -391,33 +391,33 @@ Container Subtraction
 
 .. interface:: Corrections
   :widget: tabContainerSubtraction
-  
+
 The Container Subtraction Tab is used to remove the containers contribution to a run.
 
-Once run the corrected output and can correction is shown in the preview plot, the Spectrum 
-spin box can be used to scroll through each spectrum. Note that when this plot shows the 
-result of a calculation the X axis is always in wavelength, however when data is initially 
+Once run the corrected output and can correction is shown in the preview plot, the Spectrum
+spin box can be used to scroll through each spectrum. Note that when this plot shows the
+result of a calculation the X axis is always in wavelength, however when data is initially
 selected the X axis unit matches that of the sample workspace.
 
 The input and container workspaces will be converted to wavelength (using
 :ref:`ConvertUnits <algm-ConvertUnits>`) if they do not already have wavelength
 as their X unit.
- 
+
 Options
 ~~~~~~~
 
 Input Sample
   Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the sample.
-  
+
 Input Container
   Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the container.
-  
+
 Scale Can by Factor
   Allows the container intensity to be scaled by a given scale factor before being used in the corrections calculation.
 
 Plot Output
   Gives the option to create either a spectra or contour plot (or both) of the corrected workspace.
-  
+
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
 

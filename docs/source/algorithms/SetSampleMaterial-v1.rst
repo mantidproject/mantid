@@ -102,17 +102,12 @@ The low-:math:`Q` limit of :math:`S(Q)` is :math:`-L` where :math:`L` is called 
 .. math:: bSquaredAverage = <b_{tot}^2> = \frac{1}{N_{atoms}}\sum_{i}b_{tot,i}^2
 .. math:: L = \frac{<b_{tot}^2>-<b_{coh}>^2}{<b_{coh}>^2}
 
-References
-----------
+.. rubric:: References
 
-The data used in this algorithm comes from the following paper.
+The data used in this algorithm comes from :cite:`sears1992` and :cite:`howard1987`.
 
-#. Varley F. Sears, *Neutron scattering lengths and cross sections*, Neutron News **3:3** (1992) 26
-   `doi: 10.1080/10448639208218770 <http://dx.doi.org/10.1080/10448639208218770>`_
-#. J. A. K. Howard, O. Johnson, A. J. Schultz and A. M. Stringer, *Determination of the neutron
-   absorption cross section for hydrogen as a function of wavelength with a pulsed neutron
-   source*, J. Appl. Cryst. (1987). 20, 120-122
-   `doi: 10.1107/S0021889887087028 <http://dx.doi.org/10.1107/S0021889887087028>`_
+.. bibliography:: ../references.bib
+   :filter: docname in docnames
 
 .. categories::
 

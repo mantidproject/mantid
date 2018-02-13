@@ -43,7 +43,7 @@ Manage Directories
 
 Plot Current Preview
   Takes the data currently plotted in the preview plot and puts it in a separate external plot
-  
+
 
 Elwin
 -----
@@ -99,7 +99,7 @@ Plot Result
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
-  
+
 MSD Fit
 -------
 
@@ -176,7 +176,7 @@ Plot Result
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
-  
+
 Tiled Plot
   Produces a tiled plot of the output workspaces generated.
 
@@ -186,7 +186,7 @@ Monte Carlo Error Calculation - Number Of Iterations
 
 A note on Binning
 ~~~~~~~~~~~~~~~~~
-  
+
 The bin width is determined by the binning range and the sample binning factor. The number of bins is automatically calculated based on the **SampleBinning** specified. The width is the determined by the width of the range divided by the number of bins.
 
 The calculated binning parameters are displayed alongside the binning options:
@@ -327,17 +327,17 @@ Options
 -  Next to the 'Fit Parameter' menu, will be either a 'Width' or 'EISF' menu, depending on
 -  which was selected. This menu can be used to select the specific width/EISF parameter to be fit.
 
-  
+
  .. _qens-fitting-features:
-  
+
 QENS Fitting Interfaces Features
 --------------------------------
 
-There are four QENS fitting interfaces:  
+There are four QENS fitting interfaces:
 
 * MSD Fit
-* I(Q,t) Fit, 
-* Conv Fit 
+* I(Q,t) Fit,
+* Conv Fit
 * F(Q)
 
 These fitting interfaces share common features, with a few unique options in each.
@@ -431,7 +431,7 @@ fit spectra (if multiple data-sets have been used, a separate plot will be produ
 
 Clicking the 'Save Result' button will save the result of the fit to your default save location.
 
-  
+
 Bayesian (FABADA minimizer)
 ---------------------------
 
@@ -463,7 +463,7 @@ Convergence Criteria
 Acceptance Rate
   The desired percentage acceptance of new parameters (see *JumpAcceptanceRate*
   in :ref:`FABADA` documentation)
-  
+
 .. _sequential-fitting-section:
 
 Sequential Fitting
@@ -535,22 +535,22 @@ and *Use Delta Function* options in the interface.
 
       - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffRotDiscreteCircle)
 
-        - :ref:`Inelastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>` 
+        - :ref:`Inelastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>`
 
         - Temperature Correction
-		
+
       - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffSphere)
 
         - :ref:`Elastic Diff Sphere <func-DiffSphere>`
 
         - Temperature Correction
-		
+
       - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffRotDiscreteCircle)
 
         - :ref:`Elastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>`
 
         - Temperature Correction
-		
+
       - :ref:`ProductFunction <func-ProductFunction>` (StretchedExpFT)
 
         - :ref:`StretchedExpFT <func-StretchedExpFT>`
@@ -564,7 +564,11 @@ formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
 **References**
 
 1. Peters & Kneller, Journal of Chemical Physics, 139, 165102 (2013)
-2. Yi et al, J Phys Chem B 116, 5028 (2012) 
+2. Yi et al, J Phys Chem B 116, 5028 (2012)
 
+.. rubric:: References
+
+.. bibliography:: ../references.bib
+   :filter: docname in docnames
 
 .. categories:: Interfaces Indirect
