@@ -1063,6 +1063,26 @@ public:
   MeshObjectTestPerformance()
       : rng(200000), octahedron(createOctahedron()), lShape(createLShape()) {}
 
+  void test_isOnSide(){
+    size_t dim = 20;
+    V3D test_pt;
+    bool dummy;
+    for (size_t i = 0; i < dim*dim*dim; ++i) {
+      test_pt = create_test_point(i, dim);
+      dummy = octahedron->isOnSide(test_pt);
+    }
+  }
+
+  void test_isValid() {
+    size_t dim = 20;
+    V3D test_pt;
+    bool dummy;
+    for (size_t i = 0; i < dim*dim*dim; ++i) {
+      test_pt = create_test_point(i, dim);
+      dummy = octahedron->isValid(test_pt);
+    }
+  }
+
   void test_generatePointInside_Convex_Solid() {
     const size_t maxAttempts(500);
     V3D dummy;
@@ -1087,6 +1107,18 @@ public:
       vertexData = octahedron->getVertices();
       triangleData = octahedron->getTriangles();
     }
+  }
+
+  V3D create_test_point(size_t index, size_t dimension) {
+    // Create a test point with coordinates within [-1.0, 1.0]
+    // for applying to octahedron
+    V3D output;
+    output.setX((2.0*(index%dimension)) / (dimension - 1) - 1.0);
+    index /= dimension;
+    output.setY((2.0*(index%dimension)) / (dimension - 1) - 1.0);
+    index /= dimension;
+    output.setZ((2.0*(index%dimension)) / (dimension - 1) - 1.0);
+    return output;
   }
 
 private:
