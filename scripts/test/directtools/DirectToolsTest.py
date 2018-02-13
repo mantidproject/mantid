@@ -1,12 +1,18 @@
 from __future__ import (absolute_import, division, print_function)
 
 import directtools
-from mantid.simpleapi import CreateWorkspace
+from mantid.api import mtd
+from mantid.simpleapi import LoadILLTOF, CreateSampleWorkspace, CreateWorkspace
 import numpy
 import numpy.testing
+import testhelpers
 import unittest
 
 class DirectTest(unittest.TestCase):
+
+    def tearDown(self):
+        mtd.clear()
+
     def test_box2D(self):
         xs = numpy.tile(numpy.array([-1, 0, 2, 4, 5]), (3, 1))
         vertAxis = numpy.array([-2, -1, 0, 1])
@@ -24,6 +30,11 @@ class DirectTest(unittest.TestCase):
         box = directtools.box2D(xs, vertAxis, vertMax=-1)
         expected = numpy.tile(numpy.array([-1, 0, 2, 4, 5]), (1, 1))
         numpy.testing.assert_equal(xs[box], expected)
+
+    def test_mantidsubplotsetup(self):
+        result = directtools.mantidsubplotsetup()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result['projection'], 'mantid')
 
     def test_nanminmax(self):
         xs = numpy.tile(numpy.array([-1, 0, 2, 4, 5]), 3)
@@ -46,6 +57,75 @@ class DirectTest(unittest.TestCase):
         self.assertEqual(cMin, ys[0])
         self.assertEqual(cMax, ys[-5])
 
+    def test_plotconstE(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
+        kwargs = {
+            'workspaces': ws,
+            'E' : 13.,
+            'dE' : 1.5
+        }
+        testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+        kwargs = {
+            'workspaces': [ws, ws],
+            'E' : 13.,
+            'dE' : 1.5,
+            'style' : 'l'
+        }
+        testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+        kwargs = {
+            'workspaces': ws,
+            'E' : [13., 23.],
+            'dE' : 1.5,
+            'style' : 'm'
+        }
+        testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+        kwargs = {
+            'workspaces': ws,
+            'E' : 13.,
+            'dE' : [1.5, 15.],
+            'style' : 'lm'
+        }
+        testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+
+    def test_plotconstQ(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
+        kwargs = {
+            'workspaces': ws,
+            'Q' : 523.,
+            'dQ' : 42.
+        }
+        testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        kwargs = {
+            'workspaces': [ws, ws],
+            'Q' : 523.,
+            'dQ' : 42.,
+            'style' : 'l'
+        }
+        testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        kwargs = {
+            'workspaces': ws,
+            'Q' : [472., 623.],
+            'dQ' : 42.,
+            'style' : 'm'
+        }
+        testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        kwargs = {
+            'workspaces': ws,
+            'Q' : 523.,
+            'dQ' : [17., 2.],
+            'style' : 'ml'
+        }
+        testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+
+    def test_plotSofQW(self):
+        ws = CreateSampleWorkspace(NumBanks=1)
+        kwargs = {'workspace': 'ws'}
+        testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+        kwargs = {'workspace': ws}
+        testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+
+    def test_subplots(self):
+        testhelpers.assertRaisesNothing(self, directtools.subplots)
 
     def test_validQ(self):
         xs = numpy.tile(numpy.array([-1, 0, 2, 4, 5]), 3)
@@ -61,6 +141,24 @@ class DirectTest(unittest.TestCase):
         qMin, qMax = directtools.validQ(ws, 0)
         self.assertEqual(qMin, xs[1])
         self.assertEqual(qMax, xs[-2])
+
+    def test_wsreport(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
+        kwargs = {'workspace': ws}
+        testhelpers.assertRaisesNothing(self, directtools.wsreport, **kwargs)
+
+
+    def test_SampleLogs(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1)
+        ws.mutableRun().addProperty('a', 7, True)
+        ws.mutableRun().addProperty('b.c', 13, True)
+        logs = directtools.SampleLogs(ws)
+        self.assertTrue(hasattr(logs, 'a'))
+        self.assertEqual(logs.a, 7)
+        self.assertTrue(hasattr(logs, 'b'))
+        self.assertTrue(hasattr(logs.b, 'c'))
+        self.assertEqual(logs.b.c, 13)
+
 
 if __name__ == '__main__':
     unittest.main()

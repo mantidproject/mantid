@@ -10,7 +10,7 @@ import time
 
 
 def _globalnanminmax(workspaces):
-    """Return a suitable maximum intensity for y limits."""
+    """Return global minimum and maximum of the given workspaces."""
     workspaces = _normwslist(workspaces)
     globalMin = numpy.inf
     globalMax = -numpy.inf
@@ -23,8 +23,24 @@ def _globalnanminmax(workspaces):
     return globalMin, globalMax
 
 
+def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
+    """Return a line label for a line profile."""
+    ws = _normws(ws)
+    logs = SampleLogs(ws)
+    wsLabel = ''
+    if not singleWS:
+        logs = SampleLogs(ws)
+        T = numpy.mean(logs.sample.temperature)
+        wsLabel = '\\#{:06d} T = {:0.1f} K Ei = {:0.2f} meV'.format(logs.run_number, T, logs.Ei)
+    cutLabel = ''
+    if not singleCut or not singleWidth:
+        cutLabel = quantity + ' = {:0.2f} +- {:1.2f}'.format(cut, width) + units
+    labels = list()
+    return wsLabel + ' ' + cutLabel
+
+
 def _normws(workspace):
-    """Return a reference to workspace."""
+    """Retrieve workspace from mtd if it is a string, otherwise return as-is."""
     name = str(workspace)
     if name:
         workspace = mtd[name]
@@ -32,44 +48,12 @@ def _normws(workspace):
 
 
 def _normwslist(workspaces):
-    """Return a list of references to workspaces."""
+    """Retrieve workspaces from mtd if they are string, otherwise return as-is."""
     ws = list()
     if not isinstance(workspaces, collections.Iterable) or isinstance(workspaces, str):
         workspaces = [workspaces]
     unnormWss = workspaces
     return [_normws(ws) for ws in unnormWss]
-
-
-def _profilelegend(workspaces, scan, units, cuts, widths, axes):
-    """Set line labels and add a legend to line profile axes."""
-    workspaces = _normwslist(workspaces)
-    if not isinstance(cuts, collections.Iterable):
-        cuts = [cuts]
-    if not isinstance(widths, collections.Iterable):
-        widths = [widths] * len(cuts)
-    wsLabels = list()
-    if len(workspaces) > 1:
-        for ws in workspaces:
-            logs = SampleLogs(ws)
-            T = numpy.mean(logs.sample.temperature)
-            wsLabels.append('\\#{:06d} T = {:0.1f} K Ei = {:0.2f} meV'.format(logs.run_number, T, logs.Ei))
-    cutLabels = list()
-    if len(cuts) > 1:
-        for cut, width in zip(cuts, widths):
-            cutLabels.append(scan + ' = {:0.2f} +- {:1.2f}'.format(cut, width) + units)
-    labels = list()
-    if len(workspaces) == 1:
-        labels = cutLabels
-    elif len(cuts) == 1:
-        labels = wsLabels
-    else:
-        for ws in wsLabels:
-            for cut in cutLabels:
-                labels.append(ws + ' ' + cut)
-    lines = axes.get_lines()
-    for line, label in zip(lines, labels):
-        line.set_label(label)
-    axes.legend()
 
 
 def _profiletitle(workspaces, scan, units, cuts, widths, figure):
@@ -100,12 +84,12 @@ def _profileytitle(axes):
 
 
 def _points(edges):
-    """Convert bin edges to points."""
+    """Return bin centers."""
     return (edges[:-1] + edges[1:]) / 2
     
 
 def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf, vertMax=numpy.inf):
-    """Return slicing for a numpy array limited by given min and max values."""
+    """Return slicing for a 2D numpy array limited by given min and max values."""
     if len(vertAxis) > xs.shape[0]:
         vertAxis = _points(vertAxis)
     horBegin = numpy.argwhere(xs[0, :] >= horMin)[0][0]
@@ -115,13 +99,13 @@ def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf,
     return slice(vertBegin, vertEnd), slice(horBegin, horEnd)
 
 
-def mantid_subplot_setup():
+def mantidsubplotsetup():
     """Return a dict for the matplotlib.pyplot.subplots()."""
     return {'projection': 'mantid'}
 
 
 def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf, vertMax=numpy.inf):
-    """Return global min and max intensities of workspaces."""
+    """Return min and max intensities of a workspace."""
     workspace = _normws(workspace)
     xs = workspace.extractX()
     ys = workspace.extractY()
@@ -135,31 +119,42 @@ def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     return cMin, cMax
 
 
-def plotprofiles(direction, workspaces, cuts, widths):
+def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l'):
     """Plot line profile from given workspaces and cuts."""
     workspaces = _normwslist(workspaces)
     if not isinstance(cuts, collections.Iterable):
         cuts = [cuts]
     if not isinstance(widths, collections.Iterable):
         widths = [widths] * len(cuts)
+    lineStyle = 'solid' if 'l' in style else 'None'
     figure, axes = subplots()
+    markers = matplotlib.markers.MarkerStyle.filled_markers
+    markerIndex = 0
+    markerStyle = 'None'
     for ws in workspaces:
-        for cut, width in zip(cuts, widths):
-            # TODO: Use StoreInADS=False after issue #21731 has been fixed.
-            wsName = '__line_profile'
-            line = LineProfile(ws, cut, width, Direction=direction,
-                               OutputWorkspace=wsName, EnableLogging=False)
-            axes.errorbar(line, specNum=0)
-            DeleteWorkspace(line)
+        for cut in cuts:
+            for width in widths:
+                # TODO: Use StoreInADS=False after issue #21731 has been fixed.
+                wsName = '__line_profile'
+                line = LineProfile(ws, cut, width, Direction=direction,
+                                   OutputWorkspace=wsName, EnableLogging=False)
+                if 'm' in style:
+                    markerStyle = markers[markerIndex]
+                    markerIndex += 1
+                    if markerIndex == len(markers):
+                        markerIndex = 0
+                label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
+                axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label)
+                DeleteWorkspace(line)
     _profileytitle(axes)
     return figure, axes
 
 
-def plotconstE(workspaces, E, dE):
+def plotconstE(workspaces, E, dE, style='l'):
     """Plot line profiles at constant energy."""
-    figure, axes = plotprofiles('Horizontal', workspaces, E, dE)
+    figure, axes = plotprofiles('Horizontal', workspaces, E, dE, 'E', 'meV', style)
     _profiletitle(workspaces, 'E', 'meV', E, dE, figure)
-    _profilelegend(workspaces, 'E', 'meV', E, dE, axes)
+    axes.legend()
     cMin, cMax = _globalnanminmax(workspaces)
     axes.set_ylim(ymin=0., ymax=cMax / 100.)
     xMin, xMax = axes.get_xlim()
@@ -167,11 +162,11 @@ def plotconstE(workspaces, E, dE):
     return figure, axes
 
 
-def plotconstQ(workspaces, Q, dQ):
+def plotconstQ(workspaces, Q, dQ, style='l'):
     """Plot line profiles at constant momentum transfer."""
-    figure, axes = plotprofiles('Vertical', workspaces, Q, dQ)
+    figure, axes = plotprofiles('Vertical', workspaces, Q, dQ, 'Q', '\\AA$^{-1}$', style)
     _profiletitle(workspaces, 'Q', '\\AA', Q, dQ, figure)
-    _profilelegend(workspaces, 'Q', '\\AA', Q, dQ, axes)
+    axes.legend()
     axes.set_xlim(xmin=0.)
     xMin, xMax = axes.get_xlim()
     print('Auto E-range: {}...{} meV'.format(xMin, xMax))
@@ -198,8 +193,31 @@ def plotSofQW(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     return figure, axes
 
 
+def subplots(**kwargs):
+    """Return matplotlib figure and axes."""
+    return pyplot.subplots(subplot_kw=mantidsubplotsetup(), **kwargs)
+
+
+def validQ(workspace, energyTransfer=0.0):
+    """Return a :math:`Q` range at given energy transfer where :math:`S(Q,E)` is defined."""
+    workspace = _normws(workspace)
+    vertBins = workspace.getAxis(1).extractValues()
+    if len(vertBins) > workspace.getNumberHistograms:
+        vertBins = _points(vertBins)
+    elasticIndex = numpy.argmin(numpy.abs(vertBins - energyTransfer))
+    ys = workspace.readY(elasticIndex)
+    validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
+    xs = workspace.readX(elasticIndex)
+    lower = xs[numpy.amin(validIndices)]
+    upperIndex = numpy.amax(validIndices)
+    if len(xs) > len(ys):
+        upperIndex = upperIndex + 1
+    upper = xs[upperIndex]
+    return lower, upper
+
+
 def wsreport(workspace):
-    """Print relevant information from sample logs."""
+    """Print some useful information from sample logs."""
     workspace = _normws(workspace)
     print(str(workspace))
     logs = SampleLogs(workspace)
@@ -215,29 +233,6 @@ def wsreport(workspace):
     print('T in [{:0.2f},{:0.2f}]'.format(minT, maxT))
     fermiHertz = logs.FC.rotation_speed / 60.
     print('Fermi = {:0.0f} rpm = {:0.1f} Hz'.format(logs.FC.rotation_speed, fermiHertz))
-
-
-def subplots(**kwargs):
-    """Return matplotlib figure and axes."""
-    return pyplot.subplots(subplot_kw=mantid_subplot_setup(), **kwargs)
-
-
-def validQ(workspace, energyTransfer=0.0):
-    """Return a q range at given energy transfer where S(q,w) is defined."""
-    workspace = _normws(workspace)
-    vertBins = workspace.getAxis(1).extractValues()
-    if len(vertBins) > workspace.getNumberHistograms:
-        vertBins = _points(vertBins)
-    elasticIndex = numpy.argmin(numpy.abs(vertBins - energyTransfer))
-    ys = workspace.readY(elasticIndex)
-    validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
-    xs = workspace.readX(elasticIndex)
-    lower = xs[numpy.amin(validIndices)]
-    upperIndex = numpy.amax(validIndices)
-    if len(xs) > len(ys):
-        upperIndex = upperIndex + 1
-    upper = xs[upperIndex]
-    return lower, upper
 
 
 class SampleLogs:
