@@ -44,32 +44,6 @@ MeshObject::MeshObject(std::vector<uint16_t> &&faces,
   setup(material);
 }
 
-
-/**
-* Copy constructor
-* @param A :: The object to initialise this copy from
-*/
-//MeshObject::MeshObject(const MeshObject &A) : MeshObject() { *this = A; }
-
-/**
-* Assignment operator
-* @param A :: Object to copy
-* @return *this
-*/
-/*
-MeshObject &MeshObject::operator=(const MeshObject &A) {
-  if (this != &A) {
-    m_boundingBox = A.m_boundingBox;
-    m_string = A.m_string;
-    m_handler = A.m_handler->clone();
-    m_material = Kernel::make_unique<Material>(A.material());
-    m_triangles = A.m_triangles;
-    m_vertices = A.m_vertices;
-  }
-  return *this;
-}
-*/
-
 MeshObject::~MeshObject() = default;
 
 
@@ -84,13 +58,6 @@ void MeshObject::setup(const Kernel::Material &material) {
   m_material = Mantid::Kernel::make_unique<Material>(material);
   m_handler = boost::make_shared<CacheGeometryHandler>(this);
 }
-
-/**
- * @param material The new Material that the object is composed from
- */
-//void MeshObject::setMaterial(const Kernel::Material &material) {
-//  m_material = Mantid::Kernel::make_unique<Material>(material);
-//}
 
 /**
  * @return The Material that the object is composed from
