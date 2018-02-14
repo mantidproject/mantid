@@ -15,8 +15,7 @@ class TeixeiraWaterTest(unittest.TestCase):
 
     def test_function_output(self):
         input = [0.01, 0.1, 1.0, 10.0]
-        expected = [2.24949386e-04, 2.20048900e-02,
-                    6.92307692e-01, 9.95575221e-01]
+        expected = [0.000224949386, 0.02200489, 0.692307692, 0.995575221]
         tolerance = 1.0e-05
         status, output = check_output("TeixeiraWater", input, expected,
                                       tolerance, Tau=1.0, L=1.5)
