@@ -287,11 +287,11 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     model.addFocusedWorkspace(runLabel, ws);
 
-    std::string failure = "Failure";
+    boost::optional<std::string> failure(boost::none);
     TS_ASSERT_THROWS_NOTHING(
         failure = model.doPawleyRefinement(
             runLabel, "", std::vector<std::string>({}), "", "", 0, 0));
-    TS_ASSERT(failure.empty());
+    TS_ASSERT(!failure);
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);
@@ -316,11 +316,11 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     model.addFocusedWorkspace(runLabel, ws);
 
-    std::string failure = "Failure";
+    boost::optional<std::string> failure(boost::none);
     TS_ASSERT_THROWS_NOTHING(
         failure = model.doRietveldRefinement(
             runLabel, "", std::vector<std::string>({}), "", ""));
-    TS_ASSERT(failure.empty());
+    TS_ASSERT(!failure);
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);

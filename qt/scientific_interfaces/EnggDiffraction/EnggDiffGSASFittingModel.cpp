@@ -81,7 +81,7 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
 }
 }
 
-std::string EnggDiffGSASFittingModel::doPawleyRefinement(
+boost::optional<std::string> EnggDiffGSASFittingModel::doPawleyRefinement(
     const RunLabel &runLabel, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile, const double dMin,
@@ -103,12 +103,12 @@ std::string EnggDiffGSASFittingModel::doPawleyRefinement(
                                     phaseFiles, pathToGSASII, GSASIIProjectFile,
                                     dMin, negativeWeight);
   } catch (const std::exception &e) {
-    return e.what();
+    return boost::make_optional<std::string>(e.what());
   }
 
   addFitResultsToMaps(runLabel, rwp, outputWSName, latticeParamsName);
 
-  return "";
+  return boost::none;
 }
 
 double EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
@@ -137,7 +137,7 @@ double EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   return rwp;
 }
 
-std::string EnggDiffGSASFittingModel::doRietveldRefinement(
+boost::optional<std::string> EnggDiffGSASFittingModel::doRietveldRefinement(
     const RunLabel &runLabel, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
@@ -160,11 +160,11 @@ std::string EnggDiffGSASFittingModel::doRietveldRefinement(
   }
 
   catch (const std::exception &e) {
-    return e.what();
+    return boost::make_optional<std::string>(e.what());
   }
   addFitResultsToMaps(runLabel, rwp, outputWSName, latticeParamsName);
 
-  return "";
+  return boost::none;
 }
 
 boost::optional<API::MatrixWorkspace_sptr>

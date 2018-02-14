@@ -31,9 +31,10 @@ public:
    @param GSASIIProjectFile Location to save the .gpx project to
    @param dMin The minimum d-spacing to use for refinement
    @param negativeWeight The weight of the penalty function
-   @return Empty string if refinement was successful, error description if not
+   @return String decription any failures that occurred (empty optional if
+   success)
    */
-  virtual std::string
+  virtual boost::optional<std::string>
   doPawleyRefinement(const RunLabel &runLabel, const std::string &instParamFile,
                      const std::vector<std::string> &phaseFiles,
                      const std::string &pathToGSASII,
@@ -49,9 +50,10 @@ public:
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
-   @return Empty string if refinement was successful, error description if not
+   @return String decription any failures that occurred (empty optional if
+   success)
    */
-  virtual std::string
+  virtual boost::optional<std::string>
   doRietveldRefinement(const RunLabel &runLabel,
                        const std::string &instParamFile,
                        const std::vector<std::string> &phaseFiles,

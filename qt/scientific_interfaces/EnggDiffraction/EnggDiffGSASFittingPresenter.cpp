@@ -77,7 +77,7 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
   m_view->displayRwp(*rwp);
 }
 
-std::string EnggDiffGSASFittingPresenter::doPawleyRefinement(
+boost::optional<std::string> EnggDiffGSASFittingPresenter::doPawleyRefinement(
     const RunLabel &runLabel, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
@@ -89,7 +89,7 @@ std::string EnggDiffGSASFittingPresenter::doPawleyRefinement(
                                      negativeWeight);
 }
 
-std::string EnggDiffGSASFittingPresenter::doRietveldRefinement(
+boost::optional<std::string> EnggDiffGSASFittingPresenter::doRietveldRefinement(
     const RunLabel &runLabel, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
@@ -107,7 +107,7 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   const auto pathToGSASII = m_view->getPathToGSASII();
   const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
 
-  std::string refinementFailure("Contact developers if you see this message");
+  boost::optional<std::string> refinementFailure(boost::none);
 
   switch (refinementMethod) {
 
@@ -122,10 +122,10 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
     break;
   }
 
-  if (refinementFailure.empty()) {
-    updatePlot(runLabel);
+  if (refinementFailure) {
+    m_view->userWarning("Refinement failed", *refinementFailure);
   } else {
-    m_view->userWarning("Refinement failed", refinementFailure);
+    updatePlot(runLabel);
   }
 }
 

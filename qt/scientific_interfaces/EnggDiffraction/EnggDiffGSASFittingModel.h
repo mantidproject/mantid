@@ -12,15 +12,14 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
     : public IEnggDiffGSASFittingModel {
 
 public:
-  std::string doPawleyRefinement(const RunLabel &runLabel,
-                                 const std::string &instParamFile,
-                                 const std::vector<std::string> &phaseFiles,
-                                 const std::string &pathToGSASII,
-                                 const std::string &GSASIIProjectFile,
-                                 const double dMin,
-                                 const double negativeWeight) override;
+  boost::optional<std::string>
+  doPawleyRefinement(const RunLabel &runLabel, const std::string &instParamFile,
+                     const std::vector<std::string> &phaseFiles,
+                     const std::string &pathToGSASII,
+                     const std::string &GSASIIProjectFile, const double dMin,
+                     const double negativeWeight) override;
 
-  std::string
+  boost::optional<std::string>
   doRietveldRefinement(const RunLabel &runLabel,
                        const std::string &instParamFile,
                        const std::vector<std::string> &phaseFiles,

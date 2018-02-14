@@ -182,7 +182,8 @@ public:
                 doRietveldRefinement(runLabel, instParams, phaseFiles,
                                      pathToGSASII, GSASIIProjectFile))
         .Times(1)
-        .WillOnce(Return("Refinement failure description"));
+        .WillOnce(Return(boost::make_optional<std::string>(
+            "Refinement failure description")));
     EXPECT_CALL(*m_mockViewPtr, userWarning("Refinement failed",
                                             "Refinement failure description"));
 
@@ -232,7 +233,8 @@ public:
                                    pathToGSASII, GSASIIProjectFile, dmin,
                                    negativeWeight))
         .Times(1)
-        .WillOnce(Return("Refinement failure description"));
+        .WillOnce(Return(boost::make_optional<std::string>(
+            "Refinement failure description")));
     EXPECT_CALL(*m_mockViewPtr, userWarning("Refinement failed",
                                             "Refinement failure description"));
 

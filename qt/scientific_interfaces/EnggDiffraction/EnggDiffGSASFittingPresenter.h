@@ -45,13 +45,14 @@ private:
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
-   @return Empty string if refinement was successful, error description if not
+   @return String describing any failures, empty optional if refinement was
+   successful
    */
-  std::string doPawleyRefinement(const RunLabel &runLabel,
-                                 const std::string &instParamFile,
-                                 const std::vector<std::string> &phaseFiles,
-                                 const std::string &pathToGSASII,
-                                 const std::string &GSASIIProjectFile);
+  boost::optional<std::string>
+  doPawleyRefinement(const RunLabel &runLabel, const std::string &instParamFile,
+                     const std::vector<std::string> &phaseFiles,
+                     const std::string &pathToGSASII,
+                     const std::string &GSASIIProjectFile);
 
   /**
    Perform a Rietveld refinement on a run
@@ -62,13 +63,13 @@ private:
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
-   @return Empty string if refinement was successful, error description if not
+   @return String describing any failures, empty optional if refinement was
+   successful
    */
-  std::string doRietveldRefinement(const RunLabel &runLabel,
-                                   const std::string &instParamFile,
-                                   const std::vector<std::string> &phaseFiles,
-                                   const std::string &pathToGSASII,
-                                   const std::string &GSASIIProjectFile);
+  boost::optional<std::string> doRietveldRefinement(
+      const RunLabel &runLabel, const std::string &instParamFile,
+      const std::vector<std::string> &phaseFiles,
+      const std::string &pathToGSASII, const std::string &GSASIIProjectFile);
 
   /**
    Overplot fitted peaks for a run, and display lattice parameters and Rwp in
