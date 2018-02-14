@@ -687,12 +687,14 @@ void FitPeaks::ConvertParametersNameToIndex() {
 void FitPeaks::fitPeaks() {
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-  for (size_t wi = m_startWorkspaceIndex; wi <= m_stopWorkspaceIndex; ++wi) {
+  for (int wi = static_cast<int>(m_startWorkspaceIndex);
+       wi <= static_cast<int>(m_stopWorkspaceIndex); ++wi) {
 
     PARALLEL_START_INTERUPT_REGION
 
     // peaks to fit
-    std::vector<double> expected_peak_centers = GetExpectedPeakPositions(wi);
+    std::vector<double> expected_peak_centers =
+        GetExpectedPeakPositions(static_cast<size_t>(wi));
 
     // initialize output for this
     size_t numfuncparams =
@@ -711,7 +713,8 @@ void FitPeaks::fitPeaks() {
 
     // check number of events
     bool noevents(false);
-    if (m_eventNumberWS && m_eventNumberWS->histogram(wi).x()[0] < 1.0) {
+    if (m_eventNumberWS &&
+        m_eventNumberWS->histogram(static_cast<size_t>(wi)).x()[0] < 1.0) {
       // no event with additional event number workspace
       noevents = true;
     } else if (m_inputEventWS &&
@@ -720,13 +723,14 @@ void FitPeaks::fitPeaks() {
       noevents = true;
     } else {
       // fit
-      fitSpectrumPeaks(wi, expected_peak_centers, fitted_peak_centers,
-                       fitted_parameters, &peak_chi2_vec);
+      fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
+                       fitted_peak_centers, fitted_parameters, &peak_chi2_vec);
     }
 
     PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
-      writeFitResult(wi, expected_peak_centers, fitted_peak_centers,
-                     fitted_parameters, peak_chi2_vec, noevents);
+      writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
+                     fitted_peak_centers, fitted_parameters, peak_chi2_vec,
+                     noevents);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -734,7 +738,6 @@ void FitPeaks::fitPeaks() {
 
   PARALLEL_CHECK_INTERUPT_REGION
 
-  g_log.notice("[DB] End of fitPeaks");
 }
 
 //----------------------------------------------------------------------------------------------
