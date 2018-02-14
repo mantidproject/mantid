@@ -34,25 +34,20 @@ void PostprocessingStep::ensureRowSizeMatchesColumnCount(
 }
 
 QString PostprocessingStep::getPostprocessedWorkspaceName(
-    const QString &rowWSPropertyName, const QString &rowWSPrefix,
     const GroupData &groupData, boost::optional<size_t> sliceIndex) {
   /* This method calculates, for a given set of rows, the name of the output
-  * (post-processed) workspace for a given slice */
+   * (post-processed) workspace for a given slice */
 
   QStringList outputNames;
 
   for (const auto &row : groupData) {
     auto rowData = row.second;
-    // If a slice index was provided, check if the slice exists (nothing to do
-    // otherwise)
+    // If given a slice, check if it exists (nothing to do for slices otherwise)
     if (sliceIndex && rowData->hasSlice(*sliceIndex)) {
-      const auto sliceName =
-          rowData->optionValue(rowWSPropertyName, *sliceIndex);
-      outputNames.append(rowWSPrefix + sliceName);
+      outputNames.append(rowData->getSlice(*sliceIndex)->reducedName());
     } else if (!sliceIndex) {
       // A slice index was not provided, so just use the row's workspace name
-      auto wsName = rowData->optionValue(rowWSPropertyName);
-      outputNames.append(rowWSPrefix + wsName);
+      outputNames.append(rowData->reducedName());
     }
   }
   return m_algorithm.prefix() + outputNames.join("_");

@@ -225,18 +225,16 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     OptionsMap options = getCanonicalOptions(
         rowData, getProcessingOptions(rowData), m_whitelist, true,
         m_processor.outputProperties(), m_processor.prefixes());
-    // Cache a copy of the unpreprocessed options in the row data
     rowData->setOptions(options);
-    // Perform any preprocessing on the input properties (e.g. multiple
-    // input runs will  be summed into a single workspace). Note that
-    // this also loads the input run(s).
-    preprocessOptionValues(options, rowData);
-    rowData->setPreprocessedOptions(options);
+    // Preprocess the row. Note that this only needs to be done once and
+    // not for each slice because the slice data can be inferred from the
+    // row data
+    preprocessOptionValues(rowData);
     // Get the (preprocessed) input workspace name for the reduction. The
     // input runs are from the first column in the whitelist and we look up
     // the associated algorithm property value in the options.
-    auto const runColumn = *m_whitelist.cbegin();
-    auto const &runName = options[runColumn.algorithmProperty()];
+    auto const &runName = rowData->preprocessedOptionValue(
+        m_processor.defaultInputPropertyName());
 
     // Do time slicing now if using uniform slicing because this is dependant
     // on the start/stop times of the current input workspace.

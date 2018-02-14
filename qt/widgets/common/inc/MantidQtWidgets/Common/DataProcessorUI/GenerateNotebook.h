@@ -57,10 +57,9 @@ tableString(const TreeData &treeData, const WhiteList &whitelist);
 
 QString DLLExport titleString(const QString &wsName);
 
-boost::tuple<QString, QString> DLLExport
-postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
-                       const ProcessingAlgorithm &processor,
-                       const PostprocessingStep &postprocessingStep);
+boost::tuple<QString, QString> DLLExport postprocessGroupString(
+    const GroupData &rowMap, const ProcessingAlgorithm &processor,
+    const PostprocessingStep &postprocessingStep);
 
 QString DLLExport plotsString(const GroupData &groupData,
                               const QString &stitched_wsStr,

@@ -81,15 +81,14 @@ void updateHiddenOptions(OptionsMap &options, const RowData_sptr data,
  * @param data : the data for this row
  */
 void updateOutputOptions(OptionsMap &options, const RowData_sptr data,
-                         const WhiteList &whitelist, const bool allowInsertions,
+                         const bool allowInsertions,
                          const std::vector<QString> &outputPropertyNames,
                          const std::vector<QString> &outputNamePrefixes) {
   // Set the properties for the output workspace names
   for (auto i = 0u; i < outputPropertyNames.size(); i++) {
     const auto propertyName = outputPropertyNames[i];
     if (allowInsertions || options.find(propertyName) != options.end()) {
-      options[propertyName] =
-          getReducedWorkspaceName(data, whitelist, outputNamePrefixes[i]);
+      options[propertyName] = data->reducedName(outputNamePrefixes[i]);
     }
   }
 }
@@ -129,13 +128,11 @@ QString preprocessingListToString(const QStringList &values,
 Returns the name of the reduced workspace for a given row
 @param data :: [input] The data for this row
 @param whitelist :: [input] The list of columns
-@param prefix : A prefix to be appended to the generated ws name
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
 QString getReducedWorkspaceName(const RowData_sptr data,
-                                const WhiteList &whitelist,
-                                const QString prefix) {
+                                const WhiteList &whitelist) {
   if (data->size() != static_cast<int>(whitelist.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 
@@ -169,7 +166,7 @@ QString getReducedWorkspaceName(const RowData_sptr data,
     }
   } // Columns
 
-  auto wsname = prefix;
+  QString wsname;
   wsname += names.join("_");
   return wsname;
 }
@@ -201,8 +198,8 @@ OptionsMap getCanonicalOptions(const RowData_sptr data,
   updateHiddenOptions(options, data, allowInsertions);
   updateUserOptions(options, data, whitelist, allowInsertions);
   updateRowOptions(options, data, whitelist, allowInsertions);
-  updateOutputOptions(options, data, whitelist, allowInsertions,
-                      outputProperties, prefixes);
+  updateOutputOptions(options, data, allowInsertions, outputProperties,
+                      prefixes);
   return options;
 }
 }

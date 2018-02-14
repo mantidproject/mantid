@@ -156,6 +156,15 @@ void RowData::setOptionValue(const QString &name, const QString &value) {
   m_options[name] = value;
 }
 
+/** Set the preprocessed value for the given property
+ * @param name [in] : the property to set
+ * @param value [in] : the value
+ */
+void RowData::setPreprocessedOptionValue(const QString &name,
+                                         const QString &value) {
+  m_preprocessedOptions[name] = value;
+}
+
 /** Get the number of slices for this row
  * @return : the number of slices
  */
@@ -194,6 +203,8 @@ RowData_sptr RowData::addSlice(const QString &sliceSuffix,
   // Create a copy
   auto sliceData = std::make_shared<RowData>(this);
   for (auto const &propertyName : workspaceProperties) {
+    // Add the slice suffix to the reduced workspace name
+    sliceData->setReducedName(reducedName() + sliceSuffix);
     // Override the workspace names in the preprocessed options with the slice
     // suffix
     if (hasPreprocessedOption(propertyName)) {
@@ -215,6 +226,17 @@ RowData_sptr RowData::addSlice(const QString &sliceSuffix,
 /** Clear all child slices for this row
  */
 void RowData::clearSlices() { m_slices.clear(); }
+
+/** Return the canonical reduced workspace name i.e. before any
+ * prefixes have been applied for specific output properties.
+ * @param prefix [in] : if not empty, apply this prefix to the name
+ */
+QString RowData::reducedName(const QString prefix) {
+  if (prefix.isEmpty())
+    return m_reducedName;
+  else
+    return prefix + m_reducedName;
+}
 }
 }
 }

@@ -112,8 +112,8 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
     boost::tuple<QString, QString> postProcessString;
     if (hasPostprocessing() && rowMap.size() > 1) {
       // If there was only one run selected, it could not be post-processed
-      postProcessString = postprocessGroupString(
-          rowMap, m_whitelist, m_processor, *m_postprocessingStep);
+      postProcessString =
+          postprocessGroupString(rowMap, m_processor, *m_postprocessingStep);
     }
     notebook->codeCell(boost::get<0>(postProcessString).toStdString());
 
@@ -284,7 +284,7 @@ QString tableString(const TreeData &treeData, const WhiteList &whitelist) {
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<QString, QString>
-postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
+postprocessGroupString(const GroupData &rowMap,
                        const ProcessingAlgorithm &processor,
                        const PostprocessingStep &postprocessingStep) {
 
@@ -301,7 +301,7 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
   // Go through each row and prepare the input and output properties
   for (const auto &row : rowMap) {
     // The reduced ws name without prefix (for example 'TOF_13460_13462')
-    auto suffix = getReducedWorkspaceName(row.second, whitelist);
+    auto suffix = row.second->reducedName();
     // The reduced ws name: 'IvsQ_TOF_13460_13462'
     inputNames.append(processor.defaultOutputPrefix() + suffix);
     // Add the suffix (i.e. 'TOF_13460_13462') to the output ws name

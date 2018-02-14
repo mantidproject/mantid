@@ -156,8 +156,7 @@ public:
   // Get the whitelist
   WhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
-  QString getReducedWorkspaceName(const RowData_sptr data,
-                                  const QString &prefix = "") const;
+  QString getReducedWorkspaceName(const RowData_sptr data) const;
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
@@ -202,7 +201,7 @@ protected:
   void preprocessColumnValue(const QString &columnName, QString &columnValue,
                              RowData_sptr data);
   // Preprocess all option values where applicable
-  void preprocessOptionValues(OptionsMap &options, RowData_sptr data);
+  void preprocessOptionValues(RowData_sptr data);
   // Update the model with results from the algorithm
   void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
                                 RowData_sptr data);

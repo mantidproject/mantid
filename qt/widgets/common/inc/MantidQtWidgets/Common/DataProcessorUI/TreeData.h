@@ -92,6 +92,8 @@ public:
   QString preprocessedOptionValue(const QString &name) const;
   /// Set a property value
   void setOptionValue(const QString &name, const QString &value);
+  /// Set a preprocessed property value
+  void setPreprocessedOptionValue(const QString &name, const QString &value);
   /// Get the number of slices for this row
   size_t numberOfSlices() const;
   /// Check whether a slice exists by index
@@ -109,6 +111,11 @@ public:
   /// Set whether the row has been processed
   void setProcessed(const bool isProcessed) { m_isProcessed = isProcessed; }
 
+  /// Get the reduced workspace name, optionally adding a prefix
+  QString reducedName(const QString prefix = QString());
+  /// Set the reduced workspace name
+  void setReducedName(const QString &name) { m_reducedName = name; }
+
 private:
   /// Check if a preprocessed property exists
   bool hasPreprocessedOption(const QString &name) const;
@@ -125,6 +132,9 @@ private:
   std::vector<RowData_sptr> m_slices;
   /// Whether the row has been processed
   bool m_isProcessed;
+  /// The canonical reduced workspace name for this row i.e. prior to any
+  /// prefixes being added for specific output workspace properties
+  QString m_reducedName;
 };
 
 using GroupData = std::map<int, RowData_sptr>;

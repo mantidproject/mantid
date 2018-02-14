@@ -419,29 +419,70 @@ private:
         DEFAULT_GROUP_NUMBER);
   }
 
+  void addRowValue(RowData_sptr rowData, const QStringList &list,
+                   const int index, const char *property,
+                   const char *prefix = "") {
+    if (index >= list.size())
+      return;
+    // Set the option based on the row value
+    rowData->setOptionValue(property, list[index]);
+    // Set the preprocessed option based on the value and prefix
+    rowData->setPreprocessedOptionValue(property, prefix + list[index]);
+  }
+
+  void addRowValue(RowData_sptr rowData, const char *property,
+                   const QString value) {
+    // Set the value and preprocessed value to the given value
+    rowData->setOptionValue(property, value);
+    rowData->setPreprocessedOptionValue(property, value);
+  }
+
+  void appendStringWithPrefix(QString &stringToEdit, const QStringList &list,
+                              std::vector<const char *> &prefixes, const int i,
+                              const char *separator = "") {
+    // do nothing if string to add is empty
+    if (i >= list.size() || list[i].isEmpty())
+      return;
+
+    // add separator and string with/without prefix
+    const long int len = prefixes.size();
+    if (i < len && prefixes[i] != 0)
+      stringToEdit += QString(separator) + QString(prefixes[i]) + list[i];
+    else
+      stringToEdit += separator + list[i];
+  }
+
   // Utility to create a row data class from a string list of simple inputs
   // (does not support multiple input runs or transmission runs, or entries
   // in the options/hidden columns). Assumes input workspaces are prefixed
   // with TOF_ and transmission runs with TRANS_
-  RowData_sptr makeRowData(const QStringList &list) {
-    // Set the row values
+  RowData_sptr makeRowData(const QStringList &list,
+                           std::vector<const char *> prefixes = {"TOF_", "",
+                                                                 "TRANS_"}) {
+    // Create the data and add default options
     auto rowData = std::make_shared<RowData>(list);
-    // Set the options (simply based on the row values)
-    rowData->setOptions({{"InputWorkspace", list[0]},
-                         {"ThetaIn", list[1]},
-                         {"FirstTransmissionRun", list[2]},
-                         {"MomentumTransferMin", list[3]},
-                         {"MomemtumTransferMax", list[4]},
-                         {"MomentumTransferStep", list[5]},
-                         {"ScaleFactor", list[6]}});
-    // Set the preprocessed options based on the input options
-    auto options = rowData->options();
-    // Add the prefixes for preprocessed run values
-    if (!list[0].isEmpty())
-      options["InputWorkspace"] = "TOF_" + list[0];
-    if (!list[2].isEmpty())
-      options["InputWorkspace"] = "TRANS_" + list[2];
-    rowData->setPreprocessedOptions(options);
+
+    if (list.size() < 1)
+      return rowData;
+
+    QString reducedName;
+    appendStringWithPrefix(reducedName, list, prefixes, 0);
+    appendStringWithPrefix(reducedName, list, prefixes, 2, "_");
+
+    rowData->setReducedName(reducedName);
+    addRowValue(rowData, "OutputWorkspace", "IvsQ_" + reducedName);
+    addRowValue(rowData, "OutputWorkspaceBinned", "IvsQ_binned_" + reducedName);
+    addRowValue(rowData, "OutputWorkspaceWavelength", "IvsLam_" + reducedName);
+
+    // Set other options from the row data values
+    addRowValue(rowData, list, 0, "InputWorkspace", "TOF_");
+    addRowValue(rowData, list, 1, "ThetaIn");
+    addRowValue(rowData, list, 2, "FirstTransmissionRun", "TRANS_");
+    addRowValue(rowData, list, 3, "MomentumTransferMin");
+    addRowValue(rowData, list, 4, "MomentumTransferMax");
+    addRowValue(rowData, list, 5, "MomentumTransferStep");
+    addRowValue(rowData, list, 6, "ScaleFactor");
+
     return rowData;
   }
 
@@ -2907,13 +2948,13 @@ public:
         makeRowData({"12346", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""});
     GroupData group = {{0, row0}, {1, row1}};
 
+    // Find and cache the reduced workspace names
+    row0->setReducedName(presenter->getReducedWorkspaceName(row0));
+    row1->setReducedName(presenter->getReducedWorkspaceName(row1));
+
     // Test the names of the reduced workspaces
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
-                     "prefix_1_TOF_12345");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1, "prefix_2_"),
-                     "prefix_2_TOF_12346");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0), "TOF_12345");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1), "TOF_12346");
+    TS_ASSERT_EQUALS(row0->reducedName().toStdString(), "TOF_12345");
+    TS_ASSERT_EQUALS(row1->reducedName().toStdString(), "TOF_12346");
     // Test the names of the post-processed ws
     TS_ASSERT_EQUALS(
         presenter->getPostprocessedWorkspaceName(group).toStdString(),
@@ -2936,14 +2977,14 @@ public:
         {"12346", "0.5", "11116", "0.1", "0.3", "0.04", "1", "", ""});
     GroupData group = {{0, row0}, {1, row1}};
 
+    // Find and cache the reduced workspace names
+    row0->setReducedName(presenter->getReducedWorkspaceName(row0));
+    row1->setReducedName(presenter->getReducedWorkspaceName(row1));
+
     // Test the names of the reduced workspaces
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
-                     "prefix_1_TOF_12345_TRANS_11115");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1, "prefix_2_"),
-                     "prefix_2_TOF_12346_TRANS_11116");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0),
+    TS_ASSERT_EQUALS(row0->reducedName().toStdString(),
                      "TOF_12345_TRANS_11115");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1),
+    TS_ASSERT_EQUALS(row1->reducedName().toStdString(),
                      "TOF_12346_TRANS_11116");
     // Test the names of the post-processed ws
     TS_ASSERT_EQUALS(
@@ -2966,14 +3007,14 @@ public:
         {"12346", "0.5", "11115+11116", "0.1", "0.3", "0.04", "1", "", ""});
     GroupData group = {{0, row0}, {1, row1}};
 
+    // Find and cache the reduced workspace names
+    row0->setReducedName(presenter->getReducedWorkspaceName(row0));
+    row1->setReducedName(presenter->getReducedWorkspaceName(row1));
+
     // Test the names of the reduced workspaces
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
-                     "prefix_1_TOF_12345_TRANS_11115+11116");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1, "prefix_2_"),
-                     "prefix_2_TOF_12346_TRANS_11115+11116");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0),
+    TS_ASSERT_EQUALS(row0->reducedName().toStdString(),
                      "TOF_12345_TRANS_11115+11116");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1),
+    TS_ASSERT_EQUALS(row1->reducedName().toStdString(),
                      "TOF_12346_TRANS_11115+11116");
     // Test the names of the post-processed ws
     TS_ASSERT_EQUALS(
@@ -2997,7 +3038,6 @@ public:
 
     // Test the names of the reduced workspaces
     TS_ASSERT_THROWS_ANYTHING(presenter->getReducedWorkspaceName(row0));
-    TS_ASSERT_THROWS_ANYTHING(presenter->getPostprocessedWorkspaceName(group));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -3071,6 +3111,9 @@ public:
 
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->m_manager = Mantid::Kernel::make_unique<MockTreeManager>();
+    MockTreeManager *mockTreeManager =
+        static_cast<MockTreeManager *>(presenter->m_manager.get());
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
@@ -3078,13 +3121,18 @@ public:
     createTOFWorkspace("IvsQ_binned_TOF_12345", "12345");
     createTOFWorkspace("IvsQ_binned_TOF_12346", "12346");
 
-    RowList rowlist;
-    rowlist[0].insert(0);
-    rowlist[0].insert(1);
+    // Set up the expected tree data to be returned in the selection
+    auto row0 = makeRowData({"12345"});
+    auto row1 = makeRowData({"12346"});
+    GroupData group = {{0, row0}, {1, row1}};
+    TreeData tree = {{0, group}};
 
     // The user hits "plot rows" with the first row selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), rowlist);
+
+    EXPECT_CALL(*mockTreeManager, selectedData(false))
+        .Times(1)
+        .WillOnce(Return(tree));
 
     auto pythonCode = QString(
         "base_graph = None\nbase_graph = "
@@ -3109,17 +3157,27 @@ public:
 
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->m_manager = Mantid::Kernel::make_unique<MockTreeManager>();
+    MockTreeManager *mockTreeManager =
+        static_cast<MockTreeManager *>(presenter->m_manager.get());
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
     createTOFWorkspace("IvsQ_TOF_12345_TOF_12346");
 
-    GroupList group = {0};
+    // Set up the expected tree data to be returned in the selection
+    auto row0 = makeRowData({"12345"});
+    auto row1 = makeRowData({"12346"});
+    GroupData group = {{0, row0}, {1, row1}};
+    TreeData tree = {{0, group}};
 
     // The user hits "plot rows" with the first row selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), group);
+
+    EXPECT_CALL(*mockTreeManager, selectedData(false))
+        .Times(1)
+        .WillOnce(Return(tree));
 
     auto pythonCode =
         QString("base_graph = None\nbase_graph = "

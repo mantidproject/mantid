@@ -24,7 +24,6 @@ public:
                         const QString &rowOutputWSPropertyName,
                         const WhiteList &whitelist, const GroupData &groupData);
   QString getPostprocessedWorkspaceName(
-      const QString &rowOutputPropertyName, const QString &rowWSPrefix,
       const GroupData &groupData,
       boost::optional<size_t> sliceIndex = boost::optional<size_t>());
   QString m_options;

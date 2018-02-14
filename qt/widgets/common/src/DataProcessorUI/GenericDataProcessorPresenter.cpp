@@ -282,9 +282,9 @@ Returns the name of the reduced workspace for a given row
 @returns : The name of the workspace
 */
 QString GenericDataProcessorPresenter::getReducedWorkspaceName(
-    const RowData_sptr data, const QString &prefix) const {
+    const RowData_sptr data) const {
   return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
-      data, m_whitelist, prefix);
+      data, m_whitelist);
 }
 
 void GenericDataProcessorPresenter::settingsChanged() {
@@ -303,8 +303,9 @@ void GenericDataProcessorPresenter::settingsChanged() {
 bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
   for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
     auto outputWorkspaceName =
-        getReducedWorkspaceName(row.second, m_processor.prefix(i));
-    if (!workspaceExists(outputWorkspaceName))
+        row.second->reducedName(m_processor.defaultOutputPrefix());
+    // The name may be empty if the row has not been reduced yet.
+    if (outputWorkspaceName.isEmpty() || !workspaceExists(outputWorkspaceName))
       return false;
   }
   return true;
@@ -348,10 +349,10 @@ void GenericDataProcessorPresenter::process() {
     RowQueue rowQueue;
 
     for (const auto &row : group.second) {
-      // Get the algorithm input properties for this row and
-      // cache it in the row data (this is done just once here as
-      // it's required by both reduceRow and saveNotebook)
       auto rowData = row.second;
+      // Work out and cache the reduced workspace name
+      rowData->setReducedName(getReducedWorkspaceName(rowData));
+      // Cache the algorithm input properties for this row
       OptionsMap options = getCanonicalOptions(
           rowData, getProcessingOptions(rowData), m_whitelist, true,
           m_processor.outputProperties(), m_processor.prefixes());
@@ -677,39 +678,7 @@ QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
   if (!hasPostprocessing())
     throw std::runtime_error("Attempted to get postprocessing workspace but no "
                              "postprocessing is specified.");
-
-  // The postprocessed name is a bit of a random combination of
-  // input/output properties and group/column prefixes.
-  // e.g. the postprocessed name might be
-  //   IvsQ_TEST_12345_slice_0_TEST_12346_slice_0
-  // where
-  //   "IvsQ_" is the grouped workspace prefix
-  //   "TEST_" is the prefix specified in the whitelist for this column
-  //   "12345" and "12346" are the input run numbers to stitch
-  //   "_slice_0" is the slice suffix
-  // and where individual reduced workspace names would be:
-  //   IvsQ_binned_TEST_12345_slice_0
-  //   IvsQ_binned_TEST_12346_slice_0
-  // where
-  //   "IvsQ_binned_" is the prefix for the OutputWorkspaceBinned property.
-
-  // We need the property name to find the run numbers for the input
-  // workspaces (e.g. "12345 a" and "12346" in the description above).
-  auto workspaceProperty = m_processor.defaultInputPropertyName();
-
-  // We need to work out the prefix for this column (e.g. "TEST_" in the
-  // description above). We can look this up from the whitelist column
-  // that corresponds to the workspace property name
-  QString prefix = "";
-  for (auto column : m_whitelist) {
-    if (column.algorithmProperty() == workspaceProperty) {
-      prefix = column.prefix();
-      break;
-    }
-  }
-
-  return m_postprocessing->getPostprocessedWorkspaceName(
-      workspaceProperty, prefix, groupData, sliceIndex);
+  return m_postprocessing->getPostprocessedWorkspaceName(groupData, sliceIndex);
 }
 
 /** Loads a run found from disk or AnalysisDataService
@@ -856,8 +825,8 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
  * to value
  * @param data : the data in the row
 */
-void GenericDataProcessorPresenter::preprocessOptionValues(OptionsMap &options,
-                                                           RowData_sptr data) {
+void GenericDataProcessorPresenter::preprocessOptionValues(RowData_sptr data) {
+  auto options = data->options();
   // Loop through all columns (excluding the Options and Hidden options
   // columns)
   for (auto columnIt = m_whitelist.cbegin(); columnIt != m_whitelist.cend() - 2;
@@ -870,6 +839,8 @@ void GenericDataProcessorPresenter::preprocessOptionValues(OptionsMap &options,
       preprocessColumnValue(column.name(), options[propertyName], data);
     }
   }
+  // Cache the preprocessed options
+  data->setPreprocessedOptions(std::move(options));
 }
 
 /** Some columns in the model should be updated with outputs
@@ -941,14 +912,11 @@ IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
  */
 void GenericDataProcessorPresenter::reduceRow(RowData_sptr data) {
 
-  // Get a copy of the (unpreprocessed) input properties in the row data
-  OptionsMap options = data->options();
   // Perform any preprocessing on the input properties and cache the results
   // in the row data
-  preprocessOptionValues(options, data);
-  data->setPreprocessedOptions(options);
+  preprocessOptionValues(data);
   // Run the algorithm
-  const auto alg = createAndRunAlgorithm(options);
+  const auto alg = createAndRunAlgorithm(data->preprocessedOptions());
   // Populate any missing values in the model with output from the algorithm
   updateModelFromAlgorithm(alg, data);
 }
@@ -1337,8 +1305,8 @@ void GenericDataProcessorPresenter::plotRow() {
 
     for (const auto &run : item.second) {
 
-      auto const wsName = getReducedWorkspaceName(
-          run.second, m_processor.defaultOutputPrefix());
+      auto const wsName =
+          run.second->reducedName(m_processor.defaultOutputPrefix());
 
       if (workspaceExists(wsName))
         workspaces.insert(wsName, nullptr);
