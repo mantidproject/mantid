@@ -1531,7 +1531,8 @@ bool FitPeaks::FitBackground(API::IAlgorithm_sptr md_fitter,
  * @param expected_peak_center
  * @param fitwindow
  * @param high
- * @param observe_peak_width :: flag to estimate peak width (by observation) or not
+ * @param observe_peak_width :: flag to estimate peak width (by observation) or
+ * not
  * @param peakfunction
  * @param bkgdfunc
  * @return
