@@ -35,7 +35,6 @@ def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
     cutLabel = ''
     if not singleCut or not singleWidth:
         cutLabel = quantity + ' = {:0.2f} $\pm$ {:1.2f}'.format(cut, width) + ' ' + units
-    labels = list()
     return wsLabel + ' ' + cutLabel
 
 
@@ -49,7 +48,6 @@ def _normws(workspace):
 
 def _normwslist(workspaces):
     """Retrieve workspaces from mtd if they are string, otherwise return as-is."""
-    ws = list()
     if not isinstance(workspaces, collections.Iterable) or isinstance(workspaces, str):
         workspaces = [workspaces]
     unnormWss = workspaces
@@ -59,6 +57,7 @@ def _normwslist(workspaces):
 def _plottingtime():
     """Return a string presenting the plotting time."""
     return time.strftime('%d.%m.%Y %H:%M:%S')
+
 
 def _points(edges):
     """Return bin centers."""
@@ -72,7 +71,6 @@ def _profiletitle(workspaces, scan, units, cuts, widths, figure):
         cuts = [cuts]
     if not isinstance(widths, collections.Iterable):
         widths = [widths] * len(cuts)
-    ws = workspaces[0]
     if len(workspaces) == 1:
         title = _singledatatitle(workspaces[0])
     else:
@@ -97,6 +95,7 @@ def _singledatatitle(workspace):
              + _plottingtime() + '\n'
              + '$T$ = {:0.1f} K $E_i$ = {:0.2f} meV'.format(T, logs.Ei))
     return title
+
 
 def _SofQWtitle(workspace, figure):
     """Add title to SofQW figure."""
