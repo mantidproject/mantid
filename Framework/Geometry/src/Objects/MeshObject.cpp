@@ -667,10 +667,13 @@ double *MeshObject::getVertices() const {
 }
 
 /**
-* get info on standard shapes
+* get info on standard shapes (none for Mesh Object)
 */
 void MeshObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                                double &myradius, double &myheight) const {
+  // In practice, this outputs type = -1, 
+  // to indicate not a "standard" object (cuboid/cone/cyl/sphere).
+  // Retained for possible future use.
   type = 0;
   if (m_handler == nullptr)
     return;
