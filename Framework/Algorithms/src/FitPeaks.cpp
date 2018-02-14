@@ -1788,7 +1788,7 @@ double FitPeaks::FitFunctionHighBackground(
   GetRangeData(ws_index, fit_window, &vec_x, &vec_y, &vec_e);
 
   // Reduce the background
-  ReduceBackground(linear_background_function_, vec_x, &vec_y, &vec_e);
+  ReduceBackground(linear_background_function_, vec_x, &vec_y);
 
   // Create a new workspace
   API::MatrixWorkspace_sptr reduced_bkgd_ws =
@@ -2121,8 +2121,7 @@ void FitPeaks::GetRangeData(size_t iws,
 // find 1 local minima: a flat background
 void FitPeaks::ReduceBackground(API::IBackgroundFunction_sptr bkgd_func,
                                 const std::vector<double> &vec_x,
-                                std::vector<double> *vec_y,
-                                std::vector<double> *vec_e) {
+                                std::vector<double> *vec_y) {
 
   // find out all local minima
   std::vector<size_t> local_min_indices;

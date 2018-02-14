@@ -126,7 +126,7 @@ private:
   /// Reduce background
   void ReduceBackground(API::IBackgroundFunction_sptr bkgd_func,
                         const std::vector<double> &vec_x,
-                        std::vector<double> *vec_y, std::vector<double> *vec_e);
+                        std::vector<double> *vec_y);
 
   API::MatrixWorkspace_sptr
   CreateMatrixWorkspace(const std::vector<double> &vec_x,
