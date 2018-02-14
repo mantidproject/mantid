@@ -77,7 +77,7 @@ private:
   QString m_activeCurveLabel;
   QStringList m_storedCurveLabels;
   QString m_xunit;
-  PythonObject m_peakLabel;
+  QList<PythonObject> m_peakLabels;
 };
 }
 }

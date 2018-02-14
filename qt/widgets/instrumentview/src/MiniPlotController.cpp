@@ -178,10 +178,18 @@ void MiniPlotController::plotSingle(int detid) {
  * @param marker A reference to the marker class
  */
 void MiniPlotController::addPeakMarker(const PeakMarker2D &marker) {
+  const auto &peak = marker.getPeak();
+  addPeakMarker(peak);
+}
+
+/**
+ * Add a label for a single crystal peak
+ * @param peak A reference to the peak instance
+ */
+void MiniPlotController::addPeakMarker(const Mantid::Geometry::IPeak &peak) {
   QString xunit = m_miniplot->getXUnits();
   if (xunit.isEmpty())
     return;
-  const auto &peak = marker.getPeak();
   double peakX(-1.0);
   if (xunit == "dSpacing") {
     peakX = peak.getDSpacing();
@@ -194,7 +202,7 @@ void MiniPlotController::addPeakMarker(const PeakMarker2D &marker) {
   std::tie(_, ymax) = m_miniplot->getYLimits();
   // arbitrarily place the label at 85% of the y-axis height
   const double peakY = 0.85 * ymax;
-  m_miniplot->addPeakLabel(peakX, peakY, marker.getLabel());
+  m_miniplot->addPeakLabel(peakX, peakY, PeakMarker2D::formatLabel(peak));
 }
 
 /**
@@ -883,6 +891,13 @@ void MiniPlotController::addPeak(double x, double y) {
       alg->setPropertyValue("PeaksWorkspace", peakTableName);
       alg->execute();
     }
+
+    if (tw->rowCount() > 0) {
+      auto index = tw->rowCount() - 1;
+      auto &peak = tw->getPeak(index);
+      addPeakMarker(peak);
+    }
+
   } catch (std::exception &e) {
     QMessageBox::critical(
         m_miniplot, "MantidPlot -Error",

@@ -119,10 +119,14 @@ void MiniPlot::removeActiveCurve() {
   removeLine(m_storedCurveLabels.size());
   m_activeCurveLabel.clear();
   m_xunit.clear();
-  if (!m_peakLabel.isNone()) {
+  if (!m_peakLabels.empty()) {
     ScopedPythonGIL gil;
-    m_peakLabel.callMethod("remove");
-    m_peakLabel = PythonObject();
+    for (auto &label : m_peakLabels) {
+      if (!label.isNone()) {
+        label.callMethod("remove");
+      }
+    }
+    m_peakLabels.clear();
   }
 }
 
@@ -146,7 +150,7 @@ void MiniPlot::removeCurve(QString label) {
  * @param label The text label to attach
  */
 void MiniPlot::addPeakLabel(double x, double y, QString label) {
-  m_peakLabel = addText(x, y, label.toAscii().constData(), "center");
+  m_peakLabels.append(addText(x, y, label.toAscii().constData(), "center"));
 }
 
 /**

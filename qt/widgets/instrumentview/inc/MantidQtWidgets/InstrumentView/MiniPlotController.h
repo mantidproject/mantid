@@ -31,6 +31,7 @@ class V3D;
 }
 namespace Geometry {
 class ICompAssembly;
+class IPeak;
 }
 }
 
@@ -96,6 +97,7 @@ private:
 
   void plotSingle(int detid);
   void addPeakMarker(const PeakMarker2D &marker);
+  void addPeakMarker(const Mantid::Geometry::IPeak &peak);
   void plotTube(int detid);
   void plotTubeSums(int detid, const InstrumentActor &instrumentActor,
                     const Mantid::Geometry::ICompAssembly &assembly);

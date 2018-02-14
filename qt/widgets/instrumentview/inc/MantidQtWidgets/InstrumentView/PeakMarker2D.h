@@ -56,6 +56,7 @@ public:
   /// Allows PeakOverlay to move the label to avoid overlapping
   void moveLabelRectTo(const QPointF &p) const { m_labelRect.moveTo(p); }
   QString getLabel() const { return m_label; }
+  static QString formatLabel(const Mantid::Geometry::IPeak &peak);
 
 protected:
   /* --- Implemented Shape2D protected virtual methods --- */
