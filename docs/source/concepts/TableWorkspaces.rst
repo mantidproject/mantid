@@ -152,7 +152,7 @@ If only a subset of the data from the table is required, or you're working with 
 
     df = pd.DataFrame()
     for col in tableWS.getColumnNames():
-        df[col] = tableWS[col]
+        df[col] = tableWS.column(col)
 
 Working with Table Workspaces in C++
 ------------------------------------
