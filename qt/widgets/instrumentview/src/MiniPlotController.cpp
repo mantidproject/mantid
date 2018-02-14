@@ -131,7 +131,7 @@ void MiniPlotController::setPlotData(QList<int> detIDs) {
   if (!x.empty()) {
     MiniPlotCurveData data{
         actor.getWorkspace()->getAxis(0)->unit()->unitID().data(), "multiple",
-        x, y};
+        x, y, {}};
     m_miniplot->setActiveCurve(std::move(data));
   }
 }
@@ -896,7 +896,7 @@ void MiniPlotController::addPeak(double x, double y) {
 
     if (tw->rowCount() > 0) {
       auto index = tw->rowCount() - 1;
-      auto &peak = tw->getPeak(index);
+      auto &peak = tw->getPeak(static_cast<int>(index));
       addPeakMarker(peak);
     }
 
