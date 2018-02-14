@@ -801,6 +801,9 @@
     <technique>Neutron Diffraction</technique>
   </instrument>
   <instrument name="V20_4-tubes_150deg">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+  <instrument name="V20_IMAGING">
     <technique>Neutron Imaging</technique>
   </instrument>
 </facility>
