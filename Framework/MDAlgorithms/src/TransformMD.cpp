@@ -157,31 +157,33 @@ void TransformMD::exec() {
     // Recalculate all the values since the dimensions changed.
     histo->cacheValues();
     // Expect first 3 dimensions to be -1 for changing conventions
-    for (double s : m_scaling)
-      if (s < 0) {
+    for (int i = 0; i < static_cast<int>(m_scaling.size()); i++)
+      if (m_scaling[i] < 0) {
+        std::vector<int> axes(m_scaling.size());        // vector with ints.
+        std::iota(std::begin(axes), std::end(axes), 0); // Fill with 0, 1, ...
+        axes[0] = i;
+        axes[i] = 0;
+        // const std::vector<int> axes = { 1, 0 };
+        histo = transposeMD(histo, axes);
         signal_t *signals = histo->getSignalArray();
         signal_t *errorsSq = histo->getErrorSquaredArray();
         signal_t *numEvents = histo->getNumEventsArray();
 
-        size_t nPoints = 1;
-        size_t d4 = 1;
-        size_t nd = histo->getNumDims();
-        for (size_t i = 0; i < nd; i++) {
-          if (m_scaling[i] < 0.0) {
-            Geometry::IMDDimension_const_sptr dim = histo->getDimension(i);
-            // Find the extents
-            nPoints *= static_cast<size_t>(dim->getNBins());
-          } else {
-            break;
-          }
+        // Find the extents
+        size_t nPoints =
+            static_cast<size_t>(histo->getDimension(0)->getNBins());
+        size_t mPoints = 1;
+        for (size_t k = 1; k < histo->getNumDims(); k++) {
+          mPoints *= static_cast<size_t>(histo->getDimension(k)->getNBins());
         }
-        d4 = histo->getNPoints() / nPoints;
+        // other dimensions
+        for (size_t j = 0; j < mPoints; j++) {
+          this->reverse(signals + j * nPoints, nPoints);
+          this->reverse(errorsSq + j * nPoints, nPoints);
+          this->reverse(numEvents + j * nPoints, nPoints);
+        }
 
-        for (size_t i = 0; i < d4; i++) {
-          this->reverse(signals + i * nPoints, nPoints);
-          this->reverse(errorsSq + i * nPoints, nPoints);
-          this->reverse(numEvents + i * nPoints, nPoints);
-        }
+        histo = transposeMD(histo, axes);
       }
 
     this->setProperty("OutputWorkspace", histo);
@@ -242,6 +244,23 @@ void TransformMD::exec() {
     }
     this->setProperty("OutputWorkspace", event);
   }
+}
+/**
+ * Transpose the input data workspace according to the axis provided.
+ * @param toTranspose Workspace to transpose
+ * @param axes : target axes indexes
+ * @return : Transposed workspace.
+ */
+MDHistoWorkspace_sptr
+TransformMD::transposeMD(MDHistoWorkspace_sptr &toTranspose,
+                         const std::vector<int> &axes) {
+
+  auto transposeMD = this->createChildAlgorithm("TransposeMD", 0.0, 0.5);
+  transposeMD->setProperty("InputWorkspace", toTranspose);
+  transposeMD->setProperty("Axes", axes);
+  transposeMD->execute();
+  IMDHistoWorkspace_sptr outputWS = transposeMD->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
 } // namespace Mantid
