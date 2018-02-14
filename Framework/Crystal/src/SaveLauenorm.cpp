@@ -72,7 +72,6 @@ void SaveLauenorm::init() {
 /** Execute the algorithm.
  */
 void SaveLauenorm::exec() {
-  int count = 0;
 
   std::string filename = getProperty("Filename");
   Poco::Path path(filename);
@@ -144,6 +143,8 @@ void SaveLauenorm::exec() {
     lattice = ws->sample().getOrientedLattice();
   }
   // Count peaks
+  std::vector<int> numPeaks;
+  int count = 0;
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
 
     Peak &p = peaks[wi];
@@ -186,12 +187,18 @@ void SaveLauenorm::exec() {
     double lambda = p.getWavelength();
     double dsp = p.getDSpacing();
     if (dsp < dMin || lambda < wlMin ||
-        (minIsigI != EMPTY_DBL() && lambda > wlMax))
+        (wlMaxI != EMPTY_DBL() && lambda > wlMax))
       continue;
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0)
       continue;
     count++;
+    if (sequence != oldSequence) {
+      oldSequence = sequence;
+      numPeaks.push_back(count);
+      count = 0;
+    }
   }
+  oldSequence = -1;
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
 
@@ -238,11 +245,14 @@ void SaveLauenorm::exec() {
     double lambda = p.getWavelength();
     double dsp = p.getDSpacing();
     if (dsp < dMin || lambda < wlMin ||
-        (minIsigI != EMPTY_DBL() && lambda > wlMax))
+        (wlMax != EMPTY_DBL() && lambda > wlMax))
       continue;
     // This can be bank number of run number depending on
     if (sequence != oldSequence) {
       oldSequence = sequence;
+      out << "END-OF-REFLECTION-DATA\n";
+      out << "HARMONICS DATA    0 REFLECTIONS\n";
+      out << "END-OF-FILE\n";
       out.flush();
       out.close();
       sequenceNo++;
@@ -336,12 +346,13 @@ void SaveLauenorm::exec() {
           out << "0.0\n";
         }
         out << "MULT  ";
-        out << count << "     0      0      0      0      0      0      0      "
-                        "0      0\n";
+        out << numPeaks[sequenceNo]
+            << "     0      0      0      0      0      0      0      "
+               "0      0\n";
         out << "      0      0      0      0      0      0      0      0      "
                "0      0\n";
         out << "      0 \n";
-        out << "LAMH  " << count
+        out << "LAMH  " << numPeaks[sequenceNo]
             << "     0      0      0      0      0      0      0      0      "
                "0\n";
         out << "      0      0      0      0      0      0\n";
@@ -349,14 +360,15 @@ void SaveLauenorm::exec() {
             << "\n";
         out << "PACK        0"
             << "\n";
-        out << "NSPT   " << count << "      0      0      0      0"
+        out << "NSPT   " << numPeaks[sequenceNo]
+            << "      0      0      0      0"
             << "\n";
-        out << "NODH " << count
+        out << "NODH " << numPeaks[sequenceNo]
             << "    0      0      0      0      0      0      0      0      0\n"
             << "      0      0\n";
         out << "INTF        0"
             << "\n";
-        out << "REFLECTION DATA   " << count << " REFLECTIONS"
+        out << "REFLECTION DATA   " << numPeaks[sequenceNo] << " REFLECTIONS"
             << "\n";
       }
     }
