@@ -1508,21 +1508,6 @@ bool FitPeaks::FitBackground(API::IAlgorithm_sptr md_fitter,
 }
 
 //----------------------------------------------------------------------------------------------
-/**  Fit a specific peak with estimated peak and background parameters
- * @brief FitPeaks::fitIndividualPeak
- * @param wi
- * @param fitter
- * @param bkgd_fitter :: child algorithm 'Fit' to fit pure background
- * @param exppeakcenter
- * @param fitwindow
- * @param high
- * @param observe_peak_width: flag to estimate peak width (by observation) or
- * not
- * @param peakbkgdfunc
- * @param peakfunction
- * @param bkgdfunc
- * @return
- */
 /**
  * @brief FitPeaks::FitIndividualPeak
  * @param wi
