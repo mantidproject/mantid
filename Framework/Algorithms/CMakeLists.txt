@@ -241,6 +241,7 @@ set ( SRC_FILES
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
+	src/ReflectometryQResolution.cpp
 	src/ReflectometryReductionOne.cpp
 	src/ReflectometryReductionOne2.cpp
 	src/ReflectometryReductionOneAuto.cpp
@@ -578,6 +579,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
+	inc/MantidAlgorithms/ReflectometryQResolution.h
 	inc/MantidAlgorithms/ReflectometryReductionOne.h
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto.h
@@ -915,6 +917,7 @@ set ( TEST_FILES
 	RebinToWorkspaceTest.h
 	RebunchTest.h
 	RectangularBeamProfileTest.h
+	ReflectometryQResolutionTest.h
 	ReflectometryReductionOne2Test.h
 	ReflectometryReductionOneAuto2Test.h
 	ReflectometryReductionOneAutoTest.h
