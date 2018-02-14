@@ -6,7 +6,7 @@ from sans.common.enums import SANSInstrument, DetectorType, IntegralEnum, SANSFa
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
 
-if sys.version_info.major == 3:
+if sys.version_info.major > 2:
     from unittest import mock
 else:
     import mock
