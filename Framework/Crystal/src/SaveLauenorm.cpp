@@ -145,6 +145,14 @@ void SaveLauenorm::exec() {
   // Count peaks
   std::vector<int> numPeaks;
   int count = 0;
+  std::vector<double> maxLamVec;
+  std::vector<double> minLamVec;
+  std::vector<double> sumLamVec;
+  std::vector<double> minDVec;
+  double maxLam = 0;
+  double minLam = EMPTY_DBL();
+  double sumLam = 0;
+  double minD = EMPTY_DBL();
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
 
     Peak &p = peaks[wi];
@@ -187,15 +195,31 @@ void SaveLauenorm::exec() {
     double lambda = p.getWavelength();
     double dsp = p.getDSpacing();
     if (dsp < dMin || lambda < wlMin ||
-        (wlMaxI != EMPTY_DBL() && lambda > wlMax))
+        (wlMax != EMPTY_DBL() && lambda > wlMax))
       continue;
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0)
       continue;
     count++;
-    if (sequence != oldSequence) {
+    if (lambda < minLam)
+      minLam = lambda;
+    if (lambda > maxLam)
+      maxLam = lambda;
+    if (dsp < minD)
+      minD = dsp;
+    sumLam += lambda;
+
+    if (sequence != oldSequence || wi == ws->getNumberPeaks() - 1) {
       oldSequence = sequence;
       numPeaks.push_back(count);
+      maxLamVec.push_back(maxLam);
+      minLamVec.push_back(minLam);
+      sumLamVec.push_back(sumLam);
+      minDVec.push_back(minD);
       count = 0;
+      maxLam = 0;
+      minLam = EMPTY_DBL();
+      sumLam = 0;
+      minD = EMPTY_DBL();
     }
   }
   oldSequence = -1;
@@ -302,18 +326,14 @@ void SaveLauenorm::exec() {
             << std::setw(12) << std::setprecision(4) << chi << std::setw(12)
             << std::setprecision(4) << omega << "\n";
         out << "LAMS      ";
-        if (wlMax != EMPTY_DBL()) {
-          out << std::setprecision(1) << std::fixed << (wlMin + wlMax) / 2
-              << " " << wlMin << " " << wlMax << "\n";
-        } else {
-          out << "3.0 2.0 4.0\n";
-        }
+
+        out << std::setprecision(1) << std::fixed
+            << sumLamVec[sequenceNo] / numPeaks[sequenceNo] << " "
+            << minLamVec[sequenceNo] << " " << maxLamVec[sequenceNo] << "\n";
+
         out << "DMIN      ";
-        if (dMin != EMPTY_DBL()) {
-          out << std::setprecision(2) << std::fixed << dMin << "\n";
-        } else {
-          out << "1.75\n";
-        }
+        out << std::setprecision(2) << std::fixed << minDVec[sequenceNo]
+            << "\n";
 
         // distance from sample to detector (use first pixel) in mm
         double L2 = 500.0;
