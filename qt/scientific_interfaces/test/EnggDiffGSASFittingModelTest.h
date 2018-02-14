@@ -96,14 +96,14 @@ TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const double negativeWeight) {
   // Mock method - just create some dummy output and ignore all the parameters
   // Do some pointless casts to stifle unused parameter warnings
-  (void)GSASIIProjectFile;
-  (void)refinementMethod;
-  (void)dMin;
-  (void)phaseFiles;
-  (void)pathToGSASII;
-  (void)negativeWeight;
-  (void)inputWorkspace;
-  (void)instParamFile;
+  UNUSED_ARG(GSASIIProjectFile);
+  UNUSED_ARG(refinementMethod);
+  UNUSED_ARG(dMin);
+  UNUSED_ARG(phaseFiles);
+  UNUSED_ARG(pathToGSASII);
+  UNUSED_ARG(negativeWeight);
+  UNUSED_ARG(inputWorkspace);
+  UNUSED_ARG(instParamFile);
 
   const static std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
   const static std::array<std::array<double, 3>, 1> targetTableValues = {
