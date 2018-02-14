@@ -497,11 +497,12 @@ void MplFigureCanvas::setLabel(const Axes::Label type, const char *label) {
  * @param axis Enumeration defining the axis
  * @param size The new font size
  */
-void MplFigureCanvas::setTickLabelFontSize(const Axes::Scale axis, double size) {
-  const char* xAxis = "x";
-  const char* yAxis = "y";
-  const char* bothAxes = "both";
-  const char* whichAxis = bothAxes;
+void MplFigureCanvas::setTickLabelFontSize(const Axes::Scale axis,
+                                           double size) {
+  const char *xAxis = "x";
+  const char *yAxis = "y";
+  const char *bothAxes = "both";
+  const char *whichAxis = bothAxes;
   if (axis == Axes::Scale::X) {
     whichAxis = xAxis;
   } else if (axis == Axes::Scale::Y) {
@@ -593,12 +594,14 @@ void MplFigureCanvas::rescaleToData(const Axes::Scale axis, bool redraw) {
  * @param y Y position in data coordinates
  * @param label The string label to attach to the canvas
  */
-PythonObject MplFigureCanvas::addText(double x, double y, const char *label, const char *horizontalalignment) {
+PythonObject MplFigureCanvas::addText(double x, double y, const char *label,
+                                      const char *horizontalalignment) {
   ScopedPythonGIL gil;
   auto axes = m_pydata->gca();
   return PythonObject::fromNewRef(PyObject_CallMethod(
       axes.get(), PYSTR_LITERAL("text"), PYSTR_LITERAL("(ffs{s:s})"), x, y,
-      label, PYSTR_LITERAL("horizontalalignment"), PYSTR_LITERAL(horizontalalignment)));
+      label, PYSTR_LITERAL("horizontalalignment"),
+      PYSTR_LITERAL(horizontalalignment)));
 }
 
 /**

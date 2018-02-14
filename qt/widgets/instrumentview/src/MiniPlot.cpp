@@ -93,7 +93,8 @@ void MiniPlot::update() {
  */
 void MiniPlot::setActiveCurve(std::vector<double> x, std::vector<double> y,
                               QString xunit, QString curveLabel) {
-  std::transform(y.begin(), y.end(), y.begin(), [](double v){return v > 0? v : SMALLEST_POSITIVE_VALUE;});
+  std::transform(y.begin(), y.end(), y.begin(),
+                 [](double v) { return v > 0 ? v : SMALLEST_POSITIVE_VALUE; });
   removeActiveCurve();
   plotLine(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT);
   setLabel(Axes::Label::X, xunit.toAscii().data());
