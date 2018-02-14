@@ -54,6 +54,8 @@ Requires: python-pip
 %{?fedora:Requires: python2-qtconsole}
 Requires: python-sphinx
 Requires: python2-sphinx-bootstrap-theme
+%{?fedora:Requires: python2-sphinxcontrib-bibtex}
+%{?fedora:Requires: python3-sphinxcontrib-bibtex}
 Requires: PyYAML
 Requires: python2-mock
 Requires: python2-psutil
@@ -138,6 +140,9 @@ required for Mantid development.
 * Wed Apr 25 2018 Steven Hahn <hahnse@ornl.gov>
 - Add qt5-qtx11extras
 - remove RHEL6-specific packages
+
+* Wed Feb 14 2018 Peter Peterson <petersonpf@ornl.gov>
+- Added python-sphinxcontrib-bibtex
 
 * Mon Jan 22 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Added qtawesome
