@@ -26,9 +26,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
+from scipy import constants
 
 
 class TeixeiraWater(IFunction1D):
+
+    planck_constant = constants.Planck / constants.e * 1E15  # meV*psec
+    hbar = planck_constant / (2 * np.pi)  # meV * ps  = ueV * ns
 
     def category(self):
         return "QuasiElastic"
@@ -41,23 +45,23 @@ class TeixeiraWater(IFunction1D):
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
-        length = length**2
+        length_square = length**2
 
         xvals = np.array(xvals)
-        hwhm = xvals * xvals * length / (tau * (6 + xvals * xvals * length))
+        hwhm = self.hbar * xvals * xvals * length_square / (tau * (6 + xvals * xvals * length_square))
 
         return hwhm
 
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
-        length = length**2
+        length_square = length**2
 
         i = 0
         for x in xvals:
-            h = x*x*length/(tau*(1+x*x*length))
+            h = self.hbar*x*x*length_square/(tau*(1+x*x*length_square))
             jacobian.set(i,0,-h/tau)
-            jacobian.set(i,1,h*(1.0-h*tau)/length)
+            jacobian.set(i,1,h*(1.0-h*tau)/length_square)
             i += 1
 
 
