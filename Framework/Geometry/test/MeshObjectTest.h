@@ -1061,10 +1061,10 @@ public:
   static void destroySuite(MeshObjectTestPerformance *suite) { delete suite; }
 
   MeshObjectTestPerformance()
-      : rng(200000), octahedron(createOctahedron()), lShape(createLShape()) {}
+      : rng(200000), octahedron(createOctahedron()), lShape(createLShape()), smallCube(createCube(0.2)) {}
 
   void test_isOnSide(){
-    size_t dim = 20;
+    const size_t dim(20);
     V3D test_pt;
     bool dummy;
     for (size_t i = 0; i < dim*dim*dim; ++i) {
@@ -1074,7 +1074,7 @@ public:
   }
 
   void test_isValid() {
-    size_t dim = 20;
+    const size_t dim(20);
     V3D test_pt;
     bool dummy;
     for (size_t i = 0; i < dim*dim*dim; ++i) {
@@ -1084,8 +1084,8 @@ public:
   }
 
   void test_calcValidType() {
-    size_t sDim = 18;
-    size_t dDim = 8;
+    const size_t sDim(18);
+    const size_t dDim(8);
     Track testRay;
     int dummy;
     for (size_t i = 0; i < sDim*sDim*sDim; ++i) {
@@ -1095,8 +1095,8 @@ public:
   }
 
   void test_interceptSurface() {
-    size_t sDim = 18;
-    size_t dDim = 8;
+    const size_t sDim(18);
+    const size_t dDim(8);
     Track testRay;
     int dummy;
     for (size_t i = 0; i < sDim*sDim*sDim; ++i) {
@@ -1105,7 +1105,48 @@ public:
     }
   }
 
+  void test_solid_angle() {
+    const size_t dim(20);
+    V3D test_pt;
+    double dummy;
+    for (size_t i = 0; i < dim*dim*dim; ++i) {
+      test_pt = create_test_point(i, dim);
+      dummy = smallCube->solidAngle(test_pt);
+    }
+  }
+
+  void test_solid_angle_scaled() {
+    const size_t dim(20);
+    V3D test_pt;
+    double dummy;
+    for (size_t i = 0; i < dim*dim*dim; ++i) {
+      test_pt = create_test_point(i, dim);
+      dummy = smallCube->solidAngle(test_pt, V3D(0.5, 1.33, 1.5));
+    }
+  }
+
+  void test_volume() {
+    const size_t numberOfRuns(10000);
+    double dummy;
+    for (size_t i = 0; i < numberOfRuns; ++i) {
+      dummy = octahedron->volume();
+      dummy = lShape->volume();
+    }
+  }
+
+  void test_getPointInObject() {
+    const size_t numberOfRuns(1000);
+    int iDummy;
+    V3D pDummy;
+    for (size_t i = 0; i < numberOfRuns; ++i) {
+      iDummy = octahedron->getPointInObject(pDummy);
+      iDummy = lShape->getPointInObject(pDummy);
+      iDummy = smallCube->getPointInObject(pDummy);
+    }
+  }
+
   void test_generatePointInside_Convex_Solid() {
+    const size_t npoints(6000);
     const size_t maxAttempts(500);
     V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
@@ -1114,6 +1155,7 @@ public:
   }
 
   void test_generatePointInside_NonConvex_Solid() {
+    const size_t npoints(6000);
     const size_t maxAttempts(500);
     V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
@@ -1122,12 +1164,14 @@ public:
   }
 
   void test_output_for_rendering() {
-    const size_t numberOfRuns(50000);
-    double* vertexData;
-    int* triangleData;
+    const size_t numberOfRuns(30000);
+    double* vertexDummy;
+    int* triangleDummy;
     for (size_t i = 0; i < numberOfRuns; ++i) {
-      vertexData = octahedron->getVertices();
-      triangleData = octahedron->getTriangles();
+      vertexDummy = octahedron->getVertices();
+      triangleDummy = octahedron->getTriangles();
+      vertexDummy = lShape->getVertices();
+      triangleDummy = lShape->getTriangles();
     }
   }
 
@@ -1154,10 +1198,10 @@ public:
   }
 
 private:
-  const size_t npoints = 6000;
   Mantid::Kernel::MersenneTwister rng;
   std::unique_ptr<MeshObject> octahedron;
   std::unique_ptr<MeshObject> lShape;
+  std::unique_ptr<MeshObject> smallCube;
 };
 
 #endif // MANTID_TESTMESHOBJECT__
