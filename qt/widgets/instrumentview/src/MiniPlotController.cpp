@@ -130,8 +130,11 @@ void MiniPlotController::setPlotData(QList<int> detIDs) {
   QApplication::restoreOverrideCursor();
   if (!x.empty()) {
     MiniPlotCurveData data{
-        actor.getWorkspace()->getAxis(0)->unit()->unitID().data(), "multiple",
-        x, y, {}};
+        actor.getWorkspace()->getAxis(0)->unit()->unitID().data(),
+        "multiple",
+        x,
+        y,
+        {}};
     m_miniplot->setActiveCurve(std::move(data));
   }
 }
