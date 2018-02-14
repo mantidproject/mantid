@@ -199,16 +199,8 @@ void SaveLauenorm::exec() {
       continue;
     if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0)
       continue;
-    count++;
-    if (lambda < minLam)
-      minLam = lambda;
-    if (lambda > maxLam)
-      maxLam = lambda;
-    if (dsp < minD)
-      minD = dsp;
-    sumLam += lambda;
 
-    if (sequence != oldSequence || wi == ws->getNumberPeaks() - 1) {
+    if (sequence != oldSequence) {
       oldSequence = sequence;
       numPeaks.push_back(count);
       maxLamVec.push_back(maxLam);
@@ -220,6 +212,21 @@ void SaveLauenorm::exec() {
       minLam = EMPTY_DBL();
       sumLam = 0;
       minD = EMPTY_DBL();
+    }
+    count++;
+    if (lambda < minLam)
+      minLam = lambda;
+    if (lambda > maxLam)
+      maxLam = lambda;
+    if (dsp < minD)
+      minD = dsp;
+    sumLam += lambda;
+    if (wi == ws->getNumberPeaks() - 1) {
+      numPeaks.push_back(count);
+      maxLamVec.push_back(maxLam);
+      minLamVec.push_back(minLam);
+      sumLamVec.push_back(sumLam);
+      minDVec.push_back(minD);
     }
   }
   oldSequence = -1;
