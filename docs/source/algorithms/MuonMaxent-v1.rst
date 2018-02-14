@@ -20,7 +20,8 @@ The algorithm calculates an estimate of each time domain spectra, :math:`g_k(t)`
 
 .. math::  g_k(t)=(1+A_k \Re(\mathrm{IFFT}(f(\omega) R(\omega))\exp(-j\phi_k) ) ),
 
-where :math:`\Re(z)` is the real part of :math:`z`, :math:`\mathrm{IFFT}` is the inverse fast Fourier transform, :math:`\phi_k` is the phase and :math:`A_k` is the asymmetry of the of the  :math:`k^\mathrm{th}` spectrum. 
+where :math:`\Re(z)` is the real part of :math:`z`, :math:`\mathrm{IFFT}` is the inverse fast Fourier transform (as defined by `numpy
+<https://docs.scipy.org/doc/numpy-1.12.0/reference/routines.fft.html#module-numpy.fft>`_), :math:`\phi_k` is the phase and :math:`A_k` is the asymmetry of the of the  :math:`k^\mathrm{th}` spectrum. 
 The asymmetry is normalised such that :math:`\sum_k A_k = 1`. 
 The instrumental frequency response function, :math:`R(\omega)`, is  is in general complex (due to a 
 non-symmetric pulse shape) and is the same for all spectra. The values of the phases and asymmetries are fitted in the outer loop of the algorithm. 
@@ -29,7 +30,7 @@ The :math:`\chi^2` value is calculated via the equation
 
 .. math:: \chi^2 = F\frac{\sum_{k,t} (D_k(t)-g_k(t))^2 }{E_k(t)^2},
 
-where :math:`F` is the :code:`Factor` and is of order 1.0 (but can be adjusted within the algorithm for a better fit). 
+where :math:`F` is the :code:`Factor` and is of order 1.0 (but can be adjusted by the user at the start of the algorithm for a better fit). 
 The entropy is given by
 
 .. math:: S = - \sum_\omega f(\omega) \log\left(\frac{f(\omega)}{A}\right),
