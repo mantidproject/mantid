@@ -17,7 +17,7 @@ Improvements
 Instrument definitions
 ######################
 
-
+* The MAPS instrument definition file dating back to 2017-06-03 was changed.
 
 Algorithms
 ##########

@@ -26,11 +26,12 @@ namespace API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DataProcessorAlgorithm::DataProcessorAlgorithm()
-    : API::Algorithm(), m_useMPI(false), m_loadAlg("Load"),
-      m_accumulateAlg("Plus"), m_loadAlgFileProp("Filename"),
+template <class Base>
+GenericDataProcessorAlgorithm<Base>::GenericDataProcessorAlgorithm()
+    : m_useMPI(false), m_loadAlg("Load"), m_accumulateAlg("Plus"),
+      m_loadAlgFileProp("Filename"),
       m_propertyManagerPropertyName("ReductionProperties") {
-  enableHistoryRecordingForChild(true);
+  Base::enableHistoryRecordingForChild(true);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -54,7 +55,9 @@ DataProcessorAlgorithm::DataProcessorAlgorithm()
 *default gives the latest version.
 *  @return shared pointer to the newly created algorithm object
 */
-boost::shared_ptr<Algorithm> DataProcessorAlgorithm::createChildAlgorithm(
+template <class Base>
+boost::shared_ptr<Algorithm>
+GenericDataProcessorAlgorithm<Base>::createChildAlgorithm(
     const std::string &name, const double startProgress,
     const double endProgress, const bool enableLogging, const int &version) {
   // call parent method to create the child algorithm
@@ -63,18 +66,20 @@ boost::shared_ptr<Algorithm> DataProcessorAlgorithm::createChildAlgorithm(
   alg->enableHistoryRecordingForChild(this->isRecordingHistoryForChild());
   if (this->isRecordingHistoryForChild()) {
     // pass pointer to the history object created in Algorithm to the child
-    alg->trackAlgorithmHistory(m_history);
+    alg->trackAlgorithmHistory(Base::m_history);
   }
   return alg;
 }
 
-void DataProcessorAlgorithm::setLoadAlg(const std::string &alg) {
+template <class Base>
+void GenericDataProcessorAlgorithm<Base>::setLoadAlg(const std::string &alg) {
   if (alg.empty())
     throw std::invalid_argument("Cannot set load algorithm to empty string");
   m_loadAlg = alg;
 }
 
-void DataProcessorAlgorithm::setLoadAlgFileProp(
+template <class Base>
+void GenericDataProcessorAlgorithm<Base>::setLoadAlgFileProp(
     const std::string &filePropName) {
   if (filePropName.empty()) {
     throw std::invalid_argument(
@@ -83,14 +88,16 @@ void DataProcessorAlgorithm::setLoadAlgFileProp(
   m_loadAlgFileProp = filePropName;
 }
 
-void DataProcessorAlgorithm::setAccumAlg(const std::string &alg) {
+template <class Base>
+void GenericDataProcessorAlgorithm<Base>::setAccumAlg(const std::string &alg) {
   if (alg.empty())
     throw std::invalid_argument(
         "Cannot set accumulate algorithm to empty string");
   m_accumulateAlg = alg;
 }
 
-void DataProcessorAlgorithm::setPropManagerPropName(
+template <class Base>
+void GenericDataProcessorAlgorithm<Base>::setPropManagerPropName(
     const std::string &propName) {
   m_propertyManagerPropertyName = propName;
 }
@@ -103,7 +110,8 @@ void DataProcessorAlgorithm::setPropManagerPropName(
  * @param nameInProp Name of the property as declared in Algorithm::init().
  * @param nameInPropManager Name of the property in the PropertyManager.
  */
-void DataProcessorAlgorithm::mapPropertyName(
+template <class Base>
+void GenericDataProcessorAlgorithm<Base>::mapPropertyName(
     const std::string &nameInProp, const std::string &nameInPropManager) {
   m_nameToPMName[nameInProp] = nameInPropManager;
 }
@@ -119,8 +127,9 @@ void DataProcessorAlgorithm::mapPropertyName(
  *
  * @throws std::runtime_error If you ask to copy a non-existent property
  */
-void DataProcessorAlgorithm::copyProperty(API::Algorithm_sptr alg,
-                                          const std::string &name) {
+template <class Base>
+void GenericDataProcessorAlgorithm<Base>::copyProperty(
+    API::Algorithm_sptr alg, const std::string &name) {
   if (!alg->existsProperty(name)) {
     std::stringstream msg;
     msg << "Algorithm \"" << alg->name() << "\" does not have property \""
@@ -129,8 +138,8 @@ void DataProcessorAlgorithm::copyProperty(API::Algorithm_sptr alg,
   }
 
   auto prop = alg->getPointerToProperty(name);
-  declareProperty(std::unique_ptr<Property>(prop->clone()),
-                  prop->documentation());
+  Base::declareProperty(std::unique_ptr<Property>(prop->clone()),
+                        prop->documentation());
 }
 
 /**
@@ -141,10 +150,11 @@ void DataProcessorAlgorithm::copyProperty(API::Algorithm_sptr alg,
  * @param name
  * @return
  */
-std::string
-DataProcessorAlgorithm::getPropertyValue(const std::string &name) const {
+template <class Base>
+std::string GenericDataProcessorAlgorithm<Base>::getPropertyValue(
+    const std::string &name) const {
   // explicitly specifying a property wins
-  if (!isDefault(name)) {
+  if (!Base::isDefault(name)) {
     return Algorithm::getPropertyValue(name);
   }
 
@@ -168,11 +178,13 @@ DataProcessorAlgorithm::getPropertyValue(const std::string &name) const {
  * @param name
  * @return
  */
+template <class Base>
 PropertyManagerOwner::TypedValue
-DataProcessorAlgorithm::getProperty(const std::string &name) const {
+GenericDataProcessorAlgorithm<Base>::getProperty(
+    const std::string &name) const {
   // explicitely specifying a property wins
-  if (!isDefault(name)) {
-    return Algorithm::getProperty(name);
+  if (!Base::isDefault(name)) {
+    return Base::getProperty(name);
   }
 
   // return it if it is in the held property manager
@@ -188,15 +200,18 @@ DataProcessorAlgorithm::getProperty(const std::string &name) const {
   return Algorithm::getProperty(name);
 }
 
-ITableWorkspace_sptr
-DataProcessorAlgorithm::determineChunk(const std::string &filename) {
+template <class Base>
+ITableWorkspace_sptr GenericDataProcessorAlgorithm<Base>::determineChunk(
+    const std::string &filename) {
   UNUSED_ARG(filename);
 
   throw std::runtime_error(
       "DataProcessorAlgorithm::determineChunk is not implemented");
 }
 
-MatrixWorkspace_sptr DataProcessorAlgorithm::loadChunk(const size_t rowIndex) {
+template <class Base>
+MatrixWorkspace_sptr
+GenericDataProcessorAlgorithm<Base>::loadChunk(const size_t rowIndex) {
   UNUSED_ARG(rowIndex);
 
   throw std::runtime_error(
@@ -208,7 +223,9 @@ MatrixWorkspace_sptr DataProcessorAlgorithm::loadChunk(const size_t rowIndex) {
  * @param partialWS :: workspace to assemble
  * thread only)
  */
-Workspace_sptr DataProcessorAlgorithm::assemble(Workspace_sptr partialWS) {
+template <class Base>
+Workspace_sptr
+GenericDataProcessorAlgorithm<Base>::assemble(Workspace_sptr partialWS) {
   Workspace_sptr outputWS = partialWS;
 #ifdef MPI_BUILD
   IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
@@ -233,9 +250,10 @@ Workspace_sptr DataProcessorAlgorithm::assemble(Workspace_sptr partialWS) {
  * @param outputWSName :: Name of the assembled workspace (available in main
  * thread only)
  */
+template <class Base>
 Workspace_sptr
-DataProcessorAlgorithm::assemble(const std::string &partialWSName,
-                                 const std::string &outputWSName) {
+GenericDataProcessorAlgorithm<Base>::assemble(const std::string &partialWSName,
+                                              const std::string &outputWSName) {
 #ifdef MPI_BUILD
   std::string threadOutput = partialWSName;
   Workspace_sptr partialWS =
@@ -266,8 +284,9 @@ DataProcessorAlgorithm::assemble(const std::string &partialWSName,
  * @param outputWSName :: Name of the workspace to save
  * @param outputFile :: Path to the Nexus file to save
  */
-void DataProcessorAlgorithm::saveNexus(const std::string &outputWSName,
-                                       const std::string &outputFile) {
+template <class Base>
+void GenericDataProcessorAlgorithm<Base>::saveNexus(
+    const std::string &outputWSName, const std::string &outputFile) {
   bool saveOutput = true;
 #ifdef MPI_BUILD
   if (boost::mpi::communicator().rank() > 0)
@@ -283,7 +302,7 @@ void DataProcessorAlgorithm::saveNexus(const std::string &outputWSName,
 }
 
 /// Return true if we are running on the main thread
-bool DataProcessorAlgorithm::isMainThread() {
+template <class Base> bool GenericDataProcessorAlgorithm<Base>::isMainThread() {
   bool mainThread;
 #ifdef MPI_BUILD
   mainThread = (boost::mpi::communicator().rank() == 0);
@@ -294,7 +313,7 @@ bool DataProcessorAlgorithm::isMainThread() {
 }
 
 /// Return the number of MPI processes running
-int DataProcessorAlgorithm::getNThreads() {
+template <class Base> int GenericDataProcessorAlgorithm<Base>::getNThreads() {
 #ifdef MPI_BUILD
   return boost::mpi::communicator().size();
 #else
@@ -307,8 +326,10 @@ int DataProcessorAlgorithm::getNThreads() {
  * @param inputData :: File path or workspace name
  * @param loadQuiet :: If true then the output is not stored in the ADS
  */
-Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
-                                            const bool loadQuiet) {
+template <class Base>
+Workspace_sptr
+GenericDataProcessorAlgorithm<Base>::load(const std::string &inputData,
+                                          const bool loadQuiet) {
   Workspace_sptr inputWS;
 
   // First, check whether we have the name of an existing workspace
@@ -370,11 +391,13 @@ Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
  *
  * @param propertyManager :: Name of the property manager to retrieve.
  */
-boost::shared_ptr<PropertyManager> DataProcessorAlgorithm::getProcessProperties(
+template <class Base>
+boost::shared_ptr<PropertyManager>
+GenericDataProcessorAlgorithm<Base>::getProcessProperties(
     const std::string &propertyManager) const {
   std::string propertyManagerName(propertyManager);
   if (propertyManager.empty() && (!m_propertyManagerPropertyName.empty())) {
-    if (!existsProperty(m_propertyManagerPropertyName)) {
+    if (!Base::existsProperty(m_propertyManagerPropertyName)) {
       std::stringstream msg;
       msg << "Failed to find property \"" << m_propertyManagerPropertyName
           << "\"";
@@ -388,7 +411,7 @@ boost::shared_ptr<PropertyManager> DataProcessorAlgorithm::getProcessProperties(
     processProperties =
         PropertyManagerDataService::Instance().retrieve(propertyManagerName);
   } else {
-    getLogger().notice() << "Could not find property manager\n";
+    Base::getLogger().notice() << "Could not find property manager\n";
     processProperties = boost::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(propertyManagerName,
                                                         processProperties);
@@ -396,14 +419,16 @@ boost::shared_ptr<PropertyManager> DataProcessorAlgorithm::getProcessProperties(
   return processProperties;
 }
 
+template <class Base>
 std::vector<std::string>
-DataProcessorAlgorithm::splitInput(const std::string &input) {
+GenericDataProcessorAlgorithm<Base>::splitInput(const std::string &input) {
   UNUSED_ARG(input);
   throw std::runtime_error(
       "DataProcessorAlgorithm::splitInput is not implemented");
 }
 
-void DataProcessorAlgorithm::forwardProperties() {
+template <class Base>
+void GenericDataProcessorAlgorithm<Base>::forwardProperties() {
   throw std::runtime_error(
       "DataProcessorAlgorithm::forwardProperties is not implemented");
 }
@@ -418,9 +443,10 @@ void DataProcessorAlgorithm::forwardProperties() {
  * @param rhs :: the workspace on the right hand side of the divide symbol
  * @return matrix workspace resulting from the operation
  */
+template <class Base>
 MatrixWorkspace_sptr
-DataProcessorAlgorithm::divide(const MatrixWorkspace_sptr lhs,
-                               const MatrixWorkspace_sptr rhs) {
+GenericDataProcessorAlgorithm<Base>::divide(const MatrixWorkspace_sptr lhs,
+                                            const MatrixWorkspace_sptr rhs) {
   return this->executeBinaryAlgorithm<
       MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Divide", lhs, rhs);
@@ -432,9 +458,10 @@ DataProcessorAlgorithm::divide(const MatrixWorkspace_sptr lhs,
  * @param rhsValue :: the value on the right hand side of the divide symbol
  * @return matrix workspace resulting from the operation
  */
+template <class Base>
 MatrixWorkspace_sptr
-DataProcessorAlgorithm::divide(const MatrixWorkspace_sptr lhs,
-                               const double &rhsValue) {
+GenericDataProcessorAlgorithm<Base>::divide(const MatrixWorkspace_sptr lhs,
+                                            const double &rhsValue) {
   return this->executeBinaryAlgorithm<
       MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Divide", lhs, createWorkspaceSingleValue(rhsValue));
@@ -448,9 +475,10 @@ DataProcessorAlgorithm::divide(const MatrixWorkspace_sptr lhs,
  * symbol
  * @return matrix workspace resulting from the operation
  */
+template <class Base>
 MatrixWorkspace_sptr
-DataProcessorAlgorithm::multiply(const MatrixWorkspace_sptr lhs,
-                                 const MatrixWorkspace_sptr rhs) {
+GenericDataProcessorAlgorithm<Base>::multiply(const MatrixWorkspace_sptr lhs,
+                                              const MatrixWorkspace_sptr rhs) {
   return this->executeBinaryAlgorithm<
       MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Divide", lhs, rhs);
@@ -464,9 +492,10 @@ DataProcessorAlgorithm::multiply(const MatrixWorkspace_sptr lhs,
  * symbol
  * @return matrix workspace resulting from the operation
  */
+template <class Base>
 MatrixWorkspace_sptr
-DataProcessorAlgorithm::multiply(const MatrixWorkspace_sptr lhs,
-                                 const double &rhsValue) {
+GenericDataProcessorAlgorithm<Base>::multiply(const MatrixWorkspace_sptr lhs,
+                                              const double &rhsValue) {
   return this->executeBinaryAlgorithm<
       MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Multiply", lhs, createWorkspaceSingleValue(rhsValue));
@@ -478,9 +507,10 @@ DataProcessorAlgorithm::multiply(const MatrixWorkspace_sptr lhs,
  * @param rhs :: the workspace on the right hand side of the addition symbol
  * @return matrix workspace resulting from the operation
  */
+template <class Base>
 MatrixWorkspace_sptr
-DataProcessorAlgorithm::plus(const MatrixWorkspace_sptr lhs,
-                             const MatrixWorkspace_sptr rhs) {
+GenericDataProcessorAlgorithm<Base>::plus(const MatrixWorkspace_sptr lhs,
+                                          const MatrixWorkspace_sptr rhs) {
   return this->executeBinaryAlgorithm<
       MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Plus", lhs, rhs);
@@ -492,9 +522,10 @@ DataProcessorAlgorithm::plus(const MatrixWorkspace_sptr lhs,
  * @param rhsValue :: the value on the right hand side of the addition symbol
  * @return matrix workspace resulting from the operation
  */
+template <class Base>
 MatrixWorkspace_sptr
-DataProcessorAlgorithm::plus(const MatrixWorkspace_sptr lhs,
-                             const double &rhsValue) {
+GenericDataProcessorAlgorithm<Base>::plus(const MatrixWorkspace_sptr lhs,
+                                          const double &rhsValue) {
   return this->executeBinaryAlgorithm<
       MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Plus", lhs, createWorkspaceSingleValue(rhsValue));
@@ -506,9 +537,10 @@ DataProcessorAlgorithm::plus(const MatrixWorkspace_sptr lhs,
  * @param rhs :: the workspace on the right hand side of the subtraction symbol
  * @return matrix workspace resulting from the operation
  */
+template <class Base>
 MatrixWorkspace_sptr
-DataProcessorAlgorithm::minus(const MatrixWorkspace_sptr lhs,
-                              const MatrixWorkspace_sptr rhs) {
+GenericDataProcessorAlgorithm<Base>::minus(const MatrixWorkspace_sptr lhs,
+                                           const MatrixWorkspace_sptr rhs) {
   return this->executeBinaryAlgorithm<
       MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Minus", lhs, rhs);
@@ -521,9 +553,10 @@ DataProcessorAlgorithm::minus(const MatrixWorkspace_sptr lhs,
  * symbol
  * @return matrix workspace resulting from the operation
  */
+template <class Base>
 MatrixWorkspace_sptr
-DataProcessorAlgorithm::minus(const MatrixWorkspace_sptr lhs,
-                              const double &rhsValue) {
+GenericDataProcessorAlgorithm<Base>::minus(const MatrixWorkspace_sptr lhs,
+                                           const double &rhsValue) {
   return this->executeBinaryAlgorithm<
       MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Minus", lhs, createWorkspaceSingleValue(rhsValue));
@@ -534,14 +567,29 @@ DataProcessorAlgorithm::minus(const MatrixWorkspace_sptr lhs,
  * @param rhsValue :: the value to convert to a single value matrix workspace
  * @return matrix workspace resulting from the operation
  */
+template <class Base>
 MatrixWorkspace_sptr
-DataProcessorAlgorithm::createWorkspaceSingleValue(const double &rhsValue) {
+GenericDataProcessorAlgorithm<Base>::createWorkspaceSingleValue(
+    const double &rhsValue) {
   MatrixWorkspace_sptr retVal =
       WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
   retVal->dataY(0)[0] = rhsValue;
 
   return retVal;
 }
+
+template <typename T>
+void GenericDataProcessorAlgorithm<T>::visualStudioC4661Workaround() {}
+
+template class GenericDataProcessorAlgorithm<Algorithm>;
+template class MANTID_API_DLL GenericDataProcessorAlgorithm<SerialAlgorithm>;
+template class MANTID_API_DLL GenericDataProcessorAlgorithm<ParallelAlgorithm>;
+template class MANTID_API_DLL
+    GenericDataProcessorAlgorithm<DistributedAlgorithm>;
+
+template <>
+MANTID_API_DLL void
+GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround() {}
 
 } // namespace Mantid
 } // namespace API

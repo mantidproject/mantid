@@ -34,13 +34,10 @@ public:
 
 private:
   // not async at all
-  void startAsyncFittingWorker(
-      const std::vector<std::pair<int, size_t>> &runNumberBankPairs,
-      const std::string &ExpectedPeaks) override {
-    assert(runNumberBankPairs.size() == 1);
-    const auto runNumber = runNumberBankPairs[0].first;
-    const auto bank = runNumberBankPairs[0].second;
-    doFitting(runNumber, bank, ExpectedPeaks);
+  void startAsyncFittingWorker(const std::vector<RunLabel> &runLabels,
+                               const std::string &ExpectedPeaks) override {
+    assert(runLabels.size() == 1);
+    doFitting(runLabels[0], ExpectedPeaks);
     fittingFinished();
   }
 };
@@ -195,7 +192,7 @@ public:
         .Times(1)
         .WillOnce(Return(boost::optional<std::string>(
             boost::optional<std::string>("123_1"))));
-    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(testing::_, testing::_))
+    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(testing::_))
         .Times(1)
         .WillOnce(ReturnRef(EMPTY));
 
@@ -235,12 +232,12 @@ public:
         .Times(1)
         .WillOnce(Return("2.3445,3.3433,4.5664"));
 
-    EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+    const RunLabel runLabel(123, 1);
+    EXPECT_CALL(*mockModel_ptr, getRunLabels())
         .Times(1)
-        .WillOnce(Return(
-            std::vector<std::pair<int, size_t>>({std::make_pair(123, 1)})));
+        .WillOnce(Return(std::vector<RunLabel>({runLabel})));
 
-    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(123, 1))
+    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(runLabel))
         .Times(1)
         .WillOnce(ReturnRef(EMPTY));
 
@@ -275,12 +272,12 @@ public:
         .WillOnce(Return(",3.5,7.78,r43d"));
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
-    EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+    const RunLabel runLabel(123, 1);
+    EXPECT_CALL(*mockModel_ptr, getRunLabels())
         .Times(1)
-        .WillOnce(Return(
-            std::vector<std::pair<int, size_t>>({std::make_pair(123, 1)})));
+        .WillOnce(Return(std::vector<RunLabel>({runLabel})));
 
-    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(123, 1))
+    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(runLabel))
         .Times(1)
         .WillOnce(ReturnRef(EMPTY));
 
@@ -578,11 +575,11 @@ public:
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
         .WillOnce(Return(boost::optional<std::string>("123_1")));
-    EXPECT_CALL(*mockModel_ptr, removeRun(123, 1));
-    EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+    EXPECT_CALL(*mockModel_ptr, removeRun(RunLabel(123, 1)));
+    EXPECT_CALL(*mockModel_ptr, getRunLabels())
         .Times(1)
-        .WillOnce(Return(std::vector<std::pair<int, size_t>>(
-            {std::make_pair(123, 2), std::make_pair(456, 1)})));
+        .WillOnce(Return(
+            std::vector<RunLabel>({RunLabel(123, 2), RunLabel(456, 1)})));
     EXPECT_CALL(mockView, updateFittingListWidget(
                               std::vector<std::string>({"123_2", "456_1"})));
 
@@ -602,19 +599,20 @@ public:
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
+    const RunLabel runLabel(123, 1);
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(2)
         .WillRepeatedly(Return(boost::optional<std::string>("123_1")));
-    EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(123, 1))
+    EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(runLabel))
         .Times(1)
         .WillOnce(Return(true));
-    EXPECT_CALL(*mockModel_ptr, getAlignedWorkspace(123, 1))
+    EXPECT_CALL(*mockModel_ptr, getAlignedWorkspace(runLabel))
         .Times(1)
         .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     EXPECT_CALL(mockView, plotFittedPeaksEnabled())
         .Times(1)
         .WillOnce(Return(true));
-    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(123, 1))
+    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel))
         .Times(1)
         .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
@@ -635,19 +633,20 @@ public:
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
+    const RunLabel runLabel(123, 1);
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
         .WillOnce(Return(boost::optional<std::string>("123_1")));
-    EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(123, 1))
+    EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(runLabel))
         .Times(1)
         .WillOnce(Return(false));
-    EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(123, 1))
+    EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(runLabel))
         .Times(1)
         .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     EXPECT_CALL(mockView, plotFittedPeaksEnabled())
         .Times(1)
         .WillOnce(Return(true));
-    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(123, 1)).Times(0);
+    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel)).Times(0);
     EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
                                         testing::_)).Times(1);
     EXPECT_CALL(mockView, userWarning("Cannot plot fitted peaks", testing::_))
@@ -668,19 +667,20 @@ public:
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
+    const RunLabel runLabel(123, 1);
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(2)
         .WillRepeatedly(Return(boost::optional<std::string>("123_1")));
-    EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(123, 1))
+    EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(runLabel))
         .Times(1)
         .WillOnce(Return(true));
-    EXPECT_CALL(*mockModel_ptr, getAlignedWorkspace(123, 1))
+    EXPECT_CALL(*mockModel_ptr, getAlignedWorkspace(runLabel))
         .Times(1)
         .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     EXPECT_CALL(mockView, plotFittedPeaksEnabled())
         .Times(1)
         .WillOnce(Return(false));
-    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(123, 1)).Times(0);
+    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel)).Times(0);
     EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
                                         testing::_)).Times(1);
 

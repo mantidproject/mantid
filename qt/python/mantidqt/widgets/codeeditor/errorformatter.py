@@ -34,7 +34,7 @@ class ErrorFormatter(object):
         all return by traceback.extract_tb
         :return: A formatted string.
         """
-        lines = traceback.format_exception(exc_type, exc_value, None)
+        lines = traceback.format_exception_only(exc_type, exc_value)
         if stack is not None:
             lines.extend(traceback.format_list(stack))
         return ''.join(lines)

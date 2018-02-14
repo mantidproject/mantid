@@ -49,12 +49,12 @@ load_reference_workspace(const std::string &filename) {
 }
 
 void run_MPI_load(const Parallel::Communicator &comm,
-                  boost::shared_ptr<std::mutex> mutex) {
+                  boost::shared_ptr<std::mutex> mutex,
+                  const std::string &filename) {
   boost::shared_ptr<const EventWorkspace> reference;
   boost::shared_ptr<const EventWorkspace> eventWS;
   {
     std::lock_guard<std::mutex> lock(*mutex);
-    const std::string filename("CNCS_7860_event.nxs");
     reference = load_reference_workspace(filename);
     auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
     alg->setProperty("Filename", filename);
@@ -76,11 +76,11 @@ void run_MPI_load(const Parallel::Communicator &comm,
   if (comm.rank() == 0) {
     TS_ASSERT_EQUALS(std::accumulate(localSizes.begin(), localSizes.end(),
                                      static_cast<size_t>(0)),
-                     static_cast<size_t>(51200));
+                     reference->getNumberHistograms());
     TS_ASSERT_EQUALS(std::accumulate(localEventCounts.begin(),
                                      localEventCounts.end(),
                                      static_cast<size_t>(0)),
-                     static_cast<size_t>(112266));
+                     reference->getNumberEvents());
   }
 
   const auto &indexInfo = eventWS->indexInfo();
@@ -836,12 +836,28 @@ public:
   }
 
   void test_MPI_load() {
+    // Note that this and other MPI tests currently work only in non-MPI builds
+    // with the default event loader, i.e., ParallelEventLoader is not
+    // supported. The reason is the locking we need in the test for HDF5 access,
+    // which implies that the communication within ParallelEventLoader will
+    // simply get stuck. Additionally, it will fail for the CNCS file since
+    // empty banks contain a dummy event with an invalid event ID, which
+    // ParallelEventLoader does not support.
     int threads = 3; // Limited number of threads to avoid long running test.
     ParallelTestHelpers::ParallelRunner runner(threads);
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
     auto hdf5Mutex = boost::make_shared<std::mutex>();
-    runner.run(run_MPI_load, hdf5Mutex);
+    runner.run(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
+  }
+
+  void test_MPI_load_ISIS() {
+    int threads = 3; // Limited number of threads to avoid long running test.
+    ParallelTestHelpers::ParallelRunner runner(threads);
+    // Test reads from multiple threads, which is not supported by our HDF5
+    // libraries, so we need a mutex.
+    auto hdf5Mutex = boost::make_shared<std::mutex>();
+    runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 
 private:

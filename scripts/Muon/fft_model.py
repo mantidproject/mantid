@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from six import iteritems
-import math
 
 import mantid.simpleapi as mantid
 
@@ -13,48 +12,51 @@ class FFTWrapper(object):
     This keeps the main FFT class simple.
     """
     def __init__(self,FFT):
-        self.name="FFT"
-        self.model=FFT
+        self.name = "FFT"
+        self.model = FFT
 
     def loadData(self,inputs):
         """
         store the data in the wrapper for later
         """
         if "phaseTable" in inputs:
-            self.phaseTable=inputs["phaseTable"]
+            self.phaseTable = inputs["phaseTable"]
         else:
-            self.phaseTable=None
+            self.phaseTable = None
         if "preRe" in inputs:
-            self.preRe=inputs["preRe"]
+            self.preRe = inputs["preRe"]
         else:
-            self.preRe=None
+            self.preRe = None
         if "preIm" in inputs:
-            self.preIm=inputs["preIm"]
+            self.preIm = inputs["preIm"]
         else:
-            self.preIm=None
+            self.preIm = None
         if "FFT" in inputs:
-            self.FFT=inputs["FFT"]
+            self.FFT = inputs["FFT"]
         else:
-            self.FFT=None
+            self.FFT = None
         self.model.setRun(inputs["Run"])
 
     def execute(self):
         """
         runs the relevant parts of the FFT and the preprocessing
         """
-        if self.phaseTable is not None:
-            if self.phaseTable["newTable"]:
-                self.model.makePhaseQuadTable(self.phaseTable["axis"],self.phaseTable["Instrument"])
-            self.model.PhaseQuad()
+        try:
+            if self.phaseTable is not None:
+                if self.phaseTable["newTable"]:
+                    self.model.makePhaseQuadTable(self.phaseTable)
+                self.model.PhaseQuad()
 
-        if self.preRe is not None:
-            self.model.preAlg(self.preRe)
+            if self.preRe is not None:
+                self.model.preAlg(self.preRe)
 
-        if self.preIm is not None:
-            self.model.preAlg(self.preIm)
+            if self.preIm is not None:
+                self.model.preAlg(self.preIm)
 
-        if self.FFT is not None:
-            self.model.FFTAlg(self.FFT)
+            if self.FFT is not None:
+                self.model.FFTAlg(self.FFT)
+        except:
+            pass
 
     def output(self):
         return
@@ -67,7 +69,7 @@ class FFTModel(object):
     the analysis.
     """
     def __init__(self):
-        self.name="FFT"
+        self.name = "FFT"
 
     def setRun(self,run):
         self.runName=run
@@ -76,19 +78,19 @@ class FFTModel(object):
         """
         PaddingAndApodization alg on the data
         """
-        preAlg=mantid.AlgorithmManager.create("PaddingAndApodization")
+        preAlg = mantid.AlgorithmManager.create("PaddingAndApodization")
         preAlg.initialize()
         preAlg.setChild(True)
         for name,value in iteritems(preInputs):
             preAlg.setProperty(name,value)
         preAlg.execute()
-        mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"],preAlg.getProperty("OutputWorkspace").value)
+        mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"], preAlg.getProperty("OutputWorkspace").value)
 
     def FFTAlg(self,FFTInputs):
         """
         Use the FFT alg
         """
-        alg=mantid.AlgorithmManager.create("FFT")
+        alg = mantid.AlgorithmManager.create("FFT")
         alg.initialize()
         alg.setChild(True)
         for name,value in iteritems(FFTInputs):
@@ -96,55 +98,33 @@ class FFTModel(object):
         alg.execute()
         mantid.AnalysisDataService.addOrReplace(FFTInputs["OutputWorkspace"],alg.getProperty("OutputWorkspace").value)
 
-        ws=alg.getPropertyValue("OutputWorkspace")
+        ws = alg.getPropertyValue("OutputWorkspace")
         group = mantid.AnalysisDataService.retrieve(self.runName)
         group.add(ws)
 
-    def makePhaseQuadTable(self,axis,instrument):
+    def makePhaseQuadTable(self,inputs):
         """
-        generates a phase table based on the detector setup
-        need to become an algorithm
+        generates a phase table from CalMuonDetectorPhases
         """
-        wsAlg=mantid.AlgorithmManager.create("CreateSimulationWorkspace")
-        wsAlg.initialize()
-        wsAlg.setChild(True)
-        wsAlg.setProperty("Instrument",instrument)
-        wsAlg.setProperty("BinParams","0,1,32")
-        wsAlg.setProperty("OutputWorkspace","__tmp__")
-        wsAlg.execute()
-        output=wsAlg.getProperty("OutputWorkspace").value
+        alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
+        alg.initialize()
+        alg.setChild(True)
 
-        tableAlg=mantid.AlgorithmManager.create("CreateEmptyTableWorkspace")
-        tableAlg.initialize()
-        tableAlg.setChild(False)
-        tableAlg.setProperty("OutputWorkspace","PhaseTable")
-        tableAlg.execute()
+        alg.setProperty("FirstGoodData",inputs["FirstGoodData"])
+        alg.setProperty("LastGoodData",inputs["LastGoodData"])
 
-        phaseTable=mantid.AnalysisDataService.retrieve("PhaseTable")
-        phaseTable.addColumn("int","DetectorID")
-        phaseTable.addColumn("double","Phase")
-        phaseTable.addColumn("double","Asym")
-
-        for j in range(output.getNumberHistograms()):
-            det = output.getDetector(j).getPos()-output.getInstrument().getSample().getPos()
-            r=math.sqrt(det.X()**2+det.Y()**2+det.Z()**2)
-            if(axis=="x"):
-                phi=math.atan2(det.Z(),det.Y())
-                asym=math.sqrt(det.Z()**2+det.Y()**2)/r
-            elif(axis=="y"):
-                phi=math.atan2(det.X(),det.Z())
-                asym=math.sqrt(det.X()**2+det.Z()**2)/r
-            else: # z
-                phi=math.atan2(det.Y(),det.X())
-                asym=math.sqrt(det.Y()**2+det.X()**2)/r
-            phaseTable.addRow([j,asym,phi])
+        alg.setProperty("InputWorkspace","MuonAnalysis")
+        alg.setProperty("DetectorTable","PhaseTable")
+        alg.setProperty("DataFitted","fits")
+        alg.execute()
+        mantid.AnalysisDataService.addOrReplace("PhaseTable",alg.getProperty("DetectorTable").value)
 
     def PhaseQuad(self):
         """
         do the phaseQuad algorithm
         groups data into a single set
-         """
-        phaseQuad=mantid.AlgorithmManager.create("PhaseQuad")
+        """
+        phaseQuad = mantid.AlgorithmManager.create("PhaseQuad")
         phaseQuad.initialize()
         phaseQuad.setChild(False)
         print (self.runName)
