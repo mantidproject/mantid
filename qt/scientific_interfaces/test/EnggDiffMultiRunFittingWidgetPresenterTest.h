@@ -15,12 +15,17 @@ using namespace Mantid;
 using namespace MantidQt::CustomInterfaces;
 using testing::Return;
 
+namespace {
+API::MatrixWorkspace_sptr createSampleWorkspace() {
+  return API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+}
+}
+
 class EnggDiffMultiRunFittingWidgetPresenterTest : public CxxTest::TestSuite {
 public:
   void test_addFittedPeaks() {
     auto presenter = setUpPresenter();
-    const API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    const auto ws = createSampleWorkspace();
 
     const RunLabel runLabel(123, 1);
     EXPECT_CALL(*m_mockModel, addFittedPeaks(runLabel, ws)).Times(1);
@@ -31,9 +36,7 @@ public:
 
   void test_focusedRunIsAddedToModel() {
     auto presenter = setUpPresenter();
-    const API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-
+    const API::MatrixWorkspace_sptr ws = createSampleWorkspace();
     const RunLabel runLabel(123, 1);
 
     EXPECT_CALL(*m_mockModel, addFocusedRun(runLabel, ws)).Times(1);
@@ -49,8 +52,6 @@ public:
 
   void test_loadRunUpdatesView() {
     auto presenter = setUpPresenter();
-    const API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
     const RunLabel runLabel(123, 1);
     const std::vector<RunLabel> workspaceLabels({runLabel});
@@ -58,7 +59,7 @@ public:
         .WillByDefault(Return(workspaceLabels));
     EXPECT_CALL(*m_mockView, updateRunList(workspaceLabels));
 
-    presenter->addFocusedRun(runLabel, ws);
+    presenter->addFocusedRun(runLabel, createSampleWorkspace());
     assertMocksUsedCorrectly();
   }
 
@@ -94,11 +95,9 @@ public:
         .Times(1)
         .WillOnce(Return(runLabel));
 
-    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
     EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
         .Times(1)
-        .WillOnce(Return(sampleWorkspace));
+        .WillOnce(Return(createSampleWorkspace()));
 
     EXPECT_CALL(*m_mockView, reportPlotInvalidFocusedRun(testing::_)).Times(0);
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
@@ -137,8 +136,7 @@ public:
     const RunLabel runLabel(123, 1);
     ON_CALL(*m_mockView, getSelectedRunLabel()).WillByDefault(Return(runLabel));
 
-    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    const auto sampleWorkspace = createSampleWorkspace();
     ON_CALL(*m_mockModel, getFocusedRun(runLabel))
         .WillByDefault(Return(sampleWorkspace));
 
