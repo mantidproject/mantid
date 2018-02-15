@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
 
+
 #include <QMessageBox>
 #include <QPushButton>
 
@@ -35,17 +36,11 @@ MantidApplication::MantidApplication(int &argc, char **argv)
 
 bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   bool res = false;
+  bool error = false;
   try {
     res = QApplication::notify(receiver, event);
   } catch (std::exception &e) {
-
-    int reportingEnabled = 0;
-    int retVal = Mantid::Kernel::ConfigService::Instance().getValue("usagereports.enabled", reportingEnabled);
-    if (reportingEnabled && retVal == 1){
-      Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "");
-      errorReporter.sendErrorReport();
-    }
-      
+ 
     if (MantidQt::API::MantidDialog::handle(receiver, e))
       return true; // stops event propagation
 
@@ -55,25 +50,29 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
     }
 
     g_log.fatal() << "Unexpected exception: " << e.what() << "\n";
-    QMessageBox ask;
-    QAbstractButton *terminateButton =
-        ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
-    ask.addButton(tr("Continue"), QMessageBox::ActionRole);
-    ask.setText("Sorry, MantidPlot has caught an unexpected exception:\n\n" +
-                QString::fromStdString(e.what()) +
-                "\n\nWould you like to terminate MantidPlot or try to continue "
-                "working?\nIf you choose to continue it is advisable to save "
-                "your data and restart the application.");
-    ask.setIcon(QMessageBox::Critical);
-    ask.exec();
-    if (ask.clickedButton() == terminateButton) {
-      g_log.fatal("Terminated by user.");
-      quit();
-    } else
-      g_log.fatal("Continue working.");
+    error = true;
   } catch (...) {
 
     g_log.fatal() << "Unknown exception\n";
+    error = true;
+  }
+
+  if (error){
+    int reportingEnabled = 0;
+    int retVal = Mantid::Kernel::ConfigService::Instance().getValue("usagereports.enabled", reportingEnabled);
+    if (reportingEnabled && retVal == 1){
+      Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "");
+      errorReporter.sendErrorReport();
+    }  
+    
+    // QString pythonCode(
+    //   "\nfrom errorreport import CrashReportPage\n"
+    //   "dialog = CrashReportPage()\n"
+    //   "CrashReportPage.show()");
+    QString pythonCode("from errorreport import CrashReportPage");
+    
+    emit runAsPythonScript(pythonCode);
+
     QMessageBox ask;
     QAbstractButton *terminateButton =
         ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
@@ -87,9 +86,11 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
     if (ask.clickedButton() == terminateButton) {
       g_log.fatal("Terminated by user.");
       quit();
-    } else
+    } else {
       g_log.fatal("Continue working.");
+    }
   }
+
   return res;
 }
 
