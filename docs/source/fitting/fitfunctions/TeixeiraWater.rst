@@ -18,14 +18,14 @@ associated long range diffusive motions of molecules.
 This model (1961) has the form:
 
 .. math::
-    \Gamma(Q) = \frac{\hbar}{\tau} \cdot \frac{(QL)^2}{6 + (QL)^2}
+    HWHM(Q) = \frac{\hbar}{\tau} \cdot \frac{(QL)^2}{6 + (QL)^2}
 
     D = \frac{L^2}{6 \tau}
 
 Units of :math:`L` are inverse units of :math:`Q`.
 
-Units of :math:`\Gamma` are :math:`meV` if units of :math:`\tau` are *ps*.
-Alternatively, units of :math:`\Gamma` are :math:`\mu eV` if units of
+Units of :math:`HWHM` are :math:`meV` if units of :math:`\tau` are *ps*.
+Alternatively, units of :math:`HWHM` are :math:`\mu eV` if units of
 :math:`\tau` are *ns*.
 
 .. attributes::
