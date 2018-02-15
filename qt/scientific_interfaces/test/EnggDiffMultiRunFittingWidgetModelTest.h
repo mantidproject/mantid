@@ -11,7 +11,7 @@ using namespace MantidQt::CustomInterfaces;
 
 class EnggDiffMultiRunFittingWidgetModelTest : public CxxTest::TestSuite {
 public:
-  void test_addAndGetFittedPeaks() {
+  void test_addAndGetFittedPeak() {
     EnggDiffMultiRunFittingWidgetModel model;
 
     Mantid::API::MatrixWorkspace_sptr ws =
@@ -23,9 +23,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFittedPeaks(runLabel));
     TS_ASSERT(retrievedWS);
     TS_ASSERT_EQUALS(ws, *retrievedWS);
+  }
 
+  void test_getFittedPeaksSucceedsWhenWorkspaceNotInModel() {
+    EnggDiffMultiRunFittingWidgetModel model;
+    boost::optional<Mantid::API::MatrixWorkspace_sptr> retrievedWS(boost::none);
     TS_ASSERT_THROWS_NOTHING(retrievedWS =
-                                 model.getFittedPeaks(RunLabel(456, 2)));
+                                 model.getFittedPeaks(RunLabel(123, 1)));
     TS_ASSERT(!retrievedWS);
   }
 
@@ -41,9 +45,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFocusedRun(runLabel));
     TS_ASSERT(retrievedWS);
     TS_ASSERT_EQUALS(ws, *retrievedWS);
+  }
 
+  void test_getFocusedRunSucceedsWhenWorkspaceNotInModel() {
+    EnggDiffMultiRunFittingWidgetModel model;;
+    boost::optional<Mantid::API::MatrixWorkspace_sptr> retrievedWS(boost::none);
     TS_ASSERT_THROWS_NOTHING(retrievedWS =
-                                 model.getFocusedRun(RunLabel(456, 2)));
+                                 model.getFocusedRun(RunLabel(123, 1)));
     TS_ASSERT(!retrievedWS);
   }
 
