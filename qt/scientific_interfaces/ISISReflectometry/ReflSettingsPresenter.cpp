@@ -192,6 +192,7 @@ void ReflSettingsPresenter::onReductionPaused() { m_view->enableAll(); }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
  * @return :: Global options for 'ReflectometryReductionOneAuto'
+ * @throws :: if the settings the user entered are invalid
  */
 OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
@@ -282,6 +283,7 @@ bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
 /** Gets the default user-specified transmission runs from the view. Default
 * runs are those without an angle (i.e. the angle is blank)
 * @return :: the transmission run(s) as a string of comma-separated values
+* @throws :: if the settings the user entered are invalid
 */
 std::string
 ReflSettingsPresenter::getDefaultTransmissionRuns() const {

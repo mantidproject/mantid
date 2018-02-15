@@ -221,9 +221,18 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     // Work out and cache the reduced workspace name
     rowData->setReducedName(getReducedWorkspaceName(rowData));
+
     // Get the algorithm input properties for this row
+    OptionsMap processingOptions;
+    try {
+      processingOptions = getProcessingOptions(rowData);
+    } catch (std::runtime_error &e) {
+      // Quit with errors if the user entered invalid settings
+      m_view->giveUserCritical(e.what(), "Error");
+      return true;
+    }
     OptionsMap options = getCanonicalOptions(
-        rowData, getProcessingOptions(rowData), m_whitelist, true,
+        rowData, processingOptions, m_whitelist, true,
         m_processor.outputProperties(), m_processor.prefixes());
     rowData->setOptions(options);
     // Preprocess the row. Note that this only needs to be done once and
@@ -333,8 +342,16 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
     rowData->setReducedName(getReducedWorkspaceName(rowData));
     // Get the algorithm input properties for this row and cache in the row
     // data
+    OptionsMap processingOptions;
+    try {
+      processingOptions = getProcessingOptions(rowData);
+    } catch (std::runtime_error &e) {
+      // Quit with errors if the user entered invalid settings
+      m_view->giveUserCritical(e.what(), "Error");
+      return true;
+    }
     OptionsMap options = getCanonicalOptions(
-        rowData, getProcessingOptions(rowData), m_whitelist, true,
+        rowData, processingOptions, m_whitelist, true,
         m_processor.outputProperties(), m_processor.prefixes());
     rowData->setOptions(std::move(options));
 
@@ -802,6 +819,9 @@ void ReflDataProcessorPresenter::addNumGroupSlicesEntry(int groupID,
 }
 
 /** Get the processing options for a given row
+ *
+ * @param data : the row data
+ * @throws :: if the settings the user entered are invalid
  * */
 OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
   // Return the global settings but also include the transmission runs,

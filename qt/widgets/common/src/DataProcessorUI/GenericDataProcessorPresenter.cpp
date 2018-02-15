@@ -295,16 +295,20 @@ QString GenericDataProcessorPresenter::getReducedWorkspaceName(
 }
 
 void GenericDataProcessorPresenter::settingsChanged() {
-  m_preprocessing.m_options =
-      convertColumnOptionsFromQMap(m_mainPresenter->getPreprocessingOptions());
-  m_processingOptions =
-      convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
+  try {
+    m_preprocessing.m_options = convertColumnOptionsFromQMap(
+        m_mainPresenter->getPreprocessingOptions());
+    m_processingOptions =
+        convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
 
-  if (hasPostprocessing())
-    m_postprocessing->m_options =
-        m_mainPresenter->getPostprocessingOptionsAsString();
+    if (hasPostprocessing())
+      m_postprocessing->m_options =
+          m_mainPresenter->getPostprocessingOptionsAsString();
 
-  m_manager->invalidateAllProcessed();
+    m_manager->invalidateAllProcessed();
+  } catch (std::runtime_error &e) {
+    m_view->giveUserCritical(e.what(), "Error");
+  }
 }
 
 bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
@@ -360,6 +364,14 @@ void GenericDataProcessorPresenter::process() {
       // Work out and cache the reduced workspace name
       rowData->setReducedName(getReducedWorkspaceName(rowData));
       // Cache the algorithm input properties for this row
+      OptionsMap processingOptions;
+      try {
+        processingOptions = getProcessingOptions(rowData);
+      } catch (std::runtime_error &e) {
+        // Warn and quit if user entered invalid options
+        m_view->giveUserCritical(e.what(), "Error");
+        return;
+      }
       OptionsMap options = getCanonicalOptions(
           rowData, getProcessingOptions(rowData), m_whitelist, true,
           m_processor.outputProperties(), m_processor.prefixes());
