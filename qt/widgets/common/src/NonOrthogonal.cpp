@@ -120,7 +120,8 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
     else {
       // Create identity matrix of dimension+1
       std::size_t nDims = workspace.getNumDims() + 1;
-      affineMatrix = Mantid::Kernel::Matrix<Mantid::coord_t>(nDims, nDims, true);
+      affineMatrix =
+          Mantid::Kernel::Matrix<Mantid::coord_t>(nDims, nDims, true);
     }
   } catch (...) {
     // Create identity matrix of dimension+1
