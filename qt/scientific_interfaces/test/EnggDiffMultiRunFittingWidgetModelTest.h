@@ -11,7 +11,7 @@ using namespace MantidQt::CustomInterfaces;
 
 class EnggDiffMultiRunFittingWidgetModelTest : public CxxTest::TestSuite {
 public:
-  void test_addAndGetFittedPeak() {
+  void test_addAndGetFittedPeaks() {
     EnggDiffMultiRunFittingWidgetModel model;
 
     Mantid::API::MatrixWorkspace_sptr ws =
