@@ -47,7 +47,7 @@ private:
   iAbstractBuilder_sptr iBuilder_sptr;
   /// Opens sub groups of current group
   std::vector<H5::Group> openSubGroups(H5::Group &parentGroup,
-                                       H5std_string CLASS_TYPE);
+                                       const H5std_string &CLASS_TYPE);
   /// Opens all detector groups in a file
   std::vector<H5::Group> openDetectorGroups();
   /// Stores detectorGroup detIds in vector of ints

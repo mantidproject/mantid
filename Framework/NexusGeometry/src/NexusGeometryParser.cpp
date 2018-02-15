@@ -10,8 +10,6 @@
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include <boost/algorithm/string.hpp>
-#include <string>
-#include <vector>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -68,7 +66,7 @@ NexusGeometryParser::NexusGeometryParser(
     this->exitStatus = OPENING_ROOT_GROUP_ERROR;
   }
   // Initialize the instrumentAbstractBuilder
-  this->iBuilder_sptr = iAbsBuilder_sptr;
+  this->iBuilder_sptr = std::move(iAbsBuilder_sptr);
 }
 
 /// OFF NEXUS GEOMETRY PARSER
@@ -84,22 +82,21 @@ ParsingErrors NexusGeometryParser::parseNexusGeometry() {
   // Get path to all detector groups
   try {
     std::vector<Group> detectorGroups = this->openDetectorGroups();
-    for (std::vector<Group>::iterator iter = detectorGroups.begin();
-         iter < detectorGroups.end(); ++iter) {
+    for (auto detectorGroup : detectorGroups) {
       // Get the pixel offsets
-      Pixels pixelOffsets = this->getPixelOffsets(*iter);
+      Pixels pixelOffsets = this->getPixelOffsets(detectorGroup);
       // Get the transformations
       Eigen::Transform<double, 3, 2> transforms =
-          this->getTransformations(*iter);
+          this->getTransformations(detectorGroup);
       // Calculate pixel positions
       Pixels detectorPixels = transforms * pixelOffsets;
       // Get the pixel detIds
-      std::vector<int> detectorIds = this->getDetectorIds(*iter);
+      std::vector<int> detectorIds = this->getDetectorIds(detectorGroup);
       // Extract shape
-      auto shape = this->parseNexusShape(*iter);
+      auto shape = this->parseNexusShape(detectorGroup);
 
       for (size_t i = 0; i < detectorIds.size(); ++i) {
-        int index = static_cast<int>(i);
+        auto index = static_cast<int>(i);
         std::string name = std::to_string(index);
         Eigen::Vector3d detPos = detectorPixels.col(index);
         this->iBuilder_sptr->addDetector(name, detectorIds[index], detPos,
@@ -120,8 +117,9 @@ ParsingErrors NexusGeometryParser::parseNexusGeometry() {
 }
 
 /// Open subgroups of parent group
-std::vector<Group> NexusGeometryParser::openSubGroups(Group &parentGroup,
-                                                      H5std_string CLASS_TYPE) {
+std::vector<Group>
+NexusGeometryParser::openSubGroups(Group &parentGroup,
+                                   const H5std_string &CLASS_TYPE) {
   std::vector<Group> subGroups;
 
   // Iterate over children, and determine if a group
@@ -131,9 +129,10 @@ std::vector<Group> NexusGeometryParser::openSubGroups(Group &parentGroup,
       // Open the sub group
       Group childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
-      for (int i = 0; i < childGroup.getNumAttrs(); ++i) {
+      for (uint32_t attribute_index = 0; attribute_index < childGroup.getNumAttrs();
+           ++attribute_index) {
         // Test attribute at current index for NX_class
-        Attribute attribute = childGroup.openAttribute(i);
+        Attribute attribute = childGroup.openAttribute(attribute_index);
         if (attribute.getName() == NX_CLASS) {
           // Get attribute data type
           DataType dataType = attribute.getDataType();
@@ -158,20 +157,19 @@ std::vector<Group> NexusGeometryParser::openDetectorGroups() {
 
   // Open all instrument groups within rawDataGroups
   std::vector<Group> instrumentGroupPaths;
-  for (std::vector<Group>::iterator iter = rawDataGroupPaths.begin();
-       iter != rawDataGroupPaths.end(); ++iter) {
+  for (auto rawDataGroupPath : rawDataGroupPaths) {
     std::vector<Group> instrumentGroups =
-        this->openSubGroups(*iter, NX_INSTRUMENT);
+        this->openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
     instrumentGroupPaths.insert(instrumentGroupPaths.end(),
                                 instrumentGroups.begin(),
                                 instrumentGroups.end());
   }
   // Open all detector groups within instrumentGroups
   std::vector<Group> detectorGroupPaths;
-  for (std::vector<Group>::iterator iter = instrumentGroupPaths.begin();
-       iter != instrumentGroupPaths.end(); ++iter) {
+  for (auto instrumentGroupPath : instrumentGroupPaths) {
     // Open sub detector groups
-    std::vector<Group> detectorGroups = this->openSubGroups(*iter, NX_DETECTOR);
+    std::vector<Group> detectorGroups =
+        this->openSubGroups(instrumentGroupPath, NX_DETECTOR);
     // Append to detectorGroups vector
     detectorGroupPaths.insert(detectorGroupPaths.end(), detectorGroups.begin(),
                               detectorGroups.end());
@@ -180,7 +178,7 @@ std::vector<Group> NexusGeometryParser::openDetectorGroups() {
   return detectorGroupPaths;
 }
 
-// Function to return the detector ids in the same order as the opffsets
+// Function to return the detector ids in the same order as the offsets
 std::vector<int> NexusGeometryParser::getDetectorIds(Group &detectorGroup) {
 
   std::vector<int> detIds;
@@ -321,7 +319,7 @@ NexusGeometryParser::getTransformations(Group &detectorGroup) {
     Eigen::Vector3d transformVector(0.0, 0.0, 0.0);
     H5std_string transformType;
     H5std_string transformUnits;
-    for (int i = 0; i < transformation.getNumAttrs(); i++) {
+    for (uint32_t i = 0; i < transformation.getNumAttrs(); i++) {
       // Open attribute at current index
       Attribute attribute = transformation.openAttribute(i);
       H5std_string attributeName = attribute.getName();
@@ -386,7 +384,7 @@ objectHolder NexusGeometryParser::parseNexusShape(Group &detectorGroup) {
   }
 
   H5std_string shapeType;
-  for (int i = 0; i < shapeGroup.getNumAttrs(); ++i) {
+  for (uint32_t i = 0; i < shapeGroup.getNumAttrs(); ++i) {
     Attribute attribute = shapeGroup.openAttribute(i);
     H5std_string attributeName = attribute.getName();
     if (attributeName == NX_CLASS) {
@@ -447,10 +445,9 @@ void NexusGeometryParser::parseMonitors() {
       this->openSubGroups(this->rootGroup, NX_ENTRY);
 
   // Open all instrument groups within rawDataGroups
-  for (std::vector<Group>::iterator iter = rawDataGroupPaths.begin();
-       iter != rawDataGroupPaths.end(); ++iter) {
+  for (auto rawDataGroupPath : rawDataGroupPaths) {
     std::vector<Group> instrumentGroups =
-        this->openSubGroups(*iter, NX_INSTRUMENT);
+        this->openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
     for (auto &inst : instrumentGroups) {
       std::vector<Group> monitorGroups = this->openSubGroups(inst, NX_MONITOR);
       for (auto &monitor : monitorGroups) {
