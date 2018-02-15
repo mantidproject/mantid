@@ -445,6 +445,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # check boxes
         self.ui.graphicsView_detector2dPlot.set_parent_window(self)
+        self.ui.checkBox_fpHighPrecision.setChecked(True)
 
         # background points
         self.ui.lineEdit_backgroundPts.setText('1, 1')
@@ -1286,7 +1287,8 @@ class MainWindow(QtGui.QMainWindow):
             export_absorption = self.ui.checkBox_exportAbsorptionToFP.isChecked()
 
             status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
-                                                                      user_header, export_absorption, fp_name)
+                                                                      user_header, export_absorption, fp_name,
+                                                                      self.ui.checkBox_fpHighPrecision.isChecked())
             self.ui.plainTextEdit_fpContent.setPlainText(file_content)
             if status is False:
                 error_msg = file_content

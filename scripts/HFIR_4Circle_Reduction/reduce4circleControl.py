@@ -745,7 +745,7 @@ class CWSCDReductionControl(object):
         return move_tup[1]
 
     def export_to_fullprof(self, exp_number, scan_number_list, user_header,
-                           export_absorption, fullprof_file_name):
+                           export_absorption, fullprof_file_name, high_precision):
         """
         Export peak intensities to Fullprof data file
         :param exp_number:
@@ -753,6 +753,7 @@ class CWSCDReductionControl(object):
         :param user_header:
         :param export_absorption:
         :param fullprof_file_name:
+        :param high_precision: flag to write peak intensity as f18.5 if true; otherwise, output as f8.2
         :return: 2-tuples. status and return object ((mixed) file content or error message)
         """
         # check
@@ -839,7 +840,8 @@ class CWSCDReductionControl(object):
                 file_content = fputility.write_scd_fullprof_kvector(
                     user_header=user_header, wave_length=exp_wave_length,
                     k_vector_dict=k_shift_dict, peak_dict_list=peaks,
-                    fp_file_name=this_file_name, with_absorption=export_absorption)
+                    fp_file_name=this_file_name, with_absorption=export_absorption,
+                    high_precision=high_precision)
                 if algorithm_type == 'mixed':
                     mixed_content = file_content
             except AssertionError as error:

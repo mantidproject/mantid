@@ -132,7 +132,7 @@ def convert_to_peak_dict_list(refection_dict):
 
     return peak_dict_list
 
-# TODO/NOW/ - Apply to callers
+
 def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dict_list, fp_file_name,
                                with_absorption, high_precision):
     """
