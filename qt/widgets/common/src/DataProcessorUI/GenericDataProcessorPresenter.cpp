@@ -274,6 +274,13 @@ void GenericDataProcessorPresenter::acceptViews(
   updateWidgetEnabledState(false);
 }
 
+/** Set a different tree manager to the default (only used by tests to set a
+ * mock)
+ */
+void GenericDataProcessorPresenter::acceptTreeManager(TreeManager *manager) {
+  m_manager.reset(manager);
+}
+
 /**
 Returns the name of the reduced workspace for a given row
 @param data :: [input] The data for this row

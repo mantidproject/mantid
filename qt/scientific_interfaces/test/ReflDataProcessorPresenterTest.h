@@ -110,6 +110,84 @@ private:
     AnalysisDataService::Instance().addOrReplace(wsName.toStdString(), tinyWS);
   }
 
+  void addRowValue(RowData_sptr rowData, const QStringList &list,
+                   const int index, const char *property,
+                   const char *prefix = "") {
+    if (index >= list.size())
+      return;
+    // Set the option based on the row value
+    rowData->setOptionValue(property, list[index]);
+    // Set the preprocessed option based on the value and prefix
+    rowData->setPreprocessedOptionValue(property, prefix + list[index]);
+  }
+
+  void addRowValue(RowData_sptr rowData, const char *property,
+                   const QString value) {
+    // Set the value and preprocessed value to the given value
+    rowData->setOptionValue(property, value);
+    rowData->setPreprocessedOptionValue(property, value);
+  }
+
+  void appendStringWithPrefix(QString &stringToEdit, const QStringList &list,
+                              std::vector<const char *> &prefixes, const int i,
+                              const char *separator = "") {
+    // do nothing if string to add is empty
+    if (i >= list.size() || list[i].isEmpty())
+      return;
+
+    // add separator and string with/without prefix
+    const long int len = prefixes.size();
+    if (i < len && prefixes[i] != 0)
+      stringToEdit += QString(separator) + QString(prefixes[i]) + list[i];
+    else
+      stringToEdit += separator + list[i];
+  }
+
+  // Utility to create a row data class from a string list of simple inputs
+  // (does not support multiple input runs or transmission runs, or entries
+  // in the options/hidden columns). Assumes input workspaces are prefixed
+  // with TOF_ and transmission runs with TRANS_
+  RowData_sptr makeRowData(const QStringList &list,
+                           std::vector<const char *> prefixes = {"TOF_", "",
+                                                                 "TRANS_"},
+                           const size_t numSlices = 0) {
+    // Create the data and add default options
+    auto rowData = std::make_shared<RowData>(list);
+
+    if (list.size() < 1)
+      return rowData;
+
+    QString reducedName;
+    appendStringWithPrefix(reducedName, list, prefixes, 0);
+    appendStringWithPrefix(reducedName, list, prefixes, 2, "_");
+
+    rowData->setReducedName(reducedName);
+    addRowValue(rowData, "OutputWorkspace", "IvsQ_" + reducedName);
+    addRowValue(rowData, "OutputWorkspaceBinned", "IvsQ_binned_" + reducedName);
+    addRowValue(rowData, "OutputWorkspaceWavelength", "IvsLam_" + reducedName);
+
+    // Set other options from the row data values
+    addRowValue(rowData, list, 0, "InputWorkspace", "TOF_");
+    addRowValue(rowData, list, 1, "ThetaIn");
+    addRowValue(rowData, list, 2, "FirstTransmissionRun", "TRANS_");
+    addRowValue(rowData, list, 3, "MomentumTransferMin");
+    addRowValue(rowData, list, 4, "MomentumTransferMax");
+    addRowValue(rowData, list, 5, "MomentumTransferStep");
+    addRowValue(rowData, list, 6, "ScaleFactor");
+
+    // Add some slices if requested
+    std::vector<QString> workspaceProperties = {
+        "InputWorkspace", "OutputWorkspace", "OutputWorkspaceBinned",
+        "OutputWorkspaceWavelength"};
+    for (size_t i = 0; i < numSlices; ++i) {
+      QString sliceName =
+          QString("_slice_") + QString::fromStdString(std::to_string(i));
+      rowData->addSlice(sliceName, workspaceProperties);
+    }
+
+    return rowData;
+  }
+
   ReflGenericDataProcessorPresenterFactory presenterFactory;
 
 public:
@@ -189,7 +267,7 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
-        .Times(14)
+        .Times(6)
         .WillRepeatedly(Return("INTER"));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
@@ -274,7 +352,7 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
-        .Times(18)
+        .Times(6)
         .WillRepeatedly(Return("INTER"));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
@@ -370,7 +448,7 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
-        .Times(14)
+        .Times(6)
         .WillRepeatedly(Return("INTER"));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
@@ -454,7 +532,7 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
-        .Times(14)
+        .Times(6)
         .WillRepeatedly(Return("INTER"));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
@@ -616,9 +694,10 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
+    auto presenter = presenterFactory.create();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
+    presenter->acceptTreeManager(mockTreeManager);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -629,47 +708,51 @@ public:
 
     // The following code sets up the desired workspaces without having to
     // process any runs to obtain them
-    presenter->addNumGroupSlicesEntry(0, 3);
-    presenter->addNumGroupSlicesEntry(1, 3);
+    const size_t numSlices = 3;
+    presenter->addNumGroupSlicesEntry(0, numSlices);
+    presenter->addNumGroupSlicesEntry(1, numSlices);
+    auto row0 = makeRowData({"13460"}, {}, numSlices);
+    auto row1 = makeRowData({"13462"}, {}, numSlices);
+    GroupData group = {{0, row0}, {1, row1}};
+    TreeData tree = {{0, group}};
 
-    createSampleEventWS("IvsQ_13460_slice_0");
-    createSampleEventWS("IvsQ_13460_slice_1");
-    createSampleEventWS("IvsQ_13460_slice_2");
-    createSampleEventWS("IvsQ_13462_slice_0");
-    createSampleEventWS("IvsQ_13462_slice_1");
-    createSampleEventWS("IvsQ_13462_slice_2");
-
-    std::map<int, std::set<int>> rowlist;
-    rowlist[0].insert(0);
-    rowlist[0].insert(1);
+    createSampleEventWS("IvsQ_binned_13460_slice_0");
+    createSampleEventWS("IvsQ_binned_13460_slice_1");
+    createSampleEventWS("IvsQ_binned_13460_slice_2");
+    createSampleEventWS("IvsQ_binned_13462_slice_0");
+    createSampleEventWS("IvsQ_binned_13462_slice_1");
+    createSampleEventWS("IvsQ_binned_13462_slice_2");
 
     // We should not be warned
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
 
-    // The user hits "plot rows" with the first row selected
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+    // The user hits "plot rows" with the first group selected
+    EXPECT_CALL(*mockTreeManager, selectedData(false))
         .Times(1)
-        .WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
-        .WillRepeatedly(Return(std::set<int>()));
+        .WillOnce(Return(tree));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
-    auto const pythonCode = QString(
-        "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_slice_0\", "
-        "0, True, window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13460_slice_1\", 0, True, window = "
-        "base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13460_slice_2\", 0, True, window = "
-        "base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_slice_0\", 0, True, window = "
-        "base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_slice_1\", 0, True, window = "
-        "base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
-        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
+    auto const pythonCode =
+        QString("base_graph = None\nbase_graph = "
+                "plotSpectrum(\"IvsQ_binned_13460_slice_0\", "
+                "0, True, window = base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13460_slice_1\", 0, "
+                "True, window = "
+                "base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13460_slice_2\", 0, "
+                "True, window = "
+                "base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13462_slice_0\", 0, "
+                "True, window = "
+                "base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13462_slice_1\", 0, "
+                "True, window = "
+                "base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13462_slice_2\", 0, "
+                "True, window = "
+                "base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
 
     EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
@@ -686,9 +769,11 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
+    auto mockTreeManager = new MockTreeManager;
+    auto presenter = presenterFactory.create();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
+    presenter->acceptTreeManager(mockTreeManager);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -699,46 +784,51 @@ public:
 
     // The following code sets up the desired workspaces without having to
     // process any runs to obtain them
-    presenter->addNumGroupSlicesEntry(0, 3);
-    presenter->addNumGroupSlicesEntry(1, 3);
+    const size_t numSlices = 3;
+    presenter->addNumGroupSlicesEntry(0, numSlices);
+    presenter->addNumGroupSlicesEntry(1, numSlices);
+    auto row0 = makeRowData({"13460"}, {}, numSlices);
+    auto row1 = makeRowData({"13462"}, {}, numSlices);
+    GroupData group = {{0, row0}, {1, row1}};
+    TreeData tree = {{0, group}};
 
-    createSampleEventWS("IvsQ_13460_slice_0");
-    createSampleEventWS("IvsQ_13460_slice_1");
-    createSampleEventWS("IvsQ_13460_slice_2");
-    createSampleEventWS("IvsQ_13462_slice_0");
-    createSampleEventWS("IvsQ_13462_slice_1");
-    createSampleEventWS("IvsQ_13462_slice_2");
-
-    std::set<int> groupList;
-    groupList.insert(0);
+    createSampleEventWS("IvsQ_binned_13460_slice_0");
+    createSampleEventWS("IvsQ_binned_13460_slice_1");
+    createSampleEventWS("IvsQ_binned_13460_slice_2");
+    createSampleEventWS("IvsQ_binned_13462_slice_0");
+    createSampleEventWS("IvsQ_binned_13462_slice_1");
+    createSampleEventWS("IvsQ_binned_13462_slice_2");
 
     // We should not be warned
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
 
-    // The user hits "plot rows" with the first row selected
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+    // The user hits "plot rows" with the first group selected
+    EXPECT_CALL(*mockTreeManager, selectedData(false))
         .Times(1)
-        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
-        .WillRepeatedly(Return(groupList));
+        .WillOnce(Return(tree));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
-    auto const pythonCode = QString(
-        "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_slice_0\", "
-        "0, True, window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13460_slice_1\", 0, True, window = "
-        "base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13460_slice_2\", 0, True, window = "
-        "base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_slice_0\", 0, True, window = "
-        "base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_slice_1\", 0, True, window = "
-        "base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
-        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
+    auto const pythonCode =
+        QString("base_graph = None\nbase_graph = "
+                "plotSpectrum(\"IvsQ_binned_13460_slice_0\", "
+                "0, True, window = base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13460_slice_1\", 0, "
+                "True, window = "
+                "base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13460_slice_2\", 0, "
+                "True, window = "
+                "base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13462_slice_0\", 0, "
+                "True, window = "
+                "base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13462_slice_1\", 0, "
+                "True, window = "
+                "base_graph)\n"
+                "base_graph = plotSpectrum(\"IvsQ_binned_13462_slice_2\", 0, "
+                "True, window = "
+                "base_graph)\nbase_graph.activeLayer().logLogAxes()\n");
 
     EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
@@ -755,9 +845,11 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
+    auto mockTreeManager = new MockTreeManager;
+    auto presenter = presenterFactory.create();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
+    presenter->acceptTreeManager(mockTreeManager);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -766,22 +858,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
-    presenter->addNumGroupSlicesEntry(0, 1);
-    createSampleEventWS("13460");
+    // The following code sets up the desired workspaces without having to
+    // process any runs to obtain them
+    const size_t numSlices = 1;
+    presenter->addNumGroupSlicesEntry(0, numSlices);
+    auto row0 = makeRowData({"13460"}, {}, numSlices);
+    GroupData group = {{0, row0}};
+    TreeData tree = {{0, group}};
 
-    std::map<int, std::set<int>> rowlist;
-    rowlist[0].insert(0);
+    createSampleEventWS("13460");
 
     // We should be warned
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(1);
 
     // The user hits "plot rows" with the first row selected
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+    EXPECT_CALL(*mockTreeManager, selectedData(false))
         .Times(1)
-        .WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
-        .WillRepeatedly(Return(std::set<int>()));
+        .WillOnce(Return(tree));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));

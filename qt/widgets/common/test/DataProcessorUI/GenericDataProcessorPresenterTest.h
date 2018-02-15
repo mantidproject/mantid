@@ -3108,12 +3108,11 @@ public:
   void testPlotRowPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
+    auto *mockTreeManager = new MockTreeManager;
 
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter->m_manager = Mantid::Kernel::make_unique<MockTreeManager>();
-    MockTreeManager *mockTreeManager =
-        static_cast<MockTreeManager *>(presenter->m_manager.get());
+    presenter->acceptTreeManager(mockTreeManager);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
@@ -3154,12 +3153,11 @@ public:
   void testPlotGroupPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
+    auto mockTreeManager = new MockTreeManager;
 
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter->m_manager = Mantid::Kernel::make_unique<MockTreeManager>();
-    MockTreeManager *mockTreeManager =
-        static_cast<MockTreeManager *>(presenter->m_manager.get());
+    presenter->acceptTreeManager(mockTreeManager);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");

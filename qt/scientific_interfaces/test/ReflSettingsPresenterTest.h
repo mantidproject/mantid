@@ -197,15 +197,9 @@ public:
     onCallReturnDefaultSettings(mockView);
     auto presenter = makeReflSettingsPresenter(&mockView);
 
-    EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(mockView, instrumentSettingsEnabled())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(mockView, getAnalysisMode())
-        .Times(Exactly(1))
-        .WillOnce(Return("MultiDetectorAnalysis"));
+    EXPECT_CALL(mockView, getPolarisationCorrections())
+        .Times(AtLeast(1))
+        .WillOnce(Return("PNR"));
     EXPECT_CALL(mockView, getCRho())
         .Times(AtLeast(1))
         .WillOnce(Return("2.5,0.4,1.1"));
@@ -582,7 +576,7 @@ public:
     auto presenter = makeReflSettingsPresenter(&mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(3)
+        .Times(4)
         .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, instrumentSettingsEnabled())
         .Times(2)
@@ -624,6 +618,7 @@ public:
 
   void testDefaultTransmissionRuns() {
     MockSettingsView mockView;
+    onCallReturnDefaultSettings(mockView);
     auto presenter = makeReflSettingsPresenter(&mockView);
 
     // Default transmission runs are specified with a single
@@ -653,17 +648,17 @@ public:
     // Test looking up transmission runs based on the angle. It has
     // quite a generous tolerance so the angle does not have to be
     // exact
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(4)
+        .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getTransmissionRuns())
-        .Times(1)
-        .WillOnce(Return(transmissionRunsMap));
+        .Times(6)
+        .WillRepeatedly(Return(transmissionRunsMap));
+
     auto result = presenter.getTransmissionRunsForAngle(0.69);
     TS_ASSERT_EQUALS(result, "INTER00013463,INTER00013464");
-
-    EXPECT_CALL(mockView, getTransmissionRuns())
-        .Times(1)
-        .WillOnce(Return(transmissionRunsMap));
     result = presenter.getTransmissionRunsForAngle(2.34);
-    TS_ASSERT_EQUALS(result, "INTER000013463");
+    TS_ASSERT_EQUALS(result, "INTER00013463");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
