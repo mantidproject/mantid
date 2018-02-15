@@ -1,9 +1,9 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
-
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidCrystal/SortHKL.h"
-
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
@@ -92,29 +92,42 @@ void SortHKL::exec() {
   UniqueReflectionCollection uniqueReflections =
       getUniqueReflections(peaks, cell);
 
+  MatrixWorkspace_sptr UniqWksp =
+      Mantid::API::WorkspaceFactory::Instance().create(
+          "Workspace2D", uniqueReflections.getReflections().size(), 15, 15);
+  // UniqWksp->setInstrument(inst2);
+  int counter = 0;
   for (const auto &unique : uniqueReflections.getReflections()) {
     /* Since all possible unique reflections are explored
      * there may be 0 observations for some of them.
      * In that case, nothing can be done.*/
+    // UniqWksp->getSpectrum(counter).setSpectrumNo(unique.second.getHKL());
     if (unique.second.count() > 2) {
+      auto &UniqX = UniqWksp->mutableX(counter);
+      auto &UniqY = UniqWksp->mutableY(counter);
+      auto &UniqE = UniqWksp->mutableE(counter);
+      counter++;
       auto intensities = unique.second.getIntensities();
       std::cout << unique.second.getHKL() << "\n";
       for (const auto &e : intensities)
         std::cout << e << "  ";
       std::cout << "\n";
       auto zScores = Kernel::getZscore(intensities);
-
-      for (size_t i = 0; i < zScores.size(); ++i) {
-        std::cout << zScores[i] << "  ";
-      }
-      std::cout << "\n";
       auto intensityStatistics = Kernel::getStatistics(
           intensities, StatOptions::Mean | StatOptions::Median);
 
       std::cout << intensityStatistics.mean << "  "
                 << intensityStatistics.median << "\n";
+      for (size_t i = 0; i < zScores.size(); ++i) {
+        UniqX[i] = static_cast<double>(i);
+        UniqY[i] = intensities[i];
+        UniqE[i] = intensityStatistics.mean - intensities[i];
+        std::cout << zScores[i] << "  ";
+      }
+      std::cout << "\n";
     }
   }
+  AnalysisDataService::Instance().addOrReplace("UniqWksp", UniqWksp);
 
   PeaksStatistics peaksStatistics(uniqueReflections);
 
