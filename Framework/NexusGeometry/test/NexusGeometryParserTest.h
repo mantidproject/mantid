@@ -111,10 +111,10 @@ public:
                                                   // z defaults to 0
     auto affine = Eigen::Transform<double, 3, Eigen::Affine>::Identity();
     // Rotation of bank
-    affine *= Eigen::Quaterniond(
-        Eigen::AngleAxisd(rotation * M_PI / 180, rotationAxis));
-    // Tranlsation of bank
-    affine *= Eigen::Translation3d(magnitude * unitVectorTranslation);
+    affine = Eigen::Quaterniond(
+        Eigen::AngleAxisd(rotation * M_PI / 180, rotationAxis)) * affine;
+    // Translation of bank
+    affine = Eigen::Translation3d(magnitude * unitVectorTranslation) * affine;
     auto expectedPosition = affine * offset;
     TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-3));
   }

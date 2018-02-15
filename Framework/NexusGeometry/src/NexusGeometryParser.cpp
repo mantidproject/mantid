@@ -309,7 +309,8 @@ NexusGeometryParser::getTransformations(Group &detectorGroup) {
   transforms = Eigen::AngleAxisd(0.0, axis);
 
   // Breaks when no more dependencies (dependency = ".")
-  // Transformations must be applied in opposite order to direction of discovery
+  // Transformations must be applied in the order of direction of discovery
+  // (they are _passive_ transformations)
   while (dependency != NO_DEPENDENCY) {
     // Open the transformation data set
     DataSet transformation = this->nexusFile.openDataSet(dependency);
@@ -360,7 +361,7 @@ NexusGeometryParser::getTransformations(Group &detectorGroup) {
       // Translation = magnitude*unitVector
       transformVector *= magnitude;
       Eigen::Translation3d translation(transformVector);
-      transforms *= translation;
+      transforms = translation * transforms;
     } else if (transformType == ROTATION) {
       double angle = magnitude;
       if (transformUnits == DEGREES) {
@@ -368,7 +369,7 @@ NexusGeometryParser::getTransformations(Group &detectorGroup) {
         angle *= PI / DEGREES_IN_SEMICIRCLE;
       }
       Eigen::AngleAxisd rotation(angle, transformVector);
-      transforms *= rotation;
+      transforms = rotation * transforms;
     }
   }
   return transforms;
