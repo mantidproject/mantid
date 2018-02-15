@@ -6,8 +6,10 @@ import re
 import string
 import itertools
 import math
+#import stresstesting
 from operator import itemgetter
 from mantid.simpleapi import *
+from mantid import ConfigService
 from isis_reflectometry.combineMulti import combineDataMulti, getWorkspace
 
 
@@ -29,13 +31,26 @@ class ISISReflectometryAutoreductionTest(object):
         return (self.result_workspace, self.reference_result_file)
 
     def runTest(self):
+        ConfigService.Instance().setString("default.instrument", "INTER")
         Load(self.runs_file, OutputWorkspace=self.runs_workspace)
-        transmission_workspace_name = CreateTransmissionWorkspaces(
-                                        self.transmission_run_names[0],
-                                        self.transmission_run_names[1],
-                                        scale=False)
-        AutoReduce([transmission_workspace_name, transmission_workspace_name],
+        CreateTransmissionWorkspaces(self.transmission_run_names[0],
+                                     self.transmission_run_names[1],
+                                     scale=False)
+        workspaces_to_exclude_from_result = AnalysisDataService.Instance().getObjectNames()
+        stitched_name = StitchedTransmissionWorkspaceName(self.transmission_run_names[0], self.transmission_run_names[1])
+        Stitch1D(
+            LHSWorkspace=TransmissionWorkspaceName(self.transmission_run_names[0]),
+            RHSWorkspace=TransmissionWorkspaceName(self.transmission_run_names[1]),
+            StartOverlap=10,
+            EndOverlap=12,
+            ScaleRHSWorkspace=False,
+            OutputWorkspace=stitched_name)
+        AutoReduce([stitched_name, stitched_name],
                    self.run_numbers)
+        RemoveWorkspaces(workspaces_to_exclude_from_result)
+        GroupWorkspaces(InputWorkspaces=AnalysisDataService.Instance().getObjectNames(),
+                        OutputWorkspace=self.result_workspace)
+        mtd[self.result_workspace].sortByName()
 
     @staticmethod
     def regenerateRunsFile():
@@ -44,22 +59,33 @@ class ISISReflectometryAutoreductionTest(object):
 
     @staticmethod
     def regenerateReferenceFile(reference_file_directory):
-        RegenerateReferenceFile(reference_file_directory,
-                                ISISReflectometryAutoreductionTest.reference_result_file)
+        RegenerateReferenceFile(reference_file_directory, ISISReflectometryAutoreductionTest.reference_result_file)
 
     @staticmethod
     def regenerateRunTitles():
         RegenerateRunTitles(ISISReflectometryAutoreductionTest.investigation_id)
 
 
+def RemoveWorkspaces(to_remove):
+    for workspace_name in to_remove:
+        AnalysisDataService.Instance().remove(workspace_name)
+
+
+def WorkspaceName(file_path):
+    return os.path.splitext(os.path.basename(file_path))[0]
+
+
 def RegenerateReferenceFile(reference_file_directory, output_filename):
-    files = [path for path in os.listdir(reference_file_directory) if ".raw" not in path]
-    workspace_names = [os.path.splitext(os.path.basename(path))[0] for path in files]
-    for file, workspace_name in zip(files, workspace_names):
+    files = os.listdir(reference_file_directory)
+    workspace_names = []
+    for file in files:
+        workspace_name = WorkspaceName(file)
         Load(file, OutputWorkspace=workspace_name)
+        workspace_names.append(workspace_name)
 
     output_workspace_name = 'Output'
     GroupWorkspaces(InputWorkspaces=workspace_names, OutputWorkspace=output_workspace_name)
+    mtd[output_workspace_name].sortByName()
     SaveNexus(InputWorkspace=output_workspace_name, Filename=output_filename)
 
 
@@ -122,9 +148,8 @@ def RegenerateRunTitles(investigation_id):
         if bool(re.search('(raw)$', file_name, re.IGNORECASE)):
             title = (run_number + '~ ' + description).strip()
             runlist.append(title)
-            # self.SampleText.__icat_file_map[title] = \
-            #    (file_id, run_number, file_name)
-            # self.listMain.addItem(title)
+    # self.SampleText.__icat_file_map[title] = #(file_id, run_number, file_name)
+    # self.listMain.addItem(title)
     # self.listMain.sortItems()
     return runlist
     # del search_results
@@ -230,7 +255,7 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
             runno = item[0]
             angle = item[1]
             runnos = string.split(runno, '+')
-#check if runs have been added together
+            # check if runs have been added together
             runnos = [int(i) for i in runnos]
 
             try:
@@ -244,8 +269,8 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
 
             if float(angle) > 0.0:
                 ws = str(runno)
-#w1 = mtd[runno + '.raw']
-#spectra = w1.getRun().getLogData('nspectra').value
+                # w1 = mtd[runno + '.raw']
+                # spectra = w1.getRun().getLogData('nspectra').value
                 if not mtd.doesExist(runno + '_IvsQ'):
                     th = angle
                     if len(transRun) > 1 and angle > 2.25:
@@ -286,8 +311,8 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
             Qmax = max(w2.readX(0))
             Qmax = 0.3
 
-#print(Qmin, Qmax, dqq)
-#print(overlapHigh)
+            # print(Qmin, Qmax, dqq)
+            # print(overlapHigh)
             if len(wq_list) > 1:
                 outputwksp = string.split(wq_list[0], sep='_')[
                     0] + '_' + string.split(wq_list[-1], sep='_')[0][3:]
@@ -311,7 +336,7 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
 
 
 def MakeTuples(rlist):
-#sort runs into tuples : run number, title, theta
+    # sort runs into tuples : run number, title, theta
     tup = ()
     for idx in rlist:
         split_title = re.split("th=|~", idx)
@@ -327,7 +352,7 @@ def MakeTuples(rlist):
                 split_title.append(theta)  # Append a dummy theta value.
                 tup = tup + (split_title,)
         else:
-#Tuple of lists containing(run number, title, theta)
+            # Tuple of lists containing(run number, title, theta)
             tup = tup + (split_title,)
 
     tupsort = sorted(tup, key=itemgetter(1, 2))
@@ -335,20 +360,20 @@ def MakeTuples(rlist):
 
 
 def SortRuns(tupsort):
-#sort tuples of runs into groups beloning to one sample title
+    # sort tuples of runs into groups beloning to one sample title
     row = 0
     complete_list = []
     for _key, group in itertools.groupby(
             tupsort, lambda x: x[1]):  # now group by title
         col = 0
-#for storing run_angle pairs all with the same title
+        # for storing run_angle pairs all with the same title
         run_angle_pairs_of_title = list()
         for object in group:  # loop over all with equal title
             one_sample = []
             run_no = object[0]
             angle = object[-1]
             run_angle_pairs_of_title.append((run_no, angle))
-#print run_angle_pairs_of_title
+            # print run_angle_pairs_of_title
         for angle_key, group in itertools.groupby(
                 run_angle_pairs_of_title, lambda x: x[1]):
             runnumbers = "+".join(["%s" % pair[0] for pair in group])
@@ -365,25 +390,27 @@ def SortRuns(tupsort):
     return sortedList
 
 
+def TransmissionWorkspaceName(run):
+    return "TRANS_{}".format(run)
+
+
+def StitchedTransmissionWorkspaceName(run_number_1, run_number_2):
+    return 'TRANS_{}_{}'.format(run_number_1, run_number_2)
+
+
 def CreateTransmissionWorkspaces(run1, run2, scale=False):
-    Load(run1 + '.raw', OutputWorkspace=run1)
-    Load(run2 + '.raw', OutputWorkspace=run2)
     CreateTransmissionWorkspaceAuto(
         run1,
-        OutputWorkspace='TRANS_{}'.format(run1),
+        OutputWorkspace=TransmissionWorkspaceName(run1),
         StartOverlap=10,
         EndOverlap=12)
     CreateTransmissionWorkspaceAuto(
         run2,
-        OutputWorkspace='TRANS_{}'.format(run2),
+        OutputWorkspace=TransmissionWorkspaceName(run2),
         StartOverlap=10,
         EndOverlap=12)
-    stitched_name = 'TRANS_{}_{}'.format(run1, run2)
-    Stitch1D(
-        LHSWorkspace='TRANS_{}'.format(run1),
-        RHSWorkspace='TRANS_{}'.format(run2),
-        StartOverlap=10,
-        EndOverlap=12,
-        ScaleRHSWorkspace=scale,
-        OutputWorkspace=stitched_name)
-    return stitched_name
+
+
+test = ISISReflectometryAutoreductionTest()
+test.runTest()
+#ISISReflectometryAutoreductionTest.regenerateReferenceFile("/home/ejb/Documents/INTER_Mantid_Test/Autoreduce test workspaces")
