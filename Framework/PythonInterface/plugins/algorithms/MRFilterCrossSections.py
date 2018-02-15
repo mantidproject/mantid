@@ -31,6 +31,7 @@ class MRFilterCrossSections(PythonAlgorithm):
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc="Workspace group containing cross-sections")
+
     def PyExec(self):
         """ Execute filtering """
         file_path = self.getProperty("Filename").value
@@ -59,7 +60,7 @@ class MRFilterCrossSections(PythonAlgorithm):
 
         # Check whether we have a polarizer
         polarizer = ws.getRun().getProperty("Polarizer").value[0]
-    
+
         # Determine cross-sections
         cross_sections = list()
         if polarizer > 0:
