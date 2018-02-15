@@ -65,24 +65,24 @@ class MRFilterCrossSections(PythonAlgorithm):
         if polarizer > 0:
             xs_name = "%s_Off" % run_number
             ws_off = api.FilterByLogValue(InputWorkspace=ws, LogName=pol_state, TimeTolerance=0.1,
-                                      MinimumValue=-.01, MaximumValue=0.01, LogBoundary='Left',
-                                      OutputWorkspace=xs_name)
-            if not pol_veto == '':
-                ws_off = api.FilterByLogValue(InputWorkspace=ws_off, LogName=pol_veto, TimeTolerance=0.1,
                                           MinimumValue=-.01, MaximumValue=0.01, LogBoundary='Left',
                                           OutputWorkspace=xs_name)
+            if not pol_veto == '':
+                ws_off = api.FilterByLogValue(InputWorkspace=ws_off, LogName=pol_veto, TimeTolerance=0.1,
+                                              MinimumValue=-.01, MaximumValue=0.01, LogBoundary='Left',
+                                              OutputWorkspace=xs_name)
 
             xs_events = self.filter_analyzer(ws_off, 'Off')
             cross_sections.extend(xs_events)
 
             xs_name = "%s_On" % run_number
             ws_on = api.FilterByLogValue(InputWorkspace=ws, LogName=pol_state, TimeTolerance=0.1,
-                                     MinimumValue=0.99, MaximumValue=1.01, LogBoundary='Left',
-                                     OutputWorkspace=xs_name)
+                                         MinimumValue=0.99, MaximumValue=1.01, LogBoundary='Left',
+                                         OutputWorkspace=xs_name)
             if not pol_veto == '':
                 ws_on = api.FilterByLogValue(InputWorkspace=ws_on, LogName=pol_veto, TimeTolerance=0.1,
-                                         MinimumValue=-.01, MaximumValue=0.01, LogBoundary='Left',
-                                         OutputWorkspace=xs_name)
+                                             MinimumValue=-.01, MaximumValue=0.01, LogBoundary='Left',
+                                             OutputWorkspace=xs_name)
 
             xs_events = self.filter_analyzer(ws_on, 'On')
             cross_sections.extend(xs_events)
@@ -110,14 +110,14 @@ class MRFilterCrossSections(PythonAlgorithm):
             try:
                 xs_name = "%s_%s_Off" % (run_number, pol_state)
                 ws_ana_off = api.FilterByLogValue(InputWorkspace=ws, LogName=ana_state,
-                                              MinimumValue=-0.01, MaximumValue=0.01, LogBoundary='Left',
-                                              OutputWorkspace=xs_name)
+                                                  MinimumValue=-0.01, MaximumValue=0.01, LogBoundary='Left',
+                                                  OutputWorkspace=xs_name)
                 if not ana_veto == '':
                     ws_ana_off = api.FilterByLogValue(InputWorkspace=ws_ana_off, LogName=ana_veto, TimeTolerance=0.1,
-                                                  MinimumValue=-.01, MaximumValue=0.01, LogBoundary='Left',
-                                                  OutputWorkspace=xs_name)
+                                                      MinimumValue=-.01, MaximumValue=0.01, LogBoundary='Left',
+                                                      OutputWorkspace=xs_name)
                 api.AddSampleLog(Workspace=ws_ana_off, LogName='cross_section_id',
-                                      LogText="%s_Off" % pol_state)
+                                 LogText="%s_Off" % pol_state)
                 cross_sections.append(xs_name)
             except:
                 api.logger.error("Could not filter %s-Off" % pol_state)
@@ -125,21 +125,21 @@ class MRFilterCrossSections(PythonAlgorithm):
             try:
                 xs_name = "%s_%s_On" % (run_number, pol_state)
                 ws_ana_on = api.FilterByLogValue(InputWorkspace=ws, LogName=ana_state,
-                                             MinimumValue=1, MaximumValue=1, LogBoundary='Left',
-                                             OutputWorkspace=xs_name)
+                                                 MinimumValue=1, MaximumValue=1, LogBoundary='Left',
+                                                 OutputWorkspace=xs_name)
                 if not ana_veto == '':
                     ws_ana_on = api.FilterByLogValue(InputWorkspace=ws_ana_on, LogName=ana_veto, TimeTolerance=0.1,
-                                                 MinimumValue=-.01, MaximumValue=0.01, LogBoundary='Left',
-                                                 OutputWorkspace=xs_name)
+                                                     MinimumValue=-.01, MaximumValue=0.01, LogBoundary='Left',
+                                                     OutputWorkspace=xs_name)
                 api.AddSampleLog(Workspace=ws_ana_on, LogName='cross_section_id',
-                                      LogText="%s_On" % pol_state)
+                                 LogText="%s_On" % pol_state)
                 cross_sections.append(xs_name)
             except:
                 api.logger.error("Could not filter %s-On" % pol_state)
             AnalysisDataService.remove(str(ws))
         else:
             api.AddSampleLog(Workspace=ws, LogName='cross_section_id',
-                                      LogText="%s_Off" % pol_state)
+                             LogText="%s_Off" % pol_state)
             cross_sections.append(str(ws))
 
         return cross_sections
@@ -158,7 +158,7 @@ class MRFilterCrossSections(PythonAlgorithm):
                                     NXentryName='entry-%s' % entry,
                                     OutputWorkspace=ws_name)
             api.AddSampleLog(Workspace=ws, LogName='cross_section_id',
-                                      LogText=entry)
+                             LogText=entry)
             cross_sections.append(ws_name)
 
         return cross_sections
