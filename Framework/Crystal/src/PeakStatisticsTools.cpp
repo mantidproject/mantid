@@ -16,6 +16,19 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+/// Returns a vector with the wavelengths of the Peaks stored in this
+/// reflection.
+std::vector<double> UniqueReflection::getWavelengths() const {
+  std::vector<double> wavelengths;
+  wavelengths.reserve(m_peaks.size());
+
+  std::transform(
+      m_peaks.begin(), m_peaks.end(), std::back_inserter(wavelengths),
+      [](const DataObjects::Peak &peak) { return peak.getWavelength(); });
+
+  return wavelengths;
+}
+
 /// Returns a vector with the intensities of the Peaks stored in this
 /// reflection.
 std::vector<double> UniqueReflection::getIntensities() const {

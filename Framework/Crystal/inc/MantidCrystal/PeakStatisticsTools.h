@@ -34,6 +34,7 @@ public:
   const std::vector<DataObjects::Peak> &getPeaks() const { return m_peaks; }
   size_t count() const { return m_peaks.size(); }
 
+  std::vector<double> getWavelengths() const;
   std::vector<double> getIntensities() const;
   std::vector<double> getSigmas() const;
 

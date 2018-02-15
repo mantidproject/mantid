@@ -107,6 +107,7 @@ void SortHKL::exec() {
       auto &UniqY = UniqWksp->mutableY(counter);
       auto &UniqE = UniqWksp->mutableE(counter);
       counter++;
+      auto wavelengths = unique.second.getWavelengths();
       auto intensities = unique.second.getIntensities();
       std::cout << unique.second.getHKL() << "\n";
       for (const auto &e : intensities)
@@ -118,8 +119,20 @@ void SortHKL::exec() {
 
       std::cout << intensityStatistics.mean << "  "
                 << intensityStatistics.median << "\n";
+      for (size_t i = 0; i < zScores.size() - 1; ++i) {
+        for (size_t j = i; j < zScores.size(); ++j) {
+          if (wavelengths[i] > wavelengths[i + j]) {
+            double tmp = wavelengths[i];
+            wavelengths[i] = wavelengths[i + j];
+            wavelengths[i + j] = tmp;
+            tmp = intensities[i];
+            intensities[i] = intensities[i + j];
+            intensities[i + j] = tmp;
+          }
+        }
+      }
       for (size_t i = 0; i < zScores.size(); ++i) {
-        UniqX[i] = static_cast<double>(i);
+        UniqX[i] = wavelengths[i];
         UniqY[i] = intensities[i];
         UniqE[i] = intensityStatistics.mean - intensities[i];
         std::cout << zScores[i] << "  ";
