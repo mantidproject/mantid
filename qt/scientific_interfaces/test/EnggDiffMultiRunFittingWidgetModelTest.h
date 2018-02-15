@@ -48,7 +48,7 @@ public:
   }
 
   void test_getFocusedRunSucceedsWhenWorkspaceNotInModel() {
-    EnggDiffMultiRunFittingWidgetModel model;;
+    EnggDiffMultiRunFittingWidgetModel model;
     boost::optional<Mantid::API::MatrixWorkspace_sptr> retrievedWS(boost::none);
     TS_ASSERT_THROWS_NOTHING(retrievedWS =
                                  model.getFocusedRun(RunLabel(123, 1)));
