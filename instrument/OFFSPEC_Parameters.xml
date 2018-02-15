@@ -47,7 +47,7 @@
   <parameter name="LambdaMax">
     <value val="14.0"/>
   </parameter>
-
+  
   <parameter name="TransRunStartOverlap"> <!-- in wavelength -->
     <value val="10"/>
   </parameter>
@@ -55,6 +55,6 @@
   <parameter name="TransRunEndOverlap"> <!-- in wavelength -->
     <value val="12"/>
   </parameter>
-
+  
 </component-link>
 </parameter-file>
