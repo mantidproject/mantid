@@ -8,6 +8,11 @@
 #include "InstrumentOptionDefaults.h"
 
 namespace MantidQt {
+
+namespace MantidWidgets {
+class HintingLineEdit;
+}
+
 namespace CustomInterfaces {
 
 // Forward decs
@@ -168,6 +173,8 @@ private:
   std::unique_ptr<IReflSettingsPresenter> m_presenter;
   /// Whether or not polarisation corrections should be enabled
   mutable bool m_isPolCorrEnabled;
+  /// The stitch params entry widget
+  MantidQt::MantidWidgets::HintingLineEdit *m_stitchEdit;
 };
 } // namespace Mantid
 } // namespace CustomInterfaces

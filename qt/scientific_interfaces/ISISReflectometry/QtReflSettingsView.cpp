@@ -40,7 +40,7 @@ void QtReflSettingsView::initLayout() {
   int numCols = 2;
   m_ui.transmissionRunsTable->setColumnCount(numCols);
   m_ui.transmissionRunsTable->setColumnWidth(0, 40);
-  m_ui.transmissionRunsTable->setColumnWidth(1, 149);
+  m_ui.transmissionRunsTable->setColumnWidth(1, 133);
   m_ui.transmissionRunsTable->setHorizontalHeaderLabels(
       {QString::fromStdString("Angle"),
        QString::fromStdString("Transmission Run(s)")});
@@ -409,8 +409,7 @@ std::string QtReflSettingsView::getStitchOptions() const {
 }
 
 QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
-  auto widget = m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget();
-  return *static_cast<QLineEdit *>(widget);
+  return *static_cast<QLineEdit *>(m_stitchEdit);
 }
 
 /** Creates hints for 'Stitch1DMany'
@@ -419,8 +418,21 @@ QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
 void QtReflSettingsView::createStitchHints(
     const std::map<std::string, std::string> &hints) {
 
-  m_ui.expSettingsLayout0->addWidget(new HintingLineEdit(this, hints), 7, 1, 1,
-                                     3);
+  // We want to add the stitch params box next to the stitch
+  // label, so first find the label's position
+  for (int i = 0; i < m_ui.expSettingsLayout0->count(); ++i) {
+    if (m_ui.expSettingsLayout0->itemAt(i)->widget() == m_ui.stitchLabel) {
+      // Get the label's position
+      int row, col, rowSpan, colSpan;
+      m_ui.expSettingsLayout0->getItemPosition(i, &row, &col, &rowSpan,
+                                               &colSpan);
+      // Create the new edit box and add it to the right of the label
+      m_stitchEdit = new HintingLineEdit(this, hints);
+      m_ui.expSettingsLayout0->addWidget(m_stitchEdit, row, col + colSpan, 1,
+                                         3);
+      return;
+    }
+  }
 }
 
 /** Return selected analysis mode
