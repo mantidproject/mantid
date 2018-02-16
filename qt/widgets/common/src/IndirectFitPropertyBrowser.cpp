@@ -203,14 +203,14 @@ IFunction_sptr IndirectFitPropertyBrowser::background() const {
  * @return  The function index of the selected background. -1 if no background
  *          is selected.
  */
-int IndirectFitPropertyBrowser::backgroundIndex() const {
+boost::optional<int> IndirectFitPropertyBrowser::backgroundIndex() const {
   if (m_backgroundHandler != nullptr) {
     const auto prefix = m_backgroundHandler->functionPrefix();
 
     if (!prefix.endsWith("-1"))
       return prefix.right(1).toInt();
   }
-  return -1;
+  return boost::none;
 }
 
 /**

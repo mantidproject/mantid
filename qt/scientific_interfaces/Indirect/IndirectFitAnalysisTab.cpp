@@ -190,8 +190,8 @@ IFunction_sptr IndirectFitAnalysisTab::model() const {
   if (compositeModel) {
     auto index = m_fitPropertyBrowser->backgroundIndex();
 
-    if (index != -1)
-      compositeModel->removeFunction(static_cast<size_t>(index));
+    if (index)
+      compositeModel->removeFunction(static_cast<size_t>(index.get()));
     return compositeModel;
   }
   return model;
@@ -200,7 +200,7 @@ IFunction_sptr IndirectFitAnalysisTab::model() const {
 /**
  * @return  The function index of the selected background.
  */
-int IndirectFitAnalysisTab::backgroundIndex() const {
+boost::optional<int> IndirectFitAnalysisTab::backgroundIndex() const {
   return m_fitPropertyBrowser->backgroundIndex();
 }
 
@@ -926,7 +926,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 

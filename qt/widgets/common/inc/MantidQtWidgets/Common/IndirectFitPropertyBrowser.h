@@ -6,6 +6,8 @@
 
 #include <QSet>
 
+#include <boost/optional.hpp>
+
 #include <unordered_map>
 
 namespace MantidQt {
@@ -24,7 +26,7 @@ public:
 
   Mantid::API::IFunction_sptr background() const;
 
-  int backgroundIndex() const;
+  boost::optional<int> backgroundIndex() const;
 
   int functionIndex(Mantid::API::IFunction_sptr function) const;
 
