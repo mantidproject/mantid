@@ -6,7 +6,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-
+#include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -97,12 +97,15 @@ void SortHKL::exec() {
           "Workspace2D", uniqueReflections.getReflections().size(), 15, 15);
   // UniqWksp->setInstrument(inst2);
   int counter = 0;
+  auto taxis = new TextAxis(uniqueReflections.getReflections().size());
   for (const auto &unique : uniqueReflections.getReflections()) {
     /* Since all possible unique reflections are explored
      * there may be 0 observations for some of them.
      * In that case, nothing can be done.*/
-    // UniqWksp->getSpectrum(counter).setSpectrumNo(unique.second.getHKL());
+
     if (unique.second.count() > 2) {
+      std::cout << unique.second.getHKL().toString() << '\n';
+      taxis->setLabel(counter, unique.second.getHKL().toString());
       auto &UniqX = UniqWksp->mutableX(counter);
       auto &UniqY = UniqWksp->mutableY(counter);
       auto &UniqE = UniqWksp->mutableE(counter);
@@ -119,18 +122,24 @@ void SortHKL::exec() {
 
       std::cout << intensityStatistics.mean << "  "
                 << intensityStatistics.median << "\n";
-      for (size_t i = 0; i < zScores.size() - 1; ++i) {
-        for (size_t j = i; j < zScores.size(); ++j) {
-          if (wavelengths[i] > wavelengths[i + j]) {
-            double tmp = wavelengths[i];
-            wavelengths[i] = wavelengths[i + j];
-            wavelengths[i + j] = tmp;
-            tmp = intensities[i];
-            intensities[i] = intensities[i + j];
-            intensities[i + j] = tmp;
+      // sort wavelengths & intensities
+      size_t i0;
+      for (size_t i = 0; i < wavelengths.size(); i++) {
+        i0 = i;
+        for (size_t j = i + 1; j < wavelengths.size(); j++) {
+          if (wavelengths[j] < wavelengths[i0]) // Change was here!
+          {
+            i0 = j;
           }
         }
+        double temp = wavelengths[i0];
+        wavelengths[i0] = wavelengths[i];
+        wavelengths[i] = temp;
+        temp = intensities[i0];
+        intensities[i0] = intensities[i];
+        intensities[i] = temp;
       }
+
       for (size_t i = 0; i < zScores.size(); ++i) {
         UniqX[i] = wavelengths[i];
         UniqY[i] = intensities[i];
@@ -140,6 +149,7 @@ void SortHKL::exec() {
       std::cout << "\n";
     }
   }
+  UniqWksp->replaceAxis(1, taxis);
   AnalysisDataService::Instance().addOrReplace("UniqWksp", UniqWksp);
 
   PeaksStatistics peaksStatistics(uniqueReflections);
