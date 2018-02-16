@@ -157,12 +157,12 @@ void SortHKL::exec() {
       for (size_t i = 0; i < zScores.size(); ++i) {
         UniqX[i] = wavelengths[i];
         UniqY[i] = intensities[i];
-        if (equivalentIntensities == "mean")
+        if (zScores[i] > sigmaCritical)
+          UniqE[i] = intensities[i];
+        else if (equivalentIntensities == "mean")
           UniqE[i] = intensityStatistics.mean - intensities[i];
         else
           UniqE[i] = intensityStatistics.median - intensities[i];
-        if (zScores[i] > sigmaCritical)
-          UniqE[i] = intensities[i];
         std::cout << zScores[i] << "  ";
       }
       std::cout << "\n";
