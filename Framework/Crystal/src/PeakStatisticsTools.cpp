@@ -127,8 +127,8 @@ UniqueReflectionCollection::UniqueReflectionCollection(
 
 /// Assigns the supplied peaks to the proper UniqueReflection. Peaks for which
 /// the reflection family can not be found are ignored.
-void UniqueReflectionCollection::addObservations(
-    const std::vector<Peak> &peaks) {
+void
+UniqueReflectionCollection::addObservations(const std::vector<Peak> &peaks) {
   for (auto const &peak : peaks) {
     V3D hkl = peak.getHKL();
     hkl.round();
@@ -211,7 +211,8 @@ UniqueReflectionCollection::getReflections() const {
  * @param uniqueReflections :: Map of unique reflections and peaks.
  */
 void PeaksStatistics::calculatePeaksStatistics(
-    const std::map<V3D, UniqueReflection> &uniqueReflections) {
+    const std::map<V3D, UniqueReflection> &uniqueReflections,
+    std::string &equivalentIntensities, double &sigmaCritical) {
   double rMergeNumerator = 0.0;
   double rPimNumerator = 0.0;
   double intensitySumRValues = 0.0;
@@ -225,7 +226,7 @@ void PeaksStatistics::calculatePeaksStatistics(
       ++m_uniqueReflections;
 
       // Possibly remove outliers.
-      auto outliersRemoved = unique.second.removeOutliers();
+      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical);
 
       // I/sigma is calculated for all reflections, even if there is only one
       // observation.
@@ -238,9 +239,12 @@ void PeaksStatistics::calculatePeaksStatistics(
       if (outliersRemoved.count() > 1) {
         // Get mean, standard deviation for intensities
         auto intensityStatistics = Kernel::getStatistics(
-            intensities, StatOptions::Mean | StatOptions::UncorrectedStdDev);
+            intensities, StatOptions::Mean | StatOptions::UncorrectedStdDev |
+                             StatOptions::Median);
 
         double meanIntensity = intensityStatistics.mean;
+        if (equivalentIntensities == "Median")
+          meanIntensity = intensityStatistics.median;
 
         /* This was in the original algorithm, not entirely sure where it is
          * used. It's basically the sum of all relative standard deviations.
@@ -252,8 +256,8 @@ void PeaksStatistics::calculatePeaksStatistics(
         double sumOfDeviationsFromMean =
             std::accumulate(intensities.begin(), intensities.end(), 0.0,
                             [meanIntensity](double sum, double intensity) {
-                              return sum + fabs(intensity - meanIntensity);
-                            });
+              return sum + fabs(intensity - meanIntensity);
+            });
 
         // Accumulate into total sum for numerator of RMerge
         rMergeNumerator += sumOfDeviationsFromMean;
@@ -306,9 +310,9 @@ void PeaksStatistics::calculatePeaksStatistics(
 
 /// Returns the sum of all I/sigma-ratios defined by the two vectors using
 /// std::inner_product.
-double PeaksStatistics::getIOverSigmaSum(
-    const std::vector<double> &sigmas,
-    const std::vector<double> &intensities) const {
+double PeaksStatistics::getIOverSigmaSum(const std::vector<double> &sigmas,
+                                         const std::vector<double> &intensities)
+    const {
   return std::inner_product(intensities.begin(), intensities.end(),
                             sigmas.begin(), 0.0, std::plus<double>(),
                             std::divides<double>());

@@ -74,6 +74,19 @@ void SortHKL::init() {
   declareProperty("Append", false,
                   "Append to output table workspace if true.\n"
                   "If false, new output table workspace (default).");
+  std::vector<std::string> equivTypes{ "Mean", "Median" };
+  declareProperty("EquivalentIntensities", equivTypes[0],
+                  boost::make_shared<StringListValidator>(equivTypes),
+                  "Replace intensities by mean(default), "
+                  "or median.");
+  declareProperty(Kernel::make_unique<PropertyWithValue<double> >(
+                      "SigmaCritical", 3.0, Direction::Input),
+                  "Removes peaks whose intensity deviates more than "
+                  "SigmaCritical from the mean (or median).");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace> >(
+          "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
+      "Output Equivalent Intensities");
 }
 
 void SortHKL::exec() {
@@ -91,11 +104,12 @@ void SortHKL::exec() {
 
   UniqueReflectionCollection uniqueReflections =
       getUniqueReflections(peaks, cell);
+  std::string equivalentIntensities = getPropertyValue("EquivalentIntensities");
+  double sigmaCritical = getProperty("SigmaCritical");
 
   MatrixWorkspace_sptr UniqWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", uniqueReflections.getReflections().size(), 15, 15);
-  // UniqWksp->setInstrument(inst2);
   int counter = 0;
   auto taxis = new TextAxis(uniqueReflections.getReflections().size());
   for (const auto &unique : uniqueReflections.getReflections()) {
@@ -104,15 +118,15 @@ void SortHKL::exec() {
      * In that case, nothing can be done.*/
 
     if (unique.second.count() > 2) {
-      std::cout << unique.second.getHKL().toString() << '\n';
-      taxis->setLabel(counter, unique.second.getHKL().toString());
+      taxis->setLabel(counter, "   " + unique.second.getHKL().toString());
       auto &UniqX = UniqWksp->mutableX(counter);
       auto &UniqY = UniqWksp->mutableY(counter);
       auto &UniqE = UniqWksp->mutableE(counter);
       counter++;
       auto wavelengths = unique.second.getWavelengths();
       auto intensities = unique.second.getIntensities();
-      std::cout << unique.second.getHKL() << "\n";
+      std::cout << "HKL " << unique.second.getHKL() << "\n";
+      std::cout << "Intensities ";
       for (const auto &e : intensities)
         std::cout << e << "  ";
       std::cout << "\n";
@@ -120,8 +134,8 @@ void SortHKL::exec() {
       auto intensityStatistics = Kernel::getStatistics(
           intensities, StatOptions::Mean | StatOptions::Median);
 
-      std::cout << intensityStatistics.mean << "  "
-                << intensityStatistics.median << "\n";
+      std::cout << "Mean = " << intensityStatistics.mean
+                << "  Median = " << intensityStatistics.median << "\n";
       // sort wavelengths & intensities
       size_t i0;
       for (size_t i = 0; i < wavelengths.size(); i++) {
@@ -139,20 +153,26 @@ void SortHKL::exec() {
         intensities[i0] = intensities[i];
         intensities[i] = temp;
       }
-
+      std::cout << "Zscores ";
       for (size_t i = 0; i < zScores.size(); ++i) {
         UniqX[i] = wavelengths[i];
         UniqY[i] = intensities[i];
-        UniqE[i] = intensityStatistics.mean - intensities[i];
+        if (equivalentIntensities == "mean")
+          UniqE[i] = intensityStatistics.mean - intensities[i];
+        else
+          UniqE[i] = intensityStatistics.median - intensities[i];
+        if (zScores[i] > sigmaCritical)
+          UniqE[i] = intensities[i];
         std::cout << zScores[i] << "  ";
       }
       std::cout << "\n";
     }
   }
   UniqWksp->replaceAxis(1, taxis);
-  AnalysisDataService::Instance().addOrReplace("UniqWksp", UniqWksp);
+  setProperty("EquivalentsWorkspace", UniqWksp);
 
-  PeaksStatistics peaksStatistics(uniqueReflections);
+  PeaksStatistics peaksStatistics(uniqueReflections, equivalentIntensities,
+                                  sigmaCritical);
 
   // Store the statistics for output.
   const std::string tableName = getProperty("StatisticsTable");
