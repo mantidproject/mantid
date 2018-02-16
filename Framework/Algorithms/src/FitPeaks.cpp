@@ -1556,10 +1556,10 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
  * @param vec_xmax :: maximim values of domains
  * @return
  */
-double FitPeaks::FitFunctionMD(
-    API::IFunction_sptr fit_function, API::MatrixWorkspace_sptr dataws,
-    size_t wsindex, std::vector<double> &vec_xmin,
-    std::vector<double> &vec_xmax) {
+double FitPeaks::FitFunctionMD(API::IFunction_sptr fit_function,
+                               API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                               std::vector<double> &vec_xmin,
+                               std::vector<double> &vec_xmax) {
   // Validate
   if (vec_xmin.size() != vec_xmax.size())
     throw runtime_error("Sizes of xmin and xmax (vectors) are not equal. ");
