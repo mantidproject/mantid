@@ -24,9 +24,12 @@ if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
 endif()
 
 # We are only generating Qt4 packages at the moment
-set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qt4; )
+# ../lib gets from bin -> lib
+# ../../lib gets from plugins/qt4 -> lib
+# ../../../lib gets from bin/mantid/kernel -> lib
+set ( CMAKE_INSTALL_RPATH \$ORIGIN/../${LIB_DIR};\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../../../${LIB_DIR};$ORIGIN/../${PLUGINS_DIR};\$ORIGIN/../${PLUGINS_DIR}/qt4; )
 if ( MAKE_VATES )
-  list ( APPEND CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR} )
+  list ( APPEND CMAKE_INSTALL_RPATH \$ORIGIN/../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR} )
 endif ()
 
 # Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
