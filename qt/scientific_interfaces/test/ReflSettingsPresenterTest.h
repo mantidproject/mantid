@@ -574,6 +574,7 @@ public:
   void testInstrumentSettingsDisabled() {
     NiceMock<MockSettingsView> mockView;
     auto presenter = makeReflSettingsPresenter(&mockView);
+    onCallReturnDefaultTransmissionRuns(mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(4)
@@ -618,7 +619,6 @@ public:
 
   void testDefaultTransmissionRuns() {
     MockSettingsView mockView;
-    onCallReturnDefaultSettings(mockView);
     auto presenter = makeReflSettingsPresenter(&mockView);
 
     // Default transmission runs are specified with a single
@@ -626,6 +626,9 @@ public:
     std::map<std::string, std::string> transmissionRunsMap = {
         {"", "INTER00013463,INTER00013464"}};
 
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(1)
+        .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(1)
         .WillOnce(Return(transmissionRunsMap));

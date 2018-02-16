@@ -91,18 +91,19 @@ private:
   }
 
   void appendStringWithPrefix(QString &stringToEdit, const QStringList &list,
-                              std::vector<const char *> &prefixes, const int i,
-                              const char *separator = "") {
+                              std::vector<const char *> &prefixes,
+                              const size_t i, const char *separator = "") {
     // do nothing if string to add is empty
-    if (i >= list.size() || list[i].isEmpty())
+    const auto idx = static_cast<int>(i);
+    if (idx >= list.size() || list[idx].isEmpty())
       return;
 
     // add separator and string with/without prefix
-    const long int len = prefixes.size();
+    const auto len = prefixes.size();
     if (i < len && prefixes[i] != 0)
-      stringToEdit += QString(separator) + QString(prefixes[i]) + list[i];
+      stringToEdit += QString(separator) + QString(prefixes[i]) + list[idx];
     else
-      stringToEdit += separator + list[i];
+      stringToEdit += separator + list[idx];
   }
 
   // Utility to create a row data class from a string list of simple inputs
