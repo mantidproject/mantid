@@ -3,9 +3,26 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
+import re
 import os
-import sphinx_bootstrap_theme # checked at cmake time
+from warnings import warn
+
+import sphinx_bootstrap_theme
+
+
+VERSION_STR_RE = re.compile(r'^\s*return "(\d+\.\d+\.(\d{8}\.\d{4}|\d+))";$')
+
+
+def _version_string_from_cpp(filename):
+    vers_cpp_lines = open(filename, 'r').readlines()
+    version_str = '0.0.0'
+    for line in vers_cpp_lines:
+        match = VERSION_STR_RE.match(line.rstrip())
+        if match is not None:
+            version_str = match.group(1)
+            break
+
+    return version_str
 
 # -- General configuration ------------------------------------------------
 
@@ -13,8 +30,8 @@ import sphinx_bootstrap_theme # checked at cmake time
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-     # we use pngmath over mathjax so that the the offline help isn't reliant on
-     # anything external and we don't need to include the large mathjax package
+    # we use pngmath over mathjax so that the the offline help isn't reliant on
+    # anything external and we don't need to include the large mathjax package
     'sphinx.ext.pngmath',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx'
@@ -36,8 +53,16 @@ copyright = u'2007-2018, Mantid'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-#
-version_str = 'X.Y.Z'
+# This is read from Framework/Kernel/src/MantidVersion.cpp to avoid the requirement of having
+# a built copy of mantid
+version_cpp_path = os.path.relpath(os.path.join('..', '..', 'Framework',
+                                                'Kernel', 'src', 'MantidVersion.cpp'))
+try:
+    version_str = _version_string_from_cpp(version_cpp_path)
+except StandardError as ex:
+    warn("WARNING: Unable to parse version from MantidVersion: {}\nSetting version string to 0.0.0".format(str(ex)))
+    version_str = '0.0.0'
+
 # The short X.Y version.
 version = ".".join(version_str.split(".")[:2])
 # The full version, including alpha/beta/rc tags.

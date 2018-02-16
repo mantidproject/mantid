@@ -11,7 +11,7 @@
 Developer Documentation
 =======================
 
-These pages contain the developer documentation for mantid.
+These pages contain the developer documentation for mantid version |release|.
 
 ======
 Guides
@@ -25,9 +25,9 @@ Guides
 :doc:`GettingStarted`
    Describes the process of obtaining and building the mantid code base
 
-====================
-Component References
-====================
+===================
+Component Overviews
+===================
 
 .. toctree::
    :maxdepth: 1
