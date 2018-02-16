@@ -286,35 +286,26 @@ void InstrumentRenderer::generateRectangularTexture(
     size_t bankIndex) {
   const auto &compInfo = m_actor.componentInfo();
   auto bank = compInfo.quadrilateralComponent(bankIndex);
-  auto xstep = (compInfo.position(bank.bottomRight).X() -
-                compInfo.position(bank.bottomLeft).X()) /
-               bank.nX;
-  auto ystep = (compInfo.position(bank.topRight).Y() -
-                compInfo.position(bank.bottomLeft).Y()) /
-               bank.nY;
-
+  // Round size up to nearest power of 2
   auto res = Mantid::Geometry::detail::Renderer::getCorrectedTextureSize(
       bank.nX, bank.nY);
   auto texSizeX = res.first;
   auto texSizeY = res.second;
 
+  // Texture width is 3 times wider due to RGB values
   texture.resize(texSizeX * texSizeY * 3, 0); // fill with black
-  auto basePos = compInfo.position(bank.bottomLeft);
-  auto dets = compInfo.detectorsInSubtree(bankIndex);
 
-  for (auto det : dets) {
-    if (!compInfo.isDetector(det))
-      continue;
-
-    auto x = static_cast<size_t>(abs(compInfo.position(det).X() - basePos.X()) /
-                                 xstep);
-    auto y = static_cast<size_t>(abs(compInfo.position(det).Y() - basePos.Y()) /
-                                 ystep);
-    x *= 3;
-    auto ti = (y * texSizeX * 3) + x;
-    texture[ti] = static_cast<char>(colors[det].red());
-    texture[ti + 1] = static_cast<char>(colors[det].green());
-    texture[ti + 2] = static_cast<char>(colors[det].blue());
+  const auto &children = compInfo.children(bankIndex);
+  auto colWidth = children.size() * 3;
+  for (size_t x = 0; x < colWidth; x += 3) {
+    const auto &dets = compInfo.detectorsInSubtree(children[x / 3]);
+    for (size_t y = 0; y < dets.size(); ++y) {
+      auto det = dets[y];
+      auto ti = (y * texSizeX * 3) + x;
+      texture[ti] = static_cast<char>(colors[det].red());
+      texture[ti + 1] = static_cast<char>(colors[det].green());
+      texture[ti + 2] = static_cast<char>(colors[det].blue());
+    }
   }
 }
 
