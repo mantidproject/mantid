@@ -165,6 +165,11 @@ void SortHKL::exec() {
           UniqE[i] = intensityStatistics.median - intensities[i];
         std::cout << zScores[i] << "  ";
       }
+      for (size_t i = zScores.size(); i < 15; ++i) {
+        UniqX[i] = wavelengths[zScores.size() - 1];
+        UniqY[i] = intensities[zScores.size() - 1];
+        UniqE[i] = 0.0;
+      }
       std::cout << "\n";
     }
   }
