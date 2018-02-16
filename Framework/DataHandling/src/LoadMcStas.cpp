@@ -256,19 +256,19 @@ void LoadMcStas::readEventData(
   const auto eventDataTotalName = std::string("EventData_") + nameOfGroupWS;
   std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {
       {eventWS, eventDataTotalName}};
-  if (numEventEntries > 1) {
-    for (size_t i = 1; i <= numEventEntries; i++) {
-      allEventWS.push_back({eventWS->clone(), "partial_event_data_worksapce"});
-    }
-  }
+
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
   auto eventWSIndex = 1; // Starts at the first non-sum workspace
   for (const auto &eventEntry : eventEntries) {
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
-
+  if (numEventEntries > 1) {
+    for (size_t i = 1; i <= numEventEntries; i++) {
+      allEventWS.push_back({eventWS->clone(), "partial_event_data_workspace"});
+    }
     allEventWS[eventWSIndex].second =
-        dataName + std::string("_") + nameOfGroupWS;
+      dataName + std::string("_") + nameOfGroupWS;
+  }
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
