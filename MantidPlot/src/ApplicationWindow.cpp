@@ -11574,8 +11574,6 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   hints and 'What's This' boxes but creates one for ordinary tooltips.
   Instead we set the background colour to a darker one, consistent with
   ordinary tooltips.
-
-  @returns A pallete with contrasting tooltip and background colours.
 */
 void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
   auto tooltipColorApprox =
