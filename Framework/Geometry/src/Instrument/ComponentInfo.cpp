@@ -132,11 +132,19 @@ ComponentInfo::quadrilateralComponent(const size_t componentIndex) const {
   auto nSubDetectors =
       std::distance(innerRangeDet.begin(), innerRangeDet.end());
   corners.nY = nSubDetectors / corners.nX;
+  auto firstComp = *innerRangeComp.begin();
+  // The ranges contain the parent component as the last index
+  // therefore end() - 2
+  auto lastComp = *(innerRangeComp.end() - 2);
+  corners.bottomLeft =
+      *(m_componentInfo->detectorRangeInSubtree(firstComp).begin());
+  corners.topRight =
+      *(m_componentInfo->detectorRangeInSubtree(lastComp).end() - 1);
+  corners.topLeft =
+      *(m_componentInfo->detectorRangeInSubtree(firstComp).end() - 1);
+  corners.bottomRight =
+      *m_componentInfo->detectorRangeInSubtree(lastComp).begin();
 
-  corners.bottomLeft = *innerRangeDet.begin();
-  corners.topRight = corners.bottomLeft + nSubDetectors - 1;
-  corners.topLeft = corners.bottomLeft + (corners.nY - 1);
-  corners.bottomRight = corners.topRight - (corners.nY - 1);
   return corners;
 }
 

@@ -1,5 +1,6 @@
 #include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
@@ -134,6 +135,64 @@ void render(const TopoDS_Shape &ObjSurf) {
   glEnd();
 }
 #endif
+
+std::pair<size_t, size_t>
+Renderer::getCorrectedTextureSize(const size_t width, const size_t height) {
+  return {roundToNearestPowerOfTwo(width), roundToNearestPowerOfTwo(height)};
+}
+
+void Renderer::renderRectangularBank(const Geometry::ComponentInfo &compInfo,
+                                     size_t index) {
+  auto bank = compInfo.quadrilateralComponent(index);
+  auto xstep = (compInfo.position(bank.bottomRight).X() -
+                compInfo.position(bank.bottomLeft).X()) /
+               bank.nX;
+  auto ystep = (compInfo.position(bank.topRight).Y() -
+                compInfo.position(bank.bottomLeft).Y()) /
+               bank.nY;
+  // Because texture colours are combined with the geometry colour
+  // make sure the current colour is white
+  glColor3f(1.0f, 1.0f, 1.0f);
+
+  // Nearest-neighbor scaling
+  GLint texParam = GL_NEAREST;
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texParam);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texParam);
+
+  glEnable(GL_TEXTURE_2D); // enable texture mapping
+
+  size_t texx, texy;
+  auto res = getCorrectedTextureSize(bank.nX, bank.nY);
+  texx = res.first;
+  texy = res.second;
+  double tex_frac_x = (1.0 * bank.nX) / (texx);
+  double tex_frac_y = (1.0 * bank.nY) / (texy);
+
+  glBegin(GL_QUADS);
+
+  auto basePos = compInfo.position(bank.bottomLeft);
+  glTexCoord2f(0.0, 0.0);
+  auto pos = compInfo.position(bank.bottomLeft) - basePos;
+  addVertex(pos, xstep, ystep);
+
+  glTexCoord2f(static_cast<GLfloat>(tex_frac_x), 0.0);
+  pos = compInfo.position(bank.bottomRight) - basePos;
+  addVertex(pos, xstep, ystep);
+
+  glTexCoord2f(static_cast<GLfloat>(tex_frac_x),
+               static_cast<GLfloat>(tex_frac_y));
+  pos = compInfo.position(bank.topRight) - basePos;
+  addVertex(pos, xstep, ystep);
+
+  glTexCoord2f(0.0, static_cast<GLfloat>(tex_frac_y));
+  pos = compInfo.position(bank.topLeft) - basePos;
+  addVertex(pos, xstep, ystep);
+
+  glEnd();
+
+  glDisable(
+      GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
+}
 
 // Render Bitmap for RectangularDetector
 void render(const RectangularDetector &rectDet) {

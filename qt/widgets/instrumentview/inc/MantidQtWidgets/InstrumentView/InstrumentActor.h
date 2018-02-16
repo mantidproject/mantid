@@ -81,6 +81,8 @@ public:
   void invertMaskWorkspace() const;
   /// Get the mask displayed but not yet applied as a IMaskWorkspace
   boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const;
+  boost::shared_ptr<Mantid::API::IMaskWorkspace>
+  getMaskWorkspaceIfExists() const;
   /// Apply the mask in the attached mask workspace to the data.
   void applyMaskWorkspace();
   /// Add a range of bins for masking
@@ -217,9 +219,6 @@ private:
   void sumDetectorsRagged(const std::vector<size_t> &dets,
                           std::vector<double> &x, std::vector<double> &y,
                           size_t size) const;
-
-  boost::shared_ptr<Mantid::API::IMaskWorkspace>
-  getMaskWorkspaceIfExists() const;
 
   /// The workspace whose data are shown
   const boost::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;

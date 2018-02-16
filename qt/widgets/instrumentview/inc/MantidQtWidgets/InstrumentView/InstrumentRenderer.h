@@ -7,13 +7,6 @@
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include <QString>
 
-namespace Mantid {
-namespace Geometry {
-class ComponentInfo;
-class DetectorInfo;
-} // namespace Geometry
-} // namespace Mantid
-
 namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
@@ -25,6 +18,11 @@ private:
   std::vector<GLColor> m_pickColors;
   mutable GLuint m_displayListId[2];
   mutable bool m_useDisplayList[2];
+  mutable std::vector<GLuint> m_textureIDs;
+  mutable std::vector<size_t> m_textureIndices;
+  mutable std::map<size_t, size_t> m_reverseTextureIndexMap;
+  mutable std::vector<std::vector<char>> colorTextures;
+  mutable std::vector<std::vector<char>> pickTextures;
   std::vector<double> m_specIntegrs;
   MantidColorMap m_colorMap;
 
@@ -54,6 +52,14 @@ private:
   void resetPickColors();
   void draw(const std::vector<bool> &visibleComps, bool showGuides,
             bool picking);
+  void drawRectangularBank(size_t bankIndex, bool picking);
+  void drawSingleDetector(size_t detIndex, bool picking);
+  void generateRectangularTexture(std::vector<char> &texture,
+                                  const std::vector<GLColor> &colors,
+                                  size_t bankIndex);
+
+  void uploadRectangularTexture(const std::vector<char> &texture,
+                                size_t textureIndex);
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

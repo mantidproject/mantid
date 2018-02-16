@@ -94,6 +94,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   m_isCompVisible.assign(componentInfo().size(), true);
 
   m_renderer.reset(new InstrumentRenderer(*this));
+  m_renderer->changeScaleType(m_scaleType);
 
   // set up the color map
   if (!m_currentColorMapFilename.isEmpty()) {
@@ -109,13 +110,6 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
                          "This instrument appears to contain no detectors",
                          "OK");
   }
-
-  if (!m_showGuides) {
-    // hide guide and other components
-    showGuides(m_showGuides);
-  }
-
-  m_renderer->changeScaleType(m_scaleType);
 }
 
 /**
@@ -209,7 +203,7 @@ void InstrumentActor::setComponentVisible(size_t componentIndex) {
   for (auto child : children)
     m_isCompVisible[child] = true;
 
-  m_renderer->reset();
+  resetColors();
 }
 
 void InstrumentActor::setChildVisibility(bool on) {
@@ -635,7 +629,7 @@ void InstrumentActor::updateColors() {
  */
 void InstrumentActor::showGuides(bool on) {
   m_showGuides = on;
-  m_renderer->reset();
+  resetColors();
 }
 
 GLColor InstrumentActor::getColor(size_t index) const {
