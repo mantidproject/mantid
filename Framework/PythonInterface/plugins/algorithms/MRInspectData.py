@@ -107,7 +107,27 @@ class MRInspectData(PythonAlgorithm):
         mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='low_res_max',
                                       LogText=str(data_info.low_res_range[1]),
                                       LogType='Number', LogUnit='pixel')
+        # Add process ROI information
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_peak_min',
+                                      LogText=str(data_info.roi_peak[0]),
+                                      LogType='Number', LogUnit='pixel')
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_peak_max',
+                                      LogText=str(data_info.roi_peak[1]),
+                                      LogType='Number', LogUnit='pixel')
 
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_low_res_min',
+                                      LogText=str(data_info.roi_low_res[0]),
+                                      LogType='Number', LogUnit='pixel')
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_low_res_max',
+                                      LogText=str(data_info.roi_low_res[1]),
+                                      LogType='Number', LogUnit='pixel')
+
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_background_min',
+                                      LogText=str(data_info.roi_background[0]),
+                                      LogType='Number', LogUnit='pixel')
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_background_max',
+                                      LogText=str(data_info.roi_background[1]),
+                                      LogType='Number', LogUnit='pixel')
 
 def _as_ints(a): return [int(a[0]), int(a[1])]
 
