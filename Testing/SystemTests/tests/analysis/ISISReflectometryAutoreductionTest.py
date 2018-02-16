@@ -24,6 +24,9 @@ class ISISReflectometryAutoreductionTest(object):
     reference_result_file = 'ISISReflectometryAutoreductionResult.nxs'
     result_workspace = 'Result'
 
+    def __init__(self):
+        self.tolerance = 0.00000001
+
     def requiredFiles(self):
         return [self.reference_result_file, self.runs_file]
 
@@ -58,7 +61,19 @@ class ISISReflectometryAutoreductionTest(object):
                            ISISReflectometryAutoreductionTest.run_numbers)
 
     @staticmethod
-    def regenerateReferenceFile(reference_file_directory):
+    def run():
+        test = ISISReflectometryAutoreductionTest()
+        test.runTest()
+
+    @staticmethod
+    def regenerateReferenceFileByReducing():
+        test = ISISReflectometryAutoreductionTest()
+        test.runTest()
+        SaveNexus(InputWorkspace=ISISReflectometryAutoreductionTest.result_workspace,
+                           Filename=ISISReflectometryAutoreductionTest.reference_result_file)
+
+    @staticmethod
+    def regenerateReferenceFileFromDirectory(reference_file_directory):
         RegenerateReferenceFile(reference_file_directory, ISISReflectometryAutoreductionTest.reference_result_file)
 
     @staticmethod
@@ -411,6 +426,6 @@ def CreateTransmissionWorkspaces(run1, run2, scale=False):
         EndOverlap=12)
 
 
-test = ISISReflectometryAutoreductionTest()
-test.runTest()
-#ISISReflectometryAutoreductionTest.regenerateReferenceFile("/home/ejb/Documents/INTER_Mantid_Test/Autoreduce test workspaces")
+# ISISReflectometryAutoreductionTest.regenerateReferenceFileFromDirectory("/home/ejb/Documents/INTER_Mantid_Test/Autoreduce test workspaces")
+# ISISReflectometryAutoreductionTest.regenerateReferenceFileByReducing()
+ISISReflectometryAutoreductionTest.run()
