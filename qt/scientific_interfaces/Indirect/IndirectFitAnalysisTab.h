@@ -346,7 +346,7 @@ private:
                 double endX, int startIndex, int endIndex) const;
   void deleteWorkspace(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
-  Mantid::API::IFunction_const_sptr m_fitFunction;
+  Mantid::API::CompositeFunction_const_sptr m_fitFunction;
   QHash<size_t, QHash<QString, double>> m_parameterValues;
   QHash<QString, double> m_defaultPropertyValues;
   QHash<QString, QString> m_functionNameChanges;

@@ -99,6 +99,23 @@ bool functionNameComparator(IFunction_const_sptr first,
   return first->name() < second->name();
 }
 
+/**
+ * Extracts the functions from a composite function into a vector.
+ *
+ * @param composite The composite function.
+ * @return          A vector of the functions in the specified composite
+ *                  function.
+ */
+std::vector<IFunction_const_sptr>
+extractFunctions(const CompositeFunction &composite) {
+  std::vector<IFunction_const_sptr> functions;
+  functions.reserve(composite.nFunctions());
+
+  for (auto i = 0u; i < composite.nFunctions(); ++i)
+    functions.emplace_back(composite.getFunction(i));
+  return functions;
+}
+
 /*
  * Checks whether the specified composite functions have the same composition.
  *
@@ -113,8 +130,8 @@ bool equivalentComposites(const CompositeFunction &composite1,
   if (composite1.nFunctions() != composite2.nFunctions()) {
     return false;
   } else {
-    auto functions1 = composite1.createEquivalentFunctions();
-    auto functions2 = composite2.createEquivalentFunctions();
+    auto functions1 = extractFunctions(composite1);
+    auto functions2 = extractFunctions(composite2);
     std::sort(functions1.begin(), functions1.end(), functionNameComparator);
     std::sort(functions2.begin(), functions2.end(), functionNameComparator);
 
@@ -143,7 +160,7 @@ bool equivalentFunctions(IFunction_const_sptr func1,
 
   if (composite1 && composite2)
     return equivalentComposites(*composite1, *composite2);
-  else if (!(composite1 || composite2))
+  else if (func1 && func2 && !composite1 && !composite2)
     return func1->name() == func2->name();
   return false;
 }
@@ -793,8 +810,11 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
  * Updates a bool specifying whether the previous fit model is selected.
  */
 void IndirectFitAnalysisTab::updatePreviousModelSelected() {
-  m_previousModelSelected = equivalentFunctions(
-      m_fitFunction, m_fitPropertyBrowser->compositeFunction());
+  if (m_fitFunction)
+    m_previousModelSelected = equivalentComposites(
+        *m_fitFunction, *m_fitPropertyBrowser->compositeFunction());
+  else
+    m_previousModelSelected = false;
 }
 
 /**
@@ -1017,7 +1037,9 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
 
-  m_fitFunction = m_fitPropertyBrowser->getFittingFunction();
+  m_fitFunction = boost::dynamic_pointer_cast<CompositeFunction>(
+      m_fitPropertyBrowser->compositeFunction()->clone());
+  m_previousModelSelected = true;
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
