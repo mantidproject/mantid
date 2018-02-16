@@ -21,6 +21,9 @@ using namespace Mantid::API;
 
 namespace {
 
+bool equivalentFunctions(IFunction_const_sptr func1,
+                         IFunction_const_sptr func2);
+
 /**
  * Checks whether the specified algorithm has a property with the specified
  * name. If true, sets this property to the specified value, else returns.
@@ -132,8 +135,10 @@ bool equivalentComposites(CompositeFunction_const_sptr composite1,
  */
 bool equivalentFunctions(IFunction_const_sptr func1,
                          IFunction_const_sptr func2) {
-  const auto composite1 = boost::dynamic_pointer_cast<CompositeFunction>(func1);
-  const auto composite2 = boost::dynamic_pointer_cast<CompositeFunction>(func2);
+  const auto composite1 =
+      boost::dynamic_pointer_cast<const CompositeFunction>(func1);
+  const auto composite2 =
+      boost::dynamic_pointer_cast<const CompositeFunction>(func2);
 
   if (composite1 && composite2)
     return equivalentComposites(composite1, composite2);
@@ -990,7 +995,7 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
     function = updateFunctionTies(function, m_functionNameChanges);
   function->applyTies();
 
-  setAlgorithmProperty(fitAlgorithm, "InputWorkspace", fitWorkspace());
+  fitAlgorithm->setProperty("InputWorkspace", fitWorkspace());
   setAlgorithmProperty(fitAlgorithm, "Function", function->asString());
   setAlgorithmProperty(fitAlgorithm, "StartX", m_fitPropertyBrowser->startX());
   setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
@@ -1190,7 +1195,7 @@ void IndirectFitAnalysisTab::plotGuessInWindow() {
  */
 void IndirectFitAnalysisTab::clearGuessWindowPlot() {
   if (m_inputAndGuessWorkspace) {
-    deleteWorkspaceAlgorithm(m_inputAndGuessWorkspace)->execute();
+    deleteWorkspace(m_inputAndGuessWorkspace);
     m_inputAndGuessWorkspace.reset();
   }
 }
@@ -1238,15 +1243,9 @@ MatrixWorkspace_sptr IndirectFitAnalysisTab::createInputAndGuessWorkspace(
   ensureAppendCompatibility(inputWS, guessWorkspace);
   const auto spectrum = selectedSpectrum();
 
-  auto extractAlg =
-      extractSpectraAlgorithm(inputWS, spectrum, spectrum, startX(), endX());
-  extractAlg->execute();
-  MatrixWorkspace_sptr extracted = extractAlg->getProperty("OutputWorkspace");
-
-  auto appendAlg = appendSpectraAlgorithm(extracted, guessWorkspace);
-  appendAlg->execute();
-  MatrixWorkspace_sptr inputAndGuess =
-      appendAlg->getProperty("OutputWorkspace");
+  auto extracted =
+      extractSpectra(inputWS, spectrum, spectrum, startX(), endX());
+  auto inputAndGuess = appendSpectra(extracted, guessWorkspace);
 
   auto axis = Mantid::Kernel::make_unique<TextAxis>(2);
   axis->setLabel(0, "Sample");
@@ -1269,19 +1268,20 @@ void IndirectFitAnalysisTab::ensureAppendCompatibility(
 }
 
 /**
- * Creates an algorithm for extracting the spectra from a specified workspace.
+ * Extracts spectra from a specified workspace.
  *
  * @param inputWS     The workspace to extract spectra from.
  * @param startIndex  The index of the first spectrum to be retained.
  * @param endIndex    The index of the last spectrum to be retained.
  * @param startX      The x-value that is within the first bin to be retained.
  * @param endX        The x-value that is within the last bin to be retained.
- * @return            An algorithm for extracting spectra.
+ * @return            A workspace containing the extracted spectra.
  */
-IAlgorithm_sptr IndirectFitAnalysisTab::extractSpectraAlgorithm(
-    MatrixWorkspace_sptr inputWS, int startIndex, int endIndex, double startX,
-    double endX) const {
-  IAlgorithm_sptr extractSpectraAlg =
+MatrixWorkspace_sptr
+IndirectFitAnalysisTab::extractSpectra(MatrixWorkspace_sptr inputWS,
+                                       int startIndex, int endIndex,
+                                       double startX, double endX) const {
+  auto extractSpectraAlg =
       AlgorithmManager::Instance().create("ExtractSpectra");
   extractSpectraAlg->initialize();
   extractSpectraAlg->setChild(true);
@@ -1292,60 +1292,62 @@ IAlgorithm_sptr IndirectFitAnalysisTab::extractSpectraAlgorithm(
   extractSpectraAlg->setProperty("XMax", endX);
   extractSpectraAlg->setProperty("EndWorkspaceIndex", endIndex);
   extractSpectraAlg->setProperty("OutputWorkspace", "__extracted");
-  return extractSpectraAlg;
+  extractSpectraAlg->execute();
+  return extractSpectraAlg->getProperty("OutputWorkspace");
 }
 
 /**
- * Creates an algorithm for appending the spectra of a specified workspace to
- * another specified workspace.
+ * Appends the spectra of a specified workspace to another specified workspace.
  *
  * @param inputWS   The workspace to append to.
  * @param spectraWS The workspace containing the spectra to append.
- * @return          An algorithm for appending spectra.
+ * @return          A workspace containing the spectra of the second workspace
+ *                  appended to the first.
  */
-IAlgorithm_sptr IndirectFitAnalysisTab::appendSpectraAlgorithm(
-    MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr spectraWS) const {
-  IAlgorithm_sptr appendSpectraAlg =
-      AlgorithmManager::Instance().create("AppendSpectra");
+MatrixWorkspace_sptr
+IndirectFitAnalysisTab::appendSpectra(MatrixWorkspace_sptr inputWS,
+                                      MatrixWorkspace_sptr spectraWS) const {
+  auto appendSpectraAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendSpectraAlg->initialize();
   appendSpectraAlg->setChild(true);
   appendSpectraAlg->setLogging(false);
   appendSpectraAlg->setProperty("InputWorkspace1", inputWS);
   appendSpectraAlg->setProperty("InputWorkspace2", spectraWS);
   appendSpectraAlg->setProperty("OutputWorkspace", "__appended");
-  return appendSpectraAlg;
+  appendSpectraAlg->execute();
+  return appendSpectraAlg->getProperty("OutputWorkspace");
 }
 
 /**
- * Creates an algorithm for deleting the specified workspace.
+ * Deletes the specified workspace.
  *
  * @param workspace The workspace to delete.
- * @return          An algorithm for deleting the specified workspace.
  */
-IAlgorithm_sptr IndirectFitAnalysisTab::deleteWorkspaceAlgorithm(
+void IndirectFitAnalysisTab::deleteWorkspace(
     MatrixWorkspace_sptr workspace) const {
-  IAlgorithm_sptr deleteWorkspaceAlg =
+  auto deleteWorkspaceAlg =
       AlgorithmManager::Instance().create("DeleteWorkspace");
   deleteWorkspaceAlg->initialize();
   deleteWorkspaceAlg->setChild(true);
   deleteWorkspaceAlg->setLogging(false);
   deleteWorkspaceAlg->setProperty("Workspace", workspace);
-  return deleteWorkspaceAlg;
+  deleteWorkspaceAlg->execute();
 }
 
 /**
- * Creates an algorithm for cropping the specified workspace.
+ * Crops the specified workspace.
  *
  * @param inputWS     The workspace to crop.
  * @param startX      The x-value that is within the first bin to be retained.
  * @param endX        The x-value that is within the last bin to be retained.
  * @param startIndex  The index of the first entry to be retained.
  * @param endIndex    The index of the last entry to be retained.
- * @return            The algorithm for cropping the specified workspace.
+ * @return            The cropped workspace.
  */
-IAlgorithm_sptr IndirectFitAnalysisTab::cropWorkspaceAlgorithm(
-    MatrixWorkspace_sptr inputWS, double startX, double endX, int startIndex,
-    int endIndex) const {
+MatrixWorkspace_sptr
+IndirectFitAnalysisTab::cropWorkspace(MatrixWorkspace_sptr inputWS,
+                                      double startX, double endX,
+                                      int startIndex, int endIndex) const {
   IAlgorithm_sptr cropWorkspaceAlg =
       AlgorithmManager::Instance().create("CropWorkspace");
   cropWorkspaceAlg->initialize();
@@ -1357,7 +1359,8 @@ IAlgorithm_sptr IndirectFitAnalysisTab::cropWorkspaceAlgorithm(
   cropWorkspaceAlg->setProperty("StartWorkspaceIndex", startIndex);
   cropWorkspaceAlg->setProperty("EndWorkspaceIndex", endIndex);
   cropWorkspaceAlg->setProperty("OutputWorkspace", "__cropped");
-  return cropWorkspaceAlg;
+  cropWorkspaceAlg->execute();
+  return cropWorkspaceAlg->getProperty("OutputWorkspace");
 }
 
 /*
@@ -1371,12 +1374,8 @@ IAlgorithm_sptr IndirectFitAnalysisTab::cropWorkspaceAlgorithm(
 MatrixWorkspace_sptr
 IndirectFitAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
                                              int wsIndex) const {
-  auto cropWorkspaceAlg = cropWorkspaceAlgorithm(inputWorkspace(), startX(),
-                                                 endX(), wsIndex, wsIndex);
-  cropWorkspaceAlg->execute();
-
-  MatrixWorkspace_sptr croppedWS =
-      cropWorkspaceAlg->getProperty("OutputWorkspace");
+  auto croppedWS =
+      cropWorkspace(inputWorkspace(), startX(), endX(), wsIndex, wsIndex);
   const auto dataY = computeOutput(func, croppedWS->points(0).rawData());
 
   if (dataY.empty())

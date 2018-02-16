@@ -332,19 +332,17 @@ private:
   createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
                            const std::vector<double> &dataX,
                            const std::vector<double> &dataY) const;
-  Mantid::API::IAlgorithm_sptr
-  extractSpectraAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
-                          int startIndex, int endIndex, double startX,
-                          double endX) const;
-  Mantid::API::IAlgorithm_sptr
-  appendSpectraAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
-                         Mantid::API::MatrixWorkspace_sptr spectraWS) const;
-  Mantid::API::IAlgorithm_sptr
-  cropWorkspaceAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
+  Mantid::API::MatrixWorkspace_sptr
+  extractSpectra(Mantid::API::MatrixWorkspace_sptr inputWS, int startIndex,
+                 int endIndex, double startX, double endX) const;
+  Mantid::API::MatrixWorkspace_sptr
+  appendSpectra(Mantid::API::MatrixWorkspace_sptr inputWS,
+                Mantid::API::MatrixWorkspace_sptr spectraWS) const;
+  Mantid::API::MatrixWorkspace_sptr
+  cropWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS,
                          double startX, double endX, int startIndex,
                          int endIndex) const;
-  Mantid::API::IAlgorithm_sptr
-  deleteWorkspaceAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace) const;
+  void deleteWorkspace(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
   Mantid::API::IFunction_sptr m_fitFunction;
   QHash<size_t, QHash<QString, double>> m_parameterValues;
