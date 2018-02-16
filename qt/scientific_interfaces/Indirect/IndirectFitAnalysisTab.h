@@ -94,6 +94,9 @@ public:
 
   std::vector<double> parameterValue(const std::string &functionName,
                                      const std::string &parameterName) const;
+  boost::optional<double>
+  lastParameterValue(const std::string &functionName,
+                     const std::string &parameterName) const;
 
   bool isEmptyModel() const;
 
@@ -339,9 +342,8 @@ private:
   appendSpectra(Mantid::API::MatrixWorkspace_sptr inputWS,
                 Mantid::API::MatrixWorkspace_sptr spectraWS) const;
   Mantid::API::MatrixWorkspace_sptr
-  cropWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS,
-                         double startX, double endX, int startIndex,
-                         int endIndex) const;
+  cropWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS, double startX,
+                double endX, int startIndex, int endIndex) const;
   void deleteWorkspace(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
   Mantid::API::IFunction_const_sptr m_fitFunction;

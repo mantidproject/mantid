@@ -282,6 +282,18 @@ IndirectFitAnalysisTab::parameterValue(const std::string &functionName,
 }
 
 /**
+ * @param functionName  The name of the function containing the parameter.
+ * @param parameterName The name of the parameter whose value to retrieve.
+ * @return              The value of the parameter with the specified name, in
+ *                      the last function with the specified name.
+ */
+boost::optional<double> IndirectFitAnalysisTab::lastParameterValue(
+    const std::string &functionName, const std::string &parameterName) const {
+  const auto values = parameterValue(functionName, parameterName);
+  return values.empty() ? boost::none : boost::make_optional(values.back());
+}
+
+/**
  * @return  True if the selected model is empty, false otherwise.
  */
 bool IndirectFitAnalysisTab::isEmptyModel() const {
