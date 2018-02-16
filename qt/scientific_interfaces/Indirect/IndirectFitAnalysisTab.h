@@ -95,11 +95,9 @@ public:
   std::vector<double> parameterValue(const std::string &functionName,
                                      const std::string &parameterName) const;
 
-  bool emptyModel() const;
+  bool isEmptyModel() const;
 
   QString backgroundName() const;
-
-  bool previousFitModelSelected() const;
 
   virtual bool canPlotGuess() const;
 
@@ -281,6 +279,8 @@ protected slots:
 
   void xMaxSelected(double xMax);
 
+  void updatePreviousModelSelected();
+
   virtual void updatePlotRange() = 0;
 
   void executeSingleFit();
@@ -344,7 +344,7 @@ private:
                          int endIndex) const;
   void deleteWorkspace(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
-  Mantid::API::IFunction_sptr m_fitFunction;
+  Mantid::API::IFunction_const_sptr m_fitFunction;
   QHash<size_t, QHash<QString, double>> m_parameterValues;
   QHash<QString, double> m_defaultPropertyValues;
   QHash<QString, QString> m_functionNameChanges;
@@ -352,6 +352,7 @@ private:
 
   std::string m_outputFitName;
   bool m_appendResults;
+  bool m_previousModelSelected;
   Mantid::API::MatrixWorkspace_sptr m_inputAndGuessWorkspace;
 
   QtLazyAsyncRunner<std::function<Mantid::API::MatrixWorkspace_sptr()>>

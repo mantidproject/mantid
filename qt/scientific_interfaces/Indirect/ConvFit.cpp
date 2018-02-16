@@ -487,7 +487,7 @@ bool ConvFit::validate() {
   // Enforce the rule that at least one fit is needed; either a delta function,
   // one or two Lorentzian functions,
   // or both.  (The resolution function must be convolved with a model.)
-  if (emptyModel())
+  if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
   else if (compositeModel && compositeModel->nFunctions() == 1 &&
            compositeModel->getFunction(0)->name() == "DeltaFunction")

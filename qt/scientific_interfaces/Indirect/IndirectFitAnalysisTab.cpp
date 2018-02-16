@@ -182,6 +182,8 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SLOT(updateGuessPlots()));
 
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updatePreviousModelSelected()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateParameterValues()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(emitFunctionChanged()));
@@ -281,15 +283,11 @@ IndirectFitAnalysisTab::parameterValue(const std::string &functionName,
 /**
  * @return  True if the selected model is empty, false otherwise.
  */
-bool IndirectFitAnalysisTab::emptyModel() const {
+bool IndirectFitAnalysisTab::isEmptyModel() const {
   auto modelFunction = model();
   auto compositeModel =
       boost::dynamic_pointer_cast<CompositeFunction>(modelFunction);
-
-  if (compositeModel)
-    return compositeModel->nFunctions() == 0;
-  else
-    return modelFunction->asString() == "";
+  return compositeModel && compositeModel->nFunctions() == 0;
 }
 
 /**
@@ -300,19 +298,10 @@ QString IndirectFitAnalysisTab::backgroundName() const {
 }
 
 /**
- * @return  True if the current model is the same as the model which was most
- *          recently fit, false otherwise.
- */
-bool IndirectFitAnalysisTab::previousFitModelSelected() const {
-  return equivalentFunctions(m_fitFunction,
-                             m_fitPropertyBrowser->compositeFunction());
-}
-
-/**
  * @return  True if a guess plot can be fit, false otherwise.
  */
 bool IndirectFitAnalysisTab::canPlotGuess() const {
-  return !emptyModel() && inputWorkspace();
+  return !isEmptyModel() && inputWorkspace();
 }
 
 /**
@@ -606,7 +595,7 @@ QHash<QString, double> IndirectFitAnalysisTab::fitParameterValues() const {
  * @return  The default parameter values as applied to the model.
  */
 QHash<QString, double> IndirectFitAnalysisTab::defaultParameterValues() const {
-  if (emptyModel())
+  if (isEmptyModel())
     return QHash<QString, double>();
 
   QHash<QString, double> defaultValues;
@@ -787,6 +776,11 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   m_fitPropertyBrowser->setWorkspaceName(wsName);
 }
 
+void IndirectFitAnalysisTab::updatePreviousModelSelected() {
+  m_previousModelSelected = equivalentFunctions(
+      m_fitFunction, m_fitPropertyBrowser->compositeFunction());
+}
+
 /**
  * Updates the parameter values in the fit property browser.
  */
@@ -794,7 +788,7 @@ void IndirectFitAnalysisTab::updateParameterValues() {
   const auto spectrum = static_cast<size_t>(selectedSpectrum());
 
   if (m_parameterValues.contains(spectrum))
-    if (previousFitModelSelected())
+    if (m_previousModelSelected)
       m_fitPropertyBrowser->updateParameterValues(m_parameterValues[spectrum]);
     else
       m_fitPropertyBrowser->updateParameterValues(parameterValues());
@@ -891,7 +885,7 @@ void IndirectFitAnalysisTab::updatePlot(
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
 
-  if (previousFitModelSelected())
+  if (m_previousModelSelected)
     IndirectDataAnalysisTab::updatePlot(workspaceName, fitPreviewPlot,
                                         diffPreviewPlot);
   else
@@ -944,7 +938,7 @@ void IndirectFitAnalysisTab::executeSequentialFit() {
  * @return  The fit function defined in this indirect fit analysis tab.
  */
 IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
-  if (!emptyModel())
+  if (!isEmptyModel())
     return m_fitPropertyBrowser->getFittingFunction();
   else
     return nullptr;
@@ -1007,7 +1001,7 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
 
-  m_fitFunction = m_fitPropertyBrowser->getFittingFunction()->clone();
+  m_fitFunction = m_fitPropertyBrowser->getFittingFunction();
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
@@ -1091,7 +1085,7 @@ void IndirectFitAnalysisTab::setPlotOptions(
  * enabled/disabled.
  */
 void IndirectFitAnalysisTab::updateResultOptions() {
-  if (previousFitModelSelected()) {
+  if (m_previousModelSelected) {
     enablePlotResult();
     enableSaveResult();
   } else {

@@ -85,7 +85,7 @@ bool JumpFit::validate() {
         "Input workspace doesn't appear to contain any width data.");
   }
 
-  if (emptyModel())
+  if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
 
   QString errors = uiv.generateErrorMessage();
