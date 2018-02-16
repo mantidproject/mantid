@@ -92,8 +92,8 @@ public:
 
   double endX() const;
 
-  double parameterValue(const std::string &functionName,
-                        const std::string &parameterName);
+  std::vector<double> parameterValue(const std::string &functionName,
+                                     const std::string &parameterName) const;
 
   bool emptyModel() const;
 

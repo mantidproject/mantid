@@ -43,8 +43,8 @@ public:
 
   size_t numberOfCustomFunctions(const std::string &functionName) const;
 
-  double parameterValue(const std::string &functionName,
-                        const std::string &parameterName) const;
+  std::vector<double> parameterValue(const std::string &functionName,
+                                     const std::string &parameterName) const;
 
   void setParameterValue(const std::string &functionName,
                          const std::string &parameterName, double value);

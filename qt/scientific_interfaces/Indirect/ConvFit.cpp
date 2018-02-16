@@ -568,8 +568,8 @@ void ConvFit::parameterUpdated(const Mantid::API::IFunction *function) {
     rangeSelector->blockSignals(false);
   } else if (function->hasParameter("FWHM")) {
     auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
-    auto peakCentre = parameterValue(function->name(), "PeakCentre");
-    auto hwhm = parameterValue(function->name(), "FWHM") / 2.0;
+    auto peakCentre = parameterValue(function->name(), "PeakCentre").back();
+    auto hwhm = parameterValue(function->name(), "FWHM").back() / 2.0;
     rangeSelector->blockSignals(true);
     rangeSelector->setMaximum(peakCentre + hwhm);
     rangeSelector->setMinimum(peakCentre - hwhm);
@@ -916,7 +916,7 @@ void ConvFit::endXChanged(double endX) {
 }
 
 void ConvFit::hwhmMinChanged(double val) {
-  const double peakCentre = parameterValue("Lorentzian", "PeakCentre");
+  const double peakCentre = parameterValue("Lorentzian", "PeakCentre").back();
   const double difference = peakCentre - val;
 
   auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
@@ -927,7 +927,7 @@ void ConvFit::hwhmMinChanged(double val) {
 }
 
 void ConvFit::hwhmMaxChanged(double val) {
-  const double peakCentre = parameterValue("Lorentzian", "PeakCentre");
+  const double peakCentre = parameterValue("Lorentzian", "PeakCentre").back();
   const double difference = val - peakCentre;
 
   auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");

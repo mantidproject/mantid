@@ -239,12 +239,12 @@ double IndirectFitAnalysisTab::endX() const {
 /**
  * @param functionName  The name of the function containing the parameter.
  * @param parameterName The name of the parameter whose value to retrieve.
- * @return              The value of the parameter with the specified name, in
+ * @return              All values of the parameter with the specified name, in
  *                      the function with the specified name.
  */
-double
+std::vector<double>
 IndirectFitAnalysisTab::parameterValue(const std::string &functionName,
-                                       const std::string &parameterName) {
+                                       const std::string &parameterName) const {
   return m_fitPropertyBrowser->parameterValue(functionName, parameterName);
 }
 
