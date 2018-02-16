@@ -109,14 +109,15 @@ bool functionNameComparator(IFunction_const_sptr first,
  */
 bool equivalentComposites(const CompositeFunction &composite1,
                           const CompositeFunction &composite2) {
-  auto functions1 = composite1.createEquivalentFunctions();
-  auto functions2 = composite2.createEquivalentFunctions();
-  std::sort(functions1.begin(), functions1.end(), functionNameComparator);
-  std::sort(functions2.begin(), functions2.end(), functionNameComparator);
 
-  if (functions1.size() != functions2.size()) {
+  if (composite1.nFunctions() != composite2.nFunctions()) {
     return false;
   } else {
+    auto functions1 = composite1.createEquivalentFunctions();
+    auto functions2 = composite2.createEquivalentFunctions();
+    std::sort(functions1.begin(), functions1.end(), functionNameComparator);
+    std::sort(functions2.begin(), functions2.end(), functionNameComparator);
+
     for (auto i = 0u; i < functions1.size(); ++i) {
       if (!equivalentFunctions(functions1[i], functions2[i]))
         return false;
