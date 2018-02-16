@@ -52,6 +52,9 @@ public:
   */
   virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const = 0;
+
+  /// Get whether the model contains fitted peaks for a given run
+  virtual bool hasFittedPeaksForRun(const RunLabel &runLabel) const = 0;
 };
 
 } // namespace MantidQt
