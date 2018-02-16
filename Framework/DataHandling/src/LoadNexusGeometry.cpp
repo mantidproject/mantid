@@ -2,13 +2,11 @@
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataHandling/LoadNexusGeometry.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/ParsingErrors.h"
-
-#include <memory>
-#include <string>
 
 namespace Mantid {
 namespace DataHandling {
@@ -43,9 +41,11 @@ const std::string LoadNexusGeometry::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadNexusGeometry::init() {
-  declareProperty("Filename"
-                  "",
-                  "Name of OFF Nexus Geometry File");
+  const std::vector<std::string> extensions{".nxs"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load, extensions),
+                  "The name of the Nexus file to read geometry from, as a full "
+                  "or relative path.");
   declareProperty("InstrumentName", "", "Name of Instrument");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
