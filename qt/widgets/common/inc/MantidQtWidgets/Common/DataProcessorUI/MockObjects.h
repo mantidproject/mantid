@@ -196,6 +196,7 @@ public:
   std::vector<std::unique_ptr<Command>> publishCommands() override {
     return std::vector<std::unique_ptr<Command>>();
   };
+  bool isMultiLevel() const override { return false; }
   void appendRow() override{};
   void appendGroup() override{};
   void deleteRow() override{};

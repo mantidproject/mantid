@@ -695,7 +695,8 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto presenter = presenterFactory.create();
+    auto mockTreeManager = new MockTreeManager;
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
     presenter->acceptTreeManager(mockTreeManager);
@@ -771,7 +772,7 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
     auto mockTreeManager = new MockTreeManager;
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
     presenter->acceptTreeManager(mockTreeManager);
@@ -847,7 +848,7 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
     auto mockTreeManager = new MockTreeManager;
-    auto presenter = presenterFactory.create();
+    auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
     presenter->acceptTreeManager(mockTreeManager);
