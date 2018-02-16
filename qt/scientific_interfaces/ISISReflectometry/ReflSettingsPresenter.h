@@ -67,7 +67,7 @@ public:
   getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
-  
+
   void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) override;
   void onReductionPaused() override;
   void onReductionResumed() override;

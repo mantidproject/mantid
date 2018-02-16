@@ -47,7 +47,8 @@ void QtReflSettingsView::initLayout() {
   // Hard code the number of rows for now (typically we'll have 2 or 3 angles)
   int numRows = 3;
   m_ui.transmissionRunsTable->setRowCount(numRows);
-  auto headerHeight = m_ui.transmissionRunsTable->horizontalHeader()->height() + 2;
+  auto headerHeight =
+      m_ui.transmissionRunsTable->horizontalHeader()->height() + 2;
   auto rowHeight = m_ui.transmissionRunsTable->rowHeight(0);
   m_ui.transmissionRunsTable->setMinimumHeight(rowHeight * numRows +
                                                headerHeight);

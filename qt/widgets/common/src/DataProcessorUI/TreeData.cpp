@@ -4,8 +4,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 // Constructors
-RowData::RowData(const int columnCount)
-  : m_isProcessed{false} {
+RowData::RowData(const int columnCount) : m_isProcessed{false} {
   // Create a list of empty column values of the required length
   for (int i = 0; i < columnCount; ++i)
     m_data.append("");

@@ -54,9 +54,8 @@ public:
 
   void test_check_transmission_runs_per_angle() {
     // Test checking whether transmission runs are available per angle
-    
   }
-  
+
   void test_get_transmission_runs_for_angle() {
     // Test getting the transmission runs for a particular angle
 
@@ -151,7 +150,7 @@ public:
 
   void test_reduction_options() {
     // Test getting options for the main reduction algorithm
-    
+
     // Set up settings presenters for 3 groups
     MockSettingsPresenter presenter_0;
     MockSettingsPresenter presenter_1;

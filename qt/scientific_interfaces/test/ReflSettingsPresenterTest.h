@@ -625,7 +625,7 @@ public:
     // entry with an empty angle as the key
     std::map<std::string, std::string> transmissionRunsMap = {
         {"", "INTER00013463,INTER00013464"}};
-    
+
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(1)
         .WillOnce(Return(transmissionRunsMap));
@@ -642,8 +642,7 @@ public:
 
     // Set up a table with transmission runs for 2 different angles
     std::map<std::string, std::string> transmissionRunsMap = {
-      {"0.7", "INTER00013463,INTER00013464"},
-      {"2.33", "INTER00013463"}};
+        {"0.7", "INTER00013463,INTER00013464"}, {"2.33", "INTER00013463"}};
 
     // Test looking up transmission runs based on the angle. It has
     // quite a generous tolerance so the angle does not have to be

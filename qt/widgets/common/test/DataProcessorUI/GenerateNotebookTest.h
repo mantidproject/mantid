@@ -251,7 +251,8 @@ public:
   void testTableStringOneRow() {
 
     // Create some tree data
-    auto rowData = makeRowData({"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+    auto rowData =
+        makeRowData({"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
     TreeData treeData = {{1, {{0, rowData}}}};
 
     auto output = tableString(treeData, reflWhitelist());
@@ -366,8 +367,8 @@ public:
         {"Run(s)", OptionsMap()}, {"Transmission Run(s)", OptionsMap()}};
 
     // Create a row
-    const auto rowData = makeRowData({"12346", "1.5", "", "1.4", "2.9",
-          "0.04",  "1",   "", ""});
+    const auto rowData =
+        makeRowData({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
 
     auto output = reduceRowString(rowData, m_instrument, reflWhitelist(),
                                   reflPreprocessMap("TOF_"), reflProcessor(),
@@ -449,8 +450,8 @@ public:
     ColumnOptionsMap emptyPreProcessingOptions;
 
     // Create a row
-    const auto data = makeRowData({"12346", "1.5", "", "1.4", "2.9",
-          "0.04",  "1",   "", ""});
+    const auto data =
+        makeRowData({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
 
     auto output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
@@ -479,8 +480,8 @@ public:
     whitelist.addElement("Trans", "", "", false, "");
 
     // Create some data
-    const auto data = makeRowData({"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
-          "0.04",      "1",   "",          ""});
+    const auto data = makeRowData(
+        {"1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", "", ""});
     TS_ASSERT_THROWS_ANYTHING(getReducedWorkspaceName(data, whitelist));
   }
 
@@ -499,8 +500,8 @@ public:
     whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
     // Create some data
-    const auto data = makeRowData({"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
-          "0.04",      "1",   "",          ""});
+    const auto data = makeRowData(
+        {"1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", "", ""});
 
     auto name = getReducedWorkspaceName(data, whitelist);
     TS_ASSERT_EQUALS(name.toStdString(), "run_1000+1001")
@@ -521,8 +522,8 @@ public:
     whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
     // Create some data
-    const auto data = makeRowData({"1000,1001", "0.5", "2000,2001", "1.4", "2.9",
-          "0.04",      "1",   "",          ""});
+    const auto data = makeRowData(
+        {"1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", "", ""});
 
     auto name = getReducedWorkspaceName(data, whitelist);
     TS_ASSERT_EQUALS(name.toStdString(), "run_1000+1001_trans_2000+2001")
@@ -542,8 +543,8 @@ public:
     whitelist.addElement("Options", "Options", "");
     whitelist.addElement("HiddenOptions", "HiddenOptions", "");
 
-    const auto data = makeRowData({"1000,1001", "0.5", "2000+2001", "1.4", "2.9",
-          "0.04",      "1",   "",          ""});
+    const auto data = makeRowData(
+        {"1000,1001", "0.5", "2000+2001", "1.4", "2.9", "0.04", "1", "", ""});
 
     auto name = getReducedWorkspaceName(data, whitelist);
     TS_ASSERT_EQUALS(name.toStdString(), "2000+2001")

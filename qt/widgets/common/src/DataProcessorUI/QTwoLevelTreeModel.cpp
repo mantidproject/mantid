@@ -15,8 +15,8 @@ public:
   // Constructor taking a column count creates an empty data value list of that
   // size
   RowInfo(const size_t absoluteIndex, const int columnCount)
-      : m_absoluteIndex(absoluteIndex), m_rowData(std::make_shared<RowData>(columnCount)) {
-  }
+      : m_absoluteIndex(absoluteIndex),
+        m_rowData(std::make_shared<RowData>(columnCount)) {}
   // Constructor taking a list of data values
   RowInfo(const size_t absoluteIndex, QStringList rowDataValues)
       : m_absoluteIndex(absoluteIndex),
@@ -81,8 +81,10 @@ public:
   // Add a new row to the group at the given local row index
   // Note that new rows have an absolute index of 0 which must then
   // be set correctly by the caller.
-  void insert(const size_t position, const int numToInsert, const int columnCount) {
-    m_rows.insert(m_rows.begin() + position, numToInsert, RowInfo(0, columnCount));
+  void insert(const size_t position, const int numToInsert,
+              const int columnCount) {
+    m_rows.insert(m_rows.begin() + position, numToInsert,
+                  RowInfo(0, columnCount));
   }
   // Remove rows from the group
   void erase(const size_t position, const int numToErase) {

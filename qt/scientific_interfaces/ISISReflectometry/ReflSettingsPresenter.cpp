@@ -285,8 +285,7 @@ bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
 * @return :: the transmission run(s) as a string of comma-separated values
 * @throws :: if the settings the user entered are invalid
 */
-std::string
-ReflSettingsPresenter::getDefaultTransmissionRuns() const {
+std::string ReflSettingsPresenter::getDefaultTransmissionRuns() const {
   if (!m_view->experimentSettingsEnabled())
     return std::string();
 

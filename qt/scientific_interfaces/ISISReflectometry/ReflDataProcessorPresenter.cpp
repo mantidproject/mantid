@@ -112,7 +112,7 @@ void ReflDataProcessorPresenter::process() {
           /// @todo Implement save notebook for event-sliced workspaces.
           // The per-slice input properties are stored in the RowData but
           // at the moment GenerateNotebook just uses the parent row
-          //saveNotebook(m_selectedData);
+          // saveNotebook(m_selectedData);
           GenericDataProcessorPresenter::giveUserWarning(
               "Notebook not implemented for sliced data yet",
               "Notebook will not be generated");
@@ -215,7 +215,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
   for (const auto &row : group) {
 
-    const auto rowID = row.first;  // Integer ID of this row
+    const auto rowID = row.first;      // Integer ID of this row
     const auto rowData = row.second;   // data values for this row
     auto runNo = row.second->value(0); // The run number
 
@@ -258,7 +258,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     // with the slice suffix for each slice.
     // For the input properties, the InputWorkspace is the only one that is
     // sliced
-    auto workspaceProperties = std::vector<QString>{ "InputWorkspace" };
+    auto workspaceProperties = std::vector<QString>{"InputWorkspace"};
     auto outputProperties = m_processor.outputProperties();
     workspaceProperties.insert(workspaceProperties.end(),
                                outputProperties.begin(),

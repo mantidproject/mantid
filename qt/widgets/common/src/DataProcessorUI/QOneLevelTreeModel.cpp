@@ -164,7 +164,8 @@ bool QOneLevelTreeModel::insertRows(int position, int count,
   // Update the table workspace and row process status vector
   for (int pos = position; pos < position + count; pos++) {
     m_tWS->insertRow(position);
-    m_rows.insert(m_rows.begin() + position, std::make_shared<RowData>(columnCount()));
+    m_rows.insert(m_rows.begin() + position,
+                  std::make_shared<RowData>(columnCount()));
   }
 
   endInsertRows();

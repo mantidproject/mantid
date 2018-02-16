@@ -84,7 +84,6 @@ void ReflMainWindowPresenter::settingsChanged(int group) {
   m_runsPresenter->settingsChanged(group);
 }
 
-
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 *
 * @param group :: Index of the group in 'Settings' tab from which to get the

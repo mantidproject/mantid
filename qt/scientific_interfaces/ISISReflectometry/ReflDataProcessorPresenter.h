@@ -56,6 +56,7 @@ public:
   // The following methods are public for testing purposes only
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
+
 private:
   // Get the processing options for this row
   OptionsMap getProcessingOptions(RowData_sptr data) override;
