@@ -16,6 +16,7 @@ ISIS Reflectometry Interface
 New features
 ############
 
+- A new table has been added to the Settings tab to allow default transmission runs to be specified on a per-angle basis. If a row in the Runs tab contains an angle, it will be looked up in this table and those transmission runs will be used if a matching angle is found (the angle does not have to be exact as it will match to within 100th of a degree). If you want to specify transmission runs that will be used by default for all runs, then simply leave the angle empty.
 - Two new boxes have been added to the settings tab of the ISIS Reflectometry interface, 'ReductionType' and 'SummationType' which are passed to the corresponding parameters of :ref:`algm-ReflectometryReductionOneAuto`.
 - The ISIS Reflectometry interface now has a checkbox 'CorrectDetectors' which maps to the corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
 - The 'Get Defaults' button now looks for values for the following additional properties in the IDF:
@@ -33,11 +34,13 @@ Improvements
 ############
 
 - Grid lines are now displayed in the runs tab.
+- Plotting results in event handling mode now plots the `IvsQ_binned_` workspaces rather than `IvsQ_`, to make the behaviour consistent with non-event mode.
 - Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows and settings is also disabled during processing.
 - Removed the 'DirectBeam' box from the settings tab of the ISIS Reflectometry interface because this is not used.
 - Properties on the Runs tab now take precedence over properties on the Settings tab.
 - Output workspace names have been improved. Names now use '+' to indicate preprocessed (i.e. summed) workspaces, rather than '_', which is used to indicate postprocessed (i.e. stitched) workspaces.
 - The Python code generated when you tick `Output Notebook` has been improved to support special characters (e.g. `+`) in workspace names. Output workspaces are now set using the output properties of the algorithm rather than by variable assignment. This avoids the possibility of invalid characters being used in Python variable names.
+- The `Output Notebook` option now works for all groups that are processed as non-event workspaces. Previously, if event handling was enabled but a group contained non-event workspaces, generating the notebook was disabled.
 - Added a new `?` button to the ISIS Reflectometry Interface which links to the documentation page.
 - Added extra tooltips to the ISIS Reflectometry Interface.
 
