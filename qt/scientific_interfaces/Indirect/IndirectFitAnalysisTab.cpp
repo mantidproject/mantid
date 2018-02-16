@@ -776,6 +776,9 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   m_fitPropertyBrowser->setWorkspaceName(wsName);
 }
 
+/**
+ * Updates a bool specifying whether the previous fit model is selected.
+ */
 void IndirectFitAnalysisTab::updatePreviousModelSelected() {
   m_previousModelSelected = equivalentFunctions(
       m_fitFunction, m_fitPropertyBrowser->compositeFunction());
