@@ -24,6 +24,12 @@ size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
   index += b - 1;
   return index;
 }
+
+void updateVisited(std::vector<bool> &visited,
+                   const std::vector<size_t> &components) {
+  for (auto component : components)
+    visited[component] = true;
+}
 } // namespace
 
 InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
@@ -37,8 +43,9 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
   const auto &componentInfo = actor.componentInfo();
   size_t numTextures = 0;
   for (size_t i = componentInfo.root(); !componentInfo.isDetector(i); --i) {
-    if (componentInfo.componentType(i) ==
-        Mantid::Beamline::ComponentType::Rectangular) {
+    auto type = componentInfo.componentType(i);
+    if (type == Mantid::Beamline::ComponentType::Rectangular ||
+        type == Mantid::Beamline::ComponentType::OutlineComposite) {
       m_textureIndices.push_back(i);
       m_reverseTextureIndexMap[i] = numTextures;
       numTextures++;
@@ -82,14 +89,6 @@ void InstrumentRenderer::renderInstrument(const std::vector<bool> &visibleComps,
   OpenGLError::check("InstrumentActor::draw()");
 }
 
-namespace {
-void updateVisited(std::vector<bool> &visited,
-                   const std::vector<size_t> &components) {
-  for (auto component : components)
-    visited[component] = true;
-}
-} // namespace
-
 void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
                               bool showGuides, bool picking) {
   const auto &compInfo = m_actor.componentInfo();
@@ -109,6 +108,8 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
     if (compInfo.componentType(i) ==
         Mantid::Beamline::ComponentType::OutlineComposite) {
       updateVisited(visited, compInfo.componentsInSubtree(i));
+      if (visibleComps[i])
+        drawTube(i, picking);
       continue;
     }
 
@@ -149,6 +150,32 @@ void InstrumentRenderer::drawRectangularBank(size_t bankIndex, bool picking) {
   glPopMatrix();
 }
 
+void InstrumentRenderer::drawTube(size_t bankIndex, bool picking) {
+  const auto &compInfo = m_actor.componentInfo();
+  glPushMatrix();
+
+  // auto dets = compInfo.detectorsInSubtree(bankIndex);
+  auto pos = compInfo.position(bankIndex);
+  auto rot = compInfo.rotation(bankIndex);
+  auto scale = compInfo.scaleFactor(bankIndex);
+  glTranslated(pos.X(), pos.Y(), pos.Z());
+  glScaled(scale[0], scale[1], scale[2]);
+  double deg, ax0, ax1, ax2;
+  rot.getAngleAxis(deg, ax0, ax1, ax2);
+  glRotated(deg, ax0, ax1, ax2);
+
+  auto ti = m_reverseTextureIndexMap[bankIndex];
+  glColor3f(1.0f, 1.0f, 1.0f);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, m_textureIDs[ti]);
+  uploadTubeTexture(picking ? pickTextures[ti] : colorTextures[ti], bankIndex);
+
+  compInfo.shape(bankIndex).draw();
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glPopMatrix();
+}
+
 void InstrumentRenderer::drawSingleDetector(size_t detIndex, bool picking) {
   const auto &compInfo = m_actor.componentInfo();
   if (picking)
@@ -183,11 +210,20 @@ void InstrumentRenderer::reset() {
   resetPickColors();
 
   if (m_textureIDs.size() > 0) {
+    const auto &compInfo = m_actor.componentInfo();
     for (size_t i = 0; i < m_textureIDs.size(); i++) {
-      generateRectangularTexture(colorTextures[i], m_colors,
-                                 m_textureIndices[i]);
-      generateRectangularTexture(pickTextures[i], m_pickColors,
-                                 m_textureIndices[i]);
+      switch (compInfo.componentType(m_textureIndices[i])) {
+      case Mantid::Beamline::ComponentType::Rectangular:
+        generateRectangularTexture(colorTextures[i], m_colors,
+                                   m_textureIndices[i]);
+        generateRectangularTexture(pickTextures[i], m_pickColors,
+                                   m_textureIndices[i]);
+        break;
+      case Mantid::Beamline::ComponentType::OutlineComposite:
+        generateTubeTexture(colorTextures[i], m_colors, m_textureIndices[i]);
+        generateTubeTexture(pickTextures[i], m_pickColors, m_textureIndices[i]);
+        break;
+      }
     }
   }
 
@@ -309,8 +345,24 @@ void InstrumentRenderer::generateRectangularTexture(
   }
 }
 
+void InstrumentRenderer::generateTubeTexture(std::vector<char> &texture,
+                                             const std::vector<GLColor> &colors,
+                                             size_t bankIndex) {
+  const auto &compInfo = m_actor.componentInfo();
+  const auto &children = compInfo.children(bankIndex);
+  texture.resize(children.size() * 3);
+
+  for (size_t i = 0; i < children.size(); ++i) {
+    auto col = colors[children[i]];
+    auto pos = i * 3;
+    texture[pos] = static_cast<unsigned char>(col.red());
+    texture[pos + 1] = static_cast<unsigned char>(col.green());
+    texture[pos + 2] = static_cast<unsigned char>(col.blue());
+  }
+}
+
 void InstrumentRenderer::uploadRectangularTexture(
-    const std::vector<char> &texture, size_t textureIndex) {
+    const std::vector<char> &texture, size_t textureIndex) const {
   auto bank = m_actor.componentInfo().quadrilateralComponent(textureIndex);
   auto res = Mantid::Geometry::detail::Renderer::getCorrectedTextureSize(
       bank.nX, bank.nY);
@@ -338,5 +390,21 @@ void InstrumentRenderer::uploadRectangularTexture(
                texture.data());
 }
 
+void InstrumentRenderer::uploadTubeTexture(const std::vector<char> &texture,
+                                           size_t textureIndex) const {
+  auto ti = m_reverseTextureIndexMap[textureIndex];
+  if (m_textureIDs[ti] > 0)
+    glDeleteTextures(1, &m_textureIDs[ti]);
+
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glGenTextures(1, &m_textureIDs[ti]);
+  glBindTexture(GL_TEXTURE_2D, m_textureIDs[ti]);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, 1, static_cast<GLsizei>(texture.size() / 3),
+               0, GL_RGB, GL_UNSIGNED_BYTE, texture.data());
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
 } // namespace MantidWidgets
 } // namespace MantidQt

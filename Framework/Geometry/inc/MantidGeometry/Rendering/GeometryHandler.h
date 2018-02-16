@@ -59,7 +59,6 @@ private:
 protected:
   std::shared_ptr<detail::ShapeInfo> m_shapeInfo;
   std::unique_ptr<detail::GeometryTriangulator> m_triangulator;
-  RectangularDetector *m_rectDet = nullptr;
   MeshObject *m_meshObj =
       nullptr; ///< Mesh Object that uses this geometry handler
   StructuredDetector *m_structDet = nullptr;
@@ -70,7 +69,6 @@ public:
   GeometryHandler(IObjComponent *comp);              ///< Constructor
   GeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
   GeometryHandler(CSGObject *obj);                   ///< Constructor
-  GeometryHandler(RectangularDetector *comp);
   GeometryHandler(boost::shared_ptr<MeshObject> obj); ///<Constructor
   GeometryHandler(MeshObject *obj);
   GeometryHandler(StructuredDetector *comp);

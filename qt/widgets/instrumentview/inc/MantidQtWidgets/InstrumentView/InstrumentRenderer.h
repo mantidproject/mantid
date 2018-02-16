@@ -53,13 +53,20 @@ private:
   void draw(const std::vector<bool> &visibleComps, bool showGuides,
             bool picking);
   void drawRectangularBank(size_t bankIndex, bool picking);
+  void drawTube(size_t bankIndex, bool picking);
   void drawSingleDetector(size_t detIndex, bool picking);
   void generateRectangularTexture(std::vector<char> &texture,
                                   const std::vector<GLColor> &colors,
                                   size_t bankIndex);
 
   void uploadRectangularTexture(const std::vector<char> &texture,
-                                size_t textureIndex);
+                                size_t textureIndex) const;
+
+  void generateTubeTexture(std::vector<char> &texture,
+                           const std::vector<GLColor> &colors,
+                           size_t bankIndex);
+  void uploadTubeTexture(const std::vector<char> &texture,
+                         size_t textureIndex) const;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

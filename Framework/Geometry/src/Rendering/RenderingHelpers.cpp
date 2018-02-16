@@ -155,10 +155,8 @@ void Renderer::renderRectangularBank(const Geometry::ComponentInfo &compInfo,
   glColor3f(1.0f, 1.0f, 1.0f);
 
   // Nearest-neighbor scaling
-  GLint texParam = GL_NEAREST;
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texParam);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texParam);
-
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glEnable(GL_TEXTURE_2D); // enable texture mapping
 
   size_t texx, texy;
@@ -189,65 +187,6 @@ void Renderer::renderRectangularBank(const Geometry::ComponentInfo &compInfo,
   addVertex(pos, xstep, ystep);
 
   glEnd();
-
-  glDisable(
-      GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
-}
-
-// Render Bitmap for RectangularDetector
-void render(const RectangularDetector &rectDet) {
-  // Because texture colours are combined with the geometry colour
-  // make sure the current colour is white
-  glColor3f(1.0f, 1.0f, 1.0f);
-
-  // Nearest-neighbor scaling
-  GLint texParam = GL_NEAREST;
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texParam);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texParam);
-
-  glEnable(GL_TEXTURE_2D); // enable texture mapping
-
-  int texx, texy;
-  rectDet.getTextureSize(texx, texy);
-  double tex_frac_x = (1.0 * rectDet.xpixels()) / (texx);
-  double tex_frac_y = (1.0 * rectDet.ypixels()) / (texy);
-
-  glBegin(GL_QUADS);
-
-  glTexCoord2f(0.0, 0.0);
-  V3D pos;
-  pos = rectDet.getRelativePosAtXY(0, 0);
-  pos += V3D(rectDet.xstep() * (-0.5), rectDet.ystep() * (-0.5),
-             0.0); // Adjust to account for the size of a pixel
-  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-             static_cast<GLfloat>(pos.Z()));
-
-  glTexCoord2f(static_cast<GLfloat>(tex_frac_x), 0.0);
-  pos = rectDet.getRelativePosAtXY(rectDet.xpixels() - 1, 0);
-  pos += V3D(rectDet.xstep() * (+0.5), rectDet.ystep() * (-0.5),
-             0.0); // Adjust to account for the size of a pixel
-  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-             static_cast<GLfloat>(pos.Z()));
-
-  glTexCoord2f(static_cast<GLfloat>(tex_frac_x),
-               static_cast<GLfloat>(tex_frac_y));
-  pos =
-      rectDet.getRelativePosAtXY(rectDet.xpixels() - 1, rectDet.ypixels() - 1);
-  pos += V3D(rectDet.xstep() * (+0.5), rectDet.ystep() * (+0.5),
-             0.0); // Adjust to account for the size of a pixel
-  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-             static_cast<GLfloat>(pos.Z()));
-
-  glTexCoord2f(0.0, static_cast<GLfloat>(tex_frac_y));
-  pos = rectDet.getRelativePosAtXY(0, rectDet.ypixels() - 1);
-  pos += V3D(rectDet.xstep() * (-0.5), rectDet.ystep() * (+0.5),
-             0.0); // Adjust to account for the size of a pixel
-  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-             static_cast<GLfloat>(pos.Z()));
-
-  glEnd();
-  if (glGetError() > 0)
-    std::cout << "OpenGL error in doRender(const RectangularDetector &) \n";
 
   glDisable(
       GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
