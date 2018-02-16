@@ -221,14 +221,12 @@ void SaveLauenorm::exec() {
     if (dsp < minD)
       minD = dsp;
     sumLam += lambda;
-    if (wi == ws->getNumberPeaks() - 1) {
-      numPeaks.push_back(count);
-      maxLamVec.push_back(maxLam);
-      minLamVec.push_back(minLam);
-      sumLamVec.push_back(sumLam);
-      minDVec.push_back(minD);
-    }
   }
+  numPeaks.push_back(count);
+  maxLamVec.push_back(maxLam);
+  minLamVec.push_back(minLam);
+  sumLamVec.push_back(sumLam);
+  minDVec.push_back(minD);
   oldSequence = -1;
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
