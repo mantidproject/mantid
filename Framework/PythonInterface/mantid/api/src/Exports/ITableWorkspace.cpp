@@ -1,7 +1,10 @@
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
@@ -16,6 +19,7 @@
 #include <boost/python/converter/builtin_converters.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/make_constructor.hpp>
 #include <cstring>
 #include <vector>
 
@@ -26,6 +30,7 @@
 #include <numpy/arrayobject.h>
 
 using namespace Mantid::API;
+using namespace Mantid::PythonInterface::Policies;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
 
@@ -238,7 +243,7 @@ void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype) {
  * called on
  * @param value A python object containing a column name or index
  */
-PyObject *column(ITableWorkspace &self, const bpl::object &value) {
+PyObject *column(const ITableWorkspace &self, const bpl::object &value) {
   // Find the column and row
   Mantid::API::Column_const_sptr column;
   if (STR_CHECK(value.ptr())) {
@@ -458,7 +463,7 @@ void setCell(ITableWorkspace &self, const bpl::object &col_or_row,
  * @returns a boost python dictionary object with keys that are column names and
  * values which are lists of the column values.
  */
-bpl::dict toDict(ITableWorkspace &self) {
+bpl::dict toDict(const ITableWorkspace &self) {
   bpl::dict result;
 
   for (const auto &name : self.getColumnNames()) {
@@ -469,6 +474,96 @@ bpl::dict toDict(ITableWorkspace &self) {
 
   return result;
 }
+
+/** Constructor function for ITableWorkspaces */
+ITableWorkspace_sptr makeTableWorkspace() {
+  const auto ws = WorkspaceFactory::Instance().createTable();
+  Mantid::API::AnalysisDataService::Instance().add(ws->getName(), ws);
+  return ws;
+}
+
+class ITableWorkspacePickleSuite : public boost::python::pickle_suite {
+public:
+  static dict getstate(const ITableWorkspace &ws) {
+    dict data;
+    data["data"] = toDict(ws);
+    data["meta_data"] = writeMetaData(ws);
+    return data;
+  }
+
+  static void setstate(ITableWorkspace &ws, dict state) {
+    readMetaData(ws, state);
+    readData(ws, state);
+  }
+
+private:
+  /** Write the meta data from a table workspace to a python dict
+   *
+   * @param ws :: the workspace to load data into
+   */
+  static dict writeMetaData(const ITableWorkspace &ws) {
+    list columnTypes;
+    list columnNames;
+
+    const auto &names = ws.getColumnNames();
+    for (const auto &name : names) {
+      const auto &column = ws.getColumn(name);
+      columnNames.append(name);
+      columnTypes.append(column->type());
+    }
+
+    dict metaData;
+    metaData["column_names"] = columnNames;
+    metaData["column_types"] = columnTypes;
+    return metaData;
+  }
+
+  /** Read the meta data from a python dict into the table workspace
+   *
+   * This will read information relating to the column names and data
+   * types to be stored in the new table
+   *
+   * @param ws :: the workspace to load data into
+   * @param state :: the pickled state of the table
+   */
+  static void readMetaData(ITableWorkspace &ws, const dict &state) {
+    const auto &metaData = state["meta_data"];
+    const auto &columnNames = metaData["column_names"];
+    const auto &columnTypes = metaData["column_types"];
+
+    const bpl::ssize_t numColumns = len(columnNames);
+    for (bpl::ssize_t colIndex = 0; colIndex < numColumns; ++colIndex) {
+      const auto &key = columnNames[colIndex];
+      const auto &value = columnTypes[colIndex];
+      const auto &name = extract<std::string>(key);
+      const auto &type = extract<std::string>(value);
+      ws.addColumn(type, name);
+    }
+  }
+
+  /** Read the data from a python dict into the table workspace
+   *
+   * @param ws :: the workspace to load data into
+   * @param state :: the pickled state of the table
+   */
+  static void readData(ITableWorkspace &ws, const dict &state) {
+    const auto &data = state["data"];
+    const auto &names = ws.getColumnNames();
+
+    if (names.empty()) {
+      return;
+    }
+
+    bpl::ssize_t numRows = len(data[names[0]]);
+    for (int rowIndex = 0; rowIndex < numRows; ++rowIndex) {
+      ws.appendRow();
+      for (const auto &name : names) {
+        setValue(ws.getColumn(name), static_cast<int>(rowIndex),
+                 data[name][rowIndex]);
+      }
+    }
+  }
+};
 
 void export_ITableWorkspace() {
   using Mantid::PythonInterface::Policies::VectorToNumpy;
@@ -483,6 +578,8 @@ void export_ITableWorkspace() {
 
   class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
       "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
+      .def_pickle(ITableWorkspacePickleSuite())
+      .def("__init__", make_constructor(&makeTableWorkspace))
       .def("addColumn", &addColumnSimple,
            (arg("self"), arg("type"), arg("name")),
            "Add a named column with the given type. Recognized types are: "
@@ -554,7 +651,7 @@ void export_ITableWorkspace() {
       .def("setCell", &setCell, (arg("self"), arg("row_or_column"),
                                  arg("column_or_row"), arg("value")),
            "Sets the value of a given cell. If the first argument is a "
-           "number then it is interpreted as a row otherwise it is interpreted "
+
            "as a column name")
 
       .def("toDict", &toDict, (arg("self")),

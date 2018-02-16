@@ -7,6 +7,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -24,6 +25,41 @@ using namespace Mantid::HistogramData;
 using namespace Mantid::Indexing;
 using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
+
+namespace {
+MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
+                                          std::vector<double> rotations,
+                                          std::string name = "testWS") {
+  const auto instrument = ComponentCreationHelper::createInstrumentWithPSDTubes(
+      nTubes, nPixelsPerTube, true);
+  size_t nTimeIndexes = rotations.size();
+  size_t nBins = 1;
+
+  std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges;
+  for (size_t i = 0; i < nTimeIndexes; ++i)
+    timeRanges.push_back(std::make_pair(DateAndTime(i), DateAndTime(i + 1)));
+
+  ScanningWorkspaceBuilder builder(instrument, nTimeIndexes, nBins);
+  builder.setTimeRanges(timeRanges);
+  builder.setRelativeRotationsForScans(rotations, V3D(0, 0, 0), V3D(0, 1, 0));
+
+  Points x(nBins, LinearGenerator(0.0, 1.0));
+  Counts y(std::vector<double>(nBins, 2.0));
+  builder.setHistogram(Histogram(x, y));
+
+  auto testWS = builder.buildWorkspace();
+
+  // This has to be added to the ADS so that it can be used with the string
+  // validator used in the algorithm.
+  AnalysisDataService::Instance().add(name, testWS);
+
+  auto parameterMap = testWS->getInstrument()->getParameterMap();
+  parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
+                          "detector_for_height_axis", "tube-1");
+
+  return testWS;
+}
+}
 
 class SumOverlappingTubesTest : public CxxTest::TestSuite {
 public:
@@ -59,39 +95,6 @@ public:
                           "mirror_detector_angles", mirrorOutput);
     parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
                             "detector_for_height_axis", "tube-1");
-    return testWS;
-  }
-
-  MatrixWorkspace_sptr createTestScanningWS(size_t nTubes,
-                                            size_t nPixelsPerTube,
-                                            std::vector<double> rotations) {
-    const auto instrument =
-        ComponentCreationHelper::createInstrumentWithPSDTubes(
-            nTubes, nPixelsPerTube, true);
-    size_t nTimeIndexes = 3;
-    size_t nBins = 1;
-
-    const std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges = {
-        {0, 1}, {1, 2}, {2, 3}};
-
-    ScanningWorkspaceBuilder builder(instrument, nTimeIndexes, nBins);
-    builder.setTimeRanges(timeRanges);
-    builder.setRelativeRotationsForScans(rotations, V3D(0, 0, 0), V3D(0, 1, 0));
-
-    Points x(nBins, LinearGenerator(0.0, 1.0));
-    Counts y(std::vector<double>(nBins, 2.0));
-    builder.setHistogram(Histogram(x, y));
-
-    auto testWS = builder.buildWorkspace();
-
-    // This has to be added to the ADS so that it can be used with the string
-    // validator used in the algorithm.
-    AnalysisDataService::Instance().add("testWS", testWS);
-
-    auto parameterMap = testWS->getInstrument()->getParameterMap();
-    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
-                            "detector_for_height_axis", "tube-1");
-
     return testWS;
   }
 
@@ -261,9 +264,9 @@ public:
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
                             std::string(e.what()),
-                            "Component not_a_component could not be found.");
+                            "not_a_component does not exist");
     AnalysisDataService::Instance().remove("testWS");
   }
 
@@ -680,6 +683,56 @@ public:
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
   }
+};
+
+class SumOverlappingTubesTestPerformance : public CxxTest::TestSuite {
+public:
+  static SumOverlappingTubesTestPerformance *createSuite() {
+    return new SumOverlappingTubesTestPerformance();
+  }
+  static void destroySuite(SumOverlappingTubesTestPerformance *suite) {
+    delete suite;
+  }
+
+  SumOverlappingTubesTestPerformance() {}
+
+  void setUp() override {
+
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+
+    for (size_t i = 0; i < m_numberOfWorkspaces; ++i) {
+      std::vector<double> rotations;
+      for (size_t j = 0; j < 25; ++j)
+        rotations.push_back(double(j * m_numberOfWorkspaces + i) * 0.1);
+
+      auto testWS =
+          createTestScanningWS(100, 128, rotations, "a" + std::to_string(i));
+      group->addWorkspace(testWS);
+    }
+
+    AnalysisDataService::Instance().addOrReplace("group", group);
+
+    m_alg.initialize();
+    m_alg.setProperty("InputWorkspaces", "group");
+    m_alg.setProperty("OutputWorkspace", "outWS");
+    m_alg.setProperty("OutputType", "2D");
+    m_alg.setProperty("ScatteringAngleBinning", "1.0");
+  }
+
+  void test_merge_d2b_like_detector_scan_workspaces() {
+    TS_ASSERT_THROWS_NOTHING(m_alg.execute());
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("group");
+    AnalysisDataService::Instance().remove("outWS");
+    for (size_t i = 0; i < m_numberOfWorkspaces; ++i)
+      AnalysisDataService::Instance().remove("a" + std::to_string(i));
+  }
+
+private:
+  SumOverlappingTubes m_alg;
+  size_t m_numberOfWorkspaces = 20;
 };
 
 #endif /* MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_ */

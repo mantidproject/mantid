@@ -33,67 +33,65 @@ size_t getBankID(API::MatrixWorkspace_const_sptr ws) {
 namespace MantidQt {
 namespace CustomInterfaces {
 void EnggDiffGSASFittingModel::addFitResultsToMaps(
-    const int runNumber, const size_t bank, const double rwp,
+    const RunLabel &runLabel, const double rwp,
     const std::string &fittedPeaksWSName,
     const std::string &latticeParamsTableName) {
-  addRwp(runNumber, bank, rwp);
+  addRwp(runLabel, rwp);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto fittedPeaks =
       ADS.retrieveWS<API::MatrixWorkspace>(fittedPeaksWSName);
-  addFittedPeaks(runNumber, bank, fittedPeaks);
+  addFittedPeaks(runLabel, fittedPeaks);
 
   const auto latticeParams =
       ADS.retrieveWS<API::ITableWorkspace>(latticeParamsTableName);
-  addLatticeParams(runNumber, bank, latticeParams);
+  addLatticeParams(runLabel, latticeParams);
 }
 
-void EnggDiffGSASFittingModel::addFittedPeaks(const int runNumber,
-                                              const size_t bank,
+void EnggDiffGSASFittingModel::addFittedPeaks(const RunLabel &runLabel,
                                               API::MatrixWorkspace_sptr ws) {
-  m_fittedPeaksMap.add(runNumber, bank, ws);
+  m_fittedPeaksMap.add(runLabel, ws);
 }
 
-void EnggDiffGSASFittingModel::addFocusedRun(const int runNumber,
-                                             const size_t bank,
+void EnggDiffGSASFittingModel::addFocusedRun(const RunLabel &runLabel,
                                              API::MatrixWorkspace_sptr ws) {
-  m_focusedWorkspaceMap.add(runNumber, bank, ws);
+  m_focusedWorkspaceMap.add(runLabel, ws);
 }
 
 void EnggDiffGSASFittingModel::addLatticeParams(
-    const int runNumber, const size_t bank, API::ITableWorkspace_sptr table) {
-  m_latticeParamsMap.add(runNumber, bank, table);
+    const RunLabel &runLabel, API::ITableWorkspace_sptr table) {
+  m_latticeParamsMap.add(runLabel, table);
 }
 
-void EnggDiffGSASFittingModel::addRwp(const int runNumber, const size_t bank,
+void EnggDiffGSASFittingModel::addRwp(const RunLabel &runLabel,
                                       const double rwp) {
-  m_rwpMap.add(runNumber, bank, rwp);
+  m_rwpMap.add(runLabel, rwp);
 }
 
 namespace {
 
-std::string generateFittedPeaksWSName(const int runNumber, const size_t bank) {
-  return std::to_string(runNumber) + "_" + std::to_string(bank) +
-         "_gsasii_fitted_peaks";
+std::string generateFittedPeaksWSName(const RunLabel &runLabel) {
+  return std::to_string(runLabel.runNumber) + "_" +
+         std::to_string(runLabel.bank) + "_gsasii_fitted_peaks";
 }
 
-std::string generateLatticeParamsName(const int runNumber, const size_t bank) {
-  return std::to_string(runNumber) + "_" + std::to_string(bank) +
-         "_lattice_params";
+std::string generateLatticeParamsName(const RunLabel &runLabel) {
+  return std::to_string(runLabel.runNumber) + "_" +
+         std::to_string(runLabel.bank) + "_lattice_params";
 }
 }
 
 bool EnggDiffGSASFittingModel::doPawleyRefinement(
-    const int runNumber, const size_t bank, const std::string &instParamFile,
+    const RunLabel &runLabel, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile, const double dMin,
     const double negativeWeight) {
-  const auto inputWS = getFocusedWorkspace(runNumber, bank);
+  const auto inputWS = getFocusedWorkspace(runLabel);
   if (!inputWS) {
     return false;
   }
-  const auto outputWSName = generateFittedPeaksWSName(runNumber, bank);
-  const auto latticeParamsName = generateLatticeParamsName(runNumber, bank);
+  const auto outputWSName = generateFittedPeaksWSName(runLabel);
+  const auto latticeParamsName = generateLatticeParamsName(runLabel);
 
   const auto rwp = doGSASRefinementAlgorithm(
       *inputWS, outputWSName, latticeParamsName, "Pawley refinement",
@@ -104,7 +102,7 @@ bool EnggDiffGSASFittingModel::doPawleyRefinement(
     return false;
   }
 
-  addFitResultsToMaps(runNumber, bank, *rwp, outputWSName, latticeParamsName);
+  addFitResultsToMaps(runLabel, *rwp, outputWSName, latticeParamsName);
 
   return true;
 }
@@ -141,15 +139,15 @@ boost::optional<double> EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
 }
 
 bool EnggDiffGSASFittingModel::doRietveldRefinement(
-    const int runNumber, const size_t bank, const std::string &instParamFile,
+    const RunLabel &runLabel, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
-  const auto inputWS = getFocusedWorkspace(runNumber, bank);
+  const auto inputWS = getFocusedWorkspace(runLabel);
   if (!inputWS) {
     return false;
   }
-  const auto outputWSName = generateFittedPeaksWSName(runNumber, bank);
-  const auto latticeParamsName = generateLatticeParamsName(runNumber, bank);
+  const auto outputWSName = generateFittedPeaksWSName(runLabel);
+  const auto latticeParamsName = generateLatticeParamsName(runLabel);
 
   const auto rwp = doGSASRefinementAlgorithm(
       *inputWS, outputWSName, latticeParamsName, "Rietveld refinement",
@@ -160,47 +158,42 @@ bool EnggDiffGSASFittingModel::doRietveldRefinement(
     return false;
   }
 
-  addFitResultsToMaps(runNumber, bank, *rwp, outputWSName, latticeParamsName);
+  addFitResultsToMaps(runLabel, *rwp, outputWSName, latticeParamsName);
 
   return true;
 }
 
 boost::optional<API::MatrixWorkspace_sptr>
-EnggDiffGSASFittingModel::getFittedPeaks(const int runNumber,
-                                         const size_t bank) const {
-  return getFromRunMapOptional(m_fittedPeaksMap, runNumber, bank);
+EnggDiffGSASFittingModel::getFittedPeaks(const RunLabel &runLabel) const {
+  return getFromRunMapOptional(m_fittedPeaksMap, runLabel);
 }
 
 boost::optional<API::MatrixWorkspace_sptr>
-EnggDiffGSASFittingModel::getFocusedWorkspace(const int runNumber,
-                                              const size_t bank) const {
-  return getFromRunMapOptional(m_focusedWorkspaceMap, runNumber, bank);
+EnggDiffGSASFittingModel::getFocusedWorkspace(const RunLabel &runLabel) const {
+  return getFromRunMapOptional(m_focusedWorkspaceMap, runLabel);
 }
 
 boost::optional<API::ITableWorkspace_sptr>
-EnggDiffGSASFittingModel::getLatticeParams(const int runNumber,
-                                           const size_t bank) const {
-  return getFromRunMapOptional(m_latticeParamsMap, runNumber, bank);
+EnggDiffGSASFittingModel::getLatticeParams(const RunLabel &runLabel) const {
+  return getFromRunMapOptional(m_latticeParamsMap, runLabel);
 }
 
-std::vector<std::pair<int, size_t>>
-EnggDiffGSASFittingModel::getRunLabels() const {
-  return m_focusedWorkspaceMap.getRunNumbersAndBankIDs();
+std::vector<RunLabel> EnggDiffGSASFittingModel::getRunLabels() const {
+  return m_focusedWorkspaceMap.getRunLabels();
 }
 
 boost::optional<double>
-EnggDiffGSASFittingModel::getRwp(const int runNumber, const size_t bank) const {
-  return getFromRunMapOptional(m_rwpMap, runNumber, bank);
+EnggDiffGSASFittingModel::getRwp(const RunLabel &runLabel) const {
+  return getFromRunMapOptional(m_rwpMap, runLabel);
 }
 
-bool EnggDiffGSASFittingModel::hasFittedPeaksForRun(const int runNumber,
-                                                    const size_t bank) const {
-  return m_fittedPeaksMap.contains(runNumber, bank);
+bool EnggDiffGSASFittingModel::hasFittedPeaksForRun(
+    const RunLabel &runLabel) const {
+  return m_fittedPeaksMap.contains(runLabel);
 }
 
-bool EnggDiffGSASFittingModel::hasFocusedRun(const int runNumber,
-                                             const size_t bank) const {
-  return m_focusedWorkspaceMap.contains(runNumber, bank);
+bool EnggDiffGSASFittingModel::hasFocusedRun(const RunLabel &runLabel) const {
+  return m_focusedWorkspaceMap.contains(runLabel);
 }
 
 bool EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) {
@@ -220,7 +213,7 @@ bool EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) {
 
   const auto runNumber = ws->getRunNumber();
   const auto bank = getBankID(ws);
-  m_focusedWorkspaceMap.add(runNumber, bank, ws);
+  m_focusedWorkspaceMap.add(RunLabel(runNumber, bank), ws);
   return true;
 }
 

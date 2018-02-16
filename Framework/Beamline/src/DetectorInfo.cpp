@@ -7,22 +7,27 @@
 namespace Mantid {
 namespace Beamline {
 
-DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
-                           std::vector<Eigen::Quaterniond> rotations)
+DetectorInfo::DetectorInfo(
+    std::vector<Eigen::Vector3d> positions,
+    std::vector<Eigen::Quaterniond,
+                Eigen::aligned_allocator<Eigen::Quaterniond>> rotations)
     : m_isMonitor(Kernel::make_cow<std::vector<bool>>(positions.size())),
       m_isMasked(Kernel::make_cow<std::vector<bool>>(positions.size())),
       m_positions(
           Kernel::make_cow<std::vector<Eigen::Vector3d>>(std::move(positions))),
-      m_rotations(Kernel::make_cow<std::vector<Eigen::Quaterniond>>(
+      m_rotations(Kernel::make_cow<std::vector<
+          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
           std::move(rotations))) {
   if (m_positions->size() != m_rotations->size())
     throw std::runtime_error("DetectorInfo: Position and rotations vectors "
                              "must have identical size");
 }
 
-DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
-                           std::vector<Eigen::Quaterniond> rotations,
-                           const std::vector<size_t> &monitorIndices)
+DetectorInfo::DetectorInfo(
+    std::vector<Eigen::Vector3d> positions,
+    std::vector<Eigen::Quaterniond,
+                Eigen::aligned_allocator<Eigen::Quaterniond>> rotations,
+    const std::vector<size_t> &monitorIndices)
     : DetectorInfo(std::move(positions), std::move(rotations)) {
   for (const auto i : monitorIndices)
     m_isMonitor.access().at(i) = true;

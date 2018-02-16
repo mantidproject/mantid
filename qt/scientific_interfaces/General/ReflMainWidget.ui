@@ -15,7 +15,16 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="layoutMain">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>1</number>
+    </property>
+    <property name="topMargin">
+     <number>1</number>
+    </property>
+    <property name="rightMargin">
+     <number>1</number>
+    </property>
+    <property name="bottomMargin">
      <number>1</number>
     </property>
     <item>
@@ -33,6 +42,9 @@
        <bool>true</bool>
       </property>
       <widget class="QGroupBox" name="groupSearchPane">
+       <property name="toolTip">
+        <string/>
+       </property>
        <property name="title">
         <string>Search Runs</string>
        </property>
@@ -40,7 +52,16 @@
         <property name="spacing">
          <number>1</number>
         </property>
-        <property name="margin">
+        <property name="leftMargin">
+         <number>1</number>
+        </property>
+        <property name="topMargin">
+         <number>1</number>
+        </property>
+        <property name="rightMargin">
+         <number>1</number>
+        </property>
+        <property name="bottomMargin">
          <number>1</number>
         </property>
         <item>
@@ -73,7 +94,7 @@
              </size>
             </property>
             <property name="toolTip">
-             <string>Select the instrument to search with</string>
+             <string>The instrument used for this investigation</string>
             </property>
             <property name="whatsThis">
              <string>Specifies which instrument you're searching for data from.</string>
@@ -111,7 +132,7 @@
              </size>
             </property>
             <property name="toolTip">
-             <string>Investigation to search for</string>
+             <string>ID of the investigation runs to search for</string>
             </property>
             <property name="whatsThis">
              <string>Specifies the investigation id that you are searching for runs from.</string>
@@ -133,7 +154,7 @@
              </sizepolicy>
             </property>
             <property name="toolTip">
-             <string>Search</string>
+             <string>Search for runs using ICAT</string>
             </property>
             <property name="whatsThis">
              <string>Searches ICAT for runs from the given instrument with the given investigation id.</string>
@@ -145,6 +166,9 @@
           </item>
           <item row="2" column="0">
            <widget class="QComboBox" name="comboTransferMethod">
+            <property name="toolTip">
+             <string>The method used to transfer runs into the processing table</string>
+            </property>
             <property name="whatsThis">
              <string>The strategy for searching and transfering files. See help.</string>
             </property>
@@ -197,6 +221,9 @@
           </item>
           <item>
            <widget class="QToolButton" name="buttonTransfer">
+            <property name="toolTip">
+             <string>Transfer selected results into the processing table</string>
+            </property>
             <property name="text">
              <string>Transfer</string>
             </property>
@@ -217,7 +244,16 @@
         <property name="spacing">
          <number>1</number>
         </property>
-        <property name="margin">
+        <property name="leftMargin">
+         <number>1</number>
+        </property>
+        <property name="topMargin">
+         <number>1</number>
+        </property>
+        <property name="rightMargin">
+         <number>1</number>
+        </property>
+        <property name="bottomMargin">
          <number>1</number>
         </property>
         <item>
@@ -286,11 +322,23 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="layoutRowButtons">
-            <property name="margin">
+            <property name="leftMargin">
+             <number>1</number>
+            </property>
+            <property name="topMargin">
+             <number>1</number>
+            </property>
+            <property name="rightMargin">
+             <number>1</number>
+            </property>
+            <property name="bottomMargin">
              <number>1</number>
             </property>
             <item>
              <widget class="QProgressBar" name="progressBar">
+              <property name="toolTip">
+               <string>Progress of the active reduction</string>
+              </property>
               <property name="whatsThis">
                <string>Shows the current progress when processing.</string>
               </property>
@@ -324,6 +372,9 @@
             </item>
             <item>
              <widget class="QCheckBox" name="checkEnableNotebook">
+              <property name="toolTip">
+               <string>Tick to generate a python notebook when performing a reduction.</string>
+              </property>
               <property name="text">
                <string>Output Notebook</string>
               </property>
@@ -331,6 +382,9 @@
             </item>
             <item>
              <widget class="QToolButton" name="buttonProcess">
+              <property name="toolTip">
+               <string>Begin processing runs from the table</string>
+              </property>
               <property name="text">
                <string>Process</string>
               </property>
@@ -358,7 +412,7 @@
      <x>0</x>
      <y>0</y>
      <width>959</width>
-     <height>18</height>
+     <height>28</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -373,7 +427,7 @@
       <string>Open Table</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+      <iconset>
        <normaloff>:/multiload.png</normaloff>:/multiload.png</iconset>
      </property>
     </widget>
@@ -415,7 +469,7 @@
   </widget>
   <action name="actionNewTable">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/new.png</normaloff>:/new.png</iconset>
    </property>
    <property name="text">
@@ -427,7 +481,7 @@
   </action>
   <action name="actionSaveTable">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/filesave.png</normaloff>:/filesave.png</iconset>
    </property>
    <property name="text">
@@ -439,7 +493,7 @@
   </action>
   <action name="actionSaveTableAs">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/filesaveas.png</normaloff>:/filesaveas.png</iconset>
    </property>
    <property name="text">
@@ -451,7 +505,7 @@
   </action>
   <action name="actionAppendRow">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/insert_row.png</normaloff>:/insert_row.png</iconset>
    </property>
    <property name="text">
@@ -466,7 +520,7 @@
   </action>
   <action name="actionPrependRow">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/insert_row.png</normaloff>:/insert_row.png</iconset>
    </property>
    <property name="text">
@@ -481,7 +535,7 @@
   </action>
   <action name="actionDeleteRow">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/delete_row.png</normaloff>:/delete_row.png</iconset>
    </property>
    <property name="text">
@@ -493,7 +547,7 @@
   </action>
   <action name="actionGroupRows">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/drag_curves.png</normaloff>:/drag_curves.png</iconset>
    </property>
    <property name="text">
@@ -505,7 +559,7 @@
   </action>
   <action name="actionProcess">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/stat_rows.png</normaloff>:/stat_rows.png</iconset>
    </property>
    <property name="text">
@@ -517,7 +571,7 @@
   </action>
   <action name="actionExpandSelection">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/fit_frame.png</normaloff>:/fit_frame.png</iconset>
    </property>
    <property name="text">
@@ -532,7 +586,7 @@
   </action>
   <action name="actionOptionsDialog">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
    </property>
    <property name="text">
@@ -547,7 +601,7 @@
   </action>
   <action name="actionClearSelected">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/erase.png</normaloff>:/erase.png</iconset>
    </property>
    <property name="text">
@@ -559,7 +613,7 @@
   </action>
   <action name="actionCopySelected">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/copy.png</normaloff>:/copy.png</iconset>
    </property>
    <property name="text">
@@ -574,7 +628,7 @@
   </action>
   <action name="actionPasteSelected">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/paste.png</normaloff>:/paste.png</iconset>
    </property>
    <property name="text">
@@ -589,7 +643,7 @@
   </action>
   <action name="actionCutSelected">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/cut.png</normaloff>:/cut.png</iconset>
    </property>
    <property name="text">
@@ -604,7 +658,7 @@
   </action>
   <action name="actionSearch">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/folder.png</normaloff>:/folder.png</iconset>
    </property>
    <property name="text">
@@ -613,7 +667,7 @@
   </action>
   <action name="actionTransfer">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/append_drag_curves.png</normaloff>:/append_drag_curves.png</iconset>
    </property>
    <property name="text">
@@ -628,7 +682,7 @@
   </action>
   <action name="actionImportTable">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/open_template.png</normaloff>:/open_template.png</iconset>
    </property>
    <property name="text">
@@ -643,7 +697,7 @@
   </action>
   <action name="actionExportTable">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/save_template.png</normaloff>:/save_template.png</iconset>
    </property>
    <property name="text">
@@ -658,7 +712,7 @@
   </action>
   <action name="actionHelp">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/help.png</normaloff>:/help.png</iconset>
    </property>
    <property name="text">
@@ -676,7 +730,7 @@
   </action>
   <action name="actionPlotRow">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/graph.png</normaloff>:/graph.png</iconset>
    </property>
    <property name="text">
@@ -691,7 +745,7 @@
   </action>
   <action name="actionPlotGroup">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/trajectory.png</normaloff>:/trajectory.png</iconset>
    </property>
    <property name="text">
@@ -706,7 +760,7 @@
   </action>
   <action name="actionSlitCalculator">
    <property name="icon">
-    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+    <iconset>
      <normaloff>:/param_range_btn.png</normaloff>:/param_range_btn.png</iconset>
    </property>
    <property name="text">
