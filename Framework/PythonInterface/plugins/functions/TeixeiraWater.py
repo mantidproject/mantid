@@ -48,19 +48,6 @@ class TeixeiraWater(IFunction1D):
         q2l2 = np.square(length * np.array(xvals))
         return (self.hbar/tau) * q2l2 / (6 + q2l2)
 
-    def functionDeriv1D(self, xvals, jacobian):
-        tau = self.getParameterValue("Tau")
-        length = self.getParameterValue("L")
-        hwhm0 = self.hbar / tau
-        length_square = length**2
-        i = 0
-        for x in xvals:
-            q2l2 = x * x * length_square
-            h = hwhm0 * q2l2 / (6 + q2l2)
-            jacobian.set(i, 0, -h / tau)
-            jacobian.set(i, 1, h * h / (hwhm0 * length * q2l2))
-            i += 1
-
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(TeixeiraWater)
