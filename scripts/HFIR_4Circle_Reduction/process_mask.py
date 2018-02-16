@@ -196,4 +196,3 @@ class RegionOfInterest(object):
         self._upperRightCorner = max(ll_x, ur_x), max(ll_y, ur_y)
 
         return
-

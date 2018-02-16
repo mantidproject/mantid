@@ -695,7 +695,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # prototype for a new thread
         self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_number_list))
-        self._addUBPeaksThread = AddPeaksThread(self, exp_number, scan_number_list)
+        self._addUBPeaksThread = thread_pool.AddPeaksThread(self, exp_number, scan_number_list)
         self._addUBPeaksThread.start()
 
         # set the flag/notification where the indexing (HKL) from
@@ -720,7 +720,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # prototype for a new thread
         self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_list))
-        self._addUBPeaksThread = AddPeaksThread(self, exp_number, scan_list)
+        self._addUBPeaksThread = thread_pool.AddPeaksThread(self, exp_number, scan_list)
         self._addUBPeaksThread.start()
 
         # set the flag/notification where the indexing (HKL) from
@@ -1231,14 +1231,10 @@ class MainWindow(QtGui.QMainWindow):
         if len(roi_file_name) == 0:
             return
 
-        # other information
-
-
         # save file
         self._myControl.save_roi_to_file(None, None, mask_name, roi_file_name)
 
         return
-
 
     def do_export_selected_peaks_to_integrate(self):
         """
@@ -1748,8 +1744,6 @@ class MainWindow(QtGui.QMainWindow):
                                                         self.ui.lineEdit_run,
                                                         self.ui.lineEdit_rawDataPtNo])
         if status is True:
-            exp_no = ret_obj[0]
-            scan_no = ret_obj[1]
             pt_no = ret_obj[2]
         else:
             self.pop_one_button_dialog(ret_obj)
@@ -1765,8 +1759,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Plot
         self.do_plot_pt_raw()
-
-        # self.load_plot_raw_data(exp_no, scan_no, pt_no)
 
         return
 
@@ -1788,14 +1780,6 @@ class MainWindow(QtGui.QMainWindow):
         if scan_number < 0:
             self.pop_one_button_dialog('Scan number cannot be negative!')
             return
-
-        # plot
-        # try:
-        #     self.load_plot_raw_data(exp_number, scan_number, pt_number)
-        # except RuntimeError as err:
-        #     error_msg = 'Unable to plot next scan %d due to %s.' % (scan_number, str(err))
-        #     self.pop_one_button_dialog(error_msg)
-        #     return
 
         # update line edits
         self.ui.lineEdit_run.setText(str(scan_number))

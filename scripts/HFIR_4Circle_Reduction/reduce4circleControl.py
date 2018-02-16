@@ -413,7 +413,6 @@ class CWSCDReductionControl(object):
         check_int_type(scan_no, 'Scan number')
         check_int_type(pt_no, 'Pt number')
 
-
         loaded = (exp_no, scan_no, pt_no) in self._myRawDataWSDict
         if loaded:
             curr_roi = self._myRawDataMasked[(exp_no, scan_no, pt_no)]
@@ -1160,13 +1159,6 @@ class CWSCDReductionControl(object):
         """
         return self._workDir
 
-    def get_working_directory(self):
-        """
-        get working directory
-        :return:
-        """
-        return self._workDir
-
     def group_workspaces(self, exp_number, group_name):
         """
 
@@ -1287,7 +1279,6 @@ class CWSCDReductionControl(object):
             has = False
 
         return has
-
 
     def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
         """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
@@ -2157,7 +2148,7 @@ class CWSCDReductionControl(object):
         :return:
         """
         assert isinstance(roi_name, str), 'ROI name {0} must be an integer but not a {1}' \
-                                         ''.format(roi_name, type(roi_name))
+                                          ''.format(roi_name, type(roi_name))
         assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2
         assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2
 
