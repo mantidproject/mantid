@@ -253,7 +253,7 @@ if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
        https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
   status=$(echo ${status} | sed -e 's/^ *//' -e 's/ *$//')
-  if [[ -z $status ]]; then
+  if [[ -z $status ]] || [[ ${status} == "Build successfully submitted." ]]; then
     exit 0
   else
     echo "$status"
