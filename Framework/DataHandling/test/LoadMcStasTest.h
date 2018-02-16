@@ -71,12 +71,7 @@ public:
     MatrixWorkspace_sptr outputItem1 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "EventData" + postfix);
-    TS_ASSERT_EQUALS(outputItem1->getNumberHistograms(), 8192);
-    auto sum_total = 0.0;
-    for (size_t i = 0; i < outputItem1->getNumberHistograms(); i++)
-      sum_total += outputItem1->y(i)[0];
-    sum_total *= 1.0e22;
-    TS_ASSERT_DELTA(sum_total, 107163.7851, 0.0001);
+    const auto sum_total = extractSumAndTest(outputItem1, 107163.7851);
     //
     //
     MatrixWorkspace_sptr outputItem2 =
@@ -109,29 +104,28 @@ public:
     MatrixWorkspace_sptr outputItem6 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "k01_events_dat_list_p_x_y_n_id_t" + postfix);
-    TS_ASSERT_EQUALS(outputItem6->getNumberHistograms(), 8192);
-    auto sum_single = 0.0;
-    for (size_t i = 0; i < outputItem6->getNumberHistograms(); i++)
-      sum_single += outputItem6->y(i)[0];
-    sum_single *= 1.0e22;
-    TS_ASSERT_DELTA(sum_single, 107141.3295, 0.0001);
+    const auto sum_single = extractSumAndTest(outputItem6, 107141.3295);
     //
     //
     MatrixWorkspace_sptr outputItem7 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "k02_events_dat_list_p_x_y_n_id_t" + postfix);
-    TS_ASSERT_EQUALS(outputItem7->getNumberHistograms(), 8192);
-    auto sum_multiple = 0.0;
-    for (size_t i = 0; i < outputItem7->getNumberHistograms(); i++)
-      sum_multiple += outputItem7->y(i)[0];
-    sum_multiple *= 1.0e22;
-    TS_ASSERT_DELTA(sum_multiple, 22.4558, 0.0001);
+    const auto sum_multiple = extractSumAndTest(outputItem7, 22.4558);
 
     TS_ASSERT_DELTA(sum_total, (sum_single + sum_multiple), 0.0001);
-
-  } // testExec()
+  }
 
 private:
+  double extractSumAndTest(MatrixWorkspace_sptr workspace, const double &expectedSum) {
+    TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 8192);
+    auto sum = 0.0;
+    for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
+      sum += workspace->y(i)[0];
+    sum *= 1.0e22;
+    TS_ASSERT_DELTA(sum, expectedSum, 0.0001);
+    return sum;
+  }
+
   LoadMcStas algToBeTested;
   std::string inputFile;
   std::string outputSpace;
