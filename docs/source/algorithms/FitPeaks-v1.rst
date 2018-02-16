@@ -317,12 +317,12 @@ Usage
    ws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction="name=LinearBackground, \
       A0=0.3;name=Gaussian, PeakCentre=5, Height=10, Sigma=0.7", NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
 
-   table = FindPeaks(InputWorkspace='ws', FWHM='20')
+   table = FitPeaks(InputWorkspace='ws', FWHM='20')
 
    row = table.row(0)
 
    #print row
-   print "Peak 1 {Centre: %.3f, width: %.3f, height: %.3f }" % ( row["centre"],  row["width"], row["height"])
+   print ("Peak 1 {Centre: %.3f, width: %.3f, height: %.3f }" % ( row["centre"],  row["width"], row["height"]))
 
 
 Output:
@@ -332,14 +332,59 @@ Output:
    Peak 1 {Centre: 5.050, width: 1.648, height: 10.000 }
 
 
-**Example - Find multiple peaks with uniform positions among all spectra:**
+**Example - Fit peaks on high background (vanadium):**
+
+.. testcode:: ExFitVanadiumPeaks
+
+    # load a 4 spectra workspace
+    ws = Load("PG3_733.nxs")
+
+    # all peaks test
+    van_peak_centers = "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401"
+    FitPeaks(InputWorkspace=ws, StartWorkspaceIndex=0, StopWorkspaceIndex=3,PeakCenters=van_peak_centers,
+               FitFromRight=True,HighBackground=True,
+               PeakWidthPercent=0.016,
+               OutputWorkspace='PG3_733_peak_positions',OutputPeakParametersWorkspace='PG3_733_peak_params',
+               FittedPeaksWorkspace='PG3_733_stripped')
+    
+    print ('Hello world!')
+
+Output:
 
 
-**Example - Find multiple peaks with various positions among all sepctra:**
+.. testoutput::  ExFitVanadiumPeaks
+
+    Hello world!
 
 
-**Example - Find multiple peaks in partial spectra with various positions among those spectra:**
+**Example - Fit back-to-back exponential peaks (Vulcan diamond):**
 
+.. testcode:: ExFitVulcanPeaks
+
+    # load data
+    Load(Filename="vulcan_diamond.nxs", OutputWorkspace="diamond_3peaks")
+    
+    FitPeaks(InputWorkspace="diamond_3peaks", StartWorkspaceIndex=0, StopWorkspaceIndex=5,
+       PeakCenters="0.6867, 0.728299, 0.89198, 1.0758",
+       # PeakCenters="0.89198, 1.0758",
+       PeakFunction="BackToBackExponential", BackgroundType="Linear",
+       FitWindowBoundaryList="0.67, 0.709, 0.71, 0.76, 0.87, 0.92, 1.05, 1.1",  
+       # FitWindowBoundaryList="0.87, 0.92, 1.05, 1.1",  
+       PeakParameterNames="I, A, B, X0, S",
+       PeakParameterValues="2.5e+06, 5400, 1700, 1.07, 0.000355",
+       FitFromRight=True,
+       HighBackground=False,
+       OutputWorkspace="diamond_peaks_centers",
+       OutputPeakParametersWorkspace="PeakParametersWS2",
+       FittedPeaksWorkspace="FittedPeaksWS2")
+    
+    print ('Hello world!')
+
+Output:
+
+.. testoutput:: ExFitVulcanPeaks
+
+    Hello world!
 
 .. categories::
 

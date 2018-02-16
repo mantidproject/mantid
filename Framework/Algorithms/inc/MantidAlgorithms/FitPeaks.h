@@ -83,14 +83,13 @@ private:
                    std::vector<double> *peak_chi2_vec);
 
   /// fit background
-  bool FitBackground(API::IAlgorithm_sptr md_fitter, const size_t &ws_index,
+  bool FitBackground(const size_t &ws_index,
                      const std::pair<double, double> &fit_window,
                      const double &expected_peak_pos,
                      API::IBackgroundFunction_sptr bkgd_func);
 
   // Peak fitting suite
   double FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
-                           API::IAlgorithm_sptr bkgd_fitter,
                            const double &expected_peak_center,
                            const std::pair<double, double> &fitwindow,
                            const bool &high, const bool &observe_peak_width,
@@ -105,18 +104,19 @@ private:
                        double xmin, double xmax, bool observe_peak_width,
                        bool estimate_background);
 
-  double FitFunctionMD(API::IAlgorithm_sptr fit,
-                       API::IFunction_sptr fit_function,
+  double FitFunctionMD(API::IFunction_sptr fit_function,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
                        std::vector<double> &vec_xmin,
                        std::vector<double> &vec_xmax);
 
   /// fit a single peak with high background
-  double FitFunctionHighBackground(
-      API::IAlgorithm_sptr fit, API::IAlgorithm_sptr bkgd_fitter,
-      const std::pair<double, double> &fit_window, const size_t &ws_index,
-      const double &expected_peak_center, API::IPeakFunction_sptr peakfunction,
-      API::IBackgroundFunction_sptr bkgdfunc, bool observe_peak_width);
+  double FitFunctionHighBackground(API::IAlgorithm_sptr fit,
+                                   const std::pair<double, double> &fit_window,
+                                   const size_t &ws_index,
+                                   const double &expected_peak_center,
+                                   API::IPeakFunction_sptr peakfunction,
+                                   API::IBackgroundFunction_sptr bkgdfunc,
+                                   bool observe_peak_width);
 
   /// get vector X, Y and E in a given range
   void GetRangeData(size_t iws, const std::pair<double, double> &fit_window,
