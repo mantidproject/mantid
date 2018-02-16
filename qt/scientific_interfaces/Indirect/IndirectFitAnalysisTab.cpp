@@ -87,18 +87,39 @@ void revertChanges(Map &map, const Changes &changes) {
   }
 }
 
-/*
- * Sets the value of each parameter, in a clone of the specified function, to 0.
- *
- * @param function  The function to create a clone of.
- * @return          A clone of the specified function, whose parameter values
- *                  are all set to 0.
+/**
+ * @return  True if the first function precedes the second when ordering by
+ *          name.
  */
-IFunction_sptr zeroFunction(IFunction_const_sptr function) {
-  auto functionClone = function->clone();
-  for (const auto &parameter : functionClone->getParameterNames())
-    functionClone->setParameter(parameter, 0.0);
-  return functionClone;
+bool functionNameComparator(IFunction_const_sptr first,
+                            IFunction_const_sptr second) {
+  first->name() < second->name();
+}
+
+/*
+ * Checks whether the specified composite functions have the same composition.
+ *
+ * @param composite1 Function to compare.
+ * @param composite2 Function to compare.
+ * @return           True if the specified functions have the same composition,
+ *                   False otherwise.
+ */
+bool equivalentComposites(CompositeFunction_const_sptr composite1,
+                          CompositeFunction_const_sptr composite2) {
+  auto functions1 = composite1->createEquivalentFunctions();
+  auto functions2 = composite2->createEquivalentFunctions();
+  std::sort(functions1.begin(), functions1.end(), functionNameComparator);
+  std::sort(functions2.begin(), functions2.end(), functionNameComparator);
+
+  if (functions1.size() != functions2.size()) {
+    return false;
+  } else {
+    for (auto i = 0u; i < functions1.size(); ++i) {
+      if (!equivalentFunctions(functions1[i], functions2[i]))
+        return false;
+    }
+    return true;
+  }
 }
 
 /*
@@ -111,10 +132,14 @@ IFunction_sptr zeroFunction(IFunction_const_sptr function) {
  */
 bool equivalentFunctions(IFunction_const_sptr func1,
                          IFunction_const_sptr func2) {
-  if (!func1 || !func2)
-    return false;
+  const auto composite1 = boost::dynamic_pointer_cast<CompositeFunction>(func1);
+  const auto composite2 = boost::dynamic_pointer_cast<CompositeFunction>(func2);
 
-  return zeroFunction(func1)->asString() == zeroFunction(func2)->asString();
+  if (composite1 && composite2)
+    return equivalentComposites(composite1, composite2);
+  else if (!(composite1 || composite2))
+    return func1->name() == func2->name();
+  return false;
 }
 } // namespace
 
