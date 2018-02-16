@@ -153,10 +153,12 @@ std::string ReflMainWindowPresenter::getTimeSlicingType(int group) const {
   return m_eventPresenter->getTimeSlicingType(group);
 }
 
-/** Returns values passed for 'Transmission run(s)'
+/** Returns default values specified for 'Transmission run(s)' for the
+* given angle
 *
 * @param group :: Index of the group in 'Settings' tab from which to get the
 *values
+* @param angle :: the run angle to look up transmission runs for
 * @return :: Values passed for 'Transmission run(s)'
 */
 std::string

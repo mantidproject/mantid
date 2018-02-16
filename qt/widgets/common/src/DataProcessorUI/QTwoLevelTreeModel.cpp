@@ -204,7 +204,6 @@ QVariant QTwoLevelTreeModel::headerData(int section,
 /** Returns row data struct (which includes metadata about the row)
  * for specified index
 * @param index : The index
-* @param role : The role
 * @return : The data associated with the given index as a RowData class
 */
 RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) {

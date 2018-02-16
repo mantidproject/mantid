@@ -284,7 +284,6 @@ void GenericDataProcessorPresenter::acceptTreeManager(TreeManager *manager) {
 /**
 Returns the name of the reduced workspace for a given row
 @param data :: [input] The data for this row
-@param prefix : A prefix to be appended to the generated ws name
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
@@ -840,8 +839,6 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
 }
 
 /** Perform preprocessing on algorithm property values where applicable
- * @param options : the algorithm properties as a map of property name
- * to value
  * @param data : the data in the row
 */
 void GenericDataProcessorPresenter::preprocessOptionValues(RowData_sptr data) {

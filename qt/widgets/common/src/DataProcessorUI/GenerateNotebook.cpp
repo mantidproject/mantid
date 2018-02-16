@@ -42,7 +42,6 @@ corresponding pre-processing algorithms
 @param postprocessingStep : the post-processing algorithm and options for the
 post-processing algorithms specified via hinting line edits in the view
 @param preprocessingOptionsMap : options passed to the preprocessing algorithm.
-@param processingOptions : options to the reduction algorithm specified via
 the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
@@ -147,8 +146,7 @@ QString titleString(const QString &wsName) {
 
 /**
   Create string of python code to call plots() with the required workspaces
-  @param processingOptionsPerRow : the properties that were used in the
-  reduction for each row
+  @param groupData : the group of rows to plot
   @param stitched_wsStr : string containing the name of the stitched
   (post-processed workspace)
   @param processor : the data processor algorithm
@@ -276,7 +274,6 @@ QString tableString(const TreeData &treeData, const WhiteList &whitelist) {
   Create string of python code to post-process rows in the same group
   @param rowMap : map where keys are row indices and values are vectors
   containing the data
-  @param whitelist : the whitelist
   @param processor : the reduction algorithm
   @param postprocessingStep : the algorithm responsible for post-processing
   groups and the options specified for post-processing via HintingLineEdit.
