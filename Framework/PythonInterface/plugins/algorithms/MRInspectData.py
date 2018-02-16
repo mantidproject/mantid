@@ -129,6 +129,7 @@ class MRInspectData(PythonAlgorithm):
                                       LogText=str(data_info.roi_background[1]),
                                       LogType='Number', LogUnit='pixel')
 
+
 def _as_ints(a): return [int(a[0]), int(a[1])]
 
 
