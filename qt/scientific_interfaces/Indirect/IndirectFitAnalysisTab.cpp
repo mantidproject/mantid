@@ -107,10 +107,10 @@ bool functionNameComparator(IFunction_const_sptr first,
  * @return           True if the specified functions have the same composition,
  *                   False otherwise.
  */
-bool equivalentComposites(CompositeFunction_const_sptr composite1,
-                          CompositeFunction_const_sptr composite2) {
-  auto functions1 = composite1->createEquivalentFunctions();
-  auto functions2 = composite2->createEquivalentFunctions();
+bool equivalentComposites(const CompositeFunction &composite1,
+                          const CompositeFunction &composite2) {
+  auto functions1 = composite1.createEquivalentFunctions();
+  auto functions2 = composite2.createEquivalentFunctions();
   std::sort(functions1.begin(), functions1.end(), functionNameComparator);
   std::sort(functions2.begin(), functions2.end(), functionNameComparator);
 
@@ -141,7 +141,7 @@ bool equivalentFunctions(IFunction_const_sptr func1,
       boost::dynamic_pointer_cast<const CompositeFunction>(func2);
 
   if (composite1 && composite2)
-    return equivalentComposites(composite1, composite2);
+    return equivalentComposites(*composite1, *composite2);
   else if (!(composite1 || composite2))
     return func1->name() == func2->name();
   return false;
