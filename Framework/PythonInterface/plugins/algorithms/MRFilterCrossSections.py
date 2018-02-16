@@ -154,13 +154,16 @@ class MRFilterCrossSections(PythonAlgorithm):
         cross_sections = list()
 
         for entry in ['Off_Off', 'On_Off', 'Off_On', 'On_On']:
-            ws_name = "%s_%s" % (ws_base_name, entry)
-            ws = api.LoadEventNexus(Filename=file_path,
-                                    NXentryName='entry-%s' % entry,
-                                    OutputWorkspace=ws_name)
-            api.AddSampleLog(Workspace=ws, LogName='cross_section_id',
-                             LogText=entry)
-            cross_sections.append(ws_name)
+            try:
+                ws_name = "%s_%s" % (ws_base_name, entry)
+                ws = api.LoadEventNexus(Filename=file_path,
+                                        NXentryName='entry-%s' % entry,
+                                        OutputWorkspace=ws_name)
+                api.AddSampleLog(Workspace=ws, LogName='cross_section_id',
+                                 LogText=entry)
+                cross_sections.append(ws_name)
+            except:
+                api.logger.information("Could not load %s from legacy data file" % entry)
 
         return cross_sections
 
