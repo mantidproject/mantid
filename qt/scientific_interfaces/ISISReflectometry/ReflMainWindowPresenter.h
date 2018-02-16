@@ -94,6 +94,7 @@ private:
   void pauseReduction() const;
   /// Resumes reduction in the Runs Tab
   void resumeReduction() const;
+  void showHelp();
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'

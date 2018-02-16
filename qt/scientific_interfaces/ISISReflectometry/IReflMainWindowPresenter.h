@@ -40,7 +40,11 @@ public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
 
-  enum class Flag { ConfirmReductionPausedFlag, ConfirmReductionResumedFlag };
+  enum class Flag {
+    ConfirmReductionPausedFlag,
+    ConfirmReductionResumedFlag,
+    HelpPressed
+  };
   virtual void notify(Flag flag) = 0;
 
   /// Pre-processing

@@ -4,6 +4,7 @@
 #include "DllConfig.h"
 #include <map>
 #include <vector>
+#include "MantidAPI/Algorithm.h"
 #include "ExperimentOptionDefaults.h"
 #include "InstrumentOptionDefaults.h"
 #include "GetInstrumentParameter.h"

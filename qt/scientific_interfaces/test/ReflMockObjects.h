@@ -4,6 +4,7 @@
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "../ISISReflectometry/IReflEventPresenter.h"
 #include "../ISISReflectometry/IReflEventTabPresenter.h"
 #include "../ISISReflectometry/IReflEventView.h"
@@ -216,6 +217,9 @@ public:
   MOCK_METHOD1(acceptTabPresenter, void(IReflSettingsTabPresenter *));
   MOCK_METHOD1(setInstrumentName, void(const std::string &));
   void notify(IReflSettingsPresenter::Flag flag) override { UNUSED_ARG(flag); }
+  IAlgorithm_sptr createReductionAlg() override {
+    return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  }
   ~MockSettingsPresenter() override{};
 };
 
