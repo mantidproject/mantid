@@ -65,6 +65,7 @@ Core Functionality
 - Added new classes ``ConfigObserver`` for listening for changes to any configuration property and ``ConfigPropertyObserver`` for listening to changes to an individual config property of interest.
 - Fixed the calculation of scattering length and scattering length squared for :py:obj:`Material <mantid.kernel.Material>`
 - Fixed the behaviour of ``UpdateInstrumentDefinitions.OnStartup`` in the :ref:`properties file <Properties File>`. It was not being used correctly for using the updated ``Facilities.xml`` file.
+- ``MultiFileProperty`` now accepts complex summation ranges for run numbers, such as ``111-113+115`` and ``111-115+123-132``.
 
 Performance
 -----------
