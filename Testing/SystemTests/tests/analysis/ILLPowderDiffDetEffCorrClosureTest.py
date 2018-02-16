@@ -26,7 +26,7 @@ class ILLPowderDiffDetEffCorrClosureTest(stresstesting.MantidStressTest):
 
     def tearDown(self):
         mtd.clear()
-        os.remove(self._m_tmp_file)
+        remove(self._m_tmp_file)
 
     def runTest(self):
 
