@@ -1401,6 +1401,10 @@ bool FitPeaks::FitBackground(const size_t &ws_index,
                 "domain function!");
   }
 
+  g_log.notice() << "[DB...BAT] ws-index " << ws_index
+                 << ", fit window (index): " << start_index << ", " << stop_index
+                 << ". background function: " << bkgd_func->asString() << "\n";
+
   return false;
 }
 
@@ -1519,8 +1523,8 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
 
   fit->executeAsChildAlg();
 
-  g_log.debug() << "[E1202] FitSingleDomain After fitting, Fit function: "
-                << fit->asString() << "\n";
+  g_log.notice() << "[E1202] FitSingleDomain After fitting, Fit function: "
+                 << fit->asString() << "\n";
 
   if (!fit->isExecuted()) {
     g_log.error("Fitting peak SD (single domain) failed to execute.");
