@@ -96,7 +96,7 @@ void revertChanges(Map &map, const Changes &changes) {
  */
 bool functionNameComparator(IFunction_const_sptr first,
                             IFunction_const_sptr second) {
-  first->name() < second->name();
+  return first->name() < second->name();
 }
 
 /*
