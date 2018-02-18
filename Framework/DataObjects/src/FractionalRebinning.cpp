@@ -21,13 +21,13 @@ namespace FractionalRebinning {
 
 const double POS_TOLERANCE = 1.e-10;
 
-enum QuadrilateralType { Rectangle, TrapezoidX, TrapezoidY, General };
+enum class QuadrilateralType { Rectangle, TrapezoidX, TrapezoidY, General };
 
 /**
  * Determine the (axis-aligned) quadrilateral type of the input polygon
  * @param inputQ Input polygon (assumes vertices are in order: ll, ul, ur, lr)
  */
-QuadrilateralType getQuadrilateralType(const Quadrilateral inputQ) {
+QuadrilateralType getQuadrilateralType(const Quadrilateral &inputQ) {
   const bool inputQHasXParallel =
       fabs(inputQ[0].Y() - inputQ[3].Y()) < POS_TOLERANCE &&
       fabs(inputQ[1].Y() - inputQ[2].Y()) < POS_TOLERANCE;
@@ -35,13 +35,13 @@ QuadrilateralType getQuadrilateralType(const Quadrilateral inputQ) {
       fabs(inputQ[0].X() - inputQ[1].X()) < POS_TOLERANCE &&
       fabs(inputQ[2].X() - inputQ[3].X()) < POS_TOLERANCE;
   if (inputQHasXParallel && inputQHasYParallel) {
-    return Rectangle;
+    return QuadrilateralType::Rectangle;
   } else if (inputQHasXParallel) {
-    return TrapezoidX;
+    return QuadrilateralType::TrapezoidX;
   } else if (inputQHasYParallel) {
-    return TrapezoidY;
+    return QuadrilateralType::TrapezoidY;
   } else {
-    return General;
+    return QuadrilateralType::General;
   }
 }
 
@@ -58,11 +58,10 @@ QuadrilateralType getQuadrilateralType(const Quadrilateral inputQ) {
  * @param x_end An output giving the end index in the dX direction
  * @return True if an intersection is possible
  */
-bool getIntersectionRegion(MatrixWorkspace_const_sptr outputWS,
+bool getIntersectionRegion(const std::vector<double> &xAxis,
                            const std::vector<double> &verticalAxis,
                            const Quadrilateral &inputQ, size_t &qstart,
                            size_t &qend, size_t &x_start, size_t &x_end) {
-  const auto &xAxis = outputWS->x(0);
   const double xn_lo(inputQ.minX()), xn_hi(inputQ.maxX());
   const double yn_lo(inputQ.minY()), yn_hi(inputQ.maxY());
 
@@ -109,12 +108,12 @@ bool getIntersectionRegion(MatrixWorkspace_const_sptr outputWS,
  * @param areaInfo Output vector of indices and areas of overlapping bins
  */
 void calcRectangleIntersections(
-    MatrixWorkspace_const_sptr outputWS, const std::vector<double> &yAxis,
+    const std::vector<double> &xAxis, const std::vector<double> &yAxis,
     const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
     const size_t x_start, const size_t x_end,
     std::vector<std::tuple<size_t, size_t, double>> &areaInfo) {
-  const auto &xAxis = outputWS->x(0);
   std::vector<double> width;
+  width.reserve(x_end - x_start);
   for (size_t xi = x_start; xi < x_end; ++xi) {
     const double x0 = (xi == x_start) ? inputQ.minX() : xAxis[xi];
     const double x1 = (xi == x_end - 1) ? inputQ.maxX() : xAxis[xi + 1];
@@ -159,7 +158,7 @@ double polyArea(T &v1, T &v2, Ts &&... vertices) {
  * @param areaInfo Output vector of indices and areas of overlapping bins
  */
 void calcTrapezoidYIntersections(
-    MatrixWorkspace_const_sptr outputWS, const std::vector<double> &yAxis,
+    const std::vector<double> &xAxis, const std::vector<double> &yAxis,
     const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
     const size_t x_start, const size_t x_end,
     std::vector<std::tuple<size_t, size_t, double>> &areaInfo) {
@@ -170,8 +169,6 @@ void calcTrapezoidYIntersections(
   //    lies within the bin. Construct an overlap polygon depending on which
   //    vertices are in. The polygon will include these vertices of inputQ
   //    and left/right points previously calc.
-  const auto &xAxis = outputWS->x(0);
-
   V2D ll = inputQ[0], ul = inputQ[1], ur = inputQ[2], lr = inputQ[3];
   const double mBot = (lr.Y() - ll.Y()) / (lr.X() - ll.X());
   const double cBot = ll.Y() - mBot * ll.X();
@@ -449,11 +446,10 @@ void calcTrapezoidYIntersections(
  * @param areaInfo Output vector of indices and areas of overlapping bins
  */
 void calcGeneralIntersections(
-    MatrixWorkspace_const_sptr outputWS, const std::vector<double> &yAxis,
+    const std::vector<double> &xAxis, const std::vector<double> &yAxis,
     const Quadrilateral &inputQ, const size_t qstart, const size_t qend,
     const size_t x_start, const size_t x_end,
     std::vector<std::tuple<size_t, size_t, double>> &areaInfo) {
-  const auto &xAxis = outputWS->x(0);
   ConvexPolygon intersectOverlap;
   for (size_t yi = qstart; yi < qend; ++yi) {
     const double vlo = yAxis[yi];
@@ -517,11 +513,11 @@ void rebinToOutput(const Quadrilateral &inputQ,
                    MatrixWorkspace_const_sptr inputWS, const size_t i,
                    const size_t j, MatrixWorkspace_sptr outputWS,
                    const std::vector<double> &verticalAxis) {
-  const auto &X = outputWS->x(0);
+  const auto &X = outputWS->x(0).rawData();
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
-  if (!getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend,
-                             x_start, x_end))
+  if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start,
+                             x_end))
     return;
 
   const auto &inY = inputWS->y(i);
@@ -588,11 +584,11 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   if (std::isnan(signal))
     return;
 
-  const auto &X = outputWS->x(0);
+  const auto &X = outputWS->x(0).rawData();
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
-  if (!getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend,
-                             x_start, x_end))
+  if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start,
+                             x_end))
     return;
 
   // If the input workspace was normalized by the bin width, we need to
@@ -611,18 +607,18 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   std::vector<std::tuple<size_t, size_t, double>> areaInfo;
   const double inputQArea = inputQ.area();
   const QuadrilateralType inputQType = getQuadrilateralType(inputQ);
-  if (inputQType == Rectangle) {
-    calcRectangleIntersections(outputWS, verticalAxis, inputQ, qstart, qend,
-                               x_start, x_end, areaInfo);
-  } else if (inputQType == TrapezoidY) {
-    calcTrapezoidYIntersections(outputWS, verticalAxis, inputQ, qstart, qend,
-                                x_start, x_end, areaInfo);
+  if (inputQType == QuadrilateralType::Rectangle) {
+    calcRectangleIntersections(X, verticalAxis, inputQ, qstart, qend, x_start,
+                               x_end, areaInfo);
+  } else if (inputQType == QuadrilateralType::TrapezoidY) {
+    calcTrapezoidYIntersections(X, verticalAxis, inputQ, qstart, qend, x_start,
+                                x_end, areaInfo);
   } else {
-    calcGeneralIntersections(outputWS, verticalAxis, inputQ, qstart, qend,
-                             x_start, x_end, areaInfo);
+    calcGeneralIntersections(X, verticalAxis, inputQ, qstart, qend, x_start,
+                             x_end, areaInfo);
   }
 
-  for (auto ai : areaInfo) {
+  for (const auto &ai : areaInfo) {
     const size_t xi = std::get<0>(ai);
     const size_t yi = std::get<1>(ai);
     const double weight = std::get<2>(ai) / inputQArea;
