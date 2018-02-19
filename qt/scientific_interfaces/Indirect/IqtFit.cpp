@@ -1,6 +1,8 @@
 #include "IqtFit.h"
 
 #include "../General/UserInputValidator.h"
+
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -267,22 +269,18 @@ void IqtFit::updatePlotOptions() {
 
 void IqtFit::enablePlotResult() {
   m_uiForm->pbPlot->setEnabled(true);
-  m_uiForm->pbPlot->blockSignals(false);
 }
 
 void IqtFit::disablePlotResult() {
   m_uiForm->pbPlot->setEnabled(false);
-  m_uiForm->pbPlot->blockSignals(true);
 }
 
 void IqtFit::enableSaveResult() {
   m_uiForm->pbSave->setEnabled(true);
-  m_uiForm->pbSave->blockSignals(false);
 }
 
 void IqtFit::disableSaveResult() {
   m_uiForm->pbSave->setEnabled(false);
-  m_uiForm->pbSave->blockSignals(true);
 }
 
 /**
@@ -379,9 +377,8 @@ void IqtFit::parameterUpdated(const Mantid::API::IFunction *function) {
   if (background() && function->asString() == background()->asString()) {
     auto rangeSelector =
         m_uiForm->ppPlotTop->getRangeSelector("IqtFitBackRange");
-    rangeSelector->blockSignals(true);
+    MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
     rangeSelector->setMinimum(function->getParameter("A0"));
-    rangeSelector->blockSignals(false);
   }
 }
 
@@ -450,16 +447,14 @@ void IqtFit::specMaxChanged(int value) {
 
 void IqtFit::startXChanged(double startX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("IqtFitRange");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMinimum(startX);
-  rangeSelector->blockSignals(false);
 }
 
 void IqtFit::endXChanged(double endX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("IqtFitRange");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMaximum(endX);
-  rangeSelector->blockSignals(false);
 }
 
 void IqtFit::singleFit() {
@@ -469,12 +464,10 @@ void IqtFit::singleFit() {
 
 void IqtFit::disablePlotGuess() {
   m_uiForm->ckPlotGuess->setEnabled(false);
-  m_uiForm->ckPlotGuess->blockSignals(true);
 }
 
 void IqtFit::enablePlotGuess() {
   m_uiForm->ckPlotGuess->setEnabled(true);
-  m_uiForm->ckPlotGuess->blockSignals(false);
 }
 
 void IqtFit::addGuessPlot(MatrixWorkspace_sptr workspace) {

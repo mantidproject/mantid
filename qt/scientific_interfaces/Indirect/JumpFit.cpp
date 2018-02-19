@@ -7,6 +7,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidQtWidgets/Common/SignalBlocker.h"
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -183,7 +185,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
  * @param ws :: The workspace to search
  */
 void JumpFit::findAllWidths(MatrixWorkspace_const_sptr ws) {
-  m_uiForm->cbWidth->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm->cbWidth);
   m_uiForm->cbWidth->clear();
 
   auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
@@ -196,8 +198,6 @@ void JumpFit::findAllWidths(MatrixWorkspace_const_sptr ws) {
   } else {
     m_spectraList.clear();
   }
-
-  m_uiForm->cbWidth->blockSignals(false);
 }
 
 std::map<std::string, size_t> JumpFit::findAxisLabelsWithSubstrings(
@@ -234,26 +234,22 @@ void JumpFit::handleWidthChange(const QString &text) {
 
 void JumpFit::startXChanged(double startX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("JumpFitQ");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMinimum(startX);
-  rangeSelector->blockSignals(false);
 }
 
 void JumpFit::endXChanged(double endX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("JumpFitQ");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMaximum(endX);
-  rangeSelector->blockSignals(false);
 }
 
 void JumpFit::disablePlotGuess() {
   m_uiForm->ckPlotGuess->setEnabled(false);
-  m_uiForm->ckPlotGuess->blockSignals(true);
 }
 
 void JumpFit::enablePlotGuess() {
   m_uiForm->ckPlotGuess->setEnabled(true);
-  m_uiForm->ckPlotGuess->blockSignals(false);
 }
 
 /**
@@ -349,22 +345,18 @@ void JumpFit::updatePlotOptions() {}
 
 void JumpFit::enablePlotResult() {
   m_uiForm->pbPlot->setEnabled(true);
-  m_uiForm->pbPlot->blockSignals(false);
 }
 
 void JumpFit::disablePlotResult() {
   m_uiForm->pbPlot->setEnabled(false);
-  m_uiForm->pbPlot->blockSignals(true);
 }
 
 void JumpFit::enableSaveResult() {
   m_uiForm->pbSave->setEnabled(true);
-  m_uiForm->pbSave->blockSignals(false);
 }
 
 void JumpFit::disableSaveResult() {
   m_uiForm->pbSave->setEnabled(false);
-  m_uiForm->pbSave->blockSignals(true);
 }
 
 void JumpFit::addGuessPlot(MatrixWorkspace_sptr workspace) {

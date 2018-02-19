@@ -1,13 +1,9 @@
 #include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -32,13 +28,9 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/IPeakFunction.h"
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-
-#include <Poco/ActiveResult.h>
 
 #include <QAction>
 #include <QFormLayout>
@@ -48,7 +40,6 @@
 #include <QLabel>
 #include <QLayout>
 #include <QPushButton>
-#include <QSplitter>
 
 #include <QMenu>
 #include <QSignalMapper>
@@ -461,11 +452,10 @@ void IndirectFitPropertyBrowser::setBackgroundOptions(
  * model.
  */
 void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
-
   if (compositeFunction()->nFunctions() == 0)
     return;
 
-  blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(this);
   for (auto &handlerProperty : m_orderedFunctionGroups) {
     auto &handlers = m_functionHandlers[handlerProperty];
 
@@ -479,7 +469,6 @@ void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
       }
     }
   }
-  blockSignals(false);
 }
 
 /**
@@ -786,14 +775,24 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
   if (!m_functionHandlers.contains(prop))
     m_functionHandlers.insert(prop, QVector<PropertyHandler *>());
 
-  blockSignals(true);
-  for (const auto &function : m_groupToFunctionList[groupName]) {
+  addCustomFunctions(prop, m_groupToFunctionList[groupName]);
+  emit functionChanged();
+}
+
+/**
+ * Adds the functions with the specified name. Displays the functions in the
+ * specified property.
+ *
+ * @param prop      The property in which to display the functions.
+ * @param functions The functions to add.
+ */
+void IndirectFitPropertyBrowser::addCustomFunctions(
+    QtProperty *prop, const std::vector<IFunction_sptr> &functions) {
+  MantidQt::API::SignalBlocker<QObject> blocker(this);
+  for (const auto &function : functions) {
     m_functionHandlers[prop] << addFunction(function->asString());
     m_customFunctionCount[function->name()] += 1;
   }
-  blockSignals(false);
-
-  emit functionChanged();
 }
 
 /**
@@ -840,21 +839,29 @@ void IndirectFitPropertyBrowser::updatePlotGuess() {
  */
 void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop,
                                                       bool emitSignals) {
-  blockSignals(true);
-  for (const auto &functionHandler : m_functionHandlers[prop]) {
-
-    if (functionHandler->parentHandler() != nullptr) {
-      FitPropertyBrowser::removeFunction(functionHandler);
-      m_customFunctionCount[functionHandler->function()->name()] -= 1;
-    }
-  }
-  blockSignals(false);
+  clearCustomFunctions(prop);
   m_functionHandlers[prop].clear();
 
   if (emitSignals) {
     emit removePlotSignal(getHandler());
     emit functionRemoved();
     emit functionChanged();
+  }
+}
+
+/**
+ * Clears all custom functions in the specified property.
+ *
+ * @param prop        The property to clear of custom functions.
+ */
+void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
+  MantidQt::API::SignalBlocker<QObject> blocker(this);
+  for (const auto &functionHandler : m_functionHandlers[prop]) {
+
+    if (functionHandler->parentHandler() != nullptr) {
+      FitPropertyBrowser::removeFunction(functionHandler);
+      m_customFunctionCount[functionHandler->function()->name()] -= 1;
+    }
   }
 }
 
@@ -968,7 +975,7 @@ void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
     if (m_boolManager->value(prop))
       addCustomFunctions(prop, propertyName);
     else
-      clearCustomFunctions(prop);
+      clearCustomFunctions(prop, true);
   } else if (m_customSettings.values().contains(prop)) {
     emit customBoolChanged(propertyName, m_boolManager->value(prop));
     emit customSettingChanged(prop);

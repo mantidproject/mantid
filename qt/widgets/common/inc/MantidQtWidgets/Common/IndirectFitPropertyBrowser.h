@@ -173,11 +173,13 @@ private:
       const std::vector<Mantid::API::IFunction_sptr> &functions);
 
   void addCustomFunctions(QtProperty *prop, const QString &groupName);
-
   void addCustomFunctions(QtProperty *prop, const QString &groupName,
                           const int &multiples);
+  void addCustomFunctions(QtProperty *prop,
+                          const std::vector<Mantid::API::IFunction_sptr> &functions);
 
-  void clearCustomFunctions(QtProperty *prop, bool emitSignals = true);
+  void clearCustomFunctions(QtProperty *prop, bool emitSignals);
+  void clearCustomFunctions(QtProperty *prop);
 
   QtProperty *
   createFunctionGroupProperty(const QString &groupName,

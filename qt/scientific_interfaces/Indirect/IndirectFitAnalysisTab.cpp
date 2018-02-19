@@ -41,8 +41,8 @@ void setAlgorithmProperty(IAlgorithm_sptr algorithm,
 
 /**
  * Combines the two maps of parameter values, by adding the values from
- * the second into the first, where the parameters (keys) are taken from
- * the first map, and the value doesn't already exist in the first map.
+ * the second into the first, replacing where a value for a given key
+ * already exists.
  *
  * @param parameterValues1  The first parameter values map to combine with.
  * @param parameterValues2  The second parameter values map to combine with.
@@ -52,19 +52,8 @@ template <typename Map>
 Map combineParameterValues(const Map &parameterValues1,
                            const Map &parameterValues2) {
   auto combinedValues = parameterValues1;
-
-  for (const auto &index : parameterValues1.keys()) {
-    if (parameterValues2.contains(index)) {
-      const auto &values1 = parameterValues1[index];
-      const auto &values2 = parameterValues2[index];
-
-      for (const auto &parameterName : values2.keys()) {
-        if (!values1.contains(parameterName))
-          combinedValues[index][parameterName] = values2[parameterName];
-      }
-    }
-  }
-
+  for (const auto &index : parameterValues2.keys())
+    combinedValues[index] = parameterValues2[index];
   return combinedValues;
 }
 
@@ -754,7 +743,7 @@ void IndirectFitAnalysisTab::updateParametersFromTable(
 
   if (m_appendResults)
     m_parameterValues =
-        combineParameterValues(parameterValues, m_parameterValues);
+        combineParameterValues(m_parameterValues, parameterValues);
   else
     m_parameterValues = parameterValues;
 
@@ -986,7 +975,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
@@ -1037,8 +1026,13 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
 
-  m_fitFunction = boost::dynamic_pointer_cast<CompositeFunction>(
-      m_fitPropertyBrowser->compositeFunction()->clone());
+  auto composite = m_fitPropertyBrowser->compositeFunction();
+  m_appendResults = false;
+  if (m_fitFunction)
+    m_appendResults = equivalentComposites(*m_fitFunction, *composite);
+
+  m_fitFunction =
+      boost::dynamic_pointer_cast<CompositeFunction>(composite->clone());
   m_previousModelSelected = true;
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
