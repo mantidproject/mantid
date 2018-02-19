@@ -1417,15 +1417,15 @@ bool FitPeaks::FitBackground(const size_t &ws_index,
 }
 
 //----------------------------------------------------------------------------------------------
-/**
+/** Fit an individual peak
  * @brief FitPeaks::FitIndividualPeak
  * @param wi
  * @param fitter
- * @param bkgd_fitter :: child algorithm 'Fit' to fit pure background
  * @param expected_peak_center
  * @param fitwindow
  * @param high
- * @param observe_peak_width :: flag to estimate peak width (by observation) or
+ * @param high_background_function
+ * @param observe_peak_width:: flag to estimate peak width (by observation) or
  * not
  * @param peakfunction
  * @param bkgdfunc
@@ -1559,7 +1559,6 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
 //----------------------------------------------------------------------------------------------
 /**
  * @brief FitPeaks::FitFunctionMD
- * @param fit
  * @param fit_function :: function to fit
  * @param dataws :: matrix workspace to fit with
  * @param wsindex ::  workspace index of the spectrum in matrix workspace
@@ -1639,13 +1638,13 @@ double FitPeaks::FitFunctionMD(API::IFunction_sptr fit_function,
 /** Fit peak with high background
  * @brief FitPeaks::FitFunctionHighBackground
  * @param fit
- * @param bkgd_fitter
  * @param fit_window
  * @param ws_index
  * @param expected_peak_center
+ * @param observe_peak_width
  * @param peakfunction
  * @param bkgdfunc
- * @param observe_peak_width
+ * @param high_bkgd_function
  * @return
  */
 double FitPeaks::FitFunctionHighBackground(
