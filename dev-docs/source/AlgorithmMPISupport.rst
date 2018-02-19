@@ -253,7 +253,6 @@ MPI support for an algorithm is implemented by means of a couple of virtual meth
   protected:
     virtual void execDistributed();
     virtual void execMasterOnly();
-    virtual void execNonMaster();
     virtual Parallel::ExecutionMode getParallelExecutionMode(
         const std::map<std::string, Parallel::StorageMode> &storageModes) const;
     // ...
@@ -339,23 +338,15 @@ Master-only execution
 ---------------------
 
 Master-only execution is handled by ``Algorithm::execMasterOnly()``.
-By default this simply calls ``Algorithm::exec()`` on rank 0 and ``Algorithm::execNonMaster()`` on all other ranks.
+By default this simply calls ``Algorithm::exec()`` on rank 0 and does nothing on all other ranks.
 
 To support running existing Python scripts without significant modification, and to be able to automatically determine execution modes based on input workspaces, workspaces with storage mode ``StorageMode::MasterOnly`` also exist on the non-master ranks.
-The default implementation of ``Algorithm::execNonMaster()`` creates an **uninitialized** (in the case of ``MatrixWorkspace``) workspace of the same type as the input workspace.
-If ``Algorithm::execNonMaster()`` is overridden, any workspaces that are created shall also be uninitialized and should have storage mode ``StorageMode::MasterOnly``.
 
-Given that the workspace on non-master ranks are not initialized, no methods of the workspace should be called, apart from ``Workspace::storageMode()``.
-Validators on the non-master ranks are thus also disabled.
-
-A typical implementation could look as follows:
-
-.. code-block:: c++
-
-  void MyAlg::execNonMaster() {
-    setProperty("OutputWorkspace", Kernel::make_unique<Workspace2D>(
-                                       Parallel::StorageMode::MasterOnly));
-  }
+Given that no algorithm execution happens on non-master ranks, workspaces with ``StorageMode::MasterOnly`` do not exist on non-master ranks.
+This implies:
+- No methods of such a workspace can be called, except when wrapped in an algorithm that has ``ExecutionMode::MasterOnly``.
+- Retrieving such a workspace from the AnalysisDataService is not possible.
+- Algorithms that transform a workspace into a workspace with ``StorageMode::MasterOnly`` such as ``DiffractionFocussing2`` should delete the input workspace when using in-place operation.
 
 
 Setting spectrum numbers
