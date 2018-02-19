@@ -394,6 +394,9 @@ class SANSWLNormCorrection(PythonAlgorithm):
             return None
 
     def _fitting(self, input_ws_reference_name):
+        '''
+        This is the main fitting routine
+        '''
 
         progress = Progress(
             self, start=0.0, end=1.0, nreports=len(self.data.items()))
@@ -560,6 +563,10 @@ class SANSWLNormCorrection(PythonAlgorithm):
         if self.parser is None:
             self.parser = ConfigParser()
             self.parser.optionxform = lambda option: option # case sensitive
+        # Get all the algorithm properties in the file
+        props = self.getProperties()
+        for p in props:
+            self.parser.set('DEFAULT', p.name, str(p.value))
 
         self.parser.set('DEFAULT', 'KList',
                         ",".join(str(e) for e in ws_table.column("K")))
