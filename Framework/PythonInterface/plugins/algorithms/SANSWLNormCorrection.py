@@ -160,7 +160,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
         issues = dict()
 
-        if self.getProperty('InputWorkspaces').value is not None:
+        if self.getProperty('InputWorkspaces').value is not None and \
+                len(self.getProperty('InputWorkspaces').value) > 0:
             for ws in self.getProperty('InputWorkspaces').value:
                 run = ws.getRun()
                 if not run.hasProperty('wavelength_min'):
@@ -170,13 +171,17 @@ class SANSWLNormCorrection(PythonAlgorithm):
         else:
             issues['InputWorkspaces'] = "Input workspace can not be null."
 
-        if len(self.getProperty('BList').value) > 1 and len(
+        if len(self.getProperty('BList').value) > 1 and \
+                self.getProperty('InputWorkspaces').value is not None and len(
+                self.getProperty('InputWorkspaces').value) > 0 and len(
                 self.getProperty('BList').value) != len(
                     self.getProperty('InputWorkspaces').value) - 1:
             message = "The length of B List Parameters must be 1 or equal to the length of the input workspaces - 1"
             issues['BList'] = message
 
-        if len(self.getProperty('KList').value) > 1 and len(
+        if len(self.getProperty('KList').value) > 1 and \
+                self.getProperty('InputWorkspaces').value is not None and len(
+                self.getProperty('InputWorkspaces').value) > 0 and len(
                 self.getProperty('KList').value) != len(
                     self.getProperty('InputWorkspaces').value) - 1:
             message = "The length of K List Parameters must be 1 or equal to the length of the input workspaces - 1"
@@ -406,16 +411,12 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
                 plsq, cov, infodict, mesg, ier = optimize.leastsq(
                     self._residuals,
-                    ([0.1, 0.1] if k is None and b is None else [0.1]),  # guess
+                    [0.1, 0.1] if k is None and b is None else [0.1],  # guess
                     args=(
-                        ws_values['x_qrange'],
-                        ws_values['e_qrange'],
+                        ws_values['x_qrange'], ws_values['e_qrange'],
                         # reference interpolation function
                         self.data[input_ws_reference_name]['f'],
-                        ws_values['f'],
-                        k,
-                        b),
-                    full_output=True,
+                        ws_values['f'], k, b), full_output=True,
                 )
 
                 y_qrange_fit = self._peval(
@@ -435,24 +436,31 @@ class SANSWLNormCorrection(PythonAlgorithm):
                     'y_qrange_fit': y_qrange_fit,
                     'y_trimmed_fit': y_trimmed_fit,
                     'y_fit': y_fit,
-                    'plsq': plsq,
-                    'cov': cov,
                     'r_squared': r_squared,
                 })
+
+                errors = np.sqrt(np.diag(cov)) if cov.any() else [-1, -1]
+                ws_values.update({
+                    'k': plsq[0] if k is None else k,
+                    'k_error': errors[0] if k is None else 0,
+                    'b': plsq[1] if k is None and b is None else (
+                        plsq[0] if b is None else b
+                    ),
+                    'b_error': errors[1] if k is None and b is None else(
+                        errors[0] if b is None else 0
+                    ),
+                })
+
             else:
                 ws_values.update({
-                    'y_qrange_fit':
-                    ws_values['f'](ws_values['x_qrange']),
-                    'y_trimmed_fit':
-                    ws_values['f'](ws_values['x_trimmed']),
-                    'y_fit':
-                    ws_values['f'](ws_values['x']),
-                    'plsq':
-                    None,
-                    'cov':
-                    None,
-                    'r_squared':
-                    0,
+                    'y_qrange_fit': ws_values['f'](ws_values['x_qrange']),
+                    'y_trimmed_fit': ws_values['f'](ws_values['x_trimmed']),
+                    'y_fit': ws_values['f'](ws_values['x']),
+                    'k': 1.0,
+                    'k_error': 0.0,
+                    'b': 0.0,
+                    'b_error': 0.0,
+                    'r_squared': 0,
                 })
 
     def _create_grouped_ws(self, suffix=""):
@@ -529,57 +537,17 @@ class SANSWLNormCorrection(PythonAlgorithm):
             ws_table.addColumn(type="double", name=col)
 
         for name, v in self.data.items():
-            if v['plsq'] is None and v['cov'] is None:
-                # Reference dataset case
-                row = {
-                    "IQCurve": name,
-                    "K": 1,
-                    "KError": 0,
-                    "B": 0,
-                    "BError": 0,
-                    "GoodnessOfFit": 0,
-                }
-            else:
-                if v['cov'].any():
-                    errors = np.sqrt(np.diag(v['cov']))
-                else:
-                    errors = [-1, -1]
-                k = self.k
-                b = self.b
-                if k is None and b is None:
-                    # both k and b fitted
-                    row = {
-                        "IQCurve": name,
-                        "K": v['plsq'][0],
-                        "KError": errors[0],
-                        "B": v['plsq'][1],
-                        "BError": errors[1],
-                    }
-                elif b is None:
-                    # b was fitted
-                    row = {
-                        "IQCurve": name,
-                        "K": k,
-                        "KError": 0,
-                        "B": v['plsq'][0],
-                        "BError": errors[0],
-                    }
-                elif k is None:
-                    # k was fitted
-                    row = {
-                        "IQCurve": name,
-                        "K": v['plsq'][0],
-                        "KError": errors[0],
-                        "B": b,
-                        "BError": 0,
-
-                    }
-                row.update({"GoodnessOfFit": v['r_squared'],})
-            row.update({
+            row = {
+                "IQCurve": name,
+                "K": v['k'],
+                "KError": v['k_error'],
+                "B": v['b'],
+                "BError": v['b_error'],
+                "GoodnessOfFit": v['r_squared'],
                 "WavelengthMin": v['wl_min'],
                 "WavelengthMax": v['wl_max'],
                 "WavelengthAverage": (v['wl_max'] + v['wl_min']) / 2.0,
-            })
+            }
             logger.debug("%s" % row)
             ws_table.addRow(row)
         self._save_config_file(ws_table)
