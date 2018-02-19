@@ -29,11 +29,11 @@ const std::string ERROR_URL("http://ptsv2.com/t/mantidmat/post");
 
 //----------------------------------------------------------------------------------------------
 // Constructor for ErrorReporter
-ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode, bool share)
-    : m_application(application), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl), m_exitCode(exitCode), m_upTime(startTime), m_share(share), m_name(""), m_email("") {}
+ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration upTime, std::string exitCode, bool share)
+    : m_application(application), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl), m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(""), m_email("") {}
 
-ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode, bool share, std::string name, std::string email)
-    : m_application(application), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl), m_exitCode(exitCode), m_upTime(startTime), m_share(share), m_name(name), m_email(email) {}
+ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration upTime, std::string exitCode, bool share, std::string name, std::string email)
+    : m_application(application), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl), m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(name), m_email(email) {}
 
 void ErrorReporter::sendErrorReport() {
   try {
@@ -77,7 +77,7 @@ std::string ErrorReporter::generateErrorMessage() {
   message["dateTime"] =
       Types::Core::DateAndTime::getCurrentTime().toISO8601String();
 
-  message["upTime"] = to_iso_string(m_upTime);
+  message["upTime"] = to_simple_string(m_upTime);
 
   message["application"] = m_application;
 

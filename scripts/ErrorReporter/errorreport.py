@@ -8,8 +8,10 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
-        #self.action = pyqtSignal()
+        
         self.action.connect(QtGui.QApplication.instance().errorHandling)
+
+        self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
 
 #  The options on what to do after closing the window (exit/continue)
         self.radioButtonContinue.setChecked(True)     # Set continue to be checked by default
