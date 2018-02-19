@@ -29,6 +29,8 @@ public:
   MOCK_METHOD2(plotToSeparateWindow, void(const std::string &focusedRunName,
                                           const std::string &fittedPeaksName));
 
+  MOCK_METHOD0(reportNoRunSelectedForPlot, void());
+
   MOCK_METHOD1(reportPlotInvalidFittedPeaks, void(const RunLabel &runLabel));
 
   MOCK_METHOD1(reportPlotInvalidFocusedRun, void(const RunLabel &runLabel));
@@ -46,9 +48,6 @@ public:
   MOCK_CONST_METHOD0(showFitResultsSelected, bool());
 
   MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
-
-  MOCK_METHOD2(userError, void(const std::string &errorTitle,
-                               const std::string &errorDescription));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

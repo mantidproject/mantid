@@ -129,21 +129,14 @@ void EnggDiffMultiRunFittingWidgetPresenter::processPlotPeaksStateChanged() {
 
 void EnggDiffMultiRunFittingWidgetPresenter::processPlotToSeparateWindow() {
   if (!m_view->hasSelectedRunLabel()) {
-    m_view->userError("Please select a run to plot",
-                      "Cannot plot to separate window without selecting a "
-                      "run from the list");
+    m_view->reportNoRunSelectedForPlot();
     return;
   }
   const auto runLabel = m_view->getSelectedRunLabel();
   const auto focusedRun = m_model->getFocusedRun(runLabel);
 
   if (!focusedRun) {
-    m_view->userError(
-        "Invalid focused run identifier",
-        "Tried to access invalid run, run number " +
-            std::to_string(runLabel.runNumber) + " and bank ID " +
-            std::to_string(runLabel.bank) +
-            ". Please contact the development team with this message");
+    m_view->reportPlotInvalidFocusedRun(runLabel);
     return;
   }
 

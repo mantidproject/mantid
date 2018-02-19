@@ -39,6 +39,9 @@ public:
   virtual void plotToSeparateWindow(const std::string &focusedRunName,
                                     const std::string &fittedPeaksName) = 0;
 
+  /// Report that the user has tried to plot without selecting a run
+  virtual void reportNoRunSelectedForPlot() = 0;
+
   /**
    Show an error that the user has tried to plot an invalid fitted peaks
    workspace
@@ -70,10 +73,6 @@ public:
 
   /// Update the list of loaded run numbers and bank IDs
   virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
-
-  /// Report an error to the user
-  virtual void userError(const std::string &errorTitle,
-                         const std::string &errorDescription) = 0;
 };
 
 } // CustomInterfaces

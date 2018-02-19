@@ -40,6 +40,11 @@ RunLabel EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
   return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
 }
 
+void EnggDiffMultiRunFittingQtWidget::reportNoRunSelectedForPlot() {
+  userError("No run selected",
+            "Please select a run from the list before plotting");
+}
+
 void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFittedPeaks(
     const RunLabel &runLabel) {
   userError("Invalid fitted peaks identifier",

@@ -45,7 +45,7 @@ public:
     EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
         .Times(1)
         .WillOnce(Return(ws));
-    EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockView, reportPlotInvalidFocusedRun(testing::_)).Times(0);
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
     EXPECT_CALL(*m_mockView, plotFocusedRun(testing::_)).Times(1);
     EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
@@ -200,7 +200,8 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(0);
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::SelectRun);
+    presenter->notify(
+        IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
     assertMocksUsedCorrectly();
   }
 
@@ -270,10 +271,7 @@ public:
     EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(false));
-    EXPECT_CALL(*m_mockView, userError("Please select a run to plot",
-                                       "Cannot plot to separate window without "
-                                       "selecting a run from the list"))
-        .Times(1);
+    EXPECT_CALL(*m_mockView, reportNoRunSelectedForPlot()).Times(1);
 
     presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
                           PlotToSeparateWindow);
@@ -302,7 +300,8 @@ public:
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
 
-    EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockView, reportNoRunSelectedForPlot()).Times(0);
+    EXPECT_CALL(*m_mockView, reportPlotInvalidFocusedRun(testing::_)).Times(0);
 
     EXPECT_CALL(*m_mockView, showFitResultsSelected())
         .Times(1)
@@ -341,8 +340,6 @@ public:
         .Times(1)
         .WillOnce(Return(sampleWorkspace));
 
-    EXPECT_CALL(*m_mockView, userError(testing::_, testing::_)).Times(0);
-
     EXPECT_CALL(*m_mockView, showFitResultsSelected())
         .Times(1)
         .WillOnce(Return(true));
@@ -357,6 +354,7 @@ public:
     EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
         .Times(1)
         .WillOnce(Return(sampleFittedPeaks));
+    EXPECT_CALL(*m_mockView, reportPlotInvalidFittedPeaks(testing::_)).Times(0);
 
     EXPECT_CALL(*m_mockView, plotToSeparateWindow(wsName, fittedPeaksName))
         .Times(1);

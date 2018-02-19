@@ -39,6 +39,8 @@ public:
   void plotToSeparateWindow(const std::string &focusedRunName,
                             const std::string &fittedPeaksName) override;
 
+  void reportNoRunSelectedForPlot() override;
+
   void reportPlotInvalidFittedPeaks(const RunLabel &runLabel) override;
 
   void reportPlotInvalidFocusedRun(const RunLabel &runLabel) override;
@@ -54,9 +56,6 @@ public:
   bool showFitResultsSelected() const override;
 
   void updateRunList(const std::vector<RunLabel> &runLabels) override;
-
-  void userError(const std::string &errorTitle,
-                 const std::string &errorDescription) override;
 
 signals:
   void removeRunClicked();
@@ -74,6 +73,9 @@ private:
   void resetPlotZoomLevel();
 
   void setupUI();
+
+  void userError(const std::string &errorTitle,
+                 const std::string &errorDescription);
 
   std::vector<std::unique_ptr<QwtPlotCurve>> m_focusedRunCurves;
 
