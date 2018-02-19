@@ -245,7 +245,7 @@ ConvFit::functionNameChanges(IFunction_sptr model) const {
     prefixSuffix = "f1.";
 
   if (compositeModel) {
-    const auto &offset = backIndex ? 0 : 1;
+    const auto &offset = backIndex ? 1 : 0;
     const auto &index = backIndex.get_value_or(0);
     addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix, 0, index,
                            0, changes);
