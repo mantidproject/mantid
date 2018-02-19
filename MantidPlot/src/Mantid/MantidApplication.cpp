@@ -34,6 +34,27 @@ MantidApplication::MantidApplication(int &argc, char **argv)
   }
 }
 
+void MantidApplication::errorHandling(bool continueWork, int share, QString name, QString email){
+  int reportingEnabled = 0;
+    int retVal = Mantid::Kernel::ConfigService::Instance().getValue("usagereports.enabled", reportingEnabled);
+    //if (reportingEnabled && retVal == 1){
+      if (share==0){
+        Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "", true, name.toStdString(), email.toStdString());
+        errorReporter.sendErrorReport();
+      } 
+      else if (share==1){
+        Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "", false, name.toStdString(), email.toStdString());
+      errorReporter.sendErrorReport();
+      }
+    //}  
+
+    if(!continueWork){
+      g_log.fatal("Terminated by user.");
+      quit();
+    }
+    g_log.fatal("Continue working.");
+}
+
 bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   bool res = false;
   bool error = false;
@@ -58,37 +79,9 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   }
 
   if (error){
-    int reportingEnabled = 0;
-    int retVal = Mantid::Kernel::ConfigService::Instance().getValue("usagereports.enabled", reportingEnabled);
-    if (reportingEnabled && retVal == 1){
-      Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "");
-      errorReporter.sendErrorReport();
-    }  
-    
-    // QString pythonCode(
-    //   "\nfrom errorreport import CrashReportPage\n"
-    //   "dialog = CrashReportPage()\n"
-    //   "CrashReportPage.show()");
-    QString pythonCode("from errorreport import CrashReportPage");
+    QString pythonCode("from ErrorReporter.errorreport import CrashReportPage\npage = CrashReportPage()\npage.show()");
     
     emit runAsPythonScript(pythonCode);
-
-    QMessageBox ask;
-    QAbstractButton *terminateButton =
-        ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
-    ask.addButton(tr("Continue"), QMessageBox::ActionRole);
-    ask.setText("Sorry, MantidPlot has caught an unexpected exception"
-                "\n\nWould you like to terminate MantidPlot or try to continue "
-                "working?\nIf you choose to continue it is advisable to save "
-                "your data and restart the application.");
-    ask.setIcon(QMessageBox::Critical);
-    ask.exec();
-    if (ask.clickedButton() == terminateButton) {
-      g_log.fatal("Terminated by user.");
-      quit();
-    } else {
-      g_log.fatal("Continue working.");
-    }
   }
 
   return res;

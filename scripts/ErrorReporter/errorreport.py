@@ -1,12 +1,15 @@
 import sys
 from PyQt4 import QtGui
 import ui_errorreport
+from PyQt4.QtCore import pyqtSignal
 
 class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
-
+    action = pyqtSignal(bool, int, str, str)
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
+        #self.action = pyqtSignal()
+        self.action.connect(QtGui.QApplication.instance().errorHandling)
 
 #  The options on what to do after closing the window (exit/continue)
         self.radioButtonContinue.setChecked(True)     # Set continue to be checked by default
@@ -17,30 +20,51 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         self.noShareButton.clicked.connect(self.noShare)
 
     def fullShare(self):
-        print('Thank you so much!')
-        if self.radioButtonContinue.isChecked() == True:
-            print('Continuing Mantid')
-        else:
-            print('Exiting Mantid')
-        sys.exit()
+        #print('Thank you so much!')
+        self.action.emit(self.continue_working, 0, self.input_name, self.input_email)
+        self.close()
+        # if self.radioButtonContinue.isChecked() == True: 
+        #     #print('Continuing Mantid')
+        # else:
+        #     #print('Exiting Mantid')
+        #     sys.exit()
 
     def nonIDShare(self):
-        print('No worries, it all helps.')
-        if self.radioButtonContinue.isChecked() == True:
-            print('Continuing Mantid')
-        else:
-            print('Exiting Mantid')
-        sys.exit()
+        #print('No worries, it all helps.')
+        self.action.emit(self.continue_working, 1, self.input_name, self.input_email)
+        self.close()
+        # if self.radioButtonContinue.isChecked() == True:
+        #     #print('Continuing Mantid') 
+        # else:
+        #     #print('Exiting Mantid')
+        #     sys.exit()
 
     def noShare(self):
-        print('O.K.')
-        if self.radioButtonContinue.isChecked() == True:
-            print('Continuing Mantid')
-        else:
-            print('Exiting Mantid')
-        sys.exit()
+        #print('O.K.')
+        self.action.emit(self.continue_working, 2, self.input_name, self.input_email)
+        self.close()
+        # if self.radioButtonContinue.isChecked() == True:
+        #     #print('Continuing Mantid')  
+        # else:
+        #     #print('Exiting Mantid')
+        #     sys.exit()
 
+    def get_simple_line_edit_field(self, expected_type, line_edit):
+        gui_element = getattr(self, line_edit)
+        value_as_string = gui_element.text()
+        return expected_type(value_as_string) if value_as_string else None
 
+    @property
+    def input_name(self):
+        return self.get_simple_line_edit_field(line_edit="input_name_line_edit", expected_type=str)
+
+    @property
+    def input_email(self):
+        return self.get_simple_line_edit_field(line_edit="input_email_line_edit", expected_type=str)
+
+    @property
+    def continue_working(self):
+        return self.radioButtonContinue.isChecked()
 
 
 def main():

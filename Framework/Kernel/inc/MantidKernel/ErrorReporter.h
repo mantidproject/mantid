@@ -36,8 +36,8 @@ namespace Kernel {
 
 class MANTID_KERNEL_DLL ErrorReporter {  
     public:
-    ErrorReporter(std::string application);
-    ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode);
+    ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode, bool share);
+    ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode, bool share, std::string name, std::string email);
     void sendErrorReport();
 
     protected:
@@ -48,10 +48,15 @@ class MANTID_KERNEL_DLL ErrorReporter {
     private:
     int sendErrorAsyncImpl(const std::string &message);
     const std::string m_application;
-    const std::string m_exitCode;
-    Types::Core::time_duration m_upTime;
+    
     /// Async method for sending startup notifications
     Poco::ActiveMethod<int, std::string, ErrorReporter> m_errorActiveMethod;
+    const std::string m_exitCode;
+    const Types::Core::time_duration m_upTime;
+    const bool m_share;
+    const std::string m_name;
+    const std::string m_email;
+
 };
 
 } // namespace Kernel
