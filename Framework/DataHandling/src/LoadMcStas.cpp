@@ -402,21 +402,21 @@ void LoadMcStas::readEventData(
 
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
-  for (size_t i = 0; i < allEventWS.size(); i++) {
-    auto ws = allEventWS[i].first;
-    ws->setAllX(axis);
-    std::string extraProperty =
+  for (auto i = 0; i < allEventWS.size(); i++) {
+    if (allEventWS[i].second != "partial_event_data_workspace") {
+      auto ws = allEventWS[i].first;
+      ws->setAllX(axis);
+      std::string extraProperty =
         "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
-    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
         extraProperty, allEventWS[i].second, Direction::Output));
-    setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
-    m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
-                                // unique
-  }
-  outputGroup->addWorkspace(allEventWS[0].first);
-  allEventWS.erase(allEventWS.begin());
-  for (auto ws : allEventWS) {
-    m_scaterringWS.push_back(ws.first);
+      setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
+      m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
+                                  // unique
+      //if (i != 0) {
+        m_scaterringWS.push_back(ws);
+      //}
+    }
   }
 }
 
