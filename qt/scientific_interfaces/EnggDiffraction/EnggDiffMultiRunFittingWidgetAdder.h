@@ -15,7 +15,7 @@ class EnggDiffMultiRunFittingWidgetView;
 class EnggDiffMultiRunFittingWidgetAdder
     : public IEnggDiffMultiRunFittingWidgetAdder {
 public:
-  EnggDiffMultiRunFittingWidgetAdder(
+  explicit EnggDiffMultiRunFittingWidgetAdder(
       IEnggDiffMultiRunFittingWidgetView *widget);
 
   /// Add the widget to an owner
