@@ -39,9 +39,16 @@ class IReflMainWindowPresenter {
 public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
+  enum class Flag {
+    ConfirmReductionPausedFlag,
+    ConfirmReductionResumedFlag,
+    HelpPressed
+  };
 
+  virtual void notify(Flag flag) = 0;
   virtual void notifyReductionPaused(int group) = 0;
   virtual void notifyReductionResumed(int group) = 0;
+
   /// Pre-processing
   virtual std::string getTransmissionRuns(int group) const = 0;
   virtual MantidWidgets::DataProcessor::OptionsQMap

@@ -31,7 +31,19 @@ public:
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const override;
 
+  void
+  notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) override;
+
 private:
+  void processSelectRun();
+
+  /// Display fitted peaks and any other fit information for a certain run
+  void displayFitResults(const RunLabel &runLabel);
+
+  /// Update the plot area with a focused run, and its fitted peaks if available
+  /// and requested
+  void updatePlot(const RunLabel &runLabel);
+
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> m_model;
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> m_view;

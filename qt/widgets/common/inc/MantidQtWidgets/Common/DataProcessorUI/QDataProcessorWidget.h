@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
+#include "MantidQtWidgets/Common/HintStrategy.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -154,6 +155,10 @@ public:
   void emitProcessingFinished() override { emit processingFinished(); }
 
   void skipProcessing() override;
+
+  void enableGrouping() override;
+  void disableGrouping() override;
+
   void settingsChanged();
 signals:
   void processButtonClicked();

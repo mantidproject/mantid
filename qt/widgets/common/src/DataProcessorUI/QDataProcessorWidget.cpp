@@ -3,6 +3,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GridDelegate.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 
 #include <QClipboard>
@@ -130,6 +131,7 @@ void QDataProcessorWidget::createTable() {
   // Allow rows and columns to be reordered
   QHeaderView *header = new QHeaderView(Qt::Horizontal);
   header->setStretchLastSection(true);
+  header->setStyleSheet("QHeaderView {font-size:11pt;}");
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setMovable(true);
   header->setResizeMode(QHeaderView::ResizeToContents);
@@ -211,6 +213,9 @@ void QDataProcessorWidget::showTable(
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   ui.viewTable->setModel(m_model.get());
+  ui.viewTable->setStyleSheet("QTreeView {font-size:11pt;}");
+  ui.viewTable->setAlternatingRowColors(false);
+  ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable));
 
   // Hide the Hidden Options column
   ui.viewTable->hideColumn(m_model->columnCount() - 1);
@@ -459,8 +464,8 @@ column.
 @param hintStrategy : The hinting strategy to use
 @param column : The index of the 'Options' column
 */
-void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy,
-                                                  int column) {
+void QDataProcessorWidget::setOptionsHintStrategy(
+    MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column) {
   ui.viewTable->setItemDelegateForColumn(
       column, new HintingLineEditFactory(hintStrategy));
 }
@@ -706,6 +711,13 @@ QString QDataProcessorWidget::getCurrentInstrument() const {
 }
 
 void QDataProcessorWidget::skipProcessing() { m_presenter->skipProcessing(); }
+
+void QDataProcessorWidget::enableGrouping() {
+  ui.viewTable->setRootIsDecorated(true);
+}
+void QDataProcessorWidget::disableGrouping() {
+  ui.viewTable->setRootIsDecorated(false);
+}
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

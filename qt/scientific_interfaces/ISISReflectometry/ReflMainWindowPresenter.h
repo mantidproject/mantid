@@ -79,9 +79,8 @@ public:
 
   /// Returns whether the Runs Tab is currently processing any runs
   bool checkIfProcessing() const override;
-
   void settingsChanged(int group) override;
-
+  void notify(IReflMainWindowPresenter::Flag flag) override;
   void notifyReductionPaused(int group) override;
   void notifyReductionResumed(int group) override;
 
@@ -94,7 +93,7 @@ private:
   void pauseReduction() const;
   /// Resumes reduction in the Runs Tab
   void resumeReduction() const;
-
+  void showHelp();
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'
