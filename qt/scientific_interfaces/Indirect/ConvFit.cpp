@@ -560,6 +560,8 @@ void ConvFit::fitFunctionChanged() {
 }
 
 void ConvFit::parameterUpdated(const Mantid::API::IFunction *function) {
+  if (function == nullptr)
+    return;
 
   if (background() && function->asString() == background()->asString()) {
     auto rangeSelector =
@@ -797,17 +799,6 @@ QString ConvFit::backgroundString(const QString &backgroundType) const {
     return "FitL_s";
   else
     return "";
-}
-
-void ConvFit::setSelectedSpectrum(int spectrum) {
-  auto fitRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitRange");
-  auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
-
-  disconnect(fitRangeSelector, SIGNAL(rangeChanged(double, double)),
-             hwhmRangeSelector, SLOT(setRange(double, double)));
-  IndirectFitAnalysisTab::setSelectedSpectrum(spectrum);
-  connect(fitRangeSelector, SIGNAL(rangeChanged(double, double)),
-          hwhmRangeSelector, SLOT(setRange(double, double)));
 }
 
 /**

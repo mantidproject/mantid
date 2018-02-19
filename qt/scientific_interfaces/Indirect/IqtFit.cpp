@@ -373,6 +373,8 @@ void IqtFit::backgroundSelectorChanged(double val) {
 }
 
 void IqtFit::parameterUpdated(const Mantid::API::IFunction *function) {
+  if (function == nullptr)
+    return;
 
   if (background() && function->asString() == background()->asString()) {
     auto rangeSelector =
