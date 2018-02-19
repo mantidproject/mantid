@@ -254,7 +254,8 @@ void QtReflSettingsView::setChecked(QCheckBox &checkBox, bool checked) {
 
 class SetI0MonIndex : public boost::static_visitor<> {
 public:
-  explicit SetI0MonIndex(QLineEdit &I0MonIndexEdit) : m_I0monIndexEdit(I0MonIndexEdit) {}
+  explicit SetI0MonIndex(QLineEdit &I0MonIndexEdit)
+      : m_I0monIndexEdit(I0MonIndexEdit) {}
 
   void operator()(int index) const {
     m_I0monIndexEdit.setText(QString::number(index));
