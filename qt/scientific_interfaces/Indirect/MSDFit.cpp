@@ -1,8 +1,11 @@
 #include "MSDFit.h"
 #include "../General/UserInputValidator.h"
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QFileInfo>
@@ -198,37 +201,19 @@ void MSDFit::updatePlotRange() {
   }
 }
 
-void MSDFit::disablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(false);
-  m_uiForm->ckPlotGuess->blockSignals(true);
-}
+void MSDFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 
-void MSDFit::enablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(true);
-  m_uiForm->ckPlotGuess->blockSignals(false);
-}
+void MSDFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
 void MSDFit::updatePlotOptions() {}
 
-void MSDFit::enablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(true);
-  m_uiForm->pbPlot->blockSignals(false);
-}
+void MSDFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
 
-void MSDFit::disablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(false);
-  m_uiForm->pbPlot->blockSignals(true);
-}
+void MSDFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 
-void MSDFit::enableSaveResult() {
-  m_uiForm->pbSave->setEnabled(true);
-  m_uiForm->pbSave->blockSignals(false);
-}
+void MSDFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
-void MSDFit::disableSaveResult() {
-  m_uiForm->pbSave->setEnabled(false);
-  m_uiForm->pbSave->blockSignals(true);
-}
+void MSDFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
 
 void MSDFit::addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);
@@ -291,16 +276,14 @@ void MSDFit::specMaxChanged(int value) {
 
 void MSDFit::startXChanged(double startX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("MSDRange");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMinimum(startX);
-  rangeSelector->blockSignals(false);
 }
 
 void MSDFit::endXChanged(double endX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("MSDRange");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMaximum(endX);
-  rangeSelector->blockSignals(false);
 }
 
 /*

@@ -2,6 +2,7 @@
 
 #include "../General/UserInputValidator.h"
 
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -244,7 +245,7 @@ ConvFit::functionNameChanges(IFunction_sptr model) const {
     prefixSuffix = "f1.";
 
   if (compositeModel) {
-    const auto &offset = backIndex ? 0 : 1;
+    const auto &offset = backIndex ? 1 : 0;
     const auto &index = backIndex.get_value_or(0);
     addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix, 0, index,
                            0, changes);
@@ -559,23 +560,23 @@ void ConvFit::fitFunctionChanged() {
 }
 
 void ConvFit::parameterUpdated(const Mantid::API::IFunction *function) {
+  if (function == nullptr)
+    return;
 
   if (background() && function->asString() == background()->asString()) {
     auto rangeSelector =
         m_uiForm->ppPlotTop->getRangeSelector("ConvFitBackRange");
-    rangeSelector->blockSignals(true);
+    MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
     rangeSelector->setMinimum(function->getParameter("A0"));
-    rangeSelector->blockSignals(false);
   } else if (function->hasParameter("FWHM")) {
     auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
     auto peakCentre =
         lastParameterValue(function->name(), "PeakCentre").get_value_or(0);
     auto hwhm =
         lastParameterValue(function->name(), "FWHM").get_value_or(0) / 2.0;
-    rangeSelector->blockSignals(true);
+    MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
     rangeSelector->setMaximum(peakCentre + hwhm);
     rangeSelector->setMinimum(peakCentre - hwhm);
-    rangeSelector->blockSignals(false);
   }
 }
 
@@ -800,17 +801,6 @@ QString ConvFit::backgroundString(const QString &backgroundType) const {
     return "";
 }
 
-void ConvFit::setSelectedSpectrum(int spectrum) {
-  auto fitRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitRange");
-  auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
-
-  disconnect(fitRangeSelector, SIGNAL(rangeChanged(double, double)),
-             hwhmRangeSelector, SLOT(setRange(double, double)));
-  IndirectFitAnalysisTab::setSelectedSpectrum(spectrum);
-  connect(fitRangeSelector, SIGNAL(rangeChanged(double, double)),
-          hwhmRangeSelector, SLOT(setRange(double, double)));
-}
-
 /**
  * Updates the plot in the GUI window
  */
@@ -831,35 +821,17 @@ void ConvFit::updatePlotRange() {
   }
 }
 
-void ConvFit::disablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(false);
-  m_uiForm->ckPlotGuess->blockSignals(true);
-}
+void ConvFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 
-void ConvFit::enablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(true);
-  m_uiForm->ckPlotGuess->blockSignals(false);
-}
+void ConvFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
-void ConvFit::enablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(true);
-  m_uiForm->pbPlot->blockSignals(false);
-}
+void ConvFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
 
-void ConvFit::disablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(false);
-  m_uiForm->pbPlot->blockSignals(true);
-}
+void ConvFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 
-void ConvFit::enableSaveResult() {
-  m_uiForm->pbSave->setEnabled(true);
-  m_uiForm->pbSave->blockSignals(false);
-}
+void ConvFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
-void ConvFit::disableSaveResult() {
-  m_uiForm->pbSave->setEnabled(false);
-  m_uiForm->pbSave->blockSignals(true);
-}
+void ConvFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
 
 void ConvFit::addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);
@@ -905,16 +877,14 @@ void ConvFit::specMaxChanged(int value) {
 
 void ConvFit::startXChanged(double startX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitRange");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMinimum(startX);
-  rangeSelector->blockSignals(false);
 }
 
 void ConvFit::endXChanged(double endX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitRange");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMaximum(endX);
-  rangeSelector->blockSignals(false);
 }
 
 void ConvFit::hwhmMinChanged(double val) {
@@ -923,10 +893,9 @@ void ConvFit::hwhmMinChanged(double val) {
   const double difference = peakCentre - val;
 
   auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
-  hwhmRangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(hwhmRangeSelector);
   hwhmRangeSelector->setMaximum(peakCentre + difference);
   fwhmChanged(std::fabs(difference) * 2.0);
-  hwhmRangeSelector->blockSignals(false);
 }
 
 void ConvFit::hwhmMaxChanged(double val) {
@@ -935,10 +904,9 @@ void ConvFit::hwhmMaxChanged(double val) {
   const double difference = val - peakCentre;
 
   auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
-  hwhmRangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(hwhmRangeSelector);
   hwhmRangeSelector->setMinimum(peakCentre - difference);
   fwhmChanged(std::fabs(difference) * 2.0);
-  hwhmRangeSelector->blockSignals(false);
 }
 
 void ConvFit::fwhmChanged(double fwhm) {

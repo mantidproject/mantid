@@ -45,7 +45,6 @@ private:
   void loadSettings(const QSettings &settings) override;
 
 protected slots:
-  void setSelectedSpectrum(int spectrum) override;
   void algorithmComplete(bool error) override;
   void newDataLoaded(const QString &wsName);
   void extendResolutionWorkspace();

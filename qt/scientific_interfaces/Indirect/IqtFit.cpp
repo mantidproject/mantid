@@ -1,6 +1,8 @@
 #include "IqtFit.h"
 
 #include "../General/UserInputValidator.h"
+
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -268,25 +270,13 @@ void IqtFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
-void IqtFit::enablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(true);
-  m_uiForm->pbPlot->blockSignals(false);
-}
+void IqtFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
 
-void IqtFit::disablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(false);
-  m_uiForm->pbPlot->blockSignals(true);
-}
+void IqtFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 
-void IqtFit::enableSaveResult() {
-  m_uiForm->pbSave->setEnabled(true);
-  m_uiForm->pbSave->blockSignals(false);
-}
+void IqtFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
-void IqtFit::disableSaveResult() {
-  m_uiForm->pbSave->setEnabled(false);
-  m_uiForm->pbSave->blockSignals(true);
-}
+void IqtFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
 
 /**
  * Plot workspace based on user input
@@ -378,13 +368,14 @@ void IqtFit::backgroundSelectorChanged(double val) {
 }
 
 void IqtFit::parameterUpdated(const Mantid::API::IFunction *function) {
+  if (function == nullptr)
+    return;
 
   if (background() && function->asString() == background()->asString()) {
     auto rangeSelector =
         m_uiForm->ppPlotTop->getRangeSelector("IqtFitBackRange");
-    rangeSelector->blockSignals(true);
+    MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
     rangeSelector->setMinimum(function->getParameter("A0"));
-    rangeSelector->blockSignals(false);
   }
 }
 
@@ -453,16 +444,14 @@ void IqtFit::specMaxChanged(int value) {
 
 void IqtFit::startXChanged(double startX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("IqtFitRange");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMinimum(startX);
-  rangeSelector->blockSignals(false);
 }
 
 void IqtFit::endXChanged(double endX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("IqtFitRange");
-  rangeSelector->blockSignals(true);
+  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMaximum(endX);
-  rangeSelector->blockSignals(false);
 }
 
 void IqtFit::singleFit() {
@@ -470,15 +459,9 @@ void IqtFit::singleFit() {
     executeSingleFit();
 }
 
-void IqtFit::disablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(false);
-  m_uiForm->ckPlotGuess->blockSignals(true);
-}
+void IqtFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 
-void IqtFit::enablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(true);
-  m_uiForm->ckPlotGuess->blockSignals(false);
-}
+void IqtFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
 void IqtFit::addGuessPlot(MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);
