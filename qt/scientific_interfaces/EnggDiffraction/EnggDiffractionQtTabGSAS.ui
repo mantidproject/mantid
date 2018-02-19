@@ -32,46 +32,6 @@
       <string>General Parameters</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_phaseFiles">
-        <property name="toolTip">
-         <string>*.cif files containing the phases to refine</string>
-        </property>
-        <property name="text">
-         <string>Phase Files</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_gsasProjPath">
-        <property name="toolTip">
-         <string>The name of a new *.gpx project to write refinement results out to. This can be opened and used for more complex refinements in GSAS-II</string>
-        </property>
-        <property name="text">
-         <string>New GSAS-II Project</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QPushButton" name="pushButton_gsasProjPath">
-        <property name="text">
-         <string>Browse</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_runFile">
-        <property name="toolTip">
-         <string>Nexus file containing a spectrum focused using EnggFocus or the Focus tab</string>
-        </property>
-        <property name="text">
-         <string>Focused Run Files</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="lineEdit_gsasProjPath"/>
-      </item>
       <item row="1" column="1">
        <widget class="QLineEdit" name="lineEdit_instParamsFile"/>
       </item>
@@ -85,6 +45,30 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="1">
+       <widget class="QComboBox" name="comboBox_refinementMethod">
+        <item>
+         <property name="text">
+          <string>Pawley</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Rietveld</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_phaseFiles">
+        <property name="toolTip">
+         <string>*.cif files containing the phases to refine</string>
+        </property>
+        <property name="text">
+         <string>Phase Files</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="pushButton_browseRunFile">
         <property name="text">
@@ -92,25 +76,18 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
-       <widget class="QPushButton" name="pushButton_loadRun">
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_gsasHome">
+        <property name="toolTip">
+         <string>Directory containing GSAS-II installation. This directory must contain GSASIIscriptable.py</string>
+        </property>
         <property name="text">
-         <string>Load</string>
+         <string>GSAS-II Installation Directory</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="pushButton_browseInstParams">
-        <property name="text">
-         <string>Browse</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit_runFile"/>
-      </item>
-      <item row="4" column="2">
-       <widget class="QPushButton" name="pushButton_browseGSASHome">
+      <item row="3" column="2">
+       <widget class="QPushButton" name="pushButton_gsasProjPath">
         <property name="text">
          <string>Browse</string>
         </property>
@@ -126,19 +103,6 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="lineEdit_gsasHome"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_gsasHome">
-        <property name="toolTip">
-         <string>Directory containing GSAS-II installation. This directory must contain GSASIIscriptable.py</string>
-        </property>
-        <property name="text">
-         <string>GSAS-II Installation Directory</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="2">
        <widget class="QPushButton" name="pushButton_browsePhaseFiles">
         <property name="text">
@@ -146,22 +110,112 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="pushButton_loadRun">
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_gsasProjPath">
+        <property name="toolTip">
+         <string>The name of a new *.gpx project to write refinement results out to. This can be opened and used for more complex refinements in GSAS-II</string>
+        </property>
+        <property name="text">
+         <string>New GSAS-II Project</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="lineEdit_gsasHome"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_runFile">
+        <property name="toolTip">
+         <string>Nexus file containing a spectrum focused using EnggFocus or the Focus tab</string>
+        </property>
+        <property name="text">
+         <string>Focused Run Files</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEdit_runFile"/>
+      </item>
       <item row="2" column="1">
        <widget class="QLineEdit" name="lineEdit_phaseFiles"/>
       </item>
-      <item row="5" column="1">
-       <widget class="QComboBox" name="comboBox_refinementMethod">
-        <item>
-         <property name="text">
-          <string>Pawley</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Rietveld</string>
-         </property>
-        </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="lineEdit_gsasProjPath"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="pushButton_browseInstParams">
+        <property name="text">
+         <string>Browse</string>
+        </property>
        </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QPushButton" name="pushButton_browseGSASHome">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_xMax">
+        <item>
+         <widget class="QLabel" name="label_xMax">
+          <property name="text">
+           <string>XMax</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_xMax"/>
+        </item>
+       </layout>
+      </item>
+      <item row="6" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_xMin">
+        <item>
+         <widget class="QLabel" name="label_xMin">
+          <property name="text">
+           <string>XMin</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_xMin"/>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
