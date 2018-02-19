@@ -31,7 +31,7 @@ New features
 
 Improvements
 ############
-
+- Grid lines are now displayed in the runs tab.
 - Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows is also disabled during processing.
 - Removed the 'DirectBeam' box from the settings tab of the ISIS Reflectometry interface because this is not used.
 - Properties on the Runs tab now take precedence over properties on the Settings tab.
