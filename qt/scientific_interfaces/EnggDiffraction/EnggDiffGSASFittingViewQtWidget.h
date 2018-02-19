@@ -61,6 +61,7 @@ public:
 
 private slots:
   void browseFocusedRun();
+  void browseInstParams();
   void disableLoadIfInputEmpty();
   void loadFocusedRun();
   void selectRun();

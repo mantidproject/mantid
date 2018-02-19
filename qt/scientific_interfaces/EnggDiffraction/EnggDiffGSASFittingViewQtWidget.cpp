@@ -54,6 +54,13 @@ void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
   setFocusedRunFileNames(filenames);
 }
 
+void EnggDiffGSASFittingViewQtWidget::browseInstParams() {
+  const auto filename =
+      QFileDialog::getOpenFileName(this, tr("Instrument parameter file"), "",
+                                   "Instrument parameter file (*.par *.prm)");
+  m_ui.lineEdit_instParamsFile->setText(filename);
+}
+
 void EnggDiffGSASFittingViewQtWidget::disableLoadIfInputEmpty() {
   setLoadEnabled(!runFileLineEditEmpty());
 }
@@ -170,6 +177,9 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
           SLOT(loadFocusedRun()));
   connect(m_ui.lineEdit_runFile, SIGNAL(textChanged(const QString &)), this,
           SLOT(disableLoadIfInputEmpty()));
+
+  connect(m_ui.pushButton_browseInstParams, SIGNAL(clicked()), this,
+          SLOT(browseInstParams()));
 
   connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));
