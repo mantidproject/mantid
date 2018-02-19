@@ -314,77 +314,125 @@ Usage
 
 .. testcode:: ExFindPeakSingle
 
-   ws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction="name=LinearBackground, \
-      A0=0.3;name=Gaussian, PeakCentre=5, Height=10, Sigma=0.7", NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
+  ws = CreateSampleWorkspace(Function="User Defined",
+                             UserDefinedFunction="name=LinearBackground, A0=0.3;name=Gaussian, PeakCentre=5, Height=10, Sigma=0.7", 
+                             NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
 
-   table = FitPeaks(InputWorkspace='ws', FWHM='20')
+  FitPeaks(InputWorkspace='ws', PeakCenters='5.1', FitWindowBoundaryList='0,10', OutputPeakParametersWorkspace='fitted_params', 
+           BackgroundType='Linear', FittedPeaksWorkspace='fitted', OutputWorkspace='peakpositions')
 
-   row = table.row(0)
+  peakposws = mtd['peakpositions']
+  param_ws = mtd['fitted_params']
+  row = param_ws.row(0)
+  
+  # output
+  print ('Fitted peak position: {0:.5f}'.format(peakposws.readY(0)[0]))
+  print ("Peak 0  Centre: {0:.5f}, width: {1:.5f}, height: {2:.5f}".format(row["PeakCentre"], row["Sigma"], row["Height"]))
+  
+  # clean up workspaces
+  DeleteWorkspace(Workspace='fitted')
+  DeleteWorkspace(Workspace='fitted_params')
+  DeleteWorkspace(Workspace='ws')
+  DeleteWorkspace(Workspace='peakpositions')
 
-   #print row
-   print ("Peak 1 {Centre: %.3f, width: %.3f, height: %.3f }" % ( row["centre"],  row["width"], row["height"]))
 
 
 Output:
 
 .. testoutput:: ExFindPeakSingle
 
-   Peak 1 {Centre: 5.050, width: 1.648, height: 10.000 }
+   Fitted peak position: 5.05000
+   Peak 0  Centre: 5.05000, width: 0.70000, height: 10.00000
 
 
 **Example - Fit peaks on high background (vanadium):**
 
 .. testcode:: ExFitVanadiumPeaks
 
-    # load a 4 spectra workspace
-    ws = Load("PG3_733.nxs")
+  # load a 4 spectra workspace
+  ws = Load("PG3_733.nxs")
+  
+  van_peak_centers = "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401"
+  FitPeaks(InputWorkspace=ws, StartWorkspaceIndex=0, StopWorkspaceIndex=3,PeakCenters=van_peak_centers,
+             FitFromRight=True,HighBackground=True,
+             BackgroundType='Quadratic',
+             PeakWidthPercent=0.008,
+             OutputWorkspace='PG3_733_peak_positions',OutputPeakParametersWorkspace='PG3_733_peak_params',
+             FittedPeaksWorkspace='PG3_733_fitted_peaks')
+  
+  PG3_733_peak_positions = mtd["PG3_733_peak_positions"]
+  ep0 = PG3_733_peak_positions.readX(0)[-1]
+  ep1 = PG3_733_peak_positions.readX(0)[-2]
+  ep2 = PG3_733_peak_positions.readX(0)[-3]
+  fp0 = PG3_733_peak_positions.readY(0)[-1]
+  fp1 = PG3_733_peak_positions.readY(0)[-2]
+  fp2 = PG3_733_peak_positions.readY(0)[-3]
+  
+  # print data
+  print ('Spectrum 1: Expected right most 3 peaks at {0:.7f}, {1:.7f}, {2:.7f}'.format(ep0, ep1, ep2))
+  print ('Spectrum 1: Found    right most 3 peaks at {0:.7f}, {1:.7f}, {2:.7f}'.format(fp0, fp1, fp2))
+  
+  # delete workspaces
+  DeleteWorkspace(Workspace='PG3_733_peak_positions')
+  DeleteWorkspace(Workspace='PG3_733_fitted_peaks')
+  DeleteWorkspace(Workspace='PG3_733_peak_params')
+  DeleteWorkspace(Workspace='ws')
 
-    # all peaks test
-    van_peak_centers = "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401"
-    FitPeaks(InputWorkspace=ws, StartWorkspaceIndex=0, StopWorkspaceIndex=3,PeakCenters=van_peak_centers,
-               FitFromRight=True,HighBackground=True,
-               PeakWidthPercent=0.016,
-               OutputWorkspace='PG3_733_peak_positions',OutputPeakParametersWorkspace='PG3_733_peak_params',
-               FittedPeaksWorkspace='PG3_733_stripped')
-    
-    print ('Hello world!')
 
 Output:
 
-
 .. testoutput::  ExFitVanadiumPeaks
 
-    Hello world!
+  Spectrum 1: Expected right most 3 peaks at 2.1401000, 1.5133000, 1.2356000
+  Spectrum 1: Found    right most 3 peaks at 2.1483553, 1.5188663, 1.2401992
 
 
 **Example - Fit back-to-back exponential peaks (Vulcan diamond):**
 
 .. testcode:: ExFitVulcanPeaks
 
-    # load data
-    Load(Filename="vulcan_diamond.nxs", OutputWorkspace="diamond_3peaks")
-    
-    FitPeaks(InputWorkspace="diamond_3peaks", StartWorkspaceIndex=0, StopWorkspaceIndex=5,
-       PeakCenters="0.6867, 0.728299, 0.89198, 1.0758",
-       # PeakCenters="0.89198, 1.0758",
-       PeakFunction="BackToBackExponential", BackgroundType="Linear",
-       FitWindowBoundaryList="0.67, 0.709, 0.71, 0.76, 0.87, 0.92, 1.05, 1.1",  
-       # FitWindowBoundaryList="0.87, 0.92, 1.05, 1.1",  
-       PeakParameterNames="I, A, B, X0, S",
-       PeakParameterValues="2.5e+06, 5400, 1700, 1.07, 0.000355",
-       FitFromRight=True,
-       HighBackground=False,
-       OutputWorkspace="diamond_peaks_centers",
-       OutputPeakParametersWorkspace="PeakParametersWS2",
-       FittedPeaksWorkspace="FittedPeaksWS2")
-    
-    print ('Hello world!')
+  # load data
+  Load(Filename="vulcan_diamond.nxs", OutputWorkspace="diamond_3peaks")
+      
+  FitPeaks(InputWorkspace="diamond_3peaks", StartWorkspaceIndex=0, StopWorkspaceIndex=5,
+         PeakCenters="0.6867, 0.728299, 0.89198, 1.0758",
+         PeakFunction="BackToBackExponential", BackgroundType="Linear",
+         FitWindowBoundaryList="0.67, 0.709, 0.71, 0.76, 0.87, 0.92, 1.05, 1.1",  
+         PeakParameterNames="I, A, B, X0, S",
+         PeakParameterValues="2.5e+06, 5400, 1700, 1.07, 0.000355",
+         FitFromRight=True,
+         HighBackground=False,
+         OutputWorkspace="diamond_peaks_centers",
+         OutputPeakParametersWorkspace="PeakParametersWS2",
+         FittedPeaksWorkspace="FittedPeaksWS2")
+         
+  fitted_peak_pos_ws = mtd['diamond_peaks_centers']
+  
+  # print result
+  for ws_index in range(0, 2):
+      print ('Spectrum {0}: '.format(ws_index+1))
+      for peak_index in range(2, 4):
+          exp_pos = fitted_peak_pos_ws.readX(ws_index)[peak_index]
+          fit_pos = fitted_peak_pos_ws.readY(ws_index)[peak_index]
+          print 'Expected @ {0:-5f}  Fitted @ {1:-5f}'.format(exp_pos, fit_pos)
+      
+  # clean
+  DeleteWorkspace(Workspace='diamond_3peaks')
+  DeleteWorkspace(Workspace='diamond_peaks_centers')
+  DeleteWorkspace(Workspace='FittedPeaksWS2')
+  DeleteWorkspace(Workspace='PeakParametersWS2')
 
 Output:
 
 .. testoutput:: ExFitVulcanPeaks
 
-    Hello world!
+
+  Spectrum 1: 
+  Expected @ 0.891980  Fitted @ 0.891512
+  Expected @ 1.075800  Fitted @ 1.074609
+  Spectrum 2: 
+  Expected @ 0.891980  Fitted @ 0.891379
+  Expected @ 1.075800  Fitted @ 1.074763
 
 .. categories::
 
