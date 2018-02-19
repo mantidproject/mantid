@@ -61,6 +61,7 @@ public:
 
 private slots:
   void browseFocusedRun();
+  void browseGSASHome();
   void browseGSASProj();
   void browseInstParams();
   void browsePhaseFiles();

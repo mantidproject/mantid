@@ -54,6 +54,12 @@ void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
   setFocusedRunFileNames(filenames);
 }
 
+void EnggDiffGSASFittingViewQtWidget::browseGSASHome() {
+  auto directoryName(QFileDialog::getExistingDirectory(
+      this, tr("GSAS-II installation directory")));
+  m_ui.lineEdit_gsasHome->setText(directoryName);
+}
+
 void EnggDiffGSASFittingViewQtWidget::browseGSASProj() {
   auto filename(QFileDialog::getSaveFileName(
       this, tr("Output GSAS-II project file"), "", "GSAS-II Project (*.gpx)"));
@@ -199,6 +205,8 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
           SLOT(browsePhaseFiles()));
   connect(m_ui.pushButton_gsasProjPath, SIGNAL(clicked()), this,
           SLOT(browseGSASProj()));
+  connect(m_ui.pushButton_browseGSASHome, SIGNAL(clicked()), this,
+          SLOT(browseGSASHome()));
 
   connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));
