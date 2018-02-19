@@ -10,7 +10,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Utils.h"
 
@@ -112,6 +112,7 @@ void SortHKL::exec() {
           "Workspace2D", uniqueReflections.getReflections().size(), 15, 15);
   int counter = 0;
   auto taxis = new TextAxis(uniqueReflections.getReflections().size());
+  UniqWksp->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   for (const auto &unique : uniqueReflections.getReflections()) {
     /* Since all possible unique reflections are explored
      * there may be 0 observations for some of them.
@@ -131,8 +132,12 @@ void SortHKL::exec() {
         std::cout << e << "  ";
       std::cout << "\n";
       auto zScores = Kernel::getZscore(intensities);
-      auto intensityStatistics = Kernel::getStatistics(
-          intensities, StatOptions::Mean | StatOptions::Median);
+      // Possibly remove outliers.
+      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical);
+
+      auto intensityStatistics =
+          Kernel::getStatistics(outliersRemoved.getIntensities(),
+                                StatOptions::Mean | StatOptions::Median);
 
       std::cout << "Mean = " << intensityStatistics.mean
                 << "  Median = " << intensityStatistics.median << "\n";
