@@ -41,7 +41,7 @@ void ConvFit::setup() {
   setMaximumSpectrum(0);
   setDefaultPeakType("Lorentzian");
   setConvolveMembers(true);
-  
+
   auto fitRangeSelector = m_uiForm->ppPlotTop->addRangeSelector("ConvFitRange");
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
           SLOT(xMinSelected(double)));
@@ -821,29 +821,17 @@ void ConvFit::updatePlotRange() {
   }
 }
 
-void ConvFit::disablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(false);
-}
+void ConvFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 
-void ConvFit::enablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(true);
-}
+void ConvFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
-void ConvFit::enablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(true);
-}
+void ConvFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
 
-void ConvFit::disablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(false);
-}
+void ConvFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 
-void ConvFit::enableSaveResult() {
-  m_uiForm->pbSave->setEnabled(true);
-}
+void ConvFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
-void ConvFit::disableSaveResult() {
-  m_uiForm->pbSave->setEnabled(false);
-}
+void ConvFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
 
 void ConvFit::addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);

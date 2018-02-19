@@ -201,31 +201,19 @@ void MSDFit::updatePlotRange() {
   }
 }
 
-void MSDFit::disablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(false);
-}
+void MSDFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 
-void MSDFit::enablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(true);
-}
+void MSDFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
 void MSDFit::updatePlotOptions() {}
 
-void MSDFit::enablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(true);
-}
+void MSDFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
 
-void MSDFit::disablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(false);
-}
+void MSDFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 
-void MSDFit::enableSaveResult() {
-  m_uiForm->pbSave->setEnabled(true);
-}
+void MSDFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
-void MSDFit::disableSaveResult() {
-  m_uiForm->pbSave->setEnabled(false);
-}
+void MSDFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
 
 void MSDFit::addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);

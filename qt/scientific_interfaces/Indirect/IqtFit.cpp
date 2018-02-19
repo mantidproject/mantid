@@ -267,21 +267,13 @@ void IqtFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
-void IqtFit::enablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(true);
-}
+void IqtFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
 
-void IqtFit::disablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(false);
-}
+void IqtFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 
-void IqtFit::enableSaveResult() {
-  m_uiForm->pbSave->setEnabled(true);
-}
+void IqtFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
-void IqtFit::disableSaveResult() {
-  m_uiForm->pbSave->setEnabled(false);
-}
+void IqtFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
 
 /**
  * Plot workspace based on user input
@@ -464,13 +456,9 @@ void IqtFit::singleFit() {
     executeSingleFit();
 }
 
-void IqtFit::disablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(false);
-}
+void IqtFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 
-void IqtFit::enablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(true);
-}
+void IqtFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
 void IqtFit::addGuessPlot(MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);

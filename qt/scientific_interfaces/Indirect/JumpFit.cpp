@@ -244,13 +244,9 @@ void JumpFit::endXChanged(double endX) {
   rangeSelector->setMaximum(endX);
 }
 
-void JumpFit::disablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(false);
-}
+void JumpFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 
-void JumpFit::enablePlotGuess() {
-  m_uiForm->ckPlotGuess->setEnabled(true);
-}
+void JumpFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
 /**
  * Updates the plot
@@ -343,21 +339,13 @@ IAlgorithm_sptr JumpFit::scaleAlgorithm(const std::string &workspaceToScale,
 
 void JumpFit::updatePlotOptions() {}
 
-void JumpFit::enablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(true);
-}
+void JumpFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
 
-void JumpFit::disablePlotResult() {
-  m_uiForm->pbPlot->setEnabled(false);
-}
+void JumpFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 
-void JumpFit::enableSaveResult() {
-  m_uiForm->pbSave->setEnabled(true);
-}
+void JumpFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
-void JumpFit::disableSaveResult() {
-  m_uiForm->pbSave->setEnabled(false);
-}
+void JumpFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
 
 void JumpFit::addGuessPlot(MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);
