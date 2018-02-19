@@ -127,11 +127,48 @@ class SANSWLNormCorrection(PythonAlgorithm):
             "Optional output directory if OutputDirectory exists in the Property Manager."
         )
 
+    def _parse_config_file(self, config_file):
+        '''
+        Parses the config file and sets the input properties as
+        the values in the file
+        Note the Key in the files must be a valid property
+        '''
+        self.parser = None
+        if os.path.exists(config_file):
+            logger.information("Using configuration file: {}.".format(config_file))
+            self.parser = ConfigParser()
+            self.parser.optionxform = lambda option: option # case sensitive
+            self.parser.read(config_file)
+
     def validateInputs(self):
         '''
         Called before everything else to make sure the inputs are valid
         '''
+
+        # If the poperty is not in the algorithm call and exists in the config file
+        # Get it from there
+        self._parse_config_file(self.getProperty('ConfigurationFile').value)
+        if self.parser:
+            props = self.getProperties()
+            for p in props:
+                logger.debug("Validating input properties: {} :: {}".format(p.name, p.value))
+                if p.isDefault and self.parser.has_option('DEFAULT', p.name):
+                    logger.information("Setting property {} with the file value {}".format(
+                        p.name, self.parser.get('DEFAULT', p.name)
+                    ))
+                    self.setProperty(p.name, self.parser.get('DEFAULT', p.name))
+
         issues = dict()
+
+        if self.getProperty('InputWorkspaces').value is not None:
+            for ws in self.getProperty('InputWorkspaces').value:
+                run = ws.getRun()
+                if not run.hasProperty('wavelength_min'):
+                    issues['InputWorkspaces'] = "Input workspace must have wavelength_min property."
+                if not run.hasProperty('wavelength_max'):
+                    issues['InputWorkspaces'] = "Input workspace must have wavelength_max property."
+        else:
+            issues['InputWorkspaces'] = "Input workspace can not be null."
 
         if len(self.getProperty('BList').value) > 1 and len(
                 self.getProperty('BList').value) != len(
@@ -152,24 +189,12 @@ class SANSWLNormCorrection(PythonAlgorithm):
         if "OutputDirectory" not in pm and self.getProperty("OutputDirectory").value.strip() == "":
             issues['OutputDirectory'] = "Property Manager has no OutputDirectory."
 
-        if self.getProperty('InputWorkspaces').value is not None:
-            for ws in self.getProperty('InputWorkspaces').value:
-                run = ws.getRun()
-                if not run.hasProperty('wavelength_min'):
-                    issues['InputWorkspaces'] = "Input workpsace must have wavelength_min property."
-                if not run.hasProperty('wavelength_max'):
-                    issues['InputWorkspaces'] = "Input workpsace must have wavelength_max property."
-
         return issues
 
     def _setup(self):
         '''
         Sets the properties as method properties
         '''
-
-        self.config_file  = self.getProperty('ConfigurationFile').value
-        # Let's replace the input properties with those from the conf file
-        self._parse_config_file()
 
         self.input_wss = self.getProperty('InputWorkspaces').value
         self.input_ws_reference = self.getProperty(
@@ -202,23 +227,6 @@ class SANSWLNormCorrection(PythonAlgorithm):
         else:
             pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
             self.output_directory = pm["OutputDirectory"].value
-
-    def _parse_config_file(self):
-        '''
-        Parses the config file and set's the input properties as
-        the values in the file
-        Note the Key in the files must be a valid property
-        '''
-
-        self.parser = None
-        if os.path.exists(self.config_file):
-            logger.information("Using configuration file: {}.".format(self.config_file))
-            self.parser = ConfigParser()
-            self.parser.optionxform = lambda option: option # case sensitive
-            self.parser.read(self.config_file)
-            for k, v in self.parser.items('DEFAULT'):
-                logger.information("Using property {} = {} from the conf file.".format(k, v))
-                self.setProperty(k, v)
 
     def _ws_to_dict(self):
         '''
@@ -398,8 +406,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
                 plsq, cov, infodict, mesg, ier = optimize.leastsq(
                     self._residuals,
-                    ([0.1, 0.1]
-                     if k is None and b is None else [0.1]),  # guess
+                    ([0.1, 0.1] if k is None and b is None else [0.1]),  # guess
                     args=(
                         ws_values['x_qrange'],
                         ws_values['e_qrange'],
