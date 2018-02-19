@@ -61,6 +61,7 @@ public:
 
 private slots:
   void browseFocusedRun();
+  void browseGSASProj();
   void browseInstParams();
   void browsePhaseFiles();
   void disableLoadIfInputEmpty();

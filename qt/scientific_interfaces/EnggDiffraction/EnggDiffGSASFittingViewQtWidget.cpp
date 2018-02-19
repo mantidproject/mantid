@@ -54,6 +54,15 @@ void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
   setFocusedRunFileNames(filenames);
 }
 
+void EnggDiffGSASFittingViewQtWidget::browseGSASProj() {
+  auto filename(QFileDialog::getSaveFileName(
+      this, tr("Output GSAS-II project file"), "", "GSAS-II Project (*.gpx)"));
+  if (!filename.endsWith(".gpx")) {
+    filename.append(".gpx");
+  }
+  m_ui.lineEdit_gsasProjPath->setText(filename);
+}
+
 void EnggDiffGSASFittingViewQtWidget::browseInstParams() {
   const auto filename(
       QFileDialog::getOpenFileName(this, tr("Instrument parameter file"), "",
@@ -188,6 +197,8 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
           SLOT(browseInstParams()));
   connect(m_ui.pushButton_browsePhaseFiles, SIGNAL(clicked()), this,
           SLOT(browsePhaseFiles()));
+  connect(m_ui.pushButton_gsasProjPath, SIGNAL(clicked()), this,
+          SLOT(browseGSASProj()));
 
   connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));
