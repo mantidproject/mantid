@@ -812,12 +812,12 @@ void IndirectFitAnalysisTab::updatePreviousModelSelected() {
 void IndirectFitAnalysisTab::updateParameterValues() {
   const auto spectrum = static_cast<size_t>(selectedSpectrum());
 
-  if (m_parameterValues.contains(spectrum))
+  if (m_parameterValues.contains(spectrum)) {
     if (m_previousModelSelected)
       m_fitPropertyBrowser->updateParameterValues(m_parameterValues[spectrum]);
     else
       m_fitPropertyBrowser->updateParameterValues(parameterValues());
-  else
+  } else
     m_fitPropertyBrowser->updateParameterValues(defaultParameterValues());
 }
 
