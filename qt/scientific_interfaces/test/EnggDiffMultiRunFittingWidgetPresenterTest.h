@@ -248,6 +248,13 @@ public:
         .Times(1)
         .WillOnce(Return(runLabel));
     EXPECT_CALL(*m_mockModel, removeRun(runLabel));
+
+    const std::vector<RunLabel> runLabels({runLabel});
+    EXPECT_CALL(*m_mockModel, getAllWorkspaceLabels())
+        .Times(1)
+        .WillOnce(Return(runLabels));
+    EXPECT_CALL(*m_mockView, updateRunList(runLabels));
+
     presenter->notify(
         IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
     assertMocksUsedCorrectly();
