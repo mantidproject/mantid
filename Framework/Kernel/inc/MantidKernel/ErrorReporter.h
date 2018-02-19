@@ -32,31 +32,32 @@ namespace Kernel {
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/  
+*/
 
-class MANTID_KERNEL_DLL ErrorReporter {  
-    public:
-    ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode, bool share);
-    ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode, bool share, std::string name, std::string email);
-    void sendErrorReport();
+class MANTID_KERNEL_DLL ErrorReporter {
+public:
+  ErrorReporter(std::string application, Types::Core::time_duration startTime,
+                std::string exitCode, bool share);
+  ErrorReporter(std::string application, Types::Core::time_duration startTime,
+                std::string exitCode, bool share, std::string name,
+                std::string email);
+  void sendErrorReport();
 
-    protected:
-    virtual std::string generateErrorMessage();
-    virtual int sendReport(const std::string &message,
-                                 const std::string &url);
-    
-    private:
-    int sendErrorAsyncImpl(const std::string &message);
-    const std::string m_application;
-    
-    /// Async method for sending startup notifications
-    Poco::ActiveMethod<int, std::string, ErrorReporter> m_errorActiveMethod;
-    const std::string m_exitCode;
-    const Types::Core::time_duration m_upTime;
-    const bool m_share;
-    const std::string m_name;
-    const std::string m_email;
+protected:
+  virtual std::string generateErrorMessage();
+  virtual int sendReport(const std::string &message, const std::string &url);
 
+private:
+  int sendErrorAsyncImpl(const std::string &message);
+  const std::string m_application;
+
+  /// Async method for sending startup notifications
+  Poco::ActiveMethod<int, std::string, ErrorReporter> m_errorActiveMethod;
+  const std::string m_exitCode;
+  const Types::Core::time_duration m_upTime;
+  const bool m_share;
+  const std::string m_name;
+  const std::string m_email;
 };
 
 } // namespace Kernel

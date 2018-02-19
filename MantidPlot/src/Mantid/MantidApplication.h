@@ -15,7 +15,8 @@ public:
 signals:
   bool runAsPythonScript(const QString &code);
 public slots:
-  void errorHandling(bool continueWork, int sharing, QString name, QString email);
+  void errorHandling(bool continueWork, int sharing, QString name,
+                     QString email);
 };
 
 #endif // MANTIDAPPLICATION_H_

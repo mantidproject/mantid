@@ -37,7 +37,7 @@ public:
 
   void test_errorMessage() {
     std::string name = "My testing application name";
-    Mantid::Types::Core::time_duration upTime(5,0,7,0);
+    Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime);
     std::string message = errorService.generateErrorMessage();
 
@@ -46,8 +46,9 @@ public:
     reader.parse(message, root);
     auto members = root.getMemberNames();
     std::vector<std::string> expectedMembers{
-        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
-        "osArch",   "osName",      "osReadable", "osVersion",  "uid", "facility", "upTime"};
+        "ParaView",      "application", "host",     "mantidSha1",
+        "mantidVersion", "osArch",      "osName",   "osReadable",
+        "osVersion",     "uid",         "facility", "upTime"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) !=

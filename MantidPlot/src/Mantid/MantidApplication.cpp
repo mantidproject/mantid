@@ -9,7 +9,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
 
-
 #include <QMessageBox>
 #include <QPushButton>
 
@@ -34,25 +33,30 @@ MantidApplication::MantidApplication(int &argc, char **argv)
   }
 }
 
-void MantidApplication::errorHandling(bool continueWork, int share, QString name, QString email){
+void MantidApplication::errorHandling(bool continueWork, int share,
+                                      QString name, QString email) {
   int reportingEnabled = 0;
-    int retVal = Mantid::Kernel::ConfigService::Instance().getValue("usagereports.enabled", reportingEnabled);
-    if (reportingEnabled && retVal == 1){
-      if (share==0){
-        Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "", true, name.toStdString(), email.toStdString());
-        errorReporter.sendErrorReport();
-      } 
-      else if (share==1){
-        Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "", false, name.toStdString(), email.toStdString());
+  int retVal = Mantid::Kernel::ConfigService::Instance().getValue(
+      "usagereports.enabled", reportingEnabled);
+  if (reportingEnabled && retVal == 1) {
+    if (share == 0) {
+      Mantid::Kernel::ErrorReporter errorReporter(
+          "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(),
+          "", true, name.toStdString(), email.toStdString());
       errorReporter.sendErrorReport();
-      }
-    }  
-
-    if(!continueWork){
-      g_log.fatal("Terminated by user.");
-      quit();
+    } else if (share == 1) {
+      Mantid::Kernel::ErrorReporter errorReporter(
+          "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(),
+          "", false, name.toStdString(), email.toStdString());
+      errorReporter.sendErrorReport();
     }
-    g_log.fatal("Continue working.");
+  }
+
+  if (!continueWork) {
+    g_log.fatal("Terminated by user.");
+    quit();
+  }
+  g_log.fatal("Continue working.");
 }
 
 bool MantidApplication::notify(QObject *receiver, QEvent *event) {
@@ -61,7 +65,7 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   try {
     res = QApplication::notify(receiver, event);
   } catch (std::exception &e) {
- 
+
     if (MantidQt::API::MantidDialog::handle(receiver, e))
       return true; // stops event propagation
 
@@ -78,9 +82,11 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
     error = true;
   }
 
-  if (error){
-    QString pythonCode("from ErrorReporter.errorreport import CrashReportPage\npage = CrashReportPage()\npage.show()");
-    
+  if (error) {
+    QString pythonCode("from ErrorReporter.errorreport import "
+                       "CrashReportPage\npage = "
+                       "CrashReportPage()\npage.show()");
+
     emit runAsPythonScript(pythonCode);
   }
 

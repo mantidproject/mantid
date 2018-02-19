@@ -20,20 +20,32 @@ namespace {
 /// static logger
 Logger g_log("ErrorReporter");
 }
-// const std::string ERROR_URL("http://errorreports.mantidproject.org/api/error");
+// const std::string
+// ERROR_URL("http://errorreports.mantidproject.org/api/error");
 // const std::string STARTUP_URL(
 //    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
 // http://posttestserver.com/data/
 const std::string ERROR_URL("http://ptsv2.com/t/mantidmat/post");
-//const std::string ERROR_URL("http://localhost:8082/api/error");
+// const std::string ERROR_URL("http://localhost:8082/api/error");
 
 //----------------------------------------------------------------------------------------------
 // Constructor for ErrorReporter
-ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration upTime, std::string exitCode, bool share)
-    : m_application(application), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl), m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(""), m_email("") {}
+ErrorReporter::ErrorReporter(std::string application,
+                             Types::Core::time_duration upTime,
+                             std::string exitCode, bool share)
+    : m_application(application),
+      m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl),
+      m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(""),
+      m_email("") {}
 
-ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration upTime, std::string exitCode, bool share, std::string name, std::string email)
-    : m_application(application), m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl), m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(name), m_email(email) {}
+ErrorReporter::ErrorReporter(std::string application,
+                             Types::Core::time_duration upTime,
+                             std::string exitCode, bool share, std::string name,
+                             std::string email)
+    : m_application(application),
+      m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl),
+      m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(name),
+      m_email(email) {}
 
 void ErrorReporter::sendErrorReport() {
   try {
@@ -48,9 +60,9 @@ void ErrorReporter::sendErrorReport() {
 }
 
 std::string ErrorReporter::generateErrorMessage() {
-    ::Json::Value message;
+  ::Json::Value message;
 
-    // username
+  // username
   message["uid"] = Kernel::ChecksumHelper::md5FromString(
       ConfigService::Instance().getUsername());
   // hostname
@@ -63,12 +75,12 @@ std::string ErrorReporter::generateErrorMessage() {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-  #if defined(MAKE_VATES)
-    // paraview
-    message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
-  #else
-    message["ParaView"] = 0;
-  #endif
+#if defined(MAKE_VATES)
+  // paraview
+  message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
+#else
+  message["ParaView"] = 0;
+#endif
 
   // mantid version and sha1
   message["mantidVersion"] = MantidVersion::version();
@@ -85,7 +97,7 @@ std::string ErrorReporter::generateErrorMessage() {
 
   message["exitCode"] = m_exitCode;
 
-  if (m_share){
+  if (m_share) {
     message["email"] = m_email;
     message["name"] = m_name;
   }
@@ -99,7 +111,7 @@ int ErrorReporter::sendErrorAsyncImpl(const std::string &message) {
 }
 
 int ErrorReporter::sendReport(const std::string &message,
-                                 const std::string &url) {
+                              const std::string &url) {
   int status = -1;
   try {
     Kernel::InternetHelper helper;
