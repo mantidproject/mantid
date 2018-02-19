@@ -542,6 +542,7 @@ LoadCanSAS1D                           Identical               see ``IFileLoader
 LoadDaveGrp                            Identical               see ``IFileLoader``
 LoadDiffCal                            Identical
 LoadEmptyInstrument                    Identical               see ``IFileLoader``
+LoadEventAndCompress                   Distributed
 LoadEventNexus                         Distributed             storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
 LoadEventPreNexus2                     Identical               see ``IFileLoader``
 LoadFITS                               Identical               see ``IFileLoader``
