@@ -109,7 +109,7 @@ void SortHKL::exec() {
 
   MatrixWorkspace_sptr UniqWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
-          "Workspace2D", uniqueReflections.getReflections().size(), 15, 15);
+          "Workspace2D", uniqueReflections.getReflections().size(), 20, 20);
   int counter = 0;
   auto taxis = new TextAxis(uniqueReflections.getReflections().size());
   UniqWksp->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
@@ -164,13 +164,13 @@ void SortHKL::exec() {
         UniqY[i] = intensities[i];
         if (zScores[i] > sigmaCritical)
           UniqE[i] = intensities[i];
-        else if (equivalentIntensities == "mean")
+        else if (equivalentIntensities == "Mean")
           UniqE[i] = intensityStatistics.mean - intensities[i];
         else
           UniqE[i] = intensityStatistics.median - intensities[i];
         std::cout << zScores[i] << "  ";
       }
-      for (size_t i = zScores.size(); i < 15; ++i) {
+      for (size_t i = zScores.size(); i < 20; ++i) {
         UniqX[i] = wavelengths[zScores.size() - 1];
         UniqY[i] = intensities[zScores.size() - 1];
         UniqE[i] = 0.0;
@@ -178,8 +178,19 @@ void SortHKL::exec() {
       std::cout << "\n";
     }
   }
-  UniqWksp->replaceAxis(1, taxis);
-  setProperty("EquivalentsWorkspace", UniqWksp);
+
+  MatrixWorkspace_sptr UniqWksp2 =
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", counter,
+                                                       20, 20);
+  for (int64_t i = 0; i < counter; ++i) {
+    auto &outSpec = UniqWksp2->getSpectrum(i);
+    const auto &inSpec = UniqWksp->getSpectrum(i);
+    outSpec.setHistogram(inSpec.histogram());
+    // Copy the spectrum number/detector IDs
+    outSpec.copyInfoFrom(inSpec);
+  }
+  UniqWksp2->replaceAxis(1, taxis);
+  setProperty("EquivalentsWorkspace", UniqWksp2);
 
   PeaksStatistics peaksStatistics(uniqueReflections, equivalentIntensities,
                                   sigmaCritical);
