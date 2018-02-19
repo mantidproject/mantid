@@ -89,6 +89,11 @@ EnggDiffGSASFittingPresenter::doRietveldRefinement(
 }
 
 void EnggDiffGSASFittingPresenter::processDoRefinement() {
+  if (!m_multiRunWidget->hasSelectedRunLabel()){
+    m_view->userWarning("No run selected",
+                        "Please select a run to do refinement on");
+    return;
+  }
   const auto runLabel = m_multiRunWidget->getSelectedRunLabel();
   const auto inputWSOptional = m_multiRunWidget->getFocusedRun(runLabel);
 

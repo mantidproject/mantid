@@ -114,6 +114,10 @@ RunLabel EnggDiffMultiRunFittingWidgetPresenter::getSelectedRunLabel() const {
   return m_view->getSelectedRunLabel();
 }
 
+bool EnggDiffMultiRunFittingWidgetPresenter::hasSelectedRunLabel() const {
+  return m_view->hasSelectedRunLabel();
+}
+
 void EnggDiffMultiRunFittingWidgetPresenter::notify(
     IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) {
   switch (notif) {

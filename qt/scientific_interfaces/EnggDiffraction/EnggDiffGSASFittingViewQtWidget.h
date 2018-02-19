@@ -66,6 +66,7 @@ private slots:
   void browseInstParams();
   void browsePhaseFiles();
   void disableLoadIfInputEmpty();
+  void doRefinement();
   void loadFocusedRun();
   void selectRun();
 

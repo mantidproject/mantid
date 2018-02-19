@@ -32,6 +32,8 @@ public:
 
   RunLabel getSelectedRunLabel() const override;
 
+  bool hasSelectedRunLabel() const override;
+
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
   getWidgetAdder() const override;
 

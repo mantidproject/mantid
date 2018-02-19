@@ -65,6 +65,9 @@ public:
   virtual std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
   getWidgetAdder() const = 0;
 
+  /// Get whether the user has selected a run from the list
+  virtual bool hasSelectedRunLabel() const = 0;
+
   /**
    * Notifications sent through the presenter when something changes
    * in the view. This plays the role of signals emitted by the view

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>549</width>
+    <width>580</width>
     <height>658</height>
    </rect>
   </property>
@@ -216,6 +216,13 @@
          <widget class="QLineEdit" name="lineEdit_xMin"/>
         </item>
        </layout>
+      </item>
+      <item row="5" column="3">
+       <widget class="QPushButton" name="pushButton_doRefinement">
+        <property name="text">
+         <string>Do Refinement</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

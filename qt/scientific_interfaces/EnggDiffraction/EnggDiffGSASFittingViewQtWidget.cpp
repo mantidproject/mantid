@@ -97,6 +97,10 @@ void EnggDiffGSASFittingViewQtWidget::displayRwp(const double rwp) const {
   throw std::runtime_error("displayRwp not yet implemented");
 }
 
+void EnggDiffGSASFittingViewQtWidget::doRefinement() {
+  m_presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
+}
+
 std::vector<std::string>
 EnggDiffGSASFittingViewQtWidget::getFocusedFileNames() const {
   const auto filenamesQStringList = m_ui.lineEdit_runFile->text().split(",");
@@ -207,6 +211,9 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
           SLOT(browseGSASProj()));
   connect(m_ui.pushButton_browseGSASHome, SIGNAL(clicked()), this,
           SLOT(browseGSASHome()));
+
+  connect(m_ui.pushButton_doRefinement, SIGNAL(clicked()), this,
+          SLOT(doRefinement()));
 
   connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));
