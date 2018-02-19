@@ -34,7 +34,9 @@ add_library ( Beamline ${SRC_FILES} ${INC_FILES} )
 set_target_properties ( Beamline PROPERTIES OUTPUT_NAME MantidBeamline
                                  COMPILE_DEFINITIONS IN_MANTID_BEAMLINE )
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Beamline PROPERTIES INSTALL_RPATH "@loader_path/../MacOS" )
+  set_target_properties(Beamline PROPERTIES INSTALL_RPATH "@loader_path/../MacOS" )
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Beamline PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 target_include_directories( Beamline SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
