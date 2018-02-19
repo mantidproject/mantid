@@ -111,6 +111,7 @@ void SortHKL::exec() {
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", uniqueReflections.getReflections().size(), 20, 20);
   int counter = 0;
+  size_t maxPeaks = 0;
   auto taxis = new TextAxis(uniqueReflections.getReflections().size());
   UniqWksp->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   for (const auto &unique : uniqueReflections.getReflections()) {
@@ -159,7 +160,8 @@ void SortHKL::exec() {
         intensities[i] = temp;
       }
       std::cout << "Zscores ";
-      for (size_t i = 0; i < zScores.size(); ++i) {
+      for (size_t i = 0; i < std::min(zScores.size(), static_cast<size_t>(20));
+           ++i) {
         UniqX[i] = wavelengths[i];
         UniqY[i] = intensities[i];
         if (zScores[i] > sigmaCritical)
