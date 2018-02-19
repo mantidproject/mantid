@@ -65,7 +65,7 @@
          <string>Nexus file containing a spectrum focused using EnggFocus or the Focus tab</string>
         </property>
         <property name="text">
-         <string>Focused Run File</string>
+         <string>Focused Run Files</string>
         </property>
        </widget>
       </item>
