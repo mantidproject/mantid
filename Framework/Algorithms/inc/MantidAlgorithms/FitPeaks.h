@@ -89,12 +89,13 @@ private:
                      API::IBackgroundFunction_sptr bkgd_func);
 
   // Peak fitting suite
-  double FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
-                           const double &expected_peak_center,
-                           const std::pair<double, double> &fitwindow,
-                           const bool &high, const bool &observe_peak_width,
-                           API::IPeakFunction_sptr peakfunction,
-                           API::IBackgroundFunction_sptr bkgdfunc);
+  double FitIndividualPeak(
+      size_t wi, API::IAlgorithm_sptr fitter,
+      const double &expected_peak_center,
+      const std::pair<double, double> &fitwindow, const bool &high,
+      API::IBackgroundFunction_sptr high_background_function,
+      const bool &observe_peak_width, API::IPeakFunction_sptr peakfunction,
+      API::IBackgroundFunction_sptr bkgdfunc);
 
   /// Methods to fit functions (general)
   double FitFunctionSD(API::IAlgorithm_sptr fit,
@@ -110,13 +111,12 @@ private:
                        std::vector<double> &vec_xmax);
 
   /// fit a single peak with high background
-  double FitFunctionHighBackground(API::IAlgorithm_sptr fit,
-                                   const std::pair<double, double> &fit_window,
-                                   const size_t &ws_index,
-                                   const double &expected_peak_center,
-                                   API::IPeakFunction_sptr peakfunction,
-                                   API::IBackgroundFunction_sptr bkgdfunc,
-                                   bool observe_peak_width);
+  double FitFunctionHighBackground(
+      API::IAlgorithm_sptr fit, const std::pair<double, double> &fit_window,
+      const size_t &ws_index, const double &expected_peak_center,
+      bool observe_peak_width, API::IPeakFunction_sptr peakfunction,
+      API::IBackgroundFunction_sptr bkgdfunc,
+      API::IBackgroundFunction_sptr high_bkgd_function);
 
   /// get vector X, Y and E in a given range
   void GetRangeData(size_t iws, const std::pair<double, double> &fit_window,

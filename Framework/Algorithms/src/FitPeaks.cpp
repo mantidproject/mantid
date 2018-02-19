@@ -759,6 +759,12 @@ void FitPeaks::fitSpectrumPeaks(
   compfunc->addFunction(peakfunction);
   compfunc->addFunction(bkgdfunction);
 
+  // high background to reduce
+  API::IBackgroundFunction_sptr high_bkgd_func(0);
+  if (linear_background_function_)
+    high_bkgd_func = boost::dynamic_pointer_cast<API::IBackgroundFunction>(
+        linear_background_function_->clone());
+
   // set up properties of algorithm (reference) 'Fit'
   peak_fitter->setProperty("Minimizer", m_minimizer);
   peak_fitter->setProperty("CostFunction", m_costFunction);
@@ -791,7 +797,7 @@ void FitPeaks::fitSpectrumPeaks(
       // do fitting with peak and background function (no analysis at this
       // point)
       cost = FitIndividualPeak(wi, peak_fitter, expected_peak_pos,
-                               peak_window_i, m_highBackground,
+                               peak_window_i, m_highBackground, high_bkgd_func,
                                observe_peak_width, peakfunction, bkgdfunction);
     }
 
@@ -1348,6 +1354,14 @@ double FitPeaks::ObservePeakWidth(HistogramData::HistogramX &vector_x,
 }
 
 //----------------------------------------------------------------------------------------------
+/** Fit background function
+ * @brief FitPeaks::FitBackground
+ * @param ws_index
+ * @param fit_window
+ * @param expected_peak_pos
+ * @param bkgd_func
+ * @return
+ */
 bool FitPeaks::FitBackground(const size_t &ws_index,
                              const std::pair<double, double> &fit_window,
                              const double &expected_peak_pos,
@@ -1362,6 +1376,7 @@ bool FitPeaks::FitBackground(const size_t &ws_index,
       findXIndex(m_inputMatrixWS->histogram(ws_index).x(), expected_peak_pos);
 
   // treat 5 as a magic number
+  bool good_fit(false);
   if (expected_peak_index - start_index > 10 &&
       stop_index - expected_peak_index - stop_index > 10) {
     // enough data points left for multi-domain fitting
@@ -1386,12 +1401,9 @@ bool FitPeaks::FitBackground(const size_t &ws_index,
         FitFunctionMD(bkgd_func, m_inputMatrixWS, ws_index, vec_min, vec_max);
 
     // process
-    bool good_fit(false);
     if (chi2 < DBL_MAX - 1) {
       good_fit = true;
     }
-
-    return good_fit;
 
   } else {
     // fit as a single domain function.  check whether the result is good or bad
@@ -1401,11 +1413,7 @@ bool FitPeaks::FitBackground(const size_t &ws_index,
                 "domain function!");
   }
 
-  g_log.notice() << "[DB...BAT] ws-index " << ws_index
-                 << ", fit window (index): " << start_index << ", " << stop_index
-                 << ". background function: " << bkgd_func->asString() << "\n";
-
-  return false;
+  return good_fit;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1423,21 +1431,20 @@ bool FitPeaks::FitBackground(const size_t &ws_index,
  * @param bkgdfunc
  * @return
  */
-double FitPeaks::FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
-                                   const double &expected_peak_center,
-                                   const std::pair<double, double> &fitwindow,
-                                   const bool &high,
-                                   const bool &observe_peak_width,
-                                   API::IPeakFunction_sptr peakfunction,
-                                   API::IBackgroundFunction_sptr bkgdfunc) {
+double FitPeaks::FitIndividualPeak(
+    size_t wi, API::IAlgorithm_sptr fitter, const double &expected_peak_center,
+    const std::pair<double, double> &fitwindow, const bool &high,
+    API::IBackgroundFunction_sptr high_background_function,
+    const bool &observe_peak_width, API::IPeakFunction_sptr peakfunction,
+    API::IBackgroundFunction_sptr bkgdfunc) {
 
   double cost(DBL_MAX);
 
   if (high) {
     // fit peak with high background!
-    cost =
-        FitFunctionHighBackground(fitter, fitwindow, wi, expected_peak_center,
-                                  peakfunction, bkgdfunc, observe_peak_width);
+    cost = FitFunctionHighBackground(
+        fitter, fitwindow, wi, expected_peak_center, observe_peak_width,
+        peakfunction, bkgdfunc, high_background_function);
   } else {
     // fit peak and background
     cost = FitFunctionSD(fitter, peakfunction, bkgdfunc, m_inputMatrixWS, wi,
@@ -1523,8 +1530,8 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
 
   fit->executeAsChildAlg();
 
-  g_log.notice() << "[E1202] FitSingleDomain After fitting, Fit function: "
-                 << fit->asString() << "\n";
+  g_log.debug() << "[E1202] FitSingleDomain After fitting, Fit function: "
+                << fit->asString() << "\n";
 
   if (!fit->isExecuted()) {
     g_log.error("Fitting peak SD (single domain) failed to execute.");
@@ -1644,18 +1651,18 @@ double FitPeaks::FitFunctionMD(API::IFunction_sptr fit_function,
 double FitPeaks::FitFunctionHighBackground(
     IAlgorithm_sptr fit, const std::pair<double, double> &fit_window,
     const size_t &ws_index, const double &expected_peak_center,
-    API::IPeakFunction_sptr peakfunction,
-    API::IBackgroundFunction_sptr bkgdfunc, bool observe_peak_width) {
+    bool observe_peak_width, API::IPeakFunction_sptr peakfunction,
+    API::IBackgroundFunction_sptr bkgdfunc,
+    API::IBackgroundFunction_sptr high_bkgd_function) {
   // Fit the background first if there is enough data points
-  FitBackground(ws_index, fit_window, expected_peak_center,
-                linear_background_function_);
+  FitBackground(ws_index, fit_window, expected_peak_center, high_bkgd_function);
 
   // Get partial of the data
   std::vector<double> vec_x, vec_y, vec_e;
   GetRangeData(ws_index, fit_window, &vec_x, &vec_y, &vec_e);
 
   // Reduce the background
-  ReduceBackground(linear_background_function_, vec_x, &vec_y);
+  ReduceBackground(high_bkgd_function, vec_x, &vec_y);
 
   // Create a new workspace
   API::MatrixWorkspace_sptr reduced_bkgd_ws =
@@ -1668,9 +1675,9 @@ double FitPeaks::FitFunctionHighBackground(
 
   // add the reduced background back
   bkgdfunc->setParameter(0, bkgdfunc->getParameter(0) +
-                                linear_background_function_->getParameter(0));
+                                high_bkgd_function->getParameter(0));
   bkgdfunc->setParameter(1, bkgdfunc->getParameter(1) +
-                                linear_background_function_->getParameter(1));
+                                high_bkgd_function->getParameter(1));
 
   return cost;
 }
