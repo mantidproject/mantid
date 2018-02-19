@@ -57,9 +57,11 @@ public:
   /// Returns values passed for 'Transmission run(s)'
   std::string getTransmissionRuns(int group) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions(int group) const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions(int group) const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions(int group) const override;
   /// Returns time-slicing values
@@ -81,6 +83,8 @@ public:
   /// Returns whether the Runs Tab is currently processing any runs
   bool checkIfProcessing() const override;
 
+  void settingsChanged(int group) override;
+
 private:
   /// Check for Settings Tab null pointer
   void checkSettingsPtrValid(IReflSettingsTabPresenter *pointer) const;
@@ -90,6 +94,7 @@ private:
   void pauseReduction() const;
   /// Resumes reduction in the Runs Tab
   void resumeReduction() const;
+  void showHelp();
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'

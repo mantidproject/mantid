@@ -60,6 +60,8 @@ OneLevelTreeManager::OneLevelTreeManager(DataProcessorPresenter *presenter,
 */
 OneLevelTreeManager::~OneLevelTreeManager() {}
 
+bool OneLevelTreeManager::isMultiLevel() const { return false; }
+
 /**
 * Publishes a list of available commands
 * @return : The list of available commands
@@ -428,6 +430,12 @@ bool OneLevelTreeManager::isProcessed(int position, int parent) const {
 */
 void OneLevelTreeManager::setProcessed(bool processed, int position) {
   m_model->setProcessed(processed, position);
+}
+
+void OneLevelTreeManager::invalidateAllProcessed() {
+  for (auto i = 0; i < m_model->rowCount(); i++) {
+    setProcessed(false, i);
+  }
 }
 
 /** Sets the 'process' status of a row

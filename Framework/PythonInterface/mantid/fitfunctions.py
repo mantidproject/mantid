@@ -746,6 +746,10 @@ def _create_wrapper_function(name):
     wrapper_function.__name__ = name
     globals()[name] = wrapper_function
 
-fnames = FunctionFactory.getFunctionNames()
-for i, val in enumerate(fnames):
-    _create_wrapper_function(val)
+
+def _create_wrappers_for_all_fit_functions():
+    for name in FunctionFactory.getFunctionNames():
+        _create_wrapper_function(name)
+
+
+_create_wrappers_for_all_fit_functions()

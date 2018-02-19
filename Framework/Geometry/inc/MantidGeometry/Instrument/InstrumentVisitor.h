@@ -5,11 +5,11 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
 #include <boost/shared_ptr.hpp>
 #include <cstddef>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -99,10 +99,14 @@ private:
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_detectorPositions;
 
   /// Rotations for non-detectors
-  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
+  boost::shared_ptr<std::vector<Eigen::Quaterniond,
+                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      m_rotations;
 
   /// Rotations for detectors
-  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_detectorRotations;
+  boost::shared_ptr<std::vector<Eigen::Quaterniond,
+                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      m_detectorRotations;
 
   /// Monitor indexes for detectors
   boost::shared_ptr<std::vector<size_t>> m_monitorIndices;
@@ -147,6 +151,9 @@ private:
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers() const;
 
+  /// Extract the common aspects relevant to all component types
+  size_t commonRegistration(const Mantid::Geometry::IComponent &component);
+
 public:
   InstrumentVisitor(boost::shared_ptr<const Instrument> instrument);
 
@@ -165,14 +172,10 @@ public:
   registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;
 
   virtual size_t
-  registerBankOfTubes(const Mantid::Geometry::ICompAssembly &bank) override;
-
-  virtual size_t registerTube(const ICompAssembly &tube) override;
-
-  virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
-  virtual size_t registerTubeObj(const ObjCompAssembly &objTube) override;
+  virtual size_t
+  registerObjComponentAssembly(const ObjCompAssembly &obj) override;
 
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
   componentIds() const;

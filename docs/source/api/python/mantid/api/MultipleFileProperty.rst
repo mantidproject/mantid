@@ -28,7 +28,7 @@ with some simple examples:
 +--------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
 | Name               | Usage                       | Description                                                                                | Example Input     | Example Result                       |
 +====================+=============================+============================================================================================+===================+======================================+
-| List               | ``<run>,<run>``             | Used to list runs                                                                          | ``INST1,2,3.ext`` | Load and sum runs 1, 2 and 3         |
+| List               | ``<run>,<run>``             | Used to list runs                                                                          | ``INST1,2,3.ext`` | Load runs 1, 2 and 3                 |
 +--------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
 | Plus               | ``<run>+<run>``             | Used to specify which runs that are to be loaded and then summed together                  | ``INST1+2+3.ext`` | Load and sum runs 1, 2 and 3         |
 +--------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
@@ -36,9 +36,9 @@ with some simple examples:
 +--------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
 | Stepped Range      | ``<run>:<run>:<step_size>`` | Used to specify a ''stepped'' range of runs to load                                        | ``INST1:5:2.ext`` | Load runs 1, 3 and 5                 |
 +--------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
-| Added Range        | ``<run>-<run>``             | Used to specify a range of runs that are to be loaded and then summed together             | ``INST1-4.ext``   | Load and then sum runs 1, 2, 3 and 4 |
+| Added Range        | ``<run>-<run>``             | Used to specify a range of runs that are to be loaded and then summed together             | ``INST1-4.ext``   | Load and sum runs 1, 2, 3 and 4      |
 +--------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
-|Stepped Added Range | ``<run>-<run>:<step_size>`` | Used to specify a ''stepped'' range of runs that are to be loaded and then summed together | ``INST1-5:2.ext`` | Load and then sum runs 1, 3 and 5    |
+|Stepped Added Range | ``<run>-<run>:<step_size>`` | Used to specify a ''stepped'' range of runs that are to be loaded and then summed together | ``INST1-5:2.ext`` | Load and sum runs 1, 3 and 5         |
 +--------------------+-----------------------------+--------------------------------------------------------------------------------------------+-------------------+--------------------------------------+
 
 Optional Info

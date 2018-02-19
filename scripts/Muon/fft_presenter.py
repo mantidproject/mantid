@@ -69,7 +69,8 @@ class FFTPresenter(object):
         if self.view.getWS() == "PhaseQuad":
             phaseTable={}
             phaseTable["newTable"]= self.view.isNewPhaseTable()
-            phaseTable["axis"]=self.view.getAxis()
+            phaseTable["FirstGoodData"]=self.view.getFirstGoodData()
+            phaseTable["LastGoodData"]=self.view.getLastGoodData()
             phaseTable["Instrument"]=self.load.getInstrument()
             inputs["phaseTable"]=phaseTable
             self.view.RePhaseAdvanced(preInputs)

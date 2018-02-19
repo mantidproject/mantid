@@ -2,7 +2,6 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
-#include "MantidGeometry/Instrument/ComponentVisitorHelper.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
@@ -491,13 +490,6 @@ Quat CompAssembly::getRotation() const {
 }
 
 size_t CompAssembly::registerContents(ComponentVisitor &visitor) const {
-  // via common helper
-  const auto name = this->getName();
-  if (ComponentVisitorHelper::matchesPackOfTubes(name)) {
-    return visitor.registerBankOfTubes(*this);
-  } else if (ComponentVisitorHelper::matchesPSDTube(name)) {
-    return visitor.registerTube(*this);
-  }
   // Generic Assembly registration call.
   return visitor.registerComponentAssembly(*this);
 }

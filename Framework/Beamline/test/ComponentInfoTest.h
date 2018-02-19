@@ -6,6 +6,7 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
 #include <boost/make_shared.hpp>
 #include <numeric>
 #include <string>
@@ -16,7 +17,8 @@ using namespace Mantid::Beamline;
 namespace {
 
 using PosVec = std::vector<Eigen::Vector3d>;
-using RotVec = std::vector<Eigen::Quaterniond>;
+using RotVec = std::vector<Eigen::Quaterniond,
+                           Eigen::aligned_allocator<Eigen::Quaterniond>>;
 using StrVec = std::vector<std::string>;
 
 /*
@@ -760,21 +762,21 @@ public:
     TS_ASSERT_EQUALS(compInfo.name(0), "det0");
   }
 
-  void test_indexOf_name_throws_when_name_invalid() {
+  void test_indexOfAny_name_throws_when_name_invalid() {
     auto infos = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &compInfo = *std::get<0>(infos);
     TSM_ASSERT_THROWS("Should throw, this name does not exist",
-                      compInfo.indexOf("phantom"), std::invalid_argument &)
+                      compInfo.indexOfAny("phantom"), std::invalid_argument &)
     // Sanity check.
     TSM_ASSERT_THROWS_NOTHING("Should NOT throw if provided with a valid name",
-                              compInfo.indexOf(compInfo.name(0)));
+                              compInfo.indexOfAny(compInfo.name(0)));
   }
 
-  void test_indexOf() {
+  void test_indexOfAny() {
     auto infos = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &compInfo = *std::get<0>(infos);
-    TS_ASSERT_EQUALS(compInfo.indexOf("det0"), 0);
-    TS_ASSERT_EQUALS(compInfo.indexOf("root"), compInfo.root());
+    TS_ASSERT_EQUALS(compInfo.indexOfAny("det0"), 0);
+    TS_ASSERT_EQUALS(compInfo.indexOfAny("root"), compInfo.root());
   }
 
   void test_scan_count_no_scanning() {
