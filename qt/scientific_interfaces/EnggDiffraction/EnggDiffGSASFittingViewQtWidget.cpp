@@ -55,16 +55,22 @@ void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
 }
 
 void EnggDiffGSASFittingViewQtWidget::browseInstParams() {
-  const auto filename =
+  const auto filename(
       QFileDialog::getOpenFileName(this, tr("Instrument parameter file"), "",
-                                   "Instrument parameter file (*.par *.prm)");
+                                   "Instrument parameter file (*.par *.prm)"));
   m_ui.lineEdit_instParamsFile->setText(filename);
+}
+
+void EnggDiffGSASFittingViewQtWidget::browsePhaseFiles() {
+  const auto filenames(QFileDialog::getOpenFileNames(
+      this, tr("Phase files"), "", "Phase files (*.cif)"));
+  m_ui.lineEdit_phaseFiles->setText(filenames.join(tr(",")));
 }
 
 void EnggDiffGSASFittingViewQtWidget::disableLoadIfInputEmpty() {
   setLoadEnabled(!runFileLineEditEmpty());
 }
-
+  
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
     const Mantid::API::ITableWorkspace_sptr latticeParams) const {
   UNUSED_ARG(latticeParams);
@@ -180,6 +186,8 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
 
   connect(m_ui.pushButton_browseInstParams, SIGNAL(clicked()), this,
           SLOT(browseInstParams()));
+  connect(m_ui.pushButton_browsePhaseFiles, SIGNAL(clicked()), this,
+          SLOT(browsePhaseFiles()));
 
   connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));
