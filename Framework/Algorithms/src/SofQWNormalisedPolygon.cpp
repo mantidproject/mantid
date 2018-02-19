@@ -407,7 +407,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
  */
 RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
     const API::MatrixWorkspace &inputWorkspace,
-    const std::vector<double> &binParams, std::vector<double> &newAxis,
+    const std::vector<double> &qbinParams, std::vector<double> &qAxis,
     const std::vector<double> &ebinParams) {
   using Kernel::VectorHelper::createAxisFromRebinParams;
 
@@ -423,14 +423,14 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(
-      VectorHelper::createAxisFromRebinParams(binParams, newAxis));
+      VectorHelper::createAxisFromRebinParams(qbinParams, qAxis));
 
   // Create output workspace, bin edges are same as in inputWorkspace index 0
   auto outputWorkspace =
       create<RebinnedOutput>(inputWorkspace, yLength - 1, xAxis);
 
   // Create a binned numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new BinEdgeAxis(newAxis);
+  Axis *const verticalAxis = new BinEdgeAxis(qAxis);
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   // Set the axis units

@@ -151,8 +151,8 @@ void SofQW::exec() {
  */
 API::MatrixWorkspace_sptr
 SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
-                            const std::vector<double> &binParams,
-                            std::vector<double> &newAxis,
+                            const std::vector<double> &qbinParams,
+                            std::vector<double> &qAxis,
                             const std::vector<double> &ebinParams) {
   // Create vector to hold the new X axis values
   HistogramData::BinEdges xAxis(0);
@@ -167,13 +167,13 @@ SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(
-      VectorHelper::createAxisFromRebinParams(binParams, newAxis));
+      VectorHelper::createAxisFromRebinParams(qbinParams, qAxis));
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, yLength - 1, xLength, xLength - 1);
   // Create a numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new BinEdgeAxis(newAxis);
+  Axis *const verticalAxis = new BinEdgeAxis(qAxis);
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   // Now set the axis values
