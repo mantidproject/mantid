@@ -3,6 +3,8 @@
 call %~dp0buildenv.bat
 
 setlocal ENABLEEXTENSIONS
+setlocal enabledelayedexpansion
+
 set KEY_NAME="HKCR\Applications\pycharm.exe\shell\open\command"
 
 FOR /F "usebackq tokens=2*" %%A IN (`REG QUERY %KEY_NAME% `) DO (
@@ -11,9 +13,10 @@ FOR /F "usebackq tokens=2*" %%A IN (`REG QUERY %KEY_NAME% `) DO (
 )
 
 if defined ValueValue (
-    @echo Value Type = %ValueType%
-    @echo Command = %ValueValue%
-    start "" %ValueValue: "%1"=%
+    :: Strip "" and %1
+    set ValueValue=!ValueValue:"=!
+    set ValueValue=!ValueValue: %%1=!
+    start "" "!ValueValue!"
 ) else (
     @echo %KEY_NAME% not found.
 )
