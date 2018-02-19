@@ -71,12 +71,10 @@ void LoadMcStas::exec() {
   auto itend = entries.end();
   WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);
 
-  // here loop over all top level Nexus entries
-  // HOWEVER IF IT IS KNOWN THAT MCSTAS NEXUS ONLY EVER HAVE ONE TOP LEVEL ENTRY
-  // THIS LOOP CAN BE REMOVED
-  for (auto it = entries.begin(); it != itend; ++it) {
-    std::string name = it->first;
-    std::string type = it->second;
+    // McStas Nexus only ever have one top level entry
+    auto entry = entries.begin();
+    std::string name = entry->first;
+    std::string type = entry->second;
 
     // open top entry - open data entry
     nxFile.openGroup(name, type);
@@ -143,8 +141,7 @@ void LoadMcStas::exec() {
     }
 
     setProperty("OutputWorkspace", outputGroup);
-  }
-} // LoadMcStas::exec()
+  } // LoadMcStas::exec()
 
 /**
  * Read Event Data
