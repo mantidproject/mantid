@@ -9,6 +9,7 @@ from SANSUtility import (AddOperation, transfer_special_sample_logs,
                          bundle_added_event_data_as_group, WorkspaceType,
                          get_workspace_type, getFileAndName)
 from shutil import copyfile
+import numpy as np
 
 sanslog = Logger("SANS")
 _NO_INDIVIDUAL_PERIODS = -1
@@ -18,8 +19,17 @@ ADD_FILES_NEW_TEMPORARY = "AddFilesNewTempory"
 ADD_FILES_NEW_TEMPORARY_MONITORS = "AddFilesNewTempory_monitors"
 
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, # noqa: C901
-             binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts=None):
+def add_runs(runs, # noqa: C901
+             inst='sans2d',
+             defType='.nxs',
+             rawTypes=('.raw', '.s*', 'add','.RAW'),
+             lowMem=False,
+             binning='Monitors',
+             saveAsEvent=False,
+             isOverlay=False,
+             time_shifts=None,
+             outFile=None,
+             outFile_monitors=None):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
   #check if there is at least one file in the list
@@ -120,8 +130,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
         lastFile = os.path.splitext(lastFile)[0]
     # now save the added file
-        outFile = lastFile+'-add.'+'nxs'
-        outFile_monitors = lastFile+'-add_monitors.'+'nxs'
+        outFile = lastFile+'-add.'+'nxs' if outFile is None else outFile
+        outFile_monitors = lastFile+'-add_monitors.'+'nxs' if outFile_monitors is None else outFile_monitors
         logger.notice('writing file:   '+outFile)
 
         if period == 1 or period == _NO_INDIVIDUAL_PERIODS:
@@ -307,7 +317,7 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
         # but hopefully not longer than two weeks!
         for i in range(len(timeArray)-1):
         # cal time dif in seconds
-            timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
+            timeDif = (timeArray[i+1]-timeArray[i]) / np.timedelta64(1, 's')
             if timeDif > 172800:
                 sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
                                 ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")

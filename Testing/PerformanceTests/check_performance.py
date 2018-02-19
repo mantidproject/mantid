@@ -19,7 +19,11 @@ import subprocess
 import tempfile
 import sqlresults
 import numpy as np
-import analysis
+try:
+    import analysis
+except ImportError:
+    import analysis_mpl as analysis
+import secureemail
 
 
 #====================================================================================
@@ -63,6 +67,9 @@ def run(args):
     # up the tolerance for those taking less time than 10ms.
     timer_resolution_hi = 0.01
     timer_resolution_lo = 0.0011
+    
+    regression_names = []
+    speedup_names = []
 
     for name in names:
         (r, t) = analysis.get_runtime_data(name, x_field='revision')
@@ -79,8 +86,6 @@ def run(args):
                 tolerance = 100.0
             else:
                 tolerance = 70.0
-            print "%s is fast, tolerance has been increased to %f" % (name,tolerance)
-
 
         # Cut out any times after or = to the current rev
         t = t[r < rev]
@@ -95,56 +100,16 @@ def run(args):
             # % speed change
             pct = ((baseline_time / current_time) - 1) * 100
 
-            timing_str = "was %8.3f s, now %8.3f s. Speed changed by %+8.1f %%." % (baseline_time, current_time, pct)
-            if args.verbose:
-                print "%s" % name
-                print "   %s" % timing_str
-
             # Did we fail (slow down too much)
             if pct < -tolerance:
-                bad_results += "Warning! Slow down in performance test %s\n" % name
-                bad_results += "    (%s)\n" % timing_str
-                num_bad += 1
-
-            # Hey you got better!
+                regression_names.append(name)
             elif pct > tolerance:
-                good_results += "Congratulations! You sped up the performance of test %s\n" % name
-                good_results += "    (%s)\n" % timing_str
-                num_good += 1
-            # No change
-            else:
-                num_same += 1
-
-        else:
-            # Not enough stats
-            num_notenoughstats += 1
-            if args.verbose:
-                print "%s" % name
-                print "   Insufficient statistics."
-
-    np.random.seed()
-
-    def waswere(num):
-        if num > 1 or num==0:
-            return "were"
-        else:
-            return "was"
-
-    print
-    print "-------- Summary ---------"
-    print
-    print "Out of %d tests, %d %s the same speed, %d %s faster, and %d %s slower." % (len(names), num_same, waswere(num_same),  num_good, waswere(num_good),  num_bad, waswere(num_bad))
-    if (num_notenoughstats > 0):
-        print "%d test(s) did not have a history of %d previous revisions and were not compared." % (num_notenoughstats, avg)
-    print
-    if num_good > 0:
-        print good_results
-    if num_bad > 0:
-        print bad_results
-        quips = ["Bad programmer! No cookie!", "Tsk. Tsk. Tsk.", "How could you!?", "Now get back in there and fix it!", "What did you do? WHAT DID YOU DO!?!"]
-        print quips[np.random.randint(len(quips))]
-        print
-
+                speedup_names.append(name)
+    
+    regLinks = ["http://builds.mantidproject.org/job/master_performancetests2/Master_branch_performance_tests/{}.htm".format(name) for name in regression_names]
+    speedLinks = ["http://builds.mantidproject.org/job/master_performancetests2/Master_branch_performance_tests/{}.htm".format(name) for name in speedup_names]
+    email = secureemail.SendEmailSecure(args.sender, args.pwd, args.recipient, regLinks, speedLinks)
+    email.send()
 
 #====================================================================================
 if __name__ == "__main__":
@@ -154,6 +119,12 @@ if __name__ == "__main__":
     parser.add_argument('db', metavar='DBFILE', type=str, nargs=1,
                         default="./MantidSystemTests.db",
                         help='Full path to the SQLite database holding the results (default "./MantidSystemTests.db"). ')
+                        
+    parser.add_argument('sender', type=str, default="mantidproject@gmail.com",
+                        help='Gmail email address')
+
+    parser.add_argument('pwd', type=str, help='password for gmail address')
+    parser.add_argument('recipient', type=str, help='recipient email address')
 
     parser.add_argument('--avg', dest='avg', type=int, default="5",
                         help='Average over this many previous revisions to find a baseline. Default 5.')

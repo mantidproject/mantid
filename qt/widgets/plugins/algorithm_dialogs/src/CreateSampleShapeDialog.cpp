@@ -622,8 +622,13 @@ void BinaryTreeWidget::traverseInPostOrder(
   expression.append(node);
 }
 
+#if QT_VERSION < 0x050000
 void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
                                    const QModelIndex &) {
+#else
+void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
+                                   const QModelIndex &, const QVector<int> &) {
+#endif
   emit treeDataChange(
       dynamic_cast<BinaryTreeWidgetItem *>(itemFromIndex(topLeft)),
       topLeft.data(Qt::UserRole).toInt());

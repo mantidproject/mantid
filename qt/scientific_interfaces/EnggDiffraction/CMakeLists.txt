@@ -2,8 +2,15 @@ set ( SRC_FILES
 	EnggDiffFittingModel.cpp
 	EnggDiffFittingPresenter.cpp
 	EnggDiffFittingViewQtWidget.cpp
+	EnggDiffGSASFittingModel.cpp
+	EnggDiffGSASFittingPresenter.cpp
+	EnggDiffGSASFittingViewQtWidget.cpp
+	EnggDiffMultiRunFittingQtWidget.cpp
+	EnggDiffMultiRunFittingWidgetModel.cpp
+	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
+	RunLabel.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -14,22 +21,39 @@ set ( INC_FILES
 	EnggDiffFittingPresWorker.h
 	EnggDiffFittingPresenter.h
 	EnggDiffFittingViewQtWidget.h
+	EnggDiffGSASFittingModel.h
+	EnggDiffGSASFittingPresenter.h
+	EnggDiffGSASFittingViewQtWidget.h
+	EnggDiffGSASRefinementMethod.h
+	EnggDiffMultiRunFittingQtWidget.h
+	EnggDiffMultiRunFittingWidgetModel.h
+	EnggDiffMultiRunFittingWidgetPresenter.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
 	IEnggDiffFittingModel.h
 	IEnggDiffFittingPresenter.h
+	IEnggDiffGSASFittingModel.h
+	IEnggDiffGSASFittingPresenter.h
+	IEnggDiffGSASFittingView.h
+	IEnggDiffMultiRunFittingWidgetModel.h
+	IEnggDiffMultiRunFittingWidgetPresenter.h
+	IEnggDiffMultiRunFittingWidgetView.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
+	RunLabel.h
+	RunMap.h
 )
 
 set ( MOC_FILES
     EnggDiffFittingPresenter.h
     EnggDiffFittingPresWorker.h
     EnggDiffFittingViewQtWidget.h
+    EnggDiffGSASFittingViewQtWidget.h
     EnggDiffractionPresenter.h
     EnggDiffractionPresWorker.h
     EnggDiffractionViewQtGUI.h
+    EnggDiffMultiRunFittingQtWidget.h
 )
 
 set ( UI_FILES
@@ -38,7 +62,9 @@ set ( UI_FILES
    EnggDiffractionQtTabFocus.ui
    EnggDiffractionQtTabPreproc.ui
    EnggDiffractionQtTabFitting.ui
+   EnggDiffractionQtTabGSAS.ui
    EnggDiffractionQtTabSettings.ui
+   EnggDiffMultiRunFittingWidget.ui
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction

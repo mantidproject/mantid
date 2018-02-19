@@ -1,4 +1,6 @@
 #include "ReflRunsTabPresenter.h"
+#include "IReflMainWindowPresenter.h"
+#include "IReflRunsTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,17 +9,16 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "IReflMainWindowPresenter.h"
-#include "IReflRunsTabView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflCatalogSearcher.h"
+#include "ReflFromStdStringMap.h"
 #include "ReflLegacyTransferStrategy.h"
 #include "ReflMeasureTransferStrategy.h"
 #include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
-#include "ReflFromStdStringMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/ProgressPresenter.h"
 
 #include <QStringList>
 #include <boost/regex.hpp>
@@ -58,14 +59,9 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     std::vector<DataProcessorPresenter *> tablePresenters,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_tablePresenters(tablePresenters), m_mainPresenter(),
+      m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
       m_searcher(searcher), m_instrumentChanged(false) {
-
-  // Register this presenter as the workspace receiver
-  // When doing so, the inner presenters will notify this
-  // presenter with the list of commands
-  for (const auto &presenter : m_tablePresenters)
-    presenter->accept(this);
+  assert(m_view != nullptr);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
@@ -112,8 +108,21 @@ ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
 */
 void ReflRunsTabPresenter::acceptMainPresenter(
     IReflMainWindowPresenter *mainPresenter) {
-
   m_mainPresenter = mainPresenter;
+  // Register this presenter as the workspace receiver
+  // When doing so, the inner presenters will notify this
+  // presenter with the list of commands
+
+  for (const auto &presenter : m_tablePresenters)
+    presenter->accept(this);
+  // Note this must be done here since notifying the gdpp of its view
+  // will cause it to request settings only accessible via the main
+  // presenter.
+}
+
+void ReflRunsTabPresenter::settingsChanged(int group) {
+  assert(static_cast<std::size_t>(group) < m_tablePresenters.size());
+  m_tablePresenters[group]->settingsChanged();
 }
 
 /**
@@ -403,13 +412,26 @@ void ReflRunsTabPresenter::notifyADSChanged(
       m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
-/** Requests global pre-processing options as a string. Options are supplied by
+/** Requests global pre-processing options. Options are supplied by
+  * the main presenter and there can be multiple sets of options for different
+  * columns that need to be preprocessed.
+  * @return :: A map of the column name to the global pre-processing options
+  * for that column
   * the main presenter.
   * @return :: Global pre-processing options
   */
-OptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+  ColumnOptionsQMap result;
+  assert(m_mainPresenter != nullptr &&
+         "The main presenter must be set with acceptMainPresenter.");
 
-  return m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
+  // Note that there are no options for the Run(s) column so just add
+  // Transmission Run(s)
+  auto transmissionOptions = OptionsQMap(
+      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
+  result["Transmission Run(s)"] = transmissionOptions;
+
+  return result;
 }
 
 /** Requests global processing options. Options are supplied by the main
@@ -417,6 +439,8 @@ OptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
 * @return :: Global processing options
 */
 OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
+  assert(m_mainPresenter != nullptr &&
+         "The main presenter must be set with acceptMainPresenter.");
   return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 

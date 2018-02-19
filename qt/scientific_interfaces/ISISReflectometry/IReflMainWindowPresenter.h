@@ -40,7 +40,11 @@ public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
 
-  enum class Flag { ConfirmReductionPausedFlag, ConfirmReductionResumedFlag };
+  enum class Flag {
+    ConfirmReductionPausedFlag,
+    ConfirmReductionResumedFlag,
+    HelpPressed
+  };
   virtual void notify(Flag flag) = 0;
 
   /// Pre-processing
@@ -67,6 +71,8 @@ public:
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check
   virtual bool checkIfProcessing() const = 0;
+
+  virtual void settingsChanged(int group) = 0;
 };
 }
 }

@@ -4,6 +4,8 @@
 #include "IReflEventTabPresenter.h"
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include <iostream>
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
@@ -30,7 +32,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_savePresenter->acceptMainPresenter(this);
-  // Settings tab does not need a main presenter
+  m_settingsPresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
   m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
@@ -52,9 +54,21 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
   case Flag::ConfirmReductionResumedFlag:
     m_isProcessing = true;
     break;
+  case Flag::HelpPressed:
+    showHelp();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
+}
+
+void ReflMainWindowPresenter::showHelp() {
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("ISIS Reflectometry"));
+}
+
+void ReflMainWindowPresenter::settingsChanged(int group) {
+  m_runsPresenter->settingsChanged(group);
 }
 
 /** Returns values passed for 'Transmission run(s)'

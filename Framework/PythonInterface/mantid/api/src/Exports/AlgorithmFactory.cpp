@@ -167,6 +167,10 @@ void export_AlgorithmFactory() {
            (arg("self"), arg("include_hidden")),
            "Return a list of descriptors of registered algorithms. Each "
            "descriptor is a list: [name, version, category, alias].")
+      .def("unsubscribe", &AlgorithmFactoryImpl::unsubscribe,
+           (arg("self"), arg("name"), arg("version")),
+           "Returns the highest version of the named algorithm. Throws "
+           "ValueError if no algorithm can be found")
 
       .def("Instance", &AlgorithmFactory::Instance,
            return_value_policy<reference_existing_object>(),

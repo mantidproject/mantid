@@ -707,11 +707,16 @@ void Peak::setMonitorCount(double m_monitorCount) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get the final neutron energy */
+/** Get the final neutron energy in meV */
 double Peak::getFinalEnergy() const { return m_finalEnergy; }
 
-/** Get the initial (incident) neutron energy */
+/** Get the initial (incident) neutron energy in meV */
 double Peak::getInitialEnergy() const { return m_initialEnergy; }
+
+/** Get the difference between the initial and final neutron energy in meV */
+double Peak::getEnergyTransfer() const {
+  return getInitialEnergy() - getFinalEnergy();
+}
 
 //----------------------------------------------------------------------------------------------
 /** Get the H index of the peak */
@@ -791,6 +796,12 @@ double Peak::getIntensity() const { return m_intensity; }
 /** Return the error on the integrated peak intensity */
 double Peak::getSigmaIntensity() const { return m_sigmaIntensity; }
 
+/** Return the peak intensity divided by the error in the intensity */
+double Peak::getIntensityOverSigma() const {
+  const auto result = m_intensity / m_sigmaIntensity;
+  return (std::isinf(result)) ? 0.0 : result;
+}
+
 /** Set the integrated peak intensity
  * @param m_intensity :: intensity value   */
 void Peak::setIntensity(double m_intensity) { this->m_intensity = m_intensity; }
@@ -837,7 +848,7 @@ void Peak::setGoniometerMatrix(
   m_InverseGoniometerMatrix = m_GoniometerMatrix;
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
-        "Peak::setGoniometerMatrix(): Goniometer matrix must non-singular.");
+        "Peak::setGoniometerMatrix(): Goniometer matrix must be non-singular.");
 }
 
 // -------------------------------------------------------------------------------------

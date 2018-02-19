@@ -100,8 +100,9 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
 
   auto positions =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, position);
-  auto rotations =
-      boost::make_shared<std::vector<Eigen::Quaterniond>>(1, rotation);
+  auto rotations = boost::make_shared<std::vector<
+      Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
+      1, rotation);
   auto scaleFactors =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
   auto names = boost::make_shared<std::vector<std::string>>(1);
@@ -148,7 +149,8 @@ public:
                                        // ok as not being tested here
 
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
-    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
+    auto rotations = boost::make_shared<std::vector<
+        Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(2);
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto names = boost::make_shared<std::vector<std::string>>(2);
     using Mantid::Beamline::ComponentType;
@@ -203,7 +205,7 @@ public:
     TS_ASSERT(!b->hasDetectorInfo());
   }
 
-  void test_has_shape() {
+  void test_hasValidShape() {
     auto internalInfo = makeSingleBeamlineComponentInfo();
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
@@ -218,10 +220,10 @@ public:
     ComponentInfo compInfo(std::move(internalInfo), componentIds,
                            makeComponentIDMap(componentIds), shapes);
 
-    TS_ASSERT(compInfo.hasShape(0));
+    TS_ASSERT(compInfo.hasValidShape(0));
     // Nullify the shape of the component
     shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
-    TS_ASSERT(!compInfo.hasShape(0));
+    TS_ASSERT(!compInfo.hasValidShape(0));
     TS_ASSERT_THROWS(compInfo.solidAngle(0, V3D{1, 1, 1}),
                      Mantid::Kernel::Exception::NullPointerException &);
   }
@@ -494,7 +496,7 @@ public:
 
     size_t bankOfTubesIndex = componentInfo->root() - 3;
     TS_ASSERT_EQUALS(componentInfo->componentType(bankOfTubesIndex),
-                     Beamline::ComponentType::BankOfTube); // Sanity check
+                     Beamline::ComponentType::Unstructured); // Sanity check
 
     auto boundingBox = componentInfo->boundingBox(bankOfTubesIndex);
     TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter, 1e-5);
@@ -535,7 +537,7 @@ public:
 
     size_t bankOfTubesIndex = componentInfo->root() - 3;
     TS_ASSERT_EQUALS(componentInfo->componentType(bankOfTubesIndex),
-                     Beamline::ComponentType::BankOfTube); // Sanity check
+                     Beamline::ComponentType::Unstructured); // Sanity check
 
     auto boundingBox = componentInfo->boundingBox(bankOfTubesIndex);
     TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter + offsets[3],
@@ -573,10 +575,10 @@ public:
 
     size_t tube1Index = componentInfo->root() - 5;
     TS_ASSERT_EQUALS(componentInfo->componentType(tube1Index),
-                     Beamline::ComponentType::Tube); // Sanity check
+                     Beamline::ComponentType::OutlineComposite); // Sanity check
     size_t tube2Index = componentInfo->root() - 4;
     TS_ASSERT_EQUALS(componentInfo->componentType(tube2Index),
-                     Beamline::ComponentType::Tube); // Sanity check
+                     Beamline::ComponentType::OutlineComposite); // Sanity check
 
     auto boundingBox = componentInfo->boundingBox(tube1Index);
     TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter + offsets[0],

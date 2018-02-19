@@ -9,37 +9,7 @@
 ###########################################################################
 set ( old_boost ${Boost_LIBRARIES} )
 set ( Boost_LIBRARIES ) # Empty out the variable after previous use
-
-# We need to find the right boost python version for the given python version. Unfortunately
-# there is not standard naming convention across the platforms, for example:
-#  - fedora, arch: libboost_python.so (python2), libboost_python3.so (python3)
-#  - debian, ubuntu: libboost_python.so (python2), libboost_python-py34.so (python 3.4)
-#  - windows: boost_python (python2), ????? (python3)
-#  - others?
-if ( MSVC )
-  find_package ( Boost COMPONENTS python REQUIRED )
-else ()
-  if ( PYTHON_VERSION_MAJOR GREATER 2 )
-    # Try a known set of suffixes plus a user-defined set
-    # Define a cache variable to supply additional suffxies. These are tried first
-    set ( BOOST_PYTHON_ADDITIONAL_SUFFIXES "" CACHE STRING "Additional suffixes to try when searching for the boost python3 library. These are prepended to the default list" )
-    set ( _suffixes ${BOOST_PYTHON_ADDITIONAL_SUFFIXES} ${PYTHON_VERSION_MAJOR} -py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} )
-    foreach ( _suffix ${_suffixes})
-      find_package ( Boost COMPONENTS python${_suffix} )
-      if ( Boost_FOUND )
-        break ()
-      endif()
-    endforeach ()
-    if ( NOT Boost_FOUND )
-      message ( FATAL_ERROR "Cannot find appropriate boost python version after trying with the "
-                "following library suffixes: ${_suffixes}" )
-    endif ()
-  else ()
-    # Assumes that the default version is 2
-    find_package ( Boost COMPONENTS python REQUIRED )
-  endif ()
-endif ()
-
+find_package ( BoostPython REQUIRED )
 set ( Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
 
 include_directories ( SYSTEM ${PYTHON_INCLUDE_PATH} )
@@ -55,7 +25,6 @@ if ( CMAKE_COMPILER_IS_GNUCXX AND Boost_MAJOR_VERSION EQUAL "1" AND
   # this definition:   https://github.com/boostorg/python/issues/131
   add_definitions ( -DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY )
 endif ()
-
 set ( PYTHON_DEPS ${MPI_CXX_LIBRARIES} )
 
 ####################################################################################

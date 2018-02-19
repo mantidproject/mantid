@@ -11,6 +11,8 @@ Algorithms
 New
 ###
 
+- :ref:`algm-ExtractQENSMembers` can be used to extract the fit members from any QENS fit.
+
 Improved
 ########
 
@@ -46,6 +48,7 @@ Improved
 ########
 - The Plot Guess Feature in the ConvFit Interface is now enabled for the diffusion functions.
 - The Plot Guess Feature in the MSDFit Interface is now implemented for the three models introduced in release v3.11 (MsdGauss, MsdPeters and MsdYi).
+- The ExtractMembers option in the ConvFit Interface will now function correctly for diffusion functions.
 
 Bugfixes
 ########
@@ -53,6 +56,7 @@ Bugfixes
 - In the IqtFit interface, the 'AO' parameter now defaults to 0.
 - The mini preview plot now updates correctly in the Indirect Data Analysis interfaces, when the fit function is changed; when changed to a function that wasn't used in the most recent fit, will plot only the sample, else will plot the sample, fit and difference.
 - Plotting individual parameters of the fit in the interface ('Plot Options'), will no longer produce an error in the ConvFit interface, when plotting 'FWHM'.
+- In the Calculate Paalman Pings tab of the Indirect Correction interface the container back thickness is now set correctly.
 
 Data Reduction Interfaces
 -------------------------

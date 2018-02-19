@@ -39,16 +39,6 @@ if [ -z "$MANTID_DATA_STORE" ]; then
 fi
 
 ###############################################################################
-# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
-###############################################################################
-if [[ ${NODE_LABELS} == *rhel6* ]]; then
-  SCL_ON_RHEL6="scl enable mantidlibs34"
-  ON_RHEL6=true
-else
-  SCL_ON_RHEL6="eval"
-fi
-
-###############################################################################
 # Create the build directory if it doesn't exist
 ###############################################################################
 BUILD_DIR=$WORKSPACE/build
@@ -59,12 +49,12 @@ cd $BUILD_DIR
 # CMake configuration. We only need a minimal configuration as we will actually
 # just run from the package
 ###############################################################################
-$SCL_ON_RHEL6 "${CMAKE_EXE} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} .."
+${CMAKE_EXE} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} ..
 
 ###############################################################################
 # Build step
 ###############################################################################
-$SCL_ON_RHEL6 "${CMAKE_EXE} --build . -- StandardTestData"
+${CMAKE_EXE} --build . -- StandardTestData
 
 ###############################################################################
 # Add tests from the examples available on the mantidproject wiki pages
@@ -79,7 +69,7 @@ if [[ ${NODE_LABELS} == *ubuntu* ]]; then
     ON_WT_PLATFORMS=true
 fi
 if [[ "${ON_WT_PLATFORMS}" == true ]] && [[ ${JOB_NAME} == *wikitests* ]]; then
-  $SCL_ON_RHEL6 "python ${WORKSPACE}/tools/scripts/TestWikiPython.py -o ${WORKSPACE}/docs/source/mwTests"
+  python ${WORKSPACE}/tools/scripts/TestWikiPython.py -o ${WORKSPACE}/docs/source/mwTests
 fi
 
 #####################################################################################
