@@ -113,33 +113,73 @@ EnggDiffGSASFittingViewQtWidget::getFocusedFileNames() const {
 }
 
 std::string EnggDiffGSASFittingViewQtWidget::getGSASIIProjectPath() const {
-  throw std::runtime_error("getGSASIIProjectPath not yet implemented");
+  return m_ui.lineEdit_gsasProjPath->text().toStdString();
 }
 
 std::string EnggDiffGSASFittingViewQtWidget::getInstrumentFileName() const {
-  throw std::runtime_error("getInstrumentFileName not yet implemented");
+  return m_ui.lineEdit_instParamsFile->text().toStdString();
 }
 
 std::string EnggDiffGSASFittingViewQtWidget::getPathToGSASII() const {
-  throw std::runtime_error("getPathToGSASII not yet implemented");
+  return m_ui.lineEdit_gsasHome->text().toStdString();
 }
 
 double EnggDiffGSASFittingViewQtWidget::getPawleyDMin() const {
-  throw std::runtime_error("getPawleyDMin not yet implemented");
+  const auto pawleyDMinString = m_ui.lineEdit_pawleyDMin->text();
+  bool conversionSuccessful(false);
+  const auto pawleyDMin = pawleyDMinString.toDouble(&conversionSuccessful);
+  if (conversionSuccessful) {
+    return pawleyDMin;
+  } else {
+    userWarning("Invalid Pawley DMin", "Invalid entry for Pawley DMin \"" +
+                                           pawleyDMinString.toStdString() +
+                                           "\". Using default (1");
+    return 1;
+  }
 }
 
 double EnggDiffGSASFittingViewQtWidget::getPawleyNegativeWeight() const {
-  throw std::runtime_error("getPawleyNegativeWeight not yet implemented");
+  const auto pawleyNegWeightString = m_ui.lineEdit_pawleyNegativeWeight->text();
+  bool conversionSuccessful(false);
+  const auto pawleyNegWeight =
+      pawleyNegWeightString.toDouble(&conversionSuccessful);
+  if (conversionSuccessful) {
+    return pawleyNegWeight;
+  } else {
+    userWarning("Invalid Pawley negative weight",
+                "Invalid entry for negative weight \"" +
+                    pawleyNegWeightString.toStdString() +
+                    "\". Using default (0)");
+    return 0;
+  }
 }
 
 std::vector<std::string>
 EnggDiffGSASFittingViewQtWidget::getPhaseFileNames() const {
-  throw std::runtime_error("getPhaseFileNames not yet implemented");
+  std::vector<std::string> fileNameStrings;
+  const auto fileNameQStrings = m_ui.lineEdit_phaseFiles->text().split(",");
+  fileNameStrings.reserve(fileNameQStrings.size());
+  for (const auto &fileNameQString : fileNameQStrings) {
+    fileNameStrings.push_back(fileNameQString.toStdString());
+  }
+  return fileNameStrings;
 }
 
 GSASRefinementMethod
 EnggDiffGSASFittingViewQtWidget::getRefinementMethod() const {
-  throw std::runtime_error("getRefinementMethod not yet implemented");
+  const auto refinementMethod =
+      m_ui.comboBox_refinementMethod->currentText().toStdString();
+  if (refinementMethod == "Pawley") {
+    return GSASRefinementMethod::PAWLEY;
+  } else if (refinementMethod == "Rietveld") {
+    return GSASRefinementMethod::RIETVELD;
+  } else {
+    userError("Unexpected refinement method",
+              "Unexpected refinement method \"" + refinementMethod +
+                  "\" selected. Please contact development team with this "
+                  "message. If you choose to continue, Pawley will be used");
+    return GSASRefinementMethod::PAWLEY;
+  }
 }
 
 void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {

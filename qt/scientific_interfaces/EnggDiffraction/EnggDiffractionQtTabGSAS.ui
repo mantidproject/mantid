@@ -254,6 +254,9 @@
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
+        <property name="text">
+         <string>1</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -280,7 +283,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_pawleyNegativeWeight"/>
+       <widget class="QLineEdit" name="lineEdit_pawleyNegativeWeight">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
