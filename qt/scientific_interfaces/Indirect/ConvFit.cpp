@@ -233,9 +233,9 @@ ConvFit::functionNameChanges(IFunction_sptr model) const {
   auto compositeModel = boost::dynamic_pointer_cast<CompositeFunction>(model);
 
   QString prefixPrefix = "f1.";
-  int backIndex = backgroundIndex();
+  const auto backIndex = backgroundIndex();
 
-  if (backIndex != -1)
+  if (backIndex)
     prefixPrefix += "f1.";
 
   QString prefixSuffix = "";
@@ -244,13 +244,13 @@ ConvFit::functionNameChanges(IFunction_sptr model) const {
     prefixSuffix = "f1.";
 
   if (compositeModel) {
-    int offset = backIndex < 0 ? 0 : 1;
-    backIndex = backIndex < 0 ? 0 : backIndex;
-    addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix, 0,
-                           backIndex, 0, changes);
-    addFunctionNameChanges(
-        compositeModel, prefixPrefix, prefixSuffix, backIndex,
-        static_cast<int>(compositeModel->nFunctions()), offset, changes);
+    const auto &offset = backIndex ? 0 : 1;
+    const auto &index = backIndex.get_value_or(0);
+    addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix, 0, index,
+                           0, changes);
+    addFunctionNameChanges(compositeModel, prefixPrefix, prefixSuffix, index,
+                           static_cast<int>(compositeModel->nFunctions()),
+                           offset, changes);
   } else
     addFunctionNameChanges(model, "", prefixPrefix + prefixSuffix, changes);
   return changes;
@@ -487,7 +487,7 @@ bool ConvFit::validate() {
   // Enforce the rule that at least one fit is needed; either a delta function,
   // one or two Lorentzian functions,
   // or both.  (The resolution function must be convolved with a model.)
-  if (emptyModel())
+  if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
   else if (compositeModel && compositeModel->nFunctions() == 1 &&
            compositeModel->getFunction(0)->name() == "DeltaFunction")
@@ -568,8 +568,10 @@ void ConvFit::parameterUpdated(const Mantid::API::IFunction *function) {
     rangeSelector->blockSignals(false);
   } else if (function->hasParameter("FWHM")) {
     auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
-    auto peakCentre = parameterValue(function->name(), "PeakCentre");
-    auto hwhm = parameterValue(function->name(), "FWHM") / 2.0;
+    auto peakCentre =
+        lastParameterValue(function->name(), "PeakCentre").get_value_or(0);
+    auto hwhm =
+        lastParameterValue(function->name(), "FWHM").get_value_or(0) / 2.0;
     rangeSelector->blockSignals(true);
     rangeSelector->setMaximum(peakCentre + hwhm);
     rangeSelector->setMinimum(peakCentre - hwhm);
@@ -916,7 +918,8 @@ void ConvFit::endXChanged(double endX) {
 }
 
 void ConvFit::hwhmMinChanged(double val) {
-  const double peakCentre = parameterValue("Lorentzian", "PeakCentre");
+  const auto peakCentre =
+      lastParameterValue("Lorentzian", "PeakCentre").get_value_or(0);
   const double difference = peakCentre - val;
 
   auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");
@@ -927,7 +930,8 @@ void ConvFit::hwhmMinChanged(double val) {
 }
 
 void ConvFit::hwhmMaxChanged(double val) {
-  const double peakCentre = parameterValue("Lorentzian", "PeakCentre");
+  const double peakCentre =
+      lastParameterValue("Lorentzian", "PeakCentre").get_value_or(0);
   const double difference = val - peakCentre;
 
   auto hwhmRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitHWHM");

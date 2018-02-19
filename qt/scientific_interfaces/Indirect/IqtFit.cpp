@@ -232,10 +232,10 @@ IFunction_sptr IqtFit::fitFunction() const {
 
 std::string IqtFit::createIntensityTie(IFunction_sptr function) const {
   std::string tieString = "1";
-  auto backIndex = backgroundIndex();
+  const auto backIndex = backgroundIndex();
 
-  if (backIndex != -1)
-    tieString += "-f" + std::to_string(backIndex) + ".A0";
+  if (backIndex)
+    tieString += "-f" + std::to_string(backIndex.get()) + ".A0";
 
   const auto intensityParameters = getParameters(function, "Height");
 

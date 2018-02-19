@@ -82,7 +82,7 @@ public:
 
   Mantid::API::IFunction_sptr model() const;
 
-  int backgroundIndex() const;
+  boost::optional<int> backgroundIndex() const;
 
   QString selectedFitType() const;
 
@@ -92,14 +92,15 @@ public:
 
   double endX() const;
 
-  double parameterValue(const std::string &functionName,
-                        const std::string &parameterName);
+  std::vector<double> parameterValue(const std::string &functionName,
+                                     const std::string &parameterName) const;
+  boost::optional<double>
+  lastParameterValue(const std::string &functionName,
+                     const std::string &parameterName) const;
 
-  bool emptyModel() const;
+  bool isEmptyModel() const;
 
   QString backgroundName() const;
-
-  bool previousFitModelSelected() const;
 
   virtual bool canPlotGuess() const;
 
@@ -281,6 +282,8 @@ protected slots:
 
   void xMaxSelected(double xMax);
 
+  void updatePreviousModelSelected();
+
   virtual void updatePlotRange() = 0;
 
   void executeSingleFit();
@@ -332,21 +335,18 @@ private:
   createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
                            const std::vector<double> &dataX,
                            const std::vector<double> &dataY) const;
-  Mantid::API::IAlgorithm_sptr
-  extractSpectraAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
-                          int startIndex, int endIndex, double startX,
-                          double endX) const;
-  Mantid::API::IAlgorithm_sptr
-  appendSpectraAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
-                         Mantid::API::MatrixWorkspace_sptr spectraWS) const;
-  Mantid::API::IAlgorithm_sptr
-  cropWorkspaceAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
-                         double startX, double endX, int startIndex,
-                         int endIndex) const;
-  Mantid::API::IAlgorithm_sptr
-  deleteWorkspaceAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace) const;
+  Mantid::API::MatrixWorkspace_sptr
+  extractSpectra(Mantid::API::MatrixWorkspace_sptr inputWS, int startIndex,
+                 int endIndex, double startX, double endX) const;
+  Mantid::API::MatrixWorkspace_sptr
+  appendSpectra(Mantid::API::MatrixWorkspace_sptr inputWS,
+                Mantid::API::MatrixWorkspace_sptr spectraWS) const;
+  Mantid::API::MatrixWorkspace_sptr
+  cropWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS, double startX,
+                double endX, int startIndex, int endIndex) const;
+  void deleteWorkspace(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
-  Mantid::API::IFunction_sptr m_fitFunction;
+  Mantid::API::CompositeFunction_const_sptr m_fitFunction;
   QHash<size_t, QHash<QString, double>> m_parameterValues;
   QHash<QString, double> m_defaultPropertyValues;
   QHash<QString, QString> m_functionNameChanges;
@@ -354,6 +354,7 @@ private:
 
   std::string m_outputFitName;
   bool m_appendResults;
+  bool m_previousModelSelected;
   Mantid::API::MatrixWorkspace_sptr m_inputAndGuessWorkspace;
 
   QtLazyAsyncRunner<std::function<Mantid::API::MatrixWorkspace_sptr()>>

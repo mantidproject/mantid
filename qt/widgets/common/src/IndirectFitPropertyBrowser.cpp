@@ -203,14 +203,14 @@ IFunction_sptr IndirectFitPropertyBrowser::background() const {
  * @return  The function index of the selected background. -1 if no background
  *          is selected.
  */
-int IndirectFitPropertyBrowser::backgroundIndex() const {
+boost::optional<int> IndirectFitPropertyBrowser::backgroundIndex() const {
   if (m_backgroundHandler != nullptr) {
     const auto prefix = m_backgroundHandler->functionPrefix();
 
     if (!prefix.endsWith("-1"))
       return prefix.right(1).toInt();
   }
-  return -1;
+  return boost::none;
 }
 
 /**
@@ -301,20 +301,21 @@ size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
 /**
  * @param functionName  The name of the function containing the parameter.
  * @param parameterName The name of the parameter whose value to retrieve.
- * @return              The value of the parameter with the specified name, in
+ * @return              All values of the parameter with the specified name, in
  *                      the function with the specified name.
  */
-double IndirectFitPropertyBrowser::parameterValue(
+std::vector<double> IndirectFitPropertyBrowser::parameterValue(
     const std::string &functionName, const std::string &parameterName) const {
+  std::vector<double> values;
   const auto composite = compositeFunction();
 
   for (size_t i = 0u; i < composite->nFunctions(); ++i) {
     const auto function = composite->getFunction(i);
 
     if (function->name() == functionName)
-      return function->getParameter(parameterName);
+      values.emplace_back(function->getParameter(parameterName));
   }
-  return 0.0;
+  return values;
 }
 
 /**
