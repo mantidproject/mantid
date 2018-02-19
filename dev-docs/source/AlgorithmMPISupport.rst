@@ -513,6 +513,7 @@ CreateWorkspace                        all
 CropToComponent                        all
 CropWorkspace                          all                     see ``ExtractSpectra`` regarding X cropping
 DeleteWorkspace                        all
+DetermineChunking                      MasterOnly, Identical
 Divide                                 all                     see ``BinaryOperation``
 EstimateFitParameters                  MasterOnly, Identical   see ``IFittingAlgorithm``
 EvaluateFunction                       MasterOnly, Identical   see ``IFittingAlgorithm``
