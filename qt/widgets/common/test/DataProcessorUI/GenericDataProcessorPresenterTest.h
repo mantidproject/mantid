@@ -1594,7 +1594,7 @@ public:
   std::unique_ptr<GenericDataProcessorPresenter> makeNonPostProcessPresenter() {
     return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor());
+        createReflectometryProcessor(), DEFAULT_GROUP_NUMBER);
   }
 
   void testBadWorkspaceType() {
