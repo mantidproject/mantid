@@ -606,6 +606,7 @@ PowerLawCorrection                     all                     see ``UnaryOperat
 RealFFT                                MasterOnly, Identical
 Rebin                                  all
 RebinToWorkspace                       all                     ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
+RemoveLowResTOF                        all
 RemovePromptPulse                      all
 RenameWorkspace                        all
 ReplaceSpecialValues                   all                     see ``UnaryOperation``

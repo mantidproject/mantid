@@ -3,7 +3,6 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
@@ -32,9 +31,6 @@ DECLARE_ALGORITHM(RemoveLowResTOF)
 RemoveLowResTOF::RemoveLowResTOF()
     : m_inputWS(), m_inputEvWS(), m_DIFCref(0.), m_K(0.), m_Tmin(0.),
       m_wavelengthMin(0.), m_numberOfSpectra(0), m_outputLowResTOF(false) {}
-
-/// Destructor
-RemoveLowResTOF::~RemoveLowResTOF() {}
 
 /// Algorithm's name for identification overriding a virtual method
 const string RemoveLowResTOF::name() const { return "RemoveLowResTOF"; }
@@ -145,8 +141,6 @@ void RemoveLowResTOF::exec() {
     }
     m_progress->report();
   }
-
-  this->runMaskDetectors();
 }
 
 /** Remove low resolution TOF from an EventWorkspace
@@ -237,7 +231,6 @@ void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
   g_log.debug() << "TOF range is now " << outW->getTofMin() << " to "
                 << outW->getTofMax() << " microseconds\n";
   outW->clearMRU();
-  this->runMaskDetectors();
 }
 
 double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
@@ -300,17 +293,6 @@ void RemoveLowResTOF::getTminData(const bool isEvent) {
   g_log.information() << "Tmin = " << m_Tmin << " microseconds\n";
   if (m_Tmin < 0.)
     throw std::runtime_error("Cannot have minimum time less than zero");
-}
-
-void RemoveLowResTOF::runMaskDetectors() {
-  IAlgorithm_sptr alg = createChildAlgorithm("MaskDetectors");
-  alg->setProperty<MatrixWorkspace_sptr>("Workspace",
-                                         this->getProperty("OutputWorkspace"));
-  alg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace",
-                                         this->getProperty("InputWorkspace"));
-  if (!alg->execute())
-    throw std::runtime_error(
-        "MaskDetectors Child Algorithm has not executed successfully");
 }
 
 } // namespace Algorithm
