@@ -386,16 +386,11 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         fit_peaks_alg.setProperty("BackgroundType", "Quadratic"));
-    //    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
-    //        "PeakCenters",
-    //        "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
-    //                       "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,"
-    //                       "1.5133,2.1401"));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
         "PeakCenters", "0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1."
                        "2356, 1.5133, 2.1401"));
     fit_peaks_alg.setProperty("StartWorkspaceIndex", 0);
-    fit_peaks_alg.setProperty("StopWorkspaceIndex", 0);
+    fit_peaks_alg.setProperty("StopWorkspaceIndex", 3);
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("FitFromRight", true));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
@@ -423,8 +418,27 @@ public:
     API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(
         peak_param_ws_name, &peak_param_ws_exist);
 
+    // check peak positions
     if (peak_pos_ws_exist) {
-      ;
+      TS_ASSERT_EQUALS(peak_pos_ws->getNumberHistograms(), 4);
+      TS_ASSERT_EQUALS(peak_pos_ws->histogram(0).size(), 10);
+      TS_ASSERT_DELTA(peak_pos_ws->histogram(0).y().back(), 2.1483553, 0.0005);
+    }
+
+    if (fitted_peak_ws_exist) {
+      TS_ASSERT_EQUALS(fitted_peak_ws->getNumberHistograms(), 4);
+    }
+
+    if (peak_param_ws_exist) {
+      TS_ASSERT_EQUALS(peak_param_ws->rowCount(), 40);
+      TS_ASSERT_EQUALS(peak_param_ws->columnCount(), 9);
+      TS_ASSERT_EQUALS(peak_param_ws->cell<int>(10, 0), 1);
+      TS_ASSERT_EQUALS(peak_param_ws->cell<int>(22, 1), 2);
+
+      // check first peak's height, center and sigma
+      TS_ASSERT_DELTA(peak_param_ws->cell<double>(9, 2), 414.48, 10.0);
+      TS_ASSERT_DELTA(peak_param_ws->cell<double>(9, 3), 2.14836, 0.0006);
+      TS_ASSERT_DELTA(peak_param_ws->cell<double>(9, 4), 0.005051, 0.0005);
     }
 
     // Clean up

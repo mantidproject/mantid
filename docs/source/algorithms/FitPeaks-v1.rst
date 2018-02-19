@@ -409,12 +409,12 @@ Output:
   fitted_peak_pos_ws = mtd['diamond_peaks_centers']
   
   # print result
-  for ws_index in range(0, 2):
+  for ws_index in range(0, 1):
       print ('Spectrum {0}: '.format(ws_index+1))
       for peak_index in range(2, 4):
           exp_pos = fitted_peak_pos_ws.readX(ws_index)[peak_index]
           fit_pos = fitted_peak_pos_ws.readY(ws_index)[peak_index]
-          print 'Expected @ {0:-5f}  Fitted @ {1:-5f}'.format(exp_pos, fit_pos)
+          print ('Expected @ {0:.3f}  Fitted @ {1:.3f}'.format(exp_pos, fit_pos))
       
   # clean
   DeleteWorkspace(Workspace='diamond_3peaks')
@@ -426,13 +426,9 @@ Output:
 
 .. testoutput:: ExFitVulcanPeaks
 
-
   Spectrum 1: 
-  Expected @ 0.891980  Fitted @ 0.891512
-  Expected @ 1.075800  Fitted @ 1.074609
-  Spectrum 2: 
-  Expected @ 0.891980  Fitted @ 0.891379
-  Expected @ 1.075800  Fitted @ 1.074763
+  Expected @ 0.892  Fitted @ 0.892
+  Expected @ 1.076  Fitted @ 1.075
 
 .. categories::
 
