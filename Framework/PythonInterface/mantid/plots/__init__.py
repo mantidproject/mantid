@@ -369,7 +369,7 @@ class MantidAxes3D(Axes3D):
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
-            return mantid.plots.plotfunctions3D.plot3d(self, *args, **kwargs)
+            return mantid.plots.plotfunctions3D.plot(self, *args, **kwargs)
         else:
             return Axes3D.plot(self, *args, **kwargs)
 

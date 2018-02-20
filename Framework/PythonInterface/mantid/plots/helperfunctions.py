@@ -133,7 +133,7 @@ def get_md_data1d(workspace, normalization):
     return coordinate, data, err
 
 
-def get_md_data(workspace, normalization, with_error = False):
+def get_md_data(workspace, normalization, withError=False):
     """
     Generic function to extract data from an MDHisto workspace
     :param workspace: :class:`mantid.api.IMDHistoWorkspace` containing data
@@ -141,6 +141,7 @@ def get_md_data(workspace, normalization, with_error = False):
         it will divide intensity by the number of corresponding MDEvents
     returns a tuple containing bin boundaries for each dimension, the (maybe normalized)
     signal and error arrays
+    :param withError: flag for if the error is calculated. If False, err is returned as None
     """
     dims = workspace.getNonIntegratedDimensions()
     dim_arrays = [_dim2array(d) for d in dims]
@@ -150,7 +151,7 @@ def get_md_data(workspace, normalization, with_error = False):
         nev = workspace.getNumEventsArray()
         data /= nev
     err = None
-    if with_error:
+    if withError:
         err2 = workspace.getErrorSquaredArray()*1.
         if normalization == mantid.api.MDNormalization.NumEventsNormalization:
             err2 /= (nev * nev)
@@ -163,7 +164,7 @@ def get_md_data(workspace, normalization, with_error = False):
     return dim_arrays, data, err
 
 
-def get_spectrum(workspace, wkspIndex, distribution, withDy = False, withDx = False):
+def get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False):
     """
     Extract a single spectrum and process the data into a frequency
     :param workspace: a Workspace2D or an EventWorkspace
@@ -209,7 +210,7 @@ def get_md_data2d_bin_bounds(workspace, normalization):
     dimension, and data. To be used in 2D plots (pcolor, pcolorfast, pcolormesh)
     Note return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
-    coordinate, data, _ = get_md_data(workspace, normalization, with_error=False)
+    coordinate, data, _ = get_md_data(workspace, normalization, withError=False)
     assert len(coordinate) == 2, 'The workspace is not 2D'
     return coordinate[0], coordinate[1], data
 
@@ -250,18 +251,18 @@ def common_x(arr):
     return numpy.all(arr == arr[0, :], axis=(1, 0))
 
 
-def get_matrix2d_data(workspace, distribution, histogram2D=False):
-    """"
+def get_matrix_2d_data(workspace, distribution, histogram2D=False):
+    '''
     Get all data from a Matrix workspace that has the same number of bins
     in every spectrum. It is used for 2D plots
     :param workspace: Matrix workspace to extract the data from
     :param distribution: if False, and the workspace contains histogram data,
         the intensity will be divided by the x bin width
-    :param histogram2d: flag that specifies if the coordinates in the output are
+    :param histogram2D: flag that specifies if the coordinates in the output are
         -bin centers (such as for contour) for False, or
         -bin edges (such as for pcolor) for True.
     Returns x,y,z 2D arrays
-    """
+    '''
     try:
         _ = workspace.blocksize()
     except RuntimeError:
@@ -298,9 +299,61 @@ def get_matrix2d_data(workspace, distribution, histogram2D=False):
     return x, y, z
 
 
+def get_uneven_data(workspace, distribution):
+    '''
+    Function to get data for uneven workspace2Ds, such as
+    that pcolor, pcolorfast, and pcolormesh will plot axis aligned rectangles
+    :param workspace: a workspace2d
+    :param distribution: if False, and the workspace contains histogram data,
+        the intensity will be divided by the x bin width
+    Returns three lists. Each element in the x list is an array of boundaries
+    for a spectra. Each element in the y list is a 2 element array with the extents
+    of a particular spectra. The z list contains arrays of intensities at bin centers
+    '''
+    z = []
+    x = []
+    y = []
+    nhist = workspace.getNumberHistograms()
+    yvals = workspace.getAxis(1).extractValues()
+    if len(yvals) == nhist:
+        yvals = boundaries_from_points(yvals)
+    for index in range(nhist):
+        xvals = workspace.readX(index)
+        zvals = workspace.readY(index)
+        if workspace.isHistogramData():
+            if not distribution:
+                zvals = zvals / (xvals[1:] - xvals[0:-1])
+        else:
+            xvals = boundaries_from_points(xvals)
+        zvals = numpy.ma.masked_invalid(zvals)
+        z.append(zvals)
+        x.append(xvals)
+        y.append([yvals[index], yvals[index+1]])
+    return x, y, z
+
+
+def get_data_uneven_flag(workspace, **kwargs):
+    '''
+    Helper function that allows :meth:`matplotlib.axes.Axes.pcolor`,
+    :meth:`matplotlib.axes.Axes.pcolorfast`, and :meth:`matplotlib.axes.Axes.pcolormesh`
+    to plot rectangles parallel to the axes even if the data is not
+    on a regular grid.
+    :param workspace: a workspace2d
+    if axisaligned keyword is available and True or if the workspace does
+    not have a constant number of bins, it will return true, otherwise false
+    '''
+    aligned = kwargs.pop('axisaligned', False)
+    try:
+        _ = workspace.blocksize()
+    except RuntimeError:
+        aligned = True
+    return aligned, kwargs
+
+
 # ====================================================
 # Plot functionality
 # ====================================================
+
 
 def get_axes_labels(workspace):
     """

@@ -27,105 +27,6 @@ import matplotlib.colors
 # ================================================
 
 
-def _getMatrix2DData(workspace, distribution, histogram2D=False):
-    '''
-    Get all data from a Matrix workspace that has the same number of bins
-    in every spectrum. It is used for 2D plots
-    :param workspace: Matrix workspace to extract the data from
-    :param distribution: if False, and the workspace contains histogram data,
-        the intensity will be divided by the x bin width
-    :param histogram2D: flag that specifies if the coordinates in the output are
-        -bin centers (such as for contour) for False, or
-        -bin edges (such as for pcolor) for True.
-    Returns x,y,z 2D arrays
-    '''
-    try:
-        _ = workspace.blocksize()
-    except RuntimeError:
-        raise ValueError('The spectra are not the same length. Try using pcolor, pcolorfast, or pcolormesh instead')
-    x = workspace.extractX()
-    y = workspace.getAxis(1).extractValues()
-    z = workspace.extractY()
-
-    if workspace.isHistogramData():
-        if not distribution:
-            z = z / (x[:, 1:] - x[:, 0:-1])
-        if histogram2D:
-            if len(y) == z.shape[0]:
-                y = boundaries_from_points(y)
-            x = numpy.vstack((x, x[-1]))
-        else:
-            x = .5*(x[:, 0:-1]+x[:, 1:])
-            if len(y) == z.shape[0]+1:
-                y = points_from_boundaries(y)
-    else:
-        if histogram2D:
-            if _commonX(x):
-                x = numpy.tile(boundaries_from_points(x[0]), z.shape[0]+1).reshape(z.shape[0]+1, -1)
-            else:
-                x = numpy.vstack((x, x[-1]))
-                x = numpy.array([boundaries_from_points(xi) for xi in x])
-            if len(y) == z.shape[0]:
-                y = boundaries_from_points(y)
-        else:
-            if len(y) == z.shape[0]+1:
-                y = points_from_boundaries(y)
-    y = numpy.tile(y, x.shape[1]).reshape(x.shape[1], x.shape[0]).transpose()
-    z = numpy.ma.masked_invalid(z)
-    return x, y, z
-
-
-def _getDataUnevenFlag(workspace, **kwargs):
-    '''
-    Helper function that allows :meth:`matplotlib.axes.Axes.pcolor`,
-    :meth:`matplotlib.axes.Axes.pcolorfast`, and :meth:`matplotlib.axes.Axes.pcolormesh`
-    to plot rectangles parallel to the axes even if the data is not
-    on a regular grid.
-    :param workspace: a workspace2d
-    if axisaligned keyword is available and True or if the workspace does
-    not have a constant number of bins, it will return true, otherwise false
-    '''
-    aligned = kwargs.pop('axisaligned', False)
-    try:
-        _ = workspace.blocksize()
-    except RuntimeError:
-        aligned = True
-    return aligned, kwargs
-
-
-def _getUnevenData(workspace, distribution):
-    '''
-    Function to get data for uneven workspace2Ds, such as
-    that pcolor, pcolorfast, and pcolormesh will plot axis aligned rectangles
-    :param workspace: a workspace2d
-    :param distribution: if False, and the workspace contains histogram data,
-        the intensity will be divided by the x bin width
-    Returns three lists. Each element in the x list is an array of boundaries
-    for a spectra. Each element in the y list is a 2 element array with the extents
-    of a particular spectra. The z list contains arrays of intensities at bin centers
-    '''
-    z = []
-    x = []
-    y = []
-    nhist = workspace.getNumberHistograms()
-    yvals = workspace.getAxis(1).extractValues()
-    if len(yvals) == nhist:
-        yvals = boundaries_from_points(yvals)
-    for index in range(nhist):
-        xvals = workspace.readX(index)
-        zvals = workspace.readY(index)
-        if workspace.isHistogramData():
-            if not distribution:
-                zvals = zvals / (xvals[1:] - xvals[0:-1])
-        else:
-            xvals = boundaries_from_points(xvals)
-        zvals = numpy.ma.masked_invalid(zvals)
-        z.append(zvals)
-        x.append(xvals)
-        y.append([yvals[index], yvals[index+1]])
-    return x, y, z
-
-
 def _setLabels1D(axes, workspace):
     '''
     helper function to automatically set axes labels for 1D plots
@@ -143,10 +44,10 @@ def _setLabels2D(axes, workspace):
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
 
-
 # ========================================================
 # Plot functions
 # ========================================================
+
 
 def plot(axes, workspace, *args, **kwargs):
     '''
@@ -174,10 +75,10 @@ def plot(axes, workspace, *args, **kwargs):
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
-        (x, y, _) = _getMDData1D(workspace, normalization)
+        (x, y, dy) = get_md_data1d(workspace, normalization)
     else:
-        (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, **kwargs)
-        (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
+        (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
+        (x, y, dy, dx) = get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
     _setLabels1D(axes, workspace)
     return axes.plot(x, y, *args, **kwargs)
 
@@ -208,11 +109,11 @@ def errorbar(axes, workspace, *args, **kwargs):
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
-        (x, y, dy) = _getMDData1D(workspace, normalization)
+        (x, y, dy) = get_md_data1d(workspace, normalization)
         dx = None
     else:
-        (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, **kwargs)
-        (x, y, dy, dx) = _getSpectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
+        (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
+        (x, y, dy, dx) = get_spectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
     _setLabels1D(axes, workspace)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
@@ -243,10 +144,10 @@ def scatter(axes, workspace, *args, **kwargs):
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
-        (x, y, _) = _getMDData1D(workspace, normalization)
+        (x, y, _) = get_md_data1d(workspace, normalization)
     else:
-        (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, **kwargs)
-        (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution)
+        (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
+        (x, y, _, _) = get_spectrum(workspace, wkspIndex, distribution)
     _setLabels1D(axes, workspace)
     return axes.scatter(x, y, *args, **kwargs)
 
@@ -272,7 +173,7 @@ def contour(axes, workspace, *args, **kwargs):
         x, y, z = get_md_data2d_bin_centers(workspace, normalization)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
     return axes.contour(x, y, z, *args, **kwargs)
 
@@ -298,7 +199,7 @@ def contourf(axes, workspace, *args, **kwargs):
         x, y, z = get_md_data2d_bin_centers(workspace, normalization)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
     return axes.contourf(x, y, z, *args, **kwargs)
 
@@ -318,7 +219,7 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
         pcolor by default
     Note: the return is the pcolor, pcolormesh, or pcolorfast of the last spectrum
     '''
-    (x, y, z) = _getUnevenData(workspace, distribution)
+    (x, y, z) = get_uneven_data(workspace, distribution)
     pcolortype = kwargs.pop('pcolortype', '')
     mini = numpy.min([numpy.min(i) for i in z])
     maxi = numpy.max([numpy.max(i) for i in z])
@@ -365,13 +266,13 @@ def pcolor(axes, workspace, *args, **kwargs):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization)
     else:
-        (aligned, kwargs) = _getDataUnevenFlag(workspace, **kwargs)
+        (aligned, kwargs) = get_data_uneven_flag(workspace, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs['pcolortype'] = ''
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
-            (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=True)
+            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
     return axes.pcolor(x, y, z, *args, **kwargs)
 
 
@@ -396,13 +297,13 @@ def pcolorfast(axes, workspace, *args, **kwargs):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization)
     else:
-        (aligned, kwargs) = _getDataUnevenFlag(workspace, **kwargs)
+        (aligned, kwargs) = get_data_uneven_flag(workspace, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs['pcolortype'] = 'fast'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
-            (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=True)
+            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
     return axes.pcolorfast(x, y, z, *args, **kwargs)
 
 
@@ -427,13 +328,13 @@ def pcolormesh(axes, workspace, *args, **kwargs):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization)
     else:
-        (aligned, kwargs) = _getDataUnevenFlag(workspace, **kwargs)
+        (aligned, kwargs) = get_data_uneven_flag(workspace, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs['pcolortype'] = 'mesh'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
-            (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=True)
+            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
 
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
@@ -462,7 +363,7 @@ def tripcolor(axes, workspace, *args, **kwargs):
         x, y = numpy.meshgrid(x_temp, y_temp)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
 
     return axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
@@ -493,7 +394,7 @@ def tricontour(axes, workspace, *args, **kwargs):
         (x, y) = numpy.meshgrid(x_temp, y_temp)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
     # tricontour segfaults if many z values are not finite
     # https://github.com/matplotlib/matplotlib/issues/10167
@@ -532,7 +433,7 @@ def tricontourf(axes, workspace, *args, **kwargs):
         (x, y) = numpy.meshgrid(x_temp, y_temp)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = _getMatrix2DData(workspace, distribution, histogram2D=False)
+        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
     # tricontourf segfaults if many z values are not finite
     # https://github.com/matplotlib/matplotlib/issues/10167

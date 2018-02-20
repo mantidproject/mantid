@@ -19,7 +19,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy
 
 from mantid.plots.helperfunctions import (get_axes_labels, get_normalization, get_distribution,
-                                          get_md_data2d_bin_centers, get_matrix2d_data, get_md_data1d,
+                                          get_md_data2d_bin_centers, get_matrix_2d_data, get_md_data1d,
                                           get_wksp_index_dist_and_label, get_spectrum)
 import mantid.dataobjects
 
@@ -41,11 +41,11 @@ def _extract_3d_data(workspace, **kwargs):
         x, y = numpy.meshgrid(x_temp, y_temp)
     else:
         distribution, kwargs = get_distribution(workspace, **kwargs)
-        x, y, z = get_matrix2d_data(workspace, distribution, histogram2D=False)
+        x, y, z = get_matrix_2d_data(workspace, distribution, histogram2D=False)
     return x, y, z
 
 
-def plot3d(axes, workspace, *args, **kwargs):
+def plot(axes, workspace, *args, **kwargs):
     """
     3D plots - line plots
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
