@@ -4,6 +4,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include <boost/algorithm/string/join.hpp>
+
 using namespace Mantid;
 
 namespace {
@@ -92,7 +94,7 @@ double EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   gsasAlg->setProperty("OutputWorkspace", outputWorkspaceName);
   gsasAlg->setProperty("LatticeParameters", latticeParamsName);
   gsasAlg->setProperty("InstrumentFile", instParamFile);
-  gsasAlg->setProperty("PhaseInfoFiles", phaseFiles);
+  gsasAlg->setProperty("PhaseInfoFiles", boost::algorithm::join(phaseFiles, ","));
   gsasAlg->setProperty("PathToGSASII", pathToGSASII);
   gsasAlg->setProperty("SaveGSASIIProjectFile", GSASIIProjectFile);
   gsasAlg->setProperty("PawleyDMin", dMin);
