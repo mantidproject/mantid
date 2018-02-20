@@ -49,7 +49,7 @@ private:
   void checkTriangulated();
 
 public:
-  GeometryTriangulator(const CSGObject *obj);
+  GeometryTriangulator(const CSGObject *obj = nullptr);
   GeometryTriangulator(const MeshObject *obj);
   ~GeometryTriangulator();
   void triangulate();

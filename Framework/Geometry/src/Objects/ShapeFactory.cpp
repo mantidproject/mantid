@@ -1432,7 +1432,6 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
 
   auto geomHandler = boost::make_shared<GeometryHandler>(Obj);
   detail::ShapeInfo shapeInfo;
-  detail::ShapeInfo shapeInfo;
   Obj->setGeometryHandler(geomHandler);
 
   if (pElem->tagName() == "cuboid") {

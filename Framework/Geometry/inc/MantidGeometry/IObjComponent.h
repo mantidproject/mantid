@@ -59,6 +59,10 @@ public:
 
   IObjComponent(GeometryHandler *the_handler);
 
+  IObjComponent(const IObjComponent &);
+
+  IObjComponent &operator=(const IObjComponent &rhs);
+
   // Looking to get rid of the first of these constructors in due course (and
   // probably add others)
   ~IObjComponent() override;

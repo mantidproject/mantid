@@ -69,10 +69,6 @@ bool ShapeInfo::operator==(const ShapeInfo &other) {
          m_radius == other.m_radius && m_points == other.m_points;
 }
 
-bool ShapeInfo::operator==(const ShapeInfo &other) {
-  return m_shape == other.m_shape && m_height == other.m_height &&
-         m_radius == other.m_radius && m_points == other.m_points;
-}
 } // namespace detail
 } // namespace Geometry
 } // namespace Mantid
