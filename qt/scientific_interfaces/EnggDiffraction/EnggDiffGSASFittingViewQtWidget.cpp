@@ -5,10 +5,11 @@
 #include "EnggDiffMultiRunFittingWidgetModel.h"
 #include "EnggDiffMultiRunFittingWidgetPresenter.h"
 
-#include <boost/make_shared.hpp>
+#include "MantidAPI/TableRow.h"
 
 #include <QFileDialog>
 #include <QSettings>
+#include <boost/make_shared.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -93,13 +94,28 @@ void EnggDiffGSASFittingViewQtWidget::disableLoadIfInputEmpty() {
   
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
     const Mantid::API::ITableWorkspace_sptr latticeParams) const {
-  UNUSED_ARG(latticeParams);
-  throw std::runtime_error("displayLatticeParams not yet implemented");
+  double length_a, length_b, length_c, angle_alpha, angle_beta, angle_gamma;
+  Mantid::API::TableRow row = latticeParams->getFirstRow();
+  row >> length_a >> length_b >> length_c >> angle_alpha >> angle_beta >>
+      angle_gamma;
+  m_ui.lineEdit_latticeParamA->setText(QString::number(length_a));
+  m_ui.lineEdit_latticeParamB->setText(QString::number(length_b));
+  m_ui.lineEdit_latticeParamC->setText(QString::number(length_c));
+  m_ui.lineEdit_latticeParamAlpha->setText(QString::number(angle_alpha));
+  m_ui.lineEdit_latticeParamBeta->setText(QString::number(angle_beta));
+  m_ui.lineEdit_latticeParamGamma->setText(QString::number(angle_gamma));
+}
+
+void EnggDiffGSASFittingViewQtWidget::displayGamma(const double gamma) const {
+  m_ui.lineEdit_gamma->setText(QString::number(gamma));
 }
 
 void EnggDiffGSASFittingViewQtWidget::displayRwp(const double rwp) const {
-  UNUSED_ARG(rwp);
-  throw std::runtime_error("displayRwp not yet implemented");
+  m_ui.lineEdit_rwp->setText(QString::number(rwp));
+}
+
+void EnggDiffGSASFittingViewQtWidget::displaySigma(const double sigma) const {
+  m_ui.lineEdit_sigma->setText(QString::number(sigma));
 }
 
 void EnggDiffGSASFittingViewQtWidget::doRefinement() {

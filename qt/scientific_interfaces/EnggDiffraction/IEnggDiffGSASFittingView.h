@@ -32,11 +32,17 @@ public:
   virtual void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const = 0;
 
+  /// Display gamma broadening term to the user
+  virtual void displayGamma(const double gamma) const = 0;
+
   /**
    Display Rwp value to the user
    @param rwp for the run to display
   */
   virtual void displayRwp(const double rwp) const = 0;
+
+  /// Display sigma broadening term to the user
+  virtual void displaySigma(const double sigma) const = 0;
 
   /**
    Get the names of the focused run files the user has requested to load

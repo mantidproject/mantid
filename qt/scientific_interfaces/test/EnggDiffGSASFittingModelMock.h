@@ -21,11 +21,17 @@ public:
                Mantid::API::MatrixWorkspace_sptr(
                    const GSASIIRefineFitPeaksParameters &params));
 
+  MOCK_CONST_METHOD1(getGamma,
+                     boost::optional<double>(const RunLabel &runLabel));
+
   MOCK_CONST_METHOD1(getLatticeParams,
                      boost::optional<Mantid::API::ITableWorkspace_sptr>(
                          const RunLabel &runLabel));
 
   MOCK_CONST_METHOD1(getRwp, boost::optional<double>(const RunLabel &runLabel));
+
+  MOCK_CONST_METHOD1(getSigma,
+                     boost::optional<double>(const RunLabel &runLabel));
 
   MOCK_CONST_METHOD1(loadFocusedRun, Mantid::API::MatrixWorkspace_sptr(
                                          const std::string &filename));

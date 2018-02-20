@@ -24,9 +24,11 @@ std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
 namespace MantidQt {
 namespace CustomInterfaces {
 void EnggDiffGSASFittingModel::addFitResultsToMaps(
-    const RunLabel &runLabel, const double rwp,
-    const std::string &latticeParamsTableName) {
+    const RunLabel &runLabel, const double rwp, const double sigma,
+    const double gamma, const std::string &latticeParamsTableName) {
   addRwp(runLabel, rwp);
+  addSigma(runLabel, sigma);
+  addGamma(runLabel, gamma);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto latticeParams =
@@ -39,9 +41,19 @@ void EnggDiffGSASFittingModel::addLatticeParams(
   m_latticeParamsMap.add(runLabel, table);
 }
 
+void EnggDiffGSASFittingModel::addGamma(const RunLabel &runLabel,
+                                        const double gamma) {
+  m_gammaMap.add(runLabel, gamma);
+}
+
 void EnggDiffGSASFittingModel::addRwp(const RunLabel &runLabel,
                                       const double rwp) {
   m_rwpMap.add(runLabel, rwp);
+}
+
+void EnggDiffGSASFittingModel::addSigma(const RunLabel &runLabel,
+                                        const double sigma) {
+  m_sigmaMap.add(runLabel, sigma);
 }
 
 namespace {
@@ -62,10 +74,12 @@ API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doPawleyRefinement(
   const auto outputWSName = generateFittedPeaksWSName(params.runLabel);
   const auto latticeParamsName = generateLatticeParamsName(params.runLabel);
 
-  const auto rwp = doGSASRefinementAlgorithm(outputWSName, latticeParamsName,
-                                             params, "Pawley refinement");
+  const auto outputProperties = doGSASRefinementAlgorithm(
+      outputWSName, latticeParamsName, params, "Pawley refinement");
 
-  addFitResultsToMaps(params.runLabel, rwp, latticeParamsName);
+  addFitResultsToMaps(params.runLabel, outputProperties.rwp,
+                      outputProperties.sigma, outputProperties.gamma,
+                      latticeParamsName);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
@@ -73,7 +87,8 @@ API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doPawleyRefinement(
   return fittedPeaks;
 }
 
-double EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
+GSASIIRefineFitPeaksOutputProperties
+EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const std::string &outputWorkspaceName,
     const std::string &latticeParamsName,
     const GSASIIRefineFitPeaksParameters &params,
@@ -109,7 +124,9 @@ double EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   gsasAlg->execute();
 
   const double rwp = gsasAlg->getProperty("Rwp");
-  return rwp;
+  const double sigma = gsasAlg->getProperty("Sigma");
+  const double gamma = gsasAlg->getProperty("Gamma");
+  return GSASIIRefineFitPeaksOutputProperties(rwp, sigma, gamma);
 }
 
 API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doRietveldRefinement(
@@ -117,10 +134,12 @@ API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doRietveldRefinement(
   const auto outputWSName = generateFittedPeaksWSName(params.runLabel);
   const auto latticeParamsName = generateLatticeParamsName(params.runLabel);
 
-  const auto rwp = doGSASRefinementAlgorithm(outputWSName, latticeParamsName,
-                                             params, "Rietveld refinement");
+  const auto outputProperties = doGSASRefinementAlgorithm(
+      outputWSName, latticeParamsName, params, "Rietveld refinement");
 
-  addFitResultsToMaps(params.runLabel, rwp, latticeParamsName);
+  addFitResultsToMaps(params.runLabel, outputProperties.rwp,
+                      outputProperties.sigma, outputProperties.gamma,
+                      latticeParamsName);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
@@ -134,8 +153,18 @@ EnggDiffGSASFittingModel::getLatticeParams(const RunLabel &runLabel) const {
 }
 
 boost::optional<double>
+EnggDiffGSASFittingModel::getGamma(const RunLabel &runLabel) const {
+  return getFromRunMapOptional(m_gammaMap, runLabel);
+}
+
+boost::optional<double>
 EnggDiffGSASFittingModel::getRwp(const RunLabel &runLabel) const {
   return getFromRunMapOptional(m_rwpMap, runLabel);
+}
+
+boost::optional<double>
+EnggDiffGSASFittingModel::getSigma(const RunLabel &runLabel) const {
+  return getFromRunMapOptional(m_sigmaMap, runLabel);
 }
 
 Mantid::API::MatrixWorkspace_sptr

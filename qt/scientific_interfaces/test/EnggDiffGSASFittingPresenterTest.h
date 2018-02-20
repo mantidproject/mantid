@@ -140,13 +140,6 @@ public:
         .Times(1)
         .WillOnce(Return(params.runLabel));
 
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(params.runLabel));
-
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getFocusedRun(params.runLabel))
         .Times(1)
         .WillOnce(Return(params.inputWorkspace));
@@ -210,6 +203,16 @@ public:
         .Times(1)
         .WillOnce(Return(rwp));
 
+    const double sigma = 30;
+    EXPECT_CALL(*m_mockModelPtr, getSigma(runLabel))
+        .Times(1)
+        .WillOnce(Return(sigma));
+
+    const double gamma = 40;
+    EXPECT_CALL(*m_mockModelPtr, getGamma(runLabel))
+        .Times(1)
+        .WillOnce(Return(gamma));
+
     const auto latticeParams =
         Mantid::API::WorkspaceFactory::Instance().createTable();
     EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
@@ -218,6 +221,8 @@ public:
 
     EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*m_mockViewPtr, displayRwp(rwp)).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, displaySigma(sigma)).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, displayGamma(gamma)).Times(1);
     EXPECT_CALL(*m_mockViewPtr, displayLatticeParams(latticeParams)).Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
@@ -241,12 +246,18 @@ public:
     EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
         .Times(1)
         .WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_mockModelPtr, getSigma(runLabel))
+        .Times(1)
+        .WillOnce(Return(30));
+    EXPECT_CALL(*m_mockModelPtr, getGamma(runLabel))
+        .Times(1)
+        .WillOnce(Return(40));
 
-    EXPECT_CALL(*m_mockViewPtr, userError("Invalid run label",
-                                          "Tried to display fit results "
-                                          "for run number 123 and bank ID 1. "
-                                          "Please contact the development "
-                                          "team with this message"));
+    EXPECT_CALL(*m_mockViewPtr,
+                userError("Invalid run identifier",
+                          "Unexpectedly tried to display fit results for "
+                          "invalid run, run number = 123, bank ID = 1. Please "
+                          "contact the development team"));
 
     presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
     assertMocksUsedCorrectly();

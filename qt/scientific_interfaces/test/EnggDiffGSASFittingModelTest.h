@@ -44,18 +44,28 @@ API::ITableWorkspace_sptr createDummyTable(
 // Helper class with some protected methods exposed
 class TestEnggDiffGSASFittingModel : public EnggDiffGSASFittingModel {
 public:
+  void addGammaValue(const RunLabel &runLabel, const double gamma);
+
   void addLatticeParamTable(const RunLabel &runLabel,
                             API::ITableWorkspace_sptr table);
 
   void addRwpValue(const RunLabel &runLabel, const double rwp);
 
+  void addSigmaValue(const RunLabel &runLabel, const double sigma);
+
 private:
-  inline double
+  inline GSASIIRefineFitPeaksOutputProperties
   doGSASRefinementAlgorithm(const std::string &fittedPeaksWSName,
                             const std::string &latticeParamsWSName,
                             const GSASIIRefineFitPeaksParameters &params,
                             const std::string &refinementMethod) override;
 };
+
+inline void
+TestEnggDiffGSASFittingModel::addGammaValue(const RunLabel &runLabel,
+                                            const double gamma) {
+  addGamma(runLabel, gamma);
+}
 
 inline void TestEnggDiffGSASFittingModel::addLatticeParamTable(
     const RunLabel &runLabel, API::ITableWorkspace_sptr table) {
@@ -67,7 +77,14 @@ inline void TestEnggDiffGSASFittingModel::addRwpValue(const RunLabel &runLabel,
   addRwp(runLabel, rwp);
 }
 
-inline double TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
+inline void
+TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel,
+                                            const double sigma) {
+  addSigma(runLabel, sigma);
+}
+
+inline GSASIIRefineFitPeaksOutputProperties
+TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const std::string &fittedPeaksWSName,
     const std::string &latticeParamsWSName,
     const GSASIIRefineFitPeaksParameters &params,
@@ -89,7 +106,7 @@ inline double TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
       WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
   ADS.add(fittedPeaksWSName, ws);
 
-  return 75;
+  return GSASIIRefineFitPeaksOutputProperties(1, 2, 3);
 }
 
 } // Anonymous namespace
@@ -140,6 +157,40 @@ public:
     const RunLabel invalid(456, 2);
     TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(invalid));
     TS_ASSERT_EQUALS(retrievedRwp, boost::none);
+  }
+
+  void test_getGamma() {
+    TestEnggDiffGSASFittingModel model;
+
+    const RunLabel valid(123, 1);
+    const double gamma = 75.5;
+    model.addGammaValue(valid, gamma);
+
+    auto retrievedGamma = boost::make_optional<double>(false, double());
+    TS_ASSERT_THROWS_NOTHING(retrievedGamma = model.getGamma(valid));
+    TS_ASSERT(retrievedGamma);
+    TS_ASSERT_EQUALS(gamma, *retrievedGamma);
+
+    const RunLabel invalid(456, 2);
+    TS_ASSERT_THROWS_NOTHING(retrievedGamma = model.getGamma(invalid));
+    TS_ASSERT_EQUALS(retrievedGamma, boost::none);
+  }
+
+  void test_getSigma() {
+    TestEnggDiffGSASFittingModel model;
+
+    const RunLabel valid(123, 1);
+    const double sigma = 75.5;
+    model.addSigmaValue(valid, sigma);
+
+    auto retrievedSigma = boost::make_optional<double>(false, double());
+    TS_ASSERT_THROWS_NOTHING(retrievedSigma = model.getSigma(valid));
+    TS_ASSERT(retrievedSigma);
+    TS_ASSERT_EQUALS(sigma, *retrievedSigma);
+
+    const RunLabel invalid(456, 2);
+    TS_ASSERT_THROWS_NOTHING(retrievedSigma = model.getSigma(invalid));
+    TS_ASSERT_EQUALS(retrievedSigma, boost::none);
   }
 
   void test_getLatticeParams() {
@@ -196,6 +247,12 @@ public:
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);
 
+    const auto sigma = model.getSigma(runLabel);
+    TS_ASSERT(sigma);
+
+    const auto gamma = model.getGamma(runLabel);
+    TS_ASSERT(gamma);
+
     const auto latticeParams = model.getLatticeParams(runLabel);
     TS_ASSERT(latticeParams);
 
@@ -221,6 +278,12 @@ public:
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);
+
+    const auto sigma = model.getSigma(runLabel);
+    TS_ASSERT(sigma);
+
+    const auto gamma = model.getGamma(runLabel);
+    TS_ASSERT(gamma);
 
     const auto latticeParams = model.getLatticeParams(runLabel);
     TS_ASSERT(latticeParams);

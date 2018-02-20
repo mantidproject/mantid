@@ -70,8 +70,10 @@ EnggDiffGSASFittingPresenter::collectInputParameters(
 void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
   const auto latticeParams = m_model->getLatticeParams(runLabel);
   const auto rwp = m_model->getRwp(runLabel);
+  const auto sigma = m_model->getSigma(runLabel);
+  const auto gamma = m_model->getGamma(runLabel);
 
-  if (!latticeParams || !rwp) {
+  if (!latticeParams || !rwp || !sigma || !gamma) {
     m_view->userError("Invalid run identifier",
                       "Unexpectedly tried to display fit results for invalid "
                       "run, run number = " +
@@ -83,6 +85,8 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
 
   m_view->displayLatticeParams(*latticeParams);
   m_view->displayRwp(*rwp);
+  m_view->displaySigma(*sigma);
+  m_view->displayGamma(*gamma);
 }
 
 Mantid::API::MatrixWorkspace_sptr
@@ -135,6 +139,7 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
     }
 
     m_multiRunWidget->addFittedPeaks(runLabel, fittedPeaks);
+    displayFitResults(runLabel);
   } catch (const std::runtime_error &ex) {
     m_view->userError("Refinement failed", ex.what());
   }
@@ -156,20 +161,7 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
 void EnggDiffGSASFittingPresenter::processSelectRun() {
   if (m_multiRunWidget->showFitResultsSelected()) {
     const auto runLabel = m_multiRunWidget->getSelectedRunLabel();
-    const auto rwp = m_model->getRwp(runLabel);
-    const auto latticeParams = m_model->getLatticeParams(runLabel);
-
-    if (!rwp || !latticeParams) {
-      m_view->userError(
-          "Invalid run label",
-          "Tried to display fit results for run number " +
-              std::to_string(runLabel.runNumber) + " and bank ID " +
-              std::to_string(runLabel.bank) +
-              ". Please contact the development team with this message");
-      return;
-    }
-    m_view->displayRwp(*rwp);
-    m_view->displayLatticeParams(*latticeParams);
+    displayFitResults(runLabel);
   }
 }
 

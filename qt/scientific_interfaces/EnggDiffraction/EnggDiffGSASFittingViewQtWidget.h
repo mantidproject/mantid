@@ -33,7 +33,11 @@ public:
   void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 
+  void displayGamma(const double gamma) const override;
+
   void displayRwp(const double rwp) const override;
+
+  void displaySigma(const double sigma) const override;
 
   std::vector<std::string> getFocusedFileNames() const override;
 

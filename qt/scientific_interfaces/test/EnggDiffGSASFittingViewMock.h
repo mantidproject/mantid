@@ -15,10 +15,14 @@ class MockEnggDiffGSASFittingView : public IEnggDiffGSASFittingView {
 public:
   MOCK_METHOD1(addWidget, void(IEnggDiffMultiRunFittingWidgetView *widget));
 
+  MOCK_CONST_METHOD1(displayGamma, void(const double gamma));
+
   MOCK_CONST_METHOD1(displayLatticeParams,
                      void(const Mantid::API::ITableWorkspace_sptr));
 
   MOCK_CONST_METHOD1(displayRwp, void(const double rwp));
+
+  MOCK_CONST_METHOD1(displaySigma, void(const double sigma));
 
   MOCK_CONST_METHOD0(getFocusedFileNames, std::vector<std::string>());
 

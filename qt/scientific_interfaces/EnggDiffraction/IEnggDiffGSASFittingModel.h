@@ -48,6 +48,10 @@ public:
   virtual boost::optional<Mantid::API::ITableWorkspace_sptr>
   getLatticeParams(const RunLabel &runLabel) const = 0;
 
+  /// Get gamma peak broadening term for a given run, if a fit has been done on
+  /// that run
+  virtual boost::optional<double> getGamma(const RunLabel &runLabel) const = 0;
+
   /**
    Get the weighted profile R-factor discrepancy index for goodness of fit on a
    run
@@ -56,6 +60,10 @@ public:
    been performed on this run)
   */
   virtual boost::optional<double> getRwp(const RunLabel &runLabel) const = 0;
+
+  /// Get sigma peak broadening term for a given run, if a fit has been done on
+  /// that run
+  virtual boost::optional<double> getSigma(const RunLabel &runLabel) const = 0;
 
   /**
    Load a focused run from a file
