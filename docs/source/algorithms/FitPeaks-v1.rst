@@ -426,7 +426,7 @@ Output:
 
 .. testoutput:: ExFitVulcanPeaks
 
-  Spectrum 1: 
+  Spectrum 1:
   Expected @ 0.892  Fitted @ 0.892
   Expected @ 1.076  Fitted @ 1.075
 
