@@ -11,6 +11,7 @@ set ( SRC_FILES
 	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
+	GSASIIRefineFitPeaksParameters.cpp
 	RunLabel.cpp
 )
 
@@ -33,6 +34,7 @@ set ( INC_FILES
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
+	GSASIIRefineFitPeaksParameters.h
 	IEnggDiffFittingModel.h
 	IEnggDiffFittingPresenter.h
 	IEnggDiffGSASFittingModel.h

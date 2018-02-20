@@ -13,20 +13,10 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
 
 public:
   Mantid::API::MatrixWorkspace_sptr
-  doPawleyRefinement(const Mantid::API::MatrixWorkspace_sptr inputWS,
-                     const RunLabel &runLabel, const std::string &instParamFile,
-                     const std::vector<std::string> &phaseFiles,
-                     const std::string &pathToGSASII,
-                     const std::string &GSASIIProjectFile, const double dMin,
-                     const double negativeWeight) override;
+  doPawleyRefinement(const GSASIIRefineFitPeaksParameters &params) override;
 
   Mantid::API::MatrixWorkspace_sptr
-  doRietveldRefinement(const Mantid::API::MatrixWorkspace_sptr inputWS,
-                       const RunLabel &runLabel,
-                       const std::string &instParamFile,
-                       const std::vector<std::string> &phaseFiles,
-                       const std::string &pathToGSASII,
-                       const std::string &GSASIIProjectFile) override;
+  doRietveldRefinement(const GSASIIRefineFitPeaksParameters &params) override;
 
   boost::optional<Mantid::API::ITableWorkspace_sptr>
   getLatticeParams(const RunLabel &runLabel) const override;
@@ -73,14 +63,11 @@ private:
   /// Note this must be virtual so that it can be mocked out by the helper class
   /// in EnggDiffGSASFittingModelTest
   /// Returns Rwp of the fit
-  virtual double doGSASRefinementAlgorithm(
-      Mantid::API::MatrixWorkspace_sptr inputWorkspace,
-      const std::string &outputWorkspaceName,
-      const std::string &latticeParamsName, const std::string &refinementMethod,
-      const std::string &instParamFile,
-      const std::vector<std::string> &phaseFiles,
-      const std::string &pathToGSASII, const std::string &GSASIIProjectFile,
-      const double dMin, const double negativeWeight);
+  virtual double
+  doGSASRefinementAlgorithm(const std::string &fittedPeaksWSName,
+                            const std::string &latticeParamsWSName,
+                            const GSASIIRefineFitPeaksParameters &params,
+			    const std::string &refinementMethod);
 };
 
 } // CustomInterfaces

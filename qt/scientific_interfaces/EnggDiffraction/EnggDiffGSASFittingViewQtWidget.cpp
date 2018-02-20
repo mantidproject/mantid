@@ -129,34 +129,42 @@ std::string EnggDiffGSASFittingViewQtWidget::getPathToGSASII() const {
   return m_ui.lineEdit_gsasHome->text().toStdString();
 }
 
-double EnggDiffGSASFittingViewQtWidget::getPawleyDMin() const {
+boost::optional<double> EnggDiffGSASFittingViewQtWidget::getPawleyDMin() const {
   const auto pawleyDMinString = m_ui.lineEdit_pawleyDMin->text();
+  if (pawleyDMinString.isEmpty()) {
+    return boost::none;
+  }
+
   bool conversionSuccessful(false);
   const auto pawleyDMin = pawleyDMinString.toDouble(&conversionSuccessful);
-  if (conversionSuccessful) {
-    return pawleyDMin;
-  } else {
+  if (!conversionSuccessful) {
     userWarning("Invalid Pawley DMin", "Invalid entry for Pawley DMin \"" +
                                            pawleyDMinString.toStdString() +
-                                           "\". Using default (1");
-    return 1;
+                                           "\". Using default");
+    return boost::none;
   }
+
+  return pawleyDMin;
 }
 
-double EnggDiffGSASFittingViewQtWidget::getPawleyNegativeWeight() const {
+boost::optional<double>
+EnggDiffGSASFittingViewQtWidget::getPawleyNegativeWeight() const {
   const auto pawleyNegWeightString = m_ui.lineEdit_pawleyNegativeWeight->text();
+  if (pawleyNegWeightString.isEmpty()) {
+    return boost::none;
+  }
+
   bool conversionSuccessful(false);
   const auto pawleyNegWeight =
       pawleyNegWeightString.toDouble(&conversionSuccessful);
-  if (conversionSuccessful) {
-    return pawleyNegWeight;
-  } else {
+  if (!conversionSuccessful) {
     userWarning("Invalid Pawley negative weight",
                 "Invalid entry for negative weight \"" +
-                    pawleyNegWeightString.toStdString() +
-                    "\". Using default (0)");
-    return 0;
+                    pawleyNegWeightString.toStdString() + "\". Using default");
+    return boost::none;
   }
+
+  return pawleyNegWeight;
 }
 
 std::vector<std::string>
@@ -168,6 +176,14 @@ EnggDiffGSASFittingViewQtWidget::getPhaseFileNames() const {
     fileNameStrings.push_back(fileNameQString.toStdString());
   }
   return fileNameStrings;
+}
+
+bool EnggDiffGSASFittingViewQtWidget::getRefineGamma() const {
+  return m_ui.checkBox_refineGamma->isChecked();
+}
+
+bool EnggDiffGSASFittingViewQtWidget::getRefineSigma() const {
+  return m_ui.checkBox_refineSigma->isChecked();
 }
 
 GSASRefinementMethod
@@ -185,6 +201,42 @@ EnggDiffGSASFittingViewQtWidget::getRefinementMethod() const {
                   "message. If you choose to continue, Pawley will be used");
     return GSASRefinementMethod::PAWLEY;
   }
+}
+
+boost::optional<double> EnggDiffGSASFittingViewQtWidget::getXMax() const {
+  const auto xMaxString = m_ui.lineEdit_xMax->text();
+  if (xMaxString.isEmpty()) {
+    return boost::none;
+  }
+
+  bool conversionSuccessful(false);
+  const auto xMax = xMaxString.toDouble(&conversionSuccessful);
+  if (!conversionSuccessful) {
+    userWarning("Invalid XMax", "Invalid entry for XMax \"" +
+                                    xMaxString.toStdString() +
+                                    "\". Using default");
+    return boost::none;
+  }
+
+  return xMax;
+}
+
+boost::optional<double> EnggDiffGSASFittingViewQtWidget::getXMin() const {
+  const auto xMinString = m_ui.lineEdit_xMin->text();
+  if (xMinString.isEmpty()) {
+    return boost::none;
+  }
+
+  bool conversionSuccessful(false);
+  const auto xMin = xMinString.toDouble(&conversionSuccessful);
+  if (!conversionSuccessful) {
+    userWarning("Invalid XMin", "Invalid entry for XMin \"" +
+                                    xMinString.toStdString() +
+                                    "\". Using default");
+    return boost::none;
+  }
+
+  return xMin;
 }
 
 void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {

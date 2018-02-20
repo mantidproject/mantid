@@ -43,13 +43,21 @@ public:
 
   std::string getPathToGSASII() const override;
 
-  double getPawleyDMin() const override;
+  boost::optional<double> getPawleyDMin() const override;
 
-  double getPawleyNegativeWeight() const override;
+  boost::optional<double> getPawleyNegativeWeight() const override;
 
   std::vector<std::string> getPhaseFileNames() const override;
 
   GSASRefinementMethod getRefinementMethod() const override;
+
+  bool getRefineGamma() const override;
+
+  bool getRefineSigma() const override;
+
+  boost::optional<double> getXMax() const override;
+
+  boost::optional<double> getXMin() const override;
 
   void setEnabled(const bool enabled);
 

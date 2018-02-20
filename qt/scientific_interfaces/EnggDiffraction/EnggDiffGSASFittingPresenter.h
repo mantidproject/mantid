@@ -42,42 +42,28 @@ private:
   void processShutDown();
   void processStart();
 
+  /// Collect GSASIIRefineFitPeaks input parameters for a given run from the
+  /// presenter's various children
+  GSASIIRefineFitPeaksParameters
+  collectInputParameters(const RunLabel &runLabel,
+                         const Mantid::API::MatrixWorkspace_sptr ws,
+                         const GSASRefinementMethod refinementMethod) const;
+
   /**
    Perform a Pawley refinement on a run
-   @param inputWS Workspace to run refinement on
-   @param runLabel Run number and bank ID of the workspace to refine
-   @param instParamFile The instrument parameter file name (.prm) to use for
-   refinement
-   @param phaseFiles Vector of file paths to phases to use in refinement
-   @param pathToGSASII Location of the directory containing GSASIIscriptable.py
-   (and GSAS-II executables)
-   @param GSASIIProjectFile Location to save the .gpx project to
+   @param params Input parameters for GSASIIRefineFitPeaks
    @return Fitted peaks workspace resulting from refinement
    */
   Mantid::API::MatrixWorkspace_sptr
-  doPawleyRefinement(const Mantid::API::MatrixWorkspace_sptr inputWS,
-                     const RunLabel &runLabel, const std::string &instParamFile,
-                     const std::vector<std::string> &phaseFiles,
-                     const std::string &pathToGSASII,
-                     const std::string &GSASIIProjectFile);
+  doPawleyRefinement(const GSASIIRefineFitPeaksParameters &params);
 
   /**
    Perform a Rietveld refinement on a run
-   @param inputWS Workspace to run refinement on
-   @param runLabel Run number and bank ID of the workspace to refine
-   @param instParamFile The instrument parameter file name (.prm) to use for
-   refinement
-   @param phaseFiles Vector of file paths to phases to use in refinement
-   @param pathToGSASII Location of the directory containing GSASIIscriptable.py
-   (and GSAS-II executables)
-   @param GSASIIProjectFile Location to save the .gpx project to
+   @param params Input parameters for GSASIIRefineFitPeaks
    @return Fitted peaks workspace resulting from refinement
    */
-  Mantid::API::MatrixWorkspace_sptr doRietveldRefinement(
-      const Mantid::API::MatrixWorkspace_sptr inputWS, const RunLabel &runLabel,
-      const std::string &instParamFile,
-      const std::vector<std::string> &phaseFiles,
-      const std::string &pathToGSASII, const std::string &GSASIIProjectFile);
+  Mantid::API::MatrixWorkspace_sptr
+  doRietveldRefinement(const GSASIIRefineFitPeaksParameters &params);
 
   /**
    Overplot fitted peaks for a run, and display lattice parameters and Rwp in

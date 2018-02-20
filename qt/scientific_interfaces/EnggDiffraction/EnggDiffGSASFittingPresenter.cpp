@@ -45,6 +45,28 @@ void EnggDiffGSASFittingPresenter::notify(
   }
 }
 
+GSASIIRefineFitPeaksParameters
+EnggDiffGSASFittingPresenter::collectInputParameters(
+    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr inputWS,
+    const GSASRefinementMethod refinementMethod) const {
+  const auto instParamFile = m_view->getInstrumentFileName();
+  const auto phaseFiles = m_view->getPhaseFileNames();
+  const auto pathToGSASII = m_view->getPathToGSASII();
+  const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
+
+  const auto dMin = m_view->getPawleyDMin();
+  const auto negativeWeight = m_view->getPawleyNegativeWeight();
+  const auto xMin = m_view->getXMin();
+  const auto xMax = m_view->getXMax();
+  const auto refineSigma = m_view->getRefineSigma();
+  const auto refineGamma = m_view->getRefineGamma();
+
+  return GSASIIRefineFitPeaksParameters(inputWS, runLabel, refinementMethod,
+                                        instParamFile, phaseFiles, pathToGSASII,
+                                        GSASIIProjectFile, dMin, negativeWeight,
+                                        xMin, xMax, refineSigma, refineGamma);
+}
+
 void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
   const auto latticeParams = m_model->getLatticeParams(runLabel);
   const auto rwp = m_model->getRwp(runLabel);
@@ -65,31 +87,18 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
 
 Mantid::API::MatrixWorkspace_sptr
 EnggDiffGSASFittingPresenter::doPawleyRefinement(
-    const Mantid::API::MatrixWorkspace_sptr inputWS, const RunLabel &runLabel,
-    const std::string &instParamFile,
-    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
-    const std::string &GSASIIProjectFile) {
-  const auto dMin = m_view->getPawleyDMin();
-  const auto negativeWeight = m_view->getPawleyNegativeWeight();
-
-  return m_model->doPawleyRefinement(inputWS, runLabel, instParamFile,
-                                     phaseFiles, pathToGSASII,
-                                     GSASIIProjectFile, dMin, negativeWeight);
+    const GSASIIRefineFitPeaksParameters &params) {
+  return m_model->doPawleyRefinement(params);
 }
 
 Mantid::API::MatrixWorkspace_sptr
 EnggDiffGSASFittingPresenter::doRietveldRefinement(
-    const Mantid::API::MatrixWorkspace_sptr inputWS, const RunLabel &runLabel,
-    const std::string &instParamFile,
-    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
-    const std::string &GSASIIProjectFile) {
-  return m_model->doRietveldRefinement(inputWS, runLabel, instParamFile,
-                                       phaseFiles, pathToGSASII,
-                                       GSASIIProjectFile);
+    const GSASIIRefineFitPeaksParameters &params) {
+  return m_model->doRietveldRefinement(params);
 }
 
 void EnggDiffGSASFittingPresenter::processDoRefinement() {
-  if (!m_multiRunWidget->hasSelectedRunLabel()){
+  if (!m_multiRunWidget->hasSelectedRunLabel()) {
     m_view->userWarning("No run selected",
                         "Please select a run to do refinement on");
     return;
@@ -108,11 +117,8 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   }
 
   const auto refinementMethod = m_view->getRefinementMethod();
-
-  const auto instParamFile = m_view->getInstrumentFileName();
-  const auto phaseFiles = m_view->getPhaseFileNames();
-  const auto pathToGSASII = m_view->getPathToGSASII();
-  const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
+  const auto refinementParams =
+      collectInputParameters(runLabel, *inputWSOptional, refinementMethod);
 
   try {
     Mantid::API::MatrixWorkspace_sptr fittedPeaks;
@@ -120,15 +126,11 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
     switch (refinementMethod) {
 
     case GSASRefinementMethod::PAWLEY:
-      fittedPeaks =
-          doPawleyRefinement(*inputWSOptional, runLabel, instParamFile,
-                             phaseFiles, pathToGSASII, GSASIIProjectFile);
+      fittedPeaks = doPawleyRefinement(refinementParams);
       break;
 
     case GSASRefinementMethod::RIETVELD:
-      fittedPeaks =
-          doRietveldRefinement(*inputWSOptional, runLabel, instParamFile,
-                               phaseFiles, pathToGSASII, GSASIIProjectFile);
+      fittedPeaks = doRietveldRefinement(refinementParams);
       break;
     }
 

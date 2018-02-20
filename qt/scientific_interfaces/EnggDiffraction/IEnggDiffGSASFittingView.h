@@ -7,6 +7,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "RunLabel.h"
 
+#include <boost/optional.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -62,14 +63,15 @@ public:
   virtual std::string getPathToGSASII() const = 0;
 
   /**
-   @return The minimum d-spacing to use in Pawley refinement
+   @return The minimum d-spacing to use in Pawley refinement, if it is set
    */
-  virtual double getPawleyDMin() const = 0;
+  virtual boost::optional<double> getPawleyDMin() const = 0;
 
   /**
-   @return The weight for penalty function applied during Pawley refinement
+   @return The weight for penalty function applied during Pawley refinement, if
+   it is set
    */
-  virtual double getPawleyNegativeWeight() const = 0;
+  virtual boost::optional<double> getPawleyNegativeWeight() const = 0;
 
   /**
    Get paths to all phase files selected for refinement
@@ -77,11 +79,23 @@ public:
    */
   virtual std::vector<std::string> getPhaseFileNames() const = 0;
 
+  /// Get whether the user has selected to refine gamma broadening term
+  virtual bool getRefineGamma() const = 0;
+
+  /// Get whether the user has selected to refine sigma broadening term
+  virtual bool getRefineSigma() const = 0;
+
   /**
    Get the selected refinement method (Pawley or Rietveld)
    @return Refinement method
    */
   virtual GSASRefinementMethod getRefinementMethod() const = 0;
+
+  /// Get XMax parameter, if it is set
+  virtual boost::optional<double> getXMax() const = 0;
+
+  /// Get XMin parameter, if it is set
+  virtual boost::optional<double> getXMin() const = 0;
 
   /**
    Display an error to the user
