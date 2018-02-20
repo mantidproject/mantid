@@ -45,6 +45,7 @@ set ( TEST_PY_FILES
   SANSFitShiftScaleTest.py
   SANSStitchTest.py
   SavePlot1DTest.py
+  SaveVulcanGSSTest.py
   SimpleShapeMonteCarloAbsorptionTest.py
   SimulatedDensityOfStatesTest.py
   SofQWMomentsTest.py
