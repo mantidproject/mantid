@@ -45,12 +45,12 @@ not all are used in all places.
    from matplotlib.colors import LogNorm
 
 First, load some diffraction data and see what the automatic axes will
-be using :func:`~mantid.plots.functions.getAxesLabels`.
+be using :func:`~mantid.plots.helperfunctions.get_axes_labels`.
 
 .. code-block:: python
 
    Load(Filename="PG3_733", OutputWorkspace="PG3_733")
-   print(plots.functions.getAxesLabels(mtd['PG3_733']))
+   print(plots.helperfunctions.get_axes_labels(mtd['PG3_733']))
 
 Which will print the ``y-label`` then the labels for all the other
 axes as properly escaped for use directly in
@@ -75,8 +75,8 @@ or without:
 .. code-block:: python
 
    fig, ax = plt.subplots()
-   plots.functions.plot(ax, mtd['PG3_733'], 'go-', specNum=1, label='user label')
-   plots.functions.errorbar(ax, mtd['PG3_733'],  wkspIndex=2)
+   plots.plotfunctions.plot(ax, mtd['PG3_733'], 'go-', specNum=1, label='user label')
+   plots.plotfunctions.errorbar(ax, mtd['PG3_733'],  wkspIndex=2)
    ax.legend()
    fig.show()
 
@@ -166,7 +166,7 @@ Types of functions
 
 **Informational**
 
-* :func:`~mantid.plots.functions.getAxesLabels`
+* :func:`~mantid.plots.helperfunctions.get_axes_labels`
 
 **1D Plotting**
 
@@ -218,7 +218,7 @@ Functions to use when **mantid** projection is not available
 
              
 Functions to use when **mantid3d** projection is not available
-------------------------------------------------------------
+--------------------------------------------------------------
 
 .. automodule:: mantid.plots.plotfunctions3D
    :members: plot, scatter, plot_wireframe, plot_surface,

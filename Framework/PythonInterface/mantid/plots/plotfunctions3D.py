@@ -46,13 +46,14 @@ def _extract_3d_data(workspace, **kwargs):
 
 
 def plot(axes, workspace, *args, **kwargs):
-    """
+    '''
     3D plots - line plots
+
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or
                       :class:`mantid.api.IMDHistoWorkspace` to extract the data from
     :param zdir: Which direction to use as z ('x', 'y' or 'z') when plotting a 2D set.
-    """
+    '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x, y, z) = get_md_data1d(workspace, normalization)
@@ -66,11 +67,12 @@ def plot(axes, workspace, *args, **kwargs):
 
 
 def scatter(axes, workspace, *args, **kwargs):
-    """
+    '''
     Scatter plots
+
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` or
-                      :class:`mantid.api.IMDHistoWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param zdir:	Which direction to use as z ('x', 'y' or 'z') when plotting a 2D set.
     :param s:	Size in points^2. It is a scalar or an array of the same length as x and y.
     :param c:	A color. c can be a single color format string, or a sequence of color
@@ -82,15 +84,16 @@ def scatter(axes, workspace, *args, **kwargs):
                 the case of a single row to specify the same color for all points.
     :param depthshade:	Whether or not to shade the scatter markers to give the appearance
                         of depth. Default is True.
-    """
+    '''
     x, y, z = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace)
     return axes.scatter(x, y, z, *args, **kwargs)
 
 
 def plot_wireframe(axes, workspace, *args, **kwargs):
-    """
+    '''
     Wire-frame plot
+
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or
                       :class:`mantid.api.IMDHistoWorkspace` to extract the data from
@@ -98,15 +101,16 @@ def plot_wireframe(axes, workspace, *args, **kwargs):
     :param cstride: Array column stride (step size), defaults to 1
     :param rcount:	Use at most this many rows, defaults to 50
     :param ccount:	Use at most this many columns, defaults to 50
-    """
+    '''
     x, y, z = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace)
     return axes.plot_wireframe(x, y, z, *args, **kwargs)
 
 
 def plot_surface(axes, workspace, *args, **kwargs):
-    """
+    '''
     Surface plots
+
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or
                       :class:`mantid.api.IMDHistoWorkspace` to extract the data from
@@ -121,15 +125,16 @@ def plot_surface(axes, workspace, *args, **kwargs):
     :param vmax:	Maximum value to map
     :param shade:	Whether to shade the facecolors
     :param facecolors:	Face colors for the individual patches
-    """
+    '''
     x, y, z = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace)
     return axes.plot_surface(x, y, z, *args, **kwargs)
 
 
 def contour(axes, workspace, *args, **kwargs):
-    """
+    '''
     Contour plots
+
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or
                       :class:`mantid.api.IMDHistoWorkspace` to extract the data from
@@ -138,22 +143,23 @@ def contour(axes, workspace, *args, **kwargs):
     :param zdir:	The direction to use: x, y or z (default)
     :param offset:	If specified plot a projection of the contour lines
                     on this position in plane normal to zdir
-    """
+    '''
     x, y, z = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace)
     return axes.contour(x, y, z, *args, **kwargs)
 
 
 def contourf(axes, workspace, *args, **kwargs):
-    """
+    '''
     Filled Contour plots
+
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or
                       :class:`mantid.api.IMDHistoWorkspace` to extract the data from
     :param zdir:	The direction to use: x, y or z (default)
     :param offset:	If specified plot a projection of the filled contour on this
                     position in plane normal to zdir
-    """
+    '''
     x, y, z = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace)
     return axes.contourf(x, y, z, *args, **kwargs)
