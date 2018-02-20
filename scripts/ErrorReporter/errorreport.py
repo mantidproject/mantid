@@ -5,7 +5,6 @@ from PyQt4.QtCore import pyqtSignal
 from mantidqtpython import MantidQt
 
 
-
 class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
     action = pyqtSignal(bool, int, str, str)
 
