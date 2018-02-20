@@ -410,7 +410,7 @@ Output:
   
   # print result
   for ws_index in range(0, 1):
-      print ('Spectrum {0}: '.format(ws_index+1))
+      print ('Spectrum {0}:'.format(ws_index+1))
       for peak_index in range(2, 4):
           exp_pos = fitted_peak_pos_ws.readX(ws_index)[peak_index]
           fit_pos = fitted_peak_pos_ws.readY(ws_index)[peak_index]
