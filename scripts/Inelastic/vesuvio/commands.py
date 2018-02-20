@@ -888,6 +888,16 @@ def _add_corrections_to_ads(corrections_group, prefix):
     return corrections_names
 
 
+def _compute_caad(fit_workspaces):
+    normalised_workspaces = [_normalise_by_integral(workspace) for workspace in fit_workspaces]
+    return normalised_workspaces, sum(normalised_workspaces)
+
+
+def _normalise_by_integral(workspace):
+    return workspace / Integration(InputWorkspace=workspace, OutputWorkspace="__integral",
+                                   StoreInADS=False, EnableLogging=False)
+
+
 def _parse_hydrogen_constraint(constraint):
     symbol = constraint.pop("symbol", None)
 
