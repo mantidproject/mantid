@@ -52,7 +52,7 @@ private:
   void init() override;
   void exec() override;
 
-  void readEventData(const std::map<std::string, std::string> &eventEntries,
+  std::vector<API::IEventWorkspace_sptr> readEventData(const std::map<std::string, std::string> &eventEntries,
                      API::WorkspaceGroup_sptr &outputGroup,
                      ::NeXus::File &nxFile);
   void
@@ -63,10 +63,6 @@ private:
   // used as part of given useful names to workspaces added to output
   // groupworkspace
   size_t m_countNumWorkspaceAdded{1};
-
-  // Holds the single and multiple scattering event data to be added at
-  // end of the groupworkspace
-  std::vector<API::IEventWorkspace_sptr> m_scaterringWS = {};
 };
 
 } // namespace DataHandling

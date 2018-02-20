@@ -124,9 +124,9 @@ void LoadMcStas::exec() {
       // close second entry
       nxFile.closeGroup();
     }
-
+    std::vector<API::IEventWorkspace_sptr> scatteringWS;
     if (!eventEntries.empty()) {
-      readEventData(eventEntries, outputGroup, nxFile);
+      scatteringWS = readEventData(eventEntries, outputGroup, nxFile);
     }
 
     readHistogramData(histogramEntries, outputGroup, nxFile);
@@ -136,7 +136,7 @@ void LoadMcStas::exec() {
         .closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
     nxFile.closeGroup();
 
-    for (auto ws : m_scaterringWS) {
+    for (auto ws : scatteringWS) {
       outputGroup->addWorkspace(ws);
     }
 
@@ -149,10 +149,11 @@ void LoadMcStas::exec() {
  * @param outputGroup pointer to the workspace group
  * @param nxFile Reads data from inside first first top entry
  */
-void LoadMcStas::readEventData(
+ std::vector<API::IEventWorkspace_sptr> LoadMcStas::readEventData(
     const std::map<std::string, std::string> &eventEntries,
     WorkspaceGroup_sptr &outputGroup, ::NeXus::File &nxFile) {
 
+   std::vector<API::IEventWorkspace_sptr> scatteringWS;
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
   bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
@@ -185,7 +186,7 @@ void LoadMcStas::readEventData(
     g_log.warning()
         << "\nCould not find the instrument description in the Nexus file:"
         << filename << " Ignore eventdata from the Nexus file\n";
-    return;
+    return scatteringWS;;
   }
 
   try {
@@ -210,12 +211,12 @@ void LoadMcStas::readEventData(
         << "When trying to read the instrument description in the Nexus file: "
         << filename << " the following error is reported: " << e.what()
         << " Ignore eventdata from the Nexus file\n";
-    return;
+    return scatteringWS;;
   } catch (...) {
     g_log.warning()
         << "Could not parse instrument description in the Nexus file: "
         << filename << " Ignore eventdata from the Nexus file\n";
-    return;
+    return scatteringWS;;
   }
   // Finished reading Instrument. Then open new data folder again
   nxFile.openGroup("data", "NXdetector");
@@ -260,8 +261,8 @@ void LoadMcStas::readEventData(
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
   if (numEventEntries > 1) {
-    for (size_t i = 1; i <= numEventEntries; i++) {
-      allEventWS.push_back({eventWS->clone(), "partial_event_data_workspace"});
+    for (auto i = 1u; i <= numEventEntries; i++) {
+      allEventWS.emplace_back(eventWS->clone(), "partial_event_data_workspace");
     }
     allEventWS[eventWSIndex].second =
       dataName + std::string("_") + nameOfGroupWS;
@@ -291,13 +292,13 @@ void LoadMcStas::readEventData(
     if (id_info.dims.size() != 2) {
       g_log.error() << "Event data in McStas nexus file not loaded. Expected "
                        "event data block to be two dimensional\n";
-      return;
+      return scatteringWS;;
     }
     int64_t nNeutrons = id_info.dims[0];
     int64_t numberOfDataColumn = id_info.dims[1];
     if (nNeutrons && numberOfDataColumn != 6) {
       g_log.error() << "Event data in McStas nexus file expecting 6 columns\n";
-      return;
+      return scatteringWS;;
     }
     if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
@@ -413,11 +414,10 @@ void LoadMcStas::readEventData(
       setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
       m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
                                   // unique
-      //if (i != 0) {
-        m_scaterringWS.push_back(ws);
-      //}
+      scatteringWS.emplace_back(ws);
     }
   }
+  return scatteringWS;
 }
 
 /**
