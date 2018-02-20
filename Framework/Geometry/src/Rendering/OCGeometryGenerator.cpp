@@ -1,5 +1,5 @@
 #include "MantidGeometry/Rendering/OCGeometryGenerator.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
@@ -77,7 +77,7 @@ Kernel::Logger g_log("OCGeometryGenerator");
 * Constructor
 * @param obj :: input object
 */
-OCGeometryGenerator::OCGeometryGenerator(const Object *obj) : Obj(obj) {
+OCGeometryGenerator::OCGeometryGenerator(const CSGObject *obj) : Obj(obj) {
   ObjSurface = nullptr;
 }
 

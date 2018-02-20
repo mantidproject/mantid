@@ -4,12 +4,19 @@ from PyQt4 import QtGui
 
 
 class TransformView(QtGui.QWidget):
+    """
+    Creates the view for the transformation tab.
+    At the top is the transform selection widget
+    and below it is the selected GUI (FFT or MaxEnt)
+    """
     def __init__(self,groupedViews,parent=None):
         super(TransformView,self).__init__(parent)
-        self.methods = groupedViews.getTransformMethods()
+        # set selector
         self.selection = groupedViews.getTransformSelection()
         self.Layout = QtGui.QGridLayout()
         self.Layout.addWidget(self.selection,1,0)
+        # add the transform widgets to the tab
+        self.methods = groupedViews.getTransformMethods()
         for key in self.methods:
             self.Layout.addWidget(self.methods[key])
         self.setLayout(self.Layout)

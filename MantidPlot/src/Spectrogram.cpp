@@ -26,7 +26,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "Spectrogram.h"
-#include "MantidQtWidgets/Common/qwt_compat.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include <QColor>
 #include <QPainter>
 #include <QPen>
@@ -43,8 +43,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
-#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
-#include "MantidQtWidgets/Common/SignalRange.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
@@ -1061,7 +1061,6 @@ void Spectrogram::loadFromProject(const std::string &lines) {
     std::string policyStr = tsv.sections("ColorPolicy").front();
     int policy = 0;
     Strings::convert<int>(policyStr, policy);
-    // cppcheck-suppress knownConditionTrueFalse
     if (policy == GrayScale)
       setGrayScale();
     else if (policy == Default)

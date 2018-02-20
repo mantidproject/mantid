@@ -28,7 +28,8 @@ ParallelRunner::ParallelRunner(const int threads) {
   if (comm.size() != 1 && comm.size() != threads)
     throw("ParallelRunner: number of requested threads does not match number "
           "of MPI ranks");
-  m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
+  if (comm.size() == 1)
+    m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
   m_serialBackend = boost::make_shared<detail::ThreadingBackend>(1);
 }
 

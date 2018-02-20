@@ -23,8 +23,47 @@ except ImportError:
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
+from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file)
+
+from sans.gui_logic.models.run_summation import RunSummation
+from sans.gui_logic.models.run_selection import RunSelection
+from sans.gui_logic.models.run_finder import SummableRunFinder
+from sans.gui_logic.models.summation_settings import SummationSettings
+from sans.gui_logic.models.binning_type import BinningType
+
+from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
+from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
+from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+from ui.sans_isis.work_handler import WorkHandler
+
+DEFAULT_BIN_SETTINGS = \
+    '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
+
+
+class RunSelectorPresenterFactory(object):
+    def __init__(self, title, run_finder):
+        self._title = title
+        self._run_finder = run_finder
+
+    def __call__(self,
+                 run_selector_view,
+                 on_selection_change,
+                 parent_view):
+        return RunSelectorPresenter(self._title,
+                                    RunSelection(on_selection_change),
+                                    self._run_finder,
+                                    run_selector_view,
+                                    parent_view)
+
+
+def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
+    summation_settings = SummationSettings(BinningType.Custom)
+    summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
+    return SummationSettingsPresenter(summation_settings,
+                                      summation_settings_view,
+                                      parent_view)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -57,6 +96,18 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         @abstractmethod
         def on_processing_finished(self):
+            pass
+
+        @abstractmethod
+        def on_multi_period_selection(self):
+            pass
+
+        @abstractmethod
+        def on_data_changed(self):
+            pass
+
+        @abstractmethod
+        def on_manage_directories(self):
             pass
 
     def __init__(self, main_presenter):
@@ -118,6 +169,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def set_current_page(self, index):
         self.main_stacked_widget.setCurrentIndex(index)
 
+    def _setup_add_runs_page(self):
+        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(WorkHandler()),
+                                                       RunSelectorPresenterFactory('Runs To Sum',
+                                                                                   SummableRunFinder(SANSFileInformationFactory())),
+                                                       _make_run_summation_settings_presenter,
+                                                       self.add_runs_page, self)
+
     def setup_layout(self):
         """
         Do further setup that could not be done in the designer.
@@ -137,36 +195,31 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         runs_icon = QtGui.QIcon(runs_icon_path)
         _ = QtGui.QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
+        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
+        add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
+        _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
+
         settings_icon_path = os.path.join(path, "icons", "settings.png")
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
+        settings_icon_path = os.path.join(path, "icons", "settings.png")
+        settings_icon = QtGui.QIcon(settings_icon_path)
+        _ = QtGui.QListWidgetItem(settings_icon, "Beam Centre", self.tab_choice_list)  # noqa
+
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
 
-        # --------------------------------------------------------------------------------------------------------------
-        # Algorithm setup
-        # --------------------------------------------------------------------------------------------------------------
-        # Setup white list
-        white_list = MantidQt.MantidWidgets.DataProcessor.WhiteList()
-        for entry in self._white_list_entries:
-            # If there is a column name specified, then it is a white list entry.
-            if entry.column_name:
-                white_list.addElement(entry.column_name, entry.algorithm_property, entry.description,
-                                      entry.show_value, entry.prefix)
-
-        # Setup the black list, ie the properties which should not appear in the Options column
-
-        # Processing algorithm (mandatory)
-        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
-                                                                       'unused_', self._black_list)
+        self._setup_add_runs_page()
 
         # --------------------------------------------------------------------------------------------------------------
         # Main Tab
         # --------------------------------------------------------------------------------------------------------------
-        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
-        self.data_processor_table.setForcedReProcessing(True)
+        self.create_data_table(show_periods=False)
+
         self._setup_main_tab()
+
+        self.multi_period_check_box.stateChanged.connect(self._on_multi_period_selection)
 
         # --------------------------------------------------------------------------------------------------------------
         # Settings tabs
@@ -184,6 +237,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Mask file input settings
         self.mask_file_browse_push_button.clicked.connect(self._on_load_mask_file)
         self.mask_file_add_push_button.clicked.connect(self._on_mask_file_add)
+
+        self.manage_directories_button.clicked.connect(self._on_manage_directories)
 
         # Set the q step type settings
         self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
@@ -214,22 +269,47 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Q Resolution
         self.q_resolution_moderator_file_push_button.clicked.connect(self._on_load_moderator_file)
 
+        self.plot_results_checkbox.stateChanged.connect(self._on_plot_results_toggled)
+        self.use_optimizations_checkbox.stateChanged.connect(self._on_use_optimisations_changed)
+
+        self.output_mode_memory_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_file_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_both_radio_button.toggled.connect(self._on_output_mode_changed)
+
         return True
 
-    def _setup_main_tab(self):
-        # --------------------------------------------------------------------------------------------------------------
-        # Header setup
-        # --------------------------------------------------------------------------------------------------------------
-        self.user_file_button.clicked.connect(self._on_user_file_load)
-        self.batch_button.clicked.connect(self._on_batch_file_load)
+    def _on_output_mode_changed(self, state):
+        self.data_processor_table.settingsChanged()
 
-        # Disable the line edit fields. The user should not edit the paths manually. They have to use the button.
-        self.user_file_line_edit.setDisabled(True)
-        self.batch_line_edit.setDisabled(True)
+    def _on_use_optimisations_changed(self, state):
+        self.data_processor_table.settingsChanged()
 
-        # --------------------------------------------------------------------------------------------------------------
-        # Table setup
-        # --------------------------------------------------------------------------------------------------------------
+    def _on_plot_results_toggled(self, state):
+        self.data_processor_table.settingsChanged()
+
+    def create_data_table(self, show_periods):
+        # Delete an already existing table
+        if self.data_processor_table:
+            self.data_processor_table.setParent(None)
+
+        # Create the white list
+        self._white_list_entries = self._main_presenter.get_white_list(show_periods=show_periods)
+
+        # Setup white list
+        white_list = MantidQt.MantidWidgets.DataProcessor.WhiteList()
+        for entry in self._white_list_entries:
+            # If there is a column name specified, then it is a white list entry.
+            if entry.column_name:
+                white_list.addElement(entry.column_name, entry.algorithm_property, entry.description,
+                                      entry.show_value, entry.prefix)
+
+        # Processing algorithm (mandatory)
+        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
+                                                                       'unused_', self._black_list)
+
+        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
+        self.data_processor_table.setForcedReProcessing(True)
+
         # Add the presenter to the data processor
         self.data_processor_table.accept(self._main_presenter)
 
@@ -239,14 +319,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         if instrument_name:
             self._set_mantid_instrument(instrument_name)
-
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
         self.data_processor_table.processButtonClicked.connect(self._processed_clicked)
         self.data_processor_table.processingFinished.connect(self._processing_finished)
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
-
+        self.data_processor_table.dataChanged.connect(self._data_changed)
         self.data_processor_table.instrumentHasChanged.connect(self._handle_instrument_change)
+
+    def _setup_main_tab(self):
+        self.user_file_button.clicked.connect(self._on_user_file_load)
+        self.batch_button.clicked.connect(self._on_batch_file_load)
+
+        # Disable the line edit fields. The user should not edit the paths manually. They have to use the button.
+        self.user_file_line_edit.setDisabled(True)
+        self.batch_line_edit.setDisabled(True)
 
     def _processed_clicked(self):
         """
@@ -259,6 +346,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         Clean up
         """
         self._call_settings_listeners(lambda listener: listener.on_processing_finished())
+
+    def _data_changed(self):
+        """
+        Clean up
+        """
+        self._call_settings_listeners(lambda listener: listener.on_data_changed())
 
     def _on_user_file_load(self):
         """
@@ -469,12 +562,24 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def get_mask_file(self):
         return str(self.mask_file_input_line_edit.text())
 
+    def show_directory_manager(self):
+        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
                   self.__mask_file_input_path_key,  self.get_mask_file)
 
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
+
+    def _on_multi_period_selection(self):
+        # Check if multi-period should be enabled
+        show_periods = self.multi_period_check_box.isChecked()
+        self.create_data_table(show_periods=show_periods)
+        self._call_settings_listeners(lambda listener: listener.on_multi_period_selection())
+
+    def _on_manage_directories(self):
+        self._call_settings_listeners(lambda listener: listener.on_manage_directories())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
@@ -531,6 +636,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         if value:
             gui_element = getattr(self, line_edit)
             gui_element.setText(str(value))
+
+    def is_multi_period_view(self):
+        return self.multi_period_check_box.isChecked()
+
+    def set_multi_period_view_mode(self, mode):
+        self.multi_period_check_box.setChecked(mode)
 
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -592,6 +703,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.use_optimizations_checkbox.setChecked(value)
 
     @property
+    def plot_results(self):
+        return self.plot_results_checkbox.isChecked()
+
+    @plot_results.setter
+    def plot_results(self, value):
+        self.plot_results_checkbox.setChecked(value)
+
+    @property
     def output_mode(self):
         if self.output_mode_memory_radio_button.isChecked():
             return OutputMode.PublishToADS
@@ -619,6 +738,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @compatibility_mode.setter
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
+
+    @property
+    def show_transmission(self):
+        return self.show_transmission_view.isChecked()
+
+    @show_transmission.setter
+    def show_transmission(self, value):
+        self.show_transmission_view.setChecked(value)
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -718,6 +845,32 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def merge_q_range_stop(self, value):
         if value is not None:
             self.update_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit", value=value)
+
+    @property
+    def merge_mask(self):
+        return self.merge_mask_check_box.isChecked()
+
+    @merge_mask.setter
+    def merge_mask(self, value):
+        self.merge_mask_check_box.setChecked(value)
+
+    @property
+    def merge_max(self):
+        return self.get_simple_line_edit_field(line_edit="merged_max_line_edit", expected_type=float)
+
+    @merge_max.setter
+    def merge_max(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_max_line_edit", value=value)
+
+    @property
+    def merge_min(self):
+        return self.get_simple_line_edit_field(line_edit="merged_min_line_edit", expected_type=float)
+
+    @merge_min.setter
+    def merge_min(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_min_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event slices group
@@ -1363,6 +1516,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.merged_scale_line_edit.setValidator(double_validator)
         self.merged_q_range_start_line_edit.setValidator(double_validator)
         self.merged_q_range_stop_line_edit.setValidator(double_validator)
+        self.merged_max_line_edit.setValidator(double_validator)
+        self.merged_min_line_edit.setValidator(double_validator)
 
         self.wavelength_min_line_edit.setValidator(positive_double_validator)
         self.wavelength_max_line_edit.setValidator(positive_double_validator)
@@ -1417,6 +1572,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.merged_q_range_start_line_edit.setText("")
         self.merged_q_range_stop_line_edit.setText("")
+        self.merged_max_line_edit.setText("")
+        self.merged_min_line_edit.setText("")
         self.merged_scale_line_edit.setText("")
         self.merged_shift_line_edit.setText("")
         self.merged_shift_use_fit_check_box.setChecked(False)

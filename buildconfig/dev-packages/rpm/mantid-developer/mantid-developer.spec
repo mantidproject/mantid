@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.23
+Version:        1.26
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -15,9 +15,10 @@ License:        GPL
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %{?fedora:Requires: rpmfusion-nonfree-release}
-Requires: clang
-Requires: cmake-gui >= 2.8.12
 %{?rhel:Requires: epel-release}
+Requires: clang
+%{?fedora:Requires: cmake-gui}
+%{?rhel:Requires: cmake3-gui}
 %if 0%{?el6}
 Requires: boost157-devel
 %else
@@ -47,7 +48,11 @@ Requires: numpy
 Requires: OCE-devel
 Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
+Requires: python-qt5-devel
+Requires: python-QtPy
+Requires: python2-QtAwesome
 Requires: python-devel
+Requires: python-setuptools
 Requires: python-ipython >= 1.1
 %{?el6:Conflicts: python-ipython >= 2.0}
 Requires: python-matplotlib
@@ -91,11 +96,23 @@ Requires: scl-utils
 %else
 Requires: qt-devel
 Requires: qtwebkit-devel
+Requires: qt5-qtbase-devel
+Requires: qt5-qtbase-gui
+Requires: qt5-qtimageformats
+Requires: qt5-qtsvg
+Requires: qt5-qttools-devel
+Requires: qt5-qttools-libs-designer
+Requires: qt5-qtwebkit-devel
+Requires: qscintilla-qt5-devel
 %endif
 Requires: graphviz
 %if %{with_python3}
+Requires: python3-setuptools
 Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
+Requires: python-qt5-devel
+Requires: python3-QtPy
+%{?fedora:Requires: python3-QtAwesome}
 Requires: python3-numpy
 Requires: python3-scipy
 Requires: python3-sphinx
@@ -132,6 +149,15 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Mon Jan 22 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added qtawesome
+
+* Tue Dec 05 2017 Peter Peterson <petersonpf@ornl.gov>
+- Added cmake3-gui for rhel
+
+* Wed Nov 22 2017 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added Qt5, PyQt5 and QtPy dependencies
 
 * Thu Jul 20 2017 Peter Peterson <petersonpf@ornl.gov>
 - Added python-qtconsole for fedora

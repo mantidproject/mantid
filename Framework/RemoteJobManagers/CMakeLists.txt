@@ -39,7 +39,8 @@ endif()
 add_library ( RemoteJobManagers ${SRC_FILES} ${INC_FILES})
 
 # Set the name of the generated library
-set_target_properties ( RemoteJobManagers PROPERTIES OUTPUT_NAME MantidRemoteJobManagers )
+set_target_properties ( RemoteJobManagers PROPERTIES OUTPUT_NAME MantidRemoteJobManagers
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( RemoteJobManagers PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

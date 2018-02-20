@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D2B" valid-from="1900-01-31 23:59:59">
+	<component-link name="D2B">
+
+		<parameter name="mirror_detector_angles" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="detector_for_height_axis" type="string">
+			<value val="tube_1" />
+		</parameter>
+
+	</component-link>
+</parameter-file>

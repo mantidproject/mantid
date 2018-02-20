@@ -216,6 +216,7 @@ private:
   void makeMapsMultiSiteMultiSpectrum() const;
   size_t makeMapsForFunction(const IFunction &fun, size_t iFirst,
                              const std::string &prefix) const;
+  void cacheSourceParameters() const;
 
   /// Function that creates the source function.
   mutable CrystalFieldControl m_control;
@@ -238,6 +239,8 @@ private:
   /// Map parameter/attribute prefixes to pointers to phys prop functions
   mutable std::unordered_map<std::string, API::IFunction_sptr>
       m_mapPrefixes2PhysProps;
+  /// Temporary cache for parameter values during source function resetting.
+  mutable std::vector<double> m_parameterResetCache;
 };
 
 } // namespace Functions

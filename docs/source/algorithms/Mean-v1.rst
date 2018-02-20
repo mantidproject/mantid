@@ -41,8 +41,8 @@ Usage:
    ws_2 = CreateWorkspace(dataX, dataY, NSpec=2)
 
    result = Mean("ws_1, ws_2") # note the comma-separate strings
-   print "Mean of y values in first spectrum:", result.readY(0)
-   print "Mean of y values in second spectrum:", result.readY(1)
+   print("Mean of y values in first spectrum: {}".format(result.readY(0)))
+   print("Mean of y values in second spectrum: {}".format(result.readY(1)))
 
 Output:
 

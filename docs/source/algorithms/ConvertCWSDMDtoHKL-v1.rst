@@ -26,7 +26,7 @@ Inputs
 
 **InputWorkspace** is an MDEventWorkspace ???.
 
-**PeakWorkspace** is an optional input as in many cases especially after calculating UB matrix, ...
+**PeakWorkspace** is an optional input as in many cases especially after calculating :ref:`UB matrix <Lattice>`, ...
 
 **UBMatrix** is ???.
 

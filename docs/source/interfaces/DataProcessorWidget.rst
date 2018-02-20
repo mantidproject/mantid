@@ -1,11 +1,11 @@
 .. _DataProcessorWidget_DevelopersGuide-ref:
 
-DataProcessor widget: a guide for Mantid developers 
+DataProcessor widget: a guide for Mantid developers
 ===================================================
 
 .. contents:: Table of Contents
     :local:
-    
+
 Introduction
 ------------
 
@@ -24,7 +24,7 @@ What the widget is for
 ----------------------
 
 The DataProcessor widget is a technique-independent *MantidWidget* that can be used to execute complex
-batch-processing via *DataProcessorAlgorithms* by reducing sequentially groups of runs that can be later 
+batch-processing via *DataProcessorAlgorithms* by reducing sequentially groups of runs that can be later
 post-processed.
 
 The widget, displayed below, consists in a set of table editing options, a processing table where runs can be entered
@@ -263,7 +263,7 @@ Below is a summary in pseudocode:
 		if (column_name in pre_process_map)
 		  load and pre-process_runs;
 		  alg->setPropertyValue(algorithm_property, pre_processed_runs);
-	      
+
 		else
 		  alg->setPropertyValue(algorithm_property, cell);
 
@@ -304,7 +304,7 @@ algorithm is in this case :ref:`algm-Stitch1DMany`, and can be defined as:
 As with pre-processing and processing algorithms, a third parameter indicating the list of properties
 to blacklist can be used. As with the pre-process map, you must add manually a hinting line edit
 and link the post-processing black list to it, as this functionality is not available by default.
-	
+
 .. code-block:: python
 
     post_alg = MantidQt.MantidWidgets.DataProcessor.PostprocessingAlgorithm('Stitch1DMany', 'IvsQ_', 'InputWorkspaces, OutputWorkspaces')
@@ -436,7 +436,7 @@ and then the implementation would be:
                                                                          loader.toStdString()),
               parent) {}
 
-Finally, you will need to modify file :literal:`MantidQt/Python/mantidqt.sip` to include the
+Finally, you will need to modify file :literal:`qt/python/mantidqtpython/mantidqtpython_def.sip` to include the
 above constructor:
 
 .. code-block:: c
@@ -444,7 +444,7 @@ above constructor:
     class QDataProcessorWidget : QWidget
     {
     %TypeHeaderCode
-    #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
+    #include "MantidQtWidgets/DataProcessorUI/QDataProcessorWidget.h"
     %End
     public:
     QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
@@ -703,4 +703,3 @@ How to use the widget from a Python interface
 There is a toy example written in Python that can be found in mantid/scripts/Interface/ui/dataprocessorinterface.
 It is currently invisible to users, but you can make it visible for you by adding :literal:`Utility/DataProcessorInterface.py` to
 Framework/Properties/Mantid.properties.template. This will make the toy example appear under category :literal:`Utility`.
-

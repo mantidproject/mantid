@@ -3,7 +3,6 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
@@ -103,7 +102,7 @@ int SampleEnvironment::interceptSurfaces(Track &track) const {
 /**
  * @param component An object defining some component of the environment
  */
-void SampleEnvironment::add(const Object_const_sptr &component) {
+void SampleEnvironment::add(const IObject_const_sptr &component) {
   m_components.emplace_back(component);
 }
 }

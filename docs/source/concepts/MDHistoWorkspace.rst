@@ -69,7 +69,7 @@ If you want to check if a variable points to something that is an MDHistoWorkspa
                            NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
    if isinstance(ws, IMDHistoWorkspace):
-    print ws.name() + " is a " + ws.id()
+    print(ws.name() + " is a " + ws.id())
 
 Output:
 
@@ -90,13 +90,13 @@ For a full list of the available properties and operation look at the :py:obj:`I
                                  SignalInput=range(0,100),ErrorInput=range(0,100),\
                                  NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
-   print "Number of events =", ws.getNEvents()
-   print "Number of dimensions =", ws.getNumDims()
-   print "Normalization =", ws.displayNormalization()
+   print("Number of events = {}".format(ws.getNEvents()))
+   print("Number of dimensions = {}".format(ws.getNumDims()))
+   print("Normalization = {}".format(ws.displayNormalization()))
    for i in range(ws.getNumDims()):
       dimension = ws.getDimension(i)
-      print "\tDimension {0} Name: {1}".format(i,
-         dimension.name)
+      print("\tDimension {0} Name: {1}".format(i,
+         dimension.name))
 
 .. testoutput:: MDHistoWorkspaceProperties
    :hide:
@@ -119,23 +119,23 @@ As a generic multi dimensional container being able to access information about 
                                  SignalInput=range(0,100),ErrorInput=range(0,100),\
                                  NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
-   print "Number of dimensions =", ws.getNumDims()
+   print("Number of dimensions = {}".format(ws.getNumDims()))
    for i in range(ws.getNumDims()):
      dimension = ws.getDimension(i)
-     print "\tDimension {0} Name: {1} id: {2} Range: {3}-{4} {5}".format(i,
+     print("\tDimension {0} Name: {1} id: {2} Range: {3}-{4} {5}".format(i,
          dimension.getDimensionId(),
          dimension.name,
          dimension.getMinimum(),
          dimension.getMaximum(),
-         dimension.getUnits())
+         dimension.getUnits()))
 
-   print "The dimension assigned to X =", ws.getXDimension().name
-   print "The dimension assigned to Y =", ws.getYDimension().name
+   print("The dimension assigned to X = {}".format(ws.getXDimension().name))
+   print("The dimension assigned to Y = {}".format(ws.getYDimension().name))
    try:
-     print "The dimension assigned to Z =", ws.getZDimension().name
+     print("The dimension assigned to Z = " + ws.getZDimension().name)
    except RuntimeError:
       # if the dimension does not exist you will get a RuntimeError
-     print "Workspace does not have a Z dimension"
+     print("Workspace does not have a Z dimension")
 
    # you can also get a dimension by it's id
    dim = ws.getDimensionIndexById("Dim1")
@@ -152,7 +152,7 @@ As a generic multi dimensional container being able to access information about 
       Dimension 1 Name: Dim2 id: Dim2 Range: -10.0-10.0 EnergyTransfer
    The dimension assigned to X = Dim1
    The dimension assigned to Y = Dim2
-   The dimension assigned to Z = Workspace does not have a Z dimension
+   Workspace does not have a Z dimension
 
 Accessing the Data
 ##################
@@ -165,8 +165,8 @@ Accessing the Data
                                     
    # To get the signal and error at a prticular position                            
    index = ws.getLinearIndex(5,5)
-   print ws.signalAt(index)
-   print ws.errorSquaredAt(index)
+   print(ws.signalAt(index))
+   print(ws.errorSquaredAt(index))
 
    # To extract the whole signal aray
    signalArray =  ws.getSignalArray()

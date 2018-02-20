@@ -36,8 +36,8 @@ Usage
     wsc = ConvertSpectrumAxis(ws,"theta")
 
     rb = Rebin2D(wsc,[0,100,20000],[0,0.01,1.2],UseFractionalArea=True)
-    print ("Bins in the X axis: %i" % rb.blocksize())
-    print ("Bins in the Y axis: %i" % rb.getNumberHistograms())
+    print("Bins in the X axis: {}".format(rb.blocksize()))
+    print("Bins in the Y axis: {}".format(rb.getNumberHistograms()))
 
 Output:
 
@@ -55,8 +55,8 @@ Output:
     wsc = ConvertSpectrumAxis(ws,"theta")
 
     rb = Rebin2D(wsc,[0,100,20000],[0,0.01,1.2],Transpose=True)
-    print ("Bins in the X axis: %i" % rb.blocksize())
-    print ("Bins in the Y axis: %i" % rb.getNumberHistograms())
+    print("Bins in the X axis: {}".format(rb.blocksize()))
+    print("Bins in the Y axis: {}".format(rb.getNumberHistograms()))
     
 Output:
 

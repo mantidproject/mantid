@@ -17,9 +17,9 @@ set ( SRC_FILES
 	src/ApplyTransmissionCorrection.cpp
 	src/AsymmetryCalc.cpp
 	src/AverageLogData.cpp
+	src/Bin2DPowderDiffraction.cpp
 	src/BinaryOperateMasks.cpp
-       src/BinaryOperation.cpp
-       src/Bin2DPowderDiffraction.cpp
+	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
 	src/CalculateCountRate.cpp
@@ -42,12 +42,13 @@ set ( SRC_FILES
 	src/ClearCache.cpp
 	src/ClearInstrumentParameters.cpp
 	src/ClearMaskFlag.cpp
+	src/ClearMaskedSpectra.cpp
 	src/CloneWorkspace.cpp
 	src/Comment.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/CompareWorkspaces.cpp
-	src/ConjoinXRuns.cpp
 	src/ConjoinWorkspaces.cpp
+	src/ConjoinXRuns.cpp
 	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
 	src/ConvertDiffCal.cpp
@@ -109,6 +110,7 @@ set ( SRC_FILES
 	src/EQSANSTofStructure.cpp
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
+	src/EstimateDivergence.cpp
 	src/EstimateMuonAsymmetryFromCounts.cpp
 	src/EstimateResolutionDiffraction.cpp
 	src/EventWorkspaceAccess.cpp
@@ -120,6 +122,7 @@ set ( SRC_FILES
 	src/ExtractMaskToTable.cpp
 	src/ExtractSingleSpectrum.cpp
 	src/ExtractSpectra.cpp
+	src/ExtractSpectra2.cpp
 	src/ExtractUnmaskedSpectra.cpp
 	src/FFT.cpp
 	src/FFTDerivative.cpp
@@ -158,6 +161,7 @@ set ( SRC_FILES
 	src/GroupWorkspaces.cpp
 	src/HRPDSlabCanAbsorption.cpp
 	src/He3TubeEfficiency.cpp
+	src/HyspecScharpfCorrection.cpp
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
 	src/IntegrateByComponent.cpp
@@ -173,6 +177,7 @@ set ( SRC_FILES
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
+	src/MaskInstrument.cpp
 	src/MatrixWorkspaceAccess.cpp
 	src/Max.cpp
 	src/MaxEnt.cpp
@@ -191,16 +196,17 @@ set ( SRC_FILES
 	src/ModeratorTzeroLinear.cpp
 	src/MonitorEfficiencyCorUser.cpp
 	src/MonteCarloAbsorption.cpp
+	src/MostLikelyMean.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
 	src/MuonAsymmetryHelper.cpp
 	src/MuonGroupDetectors.cpp
+	src/NRCalculateSlitResolution.cpp
 	src/NormaliseByCurrent.cpp
 	src/NormaliseByDetector.cpp
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
-	src/NRCalculateSlitResolution.cpp
 	src/OneMinusExponentialCor.cpp
 	src/PDCalibration.cpp
 	src/PDDetermineCharacterizations.cpp
@@ -214,6 +220,7 @@ set ( SRC_FILES
 	src/PointByPointVCorrection.cpp
 	src/PoissonErrors.cpp
 	src/PolarizationCorrection.cpp
+	src/PolarizationEfficiencyCor.cpp
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
@@ -297,6 +304,7 @@ set ( SRC_FILES
 	src/StripVanadiumPeaks2.cpp
 	src/SumEventsByLogValue.cpp
 	src/SumNeighbours.cpp
+	src/SumOverlappingTubes.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
@@ -333,17 +341,17 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnnularRingAbsorption.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
+	inc/MantidAlgorithms/ApodizationFunctions.h
 	inc/MantidAlgorithms/AppendSpectra.h
-    inc/MantidAlgorithms/ApodizationFunctions.h
 	inc/MantidAlgorithms/ApplyCalibration.h
 	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AsymmetryCalc.h
 	inc/MantidAlgorithms/AverageLogData.h
+	inc/MantidAlgorithms/Bin2DPowderDiffraction.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
-       inc/MantidAlgorithms/Bin2DPowderDiffraction.h
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
@@ -367,6 +375,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ClearCache.h
 	inc/MantidAlgorithms/ClearInstrumentParameters.h
 	inc/MantidAlgorithms/ClearMaskFlag.h
+	inc/MantidAlgorithms/ClearMaskedSpectra.h
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/Comment.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
@@ -434,6 +443,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
+	inc/MantidAlgorithms/EstimateDivergence.h
 	inc/MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h
 	inc/MantidAlgorithms/EstimateResolutionDiffraction.h
 	inc/MantidAlgorithms/EventWorkspaceAccess.h
@@ -445,6 +455,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExtractMaskToTable.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
 	inc/MantidAlgorithms/ExtractSpectra.h
+	inc/MantidAlgorithms/ExtractSpectra2.h
 	inc/MantidAlgorithms/ExtractUnmaskedSpectra.h
 	inc/MantidAlgorithms/FFT.h
 	inc/MantidAlgorithms/FFTDerivative.h
@@ -484,6 +495,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GroupWorkspaces.h
 	inc/MantidAlgorithms/HRPDSlabCanAbsorption.h
 	inc/MantidAlgorithms/He3TubeEfficiency.h
+	inc/MantidAlgorithms/HyspecScharpfCorrection.h
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
 	inc/MantidAlgorithms/IntegrateByComponent.h
@@ -499,6 +511,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
+	inc/MantidAlgorithms/MaskInstrument.h
 	inc/MantidAlgorithms/MatrixWorkspaceAccess.h
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxEnt.h
@@ -520,21 +533,22 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ModeratorTzeroLinear.h
 	inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
+	inc/MantidAlgorithms/MostLikelyMean.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
 	inc/MantidAlgorithms/MuonAsymmetryHelper.h
 	inc/MantidAlgorithms/MuonGroupDetectors.h
+	inc/MantidAlgorithms/NRCalculateSlitResolution.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseByDetector.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
-	inc/MantidAlgorithms/NRCalculateSlitResolution.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
-	inc/MantidAlgorithms/PaddingAndApodization.h
 	inc/MantidAlgorithms/PDCalibration.h
 	inc/MantidAlgorithms/PDDetermineCharacterizations.h
 	inc/MantidAlgorithms/PDFFourierTransform.h
+	inc/MantidAlgorithms/PaddingAndApodization.h
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
 	inc/MantidAlgorithms/PhaseQuadMuon.h
@@ -543,6 +557,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PointByPointVCorrection.h
 	inc/MantidAlgorithms/PoissonErrors.h
 	inc/MantidAlgorithms/PolarizationCorrection.h
+	inc/MantidAlgorithms/PolarizationEfficiencyCor.h
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
@@ -627,6 +642,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
 	inc/MantidAlgorithms/SumEventsByLogValue.h
 	inc/MantidAlgorithms/SumNeighbours.h
+	inc/MantidAlgorithms/SumOverlappingTubes.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
@@ -682,9 +698,9 @@ set ( TEST_FILES
 	ApplyTransmissionCorrectionTest.h
 	AsymmetryCalcTest.h
 	AverageLogDataTest.h
+	Bin2DPowderDiffractionTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
-       Bin2DPowderDiffractionTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
 	CalculateCountRateTest.h
@@ -700,14 +716,15 @@ set ( TEST_FILES
 	ChainedOperatorTest.h
 	ChangeBinOffsetTest.h
 	ChangeLogTimeTest.h
-	ChangePulsetimeTest.h
 	ChangePulsetime2Test.h
+	ChangePulsetimeTest.h
 	ChangeTimeZeroTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
 	ClearCacheTest.h
 	ClearInstrumentParametersTest.h
 	ClearMaskFlagTest.h
+	ClearMaskedSpectraTest.h
 	CloneWorkspaceTest.h
 	CommentTest.h
 	CommutativeBinaryOperationTest.h
@@ -773,6 +790,7 @@ set ( TEST_FILES
 	DivideTest.h
 	EditInstrumentGeometryTest.h
 	ElasticWindowTest.h
+	EstimateDivergenceTest.h
 	EstimateMuonAsymmetryFromCountsTest.h
 	EstimateResolutionDiffractionTest.h
 	ExponentialCorrectionTest.h
@@ -782,6 +800,7 @@ set ( TEST_FILES
 	ExtractMaskTest.h
 	ExtractMaskToTableTest.h
 	ExtractSingleSpectrumTest.h
+	ExtractSpectra2Test.h
 	ExtractSpectraTest.h
 	ExtractUnmaskedSpectraTest.h
 	FFTDerivativeTest.h
@@ -819,6 +838,7 @@ set ( TEST_FILES
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
 	He3TubeEfficiencyTest.h
+	HyspecScharpfCorrectionTest.h
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
 	IntegrateByComponentTest.h
@@ -836,6 +856,7 @@ set ( TEST_FILES
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaskDetectorsIfTest.h
+	MaskInstrumentTest.h
 	MaxEnt/MaxentCalculatorTest.h
 	MaxEnt/MaxentEntropyNegativeValuesTest.h
 	MaxEnt/MaxentEntropyPositiveValuesTest.h
@@ -853,19 +874,20 @@ set ( TEST_FILES
 	ModeratorTzeroTest.h
 	MonitorEfficiencyCorUserTest.h
 	MonteCarloAbsorptionTest.h
+	MostLikelyMeanTest.h
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
 	MuonGroupDetectorsTest.h
+	NRCalculateSlitResolutionTest.h
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
-	NRCalculateSlitResolutionTest.h
 	OneMinusExponentialCorTest.h
-	PaddingAndApodizationTest.h
 	PDCalibrationTest.h
 	PDDetermineCharacterizationsTest.h
 	PDFFourierTransformTest.h
+	PaddingAndApodizationTest.h
 	PauseTest.h
 	PerformIndexOperationsTest.h
 	PhaseQuadMuonTest.h
@@ -874,6 +896,7 @@ set ( TEST_FILES
 	PointByPointVCorrectionTest.h
 	PoissonErrorsTest.h
 	PolarizationCorrectionTest.h
+	PolarizationEfficiencyCorTest.h
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
@@ -923,6 +946,7 @@ set ( TEST_FILES
 	SmoothDataTest.h
 	SmoothNeighboursTest.h
 	SofQWCentreTest.h
+	SofQWCutTest.h
 	SofQWNormalisedPolygonTest.h
 	SofQWPolygonTest.h
 	SofQWTest.h
@@ -930,8 +954,8 @@ set ( TEST_FILES
 	SortEventsTest.h
 	SparseInstrumentTest.h
 	SpatialGroupingTest.h
-	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionCalculateTheta2Test.h
+	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionPositionCorrect2Test.h
 	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
@@ -942,6 +966,7 @@ set ( TEST_FILES
 	StripVanadiumPeaksTest.h
 	SumEventsByLogValueTest.h
 	SumNeighboursTest.h
+	SumOverlappingTubesTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
 	TOFSANSResolutionByPixelCalculatorTest.h
@@ -979,7 +1004,8 @@ enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES 
 add_library ( Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
-						           COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS" )
+  COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS"
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

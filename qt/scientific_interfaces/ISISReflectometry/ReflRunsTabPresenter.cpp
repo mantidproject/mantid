@@ -1,4 +1,6 @@
 #include "ReflRunsTabPresenter.h"
+#include "IReflMainWindowPresenter.h"
+#include "IReflRunsTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,17 +9,16 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "IReflMainWindowPresenter.h"
-#include "IReflRunsTabView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflCatalogSearcher.h"
+#include "ReflFromStdStringMap.h"
 #include "ReflLegacyTransferStrategy.h"
 #include "ReflMeasureTransferStrategy.h"
 #include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
-#include "ReflFromStdStringMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/ProgressPresenter.h"
 
 #include <QStringList>
 #include <boost/regex.hpp>
@@ -31,6 +32,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -57,14 +59,9 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     std::vector<DataProcessorPresenter *> tablePresenters,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_tablePresenters(tablePresenters), m_mainPresenter(),
+      m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
       m_searcher(searcher), m_instrumentChanged(false) {
-
-  // Register this presenter as the workspace receiver
-  // When doing so, the inner presenters will notify this
-  // presenter with the list of commands
-  for (const auto &presenter : m_tablePresenters)
-    presenter->accept(this);
+  assert(m_view != nullptr);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
@@ -111,8 +108,21 @@ ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
 */
 void ReflRunsTabPresenter::acceptMainPresenter(
     IReflMainWindowPresenter *mainPresenter) {
-
   m_mainPresenter = mainPresenter;
+  // Register this presenter as the workspace receiver
+  // When doing so, the inner presenters will notify this
+  // presenter with the list of commands
+
+  for (const auto &presenter : m_tablePresenters)
+    presenter->accept(this);
+  // Note this must be done here since notifying the gdpp of its view
+  // will cause it to request settings only accessible via the main
+  // presenter.
+}
+
+void ReflRunsTabPresenter::settingsChanged(int group) {
+  assert(static_cast<std::size_t>(group) < m_tablePresenters.size());
+  m_tablePresenters[group]->settingsChanged();
 }
 
 /**
@@ -398,46 +408,48 @@ void ReflRunsTabPresenter::notifyADSChanged(
 
   UNUSED_ARG(workspaceList);
   pushCommands();
+  m_view->updateMenuEnabledState(
+      m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
-/** Requests property names associated with pre-processing values.
-* @return :: Pre-processing property names.
-*/
-QString ReflRunsTabPresenter::getPreprocessingProperties() const {
-
-  auto properties =
-      QString("Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
-  return properties;
-}
-
-/** Requests global pre-processing options as a string. Options are supplied by
+/** Requests global pre-processing options. Options are supplied by
+  * the main presenter and there can be multiple sets of options for different
+  * columns that need to be preprocessed.
+  * @return :: A map of the column name to the global pre-processing options
+  * for that column
   * the main presenter.
   * @return :: Global pre-processing options
   */
-QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
+ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+  ColumnOptionsQMap result;
+  assert(m_mainPresenter != nullptr &&
+         "The main presenter must be set with acceptMainPresenter.");
 
-  auto optionsStr = QString("Transmission Run(s),") +
-                    QString::fromStdString(m_mainPresenter->getTransmissionRuns(
-                        m_view->getSelectedGroup()));
+  // Note that there are no options for the Run(s) column so just add
+  // Transmission Run(s)
+  auto transmissionOptions = OptionsQMap(
+      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
+  result["Transmission Run(s)"] = transmissionOptions;
 
-  return optionsStr;
+  return result;
 }
 
 /** Requests global processing options. Options are supplied by the main
 * presenter
 * @return :: Global processing options
 */
-QString ReflRunsTabPresenter::getProcessingOptions() const {
-
-  return QString::fromStdString(
-      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
+OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
+  assert(m_mainPresenter != nullptr &&
+         "The main presenter must be set with acceptMainPresenter.");
+  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 
-/** Requests global post-processing options. Options are supplied by the main
+/** Requests global post-processing options as a string. Options are supplied by
+* the main
 * presenter
-* @return :: Global post-processing options
+* @return :: Global post-processing options as a string
 */
-QString ReflRunsTabPresenter::getPostprocessingOptions() const {
+QString ReflRunsTabPresenter::getPostprocessingOptionsAsString() const {
 
   return QString::fromStdString(
       m_mainPresenter->getStitchOptions(m_view->getSelectedGroup()));
@@ -459,25 +471,31 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
-/** Tells view to enable all 'process' buttons and disable the 'pause' button
-* when data reduction is paused
-*/
-void ReflRunsTabPresenter::pause() const {
+/** Tells the view to update the enabled/disabled state of all relevant widgets
+ * based on whether processing is in progress or not.
+ * @param isProcessing :: true if processing is in progress
+ *
+ */
+void ReflRunsTabPresenter::updateWidgetEnabledState(
+    const bool isProcessing) const {
+  // Update the menus
+  m_view->updateMenuEnabledState(isProcessing);
 
-  m_view->setRowActionEnabled(0, true);
-  m_view->setAutoreduceButtonEnabled(true);
-  m_view->setRowActionEnabled(1, false);
+  // Update specific buttons
+  m_view->setAutoreduceButtonEnabled(!isProcessing);
+  m_view->setTransferButtonEnabled(!isProcessing);
+  m_view->setInstrumentComboEnabled(!isProcessing);
 }
 
-/** Tells view to disable the 'process' button and enable the 'pause' button
-* when data reduction is resumed
+/** Tells view to update the enabled/disabled state of all relevant widgets
+ * based on the fact that processing is not in progress
 */
-void ReflRunsTabPresenter::resume() const {
+void ReflRunsTabPresenter::pause() const { updateWidgetEnabledState(false); }
 
-  m_view->setRowActionEnabled(0, false);
-  m_view->setAutoreduceButtonEnabled(false);
-  m_view->setRowActionEnabled(1, true);
-}
+/** Tells view to update the enabled/disabled state of all relevant widgets
+ * based on the fact that processing is in progress
+*/
+void ReflRunsTabPresenter::resume() const { updateWidgetEnabledState(true); }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
 * either the search number, transfer method or instrument has changed
@@ -493,18 +511,14 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
 
 /** Notifies main presenter that data reduction is confirmed to be paused
 */
-void ReflRunsTabPresenter::confirmReductionPaused() const {
-
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
+void ReflRunsTabPresenter::confirmReductionPaused(int group) {
+  m_mainPresenter->notifyReductionPaused(group);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
-void ReflRunsTabPresenter::confirmReductionResumed() const {
-
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
+void ReflRunsTabPresenter::confirmReductionResumed(int group) {
+  m_mainPresenter->notifyReductionResumed(group);
 }
 
 /** Changes the current instrument in the data processor widget. Also clears the

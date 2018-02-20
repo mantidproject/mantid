@@ -41,7 +41,9 @@ public:
    * @return Standard string name  */
   const std::string id() const override { return "WorkspaceSingleValue"; }
 
-  WorkspaceSingleValue(double value = 0.0, double error = 0.0);
+  WorkspaceSingleValue(
+      double value = 0.0, double error = 0.0,
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
 
   /// Returns a clone of the workspace
   std::unique_ptr<WorkspaceSingleValue> clone() const {
@@ -86,8 +88,7 @@ private:
   // allocates space in a new workspace - does nothing in this case
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
-  void init(const std::size_t &NVectors,
-            const HistogramData::Histogram &histogram) override;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
   Histogram1D data{HistogramData::Histogram::XMode::Points,

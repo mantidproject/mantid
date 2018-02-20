@@ -9,8 +9,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidQtWidgets/Common/MantidColorMap.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MaskBinsData.h"
 #include "SampleActor.h"
 

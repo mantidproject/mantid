@@ -51,27 +51,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QToolBar>
 #include <QToolButton>
 #include <QUrl>
-#include <QWebHistory>
-#include <QWebView>
-
-using MantidQt::API::MantidDesktopServices;
 
 // ****************************************************************************
 //            CLASS pqHelpWindowNetworkReply
 // ****************************************************************************
-/// Internal class used to add support to QWebView to load files from
+/// Internal class used to add support to QWeb(Engine)View to load files from
 /// QHelpEngine.
-class pqHelpWindowNetworkReply : public QNetworkReply
-{
+class pqHelpWindowNetworkReply : public QNetworkReply {
   typedef QNetworkReply Superclass;
+
 public:
-  pqHelpWindowNetworkReply(const QUrl& url, QHelpEngineCore* helpEngine);
+  pqHelpWindowNetworkReply(const QUrl &url, QHelpEngineCore *helpEngine,
+                           QObject *parent = nullptr);
 
   void abort() override {}
 
   qint64 bytesAvailable() const override {
     return (this->RawData.size() - this->Offset) +
-        this->Superclass::bytesAvailable();
+           this->Superclass::bytesAvailable();
   }
   bool isSequential() const override { return true; }
 
@@ -80,14 +77,16 @@ protected:
 
   QByteArray RawData;
   qint64 Offset;
+
 private:
   Q_DISABLE_COPY(pqHelpWindowNetworkReply)
 };
 
 //-----------------------------------------------------------------------------
-pqHelpWindowNetworkReply::pqHelpWindowNetworkReply(
-    const QUrl& my_url, QHelpEngineCore* engine) : Superclass(engine), Offset(0)
-{
+pqHelpWindowNetworkReply::pqHelpWindowNetworkReply(const QUrl &my_url,
+                                                   QHelpEngineCore *engine,
+                                                   QObject *parent)
+    : Superclass(parent), Offset(0) {
   Q_ASSERT(engine);
 
   this->RawData = engine->fileData(my_url);
@@ -95,37 +94,34 @@ pqHelpWindowNetworkReply::pqHelpWindowNetworkReply(
   QString content_type = "text/plain";
   QString extension = QFileInfo(my_url.path()).suffix().toLower();
   QMap<QString, QString> extension_type_map;
-  extension_type_map["jpg"]   = "image/jpeg";
-  extension_type_map["jpeg"]  = "image/jpeg";
-  extension_type_map["png"]   = "image/png";
-  extension_type_map["gif"]   = "image/gif";
-  extension_type_map["tiff"]  = "image/tiff";
-  extension_type_map["htm"]   = "text/html";
-  extension_type_map["html"]  = "text/html";
-  extension_type_map["css"]   = "text/css";
-  extension_type_map["xml"]   = "text/xml";
+  extension_type_map["jpg"] = "image/jpeg";
+  extension_type_map["jpeg"] = "image/jpeg";
+  extension_type_map["png"] = "image/png";
+  extension_type_map["gif"] = "image/gif";
+  extension_type_map["tiff"] = "image/tiff";
+  extension_type_map["htm"] = "text/html";
+  extension_type_map["html"] = "text/html";
+  extension_type_map["css"] = "text/css";
+  extension_type_map["xml"] = "text/xml";
 
-  if (extension_type_map.contains(extension))
-  {
+  if (extension_type_map.contains(extension)) {
     content_type = extension_type_map[extension];
   }
 
   this->setHeader(QNetworkRequest::ContentLengthHeader,
                   QVariant(this->RawData.size()));
   this->setHeader(QNetworkRequest::ContentTypeHeader, content_type);
-  this->open(QIODevice::ReadOnly|QIODevice::Unbuffered);
+  this->open(QIODevice::ReadOnly | QIODevice::Unbuffered);
   this->setUrl(my_url);
   QTimer::singleShot(0, this, SIGNAL(readyRead()));
   QTimer::singleShot(0, this, SLOT(finished()));
 }
 
 //-----------------------------------------------------------------------------
-qint64 pqHelpWindowNetworkReply::readData(char *data, qint64 maxSize)
-{
-  if (this->Offset <= this->RawData.size())
-  {
-    qint64 end = qMin(this->Offset + maxSize,
-                      static_cast<qint64>(this->RawData.size()));
+qint64 pqHelpWindowNetworkReply::readData(char *data, qint64 maxSize) {
+  if (this->Offset <= this->RawData.size()) {
+    qint64 end =
+        qMin(this->Offset + maxSize, static_cast<qint64>(this->RawData.size()));
     qint64 delta = end - this->Offset;
     memcpy(data, this->RawData.constData() + this->Offset, delta);
     this->Offset += delta;
@@ -134,22 +130,22 @@ qint64 pqHelpWindowNetworkReply::readData(char *data, qint64 maxSize)
   return -1;
 }
 
+#if defined(USE_QTWEBKIT)
+#include <QWebHistory>
+#include <QWebView>
 
 // ****************************************************************************
 //    CLASS pqHelpWindow::pqNetworkAccessManager
 // ****************************************************************************
 //-----------------------------------------------------------------------------
-class pqHelpWindow::pqNetworkAccessManager : public QNetworkAccessManager
-{
+class pqHelpWindow::pqNetworkAccessManager : public QNetworkAccessManager {
   typedef QNetworkAccessManager Superclass;
   QPointer<QHelpEngineCore> Engine;
+
 public:
-  pqNetworkAccessManager(
-    QHelpEngineCore* helpEngine, QNetworkAccessManager *manager,
-    QObject *parentObject) :
-    Superclass(parentObject),
-    Engine(helpEngine)
-  {
+  pqNetworkAccessManager(QHelpEngineCore *helpEngine,
+                         QNetworkAccessManager *manager, QObject *parentObject)
+      : Superclass(parentObject), Engine(helpEngine) {
     Q_ASSERT(manager != NULL && helpEngine != NULL);
 
     this->setCache(manager->cache());
@@ -162,12 +158,9 @@ protected:
   QNetworkReply *createRequest(Operation operation,
                                const QNetworkRequest &request,
                                QIODevice *device) override {
-    if (request.url().scheme() == "qthelp" && operation == GetOperation)
-    {
-      return new pqHelpWindowNetworkReply(request.url(), this->Engine);
-    }
-    else
-    {
+    if (request.url().scheme() == "qthelp" && operation == GetOperation) {
+      return new pqHelpWindowNetworkReply(request.url(), this->Engine, this);
+    } else {
       return this->Superclass::createRequest(operation, request, device);
     }
   }
@@ -176,23 +169,50 @@ private:
   Q_DISABLE_COPY(pqNetworkAccessManager)
 };
 
+#else
+
+#include <QWebEngineHistory>
+#include <QWebEnginePage>
+#include <QWebEngineProfile>
+#include <QWebEngineUrlRequestJob>
+#include <QWebEngineUrlSchemeHandler>
+#include <QWebEngineView>
+
+/// Adds support for qthelp scheme links that load content from them QHelpEngine
+class QtHelpUrlHandler : public QWebEngineUrlSchemeHandler {
+public:
+  QtHelpUrlHandler(QHelpEngineCore *helpEngine, QObject *parent = nullptr)
+      : QWebEngineUrlSchemeHandler(parent), Engine(helpEngine) {}
+
+protected:
+  void requestStarted(QWebEngineUrlRequestJob *request) override {
+    request->reply("text/html",
+                   new pqHelpWindowNetworkReply(request->requestUrl(),
+                                                this->Engine, request));
+  }
+
+private:
+  QHelpEngineCore *Engine;
+};
+
+#endif
+
 // ****************************************************************************
 //            CLASS pqHelpWindow
 // ****************************************************************************
 
 //-----------------------------------------------------------------------------
-pqHelpWindow::pqHelpWindow(
-  QHelpEngine* engine, QWidget* parentObject, Qt::WindowFlags parentFlags)
-  : Superclass(parentObject, parentFlags), m_helpEngine(engine)
-{
+pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
+                           Qt::WindowFlags parentFlags)
+    : Superclass(parentObject, parentFlags), m_helpEngine(engine) {
   Q_ASSERT(engine != NULL);
 
   Ui::pqHelpWindow ui;
   ui.setupUi(this);
 
   // all warnings from the help engine get logged
-  QObject::connect(this->m_helpEngine, SIGNAL(warning(const QString&)),
-                   this, SIGNAL(helpWarnings(const QString&)));
+  QObject::connect(this->m_helpEngine, SIGNAL(warning(const QString &)), this,
+                   SIGNAL(helpWarnings(const QString &)));
 
   // add a navigation toolbar
   QToolBar *navigation = new QToolBar("Navigation");
@@ -229,13 +249,13 @@ pqHelpWindow::pqHelpWindow(
   ui.contentsDock->raise();
 
   // setup the search tab
-  QWidget* searchPane = new QWidget(this);
-  QVBoxLayout* vbox = new QVBoxLayout();
+  QWidget *searchPane = new QWidget(this);
+  QVBoxLayout *vbox = new QVBoxLayout();
   searchPane->setLayout(vbox);
   vbox->addWidget(this->m_helpEngine->searchEngine()->queryWidget());
   vbox->addWidget(this->m_helpEngine->searchEngine()->resultWidget());
-  connect(this->m_helpEngine->searchEngine()->resultWidget(), SIGNAL(requestShowLink(QUrl)),
-          this, SLOT(showPage(QUrl)));
+  connect(this->m_helpEngine->searchEngine()->resultWidget(),
+          SIGNAL(requestShowLink(QUrl)), this, SLOT(showPage(QUrl)));
 
   // set the search connection
   ui.searchDock->setWidget(searchPane);
@@ -243,50 +263,56 @@ pqHelpWindow::pqHelpWindow(
           this, SLOT(search()));
 
   // connect the index page to the content pane
-  connect(m_helpEngine->contentWidget(), SIGNAL(linkActivated(QUrl)),
-          this, SLOT(showPage(QUrl)));
-  connect(this->m_helpEngine->indexWidget(), SIGNAL(linkActivated(QUrl,QString)),
-          this, SLOT(showPage(QUrl)));
+  connect(m_helpEngine->contentWidget(), SIGNAL(linkActivated(QUrl)), this,
+          SLOT(showPage(QUrl)));
+  connect(this->m_helpEngine->indexWidget(),
+          SIGNAL(linkActivated(QUrl, QString)), this, SLOT(showPage(QUrl)));
 
-  // setup the content pane
-  this->m_browser = new QWebView(this);
-  m_browser->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-  this->setCentralWidget(this->m_browser);
-
+// setup the content pane
+#if defined(USE_QTWEBKIT)
+  m_browser = new QWebView(this);
   QNetworkAccessManager *oldManager = m_browser->page()->networkAccessManager();
-  pqNetworkAccessManager* newManager = new pqNetworkAccessManager(
-        m_helpEngine, oldManager, this);
+  pqNetworkAccessManager *newManager =
+      new pqNetworkAccessManager(m_helpEngine, oldManager, this);
+  m_browser->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
   m_browser->page()->setNetworkAccessManager(newManager);
   m_browser->page()->setForwardUnsupportedContent(false);
-  connect(this->m_browser, SIGNAL(linkClicked(QUrl)), this, SLOT(showPage(QUrl)));
+  connect(m_browser, SIGNAL(linkClicked(QUrl)), this, SLOT(showPage(QUrl)));
+  // set up the status bar
+  connect(m_browser->page(), SIGNAL(linkHovered(QString, QString, QString)),
+          this, SLOT(linkHovered(QString, QString, QString)));
+#else
+  QWebEngineProfile::defaultProfile()->installUrlSchemeHandler(
+      "qthelp", new QtHelpUrlHandler(engine));
+  m_browser = new QWebEngineView(this);
+  m_browser->setPage(new DelegatingWebPage(m_browser));
+  connect(m_browser->page(), SIGNAL(linkClicked(QUrl)), this,
+          SLOT(showPage(QUrl)));
+  // set up the status bar
+  connect(m_browser->page(), SIGNAL(linkHovered(QString)), this,
+          SLOT(linkHovered(QString)));
+#endif
+  this->setCentralWidget(this->m_browser);
 
   // connect the navigation buttons
   connect(home, SIGNAL(clicked()), this, SLOT(showHomePage()));
   connect(print, SIGNAL(clicked()), this, SLOT(printPage()));
-  connect(m_forward,  SIGNAL(clicked()), m_browser, SLOT(forward()));
+  connect(m_forward, SIGNAL(clicked()), m_browser, SLOT(forward()));
   connect(m_backward, SIGNAL(clicked()), m_browser, SLOT(back()));
-  connect(m_forward,  SIGNAL(clicked()), this, SLOT(updateNavButtons()));
+  connect(m_forward, SIGNAL(clicked()), this, SLOT(updateNavButtons()));
   connect(m_backward, SIGNAL(clicked()), this, SLOT(updateNavButtons()));
-
-  // set up the status bar
-  connect(m_browser->page(), SIGNAL(linkHovered(QString, QString, QString)), this,
-          SLOT(linkHovered(QString, QString, QString)));
 
   // setup the search engine to do its job
   m_helpEngine->searchEngine()->reindexDocumentation();
 }
 
 //-----------------------------------------------------------------------------
-pqHelpWindow::~pqHelpWindow()
-{
-}
 
 /**
  * Set the contents of the browser to show an error message.
  * @param url The url that could not be found.
  */
-void pqHelpWindow::errorMissingPage(const QUrl& url)
-{
+void pqHelpWindow::errorMissingPage(const QUrl &url) {
   QString htmlDoc =
       QString(QLatin1String(
                   "<html><head><title>Invalid Url - %1</title></head><body>"))
@@ -302,24 +328,20 @@ void pqHelpWindow::errorMissingPage(const QUrl& url)
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showPage(const QString& url)
-{
+void pqHelpWindow::showPage(const QString &url) {
   this->showPage(QUrl::fromUserInput(url));
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showPage(const QUrl& url)
-{
-  if(url.scheme() == "qthelp")
-  {
+void pqHelpWindow::showPage(const QUrl &url) {
+  if (url.scheme() == "qthelp") {
     if (this->m_helpEngine->findFile(url).isValid())
       this->m_browser->setUrl(url);
     else
       errorMissingPage(url);
     this->updateNavButtons();
-  }
-  else
-  {
+  } else {
+    using MantidQt::API::MantidDesktopServices;
     MantidDesktopServices::openUrl(url);
   }
 }
@@ -331,48 +353,45 @@ void pqHelpWindow::printPage() {
   dialog.setWindowTitle(tr("Print Document"));
   if (dialog.exec() != QDialog::Accepted)
     return;
+#if defined(USE_QTWEBKIT)
   m_browser->print(&printer);
+#else
+  m_browser->page()->print(&printer, [](bool) {});
+#endif
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::updateNavButtons()
-{
+void pqHelpWindow::updateNavButtons() {
   m_forward->setEnabled(m_browser->history()->canGoForward());
   m_backward->setEnabled(m_browser->history()->canGoBack());
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::search()
-{
+void pqHelpWindow::search() {
   QList<QHelpSearchQuery> query =
       this->m_helpEngine->searchEngine()->queryWidget()->query();
   this->m_helpEngine->searchEngine()->search(query);
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::linkHovered(const QString & link, const QString & title,
-                               const QString & textContent)
-{
+void pqHelpWindow::linkHovered(const QString &link, const QString &title,
+                               const QString &textContent) {
   (void)title;
   (void)textContent;
   this->statusBar()->showMessage(link);
 }
 
-void pqHelpWindow::showHomePage()
-{
+void pqHelpWindow::showHomePage() {
   showPage(QString("qthelp://org.mantidproject/doc/index.html"));
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showHomePage(const QString& namespace_name)
-{
-  QList<QUrl> html_pages = this->m_helpEngine->files(namespace_name,
-                                                     QStringList(), "html");
+void pqHelpWindow::showHomePage(const QString &namespace_name) {
+  QList<QUrl> html_pages =
+      this->m_helpEngine->files(namespace_name, QStringList(), "html");
   // now try to locate a file named index.html in this collection.
-  foreach (QUrl url, html_pages)
-  {
-    if (url.path().endsWith("index.html"))
-    {
+  foreach (QUrl url, html_pages) {
+    if (url.path().endsWith("index.html")) {
       this->showPage(url.toString());
       return;
     }

@@ -116,7 +116,7 @@ void IndirectBayes::runClicked() {
  */
 void IndirectBayes::helpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Indirect_Bayes"));
+                                                 QString("Indirect Bayes"));
 }
 
 /**

@@ -11,7 +11,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -73,7 +73,8 @@ void SofQWNormalisedPolygon::exec() {
   }
 
   RebinnedOutput_sptr outputWS =
-      this->setUpOutputWorkspace(*inputWS, getProperty("QAxisBinning"), m_Qout);
+      this->setUpOutputWorkspace(*inputWS, getProperty("QAxisBinning"), m_Qout,
+                                 getProperty("EAxisBinning"));
   g_log.debug() << "Workspace type: " << outputWS->id() << '\n';
   setProperty("OutputWorkspace", outputWS);
   const size_t nEnergyBins = inputWS->blocksize();
@@ -287,7 +288,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
      * The angular width is computed using the l2 distance from the sample
      */
     Kernel::V3D pos;
-    boost::shared_ptr<const Object>
+    boost::shared_ptr<const IObject>
         shape; // Defined in its own reference frame with centre at 0,0,0
     Kernel::Quat rot;
 
@@ -398,25 +399,37 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
 /** Creates the output workspace, setting the axes according to the input
  * binning parameters
  *  @param[in]  inputWorkspace The input workspace
- *  @param[in]  binParams The bin parameters from the user
- *  @param[out] newAxis        The 'vertical' axis defined by the given
- * parameters
+ *  @param[in]  qbinParams The q-bin parameters from the user
+ *  @param[out] qAxis The 'vertical' (q) axis defined by the given parameters
+ *  @param[out] ebinParams The 'horizontal' (energy) axis parameters (optional)
  *  @return A pointer to the newly-created workspace
  */
 RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
     const API::MatrixWorkspace &inputWorkspace,
-    const std::vector<double> &binParams, std::vector<double> &newAxis) {
+    const std::vector<double> &qbinParams, std::vector<double> &qAxis,
+    const std::vector<double> &ebinParams) {
+  using Kernel::VectorHelper::createAxisFromRebinParams;
+
+  HistogramData::BinEdges xAxis(0);
+  // Create vector to hold the new X axis values
+  if (ebinParams.empty()) {
+    xAxis = inputWorkspace.binEdges(0);
+  } else {
+    static_cast<void>(
+        createAxisFromRebinParams(ebinParams, xAxis.mutableRawData()));
+  }
+
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(
-      VectorHelper::createAxisFromRebinParams(binParams, newAxis));
+      VectorHelper::createAxisFromRebinParams(qbinParams, qAxis));
 
   // Create output workspace, bin edges are same as in inputWorkspace index 0
-  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1,
-                                                inputWorkspace.binEdges(0));
+  auto outputWorkspace =
+      create<RebinnedOutput>(inputWorkspace, yLength - 1, xAxis);
 
   // Create a binned numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new BinEdgeAxis(newAxis);
+  Axis *const verticalAxis = new BinEdgeAxis(qAxis);
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   // Set the axis units

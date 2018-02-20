@@ -66,11 +66,9 @@ void PeaksViewer::setPresenter(
     const auto foregroundPeakViewColor =
         m_presenter->getForegroundPeakViewColor(ws);
 
-    bool canAddPeaks = m_presenter->hasPeakAddModeFor(ws);
-
     auto widget =
         new PeaksWorkspaceWidget(ws, coordinateSystem, foregroundPeakViewColor,
-                                 backgroundPeakViewColor, canAddPeaks, this);
+                                 backgroundPeakViewColor, this);
 
     widget->setSelectedPeak(m_presenter->getZoomedPeakIndex());
 
@@ -101,11 +99,6 @@ void PeaksViewer::setPresenter(
             SIGNAL(zoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int)),
             this,
             SLOT(onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int)));
-    connect(widget,
-            SIGNAL(peaksSorted(const std::string &, const bool,
-                               Mantid::API::IPeaksWorkspace_const_sptr)),
-            this, SLOT(onPeaksSorted(const std::string &, const bool,
-                                     Mantid::API::IPeaksWorkspace_const_sptr)));
     layout()->addWidget(widget);
     ++it;
   }
@@ -142,7 +135,7 @@ void PeaksViewer::clearPeaksModeRequest(
   EditMode mode = None;
   if (on) {
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
       // For all but the most recently selected peaks workspace. Exit clear
@@ -167,7 +160,7 @@ void PeaksViewer::addPeaksModeRequest(
   EditMode mode = None;
   if (on) {
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
       // For all but the most recently selected peaks workspace. Exit clear
@@ -396,18 +389,6 @@ void PeaksViewer::onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
 }
 
 /**
- * Handler for sorting of a peaks workspace.
- * @param columnToSortBy : Column to sort by
- * @param sortedAscending : Sort direction
- * @param peaksWS : Workspace to be sorted
- */
-void PeaksViewer::onPeaksSorted(
-    const std::string &columnToSortBy, const bool sortedAscending,
-    Mantid::API::IPeaksWorkspace_const_sptr peaksWS) {
-  m_presenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
-}
-
-/**
  * Perform an update based on the proxy composite. Re-fetch data.
  */
 void PeaksViewer::performUpdate() {
@@ -425,7 +406,7 @@ void PeaksViewer::performUpdate() {
 
     // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
       Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace =
@@ -465,7 +446,7 @@ void PeaksViewer::updatePeaksWorkspace(
 
   // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
   QList<PeaksWorkspaceWidget *> children =
-      qFindChildren<PeaksWorkspaceWidget *>(this);
+      this->findChildren<PeaksWorkspaceWidget *>();
 
   for (int i = 0; i < children.size(); ++i) {
     PeaksWorkspaceWidget *candidateWidget = children.at(i);
@@ -496,7 +477,7 @@ bool PeaksViewer::removePeaksWorkspace(
   if (m_presenter) {
 
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
 
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
@@ -524,7 +505,7 @@ bool PeaksViewer::removePeaksWorkspace(const std::string &toRemove) {
   if (m_presenter) {
 
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
 
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);

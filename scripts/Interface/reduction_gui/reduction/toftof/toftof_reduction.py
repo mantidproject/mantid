@@ -340,9 +340,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.l("for ws in {}:".format(wsgroup))
         self.l("    name = ws.getComment() + {}".format(suffix))
         if self.saveNXSPE and self.binEon:
-            self.l("    SaveNXSPE(ws, join('{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
+            self.l("    SaveNXSPE(ws, join(r'{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
         if self.saveNexus:
-            self.l("    SaveNexus(ws, join('{}', name + '.nxs'))".format(self.saveDir))
+            self.l("    SaveNexus(ws, join(r'{}', name + '.nxs'))".format(self.saveDir))
         self.l()
 
     def normalize_data(self, gPrefix, gDataRuns, wsEC='', wsVan=''):
@@ -393,7 +393,10 @@ class TOFTOFScriptElement(BaseScriptElement):
         if self.CORR_TOF_VAN == self.correctTof:
             self.l("# apply vanadium TOF correction")
             self.l("{} = CorrectTOF({}, {})".format(gData2, gDataCleanFrame, eppTable))
-            self.delete_workspaces([gDataCleanFrame, gData, eppTable])
+            if self.ecRuns:
+                self.delete_workspaces([gDataCleanFrame, gData, eppTable])
+                return True
+            self.delete_workspaces([gDataCleanFrame, eppTable])
             return True
 
         elif self.CORR_TOF_SAMPLE == self.correctTof:
@@ -401,12 +404,17 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("# apply sample TOF correction")
             self.l("{} = FindEPP({})".format(eppTables, gData))
             self.l("{} = CorrectTOF({}, {})".format(gData2, gDataCleanFrame, eppTables))
-            self.delete_workspaces([gDataCleanFrame, gData, eppTables])
+            if self.ecRuns:
+                self.delete_workspaces([gDataCleanFrame, gData, eppTables])
+                return True
+            self.delete_workspaces([gDataCleanFrame, eppTables])
             return True
 
-        if self.vanRuns:
+        if self.vanRuns and self.ecRuns:
             self.delete_workspaces([eppTable, gData])
-        else:
+        elif self.vanRuns:
+            self.delete_workspaces([eppTable])
+        elif self.ecRuns:
             self.delete_workspaces([gData])
         return False
 
@@ -522,8 +530,15 @@ class TOFTOFScriptElement(BaseScriptElement):
         if self.ecRuns:
             wsECNorm2 = wsECNorm + '2'
             self.l("{} = CloneWorkspace({})".format(wsECNorm2, wsECNorm))
+
         if self.vanRuns:
-            wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
+            if self.subtractECVan:
+                wsVanNorm = wsVanSubEC
+            else:
+                wsVanNorm2 = wsVanNorm + '2'
+                self.l("{} = CloneWorkspace({})".format(wsVanNorm2, wsVanNorm))
+                wsVanNorm = wsVanNorm2
+
             if self.ecRuns:
                 self.l("{} = GroupWorkspaces({}list({}.getNames()))"
                        .format(gData, self.group_list([wsVanNorm, wsECNorm2], ' + '), gDataSource))
@@ -583,7 +598,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("for ws in {}:" .format(gLast))
             self.l("    step1 = RemoveMaskedSpectra(ws)")
             self.l("    step2 = IntegrateByComponent(step1)")
-            self.l("    step3 = ConvertSpectrumAxis(step2, Target='Theta', EMode='Direct', EFixed=Ei, OrderAxis=True)")
+            self.l("    step3 = ConvertSpectrumAxis(step2, Target='Theta', EMode='Direct', EFixed=Ei)")
             self.l("    Transpose(step3, OutputWorkspace='{}_D_' + ws.getComment())"
                    .format(self.prefix))
             self.l("{} = GroupWorkspaces(['{}_D_'+ ws.getComment() for ws in {}])"

@@ -14,9 +14,30 @@ of spectrum number/**energy transfer** to
 the intensity as a function of momentum transfer 
 :math:`Q` and energy transfer :math:`\Delta E`. 
 
-The rebinning is done as a weighted sum of overlapping polygons. See 
-:ref:`algm-SofQWCentre` for centre-point binning  or :ref:`algm-SofQWNormalisedPolygon` for
-more complex and precise (but slower) binning strategy.
+The rebinning is done as a weighted sum of overlapping polygons.
+The polygon in :math:`Q-\Delta E` space is calculated from the
+energy bin boundaries and the detector scattering angle :math:`2\theta`.
+The detectors (pixels) are assumed to be uniform, and characterised
+by a single angular width :math:`\Delta2\theta`. The signal and error
+of the rebinned data (in :math:`Q-\Delta E` space) is then the
+sum of the contributing pixels in each bin weighted by their fractional
+overlap area:
+
+.. math:: Y^{\mathrm{out}} = (\sum_i Y^{\mathrm{in}}_i F_i)
+.. math:: E^{\mathrm{out}} = \sqrt{\sum_i (E^{\mathrm{in}}_i F_i)^2}
+
+Unlike the more precise :ref:`algm-SofQWNormalisedPolygon`
+algorithm, the final counts is not weighted by the sum of fractional
+areas which means that the signal will be underestimated where the
+bins are smaller, for example at the edges of detectors.
+However, like the other algorithm, the output workspace has bins which
+are no longer independent. Thus subsequent rebinning (or integration)
+of the output of the algorithm will give incorrect error values.
+
+See :ref:`algm-SofQWCentre` for centre-point binning.
+Alternatively, see :ref:`algm-SofQWNormalisedPolygon` for a
+more complex and precise (but slower) binning strategy, where the actual
+detector shape is calculated to obtain the input polygon.
 
 Usage
 -----
@@ -30,14 +51,14 @@ Usage
    # convert workspace into MD workspace 
    ws=SofQWPolygon(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
   
-   print "The converted X-Y values are:"
+   print("The converted X-Y values are:")
    Xrow=ws.readX(59);
    Yrow=ws.readY(59);   
-   for i in xrange(0,20):
-    print '! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]),
-    if (i+1)%10 == 0:
-        print '!\n',
-   print '! {0:>6.2f} ------- !'.format(Xrow[20]),
+   line1= " ".join('! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]) for i in range(0,10))
+   print(line1 + " !")
+   line2= " ".join('! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]) for i in range(10,20))
+   print(line2 + " !")
+   print('! {0:>6.2f} ------- !'.format(Xrow[20]))
 
 
 

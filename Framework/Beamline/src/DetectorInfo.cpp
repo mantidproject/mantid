@@ -7,22 +7,27 @@
 namespace Mantid {
 namespace Beamline {
 
-DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
-                           std::vector<Eigen::Quaterniond> rotations)
+DetectorInfo::DetectorInfo(
+    std::vector<Eigen::Vector3d> positions,
+    std::vector<Eigen::Quaterniond,
+                Eigen::aligned_allocator<Eigen::Quaterniond>> rotations)
     : m_isMonitor(Kernel::make_cow<std::vector<bool>>(positions.size())),
       m_isMasked(Kernel::make_cow<std::vector<bool>>(positions.size())),
       m_positions(
           Kernel::make_cow<std::vector<Eigen::Vector3d>>(std::move(positions))),
-      m_rotations(Kernel::make_cow<std::vector<Eigen::Quaterniond>>(
+      m_rotations(Kernel::make_cow<std::vector<
+          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
           std::move(rotations))) {
   if (m_positions->size() != m_rotations->size())
     throw std::runtime_error("DetectorInfo: Position and rotations vectors "
                              "must have identical size");
 }
 
-DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
-                           std::vector<Eigen::Quaterniond> rotations,
-                           const std::vector<size_t> &monitorIndices)
+DetectorInfo::DetectorInfo(
+    std::vector<Eigen::Vector3d> positions,
+    std::vector<Eigen::Quaterniond,
+                Eigen::aligned_allocator<Eigen::Quaterniond>> rotations,
+    const std::vector<size_t> &monitorIndices)
     : DetectorInfo(std::move(positions), std::move(rotations)) {
   for (const auto i : monitorIndices)
     m_isMonitor.access().at(i) = true;
@@ -101,6 +106,12 @@ size_t DetectorInfo::scanSize() const {
     return 0;
   return m_positions->size();
 }
+
+/**
+ * Returns true if all of the detectors all have the same scan interval. Will
+ * return false if DetectorInfo is not scanning.
+ */
+bool DetectorInfo::isSyncScan() const { return isScanning() && m_isSyncScan; }
 
 /// Returns true if the detector with given detector index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
@@ -187,6 +198,8 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
  * scans. */
 void DetectorInfo::setScanInterval(
     const size_t index, const std::pair<int64_t, int64_t> &interval) {
+  // Time intervals must be set up before adding time sensitive
+  // positions/rotations hence check below.
   checkNoTimeDependence();
   checkScanInterval(interval);
   if (!m_scanIntervals)
@@ -210,7 +223,8 @@ void DetectorInfo::setScanInterval(
     m_scanIntervals =
         Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
             1, std::pair<int64_t, int64_t>{0, 1});
-  } else if (!m_isSyncScan) {
+  }
+  if (!m_isSyncScan) {
     throw std::runtime_error(
         "DetectorInfo has been initialized with a "
         "asynchonous scan, cannot set synchronous scan interval.");
@@ -301,6 +315,7 @@ bool DetectorInfo::hasComponentInfo() const {
 }
 
 double DetectorInfo::l1() const {
+  // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error(
         "DetectorInfo has no valid ComponentInfo thus cannot determine l1");
@@ -309,6 +324,7 @@ double DetectorInfo::l1() const {
 }
 
 Eigen::Vector3d DetectorInfo::sourcePosition() const {
+  // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
                              "cannot determine sourcePosition");
@@ -317,6 +333,7 @@ Eigen::Vector3d DetectorInfo::sourcePosition() const {
 }
 
 Eigen::Vector3d DetectorInfo::samplePosition() const {
+  // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
                              "cannot determine samplePosition");

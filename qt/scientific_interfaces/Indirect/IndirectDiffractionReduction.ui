@@ -198,10 +198,25 @@
            <property name="margin">
             <number>6</number>
            </property>
-           <item row="5" column="0">
-            <widget class="QCheckBox" name="ckManualDRange">
-             <property name="text">
-              <string>Manual dRange (Vanadium):</string>
+           <item row="4" column="0" colspan="2">
+            <widget class="MantidQt::API::MWRunFiles" name="rfVanadiumFile" native="true">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>22</height>
+              </size>
+             </property>
+             <property name="label" stdset="0">
+              <string>Vanadium Runs</string>
+             </property>
+             <property name="multipleFiles" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="instrumentOverride" stdset="0">
+              <string>OSIRIS</string>
              </property>
             </widget>
            </item>
@@ -226,35 +241,6 @@
               <stringlist>
                <string>.cal</string>
               </stringlist>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="MantidQt::API::MWRunFiles" name="rfVanadiumFile" native="true">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>22</height>
-              </size>
-             </property>
-             <property name="label" stdset="0">
-              <string>Vanadium Runs</string>
-             </property>
-             <property name="multipleFiles" stdset="0">
-              <bool>true</bool>
-             </property>
-             <property name="instrumentOverride" stdset="0">
-              <string>OSIRIS</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QLineEdit" name="spDRange">
-             <property name="enabled">
-              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -765,8 +751,6 @@
   <tabstop>leRebinStart_CalibOnly</tabstop>
   <tabstop>leRebinWidth_CalibOnly</tabstop>
   <tabstop>leRebinEnd_CalibOnly</tabstop>
-  <tabstop>ckManualDRange</tabstop>
-  <tabstop>spDRange</tabstop>
   <tabstop>cbPlotType</tabstop>
   <tabstop>ckGSS</tabstop>
   <tabstop>ckNexus</tabstop>
@@ -886,22 +870,6 @@
     <hint type="destinationlabel">
      <x>194</x>
      <y>427</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckManualDRange</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spDRange</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>66</x>
-     <y>371</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>303</x>
-     <y>371</y>
     </hint>
    </hints>
   </connection>

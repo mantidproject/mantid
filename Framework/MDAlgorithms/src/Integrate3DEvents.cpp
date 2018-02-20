@@ -87,7 +87,7 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
     return std::make_pair(boost::make_shared<NoShape>(),
                           make_tuple(0., 0., 0.));
 
-  const auto &events = result.get();
+  const auto &events = *result;
   if (events.empty())
     return std::make_pair(boost::make_shared<NoShape>(),
                           make_tuple(0., 0., 0.));
@@ -147,11 +147,6 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   inti = peak - ratio * backgrd;
   sigi = sqrt(peak + ratio * ratio * backgrd);
 
-  if (inti < 0) {
-    inti = 0;
-    sigi = 0;
-  }
-
   // compute the fraction of peak within the standard core
   const auto total = (core + peak) - ratio * backgrd;
   const auto frac = std::min(1.0, std::abs(inti / total));
@@ -183,12 +178,12 @@ Integrate3DEvents::integrateWeakPeak(
   if (!result)
     return boost::make_shared<NoShape>();
 
-  const auto &events = result.get();
+  const auto &events = *result;
 
   const auto &directions = shape->directions();
-  const auto &abcBackgroundInnerRadii = shape->abcRadiiBackgroundInner();
-  const auto &abcBackgroundOuterRadii = shape->abcRadiiBackgroundOuter();
-  const auto &abcRadii = shape->abcRadii();
+  auto abcBackgroundInnerRadii = shape->abcRadiiBackgroundInner();
+  auto abcBackgroundOuterRadii = shape->abcRadiiBackgroundOuter();
+  auto abcRadii = shape->abcRadii();
 
   const auto max_sigma = std::get<2>(libPeak);
   auto rValues = calculateRadiusFactors(params, max_sigma);
@@ -214,7 +209,6 @@ Integrate3DEvents::integrateWeakPeak(
   const auto fracError = std::get<1>(libPeak);
 
   inti = peak_w_back - ratio * backgrd;
-  sigi = inti + ratio * ratio * backgrd;
 
   // correct for fractional intensity
   sigi = sigi / pow(inti, 2);
@@ -223,12 +217,17 @@ Integrate3DEvents::integrateWeakPeak(
   inti = inti * frac;
   sigi = sqrt(sigi) * inti;
 
-  if (inti < 0) {
-    inti = 0;
-    sigi = 0;
+  // scale integration shape by fractional amount
+  for (size_t i = 0; i < abcRadii.size(); ++i) {
+    abcRadii[i] *= frac;
+    abcBackgroundInnerRadii[i] *= frac;
+    abcBackgroundOuterRadii[i] *= frac;
   }
 
-  return shape;
+  return boost::make_shared<const PeakShapeEllipsoid>(
+      shape->directions(), abcRadii, abcBackgroundInnerRadii,
+      abcBackgroundOuterRadii, Mantid::Kernel::QLab,
+      "IntegrateEllipsoidsTwoStep");
 }
 
 double Integrate3DEvents::estimateSignalToNoiseRatio(
@@ -238,7 +237,7 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   if (!result)
     return .0;
 
-  const auto &events = result.get();
+  const auto &events = *result;
   if (events.empty())
     return .0;
 
@@ -277,28 +276,28 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   double peak_w_back = numInEllipsoid(events, eigen_vectors, peakRadii);
 
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
-  double inti = peak_w_back - ratio * backgrd;
+  auto inti = peak_w_back - ratio * backgrd;
+  auto sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
 
-  return inti / std::max(1.0, (ratio * backgrd));
+  return inti / sigi;
 }
 
-boost::optional<const std::vector<std::pair<double, V3D>> &>
+const std::vector<std::pair<double, V3D>> *
 Integrate3DEvents::getEvents(const V3D &peak_q) {
   const auto hkl_key = getHklKey(peak_q);
 
   if (hkl_key == 0)
-    return boost::optional<const std::vector<std::pair<double, V3D>> &>();
+    return nullptr;
 
   const auto pos = m_event_lists.find(hkl_key);
-  using EventListType = const decltype(pos->second) &;
 
   if (m_event_lists.end() == pos)
-    return boost::optional<EventListType>();
+    return nullptr;
 
   if (pos->second.size() < 3) // if there are not enough events
-    return boost::optional<EventListType>();
+    return nullptr;
 
-  return boost::make_optional<EventListType>(pos->second);
+  return &(pos->second);
 }
 
 bool Integrate3DEvents::correctForDetectorEdges(

@@ -1,9 +1,11 @@
 #include <qwt_plot_canvas.h>
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/MantidColorMap.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 
 #include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
+
+#include <QWheelEvent>
 
 namespace MantidQt {
 namespace SpectrumView {
@@ -602,7 +604,7 @@ void SVConnections::showColorScale(std::vector<QRgb> &positiveColorTable,
  */
 void SVConnections::openOnlineHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("SpectrumViewer"));
+                                                 QString("Spectrum Viewer"));
 }
 
 /// Set the display which is currently visible

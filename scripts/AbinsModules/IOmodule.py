@@ -8,8 +8,6 @@ import hashlib
 import io
 import AbinsModules
 import os
-
-
 from mantid.kernel import logger, ConfigService
 
 
@@ -24,7 +22,7 @@ class IOmodule(object):
 
             self._input_filename = input_filename
             try:
-                self._hash_input_filename = self.calculate_dft_file_hash()
+                self._hash_input_filename = self.calculate_ab_initio_file_hash()
             except IOError as err:
                 logger.error(str(err))
             except ValueError as err:
@@ -66,7 +64,7 @@ class IOmodule(object):
 
     def _valid_hash(self):
         """
-        Checks if input DFT file and content of HDF file are consistent.
+        Checks if input ab initio file and content of HDF file are consistent.
         :returns: True if consistent, otherwise False.
         """
         saved_hash = self.load(list_of_attributes=["hash"])
@@ -81,21 +79,20 @@ class IOmodule(object):
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
         return self._advanced_parameters == previous_advanced_parameters["attributes"]["advanced_parameters"]
 
-    def get_previous_dft_program(self):
+    def get_previous_ab_initio_program(self):
         """
-        :returns: name of DFT program which  was used in the previous calculation.
+        :returns: name of ab initio program which  was used in the previous calculation.
         """
-        return self.load(list_of_attributes=["DFT_program"])["attributes"]["DFT_program"]
+        return self.load(list_of_attributes=["ab_initio_program"])["attributes"]["ab_initio_program"]
 
     def check_previous_data(self):
         """
-        Checks if currently used DFT file is the same as in the previous calculations. Also checks if currently used
-        parameters from AbinsParameters are the same as in the previous calculations.
-
+        Checks if currently used ab initio file is the same as in the previous calculations. Also checks if currently
+        used parameters from AbinsParameters are the same as in the previous calculations.
         """
 
         if not self._valid_hash():
-            raise ValueError("Different DFT file  was used in the previous calculations.")
+            raise ValueError("Different ab initio file  was used in the previous calculations.")
 
         if not self._valid_advanced_parameters():
             raise ValueError("Different advanced parameters were used in the previous calculations.")
@@ -144,7 +141,8 @@ class IOmodule(object):
                 group.attrs[name] = self._attributes[name]
             else:
                 raise ValueError("Invalid value of attribute. String, "
-                                 "int or bytes was expected! (invalid type : %s)" % type(self._attributes[name]))
+                                 "int or bytes was expected! " + name +
+                                 "= (invalid type : %s) " % type(self._attributes[name]))
 
     def _recursively_save_structured_data_to_group(self, hdf_file=None, path=None, dic=None):
         """
@@ -458,10 +456,11 @@ class IOmodule(object):
     def get_input_filename(self):
         return self._input_filename
 
-    def calculate_dft_file_hash(self):
+    def calculate_ab_initio_file_hash(self):
         """
-        This method calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
-        :returns: string representation of hash for phonon file which contains only hexadecimal digits
+        This method calculates hash of the file with vibrational or phonon data according to SHA-2 algorithm from
+        hashlib library: sha512.
+        :returns: string representation of hash for file with vibrational data which contains only hexadecimal digits
         """
 
         return self._calculate_hash(filename=self._input_filename)

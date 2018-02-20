@@ -1,13 +1,14 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NearestNeighbours.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
@@ -134,6 +135,73 @@ public:
       TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
                        integratedPeaksWS->getPeak(i).getIntensity(),
                        numEventsPerPeak, 5);
+    }
+  }
+
+  void test_exec_histogram_distribution_with_no_background() {
+    using namespace Mantid::API;
+    const int numEventsPerPeak = 10000;
+    const auto sigmas = std::make_tuple(.002, .002, 0.01);
+    const std::vector<double> rebinParams = {800, 5, 10000};
+
+    WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
+    builder.setNumPixels(100);
+    builder.addBackground(false);
+    builder.outputAsHistogram(true);
+    builder.setRebinParameters(rebinParams);
+
+    builder.addPeakByHKL(V3D(1, -5, -3), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, -4), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -3, -5), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, -2), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, 0), numEventsPerPeak, sigmas);
+    builder.addPeakByHKL(V3D(2, -3, -4), numEventsPerPeak, sigmas);
+
+    auto data = builder.build();
+    auto histoWS = std::get<0>(data);
+    auto peaksWS = std::get<1>(data);
+
+    const auto &algManager = AlgorithmManager::Instance();
+    auto cloneWorkspace = algManager.createUnmanaged("CloneWorkspace");
+    cloneWorkspace->setChild(true);
+    cloneWorkspace->initialize();
+    cloneWorkspace->setProperty("InputWorkspace", histoWS);
+    cloneWorkspace->setPropertyValue("OutputWorkspace", "dist_workspace");
+    cloneWorkspace->execute();
+    Workspace_sptr temp = cloneWorkspace->getProperty("OutputWorkspace");
+    auto distWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+    auto convertToDist = algManager.createUnmanaged("ConvertToDistribution");
+    convertToDist->setChild(true);
+    convertToDist->initialize();
+    convertToDist->setProperty("Workspace", distWS);
+    convertToDist->execute();
+    distWS = convertToDist->getProperty("Workspace");
+
+    IntegrateEllipsoidsTwoStep alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", distWS);
+    alg.setProperty("PeaksWorkspace", peaksWS);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", .5));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", .5));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", .6));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WeakPeakThreshold", 0.1));
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
+                      integratedPeaksWS->getNumberPeaks(),
+                      peaksWS->getNumberPeaks());
+
+    const double binWidth{0.2};
+    for (int i = 0; i < 5; ++i) {
+      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
+                       integratedPeaksWS->getPeak(i).getIntensity(),
+                       numEventsPerPeak * binWidth, 5);
     }
   }
 
@@ -282,6 +350,9 @@ public:
     builder.addPeakByHKL(V3D(1, -4, 0), numEventsPerStrongPeak, sigmas);
     builder.addPeakByHKL(V3D(2, -3, -4), numEventsPerStrongPeak, sigmas);
 
+    // weak peak with zero intensity
+    builder.addPeakByHKL(V3D(2, -5, -5), 0, sigmas);
+
     auto data = builder.build();
     auto eventWS = std::get<0>(data);
     auto peaksWS = std::get<1>(data);
@@ -334,6 +405,8 @@ public:
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(5),
                      integratedPeaksWS->getPeak(5).getIntensity(),
                      numEventsPerStrongPeak, 800);
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(6),
+                     integratedPeaksWS->getPeak(6).getIntensity(), 100, 10);
   }
 
   void test_exec_events_with_adaptive_q() {
@@ -399,10 +472,10 @@ public:
 
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(0),
                      integratedPeaksWS->getPeak(0).getIntensity(),
-                     numEventsPerStrongPeak, 150);
+                     numEventsPerStrongPeak, 5100);
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(1),
                      integratedPeaksWS->getPeak(1).getIntensity(),
-                     numEventsPerStrongPeak, 150);
+                     numEventsPerStrongPeak, 5100);
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(2),
                      integratedPeaksWS->getPeak(2).getIntensity(),
                      numEventsPerStrongPeak, 900);

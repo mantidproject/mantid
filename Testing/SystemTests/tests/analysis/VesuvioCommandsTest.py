@@ -9,6 +9,7 @@ import numpy as np
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
 from mantid.simpleapi import *
 from vesuvio.commands import fit_tof
+from vesuvio.instrument import *
 
 
 # =====================================Helper Function=================================
@@ -30,7 +31,6 @@ def _is_old_boost_version():
 def _create_test_flags(background, multivariate=False):
     flags = dict()
     flags['fit_mode'] = 'spectrum'
-    flags['spectra'] = '135'
     if multivariate:
         mass1 = {'value': 1.0079, 'function': 'MultivariateGaussian', 'SigmaX': 5, 'SigmaY': 5, 'SigmaZ': 5}
     else:
@@ -79,6 +79,63 @@ def _get_peak_height_and_index(workspace, ws_index):
     return peak_height, peak_bin
 
 
+def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
+                       fit_mode='spectra', rebin_params=None):
+    """
+    @param runs The string giving the runs to load
+    @param spectra A list of spectra to load
+    @param ip_file A string denoting the IP file
+    @param diff_mode Either 'double' or 'single'
+    @param fit_mode If bank then the loading is changed to summing each bank to a separate spectrum
+    @param rebin_params Rebin parameter string to rebin data by (no rebin if None)
+    """
+    instrument = VESUVIO()
+    load_banks = (fit_mode == 'bank')
+    output_name = runs + "_" + spectra + "_tof"
+
+    if load_banks:
+        sum_spectra = True
+        if spectra == "forward":
+            bank_ranges = instrument.forward_banks
+        elif spectra == "backward":
+            bank_ranges = instrument.backward_banks
+        else:
+            raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' "
+                             "for the spectra to load")
+        bank_ranges = ["{0}-{1}".format(x, y) for x, y in bank_ranges]
+        spectra = ";".join(bank_ranges)
+    else:
+        sum_spectra = False
+        if spectra == "forward":
+            spectra = "{0}-{1}".format(*instrument.forward_spectra)
+        elif spectra == "backward":
+            spectra = "{0}-{1}".format(*instrument.backward_spectra)
+
+    if diff_mode == "double":
+        diff_mode = "DoubleDifference"
+    else:
+        diff_mode = "SingleDifference"
+
+    kwargs = {"Filename": runs,
+              "Mode": diff_mode, "InstrumentParFile": ip_file,
+              "SpectrumList": spectra, "SumSpectra": sum_spectra,
+              "OutputWorkspace": output_name, "StoreInADS": False}
+    full_range = LoadVesuvio(**kwargs)
+    tof_data = CropWorkspace(InputWorkspace=full_range,
+                             XMin=instrument.tof_range[0],
+                             XMax=instrument.tof_range[1],
+                             OutputWorkspace=output_name,
+                             StoreInADS=False)
+
+    if rebin_params is not None:
+        tof_data = Rebin(InputWorkspace=tof_data,
+                         OutputWorkspace=output_name,
+                         Params=rebin_params,
+                         StoreInADS=False)
+
+    return tof_data
+
+
 # ====================================================================================
 
 
@@ -88,6 +145,7 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
     def runTest(self):
         flags = _create_test_flags(background=False)
         runs = "15039-15045"
+        flags['spectra'] = '135'
         self._fit_results = fit_tof(runs, flags)
 
     def validate(self):
@@ -144,6 +202,7 @@ class FitSingleSpectrumBivariateGaussianTiesTest(stresstesting.MantidStressTest)
 
     def runTest(self):
         flags = _create_test_flags(background=False, multivariate=True)
+        flags['spectra'] = '135'
         flags['masses'][0]['ties'] = 'SigmaX=SigmaY'
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
@@ -164,6 +223,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
     def runTest(self):
         flags = _create_test_flags(background=True)
+        flags['spectra'] = '135'
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
@@ -301,4 +361,47 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
+
 # ====================================================================================
+
+
+class PassPreLoadedWorkspaceToFitTOF(stresstesting.MantidStressTest):
+    _fit_results = None
+
+    def runTest(self):
+        flags = _create_test_flags(background=False)
+        runs_ws = load_and_crop_data('15039-15045', '143-144', flags['ip_file'])
+        self._fit_results = fit_tof(runs_ws, flags)
+
+    def validate(self):
+        self.assertTrue(isinstance(self._fit_results, tuple))
+        self.assertEquals(4, len(self._fit_results))
+
+        fitted_spec = self._fit_results[0]
+        self.assertTrue(isinstance(fitted_spec, WorkspaceGroup))
+        self.assertEqual(2, len(fitted_spec))
+
+        spec143 = fitted_spec[0]
+        self.assertTrue(isinstance(spec143, MatrixWorkspace))
+
+        self.assertAlmostEqual(50.0, spec143.readX(0)[0])
+        self.assertAlmostEqual(562.0, spec143.readX(0)[-1])
+
+        _equal_within_tolerance(self, 2.27289862507e-06, spec143.readY(1)[0])
+        _equal_within_tolerance(self, 3.49287467421e-05, spec143.readY(1)[-1])
+
+        spec144 = fitted_spec[1]
+        self.assertTrue(isinstance(spec144, MatrixWorkspace))
+
+        self.assertAlmostEqual(50.0, spec144.readX(0)[0])
+        self.assertAlmostEqual(562.0, spec144.readX(0)[-1])
+
+        _equal_within_tolerance(self, 5.9811662524e-06, spec144.readY(1)[0])
+        _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
+
+        chisq_values = self._fit_results[2]
+        self.assertTrue(isinstance(chisq_values, list))
+        self.assertEqual(2, len(chisq_values))
+
+        exit_iteration = self._fit_results[3]
+        self.assertTrue(isinstance(exit_iteration, int))

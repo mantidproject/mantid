@@ -1000,14 +1000,20 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   m_modelY = new MantidMatrixModel(this, ws.get(), m_rows, m_cols, m_startRow,
                                    MantidMatrixModel::Y);
   connectTableView(m_table_viewY, m_modelY);
+  setNumberFormat(0, MantidPreferences::MantidMatrixNumberFormatY(),
+                  MantidPreferences::MantidMatrixNumberPrecisionY());
 
   m_modelX = new MantidMatrixModel(this, ws.get(), m_rows, m_cols, m_startRow,
                                    MantidMatrixModel::X);
   connectTableView(m_table_viewX, m_modelX);
+  setNumberFormat(1, MantidPreferences::MantidMatrixNumberFormatX(),
+                  MantidPreferences::MantidMatrixNumberPrecisionX());
 
   m_modelE = new MantidMatrixModel(this, ws.get(), m_rows, m_cols, m_startRow,
                                    MantidMatrixModel::E);
   connectTableView(m_table_viewE, m_modelE);
+  setNumberFormat(2, MantidPreferences::MantidMatrixNumberFormatE(),
+                  MantidPreferences::MantidMatrixNumberPrecisionE());
 
   // Update the extensions
   updateExtensions(ws);
@@ -1286,39 +1292,44 @@ void MantidMatrix::addMantidMatrixTabExtension(MantidMatrixModel::Type type) {
  * Hook up the MantidMatrixExtension to the new tab etc
  */
 void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
-  // Provide an extension
-  auto extension = m_extensionRequest.createMantidMatrixTabExtension(type);
+  switch (type) {
+  case MantidMatrixModel::DX: {
+    // Provide an extension
+    auto extension = m_extensionRequest.createMantidMatrixTabExtension(type);
 
-  // We need to hook up the extension
-  extension.model = new MantidMatrixModel(this, m_workspace.get(), m_rows,
-                                          m_cols, m_startRow, type);
-  extension.tableView = new QTableView();
+    // We need to hook up the extension
+    extension.model = new MantidMatrixModel(this, m_workspace.get(), m_rows,
+                                            m_cols, m_startRow, type);
+    extension.tableView = Mantid::Kernel::make_unique<QTableView>();
 
-  // Add it to the extension collection, so we can set it up in place
-  m_extensions.emplace(type, extension);
-  auto mapped_extension = m_extensions[type];
+    // Add a new tab
+    m_tabs->insertTab(modelTypeToInt(type), extension.tableView.get(),
+                      extension.label);
 
-  // Add a new tab
-  m_tabs->insertTab(modelTypeToInt(type), mapped_extension.tableView,
-                    mapped_extension.label);
+    // Install the eventfilter
+    extension.tableView->installEventFilter(this);
 
-  // Install the eventfilter
-  mapped_extension.tableView->installEventFilter(this);
+    // Connect Table View
+    connectTableView(extension.tableView.get(), extension.model);
 
-  // Connect Table View
-  connectTableView(mapped_extension.tableView, mapped_extension.model);
+    m_extensions.emplace(type, std::move(extension));
 
-  // Set the column width
-  auto columnWidth = m_extensionRequest.getColumnWidthPreference(
-      type, m_extensions, MantidPreferences::MantidMatrixColumnWidthY());
-  setColumnsWidth(modelTypeToInt(type), columnWidth);
+    // Set the column width
+    auto columnWidth = m_extensionRequest.getColumnWidthPreference(
+        type, m_extensions, MantidPreferences::MantidMatrixColumnWidthDx());
+    setColumnsWidth(modelTypeToInt(type), columnWidth);
 
-  // Set the number format
-  auto format = m_extensionRequest.getFormat(
-      type, m_extensions, MantidPreferences::MantidMatrixNumberFormatY());
-  auto precision = m_extensionRequest.getPrecision(
-      type, m_extensions, MantidPreferences::MantidMatrixNumberPrecisionY());
-  setNumberFormat(modelTypeToInt(type), format, precision);
+    // Set the number format
+    auto format = m_extensionRequest.getFormat(
+        type, m_extensions, MantidPreferences::MantidMatrixNumberFormatDx());
+    auto precision = m_extensionRequest.getPrecision(
+        type, m_extensions, MantidPreferences::MantidMatrixNumberPrecisionDx());
+    setNumberFormat(modelTypeToInt(type), format, precision);
+    break;
+  }
+  default:
+    throw std::runtime_error("Unknown MantidMatrix extension.");
+  }
 }
 
 /**
@@ -1326,11 +1337,32 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
  * @param ws: the new workspace
  */
 void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
-  // Remove the tabs
-  for (auto it = m_extensions.begin(); it != m_extensions.end(); ++it) {
-    auto &extension = it->second;
-    extension.model = new MantidMatrixModel(this, ws.get(), m_rows, m_cols,
-                                            m_startRow, it->first);
-    connectTableView(extension.tableView, extension.model);
+  auto it = m_extensions.begin();
+  while (it != m_extensions.cend()) {
+    auto type = it->first;
+    switch (type) {
+    case MantidMatrixModel::DX:
+      if (ws->hasDx(0)) {
+        auto &extension = it->second;
+        extension.model = new MantidMatrixModel(this, ws.get(), m_rows, m_cols,
+                                                m_startRow, type);
+        connectTableView(extension.tableView.get(), extension.model);
+        auto format = m_extensionRequest.getFormat(
+            type, m_extensions,
+            MantidPreferences::MantidMatrixNumberFormatDx());
+        auto precision = m_extensionRequest.getPrecision(
+            type, m_extensions,
+            MantidPreferences::MantidMatrixNumberPrecisionDx());
+        setNumberFormat(modelTypeToInt(type), format, precision);
+        ++it;
+      } else {
+        closeDependants();
+        m_tabs->removeTab(modelTypeToInt(type));
+        it = m_extensions.erase(it);
+      }
+      break;
+    default:
+      throw std::runtime_error("Unknown MantidMatrix extension.");
+    }
   }
 }

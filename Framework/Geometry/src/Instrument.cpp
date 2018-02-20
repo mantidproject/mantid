@@ -33,7 +33,7 @@ void raiseDuplicateDetectorError(const size_t detectorId) {
   std::stringstream sstream;
   sstream << "Instrument Definition corrupt. Detector with ID " << detectorId
           << " already exists.";
-  throw std::runtime_error(sstream.str());
+  throw Exception::InstrumentDefinitionError(sstream.str());
 }
 }
 
@@ -830,9 +830,6 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
       return;
     }
 
-    if (m_map->getCachedBoundingBox(this, assemblyBox)) {
-      return;
-    }
     // Loop over the children and define a box large enough for all of them
     ComponentID sourceID = getSource()->getComponentID();
     assemblyBox =
@@ -846,9 +843,6 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
         assemblyBox.grow(compBox);
       }
     }
-    // Set the cache
-    m_map->setCachedBoundingBox(this, assemblyBox);
-
   } else {
 
     if (!m_cachedBoundingBox) {
@@ -1403,7 +1397,7 @@ Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
                          const DetectorInfo &detectorInfo) const {
-  auto compInfo = Kernel::make_unique<ComponentInfo>(componentInfo);
+  auto compInfo = componentInfo.cloneWithoutDetectorInfo();
   auto detInfo = Kernel::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   detInfo->m_detectorInfo->setComponentInfo(compInfo->m_componentInfo.get());

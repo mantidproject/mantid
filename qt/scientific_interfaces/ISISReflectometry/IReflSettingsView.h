@@ -4,9 +4,13 @@
 #include "DllConfig.h"
 #include <map>
 #include <vector>
+#include "MantidAPI/Algorithm.h"
+#include "ExperimentOptionDefaults.h"
+#include "InstrumentOptionDefaults.h"
+#include "GetInstrumentParameter.h"
+#include "InstrumentParameters.h"
 
 namespace MantidQt {
-
 namespace CustomInterfaces {
 
 class IReflSettingsPresenter;
@@ -54,7 +58,6 @@ public:
 
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
-  virtual std::string getDirectBeam() const = 0;
   virtual std::string getTransmissionRuns() const = 0;
   virtual std::string getStartOverlap() const = 0;
   virtual std::string getEndOverlap() const = 0;
@@ -76,20 +79,29 @@ public:
   virtual std::string getI0MonitorIndex() const = 0;
   virtual std::string getProcessingInstructions() const = 0;
   virtual std::string getDetectorCorrectionType() const = 0;
+  virtual std::string getSummationType() const = 0;
+  virtual std::string getReductionType() const = 0;
 
   /// Check if settings are enabled
   virtual bool experimentSettingsEnabled() const = 0;
   virtual bool instrumentSettingsEnabled() const = 0;
+  virtual bool detectorCorrectionEnabled() const = 0;
 
   /// Set default values for settings
-  virtual void setExpDefaults(const std::vector<std::string> &) const = 0;
-  virtual void setInstDefaults(const std::vector<double> &,
-                               const std::vector<std::string> &) const = 0;
+  virtual void setExpDefaults(ExperimentOptionDefaults defaults) = 0;
+  virtual void setInstDefaults(InstrumentOptionDefaults defaults) = 0;
+  virtual void showOptionLoadErrors(
+      std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
+      std::vector<MissingInstrumentParameterValue> const &missingValues) = 0;
 
   /// Sets status of whether polarisation corrections should be enabled/disabled
   virtual void setIsPolCorrEnabled(bool enable) const = 0;
+  virtual void setReductionTypeEnabled(bool enable) = 0;
   /// Set polarisation corrections and parameters enabled/disabled
-  virtual void setPolarisationOptionsEnabled(bool enable) const = 0;
+  virtual void setPolarisationOptionsEnabled(bool enable) = 0;
+  virtual void setDetectorCorrectionEnabled(bool enable) = 0;
+  virtual void disableAll() = 0;
+  virtual void enableAll() = 0;
 };
 }
 }

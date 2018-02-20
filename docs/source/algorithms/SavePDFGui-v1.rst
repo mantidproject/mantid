@@ -35,7 +35,7 @@ Usage
    SavePDFGui(ws, path)
 
    # Check that the file exists
-   print os.path.isfile(path)
+   print(os.path.isfile(path))
 
 Output:
 

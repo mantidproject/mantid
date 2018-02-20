@@ -157,7 +157,6 @@ Usage
        print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.readX(0)[i], Rt.readY(0)[i]))
 
 
-
 .. testcleanup:: ExPDFFouurierTransform
 
    DeleteWorkspace(ws)

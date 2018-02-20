@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+"""This will create a mantid.pth file in your current python
+environment pointing to this build of mantid
+"""
+
+from __future__ import print_function
+from distutils import sysconfig as sc
+import os
+import sys
+
+# get location of mantid this was run with
+mantidpath = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@"
+
+# check mantid can be loaded in this python
+sys.path.append(mantidpath)
+try:
+    import mantid
+except ImportError as e:
+    print("Can't import mantid: {}".format(e))
+    exit(1)
+
+# check that trailing `/` is there
+if not mantidpath.endswith(os.sep):
+    mantidpath += os.sep
+
+# where path file should go
+pathfile = os.path.join(sc.get_python_lib(plat_specific=True), 'mantid.pth')
+
+print('writing', mantidpath, 'to', pathfile)
+with open(pathfile, 'w') as f:
+    f.write(mantidpath)
+    f.write('\n')

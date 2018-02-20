@@ -20,7 +20,7 @@ if ( SPHINX_FOUND )
   endif (SPHINX_BOOTSTRAP_THEME_ERR)
 
   # We generate a target per build type, i.e docs-html
-  set ( SPHINX_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source )
+  set ( SPHINX_CONF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source )
   set ( SPHINX_BUILD_DIR ${DOCS_BUILDDIR} )
   set ( SCREENSHOTS_DIR ${SPHINX_BUILD_DIR}/screenshots )
   set ( DIAGRAMS_DIR ${SPHINX_BUILD_DIR}/diagrams )
@@ -40,14 +40,12 @@ if ( SPHINX_FOUND )
   # qthelp target
   if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
     set ( BUILDER qthelp )
-    set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
-    configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
     configure_file ( runsphinx.py.in runsphinx_qthelp.py @ONLY )
 
     add_custom_command ( OUTPUT qthelp/MantidProject.qhcp
                                 qthelp/MantidProject.qhp
                        COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_qthelp.py
-                       DEPENDS Framework MantidPlot MantidQt ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_qthelp.py
+                       DEPENDS Framework AllQt4 ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_qthelp.py
                        COMMENT "Building qt-assistant index files")
 
     add_custom_command ( OUTPUT qthelp/MantidProject.qhc
@@ -56,7 +54,8 @@ if ( SPHINX_FOUND )
                         COMMENT "Compiling Qt help documentation")
 
     add_custom_target ( ${TARGET_PREFIX}-qthelp
-                        DEPENDS qthelp/MantidProject.qhc ${SPHINX_CONF_DIR}/conf.py conf-qthelp.py )
+                        DEPENDS qthelp/MantidProject.qhc
+                        ${SPHINX_CONF_DIR}/conf.py ${SPHINX_CONF_DIR}/conf-qthelp.py )
 
     # Group within VS and exclude from whole build
     set_target_properties ( ${TARGET_PREFIX}-qthelp PROPERTIES FOLDER "Documentation"
@@ -71,12 +70,11 @@ if ( SPHINX_FOUND )
   option (DOCS_HTML "Add target for building html docs" ON)
   if (DOCS_HTML)
     set ( BUILDER html )
-    set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
-    configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
     configure_file ( runsphinx.py.in runsphinx_html.py @ONLY )
     add_custom_target ( ${TARGET_PREFIX}-html
                        COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_html.py
-                       DEPENDS Framework MantidPlot MantidQt ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_html.py ${SPHINX_CONF_DIR}/conf.py conf-html.py
+                       DEPENDS Framework AllQt4 ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_html.py
+                               ${SPHINX_CONF_DIR}/conf.py ${SPHINX_CONF_DIR}/conf-html.py
                        COMMENT "Building html documentation"
                        )
     # Group within VS and exclude from whole build
@@ -90,12 +88,12 @@ if ( SPHINX_FOUND )
   option (DOCS_EPUB "Add target for building epub docs" OFF)
   if (DOCS_EPUB)
     set ( BUILDER epub )
-    set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
-    configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
     configure_file ( runsphinx.py.in runsphinx_epub.py @ONLY )
     add_custom_target ( ${TARGET_PREFIX}-epub
                        COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_epub.py
-                       DEPENDS Framework MantidPlot MantidQt ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_epub.py ${SPHINX_CONF_DIR}/conf.py                        COMMENT "Building html documentation"
+                       DEPENDS Framework AllQt4 ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_epub.py
+                               ${SPHINX_CONF_DIR}/conf.py
+                       COMMENT "Building html documentation"
                        )
     # Group within VS and exclude from whole build
     set_target_properties ( ${TARGET_PREFIX}-epub PROPERTIES FOLDER "Documentation"
@@ -107,12 +105,11 @@ if ( SPHINX_FOUND )
 
   # LINKCHECK target
   set ( BUILDER linkcheck )
-  set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
-  configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
   configure_file ( runsphinx.py.in runsphinx_linkcheck.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-linkcheck
                       COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_linkcheck.py
-                      DEPENDS Framework MantidPlot MantidQt ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_linkcheck.py ${SPHINX_CONF_DIR}/conf.py
+                      DEPENDS Framework AllQt4 ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_linkcheck.py
+                              ${SPHINX_CONF_DIR}/conf.py
                       COMMENT "Checking documentation links"
                       )
   # Group within VS and exclude from whole build
@@ -130,12 +127,10 @@ if ( SPHINX_FOUND )
   # Overall doctest target that executes in MantidPlot
   ###############################################################################
   set ( BUILDER doctest )
-  set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
-  configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
   configure_file ( runsphinx.py.in runsphinx_doctest.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-test
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
-    DEPENDS Framework MantidPlot ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py
+    DEPENDS Framework AllQt4 ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py
             ${SPHINX_CONF_DIR}/conf.py
     COMMENT "Running documentation tests"
   )

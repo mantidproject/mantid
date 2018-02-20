@@ -77,6 +77,7 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
                               orientations used during the initial scan.
   @param  fixAll              Fix the lattice parameters and do not optimise
                               the UB matrix.
+  @param  iterations          Number of refinements of UB
 
   @return  This will return the sum of the squares of the residual errors.
 
@@ -90,7 +91,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
                               OrientedLattice &lattice,
                               double required_tolerance, int base_index,
                               size_t num_initial, double degrees_per_step,
-                              bool fixAll) {
+                              bool fixAll, int iterations) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
@@ -176,15 +177,16 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
 
     for (size_t i = some_qs.size(); i < num_initial; i++)
       some_qs.push_back(sorted_qs[i]);
-
-    try {
-      GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
-                      fit_error);
-      Matrix<double> temp_UB(3, 3, false);
-      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
-      UB = temp_UB;
-    } catch (...) {
-      // failed to fit using these peaks, so add some more and try again
+    for (int counter = 0; counter < iterations; counter++) {
+      try {
+        GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
+                        fit_error);
+        Matrix<double> temp_UB(3, 3, false);
+        fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
+        UB = temp_UB;
+      } catch (...) {
+        // failed to fit using these peaks, so add some more and try again
+      }
     }
   }
 
@@ -192,14 +194,16 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   if (!fixAll &&
       q_vectors.size() >= 3) // try one last refinement using all peaks
   {
-    try {
-      GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
-                      fit_error);
-      Matrix<double> temp_UB = UB;
-      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs, sigabc);
-      UB = temp_UB;
-    } catch (...) {
-      // failed to improve UB using these peaks, so just return the current UB
+    for (int counter = 0; counter < iterations; counter++) {
+      try {
+        GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind,
+                        indexed_qs, fit_error);
+        Matrix<double> temp_UB = UB;
+        fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs, sigabc);
+        UB = temp_UB;
+      } catch (...) {
+        // failed to improve UB using these peaks, so just return the current UB
+      }
     }
   }
   // Regardless of how we got the UB, find the
@@ -448,6 +452,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
                               from integer values for a peak to be indexed.
   @param  degrees_per_step    The number of degrees between different
                               orientations used during the initial scan.
+  @param  iterations          Number of refinements of UB
 
   @return  This will return the sum of the squares of the residual errors.
 
@@ -464,7 +469,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
 double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
                               double min_d, double max_d,
                               double required_tolerance,
-                              double degrees_per_step) {
+                              double degrees_per_step, int iterations) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
@@ -529,7 +534,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
                     fit_error);
 
-    for (int counter = 0; counter < 4; counter++) {
+    for (int counter = 0; counter < iterations; counter++) {
       try {
         fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
         UB = temp_UB;
@@ -1343,7 +1348,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
   for (auto &temp_dir : temp_dirs) {
     current_dir = temp_dir;
     double length = current_dir.norm();
-    if (length >= min_d && length <= max_d)
+    if (length >= 0.8 * min_d && length <= 1.2 * max_d)
       temp_dirs_2.push_back(current_dir);
   }
   // only keep directions that index at
@@ -1508,9 +1513,7 @@ double IndexingUtils::GetFirstMaxIndex(const double magnitude_fft[], size_t N,
 bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
                                             const std::vector<V3D> &directions,
                                             size_t a_index, double min_d,
-                                            double max_d)
-
-{
+                                            double max_d) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
@@ -1521,7 +1524,7 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
   // the possible range of d-values
   // implies a bound on the minimum
   // angle between a,b, c vectors.
-  double min_deg = (RAD_TO_DEG)*atan(2.0 * min_d / max_d);
+  double min_deg = (RAD_TO_DEG)*atan(2.0 * std::min(0.2, min_d / max_d));
 
   double epsilon = 5; //  tolerance on right angle (degrees)
   V3D b_dir;

@@ -44,7 +44,7 @@ class Mean(PythonAlgorithm):
                 # cannot run the next test if this fails
                 return issues
             for spectra in range(0,nSpectra):
-                if numpy.allclose(ws1.readX(spectra) ,ws2.readX(spectra)) ==False:
+                if not numpy.allclose(ws1.readX(spectra) ,ws2.readX(spectra)):
                     issues["Workspaces"] = "The data should have the same order for x values. Sort your data first"
         return issues
 

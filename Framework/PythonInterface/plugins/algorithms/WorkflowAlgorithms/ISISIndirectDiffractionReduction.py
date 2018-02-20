@@ -384,6 +384,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             if mtd.doesExist(workspace_name + "_mon"):
                 DeleteWorkspace(workspace_name + '_mon')
 
-# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 AlgorithmFactory.subscribe(ISISIndirectDiffractionReduction)

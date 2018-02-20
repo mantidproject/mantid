@@ -14,7 +14,7 @@ Overview and similar algorithms
 
 This algorithm will integrate disjoint single crystal Bragg peaks by
 summing the number of raw or weighted events in a 3D ellipsoidal peak region in
-reciprocal space (See *IntegrateInHKL* option for integrating in HKL) 
+reciprocal space (See *IntegrateInHKL* option for integrating in HKL)
 and subtracting an estimate of the background obtained
 from an ellipsoidal shell. In some ways it is similar to the
 :ref:`algm-IntegratePeaksMD` algorithm. In particular the size parameters to
@@ -23,8 +23,8 @@ background subtraction is done in the same way for both the intensity
 and the estimated standard deviations. However, this algorithm differs
 from :ref:`algm-IntegratePeaksMD` in several critical ways.
 
--  This algorithm works directly with raw or weighted events 
-   while :ref:`algm-IntegratePeaksMD` uses **MDEvents** from 
+-  This algorithm works directly with raw or weighted events
+   while :ref:`algm-IntegratePeaksMD` uses **MDEvents** from
    `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_.
 -  This algorithm uses 3D ellipsoidal regions with aspect ratios that
    are adapted to the set of events that are near the peak center, while
@@ -42,10 +42,10 @@ or strong is based on computing a rough estimate for the signal to noise ratio
 for each peak. The *WeakPeakThreshold* parameter is used to control this
 threshold.
 
-For strong peaks the algorithm calculates the three principal axes of the events 
-near a peak, and uses the standard deviations in the directions of the principal 
-axes to determine the aspect ratio of ellipsoids used for the peak and 
-background regions. This is identical to the method used in 
+For strong peaks the algorithm calculates the three principal axes of the events
+near a peak, and uses the standard deviations in the directions of the principal
+axes to determine the aspect ratio of ellipsoids used for the peak and
+background regions. This is identical to the method used in
 :ref:`algm-IntegrateEllipsoids`.
 
 For weak peaks the nearest strong peak is found and the ellipsoid used to
@@ -55,18 +55,18 @@ contour computed for the strong peak.
 
 The method is based on the ILL program Racer and the following paper:
 
- - Wilkinson, C., et al. "Integration of single-crystal reflections using area 
+ - Wilkinson, C., et al. "Integration of single-crystal reflections using area
    multidetectors." *Journal of Applied Crystallography* 21.5 (1988): 471-478.
 
 Explanation of Inputs
 #####################
 
 -  The event data to be integrated is obtained from an ordinary
-   :ref:`EventWorkspace <EventWorkspace>` 
+   :ref:`EventWorkspace <EventWorkspace>`
    with an X-axis in time-of-flight, as loaded from a
-   NeXus event file. This algorithm maps the events to reciprocal space 
-   using *PeaksWorkwpace* with indexed peaks to determine the parameters 
-   of the transformation into the reciprocal space (UB matrix)
+   NeXus event file. This algorithm maps the events to reciprocal space
+   using *PeaksWorkwpace* with indexed peaks to determine the parameters
+   of the transformation into the reciprocal space (:ref:`UB matrix <Lattice>`)
 
 -  The peaks to be integrated are are also obtained from a *PeaksWorkspace*. The
    peaks must be indexed, and any peaks indexed as (0,0,0) will be
@@ -86,7 +86,7 @@ Explanation of Inputs
 
 .. figure:: /images/IntegrateEllipsoids.png
    :alt: IntegrateEllipsoids.png
-    
+
    IntegrateEllipsoidsTwoStep algorithm regions map.
 
 -  If the *SpecifySize* option is selected, then the user MUST specify the
@@ -129,7 +129,7 @@ Explanation of Inputs
 
 -  The *WeakPeakThreshold* parameter controls the signal to noise threshold used
    to classify peaks as either strong or weak.
-	
+
 -  The integrated intensities will be set in the specified *OutputWorkspace*. If
    this is different from the input *PeaksWorkspace*, the input peaks workspace
    will be copied to the *OutputWorkspace* before setting the integrated
@@ -140,8 +140,8 @@ Detailed Algorithm Description
 
 This algorithm will integrate a list of indexed single-crystal diffraction peaks
 from a *PeaksWorkspace*, using events from an ( :ref:`EventWorkspace
-<EventWorkspace>` ).  The indexed peaks are first used to determine a UB matrix.
-The inverse of that UB matrix is then used to form lists of events that are
+<EventWorkspace>` ).  The indexed peaks are first used to determine a :ref:`UB matrix <Lattice>`.
+The inverse of that :ref:`UB matrix <Lattice>` is then used to form lists of events that are
 close to peaks in reciprocal space. An event will be added to the list of events
 for a peak provided that the fractional :math:`h,k,l` value of that event
 (obtained by applying UB-inverse to the :math:`Q` -vector) is closer to the
@@ -219,12 +219,12 @@ line, going through:
 
 :math:`\vec{O}=(0,0,0)`
 
-Calculate a point at a fixed momentum, say k=1. 
+Calculate a point at a fixed momentum, say k=1.
 Q in the lab frame:
 
 :math:`\vec{E}=(-k*sin(\theta)*cos(\phi),-k*sin(\theta)*sin(\phi),k-k*cos(\phi))`
 
-Normalize E to 1: 
+Normalize E to 1:
 
 :math:`\vec{E}=\vec{E}*(1./\left|\vec{E}\right|)`
 
@@ -278,7 +278,7 @@ availible in `Mantid system tests repository
               name= name[:8]
            row += "| {:8} ".format(name)
        print(row + "|")
-   
+
        for i in range(nRows):
            row = ""
            for name in tab_names:
@@ -293,18 +293,18 @@ availible in `Mantid system tests repository
 
    # load test workspace
    Load(Filename=r'TOPAZ_3132_event.nxs',OutputWorkspace='TOPAZ_3132_event',LoadMonitors='1')
-      
+
    # build peak workspace necessary for IntegrateEllipsoids algorithm to work
    ConvertToMD(InputWorkspace='TOPAZ_3132_event',QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection='1',OutputWorkspace='TOPAZ_3132_md',\
    MinValues='-25,-25,-25',MaxValues='25,25,25',SplitInto='2',SplitThreshold='50',MaxRecursionDepth='13',MinRecursionDepth='7')
-   FindPeaksMD(InputWorkspace='TOPAZ_3132_md',PeakDistanceThreshold='0.3768',MaxPeaks='50',DensityThresholdFactor='100',OutputWorkspace='TOPAZ_3132_peaks')   
+   FindPeaksMD(InputWorkspace='TOPAZ_3132_md',PeakDistanceThreshold='0.3768',MaxPeaks='50',DensityThresholdFactor='100',OutputWorkspace='TOPAZ_3132_peaks')
    FindUBUsingFFT(PeaksWorkspace='TOPAZ_3132_peaks',MinD='3',MaxD='15',Tolerance='0.12')
    IndexPeaks(PeaksWorkspace='TOPAZ_3132_peaks',Tolerance='0.12')
-   
-   # integrate ellipsoids   
+
+   # integrate ellipsoids
    result=IntegrateEllipsoidsTwoStep(InputWorkspace='TOPAZ_3132_event',PeaksWorkspace='TOPAZ_3132_peaks',\
          RegionRadius='0.25',PeakSize='0.2',BackgroundInnerSize='0.2',BackgroundOuterSize='0.25',OutputWorkspace='TOPAZ_3132_peaks')
-   
+
    # print 10 rows of resulting table workspace
    print_tableWS(result,10)
 

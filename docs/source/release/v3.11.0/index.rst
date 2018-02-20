@@ -14,19 +14,18 @@ Mantid 3.11.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-We are proud to announce version 3.11.0 of Mantid. This release celebrates 10 years of the Mantid project supporting Neutron and Muon research.
+We are proud to announce version 3.11.0 of Mantid, celebrating 10 years of the Mantid project supporting Neutron and Muon research.
 
-This release includes improvements to allow Mantid to handle Scanning workspaces, where detectors may be in several locations for different time periods, and updates to the VSI improving the performance of slicing regularly binned data. There have also been some significant performance enhancements for various algorithms with the framework due to the continued on improving our handling of he instrument geometry.
+This release includes improvements to allow Mantid to handle scanning workspaces, where detectors may be in several locations for different time periods, and updates to the VSI to improve the performance of slicing regularly binned data. There have also been some significant performance enhancements for various algorithms within the framework due to the ongoing efforts to improving our handling of instrument geometry.
 
-This is just one of many improvements in this release, so please take a
+These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
 Mantid, and we would like to thank all of our beta testers for their
 time and effort helping us to make this another reliable version of Mantid.
 
-Throughout the Mantid project we put a lot of effort into ensuring
-Mantid is a robust and reliable product. Thank you to everyone that has
+Thank you to everyone that has
 reported any issues to us. Please keep on reporting any problems you
 have, or crashes that occur on our `forum`_.
 
@@ -40,6 +39,8 @@ Citation
 Please cite any usage of Mantid as follows:
 
 - *Mantid 3.11: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.11
+
+- Arnold, O. et al. *Mantid-Data Analysis and Visualization Package for Neutron Scattering and mu-SR Experiments.* Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment 764 (2014): 156-166 `doi: 10.1016/j.nima.2014.07.029 <https://doi.org/10.1016/j.nima.2014.07.029>`_ (`download bibtex <https://raw.githubusercontent.com/mantidproject/mantid/master/docs/source/mantid.bib>`_)
 
 Changes
 -------

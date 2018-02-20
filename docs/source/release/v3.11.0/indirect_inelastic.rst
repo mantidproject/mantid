@@ -16,7 +16,7 @@ New
 Improved
 ########
 - The following changes were made to the :ref:`algm-MSDFit` algorithm:
-   - Added model selection to the :ref:`algm-MSDFit` algorithm, with three current models: MsdPeters, MsdYi and MsdPeters. New models now work with workspaces in Q not Q^2 (e.g. _eq workspaces 'Elastic Q').
+   - Added model selection to the :ref:`algm-MSDFit` algorithm, with three current models: :ref:`MsdGauss <func-MsdGauss>`, :ref:`MsdYi <func-MsdYi>`, and :ref:`MsdYi <func-MsdYi>`. New models now work with workspaces in :math:`Q` not :math:`Q^2` (e.g. _eq workspaces 'Elastic Q').
 - The following changes were made to the the :ref:`algm-ConvolutionFitSequential` algorithm:
    - Added 'ExtractMembers' property to :ref:`algm-ConvolutionFitSequential` - this allows for extracting the members of the convolution fitting into their own workspaces.
    - Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.

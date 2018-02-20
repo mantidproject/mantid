@@ -5,7 +5,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (CreateWorkspace, Load, ConvertUnits,
                               SplineInterpolation, ApplyPaalmanPingsCorrection,
-                              DeleteWorkspace)
+                              DeleteWorkspace, GroupWorkspaces, CloneWorkspace)
 import numpy
 
 
@@ -80,6 +80,24 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
             self.assertEqual(log_correction_type, correction_type)
 
 
+    def _create_group_of_factors(self, corrections, factors):
+        def is_factor(workspace, factor):
+            if factor == "ass":
+                return factor in workspace.getName() and not 'assc' in workspace.getName()
+            else:
+                return factor in workspace.getName()
+
+        def is_factor_workspace(workspace):
+            return any([is_factor(workspace, factor) for factor in factors])
+
+        filtered_corr = filter(is_factor_workspace, corrections)
+        cloned_corr = [CloneWorkspace(InputWorkspace=correction,
+                                      OutputWorkspace=correction.getName() + "_clone")
+                       for correction in filtered_corr]
+        correction_names = [correction.getName() for correction in cloned_corr]
+        return GroupWorkspaces(InputWorkspaces=correction_names, OutputWorkspace="factor_group")
+
+
     def test_can_subtraction(self):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
                                            CanWorkspace=self._can_ws)
@@ -131,6 +149,16 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
                                            CanWorkspace=self._can_ws,
                                            CanShiftFactor = 0.03)
 
+        self._verify_workspace(corr, 'sample_and_can_corrections')
+
+    def test_two_factor_approximation(self):
+        two_corrections = self._create_group_of_factors(self._corrections_ws, ['acc', 'ass'])
+
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
+                                           CorrectionsWorkspace=two_corrections,
+                                           CanWorkspace=self._can_ws,
+                                           CanShiftFactor = 0.03)
+        DeleteWorkspace(two_corrections)
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
     def test_container_input_workspace_not_unintentionally_rebinned(self):

@@ -51,6 +51,7 @@ public:
   /// Destructor
   ~OneLevelTreeManager() override;
 
+  bool isMultiLevel() const override;
   /// Publish commands
   std::vector<std::unique_ptr<Command>> publishCommands() override;
   /// Append a row
@@ -98,6 +99,7 @@ public:
   /// Set the 'processed' status of a data item
   void setProcessed(bool processed, int position) override;
   void setProcessed(bool processed, int position, int parent) override;
+  void invalidateAllProcessed() override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,
@@ -109,6 +111,13 @@ public:
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
 private:
+  bool isEmptyTable() const;
+  bool shouldProcessAll() const;
+  bool askUserIfShouldProcessAll() const;
+  std::set<int> allRows() const;
+  std::set<int> noRows() const;
+  std::set<int> getRowsToProcess(bool prompt) const;
+  TreeData handleEmptyTable(bool prompt);
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model

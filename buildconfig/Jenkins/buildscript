@@ -14,9 +14,6 @@ SCRIPT_DIR=$(dirname "$0")
 ###############################################################################
 # System discovery
 ###############################################################################
-if [[ ${NODE_LABELS} == *rhel6* ]]; then
-  ON_RHEL6=true
-fi
 if [[ ${NODE_LABELS} == *rhel7* ]]; then
   ON_RHEL7=true
 fi
@@ -30,17 +27,30 @@ fi
 ###############################################################################
 # All nodes currently have PARAVIEW_DIR=5.2.0 and PARAVIEW_NEXT_DIR=5.3.0-RC1
 ###############################################################################
-export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
+export PARAVIEW_DIR=${PARAVIEW_DIR}
 
 ###############################################################################
 # Print out the versions of things we are using
 ###############################################################################
-cmake --version
+# we use cmake3 on rhel because cmake is too old
+if [ $(command -v cmake3) ]; then
+    CMAKE_EXE=cmake3
+    CPACK_EXE=cpack3
+    CTEST_EXE=ctest3
+else
+    CMAKE_EXE=cmake
+    CPACK_EXE=cpack
+    CTEST_EXE=ctest
+fi
+$CMAKE_EXE --version
 
 ###############################################################################
 # Check job requirements from the name and changes
 ###############################################################################
 if [[ ${JOB_NAME} == *clean* ]]; then
+  CLEANBUILD=true
+fi
+if [[ ${JOB_NAME} == *clang_tidy* ]]; then
   CLEANBUILD=true
 fi
 
@@ -94,7 +104,7 @@ if [[ "$CLEANBUILD" == true ]]; then
   rm -rf $BUILD_DIR
 fi
 if [ -d $BUILD_DIR ]; then
-  rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData
+  rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
       rm -rf $BUILD_DIR/googletest-*
@@ -121,10 +131,14 @@ if [[ $USE_CLANG ]]; then
   clang --version
   export CC=clang
   export CXX=clang++
+  # check if this is also a clang-tidy build
+  if [[ ${JOB_NAME} == *clang_tidy* ]]; then
+      CLANGTIDYVAR="-DENABLE_CLANG_TIDY=ON"
+  fi
   #check if CMakeCache.txt exists and if so that the cxx compiler is clang++
   #only needed with incremental builds. Clean builds delete this directory in a later step.
   if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
-    COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $BUILD_DIR/CMakeCache.txt`
+    COMPILERFILEPATH=$(grep 'CMAKE_CXX_COMPILER:FILEPATH' $BUILD_DIR/CMakeCache.txt)
     if [[ $COMPILERFILEPATH != *clang++* ]]; then
       # Removing the build directory entirely guarantees clang is used.
       rm -rf $BUILD_DIR
@@ -153,22 +167,17 @@ if [ -z "$MANTID_DATA_STORE" ]; then
 fi
 
 ###############################################################################
-# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
-###############################################################################
-DIST_FLAGS="-DSTATIC_LIBSTDCXX=OFF"
-if [[ "${ON_RHEL6}" == true ]]; then
-  SCL_ON_RHEL6="scl enable mantidlibs34 devtoolset-2"
-else
-  SCL_ON_RHEL6="eval"
-fi
-
-###############################################################################
 # Check if this is a Python 3 build and set CMake arguments.
 ###############################################################################
+PY2_BUILD=false
+PY3_BUILD=false
 if [[ ${JOB_NAME} == *python3* ]]; then
-  PYTHON3_EXECUTABLE=`which python3`
+  PY3_BUILD=true
+  PYTHON3_EXECUTABLE=$(which python3)
   DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
   PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+else
+  PY2_BUILD=true
 fi
 
 ###############################################################################
@@ -177,10 +186,12 @@ fi
 if [[ "$BUILDPKG" == true ]]; then
   PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   # Set some variables relating to the linux packages
-  if [[ ${ON_MACOS} != true ]]; then
+  if [[ "${ON_MACOS}" == true ]]; then
+    PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
+  else
     # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *release* ]]; then
-      echo "Performing release build" # do nothing
+       PACKAGE_SUFFIX=""
     elif [[ ${JOB_NAME} == *master* ]]; then
       PACKAGE_SUFFIX="nightly"
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
@@ -189,19 +200,16 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGE_SUFFIX="unstable"
     fi
 
-    # Add '-python3' to package name and install path
-    if [[ ${JOB_NAME} == *python3* ]]; then
-	PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
+    if [[ ${PY3_BUILD} == true ]]; then
+      # Add '-python3' to package name and install path
+      PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
     fi
 
-    # Only unsuffixed release builds create envvars scripts
-    if [[ ${JOB_NAME} == *release* && -z "$PACKAGE_SUFFIX" ]]; then
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON"
+    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]]; then
+      # No suffix and traditional install path for python 2 release build
+      PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
     else
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=False -DCPACK_SET_DESTDIR=OFF"
-    fi
-
-    if [ ! -z "$PACKAGE_SUFFIX" ]; then
+      # everything else uses lower-case values
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
     fi
   fi
@@ -210,9 +218,9 @@ fi
 ###############################################################################
 # Generator
 ###############################################################################
-if [ $(command -v ninja) ]; then
+if [ "$(command -v ninja)" ]; then
   CMAKE_GENERATOR="-G Ninja"
-elif [ $(command -v ninja-build) ]; then
+elif [ "$(command -v ninja-build)" ]; then
   CMAKE_GENERATOR="-G Ninja"
 fi
 if [ -e $BUILD_DIR/CMakeCache.txt ]; then
@@ -228,24 +236,24 @@ cd $BUILD_DIR
 # Clean up any artifacts from last build so that if it fails
 # they don't get archived again
 ###############################################################################
-rm -f *.dmg *.rpm *.deb *.tar.gz
+rm -f -- *.dmg *.rpm *.deb *.tar.gz
 
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} .."
+${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ..
 
 ###############################################################################
 # Coverity build should exit early
 ###############################################################################
 if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
-  ${COVERITY_DIR}/cov-build --dir cov-int cmake --build . -- -j ${BUILD_THREADS}
+  ${COVERITY_DIR}/cov-build --dir cov-int ${CMAKE_EXE} --build . -- -j ${BUILD_THREADS:?}
   tar czvf mantid.tgz cov-int
   status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
        https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
   status=$(echo ${status} | sed -e 's/^ *//' -e 's/ *$//')
-  if [[ -z $status ]]; then
+  if [[ -z $status ]] || [[ ${status} == "Build successfully submitted." ]]; then
     exit 0
   else
     echo "$status"
@@ -256,8 +264,16 @@ fi
 ###############################################################################
 # Build step
 ###############################################################################
-$SCL_ON_RHEL6 "cmake --build . -- -j$BUILD_THREADS"
-$SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
+${CMAKE_EXE} --build . -- -j${BUILD_THREADS:?}
+${CMAKE_EXE} --build . --target AllTests -- -j${BUILD_THREADS:?}
+
+###############################################################################
+# static analysis builds stop here
+###############################################################################
+if [[ $USE_CLANG ]] && [[ ${JOB_NAME} == *clang_tidy* ]]; then
+  exit 0
+fi
+
 
 ###############################################################################
 # Run the unit tests
@@ -265,18 +281,20 @@ $SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
 # Remove any Mantid.user.properties file
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
-$SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
+$CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
 
 ###############################################################################
 # Run the documentation tests on Ubuntu when doing a pull request build but not for python 3.
 ###############################################################################
-if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]] && [[ ! ${JOB_NAME} == *python3* ]]; then
+if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]]; then
   # Remove doctrees directory so it forces a full reparse. It seems that
   # without this newly added doctests are not executed
   if [ -d $BUILD_DIR/docs/doctrees ]; then
     rm -rf $BUILD_DIR/docs/doctrees/*
   fi
-  $SCL_ON_RHEL6 "cmake --build . --target docs-test"
+  # Build HTML to verify that no referencing errors have crept in.
+  ${CMAKE_EXE} --build . --target docs-html
+  ${CMAKE_EXE} --build . --target docs-test
 fi
 
 ###############################################################################
@@ -289,18 +307,18 @@ if [[ ${BUILDPKG} == true ]]; then
   if [[ ${ON_MACOS} == true ]]; then
     export MANTIDPATH=$PWD/bin
   fi
-  $SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"
-  $SCL_ON_RHEL6 "cpack"
+  ${CMAKE_EXE} --build . --target docs-qthelp
+  ${CPACK_EXE}
 
   # Source tarball on clean build (arbitrarily choose rhel7)
   # Also, parcel up the documentation into a tar file that is easier to move around
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
   if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
-    $SCL_ON_RHEL6 "cmake --build . --target docs-html"
+    ${CMAKE_EXE} --build . --target docs-html
     tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
-    $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
+    ${CPACK_EXE} --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX=
   fi
 fi
 

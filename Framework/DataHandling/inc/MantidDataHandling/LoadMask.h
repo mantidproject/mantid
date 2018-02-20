@@ -2,10 +2,13 @@
 #define MANTID_DATAHANDLING_LOADMASK_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
+
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/Document.h>
 
 namespace Poco {
 namespace XML {
@@ -44,11 +47,8 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadMask : public API::Algorithm {
+class DLLExport LoadMask : public API::ParallelAlgorithm {
 public:
-  LoadMask();
-  ~LoadMask() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadMask"; };
   /// Summary of algorithms purpose
@@ -97,6 +97,8 @@ private:
                               const std::vector<specnum_t> &maskedSpecID,
                               std::vector<detid_t> &singleDetIds);
 
+  void reset();
+
   /// Mask Workspace
   DataObjects::MaskWorkspace_sptr m_maskWS;
   /// Instrument name
@@ -104,15 +106,12 @@ private:
   /// optional source workspace, containing spectra-detector mapping
   API::MatrixWorkspace_sptr m_sourceMapWS;
   /// XML document loaded
-  Poco::XML::Document *m_pDoc;
+  Poco::AutoPtr<Poco::XML::Document> m_pDoc;
   /// Root element of the parsed XML
-  Poco::XML::Element *m_pRootElem;
+  Poco::XML::Element *m_pRootElem{nullptr};
 
   /// Default setup.  If true, not masking, but use the pixel
-  bool m_defaultToUse;
-  /// input property contains name of instrument definition file rather than
-  /// instrument name itself
-  bool m_IDF_provided;
+  bool m_defaultToUse{true};
 
   // detector id-s to mask
   std::vector<detid_t> m_maskDetID;

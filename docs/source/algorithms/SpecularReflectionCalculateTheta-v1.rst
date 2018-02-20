@@ -40,7 +40,7 @@ Usage
 
    # Calculate the two theta.
    two_theta = SpecularReflectionCalculateTheta(InputWorkspace=ws, DetectorComponentName='point-detector', AnalysisMode='PointDetectorAnalysis', Version=1)
-   print two_theta
+   print(two_theta)
    
 Output:
 

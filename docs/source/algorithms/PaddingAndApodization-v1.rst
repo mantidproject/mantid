@@ -37,7 +37,7 @@ Usage
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
    output=PaddingAndApodization(InputWorkspace=input,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=0,)
-   print  "output: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
+   print("output:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
    
 Output:
 
@@ -55,7 +55,7 @@ Output:
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
    output=PaddingAndApodization(InputWorkspace=input,Padding=2,)
-   print  "output: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
+   print("output:  {}".format(['{0:.2f}'.format(value)  for value in output.readY(0)]))
    
 Output:
 
@@ -73,7 +73,7 @@ Output:
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
    output=PaddingAndApodization(InputWorkspace=input,ApodizationFunction="Gaussian",DecayConstant=2.44,Padding=2,)
-   print  "output: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
+   print("output:  {}".format(['{0:.2f}'.format(value)  for value in output.readY(0)]))
    
 Output:
 

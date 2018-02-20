@@ -80,9 +80,9 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
             values_found[parameter] = ws.row(row_index)["Value"]
             break
    if values_found["Beta"] > 0.63 and values_found["Beta"] < 0.71:
-      print "Beta found within [0.63, 0.71]"
+      print("Beta found within [0.63, 0.71]")
    if values_found["Tau"] > 54.0 and values_found["Tau"] < 60.0:
-      print "Tau found within [54.0, 60.0]"
+      print("Tau found within [54.0, 60.0]")
 
 .. testcleanup:: ExampleStretchedExpFT
 

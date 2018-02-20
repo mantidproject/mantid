@@ -3,6 +3,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/SmoothNeighboursDialog.h"
 
+#include <QGroupBox>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::API;

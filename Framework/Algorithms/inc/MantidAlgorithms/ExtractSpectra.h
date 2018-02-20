@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_EXTRACTSPECTRA_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -33,7 +33,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ExtractSpectra : public API::Algorithm {
+class DLLExport ExtractSpectra : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -46,11 +46,11 @@ private:
   void execHistogram();
   void execEvent();
 
+  void propagateBinMasking(API::MatrixWorkspace &workspace, const int i) const;
   void checkProperties();
-  std::size_t getXMin(const int wsIndex = 0);
-  std::size_t getXMax(const int wsIndex = 0);
-  void cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex,
-                  int outIndex);
+  std::size_t getXMin(const size_t wsIndex = 0);
+  std::size_t getXMax(const size_t wsIndex = 0);
+  void cropRagged(API::MatrixWorkspace &workspace, int index);
 
   /// The input workspace
   API::MatrixWorkspace_sptr m_inputWorkspace;

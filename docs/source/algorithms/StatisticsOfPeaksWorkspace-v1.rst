@@ -69,20 +69,20 @@ Usage
     statistics = statistics_table.row(0)
 
     peak = sorted.getPeak(0)
-    print "HKL of first peak in table %d" % peak.getH(),peak.getK(),peak.getL()
-    print "Multiplicity = %.2f" % statistics['Multiplicity']
-    print "Resolution Min = %.2f" % statistics['Resolution Min']
-    print "Resolution Max = %.2f" % statistics['Resolution Max']
-    print "No. of Unique Reflections = %i" % statistics['No. of Unique Reflections']
-    print "Mean ((I)/sd(I)) = %.2f" % statistics['Mean ((I)/sd(I))']
-    print "Rmerge = %.2f" % statistics['Rmerge']
-    print "Rpim = %.2f" % statistics['Rpim']
+    print("HKL of first peak in table {} {} {}".format(peak.getH(),peak.getK(),peak.getL()))
+    print("Multiplicity = %.2f" % statistics['Multiplicity'])
+    print("Resolution Min = %.2f" % statistics['Resolution Min'])
+    print("Resolution Max = %.2f" % statistics['Resolution Max'])
+    print("No. of Unique Reflections = %i" % statistics['No. of Unique Reflections'])
+    print("Mean ((I)/sd(I)) = %.2f" % statistics['Mean ((I)/sd(I))'])
+    print("Rmerge = %.2f" % statistics['Rmerge'])
+    print("Rpim = %.2f" % statistics['Rpim'])
 
 Output:
 
 .. testoutput:: ExStatisticsOfPeaksWorkspaceOption
 
-    HKL of first peak in table -10 5.0 42.0
+    HKL of first peak in table -10.0 5.0 42.0
     Multiplicity = 1.21
     Resolution Min = 0.21
     Resolution Max = 2.08

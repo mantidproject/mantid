@@ -86,11 +86,11 @@
 ****************************************************************************/
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h"
-#include <QtCore/QSet>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QGroupBox>
-#include <QtCore/QTimer>
+#include <QSet>
+#include <QGridLayout>
+#include <QLabel>
+#include <QGroupBox>
+#include <QTimer>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -521,5 +521,3 @@ void QtGroupBoxPropertyBrowser::itemChanged(QtBrowserItem *item) {
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
 #endif
-
-#include "moc_qtgroupboxpropertybrowser.cpp"

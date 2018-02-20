@@ -12,14 +12,15 @@
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QCheckBox>
+#include <QCloseEvent>
 #include <QComboBox>
+#include <QDateTimeEdit>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QtGui>
 
 #include <Poco/ActiveResult.h>
 

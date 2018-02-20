@@ -7,13 +7,13 @@ from math import (acos, sqrt, degrees)
 import re
 from copy import deepcopy
 import json
+import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
 from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARMOR, ZOOM, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
-                               SANSInstrument, SANSFacility)
-
+                               SANSInstrument, SANSFacility, DataType)
 # -------------------------------------------
 # Constants
 # -------------------------------------------
@@ -48,7 +48,7 @@ def get_log_value(run, log_name, log_type):
             output = log_type(run.getLogData(log_name).value[0])
         else:
             # Get the first entry which is past the start time log
-            start_time = run.startTime()
+            start_time = run.startTime().to_datetime64()
             times = log_property.times
             values = log_property.value
 
@@ -214,8 +214,8 @@ def get_charge_and_time(workspace):
     run = workspace.getRun()
     charges = run.getLogData('proton_charge')
     total_charge = sum(charges.value)
-    time_passed = (charges.times[-1] - charges.times[0]).total_microseconds()
-    time_passed /= 1e6
+    time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1,'us')) # microseconds
+    time_passed = float(time_passed) / 1e6
     return total_charge, time_passed
 
 
@@ -511,7 +511,8 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_standard_output_workspace_name(state, reduction_data_type):
+def get_standard_output_workspace_name(state, reduction_data_type, transmission = False,
+                                       data_type = DataType.to_string(DataType.Sample)):
     """
     Creates the name of the output workspace from a state object.
 
@@ -587,12 +588,22 @@ def get_standard_output_workspace_name(state, reduction_data_type):
         start_time_as_string = ""
         end_time_as_string = ""
 
+    # 8. Transmission name
+    transmission_name = "_trans_" + data_type
+
     # Piece it all together
-    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
-                             dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
-                             start_time_as_string + end_time_as_string)
-    output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string +
-                                  wavelength_range_string + phi_limits_as_string)
+    if not transmission:
+        output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
+                                 dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
+                                 start_time_as_string + end_time_as_string)
+        output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string +
+                                      wavelength_range_string + phi_limits_as_string)
+    else:
+        output_workspace_name = (short_run_number_as_string + period_as_string + transmission_name +
+                                 wavelength_range_string + phi_limits_as_string + start_time_as_string
+                                 + end_time_as_string)
+        output_workspace_base_name = (short_run_number_as_string + transmission_name +
+                                      wavelength_range_string + phi_limits_as_string)
     return output_workspace_name, output_workspace_base_name
 
 
@@ -606,6 +617,11 @@ def get_output_name(state, reduction_mode, is_group, suffix=""):
     user_specified_output_name = save_info.user_specified_output_name
     user_specified_output_name_suffix = save_info.user_specified_output_name_suffix
     use_reduction_mode_as_suffix = save_info.use_reduction_mode_as_suffix
+
+    # This adds a reduction mode suffix in merged or all reductions so the workspaces do not overwrite each other.
+    if (state.reduction.reduction_mode == ISISReductionMode.Merged or state.reduction.reduction_mode == ISISReductionMode.All) \
+            and user_specified_output_name:
+        use_reduction_mode_as_suffix = True
 
     # An output name requires special attention when the workspace is part of a multi-period reduction
     # or slice event scan

@@ -280,42 +280,27 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
     const auto &ADS = AnalysisDataService::Instance();
 
     if (alg->execute()) {
-      bool use_monitor_counts = true;
-      double proton_charge = 0.0;
-      double monitor_count = 0.0;
-      if (use_monitor_counts) {
-        Mantid::API::MatrixWorkspace_sptr mon_ws =
-            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
-        IAlgorithm_sptr int_alg =
-            AlgorithmManager::Instance().create("Integration");
-        int_alg->setProperty("InputWorkspace", mon_ws);
-        int_alg->setProperty("RangeLower", 1000.0);
-        int_alg->setProperty("RangeUpper", 12500.0);
-        int_alg->setProperty("OutputWorkspace",
-                             ev_ws_name + "_integrated_monitor");
-        int_alg->execute();
-        Mantid::API::MatrixWorkspace_sptr int_ws =
-            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
-        monitor_count = int_ws->y(0)[0];
-        std::cout << "Beam monitor counts used for scaling = " << monitor_count
-                  << "\n";
-      } else {
-        Mantid::API::MatrixWorkspace_sptr ev_ws =
-            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
-        double proton_charge =
-            ev_ws->run().getProtonCharge() * 1000.0; // get proton charge
-        std::cout << "Proton charge x 1000 used for scaling = " << proton_charge
-                  << "\n";
-      }
+      Mantid::API::MatrixWorkspace_sptr mon_ws =
+          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
+      IAlgorithm_sptr int_alg =
+          AlgorithmManager::Instance().create("Integration");
+      int_alg->setProperty("InputWorkspace", mon_ws);
+      int_alg->setProperty("RangeLower", 1000.0);
+      int_alg->setProperty("RangeUpper", 12500.0);
+      int_alg->setProperty("OutputWorkspace",
+                           ev_ws_name + "_integrated_monitor");
+      int_alg->execute();
+      Mantid::API::MatrixWorkspace_sptr int_ws =
+          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
+      double monitor_count = int_ws->y(0)[0];
+      std::cout << "Beam monitor counts used for scaling = " << monitor_count
+                << "\n";
 
       IPeaksWorkspace_sptr peaks_ws =
           ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
       for (int iPeak = 0; iPeak < peaks_ws->getNumberPeaks(); iPeak++) {
         Mantid::Geometry::IPeak &peak = peaks_ws->getPeak(iPeak);
-        if (use_monitor_counts)
-          peak.setMonitorCount(monitor_count);
-        else
-          peak.setMonitorCount(proton_charge);
+        peak.setMonitorCount(monitor_count);
       }
 
       if (minQPeaks != Mantid::EMPTY_DBL()) {
@@ -677,13 +662,14 @@ bool MantidEVWorker::showCells(const std::string &peaks_ws_name,
  *  @param allow_perm        If true, permutations are used to find the
  *                           best fitting cell of any
  *                           particular type.
+ *  @param tolerance       The tolerance on hkl values to use when
  *
  *  @return true if the SelectCellOfType algorithm completes successfully.
  */
 bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name,
                                       const std::string &cell_type,
                                       const std::string &centering,
-                                      bool allow_perm) {
+                                      bool allow_perm, double tolerance) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
@@ -692,7 +678,7 @@ bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name,
   alg->setProperty("CellType", cell_type);
   alg->setProperty("Centering", centering);
   alg->setProperty("Apply", true);
-  alg->setProperty("tolerance", 0.12);
+  alg->setProperty("tolerance", tolerance);
   alg->setProperty("AllowPermutations", allow_perm);
 
   return alg->execute();
@@ -709,11 +695,13 @@ bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name,
  *  @param allow_perm        If true, permutations are used to find the
  *                           best fitting cell of any
  *                           particular type.
+ *  @param tolerance       The tolerance on hkl values to use when
  *
  *  @return true if the SelectCellWithForm algorithm completes successfully.
  */
 bool MantidEVWorker::selectCellWithForm(const std::string &peaks_ws_name,
-                                        size_t form_num, bool allow_perm) {
+                                        size_t form_num, bool allow_perm,
+                                        double tolerance) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
@@ -722,7 +710,7 @@ bool MantidEVWorker::selectCellWithForm(const std::string &peaks_ws_name,
   alg->setProperty("PeaksWorkspace", peaks_ws_name);
   alg->setProperty("FormNumber", (int)form_num);
   alg->setProperty("Apply", true);
-  alg->setProperty("tolerance", 0.12);
+  alg->setProperty("tolerance", tolerance);
   alg->setProperty("AllowPermutations", allow_perm);
 
   return alg->execute();

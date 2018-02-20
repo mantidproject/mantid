@@ -327,3 +327,27 @@ class BatchReductionEntry(object):
     Defines the entries of a batch reduction file.
     """
     pass
+
+
+# ------------------------------
+# Quadrants for beam centre finder
+# -------------------------------
+@string_convertible
+@serializable_enum("Left", "Right", "Top", "Bottom")
+class MaskingQuadrant(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass
+
+
+# ------------------------------
+# Directions for Beam centre finder
+# -------------------------------
+@string_convertible
+@serializable_enum("All", "Up_Down", "Left_Right")
+class FindDirectionEnum(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass

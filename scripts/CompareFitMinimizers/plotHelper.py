@@ -156,8 +156,9 @@ class plot(data,insert):
         if save=="":
             plt.show()
         else:
-            print ("saving to "+save.replace(" ","_"))
-            plt.savefig(save.replace(" ","_"))
+            output_file = save.replace(",","")
+            print ("saving to "+output_file.replace(" ","_"))
+            plt.savefig(output_file.replace(" ","_"))
 
     # safe is used if the y values (strings) all have unique names
     def make_y_bar_plot(self,safe=True,save=""):

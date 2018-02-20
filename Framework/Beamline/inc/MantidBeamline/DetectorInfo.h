@@ -5,6 +5,7 @@
 #include "MantidKernel/cow_ptr.h"
 
 #include "Eigen/Geometry"
+#include "Eigen/StdVector"
 
 namespace Mantid {
 namespace Beamline {
@@ -60,17 +61,22 @@ class ComponentInfo;
 class MANTID_BEAMLINE_DLL DetectorInfo {
 public:
   DetectorInfo() = default;
-  DetectorInfo(std::vector<Eigen::Vector3d> positions,
-               std::vector<Eigen::Quaterniond> rotations);
-  DetectorInfo(std::vector<Eigen::Vector3d> positions,
-               std::vector<Eigen::Quaterniond> rotations,
-               const std::vector<size_t> &monitorIndices);
+  DetectorInfo(
+      std::vector<Eigen::Vector3d> positions,
+      std::vector<Eigen::Quaterniond,
+                  Eigen::aligned_allocator<Eigen::Quaterniond>> rotations);
+  DetectorInfo(
+      std::vector<Eigen::Vector3d> positions,
+      std::vector<Eigen::Quaterniond,
+                  Eigen::aligned_allocator<Eigen::Quaterniond>> rotations,
+      const std::vector<size_t> &monitorIndices);
 
   bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
   size_t scanSize() const;
   bool isScanning() const;
+  bool isSyncScan() const;
 
   bool isMonitor(const size_t index) const;
   bool isMonitor(const std::pair<size_t, size_t> &index) const;
@@ -119,12 +125,16 @@ private:
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
   Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions{nullptr};
-  Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations{nullptr};
+  Kernel::cow_ptr<std::vector<Eigen::Quaterniond,
+                              Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      m_rotations{nullptr};
 
   Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
   Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
       nullptr};
+  /// For (detector index, time index) -> linear index conversions
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
+  /// For linear index -> (detector index, time index) conversions
   Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
   ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
 };

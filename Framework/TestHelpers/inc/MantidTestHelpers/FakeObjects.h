@@ -54,6 +54,10 @@ public:
     m_histogram.setCountStandardDeviations(0);
   }
 
+  void copyDataFrom(const ISpectrum &other) override {
+    other.copyDataInto(*this);
+  }
+
   void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X)
       override {
     m_histogram.setX(X);
@@ -93,6 +97,11 @@ protected:
   Mantid::HistogramData::Histogram m_histogram;
 
 private:
+  using ISpectrum::copyDataInto;
+  void copyDataInto(SpectrumTester &other) const override {
+    other.m_histogram = m_histogram;
+  }
+
   const Mantid::HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
   }
@@ -160,9 +169,8 @@ protected:
       m_vec[i].setSpectrumNo(specnum_t(i + 1));
     }
   }
-  void init(const size_t &numspec,
-            const Mantid::HistogramData::Histogram &histogram) override {
-    m_spec = numspec;
+  void init(const Mantid::HistogramData::Histogram &histogram) override {
+    m_spec = numberOfDetectorGroups();
     m_vec.resize(m_spec, SpectrumTester(histogram.xMode(), histogram.yMode()));
     for (size_t i = 0; i < m_spec; i++) {
       m_vec[i].setHistogram(histogram);
@@ -208,16 +216,15 @@ protected:
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(j, this);
+    m_axes[0] = new Mantid::API::RefAxis(this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
-  void init(const size_t &numspec,
-            const Mantid::HistogramData::Histogram &histogram) override {
-    AxeslessWorkspaceTester::init(numspec, histogram);
+  void init(const Mantid::HistogramData::Histogram &histogram) override {
+    AxeslessWorkspaceTester::init(histogram);
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(histogram.x().size(), this);
+    m_axes[0] = new Mantid::API::RefAxis(this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
 
@@ -398,6 +405,17 @@ protected:
   }
   const void *void_pointer(size_t) const override {
     throw std::runtime_error("void_pointer const not implemented");
+  }
+};
+
+class VariableBinThrowingTester : public AxeslessWorkspaceTester {
+  size_t blocksize() const override {
+    if (getSpectrum(0).dataY().size() == getSpectrum(1).dataY().size())
+      return getSpectrum(0).dataY().size();
+    else
+      throw std::length_error("Mismatched bins sizes");
+
+    return 0;
   }
 };
 #endif /* FAKEOBJECTS_H_ */

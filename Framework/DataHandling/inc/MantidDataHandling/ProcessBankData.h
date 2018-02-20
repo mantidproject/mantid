@@ -1,30 +1,24 @@
 #ifndef MANTID_DATAHANDLING_PROCESSBANKDATA_H
 #define MANTID_DATAHANDLING_PROCESSBANKDATA_H
 
-// #include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/IDTypes.h"
-// Process bank data
 #include "MantidKernel/Task.h"
 #include "MantidKernel/Timer.h"
-#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 
 #include <boost/shared_array.hpp>
 
 namespace Mantid {
 namespace DataHandling {
+class DefaultEventLoader;
 
-//==============================================================================================
-// Class ProcessBankData
-//==============================================================================================
 /** This task does the disk IO from loading the NXS file,
 * and so will be on a disk IO mutex */
 class ProcessBankData : public Mantid::Kernel::Task {
 public:
-  //----------------------------------------------------------------------------------------------
   /** Constructor
   *
-  * @param alg :: LoadEventNexus
+  * @param loader :: DefaultEventLoader
   * @param entry_name :: name of the bank
   * @param prog :: Progress reporter
   * @param event_id :: array with event IDs
@@ -40,7 +34,7 @@ public:
   * @param max_event_id :: maximum detector ID to load
   * @return
   */ // API::IFileLoader<Kernel::NexusDescriptor>
-  ProcessBankData(LoadEventNexus *alg, std::string entry_name,
+  ProcessBankData(DefaultEventLoader &loader, std::string entry_name,
                   API::Progress *prog, boost::shared_array<uint32_t> event_id,
                   boost::shared_array<float> event_time_of_flight,
                   size_t numEvents, size_t startAt,
@@ -55,7 +49,7 @@ private:
   size_t getWorkspaceIndexFromPixelID(const detid_t pixID);
 
   /// Algorithm being run
-  LoadEventNexus *alg;
+  DefaultEventLoader &m_loader;
   /// NXS path to bank
   std::string entry_name;
   /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace

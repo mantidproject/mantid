@@ -10,8 +10,9 @@ The SCD Event Data Reduction interface(MantidEV) is a wrapper around
 MantidPlot algorithms that is intended to help handle the basic data reduction
 steps for one crystal orientation in a time-of-flight single crystal neutron
 diffraction experiment.  The basic steps of loading data, converting to
-reciprocal space, finding peaks, finding a UB matrix (indexing), choosing
-and modifying a conventional cell and peak integration are supported.
+reciprocal space, finding peaks, finding a  :ref:`UB matrix <Lattice>`
+(indexing), choosing and modifying a conventional cell and peak integration
+are supported.
 
 All of the steps carried out can also be done by using the algorithms
 directly from from the MantidPlot GUI.  In most cases, many more
@@ -114,10 +115,10 @@ current cell is a Niggli reduced cell, as produced by the
 conventional cell (that is not a Niggli reduced cell) has already been
 chosen, then the list of possible cells will be non-sense.  In
 particular, this tab should NOT be used twice in succession in most
-cases.  Similarly, if the UB matrix was obtained by loading an IsawUB,
-or by computing the UB based on a list of previously indexed peaks,
-the UB might not correspond to a Niggli reduced cell, and the Choose
-Cell tab should be skipped.
+cases.  Similarly, if the :ref:`UB matrix <Lattice>` was obtained by
+loading an IsawUB, or by computing the UB based on a list of previously
+indexed peaks, the UB might not correspond to a Niggli reduced cell, and
+the Choose Cell tab should be skipped.
 
 Change HKL
 ^^^^^^^^^^
@@ -126,7 +127,7 @@ If some rearrangement of the chosen cell is needed, an arbitrary
 linear transformation can be applied to the HKL values using the
 Change HKL tab.  The transformation specified is applied to the Miller
 indexes of each peak and a corresponding transform is applied to the
-UB matrix, if the Apply button is pressed.
+:ref:`UB matrix <Lattice>`, if the Apply button is pressed.
 
 Integrate
 ^^^^^^^^^
@@ -216,9 +217,9 @@ step is complete when the specified peaks workspace has been created.
 .. figure:: /images/MantidEV_Find_Peaks.png
 
 
-The next step is to find a UB matrix that will index the peaks.
-MantidEV uses the FindUBUsingFFT algorithm for this purpose.  This
-algorithm requires and estimate of the range of lengths of the edges
+The next step is to find a :ref:`UB matrix <Lattice>` that will index
+the peaks. MantidEV uses the FindUBUsingFFT algorithm for this purpose.
+This algorithm requires and estimate of the range of lengths of the edges
 of the reduced cell for the sample.  As before, these don't need to be
 specified exactly, but should be reasonable and should usually cover a
 slightly larger range of values than absolutely required.  Since the
@@ -226,12 +227,12 @@ reduced cell parameters for sapphire are roughly 4.75, 4.75 and 5.13,
 choosing a min of 3 or 4 and a max of 7 or somewhat larger is
 reasonable.  A tolerance on the allowable indexing error in h,k,l also
 must be specified.  A tolerance in the range of 0.1 to 0.15 is usually
-a good choice.  After finding the UB matrix, it can be immediately
-used to index the peaks, if the Index Peaks Using UB option is
+a good choice.  After finding the :ref:`UB matrix <Lattice>`, it can be
+immediately used to index the peaks, if the Index Peaks Using UB option is
 selected.  The computed h,k,l values can either be rounded to the
-nearest integers or left as fractional values to see how well the UB
-matrix indexes the peaks.  When the parameters have been filled out,
-as shown below, press Apply to do the calculation.
+nearest integers or left as fractional values to see how well the
+:ref:`UB matrix <Lattice>` indexes the peaks.  When the parameters have
+been filled out, as shown below, press Apply to do the calculation.
 
 .. figure:: /images/MantidEV_Find_UB.png
 

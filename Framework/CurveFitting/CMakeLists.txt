@@ -32,14 +32,12 @@ set ( SRC_FILES
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
-	src/FuncMinimizers/DTRSMinimizer.cpp
 	src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
-	src/FuncMinimizers/MoreSorensenMinimizer.cpp
 	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/SimplexMinimizer.cpp
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
@@ -196,14 +194,12 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
@@ -364,6 +360,7 @@ set ( TEST_FILES
 	FuncMinimizers/LevenbergMarquardtTest.h
 	FuncMinimizers/PRConjugateGradientTest.h
 	FuncMinimizers/SimplexTest.h
+	FuncMinimizers/TrustRegionMinimizerTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
 	FunctionParameterDecoratorFitTest.h
@@ -479,7 +476,8 @@ enable_precompiled_headers( inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting 
-                                     COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING )
+  COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

@@ -77,12 +77,14 @@ Output:
     (result, messages) = CompareWorkspaces(ws1, ws2) # Fails, they're not the same
     print("Result: {}".format(result))
     print("Displaying {} messages:".format(messages.rowCount()))
-    for row in messages: print(row)
+    for row in messages:
+        print("'Message': '{Message}', 'Workspace 1': '{Workspace 1}', 'Workspace 2': '{Workspace 2}'".format(**row))
 
     (result, messages) = CompareWorkspaces(ws1, ws2, Tolerance=0.1) # Passes, they're close enough
     print("Result: {}".format(result))
     print("Displaying {} messages:".format(messages.rowCount()))
-    for row in messages: print(row)
+    for row in messages:
+        print("'Message': '{Message}', 'Workspace 1': '{Workspace 1}', 'Workspace 2': '{Workspace 2}'".format(**row))
 
 
 Output:
@@ -91,7 +93,7 @@ Output:
 
     Result: False
     Displaying 1 messages:
-    {'Message': 'Data mismatch', 'Workspace 1': 'ws1', 'Workspace 2': 'ws2'}
+    'Message': 'Data mismatch', 'Workspace 1': 'ws1', 'Workspace 2': 'ws2'
     Result: True
     Displaying 0 messages:
 

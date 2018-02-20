@@ -36,10 +36,6 @@ void HKLFilterWavelength::checkProperLambdaRangeValues() const {
     throw std::range_error("LambdaMin cannot be <= 0.");
   }
 
-  if (m_lambdaMin <= 0.0) {
-    throw std::range_error("LambdaMax cannot be <= 0.");
-  }
-
   if (m_lambdaMax <= m_lambdaMin) {
     throw std::range_error("LambdaMax cannot be smaller than LambdaMin.");
   }

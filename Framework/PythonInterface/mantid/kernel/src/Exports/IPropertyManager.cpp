@@ -1,20 +1,24 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <boost/python/stl_iterator.hpp>
 #include <boost/python/str.hpp>
 
 using namespace Mantid::Kernel;
 namespace Registry = Mantid::PythonInterface::Registry;
+namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IPropertyManager)
@@ -28,26 +32,46 @@ namespace {
  * @param name :: The name of the property
  * @param value :: The value of the property as a bpl object
  */
-void setProperty(IPropertyManager &self, const std::string &name,
+void setProperty(IPropertyManager &self, const boost::python::object &name,
                  const boost::python::object &value) {
-  extract<std::string> cppstr(value);
+  std::string namestr;
+  try {
+    namestr = Converters::pyObjToStr(name);
+  } catch (std::invalid_argument &) {
+    throw std::invalid_argument("Failed to convert property name to a string");
+  }
 
-  if (cppstr.check()) {
-    self.setPropertyValue(name, cppstr());
+  extract<std::string> valuecpp(value);
+  if (valuecpp.check()) {
+    self.setPropertyValue(namestr, valuecpp());
 #if PY_VERSION_HEX < 0x03000000
   } else if (PyUnicode_Check(value.ptr())) {
-    self.setPropertyValue(name,
+    self.setPropertyValue(namestr,
                           extract<std::string>(str(value).encode("utf-8"))());
 #endif
   } else {
     try {
-      Property *p = self.getProperty(name);
+      Property *p = self.getProperty(namestr);
       const auto &entry = Registry::TypeRegistry::retrieve(*(p->type_info()));
-      entry.set(&self, name, value);
+      entry.set(&self, namestr, value);
     } catch (std::invalid_argument &e) {
-      throw std::invalid_argument("When converting parameter \"" + name +
+      throw std::invalid_argument("When converting parameter \"" + namestr +
                                   "\": " + e.what());
     }
+  }
+}
+
+void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
+#if PY_MAJOR_VERSION >= 3
+  const object view = kwargs.attr("items")();
+  const object objectItems(handle<>(PyObject_GetIter(view.ptr())));
+#else
+  const object objectItems = kwargs.iteritems();
+#endif
+  auto begin = stl_input_iterator<object>(objectItems);
+  auto end = stl_input_iterator<object>();
+  for (auto it = begin; it != end; ++it) {
+    setProperty(self, (*it)[0], (*it)[1]);
   }
 }
 
@@ -58,10 +82,11 @@ void setProperty(IPropertyManager &self, const std::string &name,
  * @param name :: The name of the property
  * @param value :: The value of the property as a bpl object
  */
-void declareProperty(IPropertyManager &self, const std::string &name,
+void declareProperty(IPropertyManager &self, const boost::python::object &name,
                      boost::python::object value) {
+  std::string nameStr = Converters::pyObjToStr(name);
   auto p = std::unique_ptr<Property>(
-      Registry::PropertyWithValueFactory::create(name, value, 0));
+      Registry::PropertyWithValueFactory::create(nameStr, value, 0));
   self.declareProperty(std::move(p));
 }
 
@@ -73,9 +98,11 @@ void declareProperty(IPropertyManager &self, const std::string &name,
  * @param name :: The name of the property
  * @param value :: The value of the property as a bpl object
  */
-void declareOrSetProperty(IPropertyManager &self, const std::string &name,
+void declareOrSetProperty(IPropertyManager &self,
+                          const boost::python::object &name,
                           boost::python::object value) {
-  bool propExists = self.existsProperty(name);
+  std::string nameStr = Converters::pyObjToStr(name);
+  bool propExists = self.existsProperty(nameStr);
   if (propExists) {
     setProperty(self, name, value);
   } else {
@@ -134,7 +161,7 @@ Property *get(IPropertyManager &self, const std::string &name,
               const boost::python::object &value) {
   try {
     return self.getPointerToProperty(name);
-  } catch (Exception::NotFoundError) {
+  } catch (Exception::NotFoundError &) {
     return Registry::PropertyWithValueFactory::create(name, value, 0).release();
   }
 }
@@ -171,6 +198,8 @@ void export_IPropertyManager() {
       .def("setProperty", &setProperty,
            (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property")
+      .def("setProperties", &setProperties, (arg("self"), arg("kwargs")),
+           "Set a collection of properties from a dict")
 
       .def("setPropertySettings", &setPropertySettings,
            (arg("self"), arg("name"), arg("settingsManager")),

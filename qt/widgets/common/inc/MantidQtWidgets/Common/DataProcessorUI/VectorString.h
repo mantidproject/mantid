@@ -33,6 +33,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
+
 namespace {
 template <typename A>
 std::vector<std::string>

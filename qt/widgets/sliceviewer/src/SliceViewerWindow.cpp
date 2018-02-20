@@ -8,9 +8,10 @@
 #include "MantidQtWidgets/SliceViewer/LineViewer.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
-#include <qboxlayout.h>
-#include <qmainwindow.h>
-#include <qlayout.h>
+#include <QBoxLayout>
+#include <QMainWindow>
+#include <QLayout>
+#include <QTimer>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -30,7 +31,7 @@ namespace SliceViewer {
  * @return
  */
 SliceViewerWindow::SliceViewerWindow(const QString &wsName,
-                                     const QString &label, Qt::WFlags f)
+                                     const QString &label, Qt::WindowFlags f)
     : QMainWindow(NULL, f), WorkspaceObserver(), m_lastLinerWidth(0),
       m_lastPeaksViewerWidth(0) {
 

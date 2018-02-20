@@ -22,7 +22,7 @@ MPI support for these multi-dimensional workspaces is beyond the scope of this d
 Spectrum and Detector
 ---------------------
 
-In Mantid the terms spectrum and detector are used interchangeably at times, leading to unnecessary confusion.
+In Mantid the terms spectrum and detector are used interchangeably at times, leading to confusion.
 In particular, it is sometimes assumed that there is a 1:1 correspondence between spectra and detectors.
 It is important to clearly distinguish between a spectrum and a detector, especially in the context of MPI support.
 We may define the terms as follows:
@@ -139,6 +139,19 @@ Build with MPI support
 To build Mantid with MPI support as described in this document run ``cmake`` with the additional option ``-DMPI_EXPERIMENTAL=ON``.
 This requires ``boost-mpi`` and a working MPI installation.
 
+Configuration
+-------------
+
+To avoid unintentional DDOSing or potential other issues, there is no MPI support for ``DownloadInstrument`` and ``CheckMantidVersion``.
+Error messages can be avoided by disabling these startup checks in the configuration.
+Furthermore, to avoid pollution of usage reports, usage reporting should be disabled:
+
+.. code-block:: sh
+
+  UpdateInstrumentDefinitions.OnStartup = 0
+  CheckMantidVersion.OnStartup = 0
+  usagereports.enabled = 0
+
 Writing and running Python scripts
 ----------------------------------
 
@@ -165,15 +178,11 @@ For example:
       print(ws.readY(i))
 
 
-Run Python with ``mpirun`` and the desired number of MPI ranks:
+Run Python with ``mpirun`` and the desired number of MPI ranks, by using the new ``-n`` flag to ``mantidpython``:
 
 .. code-block:: sh
 
-  mpirun -n 3 python test.py
-
-Note that directly using the Mantid Python wrapper ``mantidpython`` is not possible, i.e., ``mpirun -n 3 mantidpython test.py`` does not work.
-Instead the correct paths to Mantid and library preloads should be set manually.
-Alternatively, a modified version of ``mantidpython`` that internally uses ``mpirun`` to call python could be created.
+  mantidpython -n 3 test.py
 
 Possible output:
 
@@ -265,6 +274,18 @@ In that case the execution mode can simply be determined from the input workspac
 
 Here the helper ``Parallel::getCorrespondingExecutionMode`` is used to obtain the 'natural' execution mode from a storage mode, i.e., ``ExecutionMode::Identical`` for ``StorageMode::Cloned``, ``ExecutionMode::Distributed`` for ``StorageMode::Distributed``, and ``ExecutionMode::MasterOnly`` for ``StorageMode::MasterOnly``.
 More complex algorithms may require more complex decision mechanism, e.g., when there is more than one input workspace.
+
+For many algorithms a sufficient default implementation of ``Algorithm::getParallelExecutionMode()`` is provided by one of the base classes ``API::SerialAlgorithm``, ``API::ParallelAlgorithm``, or ``API::DistributedAlgorithm``.
+MPI support can simply be enabled by inheriting from one of these instead of from ``Algorithm``.
+The level of thereby enabled MPI support is as follows:
+
+- ``API::SerialAlgorithm`` supports only ``ExecutionMode::MasterOnly``.
+- ``API::ParallelAlgorithm`` supports parallel execution, but not distributed execution, i.e., ``ExecutionMode::MasterOnly`` and  ``ExecutionMode::IdenticalOnly``.
+- ``API::DistributedAlgorithm`` supports distributed execution, i.e., ``ExecutionMode::MasterOnly``, ``ExecutionMode::IdenticalOnly``, and  ``ExecutionMode::Distributed``.
+
+In the latter two cases more than one execution mode is supported.
+Thus this usually works only for algorithms with a single input (and a single output) such that the execution mode can be uniquely derived from the storage mode of the input workpace.
+Multiple inputs are also supported to a certain extent. For example, for ``API::DistributedAlgorithm`` the storage modes of the inputs can be mixed if they are compatible, such as ``StorageMode::Distributed`` with ``StorageMode::Cloned`` (resulting in ``ExecutionMode::Distributed``).
 
 If none of the other virtual methods listed above is implemented, ``Algorithm`` will run the normal ``exec()`` method on all MPI ranks.
 The exception are non-master ranks if the execution mode is ``ExecutionMode::MasterOnly`` -- in that case creating a dummy workspace is attempted.
@@ -359,10 +380,11 @@ The consequences are as follows:
 - The number of histograms in a workspace obtained from ``MatrixWorkspace::getNumberHistograms()`` may only be used for processing all spectra, i.e., when each MPI rank is processing all its local spectra.
   It should not be logged, written as output, or used for branching execution paths since it is meaningless.
   If the total number of spectra in a workspace is required it can be accessed via ``MatrixWorkspace::indexInfo()::globalSize()``.
-- User input providing indices or spectrum numbers in way or another must be translated into local indices by ``IndexInfo``.
-  The most common cases will be covered by a workspace property that also accepts indices (under development).
+- User input providing indices or spectrum numbers in one way or another must be translated into local indices by ``IndexInfo``.
+  The most common cases are a workspace property that also accepts indices, see `IndexProperty <../concepts/IndexProperty.html>`__.
 - The distinction between local and global indices must not be exposed to the user.
   In particular, the 'global' prefix should be omitted, i.e., for the user interface we keep referring to 'workspace index', even though it is internally not what used to be the workspace index but rather a global index.
+  Indices provided by a user may never be interpreted as local indices, since a local index has no fixed meaning.
 
 
 Instrument and detectors
@@ -444,15 +466,160 @@ Documentation
 When adding MPI support for an algorithm, add it to the table at the end of this document.
 Potential limitations must be described in the comments.
 
+Porting Python reduction scripts in practice
+--------------------------------------------
+
+The mechanism of execution modes and storage modes allows for "guided" porting of algorithms as follows:
+
+1. Run Python script such as a system test with two (or more) MPI ranks.
+2. At some point an algorithm without any MPI support or inadequate MPI support may be encountered, resulting in an error message similar to this:
+
+  .. code-block:: none
+
+    MyAlg-[Error] Error in execution of algorithm MyAlg:
+    MyAlg-[Error] Algorithm does not support execution with input workspaces of the following storage types:
+    MyAlg-[Error] InputWorkspace Parallel::StorageMode::Distributed
+    MyAlg-[Error] InputWorkspaceMonitor Parallel::StorageMode::Cloned
+    MyAlg-[Error] .
+
+3. Add the required MPI support to ``MyAlg`` with one of the mechanisms described above. In rare cases the combination of storage modes of the inputs may be unexpected, indicating an error earlier in the chain which needs to be fixed.
+4. Go to 1., until the script finishes successfully.
+
 Supported Algorithms
 ####################
 
-=============== =============== ========
-Algorithm       Supported modes Comments
-=============== =============== ========
-CreateWorkspace all
-Rebin           all             min and max bin boundaries must be given explicitly
-=============== =============== ========
+====================================== ======================= ========
+Algorithm                              Supported modes         Comments
+====================================== ======================= ========
+BinaryOperation                        all                     not supported if ``AllowDifferentNumberSpectra`` is enabled
+CalculateChiSquared                    MasterOnly, Identical   see ``IFittingAlgorithm``
+CalculateCostFunction                  MasterOnly, Identical   see ``IFittingAlgorithm``
+CalculateFlatBackground                MasterOnly, Identical
+CalculateTransmission                  MasterOnly, Identical
+CloneWorkspace                         all
+Comment                                all
+CompareWorkspace                       MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used, with ``ExecutionMode::MasterOnly`` the workspaces always compare equal on non-master ranks
+CompressEvents                         all
+ConvertToHistogram                     all
+ConvertToPointData                     all
+ConvertUnits                           all                     ``AlignBins`` not supported; for indirect energy mode the number of resulting bins is in general inconsistent across MPI ranks
+CopyInstrumentParameters               all
+CreateSingleValuedWorkspace            Identical               ``OutputWorkspace`` has ``StorageMode::Cloned``, support of ``MasterOnly`` would require adding property for selecting the mode
+CreateWorkspace                        all
+CropToComponent                        all
+CropWorkspace                          all                     see ``ExtractSpectra`` regarding X cropping
+DeleteWorkspace                        all
+Divide                                 all                     see ``BinaryOperation``
+EstimateFitParameters                  MasterOnly, Identical   see ``IFittingAlgorithm``
+EvaluateFunction                       MasterOnly, Identical   see ``IFittingAlgorithm``
+ExponentialCorrection                  all                     see ``UnaryOperation``
+ExtractSingleSpectrum                  all                     in practice ``ExecutionMode::Distributed`` not supported due to current nonzero-spectrum-count limitation
+ExtractSpectra2                        all                     currently not available via algorithm factory or Python
+ExtractSpectra                         all                     not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
+FilterBadPulses                        all
+FilterByLogValue                       all
+FilterByTime                           all
+FilterEventsByLogValuePreNexus         Identical               see ``IFileLoader``
+FindDetectorsInShape                   all
+Fit                                    MasterOnly, Identical   see ``IFittingAlgorithm``
+GroupWorkspaces                        all                     grouping workspaces with mixed ``StorageMode`` is not supported
+IFileLoader                            Identical               implicitly adds support for many load-algorithms inheriting from this
+IFittingAlgorithm                      MasterOnly, Identical   implicitly adds support for several fit-algorithms inheriting from this
+Load                                   all                     actual supported mode is dictated by underlying load algorithm, which depends on file type
+LoadAscii2                             Identical               see ``IFileLoader``
+LoadAscii                              Identical               see ``IFileLoader``
+LoadBBY                                Identical               see ``IFileLoader``
+LoadCanSAS1D                           Identical               see ``IFileLoader``
+LoadDaveGrp                            Identical               see ``IFileLoader``
+LoadEmptyInstrument                    Identical               see ``IFileLoader``
+LoadEventNexus                         Distributed             storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
+LoadEventPreNexus2                     Identical               see ``IFileLoader``
+LoadFITS                               Identical               see ``IFileLoader``
+LoadGSS                                Identical               see ``IFileLoader``
+LoadILLDiffraction                     Identical               see ``IFileLoader``
+LoadILLIndirect2                       Identical               see ``IFileLoader``
+LoadILLReflectometry                   Identical               see ``IFileLoader``
+LoadILLSANS                            Identical               see ``IFileLoader``
+LoadILLTOF2                            Identical               see ``IFileLoader``
+LoadInstrument                         all
+LoadIsawPeaks                          Identical               see ``IFileLoader``
+LoadISISNexus2                         Identical               see ``IFileLoader``
+LoadLLB                                Identical               see ``IFileLoader``
+LoadMask                               Identical
+LoadMcStas                             Identical               see ``IFileLoader``
+LoadMcStasNexus                        Identical               see ``IFileLoader``
+LoadMD                                 Identical               see ``IFileLoader``
+LoadMLZ                                Identical               see ``IFileLoader``
+LoadMuonNexus                          Identical               see ``IFileLoader``
+LoadNexusLogs                          all
+LoadNexusMonitors2                     Identical
+LoadNexusProcessed                     Identical               see ``IFileLoader``
+LoadNXcanSAS                           Identical               see ``IFileLoader``
+LoadNXSPE                              Identical               see ``IFileLoader``
+LoadParameterFile                      all                     segfaults when used in unit tests with MPI threading backend due to `#9365 <https://github.com/mantidproject/mantid/issues/9365>`_, normal use should be ok
+LoadPDFgetNFile                        Identical               see ``IFileLoader``
+LoadPreNexus                           Identical               see ``IFileLoader``
+LoadQKK                                Identical               see ``IFileLoader``
+LoadRawHelper                          Identical               see ``IFileLoader``
+LoadRKH                                Identical               see ``IFileLoader``
+LoadSassena                            Identical               see ``IFileLoader``
+LoadSESANS                             Identical               see ``IFileLoader``
+LoadSINQFocus                          Identical               see ``IFileLoader``
+LoadSNSspec                            Identical               see ``IFileLoader``
+LoadSPE                                Identical               see ``IFileLoader``
+LoadSpice2D                            Identical               see ``IFileLoader``
+LoadSQW2                               Identical               see ``IFileLoader``
+LoadSQW                                Identical               see ``IFileLoader``
+LoadSwans                              Identical               see ``IFileLoader``
+LoadTBL                                Identical               see ``IFileLoader``
+LoadTOFRawNexus                        Identical               see ``IFileLoader``
+Logarithm                              all                     see ``UnaryOperation``
+MaskBins                               all
+MaskDetectorsInShape                   all
+MaskSpectra                            all
+Minus                                  all                     see ``BinaryOperation``
+MoveInstrumentComponent                all
+Multiply                               all                     see ``BinaryOperation``
+OneMinusExponentialCor                 all                     see ``UnaryOperation``
+Q1D2                                   all                     not all optional normalization inputs are supported
+Plus                                   all                     see ``BinaryOperation``
+PoissonErrors                          all                     see ``BinaryOperation``
+PolynomialCorrection                   all                     see ``UnaryOperation``
+Power                                  all                     see ``UnaryOperation``
+PowerLawCorrection                     all                     see ``UnaryOperation``
+Rebin                                  all                     min and max bin boundaries must be given explicitly
+RebinToWorkspace                       all                     ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
+RemovePromptPulse                      all
+ReplaceSpecialValues                   all                     see ``UnaryOperation``
+RotateInstrumentComponent              all
+SANSCalculateTransmission              MasterOnly, Identical
+SANSConvertToQ                         all
+SANSConvertToWavelength                all
+SANSConvertToWavelengthAndRebin        all
+SANSCreateAdjustmentWorkspaces         all
+SANSCreateWavelengthAndPixelAdjustment MasterOnly, Identical
+SANSCrop                               all
+SANSFitShiftScale                      MasterOnly, Identical
+SANSLoad                               MasterOnly, Identical   child algorithms may actually be run with ``ExecutionMode::Distributed`` if that is their default
+SANSMaskWorkspace                      all
+SANSMove                               all
+SANSNormalizeToMonitor                 MasterOnly, Identical
+SANSReductionCore                      all
+SANSScale                              all
+SANSSingleReduction                    all
+SANSSliceEvent                         all
+SANSStitch                             MasterOnly, Identical
+SaveNexus                              MasterOnly
+SaveNexusProcessed                     MasterOnly
+Scale                                  all
+SignalOverError                        all                     see ``UnaryOperation``
+SortEvents                             all
+SumSpectra                             MasterOnly, Identical
+UnaryOperation                         all
+WeightedMean                           all                     see ``BinaryOperation``
+====================================== ======================= ========
+
+Currently none of the above algorithms works with ``StorageMode::Distributed`` in case there are zero spectra on any rank.
 
 .. rubric:: Footnotes
 

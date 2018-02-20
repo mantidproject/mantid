@@ -138,6 +138,10 @@ void LoadMcStas::exec() {
         .closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
     nxFile.closeGroup();
 
+    for (auto ws : m_scaterringWS) {
+      outputGroup->addWorkspace(ws);
+    }
+
     setProperty("OutputWorkspace", outputGroup);
   }
 } // LoadMcStas::exec()
@@ -172,16 +176,22 @@ void LoadMcStas::readEventData(
   const double progressFractionInitial = 0.1;
   Progress progInitial(this, 0.0, progressFractionInitial, reports);
 
+  std::string instrumentXML;
+  progInitial.report("Loading instrument");
   try {
     nxFile.openGroup("instrument", "NXinstrument");
-    std::string instrumentXML;
     nxFile.openGroup("instrument_xml", "NXnote");
     nxFile.readData("data", instrumentXML);
     nxFile.closeGroup();
     nxFile.closeGroup();
+  } catch (...) {
+    g_log.warning()
+        << "\nCould not find the instrument description in the Nexus file:"
+        << filename << " Ignore eventdata from the Nexus file\n";
+    return;
+  }
 
-    progInitial.report("Loading instrument");
-
+  try {
     std::string instrumentName = "McStas";
     Geometry::InstrumentDefinitionParser parser(filename, instrumentName,
                                                 instrumentXML);
@@ -198,11 +208,16 @@ void LoadMcStas::readEventData(
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
-  } catch (...) {
-    // Loader should not stop if there is no IDF.xml
+  } catch (Exception::InstrumentDefinitionError &e) {
     g_log.warning()
-        << "\nCould not find the instrument description in the Nexus file:"
-        << filename << " Ignore evntdata from data file\n";
+        << "When trying to read the instrument description in the Nexus file: "
+        << filename << " the following error is reported: " << e.what()
+        << " Ignore eventdata from the Nexus file\n";
+    return;
+  } catch (...) {
+    g_log.warning()
+        << "Could not parse instrument description in the Nexus file: "
+        << filename << " Ignore eventdata from the Nexus file\n";
     return;
   }
   // Finished reading Instrument. Then open new data folder again
@@ -237,10 +252,23 @@ void LoadMcStas::readEventData(
   double longestTOF(0.0);
 
   const size_t numEventEntries = eventEntries.size();
+  std::string nameOfGroupWS = getProperty("OutputWorkspace");
+  const auto eventDataTotalName = std::string("EventData_") + nameOfGroupWS;
+  std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {
+      {eventWS, eventDataTotalName}};
+  if (numEventEntries > 1) {
+    for (size_t i = 1; i <= numEventEntries; i++) {
+      allEventWS.push_back({eventWS->clone(), "partial_event_data_worksapce"});
+    }
+  }
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
+  auto eventWSIndex = 1; // Starts at the first non-sum workspace
   for (const auto &eventEntry : eventEntries) {
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
+
+    allEventWS[eventWSIndex].second =
+        dataName + std::string("_") + nameOfGroupWS;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -315,7 +343,7 @@ void LoadMcStas::readEventData(
 
       // populate workspace with McStas events
       const detid2index_map detIDtoWSindex_map =
-          eventWS->getDetectorIDToWorkspaceIndexMap(true);
+          allEventWS[0].first->getDetectorIDToWorkspaceIndexMap(true);
 
       progEntries.report("read event data into workspace");
       for (int64_t in = 0; in < nNeutronsForthisBlock; in++) {
@@ -344,15 +372,22 @@ void LoadMcStas::readEventData(
         // Originally this was coded so the error squared is 1 it should be
         // data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
         // introduced flag to allow old usage
+        auto weightedEvent = WeightedEvent();
         if (errorBarsSetTo1) {
-          eventWS->getSpectrum(workspaceIndex) += WeightedEvent(
-              detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
+          weightedEvent = WeightedEvent(detector_time, pulse_time,
+                                        data[numberOfDataColumn * in], 1.0);
         } else {
-          eventWS->getSpectrum(workspaceIndex) += WeightedEvent(
+          weightedEvent = WeightedEvent(
               detector_time, pulse_time, data[numberOfDataColumn * in],
               data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
         }
+        allEventWS[0].first->getSpectrum(workspaceIndex) += weightedEvent;
+        if (numEventEntries > 1) {
+          allEventWS[eventWSIndex].first->getSpectrum(workspaceIndex) +=
+              weightedEvent;
+        }
       }
+      eventWSIndex++;
     } // end reading over number of blocks of an event dataset
 
     // nxFile.getData(data);
@@ -365,22 +400,27 @@ void LoadMcStas::readEventData(
   // 2 bins is the standard. However for McStas simulation data it may make
   // sense to
   // increase this number for better initial visual effect
+
   auto axis = HistogramData::BinEdges{shortestTOF - 1, longestTOF + 1};
-  eventWS->setAllX(axis);
 
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
-  std::string nameOfGroupWS = getProperty("OutputWorkspace");
-  std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
-  std::string extraProperty =
-      "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-      extraProperty, nameUserSee, Direction::Output));
-  setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
-  m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
-                              // unique
-
-  outputGroup->addWorkspace(eventWS);
+  for (size_t i = 0; i < allEventWS.size(); i++) {
+    auto ws = allEventWS[i].first;
+    ws->setAllX(axis);
+    std::string extraProperty =
+        "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
+    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        extraProperty, allEventWS[i].second, Direction::Output));
+    setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
+    m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
+                                // unique
+  }
+  outputGroup->addWorkspace(allEventWS[0].first);
+  allEventWS.erase(allEventWS.begin());
+  for (auto ws : allEventWS) {
+    m_scaterringWS.push_back(ws.first);
+  }
 }
 
 /**

@@ -5,13 +5,19 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "DllOption.h"
 
+#include <QComboBox>
+#include <QPoint>
+#include <QString>
+#include <QTreeWidget>
+
 #include <vector>
 #include <Poco/NObserver.h>
 
-#include <QtGui>
 //------------------------------------------------------------------------------
 // Forward declaration
 //------------------------------------------------------------------------------
+class QPushButton;
+
 namespace Mantid {
 namespace API {
 struct Algorithm_descriptor;
@@ -130,7 +136,7 @@ protected:
   void keyPressEvent(QKeyEvent *e) override;
 
 private:
-  typedef std::vector<Mantid::API::Algorithm_descriptor> AlgNamesType;
+  typedef std::vector<Mantid::API::AlgorithmDescriptor> AlgNamesType;
   void addAliases(AlgNamesType &algNamesList);
   QString stripAlias(const QString &text) const;
 };

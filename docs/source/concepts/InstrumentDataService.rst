@@ -36,7 +36,7 @@ workspace.
 
     ws = CreateSampleWorkspace("Event",NumBanks=1,BankPixelWidth=1)
     inst = ws.getInstrument()
-    print inst.getSource().getPos()
+    print(inst.getSource().getPos())
 
 Output:
 

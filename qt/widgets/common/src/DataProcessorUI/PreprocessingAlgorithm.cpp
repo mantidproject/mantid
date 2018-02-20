@@ -10,10 +10,10 @@ namespace DataProcessor {
  * @param blacklist : The list of properties we don't want to show
  * algorithm in the processed workspace's name
  */
-PreprocessingAlgorithm::PreprocessingAlgorithm(
-    const QString &name, const QString &prefix,
-    const std::set<QString> &blacklist)
-    : ProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
+PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
+                                               std::set<QString> blacklist)
+    : ProcessingAlgorithmBase(std::move(name), std::move(blacklist)),
+      m_prefix(std::move(prefix)) {
 
   auto inputWsProperties = getInputWsProperties();
 
@@ -42,10 +42,10 @@ PreprocessingAlgorithm::PreprocessingAlgorithm(
 * @param blacklist : The list of properties we don't want to show, as a string
 * algorithm in the processed workspace's name
 */
-PreprocessingAlgorithm::PreprocessingAlgorithm(const QString &name,
-                                               const QString &prefix,
+PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
                                                const QString &blacklist)
-    : PreprocessingAlgorithm(name, prefix, convertStringToSet(blacklist)) {}
+    : PreprocessingAlgorithm(std::move(name), std::move(prefix),
+                             convertStringToSet(blacklist)) {}
 
 /** Default constructor: do nothing
 */

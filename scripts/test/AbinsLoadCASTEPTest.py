@@ -1,20 +1,20 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
-from mantid.simpleapi import logger
+import mantid  # has to be imported so that AbinsModules can be found
 import AbinsModules
 
 
-class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
+class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
 
     # simple tests
     def test_non_existing_file(self):
         with self.assertRaises(IOError):
-            bad_castep_reader = AbinsModules.LoadCASTEP(input_dft_filename="NonExistingFile.txt")
-            bad_castep_reader.read_phonon_file()
+            bad_castep_reader = AbinsModules.LoadCASTEP(input_ab_initio_filename="NonExistingFile.txt")
+            bad_castep_reader.read_vibrational_or_phonon_data()
 
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            poor_castep_reader = AbinsModules.LoadCASTEP(input_dft_filename=1)
+            poor_castep_reader = AbinsModules.LoadCASTEP(input_ab_initio_filename=1)
 
     def tearDown(self):
         AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadCASTEP"])
@@ -53,6 +53,16 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
 
     def test_no_sum_correction_single_crystal(self):
         self.check(name=self._many_k_no_sum, loader=AbinsModules.LoadCASTEP)
+
+    # ===================================================================================
+    # |   Use case: system with isotope Li7 and D                                       |
+    # ===================================================================================
+    #
+    _li7_d2 = "LiOH_H2O_7Li_2D2O_LoadCASTEP"
+
+    def test_isotopes(self):
+        self.check(name=self._li7_d2, loader=AbinsModules.LoadCASTEP)
+
 
 if __name__ == '__main__':
     unittest.main()

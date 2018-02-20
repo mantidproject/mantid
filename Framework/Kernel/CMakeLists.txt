@@ -13,8 +13,10 @@ set ( SRC_FILES
 	src/CompositeValidator.cpp
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
+	src/ConfigObserver.cpp
+	src/ConfigPropertyObserver.cpp
 	src/DateAndTime.cpp
-    	src/DataItem.cpp
+	src/DataItem.cpp
 	src/DateAndTimeHelpers.cpp
 	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
@@ -129,14 +131,14 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
-        src/NeutronAtom.cpp
-        src/FacilityInfo.cpp
-        src/FilterChannel.cpp
-        src/FileValidator.cpp
-        src/DirectoryValidator.cpp
-        src/PropertyManager.cpp
-        src/Unit.cpp
-        src/System.cpp
+	src/NeutronAtom.cpp
+	src/FacilityInfo.cpp
+	src/FilterChannel.cpp
+	src/FileValidator.cpp
+	src/DirectoryValidator.cpp
+	src/PropertyManager.cpp
+	src/Unit.cpp
+	src/System.cpp
 )
 
 set ( INC_FILES
@@ -162,7 +164,9 @@ set ( INC_FILES
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
-    	inc/MantidKernel/DateAndTime.h
+	inc/MantidKernel/ConfigObserver.h
+	inc/MantidKernel/ConfigPropertyObserver.h
+  inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTimeHelpers.h
@@ -286,7 +290,7 @@ set ( INC_FILES
 	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSchedulerMutexes.h
-    inc/MantidKernel/TimeSeriesProperty.h
+	inc/MantidKernel/TimeSeriesProperty.h
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/Timer.h
 	inc/MantidKernel/Tolerance.h
@@ -334,9 +338,11 @@ set ( TEST_FILES
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
+	ConfigObserverTest.h
+	ConfigPropertyObserverTest.h
 	CowPtrTest.h
 	DataServiceTest.h
-   	DateAndTimeHelpersTest.h
+	DateAndTimeHelpersTest.h
 	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
@@ -344,6 +350,7 @@ set ( TEST_FILES
 	DirectoryValidatorTest.h
 	DiskBufferISaveableTest.h
 	DiskBufferTest.h
+	DllOpenTest.h
 	DynamicFactoryTest.h
 	EigenConversionHelpersTest.h
 	EnabledWhenPropertyTest.h
@@ -478,7 +485,8 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
 
-target_include_directories ( Kernel SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIR} PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+target_include_directories ( Kernel SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIR}
+  PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
@@ -492,7 +500,7 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES})
+target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} Eigen3::Eigen LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES})
 
 if (WITH_ASAN)
   target_link_libraries ( Kernel LINK_PRIVATE -lasan )
@@ -559,20 +567,21 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
   set ( MANTID_ROOT ${CMAKE_SOURCE_DIR}/.. )
 endif ()
 
-set ( PLUGINS "." )
+set ( FRAMEWORK_PLUGINS_DIR "." )
+set ( QT_PLUGINS_DIR "." )
+# %V will be replaced with the major version of Qt at runtime
 if ( MAKE_VATES )
-  set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
+  set ( PV_PLUGINS_DIR "./plugins/paraview/qt%V" )
   if ( MSVC )
     set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
   else()
     set ( PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
   endif()
 else ()
-  set ( PV_PLUGINS "" )
+  set ( PV_PLUGINS_DIR "" )
   set ( PARAVIEW_PYTHON_PATHS "")
 endif ()
 set ( IGNORE_PARAVIEW "0" )
-set ( QTPLUGINS "." )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )
 set ( CHECK_FOR_NEW_MANTID_VERSION "0" )
 set ( ENABLE_USAGE_REPORTS "0" )
@@ -617,7 +626,7 @@ endforeach()
 # These settings carry down to the installation configuration below
 if ( MPI_BUILD )
   set ( CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
-  set ( PV_PLUGINS "" )
+  set ( PV_PLUGINS_DIR "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
   option ( ENABLE_FILE_LOGGING "Enable logging to file for development builds. It is always enabled for packages" ON )
@@ -666,12 +675,15 @@ else ()
 endif ()
 
 # Log to file for installed packages but not mpi
-if ( NOT MPI_BUILD )
+if ( MPI_BUILD OR MPI_EXPERIMENTAL )
+  set ( FILELOGGER_CHANNEL "" )
+  set ( ENABLE_NETWORK_ACCESS 0 )
+else ()
   set ( FILELOGGER_CHANNEL fileFilterChannel )
+  set ( ENABLE_NETWORK_ACCESS 1 )
 endif ()
-set ( ENABLE_WEB_UPDATES 1 )
-set ( PLUGINS ${MANTID_ROOT}/plugins )
-set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
+set ( FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins )
+set ( PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python" )
 if(MAKE_VATES)
   if (APPLE)
     set ( PARAVIEW_PYTHON_PATHS "../Libraries;../Python;../Python/vtk")
@@ -685,9 +697,9 @@ if(MAKE_VATES)
 else ()
     set ( PARAVIEW_PYTHON_PATHS "")
 endif()
-set ( UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_WEB_UPDATES}" )
-set ( CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_WEB_UPDATES}" )
-set ( ENABLE_USAGE_REPORTS "1" )
+set ( UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_NETWORK_ACCESS}" )
+set ( CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}" )
+set ( ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}" )
 set ( DATADIRS "" )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository" )
 set ( HTML_ROOT ../share/doc/html )
@@ -722,14 +734,14 @@ set ( PYTHONSCRIPT_DIRS "${WITH_SEMICOLONS}" )
 # For a framework-only (e.g. MPI) build some of these are not relevant and should
 # be left empty to avoid warnings on starting Mantid
 if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
-  set ( QTPLUGINS "" )
+  set ( QT_PLUGINS_DIR "" )
   set ( COLORMAPS_FOLDER "" )
-  set ( PV_PLUGINS "" )
+  set ( PV_PLUGINS_DIR "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  set ( QTPLUGINS ${MANTID_ROOT}/plugins/qtplugins/mantid )
+  set ( QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V" )
+  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt%V" )
   set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
-  set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
 endif ()
 
 set ( CONSOLECHANNELCLASS "StdoutChannel" )

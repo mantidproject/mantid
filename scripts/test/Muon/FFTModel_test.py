@@ -1,6 +1,6 @@
 import sys
 
-from  Muon import FFT_model
+from  Muon import fft_model
 
 import unittest
 
@@ -12,15 +12,15 @@ else:
 
 class FFTModelTest(unittest.TestCase):
     def setUp(self):
-        self.model=mock.create_autospec(FFT_model.FFTModel,spec_set=True)
+        self.model=mock.create_autospec(fft_model.FFTModel,spec_set=True)
         self.model.setRun=mock.Mock()
         self.model.preAlg=mock.Mock()
         self.model.FFTAlg=mock.Mock()
         self.model.makePhaseQuadTable=mock.Mock()
-        self.model.PhaseQuad=mock.Mock()       
+        self.model.PhaseQuad=mock.Mock()
 
         #set presenter
-        self.wrapper=FFT_model.FFTWrapper(self.model)
+        self.wrapper=fft_model.FFTWrapper(self.model)
 
     def test_execute(self):
         empty = {}

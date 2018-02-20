@@ -28,8 +28,8 @@ Strongest peak mode:
   :math:`\phi`, :math:`2\theta`, and :math:`t` of two found peaks.  If the
   absolute difference between any of the parameters for two peaks is greater
   than the product of the tolerance value and the parameter value then the two
-  peaks are classed as not the same. i.e. if :math:`|\phi_1 - \phi_2| >
-  tolerance * \phi_1` then peaks 1 & 2 are not the same (as well as similar
+  peaks are classed as not the same. i.e. if :math:`|\phi_1 - \phi_2| > tolerance * \phi_1` 
+  then peaks 1 & 2 are not the same (as well as similar
   definitions for :math:`2\theta` and :math:`t`).
 
 
@@ -51,8 +51,8 @@ All peaks mode:
   difference between the parameters :math:`\phi`, :math:`2\theta`, and
   :math:`t` of two found peaks.  If the absolute difference between any of the
   parameters for two peaks is greater than the absolute tolerance then the two
-  peaks are classed as not the same. i.e. if :math:`|\phi_1 - \phi_2| >
-  PhiTolerance then peaks 1 & 2 are not the same (as well as similar
+  peaks are classed as not the same. i.e. if :math:`|\phi_1 - \phi_2| >  PhiTolerance` 
+  then peaks 1 & 2 are not the same (as well as similar
   definitions for :math:`2\theta` and :math:`t`).
 
 

@@ -215,12 +215,12 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-  // paraview version or zero
-  if (ConfigService::Instance().pvPluginsAvailable()) {
-    message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
-  } else {
-    message["ParaView"] = 0;
-  }
+#if defined(MAKE_VATES)
+  // paraview
+  message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
+#else
+  message["ParaView"] = 0;
+#endif
 
   // mantid version and sha1
   message["mantidVersion"] = MantidVersion::version();

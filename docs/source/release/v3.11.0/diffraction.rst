@@ -21,6 +21,13 @@ Powder Diffraction
 Single Crystal Diffraction
 --------------------------
 
+.. figure:: ../../images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg.png
+   :class: screenshot
+   :width: 385px
+   :align: center
+
+   SingleCrystalDiffuseReduction output from CORELLI data.
+
 - New algorithm :ref:`SingleCrystalDiffuseReduction <algm-SingleCrystalDiffuseReduction>` which performs the most common reductions done on Corelli (and elsewhere) for single crystal diffuse scattering.
 - New algorithm :ref:`ConvertMultipleRunsToSingleCrystalMD <algm-ConvertMultipleRunsToSingleCrystalMD>` which loads, converts to single crystal MDWorkspace and combines a series of runs.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to only add peaks to runs that contributed to that peak. This is a lot faster when multiple runs are in the same MDworkspace.
@@ -30,6 +37,11 @@ Single Crystal Diffraction
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has CalibrateSnapPanels option to calibrate 3X3 banks of SNAP instrument for single crystal data.
 - :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>` has not correctly aligned the detectors for SNAP since release 3.9. This bug that only impacted SNAP has been fixed.
 
+Engineering Diffraction
+-----------------------
+
+- The ISIS engineering diffraction interface has temporarily been disabled due to an issue with file search freezing Mantid when opening the interface.
+
 Imaging
 -------
 
@@ -38,4 +50,3 @@ Imaging
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.11%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 changes on GitHub.
-

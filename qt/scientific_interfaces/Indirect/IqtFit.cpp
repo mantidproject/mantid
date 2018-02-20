@@ -1,11 +1,10 @@
 #include "IqtFit.h"
 
 #include "../General/UserInputValidator.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -24,29 +23,23 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IqtFit::IqtFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
-      m_iqtFTree(nullptr), m_iqtFRangeManager(nullptr), m_fixedProps(),
-      m_ties(), m_runMin(-1), m_runMax(-1) {
+IqtFit::IqtFit(QWidget *parent) : IndirectFitAnalysisTab(parent), m_ties() {
   m_uiForm.setupUi(parent);
+  m_iqtFTree = m_propertyTree;
 }
 
 void IqtFit::setup() {
-  m_runMin = 0;
-  m_runMax = 0;
-
-  m_stringManager = new QtStringPropertyManager(m_parentWidget);
-
-  m_iqtFTree = new QtTreePropertyBrowser(m_parentWidget);
+  setMinimumSpectrum(0);
+  setMaximumSpectrum(0);
   m_uiForm.properties->addWidget(m_iqtFTree);
 
-  auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtFitRange");
+  auto fitRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("IqtFitRange");
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
           SLOT(xMinSelected(double)));
   connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this,
           SLOT(xMaxSelected(double)));
 
-  auto backgroundRangeSelector = m_uiForm.ppPlot->addRangeSelector(
+  auto backgroundRangeSelector = m_uiForm.ppPlotTop->addRangeSelector(
       "IqtFitBackground", MantidWidgets::RangeSelector::YSINGLE);
   backgroundRangeSelector->setRange(0.0, 1.0);
   backgroundRangeSelector->setColour(Qt::darkGreen);
@@ -54,19 +47,24 @@ void IqtFit::setup() {
           SLOT(backgroundSelected(double)));
 
   // setupTreePropertyBrowser
-  m_iqtFRangeManager = new QtDoublePropertyManager(m_parentWidget);
+  m_dblManager = new QtDoublePropertyManager(m_parentWidget);
 
   m_iqtFTree->setFactoryForManager(m_blnManager, m_blnEdFac);
   m_iqtFTree->setFactoryForManager(m_dblManager, m_dblEdFac);
-  m_iqtFTree->setFactoryForManager(m_iqtFRangeManager, m_dblEdFac);
 
-  m_properties["StartX"] = m_iqtFRangeManager->addProperty("StartX");
-  m_iqtFRangeManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
-  m_properties["EndX"] = m_iqtFRangeManager->addProperty("EndX");
+  m_properties["FitRange"] = m_grpManager->addProperty("Fitting Range");
+  m_properties["StartX"] = m_dblManager->addProperty("StartX");
+  m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
+  m_properties["EndX"] = m_dblManager->addProperty("EndX");
   m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
+  m_properties["FitRange"]->addSubProperty(m_properties["StartX"]);
+  m_properties["FitRange"]->addSubProperty(m_properties["EndX"]);
+  m_iqtFTree->addProperty(m_properties["FitRange"]);
+
   m_properties["MaxIterations"] = m_dblManager->addProperty("Max Iterations");
   m_dblManager->setDecimals(m_properties["MaxIterations"], 0);
   m_dblManager->setValue(m_properties["MaxIterations"], 500);
+  m_iqtFTree->addProperty(m_properties["MaxIterations"]);
 
   // FABADA
   m_properties["FABADA"] = m_grpManager->addProperty("Bayesian");
@@ -84,25 +82,22 @@ void IqtFit::setup() {
   m_dblManager->setValue(m_properties["FABADAJumpAcceptanceRate"], 0.25);
   m_iqtFTree->addProperty(m_properties["FABADA"]);
 
-  connect(m_iqtFRangeManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(propertyChanged(QtProperty *, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(propertyChanged(QtProperty *, double)));
 
-  m_properties["LinearBackground"] =
-      m_grpManager->addProperty("LinearBackground");
-  m_properties["BackgroundA0"] = m_dblManager->addProperty("A0");
-  m_dblManager->setDecimals(m_properties["BackgroundA0"], NUM_DECIMALS);
-  m_properties["LinearBackground"]->addSubProperty(
-      m_properties["BackgroundA0"]);
+  m_properties["Background"] = createFunctionProperty("Background");
+  m_properties["Background"]->removeSubProperty(m_properties["Background.A1"]);
+  m_iqtFTree->addProperty(m_properties["Background"]);
 
-  m_properties["Exponential1"] = createExponential("Exponential1");
-  m_properties["Exponential2"] = createExponential("Exponential2");
+  m_properties["Exponential1"] = createFunctionProperty("Exponential1");
+  m_properties["Exponential2"] = createFunctionProperty("Exponential2");
 
-  m_properties["StretchedExp"] = createStretchedExp("StretchedExp");
+  m_properties["StretchedExp"] = createFunctionProperty("StretchedExp");
 
-  m_dblManager->setMinimum(m_properties["BackgroundA0"], 0);
-  m_dblManager->setMaximum(m_properties["BackgroundA0"], 1);
+  m_dblManager->setMinimum(m_properties["Background.A0"], 0);
+  m_dblManager->setMaximum(m_properties["Background.A0"], 1);
 
   m_dblManager->setMinimum(m_properties["Exponential1.Intensity"], 0);
   m_dblManager->setMaximum(m_properties["Exponential1.Intensity"], 1);
@@ -115,9 +110,8 @@ void IqtFit::setup() {
 
   typeSelection(m_uiForm.cbFitType->currentIndex());
 
-  // Update guess curve on property change
-  connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(updateGuessPlot(QtProperty *)));
+  m_uiForm.ckPlotGuess->setChecked(false);
+  enablePlotGuess();
 
   // Signal/slot ui connections
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
@@ -126,22 +120,21 @@ void IqtFit::setup() {
           SLOT(typeSelection(int)));
   connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(filesFound()), this,
-          SLOT(updatePlot()));
+  // Update plot when fit type changes
+  connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updatePreviewPlots()));
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(updatePlot()));
+          SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
+          SLOT(updatePreviewPlots()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
-  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
 
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
   connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
-  connect(m_uiForm.ckPlotGuess, SIGNAL(toggled(bool)), this,
-          SLOT(updateGuessPlot()));
   connect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
           SLOT(updateCurrentPlotOption(QString)));
 
@@ -155,7 +148,7 @@ void IqtFit::setup() {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(IndirectDataAnalysisTab::plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 }
 
 void IqtFit::run() {
@@ -167,16 +160,13 @@ void IqtFit::run() {
     showMessageBox(msg);
   }
 
-  m_runMin = boost::numeric_cast<size_t>(m_uiForm.spSpectraMin->value());
-  m_runMax = boost::numeric_cast<size_t>(m_uiForm.spSpectraMax->value());
+  setMinimumSpectrum(m_uiForm.spSpectraMin->value());
+  setMaximumSpectrum(m_uiForm.spSpectraMax->value());
 
-  updateFitFunctions();
-  IAlgorithm_sptr iqtFitAlg = iqtFitAlgorithm(inputWs, m_runMin, m_runMax);
-
-  m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
+  setFitFunctions(indexToFitFunctions(selectedSpectrum()));
+  auto iqtFitAlg =
+      iqtFitAlgorithm(inputWs, minimumSpectrum(), maximumSpectrum());
+  runFitAlgorithm(iqtFitAlg);
 }
 
 Mantid::API::IAlgorithm_sptr
@@ -241,57 +231,15 @@ IqtFit::iqtFitAlgorithm(MatrixWorkspace_sptr inputWs, const size_t &specMin,
  * Plot workspace based on user input
  */
 void IqtFit::plotWorkspace() {
-  auto resultWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      m_baseName + "_Result");
-  if (!(m_plotOption.compare("None") == 0)) {
-    if (m_plotOption.compare("All") == 0) {
-      int specEnd = (int)resultWs->getNumberHistograms();
-      for (int i = 0; i < specEnd; i++) {
-        IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
-                                  i, i);
-      }
-    } else {
-      int specNumber = m_uiForm.cbPlotType->currentIndex();
-      IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
-                                specNumber, specNumber);
-    }
-  }
+  IndirectFitAnalysisTab::plotResult(m_baseName + "_Result",
+                                     QString::fromStdString(m_plotOption));
 }
 
 /**
  * Save the result of the algorithm
  */
 void IqtFit::saveResult() {
-  const auto workingdirectory =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "defaultsave.directory");
-  const auto filepath = workingdirectory + m_baseName + "_Result.nxs";
-  addSaveWorkspaceToQueue(QString::fromStdString(m_baseName + "_Result"),
-                          QString::fromStdString(filepath));
-  m_batchAlgoRunner->executeBatchAsync();
-}
-
-/**
- * Plots the current spectrum displayed in the preview plot
- */
-void IqtFit::plotCurrentPreview() {
-  auto inputWs = inputWorkspace();
-  auto previewWs = previewPlotWorkspace();
-
-  if (!inputWs || !previewWs) {
-    return;
-  }
-
-  if (inputWs->getName().compare(previewWs->getName()) == 0) {
-    // Plot only the sample curve
-    const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
-    IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
-                              workspaceIndex, workspaceIndex);
-  } else {
-    // Plot Sample, Fit and Diff curve
-    IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
-                              2);
-  }
+  IndirectFitAnalysisTab::saveResult(m_baseName + "_Result");
 }
 
 /**
@@ -300,8 +248,6 @@ void IqtFit::plotCurrentPreview() {
  * @param outputWsName The name of the output workspace
  */
 void IqtFit::algorithmComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
 
   if (error) {
     QString msg =
@@ -311,13 +257,7 @@ void IqtFit::algorithmComplete(bool error) {
     return;
   }
 
-  m_parameterToProperty = createParameterToPropertyMap(m_fitFunctions);
-  m_parameterValues = IndirectTab::extractParametersFromTable(
-      m_baseName + "_Parameters", m_parameterToProperty.keys().toSet(),
-      m_runMin, m_runMax);
-  updateProperties(m_uiForm.spPlotSpectrum->value());
-
-  updatePlot();
+  IndirectFitAnalysisTab::fitAlgorithmComplete(m_baseName + "_Parameters");
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
   m_uiForm.cbPlotType->setEnabled(true);
@@ -361,8 +301,8 @@ bool IqtFit::validate() {
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
 
-  auto range = std::make_pair(m_iqtFRangeManager->value(m_properties["StartX"]),
-                              m_iqtFRangeManager->value(m_properties["EndX"]));
+  auto range = std::make_pair(m_dblManager->value(m_properties["StartX"]),
+                              m_dblManager->value(m_properties["EndX"]));
   uiv.checkValidRange("Ranges", range);
 
   QString error = uiv.generateErrorMessage();
@@ -383,12 +323,11 @@ void IqtFit::loadSettings(const QSettings &settings) {
  * @param wsName Name of new workspace loaded
  */
 void IqtFit::newDataLoaded(const QString wsName) {
-  auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsName.toStdString());
-  setInputWorkspace(inputWs);
-  setPreviewPlotWorkspace(inputWs);
+  m_baseName.clear();
+  IndirectFitAnalysisTab::newInputDataLoaded(wsName);
 
-  int maxWsIndex = static_cast<int>(inputWs->getNumberHistograms()) - 1;
+  int maxWsIndex =
+      static_cast<int>(inputWorkspace()->getNumberHistograms()) - 1;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
@@ -401,116 +340,25 @@ void IqtFit::newDataLoaded(const QString wsName) {
   m_uiForm.spSpectraMax->setMinimum(0);
   m_uiForm.spSpectraMax->setValue(maxWsIndex);
 
-  m_dblManager->setValue(m_properties["BackgroundA0"], 1.0);
-
-  setDefaultParameters("Exponential1");
-  setDefaultParameters("Exponential2");
-  setDefaultParameters("StretchedExp");
-
-  updatePlot();
+  setDefaultParameters();
 }
 
 CompositeFunction_sptr IqtFit::createFunction(bool tie) {
   CompositeFunction_sptr result(new CompositeFunction);
-  QString fname;
   const int fitType = m_uiForm.cbFitType->currentIndex();
+  const auto functionNames = indexToFitFunctions(fitType);
 
-  IFunction_sptr func =
-      FunctionFactory::Instance().createFunction("LinearBackground");
-  func->setParameter("A0", m_dblManager->value(m_properties["BackgroundA0"]));
-  result->addFunction(func);
-  result->tie("f0.A1", "0");
-  if (tie) {
-    result->tie("f0.A0",
-                m_properties["BackgroundA0"]->valueText().toStdString());
-  }
-
-  if (fitType == 2) {
-    fname = "StretchedExp";
-  } else {
-    fname = "Exponential1";
-  }
-
-  result->addFunction(createExponentialFunction(fname, tie));
-
-  if (fitType == 1 || fitType == 3) {
-    if (fitType == 1) {
-      fname = "Exponential2";
-    } else {
-      fname = "StretchedExp";
-    }
-    result->addFunction(createExponentialFunction(fname, tie));
+  for (int i = 0; i < functionNames.size(); ++i) {
+    const auto &functionName = functionNames[i];
+    IFunction_sptr func1 = getFunction(functionName);
+    result->addFunction(func1);
+    const std::string prefix = "f" + std::to_string(i) + ".";
+    populateFunction(func1, result, m_properties[functionName], tie, prefix);
   }
 
   // Return CompositeFunction object to caller.
   result->applyTies();
   return result;
-}
-
-IFunction_sptr IqtFit::createExponentialFunction(const QString &name,
-                                                 bool tie) {
-  IFunction_sptr result;
-  if (name.startsWith("Exp")) {
-    IFunction_sptr result =
-        FunctionFactory::Instance().createFunction("ExpDecay");
-    result->setParameter(
-        "Height", m_dblManager->value(m_properties[name + ".Intensity"]));
-    result->setParameter("Lifetime",
-                         m_dblManager->value(m_properties[name + ".Tau"]));
-    if (tie) {
-      result->tie("Height",
-                  m_properties[name + ".Intensity"]->valueText().toStdString());
-      result->tie("Lifetime",
-                  m_properties[name + ".Tau"]->valueText().toStdString());
-    }
-    result->applyTies();
-    return result;
-  } else {
-    IFunction_sptr result =
-        FunctionFactory::Instance().createFunction("StretchExp");
-    result->setParameter(
-        "Height", m_dblManager->value(m_properties[name + ".Intensity"]));
-    result->setParameter("Lifetime",
-                         m_dblManager->value(m_properties[name + ".Tau"]));
-    result->setParameter("Stretching",
-                         m_dblManager->value(m_properties[name + ".Beta"]));
-    if (tie) {
-      result->tie("Height",
-                  m_properties[name + ".Intensity"]->valueText().toStdString());
-      result->tie("Lifetime",
-                  m_properties[name + ".Tau"]->valueText().toStdString());
-      result->tie("Stretching",
-                  m_properties[name + ".Beta"]->valueText().toStdString());
-    }
-    result->applyTies();
-    return result;
-  }
-}
-
-QtProperty *IqtFit::createExponential(const QString &name) {
-  QtProperty *expGroup = m_grpManager->addProperty(name);
-  m_properties[name + ".Intensity"] = m_dblManager->addProperty("Intensity");
-  m_dblManager->setDecimals(m_properties[name + ".Intensity"], NUM_DECIMALS);
-  m_properties[name + ".Tau"] = m_dblManager->addProperty("Tau");
-  m_dblManager->setDecimals(m_properties[name + ".Tau"], NUM_DECIMALS);
-  expGroup->addSubProperty(m_properties[name + ".Intensity"]);
-  expGroup->addSubProperty(m_properties[name + ".Tau"]);
-  return expGroup;
-}
-
-QtProperty *IqtFit::createStretchedExp(const QString &name) {
-  QtProperty *prop = m_grpManager->addProperty(name);
-  m_properties[name + ".Intensity"] = m_dblManager->addProperty("Intensity");
-  m_properties[name + ".Tau"] = m_dblManager->addProperty("Tau");
-  m_properties[name + ".Beta"] = m_dblManager->addProperty("Beta");
-  m_dblManager->setRange(m_properties[name + ".Beta"], 0, 1);
-  m_dblManager->setDecimals(m_properties[name + ".Intensity"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties[name + ".Tau"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties[name + ".Beta"], NUM_DECIMALS);
-  prop->addSubProperty(m_properties[name + ".Intensity"]);
-  prop->addSubProperty(m_properties[name + ".Tau"]);
-  prop->addSubProperty(m_properties[name + ".Beta"]);
-  return prop;
 }
 
 QString IqtFit::fitTypeString() const {
@@ -531,13 +379,7 @@ QString IqtFit::fitTypeString() const {
 void IqtFit::typeSelection(int index) {
   disconnect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
              SLOT(updateCurrentPlotOption(QString)));
-  m_iqtFTree->clear();
-
-  m_iqtFTree->addProperty(m_properties["StartX"]);
-  m_iqtFTree->addProperty(m_properties["EndX"]);
-  m_iqtFTree->addProperty(m_properties["MaxIterations"]);
-  m_iqtFTree->addProperty(m_properties["LinearBackground"]);
-  m_iqtFTree->addProperty(m_properties["FABADA"]);
+  fillPlotTypeComboBox(m_uiForm.cbPlotType);
 
   // option should only be available with a single stretched exponential
   m_uiForm.ckConstrainBeta->setEnabled((index == 2));
@@ -545,47 +387,6 @@ void IqtFit::typeSelection(int index) {
     m_uiForm.ckConstrainBeta->setChecked(false);
   }
 
-  switch (index) {
-  case 0:
-    m_iqtFTree->addProperty(m_properties["Exponential1"]);
-
-    // remove option to plot beta and add all
-    m_uiForm.cbPlotType->removeItem(4);
-    m_uiForm.cbPlotType->removeItem(3);
-    m_uiForm.cbPlotType->addItem("All");
-    break;
-  case 1:
-    m_iqtFTree->addProperty(m_properties["Exponential1"]);
-    m_iqtFTree->addProperty(m_properties["Exponential2"]);
-
-    // remove option to plot beta and add all
-    m_uiForm.cbPlotType->removeItem(4);
-    m_uiForm.cbPlotType->removeItem(3);
-
-    m_uiForm.cbPlotType->addItem("All");
-    break;
-  case 2:
-    m_iqtFTree->addProperty(m_properties["StretchedExp"]);
-
-    // add option to plot beta and all
-    m_uiForm.cbPlotType->removeItem(4);
-    m_uiForm.cbPlotType->removeItem(3);
-    m_uiForm.cbPlotType->addItem("Beta");
-    m_uiForm.cbPlotType->addItem("All");
-
-    break;
-  case 3:
-    m_iqtFTree->addProperty(m_properties["Exponential1"]);
-    m_iqtFTree->addProperty(m_properties["StretchedExp"]);
-
-    // add option to plot beta and all
-    m_uiForm.cbPlotType->removeItem(4);
-    m_uiForm.cbPlotType->removeItem(3);
-    m_uiForm.cbPlotType->addItem("Beta");
-    m_uiForm.cbPlotType->addItem("All");
-
-    break;
-  }
   const auto optionIndex =
       m_uiForm.cbPlotType->findText(QString::fromStdString(m_plotOption));
   if (optionIndex != -1) {
@@ -594,9 +395,8 @@ void IqtFit::typeSelection(int index) {
     m_uiForm.cbPlotType->setCurrentIndex(0);
   }
 
-  updateGuessPlot();
-  m_uiForm.ppPlot->removeSpectrum("Fit");
-  m_uiForm.ppPlot->removeSpectrum("Diff");
+  setPropertyFunctions(indexToFitFunctions(index));
+  fillPlotTypeComboBox(m_uiForm.cbPlotType);
   connect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
           SLOT(updateCurrentPlotOption(QString)));
 }
@@ -608,76 +408,20 @@ void IqtFit::updateCurrentPlotOption(QString newOption) {
   m_plotOption = newOption.toStdString();
 }
 
-void IqtFit::updatePlot() {
-  auto inputWs = inputWorkspace();
-
-  if (!inputWs) {
-    g_log.error("No workspace loaded, cannot create preview plot.");
-    return;
-  }
-
-  m_uiForm.ppPlot->clear();
-
-  size_t specNo = boost::numeric_cast<size_t>(m_uiForm.spPlotSpectrum->value());
-
+void IqtFit::updatePreviewPlots() {
   // If there is a result workspace plot then plot it
   const auto groupName = m_baseName + "_Workspaces";
-  if (AnalysisDataService::Instance().doesExist(groupName) &&
-      specNo <= m_runMax && specNo >= m_runMin) {
-    plotResult(groupName, specNo);
-  } else if (inputWs) {
-    setPreviewPlotWorkspace(inputWs);
-    m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
-  }
+  IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
+                                     m_uiForm.ppPlotBottom);
 
-  try {
-    const QPair<double, double> curveRange =
-        m_uiForm.ppPlot->getCurveRange("Sample");
-    const std::pair<double, double> range(curveRange.first, curveRange.second);
-    m_uiForm.ppPlot->getRangeSelector("IqtFitRange")
-        ->setRange(range.first, range.second);
-    m_iqtFRangeManager->setRange(m_properties["StartX"], range.first,
-                                 range.second);
-    m_iqtFRangeManager->setRange(m_properties["EndX"], range.first,
-                                 range.second);
-
-    resizePlotRange(m_uiForm.ppPlot);
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
-  }
-
-  updateGuessPlot();
+  IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm.ppPlotTop);
+  plotGuess();
 }
 
-void IqtFit::plotResult(const std::string &groupName, const size_t &specNo) {
-  WorkspaceGroup_sptr outputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-
-  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      outputGroup->getItem(specNo - m_runMin));
-
-  if (ws) {
-    if (m_uiForm.ckPlotGuess->isChecked()) {
-      m_uiForm.ckPlotGuess->setChecked(false);
-    }
-
-    setPreviewPlotWorkspace(ws);
-
-    m_uiForm.ppPlot->addSpectrum("Sample", ws, 0, Qt::black);
-    m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
-    m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
-  }
-}
-
-void IqtFit::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview) {
-  preview->resizeX();
-  preview->setAxisRange(qMakePair(0.0, 1.0), QwtPlot::yLeft);
-}
-
-void IqtFit::setDefaultParameters(const QString &name) {
-  double background = m_dblManager->value(m_properties["BackgroundA0"]);
+void IqtFit::setDefaultParameters() {
+  double background = m_dblManager->value(m_properties["Background.A0"]);
   // intensity is always 1-background
-  m_dblManager->setValue(m_properties[name + ".Intensity"], 1.0 - background);
+  setDefaultPropertyValue("Height", 1.0 - background);
 
   auto inputWs = inputWorkspace();
   double tau = 0;
@@ -691,40 +435,9 @@ void IqtFit::setDefaultParameters(const QString &name) {
     }
   }
 
-  m_dblManager->setValue(m_properties[name + ".Tau"], tau);
-  m_dblManager->setValue(m_properties[name + ".Beta"], 1.0);
-}
-
-QHash<QString, QString>
-IqtFit::createParameterToPropertyMap(const QVector<QString> &functionNames) {
-  QHash<QString, QString> parameterToProperty;
-
-  for (int i = 0; i < functionNames.size(); ++i) {
-    QString prefix = "f" + QString::number(i + 1) + ".";
-    extendParameterToPropertyMap(functionNames[i], prefix, parameterToProperty);
-  }
-
-  parameterToProperty["f0.A0"] = "BackgroundA0";
-  return parameterToProperty;
-}
-
-void IqtFit::extendParameterToPropertyMap(
-    const QString &functionName, const QString &prefix,
-    QHash<QString, QString> &parameterToProperty) {
-  bool isExponential = boost::starts_with(functionName, "Exponential") ||
-                       functionName == "StretchedExp";
-
-  if (isExponential) {
-    QString intensityName = prefix + "Height";
-    parameterToProperty[intensityName] = functionName + ".Intensity";
-    QString tauName = prefix + "Lifetime";
-    parameterToProperty[tauName] = functionName + ".Tau";
-
-    if (functionName == "StretchedExp") {
-      QString betaName = prefix + "Stretching";
-      parameterToProperty[betaName] = functionName + ".Beta";
-    }
-  }
+  setDefaultPropertyValue("Lifetime", tau);
+  setDefaultPropertyValue("Stretching", 1.0);
+  setDefaultPropertyValue("A0", 0.0);
 }
 
 /**
@@ -750,44 +463,43 @@ void IqtFit::specMaxChanged(int value) {
 }
 
 void IqtFit::xMinSelected(double val) {
-  m_iqtFRangeManager->setValue(m_properties["StartX"], val);
+  m_dblManager->setValue(m_properties["StartX"], val);
 }
 
 void IqtFit::xMaxSelected(double val) {
-  m_iqtFRangeManager->setValue(m_properties["EndX"], val);
+  m_dblManager->setValue(m_properties["EndX"], val);
 }
 
 void IqtFit::backgroundSelected(double val) {
-  m_dblManager->setValue(m_properties["BackgroundA0"], val);
-  m_dblManager->setValue(m_properties["Exponential1.Intensity"], 1.0 - val);
-  m_dblManager->setValue(m_properties["Exponential2.Intensity"], 1.0 - val);
-  m_dblManager->setValue(m_properties["StretchedExp.Intensity"], 1.0 - val);
+  m_dblManager->setValue(m_properties["Background.A0"], val);
+  m_dblManager->setValue(m_properties["Exponential1.Height"], 1.0 - val);
+  m_dblManager->setValue(m_properties["Exponential2.Height"], 1.0 - val);
+  m_dblManager->setValue(m_properties["StretchedExp.Height"], 1.0 - val);
 }
 
 void IqtFit::propertyChanged(QtProperty *prop, double val) {
-  auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtFitRange");
+  auto fitRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("IqtFitRange");
   auto backgroundRangeSelector =
-      m_uiForm.ppPlot->getRangeSelector("IqtFitBackground");
-  auto specNo = boost::numeric_cast<size_t>(m_uiForm.spPlotSpectrum->value());
-  bool autoUpdate = specNo > m_runMax || specNo < m_runMin ||
-                    m_parameterValues[prop->propertyName()].isEmpty();
+      m_uiForm.ppPlotTop->getRangeSelector("IqtFitBackground");
+  auto specNo = m_uiForm.spPlotSpectrum->value();
+  bool autoUpdate = this->hasParameterValue(prop->propertyName(), specNo);
 
   if (prop == m_properties["StartX"]) {
     fitRangeSelector->setMinimum(val);
   } else if (prop == m_properties["EndX"]) {
     fitRangeSelector->setMaximum(val);
-  } else if (autoUpdate && prop == m_properties["BackgroundA0"]) {
+  } else if (autoUpdate && prop == m_properties["Background.A0"]) {
     backgroundRangeSelector->setMinimum(val);
-    m_dblManager->setValue(m_properties["Exponential1.Intensity"], 1.0 - val);
-    m_dblManager->setValue(m_properties["Exponential2.Intensity"], 1.0 - val);
-    m_dblManager->setValue(m_properties["StretchedExp.Intensity"], 1.0 - val);
-  } else if (autoUpdate && (prop == m_properties["Exponential1.Intensity"] ||
-                            prop == m_properties["Exponential2.Intensity"] ||
-                            prop == m_properties["StretchedExp.Intensity"])) {
+    m_dblManager->setValue(m_properties["Exponential1.Height"], 1.0 - val);
+    m_dblManager->setValue(m_properties["Exponential2.Height"], 1.0 - val);
+    m_dblManager->setValue(m_properties["StretchedExp.Height"], 1.0 - val);
+  } else if (autoUpdate && (prop == m_properties["Exponential1.Height"] ||
+                            prop == m_properties["Exponential2.Height"] ||
+                            prop == m_properties["StretchedExp.Height"])) {
     backgroundRangeSelector->setMinimum(1.0 - val);
-    m_dblManager->setValue(m_properties["Exponential1.Intensity"], val);
-    m_dblManager->setValue(m_properties["Exponential2.Intensity"], val);
-    m_dblManager->setValue(m_properties["StretchedExp.Intensity"], val);
+    m_dblManager->setValue(m_properties["Exponential1.Height"], val);
+    m_dblManager->setValue(m_properties["Exponential2.Height"], val);
+    m_dblManager->setValue(m_properties["StretchedExp.Height"], val);
   }
 }
 
@@ -886,192 +598,64 @@ void IqtFit::singleFit() {
 
   // Don't plot a new guess curve until there is a fit
   disconnect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
-             SLOT(plotGuess(QtProperty *)));
+             SLOT(plotGuess()));
 
-  updateFitFunctions();
+  setFitFunctions(indexToFitFunctions(selectedSpectrum()));
   size_t specNo = m_uiForm.spPlotSpectrum->text().toULongLong();
   m_singleFitAlg = iqtFitAlgorithm(inputWorkspace(), specNo, specNo);
-
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(singleFitComplete(bool)));
-
-  m_batchAlgoRunner->addAlgorithm(m_singleFitAlg);
-  m_batchAlgoRunner->executeBatchAsync();
+  runFitAlgorithm(m_singleFitAlg);
 }
 
-void IqtFit::singleFitComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(singleFitComplete(bool)));
+void IqtFit::disablePlotGuess() {
+  m_uiForm.ckPlotGuess->setEnabled(false);
+  disconnect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
+             SLOT(plotGuess()));
+  disconnect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
+             SLOT(plotGuess()));
+  disconnect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this,
+             SLOT(plotGuess()));
+}
 
-  algorithmComplete(error);
-
-  // Can start updating the guess curve again
+void IqtFit::enablePlotGuess() {
+  m_uiForm.ckPlotGuess->setEnabled(true);
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(plotGuess(QtProperty *)));
+          SLOT(plotGuess()));
+  connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
+          SLOT(plotGuess()));
+  connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(plotGuess()));
+  plotGuess();
 }
 
-void IqtFit::updateGuessPlot() {
-  // Do nothing if there is no sample data curve
-  if (!m_uiForm.ppPlot->hasCurve("Sample"))
-    return;
+void IqtFit::plotGuess() {
 
-  // Don't plot guess if plot guess is unchecked
-  if (!m_uiForm.ckPlotGuess->isChecked()) {
-    m_uiForm.ppPlot->removeSpectrum("Guess");
-  } else {
-    plotGuess(NULL);
-  }
-}
-
-void IqtFit::plotGuess(QtProperty *) {
-  CompositeFunction_sptr function = createFunction(true);
-  auto inputWs = inputWorkspace();
-
-  // Create the double* array from the input workspace
-  const size_t binIndxLow =
-      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["StartX"]));
-  const size_t binIndxHigh =
-      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["EndX"]));
-  const size_t nData = binIndxHigh - binIndxLow;
-
-  const auto &xPoints = inputWs->points(0);
-
-  std::vector<double> dataX(nData);
-  std::copy(&xPoints[binIndxLow], &xPoints[binIndxLow + nData], dataX.begin());
-
-  FunctionDomain1DVector domain(dataX);
-  FunctionValues outputData(domain);
-  function->function(domain, outputData);
-
-  std::vector<double> dataY(nData);
-  for (size_t i = 0; i < nData; i++) {
-    dataY[i] = outputData.getCalculated(i);
-  }
-
-  IAlgorithm_sptr createWsAlg =
-      AlgorithmManager::Instance().create("CreateWorkspace");
-  createWsAlg->initialize();
-  createWsAlg->setChild(true);
-  createWsAlg->setLogging(false);
-  createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
-  createWsAlg->setProperty("NSpec", 1);
-  createWsAlg->setProperty("DataX", dataX);
-  createWsAlg->setProperty("DataY", dataY);
-  createWsAlg->execute();
-  MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
-
-  m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
-}
-
-/*
- * Updates the properties in the property table using the stored parameter
- * values for the specified spectrum.
- *
- * @param specNo  The index of the parameter values to update the properties in
- *                the property table with.
- */
-void IqtFit::updateProperties(int specNo) {
-  size_t index = boost::numeric_cast<size_t>(specNo);
-  auto parameterNames = m_parameterValues.keys();
-
-  // Check whether parameter values exist for the specified spectrum number
-  if (m_parameterValues[parameterNames[0]].contains(index)) {
-
-    for (auto &paramName : parameterNames) {
-      auto propertyName = m_parameterToProperty[paramName];
-      m_dblManager->setValue(m_properties[propertyName],
-                             m_parameterValues[paramName][index]);
-    }
-
-  } else {
-    setDefaultParameters("Exponential1");
-    setDefaultParameters("Exponential2");
-    setDefaultParameters("StretchedExp");
+  if (m_uiForm.ckPlotGuess->isChecked())
+    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
+                                       createFunction(true));
+  else {
+    m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
   }
 }
 
 /*
  * Updates a vector storing which functions were last used in a fitting.
  */
-void IqtFit::updateFitFunctions() {
-  const int fitType = m_uiForm.cbFitType->currentIndex();
-
-  if (fitType == 0)
-    m_fitFunctions = {"Exponential1"};
-  else if (fitType == 1)
-    m_fitFunctions = {"Exponential1", "Exponential2"};
-  else if (fitType == 2)
-    m_fitFunctions = {"StretchedExp"};
-  else if (fitType == 3)
-    m_fitFunctions = {"Exponential1", "StretchedExp"};
+QVector<QString> IqtFit::indexToFitFunctions(const int &fitTypeIndex) const {
+  if (fitTypeIndex == 0)
+    return {"Background", "Exponential1"};
+  else if (fitTypeIndex == 1)
+    return {"Background", "Exponential1", "Exponential2"};
+  else if (fitTypeIndex == 2)
+    return {"Background", "StretchedExp"};
+  else if (fitTypeIndex == 3)
+    return {"Background", "Exponential1", "StretchedExp"};
+  else
+    return {};
 }
 
 void IqtFit::fitContextMenu(const QPoint &) {
-  QtBrowserItem *item(nullptr);
-
-  item = m_iqtFTree->currentItem();
-
-  if (!item)
-    return;
-
-  // is it a fit property ?
-  QtProperty *prop = item->property();
-
-  // is it already fixed?
-  bool fixed = prop->propertyManager() != m_dblManager;
-
-  if (fixed && prop->propertyManager() != m_stringManager)
-    return;
-
-  // Create the menu
-  QMenu *menu = new QMenu("IqtFit", m_iqtFTree);
-  QAction *action;
-
-  if (!fixed) {
-    action = new QAction("Fix", m_parentWidget);
-    connect(action, SIGNAL(triggered()), this, SLOT(fixItem()));
-  } else {
-    action = new QAction("Remove Fix", m_parentWidget);
-    connect(action, SIGNAL(triggered()), this, SLOT(unFixItem()));
-  }
-
-  menu->addAction(action);
-
-  // Show the menu
-  menu->popup(QCursor::pos());
-}
-
-void IqtFit::fixItem() {
-  QtBrowserItem *item = m_iqtFTree->currentItem();
-
-  // Determine what the property is.
-  QtProperty *prop = item->property();
-
-  QtProperty *fixedProp = m_stringManager->addProperty(prop->propertyName());
-  QtProperty *fprlbl = m_stringManager->addProperty("Fixed");
-  fixedProp->addSubProperty(fprlbl);
-  m_stringManager->setValue(fixedProp, prop->valueText());
-
-  item->parent()->property()->addSubProperty(fixedProp);
-  m_fixedProps[fixedProp] = prop;
-  item->parent()->property()->removeSubProperty(prop);
-}
-
-void IqtFit::unFixItem() {
-  QtBrowserItem *item = m_iqtFTree->currentItem();
-
-  QtProperty *prop = item->property();
-  if (prop->subProperties().empty()) {
-    item = item->parent();
-    prop = item->property();
-  }
-
-  item->parent()->property()->addSubProperty(m_fixedProps[prop]);
-  item->parent()->property()->removeSubProperty(prop);
-  m_fixedProps.remove(prop);
-  QtProperty *proplbl = prop->subProperties()[0];
-  delete proplbl;
-  delete prop;
+  IndirectFitAnalysisTab::fitContextMenu("IqtFit");
 }
 
 IAlgorithm_sptr IqtFit::replaceInfinityAndNaN(const std::string &wsName) {
@@ -1083,6 +667,17 @@ IAlgorithm_sptr IqtFit::replaceInfinityAndNaN(const std::string &wsName) {
   replaceAlg->setProperty("InfinityError", 0.0);
   replaceAlg->setProperty("OutputWorkspace", wsName);
   return replaceAlg;
+}
+
+IFunction_sptr IqtFit::getFunction(const QString &functionName) const {
+  if (functionName.startsWith("Exponential"))
+    return IndirectFitAnalysisTab::getFunction("ExpDecay");
+  else if (functionName == "StretchedExp")
+    return IndirectFitAnalysisTab::getFunction("StretchExp");
+  else if (functionName == "Background")
+    return IndirectFitAnalysisTab::getFunction("LinearBackground");
+  else
+    return IndirectFitAnalysisTab::getFunction(functionName);
 }
 
 } // namespace IDA

@@ -81,8 +81,8 @@ Usage
                                              MultipleScattering=True)
 
    # Print a bin
-   print "Uncorrected signal: {0:.4f}".format(sample_ws.readY(0)[25])
-   print "Corrected signal: {0:.4f}".format(corrected_sample.readY(0)[25])
+   print("Uncorrected signal: {0:.4f}".format(sample_ws.readY(0)[25]))
+   print("Corrected signal: {0:.4f}".format(corrected_sample.readY(0)[25]))
 
 Output:
 

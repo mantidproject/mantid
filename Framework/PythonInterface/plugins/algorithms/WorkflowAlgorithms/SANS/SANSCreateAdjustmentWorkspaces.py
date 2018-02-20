@@ -6,16 +6,17 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, DetectorType)
-from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.general_functions import create_unmanaged_algorithm, get_standard_output_workspace_name
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from mantid import AnalysisDataService
 
 
-class SANSCreateAdjustmentWorkspaces(DataProcessorAlgorithm):
+class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Adjust'
 
@@ -122,9 +123,14 @@ class SANSCreateAdjustmentWorkspaces(DataProcessorAlgorithm):
         if wave_length_and_pixel_adjustment_workspace:
             self.setProperty("OutputWorkspaceWavelengthAndPixelAdjustment", wave_length_and_pixel_adjustment_workspace)
 
-        # TODO: Nice to have: Provide diagnostic output workspaces which could be output either directly to the
-        #                     ADS or let it percolate up via SANSCreateAdjustmentWorkspaces->SANSReductionCore->
-        #                     SANSSingleReduction and then add it to the ADS
+        if calculated_transmission_workspace and unfitted_transmission_workspace and state.adjustment.show_transmission:
+            data_type = self.getProperty("DataType").value
+            output_workspace_name, output_workspace_base_name = get_standard_output_workspace_name(state,
+                                                                                                   state.reduction.reduction_mode
+                                                                                                   , transmission = True,
+                                                                                                   data_type = data_type)
+            AnalysisDataService.addOrReplace(output_workspace_base_name, calculated_transmission_workspace)
+            AnalysisDataService.addOrReplace(output_workspace_base_name + '_unfitted', unfitted_transmission_workspace)
 
     def _get_wavelength_and_pixel_adjustment_workspaces(self, state,
                                                         monitor_normalization_workspace,

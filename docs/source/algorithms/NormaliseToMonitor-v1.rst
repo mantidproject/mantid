@@ -55,19 +55,25 @@ technically dimensionless.
 Restrictions on the input workspace
 ###################################
 
-The data must be histogram, non-distribution data.
+The data must be histogram, non-distribution data. The exception to the histogram requirement is for workspaces that contain point data with
+a single count per spectrum. In this case the normalisation is performed by dividing every spectrum by the monitor counts, taking into
+account the error on the monitor counts.
+
+Detector Scan Workspaces
+########################
+
+Workspaces that have scanning detectors are supported by this algorithm, both for bin-by-bin mode and normlisation by integrated 
+count. The only option for specifying the monitor is by 'MonitorID', attempting to use 'MonitorSpectrum' or MonitorWorkspaceIndex' 
+will throw an error. In this case the 'NormFactorWS' output will contain a monitor spectrum for each time index. 
 
 Child Algorithms used
 #####################
 
-The :ref:`algm-ExtractSingleSpectrum` algorithm is used
+The :ref:`algm-ExtractSpectra` algorithm is used
 to pull out the monitor spectrum if it's part of the InputWorkspace or
 MonitorWorkspace. For the 'integrated range' option, the
 :ref:`algm-Integration` algorithm is used to integrate the monitor
 spectrum.
-
-In both cases, the :ref:`algm-Divide` algorithm is used to perform the
-normalisation.
 
 Usage
 -----

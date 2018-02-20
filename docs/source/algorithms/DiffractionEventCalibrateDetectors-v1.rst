@@ -31,8 +31,8 @@ Usage
     LoadIsawDetCal(InputWorkspace='ws',Filename=os.path.join(config["defaultsave.directory"], 'Test.DetCal'))
     ws = ConvertUnits(InputWorkspace='ws',  Target='dSpacing')
     maxA = Max(ws)
-    print "Peak in dSpace", 0.5*(maxD.readX(0)[0]+maxD.readX(0)[1])
-    print "Peak from calibration", 0.5*(maxA.readX(0)[0]+maxA.readX(0)[1])
+    print("Peak in dSpace {:.11f}".format(0.5*(maxD.readX(0)[0]+maxD.readX(0)[1])))
+    print("Peak from calibration {:.11f}".format(0.5*(maxA.readX(0)[0]+maxA.readX(0)[1])))
 
 Output:
 

@@ -25,7 +25,7 @@ filter is used:
    ``ZERO``
 
 3. There is NO upper boundary of the filter wall if ``wall[1]`` is
-   ZERO;``
+   ``ZERO``
 
 More information is found in :ref:`EventFiltering`.
 

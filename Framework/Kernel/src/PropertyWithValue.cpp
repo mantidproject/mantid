@@ -14,7 +14,7 @@ class PropertyManager;
 #define PROPERTYWITHVALUE_SAVEPROPERTY(type)                                   \
   template <>                                                                  \
   void PropertyWithValue<type>::saveProperty(::NeXus::File *file) {            \
-    file->makeGroup(this->name(), "NXlog", 1);                                 \
+    file->makeGroup(this->name(), "NXlog", true);                              \
     file->writeData("value", m_value);                                         \
     file->closeGroup();                                                        \
   }
