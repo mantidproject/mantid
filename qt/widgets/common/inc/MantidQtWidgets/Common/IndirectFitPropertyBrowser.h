@@ -26,9 +26,10 @@ public:
 
   Mantid::API::IFunction_sptr background() const;
 
-  boost::optional<int> backgroundIndex() const;
+  boost::optional<size_t> backgroundIndex() const;
 
-  int functionIndex(Mantid::API::IFunction_sptr function) const;
+  boost::optional<size_t>
+  functionIndex(Mantid::API::IFunction_sptr function) const;
 
   QString selectedFitType() const;
 

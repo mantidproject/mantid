@@ -82,7 +82,7 @@ public:
 
   Mantid::API::IFunction_sptr model() const;
 
-  boost::optional<int> backgroundIndex() const;
+  boost::optional<size_t> backgroundIndex() const;
 
   QString selectedFitType() const;
 

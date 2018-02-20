@@ -270,10 +270,10 @@ void ConvFit::addFunctionNameChanges(
 
 void ConvFit::addFunctionNameChanges(
     CompositeFunction_sptr model, const QString &prefixPrefix,
-    const QString &prefixSuffix, int fromIndex, int toIndex, int offset,
-    QHash<QString, QString> &functionNameChanges) const {
+    const QString &prefixSuffix, size_t fromIndex, size_t toIndex,
+    int offset, QHash<QString, QString> &functionNameChanges) const {
 
-  for (int i = fromIndex; i < toIndex; ++i) {
+  for (auto i = fromIndex; i < toIndex; ++i) {
     const auto &functionPrefix = "f" + QString::number(i) + ".";
     const auto &offsetPrefix = "f" + QString::number(i + offset) + ".";
     const auto &function = model->getFunction(static_cast<size_t>(i));
@@ -735,8 +735,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }

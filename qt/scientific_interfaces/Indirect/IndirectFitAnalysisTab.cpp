@@ -239,7 +239,7 @@ IFunction_sptr IndirectFitAnalysisTab::model() const {
 /**
  * @return  The function index of the selected background.
  */
-boost::optional<int> IndirectFitAnalysisTab::backgroundIndex() const {
+boost::optional<size_t> IndirectFitAnalysisTab::backgroundIndex() const {
   return m_fitPropertyBrowser->backgroundIndex();
 }
 

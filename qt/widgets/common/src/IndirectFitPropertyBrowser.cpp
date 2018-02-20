@@ -26,7 +26,6 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/Expression.h"
 #include "MantidAPI/FrameworkManager.h"
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
@@ -191,10 +190,10 @@ IFunction_sptr IndirectFitPropertyBrowser::background() const {
 }
 
 /**
- * @return  The function index of the selected background. -1 if no background
+ * @return  The function index of the selected background. None if no background
  *          is selected.
  */
-boost::optional<int> IndirectFitPropertyBrowser::backgroundIndex() const {
+boost::optional<size_t> IndirectFitPropertyBrowser::backgroundIndex() const {
   if (m_backgroundHandler != nullptr) {
     const auto prefix = m_backgroundHandler->functionPrefix();
 
@@ -208,12 +207,13 @@ boost::optional<int> IndirectFitPropertyBrowser::backgroundIndex() const {
  * @param function  The function, whose function index to retrieve.
  * @return          The function index of the specified function in the browser.
  */
-int IndirectFitPropertyBrowser::functionIndex(IFunction_sptr function) const {
+boost::optional<size_t>
+IndirectFitPropertyBrowser::functionIndex(IFunction_sptr function) const {
   for (size_t i = 0u; i < compositeFunction()->nFunctions(); ++i) {
     if (compositeFunction()->getFunction(i) == function)
-      return static_cast<int>(i);
+      return i;
   }
-  return -1;
+  return boost::none;
 }
 
 /**
@@ -355,7 +355,7 @@ void IndirectFitPropertyBrowser::setParameterValue(
  */
 void IndirectFitPropertyBrowser::setBackground(
     const std::string &backgroundName) {
-  if (m_backgroundHandler != nullptr && backgroundIndex() >= 0)
+  if (m_backgroundHandler != nullptr && backgroundIndex())
     FitPropertyBrowser::removeFunction(m_backgroundHandler);
 
   if (backgroundName != "None")
