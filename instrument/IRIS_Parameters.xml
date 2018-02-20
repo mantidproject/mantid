@@ -94,7 +94,7 @@
     <value val="3.2" />
 </parameter>
 
-<parameter name="Workflow.TemperatureSensorNames", type="string">
+<parameter name="Workflow.TemperatureSensorNames" type="string">
 	<value val="Bottom_can" />
 	<value val="Middle_can" />
 	<value val="Top_can" />
