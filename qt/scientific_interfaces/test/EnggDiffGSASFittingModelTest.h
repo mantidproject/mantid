@@ -16,6 +16,14 @@ using namespace MantidQt::CustomInterfaces;
 
 namespace { // Helpers
 
+GSASIIRefineFitPeaksParameters createGSASIIRefineFitPeaksParameters(
+    const API::MatrixWorkspace_sptr &inputWS, const RunLabel &runLabel,
+    const GSASRefinementMethod &refinementMethod) {
+  return GSASIIRefineFitPeaksParameters(
+      inputWS, runLabel, refinementMethod, "", std::vector<std::string>({}), "",
+      "", boost::none, boost::none, boost::none, boost::none, false, false);
+}
+
 template <size_t numColumns, size_t numRows>
 API::ITableWorkspace_sptr createDummyTable(
     const std::array<std::string, numColumns> &columnHeadings,
@@ -42,14 +50,11 @@ public:
   void addRwpValue(const RunLabel &runLabel, const double rwp);
 
 private:
-  inline double doGSASRefinementAlgorithm(
-      API::MatrixWorkspace_sptr inputWorkspace,
-      const std::string &outputWorkspaceName,
-      const std::string &latticeParamsName, const std::string &refinementMethod,
-      const std::string &instParamFile,
-      const std::vector<std::string> &phaseFiles,
-      const std::string &pathToGSASII, const std::string &GSASIIProjectFile,
-      const double dMin, const double negativeWeight) override;
+  inline double
+  doGSASRefinementAlgorithm(const std::string &fittedPeaksWSName,
+                            const std::string &latticeParamsWSName,
+                            const GSASIIRefineFitPeaksParameters &params,
+                            const std::string &refinementMethod) override;
 };
 
 inline void TestEnggDiffGSASFittingModel::addLatticeParamTable(
@@ -63,22 +68,13 @@ inline void TestEnggDiffGSASFittingModel::addRwpValue(const RunLabel &runLabel,
 }
 
 inline double TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
-    API::MatrixWorkspace_sptr inputWorkspace,
-    const std::string &outputWorkspaceName,
-    const std::string &latticeParamsName, const std::string &refinementMethod,
-    const std::string &instParamFile,
-    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
-    const std::string &GSASIIProjectFile, const double dMin,
-    const double negativeWeight) {
+    const std::string &fittedPeaksWSName,
+    const std::string &latticeParamsWSName,
+    const GSASIIRefineFitPeaksParameters &params,
+    const std::string &refinementMethod) {
   // Mock method - just create some dummy output and ignore all the parameters
-  UNUSED_ARG(GSASIIProjectFile);
+  UNUSED_ARG(params);
   UNUSED_ARG(refinementMethod);
-  UNUSED_ARG(dMin);
-  UNUSED_ARG(phaseFiles);
-  UNUSED_ARG(pathToGSASII);
-  UNUSED_ARG(negativeWeight);
-  UNUSED_ARG(inputWorkspace);
-  UNUSED_ARG(instParamFile);
 
   const static std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
   const static std::array<std::array<double, 3>, 1> targetTableValues = {
@@ -87,11 +83,11 @@ inline double TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
       createDummyTable(columnHeadings, targetTableValues);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  ADS.add(latticeParamsName, latticeParams);
+  ADS.add(latticeParamsWSName, latticeParams);
 
   API::MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
-  ADS.add(outputWorkspaceName, ws);
+  ADS.add(fittedPeaksWSName, ws);
 
   return 75;
 }
@@ -192,8 +188,9 @@ public:
 
     API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        fittedPeaks = model.doPawleyRefinement(
-            inputWS, runLabel, "", std::vector<std::string>({}), "", "", 0, 0));
+        fittedPeaks =
+            model.doPawleyRefinement(createGSASIIRefineFitPeaksParameters(
+                inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
     TS_ASSERT(fittedPeaks);
 
     const auto rwp = model.getRwp(runLabel);
@@ -217,8 +214,9 @@ public:
 
     API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        fittedPeaks = model.doRietveldRefinement(
-            inputWS, runLabel, "", std::vector<std::string>({}), "", ""));
+        fittedPeaks =
+            model.doRietveldRefinement(createGSASIIRefineFitPeaksParameters(
+                inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
     TS_ASSERT(fittedPeaks);
 
     const auto rwp = model.getRwp(runLabel);

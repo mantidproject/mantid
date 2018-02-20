@@ -36,9 +36,17 @@ public:
 
   MOCK_CONST_METHOD0(getRefinementMethod, GSASRefinementMethod());
 
-  MOCK_CONST_METHOD0(getPawleyDMin, double());
+  MOCK_CONST_METHOD0(getRefineGamma, bool());
 
-  MOCK_CONST_METHOD0(getPawleyNegativeWeight, double());
+  MOCK_CONST_METHOD0(getRefineSigma, bool());
+
+  MOCK_CONST_METHOD0(getPawleyDMin, boost::optional<double>());
+
+  MOCK_CONST_METHOD0(getPawleyNegativeWeight, boost::optional<double>());
+
+  MOCK_CONST_METHOD0(getXMax, boost::optional<double>());
+
+  MOCK_CONST_METHOD0(getXMin, boost::optional<double>());
 
   MOCK_METHOD1(plotCurve,
                void(const std::vector<boost::shared_ptr<QwtData>> &curve));

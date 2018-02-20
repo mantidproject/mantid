@@ -54,7 +54,8 @@ public:
         .WillOnce(Throw(std::runtime_error("Failure reason")));
 
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Could not load file", "Failure reason")).Times(1);
+                userWarning("Could not load file", "Failure reason"))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -63,46 +64,57 @@ public:
   void test_doRietveldRefinement() {
     auto presenter = setUpPresenter();
 
-    const RunLabel runLabel(123, 1);
-    const auto refinementMethod = GSASRefinementMethod::RIETVELD;
-    const auto instParams = "Instrument file";
-    const std::vector<std::string> phaseFiles({"phase1", "phase2"});
-    const auto pathToGSASII = "GSASHOME";
-    const auto GSASIIProjectFile = "GPX.gpx";
+    const GSASIIRefineFitPeaksParameters params(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100),
+        RunLabel(123, 1), GSASRefinementMethod::RIETVELD, "Instrument file",
+        {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", boost::none, boost::none,
+        10000, 40000, true, false);
 
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
-        .WillOnce(Return(runLabel));
+        .WillOnce(Return(params.runLabel));
 
-    const boost::optional<Mantid::API::MatrixWorkspace_sptr> inputWorkspace(
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getFocusedRun(runLabel))
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getFocusedRun(params.runLabel))
         .Times(1)
-        .WillOnce(Return(inputWorkspace));
-
+        .WillOnce(Return(params.inputWorkspace));
     EXPECT_CALL(*m_mockViewPtr, getRefinementMethod())
         .Times(1)
-        .WillOnce(Return(refinementMethod));
+        .WillOnce(Return(params.refinementMethod));
     EXPECT_CALL(*m_mockViewPtr, getInstrumentFileName())
         .Times(1)
-        .WillOnce(Return(instParams));
+        .WillOnce(Return(params.instParamsFile));
     EXPECT_CALL(*m_mockViewPtr, getPhaseFileNames())
         .Times(1)
-        .WillOnce(Return(phaseFiles));
+        .WillOnce(Return(params.phaseFiles));
     EXPECT_CALL(*m_mockViewPtr, getPathToGSASII())
         .Times(1)
-        .WillOnce(Return(pathToGSASII));
+        .WillOnce(Return(params.gsasHome));
     EXPECT_CALL(*m_mockViewPtr, getGSASIIProjectPath())
         .Times(1)
-        .WillOnce(Return(GSASIIProjectFile));
+        .WillOnce(Return(params.gsasProjectFile));
+    EXPECT_CALL(*m_mockViewPtr, getPawleyDMin())
+        .Times(1)
+        .WillOnce(Return(params.dMin));
+    EXPECT_CALL(*m_mockViewPtr, getPawleyNegativeWeight())
+        .Times(1)
+        .WillOnce(Return(params.negativeWeight));
+    EXPECT_CALL(*m_mockViewPtr, getXMin())
+        .Times(1)
+        .WillOnce(Return(params.xMin));
+    EXPECT_CALL(*m_mockViewPtr, getXMax())
+        .Times(1)
+        .WillOnce(Return(params.xMax));
+    EXPECT_CALL(*m_mockViewPtr, getRefineSigma())
+        .Times(1)
+        .WillOnce(Return(params.refineSigma));
+    EXPECT_CALL(*m_mockViewPtr, getRefineGamma())
+        .Times(1)
+        .WillOnce(Return(params.refineGamma));
 
-    EXPECT_CALL(*m_mockModelPtr,
-                doRietveldRefinement(*inputWorkspace, runLabel, instParams,
-                                     phaseFiles, pathToGSASII,
-                                     GSASIIProjectFile))
+    EXPECT_CALL(*m_mockModelPtr, doRietveldRefinement(params))
         .Times(1)
         .WillOnce(Throw(std::runtime_error("Failure reason")));
     EXPECT_CALL(*m_mockViewPtr,
@@ -115,54 +127,64 @@ public:
   void test_doPawleyRefinement() {
     auto presenter = setUpPresenter();
 
-    const RunLabel runLabel(123, 1);
-    const auto refinementMethod = GSASRefinementMethod::PAWLEY;
-    const auto instParams = "Instrument file";
-    const std::vector<std::string> phaseFiles({"phase1", "phase2"});
-    const auto pathToGSASII = "GSASHOME";
-    const auto GSASIIProjectFile = "GPX.gpx";
-    const auto dmin = 1.0;
-    const auto negativeWeight = 2.0;
+    const GSASIIRefineFitPeaksParameters params(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100),
+        RunLabel(123, 1), GSASRefinementMethod::PAWLEY, "Instrument file",
+        {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", 1, 2, 10000, 40000, true,
+        false);
 
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
-        .WillOnce(Return(runLabel));
+        .WillOnce(Return(params.runLabel));
 
-    const boost::optional<Mantid::API::MatrixWorkspace_sptr> inputWorkspace(
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getFocusedRun(runLabel))
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
         .Times(1)
-        .WillOnce(Return(inputWorkspace));
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(params.runLabel));
 
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getFocusedRun(params.runLabel))
+        .Times(1)
+        .WillOnce(Return(params.inputWorkspace));
     EXPECT_CALL(*m_mockViewPtr, getRefinementMethod())
         .Times(1)
-        .WillOnce(Return(refinementMethod));
+        .WillOnce(Return(params.refinementMethod));
     EXPECT_CALL(*m_mockViewPtr, getInstrumentFileName())
         .Times(1)
-        .WillOnce(Return(instParams));
+        .WillOnce(Return(params.instParamsFile));
     EXPECT_CALL(*m_mockViewPtr, getPhaseFileNames())
         .Times(1)
-        .WillOnce(Return(phaseFiles));
+        .WillOnce(Return(params.phaseFiles));
     EXPECT_CALL(*m_mockViewPtr, getPathToGSASII())
         .Times(1)
-        .WillOnce(Return(pathToGSASII));
+        .WillOnce(Return(params.gsasHome));
     EXPECT_CALL(*m_mockViewPtr, getGSASIIProjectPath())
         .Times(1)
-        .WillOnce(Return(GSASIIProjectFile));
+        .WillOnce(Return(params.gsasProjectFile));
     EXPECT_CALL(*m_mockViewPtr, getPawleyDMin())
         .Times(1)
-        .WillOnce(Return(dmin));
+        .WillOnce(Return(params.dMin));
     EXPECT_CALL(*m_mockViewPtr, getPawleyNegativeWeight())
         .Times(1)
-        .WillOnce(Return(negativeWeight));
+        .WillOnce(Return(params.negativeWeight));
+    EXPECT_CALL(*m_mockViewPtr, getXMin())
+        .Times(1)
+        .WillOnce(Return(params.xMin));
+    EXPECT_CALL(*m_mockViewPtr, getXMax())
+        .Times(1)
+        .WillOnce(Return(params.xMax));
+    EXPECT_CALL(*m_mockViewPtr, getRefineSigma())
+        .Times(1)
+        .WillOnce(Return(params.refineSigma));
+    EXPECT_CALL(*m_mockViewPtr, getRefineGamma())
+        .Times(1)
+        .WillOnce(Return(params.refineGamma));
 
-    EXPECT_CALL(*m_mockModelPtr,
-                doPawleyRefinement(*inputWorkspace, runLabel, instParams,
-                                   phaseFiles, pathToGSASII, GSASIIProjectFile,
-                                   dmin, negativeWeight))
+    EXPECT_CALL(*m_mockModelPtr, doPawleyRefinement(params))
         .Times(1)
         .WillOnce(Throw(std::runtime_error("Failure reason")));
     EXPECT_CALL(*m_mockViewPtr,

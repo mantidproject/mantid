@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASIIREFINEFITPEAKSPARAMETERS_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASIIREFINEFITPEAKSPARAMETERS_H_
 
+#include "DllConfig.h"
 #include "EnggDiffGSASRefinementMethod.h"
 #include "RunLabel.h"
 
@@ -12,11 +13,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-struct GSASIIRefineFitPeaksParameters {
+struct MANTIDQT_ENGGDIFFRACTION_DLL GSASIIRefineFitPeaksParameters {
   GSASIIRefineFitPeaksParameters(
       const Mantid::API::MatrixWorkspace_sptr &_inputWorkspace,
-      const RunLabel &_runLabel,
-      const GSASRefinementMethod _refinementMethod,
+      const RunLabel &_runLabel, const GSASRefinementMethod &_refinementMethod,
       const std::string &_instParamsFile,
       const std::vector<std::string> &_phaseFiles, const std::string &_gsasHome,
       const std::string &_gsasProjectFile, const boost::optional<double> _dMin,
@@ -40,6 +40,14 @@ struct GSASIIRefineFitPeaksParameters {
   const bool refineSigma;
   const bool refineGamma;
 };
+
+MANTIDQT_ENGGDIFFRACTION_DLL bool
+operator==(const GSASIIRefineFitPeaksParameters &lhs,
+           const GSASIIRefineFitPeaksParameters &rhs);
+
+MANTIDQT_ENGGDIFFRACTION_DLL bool
+operator!=(const GSASIIRefineFitPeaksParameters &lhs,
+           const GSASIIRefineFitPeaksParameters &rhs);
 
 } // MantidQt
 } // CustomInterfaces

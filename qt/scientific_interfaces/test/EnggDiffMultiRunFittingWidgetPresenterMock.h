@@ -30,6 +30,8 @@ public:
 
   MOCK_CONST_METHOD0(getSelectedRunLabel, RunLabel());
 
+  MOCK_CONST_METHOD0(hasSelectedRunLabel, bool());
+
   // Must be faked so that we can return a unique_ptr out of it
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
   getWidgetAdder() const override;
