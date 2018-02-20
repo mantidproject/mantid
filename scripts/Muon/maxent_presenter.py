@@ -42,7 +42,8 @@ class MaxEntPresenter(object):
         return thread_model.ThreadModel(self.calcAlg)
 
     def handleMaxEntButton(self):
-        if  self.view.calcPhases():
+        print("moo",self.view.calcPhases())
+        if  self.view.calcPhases() and self.view.usePhases():
             self.DoPhase()
         else:
             self.DoMaxEnt()
