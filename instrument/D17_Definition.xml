@@ -80,15 +80,14 @@
     <id val="100001"/>
   </idlist>
   <!--2 Slits-->
-  <type name="Slit"/>
   <component type="slit2">
     <location x="0.0" y="0.0" z="-3.605"/>
   </component>
-  <type is="Slit" name="slit2"/>
+  <type name="slit2"/>
   <component type="slit3">
     <location x="0.0" y="0.0" z="-0.205"/>
   </component>
-  <type is="Slit" name="slit3"/>
+  <type name="slit3"/>
   <!--DETECTORS-->
   <!--64 TUBES FORM ONE DETECTOR-->
   <component idfillbyfirst="x" idstart="1" idstepbyrow="1" type="detector">
