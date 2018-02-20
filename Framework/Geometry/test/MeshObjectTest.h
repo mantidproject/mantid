@@ -1061,67 +1061,60 @@ public:
   static void destroySuite(MeshObjectTestPerformance *suite) { delete suite; }
 
   MeshObjectTestPerformance()
-      : rng(200000), octahedron(createOctahedron()), lShape(createLShape()), smallCube(createCube(0.2)) {}
+      : rng(200000), octahedron(createOctahedron()), lShape(createLShape()), smallCube(createCube(0.2)) {
+    testPoints = create_test_points();
+    testRays = create_test_rays();
+  }
 
-  void test_isOnSide(){
-    const size_t dim(20);
-    V3D test_pt;
+  void test_isOnSide() {
+    const size_t number(10000);
     bool dummy;
-    for (size_t i = 0; i < dim*dim*dim; ++i) {
-      test_pt = create_test_point(i, dim);
-      dummy = octahedron->isOnSide(test_pt);
+    for (size_t i = 0; i < number; ++i) {
+      dummy = octahedron->isOnSide(testPoints[i % testPoints.size()]);
     }
   }
 
   void test_isValid() {
-    const size_t dim(20);
-    V3D test_pt;
+    const size_t number(10000);
     bool dummy;
-    for (size_t i = 0; i < dim*dim*dim; ++i) {
-      test_pt = create_test_point(i, dim);
-      dummy = octahedron->isValid(test_pt);
+    for (size_t i = 0; i < number; ++i) {
+      dummy = octahedron->isValid(testPoints[i % testPoints.size()]);
     }
   }
 
   void test_calcValidType() {
-    const size_t sDim(18);
-    const size_t dDim(8);
-    Track testRay;
+    const size_t number(10000);
     int dummy;
-    for (size_t i = 0; i < sDim*sDim*sDim; ++i) {
-      testRay = create_test_ray(i, sDim, dDim);
-      dummy = octahedron->calcValidType(testRay.startPoint(),testRay.direction());
+    for (size_t i = 0; i < number; ++i) {
+      size_t j = i % testRays.size();
+      dummy = octahedron->calcValidType(testRays[j].startPoint(),testRays[j].direction());
     }
   }
 
   void test_interceptSurface() {
+    const size_t number(10000);
     const size_t sDim(18);
     const size_t dDim(8);
     Track testRay;
     int dummy;
-    for (size_t i = 0; i < sDim*sDim*sDim; ++i) {
-      testRay = create_test_ray(i, sDim, dDim);
-      dummy = octahedron->interceptSurface(testRay);
+    for (size_t i = 0; i < number; ++i) {
+      dummy = octahedron->interceptSurface(testRays[i % testRays.size()]);
     }
   }
 
   void test_solid_angle() {
-    const size_t dim(20);
-    V3D test_pt;
+    const size_t number(10000);
     double dummy;
-    for (size_t i = 0; i < dim*dim*dim; ++i) {
-      test_pt = create_test_point(i, dim);
-      dummy = smallCube->solidAngle(test_pt);
+    for (size_t i = 0; i < number; ++i) {
+      dummy = smallCube->solidAngle(testPoints[i % testPoints.size()]);
     }
   }
 
   void test_solid_angle_scaled() {
-    const size_t dim(20);
-    V3D test_pt;
+    const size_t number(10000);
     double dummy;
-    for (size_t i = 0; i < dim*dim*dim; ++i) {
-      test_pt = create_test_point(i, dim);
-      dummy = smallCube->solidAngle(test_pt, V3D(0.5, 1.33, 1.5));
+    for (size_t i = 0; i < number; ++i) {
+      dummy = smallCube->solidAngle(testPoints[i % testPoints.size()], V3D(0.5,1.33,1.5));
     }
   }
 
@@ -1176,25 +1169,49 @@ public:
   }
 
   V3D create_test_point(size_t index, size_t dimension) {
-    // Create a test point with coordinates within [-1.0, 1.0]
+    // Create a test point with coordinates within [-1.0, 0.0]
     // for applying to octahedron
     V3D output;
-    output.setX((2.0*(index%dimension)) / (dimension - 1) - 1.0);
+    output.setX((1.0*(index%dimension)) / (dimension - 1) );
     index /= dimension;
-    output.setY((2.0*(index%dimension)) / (dimension - 1) - 1.0);
+    output.setY((1.0*(index%dimension)) / (dimension - 1) );
     index /= dimension;
-    output.setZ((2.0*(index%dimension)) / (dimension - 1) - 1.0);
+    output.setZ((1.0*(index%dimension)) / (dimension - 1) );
+    return output;
+  }
+
+  std::vector<V3D> create_test_points() {
+    // Create a vector of test points
+    size_t dim = 5;
+    size_t num = dim*dim*dim;
+    std::vector<V3D> output;
+    output.reserve(num);
+    for (size_t i = 0; i < num; ++i) {
+      output.push_back(create_test_point(i, dim));
+    }
     return output;
   }
 
   Track create_test_ray(size_t index, size_t startDim, size_t dirDim) {
     // create a test ray 
-    const V3D shift(0.01, 1.0 / 77, 1.0 / 117);
+    const V3D shift(0.01, -1.0 / 77, -1.0 / 117);
     V3D startPoint = create_test_point(index, startDim);
-    V3D direction = create_test_point(index, dirDim);
+    V3D direction = V3D(0.0,0.0,0.0) - create_test_point(index, dirDim);
     direction += shift; // shift to avoid divide by zero error
     direction.normalize();
     return Track(startPoint, direction);
+  }
+
+  std::vector<Track> create_test_rays() {
+    size_t sDim = 3;
+    size_t dDim = 2;
+    size_t num = sDim*sDim*sDim*dDim*dDim*dDim;
+    std::vector<Track> output;
+    output.reserve(num);
+    for (size_t i = 0; i < num; ++i) {
+      output.push_back(create_test_ray(i, sDim, dDim));
+    }
+    return output;
   }
 
 private:
@@ -1202,6 +1219,8 @@ private:
   std::unique_ptr<MeshObject> octahedron;
   std::unique_ptr<MeshObject> lShape;
   std::unique_ptr<MeshObject> smallCube;
+  std::vector<V3D> testPoints;
+  std::vector<Track> testRays;
 };
 
 #endif // MANTID_TESTMESHOBJECT__
