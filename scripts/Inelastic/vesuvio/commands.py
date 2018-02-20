@@ -55,7 +55,8 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     vesuvio_fit_routine = VesuvioTOFFitRoutine(ms_helper, fit_helper, corrections_helper,
                                                mass_profile_collection, flags['fit_mode'])
     vesuvio_output, result, exit_iteration = vesuvio_fit_routine(vesuvio_input, iterations, convergence_threshold,
-                                                                 flags.get('output_verbose_corrections', False))
+                                                                 flags.get('output_verbose_corrections', False),
+                                                                 flags.get('calculate_caad', False))
     return result, vesuvio_output.prefit_parameters_workspace, vesuvio_output.fit_parameters_workspace, exit_iteration
 
 
@@ -81,7 +82,7 @@ class VesuvioTOFFitRoutine(object):
         self._mass_profile_collection = mass_profile_collection
         self._fit_mode = fit_mode
 
-    def __call__(self, vesuvio_input, iterations, convergence_threshold, verbose_output=False):
+    def __call__(self, vesuvio_input, iterations, convergence_threshold, verbose_output=False, compute_caad=False):
         if iterations < 1:
             raise ValueError('Must perform at least one iteration')
         fit_namer = VesuvioFitNamer.from_vesuvio_input(vesuvio_input, self._fit_mode)
@@ -124,6 +125,10 @@ class VesuvioTOFFitRoutine(object):
             _add_parameters_to_ads(vesuvio_output, fit_namer)
             fit_output = _add_fit_output_to_ads(vesuvio_output, fit_namer)
             corrections_output = _group_corrections(vesuvio_output, vesuvio_input.sample_runs, iteration)
+
+            if fit_output is not None and compute_caad:
+                _add_and_group_caad(fit_namer, *_compute_caad(fit_output))
+
             previous_output = vesuvio_output
         return vesuvio_output, [x for x in (fit_output, corrections_output) if x is not None], exit_iteration
 
@@ -509,7 +514,7 @@ class VesuvioFitNamer(object):
                  iteration=0, index=0, iteration_string="", index_string="", suffix=""):
         self._sample_runs = sample_runs
         self._suffix_prefix = suffix_prefix
-        self._index_to_spectrum =
+        self._index_to_spectrum = index_to_spectrum
         self._index_to_string = index_to_string
         self._iteration_string = iteration_string
         self._index_string = index_string
@@ -592,6 +597,18 @@ class VesuvioFitNamer(object):
     @property
     def corrected_group_name(self):
         return self._sample_runs + "_corrected" + self.suffix
+
+    @property
+    def caad_workspace_name(self):
+        return self._sample_runs + "_CAAD_sum_iteration_" + str(self._iteration)
+
+    @property
+    def normalised_group_name(self):
+        return self._sample_runs + "_CAAD_normalised_iteration_" + str(self._iteration)
+
+    def normalised_workspace_name(self, index):
+        return self._sample_runs + "_normalised_spectrum" + str(self._index_to_spectrum(index)) \
+               + "_iteration_" + str(self._iteration)
 
     def copy(self):
         return VesuvioFitNamer(self._sample_runs, self._suffix_prefix, self._index_to_string, self._iteration,
@@ -886,6 +903,16 @@ def _add_corrections_to_ads(corrections_group, prefix):
         mtd.addOrReplace(name, correction_workspace)
         corrections_names.append(name)
     return corrections_names
+
+
+def _add_and_group_caad(fit_namer, normalised_workspaces, summed_workspace):
+    normalised_names = [fit_namer.normalised_workspace_name(index) for index in range(len(normalised_workspaces))]
+
+    for name, workspace in zip(normalised_names, normalised_workspaces):
+        mtd.addOrReplace(name, workspace)
+
+    GroupWorkspaces(InputWorkspaces=normalised_names, OutputWorkspace=fit_namer.normalised_group_name)
+    mtd.addOrReplace(fit_namer.caad_workspace_name, summed_workspace)
 
 
 def _compute_caad(fit_workspaces):
