@@ -75,6 +75,9 @@ private:
 
   void setLoadEnabled(const bool enabled);
 
+  static const char GSAS_HOME_SETTING_NAME[];
+  static const char SETTINGS_NAME[];
+
   boost::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
 
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;

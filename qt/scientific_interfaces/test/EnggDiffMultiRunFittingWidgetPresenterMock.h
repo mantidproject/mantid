@@ -34,6 +34,8 @@ public:
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
   getWidgetAdder() const override;
 
+  MOCK_CONST_METHOD0(hasSelectedRunLabel, bool());
+
   MOCK_METHOD1(
       notify,
       void(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif));

@@ -70,6 +70,9 @@ public:
     const auto pathToGSASII = "GSASHOME";
     const auto GSASIIProjectFile = "GPX.gpx";
 
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
@@ -121,6 +124,9 @@ public:
     const auto dmin = 1.0;
     const auto negativeWeight = 2.0;
 
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));

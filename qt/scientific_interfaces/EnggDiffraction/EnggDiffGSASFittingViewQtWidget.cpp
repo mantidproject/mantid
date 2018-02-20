@@ -8,6 +8,7 @@
 #include <boost/make_shared.hpp>
 
 #include <QFileDialog>
+#include <QSettings>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -39,6 +40,10 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
 }
 
 EnggDiffGSASFittingViewQtWidget::~EnggDiffGSASFittingViewQtWidget() {
+  QSettings settings(tr(SETTINGS_NAME));
+  const auto gsasHome = m_ui.lineEdit_gsasHome->text();
+  settings.setValue(tr(GSAS_HOME_SETTING_NAME), gsasHome);
+
   m_presenter->notify(IEnggDiffGSASFittingPresenter::ShutDown);
 }
 
@@ -257,6 +262,12 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
 
   connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));
+
+  QSettings settings(tr(SETTINGS_NAME));
+  if (settings.contains(tr(GSAS_HOME_SETTING_NAME))) {
+    m_ui.lineEdit_gsasHome->setText(
+        settings.value(tr(GSAS_HOME_SETTING_NAME)).toString());
+  }
 }
 
 void EnggDiffGSASFittingViewQtWidget::userError(
@@ -269,6 +280,11 @@ void EnggDiffGSASFittingViewQtWidget::userWarning(
     const std::string &warningDescription) const {
   m_userMessageProvider->userWarning(warningTitle, warningDescription);
 }
+
+const char EnggDiffGSASFittingViewQtWidget::GSAS_HOME_SETTING_NAME[] =
+    "GSAS_HOME";
+const char EnggDiffGSASFittingViewQtWidget::SETTINGS_NAME[] =
+    "EnggGUIGSASTabSettings";
 
 } // CustomInterfaces
 } // MantidQt
