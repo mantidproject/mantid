@@ -143,7 +143,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                                                       OutputInQ="__q", OutputInQSquared="__q2",
                                                       StoreInADS=False, EnableLogging=False)
 
-            q2_workspace = Logarithm(InputWorkspace=q2_workspace, OutputWorkpace="__q2",
+            q2_workspace = Logarithm(InputWorkspace=q2_workspace, OutputWorkspace="__q2",
                                      StoreInADS=False, EnableLogging=False)
 
             q_workspaces.append(q_workspace)
