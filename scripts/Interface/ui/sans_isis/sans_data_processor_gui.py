@@ -220,6 +220,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self._setup_main_tab()
 
         self.multi_period_check_box.stateChanged.connect(self._on_multi_period_selection)
+        self.wavelength_step_type_combo_box.currentIndexChanged.connect(self._on_wavelength_step_type_changed)
 
         # --------------------------------------------------------------------------------------------------------------
         # Settings tabs
@@ -276,10 +277,20 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.output_mode_file_radio_button.toggled.connect(self._on_output_mode_changed)
         self.output_mode_both_radio_button.toggled.connect(self._on_output_mode_changed)
 
+        # Wavelength
+        self.wavelength_stackedWidget.setCurrentIndex(0)
+        self.reduction_mode_combo_box.currentIndexChanged.connect(self._on_reduction_mode_selection_has_changed)
+
         return True
 
     def _on_output_mode_changed(self, state):
         self.data_processor_table.settingsChanged()
+
+    def _on_wavelength_step_type_changed(self):
+        if self.wavelength_step_type == RangeStepType.RangeLin:
+            self.wavelength_stackedWidget.setCurrentIndex(1)
+        else:
+            self.wavelength_stackedWidget.setCurrentIndex(0)
 
     def _on_use_optimisations_changed(self, state):
         self.data_processor_table.settingsChanged()
@@ -929,6 +940,22 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @wavelength_step.setter
     def wavelength_step(self, value):
         self.update_simple_line_edit_field(line_edit="wavelength_step_line_edit", value=value)
+
+    @property
+    def wavelength_range(self):
+        self.get_simple_line_edit_field(line_edit="wavelength_range_line_edit", expected_type=str)
+
+    @wavelength_range.setter
+    def wavelength_range(self, value):
+        self.update_simple_line_edit_field(line_edit="wavelength_range_line_edit", value=value)
+
+    @property
+    def wavelength_scale(self):
+        self.get_simple_line_edit_field(line_edit="wavelength_scale_line_edit", expected_type=str)
+
+    @wavelength_scale.setter
+    def wavelength_scale(self, value):
+        self.update_simple_line_edit_field(line_edit="wavelength_scale_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale Group

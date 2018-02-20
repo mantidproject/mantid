@@ -223,7 +223,7 @@ class DetectorType(object):
 #  Ranges
 # --------------------------
 @string_convertible
-@serializable_enum("Lin", "Log")
+@serializable_enum("Lin", "Log", "RangeLin")
 class RangeStepType(object):
     """
     Defines the step type of a range
