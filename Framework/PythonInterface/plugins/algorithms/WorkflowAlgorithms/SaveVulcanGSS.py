@@ -4,7 +4,7 @@ from six.moves import range  #pylint: disable=redefined-builtin
 import mantid.simpleapi as api
 # from mantid.api import *
 from mantid.kernel import *
-from mantid.api import MatrixWorkspaceProperty, PropertyMode
+from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 
 class SaveVulcanGSS(PythonAlgorithm):
     """ Save GSS file for VULCAN.  This is a workflow algorithm
@@ -31,7 +31,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "Focused diffraction workspace to be exported to GSAS file. ")
 
-        self.declareProperty(TableWorkspaceProperty('BinningTable', '', Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty('BinningTable', '', Direction.Input, PropertyMode.Optional),
                              'Table workspace containing binning parameters. If not specified, then no re-binning'
                              'is required')
 
