@@ -184,6 +184,10 @@ QString ReflSettingsPresenter::asAlgorithmPropertyBool(bool value) {
   return value ? "1" : "0";
 }
 
+void ReflSettingsPresenter::onReductionResumed() { m_view->disableAll(); }
+
+void ReflSettingsPresenter::onReductionPaused() { m_view->enableAll(); }
+
 /** Returns global options for 'ReflectometryReductionOneAuto'
  * @return :: Global options for 'ReflectometryReductionOneAuto'
  */

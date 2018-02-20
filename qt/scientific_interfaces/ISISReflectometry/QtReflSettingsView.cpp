@@ -67,6 +67,16 @@ void QtReflSettingsView::connectSettingsChange(QGroupBox &edit) {
   connect(&edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
 }
 
+void QtReflSettingsView::disableAll() {
+  m_ui.instSettingsGroup->setEnabled(false);
+  m_ui.expSettingsGroup->setEnabled(false);
+}
+
+void QtReflSettingsView::enableAll() {
+  m_ui.instSettingsGroup->setEnabled(true);
+  m_ui.expSettingsGroup->setEnabled(true);
+}
+
 void QtReflSettingsView::registerSettingsWidgets(
     Mantid::API::IAlgorithm_sptr alg) {
   registerExperimentSettingsWidgets(alg);
@@ -244,7 +254,8 @@ void QtReflSettingsView::setChecked(QCheckBox &checkBox, bool checked) {
 
 class SetI0MonIndex : public boost::static_visitor<> {
 public:
-  SetI0MonIndex(QLineEdit &I0MonIndexEdit) : m_I0monIndexEdit(I0MonIndexEdit) {}
+  explicit SetI0MonIndex(QLineEdit &I0MonIndexEdit)
+      : m_I0monIndexEdit(I0MonIndexEdit) {}
 
   void operator()(int index) const {
     m_I0monIndexEdit.setText(QString::number(index));

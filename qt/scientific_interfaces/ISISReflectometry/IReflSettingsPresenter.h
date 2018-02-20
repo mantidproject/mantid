@@ -64,6 +64,9 @@ public:
   virtual void notify(IReflSettingsPresenter::Flag flag) = 0;
   /// Set current instrument name
   virtual void setInstrumentName(const std::string &instName) = 0;
+
+  virtual void onReductionPaused() = 0;
+  virtual void onReductionResumed() = 0;
 };
 }
 }
