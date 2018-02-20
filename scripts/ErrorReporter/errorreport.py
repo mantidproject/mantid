@@ -3,12 +3,14 @@ from PyQt4 import QtGui
 import ui_errorreport
 from PyQt4.QtCore import pyqtSignal
 
+
 class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
     action = pyqtSignal(bool, int, str, str)
+
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
-        
+
         self.action.connect(QtGui.QApplication.instance().errorHandling)
 
         self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
@@ -22,34 +24,16 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         self.noShareButton.clicked.connect(self.noShare)
 
     def fullShare(self):
-        #print('Thank you so much!')
         self.action.emit(self.continue_working, 0, self.input_name, self.input_email)
         self.close()
-        # if self.radioButtonContinue.isChecked() == True: 
-        #     #print('Continuing Mantid')
-        # else:
-        #     #print('Exiting Mantid')
-        #     sys.exit()
 
     def nonIDShare(self):
-        #print('No worries, it all helps.')
         self.action.emit(self.continue_working, 1, self.input_name, self.input_email)
         self.close()
-        # if self.radioButtonContinue.isChecked() == True:
-        #     #print('Continuing Mantid') 
-        # else:
-        #     #print('Exiting Mantid')
-        #     sys.exit()
 
     def noShare(self):
-        #print('O.K.')
         self.action.emit(self.continue_working, 2, self.input_name, self.input_email)
         self.close()
-        # if self.radioButtonContinue.isChecked() == True:
-        #     #print('Continuing Mantid')  
-        # else:
-        #     #print('Exiting Mantid')
-        #     sys.exit()
 
     def get_simple_line_edit_field(self, expected_type, line_edit):
         gui_element = getattr(self, line_edit)
