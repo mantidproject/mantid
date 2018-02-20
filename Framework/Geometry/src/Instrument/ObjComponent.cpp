@@ -53,7 +53,7 @@ const IObject_const_sptr ObjComponent::shape() const {
 }
 
 /// Set a new shape on the component
-void ObjComponent::setShape(IObject_const_sptr newShape) {
+void ObjComponent::setShape(boost::shared_ptr<const IObject> newShape) {
   if (m_map)
     throw std::runtime_error("ObjComponent::setShape - Cannot change the shape "
                              "of a parameterized object");
