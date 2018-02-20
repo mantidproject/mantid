@@ -143,10 +143,9 @@ void SofQW::exec() {
 /** Creates the output workspace, setting the axes according to the input
  * binning parameters
  *  @param[in]  inputWorkspace The input workspace
- *  @param[in]  binParams The bin parameters from the user
- *  @param[out] newAxis        The 'vertical' axis defined by the given
- * parameters
- *  @param[out] ebinParams     The 'horizontal' axis parameters (optional)
+ *  @param[in]  qbinParams The q-bin parameters from the user
+ *  @param[out] qAxis The 'vertical' (q) axis defined by the given parameters
+ *  @param[out] ebinParams The 'horizontal' (energy) axis parameters (optional)
  *  @return A pointer to the newly-created workspace
  */
 API::MatrixWorkspace_sptr

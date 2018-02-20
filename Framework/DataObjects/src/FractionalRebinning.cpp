@@ -49,7 +49,7 @@ QuadrilateralType getQuadrilateralType(const Quadrilateral &inputQ) {
  * Find the possible region of intersection on the output workspace for the
  * given polygon. The given polygon must have a CLOCKWISE winding and the
  * first vertex must be the "lowest left" point.
- * @param outputWS A pointer to the output workspace
+ * @param xAxis A vector containing the output horizontal axis edges
  * @param verticalAxis A vector containing the output vertical axis edges
  * @param inputQ The input polygon (Polygon winding must be clockwise)
  * @param qstart An output giving the starting index in the Q direction
@@ -98,7 +98,7 @@ bool getIntersectionRegion(const std::vector<double> &xAxis,
 /**
  * Computes the output grid bins which intersect the input quad and their
  * overlapping areas assuming both input and output grids are rectangular
- * @param outputWS The workspace containing the output data
+ * @param xAxis A vector containing the output horizontal axis edges
  * @param yAxis The output data vertical axis
  * @param inputQ The input quadrilateral
  * @param y_start The starting y-axis index
@@ -148,7 +148,7 @@ double polyArea(T &v1, T &v2, Ts &&... vertices) {
 /**
  * Computes the output grid bins which intersect the input quad and their
  * overlapping areas assuming input quad is a y-axis aligned trapezoid.
- * @param outputWS The workspace containing the output data
+ * @param xAxis A vector containing the output horizontal axis edges
  * @param yAxis The output data vertical axis
  * @param inputQ The input quadrilateral
  * @param y_start The starting y-axis index
@@ -436,7 +436,7 @@ void calcTrapezoidYIntersections(
 /**
  * Computes the output grid bins which intersect the input quad and their
  * overlapping areas for arbitrary shaped input grids
- * @param outputWS The workspace containing the output data
+ * @param xAxis A vector containing the output horizontal axis edges
  * @param yAxis The output data vertical axis
  * @param inputQ The input quadrilateral
  * @param qstart The starting y-axis index
