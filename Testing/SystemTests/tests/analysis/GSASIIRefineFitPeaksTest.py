@@ -6,7 +6,7 @@ import mantid
 import site
 import stresstesting
 import tempfile
-from mantid.simpleapi import GSASIIRefineFitPeaks, Load
+from mantid.simpleapi import GSASIIRefineFitPeaks, Load, SaveNexus
 
 
 class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
@@ -103,6 +103,7 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
         # TODO: Check fitted_peaks_ws has correct values once we have some data we're sure of
         self.assertEqual(self.input_ws.getNumberBins(), self.fitted_peaks_ws.getNumberBins())
         self.assertAlmostEqual(self.rwp, self._get_expected_rwp(), delta=1e-6)
+        SaveNexus(InputWorkspace=self._LATTICE_PARAM_TBL_NAME, Filename=r"C:\Users\jxl54435\ref.nxs")
         return self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._get_fit_params_reference_filename())
 
 
