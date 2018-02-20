@@ -32,6 +32,9 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
         self.declareProperty('WavelengthStep', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='The step size of the wavelength binning.')
 
+        self.declareProperty('WavelengthRangeString', defaultValue="", direction=Direction.Input,
+                             doc='A range string of the same type used by REBIN.')
+
         # Step type
         allowed_step_types = StringListValidator([RangeStepType.to_string(RangeStepType.Log),
                                                   RangeStepType.to_string(RangeStepType.Lin)])
@@ -115,6 +118,11 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
         return convert_alg.getProperty("OutputWorkspace").value
 
     def _get_rebin_string(self, workspace):
+        step_type = RangeStepType.from_string(self.getProperty("WavelengthStepType").value)
+
+        if step_type == RangeStepType.RangeLin:
+            return self.getProperty("WavelengthRangeString")
+
         wavelength_low = self.getProperty("WavelengthLow").value
         wavelength_high = self.getProperty("WavelengthHigh").value
 
@@ -128,7 +136,7 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
             wavelength_high = max(workspace.readX(0))
 
         wavelength_step = self.getProperty("WavelengthStep").value
-        step_type = RangeStepType.from_string(self.getProperty("WavelengthStepType").value)
+
         pre_factor = -1 if step_type == RangeStepType.Log else 1
         wavelength_step *= pre_factor
         return str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
