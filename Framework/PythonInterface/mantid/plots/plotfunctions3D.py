@@ -60,7 +60,7 @@ def plot(axes, workspace, *args, **kwargs):
         (wksp_index, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
         (x, z, _, _) = get_spectrum(workspace, wksp_index, distribution, withDy=False, withDx=False)
         y_val = workspace.getAxis(1).extractValues()[wksp_index]
-        y = numpy.full(x.size, y_val)  # fill x size array with y value
+        y = [y_val for _ in range(len(x))]  # fill x size array with y value
         _set_labels_3d(axes, workspace)
     return axes.plot(x, y, z, *args, **kwargs)
 
