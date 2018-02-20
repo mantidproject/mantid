@@ -19,18 +19,14 @@ namespace Crystal {
 class DLLExport SaveLauenorm : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "SaveLauenorm";
-  };
+  const std::string name() const override { return "SaveLauenorm"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Save a PeaksWorkspace to a ASCII file for each detector.";
   }
 
   /// Algorithm's version for identification
-  int version() const override {
-    return 1;
-  };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Crystal\\DataHandling;DataHandling\\Text";
