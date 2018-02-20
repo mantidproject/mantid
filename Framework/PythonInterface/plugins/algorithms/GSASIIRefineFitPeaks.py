@@ -53,10 +53,10 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                 "using GSAS-II scriptable API")
 
     def validateInputs(self):
-        x_min = self.getProperty(self.PROP_XMIN).value
-        x_max = self.getProperty(self.PROP_XMAX).value
+        x_min = self.getProperty(self.PROP_XMIN)
+        x_max = self.getProperty(self.PROP_XMAX)
 
-        if x_max <= x_min:
+        if not x_max.isDefault and x_max.value <= x_min.value:
             return {self.PROP_XMAX: "{} must be greater than {}".format(self.PROP_XMAX, self.PROP_XMIN)}
 
         return {}
