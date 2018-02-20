@@ -33,4 +33,5 @@ Component Overviews
    :maxdepth: 1
 
    AlgorithmMPISupport
+   IndexProperty
    ISISSANSReductionBackend
