@@ -47,7 +47,7 @@ void LoadMcStas::init() {
                                                     FileProperty::Load, exts),
                   "The name of the Nexus file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
   // added to allow control of errorbars
@@ -407,13 +407,7 @@ void LoadMcStas::exec() {
     if (allEventWS[i].second != "partial_event_data_workspace") {
       auto ws = allEventWS[i].first;
       ws->setAllX(axis);
-      std::string extraProperty =
-        "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
-      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-        extraProperty, allEventWS[i].second, Direction::Output));
-      setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
-      m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
-                                  // unique
+      AnalysisDataService::Instance().addOrReplace(allEventWS[i].second, ws);
       scatteringWS.emplace_back(ws);
     }
   }
@@ -550,13 +544,7 @@ void LoadMcStas::readHistogramData(
     std::string nameUserSee = std::string(nameAttrValueTITLE)
                                   .append("_")
                                   .append(getProperty("OutputWorkspace"));
-    std::string extraProperty =
-        "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
-    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-        extraProperty, nameUserSee, Direction::Output));
-    setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
-    m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
-                                // unique
+    AnalysisDataService::Instance().addOrReplace(nameUserSee, ws);
 
     // Make Mantid store the workspace in the group
     outputGroup->addWorkspace(ws);

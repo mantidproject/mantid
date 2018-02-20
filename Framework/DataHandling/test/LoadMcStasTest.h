@@ -36,29 +36,13 @@ public:
   }
 
   void testExec() {
-    if (!algToBeTested.isInitialized())
-      algToBeTested.initialize();
-
     outputSpace = "LoadMcStasTest";
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
 
-    // Now set it...
-    // specify name of file to load workspace from
-    inputFile = "mcstas_event_hist.h5";
-    algToBeTested.setPropertyValue("Filename", inputFile);
-
-    // mark the temp file to be deleted upon end of execution
-    { // limit variable scope
-      std::string tempFile = algToBeTested.getPropertyValue("Filename");
-      tempFile = tempFile.substr(0, tempFile.size() - 2) + "vtp";
-      Poco::TemporaryFile::registerForDeletion(tempFile);
-    }
-
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
-    TS_ASSERT(algToBeTested.isExecuted());
+    load_test("mcstas_event_hist.h5", outputSpace);
 
     std::string postfix = "_" + outputSpace;
     //
@@ -115,6 +99,25 @@ public:
     TS_ASSERT_DELTA(sum_total, (sum_single + sum_multiple), 0.0001);
   }
 
+  void testLoadMultiple()
+  {
+    outputSpace = "LoadMcStasTest";
+    algToBeTested.setProperty("OutputWorkspace", outputSpace);
+    auto outputGroup = load_test("mccode_contains_one_bank.h5", outputSpace);
+    TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 6);
+    outputGroup = load_test("mccode_multiple_scattering.h5", outputSpace);
+    TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 3);
+
+  }
+
+  void testLoadTwice() {
+    outputSpace = "LoadMcStasTest";
+    algToBeTested.setProperty("OutputWorkspace", outputSpace);
+    load_test("mccode_contains_one_bank.h5", outputSpace);
+    auto outputGroup = load_test("mccode_contains_one_bank.h5", outputSpace);
+    TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 6);
+  }
+
 private:
   double extractSumAndTest(MatrixWorkspace_sptr workspace, const double &expectedSum) {
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 8192);
@@ -124,6 +127,21 @@ private:
     sum *= 1.0e22;
     TS_ASSERT_DELTA(sum, expectedSum, 0.0001);
     return sum;
+  }
+  boost::shared_ptr<WorkspaceGroup> load_test(std::string fileName, std::string outputName) {
+ 
+    //specify name of file to load workspace from
+    algToBeTested.setProperty("Filename", fileName);
+
+    // mark the temp file to be deleted upon end of execution
+    { // limit variable scope
+      std::string tempFile = algToBeTested.getPropertyValue("Filename");
+      tempFile = tempFile.substr(0, tempFile.size() - 2) + "vtp";
+      Poco::TemporaryFile::registerForDeletion(tempFile);
+    }
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    auto outputGroup(AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputName));
+    return outputGroup;
   }
 
   LoadMcStas algToBeTested;
