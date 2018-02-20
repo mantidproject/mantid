@@ -39,10 +39,6 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     PROP_XMAX = "XMax"
     PROP_XMIN = "XMin"
 
-    DEFAULT_REFINEMENT_PARAMS = {"set":
-                                 {"Background": {"no.coeffs": 3,
-                                                 "refine": True},
-                                  "Sample Parameters": ["Scale"]}}
     LATTICE_TABLE_PARAMS = ["length_a", "length_b", "length_c", "angle_alpha", "angle_beta", "angle_gamma", "volume"]
     REFINEMENT_METHODS = ["Pawley refinement", "Rietveld refinement", "Peak fitting"]
 
@@ -154,26 +150,30 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         table.addRow([float(lattice_params[param]) for param in self.LATTICE_TABLE_PARAMS])
         return table
 
-    def _create_refinement_params_dict(self):
-        refinement_params = self.DEFAULT_REFINEMENT_PARAMS
+    def _create_refinement_params_dict(self, num_phases):
+        basic_refinement = {"set": {"Background": {"no.coeffs": 3, "refine": True},
+                                    "Sample Parameters": ["Scale"]}}
 
         x_max = self.getProperty(self.PROP_XMAX).value
         if x_max:
             x_min = self.getProperty(self.PROP_XMIN).value
-            refinement_params["set"].update({"Limits": [x_min, x_max]})
+            basic_refinement["set"].update({"Limits": [x_min, x_max]})
 
-        if "Instrument Parameters" not in refinement_params["set"]:
-            refinement_params["set"]["Instrument Parameters"] = []
+        scale_refinement = {"set": {"Scale": True},
+                            "phases": range(1, num_phases)}
+        unit_cell_refinement = {"set": {"Cell": True}}
+
+        profile_coeffs_refinement = {"set": {"Instrument Parameters": []}}
 
         refine_sigma = self.getProperty(self.PROP_REFINE_SIGMA).value
         if refine_sigma:
-            refinement_params["set"]["Instrument Parameters"].append("sig-1")
+            profile_coeffs_refinement["set"]["Instrument Parameters"].append("sig-1")
 
         refine_gamma = self.getProperty(self.PROP_REFINE_GAMMA).value
         if refine_gamma:
-            refinement_params["set"]["Instrument Parameters"].append("X")
+            profile_coeffs_refinement["set"]["Instrument Parameters"].append("X")
 
-        return refinement_params
+        return [basic_refinement, scale_refinement, unit_cell_refinement, profile_coeffs_refinement, {}]
 
     def _extract_spectrum_from_workspace(self):
         """
@@ -224,7 +224,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         spectrum_path = self._save_temporary_fxye(spectrum=spectrum)
 
         inst_param_path = self.getPropertyValue(self.PROP_PATH_TO_INST_PARAMS)
-        gsas_proj.add_powder_histogram(datafile=spectrum_path, iparams=inst_param_path)
+        gsas_proj.add_powder_histogram(datafile=spectrum_path, iparams=inst_param_path, fmthint="xye")
 
         self._remove_temporary_fxye(spectrum_path=spectrum_path)
 
@@ -252,8 +252,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             if do_pawley:
                 self._set_pawley_phase_parameters(phase)
 
-        gsas_proj.set_refinement(refinement=self._create_refinement_params_dict())
-        gsas_proj.do_refinements([{}])
+        refinements = self._create_refinement_params_dict(num_phases=len(phase_paths))
+        gsas_proj.do_refinements(refinements)
+        gsas_proj.save()
 
         rwp = gsas_proj.histogram(0).get_wR()
         lattice_params = gsas_proj.phases()[0].get_cell()
