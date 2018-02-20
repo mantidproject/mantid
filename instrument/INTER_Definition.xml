@@ -235,9 +235,6 @@
     <id val="4" />
   </idlist>
 
-  <idlist idname="point-detector2">
-    <id val="5" />
-  </idlist>
  <!--
   <idlist idname="linear-detector">
     <id start="2001" end="2240" />
