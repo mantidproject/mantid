@@ -192,8 +192,7 @@ Estimate background
 
 The algorithm is
 1. Find the left and right *N* points respectively, average both *x* and *y* value
-2. Use :math:`(\bar{x}_1, \bar{y}_1)` and :math:`(\bar{x}_2, \bar{y}_2)` to calculate *a* and *b*
-   in :math:`y = a\cdot x + b`
+2. Use :math:`(\bar{x}_1, \bar{y}_1)` and :math:`(\bar{x}_2, \bar{y}_2)` to calculate *a* and *b* in :math:`y = a\cdot x + b`
 
 Estimate peak parameters
 ########################
