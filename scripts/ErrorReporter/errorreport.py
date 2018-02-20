@@ -2,6 +2,8 @@ import sys
 from PyQt4 import QtGui
 import ui_errorreport
 from PyQt4.QtCore import pyqtSignal
+from mantidqtpython import MantidQt
+
 
 
 class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
@@ -14,6 +16,8 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         self.action.connect(QtGui.QApplication.instance().errorHandling)
 
         self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
+
+        self.requestTextBrowser.anchorClicked.connect(MantidQt.API.MantidDesktopServices.openUrl)
 
 #  The options on what to do after closing the window (exit/continue)
         self.radioButtonContinue.setChecked(True)     # Set continue to be checked by default

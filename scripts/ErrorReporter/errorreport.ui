@@ -122,7 +122,10 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:10pt; color:#000000;&quot;&gt;Are you willing to share further details with us about this incident?&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="openExternalLinks">
-          <bool>true</bool>
+          <bool>false</bool>
+         </property>
+         <property name="openLinks">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
