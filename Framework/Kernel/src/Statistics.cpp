@@ -100,10 +100,9 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
   }
-  double divisor = stats.standard_deviation / data.size();
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     double tmp = static_cast<double>(*it);
-    Zscore.push_back(fabs(stats.mean - tmp) / divisor;
+    Zscore.push_back(fabs((stats.mean - tmp) / stats.standard_deviation));
   }
   return Zscore;
 }

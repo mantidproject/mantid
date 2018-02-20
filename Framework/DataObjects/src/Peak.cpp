@@ -946,6 +946,8 @@ double Peak::getValueByColName(const std::string &name_in) const {
     return this->getRow();
   else if (name == "col")
     return this->getCol();
+  else if (name == "peaknumber")
+    return this->getPeakNumber();
   else
     throw std::runtime_error(
         "Peak::getValueByColName() unknown column or column is not a number: " +
