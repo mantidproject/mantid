@@ -112,7 +112,7 @@ class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
         return not self.path_to_gsas()
 
     def _get_expected_rwp(self):
-        return 73.9720953
+        return 28.441745
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksRietveldFitParams.nxs"
@@ -130,7 +130,7 @@ class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
         return not self.path_to_gsas()
 
     def _get_expected_rwp(self):
-        return 74.008464
+        return 74.025863
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksPawleyFitParams.nxs"
