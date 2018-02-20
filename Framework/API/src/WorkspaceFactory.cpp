@@ -36,6 +36,8 @@ WorkspaceFactoryImpl::WorkspaceFactoryImpl()
  *  If the workspace is the same size as its parent, then the X data, axes and
  * mask list are
  *  copied. If its a different size then they are not.
+ *
+ *  @deprecated Replaced by functions in MantidDataObjects/WorkspaceCreation.h
  *  @param  parent    A shared pointer to the parent workspace
  *  @param  NVectors  (Optional) The number of vectors/histograms/detectors in
  * the workspace
@@ -81,6 +83,7 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
  * This sets values such as title, instrument, units, sample, spectramap.
  * This does NOT copy any data.
  *
+ * @deprecated Replaced by functions in MantidDataObjects/WorkspaceCreation.h
  * @param parent :: the parent workspace
  * @param child :: the child workspace
  * @param differentSize :: A flag to indicate if the two workspace will be
@@ -139,6 +142,8 @@ void WorkspaceFactoryImpl::initializeFromParent(
 
 /** Creates a new instance of the class with the given name, and allocates
  * memory for the arrays
+ *
+ *  @deprecated Replaced by functions in MantidDataObjects/WorkspaceCreation.h
  *  @param  className The name of the class you wish to create
  *  @param  NVectors  The number of vectors/histograms/detectors in the
  * workspace

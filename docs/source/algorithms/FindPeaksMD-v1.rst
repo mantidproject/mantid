@@ -53,6 +53,80 @@ quantity the signal count (total weighted event sum divided by the number of eve
 the events are weighted this will result in boxes with signal counts larger than one for peaks and for the majority of background counts the signal count will be 1. Hence it is possible to discriminate between peaks and background. Note that the NumberOfEventNormalization selection of the `PeakFindingStrategy` property  does not make sense for all scenarios and infact might not produce useful results for your particular case.
 
 
+Calculate Goniometer For Constant Wavelength
+############################################
+
+The CalculateGoniometerForCW option allows you to keep only one
+instrument definition from a set of merged MD workspaces. It only
+works for a constant wavelength source and only for Q sample
+workspaces. It also assumes the goniometer rotation is around the
+y-axis only.
+
+The goniometer (:math:`G`) is calculated from
+:math:`\textbf{Q}_{sample}` for a given wavelength (:math:`\lambda`)
+by:
+
+First calculate the :math:`\textbf{Q}_{lab}` using
+:math:`\textbf{Q}_{sample}` and :math:`\lambda`.
+
+.. math:: k = \frac{2 \pi}{\lambda}
+
+.. math:: G \textbf{Q}_{sample} = \textbf{Q}_{lab} = \left(\begin{array}{c}
+          -k\sin(\theta)\cos(\phi) \\
+          -k\sin(\theta)\sin(\phi) \\
+          k (1-\cos(\theta))
+          \end{array}\right) (1)
+
+.. math:: |\textbf{Q}_{sample}|^2 = |\textbf{Q}_{lab}|^2 = 2 k^2 (1-\cos(\theta))
+
+:math:`\therefore`
+
+.. math:: \theta = \cos^{-1}(1-\frac{|\textbf{Q}_{sample}|^2}{2k^2})
+
+.. math:: \phi = \sin^{-1}(-\textbf{Q}_{sample}^y \sin(\theta)/k)
+
+Now you have :math:`\theta`, :math:`\phi` and k you can get :math:`\textbf{Q}_{lab}` using (1).
+
+We need to now solve :math:`G \textbf{Q}_{sample} =
+\textbf{Q}_{lab}`. For a rotation around y-axis only we want to find
+:math:`\psi` for:
+
+.. math:: G = \begin{bmatrix}
+	  \cos(\psi)  & 0 & \sin(\psi) \\
+	  0           & 1 & 0 \\
+	  -\sin(\psi) & 0 & \cos(\psi)
+	  \end{bmatrix} (2)
+
+which gives two equations
+
+.. math:: \cos(\psi)\textbf{Q}_{sample}^x+\sin(\psi)\textbf{Q}_{sample}^z = \textbf{Q}_{lab}^x
+.. math:: -\sin(\psi)\textbf{Q}_{sample}^x+\cos(\psi)\textbf{Q}_{sample}^z = \textbf{Q}_{lab}^z
+
+make
+
+.. math:: A = \begin{bmatrix}
+          \textbf{Q}_{sample}^x & \textbf{Q}_{sample}^z \\
+          \textbf{Q}_{sample}^z & \textbf{Q}_{sample}^x
+          \end{bmatrix}
+
+.. math:: B = \begin{bmatrix}
+	  \textbf{Q}_{lab}^x \\
+	  \textbf{Q}_{lab}^z
+	  \end{bmatrix}
+
+Then we need to solve :math:`A X = B` for :math:`X` where
+
+.. math:: X = \begin{bmatrix}
+              \cos{\psi} \\
+              \sin{\psi}
+              \end{bmatrix} = A^{-1} B
+
+then
+
+.. math:: \psi = \tan^{-1}\left(\frac{\sin{\psi}}{\cos{\psi}}\right)
+
+Put :math:`\psi` into (2) and you have the goniometer for that peak.
+
 Usage
 ------
 
