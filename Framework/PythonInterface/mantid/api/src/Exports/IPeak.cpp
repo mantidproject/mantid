@@ -61,6 +61,8 @@ void export_IPeak() {
            "cache values related to it.")
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"),
            "Return the run number this peak was measured at")
+      .def("getPeakNumber", &IPeak::getPeakNumber, arg("self"),
+           "Return the peak number for this peak")
       .def("setRunNumber", &IPeak::setRunNumber,
            (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")

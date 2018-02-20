@@ -111,12 +111,12 @@ public:
   Mantid::Kernel::V3D getDetectorPosition() const override;
   Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
 
-  void setQSampleFrame(
-      const Mantid::Kernel::V3D &QSampleFrame,
-      boost::optional<double> detectorDistance = boost::none) override;
-  void
-  setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
-               boost::optional<double> detectorDistance = boost::none) override;
+  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
+                       boost::optional<double> detectorDistance =
+                           boost::none) override;
+  void setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+                    boost::optional<double> detectorDistance =
+                        boost::none) override;
 
   void setWavelength(double wavelength) override;
   double getWavelength() const override;
@@ -149,6 +149,8 @@ public:
   int getCol() const override;
   void setRow(int m_row);
   void setCol(int m_col);
+  void setPeakNumber(int m_peakNumber);
+  int getPeakNumber() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;
@@ -241,6 +243,9 @@ private:
   double m_orig_H;
   double m_orig_K;
   double m_orig_L;
+
+  // keep peak number
+  int m_peakNumber;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;

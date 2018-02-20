@@ -29,7 +29,7 @@ Peak::Peak()
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(0), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -169,7 +169,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(0), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
@@ -197,8 +197,9 @@ Peak::Peak(const Peak &other)
       m_row(other.m_row), m_col(other.m_col), sourcePos(other.sourcePos),
       samplePos(other.samplePos), detPos(other.detPos),
       m_orig_H(other.m_orig_H), m_orig_K(other.m_orig_K),
-      m_orig_L(other.m_orig_L), m_detIDs(other.m_detIDs),
-      m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
+      m_orig_L(other.m_orig_L), m_peakNumber(other.m_peakNumber),
+      m_detIDs(other.m_detIDs), m_peakShape(other.m_peakShape->clone()),
+      convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -218,7 +219,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_runNumber(ipeak.getRunNumber()),
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(0), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -871,6 +872,11 @@ int Peak::getRow() const { return m_row; }
 int Peak::getCol() const { return m_col; }
 
 // -------------------------------------------------------------------------------------
+/**Returns the unique peak number
+ * Returns -1 if it could not find it. */
+int Peak::getPeakNumber() const { return m_peakNumber; }
+
+// -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, sets the row (y) of the pixel of the
  * detector.
  * @param m_row :: row value   */
@@ -881,6 +887,13 @@ void Peak::setRow(int m_row) { this->m_row = m_row; }
  * detector.
  * @param m_col :: col value   */
 void Peak::setCol(int m_col) { this->m_col = m_col; }
+
+// -------------------------------------------------------------------------------------
+/** Sets the unique peak number
+ * @param m_col :: col value   */
+void Peak::setPeakNumber(int m_peakNumber) {
+  this->m_peakNumber = m_peakNumber;
+}
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */

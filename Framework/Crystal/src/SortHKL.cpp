@@ -133,6 +133,8 @@ void SortHKL::exec() {
         std::cout << e << "  ";
       std::cout << "\n";
       auto zScores = Kernel::getZscore(intensities);
+      if (zScores.size() > maxPeaks)
+        maxPeaks = zScores.size();
       // Possibly remove outliers.
       auto outliersRemoved = unique.second.removeOutliers(sigmaCritical);
 
@@ -183,7 +185,7 @@ void SortHKL::exec() {
 
   MatrixWorkspace_sptr UniqWksp2 =
       Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", counter,
-                                                       20, 20);
+                                                       maxPeaks, maxPeaks);
   for (int64_t i = 0; i < counter; ++i) {
     auto &outSpec = UniqWksp2->getSpectrum(i);
     const auto &inSpec = UniqWksp->getSpectrum(i);

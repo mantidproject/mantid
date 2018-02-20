@@ -76,6 +76,9 @@ public:
   virtual double getBinCount() const = 0;
   virtual void setBinCount(double m_BinCount) = 0;
 
+  virtual int getPeakNumber() const = 0;
+  virtual void setPeakNumber(int m_PeakNumber) = 0;
+
   virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
   virtual void setGoniometerMatrix(
       const Mantid::Kernel::Matrix<double> &m_GoniometerMatrix) = 0;

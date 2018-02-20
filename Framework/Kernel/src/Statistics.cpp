@@ -68,7 +68,7 @@ double getMedian(const vector<TYPE> &data, const size_t num_data,
     // return the average
     return (left + right) / 2.;
   } else
-  // Odd number
+      // Odd number
   {
     if (sorted) {
       // If sorted and odd, just return the centre value
@@ -100,9 +100,10 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
   }
+  double divisor = stats.standard_deviation / data.size();
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     double tmp = static_cast<double>(*it);
-    Zscore.push_back(fabs((tmp - stats.mean) / stats.standard_deviation));
+    Zscore.push_back(fabs(stats.mean - tmp) / divisor;
   }
   return Zscore;
 }
@@ -158,7 +159,7 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
                        (flags & StatOptions::CorrectedStdDev));
   if (stddev) {
     using namespace boost::accumulators;
-    accumulator_set<double, stats<tag::min, tag::max, tag::variance>> acc;
+    accumulator_set<double, stats<tag::min, tag::max, tag::variance> > acc;
     for (auto &value : data) {
       acc(static_cast<double>(value));
     }
@@ -175,7 +176,7 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
 
   } else if (flags & StatOptions::Mean) {
     using namespace boost::accumulators;
-    accumulator_set<double, stats<tag::mean>> acc;
+    accumulator_set<double, stats<tag::mean> > acc;
     for (auto &value : data) {
       acc(static_cast<double>(value));
     }
