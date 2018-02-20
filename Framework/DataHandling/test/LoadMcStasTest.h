@@ -99,15 +99,13 @@ public:
     TS_ASSERT_DELTA(sum_total, (sum_single + sum_multiple), 0.0001);
   }
 
-  void testLoadMultiple()
-  {
+  void testLoadMultiple() {
     outputSpace = "LoadMcStasTest";
     algToBeTested.setProperty("OutputWorkspace", outputSpace);
     auto outputGroup = load_test("mccode_contains_one_bank.h5", outputSpace);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 6);
     outputGroup = load_test("mccode_multiple_scattering.h5", outputSpace);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 3);
-
   }
 
   void testLoadTwice() {
@@ -119,7 +117,8 @@ public:
   }
 
 private:
-  double extractSumAndTest(MatrixWorkspace_sptr workspace, const double &expectedSum) {
+  double extractSumAndTest(MatrixWorkspace_sptr workspace,
+                           const double &expectedSum) {
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 8192);
     auto sum = 0.0;
     for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
@@ -128,9 +127,10 @@ private:
     TS_ASSERT_DELTA(sum, expectedSum, 0.0001);
     return sum;
   }
-  boost::shared_ptr<WorkspaceGroup> load_test(std::string fileName, std::string outputName) {
- 
-    //specify name of file to load workspace from
+  boost::shared_ptr<WorkspaceGroup> load_test(std::string fileName,
+                                              std::string outputName) {
+
+    // specify name of file to load workspace from
     algToBeTested.setProperty("Filename", fileName);
 
     // mark the temp file to be deleted upon end of execution
@@ -140,7 +140,8 @@ private:
       Poco::TemporaryFile::registerForDeletion(tempFile);
     }
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
-    auto outputGroup(AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputName));
+    auto outputGroup(
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputName));
     return outputGroup;
   }
 
