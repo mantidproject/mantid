@@ -115,6 +115,21 @@ def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf,
     return slice(vertBegin, vertEnd), slice(horBegin, horEnd)
 
 
+def configurematplotlib(params):
+    """Set matplotlib rc parameters from the params dictionary."""
+    matplotlib.rcParams.update(params)
+
+
+def defaultrcParams():
+    """Return a dictionary of directtools default matplotlib rc parameters."""
+    params = {
+        'image.cmap': 'jet',
+        'legend.numpoints': 1,
+        'text.usetex': True,
+    }
+    return params
+
+
 def mantidsubplotsetup():
     """Return a dict for the matplotlib.pyplot.subplots()."""
     return {'projection': 'mantid'}
@@ -292,4 +307,5 @@ class SampleLogs:
             setattr(obj, components[0], p.value)
 
 
-matplotlib.rc('text', usetex=True)
+# Set default matplotlib rc parameters.
+configurematplotlib(defaultrcParams())

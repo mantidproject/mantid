@@ -3,10 +3,12 @@ from __future__ import (absolute_import, division, print_function)
 import directtools
 from mantid.api import mtd
 from mantid.simpleapi import LoadILLTOF, CreateSampleWorkspace, CreateWorkspace
+import matplotlib
 import numpy
 import numpy.testing
 import testhelpers
 import unittest
+
 
 class DirectTest(unittest.TestCase):
 
@@ -30,6 +32,24 @@ class DirectTest(unittest.TestCase):
         box = directtools.box2D(xs, vertAxis, vertMax=-1)
         expected = numpy.tile(numpy.array([-1, 0, 2, 4, 5]), (1, 1))
         numpy.testing.assert_equal(xs[box], expected)
+
+    def test_configurematplotlib(self):
+        defaultParams = directtools.defaultrcParams()
+        directtools.configurematplotlib(defaultParams)
+        for key in defaultParams:
+            self.assertTrue(key in matplotlib.rcParams)
+            self.assertEqual(matplotlib.rcParams[key], defaultParams[key])
+
+    def test_defaultrcParams(self):
+        result = directtools.defaultrcParams()
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(len(result), 3)
+        self.assertTrue('image.cmap' in result)
+        self.assertEqual(result['image.cmap'], 'jet')
+        self.assertTrue('legend.numpoints' in result)
+        self.assertEqual(result['legend.numpoints'], 1)
+        self.assertTrue('text.usetex' in result)
+        self.assertEqual(result['text.usetex'], True)
 
     def test_mantidsubplotsetup(self):
         result = directtools.mantidsubplotsetup()
@@ -146,7 +166,6 @@ class DirectTest(unittest.TestCase):
         ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {'workspace': ws}
         testhelpers.assertRaisesNothing(self, directtools.wsreport, **kwargs)
-
 
     def test_SampleLogs(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1)
