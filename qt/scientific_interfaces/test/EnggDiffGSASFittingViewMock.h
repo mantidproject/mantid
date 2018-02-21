@@ -47,7 +47,11 @@ public:
 
   MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
 
-  MOCK_CONST_METHOD1(userWarning, void(const std::string &warningDescription));
+  MOCK_CONST_METHOD2(userError, void(const std::string &errorTitle,
+                                     const std::string &errorDescription));
+
+  MOCK_CONST_METHOD2(userWarning, void(const std::string &warningTitle,
+                                       const std::string &warningDescription));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

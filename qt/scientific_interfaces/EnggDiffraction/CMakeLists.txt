@@ -5,6 +5,8 @@ set ( SRC_FILES
 	EnggDiffGSASFittingModel.cpp
 	EnggDiffGSASFittingPresenter.cpp
 	EnggDiffGSASFittingViewQtWidget.cpp
+	EnggDiffMultiRunFittingQtWidget.cpp
+	EnggDiffMultiRunFittingWidgetModel.cpp
 	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
@@ -23,6 +25,8 @@ set ( INC_FILES
 	EnggDiffGSASFittingPresenter.h
 	EnggDiffGSASFittingViewQtWidget.h
 	EnggDiffGSASRefinementMethod.h
+	EnggDiffMultiRunFittingQtWidget.h
+	EnggDiffMultiRunFittingWidgetModel.h
 	EnggDiffMultiRunFittingWidgetPresenter.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
@@ -49,6 +53,7 @@ set ( MOC_FILES
     EnggDiffractionPresenter.h
     EnggDiffractionPresWorker.h
     EnggDiffractionViewQtGUI.h
+    EnggDiffMultiRunFittingQtWidget.h
 )
 
 set ( UI_FILES
@@ -59,6 +64,7 @@ set ( UI_FILES
    EnggDiffractionQtTabFitting.ui
    EnggDiffractionQtTabGSAS.ui
    EnggDiffractionQtTabSettings.ui
+   EnggDiffMultiRunFittingWidget.ui
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction

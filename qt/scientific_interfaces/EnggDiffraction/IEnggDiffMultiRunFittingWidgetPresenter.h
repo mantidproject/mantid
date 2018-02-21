@@ -14,6 +14,12 @@ class IEnggDiffMultiRunFittingWidgetPresenter {
 public:
   virtual ~IEnggDiffMultiRunFittingWidgetPresenter() = default;
 
+  // User actions, triggered by the (passive) view,
+  // which need handling in implementation
+  enum class Notification {
+    SelectRun, ///< The user has selected a new run from the list
+  };
+
   /**
    Add a fitted peaks workspace to the widget, so it can be overplotted on its
    focused run
@@ -49,6 +55,16 @@ public:
   */
   virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const = 0;
+
+  /**
+   * Notifications sent through the presenter when something changes
+   * in the view. This plays the role of signals emitted by the view
+   * to this presenter.
+   *
+   * @param notif Type of notification to process.
+   */
+  virtual void
+  notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) = 0;
 };
 
 } // namespace CustomInterfaces

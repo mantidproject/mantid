@@ -11558,6 +11558,32 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   }
 }
 
+/** Fixes the colour pallete so that the hints are readable.
+
+  On Linux (tested on Fedora 26 and Ubuntu 14.4) the palette colour for
+  ToolTipBase has no effect on the colour of tooltips, but does change
+  the colour of 'What's This' boxes and and Line Edit hints. The palette
+  colour for ToolTipText on the other hand affects all three of
+  these.
+
+  The default pallete shows light text on a pale background which, although not
+  affecting tooltips, makes LineEdit hints and 'What's This' boxes difficuilt
+  if not impossible to read.
+
+  Changing the tooltip text to a darker colour fixes the problem for 'LineEdit'
+  hints and 'What's This' boxes but creates one for ordinary tooltips.
+  Instead we set the background colour to a darker one, consistent with
+  ordinary tooltips.
+*/
+void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
+  auto tooltipColorApprox =
+      palette.color(QPalette::ColorGroup::Active, QPalette::Text);
+  palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipBase,
+                   tooltipColorApprox);
+  palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipBase,
+                   tooltipColorApprox);
+}
+
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
                                      const QColor &tpc, bool force) {
   if (force || workspaceColor != wc) {
@@ -11572,6 +11598,11 @@ void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
   panelsTextColor = tpc;
 
   QPalette palette;
+
+#ifdef Q_OS_LINUX
+  patchPaletteForLinux(palette);
+#endif
+
   palette.setColor(QPalette::Base, QColor(panelsColor));
   qApp->setPalette(palette);
 

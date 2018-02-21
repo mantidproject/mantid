@@ -144,10 +144,10 @@ class NTableWidget(QtGui.QTableWidget):
         :return:
         """
         # check
-        assert isinstance(row_index, int)
-        assert isinstance(col_index, int)
-        assert 0 <= row_index < self.rowCount()
-        assert 0 <= col_index < self.columnCount()
+        assert isinstance(row_index, int), 'TODO'
+        assert isinstance(col_index, int), 'TODO'
+        assert 0 <= row_index < self.rowCount(), 'TODO'
+        assert 0 <= col_index < self.columnCount(), 'TODO'
 
         # get cell type
         cell_data_type = self._myColumnTypeList[col_index]
@@ -169,7 +169,13 @@ class NTableWidget(QtGui.QTableWidget):
             elif cell_data_type == 'int':
                 return_value = int(return_value)
             elif cell_data_type == 'float' or cell_data_type == 'double':
-                return_value = float(return_value)
+                try:
+                    return_value = float(return_value)
+                except ValueError as val_err:
+                    raise RuntimeError('Unable to convert cell ({0}, {1}) with value "{2}" to float due to {3}.'
+                                       ''.format(row_index, col_index, return_value, val_err))
+            # END-IF-ELSE
+        # END-IF-ELSE
 
         return return_value
 

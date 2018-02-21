@@ -45,12 +45,12 @@ not all are used in all places.
    from matplotlib.colors import LogNorm
 
 First, load some diffraction data and see what the automatic axes will
-be using :func:`~mantid.plots.functions.getAxesLabels`.
+be using :func:`~mantid.plots.helperfunctions.get_axes_labels`.
 
 .. code-block:: python
 
    Load(Filename="PG3_733", OutputWorkspace="PG3_733")
-   print(plots.functions.getAxesLabels(mtd['PG3_733']))
+   print(plots.helperfunctions.get_axes_labels(mtd['PG3_733']))
 
 Which will print the ``y-label`` then the labels for all the other
 axes as properly escaped for use directly in
@@ -75,8 +75,8 @@ or without:
 .. code-block:: python
 
    fig, ax = plt.subplots()
-   plots.functions.plot(ax, mtd['PG3_733'], 'go-', specNum=1, label='user label')
-   plots.functions.errorbar(ax, mtd['PG3_733'],  wkspIndex=2)
+   plots.plotfunctions.plot(ax, mtd['PG3_733'], 'go-', specNum=1, label='user label')
+   plots.plotfunctions.errorbar(ax, mtd['PG3_733'],  wkspIndex=2)
    ax.legend()
    fig.show()
 
@@ -145,13 +145,28 @@ and :func:`~mantid.plots.MantidAxes.pcolorfast`:
   **axisaligned** behavior (cannot be overriden). :func:`~mantid.plots.MantidAxes.contour`
   and the like cannot plot these type of workspaces.
 
+In addition to the ``mantid`` projection, there is also the ``mantid3d`` projection for 3d plots.
+Can be used much the same as the ``mantid`` projection, but by instead specifying ``mantid3d``
+when giving the projection:
+
+.. code-block:: python
+
+    import matplotlib.pyplot as plt
+    from mantid import plots
+
+    #some code here to get a workspace, and x, y, yerr arrays
+
+    fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
+    ax.plot_wireframe(workspace)   #for workspaces
+    ax.plot_wireframe(x,y,z)       #for arrays
+    fig.show()
 
 Types of functions
 ==================
 
 **Informational**
 
-* :func:`~mantid.plots.functions.getAxesLabels`
+* :func:`~mantid.plots.helperfunctions.get_axes_labels`
 
 **1D Plotting**
 
@@ -169,6 +184,15 @@ Types of functions
 * :func:`~mantid.plots.MantidAxes.tripcolor` - Draw a pseudocolor plot of an unstructured triangular grid
 * :func:`~mantid.plots.MantidAxes.tricontour` - Draw contours at specified levels on an unstructured triangular grid
 * :func:`~mantid.plots.MantidAxes.tricontourf` - Draw contours at calculated levels on an unstructured triangular grid
+
+**3D Plotting**
+
+* :func:`~mantid.plots.MantidAxes3D.plot` - Draws a line plot in 3D space
+* :func:`~mantid.plots.MantidAxes3D.scatter` - Draws a scatter plot in 3d space
+* :func:`~mantid.plots.MantidAxes3D.plot_wireframe` - Draws a wire frame linking all adjacent data plots
+* :func:`~mantid.plots.MantidAxes3D.plot_surface` - Draws a surface linking all adjacent data points
+* :func:`~mantid.plots.MantidAxes3D.contour` - Draws contour lines at specified levels of the data
+* :func:`~mantid.plots.MantidAxes3D.contourf` - Draws filled contour lines at specified levels of the data
 
 matplotlib demonstrates the difference between uniform and nonuniform
 grids well in `this example
@@ -188,7 +212,14 @@ When using ``mantid`` projection
 Functions to use when **mantid** projection is not available
 ------------------------------------------------------------
 
-.. automodule:: mantid.plots.functions
-   :members: getAxesLabels, plot, errorbar, scatter, contour,
-             contourf, pcolor, pcolorfast, pcolormesh, tripcolor,
-             tricontour, tricontourf
+.. automodule:: mantid.plots.plotfunctions
+   :members: plot, errorbar, scatter, contour, contourf, pcolor,
+             pcolorfast, pcolormesh, tripcolor, tricontour, tricontourf
+
+             
+Functions to use when **mantid3d** projection is not available
+--------------------------------------------------------------
+
+.. automodule:: mantid.plots.plotfunctions3D
+   :members: plot, scatter, plot_wireframe, plot_surface,
+             contour, contourf
