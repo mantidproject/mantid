@@ -23,10 +23,10 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     PROP_OUT_FITTED_PEAKS_WS = "OutputWorkspace"
     PROP_OUT_GROUP_RESULTS = "Results"
     PROP_OUT_LATTICE_PARAMS = "LatticeParameters"
-    PROP_OUT_RESIDUALS = "ResidualsTable"
+    PROP_OUT_RWP = "Rwp"
     PROP_PATH_TO_GSASII = "PathToGSASII"
     PROP_PATH_TO_INST_PARAMS = "InstrumentFile"
-    PROP_PATH_TO_PHASE = "PhaseInfoFile"
+    PROP_PATHS_TO_PHASE_FILES = "PhaseInfoFiles"
     PROP_PAWLEY_DMIN = "PawleyDMin"
     PROP_PAWLEY_NEGATIVE_WEIGHT = "PawleyNegativeWeight"
     PROP_REFINEMENT_METHOD = "RefinementMethod"
@@ -73,8 +73,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                  "(ie the only one for a focused workspace) is used")
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_INST_PARAMS, defaultValue="", action=FileAction.Load,
                                           extensions=[".prm"]), doc="Location of the phase file")
-        self.declareProperty(FileProperty(name=self.PROP_PATH_TO_PHASE, defaultValue="", action=FileAction.Load,
-                                          extensions=[".cif"]), doc="Location of the phase file")
+        self.declareProperty(MultipleFileProperty(name=self.PROP_PATHS_TO_PHASE_FILES, extensions=[".cif"]),
+                             doc="Paths to each required phase file")
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_GSASII, defaultValue="", action=FileAction.Directory),
                              doc="Path to the directory containing GSASII executable on the user's machine")
 
@@ -87,21 +87,17 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         self.declareProperty(WorkspaceProperty(name=self.PROP_OUT_FITTED_PEAKS_WS, defaultValue="",
                                                direction=Direction.Output), doc="Workspace with fitted peaks")
-        self.declareProperty(ITableWorkspaceProperty(name=self.PROP_OUT_RESIDUALS, direction=Direction.Output,
-                                                     defaultValue=self.PROP_OUT_RESIDUALS),
-                             doc="Table containing residual values for the fit. "
-                                 "Currently this contains goodness-of-fit (Chi squared, GoF) and weight-profile "
-                                 "R-factor discrepancy index (Rwp)")
-
         self.declareProperty(ITableWorkspaceProperty(name=self.PROP_OUT_LATTICE_PARAMS, direction=Direction.Output,
                                                      defaultValue=self.PROP_OUT_LATTICE_PARAMS),
                              doc="Table to output the lattice parameters (refined)")
+        self.declareProperty(name=self.PROP_OUT_RWP, direction=Direction.Output, defaultValue=0.0,
+                             doc="Weighted profile R factor (as a percentage)")
         self.declareProperty(FileProperty(name=self.PROP_GSAS_PROJ_PATH, defaultValue="", action=FileAction.Save,
                                           extensions=".gpx"), doc="GSASII Project to work on")
 
         self.setPropertyGroup(self.PROP_OUT_FITTED_PEAKS_WS, self.PROP_OUT_GROUP_RESULTS)
-        self.setPropertyGroup(self.PROP_OUT_RESIDUALS, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_OUT_LATTICE_PARAMS, self.PROP_OUT_GROUP_RESULTS)
+        self.setPropertyGroup(self.PROP_OUT_RWP, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_GSAS_PROJ_PATH, self.PROP_OUT_GROUP_RESULTS)
 
         self.declareProperty(name=self.PROP_PAWLEY_DMIN, defaultValue=1.0, direction=Direction.Input,
@@ -127,11 +123,11 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         with self._suppress_stdout():
             gsas_proj = self._initialise_GSAS()
 
-            residuals, lattice_params = \
+            rwp, lattice_params = \
                 self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj,
                                                      do_pawley=refinement_method == self.REFINEMENT_METHODS[0])
 
-            self._set_output_properties(lattice_params=lattice_params, residuals=residuals,
+            self._set_output_properties(lattice_params=lattice_params, rwp=rwp,
                                         fitted_peaks_ws=self._generate_fitted_peaks_ws(gsas_proj))
 
     def _build_output_lattice_table(self, lattice_params):
@@ -170,16 +166,6 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             spectrum = mantid.CloneWorkspace(InputWorkspace=ws, StoreInADS=False)
 
         return spectrum
-
-    def _generate_residuals_table(self, rwp, gof):
-        table_name = self.getPropertyValue(self.PROP_OUT_RESIDUALS)
-        table = mantid.CreateEmptyTableWorkspace(OutputWorkspace=table_name, StoreInADS=False)
-
-        table.addColumn("double", "Rwp")
-        table.addColumn("double", "GoF")
-
-        table.addRow([rwp, gof])
-        return table
 
     def _generate_fitted_peaks_ws(self, gsas_proj):
         input_ws = self.getPropertyValue(self.PROP_INPUT_WORKSPACE)
@@ -236,22 +222,20 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         :param do_pawley: True if doing a Pawley refinement (the default), False if doing a Rietveld refinement
         :return: (R weighted profile, goodness-of-fit coefficient, table containing refined lattice parameters)
         """
-        phase_path = self.getPropertyValue(self.PROP_PATH_TO_PHASE)
-        phase = gsas_proj.add_phase(phasefile=phase_path, histograms=[gsas_proj.histograms()[0]])
-
-        if do_pawley:
-            self._set_pawley_phase_parameters(phase)
+        phase_paths = self.getPropertyValue(self.PROP_PATHS_TO_PHASE_FILES).split(",")
+        for phase_path in phase_paths:
+            phase = gsas_proj.add_phase(phasefile=phase_path, histograms=[gsas_proj.histograms()[0]])
+            if do_pawley:
+                self._set_pawley_phase_parameters(phase)
 
         gsas_proj.set_refinement(refinement=self._create_refinement_params_dict())
         gsas_proj.do_refinements([{}])
 
-        residuals = gsas_proj.values()[2]["data"]["Rvals"]
+        rwp = gsas_proj.histogram(0).get_wR()
         lattice_params = gsas_proj.phases()[0].get_cell()
         lattice_params_table = self._build_output_lattice_table(lattice_params)
 
-        residuals_table = self._generate_residuals_table(rwp=residuals["Rwp"], gof=residuals["GOF"])
-
-        return residuals_table, lattice_params_table
+        return rwp, lattice_params_table
 
     def _save_temporary_fxye(self, spectrum):
         """
@@ -268,9 +252,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False, IncludeHeader=False)
         return file_path
 
-    def _set_output_properties(self, fitted_peaks_ws, residuals, lattice_params):
+    def _set_output_properties(self, fitted_peaks_ws, rwp, lattice_params):
         self.setProperty(self.PROP_OUT_FITTED_PEAKS_WS, fitted_peaks_ws)
-        self.setProperty(self.PROP_OUT_RESIDUALS, residuals)
+        self.setProperty(self.PROP_OUT_RWP, rwp)
         self.setProperty(self.PROP_OUT_LATTICE_PARAMS, lattice_params)
 
     def _set_pawley_phase_parameters(self, phase):
