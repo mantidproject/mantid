@@ -3,7 +3,6 @@ from six import iteritems
 import mantid.simpleapi as mantid
 
 
-
 class MaxEntModel(object):
     # A simple class to hold the MaxEnt algorithm
 
@@ -29,19 +28,20 @@ class MaxEntModel(object):
         self.addOutput("OutputPhaseTable")
         self.addOutput("OutputDeadTimeTable")
         self.addOutput("ReconstructedSpectra")
-
+        self.addOutput("PhaseConvergenceTable")
 
     def addOutput(self,name):
         if name in self.inputs:
             mantid.AnalysisDataService.addOrReplace( self.inputs[name],self.alg.getProperty(name).value)
         else:
-            return   
+            return
         if mantid.AnalysisDataService.doesExist(self.run):
             group=mantid.AnalysisDataService.retrieve(self.run)
         else:
             mantid.GroupWorkspaces(OutputWorkspace=self.run)
 
         group.add(self.inputs[name])
+
 
 class PhaseModel(object):
     # A simple class to hold the CalcMuonDetectorPhases algorithm

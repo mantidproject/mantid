@@ -6,6 +6,7 @@ from Muon import maxent_model
 import mantid.simpleapi as mantid
 import math
 
+
 class MaxEntPresenter(object):
     """
     This is the presenter for the maximum entropy widget.
@@ -51,34 +52,34 @@ class MaxEntPresenter(object):
         self.thread=self.createThread()
         self.thread.started.connect(self.deactivate)
         self.thread.finished.connect(self.handleFinished)
-       
+
         inputs = self.getMaxEntInput()
         if self.view.usePhases():
             self.view.addPhaseTable(inputs)
         runName=self.load.getRunName()
-        
+
         self.thread.setInputs(inputs,runName)
         self.thread.start()
- 
+
     def DoPhase(self):
 
         if self.view.usePhases() and self.view.calcPhases():
-             inputs_phase = self.getCalPhasesInput() 
-             if inputs_phase["InputWorkspace"] != "MuonAnalysis":
-                 mantid.logger.error("Cannot currently generate phase table from this data using CalMuonDetecotrPhases")
-                 return
-             self.calcThread=self.createPhaseThread()
-             self.calcThread.started.connect(self.deactivate)
-             self.calcThread.finished.connect(self.handleFinishedCalc)    
-             self.calcThread.loadData(inputs_phase)
-             self.calcThread.start()
- 
+            inputs_phase = self.getCalPhasesInput()
+            if inputs_phase["InputWorkspace"] != "MuonAnalysis":
+                mantid.logger.error("Cannot currently generate phase table from this data using CalMuonDetecotrPhases")
+                return
+            self.calcThread=self.createPhaseThread()
+            self.calcThread.started.connect(self.deactivate)
+            self.calcThread.finished.connect(self.handleFinishedCalc)
+            self.calcThread.loadData(inputs_phase)
+            self.calcThread.start()
+
     def handlePhase(self,row,col):
         if col==1 and row == 4:
             self.view.changedPhaseBox()
 
     def cancel(self):
-       if self.thread is not None:
+        if self.thread is not None:
             self.thread.cancel()
 
     def handleFinished(self):
@@ -102,12 +103,15 @@ class MaxEntPresenter(object):
     def getMaxEntInput(self):
         inputs=self.view.initMaxEntInput()
         if "MuonAnalysisGrouped" not in inputs["InputWorkspace"]:
-           inputs["InputWorkspace"] = "MuonAnalysis"
+            inputs["InputWorkspace"] = "MuonAnalysis"
         if self.view.outputPhases():
             self.view.addOutputPhases(inputs)
 
         if self.view.outputDeadTime():
             self.view.addOutputDeadTime(inputs)
+
+        if self.view.outputPhaseEvo():
+            self.view.addOutputPhaseEvo(inputs)
 
         if self.view.outputTime():
             self.view.addOutputTime(inputs)
@@ -119,6 +123,5 @@ class MaxEntPresenter(object):
             inputs_phase =self.view.calcPhasesInit()
             if "MuonAnalysisGrouped" not in inputs_phase["InputWorkspace"]:
                 inputs_phase["InputWorkspace"] = "MuonAnalysis"
- 
-        return inputs_phase
 
+        return inputs_phase

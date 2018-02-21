@@ -23,7 +23,7 @@ class MaxEntView(QtGui.QWidget):
         self.table = QtGui.QTableWidget(self)
         self.table.resize(800, 800)
 
-        self.table.setRowCount(10)
+        self.table.setRowCount(11)
         self.table.setColumnCount(2)
         self.table.setColumnWidth(0,300)
         self.table.setColumnWidth(1,300)
@@ -37,10 +37,10 @@ class MaxEntView(QtGui.QWidget):
 
         table_utils.setRowName(self.table,0,"Workspace")
         self.ws = table_utils.addComboToTable(self.table,0,options)
- 
+
         table_utils.setRowName(self.table,1,"First good time")
         self.first_good= table_utils.addDoubleToTable(self.table,0.1,1)
- 
+
         table_utils.setRowName(self.table,2,"Last good time")
         self.last_good= table_utils.addDoubleToTable(self.table,15.0,2)
 
@@ -55,10 +55,10 @@ class MaxEntView(QtGui.QWidget):
 
         table_utils.setRowName(self.table, 6,"Fix phases")
         self.fix_phase_box= table_utils.addCheckBoxToTable(self.table,False,6)
-  
+
         self.table.hideRow(5)
         self.table.hideRow(6)
- 
+
         table_utils.setRowName(self.table, 7,"Output phase table")
         self.output_phase_box= table_utils.addCheckBoxToTable(self.table,False,7)
 
@@ -68,7 +68,9 @@ class MaxEntView(QtGui.QWidget):
         table_utils.setRowName(self.table, 9,"Output reconstructed data")
         self.output_data_box= table_utils.addCheckBoxToTable(self.table,False,9)
 
- 
+        table_utils.setRowName(self.table, 10,"Output phase convergence")
+        self.output_phase_evo_box= table_utils.addCheckBoxToTable(self.table,False,10)
+
         self.table.resizeRowsToContents()
 
         # advanced options table
@@ -90,7 +92,7 @@ class MaxEntView(QtGui.QWidget):
 
         table_utils.setRowName(self.tableA,0,"Maximum entropy constant (A)")
         self.AConst= table_utils.addDoubleToTable(self.tableA,0.1,0)
- 
+
         table_utils.setRowName(self.tableA,1,"Lagrange multiplier for chi^2")
         self.factor= table_utils.addDoubleToTable(self.tableA,1.04,1)
 
@@ -108,8 +110,6 @@ class MaxEntView(QtGui.QWidget):
 
         table_utils.setRowName(self.tableA,6,"Maximum Field ")
         self.max_field= table_utils.addDoubleToTable(self.tableA,1000.0,6)
-
-
 
         #layout
         # this is if complex data is unhidden
@@ -152,8 +152,8 @@ class MaxEntView(QtGui.QWidget):
         self.run=run
 
     def changedPhaseBox(self):
-        self.table.setRowHidden(5,self.use_phaseTable_box.checkState() != QtCore.Qt.Checked) 
-        self.table.setRowHidden(6,self.use_phaseTable_box.checkState() != QtCore.Qt.Checked) 
+        self.table.setRowHidden(5,self.use_phaseTable_box.checkState() != QtCore.Qt.Checked)
+        self.table.setRowHidden(6,self.use_phaseTable_box.checkState() != QtCore.Qt.Checked)
 
     # send signal
     def MaxEntButtonClick(self):
@@ -200,19 +200,24 @@ class MaxEntView(QtGui.QWidget):
     def addOutputPhases(self,inputs):
         inputs['OutputPhaseTable']=self.run+";PhaseTable;MaxEnt"
 
-
     def outputDeadTime(self):
         return self.output_dead_box.checkState() == QtCore.Qt.Checked
 
     def addOutputDeadTime(self,inputs):
         inputs['OutputDeadTimeTable']=self.run+";DeadTimeTable;MaxEnt"
- 
+
+    def outputPhaseEvo(self):
+        return self.output_phase_evo_box.checkState() == QtCore.Qt.Checked
+
+    def addOutputPhaseEvo(self,inputs):
+        inputs['PhaseConvergenceTable']=self.run+";PhaseConvergenceTable;MaxEnt"
+
     def outputTime(self):
         return self.output_data_box.checkState() == QtCore.Qt.Checked
 
     def addOutputTime(self,inputs):
         inputs['ReconstructedSpectra']=self.run+";TimeDomain;MaxEnt"
-  
+
     def calcPhases(self):
         return self.phaseTable_box.checkState() == QtCore.Qt.Checked
 
@@ -231,7 +236,7 @@ class MaxEntView(QtGui.QWidget):
         inputs["DataFitted"] = "fits"
 
         return inputs
- 
+
     # turn button on and off
     def activateCalculateButton(self):
         self.button.setEnabled(True)

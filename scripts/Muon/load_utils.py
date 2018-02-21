@@ -38,14 +38,14 @@ class LoadUtils(object):
     def MuonAnalysisExists(self):
         # if period data look for the first period
         if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
-           tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
-           return True, tmpWS
-           # if its not period data
-        elif mantid.AnalysisDataService.doesExist("MuonAnalysis"): 
+            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
+            return True, tmpWS
+            # if its not period data
+        elif mantid.AnalysisDataService.doesExist("MuonAnalysis"):
             tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
             return True,tmpWS
         else:
-            return False,None 
+            return False,None
 
     # Get the groups/pairs for active WS
     # ignore raw files
@@ -57,7 +57,7 @@ class LoadUtils(object):
         for pick in options:
             if ";" in pick and "Raw" not in pick and runName in pick:
                 final_options.append(pick)
-        return final_options   
+        return final_options
 
     # Get the groups/pairs for active WS
     def getGroupedWorkspaceNames(self):
