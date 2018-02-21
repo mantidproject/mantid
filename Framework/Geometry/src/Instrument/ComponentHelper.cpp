@@ -102,7 +102,7 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
  * Create a sphere object
  */
 boost::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
-                          const std::string &id) {
+                                          const std::string &id) {
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }

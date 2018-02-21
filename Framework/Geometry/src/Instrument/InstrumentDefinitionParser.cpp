@@ -497,8 +497,9 @@ void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(
 
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
     // Only CSGObjects can be combined into one shape.
-    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(mapTypeNameToShape[typeName])){
-       csgObj->setName(static_cast<int>(iType));
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(
+            mapTypeNameToShape[typeName])) {
+      csgObj->setName(static_cast<int>(iType));
     }
   }
 }
@@ -524,7 +525,8 @@ void InstrumentDefinitionParser::createShapeIfTypeIsNotAnAssembly(
     // that does not contain any component elements
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
     // Name can be set only for a CSGObject.
-    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(mapTypeNameToShape[typeName])) {
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(
+            mapTypeNameToShape[typeName])) {
       csgObj->setName(static_cast<int>(iType));
     }
   } else {
@@ -2472,7 +2474,8 @@ void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) {
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
     // caching only applies to CSGObject
-    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
       csgObj->setVtkGeometryCacheReader(reader);
     }
   }
@@ -2514,7 +2517,8 @@ InstrumentDefinitionParser::writeAndApplyCache(
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
     // caching only applies to CSGObject
-    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
       csgObj->setVtkGeometryCacheWriter(writer);
     }
   }

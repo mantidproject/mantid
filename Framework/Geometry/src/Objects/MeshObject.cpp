@@ -24,36 +24,35 @@ using Kernel::Quat;
 */
 MeshObject::MeshObject() {} // Should never be called
 
-                            // Flexible constructor
+// Flexible constructor
 MeshObject::MeshObject(const std::vector<uint16_t> &faces,
-  const std::vector<V3D> &vertices,
-  const Kernel::Material &material)
-  : m_boundingBox(), m_material(), m_id("MeshObject"),
-  m_triangles(faces), m_vertices(vertices) {
+                       const std::vector<V3D> &vertices,
+                       const Kernel::Material &material)
+    : m_boundingBox(), m_material(), m_id("MeshObject"), m_triangles(faces),
+      m_vertices(vertices) {
 
   setup(material);
 }
 
 // Efficient constructor
 MeshObject::MeshObject(std::vector<uint16_t> &&faces,
-  std::vector<V3D> &&vertices,
-  const Kernel::Material &material)
-  : m_boundingBox(), m_material(), m_id("MeshObject"),
-  m_triangles(std::move(faces)), m_vertices(std::move(vertices)) {
+                       std::vector<V3D> &&vertices,
+                       const Kernel::Material &material)
+    : m_boundingBox(), m_material(), m_id("MeshObject"),
+      m_triangles(std::move(faces)), m_vertices(std::move(vertices)) {
 
   setup(material);
 }
 
 MeshObject::~MeshObject() = default;
 
-
 // Do things that need to be done in constructor
 void MeshObject::setup(const Kernel::Material &material) {
 
   if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
-    throw std::invalid_argument("Too many vertices (" +
-      std::to_string(m_vertices.size()) +
-      "). MeshObject cannot have more than 65535 vertices.");
+    throw std::invalid_argument(
+        "Too many vertices (" + std::to_string(m_vertices.size()) +
+        "). MeshObject cannot have more than 65535 vertices.");
   }
   m_material = Mantid::Kernel::make_unique<Material>(material);
   m_handler = boost::make_shared<CacheGeometryHandler>(this);
@@ -671,7 +670,7 @@ double *MeshObject::getVertices() const {
 */
 void MeshObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                                double &myradius, double &myheight) const {
-  // In practice, this outputs type = -1, 
+  // In practice, this outputs type = -1,
   // to indicate not a "standard" object (cuboid/cone/cyl/sphere).
   // Retained for possible future use.
   type = 0;

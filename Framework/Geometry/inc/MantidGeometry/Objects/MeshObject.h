@@ -65,12 +65,12 @@ class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
   /// Flexible constructor
   MeshObject(const std::vector<uint16_t> &faces,
-    const std::vector<Mantid::Kernel::V3D> &vertices,
-    const Kernel::Material &material);
+             const std::vector<Mantid::Kernel::V3D> &vertices,
+             const Kernel::Material &material);
   // Efficient constructor
   MeshObject(std::vector<uint16_t> &&faces,
-    std::vector<Mantid::Kernel::V3D> &&vertices,
-    const Kernel::Material &material);
+             std::vector<Mantid::Kernel::V3D> &&vertices,
+             const Kernel::Material &material);
 
   /// Copy constructor
   MeshObject(const MeshObject &) = delete;
@@ -88,7 +88,7 @@ public:
 
   const std::string &id() const override { return m_id; }
 
-  int getName() const override { return 0; }  
+  int getName() const override { return 0; }
 
   const Kernel::Material material() const override;
 

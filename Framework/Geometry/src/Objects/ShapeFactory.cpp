@@ -55,7 +55,7 @@ Logger g_log("ShapeFactory");
  *if XML tags contain no geo. info.)
  */
 boost::shared_ptr<CSGObject> ShapeFactory::createShape(std::string shapeXML,
-                                                     bool addTypeTag) {
+                                                       bool addTypeTag) {
   // wrap in a type tag
   if (addTypeTag)
     shapeXML = "<type name=\"userShape\"> " + shapeXML + " </type>";

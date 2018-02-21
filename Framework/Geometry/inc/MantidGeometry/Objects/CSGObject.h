@@ -78,7 +78,9 @@ public:
   IObject *clone() const override { return new CSGObject(*this); }
 
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
-    auto obj = new CSGObject(*this); obj->setMaterial(material); return obj;
+    auto obj = new CSGObject(*this);
+    obj->setMaterial(material);
+    return obj;
   }
 
   /// Return the top rule
@@ -86,8 +88,8 @@ public:
   void setID(const std::string &id) { m_id = id; }
   const std::string &id() const override { return m_id; }
 
-  void setName(const int nx) { ObjNum = nx; } ///< Set Name
-  int getName() const override { return ObjNum; }      ///< Get Name
+  void setName(const int nx) { ObjNum = nx; }     ///< Set Name
+  int getName() const override { return ObjNum; } ///< Get Name
 
   void setMaterial(const Kernel::Material &material);
   const Kernel::Material material() const override;
@@ -186,11 +188,9 @@ public:
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
   /// set vtkGeometryCache writer
-  void setVtkGeometryCacheWriter(
-      boost::shared_ptr<vtkGeometryCacheWriter>);
+  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
-  void setVtkGeometryCacheReader(
-      boost::shared_ptr<vtkGeometryCacheReader>);
+  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                      double &myradius, double &myheight) const override;
   /// Getter for the shape xml

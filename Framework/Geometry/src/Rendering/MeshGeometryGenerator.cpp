@@ -27,9 +27,7 @@ MeshGeometryGenerator::MeshGeometryGenerator(MeshObject *obj) : Obj(obj) {
  * Generate geometry, get triangles from object if not in cache.
  */
 void MeshGeometryGenerator::Generate() {
-  if (mNoOfVertices <= 0) 
-  { // Get triangles from object
-
+  if (mNoOfVertices <= 0) { // Get triangles from object
   }
 }
 
@@ -59,7 +57,7 @@ int *MeshGeometryGenerator::getTriangleFaces() { return mFaces; }
    @param faces :: an int array of the faces
 */
 void MeshGeometryGenerator::setGeometryCache(int noPts, int noFaces,
-                                              double *pts, int *faces) {
+                                             double *pts, int *faces) {
   if (mPoints != nullptr)
     delete[] mPoints;
   if (mFaces != nullptr)

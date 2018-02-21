@@ -344,11 +344,12 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
         }
       }
       auto shapeObject = can->createSampleShape(shapeArgs);
-      // Given that the object is a CSG object, set the object 
+      // Given that the object is a CSG object, set the object
       // directly on the sample ensuring we preserve the
       // material.
       const auto mat = workspace->sample().getMaterial();
-      if (auto csgObj = boost::dynamic_pointer_cast<Geometry::CSGObject>(shapeObject)) {
+      if (auto csgObj =
+              boost::dynamic_pointer_cast<Geometry::CSGObject>(shapeObject)) {
         csgObj->setMaterial(mat);
       }
       workspace->mutableSample().setShape(shapeObject);

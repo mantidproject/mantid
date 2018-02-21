@@ -60,7 +60,8 @@ public:
                             const Kernel::V3D &uVec) const = 0;
   virtual bool hasValidShape() const = 0;
   virtual IObject *clone() const = 0;
-  virtual IObject *cloneWithMaterial(const Kernel::Material &material) const = 0;
+  virtual IObject *
+  cloneWithMaterial(const Kernel::Material &material) const = 0;
 
   virtual int getName() const = 0;
 
@@ -97,7 +98,6 @@ public:
   // Rendering
   virtual void draw() const = 0;
   virtual void initDraw() const = 0;
-
 
   virtual const Kernel::Material material() const = 0;
   virtual const std::string &id() const = 0;

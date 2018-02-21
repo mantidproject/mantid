@@ -88,9 +88,9 @@ createSphere(double radius,
              const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D(),
              const std::string &id = "sp-1");
 /** Create a cuboid shape for your pixels */
-boost::shared_ptr<Mantid::Geometry::CSGObject> createCuboid(double x_side_length,
-                                            double y_side_length = -1.0,
-                                            double z_side_length = -1.0);
+boost::shared_ptr<Mantid::Geometry::CSGObject>
+createCuboid(double x_side_length, double y_side_length = -1.0,
+             double z_side_length = -1.0);
 /**
  * Create a component assembly at the origin made up of 4 cylindrical detectors
  */

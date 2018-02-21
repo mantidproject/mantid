@@ -364,7 +364,8 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     Kernel::Material material;
     material.loadNexus(file, "material");
     // CSGObject expected, if so, set its material
-    if (auto csgObj = boost::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
       csgObj->setMaterial(material);
     }
 

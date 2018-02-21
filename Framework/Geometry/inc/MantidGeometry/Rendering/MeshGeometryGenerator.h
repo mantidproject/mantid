@@ -34,7 +34,7 @@ namespace Geometry {
 class MeshObject;
 class MANTID_GEOMETRY_DLL MeshGeometryGenerator {
 private:
-  MeshObject *Obj;     ///< Input Object
+  MeshObject *Obj;    ///< Input Object
   int mNoOfVertices;  ///< number of vertices
   int mNoOfTriangles; ///< number of triangles
   double *mPoints;    ///<double array or points

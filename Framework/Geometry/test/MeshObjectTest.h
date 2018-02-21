@@ -113,8 +113,9 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   triangles.push_back(2);
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal =
-      std::unique_ptr<MeshObject>(new MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
+      new MeshObject(std::move(triangles), std::move(vertices),
+                     Mantid::Kernel::Material()));
   return retVal;
 }
 
@@ -177,8 +178,8 @@ std::unique_ptr<MeshObject> createOctahedron() {
   triangles.push_back(5);
 
   // Use flexible constructor
-  std::unique_ptr<MeshObject> retVal =
-      std::unique_ptr<MeshObject>(new MeshObject(triangles, vertices, Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
+      new MeshObject(triangles, vertices, Mantid::Kernel::Material()));
   return retVal;
 }
 
@@ -267,8 +268,9 @@ std::unique_ptr<MeshObject> createLShape() {
   triangles.push_back(6);
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal =
-      std::unique_ptr<MeshObject>(new MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
+      new MeshObject(std::move(triangles), std::move(vertices),
+                     Mantid::Kernel::Material()));
   return retVal;
 }
 }
@@ -303,10 +305,11 @@ public:
     triangles.push_back(2);
 
     // Test flexible constructor
-    TS_ASSERT_THROWS_NOTHING(MeshObject(triangles, vertices, Mantid::Kernel::Material()));
+    TS_ASSERT_THROWS_NOTHING(
+        MeshObject(triangles, vertices, Mantid::Kernel::Material()));
     // Test eficient constructor
-    TS_ASSERT_THROWS_NOTHING(MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
-
+    TS_ASSERT_THROWS_NOTHING(MeshObject(
+        std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
   }
 
   void testClone() {
@@ -317,7 +320,8 @@ public:
   void testTooManyVertices() {
     auto tooManyVertices = std::vector<V3D>(70000);
     auto triangles = std::vector<uint16_t>(1000);
-    TS_ASSERT_THROWS_ANYTHING(MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
+    TS_ASSERT_THROWS_ANYTHING(
+        MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
   }
 
   void testMaterial() {
@@ -346,26 +350,29 @@ public:
     triangles.push_back(3);
     triangles.push_back(2);
 
-    auto testMaterial = Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+    auto testMaterial =
+        Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
 
     // Test material through flexible constructor
     auto obj1 = std::make_unique<MeshObject>(triangles, vertices, testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-      obj1->material().numberDensity(), 1e-12);
+                     obj1->material().numberDensity(), 1e-12);
     // Test material through efficient constructor
-    auto obj2 = std::make_unique<MeshObject>(std::move(triangles), std::move(vertices), testMaterial);
+    auto obj2 = std::make_unique<MeshObject>(std::move(triangles),
+                                             std::move(vertices), testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-      obj2->material().numberDensity(), 1e-12);
+                     obj2->material().numberDensity(), 1e-12);
   }
 
   void testCloneWithMaterial() {
     using Mantid::Kernel::Material;
-    auto testMaterial = Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+    auto testMaterial =
+        Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
     auto geom_obj = createOctahedron();
     TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
     auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-      cloned_obj->material().numberDensity(), 1e-12);
+                     cloned_obj->material().numberDensity(), 1e-12);
   }
 
   void testHasValidShape() {
@@ -1014,27 +1021,27 @@ public:
   }
 
   void testSolidAngleScaledCube()
-    /**
-    Test solid angle calculation for a cube that is scaled.
-    */
+  /**
+  Test solid angle calculation for a cube that is scaled.
+  */
   {
     auto geom_obj = createCube(2.0);
     auto scale = V3D(0.5, 0.5, 0.5);
     double satol = 1e-3; // tolerance for solid angle
-                         // solid angle at distance 0.5 should be 4pi/6 by symmetry
+    // solid angle at distance 0.5 should be 4pi/6 by symmetry
 
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(1.5, 0.5, 0.5), scale), M_PI * 2.0 / 3.0,
-      satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(-0.5, 0.5, 0.5), scale), M_PI * 2.0 / 3.0,
-      satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 1.5, 0.5), scale), M_PI * 2.0 / 3.0,
-      satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, -0.5, 0.5), scale), M_PI * 2.0 / 3.0,
-      satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, 1.5), scale), M_PI * 2.0 / 3.0,
-      satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, -0.5), scale), M_PI * 2.0 / 3.0,
-      satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(1.5, 0.5, 0.5), scale),
+                    M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(-0.5, 0.5, 0.5), scale),
+                    M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 1.5, 0.5), scale),
+                    M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, -0.5, 0.5), scale),
+                    M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, 1.5), scale),
+                    M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, -0.5), scale),
+                    M_PI * 2.0 / 3.0, satol);
   }
 
   void testOutputForRendering()
@@ -1061,7 +1068,8 @@ public:
   static void destroySuite(MeshObjectTestPerformance *suite) { delete suite; }
 
   MeshObjectTestPerformance()
-      : rng(200000), octahedron(createOctahedron()), lShape(createLShape()), smallCube(createCube(0.2)) {
+      : rng(200000), octahedron(createOctahedron()), lShape(createLShape()),
+        smallCube(createCube(0.2)) {
     testPoints = create_test_points();
     testRays = create_test_rays();
   }
@@ -1087,7 +1095,8 @@ public:
     int dummy;
     for (size_t i = 0; i < number; ++i) {
       size_t j = i % testRays.size();
-      dummy = octahedron->calcValidType(testRays[j].startPoint(),testRays[j].direction());
+      dummy = octahedron->calcValidType(testRays[j].startPoint(),
+                                        testRays[j].direction());
     }
   }
 
@@ -1114,7 +1123,8 @@ public:
     const size_t number(10000);
     double dummy;
     for (size_t i = 0; i < number; ++i) {
-      dummy = smallCube->solidAngle(testPoints[i % testPoints.size()], V3D(0.5,1.33,1.5));
+      dummy = smallCube->solidAngle(testPoints[i % testPoints.size()],
+                                    V3D(0.5, 1.33, 1.5));
     }
   }
 
@@ -1158,8 +1168,8 @@ public:
 
   void test_output_for_rendering() {
     const size_t numberOfRuns(30000);
-    double* vertexDummy;
-    int* triangleDummy;
+    double *vertexDummy;
+    int *triangleDummy;
     for (size_t i = 0; i < numberOfRuns; ++i) {
       vertexDummy = octahedron->getVertices();
       triangleDummy = octahedron->getTriangles();
@@ -1172,18 +1182,18 @@ public:
     // Create a test point with coordinates within [-1.0, 0.0]
     // for applying to octahedron
     V3D output;
-    output.setX((1.0*(index%dimension)) / (dimension - 1) );
+    output.setX((1.0 * (index % dimension)) / (dimension - 1));
     index /= dimension;
-    output.setY((1.0*(index%dimension)) / (dimension - 1) );
+    output.setY((1.0 * (index % dimension)) / (dimension - 1));
     index /= dimension;
-    output.setZ((1.0*(index%dimension)) / (dimension - 1) );
+    output.setZ((1.0 * (index % dimension)) / (dimension - 1));
     return output;
   }
 
   std::vector<V3D> create_test_points() {
     // Create a vector of test points
     size_t dim = 5;
-    size_t num = dim*dim*dim;
+    size_t num = dim * dim * dim;
     std::vector<V3D> output;
     output.reserve(num);
     for (size_t i = 0; i < num; ++i) {
@@ -1193,10 +1203,10 @@ public:
   }
 
   Track create_test_ray(size_t index, size_t startDim, size_t dirDim) {
-    // create a test ray 
+    // create a test ray
     const V3D shift(0.01, -1.0 / 77, -1.0 / 117);
     V3D startPoint = create_test_point(index, startDim);
-    V3D direction = V3D(0.0,0.0,0.0) - create_test_point(index, dirDim);
+    V3D direction = V3D(0.0, 0.0, 0.0) - create_test_point(index, dirDim);
     direction += shift; // shift to avoid divide by zero error
     direction.normalize();
     return Track(startPoint, direction);
@@ -1205,7 +1215,7 @@ public:
   std::vector<Track> create_test_rays() {
     size_t sDim = 3;
     size_t dDim = 2;
-    size_t num = sDim*sDim*sDim*dDim*dDim*dDim;
+    size_t num = sDim * sDim * sDim * dDim * dDim * dDim;
     std::vector<Track> output;
     output.reserve(num);
     for (size_t i = 0; i < num; ++i) {
