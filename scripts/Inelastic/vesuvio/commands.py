@@ -10,11 +10,11 @@ import numpy as np
 from functools import reduce
 
 from mantid import mtd
-from mantid.api import AnalysisDataService, WorkspaceFactory, SpectraAxis, TextAxis
+from mantid.api import WorkspaceFactory, SpectraAxis, TextAxis
 from mantid.kernel import MaterialBuilder
-from mantid.simpleapi import (AppendSpectra, CropWorkspace, ConjoinWorkspaces, DeleteWorkspace, Divide,
-                              ExtractSingleSpectrum, ExtractSpectra, GroupWorkspaces, Integration,
-                              RenameWorkspace, SumSpectra, UnGroupWorkspace, VesuvioCorrections, VesuvioTOFFit)
+from mantid.simpleapi import (AppendSpectra, ConjoinWorkspaces, DeleteWorkspace, Divide, ExtractSingleSpectrum, 
+                              ExtractSpectra, GroupWorkspaces, Integration, SumSpectra, UnGroupWorkspace, 
+                              VesuvioCorrections, VesuvioTOFFit)
 
 from vesuvio.loading import VesuvioLoadHelper, VesuvioTOFFitInput
 
