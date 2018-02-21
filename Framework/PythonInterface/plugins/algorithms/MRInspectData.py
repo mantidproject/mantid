@@ -195,6 +195,7 @@ class DataInfo(object):
         self.update_peak_range = update_peak_range
 
         self.tof_range = self.get_tof_range(ws)
+        self.calculated_scattering_angle = 0.0
         self.determine_data_type(ws)
 
     def log(self):
