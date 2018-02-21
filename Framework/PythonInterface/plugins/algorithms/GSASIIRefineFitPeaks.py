@@ -247,13 +247,18 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         :return: (R weighted profile, goodness-of-fit coefficient, table containing refined lattice parameters)
         """
         phase_paths = self.getPropertyValue(self.PROP_PATHS_TO_PHASE_FILES).split(",")
+        refinements = self._create_refinement_params_dict(num_phases=len(phase_paths))
+        prog = Progress(self, start=0, end=1, nreports=len(refinements) + 1)
+
+        prog.report("Reading phase files")
         for phase_path in phase_paths:
             phase = gsas_proj.add_phase(phasefile=phase_path, histograms=[gsas_proj.histograms()[0]])
             if do_pawley:
                 self._set_pawley_phase_parameters(phase)
 
-        refinements = self._create_refinement_params_dict(num_phases=len(phase_paths))
-        gsas_proj.do_refinements(refinements)
+        for i, refinement in enumerate(refinements):
+            prog.report("Step {} of refinement recipe".format(i + 1))
+            gsas_proj.do_refinements([refinement])
         gsas_proj.save()
 
         rwp = gsas_proj.histogram(0).get_wR()
