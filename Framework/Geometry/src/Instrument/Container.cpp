@@ -123,7 +123,7 @@ void Container::setSampleShape(const std::string &sampleShapeXML) {
 
 /**
  * Set the ID of the shape, if it is a CSG Object
-   @param ID a string identifying to object
+ * @param id ID a string identifying to object
  */
 void Container::setID(const std::string &id) {
   // We only do anything if the contained shape is a CSGObject
