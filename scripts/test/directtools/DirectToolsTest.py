@@ -43,9 +43,7 @@ class DirectTest(unittest.TestCase):
     def test_defaultrcParams(self):
         result = directtools.defaultrcParams()
         self.assertTrue(isinstance(result, dict))
-        self.assertEqual(len(result), 3)
-        self.assertTrue('image.cmap' in result)
-        self.assertEqual(result['image.cmap'], 'jet')
+        self.assertEqual(len(result), 2)
         self.assertTrue('legend.numpoints' in result)
         self.assertEqual(result['legend.numpoints'], 1)
         self.assertTrue('text.usetex' in result)

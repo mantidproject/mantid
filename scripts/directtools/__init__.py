@@ -129,7 +129,6 @@ def configurematplotlib(params):
 def defaultrcParams():
     """Return a dictionary of directtools default matplotlib rc parameters."""
     params = {
-        'image.cmap': 'jet',
         'legend.numpoints': 1,
         'text.usetex': True,
     }
@@ -227,7 +226,7 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True):
     return figure, axes, cutWSList
 
 
-def plotSofQW(workspace, QMin=None, QMax=None, EMin=None, EMax=None, cMin=0, cMax=None):
+def plotSofQW(workspace, QMin=0., QMax=None, EMin=-10., EMax=None, VMin=0, VMax=None, colormap='jet'):
     """Plot a 2D plot with given axis limits and return the plotting layer."""
     # Accept both workspace names and actual workspaces.
     workspace = _normws(workspace)
@@ -241,14 +240,14 @@ def plotSofQW(workspace, QMin=None, QMax=None, EMin=None, EMax=None, cMin=0, cMa
     if EMax is None:
         EAxis = workspace.getAxis(1).extractValues()
         EMax = numpy.amax(EAxis)
-    if cMin is None:
-        cMin = 0.
-    if cMax is None:
+    if VMin is None:
+        VMin = 0.
+    if VMax is None:
         vertMax = EMax if EMax is not None else numpy.inf
-        dummy, cMax = nanminmax(workspace, horMin=QMin, horMax=QMax, vertMin=EMin, vertMax=vertMax)
-        cMax /= 100.
-    print('Plotting intensity range: {}...{}'.format(cMin, cMax))
-    contours = axes.pcolor(workspace, vmin=cMin, vmax=cMax, distribution=True)
+        dummy, VMax = nanminmax(workspace, horMin=QMin, horMax=QMax, vertMin=EMin, vertMax=vertMax)
+        VMax /= 100.
+    print('Plotting intensity range: {}...{}'.format(VMin, VMax))
+    contours = axes.pcolor(workspace, vmin=VMin, vmax=VMax, distribution=True, cmap=colormap)
     colorbar = figure.colorbar(contours)
     colorbar.set_label('$S(Q,E)$ (arb. units)')
     axes.set_xlim(left=QMin)
