@@ -279,9 +279,11 @@ void SaveLauenorm::exec() {
     // This can be bank number of run number depending on
     if (sequence != oldSequence) {
       oldSequence = sequence;
-      out << "END-OF-REFLECTION-DATA\n";
-      out << "HARMONICS DATA    0 REFLECTIONS\n";
-      out << "END-OF-FILE\n";
+      if (newFormat) {
+        out << "END-OF-REFLECTION-DATA\n";
+        out << "HARMONICS DATA    0 REFLECTIONS\n";
+        out << "END-OF-FILE\n";
+      }
       out.flush();
       out.close();
       sequenceNo++;
