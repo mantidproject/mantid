@@ -129,8 +129,9 @@ void LoadMcStas::exec() {
   }
   histoWSNames = readHistogramData(histogramEntries, nxFile);
 
-  //join two vectors together
-  scatteringWSNames.insert(scatteringWSNames.end(), histoWSNames.begin(), histoWSNames.end());
+  // join two vectors together
+  scatteringWSNames.insert(scatteringWSNames.end(), histoWSNames.begin(),
+                           histoWSNames.end());
 
   // close top entry
   nxFile.closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
@@ -139,13 +140,15 @@ void LoadMcStas::exec() {
   setProperty("OutputWorkspace", groupWorkspaces(scatteringWSNames));
 } // LoadMcStas::exec()
 
-  /**
-  * Group workspaces
-  * @param workspaces workspace names to group
-  * @return OutputWorkspace workspace group
-  */
-API::WorkspaceGroup_sptr LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
-  API::IAlgorithm_sptr groupAlgorithm = API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+/**
+* Group workspaces
+* @param workspaces workspace names to group
+* @return OutputWorkspace workspace group
+*/
+API::WorkspaceGroup_sptr
+LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
+  API::IAlgorithm_sptr groupAlgorithm =
+      API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
   groupAlgorithm->setChild(true);
   groupAlgorithm->setLogging(false);
   groupAlgorithm->initialize();
@@ -157,13 +160,14 @@ API::WorkspaceGroup_sptr LoadMcStas::groupWorkspaces(const std::vector<std::stri
 
 /**
  * Read Event Data
- * @param eventEntries map of the file e bin/MantidPlot -xq docs/runsphinx_doctest.py -R Rebinntries that have events
+ * @param eventEntries map of the file e bin/MantidPlot -xq
+ * docs/runsphinx_doctest.py -R Rebinntries that have events
  * @param nxFile Reads data from inside first top entry
  * @return scatteringWSNames names of workspaces to include in the output group
  */
 std::vector<std::string> LoadMcStas::readEventData(
     const std::map<std::string, std::string> &eventEntries,
-  ::NeXus::File &nxFile) {
+    ::NeXus::File &nxFile) {
 
   // vector to store output workspaces
   std::vector<std::string> scatteringWSNames;

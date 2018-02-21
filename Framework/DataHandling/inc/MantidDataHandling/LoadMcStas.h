@@ -52,7 +52,8 @@ private:
   void init() override;
   void exec() override;
 
-  API::WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaces) const;
+  API::WorkspaceGroup_sptr
+  groupWorkspaces(const std::vector<std::string> &workspaces) const;
 
   std::vector<std::string>
   readEventData(const std::map<std::string, std::string> &eventEntries,
