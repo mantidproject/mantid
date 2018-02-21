@@ -7,14 +7,17 @@ from __future__ import (absolute_import, division, print_function)
 
 import re
 import numpy as np
+from functools import reduce
 
 from mantid import mtd
-from mantid.api import (AlgorithmManager, AnalysisDataService, MatrixWorkspace, WorkspaceFactory, TextAxis)
+from mantid.api import (AlgorithmManager, AnalysisDataService, MatrixWorkspace, WorkspaceFactory, SpectraAxis, TextAxis)
 from mantid.kernel import MaterialBuilder
-from mantid.simpleapi import (CropWorkspace, ConjoinWorkspaces, DeleteWorkspace, GroupWorkspaces, Integration,
-                              LoadVesuvio, Rebin, RenameWorkspace, UnGroupWorkspace, VesuvioCorrections, VesuvioTOFFit)
+from mantid.simpleapi import (AppendSpectra, CropWorkspace, ConjoinWorkspaces, DeleteWorkspace, Divide,
+                              ExtractSingleSpectrum, ExtractSpectra, GroupWorkspaces, Integration, LoadVesuvio, Rebin,
+                              RenameWorkspace, SumSpectra, UnGroupWorkspace, VesuvioCorrections, VesuvioTOFFit)
 
 from vesuvio.loading import VesuvioLoadHelper, VesuvioTOFFitInput
+
 
 # --------------------------------------------------------------------------------
 # Functions
@@ -127,7 +130,8 @@ class VesuvioTOFFitRoutine(object):
             corrections_output = _group_corrections(vesuvio_output, vesuvio_input.sample_runs, iteration)
 
             if fit_output is not None and compute_caad:
-                _add_and_group_caad(fit_namer, *_compute_caad(fit_output))
+                _add_and_group_caad(fit_namer, vesuvio_input, fit_output[0].getAxis(1).extractValues(),
+                                    *_compute_caad(fit_output))
 
             previous_output = vesuvio_output
         return vesuvio_output, [x for x in (fit_output, corrections_output) if x is not None], exit_iteration
@@ -142,6 +146,7 @@ class VesuvioTOFFitRoutineIteration(object):
 
     Attributes:
         _ms_helper                   A helper object for multiple scattering parameters.
+        _fit_helper                  A helper object for computing a VesuvioTOFFit.
         _fit_helper                  A helper object for computing a VesuvioTOFFit.
         _corrections_helper          A helper object for computing VesuvioCorrections.
         _mass_profile_collection     An object for storing and manipulating mass values
@@ -158,7 +163,7 @@ class VesuvioTOFFitRoutineIteration(object):
         self._fit_mode = fit_mode
 
     def __call__(self, vesuvio_input, iteration, verbose_output=False):
-        vesuvio_output = VesuvioTOFFitOutput(lambda index :
+        vesuvio_output = VesuvioTOFFitOutput(lambda index:
                                              vesuvio_input.sample_data.getSpectrum(index).getSpectrumNo())
 
         if vesuvio_input.using_back_scattering_spectra:
@@ -509,7 +514,6 @@ class MassProfileCollection2D(object):
 
 
 class VesuvioFitNamer(object):
-
     def __init__(self, sample_runs, suffix_prefix, index_to_spectrum, index_to_string,
                  iteration=0, index=0, iteration_string="", index_string="", suffix=""):
         self._sample_runs = sample_runs
@@ -524,14 +528,19 @@ class VesuvioFitNamer(object):
 
     @classmethod
     def from_vesuvio_input(cls, vesuvio_input, fit_mode):
-        index_to_spectrum = lambda index: str(vesuvio_input.sample_data.getSpectrum(index).getSpectrumNo())
+        def index_to_spectrum(index):
+            return str(vesuvio_input.sample_data.getSpectrum(index).getSpectrumNo())
 
         if fit_mode == "bank":
             suffix_prefix = "_" + vesuvio_input.spectra + "_bank_"
-            index_to_string = lambda index: str(index + 1)
+
+            def index_to_string(index):
+                return str(index + 1)
         else:
             suffix_prefix = "_spectrum_"
-            index_to_string = lambda index: str(index_to_spectrum(index))
+
+            def index_to_string(index):
+                return str(index_to_spectrum(index))
 
         return VesuvioFitNamer(vesuvio_input.sample_runs, suffix_prefix, index_to_spectrum, index_to_string)
 
@@ -599,21 +608,18 @@ class VesuvioFitNamer(object):
         return self._sample_runs + "_corrected" + self.suffix
 
     @property
-    def caad_workspace_name(self):
+    def caad_group_name(self):
         return self._sample_runs + "_CAAD_sum_iteration_" + str(self._iteration)
 
     @property
     def normalised_group_name(self):
         return self._sample_runs + "_CAAD_normalised_iteration_" + str(self._iteration)
 
-    def normalised_workspace_name(self, index):
-        return self._sample_runs + "_normalised_spectrum" + str(self._index_to_spectrum(index)) \
-               + "_iteration_" + str(self._iteration)
-
     def copy(self):
         return VesuvioFitNamer(self._sample_runs, self._suffix_prefix, self._index_to_string, self._iteration,
                                self._index, self._index_to_spectrum, self._iteration_string, self._index_string,
                                self._suffix)
+
 
 # -----------------------------------------------------------------------------------------
 
@@ -854,8 +860,21 @@ def _conjoin_groups(workspace_groups):
 
 def _conjoin(workspace1, workspace2):
     workspace_name = workspace1.getName()
-    ConjoinWorkspaces(InputWorkspace1=workspace_name, InputWorkspace2=workspace2)
+    ConjoinWorkspaces(InputWorkspace1=workspace_name, InputWorkspace2=workspace2, EnableLogging=False)
     return mtd[workspace_name]
+
+
+def _append_all(workspaces):
+    if len(workspaces) == 1:
+        return workspaces[0]
+    else:
+        return reduce(_append, workspaces[1:], workspaces[0])
+
+
+def _append(workspace1, workspace2):
+    return AppendSpectra(InputWorkspace1=workspace1, InputWorkspace2=workspace2,
+                         OutputWorkspace="__appended", StoreInADS=False, EnableLogging=False)
+
 
 def _update_output(vesuvio_output, prefit_result, corrections_result, fit_result):
     vesuvio_output.add_fit_output_workspace(fit_result[0])
@@ -905,24 +924,68 @@ def _add_corrections_to_ads(corrections_group, prefix):
     return corrections_names
 
 
-def _add_and_group_caad(fit_namer, normalised_workspaces, summed_workspace):
-    normalised_names = [fit_namer.normalised_workspace_name(index) for index in range(len(normalised_workspaces))]
+def _add_and_group_caad(fit_namer, vesuvio_input, suffices, normalised_workspaces, summed_workspaces, indices):
+    normalised_names = [fit_namer.normalised_group_name + "_" + suffices[index] for index in indices]
+    summed_names = [fit_namer.caad_group_name + "_" + suffices[index] for index in indices]
+    name_count = dict()
 
-    for name, workspace in zip(normalised_names, normalised_workspaces):
-        mtd.addOrReplace(name, workspace)
+    for name, workspace in zip(normalised_names + summed_names, normalised_workspaces + summed_workspaces):
+        if name not in name_count:
+            mtd.addOrReplace(name, workspace)
+            name_count[name] = 1
+        else:
+            name_count[name] += 1
+            mtd.addOrReplace(name + str(name_count[name]), workspace)
 
-    GroupWorkspaces(InputWorkspaces=normalised_names, OutputWorkspace=fit_namer.normalised_group_name)
-    mtd.addOrReplace(fit_namer.caad_workspace_name, summed_workspace)
+    map(_create_spectra_axis_copier(vesuvio_input.sample_data), normalised_workspaces)
+
+    GroupWorkspaces(InputWorkspaces=normalised_workspaces, OutputWorkspace=fit_namer.normalised_group_name)
+    GroupWorkspaces(InputWorkspaces=summed_workspaces, OutputWorkspace=fit_namer.caad_group_name)
 
 
 def _compute_caad(fit_workspaces):
-    normalised_workspaces = [_normalise_by_integral(workspace) for workspace in fit_workspaces]
-    return normalised_workspaces, sum(normalised_workspaces)
+    indices = _get_caad_indices(fit_workspaces[0])
+    normalised_workspaces = [_normalise_by_integral(_extract_spectra(workspace, indices))
+                             for workspace in fit_workspaces]
+
+    number_of_spectrum = normalised_workspaces[0].getNumberHistograms()
+    normalised_workspaces = [[ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace="__extracted",
+                                                    WorkspaceIndex=index, StoreInADS=False, EnableLogging=True)
+                              for workspace in normalised_workspaces] for index in range(number_of_spectrum)]
+    normalised_workspaces = [_append_all(workspaces) for workspaces in normalised_workspaces]
+
+    summed_workspaces = [SumSpectra(InputWorkspace=workspace, OutputWorkspace="__summed",
+                                    StoreInADS=False, EnableLogging=False)
+                         for workspace in normalised_workspaces]
+    return normalised_workspaces, summed_workspaces, indices
+
+
+def _get_caad_indices(fit_workspace):
+    axis_labels = fit_workspace.getAxis(1).extractValues()
+    return [index for index, label in enumerate(axis_labels) if _is_valid_for_caad(label)]
+
+
+def _create_spectra_axis_copier(workspace_with_axis):
+    def _copy_spectra_axis(workspace):
+        workspace.replaceAxis(1, SpectraAxis.create(workspace_with_axis))
+
+    return _copy_spectra_axis
+
+
+def _is_valid_for_caad(label):
+    return label != "Data" and label != "Diff"
+
+
+def _extract_spectra(workspace, indices):
+    return ExtractSpectra(InputWorkspace=workspace, WorkspaceIndexList=indices,
+                          OutputWorkspace="__extracted", StoreInADS=False, EnableLogging=False)
 
 
 def _normalise_by_integral(workspace):
-    return workspace / Integration(InputWorkspace=workspace, OutputWorkspace="__integral",
-                                   StoreInADS=False, EnableLogging=False)
+    integrated = Integration(InputWorkspace=workspace, OutputWorkspace="__integral",
+                             StoreInADS=False, EnableLogging=False)
+    return Divide(LHSWorkspace=workspace, RHSWorkspace=integrated,
+                  OutputWorkspace="__divided", StoreInADS=False, EnableLogging=False)
 
 
 def _parse_hydrogen_constraint(constraint):
