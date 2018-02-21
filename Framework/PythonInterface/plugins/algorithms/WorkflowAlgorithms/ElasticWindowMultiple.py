@@ -195,7 +195,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         # Process the ELF workspace
         if self._elf_ws_name != '':
             logger.information('Creating ELF workspace')
-            elf_workspace = self._sort_x_axis(self._transpose(q_workspace))
+            elf_workspace = sort_x_axis(self._transpose(q_workspace))
             self.setProperty('OutputELF', elf_workspace)
 
         # Do temperature normalisation
@@ -205,7 +205,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # If the ELF workspace was not created, create the ELT workspace
             # from the Q workspace. Else, clone the ELF workspace.
             if self._elf_ws_name == '':
-                elt_workspace = self._sort_x_axis(self._transpose(q_workspace))
+                elt_workspace = sort_x_axis(self._transpose(q_workspace))
             else:
                 elt_workspace = CloneWorkspace(InputWorkspace=elf_workspace, OutputWorkspace="__cloned",
                                                StoreInADS=False, EnableLogging=False)
