@@ -41,6 +41,7 @@ MultiDataset Fitting Interface
 
 - After a simultaneous fit the parameters are saved in a TableWorkspace made to simplify plotting their values against the datasets.
   The parameters are organised into columns and each row corresponds to a dataset.
+- Changed the behaviour of the exported graphs: on fit re-runs they update instead of closing.
 
 SpectrumView
 ------------
