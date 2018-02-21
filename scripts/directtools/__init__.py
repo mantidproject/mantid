@@ -2,10 +2,11 @@ from __future__ import (absolute_import, division, print_function)
 
 import collections
 from mantid import mtd
-from mantid.simpleapi import DeleteWorkspace, LineProfile
+from mantid.simpleapi import DeleteWorkspace, LineProfile, OneMinusExponentialCor, Transpose
 import matplotlib
 from matplotlib import pyplot
 import numpy
+from scipy import constants
 import time
 
 
@@ -87,9 +88,12 @@ def _profiletitle(workspaces, scan, units, cuts, widths, figure):
     figure.suptitle(title)
 
 
-def _profileytitle(axes):
+def _profileytitle(workspace, axes):
     """Set the correct y label for profile axes."""
-    axes.set_ylabel('$S(Q,E)$')
+    if workspace.YUnit() == 'Dynamic susceptibility':
+        axes.set_ylabel("$\\chi''(Q,E)$")
+    else:
+        axes.set_ylabel('$S(Q,E)$')
 
 
 def _singledatatitle(workspace):
@@ -133,6 +137,25 @@ def defaultrcParams():
         'text.usetex': True,
     }
     return params
+
+
+def dynamicsusceptibility(workspace, temperature, outputName=None):
+    """Convert :math:`S(Q,E)` to susceptibility :math:`\chi''(Q,E)`."""
+    workspace = _normws(workspace)
+    horAxis = workspace.getAxis(0)
+    horUnit = horAxis.getUnit().unitID()
+    doTranspose = False if horUnit == 'DeltaE' else True
+    if outputName is None:
+        outputName = 'CHIofQW_{}'.format(str(workspace))
+    if doTranspose:
+        workspace = Transpose(workspace, OutputWorkspace='__transposed_SofQW_', EnableLogging=False)
+    c = 1e-3 * constants.e / constants.k / temperature
+    outWS = OneMinusExponentialCor(workspace, OutputWorkspace=outputName, C=c, Operation='Multiply', EnableLogging=False)
+    if doTranspose:
+        outWS = Transpose(outWS, OutputWorkspace=outputName, EnableLogging=False)
+        DeleteWorkspace('__transposed_SofQW_', EnableLogging=False)
+    outWS.setYUnit("Dynamic susceptibility")
+    return outWS
 
 
 def mantidsubplotsetup():
@@ -194,8 +217,8 @@ def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l',
                 label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
                 axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
                 if not keepCutWorkspaces:
-                    DeleteWorkspace(line)
-    _profileytitle(axes)
+                    DeleteWorkspace(line, EnableLogging=False)
+    _profileytitle(workspaces[0], axes)
     return figure, axes, cutWSList
 
 
@@ -226,7 +249,7 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True):
     return figure, axes, cutWSList
 
 
-def plotSofQW(workspace, QMin=0., QMax=None, EMin=-10., EMax=None, VMin=0, VMax=None, colormap='jet'):
+def plotSofQW(workspace, QMin=0., QMax=None, EMin=-10., EMax=None, VMin=0., VMax=None, colormap='jet'):
     """Plot a 2D plot with given axis limits and return the plotting layer."""
     # Accept both workspace names and actual workspaces.
     workspace = _normws(workspace)
@@ -249,7 +272,10 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=-10., EMax=None, VMin=0, VMax=
     print('Plotting intensity range: {}...{}'.format(VMin, VMax))
     contours = axes.pcolor(workspace, vmin=VMin, vmax=VMax, distribution=True, cmap=colormap)
     colorbar = figure.colorbar(contours)
-    colorbar.set_label('$S(Q,E)$ (arb. units)')
+    if workspace.YUnit() == 'Dynamic susceptibility':
+        colorbar.set_label("$\\chi''(Q,E)$ (arb. units)")
+    else:
+        colorbar.set_label('$S(Q,E)$ (arb. units)')
     axes.set_xlim(left=QMin)
     axes.set_xlim(right=QMax)
     axes.set_ylim(bottom=EMin)

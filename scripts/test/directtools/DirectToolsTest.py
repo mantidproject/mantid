@@ -49,6 +49,20 @@ class DirectTest(unittest.TestCase):
         self.assertTrue('text.usetex' in result)
         self.assertEqual(result['text.usetex'], True)
 
+    def test_dynamicsusceptibility(self):
+        xs = numpy.array([-1, 0, 1])
+        ys = numpy.array([1, 1])
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='DeltaE', StoreInADS=False)
+        wsOut = directtools.dynamicsusceptibility(ws, 100.)
+        self.assertEqual(wsOut.YUnit(), 'Dynamic susceptibility')
+        xs = numpy.array([0, 1, 0, 1])
+        ys = numpy.array([1, 1])
+        vertX = numpy.array([-1, 1])
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2, UnitX='MomentumTransfer', VerticalAxisUnit='DeltaE', VerticalAxisValues=vertX,
+                             StoreInADS=False)
+        wsOut = directtools.dynamicsusceptibility(ws, 100.)
+        self.assertEqual(wsOut.YUnit(), 'Dynamic susceptibility')
+
     def test_mantidsubplotsetup(self):
         result = directtools.mantidsubplotsetup()
         self.assertEqual(len(result), 1)
