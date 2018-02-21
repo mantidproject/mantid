@@ -101,7 +101,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         """
         Gets algorithm properties.
         """
-
         self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
         self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
 
@@ -115,6 +114,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         self._background_range_start = self.getProperty('BackgroundRangeStart').value
         self._background_range_end = self.getProperty('BackgroundRangeEnd').value
+
 
     def PyExec(self):
         from IndirectCommon import getInstrRun
@@ -150,7 +150,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q2_workspaces.append(q2_workspace)
 
             # Get the run number
-            run_no = getInstrRun(input_ws)[1]
+            run_no = getInstrRun(input_ws.getName())[1]
             run_numbers.append(run_no)
 
             # Get the sample environment unit
