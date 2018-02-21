@@ -6,8 +6,10 @@ from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi as api
 
+
 def extract_times(times, is_start, is_sf1=False, is_sf2=False, is_veto1=False, is_veto2=False):
     return [(times[i], is_start, [is_sf1, is_sf2, is_veto1, is_veto2]) for i in range(len(times))]
+
 
 class MRFilterCrossSections(PythonAlgorithm):
 
@@ -149,7 +151,6 @@ class MRFilterCrossSections(PythonAlgorithm):
                 time_dict = splitws.toDict()
                 change_list.extend(extract_times(time_dict['start'], True, is_veto2=True))
                 change_list.extend(extract_times(time_dict['stop'], False, is_veto2=True))
-
 
         start_time = ws_raw.run().startTime().total_nanoseconds()
 
