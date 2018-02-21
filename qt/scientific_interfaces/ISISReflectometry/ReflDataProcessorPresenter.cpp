@@ -219,22 +219,10 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     const auto rowData = row.second;   // data values for this row
     auto runNo = row.second->value(0); // The run number
 
-    // Work out and cache the reduced workspace name
-    rowData->setReducedName(getReducedWorkspaceName(rowData));
-
-    // Get the algorithm input properties for this row
-    OptionsMap processingOptions;
-    try {
-      processingOptions = getProcessingOptions(rowData);
-    } catch (std::runtime_error &e) {
-      // Quit with errors if the user entered invalid settings
-      m_view->giveUserCritical(e.what(), "Error");
+    // Set up all data required for processing the row
+    if (!initRowForProcessing(rowData))
       return true;
-    }
-    OptionsMap options = getCanonicalOptions(
-        rowData, processingOptions, m_whitelist, true,
-        m_processor.outputProperties(), m_processor.prefixes());
-    rowData->setOptions(options);
+
     // Preprocess the row. Note that this only needs to be done once and
     // not for each slice because the slice data can be inferred from the
     // row data
@@ -337,28 +325,14 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
   bool errors = false;
 
   for (auto &row : group) {
-    // Work out and cache the reduced workspace name
     auto rowData = row.second;
-    rowData->setReducedName(getReducedWorkspaceName(rowData));
-    // Get the algorithm input properties for this row and cache in the row
-    // data
-    OptionsMap processingOptions;
-    try {
-      processingOptions = getProcessingOptions(rowData);
-    } catch (std::runtime_error &e) {
-      // Quit with errors if the user entered invalid settings
-      m_view->giveUserCritical(e.what(), "Error");
+    // Set up all data required for processing the row
+    if (!initRowForProcessing(rowData))
       return true;
-    }
-    OptionsMap options = getCanonicalOptions(
-        rowData, processingOptions, m_whitelist, true,
-        m_processor.outputProperties(), m_processor.prefixes());
-    rowData->setOptions(std::move(options));
-
-    // Reduce this row
+    // Do the reduction
     reduceRow(rowData);
     // Update the tree
-    m_manager->update(groupID, row.first, row.second->data());
+    m_manager->update(groupID, row.first, rowData->data());
   }
 
   // Post-process (if needed)

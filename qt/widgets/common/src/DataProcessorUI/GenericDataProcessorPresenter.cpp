@@ -321,6 +321,36 @@ bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
   return true;
 }
 
+/** Set up the row data so that it contains all of the information needed to
+ * process the row.
+ * @param rowData [inout] : the data to initialise
+ * @return : true if ok, false if there was a problem
+ */
+bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
+  // Work out and cache the reduced workspace name
+  rowData->setReducedName(getReducedWorkspaceName(rowData));
+
+  // Get the algorithm processing properties for this row
+  OptionsMap processingOptions;
+  try {
+    processingOptions = getProcessingOptions(rowData);
+  } catch (std::runtime_error &e) {
+    // Warn and quit if user entered invalid options
+    m_view->giveUserCritical(e.what(), "Error");
+    return false;
+  }
+
+  // Combine the processing properties with the global options,
+  // preprocessed values etc. to get the actual values that will be
+  // used in the reduction.
+  OptionsMap options = getCanonicalOptions(
+      rowData, processingOptions, m_whitelist, true,
+      m_processor.outputProperties(), m_processor.prefixes());
+  rowData->setOptions(std::move(options));
+
+  return true;
+}
+
 /**
 Process selected data
 */
@@ -359,22 +389,9 @@ void GenericDataProcessorPresenter::process() {
     RowQueue rowQueue;
 
     for (const auto &row : group.second) {
-      auto rowData = row.second;
-      // Work out and cache the reduced workspace name
-      rowData->setReducedName(getReducedWorkspaceName(rowData));
-      // Cache the algorithm input properties for this row
-      OptionsMap processingOptions;
-      try {
-        processingOptions = getProcessingOptions(rowData);
-      } catch (std::runtime_error &e) {
-        // Warn and quit if user entered invalid options
-        m_view->giveUserCritical(e.what(), "Error");
+      // Set up all data required for processing the row
+      if (!initRowForProcessing(row.second))
         return;
-      }
-      OptionsMap options = getCanonicalOptions(
-          rowData, getProcessingOptions(rowData), m_whitelist, true,
-          m_processor.outputProperties(), m_processor.prefixes());
-      rowData->setOptions(std::move(options));
 
       // Add all row items to queue
       rowQueue.push(row);

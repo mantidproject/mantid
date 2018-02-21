@@ -216,6 +216,8 @@ protected:
   // Sets whether to prompt user when getting selected runs
   void setPromptUser(bool allowPrompt);
 
+  // Set up data required for processing a row
+  bool initRowForProcessing(RowData_sptr rowData);
   // Process selected rows
   virtual void process();
   // Plotting
