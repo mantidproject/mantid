@@ -670,8 +670,8 @@ double LoadILLReflectometry::reflectometryPeak() {
   auto maxFwhmIt = std::find_if(maxValueIt, ys.cend(), lessThanHalfMax);
   std::reverse_iterator<IterType> revMaxFwhmIt{maxFwhmIt};
   if (revMinFwhmIt == ys.crend() || maxFwhmIt == ys.cend()) {
-    g_log.warning()
-        << "Couldn't determine fwhm of beam, using position of max value as beam center.\n";
+    g_log.warning() << "Couldn't determine fwhm of beam, using position of max "
+                       "value as beam center.\n";
     return centreByMax;
   }
   const double fwhm =
@@ -820,7 +820,8 @@ void LoadILLReflectometry::placeSlits() {
     // For the moment, the position information for S3 is missing in the
     // NeXus files of Figaro. Using a hard-coded distance; should be fixed
     // when the NeXus files are
-    const double slitSeparation = inMeter(doubleFromRun("Theta.inter-slit_distance"));
+    const double slitSeparation =
+        inMeter(doubleFromRun("Theta.inter-slit_distance"));
     slit2ToSample = 0.368;
     slit1ToSample = slit2ToSample + slitSeparation;
   } else {
