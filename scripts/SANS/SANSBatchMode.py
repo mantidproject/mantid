@@ -565,23 +565,26 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
     """
     user_file_to_set = ""
 
-    # Try to find the user file in the default paths
-    if not os.path.isfile(new_user_file):
-        # Find the user file in the Mantid path. we make sure that the user file has a txt extension.
-        user_file_names_with_extension = su.get_user_file_name_options_with_txt_extension(new_user_file)
-        for user_file_name_with_extension in user_file_names_with_extension:
-            user_file = FileFinder.getFullPath(user_file_name_with_extension)
-            if user_file:
-                break
-
-        if not os.path.isfile(user_file):
-            message = "Error could not find specified user file {0}"\
-                .format(new_user_file)
-            raise RuntimeError(message)
-        else:
-            user_file_to_set = user_file
+    if new_user_file == '':
+        user_file_to_set = original_user_file
     else:
-        user_file_to_set = new_user_file
+        # Try to find the user file in the default paths
+        if not os.path.isfile(new_user_file):
+            # Find the user file in the Mantid path. we make sure that the user file has a txt extension.
+            user_file_names_with_extension = su.get_user_file_name_options_with_txt_extension(new_user_file)
+            for user_file_name_with_extension in user_file_names_with_extension:
+                user_file = FileFinder.getFullPath(user_file_name_with_extension)
+                if user_file:
+                    break
+
+            if not os.path.isfile(user_file):
+                message = "Error could not find specified user file {0}"\
+                    .format(new_user_file)
+                raise RuntimeError(message)
+            else:
+                user_file_to_set = user_file
+        else:
+            user_file_to_set = new_user_file
 
     # Set the user file in the reducer and load the user file
     if user_file_to_set != current_user_file:
