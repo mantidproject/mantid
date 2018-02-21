@@ -776,7 +776,7 @@ void MultiDatasetFit::removeOldOutput() {
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
   if (ADS.doesExist(outWS)) {
     if (auto group = ADS.retrieveWS<Mantid::API::WorkspaceGroup>(outWS)) {
-      auto nSpectra = getNumberOfSpectra();
+      auto nSpectra = static_cast<size_t>(getNumberOfSpectra());
       auto groupSize = group->size();
       // If size of output group decreases the extra workspaces will pop out
       // to the top level. Remove them.
