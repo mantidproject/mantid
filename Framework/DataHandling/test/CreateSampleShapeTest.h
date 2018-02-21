@@ -59,7 +59,6 @@ public:
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
-    TS_ASSERT(boost::dynamic_pointer_cast<::Mantid::Geometry::CSGObject>(sampleShape));
     Material alum("Al", getNeutronAtom(13), 2.6989);
     sampleShape->setID("mysample");
     sampleShape->setMaterial(alum);

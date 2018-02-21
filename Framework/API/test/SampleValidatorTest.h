@@ -35,10 +35,7 @@ public:
     auto sphere = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
     Mantid::Kernel::Material material(
         "stuff", Mantid::PhysicalConstants::NeutronAtom(), 10);
-    TS_ASSERT(boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(sphere));
-    if (auto csgObj = boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(sphere)) {
-      csgObj->setMaterial(material);
-    }
+    sphere->setMaterial(material);
     ws->mutableSample().setShape(sphere);
 
     SampleValidator validator;

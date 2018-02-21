@@ -46,10 +46,7 @@ void CreateSampleShape::exec() {
   // material
   if (shape->hasValidShape()) {
     const auto mat = workspace->sample().getMaterial();
-    // CSGObject expected, if so set its meterial
-    if (auto csgShape = boost::dynamic_pointer_cast<Geometry::CSGObject>(shape)) {
-      csgShape->setMaterial(mat);
-    }
+    shape->setMaterial(mat);
     workspace->mutableSample().setShape(shape);
   } else {
     std::ostringstream msg;

@@ -260,13 +260,8 @@ public:
     Material vanBlock("vanBlock",
                       Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    IObject_sptr shape = Mantid::Geometry::ShapeFactory().createShape("");
-    TS_ASSERT(boost::dynamic_pointer_cast<CSGObject>(shape));
-    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(shape)) {
-      csgObj->setMaterial(vanBlock);
-    }
-    sample.setShape(shape);
-
+    auto shape = Mantid::Geometry::ShapeFactory().createShape("");
+    shape->setMaterial(vanBlock);
     const Material &mat = sample.getMaterial();
     const double lambda(2.1);
     TS_ASSERT_DELTA(mat.cohScatterXSection(lambda), 0.0184, 1e-02);

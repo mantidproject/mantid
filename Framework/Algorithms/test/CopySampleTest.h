@@ -51,9 +51,7 @@ public:
     delete latt;
     auto shape_sptr = ComponentCreationHelper::createCappedCylinder(
         0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
-    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(shape_sptr)) {
-      csgObj->setMaterial(Material("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072));
-    }
+    shape_sptr->setMaterial(Material("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072));
     sample.setShape(shape_sptr);
     return sample;
   }
