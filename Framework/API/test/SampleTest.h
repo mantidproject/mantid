@@ -262,6 +262,8 @@ public:
     Sample sample;
     auto shape = Mantid::Geometry::ShapeFactory().createShape("");
     shape->setMaterial(vanBlock);
+    sample.setShape(shape);
+
     const Material &mat = sample.getMaterial();
     const double lambda(2.1);
     TS_ASSERT_DELTA(mat.cohScatterXSection(lambda), 0.0184, 1e-02);
