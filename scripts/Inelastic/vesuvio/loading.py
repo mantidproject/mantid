@@ -65,6 +65,7 @@ class VesuvioLoadHelper(object):
                      OutputWorkspace="rebinned",
                      StoreInADS=False)
 
+
 class VesuvioTOFFitInput(object):
     """
     A helper class for loading and storing the specified spectra of the specified
@@ -79,6 +80,7 @@ class VesuvioTOFFitInput(object):
         _back_scattering    True if back scattering spectra are being
                             loaded, false otherwise.
     """
+
     def __init__(self, sample_runs, container_runs, spectra, loader):
         # Load sample and container runs
         self.spectra = _parse_spectra(loader.fit_mode, spectra)
