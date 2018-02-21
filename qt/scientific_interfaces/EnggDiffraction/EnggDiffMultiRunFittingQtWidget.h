@@ -26,9 +26,7 @@ public:
 
   ~EnggDiffMultiRunFittingQtWidget() override;
 
-  RunLabel getSelectedRunLabel() const override;
-
-  bool hasSelectedRunLabel() const override;
+  boost::optional<RunLabel> getSelectedRunLabel() const override;
 
   void plotFittedPeaks(
       const std::vector<boost::shared_ptr<QwtData>> &curve) override;
@@ -71,12 +69,16 @@ private slots:
 private:
   void cleanUpPlot();
 
+  bool hasSelectedRunLabel() const;
+
   void resetPlotZoomLevel();
 
   void setupUI();
 
   void userError(const std::string &errorTitle,
                  const std::string &errorDescription);
+
+  std::vector<std::unique_ptr<QwtPlotCurve>> m_fittedPeaksCurves;
 
   std::vector<std::unique_ptr<QwtPlotCurve>> m_focusedRunCurves;
 

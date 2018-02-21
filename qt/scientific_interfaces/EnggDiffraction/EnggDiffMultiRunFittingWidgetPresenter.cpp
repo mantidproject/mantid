@@ -110,12 +110,9 @@ EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(
   return m_model->getFocusedRun(runLabel);
 }
 
-RunLabel EnggDiffMultiRunFittingWidgetPresenter::getSelectedRunLabel() const {
+boost::optional<RunLabel>
+EnggDiffMultiRunFittingWidgetPresenter::getSelectedRunLabel() const {
   return m_view->getSelectedRunLabel();
-}
-
-bool EnggDiffMultiRunFittingWidgetPresenter::hasSelectedRunLabel() const {
-  return m_view->hasSelectedRunLabel();
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::notify(
@@ -140,31 +137,34 @@ void EnggDiffMultiRunFittingWidgetPresenter::notify(
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processPlotPeaksStateChanged() {
-  updatePlot(getSelectedRunLabel());
+  const auto runLabel = getSelectedRunLabel();
+  if (runLabel) {
+    updatePlot(*runLabel);
+  }
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processPlotToSeparateWindow() {
-  if (!m_view->hasSelectedRunLabel()) {
+  const auto runLabel = m_view->getSelectedRunLabel();
+  if (!runLabel) {
     m_view->reportNoRunSelectedForPlot();
     return;
   }
-  const auto runLabel = m_view->getSelectedRunLabel();
-  const auto focusedRun = m_model->getFocusedRun(runLabel);
 
+  const auto focusedRun = m_model->getFocusedRun(*runLabel);
   if (!focusedRun) {
-    m_view->reportPlotInvalidFocusedRun(runLabel);
+    m_view->reportPlotInvalidFocusedRun(*runLabel);
     return;
   }
 
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
-  const auto focusedRunName = generateFocusedRunName(runLabel);
+  const auto focusedRunName = generateFocusedRunName(*runLabel);
   ADS.add(focusedRunName, *focusedRun);
 
   boost::optional<std::string> fittedPeaksName = boost::none;
   if (m_view->showFitResultsSelected() &&
-      m_model->hasFittedPeaksForRun(runLabel)) {
-    fittedPeaksName = generateFittedPeaksName(runLabel);
-    const auto fittedPeaks = m_model->getFittedPeaks(runLabel);
+      m_model->hasFittedPeaksForRun(*runLabel)) {
+    fittedPeaksName = generateFittedPeaksName(*runLabel);
+    const auto fittedPeaks = m_model->getFittedPeaks(*runLabel);
     ADS.add(*fittedPeaksName, *fittedPeaks);
   }
 
@@ -177,18 +177,18 @@ void EnggDiffMultiRunFittingWidgetPresenter::processPlotToSeparateWindow() {
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processRemoveRun() {
-  if (m_view->hasSelectedRunLabel()) {
-    const auto selectedRunLabel = m_view->getSelectedRunLabel();
-    m_model->removeRun(selectedRunLabel);
+  const auto runLabel = getSelectedRunLabel();
+  if (runLabel) {
+    m_model->removeRun(*runLabel);
     m_view->updateRunList(m_model->getAllWorkspaceLabels());
     m_view->resetCanvas();
   }
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {
-  if (m_view->hasSelectedRunLabel()) {
-    const auto selectedRunLabel = m_view->getSelectedRunLabel();
-    updatePlot(selectedRunLabel);
+  const auto runLabel = getSelectedRunLabel();
+  if (runLabel) {
+    updatePlot(*runLabel);
   }
 }
 

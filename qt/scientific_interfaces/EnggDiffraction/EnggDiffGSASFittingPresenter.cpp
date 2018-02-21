@@ -102,20 +102,20 @@ EnggDiffGSASFittingPresenter::doRietveldRefinement(
 }
 
 void EnggDiffGSASFittingPresenter::processDoRefinement() {
-  if (!m_multiRunWidget->hasSelectedRunLabel()) {
+  const auto runLabel = m_multiRunWidget->getSelectedRunLabel();
+  if (!runLabel) {
     m_view->userWarning("No run selected",
                         "Please select a run to do refinement on");
     return;
   }
-  const auto runLabel = m_multiRunWidget->getSelectedRunLabel();
-  const auto inputWSOptional = m_multiRunWidget->getFocusedRun(runLabel);
 
+  const auto inputWSOptional = m_multiRunWidget->getFocusedRun(*runLabel);
   if (!inputWSOptional) {
     m_view->userError(
         "Invalid run selected for refinement",
         "Tried to run refinement on invalid focused run, run number " +
-            std::to_string(runLabel.runNumber) + " and bank ID " +
-            std::to_string(runLabel.bank) +
+            std::to_string(runLabel->runNumber) + " and bank ID " +
+            std::to_string(runLabel->bank) +
             ". Please contact the development team with this message");
     return;
   }
@@ -123,7 +123,7 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   m_view->showStatus("Refining run");
   const auto refinementMethod = m_view->getRefinementMethod();
   const auto refinementParams =
-      collectInputParameters(runLabel, *inputWSOptional, refinementMethod);
+      collectInputParameters(*runLabel, *inputWSOptional, refinementMethod);
 
   try {
     Mantid::API::MatrixWorkspace_sptr fittedPeaks;
@@ -139,8 +139,8 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
       break;
     }
 
-    m_multiRunWidget->addFittedPeaks(runLabel, fittedPeaks);
-    displayFitResults(runLabel);
+    m_multiRunWidget->addFittedPeaks(*runLabel, fittedPeaks);
+    displayFitResults(*runLabel);
   } catch (const std::exception &ex) {
     m_view->showStatus("An error occurred in refinement");
     m_view->userError("Refinement failed", ex.what());
@@ -162,11 +162,9 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
 }
 
 void EnggDiffGSASFittingPresenter::processSelectRun() {
-  if (m_multiRunWidget->hasSelectedRunLabel()) {
-    const auto runLabel = m_multiRunWidget->getSelectedRunLabel();
-    if (m_model->hasFitResultsForRun(runLabel)) {
-      displayFitResults(runLabel);
-    }
+  const auto runLabel = m_multiRunWidget->getSelectedRunLabel();
+  if (runLabel && m_model->hasFitResultsForRun(*runLabel)) {
+    displayFitResults(*runLabel);
   }
 }
 

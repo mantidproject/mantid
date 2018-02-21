@@ -28,7 +28,7 @@ public:
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
                          const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD0(getSelectedRunLabel, RunLabel());
+  MOCK_CONST_METHOD0(getSelectedRunLabel, boost::optional<RunLabel>());
 
   // Must be faked so that we can return a unique_ptr out of it
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>

@@ -70,9 +70,6 @@ public:
         {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", boost::none, boost::none,
         10000, 40000, true, false);
 
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(params.runLabel));
@@ -133,9 +130,6 @@ public:
         {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", 1, 2, 10000, 40000, true,
         false);
 
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(params.runLabel));
@@ -191,9 +185,6 @@ public:
     auto presenter = setUpPresenter();
     const RunLabel runLabel(123, 1);
 
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
@@ -236,9 +227,6 @@ public:
     auto presenter = setUpPresenter();
     const RunLabel runLabel(123, 1);
 
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
@@ -257,10 +245,9 @@ public:
 
   void test_selectRunNoLabelSelected() {
     auto presenter = setUpPresenter();
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel()).Times(0);
+        .WillOnce(Return(boost::none));
     presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
     assertMocksUsedCorrectly();
   }

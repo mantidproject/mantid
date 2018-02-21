@@ -59,6 +59,8 @@ public:
 
   MOCK_CONST_METHOD0(showRefinementResultsSelected, bool());
 
+  MOCK_CONST_METHOD1(showStatus, void(const std::string &status));
+
   MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
 
   MOCK_CONST_METHOD2(userError, void(const std::string &errorTitle,

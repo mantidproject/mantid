@@ -16,9 +16,7 @@ class MockEnggDiffMultiRunFittingWidgetView
     : public IEnggDiffMultiRunFittingWidgetView {
 
 public:
-  MOCK_CONST_METHOD0(hasSelectedRunLabel, bool());
-
-  MOCK_CONST_METHOD0(getSelectedRunLabel, RunLabel());
+  MOCK_CONST_METHOD0(getSelectedRunLabel, boost::optional<RunLabel>());
 
   MOCK_METHOD1(plotFittedPeaks,
                void(const std::vector<boost::shared_ptr<QwtData>> &curve));

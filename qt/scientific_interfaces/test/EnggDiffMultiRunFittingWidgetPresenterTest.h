@@ -118,10 +118,6 @@ public:
   void test_selectValidRunWithoutFittedPeaks() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
-
     const RunLabel runLabel(123, 1);
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
@@ -147,10 +143,6 @@ public:
   void test_selectRunInvalid() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
-
     const RunLabel runLabel(123, 1);
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
@@ -168,10 +160,6 @@ public:
 
   void test_selectValidRunWithFittedPeaks() {
     auto presenter = setUpPresenter();
-
-    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
 
     const RunLabel runLabel(123, 1);
     ON_CALL(*m_mockView, getSelectedRunLabel()).WillByDefault(Return(runLabel));
@@ -196,10 +184,10 @@ public:
 
   void test_selectRunDoesNothingWhenNoRunSelected() {
     auto presenter = setUpPresenter();
-    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(0);
+        .WillOnce(Return(boost::none));
     presenter->notify(
         IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
     assertMocksUsedCorrectly();
@@ -231,12 +219,23 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_plotPeaksStateChangedDoesNotCrashWhenNoRunSelected() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_mockModel, getFocusedRun(testing::_)).Times(0);
+
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
+                          PlotPeaksStateChanged);
+    assertMocksUsedCorrectly();
+  }
+
   void test_removeRun() {
     auto presenter = setUpPresenter();
+
     const RunLabel runLabel(123, 1);
-    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
@@ -256,10 +255,9 @@ public:
 
   void test_removeRunDoesNothingWhenNoRunSelected() {
     auto presenter = setUpPresenter();
-    const RunLabel runLabel(123, 1);
-    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
-        .WillOnce(Return(false));
+        .WillOnce(Return(boost::none));
     EXPECT_CALL(*m_mockModel, removeRun(testing::_)).Times(0);
     presenter->notify(
         IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
@@ -269,9 +267,9 @@ public:
   void test_plotToSeparateWindowDoesNothingWhenNoRunSelected() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
-        .WillOnce(Return(false));
+        .WillOnce(Return(boost::none));
     EXPECT_CALL(*m_mockView, reportNoRunSelectedForPlot()).Times(1);
 
     presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
@@ -283,9 +281,6 @@ public:
     auto presenter = setUpPresenter();
     const RunLabel runLabel(123, 1);
 
-    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
@@ -321,9 +316,6 @@ public:
     auto presenter = setUpPresenter();
     const RunLabel runLabel(123, 1);
 
-    EXPECT_CALL(*m_mockView, hasSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
