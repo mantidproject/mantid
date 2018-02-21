@@ -751,7 +751,7 @@ void FindPeaksMD::exec() {
   peakWS->sort(criteria);
 
   for (auto i = 0; i != peakWS->getNumberPeaks(); ++i) {
-    auto p = peakWS->getPeak(i);
+    Peak &p = peakWS->getPeak(i);
     p.setPeakNumber(static_cast<int>(i + 1));
   }
   // Save the output
