@@ -239,7 +239,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         run = workspace.getRun()
 
         if self._sample_log_name == 'Position':
-            self._sample_log_name = _extract_sensor_name(self._sample_log_name, run, instrument)
+            self._sample_log_name = _extract_sensor_name(self._sample_log_name, run, workspace.getInstrument())
 
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
