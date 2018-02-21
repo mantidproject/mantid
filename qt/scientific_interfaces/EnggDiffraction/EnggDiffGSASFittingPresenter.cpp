@@ -7,13 +7,12 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     std::unique_ptr<IEnggDiffGSASFittingModel> model,
-    std::unique_ptr<IEnggDiffGSASFittingView> view)
-    : m_model(std::move(model)), m_view(std::move(view)),
-      m_viewHasClosed(false) {}
+    IEnggDiffGSASFittingView *view)
+    : m_model(std::move(model)), m_view(view), m_viewHasClosed(false) {}
 
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     EnggDiffGSASFittingPresenter &&other)
-    : m_model(std::move(other.m_model)), m_view(std::move(other.m_view)),
+    : m_model(std::move(other.m_model)), m_view(other.m_view),
       m_viewHasClosed(other.m_viewHasClosed) {}
 
 EnggDiffGSASFittingPresenter &EnggDiffGSASFittingPresenter::
@@ -56,18 +55,18 @@ void EnggDiffGSASFittingPresenter::notify(
   }
 }
 
-void EnggDiffGSASFittingPresenter::displayFitResults(const int runNumber,
-                                                     const size_t bank) {
-  const auto fittedPeaks = m_model->getFittedPeaks(runNumber, bank);
-  const auto latticeParams = m_model->getLatticeParams(runNumber, bank);
-  const auto rwp = m_model->getRwp(runNumber, bank);
+void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
+  const auto fittedPeaks = m_model->getFittedPeaks(runLabel);
+  const auto latticeParams = m_model->getLatticeParams(runLabel);
+  const auto rwp = m_model->getRwp(runLabel);
 
   if (!fittedPeaks || !latticeParams || !rwp) {
-    m_view->userWarning("Unexpectedly tried to plot fit results for invalid "
-                        "run, run number = " +
-                        std::to_string(runNumber) + ", bank ID = " +
-                        std::to_string(bank) +
-                        ". Please contact the development team");
+    m_view->userError("Invalid run identifier",
+                      "Unexpectedly tried to plot fit results for invalid "
+                      "run, run number = " +
+                          std::to_string(runLabel.runNumber) + ", bank ID = " +
+                          std::to_string(runLabel.bank) +
+                          ". Please contact the development team");
     return;
   }
 
@@ -78,31 +77,28 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const int runNumber,
   m_view->displayRwp(*rwp);
 }
 
-bool EnggDiffGSASFittingPresenter::doPawleyRefinement(
-    const int runNumber, const size_t bank, const std::string &instParamFile,
+boost::optional<std::string> EnggDiffGSASFittingPresenter::doPawleyRefinement(
+    const RunLabel &runLabel, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
   const auto dMin = m_view->getPawleyDMin();
   const auto negativeWeight = m_view->getPawleyNegativeWeight();
 
-  return m_model->doPawleyRefinement(runNumber, bank, instParamFile, phaseFiles,
+  return m_model->doPawleyRefinement(runLabel, instParamFile, phaseFiles,
                                      pathToGSASII, GSASIIProjectFile, dMin,
                                      negativeWeight);
 }
 
-bool EnggDiffGSASFittingPresenter::doRietveldRefinement(
-    const int runNumber, const size_t bank, const std::string &instParamFile,
+boost::optional<std::string> EnggDiffGSASFittingPresenter::doRietveldRefinement(
+    const RunLabel &runLabel, const std::string &instParamFile,
     const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
     const std::string &GSASIIProjectFile) {
-  return m_model->doRietveldRefinement(runNumber, bank, instParamFile,
-                                       phaseFiles, pathToGSASII,
-                                       GSASIIProjectFile);
+  return m_model->doRietveldRefinement(runLabel, instParamFile, phaseFiles,
+                                       pathToGSASII, GSASIIProjectFile);
 }
 
 void EnggDiffGSASFittingPresenter::processDoRefinement() {
   const auto runLabel = m_view->getSelectedRunLabel();
-  const auto runNumber = runLabel.first;
-  const auto bank = runLabel.second;
 
   const auto refinementMethod = m_view->getRefinementMethod();
 
@@ -111,61 +107,60 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   const auto pathToGSASII = m_view->getPathToGSASII();
   const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
 
-  bool refinementSuccessful = false;
+  boost::optional<std::string> refinementFailure(boost::none);
 
   switch (refinementMethod) {
 
   case GSASRefinementMethod::PAWLEY:
-    refinementSuccessful =
-        doPawleyRefinement(runNumber, bank, instParamFile, phaseFiles,
-                           pathToGSASII, GSASIIProjectFile);
+    refinementFailure = doPawleyRefinement(runLabel, instParamFile, phaseFiles,
+                                           pathToGSASII, GSASIIProjectFile);
     break;
 
   case GSASRefinementMethod::RIETVELD:
-    refinementSuccessful =
-        doRietveldRefinement(runNumber, bank, instParamFile, phaseFiles,
-                             pathToGSASII, GSASIIProjectFile);
+    refinementFailure = doRietveldRefinement(
+        runLabel, instParamFile, phaseFiles, pathToGSASII, GSASIIProjectFile);
     break;
   }
 
-  if (refinementSuccessful) {
-    updatePlot(runNumber, bank);
+  if (refinementFailure) {
+    m_view->userWarning("Refinement failed", *refinementFailure);
   } else {
-    m_view->userWarning("Refinement failed, see the log for more details");
+    updatePlot(runLabel);
   }
 }
 
 void EnggDiffGSASFittingPresenter::processLoadRun() {
-  const auto focusedFileName = m_view->getFocusedFileName();
-  const auto loadSuccessful = m_model->loadFocusedRun(focusedFileName);
+  const auto focusedFileNames = m_view->getFocusedFileNames();
 
-  if (loadSuccessful) {
-    const auto runLabels = m_model->getRunLabels();
-    m_view->updateRunList(runLabels);
-  } else {
-    m_view->userWarning("Load failed, see the log for more details");
+  for (const auto fileName : focusedFileNames) {
+    const auto loadFailure = m_model->loadFocusedRun(fileName);
+
+    if (loadFailure) {
+      m_view->userWarning("Load failed", *loadFailure);
+    } else {
+      const auto runLabels = m_model->getRunLabels();
+      m_view->updateRunList(runLabels);
+    }
   }
 }
 
 void EnggDiffGSASFittingPresenter::processSelectRun() {
   const auto runLabel = m_view->getSelectedRunLabel();
-  const auto runNumber = runLabel.first;
-  const auto bank = runLabel.second;
-
-  updatePlot(runNumber, bank);
+  updatePlot(runLabel);
 }
 
 void EnggDiffGSASFittingPresenter::processStart() {}
 
 void EnggDiffGSASFittingPresenter::processShutDown() { m_viewHasClosed = true; }
 
-void EnggDiffGSASFittingPresenter::updatePlot(const int runNumber,
-                                              const size_t bank) {
-  const auto focusedWSOptional = m_model->getFocusedWorkspace(runNumber, bank);
+void EnggDiffGSASFittingPresenter::updatePlot(const RunLabel &runLabel) {
+  const auto focusedWSOptional = m_model->getFocusedWorkspace(runLabel);
   if (!focusedWSOptional) {
-    m_view->userWarning("Tried to access invalid run, runNumber " +
-                        std::to_string(runNumber) + " and bank ID " +
-                        std::to_string(bank));
+    m_view->userError("Invalid run identifier",
+                      "Tried to access invalid run, runNumber " +
+                          std::to_string(runLabel.runNumber) + " and bank ID " +
+                          std::to_string(runLabel.bank) +
+                          ". Please contact the development team");
     return;
   }
   const auto focusedWS = *focusedWSOptional;
@@ -177,8 +172,8 @@ void EnggDiffGSASFittingPresenter::updatePlot(const int runNumber,
 
   const auto showRefinementResults = m_view->showRefinementResultsSelected();
 
-  if (showRefinementResults && m_model->hasFittedPeaksForRun(runNumber, bank)) {
-    displayFitResults(runNumber, bank);
+  if (showRefinementResults && m_model->hasFittedPeaksForRun(runLabel)) {
+    displayFitResults(runLabel);
   }
 }
 

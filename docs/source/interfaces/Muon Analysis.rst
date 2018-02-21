@@ -655,6 +655,20 @@ General
 |       |                             | the new one described above, enabling fits of multiple datasets to  |
 |       |                             | be made.                                                            |
 +-------+-----------------------------+---------------------------------------------------------------------+
+| **5** | **Load all groups**         | By default, this option is disabled and the workspaces are generated|
+|       |                             | when they are plotted.                                              |
+|       |                             |                                                                     |
+|       |                             | Enabling the option will automatically add workspaces for each group|
+|       |                             | to the grouped workspace. If a new group is created it will be added|
+|       |                             | to the grouped workspace.                                           |
++-------+-----------------------------+---------------------------------------------------------------------+
+| **5** | **Load all pairs**          | By default, this option is disabled and the workspaces are generated|
+|       |                             | when they are plotted.                                              |
+|       |                             |                                                                     |
+|       |                             | Enabling the option will automatically add workspaces for each pair |
+|       |                             | to the grouped workspace. If a new pair  is created it will be added|
+|       |                             | to the grouped workspace.                                           |
++-------+-----------------------------+---------------------------------------------------------------------+
 
 Feedback & Comments
 -------------------

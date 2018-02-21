@@ -8,14 +8,15 @@ The ``*.properties`` Files
 
 The Mantid framework is configured using up to three simple text ``*.properties`` files that are read an interpreted every time the framework is started. These properties are not the same as the properties of algorithms. All three have the same format. The three files are read from first to last, with the values in subsequent ``*.properties`` overriding those in previous ones.
 
-1. ``/etc/mantid.local.properties`` is an optional, linux only file that sets shared defaults on a shared system. This is commonly used for setting the ``default.facility``, ``default.instrument``, and ``datasearch.searcharchive`` properties.
-2. Install directory ``Mantid.properties`` defines the default configuration that the development team suggest as sensible defaults. This file should not be altered by users as it will be replaced with every new install or upgrade of Mantid.
+1. Install directory ``Mantid.properties`` defines the default configuration that the development team suggest as sensible defaults. This file should not be altered by users as it will be replaced with every new install or upgrade of Mantid.
+2. ``/etc/mantid.local.properties`` is an optional, linux only file that sets shared defaults on a shared system. This is commonly used for setting the ``default.facility``, ``default.instrument``, and ``datasearch.searcharchive`` properties.
 3. Home directory ``Mantid.user.properties`` is where users may override any property setting in Mantid. Any Property setting in this file will override anything set in the ``Mantid.properties`` file. Simply either enter the property you wish to override in this file together with it's new value. The change will take effect the next time Mantid is started. Subsequent installs or upgrades of Mantid will never alter this file.
 
 The Properties
 --------------
 
-Note: Use forward slash (/) or double up on the number of backslash (\) characters for all paths
+.. note:: Use forward slash (``/``) or double up on the number of backslash (``\``) characters for all paths
+
 
 General properties
 ******************
@@ -163,23 +164,37 @@ MantidPlot Properties
 Network Properties
 ******************
 
-+----------------------------------------+---------------------------------------------------+---------------------------------+
-|Property                                |Description                                        |Example value                    |
-+========================================+===================================================+=================================+
-| ``network.default.timeout``            |Defines the default timeout for all network        | ``30``                          |
-|                                        |operations (in seconds).                           |                                 |
-+----------------------------------------+---------------------------------------------------+---------------------------------+
-| ``network.scriptrepo.timeout``         |The timeout for network operations in the script   | ``5``                           |
-|                                        |repository, this overrides the deafault timeout.   |                                 |
-+----------------------------------------+---------------------------------------------------+---------------------------------+
-| ``proxy.host``                         | Allows the system proxy to be overridden, if not  | ``http://www.proxy.org``        |
-|                                        | set mantid will use the system proxy              |                                 |
-+----------------------------------------+---------------------------------------------------+---------------------------------+
-| ``proxy.port``                         | Must be set if proxy.host is set                  | ``8080``                        |
-+----------------------------------------+---------------------------------------------------+---------------------------------+
-| ``proxy.httpsTargetUrl``               | A sample url used to determine the system proxy to| ``http://www.google.com``       |
-|                                        | use on windows.                                   |                                 |
-+----------------------------------------+---------------------------------------------------+---------------------------------+
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+|Property                                   |Description                                        |Example value                    |
++===========================================+===================================================+=================================+
+| ``CheckMantidVersion.OnStartup``          | Check if there is a newer version available and   |                                 |
+|                                           | logs a message at ``information`` level           | ``1``                           |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``network.default.timeout``               |Defines the default timeout for all network        | ``30``                          |
+|                                           |operations (in seconds).                           |                                 |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``network.scriptrepo.timeout``            |The timeout for network operations in the script   | ``5``                           |
+|                                           |repository, this overrides the deafault timeout.   |                                 |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``proxy.host``                            | Allows the system proxy to be overridden, if not  | ``http://www.proxy.org``        |
+|                                           | set mantid will use the system proxy              |                                 |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``proxy.port``                            | Must be set if proxy.host is set                  | ``8080``                        |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``proxy.httpsTargetUrl``                  | A sample url used to determine the system proxy to| ``http://www.google.com``       |
+|                                           | use on windows.                                   |                                 |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``UpdateInstrumentDefinitions.OnStartup`` | Download new instrument definition files and      |                                 |
+|                                           | ``Facilities.xml`` to ``~/.mantid/instruments``   |                                 |
+|                                           | on linux or ``APPDATA`` directory on windows. If  |                                 |
+|                                           | this is disabled, previously downloaded           |                                 |
+|                                           | instruments are ignored and only those in the     |                                 |
+|                                           | installation are used.                            | ``1``                           |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``usagereports.enabled``                  | Enable usage reporting                            | ``1``                           |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+
+
 
 
 ScriptRepository Properties

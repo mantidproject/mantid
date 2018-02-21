@@ -2,6 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEW_H_
 
 #include "EnggDiffGSASRefinementMethod.h"
+#include "RunLabel.h"
+
 #include "MantidAPI/ITableWorkspace.h"
 
 #include <string>
@@ -32,10 +34,10 @@ public:
   virtual void displayRwp(const double rwp) const = 0;
 
   /**
-   Get the name of the focused run file the user has requested to load
-   @return Filename to load
+   Get the names of the focused run files the user has requested to load
+   @return Vector of filenames to load
    */
-  virtual std::string getFocusedFileName() const = 0;
+  virtual std::vector<std::string> getFocusedFileNames() const = 0;
 
   /**
    Get the path to export the created GSAS-II project file to
@@ -77,11 +79,8 @@ public:
    */
   virtual GSASRefinementMethod getRefinementMethod() const = 0;
 
-  /**
-   Get the run label (run number and bank id) currently selected in the list
-   @return Run label as a pair
-   */
-  virtual std::pair<int, size_t> getSelectedRunLabel() const = 0;
+  /// Get the run label (run number and bank id) currently selected in the list
+  virtual RunLabel getSelectedRunLabel() const = 0;
 
   /**
    Plot a Qwt curve in the canvas
@@ -99,20 +98,29 @@ public:
    @return Whether the user has selected to show the refinement results for
    the current run
   */
-  virtual bool showRefinementResultsSelected() = 0;
+  virtual bool showRefinementResultsSelected() const = 0;
 
   /**
    Update the run list with labels of all runs loaded into the model
-   @param runLabels Vector of run labels (as pairs)
+   @param runLabels Vector of run labels
    */
-  virtual void
-  updateRunList(const std::vector<std::pair<int, size_t>> &runLabels) = 0;
+  virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
+
+  /**
+   Display an error to the user
+   @param errorTitle Title of the error
+   @param errorDescription Longer description of the error
+  */
+  virtual void userError(const std::string &errorTitle,
+                         const std::string &errorDescription) const = 0;
 
   /**
    Display a warning to the user
-   @param warningDescription The warning to show
+   @param warningTitle Title of the warning
+   @param warningDescription Longer description of the warning
    */
-  virtual void userWarning(const std::string &warningDescription) const = 0;
+  virtual void userWarning(const std::string &warningTitle,
+                           const std::string &warningDescription) const = 0;
 };
 
 } // namespace CustomInterfaces

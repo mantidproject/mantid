@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/EQSANSMonitorTOF.cpp
 	src/EQSANSPatchSensitivity.cpp
 	src/EQSANSQ2D.cpp
+	src/ExtractQENSMembers.cpp
 	src/HFIRDarkCurrentSubtraction.cpp
 	src/HFIRInstrument.cpp
 	src/HFIRLoad.cpp
@@ -62,6 +63,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/EQSANSMonitorTOF.h
 	inc/MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h
 	inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
+	inc/MantidWorkflowAlgorithms/ExtractQENSMembers.h
 	inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
 	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
@@ -89,6 +91,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	ConvolutionFitSequentialTest.h
+	ExtractQENSMembersTest.h
 	IMuonAsymmetryCalculatorTest.h
 	LoadEventAndCompressTest.h
 	MuonProcessTest.h

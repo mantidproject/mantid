@@ -612,8 +612,9 @@ you must update the calibration directory. Using the cycle mapping from Peal:
 
 The relevant fields from the cycle mapping are the ``label`` and 
 ``offset_file_name``. Within the calibration directory a folder
-with the ``label`` name must exist and contain a cal file with
-the ``offset_file_name``.
+with the ``label`` name must exist. ``offset_file_name`` must either
+be the name of a cal file within that folder, or the full path to a
+cal file elsewhere.
 
 In this example we need a folder within the calibration 
 directory called *1_2* which holds a
