@@ -52,12 +52,13 @@ private:
   void init() override;
   void exec() override;
 
-  std::vector<API::IEventWorkspace_sptr>
+  API::WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaces) const;
+
+  std::vector<std::string>
   readEventData(const std::map<std::string, std::string> &eventEntries,
                 ::NeXus::File &nxFile);
-  void
+  std::vector<std::string>
   readHistogramData(const std::map<std::string, std::string> &histogramEntries,
-                    API::WorkspaceGroup_sptr &outputGroup,
                     ::NeXus::File &nxFile);
 };
 

@@ -47,7 +47,7 @@ void LoadMcStas::init() {
                                                     FileProperty::Load, exts),
                   "The name of the Nexus file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
   // added to allow control of errorbars
@@ -68,7 +68,6 @@ void LoadMcStas::exec() {
 
   ::NeXus::File nxFile(filename);
   auto entries = nxFile.getEntries();
-  WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);
 
   // McStas Nexus only ever have one top level entry
   auto entry = entries.begin();
@@ -123,36 +122,51 @@ void LoadMcStas::exec() {
     // close second entry
     nxFile.closeGroup();
   }
-  std::vector<API::IEventWorkspace_sptr> scatteringWS;
+  std::vector<std::string> scatteringWSNames;
+  std::vector<std::string> histoWSNames;
   if (!eventEntries.empty()) {
-    scatteringWS = readEventData(eventEntries, nxFile);
+    scatteringWSNames = readEventData(eventEntries, nxFile);
   }
+  histoWSNames = readHistogramData(histogramEntries, nxFile);
 
-  readHistogramData(histogramEntries, outputGroup, nxFile);
+  //join two vectors together
+  scatteringWSNames.insert(scatteringWSNames.end(), histoWSNames.begin(), histoWSNames.end());
 
-  // close top entery
+  // close top entry
   nxFile.closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
   nxFile.closeGroup();
 
-  for (auto ws : scatteringWS) {
-    outputGroup->addWorkspace(ws);
-  }
-
-  setProperty("OutputWorkspace", outputGroup);
+  setProperty("OutputWorkspace", groupWorkspaces(scatteringWSNames));
 } // LoadMcStas::exec()
+
+  /**
+  * Group workspaces
+  * @param workspaces workspace names to group
+  * @return OutputWorkspace workspace group
+  */
+API::WorkspaceGroup_sptr LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
+  API::IAlgorithm_sptr groupAlgorithm = API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  groupAlgorithm->setChild(true);
+  groupAlgorithm->setLogging(false);
+  groupAlgorithm->initialize();
+  groupAlgorithm->setProperty("InputWorkspaces", workspaces);
+  groupAlgorithm->setProperty("OutputWorkspace", "__grouped");
+  groupAlgorithm->execute();
+  return groupAlgorithm->getProperty("OutputWorkspace");
+}
 
 /**
  * Read Event Data
  * @param eventEntries map of the file e bin/MantidPlot -xq docs/runsphinx_doctest.py -R Rebinntries that have events
- * @param nxFile Reads data from inside first first top entry
- * @return scatteringWS workspaces to include in the output group
+ * @param nxFile Reads data from inside first top entry
+ * @return scatteringWSNames names of workspaces to include in the output group
  */
-std::vector<API::IEventWorkspace_sptr> LoadMcStas::readEventData(
+std::vector<std::string> LoadMcStas::readEventData(
     const std::map<std::string, std::string> &eventEntries,
   ::NeXus::File &nxFile) {
 
   // vector to store output workspaces
-  std::vector<API::IEventWorkspace_sptr> scatteringWS;
+  std::vector<std::string> scatteringWSNames;
 
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
@@ -186,7 +200,7 @@ std::vector<API::IEventWorkspace_sptr> LoadMcStas::readEventData(
     g_log.warning()
         << "\nCould not find the instrument description in the Nexus file:"
         << filename << " Ignore eventdata from the Nexus file\n";
-    return scatteringWS;
+    return scatteringWSNames;
     ;
   }
 
@@ -212,13 +226,13 @@ std::vector<API::IEventWorkspace_sptr> LoadMcStas::readEventData(
         << "When trying to read the instrument description in the Nexus file: "
         << filename << " the following error is reported: " << e.what()
         << " Ignore eventdata from the Nexus file\n";
-    return scatteringWS;
+    return scatteringWSNames;
     ;
   } catch (...) {
     g_log.warning()
         << "Could not parse instrument description in the Nexus file: "
         << filename << " Ignore eventdata from the Nexus file\n";
-    return scatteringWS;
+    return scatteringWSNames;
     ;
   }
   // Finished reading Instrument. Then open new data folder again
@@ -296,14 +310,14 @@ std::vector<API::IEventWorkspace_sptr> LoadMcStas::readEventData(
     if (id_info.dims.size() != 2) {
       g_log.error() << "Event data in McStas nexus file not loaded. Expected "
                        "event data block to be two dimensional\n";
-      return scatteringWS;
+      return scatteringWSNames;
       ;
     }
     int64_t nNeutrons = id_info.dims[0];
     int64_t numberOfDataColumn = id_info.dims[1];
     if (nNeutrons && numberOfDataColumn != 6) {
       g_log.error() << "Event data in McStas nexus file expecting 6 columns\n";
-      return scatteringWS;
+      return scatteringWSNames;
       ;
     }
     if (!isAnyNeutrons && nNeutrons > 0)
@@ -414,10 +428,10 @@ std::vector<API::IEventWorkspace_sptr> LoadMcStas::readEventData(
       auto ws = eventWS.first;
       ws->setAllX(axis);
       AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
-      scatteringWS.emplace_back(ws);
+      scatteringWSNames.emplace_back(eventWS.second);
     }
   }
-  return scatteringWS;
+  return scatteringWSNames;
 }
 
 /**
@@ -426,11 +440,12 @@ std::vector<API::IEventWorkspace_sptr> LoadMcStas::readEventData(
  * @param outputGroup pointer to the workspace group
  * @param nxFile Reads data from inside first first top entry
  */
-void LoadMcStas::readHistogramData(
+std::vector<std::string> LoadMcStas::readHistogramData(
     const std::map<std::string, std::string> &histogramEntries,
-    WorkspaceGroup_sptr &outputGroup, ::NeXus::File &nxFile) {
+    ::NeXus::File &nxFile) {
 
   std::string nameAttrValueYLABEL;
+  std::vector<std::string> histoWS;
 
   for (const auto &histogramEntry : histogramEntries) {
     const std::string &dataName = histogramEntry.first;
@@ -552,10 +567,10 @@ void LoadMcStas::readHistogramData(
                                   .append(getProperty("OutputWorkspace"));
     AnalysisDataService::Instance().addOrReplace(nameUserSee, ws);
 
-    // Make Mantid store the workspace in the group
-    outputGroup->addWorkspace(ws);
+    histoWS.emplace_back(ws->getName());
   }
   nxFile.closeGroup();
+  return histoWS;
 
 } // finish
 
