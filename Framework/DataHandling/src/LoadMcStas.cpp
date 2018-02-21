@@ -437,15 +437,15 @@ std::vector<std::string> LoadMcStas::readEventData(
 /**
  * Read histogram data
  * @param histogramEntries map of the file entries that have histogram
- * @param outputGroup pointer to the workspace group
  * @param nxFile Reads data from inside first first top entry
+ * @return histoWSNames names of workspaces to include in output group
  */
 std::vector<std::string> LoadMcStas::readHistogramData(
     const std::map<std::string, std::string> &histogramEntries,
     ::NeXus::File &nxFile) {
 
   std::string nameAttrValueYLABEL;
-  std::vector<std::string> histoWS;
+  std::vector<std::string> histoWSNames;
 
   for (const auto &histogramEntry : histogramEntries) {
     const std::string &dataName = histogramEntry.first;
@@ -567,10 +567,10 @@ std::vector<std::string> LoadMcStas::readHistogramData(
                                   .append(getProperty("OutputWorkspace"));
     AnalysisDataService::Instance().addOrReplace(nameUserSee, ws);
 
-    histoWS.emplace_back(ws->getName());
+    histoWSNames.emplace_back(ws->getName());
   }
   nxFile.closeGroup();
-  return histoWS;
+  return histoWSNames;
 
 } // finish
 

@@ -139,21 +139,21 @@ of the workspaces has been executed correctly.
     ws = LoadMcStas('mccode_multiple_scattering.h5')
 
     # Calculate total of all event data entries
-    all_scattering_event_ws = mtd['EventData_mccode_multiple_scattering']
+    all_scattering_event_ws = mtd['EventData_ws']
     total_all = 0
     for i in range(all_scattering_event_ws.getNumberHistograms()):
       total_all += all_scattering_event_ws.readY(i)[0]
     print("The sum of all scattering spectra: {0:.6e}".format(total_all))
 
     # Calculate total scattering from the single event bank
-    single_scatter_event_ws = mtd['single_list_p_x_y_n_id_t_mccode_multiple_scattering']
+    single_scatter_event_ws = mtd['single_list_p_x_y_n_id_t_ws']
     total_single = 0
     for i in range(single_scatter_event_ws.getNumberHistograms()):
       total_single += single_scatter_event_ws.readY(i)[0]
     print("The sum of all single scattering spectra: {0:.6e}".format(total_single))
 
     # Calculate total scattering from the 'k02' detector bank
-    multiple_scatter_event_ws = mtd['multi_list_p_x_y_n_id_t_mccode_multiple_scattering']
+    multiple_scatter_event_ws = mtd['multi_list_p_x_y_n_id_t_ws']
     total_multiple = 0
     for i in range(multiple_scatter_event_ws.getNumberHistograms()):
       total_multiple += multiple_scatter_event_ws.readY(i)[0]
@@ -168,10 +168,10 @@ Output:
 
 .. testoutput:: CheckEqualScattering
 
-   The sum of all scattering spectra: 1.071638e-17
-   The sum of all single scattering spectra: 1.071413e-17
-   The sum of all multiple scattering spectra: 2.245576e-21
-   Sum of single and multiple scattering workspaces: 1.071638e-17
+   The sum of all scattering spectra: 2.038678e-11
+   The sum of all single scattering spectra: 1.907862e-11
+   The sum of all multiple scattering spectra: 1.308161e-12
+   Sum of single and multiple scattering workspaces: 2.038678e-11
 
 .. categories::
 
