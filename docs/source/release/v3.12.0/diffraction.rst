@@ -68,6 +68,8 @@ Single Crystal Diffraction
 
 - SCD Event Data Reduction interface now uses the Indexing Tolerance for Index Peaks to index the peaks for the Select Cell options in Choose Cell tab.  Previously it used a constant, 0.12, for the tolerance.
 
+- :ref:`SaveLauenorm <algm-SaveLauenorm>` now has option to save peaks in geasc format for input into exchge and then lauescale from the laue package.
+
 
 
 Total Scattering

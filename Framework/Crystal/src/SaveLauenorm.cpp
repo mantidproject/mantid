@@ -470,9 +470,11 @@ void SaveLauenorm::exec() {
 
     out << '\n';
   }
-  out << "END-OF-REFLECTION-DATA\n";
-  out << "HARMONICS DATA    0 REFLECTIONS\n";
-  out << "END-OF-FILE\n";
+  if (newFormat) {
+    out << "END-OF-REFLECTION-DATA\n";
+    out << "HARMONICS DATA    0 REFLECTIONS\n";
+    out << "END-OF-FILE\n";
+  }
   out.flush();
   out.close();
 }
@@ -529,18 +531,18 @@ std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice,
   } else {
     systemVec.push_back(1); // triclinic
   }
-  size_t i = 0;
-  size_t fp = 0;
-  size_t fm = 0;
-  size_t cc = 0;
-  size_t bc = 0;
-  size_t ac = 0;
-  size_t r = 0;
-  size_t total = 0;
+  int i = 0;
+  int fp = 0;
+  int fm = 0;
+  int cc = 0;
+  int bc = 0;
+  int ac = 0;
+  int r = 0;
+  int total = 0;
   for (size_t j = 0; j < peaks.size(); j++) {
-    size_t h = static_cast<size_t>(peaks[j].getH() + 0.5);
-    size_t k = static_cast<size_t>(peaks[j].getK() + 0.5);
-    size_t l = static_cast<size_t>(peaks[j].getL() + 0.5);
+    int h = static_cast<int>(peaks[j].getH() + 0.5);
+    int k = static_cast<int>(peaks[j].getK() + 0.5);
+    int l = static_cast<int>(peaks[j].getL() + 0.5);
     if (h + k + l == 0)
       continue;
     total++;
@@ -567,7 +569,7 @@ std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice,
     }
   }
   int maxCen = 1;
-  size_t maxPeaks = 0;
+  int maxPeaks = 0;
   if (maxPeaks < i) {
     maxCen = 2; // I
     maxPeaks = i;
@@ -592,7 +594,7 @@ std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice,
     maxCen = 7; // R
     maxPeaks = r;
   }
-  if (maxPeaks < 3 * total / 4) {
+  if (maxPeaks < 6 * total / 10) {
     maxCen = 1; // P
   }
   systemVec.push_back(maxCen); // P
