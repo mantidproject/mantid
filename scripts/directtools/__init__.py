@@ -9,6 +9,12 @@ import numpy
 import time
 
 
+def _clearlatex(s):
+    """Return a string from which LaTeX formatting has been removed."""
+    s = s.translate(None, '$\\^{}')
+    return s
+
+
 def _globalnanminmax(workspaces):
     """Return global minimum and maximum of the given workspaces."""
     workspaces = _normwslist(workspaces)
@@ -150,7 +156,7 @@ def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     return cMin, cMax
 
 
-def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l'):
+def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l', keepCutWorkspaces=True):
     """Plot line profile from given workspaces and cuts."""
     workspaces = _normwslist(workspaces)
     if not isinstance(cuts, collections.Iterable):
@@ -162,11 +168,23 @@ def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l')
     markers = matplotlib.markers.MarkerStyle.filled_markers
     markerIndex = 0
     markerStyle = 'None'
+    wsCount = 0
+    cutWSList = list()
     for ws in workspaces:
+        wsCount += 1
         for cut in cuts:
             for width in widths:
                 # TODO: Use StoreInADS=False after issue #21731 has been fixed.
-                wsName = '__line_profile'
+                wsStr = str(ws)
+                if wsStr == '':
+                    wsStr = str(wsCount)
+                quantityStr = _clearlatex(quantity)
+                unitStr = _clearlatex(unit)
+                wsName = 'cut_{}_{}={}+-{}{}'.format(wsStr, quantityStr, cut, width, unitStr)
+                if not keepCutWorkspaces:
+                    wsName = '__' + wsName
+                else:
+                    cutWSList.append(wsName)
                 line = LineProfile(ws, cut, width, Direction=direction,
                                    OutputWorkspace=wsName, EnableLogging=False)
                 if 'm' in style:
@@ -176,14 +194,15 @@ def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l')
                         markerIndex = 0
                 label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
                 axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
-                DeleteWorkspace(line)
+                if not keepCutWorkspaces:
+                    DeleteWorkspace(line)
     _profileytitle(axes)
-    return figure, axes
+    return figure, axes, cutWSList
 
 
-def plotconstE(workspaces, E, dE, style='l'):
+def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True):
     """Plot line profiles at constant energy."""
-    figure, axes = plotprofiles('Horizontal', workspaces, E, dE, '$E$', 'meV', style)
+    figure, axes, cutWSList = plotprofiles('Horizontal', workspaces, E, dE, '$E$', 'meV', style, keepCutWorkspaces)
     _profiletitle(workspaces, '$E$', 'meV', E, dE, figure)
     axes.legend()
     axes.set_xlim(xmin=0.)
@@ -191,12 +210,12 @@ def plotconstE(workspaces, E, dE, style='l'):
     axes.set_ylim(0.)
     xMin, xMax = axes.get_xlim()
     print('Auto Q-range: {}...{} \xc5-1'.format(xMin, xMax))
-    return figure, axes
+    return figure, axes, cutWSList
 
 
-def plotconstQ(workspaces, Q, dQ, style='l'):
+def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True):
     """Plot line profiles at constant momentum transfer."""
-    figure, axes = plotprofiles('Vertical', workspaces, Q, dQ, '$Q$', '\\AA$^{-1}$', style)
+    figure, axes, cutWSList = plotprofiles('Vertical', workspaces, Q, dQ, '$Q$', '\\AA$^{-1}$', style, keepCutWorkspaces)
     _profiletitle(workspaces, '$Q$', '\\AA$^{-1}$', Q, dQ, figure)
     axes.legend()
     axes.set_xlim(xmin=-10.)
@@ -205,7 +224,7 @@ def plotconstQ(workspaces, Q, dQ, style='l'):
     axes.set_ylim(ymin=0., ymax=cMax / 100.)
     xMin, xMax = axes.get_xlim()
     print('Auto E-range: {}...{} meV'.format(xMin, xMax))
-    return figure, axes
+    return figure, axes, cutWSList
 
 
 def plotSofQW(workspace, QMin=None, QMax=None, EMin=None, EMax=None, cMin=0, cMax=None):
