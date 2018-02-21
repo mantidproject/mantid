@@ -40,8 +40,6 @@ public:
   void
   notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) override;
 
-  bool showFitResultsSelected() const override;
-
 private:
   void processPlotPeaksStateChanged();
   void processPlotToSeparateWindow();

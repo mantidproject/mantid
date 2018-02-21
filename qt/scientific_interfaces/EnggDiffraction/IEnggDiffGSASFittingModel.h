@@ -65,6 +65,9 @@ public:
   /// that run
   virtual boost::optional<double> getSigma(const RunLabel &runLabel) const = 0;
 
+  /// Get whether the model contains fit results for a given run
+  virtual bool hasFitResultsForRun(const RunLabel &runLabel) const = 0;
+
   /**
    Load a focused run from a file
    @param filename The name of the file to load

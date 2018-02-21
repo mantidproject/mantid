@@ -28,6 +28,8 @@ public:
 
   boost::optional<double> getSigma(const RunLabel &runLabel) const override;
 
+  bool hasFitResultsForRun(const RunLabel &runLabel) const override;
+
   Mantid::API::MatrixWorkspace_sptr
   loadFocusedRun(const std::string &filename) const override;
 

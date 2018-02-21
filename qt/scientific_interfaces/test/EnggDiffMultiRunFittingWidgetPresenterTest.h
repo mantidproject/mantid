@@ -205,13 +205,6 @@ public:
     assertMocksUsedCorrectly();
   }
 
-  void test_showFitResultsSelected() {
-    auto presenter = setUpPresenter();
-    EXPECT_CALL(*m_mockView, showFitResultsSelected()).Times(1);
-    presenter->showFitResultsSelected();
-    assertMocksUsedCorrectly();
-  }
-
   void test_plotPeaksStateChangedUpdatesPlot() {
     auto presenter = setUpPresenter();
 

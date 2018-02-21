@@ -167,6 +167,12 @@ EnggDiffGSASFittingModel::getSigma(const RunLabel &runLabel) const {
   return getFromRunMapOptional(m_sigmaMap, runLabel);
 }
 
+bool EnggDiffGSASFittingModel::hasFitResultsForRun(
+    const RunLabel &runLabel) const {
+  return m_rwpMap.contains(runLabel) && m_sigmaMap.contains(runLabel) &&
+         m_gammaMap.contains(runLabel);
+}
+
 Mantid::API::MatrixWorkspace_sptr
 EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
   const auto wsName = stripWSNameFromFilename(filename);

@@ -159,9 +159,11 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
 }
 
 void EnggDiffGSASFittingPresenter::processSelectRun() {
-  if (m_multiRunWidget->showFitResultsSelected()) {
+  if (m_multiRunWidget->hasSelectedRunLabel()) {
     const auto runLabel = m_multiRunWidget->getSelectedRunLabel();
-    displayFitResults(runLabel);
+    if (m_model->hasFitResultsForRun(runLabel)) {
+      displayFitResults(runLabel);
+    }
   }
 }
 

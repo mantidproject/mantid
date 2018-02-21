@@ -33,6 +33,8 @@ public:
   MOCK_CONST_METHOD1(getSigma,
                      boost::optional<double>(const RunLabel &runLabel));
 
+  MOCK_CONST_METHOD1(hasFitResultsForRun, bool(const RunLabel &runLabel));
+
   MOCK_CONST_METHOD1(loadFocusedRun, Mantid::API::MatrixWorkspace_sptr(
                                          const std::string &filename));
 };

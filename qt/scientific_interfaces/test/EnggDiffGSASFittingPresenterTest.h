@@ -187,16 +187,19 @@ public:
     assertMocksUsedCorrectly();
   }
 
-  void test_selectValidRunFitResultsRequested() {
+  void test_selectValidRunFitResultsAvailable() {
     auto presenter = setUpPresenter();
     const RunLabel runLabel(123, 1);
 
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, showFitResultsSelected())
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
+    EXPECT_CALL(*m_mockModelPtr, hasFitResultsForRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(true));
 
     const double rwp = 50;
     EXPECT_CALL(*m_mockModelPtr, getRwp(runLabel))
@@ -229,43 +232,32 @@ public:
     assertMocksUsedCorrectly();
   }
 
-  void test_selectRunInvalid() {
+  void test_selectRunNoFitResults() {
     auto presenter = setUpPresenter();
     const RunLabel runLabel(123, 1);
 
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, showFitResultsSelected())
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
+    EXPECT_CALL(*m_mockModelPtr, hasFitResultsForRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(false));
 
-    EXPECT_CALL(*m_mockModelPtr, getRwp(runLabel))
-        .Times(1)
-        .WillOnce(Return(50));
-    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
-        .Times(1)
-        .WillOnce(Return(boost::none));
-    EXPECT_CALL(*m_mockModelPtr, getSigma(runLabel))
-        .Times(1)
-        .WillOnce(Return(30));
-    EXPECT_CALL(*m_mockModelPtr, getGamma(runLabel))
-        .Times(1)
-        .WillOnce(Return(40));
-
-    EXPECT_CALL(*m_mockViewPtr,
-                userError("Invalid run identifier",
-                          "Unexpectedly tried to display fit results for "
-                          "invalid run, run number = 123, bank ID = 1. Please "
-                          "contact the development team"));
+    EXPECT_CALL(*m_mockModelPtr, getRwp(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockModelPtr, getSigma(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockModelPtr, getGamma(testing::_)).Times(0);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
     assertMocksUsedCorrectly();
   }
 
-  void test_selectRunFitResultsNotRequested() {
+  void test_selectRunNoLabelSelected() {
     auto presenter = setUpPresenter();
-    EXPECT_CALL(*m_mockMultiRunWidgetPtr, showFitResultsSelected())
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, hasSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel()).Times(0);

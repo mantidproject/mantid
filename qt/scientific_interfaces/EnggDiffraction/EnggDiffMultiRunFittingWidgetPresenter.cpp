@@ -161,7 +161,8 @@ void EnggDiffMultiRunFittingWidgetPresenter::processPlotToSeparateWindow() {
   ADS.add(focusedRunName, *focusedRun);
 
   boost::optional<std::string> fittedPeaksName = boost::none;
-  if (showFitResultsSelected() && m_model->hasFittedPeaksForRun(runLabel)) {
+  if (m_view->showFitResultsSelected() &&
+      m_model->hasFittedPeaksForRun(runLabel)) {
     fittedPeaksName = generateFittedPeaksName(runLabel);
     const auto fittedPeaks = m_model->getFittedPeaks(runLabel);
     ADS.add(*fittedPeaksName, *fittedPeaks);
@@ -189,10 +190,6 @@ void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {
     const auto selectedRunLabel = m_view->getSelectedRunLabel();
     updatePlot(selectedRunLabel);
   }
-}
-
-bool EnggDiffMultiRunFittingWidgetPresenter::showFitResultsSelected() const {
-  return m_view->showFitResultsSelected();
 }
 
 void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(
