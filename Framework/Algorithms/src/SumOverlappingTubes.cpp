@@ -21,6 +21,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include "boost/math/special_functions/round.hpp"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -298,8 +300,8 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         angle = specInfo.signedTwoTheta(i);
       angle *= m_mirrorDetectors * 180.0 / M_PI;
 
-      int angleIndex =
-          int((angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
+      int angleIndex = boost::math::iround((angle - m_startScatteringAngle) /
+                                           m_stepScatteringAngle);
 
       // point is out of range, a warning should have been generated already for
       // the theta index

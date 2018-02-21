@@ -14,7 +14,6 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 
 using Poco::XML::DOMParser;
-using Poco::XML::Document;
 using Poco::XML::Element;
 
 namespace Mantid {
