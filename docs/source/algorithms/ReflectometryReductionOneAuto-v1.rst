@@ -70,7 +70,7 @@ Usage
 
     run = Load(Filename='INTER00013460.nxs')
     # Basic reduction with no transmission run
-    IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, Version=1)
+    IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, CorrectDetectorPositions=False, Version=1)
 
     print("The first four IvsLam Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
   	   IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3]))
@@ -115,7 +115,7 @@ Output:
 
     run = Load(Filename='INTER00013460.nxs')
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
-    IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0, Version=1)
+    IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, CorrectDetectorPositions=False, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0, Version=1)
 
     print("The first four IvsLam Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
   	   IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3]))
