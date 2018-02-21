@@ -582,7 +582,7 @@ public:
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 2.0);
     alg.setProperty("I0MonitorIndex", 0);
-    alg.setProperty("ProcessingInstructions", "3,4");
+    alg.setProperty("ProcessingInstructions", "3");
     alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
     alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
     alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
@@ -605,8 +605,8 @@ public:
     MatrixWorkspace_sptr IvsQ = alg.getProperty("OutputWorkspace");
     TSM_ASSERT("OutputWorkspace should be a valid matrix workspace", IvsQ);
 
-    TSM_ASSERT_EQUALS("OutputWorkspaceWavelength should have two histograms",
-                      IvsLam->getNumberHistograms(), 2);
+    TSM_ASSERT_EQUALS("OutputWorkspaceWavelength should have one histogram",
+                      IvsLam->getNumberHistograms(), 1);
   }
 
   void test_point_detector_run_with_two_transmission_workspaces() {
@@ -616,7 +616,7 @@ public:
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 2.0);
     alg.setProperty("I0MonitorIndex", 0);
-    alg.setProperty("ProcessingInstructions", "3, 4");
+    alg.setProperty("ProcessingInstructions", "3");
     alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
     alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
     alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
