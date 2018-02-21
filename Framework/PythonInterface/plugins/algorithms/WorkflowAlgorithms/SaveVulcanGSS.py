@@ -3,8 +3,11 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import range  #pylint: disable=redefined-builtin
 import mantid.simpleapi as api
 # from mantid.api import *
-from mantid.kernel import *
+# from mantid.kernel import *
+from mantid.kernel import AnalysisDataService
 from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
+from mantid.api import FileProperty, FileAction, Direction
+
 
 class SaveVulcanGSS(PythonAlgorithm):
     """ Save GSS file for VULCAN.  This is a workflow algorithm
@@ -54,8 +57,12 @@ class SaveVulcanGSS(PythonAlgorithm):
         """ Main Execution Body
         """
         # Process input properties
-        self._process_inputs()
+        input_ws, binning_param_list, gsas_file_name, output_ws_name = self.process_inputs()
 
+        # Rebin workspace
+        self.rebin_workspace(input_ws, binning_param_list, output_ws_name)
+
+        TILL_HERE()
 
         # rebin the input workspace if TOF binning file is given
         if len(log_tof_file_name) > 0:
@@ -82,55 +89,52 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return
 
-    def _process_binning_parameters(self, input_workspace, bin_par_ws_name):
+    def rebin_workspace(self, input_ws, binning_param_list, output_ws_name):
         """
-
-        :param bin_par_ws_name:
+        rebin input workspace with user specified binning parameters
+        :param input_ws:
+        :param binning_param_list:
+        :param output_ws_name:
         :return:
         """
-        def convert_str_to_integers(list_str):
-            """
-
-            :param list_str:
-            :return:
-            """
-            return list()
-
-        bin_par_workspace = AnalysisDataService.retrieve(bin_par_ws_name)
-
-        # check whether it is valid TableWorkspace
-        if bin_par_workspace.columnCount() < 2:
-            raise RuntimeError('Binning parameter table must have equal or more than 2 columns')
-
-        # get workspace index
-        binning_parameter_list = [None] * input_workspace.getNumberHistograms()
-
-        # columns
-        if bin_par_workspace.rowCount() == 1:
-            # 1 binning parameter: uniform binning
-            bin_par_str = bin_par_workspace.cell(0, 1)
-            bin_parameters = self._process_binning_parameters(bin_par_str)
-            binning_parameter_list = [bin_parameters] * input_workspace.getNumberHistograms()
+        if binning_param_list is None:
+            # no re-binning is required: clone the output workspace
+            output_workspace = api.CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws_name)
 
         else:
-            # each spectrum can have individual binning parameters
-            binning_parameter_list = [None] * input_workspace.getNumberHistograms()
+            # rebin input workspace
+            processed_single_spec_ws_list = list()
+            for ws_index in range(input_ws.getNumberHistograms()):
+                # rebin on each
+                temp_out_name = output_ws_name + '_' + str(ws_index)
+                processed_single_spec_ws_list.append(temp_out_name)
+                # extract a spectrum out
+                api.ExtractSpectra(input_ws, WorkspaceIndexList=[ws_index], OutputWorkspace=temp_out_name)
+                # get binning parameter
+                bin_params = binning_param_list[ws_index]
+                if bin_params is None:
+                    continue
+                # rebin
+                api.Rebin(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name,
+                          Params=bin_params)
 
-            for i_row in range(bin_par_workspace.rowCount()):
-                ws_list_str = bin_par_workspace.cell(i_row, 0)
-                ws_list = convert_str_to_integers(ws_list_str)
+                # change vector X and to histograms...
+                if inputws.isHistogramData() is False:
+                    raise NotImplementedError("InputWorkspace must be histogram, but not point data.")
+            # END-FOR
 
-                # TODO FIXME NOW NOW2 Resume from here
-
+            # merge together
+            api.RenameWorkspace(InputWorkspace=processed_single_spec_ws_list[0],
+                                OutputWorkspace=output_ws_name)
+            for ws_index in range(1, len(processed_single_spec_ws_list)):
+                api.ConjoinWorkspaces(InputWorkspace1=output_ws_name,
+                                      InputWorkspace2=processed_single_spec_ws_list[ws_index])
+            # END-FOR
         # END-IF-ELSE
 
-        # check whether there is any spectrum that does not have been listed
-        if None in binning_parameter_list:
-            raise RuntimeError('Not all the spectra that have binning parameters set.')
+        return binning_param_list
 
-        return binning_parameter_list
-
-    def _process_inputs(self):
+    def process_inputs(self):
         """
         process input properties
         :return: input event workspace, binning parameter workspace, gsas file name, output workspace name
@@ -156,21 +160,91 @@ class SaveVulcanGSS(PythonAlgorithm):
         else:
             binning_parameter_list = None
 
-
-        bin_par_workspace = self.getProperty('BinningTable')
-        # log_tof_file_name = self.getPropertyValue("BinFilename")
+        # gsas file name (output)
         gss_file_name = self.getPropertyValue("GSSFilename")
+
+        # output workspace name
         output_ws_name = self.getPropertyValue("OutputWorkspace")
 
-        # Check properties
-        inputws = AnalysisDataService.retrieve(input_workspace)
-        if inputws is None:
-            raise RuntimeError('Inputworkspace {0} does not exist.'.format(s))
+        return input_workspace, binning_parameter_list, gss_file_name, output_ws_name
 
-        if inputws.isHistogramData() is False:
-            raise NotImplementedError("InputWorkspace must be histogram, but not point data.")
+    def _process_binning_parameters(self, input_workspace, bin_par_ws_name):
+        """
 
-        return input_workspace, bin_par_workspace, gss_file_name, output_ws_name
+        :param bin_par_ws_name:
+        :return:
+        """
+        def convert_str_to_integers(list_str):
+            """
+            convert a string to positive integers.  it could be a-b, c, d
+            :param list_str:
+            :return:
+            """
+            terms = list_str.replace(' ', '').split(',')
+            int_list = list()
+            for term in terms:
+                term = term.strip()
+                if term.count('-') == 0:
+                    # case of single integer
+                    try:
+                        int_value = int(term)
+                    except ValueError:
+                        raise RuntimeError('{0} cannot be converted to integer'.format(term))
+                    int_list.append(int_value)
+                elif term.count('-') == 1:
+                    # case of integer range
+                    two_parts = term.split('-')
+                    if len(two_parts) != 2:
+                        raise RuntimeError('{0} cannot be a negative number and must be in format X-Y'.format(term))
+                    try:
+                        i0 = int(two_parts[0])
+                        i1 = int(two_parts[1])
+                    except ValueError:
+                        raise RuntimeError('{0} cannot be converted to integers.'.format(two_parts))
+                    int_list.extend(range(i0, i1+1))
+                else:
+                    raise RuntimeError('{0} cannot have any negative number and must be in format X-Y'.format(term))
+            # END-FOR (term)
+
+            return int_list
+        # END-DEF
+
+        bin_par_workspace = AnalysisDataService.retrieve(bin_par_ws_name)
+
+        # check whether it is valid TableWorkspace
+        if bin_par_workspace.columnCount() < 2:
+            raise RuntimeError('Binning parameter table must have equal or more than 2 columns')
+
+        # columns
+        if bin_par_workspace.rowCount() == 1:
+            # 1 binning parameter: uniform binning
+            bin_par_str = bin_par_workspace.cell(0, 1)
+            bin_parameters = self._process_binning_parameters(bin_par_str)
+            binning_parameter_list = [bin_parameters] * input_workspace.getNumberHistograms()
+
+        else:
+            # each spectrum can have individual binning parameters
+            binning_parameter_list = [None] * input_workspace.getNumberHistograms()
+
+            for i_row in range(bin_par_workspace.rowCount()):
+                # get workspace indexes
+                ws_list_str = bin_par_workspace.cell(i_row, 0)
+                ws_list = convert_str_to_integers(ws_list_str)
+
+                # process the binning parameters
+                bin_par_str = bin_par_workspace.cell(i_row, 1)
+                bin_parameters = self._process_binning_parameters(bin_par_str)
+                for ws_index in ws_list:
+                    binning_parameter_list[ws_index] = bin_parameters
+                # END-FOR
+            # END-FOR (i_row)
+        # END-IF-ELSE
+
+        # check whether there is any spectrum that does not have been listed
+        if None in binning_parameter_list:
+            raise RuntimeError('Not all the spectra that have binning parameters set.')
+
+        return binning_parameter_list
 
     def _loadRefLogBinFile(self, logbinfilename):
         """ Create a vector of bin in TOF value
