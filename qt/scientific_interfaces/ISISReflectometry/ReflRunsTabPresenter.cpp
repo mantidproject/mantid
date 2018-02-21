@@ -521,18 +521,14 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
 
 /** Notifies main presenter that data reduction is confirmed to be paused
 */
-void ReflRunsTabPresenter::confirmReductionPaused() const {
-
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
+void ReflRunsTabPresenter::confirmReductionPaused(int group) {
+  m_mainPresenter->notifyReductionPaused(group);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
-void ReflRunsTabPresenter::confirmReductionResumed() const {
-
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
+void ReflRunsTabPresenter::confirmReductionResumed(int group) {
+  m_mainPresenter->notifyReductionResumed(group);
 }
 
 /** Changes the current instrument in the data processor widget. Also clears the

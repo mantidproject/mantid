@@ -25,6 +25,7 @@ namespace CustomInterfaces {
 * @param processor : A ProcessingAlgorithm
 * @param postprocessor : A PostprocessingAlgorithm
 * workspaces
+* @param group : The zero-based index of this presenter within the tab.
 * @param postprocessMap : A map containing instructions for post-processing.
 * This map links column name to properties of the post-processing algorithm
 * @param loader : The algorithm responsible for loading data
@@ -33,10 +34,11 @@ ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
-    const PostprocessingAlgorithm &postprocessor,
+    const PostprocessingAlgorithm &postprocessor, int group,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
-                                    postprocessor, postprocessMap, loader) {}
+                                    postprocessor, group, postprocessMap,
+                                    loader) {}
 
 /**
 * Destructor

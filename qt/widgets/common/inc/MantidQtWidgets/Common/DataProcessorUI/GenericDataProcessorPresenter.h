@@ -108,31 +108,34 @@ public:
       WhiteList whitelist,
       std::map<QString, PreprocessingAlgorithm> preprocessMap,
       ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
+      int group,
       std::map<QString, QString> postprocessMap = std::map<QString, QString>(),
       QString loader = "Load");
   // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
                                 ProcessingAlgorithm processor,
-                                PostprocessingAlgorithm postprocessor);
+                                PostprocessingAlgorithm postprocessor,
+                                int group);
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       WhiteList whitelist,
       std::map<QString, PreprocessingAlgorithm> preprocessMap,
-      ProcessingAlgorithm processor);
+      ProcessingAlgorithm processor, int group);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
-                                ProcessingAlgorithm processor);
+                                ProcessingAlgorithm processor, int group);
   // Constructor: only whitelist
-  GenericDataProcessorPresenter(WhiteList whitelist);
+  GenericDataProcessorPresenter(WhiteList whitelist, int group);
   // Delegating constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
                                 PreprocessMap preprocessMap,
-                                ProcessingAlgorithm processor);
+                                ProcessingAlgorithm processor, int group);
   // Delegating Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
                                 PreprocessMap preprocessMap,
                                 ProcessingAlgorithm processor,
-                                PostprocessingAlgorithm postprocessor);
+                                PostprocessingAlgorithm postprocessor,
+                                int group);
   virtual ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<QString, QVariant> &options() const override;
@@ -223,6 +226,8 @@ protected:
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData);
   bool rowOutputExists(RowItem const &row) const;
+  // Refl GUI Group.
+  int m_group;
 protected slots:
   void reductionError(QString ex);
   void groupThreadFinished(const int exitCode);

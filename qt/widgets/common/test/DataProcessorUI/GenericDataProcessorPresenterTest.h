@@ -23,6 +23,7 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
+auto const DEFAULT_GROUP_NUMBER = 0;
 
 // Use this if you need the Test class to be a friend of the data processor
 // presenter
@@ -36,24 +37,26 @@ public:
       const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &preprocessingStep,
       const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
+      const PostprocessingAlgorithm &postprocessor, int group,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load")
       : GenericDataProcessorPresenter(whitelist, std::move(preprocessingStep),
-                                      processor, postprocessor, postprocessMap,
-                                      loader) {}
+                                      processor, postprocessor, group,
+                                      postprocessMap, loader) {}
 
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterFriend(
       const WhiteList &whitelist, const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor)
-      : GenericDataProcessorPresenter(whitelist, processor, postprocessor) {}
+      const PostprocessingAlgorithm &postprocessor, int group)
+      : GenericDataProcessorPresenter(whitelist, processor, postprocessor,
+                                      group) {}
 
   // Delegating constructor (no pre- or post-processing required)
   GenericDataProcessorPresenterFriend(const WhiteList &whitelist,
-                                      const ProcessingAlgorithm &processor)
-      : GenericDataProcessorPresenter(whitelist, processor) {}
+                                      const ProcessingAlgorithm &processor,
+                                      int group)
+      : GenericDataProcessorPresenter(whitelist, processor, group) {}
 
   // Destructor
   ~GenericDataProcessorPresenterFriend() override {}
@@ -70,19 +73,20 @@ public:
       const WhiteList &whitelist,
       const std::map<QString, PreprocessingAlgorithm> &preprocessingStep,
       const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
+      const PostprocessingAlgorithm &postprocessor, int group,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load")
       : GenericDataProcessorPresenter(whitelist, std::move(preprocessingStep),
-                                      processor, postprocessor, postprocessMap,
-                                      loader) {}
+                                      processor, postprocessor, group,
+                                      postprocessMap, loader) {}
 
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterNoThread(
       const WhiteList &whitelist, const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor)
-      : GenericDataProcessorPresenter(whitelist, processor, postprocessor) {}
+      const PostprocessingAlgorithm &postprocessor, int group)
+      : GenericDataProcessorPresenter(whitelist, processor, postprocessor,
+                                      group) {}
 
   // Destructor
   ~GenericDataProcessorPresenterNoThread() override {}
@@ -403,14 +407,16 @@ private:
   std::unique_ptr<GenericDataProcessorPresenterFriend> makeDefaultPresenter() {
     return Mantid::Kernel::make_unique<GenericDataProcessorPresenterFriend>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
+        createReflectometryProcessor(), createReflectometryPostprocessor(),
+        DEFAULT_GROUP_NUMBER);
   }
 
   std::unique_ptr<GenericDataProcessorPresenterNoThread>
   makeDefaultPresenterNoThread() {
     return Mantid::Kernel::make_unique<GenericDataProcessorPresenterNoThread>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
+        createReflectometryProcessor(), createReflectometryPostprocessor(),
+        DEFAULT_GROUP_NUMBER);
   }
 
   // Expect the view's widgets to be set in a particular state according to
@@ -643,6 +649,37 @@ public:
     EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
     // Expect that the layout containing pre-processing, processing and
     // post-processing options is created
+    EXPECT_CALL(mockDataProcessorView, enableGrouping()).Times(Exactly(1));
+    std::vector<QString> stages = {"Pre-process", "Pre-process", "Process",
+                                   "Post-process"};
+    std::vector<QString> algorithms = {
+        "Plus", "CreateTransmissionWorkspaceAuto",
+        "ReflectometryReductionOneAuto", "Stitch1DMany"};
+
+    // Expect that the autocompletion hints are populated
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7))
+        .Times(Exactly(1));
+    // Now accept the views
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
+
+  void testNonPostProcessPresenterAcceptsViews() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    MockProgressableView mockProgress;
+
+    auto presenter = makeNonPostProcessPresenter();
+
+    // When the presenter accepts the views, expect the following:
+    // Expect that the list of actions is published
+    EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(Exactly(1));
+    // Expect that the list of settings is populated
+    EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
+    // Expect that the layout containing pre-processing, processing and
+    // post-processing options is created
+    EXPECT_CALL(mockDataProcessorView, enableGrouping()).Times(Exactly(0));
     std::vector<QString> stages = {"Pre-process", "Pre-process", "Process",
                                    "Post-process"};
     std::vector<QString> algorithms = {
@@ -1165,6 +1202,16 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 
+  void expectNotifiedReductionPaused(MockMainPresenter &mockMainPresenter) {
+    EXPECT_CALL(mockMainPresenter,
+                confirmReductionPaused(DEFAULT_GROUP_NUMBER));
+  }
+
+  void expectNotifiedReductionResumed(MockMainPresenter &mockMainPresenter) {
+    EXPECT_CALL(mockMainPresenter,
+                confirmReductionPaused(DEFAULT_GROUP_NUMBER));
+  }
+
   void testProcess() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
@@ -1190,6 +1237,7 @@ public:
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
+    expectNotifiedReductionResumed(mockMainPresenter);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -1541,6 +1589,12 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  std::unique_ptr<GenericDataProcessorPresenter> makeNonPostProcessPresenter() {
+    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
+        createReflectometryProcessor(), DEFAULT_GROUP_NUMBER);
   }
 
   void testBadWorkspaceType() {
@@ -2934,7 +2988,7 @@ public:
 
     GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryProcessor(),
-        createReflectometryPostprocessor());
+        createReflectometryPostprocessor(), DEFAULT_GROUP_NUMBER);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
@@ -3060,7 +3114,8 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
     GenericDataProcessorPresenterFriend presenter(
-        createReflectometryWhiteList(), createReflectometryProcessor());
+        createReflectometryWhiteList(), createReflectometryProcessor(),
+        DEFAULT_GROUP_NUMBER);
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
     // Calls that should throw
@@ -3088,7 +3143,7 @@ public:
     GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
-        postprocesssMap);
+        DEFAULT_GROUP_NUMBER, postprocesssMap);
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     presenter.accept(&mockMainPresenter);
 
@@ -3161,7 +3216,8 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
     GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
-                                            createReflectometryProcessor());
+                                            createReflectometryProcessor(),
+                                            DEFAULT_GROUP_NUMBER);
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
     EXPECT_CALL(mockDataProcessorView,
@@ -3174,5 +3230,4 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 };
-
 #endif /* MANTID_MANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERTEST_H */

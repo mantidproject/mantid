@@ -112,7 +112,7 @@
             <item>
              <widget class="QGroupBox" name="workspaceList">
               <property name="styleSheet">
-               <string notr="true">.QGroupBox { 
+               <string notr="true">.QGroupBox {
     border-bottom: transparent;
 	border-left: transparent;
     border-right: transparent;
@@ -168,7 +168,7 @@
             <item>
              <widget class="QGroupBox" name="loggedParameterList">
               <property name="styleSheet">
-               <string notr="true">.QGroupBox { 
+               <string notr="true">.QGroupBox {
     border-bottom: transparent;
 	border-left: transparent;
     border-right: transparent;
@@ -222,7 +222,7 @@
       <item>
        <widget class="QGroupBox" name="fileFormatGroup">
         <property name="styleSheet">
-         <string notr="true">.QGroupBox { 
+         <string notr="true">.QGroupBox {
     border-bottom: transparent;
 	border-left: transparent;
     border-right: transparent;

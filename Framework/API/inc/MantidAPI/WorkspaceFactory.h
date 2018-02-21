@@ -14,9 +14,6 @@
                                0));                                            \
   }
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -27,9 +24,6 @@
 
 namespace Mantid {
 namespace API {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
 class ITableWorkspace;
 class IPeaksWorkspace;
 class Workspace;

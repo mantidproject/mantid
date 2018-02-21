@@ -5,8 +5,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** @class ReflDataProcessorMainPresenter
 
-TODO: description
-
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 

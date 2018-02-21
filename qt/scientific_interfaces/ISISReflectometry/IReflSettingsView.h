@@ -4,6 +4,7 @@
 #include "DllConfig.h"
 #include <map>
 #include <vector>
+#include "MantidAPI/Algorithm.h"
 #include "ExperimentOptionDefaults.h"
 #include "InstrumentOptionDefaults.h"
 #include "GetInstrumentParameter.h"
@@ -99,6 +100,8 @@ public:
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) = 0;
   virtual void setDetectorCorrectionEnabled(bool enable) = 0;
+  virtual void disableAll() = 0;
+  virtual void enableAll() = 0;
 };
 }
 }
