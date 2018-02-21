@@ -146,6 +146,10 @@ html_show_sphinx = False
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 html_show_copyright = False
 
+# Add the last updated information to the bottom of pages. Blank string implies
+# '%b %d, %Y' format.
+html_last_updated_fmt = ""
+
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.
 # This allows easier navigation to the top of a chapter, but can be confusing because it mixes entries of different depth in one list.
