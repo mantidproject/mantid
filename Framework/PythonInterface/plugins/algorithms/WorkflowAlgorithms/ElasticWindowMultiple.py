@@ -115,7 +115,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self._background_range_start = self.getProperty('BackgroundRangeStart').value
         self._background_range_end = self.getProperty('BackgroundRangeEnd').value
 
-
     def PyExec(self):
         from IndirectCommon import getInstrRun
 
