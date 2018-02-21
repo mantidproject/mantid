@@ -22,12 +22,12 @@ public:
     auto presenter = setUpPresenter();
     const auto filename = "Valid filename";
 
-    EXPECT_CALL(*m_mockViewPtr, getFocusedFileName())
+    EXPECT_CALL(*m_mockViewPtr, getFocusedFileNames())
         .Times(1)
-        .WillOnce(Return(filename));
+        .WillOnce(Return(std::vector<std::string>({filename})));
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
-        .WillOnce(Return(true));
+        .WillOnce(Return(boost::none));
 
     const std::vector<RunLabel> runLabels({RunLabel(123, 1)});
 
@@ -36,7 +36,7 @@ public:
         .WillOnce(Return(runLabels));
     EXPECT_CALL(*m_mockViewPtr, updateRunList(runLabels)).Times(1);
 
-    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_, testing::_)).Times(0);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -46,18 +46,17 @@ public:
     auto presenter = setUpPresenter();
     const auto filename = "Invalid filename";
 
-    EXPECT_CALL(*m_mockViewPtr, getFocusedFileName())
+    EXPECT_CALL(*m_mockViewPtr, getFocusedFileNames())
         .Times(1)
-        .WillOnce(Return(filename));
+        .WillOnce(Return(std::vector<std::string>({filename})));
 
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
-        .WillOnce(Return(false));
+        .WillOnce(Return(boost::make_optional<std::string>("Failure message")));
 
     EXPECT_CALL(*m_mockModelPtr, getRunLabels()).Times(0);
 
-    EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Load failed, see the log for more details"))
+    EXPECT_CALL(*m_mockViewPtr, userWarning("Load failed", "Failure message"))
         .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
@@ -79,7 +78,7 @@ public:
         .WillOnce(Return(sampleWorkspace));
 
     EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
-    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_, testing::_)).Times(0);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
     assertMocksUsedCorrectly();
@@ -96,10 +95,10 @@ public:
         .Times(1)
         .WillOnce(Return(boost::none));
 
-    EXPECT_CALL(
-        *m_mockViewPtr,
-        userWarning(
-            "Tried to access invalid run, runNumber 123 and bank ID 1"));
+    EXPECT_CALL(*m_mockViewPtr,
+                userError("Invalid run identifier",
+                          "Tried to access invalid run, runNumber 123 and "
+                          "bank ID 1. Please contact the development team"));
 
     EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(0);
 
@@ -144,7 +143,7 @@ public:
 
     EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
     EXPECT_CALL(*m_mockViewPtr, plotCurve(testing::_)).Times(2);
-    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_, testing::_)).Times(0);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
     assertMocksUsedCorrectly();
@@ -183,9 +182,10 @@ public:
                 doRietveldRefinement(runLabel, instParams, phaseFiles,
                                      pathToGSASII, GSASIIProjectFile))
         .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Refinement failed, see the log for more details"));
+        .WillOnce(Return(boost::make_optional<std::string>(
+            "Refinement failure description")));
+    EXPECT_CALL(*m_mockViewPtr, userWarning("Refinement failed",
+                                            "Refinement failure description"));
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -233,9 +233,10 @@ public:
                                    pathToGSASII, GSASIIProjectFile, dmin,
                                    negativeWeight))
         .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Refinement failed, see the log for more details"));
+        .WillOnce(Return(boost::make_optional<std::string>(
+            "Refinement failure description")));
+    EXPECT_CALL(*m_mockViewPtr, userWarning("Refinement failed",
+                                            "Refinement failure description"));
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -250,13 +251,10 @@ private:
         testing::NiceMock<MockEnggDiffGSASFittingModel>>();
     m_mockModelPtr = mockModel.get();
 
-    auto mockView = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingView>>();
-    m_mockViewPtr = mockView.get();
+    m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();
 
     std::unique_ptr<EnggDiffGSASFittingPresenter> pres_uptr(
-        new EnggDiffGSASFittingPresenter(std::move(mockModel),
-                                         std::move(mockView)));
+        new EnggDiffGSASFittingPresenter(std::move(mockModel), m_mockViewPtr));
     return pres_uptr;
   }
 
@@ -267,6 +265,9 @@ private:
     TSM_ASSERT("Model mock not used as expected: some EXPECT_CALL conditions "
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(m_mockViewPtr));
+    if (m_mockViewPtr) {
+      delete m_mockViewPtr;
+    }
   }
 };
 

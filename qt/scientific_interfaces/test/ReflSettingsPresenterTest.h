@@ -439,6 +439,27 @@ public:
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(true))
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testDisablesControlsWhenReductionResumed() {
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    EXPECT_CALL(mockView, disableAll());
+    presenter.onReductionResumed();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testEnablesControlsWhenReductionPaused() {
+    NiceMock<MockSettingsView> mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    EXPECT_CALL(mockView, enableAll());
+    presenter.onReductionPaused();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testExperimentDefaults() {

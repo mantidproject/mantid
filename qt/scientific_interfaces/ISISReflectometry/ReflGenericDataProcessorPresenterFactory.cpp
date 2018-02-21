@@ -10,7 +10,7 @@ using namespace MantidQt::MantidWidgets;
 * Creates a Reflectometry Data Processor Presenter
 */
 std::unique_ptr<ReflDataProcessorPresenter>
-ReflGenericDataProcessorPresenterFactory::create() {
+ReflGenericDataProcessorPresenterFactory::create(int group) {
 
   // The whitelist, elements will appear in order in the table
   // 'Run(s)' column will be linked to 'InputWorkspace' property
@@ -111,7 +111,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
   std::map<QString, QString> postprocessMap = {{"dQ/Q", "Params"}};
 
   return Mantid::Kernel::make_unique<ReflDataProcessorPresenter>(
-      whitelist, preprocessMap, processor, postprocessor, postprocessMap,
+      whitelist, preprocessMap, processor, postprocessor, group, postprocessMap,
       "LoadISISNexus");
 }
 }

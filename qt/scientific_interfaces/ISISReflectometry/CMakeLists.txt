@@ -91,6 +91,7 @@ set ( MOC_FILES
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
     QtReflSettingsView.h
+    QtReflMainWindowView.h
 )
 
 set ( UI_FILES

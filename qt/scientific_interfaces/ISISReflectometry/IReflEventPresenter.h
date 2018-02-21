@@ -42,6 +42,9 @@ public:
   virtual std::string getTimeSlicingValues() const = 0;
   /// Time-slicing type
   virtual std::string getTimeSlicingType() const = 0;
+
+  virtual void onReductionPaused() = 0;
+  virtual void onReductionResumed() = 0;
 };
 }
 }

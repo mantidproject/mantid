@@ -49,6 +49,8 @@ public:
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflSaveTabPresenter::Flag flag) override;
+  void onAnyReductionPaused() override;
+  void onAnyReductionResumed() override;
 
 private:
   /// Adds all workspace names to the list of workspaces
