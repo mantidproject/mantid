@@ -19,8 +19,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy
 import datetime
 from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
-from mantid.kernel import FloatTimeSeriesProperty
-import mantid
+import mantid.kernel, mantid.api
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
@@ -367,7 +366,7 @@ def get_sample_log(workspace, **kwargs):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
     units = tsp.units
-    if not isinstance(tsp, FloatTimeSeriesProperty):
+    if not isinstance(tsp, mantid.kernel.FloatTimeSeriesProperty):
         raise RuntimeError('This function can only plot FloatTimeSeriesProperty objects')
     times = tsp.times.astype('datetime64[us]')
     y = tsp.value

@@ -96,7 +96,9 @@ plotting sample logs.
 
 .. code-block:: python
 
-   LoadEventNexus(Filename='CNCS_7860_event.nxs', OutputWorkspace='CNCS_7860_event')
+   from mantid import plots
+   import matplotlib.pyplot as plt
+   w = LoadEventNexus(Filename='CNCS_7860_event.nxs')
    fig = plt.figure()
    ax1 = fig.add_subplot(211, projection = 'mantid')
    ax2 = fig.add_subplot(212, projection = 'mantid')
