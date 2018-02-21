@@ -468,7 +468,7 @@ class CrystalField(object):
             if not islistlike(value):
                 value = [value] * self.NumberOfSpectra
             if len(value) != len(self.Temperature):
-                if len(value) == len(self.Temperature) - len(self.PhysicalProperty):
+                if self.PhysicalProperty is not None and len(value) == len(self.Temperature) - len(self.PhysicalProperty):
                     value = value + [0] * len(self.PhysicalProperty)
                 else:
                     raise RuntimeError('Vector of FWHMs must either have same size as '
@@ -579,7 +579,6 @@ class CrystalField(object):
             value: an instance of function.Background class or a list of instances
                 in a multi-spectrum case
         """
-        from .function import Background
         from mantid.simpleapi import FunctionFactory
         if self._background is not None:
             raise ValueError('Background has been set already')
@@ -616,7 +615,6 @@ class CrystalField(object):
 
     @PhysicalProperty.setter
     def PhysicalProperty(self, value):
-        from .function import PhysicalProperties
         vlist = value if islistlike(value) else [value]
         if all([hasattr(pp, 'TypeID') for pp in vlist]):
             nOldPP = len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
