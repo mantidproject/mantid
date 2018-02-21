@@ -49,12 +49,12 @@
        <widget class="QComboBox" name="comboBox_refinementMethod">
         <item>
          <property name="text">
-          <string>Pawley</string>
+          <string>Rietveld</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Rietveld</string>
+          <string>Pawley</string>
          </property>
         </item>
        </widget>
