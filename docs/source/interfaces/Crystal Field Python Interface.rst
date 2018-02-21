@@ -598,14 +598,14 @@ gives::
 
     {'O1': [0.125, 0.125, 0.375],
      'O2': [0.125, 0.375, 0.375],
-     'Yb1': [0.25, 0.25, 0.25],
-     'Yb2': [0.021, 0.0, 0.25],
-     'Yb3': [0.542, 0.0, 0.25]}
+     'Sm1': [0.25, 0.25, 0.25],
+     'Sm2': [0.021, 0.0, 0.25],
+     'Sm3': [0.542, 0.0, 0.25]}
 
 You can then define the charges for each site, the magnetic ion and the maximum distance, and calculate::
 
-    cif_pc_model.Charges = {'O1':-2, 'O2':-2, 'Yb1':3, 'Yb2':3, 'Yb3':3}
-    cif_pc_model.IonLabel = 'Yb2'
+    cif_pc_model.Charges = {'O1':-2, 'O2':-2, 'Sm1':3, 'Sm2':3, 'Sm3':3}
+    cif_pc_model.IonLabel = 'Sm2'
     cif_pc_model.Neighbour = 1
     cif_blm = cif_pc_model.calculate()
     print(cif_blm)
@@ -622,13 +622,13 @@ then the value for ``MaxDistance`` will be used regardless of where it appears i
 
 For ``Charges``, instead of listing the charges of each site, you can just give the charge for each element, e.g.::
 
-    cif_pc_model.Charges = {'O':-2, 'Yb':3}
+    cif_pc_model.Charges = {'O':-2, 'Sm':3}
     cif_blm = cif_pc_model.calculate()
 
 The result of the ``calculate()`` method can be put directly into a ``CrystalField`` object and used either
 to calculate a spectrum or as the starting parameters in a fit::
 
-    cf = CrystalField('Yb', 'C2', Temperature=5, FWHM=10, **cif_pc_model.calculate())
+    cf = CrystalField('Sm', 'C2', Temperature=5, FWHM=10, **cif_pc_model.calculate())
     plot(*cf.getSpectrum())
     fit = CrystalFieldFit(cf, InputWorkspace=ws)
     fit.fit()
@@ -791,9 +791,9 @@ properties should be a list. E.g.::
     fit.fit()
 
     # Fits two INS spectra (at 44K and 50K) and the heat capacity, susceptibility and magnetisation simultaneously.
-    PPCv = PhysicalProperty('Cv')
-    PPchi = PhysicalProperty('susc', 'powder', Unit='cgs')
-    PPMag = PhysicalProperty('M(H)', 5, [1, 1, 1], 'bohr')
+    PPCv = PhysicalProperties('Cv')
+    PPchi = PhysicalProperties('susc', 'powder', Unit='cgs')
+    PPMag = PhysicalProperties('M(H)', [1, 1, 1], 5, 'bohr')
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                       Temperature=[44.0, 50], FWHM=[1.1, 0.9], PhysicalProperty=[PPCv, PPchi, PPMag] )
     fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws_ins_44K, ws_ins_50K, ws_cp, ws_chi, ws_mag])
