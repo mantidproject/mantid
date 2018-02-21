@@ -54,15 +54,11 @@ private:
 
   std::vector<API::IEventWorkspace_sptr>
   readEventData(const std::map<std::string, std::string> &eventEntries,
-                API::WorkspaceGroup_sptr &outputGroup, ::NeXus::File &nxFile);
+                ::NeXus::File &nxFile);
   void
   readHistogramData(const std::map<std::string, std::string> &histogramEntries,
                     API::WorkspaceGroup_sptr &outputGroup,
                     ::NeXus::File &nxFile);
-
-  // used as part of given useful names to workspaces added to output
-  // groupworkspace
-  size_t m_countNumWorkspaceAdded{1};
 };
 
 } // namespace DataHandling

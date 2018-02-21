@@ -68,7 +68,6 @@ void LoadMcStas::exec() {
 
   ::NeXus::File nxFile(filename);
   auto entries = nxFile.getEntries();
-  auto itend = entries.end();
   WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);
 
   // McStas Nexus only ever have one top level entry
@@ -126,7 +125,7 @@ void LoadMcStas::exec() {
   }
   std::vector<API::IEventWorkspace_sptr> scatteringWS;
   if (!eventEntries.empty()) {
-    scatteringWS = readEventData(eventEntries, outputGroup, nxFile);
+    scatteringWS = readEventData(eventEntries, nxFile);
   }
 
   readHistogramData(histogramEntries, outputGroup, nxFile);
@@ -144,15 +143,17 @@ void LoadMcStas::exec() {
 
 /**
  * Read Event Data
- * @param eventEntries map of the file entries that have events
- * @param outputGroup pointer to the workspace group
+ * @param eventEntries map of the file e bin/MantidPlot -xq docs/runsphinx_doctest.py -R Rebinntries that have events
  * @param nxFile Reads data from inside first first top entry
+ * @return scatteringWS workspaces to include in the output group
  */
 std::vector<API::IEventWorkspace_sptr> LoadMcStas::readEventData(
     const std::map<std::string, std::string> &eventEntries,
-    WorkspaceGroup_sptr &outputGroup, ::NeXus::File &nxFile) {
+  ::NeXus::File &nxFile) {
 
+  // vector to store output workspaces
   std::vector<API::IEventWorkspace_sptr> scatteringWS;
+
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
   bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
@@ -408,11 +409,11 @@ std::vector<API::IEventWorkspace_sptr> LoadMcStas::readEventData(
 
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
-  for (auto i = 0; i < allEventWS.size(); i++) {
-    if (allEventWS[i].second != "partial_event_data_workspace") {
-      auto ws = allEventWS[i].first;
+  for (auto eventWS : allEventWS) {
+    if (eventWS.second != "partial_event_data_workspace") {
+      auto ws = eventWS.first;
       ws->setAllX(axis);
-      AnalysisDataService::Instance().addOrReplace(allEventWS[i].second, ws);
+      AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
       scatteringWS.emplace_back(ws);
     }
   }
