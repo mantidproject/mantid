@@ -20,6 +20,9 @@ import numpy
 import datetime
 from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
 from mantid.kernel import FloatTimeSeriesProperty
+import mantid.api.MDNormalization
+import mantid.kernel.config
+
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
 # These functions are common between plotfunctions.py and plotfunctions3D.py
