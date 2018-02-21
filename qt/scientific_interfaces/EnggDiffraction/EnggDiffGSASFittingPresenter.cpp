@@ -120,6 +120,7 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
     return;
   }
 
+  m_view->showStatus("Refining run");
   const auto refinementMethod = m_view->getRefinementMethod();
   const auto refinementParams =
       collectInputParameters(runLabel, *inputWSOptional, refinementMethod);
@@ -140,9 +141,11 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
 
     m_multiRunWidget->addFittedPeaks(runLabel, fittedPeaks);
     displayFitResults(runLabel);
-  } catch (const std::runtime_error &ex) {
+  } catch (const std::exception &ex) {
+    m_view->showStatus("An error occurred in refinement");
     m_view->userError("Refinement failed", ex.what());
   }
+  m_view->showStatus("Ready");
 }
 
 void EnggDiffGSASFittingPresenter::processLoadRun() {
@@ -170,6 +173,7 @@ void EnggDiffGSASFittingPresenter::processSelectRun() {
 void EnggDiffGSASFittingPresenter::processStart() {
   auto addMultiRunWidget = m_multiRunWidget->getWidgetAdder();
   (*addMultiRunWidget)(*m_view);
+  m_view->showStatus("Ready");
 }
 
 void EnggDiffGSASFittingPresenter::processShutDown() { m_viewHasClosed = true; }

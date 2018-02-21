@@ -338,6 +338,11 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
   }
 }
 
+void EnggDiffGSASFittingViewQtWidget::showStatus(
+    const std::string &status) const {
+  m_userMessageProvider->showStatus(status);
+}
+
 void EnggDiffGSASFittingViewQtWidget::userError(
     const std::string &errorTitle, const std::string &errorDescription) const {
   m_userMessageProvider->userError(errorTitle, errorDescription);

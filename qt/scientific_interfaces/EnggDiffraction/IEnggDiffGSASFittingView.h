@@ -103,6 +103,9 @@ public:
   /// Get XMin parameter, if it is set
   virtual boost::optional<double> getXMin() const = 0;
 
+  /// Update the view with current status
+  virtual void showStatus(const std::string &status) const = 0;
+
   /**
    Display an error to the user
    @param errorTitle Title of the error

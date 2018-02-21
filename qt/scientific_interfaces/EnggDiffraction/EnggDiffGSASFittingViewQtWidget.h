@@ -65,6 +65,8 @@ public:
 
   void setEnabled(const bool enabled);
 
+  void showStatus(const std::string &status) const override;
+
   void userError(const std::string &errorTitle,
                  const std::string &errorDescription) const override;
 
