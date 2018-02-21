@@ -1,17 +1,17 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-
-import mantid.api
-import mantid.plots.helperfunctions as funcs
 import matplotlib
+matplotlib.use('AGG')
 import datetime
 import numpy as np
+import mantid.api
+import mantid.plots.helperfunctions as funcs
 from mantid.kernel import config
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWorkspace,\
                              ConjoinWorkspaces, AddTimeSeriesLog
 
-matplotlib.use('AGG')
+
 
 
 class HelperFunctionsTest(unittest.TestCase):

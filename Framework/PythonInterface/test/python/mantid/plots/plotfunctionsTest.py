@@ -1,18 +1,18 @@
 from __future__ import (absolute_import, division, print_function)
 
-
 import numpy as np
-import mantid.api
-import mantid.plots.plotfunctions as funcs
 import matplotlib
+matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import unittest
 
+import mantid.api
+import mantid.plots.plotfunctions as funcs
 from mantid.kernel import config
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWorkspace,\
                              ConjoinWorkspaces, AddTimeSeriesLog
 
-matplotlib.use('AGG')
+
 
 
 class PlotFunctionsTest(unittest.TestCase):
