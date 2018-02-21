@@ -126,6 +126,7 @@ void Container::setSampleShape(const std::string &sampleShapeXML) {
    @param ID a string identifying to object
  */
 void Container::setID(const std::string& id) {
+  // We only do anything if the contained shape is a CSGObject
   if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(m_shape)) {
     csgObj->setID(id);
   }

@@ -233,11 +233,8 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
                              "Unable to find material with id=" +
                              materialID);
   }
-  // If CSGObject set ID and material
-  if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(comp)) {
-    csgObj->setID(element->getAttribute("id"));
-    csgObj->setMaterial(mat);
-  }
+  comp->setID(element->getAttribute("id"));
+  comp->setMaterial(mat);
   return comp;
 }
 
