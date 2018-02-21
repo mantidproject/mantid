@@ -5,10 +5,11 @@ import unittest
 import mantid.api
 import mantid.plots.helperfunctions as funcs
 import matplotlib
+import datetime
 import numpy as np
 from mantid.kernel import config
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWorkspace,\
-                             ConjoinWorkspaces
+                             ConjoinWorkspaces, AddTimeSeriesLog
 
 matplotlib.use('AGG')
 
@@ -84,6 +85,9 @@ class HelperFunctionsTest(unittest.TestCase):
         newYAxis.setValue(1, 15)
         newYAxis.setValue(2, 25)
         cls.ws2d_histo_uneven.replaceAxis(1, newYAxis)
+        AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:00:00", Value=100)
+        AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:30:00", Value=15)
+        AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:50:00", Value=100.2)
 
     @classmethod
     def tearDownClass(cls):
@@ -252,6 +256,16 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(z[0], np.array([1, 2, 3]))
         np.testing.assert_allclose(z[1], np.array([1, 2, 3, 4]))
 
+    def test_get_sample_logs(self):
+        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo,LogName='my_log', FullTime=True)
+        self.assertEquals(x[0],datetime.datetime(2010,1,1,0,0,0))
+        self.assertEquals(x[1],datetime.datetime(2010,1,1,0,30,0))
+        self.assertEquals(x[2],datetime.datetime(2010,1,1,0,50,0))
+        np.testing.assert_allclose(y, np.array([100,15,100.2]))
+        self.assertTrue(FullTime)
+        self.assertEquals(LogName, 'my_log')
+        self.assertEquals(units, '')
+        self.assertEquals(kwargs, {})
 
 if __name__ == '__main__':
     unittest.main()
