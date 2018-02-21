@@ -606,7 +606,9 @@ QString ReflDataProcessorPresenter::takeSlice(const QString &runName,
                                               TimeSlicingInfo &slicing,
                                               size_t sliceIndex) {
 
-  QString sliceSuffix = "_slice_" + QString::number(sliceIndex);
+  QString sliceSuffix = "_slice_" +
+                        QString::number(slicing.startTime(sliceIndex)) +
+                        "_to_" + QString::number(slicing.stopTime(sliceIndex));
   QString sliceName = runName + sliceSuffix;
   QString monName = runName + "_monitors";
   QString filterAlg =

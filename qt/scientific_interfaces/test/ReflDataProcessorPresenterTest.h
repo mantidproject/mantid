@@ -142,6 +142,15 @@ public:
 
   static auto constexpr DEFAULT_GROUP_NUMBER = 1;
 
+  void assertSliceExists(const std::string &run, const size_t i,
+                         const std::vector<std::string> &slices) {
+    const auto runName = run + "_slice_" + slices[i] + "_to_" + slices[i + 1];
+    TS_ASSERT(workspaceExists("IvsLam_" + runName));
+    TS_ASSERT(workspaceExists("IvsQ_" + runName));
+    TS_ASSERT(workspaceExists("IvsQ_binned_" + runName));
+    TS_ASSERT(workspaceExists("TOF_" + runName));
+  }
+
   void testProcessEventWorkspacesUniformEvenSlicing() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
@@ -199,19 +208,11 @@ public:
         presenter->notify(DataProcessorPresenter::ProcessFlag));
 
     // Check output workspaces were created as expected
+    std::vector<std::string> slices13460 = {"0", "461.333", "922.667", "1384"};
+    std::vector<std::string> slices13462 = {"0", "770.333", "1540.67", "2311"};
     for (size_t i = 0; i < 3; i++) {
-      std::string sliceIndex = std::to_string(i);
-
-      TS_ASSERT(workspaceExists("IvsLam_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
-                                "_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
+      assertSliceExists("13460", i, slices13460);
+      assertSliceExists("13462", i, slices13462);
     }
     TS_ASSERT(workspaceExists("TOF_13460"));
     TS_ASSERT(workspaceExists("TOF_13462"));
@@ -284,30 +285,17 @@ public:
         presenter->notify(DataProcessorPresenter::ProcessFlag));
 
     // Check output workspaces were created as expected
+    std::vector<std::string> slices13460 = {"0", "500", "1000", "1500"};
+    std::vector<std::string> slices13462 = {"0",    "500",  "1000",
+                                            "1500", "2000", "2500"};
     for (size_t i = 0; i < 3; i++) {
-      std::string sliceIndex = std::to_string(i);
-
-      TS_ASSERT(workspaceExists("IvsLam_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
-                                "_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
+      assertSliceExists("13460", i, slices13460);
+      assertSliceExists("13462", i, slices13462);
     }
     // Uniform slicing allows for different runs to have different numbers
     // of output slices
     for (size_t i = 3; i < 4; i++) {
-      std::string sliceIndex = std::to_string(i);
-
-      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
+      assertSliceExists("13462", i, slices13462);
     }
     TS_ASSERT(workspaceExists("TOF_13460"));
     TS_ASSERT(workspaceExists("TOF_13462"));
@@ -380,19 +368,11 @@ public:
         presenter->notify(DataProcessorPresenter::ProcessFlag));
 
     // Check output workspaces were created as expected
+    std::vector<std::string> slices13460 = {"0", "10", "20", "30"};
+    std::vector<std::string> slices13462 = {"0", "10", "20", "30"};
     for (size_t i = 0; i < 3; i++) {
-      std::string sliceIndex = std::to_string(i);
-
-      TS_ASSERT(workspaceExists("IvsLam_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
-                                "_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
+      assertSliceExists("13460", i, slices13460);
+      assertSliceExists("13462", i, slices13462);
     }
     TS_ASSERT(workspaceExists("TOF_13460"));
     TS_ASSERT(workspaceExists("TOF_13462"));
@@ -464,19 +444,11 @@ public:
         presenter->notify(DataProcessorPresenter::ProcessFlag));
 
     // Check output workspaces were created as expected
+    std::vector<std::string> slices13460 = {"0", "10", "20", "30"};
+    std::vector<std::string> slices13462 = {"0", "10", "20", "30"};
     for (size_t i = 0; i < 3; i++) {
-      std::string sliceIndex = std::to_string(i);
-
-      TS_ASSERT(workspaceExists("IvsLam_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsLam_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_13460_slice_" + sliceIndex +
-                                "_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("IvsQ_binned_13462_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13460_slice_" + sliceIndex));
-      TS_ASSERT(workspaceExists("TOF_13462_slice_" + sliceIndex));
+      assertSliceExists("13460", i, slices13460);
+      assertSliceExists("13462", i, slices13462);
     }
     TS_ASSERT(workspaceExists("TOF_13460"));
     TS_ASSERT(workspaceExists("TOF_13462"));
