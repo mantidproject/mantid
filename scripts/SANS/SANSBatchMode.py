@@ -250,8 +250,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                     new_combineDet = ReductionSingleton().instrument.get_detector_selection()
                     combineDet = su.get_correct_combinDet_setting(ins_name, new_combineDet)
         except (RuntimeError, ValueError) as e:
-            sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(
-                str(run['user_file']), str(e)))
+            raise RuntimeError("Error in Batchmode user files: Could not reset the specified user file {0}. More info: {1}"
+                               .format(str(run['user_file']), str(e)))
 
         local_settings = copy.deepcopy(ReductionSingleton().reference())
         local_prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
@@ -575,7 +575,9 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
                 break
 
         if not os.path.isfile(user_file):
-            user_file_to_set = original_user_file
+            message = "Error could not find specified user file {0}"\
+                .format(new_user_file)
+            raise RuntimeError(message)
         else:
             user_file_to_set = user_file
     else:
@@ -590,9 +592,11 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
             ReductionSingleton().settings = original_prop_man_settings.clone(REDUCTION_SETTINGS_OBJ_NAME)
         else:
             instrument = copy.deepcopy(ReductionSingleton().get_instrument())
+            output_type = ReductionSingleton().to_Q.output_type
             ReductionSingleton().clean(isis_reducer.ISISReducer)
             ReductionSingleton().set_instrument(instrument)
             ReductionSingleton().user_settings = UserFile(user_file_to_set)
+            ReductionSingleton().to_Q.output_type = output_type
             ReductionSingleton().user_settings.execute(ReductionSingleton())
         current_user_file = user_file_to_set
     return current_user_file
