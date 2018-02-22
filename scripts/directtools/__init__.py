@@ -96,12 +96,23 @@ def _profileytitle(workspace, axes):
         axes.set_ylabel('$S(Q,E)$')
 
 
+def _sanitizeforlatex(s):
+    """Return a string with LaTeX special characters escaped."""
+    s = s.replace('_', '\\_')
+    s = s.replace('#', '\\#')
+    s = s.replace('@', '\\@')
+    s = s.replace('&', '\\@')
+    s = s.replace('$', '\\$')
+    return s
+
+
 def _singledatatitle(workspace):
     """Return title for a single data dataset."""
     workspace = _normws(workspace)
     logs = SampleLogs(workspace)
     T = numpy.mean(logs.sample.temperature)
-    title = (str(workspace) + ' ' + logs.instrument.name + ' \\#{:06d}'.format(logs.run_number) + '\n'
+    wsName = _sanitizeforlatex(str(workspace))
+    title = (wsName + ' ' + logs.instrument.name + ' \\#{:06d}'.format(logs.run_number) + '\n'
              + _plottingtime() + '\n'
              + '$T$ = {:0.1f} K $E_i$ = {:0.2f} meV'.format(T, logs.Ei))
     return title
