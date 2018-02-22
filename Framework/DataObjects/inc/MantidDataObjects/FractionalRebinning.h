@@ -52,7 +52,7 @@ namespace FractionalRebinning {
 
 /// Find the intersect region on the output grid
 MANTID_DATAOBJECTS_DLL bool
-getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS,
+getIntersectionRegion(const std::vector<double> &xAxis,
                       const std::vector<double> &verticalAxis,
                       const Geometry::Quadrilateral &inputQ, size_t &qstart,
                       size_t &qend, size_t &x_start, size_t &x_end);

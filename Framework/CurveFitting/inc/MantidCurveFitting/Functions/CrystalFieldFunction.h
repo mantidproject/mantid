@@ -241,6 +241,7 @@ private:
       m_mapPrefixes2PhysProps;
   /// Temporary cache for parameter values during source function resetting.
   mutable std::vector<double> m_parameterResetCache;
+  mutable std::vector<bool> m_fixResetCache;
 };
 
 } // namespace Functions

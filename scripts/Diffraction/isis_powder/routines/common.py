@@ -283,10 +283,25 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
         remove_intermediate_workspace(raw_ws_list)
         raw_ws_list = [summed_ws]
 
+    if instrument._inst_prefix == "HRPD":
+        for ws in raw_ws_list:
+            _mask_all_prompt_pulses(ws)
+
     normalised_ws_list = _normalise_workspaces(ws_list=raw_ws_list, run_details=run_information,
                                                instrument=instrument)
 
     return normalised_ws_list
+
+
+def _mask_prompt_pulse(workspace, middle, left_crop, right_crop):
+    min_crop = middle - left_crop
+    max_crop = middle + right_crop
+    mantid.MaskBins(InputWorkspace=workspace, OutputWorkspace=workspace, XMin=min_crop, XMax=max_crop)
+
+
+def _mask_all_prompt_pulses(workspace):
+    for i in range(6):
+        _mask_prompt_pulse(workspace=workspace, middle=100000 + 20000 * i, left_crop=30, right_crop=140)
 
 
 def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
@@ -370,6 +385,14 @@ def run_normalise_by_current(ws):
     """
     ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
     return ws
+
+
+def runs_overlap(run_string1, run_string2):
+    """
+    Get whether two runs, specified using the usual run string format (eg 123-125 referring to 123, 124 and 125)
+    contain any individual runs in common
+    """
+    return len(set(generate_run_numbers(run_string1)).intersection(generate_run_numbers(run_string2))) > 0
 
 
 def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):

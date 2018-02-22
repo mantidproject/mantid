@@ -110,6 +110,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'SingleCrystalDiffuseReduction_UB.mat',
                 'Na2SiF6_DMOL3.outmol',
                 'FE_ALPHA.cif',
+                'Fe-gamma.cif',
+                'Fe-alpha.cif'
                 'template_ENGINX_241391_236516_North_bank.prm'
                 ]
 

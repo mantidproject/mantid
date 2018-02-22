@@ -1013,16 +1013,38 @@ def PhiRanges(phis, plot=True):
 def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,
                    find_direction=FindDirectionEnum.All, reduction_method=True):
     state = director.process_commands()
+    """
+    Finds the beam centre position.
+    @param rlow: Inner radius of quadrant
+    @param rupp: Outer radius of quadrant
+    @param MaxIter: Maximun number of iterations
+    @param xstart: starting x centre position, if not set is taken from user file
+    @param ystart: starting y centre position, if not set is taken from user file
+    @param tolerance: Sets the step size at which the search will stop
+    @param find_direction: FindDirectionEnum controls which directions to find the centre in by default is All
+    @param reduction_method: if true uses the quadrant centre finder method. If false user the COM method
+    """
 
-    # This is to mantain compatibility with how this function worked in the old Interface so that legacy scripts still
-    # function
-    if config['default.instrument'] == 'LARMOR':
+    if not xstart:
+        xstart = state.move.detectors['LAB'].sample_centre_pos1
+    elif config['default.instrument'] == 'LARMOR':
+        # This is to mantain compatibility with how this function worked in the old Interface so that legacy scripts still
+        # function
         xstart = xstart * 1000
+    if not ystart:
+        ystart = state.move.detectors['LAB'].sample_centre_pos2
 
     centre_finder = SANSCentreFinder()
-    centre = centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction, reduction_method)
-    SetCentre(centre['pos1'], centre['pos2'], bank='rear')
-    SetCentre(centre['pos1'], centre['pos2'], bank='front')
+    centre = centre_finder(state, float(rlow), float(rupp), MaxIter, float(xstart), float(ystart), float(tolerance),
+                           find_direction, reduction_method)
+
+    if config['default.instrument'] == 'LARMOR':
+        SetCentre(centre['pos1'], 1000 * centre['pos2'], bank='rear')
+    else:
+        SetCentre(1000*centre['pos1'], 1000*centre['pos2'], bank='rear')
+    if 'HAB' in state.move.detectors:
+        SetCentre(1000*centre['pos1'], 1000*centre['pos2'], bank='front')
+
     return centre
 
 

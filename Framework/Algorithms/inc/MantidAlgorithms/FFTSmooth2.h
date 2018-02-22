@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHM_FFTSMOOTH2_H_
 #define MANTID_ALGORITHM_FFTSMOOTH2_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
@@ -35,7 +32,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport FFTSmooth2 : public API::Algorithm {
+class DLLExport FFTSmooth2 : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFTSmooth"; }

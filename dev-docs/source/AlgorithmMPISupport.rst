@@ -45,7 +45,7 @@ Only a subset of all spectra is stored on the local MPI rank, so a detector may 
 Storage Mode
 ------------
 
-.. figure:: ../images/MPI-storage-modes.png
+.. figure:: images/MPI-storage-modes.png
    :figwidth: 25%
    :align: right
 
@@ -73,45 +73,45 @@ Usage examples for the storage modes could include:
 Execution Mode
 --------------
 
-.. figure:: ../images/MPI-execution-mode-identical.png
+.. figure:: images/MPI-execution-mode-identical.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::Identical`` based on an input and output workspace with ``StorageMode::Cloned``. Example: ``ConvertUnits``, ``Rebin``, or many other algorithm that do not load or save data.
 
 
-.. figure:: ../images/MPI-execution-mode-distributed-load.png
+.. figure:: images/MPI-execution-mode-distributed-load.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::Distributed`` creating an output workspace with ``StorageMode::Distributed``. Example: ``LoadEventNexus``.
 
-.. figure:: ../images/MPI-execution-mode-distributed.png
+.. figure:: images/MPI-execution-mode-distributed.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::Distributed`` based on an input and output workspace with ``StorageMode::MasterOnly``. Example: ``ConvertUnits`` or ``Rebin``.
 
-.. figure:: ../images/MPI-execution-mode-distributed-gather.png
+.. figure:: images/MPI-execution-mode-distributed-gather.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::Distributed`` based on an input workspace with ``StorageMode::Distributed`` creating an output workspace with ``StorageMode::MasterOnly``. Example: ``DiffractionFocussing``.
 
 
-.. figure:: ../images/MPI-execution-mode-master-only-load.png
+.. figure:: images/MPI-execution-mode-master-only-load.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::MasterOnly`` creating an output workspace with ``StorageMode::Distributed``. Example: ``LoadEventNexus`` or other load algorithms.
 
-.. figure:: ../images/MPI-execution-mode-master-only.png
+.. figure:: images/MPI-execution-mode-master-only.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::MasterOnly`` based on an input and output workspace with ``StorageMode::MasterOnly``. Example: ``ConvertUnits``, ``Rebin``, or many other algorithm that do not load or save data.
 
-.. figure:: ../images/MPI-execution-mode-master-only-store.png
+.. figure:: images/MPI-execution-mode-master-only-store.png
    :figwidth: 25%
    :align: right
 
@@ -161,7 +161,7 @@ For example:
 .. code-block:: python
 
   from mantid.simpleapi import *
-  
+
   dataX = [1,2,3,4,2,3,4,5,3,4,5,6,4,5,6,7]
   dataY = [1,1,1,1,1,1,1,1,1,1,1,1]
   dataE = [1,1,1,1,1,1,1,1,1,1,1,1]
@@ -253,7 +253,6 @@ MPI support for an algorithm is implemented by means of a couple of virtual meth
   protected:
     virtual void execDistributed();
     virtual void execMasterOnly();
-    virtual void execNonMaster();
     virtual Parallel::ExecutionMode getParallelExecutionMode(
         const std::map<std::string, Parallel::StorageMode> &storageModes) const;
     // ...
@@ -339,23 +338,15 @@ Master-only execution
 ---------------------
 
 Master-only execution is handled by ``Algorithm::execMasterOnly()``.
-By default this simply calls ``Algorithm::exec()`` on rank 0 and ``Algorithm::execNonMaster()`` on all other ranks.
+By default this simply calls ``Algorithm::exec()`` on rank 0 and does nothing on all other ranks.
 
 To support running existing Python scripts without significant modification, and to be able to automatically determine execution modes based on input workspaces, workspaces with storage mode ``StorageMode::MasterOnly`` also exist on the non-master ranks.
-The default implementation of ``Algorithm::execNonMaster()`` creates an **uninitialized** (in the case of ``MatrixWorkspace``) workspace of the same type as the input workspace.
-If ``Algorithm::execNonMaster()`` is overridden, any workspaces that are created shall also be uninitialized and should have storage mode ``StorageMode::MasterOnly``.
 
-Given that the workspace on non-master ranks are not initialized, no methods of the workspace should be called, apart from ``Workspace::storageMode()``.
-Validators on the non-master ranks are thus also disabled.
-
-A typical implementation could look as follows:
-
-.. code-block:: c++
-
-  void MyAlg::execNonMaster() {
-    setProperty("OutputWorkspace", Kernel::make_unique<Workspace2D>(
-                                       Parallel::StorageMode::MasterOnly));
-  }
+Given that no algorithm execution happens on non-master ranks, workspaces with ``StorageMode::MasterOnly`` do not exist on non-master ranks.
+This implies:
+- No methods of such a workspace can be called, except when wrapped in an algorithm that has ``ExecutionMode::MasterOnly``.
+- Retrieving such a workspace from the AnalysisDataService is not possible.
+- Algorithms that transform a workspace into a workspace with ``StorageMode::MasterOnly`` such as ``DiffractionFocussing2`` should delete the input workspace when using in-place operation.
 
 
 Setting spectrum numbers
@@ -443,11 +434,11 @@ A typical example could look as follows:
     Workspace_const_sptr ws = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
   }
-  
+
   class MyAlgTest : public CxxTest::TestSuite {
   public:
     // ...
-  
+
     void test_parallel() {
       // Runs run_algorithm in multiple threads. The first argument passed to
       // run_algorithm is of type Parallel::Communicator and is guaranteed to
@@ -491,6 +482,9 @@ Supported Algorithms
 ====================================== ======================= ========
 Algorithm                              Supported modes         Comments
 ====================================== ======================= ========
+AlignAndFocusPowder                    all
+AlignAndFocusPowderFromFiles           Distributed
+AlignDetectors                         all                     with ``StorageMode::Distributed`` this touches only detectors that have spectra on this rank, i.e., the modified instrument is not in an identical state on all ranks
 BinaryOperation                        all                     not supported if ``AllowDifferentNumberSpectra`` is enabled
 CalculateChiSquared                    MasterOnly, Identical   see ``IFittingAlgorithm``
 CalculateCostFunction                  MasterOnly, Identical   see ``IFittingAlgorithm``
@@ -500,6 +494,7 @@ CloneWorkspace                         all
 Comment                                all
 CompareWorkspace                       MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used, with ``ExecutionMode::MasterOnly`` the workspaces always compare equal on non-master ranks
 CompressEvents                         all
+ConvertDiffCal                         MasterOnly, Identical
 ConvertToHistogram                     all
 ConvertToPointData                     all
 ConvertUnits                           all                     ``AlignBins`` not supported; for indirect energy mode the number of resulting bins is in general inconsistent across MPI ranks
@@ -509,6 +504,7 @@ CreateWorkspace                        all
 CropToComponent                        all
 CropWorkspace                          all                     see ``ExtractSpectra`` regarding X cropping
 DeleteWorkspace                        all
+DetermineChunking                      MasterOnly, Identical
 Divide                                 all                     see ``BinaryOperation``
 EstimateFitParameters                  MasterOnly, Identical   see ``IFittingAlgorithm``
 EvaluateFunction                       MasterOnly, Identical   see ``IFittingAlgorithm``
@@ -516,12 +512,16 @@ ExponentialCorrection                  all                     see ``UnaryOperat
 ExtractSingleSpectrum                  all                     in practice ``ExecutionMode::Distributed`` not supported due to current nonzero-spectrum-count limitation
 ExtractSpectra2                        all                     currently not available via algorithm factory or Python
 ExtractSpectra                         all                     not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
+FFTSmooth2                             MasterOnly, Identical
 FilterBadPulses                        all
 FilterByLogValue                       all
 FilterByTime                           all
 FilterEventsByLogValuePreNexus         Identical               see ``IFileLoader``
 FindDetectorsInShape                   all
+FindPeakBackground                     MasterOnly, Identical
+FindPeaks                              MasterOnly, Identical
 Fit                                    MasterOnly, Identical   see ``IFittingAlgorithm``
+GeneratePythonScript                   MasterOnly
 GroupWorkspaces                        all                     grouping workspaces with mixed ``StorageMode`` is not supported
 IFileLoader                            Identical               implicitly adds support for many load-algorithms inheriting from this
 IFittingAlgorithm                      MasterOnly, Identical   implicitly adds support for several fit-algorithms inheriting from this
@@ -529,9 +529,12 @@ Load                                   all                     actual supported 
 LoadAscii2                             Identical               see ``IFileLoader``
 LoadAscii                              Identical               see ``IFileLoader``
 LoadBBY                                Identical               see ``IFileLoader``
+LoadCalFile                            Identical
 LoadCanSAS1D                           Identical               see ``IFileLoader``
 LoadDaveGrp                            Identical               see ``IFileLoader``
+LoadDiffCal                            Identical
 LoadEmptyInstrument                    Identical               see ``IFileLoader``
+LoadEventAndCompress                   Distributed
 LoadEventNexus                         Distributed             storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
 LoadEventPreNexus2                     Identical               see ``IFileLoader``
 LoadFITS                               Identical               see ``IFileLoader``
@@ -579,17 +582,24 @@ MaskDetectorsInShape                   all
 MaskSpectra                            all
 Minus                                  all                     see ``BinaryOperation``
 MoveInstrumentComponent                all
+MultipleScatteringCylinderAbsorption   all
 Multiply                               all                     see ``BinaryOperation``
+NormaliseByCurrent                     all
 OneMinusExponentialCor                 all                     see ``UnaryOperation``
-Q1D2                                   all                     not all optional normalization inputs are supported
+PDDetermineCharacterizations           all
+PDLoadCharacterizations                Identical
 Plus                                   all                     see ``BinaryOperation``
 PoissonErrors                          all                     see ``BinaryOperation``
 PolynomialCorrection                   all                     see ``UnaryOperation``
+Q1D2                                   all                     not all optional normalization inputs are supported
 Power                                  all                     see ``UnaryOperation``
 PowerLawCorrection                     all                     see ``UnaryOperation``
-Rebin                                  all                     min and max bin boundaries must be given explicitly
+RealFFT                                MasterOnly, Identical
+Rebin                                  all
 RebinToWorkspace                       all                     ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
+RemoveLowResTOF                        all
 RemovePromptPulse                      all
+RenameWorkspace                        all
 ReplaceSpecialValues                   all                     see ``UnaryOperation``
 RotateInstrumentComponent              all
 SANSCalculateTransmission              MasterOnly, Identical
@@ -609,11 +619,19 @@ SANSScale                              all
 SANSSingleReduction                    all
 SANSSliceEvent                         all
 SANSStitch                             MasterOnly, Identical
+SaveFocusedXYE                         MasterOnly
+SaveGSS                                MasterOnly
 SaveNexus                              MasterOnly
 SaveNexusProcessed                     MasterOnly
 Scale                                  all
+SetSampleMaterial                      all
+SetUncertainties                       MasterOnly, Identical
 SignalOverError                        all                     see ``UnaryOperation``
+SNSPowderReduction                     Distributed
 SortEvents                             all
+SortTableWorkspace                     MasterOnly, Identical
+StripPeaks                             MasterOnly, Identical
+StripVanadiumPeaks2                    MasterOnly, Identical
 SumSpectra                             MasterOnly, Identical
 UnaryOperation                         all
 WeightedMean                           all                     see ``BinaryOperation``
@@ -628,5 +646,3 @@ Currently none of the above algorithms works with ``StorageMode::Distributed`` i
 .. [#spectrum-index] Some will argue that this should be ``GlobalWorkspaceIndex``.
   However it is not an index of a workspace so the term ``GlobalSpectrumIndex`` has been chosen for clarity.
   On the user interface side this will still be named 'workspace index', dropping the 'global' since the distinction between global and local indices is irrelevant for users.
-
-.. categories:: Development

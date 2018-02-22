@@ -3,6 +3,7 @@
 
 #include "IReflSettingsTabPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidAPI/Algorithm.h"
 
 #include <string>
 
@@ -44,6 +45,7 @@ public:
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const = 0;
   /// Processing
+  virtual Mantid::API::IAlgorithm_sptr createReductionAlg() = 0;
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getReductionOptions() const = 0;
   /// Post-processing
@@ -62,6 +64,9 @@ public:
   virtual void notify(IReflSettingsPresenter::Flag flag) = 0;
   /// Set current instrument name
   virtual void setInstrumentName(const std::string &instName) = 0;
+
+  virtual void onReductionPaused() = 0;
+  virtual void onReductionResumed() = 0;
 };
 }
 }

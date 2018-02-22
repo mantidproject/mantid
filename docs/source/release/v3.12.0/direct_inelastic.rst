@@ -27,6 +27,12 @@ Algorithms
 Crystal Field
 #############
 
+Multi-site calculations and fitting are now supported by the crystal field (Python commandline) interface. 
+
+Calculation of dipole transition matrix elements has been added, together with the addition of a :math:`\chi_0` term in the :ref:`CrystalFieldSusceptibility <func-CrystalFieldSusceptibility>` function. 
+
+Several bugs in the Python and C++ code has been fixed - see the `github page <https://github.com/mantidproject/mantid/pull/21604>`_ for details.
+
 Features Removed
 ----------------
 

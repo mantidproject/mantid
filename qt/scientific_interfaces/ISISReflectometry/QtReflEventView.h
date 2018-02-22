@@ -50,6 +50,9 @@ public:
   /// Returns time-slicing type
   std::string getTimeSlicingType() const override;
 
+  void enableAll() override;
+  void disableAll() override;
+
 public slots:
   /// Enable / disable slicing option entry fields
   void toggleSlicingOptions() const;

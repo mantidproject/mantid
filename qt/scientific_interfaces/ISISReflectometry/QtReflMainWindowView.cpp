@@ -35,9 +35,15 @@ void QtReflMainWindowView::initLayout() {
   auto settingsPresenter = createSettingsTab();
   auto savePresenter = createSaveTab();
 
+  connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
+
   // Create the presenter
   m_presenter.reset(new ReflMainWindowPresenter(
       this, runsPresenter, eventPresenter, settingsPresenter, savePresenter));
+}
+
+void QtReflMainWindowView::helpPressed() {
+  m_presenter->notify(IReflMainWindowPresenter::Flag::HelpPressed);
 }
 
 /** Creates the 'Runs' tab and returns a pointer to its presenter

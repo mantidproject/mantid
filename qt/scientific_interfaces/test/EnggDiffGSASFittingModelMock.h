@@ -14,17 +14,19 @@ class MockEnggDiffGSASFittingModel : public IEnggDiffGSASFittingModel {
 
 public:
   MOCK_METHOD7(doPawleyRefinement,
-               bool(const RunLabel &runLabel, const std::string &instParamFile,
-                    const std::vector<std::string> &phaseFiles,
-                    const std::string &pathToGSASII,
-                    const std::string &GSASIIProjectFile, const double dMin,
-                    const double negativeWeight));
+               boost::optional<std::string>(
+                   const RunLabel &runLabel, const std::string &instParamFile,
+                   const std::vector<std::string> &phaseFiles,
+                   const std::string &pathToGSASII,
+                   const std::string &GSASIIProjectFile, const double dMin,
+                   const double negativeWeight));
 
   MOCK_METHOD5(doRietveldRefinement,
-               bool(const RunLabel &runLabel, const std::string &instParamFile,
-                    const std::vector<std::string> &phaseFiles,
-                    const std::string &pathToGSASII,
-                    const std::string &GSASIIProjectFile));
+               boost::optional<std::string>(
+                   const RunLabel &runLabel, const std::string &instParamFile,
+                   const std::vector<std::string> &phaseFiles,
+                   const std::string &pathToGSASII,
+                   const std::string &GSASIIProjectFile));
 
   MOCK_CONST_METHOD1(getFittedPeaks,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
@@ -44,7 +46,8 @@ public:
 
   MOCK_CONST_METHOD1(hasFittedPeaksForRun, bool(const RunLabel &runLabel));
 
-  MOCK_METHOD1(loadFocusedRun, bool(const std::string &filename));
+  MOCK_METHOD1(loadFocusedRun,
+               boost::optional<std::string>(const std::string &filename));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

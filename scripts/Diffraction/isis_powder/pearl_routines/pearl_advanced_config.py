@@ -15,6 +15,8 @@ general_params = {
          "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
          "tt35_grouping_filename": "pearl_group_12_1_TT35.cal"
     },
+
+    "subtract_empty_instrument": True,
 }
 
 long_mode_off_params = {
