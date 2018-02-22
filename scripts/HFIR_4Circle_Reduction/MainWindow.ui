@@ -5632,8 +5632,15 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionPre_Processing"/>
     <addaction name="actionData_Downloading"/>
    </widget>
+   <widget class="QMenu" name="menuPeak_Integration">
+    <property name="title">
+     <string>Peak Integration</string>
+    </property>
+    <addaction name="actionSingle_Pt_Integration"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
+   <addaction name="menuPeak_Integration"/>
    <addaction name="menuAdmin_Tools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -5753,6 +5760,11 @@ p, li { white-space: pre-wrap; }
   <action name="actionData_Downloading">
    <property name="text">
     <string>Download Data</string>
+   </property>
+  </action>
+  <action name="actionSingle_Pt_Integration">
+   <property name="text">
+    <string>Single Pt Integration</string>
    </property>
   </action>
  </widget>

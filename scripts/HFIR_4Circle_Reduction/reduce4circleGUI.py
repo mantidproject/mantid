@@ -326,6 +326,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.actionData_Downloading, QtCore.SIGNAL('triggered()'),
                      self.menu_download_data)
 
+        # TODO NEW self.ui.actionSingle_Pt_Integration
+        # TODO ... 1. get all the single Pt. scans... 2. 
+
         # Validator ... (NEXT)
 
         # Declaration of class variable

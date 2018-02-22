@@ -14,6 +14,7 @@ set( UI_FILES
   httpserversetup.ui
   preprocess_window.ui
   peak_integration_info.ui
+  SinglePtIntegrationWindow.ui
 )
 
 UiToPy( UI_FILES CompileUIHFIR_4Circle_Reduction)
