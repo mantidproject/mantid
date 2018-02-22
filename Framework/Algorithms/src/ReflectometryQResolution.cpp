@@ -139,7 +139,7 @@ void ReflectometryQResolution::exec() {
     }
     auto &resolutions = outWS->mutableDx(wsIndex);
     for (size_t i = 0; i < wavelengths.size(); ++i) {
-      const auto wavelength = wavelengths[i];
+      const auto wavelength = wavelengths[i] * 1e-10;
       const auto deltaLambda = wavelengthResolution(*inWS, wsIndex, wavelength);
       const auto deltaThetaSq = angularResolutionSquared(inWS, *directWS, wsIndex, setup, beamFWHM, incidentFWHM, slit1FWHM);
       resolutions[i] = qs[i] * std::sqrt(pow<2>(deltaLambda) + deltaThetaSq);
