@@ -1155,7 +1155,7 @@ bool LoadEventNexus::hasEventMonitors() {
     }
     bool hasTotalCounts = false;
     bool oldNeXusFileNames = false;
-    result = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames) == 0;
+    result = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames) > 0;
     m_file->closeGroup();
   } catch (::NeXus::Exception &) {
     result = false;

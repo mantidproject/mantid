@@ -554,21 +554,33 @@ LoadNexusMonitors2::sizeOfUnopenedEntry(::NeXus::File &file,
   return size;
 }
 
+bool LoadNexusMonitors2::keyExists(
+    std::string const &key,
+    std::map<std::string, std::string> const &entries) const {
+  return entries.find(key) != entries.cend();
+}
+
+bool LoadNexusMonitors2::eventIdNotEmptyIfExists(
+    ::NeXus::File &monitorFileHandle,
+    std::map<std::string, std::string> const &entries) const {
+  if (keyExists("event_id", entries))
+    return sizeOfUnopenedEntry(monitorFileHandle, "event_id") > 1;
+  else
+    return true;
+}
+
+bool LoadNexusMonitors2::hasAllEventLikeAttributes(
+    std::map<std::string, std::string> const &entries) const {
+  return keyExists("event_index", entries) &&
+         keyExists("event_time_offset", entries) &&
+         keyExists("event_time_zero", entries);
+}
+
 bool LoadNexusMonitors2::isEventMonitor(
     ::NeXus::File &monitorFileHandle) const {
-  auto monitorEntries = monitorFileHandle.getEntries();
-  auto constexpr expectedNumberOfEventLikeEntries = 4;
-  auto numberOfEventLikeEntries = std::count_if(
-      monitorEntries.cbegin(), monitorEntries.cend(),
-      [this, &monitorFileHandle, &monitorEntries](
-          const std::map<std::string, std::string>::value_type &entry) -> bool {
-        return entry.first == "event_index" ||
-               entry.first == "event_time_offset" ||
-               entry.first == "event_time_zero" ||
-               (entry.first == "event_id" &&
-                sizeOfUnopenedEntry(monitorFileHandle, "event_id") > 0);
-      });
-  return numberOfEventLikeEntries == expectedNumberOfEventLikeEntries;
+  auto entries = monitorFileHandle.getEntries();
+  return hasAllEventLikeAttributes(entries) &&
+         eventIdNotEmptyIfExists(monitorFileHandle, entries);
 }
 
 size_t LoadNexusMonitors2::getMonitorInfo(
