@@ -108,6 +108,8 @@ public:
   /// Creates hints for 'Stitch1DMany'
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
+  void disableAll() override;
+  void enableAll() override;
 
   void showOptionLoadErrors(
       std::vector<InstrumentParameterTypeMissmatch> const &errors,
@@ -131,6 +133,20 @@ public slots:
 private:
   /// Initialise the interface
   void initLayout();
+  void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
+  void registerInstrumentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
+  void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
+  void setToolTipAsPropertyDocumentation(QWidget &widget,
+                                         std::string const &propertyName,
+                                         Mantid::API::IAlgorithm_sptr alg);
+
+  template <typename Widget>
+  void registerSettingWidget(Widget &widget, std::string const &propertyName,
+                             Mantid::API::IAlgorithm_sptr alg);
+  void connectSettingsChange(QLineEdit &edit);
+  void connectSettingsChange(QComboBox &edit);
+  void connectSettingsChange(QCheckBox &edit);
+  void connectSettingsChange(QGroupBox &edit);
   QLineEdit &stitchOptionsLineEdit() const;
   void setSelected(QComboBox &box, std::string const &str);
   void setText(QLineEdit &lineEdit, int value);
@@ -142,13 +158,6 @@ private:
   void setChecked(QCheckBox &checkBox, bool checked);
   std::string getText(QLineEdit const &lineEdit) const;
   std::string getText(QComboBox const &box) const;
-  void connectChangeListeners();
-  void connectExperimentSettingsChangeListeners();
-  void connectInstrumentSettingsChangeListeners();
-  void connectSettingsChange(QLineEdit *edit);
-  void connectSettingsChange(QComboBox *edit);
-  void connectSettingsChange(QCheckBox *edit);
-  void connectSettingsChange(QGroupBox *edit);
 
   /// The widget
   Ui::ReflSettingsWidget m_ui;

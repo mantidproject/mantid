@@ -1781,8 +1781,8 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
   // update the iterator, this means we will skip the folder in HOME and
   // look in the instrument folder in mantid install directory or mantid source
   // code directory
-  if (updateInstrStr != "1" || updateInstrStr != "on" ||
-      updateInstrStr != "On") {
+  if (!(updateInstrStr == "1" || updateInstrStr == "on" ||
+        updateInstrStr == "On")) {
     instrDir++;
   }
 

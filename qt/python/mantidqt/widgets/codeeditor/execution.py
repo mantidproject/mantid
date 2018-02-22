@@ -149,7 +149,7 @@ class PythonCodeExecution(QObject):
         self._task = task
         return task
 
-    def execute(self, code_str, filename=''):
+    def execute(self, code_str, filename=None):
         """Execute the given code on the calling thread
         within the provided context.
 

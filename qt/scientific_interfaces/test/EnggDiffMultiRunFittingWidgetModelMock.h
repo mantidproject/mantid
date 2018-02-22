@@ -30,6 +30,8 @@ public:
   MOCK_CONST_METHOD1(getFocusedRun,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
                          const RunLabel &runLabel));
+
+  MOCK_CONST_METHOD1(hasFittedPeaksForRun, bool(const RunLabel &runLabel));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

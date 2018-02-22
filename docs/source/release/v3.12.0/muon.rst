@@ -13,10 +13,11 @@ MuSR Changes
 Interfaces
 ----------
 - Added a cancel button to the MaxEnt widget in Frequency Domain Analysis.
+- Added checkboxes for "add all pairs" and "add all groups" to the settings tab. 
 
 Bug Fixes
 ---------
--:ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` has had the sign of the phase shift changed, this produces data with a positive frequency spike as expected.
+- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` has had the sign of the phase shift changed, this produces data with a positive frequency spike as expected.
 
 Interface
 ---------
@@ -26,6 +27,7 @@ Interface
 
 Algorithms
 ----------
--:ref:`MuonProcess <algm-MuonProcess>` now has a flag to determine if to crop the input workspace (default is true). In the Muon Analysis interface this flag has been set to false.
+- :ref:`MuonProcess <algm-MuonProcess>` now has a flag to determine if to crop the input workspace (default is true). In the Muon Analysis interface this flag has been set to false.
+- :ref:`MuonMaxent <algm-MuonMaxent>` calculates a single frequency spectrum from multiple time domain spectra. 
 
 :ref:`Release 3.12.0 <v3.12.0>`
