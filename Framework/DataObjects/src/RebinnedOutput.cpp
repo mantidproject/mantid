@@ -96,14 +96,22 @@ void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
   if (m_finalized && !force)
     return;
   int nHist = static_cast<int>(this->getNumberHistograms());
+  // Checks that the fractions are not all zeros.
+  bool frac_all_zeros = true;
+  for (int i = 0; i < nHist; ++i) {
+    MantidVec &frac = this->dataF(i);
+    if (std::accumulate(frac.begin(), frac.end(), 0.) != 0) {
+      frac_all_zeros = false;
+      break;
+    }
+  }
+  if (frac_all_zeros)
+    return;
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int i = 0; i < nHist; ++i) {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
     MantidVec &frac = this->dataF(i);
-    // Checks that the fractions are not all zeros.
-    if (std::accumulate(frac.begin(), frac.end(), 0.) == 0.)
-      continue;
     std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                    std::divides<double>());
     if (hasSqrdErrs) {
