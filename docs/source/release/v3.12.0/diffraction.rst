@@ -18,6 +18,7 @@ Powder Diffraction
 
   + Scripts now support creation of grouping .cal files from ceria run(s)
   + Absorption corrections enabled for all samples, not just vanadium
+  + ``subtract_empty_instrument`` parameter added for disabling empty subtraction, useful for focusing empties
 - Improvements in ISIS Powder for HRPD:
 
   + The prompt pulse is now masked out for the long window
