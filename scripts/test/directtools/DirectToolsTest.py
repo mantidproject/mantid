@@ -63,6 +63,19 @@ class DirectTest(unittest.TestCase):
         wsOut = directtools.dynamicsusceptibility(ws, 100.)
         self.assertEqual(wsOut.YUnit(), 'Dynamic susceptibility')
 
+    def test_dynamicsusceptibility_removesingularity(self):
+        xs = numpy.array([-0.7, -0.4, -0.1, 0.2, 0.5])
+        ys = numpy.array([2, 2, 2, 2])
+        es = numpy.sqrt(ys)
+        ws = CreateWorkspace(DataX=xs, DataY=ys, DataE=es, NSpec=1, UnitX='DeltaE',
+                             StoreInADS=False)
+        wsOut = directtools.dynamicsusceptibility(ws, 100., zeroEnergyEpsilon=0.13)
+        numpy.testing.assert_equal(wsOut.readX(0), xs)
+        outYs = wsOut.readY(0)
+        outEs = wsOut.readE(0)
+        self.assertEqual(outYs[2], 0.)
+        self.assertEqual(outEs[2], 0.)
+
     def test_mantidsubplotsetup(self):
         result = directtools.mantidsubplotsetup()
         self.assertEqual(len(result), 1)

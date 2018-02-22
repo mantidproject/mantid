@@ -96,6 +96,22 @@ def _profileytitle(workspace, axes):
         axes.set_ylabel('$S(Q,E)$')
 
 
+def _removesingularity(ws, epsilon):
+    """Set bins at -epsilon <= x < epsilon  to zero."""
+    Xs = ws.extractX()
+    for i in range(ws.getNumberHistograms()):
+        xs = Xs[i, :]
+        ys = ws.dataY(i)
+        es = ws.dataE(i)
+        if len(xs) != len(ys):
+            xs = (xs[1:] + xs[:-1]) * 0.5
+        xs = numpy.abs(xs)
+        binIndex = numpy.argmin(xs)
+        if xs[binIndex] >= -epsilon and xs[binIndex] < epsilon:
+            ys[binIndex] = 0.
+            es[binIndex] = 0.
+
+
 def _sanitizeforlatex(s):
     """Return a string with LaTeX special characters escaped."""
     s = s.replace('_', '\\_')
@@ -150,7 +166,7 @@ def defaultrcParams():
     return params
 
 
-def dynamicsusceptibility(workspace, temperature, outputName=None):
+def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEpsilon=1e-6):
     """Convert :math:`S(Q,E)` to susceptibility :math:`\chi''(Q,E)`."""
     workspace = _normws(workspace)
     horAxis = workspace.getAxis(0)
@@ -162,6 +178,7 @@ def dynamicsusceptibility(workspace, temperature, outputName=None):
         workspace = Transpose(workspace, OutputWorkspace='__transposed_SofQW_', EnableLogging=False)
     c = 1e-3 * constants.e / constants.k / temperature
     outWS = OneMinusExponentialCor(workspace, OutputWorkspace=outputName, C=c, Operation='Multiply', EnableLogging=False)
+    _removesingularity(outWS, zeroEnergyEpsilon)
     if doTranspose:
         outWS = Transpose(outWS, OutputWorkspace=outputName, EnableLogging=False)
         DeleteWorkspace('__transposed_SofQW_', EnableLogging=False)
@@ -260,17 +277,21 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True):
     return figure, axes, cutWSList
 
 
-def plotSofQW(workspace, QMin=0., QMax=None, EMin=-10., EMax=None, VMin=0., VMax=None, colormap='jet'):
+def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax=None, colormap='jet'):
     """Plot a 2D plot with given axis limits and return the plotting layer."""
     # Accept both workspace names and actual workspaces.
     workspace = _normws(workspace)
+    isSusceptibility = workspace.YUnit() == 'Dynamic susceptibility'
     figure, axes = subplots()
     if QMin is None:
         QMin = 0.
     if QMax is None:
         dummy, QMax = validQ(workspace)
     if EMin is None:
-        EMin = -10.
+        if isSusceptibility:
+            EMin = 0.
+        else:
+            EMin = -10.
     if EMax is None:
         EAxis = workspace.getAxis(1).extractValues()
         EMax = numpy.amax(EAxis)
@@ -283,7 +304,7 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=-10., EMax=None, VMin=0., VMax
     print('Plotting intensity range: {}...{}'.format(VMin, VMax))
     contours = axes.pcolor(workspace, vmin=VMin, vmax=VMax, distribution=True, cmap=colormap)
     colorbar = figure.colorbar(contours)
-    if workspace.YUnit() == 'Dynamic susceptibility':
+    if isSusceptibility:
         colorbar.set_label("$\\chi''(Q,E)$ (arb. units)")
     else:
         colorbar.set_label('$S(Q,E)$ (arb. units)')
