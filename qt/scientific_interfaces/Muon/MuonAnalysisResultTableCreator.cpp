@@ -115,7 +115,7 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
 
     auto val = valMap[log];
     // multiple files use strings due to x-y format
-    if (val.canConvert<double>() && !log.endsWith(" (text)") && !m_multiple) {
+    if (val.canConvert<double>() && !log.endsWith(" (text)") ) {
       addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
 
     } else {
@@ -542,7 +542,12 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
           auto seconds =
               val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
           valuesPerWorkspace.append(QString::number(seconds));
-        } else {
+        }
+		else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+			valuesPerWorkspace.append(QString::number(val.toDouble()));
+
+		}
+		else {
           valuesPerWorkspace.append(logValues[log].toString());
         }
       }
@@ -551,8 +556,8 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
       // Why not use std::minmax_element? To avoid MSVC warning: QT bug 41092
       // (https://bugreports.qt.io/browse/QTBUG-41092)
       valuesPerWorkspace.sort();
-      const auto &min = valuesPerWorkspace.front().toStdString();
-      const auto &max = valuesPerWorkspace.back().toStdString();
+      const auto &min = valuesPerWorkspace.front().toDouble();
+      const auto &max = valuesPerWorkspace.back().toDouble();
       if (min == max) {
         row << min;
       } else {
