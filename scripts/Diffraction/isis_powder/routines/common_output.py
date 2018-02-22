@@ -30,7 +30,7 @@ def split_into_tof_d_spacing_groups(run_details, processed_spectra):
     # Group the outputs
     d_spacing_group_name = run_number + ext + "-ResultD"
     d_spacing_group = mantid.GroupWorkspaces(InputWorkspaces=d_spacing_output, OutputWorkspace=d_spacing_group_name)
-    tof_group_name = run_number + ext + "-Results-TOF"
+    tof_group_name = run_number + ext + "-ResultTOF"
     tof_group = mantid.GroupWorkspaces(InputWorkspaces=tof_output, OutputWorkspace=tof_group_name)
 
     return d_spacing_group, tof_group
