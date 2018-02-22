@@ -354,12 +354,13 @@ public:
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
 
     // Test material through flexible constructor
-    auto obj1 = Mantid::Kernel::make_unique<MeshObject>(triangles, vertices, testMaterial);
+    auto obj1 = Mantid::Kernel::make_unique<MeshObject>(triangles, vertices,
+                                                        testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      obj1->material().numberDensity(), 1e-12);
     // Test material through efficient constructor
-    auto obj2 = Mantid::Kernel::make_unique<MeshObject>(std::move(triangles),
-                                             std::move(vertices), testMaterial);
+    auto obj2 = Mantid::Kernel::make_unique<MeshObject>(
+        std::move(triangles), std::move(vertices), testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      obj2->material().numberDensity(), 1e-12);
   }
@@ -1180,11 +1181,11 @@ public:
     // Create a test point with coordinates within [-1.0, 0.0]
     // for applying to octahedron
     V3D output;
-    output.setX(((double) (index % dimension)) / (dimension - 1));
+    output.setX(((double)(index % dimension)) / (dimension - 1));
     index /= dimension;
-    output.setY(((double) (index % dimension)) / (dimension - 1));
+    output.setY(((double)(index % dimension)) / (dimension - 1));
     index /= dimension;
-    output.setZ(((double) (index % dimension)) / (dimension - 1));
+    output.setZ(((double)(index % dimension)) / (dimension - 1));
     return output;
   }
 
