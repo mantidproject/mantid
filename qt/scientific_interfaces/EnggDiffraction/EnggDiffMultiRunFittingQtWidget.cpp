@@ -98,7 +98,8 @@ void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
 }
 
 void EnggDiffMultiRunFittingQtWidget::plotToSeparateWindow(
-    const std::string &focusedRunName, const std::string &fittedPeaksName) {
+    const std::string &focusedRunName,
+    const boost::optional<std::string> fittedPeaksName) {
 
   std::string plotCode = "ws1 = \"" + focusedRunName + "\"\n";
 
@@ -112,8 +113,8 @@ void EnggDiffMultiRunFittingQtWidget::plotToSeparateWindow(
 
               "spectra_to_plot = [0]\n";
 
-  if (!fittedPeaksName.empty()) {
-    plotCode += "ws2 = \"" + fittedPeaksName + "\"\n";
+  if (fittedPeaksName) {
+    plotCode += "ws2 = \"" + *fittedPeaksName + "\"\n";
     plotCode +=
         "ws2_spectrum = ExtractSingleSpectrum(InputWorkspace=ws2, "
         "WorkspaceIndex=0, StoreInADS=False)\n"
@@ -121,6 +122,7 @@ void EnggDiffMultiRunFittingQtWidget::plotToSeparateWindow(
         "AppendSpectra(InputWorkspace1=workspaceToPlot, "
         "InputWorkspace2=ws2_spectrum, OutputWorkspace=workspaceToPlot)\n"
 
+        "DeleteWorkspace(ws2_spectrum)\n"
         "spectra_to_plot = [0, 1]\n";
   }
 

@@ -298,10 +298,6 @@ public:
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    const auto wsName = "SampleWorkspace";
-
-    auto &ADS = API::AnalysisDataService::Instance();
-    ADS.add(wsName, *sampleWorkspace);
 
     EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
         .Times(1)
@@ -317,13 +313,14 @@ public:
         .Times(1)
         .WillOnce(Return(false));
 
-    EXPECT_CALL(*m_mockView, plotToSeparateWindow(wsName, "")).Times(1);
+    EXPECT_CALL(*m_mockView, plotToSeparateWindow(
+                                 "123_1_external_plot",
+                                 boost::make_optional(false, std::string())))
+        .Times(1);
 
     presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
                           PlotToSeparateWindow);
     assertMocksUsedCorrectly();
-
-    ADS.remove(wsName);
   }
 
   void test_plotToSeparateWindowWithFittedPeaks() {
@@ -339,9 +336,6 @@ public:
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    const auto wsName = "SampleWorkspace";
-    auto &ADS = API::AnalysisDataService::Instance();
-    ADS.add(wsName, *sampleWorkspace);
 
     EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
         .Times(1)
@@ -356,22 +350,20 @@ public:
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleFittedPeaks(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    const auto fittedPeaksName = "SampleFittedPeaks";
-    ADS.add(fittedPeaksName, *sampleFittedPeaks);
     EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
         .Times(1)
         .WillOnce(Return(sampleFittedPeaks));
     EXPECT_CALL(*m_mockView, reportPlotInvalidFittedPeaks(testing::_)).Times(0);
 
-    EXPECT_CALL(*m_mockView, plotToSeparateWindow(wsName, fittedPeaksName))
+    EXPECT_CALL(*m_mockView,
+                plotToSeparateWindow("123_1_external_plot",
+                                     boost::optional<std::string>(
+                                         "123_1_fitted_peaks_external_plot")))
         .Times(1);
 
     presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
                           PlotToSeparateWindow);
     assertMocksUsedCorrectly();
-
-    ADS.remove(wsName);
-    ADS.remove(fittedPeaksName);
   }
 
 private:

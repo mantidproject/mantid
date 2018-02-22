@@ -36,8 +36,9 @@ public:
   void
   plotFocusedRun(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
 
-  void plotToSeparateWindow(const std::string &focusedRunName,
-                            const std::string &fittedPeaksName) override;
+  void plotToSeparateWindow(
+      const std::string &focusedRunName,
+      const boost::optional<std::string> fittedPeaksName) override;
 
   void reportNoRunSelectedForPlot() override;
 
