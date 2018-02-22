@@ -159,8 +159,9 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
                                 2);
     }
 
-  } else if (inputWs && inputWs->getNumberHistograms() <
-                            boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+  } else if (inputWs &&
+             inputWs->getNumberHistograms() <
+                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
   }
@@ -181,6 +182,21 @@ void IndirectDataAnalysisTab::plotInput(
 
   if (inputWS && inputWS->x(spectrum).size() > 1)
     previewPlot->addSpectrum("Sample", inputWorkspace(), spectrum);
+}
+
+/**
+ * Clears all plots and plots the selected spectrum of the input workspace in
+ * this indirect data analysis tab.
+ *
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
+void IndirectDataAnalysisTab::clearAndPlotInput(
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+  m_previewPlotWorkspace.reset();
+  plotInput(fitPreviewPlot);
+  diffPreviewPlot->clear();
 }
 
 /**
@@ -208,9 +224,7 @@ void IndirectDataAnalysisTab::updatePlot(
       return;
     }
   }
-
-  plotInput(fitPreviewPlot);
-  diffPreviewPlot->clear();
+  clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }
 
 /**
@@ -234,10 +248,8 @@ void IndirectDataAnalysisTab::updatePlot(
     auto workspace =
         boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
     updatePlot(workspace, fitPreviewPlot, diffPreviewPlot);
-  } else {
-    diffPreviewPlot->clear();
-    plotInput(fitPreviewPlot);
-  }
+  } else
+    clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }
 
 /**
@@ -267,10 +279,8 @@ void IndirectDataAnalysisTab::updatePlot(
               workspaceName);
       updatePlot(matWorkspace, fitPreviewPlot, diffPreviewPlot);
     }
-  } else {
-    diffPreviewPlot->clear();
-    plotInput(fitPreviewPlot);
-  }
+  } else
+    clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }
 
 /**
@@ -292,10 +302,8 @@ void IndirectDataAnalysisTab::updatePlot(
       selectedSpectrum() <= maximumSpectrum())
     updatePlot(outputWS, selectedSpectrum() - minimumSpectrum(), fitPreviewPlot,
                diffPreviewPlot);
-  else {
-    diffPreviewPlot->clear();
-    plotInput(fitPreviewPlot);
-  }
+  else
+    clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }
 
 /**
@@ -319,10 +327,8 @@ void IndirectDataAnalysisTab::updatePlot(
     fitPreviewPlot->addSpectrum("Sample", outputWS, 0, Qt::black);
     fitPreviewPlot->addSpectrum("Fit", outputWS, 1, Qt::red);
     diffPreviewPlot->addSpectrum("Diff", outputWS, 2, Qt::blue);
-  } else {
-    diffPreviewPlot->clear();
-    plotInput(fitPreviewPlot);
-  }
+  } else
+    clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }
 
 /*

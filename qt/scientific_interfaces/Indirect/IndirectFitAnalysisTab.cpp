@@ -1022,7 +1022,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
@@ -1030,8 +1030,7 @@ IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
  * @return  The workspace containing the data to be fit.
  */
 MatrixWorkspace_sptr IndirectFitAnalysisTab::fitWorkspace() const {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(
-      m_fitPropertyBrowser->getWorkspace());
+  return inputWorkspace();
 }
 
 /**
