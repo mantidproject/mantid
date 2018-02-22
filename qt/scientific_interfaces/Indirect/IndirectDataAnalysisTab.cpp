@@ -159,9 +159,8 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
                                 2);
     }
 
-  } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+  } else if (inputWs && inputWs->getNumberHistograms() <
+                            boost::numeric_cast<size_t>(m_selectedSpectrum)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
   }
@@ -182,6 +181,36 @@ void IndirectDataAnalysisTab::plotInput(
 
   if (inputWS && inputWS->x(spectrum).size() > 1)
     previewPlot->addSpectrum("Sample", inputWorkspace(), spectrum);
+}
+
+/**
+ * Plots the workspace at the specified index in the specified workspace
+ * group. Plots the sample and fit spectrum in the specified top preview
+ * plot. Plots the diff spectra in the specified difference preview plot.
+ *
+ * @param outputWSName      The name of the output workspace group.
+ * @param index             The index of the workspace (in the group)
+ *                          to plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
+void IndirectDataAnalysisTab::updatePlot(
+    const std::string &outputWSName, size_t index,
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+
+  if (AnalysisDataService::Instance().doesExist(outputWSName)) {
+    auto workspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        outputWSName);
+
+    if (workspace) {
+      updatePlot(workspace, index, fitPreviewPlot, diffPreviewPlot);
+      return;
+    }
+  }
+
+  plotInput(fitPreviewPlot);
+  diffPreviewPlot->clear();
 }
 
 /**

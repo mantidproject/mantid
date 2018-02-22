@@ -330,8 +330,18 @@ bool IndirectFitAnalysisTab::canPlotGuess() const {
 /**
  * @return  The output workspace name used in the most recent fit.
  */
-const std::string &IndirectFitAnalysisTab::outputWorkspaceName() const {
-  return m_outputFitName;
+std::string IndirectFitAnalysisTab::outputWorkspaceName() const {
+  return outputWorkspaceName(boost::numeric_cast<size_t>(selectedSpectrum()));
+}
+
+/**
+ * @param spectrum  Spectrum whose output fit workspace name to retrieve.
+ * @return          The output workspace name used in the most recent fit of the
+ *                  specified spectrum.
+ */
+std::string
+IndirectFitAnalysisTab::outputWorkspaceName(const size_t &spectrum) const {
+  return m_outputFitPosition[spectrum].second;
 }
 
 /**
@@ -818,7 +828,7 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   setPreviewPlotWorkspace(inputWs);
   m_parameterValues.clear();
   m_fitFunction.reset();
-  m_outputFitName = "";
+  m_outputFitPosition.clear();
   updatePreviewPlots();
   updatePlotRange();
   m_fitPropertyBrowser->setWorkspaceName(wsName);
@@ -828,9 +838,10 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
  * Updates a bool specifying whether the previous fit model is selected.
  */
 void IndirectFitAnalysisTab::updatePreviousModelSelected() {
-  if (m_fitFunction)
-    m_previousModelSelected = equivalentComposites(
-        *m_fitFunction, *m_fitPropertyBrowser->compositeFunction());
+  if (m_fitFunction &&
+      m_fitPropertyBrowser->compositeFunction()->nFunctions() > 0)
+    m_previousModelSelected = equivalentFunctions(
+        m_fitFunction, m_fitPropertyBrowser->getFittingFunction());
   else
     m_previousModelSelected = false;
 }
@@ -929,20 +940,21 @@ void IndirectFitAnalysisTab::fillPlotTypeComboBox(QComboBox *comboBox) {
  * Updates the preview plots in this fit analysis tab, given the name
  * of the output workspace from a fit.
  *
- * @param workspaceName   The name of the workspace to plot.
  * @param fitPreviewPlot  The preview plot widget in which to plot the fit.
  * @param diffPreviewPlot The preview plot widget in which to plot the
  *                        difference between the fit and sample data.
  */
 void IndirectFitAnalysisTab::updatePlot(
-    const std::string &workspaceName,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+  auto spectrum = boost::numeric_cast<size_t>(selectedSpectrum());
 
-  if (m_previousModelSelected)
-    IndirectDataAnalysisTab::updatePlot(workspaceName, fitPreviewPlot,
+  if (m_previousModelSelected && m_outputFitPosition.contains(spectrum)) {
+    auto position = m_outputFitPosition[spectrum];
+    IndirectDataAnalysisTab::updatePlot(position.second + "_Workspaces",
+                                        position.first, fitPreviewPlot,
                                         diffPreviewPlot);
-  else
+  } else
     IndirectDataAnalysisTab::updatePlot("", fitPreviewPlot, diffPreviewPlot);
 }
 
@@ -975,7 +987,8 @@ IAlgorithm_sptr IndirectFitAnalysisTab::sequentialFitAlgorithm() const {
  * Executes the single fit algorithm defined in this indirect fit analysis tab.
  */
 void IndirectFitAnalysisTab::executeSingleFit() {
-  m_outputFitName = createSingleFitOutputName();
+  const auto index = boost::numeric_cast<size_t>(selectedSpectrum());
+  m_outputFitPosition[index] = std::make_pair(0u, createSingleFitOutputName());
   runFitAlgorithm(singleFitAlgorithm());
 }
 
@@ -984,7 +997,12 @@ void IndirectFitAnalysisTab::executeSingleFit() {
  * tab.
  */
 void IndirectFitAnalysisTab::executeSequentialFit() {
-  m_outputFitName = createSequentialFitOutputName();
+  const auto name = createSequentialFitOutputName();
+  for (auto i = minimumSpectrum(); i <= maximumSpectrum(); ++i) {
+    const auto index = boost::numeric_cast<size_t>(i - minimumSpectrum());
+    m_outputFitPosition[boost::numeric_cast<size_t>(i)] =
+        std::make_pair(index, name);
+  }
   runFitAlgorithm(sequentialFitAlgorithm());
 }
 
@@ -1056,13 +1074,12 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
 
-  auto composite = m_fitPropertyBrowser->compositeFunction();
+  auto fittingFunction = m_fitPropertyBrowser->getFittingFunction();
   m_appendResults = false;
   if (m_fitFunction)
-    m_appendResults = equivalentComposites(*m_fitFunction, *composite);
+    m_appendResults = equivalentFunctions(m_fitFunction, fittingFunction);
 
-  m_fitFunction =
-      boost::dynamic_pointer_cast<CompositeFunction>(composite->clone());
+  m_fitFunction = fittingFunction->clone();
   m_previousModelSelected = true;
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,

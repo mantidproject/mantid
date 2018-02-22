@@ -143,7 +143,9 @@ IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, int specMin,
   msdAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
   msdAlg->setProperty("XStart", startX());
   msdAlg->setProperty("XEnd", endX());
-  msdAlg->setProperty("OutputWorkspace", outputWorkspaceName());
+  msdAlg->setProperty(
+      "OutputWorkspace",
+      outputWorkspaceName(boost::numeric_cast<size_t>(specMin)));
   return msdAlg;
 }
 
@@ -190,8 +192,7 @@ void MSDFit::algorithmComplete(bool error) {
 }
 
 void MSDFit::updatePreviewPlots() {
-  const auto groupName = outputWorkspaceName() + "_Workspaces";
-  IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm->ppPlotTop,
+  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
 }
 
