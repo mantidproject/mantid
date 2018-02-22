@@ -15,6 +15,18 @@ bool isDigit(const std::string &text) {
   return std::all_of(text.cbegin(), text.cend(), isdigit);
 }
 
+std::string
+generateFittedPeaksName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
+  return std::to_string(runLabel.runNumber) + "_" +
+         std::to_string(runLabel.bank) + "_fitted_peaks";
+}
+
+std::string
+generateFocusedRunName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
+  return std::to_string(runLabel.runNumber) + "_" +
+         std::to_string(runLabel.bank);
+}
+
 size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr ws) {
   const static std::string bankIDName = "bankid";
   if (ws->run().hasProperty(bankIDName)) {
@@ -140,7 +152,10 @@ void EnggDiffMultiRunFittingWidgetPresenter::processPlotToSeparateWindow() {
     return;
   }
 
-  const auto focusedRunName = (*focusedRun)->getName();
+  auto focusedRunName = (*focusedRun)->getName();
+  if (focusedRunName.empty()) {
+    focusedRunName = generateFocusedRunName(runLabel);
+  }
 
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
 
@@ -152,6 +167,9 @@ void EnggDiffMultiRunFittingWidgetPresenter::processPlotToSeparateWindow() {
   if (showFitResultsSelected() && m_model->hasFittedPeaksForRun(runLabel)) {
     const auto fittedPeaks = m_model->getFittedPeaks(runLabel);
     fittedPeaksName = (*fittedPeaks)->getName();
+    if (fittedPeaksName.empty()) {
+      fittedPeaksName = generateFittedPeaksName(runLabel);
+    }
 
     if (!ADS.doesExist(fittedPeaksName)) {
       ADS.add(fittedPeaksName, *fittedPeaks);
