@@ -98,6 +98,9 @@ private:
   /// Determines if all spectra have detectors
   bool areAllDetectorsValid() const;
 
+  /// Process input user-specified headers
+  void processUserSpecifiedHeaders();
+
   /// Turns the data associated with this spectra into a string stream
   void generateBankData(std::stringstream &outBuf, size_t specIndex) const;
 
@@ -166,6 +169,14 @@ private:
   bool m_allDetectorsValid{false};
   /// Holds pointer to progress bar
   std::unique_ptr<API::Progress> m_progress{nullptr};
+  /// User specified header string
+  std::vector<std::string> user_specified_gsas_header_;
+  /// flag to overwrite standard GSAS header
+  bool overwrite_std_gsas_header_;
+  /// User specified bank header
+  std::vector<std::string> user_specified_bank_headers_;
+  /// flag to overwrite standard GSAS bank header
+  bool overwrite_std_bank_header_;
 };
 }
 }

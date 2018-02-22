@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -97,7 +98,9 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 } // End of anonymous namespace
 
 // Constructor
-SaveGSS::SaveGSS() : Mantid::API::Algorithm() {}
+SaveGSS::SaveGSS()
+    : Mantid::API::Algorithm(), overwrite_std_gsas_header_(false),
+      overwrite_std_bank_header_(false) {}
 
 // Initialise the algorithm
 void SaveGSS::init() {
@@ -150,6 +153,24 @@ void SaveGSS::init() {
       "UseSpectrumNumberAsBankID", false,
       "If true, then each bank's bank ID is equal to the spectrum number; "
       "otherwise, the continuous bank IDs are applied. ");
+
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+          "UserSpecifiedGSASHeader"),
+      "Each line will be put to the header of the output GSAS file.");
+
+  declareProperty("OverwriteStandardHeader", true,
+                  "If true, then the standard header will be replaced "
+                  "by the user specified header.  Otherwise, the user "
+                  "specified header will be "
+                  "inserted before the original header");
+
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+          "UserSpecifiedBankHeader"),
+      "Each string will be used to replaced the standard GSAS bank header."
+      "Number of strings in the give array must be same as number of banks."
+      "And the order is preserved.");
 }
 
 // Execute the algorithm
@@ -187,6 +208,28 @@ void SaveGSS::exec() {
   // Now start executing main part of the code
   generateGSASBuffer(numOfOutFiles, numOutSpectra);
   writeBufferToFile(numOfOutFiles, numOutSpectra);
+}
+
+//----------------------------------------------------------------------------------------------
+void SaveGSS::processUserSpecifiedHeaders() {
+
+  // user specified GSAS
+  user_specified_gsas_header_ = getProperty("UserSpecifiedGSASHeader");
+  if (user_specified_gsas_header_.size() == 0) {
+    overwrite_std_gsas_header_ = false;
+  } else {
+    overwrite_std_gsas_header_ = getProperty("OverwriteStandardHeader");
+  }
+
+  // user specified bank header
+  user_specified_bank_headers_ = getProperty("UserSpecifiedBankHeader");
+  if (user_specified_bank_headers_.size() == 0) {
+    overwrite_std_bank_header_ = false;
+  } else {
+    overwrite_std_bank_header_ = true;
+  }
+
+  return;
 }
 
 /**
@@ -638,6 +681,13 @@ void SaveGSS::validateUserInput() const {
       g_log.warning("Target GSAS file " + filename +
                     " does not exist but algorithm was set to append.\n");
     }
+  }
+
+  // Check about the user specified bank header
+  if (overwrite_std_bank_header_ &&
+      user_specified_bank_headers_.size() != m_inputWS->getNumberHistograms()) {
+    throw std::invalid_argument("If user specifies bank header, each bank must "
+                                "have a unique user-specified header.");
   }
 }
 

@@ -6,7 +6,7 @@ import mantid.simpleapi as api
 # from mantid.kernel import *
 from mantid.kernel import AnalysisDataService
 from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
-from mantid.api import FileProperty, FileAction, Direction
+from mantid.api import FileProperty, FileAction, Direction, MantrixWorkspace
 
 
 class SaveVulcanGSS(PythonAlgorithm):
@@ -60,9 +60,9 @@ class SaveVulcanGSS(PythonAlgorithm):
         input_ws, binning_param_list, gsas_file_name, output_ws_name = self.process_inputs()
 
         # Rebin workspace
-        self.rebin_workspace(input_ws, binning_param_list, output_ws_name)
+        output_workspace = self.rebin_workspace(input_ws, binning_param_list, output_ws_name)
 
-        TILL_HERE()
+        #
 
         # rebin the input workspace if TOF binning file is given
         if len(log_tof_file_name) > 0:
@@ -85,11 +85,12 @@ class SaveVulcanGSS(PythonAlgorithm):
         self._rewrite_gda_file(gss_file_name, new_header)
 
         # Set property
-        self.setProperty("OutputWorkspace", output_ws)
+        self.setProperty("OutputWorkspace", output_ws_name)
 
         return
 
-    def rebin_workspace(self, input_ws, binning_param_list, output_ws_name):
+    @staticmethod
+    def rebin_workspace(input_ws, binning_param_list, output_ws_name):
         """
         rebin input workspace with user specified binning parameters
         :param input_ws:
@@ -116,11 +117,17 @@ class SaveVulcanGSS(PythonAlgorithm):
                     continue
                 # rebin
                 api.Rebin(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name,
-                          Params=bin_params)
-
-                # change vector X and to histograms...
-                if inputws.isHistogramData() is False:
-                    raise NotImplementedError("InputWorkspace must be histogram, but not point data.")
+                          Params=bin_params, PreserveEvents=True)
+                # convert to point data
+                api.ConvertToPointData(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name)
+                # align the bin boundaries if necessary
+                temp_out_ws = AnalysisDataService.retrieve(temp_out_name)
+                if len(bin_params) == len(temp_out_ws.readX(0)):
+                    # good to align
+                    for tof_i in range(len(bin_params)):
+                        temp_out_ws.dataX[tof_i] = int(bin_params[i] * 10) / 10.
+                    # END-FOR (tof-i)
+                # END-IF (align)
             # END-FOR
 
             # merge together
@@ -130,9 +137,10 @@ class SaveVulcanGSS(PythonAlgorithm):
                 api.ConjoinWorkspaces(InputWorkspace1=output_ws_name,
                                       InputWorkspace2=processed_single_spec_ws_list[ws_index])
             # END-FOR
+            output_workspace = AnalysisDataService.retrieve(output_ws_name)
         # END-IF-ELSE
 
-        return binning_param_list
+        return output_workspace
 
     def process_inputs(self):
         """
@@ -168,7 +176,49 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return input_workspace, binning_parameter_list, gss_file_name, output_ws_name
 
-    def _process_binning_parameters(self, input_workspace, bin_par_ws_name):
+    @staticmethod
+    def generate_bin_parameters_from_workspace(ref_tof_ws, ws_index):
+        """
+        generate a vector as binning parameters from reference TOF binning workspace
+        :param ref_tof_ws:
+        :param ws_index:
+        :return:
+        """
+        # Check input
+        assert isinstance(ref_tof_ws, MatrixWorkspace), 'TOF reference workspace must be a MatrixWorkspace but ' \
+                                                        'not a {0}'.format(ref_tof_ws.__class__.__name__)
+        assert isinstance(ws_index, int), 'Workspace index {0} must be an integer but not a {1}' \
+                                          ''.format(ws_index, type(ws_index))
+
+        # Create a complicated bin parameter
+        if ws_index < 0 or ws_index >= ref_tof_ws.getNumberOfHistograms():
+            raise RuntimeError('Workspace {0} is out of workspace indexes range [0, {1})'
+                               ''.format(ws_index, ref_tof_ws.getNumberOfHistograms()))
+        else:
+            # get the TOF vector
+            vec_ref_tof = ref_tof_ws.readX(ws_index)
+
+        params = list()
+        dx = None
+        for ibin in range(len(vec_ref_tof) - 1):
+            x0 = vec_ref_tof[ibin]
+            xf = vec_ref_tof[ibin + 1]
+            dx = xf - x0
+            params.append(x0)
+            params.append(dx)
+
+        # last bin: last bin is not defined by input TOF reference workspace. Set a reasonably one with 2*dX
+        assert dx is not None, 'Vector of refT has less than 2 values.  It is not supported.'
+        x0 = vec_ref_tof[-1]
+        xf = 2 * dx + x0  # last bin is out of defined range
+        params.extend([x0, 2 * dx, xf])
+
+        # Rebin ...
+        # tempws = api.Rebin(InputWorkspace=input_ws, Params=params, PreserveEvents=True)
+
+        return params
+
+    def process_binning_parameters(self, input_workspace, bin_par_ws_name):
         """
 
         :param bin_par_ws_name:
@@ -245,6 +295,20 @@ class SaveVulcanGSS(PythonAlgorithm):
             raise RuntimeError('Not all the spectra that have binning parameters set.')
 
         return binning_parameter_list
+
+    @staticmethod
+    def _process_binning_parameters(bin_par_str):
+        """
+        process binning parameters in string.  there are two types of binning parameters that are accepted
+        1. regular x0, dx0, x1, dx1, etc or
+        2. workspace name: workspace index
+        :param bin_par_str:
+        :return:
+        """
+        if bin_par_str.count(':') == 0:
+            # parse
+            terms = bin_par_str
+
 
     def _loadRefLogBinFile(self, logbinfilename):
         """ Create a vector of bin in TOF value
