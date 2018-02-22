@@ -840,7 +840,9 @@ void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
   }
 }
 
-void SaveGSS::writeSLOGHeader(std::stringstream &out_stream) {
+void SaveGSS::writeSLOGHeader(size_t bank, size_t datasize, double bc1,
+                              double bc2, double bc3,
+                              std::stringstream &out_stream) {
   // write user header first
   if (user_specified_gsas_header_.size() > 0) {
     for (auto iter = user_specified_gsas_header_.begin();
@@ -852,7 +854,7 @@ void SaveGSS::writeSLOGHeader(std::stringstream &out_stream) {
   // write standard header
   if (!overwrite_std_gsas_header_) {
     // need to write the standard header too
-    writeBankHeader(out, "SLOG", bank, datasize);
+    writeBankHeader(out_stream, "SLOG", bank, datasize);
     out_stream << std::fixed << " " << std::setprecision(0) << std::setw(10)
                << bc1 << std::fixed << " " << std::setprecision(0)
                << std::setw(10) << bc2 << std::fixed << " "

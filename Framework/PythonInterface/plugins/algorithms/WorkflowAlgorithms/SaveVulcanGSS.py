@@ -4,10 +4,10 @@ from six.moves import range  #pylint: disable=redefined-builtin
 import mantid.simpleapi as api
 # from mantid.api import *
 # from mantid.kernel import *
-from mantid.kernel import AnalysisDataService
+from mantid.api import AnalysisDataService
 from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
-from mantid.api import FileProperty, FileAction, Direction, MantrixWorkspace
-
+from mantid.api import FileProperty, FileAction, MatrixWorkspace
+from mantid.kernel import Direction
 
 class SaveVulcanGSS(PythonAlgorithm):
     """ Save GSS file for VULCAN.  This is a workflow algorithm
@@ -148,7 +148,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         :return: input event workspace, binning parameter workspace, gsas file name, output workspace name
         """
         # get input properties
-        input_workspace = self.getProperty("InputWorkspace")
+        input_ws_name = self.getPropertyValue("InputWorkspace")
         bin_par_ws_name = self.getPropertyValue('BinningTable')
         if len(bin_par_ws_name) > 0:
             bin_par_ws_exist = AnalysisDataService.doesExist(bin_par_ws_name)
@@ -156,6 +156,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             bin_par_ws_exist = False
 
         # event workspace is required for re-binning
+        input_workspace = AnalysisDataService.retrieve(input_ws_name)
         if input_workspace.id() != 'EventWorkspace' and bin_par_ws_exist:
             raise RuntimeError('Input workspace {0} must be an EventWorkspace if rebin is required by {1}'
                                ''.format(input_workspace, bin_par_ws_name))
