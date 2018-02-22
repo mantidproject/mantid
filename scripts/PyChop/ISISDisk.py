@@ -188,7 +188,8 @@ class ISISDisk:
         for ie in ie_list:
             t_mod_chop = 252.82 * lastChopDist * np.sqrt(81.81/Eis[ie])
             res = []
-            for en in Et:
+            energy_transfer = Et if single_mode else np.array(Et) * Eis[ie]
+            for en in energy_transfer:
                 Ef = Eis[ie] - en
                 if (Ef > 0):
                     fac = (Ef/Eis[ie])**1.5
@@ -351,7 +352,7 @@ class ISISDisk:
             Eis = self.getAllowedEi()
             res = []
             for ee in Eis:
-                res.append(merlin.getResolution(Etrans, ee))
+                res.append(merlin.getResolution(np.array(Etrans) * ee, ee))
         else:
             raise RuntimeError('Instrument name has not been set')
         if frequency:
