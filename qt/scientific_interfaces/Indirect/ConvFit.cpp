@@ -141,12 +141,8 @@ void ConvFit::setup() {
 
   connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
-  connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
-          SLOT(setMinimumSpectrum(int)));
   connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
-  connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
-          SLOT(setMaximumSpectrum(int)));
 
   connect(m_uiForm->pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
 
@@ -169,6 +165,8 @@ void ConvFit::setup() {
  */
 void ConvFit::run() {
   if (validate()) {
+    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
+    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
     m_uiForm->ckPlotGuess->setChecked(false);
     m_usedTemperature = boolSettingValue("UseTempCorrection");
     m_temperature = doubleSettingValue("TempCorrection");
@@ -848,6 +846,8 @@ void ConvFit::removeGuessPlot() {
 void ConvFit::singleFit() {
   // Validate tab before running a single fit
   if (validate()) {
+    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
+    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
     m_uiForm->ckPlotGuess->setChecked(false);
     executeSingleFit();
   }
