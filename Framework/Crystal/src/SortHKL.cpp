@@ -146,9 +146,8 @@ void SortHKL::exec() {
       std::cout << "Mean = " << intensityStatistics.mean
                 << "  Median = " << intensityStatistics.median << "\n";
       // sort wavelengths & intensities
-      size_t i0;
       for (size_t i = 0; i < wavelengths.size(); i++) {
-        i0 = i;
+        size_t i0 = i;
         for (size_t j = i + 1; j < wavelengths.size(); j++) {
           if (wavelengths[j] < wavelengths[i0]) // Change was here!
           {

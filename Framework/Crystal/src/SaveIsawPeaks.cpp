@@ -259,8 +259,6 @@ void SaveIsawPeaks::exec() {
     qSign = 1.0;
   // ============================== Save all Peaks
   // =========================================
-  // Sequence number
-  int seqNum = 1;
 
   // Go in order of run numbers
   runMap_t::iterator runMap_it;
@@ -383,8 +381,6 @@ void SaveIsawPeaks::exec() {
               }
             }
           }
-          // Count the sequence
-          seqNum++;
         }
       }
     }
