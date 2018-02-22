@@ -101,6 +101,9 @@ void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
     MantidVec &frac = this->dataF(i);
+    // Checks that the fractions are not all zeros.
+    if (std::accumulate(frac.begin(), frac.end(), 0.) == 0.)
+      continue;
     std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                    std::divides<double>());
     if (hasSqrdErrs) {
