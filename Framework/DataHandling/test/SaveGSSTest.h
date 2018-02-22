@@ -115,6 +115,47 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  /** test writing a 2-bank GSAS file with user input header
+   * @brief test_2BankInstrumentSLOGUserHeader
+   */
+  void test_2BankInstrumentSLOGUserHeader() {
+    // Save a 2 banks diffraction data with instrument using SLOG format
+    const std::string wsName = "SaveGSS_2BankSLOG";
+    auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
+                                              m_defaultNumBins);
+    // Get the output file handle
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string outPath = outputFileHandle.path();
+
+    // define user specified arbitrary header
+    std::vector<std::string> user_header;
+    user_header.push_back("user line 1");
+    user_header.push_back("user line 2");
+    user_header.push_back("user line 3");
+
+    // define user specified arbitrary bank header
+    std::vector<std::string> user_bank_headers;
+    user_bank_headers.push_back("Bank 1 some information");
+    user_bank_headers.push_back("Bank 2 some information different");
+
+    // Execute
+    auto alg = setupSaveGSSAlg(outPath, wsName, "SLOG");
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("UserSpecifiedGSASHeader", user_header));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("OverwriteStandardHeader", true));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("UserSpecifiedBankHeader", user_bank_headers));
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    // Check file is identical
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
+
+    // Clean
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
   void test_2BankInstrumentRALF() {
     // Save a 2 banks diffraction data with RALF format
     const std::string wsName = "SaveGSS_2BankRALF";

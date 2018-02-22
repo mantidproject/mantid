@@ -840,6 +840,36 @@ void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
   }
 }
 
+void SaveGSS::writeSLOGHeader(std::stringstream &out_stream) {
+  // write user header first
+  if (user_specified_gsas_header_.size() > 0) {
+    for (auto iter = user_specified_gsas_header_.begin();
+         iter != user_specified_gsas_header_.end(); ++iter) {
+      out_stream << *iter << "\n";
+    }
+  }
+
+  // write standard header
+  if (!overwrite_std_gsas_header_) {
+    // need to write the standard header too
+    writeBankHeader(out, "SLOG", bank, datasize);
+    out_stream << std::fixed << " " << std::setprecision(0) << std::setw(10)
+               << bc1 << std::fixed << " " << std::setprecision(0)
+               << std::setw(10) << bc2 << std::fixed << " "
+               << std::setprecision(7) << std::setw(10) << bc3 << std::fixed
+               << " 0 FXYE\n";
+  }
+
+  return;
+}
+
+/** write slog data
+ * @brief SaveGSS::writeSLOGdata
+ * @param bank
+ * @param MultiplyByBinWidth
+ * @param out
+ * @param histo
+ */
 void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
                             std::stringstream &out,
                             const HistogramData::Histogram &histo) const {

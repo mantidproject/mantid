@@ -306,8 +306,32 @@ class SaveVulcanGSS(PythonAlgorithm):
         :return:
         """
         if bin_par_str.count(':') == 0:
-            # parse
-            terms = bin_par_str
+            # parse regular binning parameters
+            terms = bin_par_str  # in string format
+            bin_param = list()
+            try:
+                for term in terms:
+                    bin_param.append(float(term))
+            except ValueError:
+                raise RuntimeError('blabla3')
+
+        elif bin_par_str.count(':') == 1:
+            # in workspace name : workspace index mode
+            terms = bin_par_str.split(':')
+            ref_ws_name = terms[0].strip()
+            if AnalysisDataService.doesExist(ref_ws_name) is False:
+                raise RuntimeError('Workspace {0} does not exist (FYI {1})'
+                                   ''.format(ref_ws_name, bin_par_str))
+            try:
+                ws_index = int(terms[1].strip())
+            except ValueError:
+                raise RuntimeError('blabla')
+
+            ref_tof_ws = AnalysisDataService.retrieve(ref_ws_name)
+            if ws_index < 0 or ws_index >= ref_tof_ws.getNumberOfHistograms():
+                raise RuntimeError('blabla2')
+
+            bin_param = self._bin
 
 
     def _loadRefLogBinFile(self, logbinfilename):
