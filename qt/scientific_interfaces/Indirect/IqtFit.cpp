@@ -83,12 +83,8 @@ void IqtFit::setup() {
 
   connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
-  connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
-          SLOT(setMinimumSpectrum(int)));
   connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
-  connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
-          SLOT(setMaximumSpectrum(int)));
 
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
@@ -139,6 +135,14 @@ void IqtFit::customBoolUpdated(const QString &key, bool value) {
       addTie(tie);
     } else
       removeTie(m_tiedParameter);
+  }
+}
+
+void IqtFit::run() {
+  if (validate()) {
+    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
+    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
+    executeSequentialFit();
   }
 }
 
@@ -450,8 +454,11 @@ void IqtFit::endXChanged(double endX) {
 }
 
 void IqtFit::singleFit() {
-  if (validate())
+  if (validate()) {
+    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
+    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
     executeSingleFit();
+  }
 }
 
 void IqtFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }

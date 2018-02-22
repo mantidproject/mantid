@@ -749,8 +749,9 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(
   enablePlotResult();
   enableSaveResult();
 
-  connect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
-          this, SLOT(updateGuessPlots()));
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+          SLOT(updateGuessPlots()));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 }
@@ -1034,15 +1035,16 @@ void IndirectFitAnalysisTab::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
  * @param fitAlgorithm      The fit algorithm to run.
  */
 void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
-  disconnect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
-             this, SLOT(updateGuessPlots()));
+  disconnect(m_fitPropertyBrowser,
+             SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+             SLOT(updateGuessPlots()));
   m_functionNameChanges = functionNameChanges(model());
   auto function = fitFunction();
   if (!m_functionNameChanges.isEmpty())
     function = updateFunctionTies(function, m_functionNameChanges);
   function->applyTies();
 
-  fitAlgorithm->setProperty("InputWorkspace", fitWorkspace());
+  setAlgorithmProperty(fitAlgorithm, "InputWorkspace", fitWorkspace());
   setAlgorithmProperty(fitAlgorithm, "Function", function->asString());
   setAlgorithmProperty(fitAlgorithm, "StartX", m_fitPropertyBrowser->startX());
   setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
