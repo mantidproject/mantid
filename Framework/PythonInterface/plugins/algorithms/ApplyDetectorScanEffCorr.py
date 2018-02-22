@@ -57,10 +57,8 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
         y_values *= full_efficiency_values
         e_values *= full_efficiency_values
 
-        __output_ws = CreateWorkspace(DataX=input_ws.extractX(), DataY=y_values, DataE=e_values, Nspec=y_values.size,
-                                      ParentWorkspace=input_ws)
-
-        RenameWorkspace(__output_ws, self.getPropertyValue("OutputWorkspace"))
-        self.setProperty("OutputWorkspace", __output_ws)
+        output = CreateWorkspace(DataX=input_ws.extractX(), DataY=y_values, DataE=e_values, Nspec=y_values.size,
+                                 ParentWorkspace=input_ws, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
+        self.setProperty("OutputWorkspace", output)
 
 AlgorithmFactory.subscribe(ApplyDetectorScanEffCorr)

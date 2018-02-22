@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
     FloatArrayProperty, StringListValidator
-from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty
+from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty, FileProperty, FileAction
 from mantid.simpleapi import *
 
 
@@ -39,6 +39,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                              defaultValue='Monitor',
                              validator=StringListValidator(['None', 'Monitor']),
                              doc='Normalise to monitor, or skip normalisation.')
+
+        self.declareProperty(FileProperty('CalibrationFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
+                             doc='File containing the detector efficiencies.')
 
         self.declareProperty(name='UseCalibratedData',
                              defaultValue=True,
@@ -89,6 +92,14 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
             input_group = NormaliseToMonitor(InputWorkspace=input_group, MonitorID=0)
+
+        calib_file = self.getPropertyValue('CalibrationFile')
+        if calib_file:
+            self._progress.report('Applying detector efficiencies')
+            LoadNexusProcessed(Filename=calib_file, OutputWorkspace='__det_eff')
+            for ws in input_group:
+                ApplyDetectorScanEffCorr(InputWorkspace=ws, DetectorEfficiencyWorkspace='__det_eff',
+                                         OutputWorkspace=ws.getName())
 
         height_range = ''
         height_range_prop = self.getProperty('HeightRange').value
