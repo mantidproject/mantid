@@ -45,7 +45,7 @@ Only a subset of all spectra is stored on the local MPI rank, so a detector may 
 Storage Mode
 ------------
 
-.. figure:: ../images/MPI-storage-modes.png
+.. figure:: images/MPI-storage-modes.png
    :figwidth: 25%
    :align: right
 
@@ -73,45 +73,45 @@ Usage examples for the storage modes could include:
 Execution Mode
 --------------
 
-.. figure:: ../images/MPI-execution-mode-identical.png
+.. figure:: images/MPI-execution-mode-identical.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::Identical`` based on an input and output workspace with ``StorageMode::Cloned``. Example: ``ConvertUnits``, ``Rebin``, or many other algorithm that do not load or save data.
 
 
-.. figure:: ../images/MPI-execution-mode-distributed-load.png
+.. figure:: images/MPI-execution-mode-distributed-load.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::Distributed`` creating an output workspace with ``StorageMode::Distributed``. Example: ``LoadEventNexus``.
 
-.. figure:: ../images/MPI-execution-mode-distributed.png
+.. figure:: images/MPI-execution-mode-distributed.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::Distributed`` based on an input and output workspace with ``StorageMode::MasterOnly``. Example: ``ConvertUnits`` or ``Rebin``.
 
-.. figure:: ../images/MPI-execution-mode-distributed-gather.png
+.. figure:: images/MPI-execution-mode-distributed-gather.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::Distributed`` based on an input workspace with ``StorageMode::Distributed`` creating an output workspace with ``StorageMode::MasterOnly``. Example: ``DiffractionFocussing``.
 
 
-.. figure:: ../images/MPI-execution-mode-master-only-load.png
+.. figure:: images/MPI-execution-mode-master-only-load.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::MasterOnly`` creating an output workspace with ``StorageMode::Distributed``. Example: ``LoadEventNexus`` or other load algorithms.
 
-.. figure:: ../images/MPI-execution-mode-master-only.png
+.. figure:: images/MPI-execution-mode-master-only.png
    :figwidth: 25%
    :align: right
 
    ``ExecutionMode::MasterOnly`` based on an input and output workspace with ``StorageMode::MasterOnly``. Example: ``ConvertUnits``, ``Rebin``, or many other algorithm that do not load or save data.
 
-.. figure:: ../images/MPI-execution-mode-master-only-store.png
+.. figure:: images/MPI-execution-mode-master-only-store.png
    :figwidth: 25%
    :align: right
 
@@ -161,7 +161,7 @@ For example:
 .. code-block:: python
 
   from mantid.simpleapi import *
-  
+
   dataX = [1,2,3,4,2,3,4,5,3,4,5,6,4,5,6,7]
   dataY = [1,1,1,1,1,1,1,1,1,1,1,1]
   dataE = [1,1,1,1,1,1,1,1,1,1,1,1]
@@ -443,11 +443,11 @@ A typical example could look as follows:
     Workspace_const_sptr ws = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
   }
-  
+
   class MyAlgTest : public CxxTest::TestSuite {
   public:
     // ...
-  
+
     void test_parallel() {
       // Runs run_algorithm in multiple threads. The first argument passed to
       // run_algorithm is of type Parallel::Communicator and is guaranteed to
@@ -628,5 +628,3 @@ Currently none of the above algorithms works with ``StorageMode::Distributed`` i
 .. [#spectrum-index] Some will argue that this should be ``GlobalWorkspaceIndex``.
   However it is not an index of a workspace so the term ``GlobalSpectrumIndex`` has been chosen for clarity.
   On the user interface side this will still be named 'workspace index', dropping the 'global' since the distinction between global and local indices is irrelevant for users.
-
-.. categories:: Development

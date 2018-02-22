@@ -91,6 +91,28 @@ warned that every call to one of the plot functions will automatically
 annotate the axes with the last one called being the one that takes
 effect.
 
+The :func:`~mantid.plots.MantidAxes.plot` function also allows
+plotting sample logs.
+
+.. code-block:: python
+
+   from mantid import plots
+   import matplotlib.pyplot as plt
+   w = LoadEventNexus(Filename='CNCS_7860_event.nxs')
+   fig = plt.figure()
+   ax1 = fig.add_subplot(211, projection = 'mantid')
+   ax2 = fig.add_subplot(212, projection = 'mantid')
+   ax1.plot(w, LogName = 'ChopperStatus5')
+   ax1.set_title('From run start')
+   ax2.plot(w, LogName = 'ChopperStatus5', FullTime = True)
+   ax2.set_title('Absolute time')
+   fig.tight_layout()
+   fig.show()
+
+.. figure:: ../../../../images/mantid_plots_1Dlogs.png
+   :align: center
+   :figwidth: image
+
 Two common ways to look at 2D plots are :func:`~mantid.plots.MantidAxes.contourf` and
 :func:`~mantid.plots.MantidAxes.pcolormesh`. The difference between these is the
 :func:`~mantid.plots.MantidAxes.contourf` calculates smooth lines of constant
@@ -209,6 +231,13 @@ When using ``mantid`` projection
              contourf, pcolor, pcolorfast, pcolormesh, tripcolor,
              tricontour, tricontourf
 
+When using ``mantid3d`` projection
+----------------------------------
+
+.. autoclass:: mantid.plots.MantidAxes3D
+   :members: plot, scatter, plot_wireframe, plot_surface, contour,
+             contourf
+
 Functions to use when **mantid** projection is not available
 ------------------------------------------------------------
 
@@ -223,3 +252,8 @@ Functions to use when **mantid3d** projection is not available
 .. automodule:: mantid.plots.plotfunctions3D
    :members: plot, scatter, plot_wireframe, plot_surface,
              contour, contourf
+
+Helper functions
+----------------
+.. automodule:: mantid.plots.helperfunctions
+

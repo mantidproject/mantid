@@ -1,13 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
-
-import matplotlib.pyplot as plt
 import matplotlib
+matplotlib.use('AGG')
+import matplotlib.pyplot as plt
 import numpy as np
 import unittest
 
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace
-matplotlib.use('AGG')
 
 
 class Plots__init__Test(unittest.TestCase):

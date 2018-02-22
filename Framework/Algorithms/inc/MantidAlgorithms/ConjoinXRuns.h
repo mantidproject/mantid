@@ -61,6 +61,8 @@ private:
   std::list<API::MatrixWorkspace_sptr> m_inputWS;
   /// Output workspace
   API::MatrixWorkspace_sptr m_outWS;
+  /// X-axis cache if sample log is given
+  std::map<std::string, std::vector<double>> m_axisCache;
 };
 
 } // namespace Algorithms
