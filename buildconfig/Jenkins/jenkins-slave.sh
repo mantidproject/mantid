@@ -30,7 +30,7 @@ SECRET=${2}
 # URL of jnlp file for slave
 SLAVE_AGENT_URL="${JENKINS_URL}/computer/${NODE_NAME}/slave-agent.jnlp"
 # name of the slave jar - full path is determined later
-JAR_FILE=slave.jar
+JAR_FILE=agent.jar
 # Some versions of cron don't set the USER environment variable
 # required by vnc
 [ -z "$USER" ] && export USER=$(whoami)
@@ -75,10 +75,10 @@ else
   if [ ! -f ${JAR_FILE} ]; then
     echo "Downloading slave jar file to ${JAR_FILE}"
     if [ $(command -v curl) ]; then
-      echo "curl -o ${JAR_FILE} ${JENKINS_URL}/jnlpJars/slave.jar"
-      curl -o ${JAR_FILE} ${JENKINS_URL}/jnlpJars/slave.jar
+      echo "curl -o ${JAR_FILE} ${JENKINS_URL}/jnlpJars/${JAR_FILE}"
+      curl -o ${JAR_FILE} ${JENKINS_URL}/jnlpJars/${JAR_FILE}
     else
-      echo "Need curl to download ${JENKINS_URL}/jnlpJars/slave.jar"
+      echo "Need curl to download ${JENKINS_URL}/jnlpJars/${JAR_FILE}"
       exit -1
     fi
   fi

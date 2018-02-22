@@ -2,7 +2,9 @@
 ## mantid.dataobjects tests
 ##
 set ( TEST_PY_FILES
-  functionsTest.py
+  helperfunctionsTest.py
+  plotfunctionsTest.py
+  plotfunctions3DTest.py
   plots__init__Test.py
 )
 

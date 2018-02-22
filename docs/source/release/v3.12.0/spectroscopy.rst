@@ -9,6 +9,9 @@ Spectroscopy Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+- The algorithms :ref:`algm-SofQWCentre`, :ref:`algm-SofQWPolygon` and :ref:`algm-SofQWNormalisedPolygon`, which rebin an inelastic workspace (has a `DeltaE` axis) from spectrum numbers (angle) to `MomentumTransfer` may now rebin the energy (`DeltaE`) axis as well as the :math:`|Q|` (`MomentumTransfer`) axes.
+- :ref:`algm-SofQWNormalisedPolygon` now has uses a faster method for calculating the polygon intersections.
+
 Direct Geometry
 ---------------
 

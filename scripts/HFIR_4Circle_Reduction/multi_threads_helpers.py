@@ -316,9 +316,6 @@ class IntegratePeaksThread(QThread):
         * add motor step information
         :return:
         """
-        # print '[DB...BAT] Set Integrated Peak Info is called for exp {0} scan {1}.' \
-        #       ''.format(self._expNumber, scan_number)
-
         # get peak information
         peak_info_obj = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number)
 

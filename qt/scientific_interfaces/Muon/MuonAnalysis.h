@@ -251,6 +251,9 @@ private slots:
 
   /// Called when "enable multi fit" checkbox is turned on/off
   void multiFitCheckboxChanged(int state);
+  bool safeToLoadAllGroupsOrPairs();
+  void loadAllGroups(int state = 0);
+  void loadAllPairs(int state = 0);
 
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
@@ -292,7 +295,8 @@ private:
 
   /// Creates workspace for specified group/pair and plots it
   void plotItem(Muon::ItemType itemType, int tableRow, Muon::PlotType plotType);
-
+  std::string addItem(Muon::ItemType itemType, int tableRow,
+                      Muon::PlotType plotType);
   /// Creates workspace ready for analysis and plotting
   Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
                                                       int tableRow,

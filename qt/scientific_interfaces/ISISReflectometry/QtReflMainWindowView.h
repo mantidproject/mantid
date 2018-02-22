@@ -44,6 +44,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
                              public IReflMainWindowView {
+  Q_OBJECT
 public:
   /// Constructor
   explicit QtReflMainWindowView(QWidget *parent = nullptr);
@@ -65,6 +66,9 @@ public:
 
   /// Close window handler
   void closeEvent(QCloseEvent *event) override;
+
+public slots:
+  void helpPressed();
 
 private:
   /// Initializes the interface

@@ -342,19 +342,22 @@ void NormaliseByPeakArea::symmetriseYSpace() {
   const int64_t nhist =
       static_cast<int64_t>(m_symmetrisedWS->getNumberHistograms());
 
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_symmetrisedWS))
   for (int64_t i = 0; i < nhist; ++i) {
     const auto &xsym = m_symmetrisedWS->x(i);
     auto &ySymOut = m_symmetrisedWS->mutableY(i);
     auto &eSymOut = m_symmetrisedWS->mutableE(i);
+    const auto &yyspace = m_yspaceWS->y(i);
+    const auto &eyspace = m_yspaceWS->e(i);
 
     for (size_t j = 0; j < npts; ++j) {
-      const double ein = m_yspaceWS->e(i)[j];
+      const double ein = eyspace[j];
       const double absXj = fabs(xsym[j]);
 
       double yout(0.0), eout(1e8);
       for (size_t k = 0; k < npts; ++k) {
-        const double yk = m_yspaceWS->y(i)[k];
-        const double ek = m_yspaceWS->e(i)[k];
+        const double yk = yyspace[k];
+        const double ek = eyspace[k];
         const double absXk = fabs(xsym[k]);
         if (absXj >= (absXk - dy) && absXj <= (absXk + dy) && ein != 0.0) {
 

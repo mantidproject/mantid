@@ -63,7 +63,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Parallel PROPERTY FOLDER "MantidFramework" )
 
-target_include_directories ( Parallel SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )
+target_include_directories ( Parallel SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} )
 

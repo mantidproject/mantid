@@ -72,7 +72,6 @@ class MultiPythonFileInterpreter(QWidget):
 
         tab_title, tab_toolip = _tab_title_and_toolip(filename)
         tab_idx = self._tabs.addTab(interpreter, tab_title)
-        self.mark_tab_modified(tab_idx, (filename is None))
         self._tabs.setTabToolTip(tab_idx, tab_toolip)
         self._tabs.setCurrentIndex(tab_idx)
         return tab_idx
@@ -80,6 +79,11 @@ class MultiPythonFileInterpreter(QWidget):
     def abort_current(self):
         """Request that that the current execution be cancelled"""
         self.current_editor().abort()
+
+    def close_all(self):
+        """Close all tabs"""
+        for idx in reversed(range(self.editor_count)):
+            self.close_tab(idx)
 
     def close_tab(self, idx):
         """Close the tab at the given index."""
