@@ -322,8 +322,8 @@ class StateGuiModel(object):
     @property
     def merge_mask(self):
         return self.get_simple_element_with_attribute(element_id=DetectorId.merge_range,
-                                               default_value=False,
-                                               attribute="use_fit")
+                                                      default_value=False,
+                                                      attribute="use_fit")
 
     @merge_mask.setter
     def merge_mask(self, value):
