@@ -1094,7 +1094,7 @@ public:
     for (size_t i = 0; i < number; ++i) {
       size_t j = i % testRays.size();
       octahedron->calcValidType(testRays[j].startPoint(),
-                                        testRays[j].direction());
+                                testRays[j].direction());
     }
   }
 
@@ -1117,7 +1117,7 @@ public:
     const size_t number(10000);
     for (size_t i = 0; i < number; ++i) {
       smallCube->solidAngle(testPoints[i % testPoints.size()],
-                                    V3D(0.5, 1.33, 1.5));
+                            V3D(0.5, 1.33, 1.5));
     }
   }
 
