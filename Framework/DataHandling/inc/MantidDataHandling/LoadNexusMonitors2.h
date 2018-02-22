@@ -99,6 +99,9 @@ private:
                         std::map<int, std::string> &monitorNumber2Name,
                         std::vector<bool> &isEventMonitors);
 
+  bool isEventMonitor(::NeXus::File &monitorFileHandle) const;
+  std::size_t sizeOfUnopenedEntry(::NeXus::File &file,
+                                  const std::string &entryName) const;
   bool
   createOutputWorkspace(size_t numHistMon, size_t numEventMon,
                         bool monitorsAsEvents,

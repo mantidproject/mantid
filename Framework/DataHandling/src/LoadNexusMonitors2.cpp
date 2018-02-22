@@ -545,6 +545,32 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   this->setProperty("OutputWorkspace", wsGroup);
 }
 
+std::size_t
+LoadNexusMonitors2::sizeOfUnopenedEntry(::NeXus::File &file,
+                                        const std::string &entryName) const {
+  file.openData(entryName);
+  auto size = static_cast<std::size_t>(file.getInfo().dims[0]);
+  file.closeData();
+  return size;
+}
+
+bool LoadNexusMonitors2::isEventMonitor(
+    ::NeXus::File &monitorFileHandle) const {
+  auto monitorEntries = monitorFileHandle.getEntries();
+  auto constexpr expectedNumberOfEventLikeEntries = 4;
+  auto numberOfEventLikeEntries = std::count_if(
+      monitorEntries.cbegin(), monitorEntries.cend(),
+      [this, &monitorFileHandle, &monitorEntries](
+          const std::map<std::string, std::string>::value_type &entry) -> bool {
+        return entry.first == "event_index" ||
+               entry.first == "event_time_offset" ||
+               entry.first == "event_time_zero" ||
+               (entry.first == "event_id" &&
+                sizeOfUnopenedEntry(monitorFileHandle, "event_id") > 0);
+      });
+  return numberOfEventLikeEntries == expectedNumberOfEventLikeEntries;
+}
+
 size_t LoadNexusMonitors2::getMonitorInfo(
     ::NeXus::File &file, std::vector<std::string> &monitorNames,
     size_t &numHistMon, size_t &numEventMon, size_t &numPeriods,
@@ -575,24 +601,9 @@ size_t LoadNexusMonitors2::getMonitorInfo(
       // -> This will prefer event monitors over histogram
       //    if they are found in the same group.
       file.openGroup(entry_name, "NXmonitor");
-      int numEventThings =
-          0; // number of things that are eventish - should be 3
       string_map_t inner_entries = file.getEntries(); // get list of entries
-      for (auto &entry : inner_entries) {
-        if (entry.first == "event_index") {
-          numEventThings += 1;
-          continue;
-        } else if (entry.first == "event_time_offset") {
-          numEventThings += 1;
-          continue;
-        } else if (entry.first == "event_time_zero") {
-          numEventThings += 1;
-          continue;
-        }
-      }
 
-      if (numEventThings == 3) {
-        // it is an event monitor
+      if (isEventMonitor(file)) {
         numEventMon += 1;
         isEventMonitors.push_back(true);
       } else {
