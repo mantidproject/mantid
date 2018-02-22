@@ -1544,17 +1544,15 @@ public:
 
   void test_generatePointInside_Solid_Primitive() {
     const size_t maxAttempts(500);
-    V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
-      dummy = solid->generatePointInObject(rng, maxAttempts);
+      solid->generatePointInObject(rng, maxAttempts);
     }
   }
 
   void test_Point_Inside_Solid_Composite_With_Hole() {
     const size_t maxAttempts(500);
-    V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
-      dummy = shell->generatePointInObject(rng, maxAttempts);
+      shell->generatePointInObject(rng, maxAttempts);
     }
   }
 

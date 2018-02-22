@@ -1077,26 +1077,23 @@ public:
 
   void test_isOnSide() {
     const size_t number(10000);
-    bool dummy;
     for (size_t i = 0; i < number; ++i) {
-      dummy = octahedron->isOnSide(testPoints[i % testPoints.size()]);
+      octahedron->isOnSide(testPoints[i % testPoints.size()]);
     }
   }
 
   void test_isValid() {
     const size_t number(10000);
-    bool dummy;
     for (size_t i = 0; i < number; ++i) {
-      dummy = octahedron->isValid(testPoints[i % testPoints.size()]);
+      octahedron->isValid(testPoints[i % testPoints.size()]);
     }
   }
 
   void test_calcValidType() {
     const size_t number(10000);
-    int dummy;
     for (size_t i = 0; i < number; ++i) {
       size_t j = i % testRays.size();
-      dummy = octahedron->calcValidType(testRays[j].startPoint(),
+      octahedron->calcValidType(testRays[j].startPoint(),
                                         testRays[j].direction());
     }
   }
@@ -1104,76 +1101,67 @@ public:
   void test_interceptSurface() {
     const size_t number(10000);
     Track testRay;
-    int dummy;
     for (size_t i = 0; i < number; ++i) {
-      dummy = octahedron->interceptSurface(testRays[i % testRays.size()]);
+      octahedron->interceptSurface(testRays[i % testRays.size()]);
     }
   }
 
   void test_solid_angle() {
     const size_t number(10000);
-    double dummy;
     for (size_t i = 0; i < number; ++i) {
-      dummy = smallCube->solidAngle(testPoints[i % testPoints.size()]);
+      smallCube->solidAngle(testPoints[i % testPoints.size()]);
     }
   }
 
   void test_solid_angle_scaled() {
     const size_t number(10000);
-    double dummy;
     for (size_t i = 0; i < number; ++i) {
-      dummy = smallCube->solidAngle(testPoints[i % testPoints.size()],
+      smallCube->solidAngle(testPoints[i % testPoints.size()],
                                     V3D(0.5, 1.33, 1.5));
     }
   }
 
   void test_volume() {
     const size_t numberOfRuns(10000);
-    double dummy;
     for (size_t i = 0; i < numberOfRuns; ++i) {
-      dummy = octahedron->volume();
-      dummy = lShape->volume();
+      octahedron->volume();
+      lShape->volume();
     }
   }
 
   void test_getPointInObject() {
     const size_t numberOfRuns(1000);
-    int iDummy;
     V3D pDummy;
     for (size_t i = 0; i < numberOfRuns; ++i) {
-      iDummy = octahedron->getPointInObject(pDummy);
-      iDummy = lShape->getPointInObject(pDummy);
-      iDummy = smallCube->getPointInObject(pDummy);
+      octahedron->getPointInObject(pDummy);
+      lShape->getPointInObject(pDummy);
+      smallCube->getPointInObject(pDummy);
     }
   }
 
   void test_generatePointInside_Convex_Solid() {
     const size_t npoints(6000);
     const size_t maxAttempts(500);
-    V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
-      dummy = octahedron->generatePointInObject(rng, maxAttempts);
+      octahedron->generatePointInObject(rng, maxAttempts);
     }
   }
 
   void test_generatePointInside_NonConvex_Solid() {
     const size_t npoints(6000);
     const size_t maxAttempts(500);
-    V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
-      dummy = lShape->generatePointInObject(rng, maxAttempts);
+      lShape->generatePointInObject(rng, maxAttempts);
     }
   }
 
   void test_output_for_rendering() {
     const size_t numberOfRuns(30000);
-    double *vertexDummy;
-    int *triangleDummy;
     for (size_t i = 0; i < numberOfRuns; ++i) {
-      vertexDummy = octahedron->getVertices();
-      triangleDummy = octahedron->getTriangles();
-      vertexDummy = lShape->getVertices();
-      triangleDummy = lShape->getTriangles();
+      octahedron->getVertices();
+      octahedron->getTriangles();
+      lShape->getVertices();
+      lShape->getTriangles();
     }
   }
 
