@@ -389,7 +389,7 @@ def parse_diagnostic_settings(string_to_parse):
         return result
 
     def _extract_number(line):
-        return [int(line[0]), int(line[0])]
+        return [int(line), int(line)]
 
     # Check if the input actually exists.
     if not string_to_parse:

@@ -25,6 +25,7 @@ Small Angle Scattering
 - Added functionality to specify q values between which merged data is used and outside of which pure HAB and LAB are used.
 - Have added the functionality to show diagnostic transmission workspaces to new GUI.
 - Have added functionality to continually plot latest results to new GUI.
+- Ported diagnostic tab across from old GUI and added support for all instruments.
 - Fixed a bug where specifying fit range was not working for merged reductions. Previously the user specified range was being ignored.
 - Fixed a bug in the old GUI where loading files on UNIX systems would not work unless the file name was in uppercase letters.
 - Added find beam centre tab to SANS GUI V2.

@@ -23,9 +23,12 @@ def run_integral(integral_ranges, mask, integral, detector, state):
 
     is_multi_range = len (ranges) > 1
 
+
     output_workspaces = []
     for input_workspace in input_workspaces:
         input_workspace_name = input_workspace.name()
+        if is_multi_range:
+            AnalysisDataService.remove(input_workspace_name + '_ranges')
         input_workspace = crop_workspace(DetectorType.to_string(detector), input_workspace)
 
         if mask:
