@@ -500,6 +500,8 @@ class RunTabPresenter(object):
         self._set_on_view("merge_shift_fit")
         self._set_on_view("merge_q_range_start")
         self._set_on_view("merge_q_range_stop")
+        self._set_on_view("merge_max")
+        self._set_on_view("merge_min")
 
         # Settings tab view
         self._set_on_view("reduction_dimensionality")

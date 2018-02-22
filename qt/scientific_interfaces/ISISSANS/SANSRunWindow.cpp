@@ -984,6 +984,24 @@ bool SANSRunWindow::loadUserFile() {
   } else
     m_uiForm.frontDetQrangeOnOff->setChecked(false);
 
+  QString qMergeRangeUserSelected =
+      runReduceScriptFunction("print("
+                              "i.ReductionSingleton().instrument.getDetector('"
+                              "FRONT').mergeRange.q_merge_range)")
+          .trimmed();
+  if (qMergeRangeUserSelected == "True") {
+    m_uiForm.mergeQRangeOnOff->setChecked(true);
+    m_uiForm.mergeQMin->setText(
+        runReduceScriptFunction("print("
+                                "i.ReductionSingleton().instrument.getDetector("
+                                "'FRONT').mergeRange.q_min)").trimmed());
+    m_uiForm.mergeQMax->setText(
+        runReduceScriptFunction("print("
+                                "i.ReductionSingleton().instrument.getDetector("
+                                "'FRONT').mergeRange.q_max)").trimmed());
+  } else
+    m_uiForm.mergeQRangeOnOff->setChecked(false);
+
   // Monitor spectra
   m_uiForm.monitor_spec->setText(
       runReduceScriptFunction(

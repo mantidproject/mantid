@@ -224,6 +224,25 @@ class StateGuiModel(object):
         q_range_stop = max(q_stop) if q_stop else default_value
         return q_range_start, q_range_stop
 
+    def get_merge_overlap(self, default_value):
+        q_start = []
+        q_stop = []
+
+        settings = []
+        if DetectorId.merge_range in self._user_file_items:
+            settings.extend(self._user_file_items[DetectorId.merge_range])
+
+        for setting in settings:
+            if setting.start is not None:
+                q_start.append(setting.start)
+
+            if setting.stop is not None:
+                q_stop.append(setting.stop)
+
+        q_range_start = min(q_start) if q_start else default_value
+        q_range_stop = max(q_stop) if q_stop else default_value
+        return q_range_start, q_range_stop
+
     @property
     def reduction_mode(self):
         return self.get_simple_element_with_attribute(element_id=DetectorId.reduction_mode,
@@ -302,27 +321,31 @@ class StateGuiModel(object):
 
     @property
     def merge_mask(self):
-        return self.get_simple_element(element_id=OtherId.merge_mask, default_value=False)
+        return self.get_simple_element_with_attribute(element_id=DetectorId.merge_range,
+                                               default_value=False,
+                                               attribute="use_fit")
 
     @merge_mask.setter
     def merge_mask(self, value):
-        self.set_simple_element(element_id=OtherId.merge_mask, value=value)
+        self._update_merged_fit(element_id=DetectorId.merge_range, use_fit=value)
 
     @property
     def merge_max(self):
-        return self.get_simple_element(element_id=OtherId.merge_max, default_value=None)
+        _, q_range_stop = self.get_merge_overlap(default_value=None)
+        return q_range_stop
 
     @merge_max.setter
     def merge_max(self, value):
-        self.set_simple_element(element_id=OtherId.merge_max, value=value)
+        self._update_merged_fit(element_id=DetectorId.merge_range, q_stop=value)
 
     @property
     def merge_min(self):
-        return self.get_simple_element(element_id=OtherId.merge_min, default_value=None)
+        q_range_start, _ = self.get_merge_overlap(default_value=None)
+        return q_range_start
 
     @merge_min.setter
     def merge_min(self, value):
-        self.set_simple_element(element_id=OtherId.merge_min, value=value)
+        self._update_merged_fit(element_id=DetectorId.merge_range, q_start=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode
