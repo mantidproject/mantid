@@ -21,5 +21,5 @@ void export_SpectrumInfo() {
            "instrument.")
       .def("twoTheta", &SpectrumInfo::twoTheta, (arg("self"), arg("index")),
            "Returns the scattering angle 2 theta in radians w.r.t. beam "
-            "direction.");
+           "direction.");
 }
