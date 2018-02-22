@@ -1153,9 +1153,10 @@ bool LoadEventNexus::hasEventMonitors() {
         break;
       }
     }
-    m_file->openData("event_id");
+    bool hasTotalCounts = false;
+    bool oldNeXusFileNames = false;
+    result = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames) == 0;
     m_file->closeGroup();
-    result = true;
   } catch (::NeXus::Exception &) {
     result = false;
   }
