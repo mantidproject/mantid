@@ -140,7 +140,8 @@ void CrystalFieldSusceptibilityBase::function1D(double *out,
     calculate(out, xValues, nData, m_en, m_wf, m_nre, H, convfact);
   }
   const double lambda = getParameter("Lambda");
-  if (fabs(lambda) > 1.e-6) {
+  const double EPS = 1.e-6;
+  if (fabs(lambda) > EPS) {
     for (size_t i = 0; i < nData; i++) {
       out[i] /= (1. - lambda * out[i]); // chi = chi_cf/(1 - lambda.chi_cf)
     }

@@ -440,6 +440,11 @@ class PhysicalProperties(object):
     """
     Contains information about measurement conditions of physical properties
     """
+    HEATCAPACITY = 1
+    SUSCEPTIBILITY = 2
+    MAGNETISATION = 3
+    MAGNETICMOMENT = 4
+
     def _str2id(self, typeid):
         mappings = [['cp', 'cv', 'heatcap'], ['chi', 'susc'], ['mag', 'm(h)'], ['mom', 'm(t)']]
         for id in range(4):
@@ -535,11 +540,11 @@ class PhysicalProperties(object):
 
     @property
     def Inverse(self):
-        return self._suscInverseFlag if (self._typeid == 2 or self._typeid == 4) else None
+        return self._suscInverseFlag if (self._typeid == self.SUSCEPTIBILITY or self._typeid == self.MAGNETICMOMENT) else None
 
     @Inverse.setter
     def Inverse(self, value):
-        if (self._typeid == 2 or self._typeid == 4):
+        if (self._typeid == self.SUSCEPTIBILITY or self._typeid == self.MAGNETICMOMENT):
             if isinstance(value, string_types):
                 self._suscInverseFlag = value.lower() in ['true', 't', '1', 'yes', 'y']
             else:
@@ -549,47 +554,47 @@ class PhysicalProperties(object):
 
     @property
     def Hdir(self):
-        return self._hdir if (self._typeid > 1) else None
+        return self._hdir if (self._typeid != self.HEATCAPACITY) else None
 
     @Hdir.setter
     def Hdir(self, value):
-        if (self._typeid > 1):
+        if (self._typeid != self.HEATCAPACITY):
             self._hdir = self._checkhdir(value)
 
     @property
     def Hmag(self):
-        return self._hmag if (self._typeid == 4) else None
+        return self._hmag if (self._typeid == self.MAGNETICMOMENT) else None
 
     @Hmag.setter
     def Hmag(self, value):
-        if (self._typeid == 4):
+        if (self._typeid == self.MAGNETICMOMENT):
             self._hmag = float(value)
 
     @property
     def Temperature(self):
-        return self._physpropTemperature if (self._typeid == 3) else None
+        return self._physpropTemperature if (self._typeid == self.MAGNETISATION) else None
 
     @Temperature.setter
     def Temperature(self, value):
-        if (self._typeid == 3):
+        if (self._typeid == self.MAGNETISATION):
             self._physpropTemperature = float(value)
 
     @property
     def Lambda(self):
-        return self._lambda if (self._typeid == 2) else None
+        return self._lambda if (self._typeid == self.SUSCEPTIBILITY) else None
 
     @Lambda.setter
     def Lambda(self, value):
-        if (self._typeid == 2):
+        if (self._typeid == self.SUSCEPTIBILITY):
             self._lambda = float(value)
 
     @property
     def Chi0(self):
-        return self._chi0 if (self._typeid == 2) else None
+        return self._chi0 if (self._typeid == self.SUSCEPTIBILITY) else None
 
     @Chi0.setter
     def Chi0(self, value):
-        if (self._typeid == 2):
+        if (self._typeid == self.SUSCEPTIBILITY):
             self._chi0 = float(value)
 
     def init1(self, *args, **kwargs):
@@ -632,20 +637,20 @@ class PhysicalProperties(object):
         types = ['CrystalFieldHeatCapacity', 'CrystalFieldSusceptibility',
                  'CrystalFieldMagnetisation', 'CrystalFieldMoment']
         out = 'name=%s' % (types[self._typeid - 1])
-        if self._typeid > 1:
+        if self._typeid != self.HEATCAPACITY:
             out += ',Unit=%s' % (self._physpropUnit)
             if 'powder' in self._hdir:
                 out += ',powder=1'
             else:
                 out += ',Hdir=(%s)' % (','.join([str(hh) for hh in self._hdir]))
-            if self._typeid == 3:  # magnetisation M(H)
+            if self._typeid == self.MAGNETISATION:
                 out += ',Temperature=%s' % (self._physpropTemperature)
             else:            # either susceptibility or M(T)
                 out += ',inverse=%s' % (1 if self._suscInverseFlag else 0)
-                out += (',Hmag=%s' % (self._hmag)) if self._typeid==3 else ''
-                if self._typeid == 2 and self._lambda != 0:
+                out += (',Hmag=%s' % (self._hmag)) if self._typeid == self.MAGNETISATION else ''
+                if self._typeid == self.SUSCEPTIBILITY and self._lambda != 0:
                     out += ',Lambda=%s' % (self._lambda)
-                if self._typeid == 2 and self._chi0 != 0:
+                if self._typeid == self.SUSCEPTIBILITY and self._chi0 != 0:
                     out += ',Chi0=%s' % (self._chi0)
         return out
 
@@ -653,17 +658,17 @@ class PhysicalProperties(object):
         """Returns a dictionary of PhysicalProperties attributes for use with IFunction"""
         dataset = '' if dataset is None else str(dataset)
         out = {}
-        if self._typeid > 1:
+        if self._typeid != self.HEATCAPACITY:
             out['Unit%s' % (dataset)] = self._physpropUnit
             if 'powder' in self._hdir:
                 out['powder%s' % (dataset)] = 1
             else:
                 out['Hdir%s' % (dataset)] = [float(hh) for hh in self._hdir] # needs to be list
-            if self._typeid != 3:  # either susceptibility or M(T)
+            if self._typeid != self.MAGNETISATION:  # either susceptibility or M(T)
                 out['inverse%s' % (dataset)] = 1 if self._suscInverseFlag else 0
-                if self._typeid==3:
+                if self._typeid == self.MAGNETICMOMENT:
                     out['Hmag%s' % (dataset)] = self._hmag
-                if self._typeid == 2:
+                if self._typeid == self.SUSCEPTIBILITY:
                     out['Lambda%s' % (dataset)] = self._lambda
                     out['Chi0%s' % (dataset)] = self._chi0
         return out
