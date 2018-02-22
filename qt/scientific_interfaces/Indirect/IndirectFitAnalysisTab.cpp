@@ -1016,7 +1016,7 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
     function = updateFunctionTies(function, m_functionNameChanges);
   function->applyTies();
 
-  fitAlgorithm->setProperty("InputWorkspace", fitWorkspace());
+  setAlgorithmProperty(fitAlgorithm, "InputWorkspace", fitWorkspace());
   setAlgorithmProperty(fitAlgorithm, "Function", function->asString());
   setAlgorithmProperty(fitAlgorithm, "StartX", m_fitPropertyBrowser->startX());
   setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
