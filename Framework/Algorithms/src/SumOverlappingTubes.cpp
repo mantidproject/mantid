@@ -301,7 +301,8 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
       angle *= m_mirrorDetectors * 180.0 / M_PI;
 
       int angleIndex = boost::math::iround((angle - m_startScatteringAngle) /
-                                           m_stepScatteringAngle);
+                                           m_stepScatteringAngle) +
+                       1;
 
       // point is out of range, a warning should have been generated already for
       // the theta index
