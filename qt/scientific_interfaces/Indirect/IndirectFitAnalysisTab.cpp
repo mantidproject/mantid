@@ -1002,8 +1002,7 @@ IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
  * @return  The workspace containing the data to be fit.
  */
 MatrixWorkspace_sptr IndirectFitAnalysisTab::fitWorkspace() const {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(
-      m_fitPropertyBrowser->getWorkspace());
+  return inputWorkspace();
 }
 
 /**

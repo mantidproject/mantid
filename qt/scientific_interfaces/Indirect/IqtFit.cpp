@@ -316,14 +316,16 @@ bool IqtFit::validate() {
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSampleInput);
 
-  QString error = uiv.generateErrorMessage();
-  showMessageBox(error);
+  if (isEmptyModel())
+    uiv.addErrorMessage("No fit function has been selected");
+
+  auto error = uiv.generateErrorMessage();
 
   if (!inputWorkspace()) {
-    QString msg = "Input workspace was deleted from the Analysis Data Service "
-                  "before Algorithm could run.";
-    showMessageBox(msg);
+    error = "Input workspace was deleted from the Analysis Data Service "
+            "before Algorithm could run.";
   }
+  showMessageBox(error);
 
   return error.isEmpty();
 }
