@@ -252,8 +252,7 @@ void JumpFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
  * Updates the plot
  */
 void JumpFit::updatePreviewPlots() {
-  const auto baseGroupName = outputWorkspaceName() + "_Workspaces";
-  IndirectFitAnalysisTab::updatePlot(baseGroupName, m_uiForm->ppPlotTop,
+  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
 }
 

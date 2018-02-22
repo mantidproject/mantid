@@ -186,7 +186,7 @@ IAlgorithm_sptr IqtFit::sequentialFitAlgorithm() const {
 
 IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
                                         const size_t &specMax) const {
-  const auto outputName = outputWorkspaceName();
+  const auto outputName = outputWorkspaceName(specMin);
   const bool constrainBeta = boolSettingValue("ConstrainBeta");
   const bool constrainIntens = boolSettingValue("ConstrainIntensities");
 
@@ -376,9 +376,7 @@ void IqtFit::parameterUpdated(const Mantid::API::IFunction *function) {
 }
 
 void IqtFit::updatePreviewPlots() {
-  // If there is a result workspace plot then plot it
-  const auto groupName = outputWorkspaceName() + "_Workspaces";
-  IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm->ppPlotTop,
+  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
 }
 

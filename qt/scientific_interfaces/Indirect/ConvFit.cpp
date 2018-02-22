@@ -351,6 +351,9 @@ IAlgorithm_sptr ConvFit::sequentialFitAlgorithm() const {
 
 IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin,
                                        const int &specMax) const {
+  const auto outputResultName =
+      outputWorkspaceName(boost::numeric_cast<size_t>(specMin)) + "_Result";
+
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
   cfs->setProperty("PassWSIndexToFunction", true);
@@ -358,7 +361,7 @@ IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin,
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("ExtractMembers", boolSettingValue("ExtractMembers"));
-  cfs->setProperty("OutputWorkspace", outputWorkspaceName() + "_Result");
+  cfs->setProperty("OutputWorkspace", outputResultName);
   return cfs;
 }
 
@@ -733,8 +736,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -803,11 +806,7 @@ QString ConvFit::backgroundString(const QString &backgroundType) const {
  * Updates the plot in the GUI window
  */
 void ConvFit::updatePreviewPlots() {
-  const auto inputWS = inputWorkspace();
-
-  // If there is a result workspace plot then plot it
-  const auto baseGroupName = outputWorkspaceName() + "_Workspaces";
-  IndirectFitAnalysisTab::updatePlot(baseGroupName, m_uiForm->ppPlotTop,
+  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
 }
 

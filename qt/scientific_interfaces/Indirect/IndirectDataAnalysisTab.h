@@ -83,6 +83,10 @@ protected:
 
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 
+  void updatePlot(const std::string &outputWSName, size_t index,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
   void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
