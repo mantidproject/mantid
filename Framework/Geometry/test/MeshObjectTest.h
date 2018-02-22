@@ -1169,11 +1169,12 @@ public:
     // Create a test point with coordinates within [-1.0, 0.0]
     // for applying to octahedron
     V3D output;
-    output.setX((static_cast<double>(index % dimension)) / (dimension - 1));
+    double scale = 1.0 / static_cast<double>(dimension - 1);
+    output.setX((static_cast<double>(index % dimension)) * scale);
     index /= dimension;
-    output.setY((static_cast<double>(index % dimension)) / (dimension - 1));
+    output.setY((static_cast<double>(index % dimension)) * scale );
     index /= dimension;
-    output.setZ((static_cast<double>(index % dimension)) / (dimension - 1));
+    output.setZ((static_cast<double>(index % dimension)) * scale );
     return output;
   }
 
