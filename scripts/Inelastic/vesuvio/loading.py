@@ -32,7 +32,7 @@ class VesuvioLoadHelper(object):
         sum_spectra = (self.fit_mode == 'bank')
         loaded = self.load_runs(runs, spectra, sum_spectra)
         cropped = self._crop_workspace(loaded)
-        return self._rebin_workspace(cropped) if self._rebin_params else cropped
+        return self._rebin_workspace(cropped) if self._rebin_params is not None else cropped
 
     def _parse_diff_mode(self, diff_mode):
         if diff_mode == "single":
