@@ -19,13 +19,13 @@ namespace Kernel {
 Kernel::Logger g_log("UsageServiceImpl");
 
 // const std::string STARTUP_URL("http://reports.mantidproject.org/api/usage");
-const std::string
-    STARTUP_URL(("http://ptsv2.com/t/mantidmat/post")); // dev location
+// const std::string
+//     STARTUP_URL(("http://ptsv2.com/t/mantidmat/post")); // dev location
 // http://posttestserver.com/data/
 // const std::string
 // FEATURE_URL("http://reports.mantidproject.org/api/feature");
-const std::string
-    FEATURE_URL(("http://ptsv2.com/t/mantidmat/post")); // dev location
+// const std::string
+//     FEATURE_URL(("http://ptsv2.com/t/mantidmat/post")); // dev location
 
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
@@ -74,6 +74,14 @@ UsageServiceImpl::UsageServiceImpl()
       m_startupActiveMethod(this, &UsageServiceImpl::sendStartupAsyncImpl),
       m_featureActiveMethod(this, &UsageServiceImpl::sendFeatureAsyncImpl) {
   setInterval(60);
+  int retval = Mantid::Kernel::ConfigService::Instance().getValue(
+      "usage_root_url", m_url);
+  if(retval == 0) {
+    g_log.error() << "Failed to load usage report url\n";
+  } else {
+    g_log.information() << "Root usage reporting url is " << m_url << "\n";
+  }
+
 }
 
 void UsageServiceImpl::setApplication(const std::string &name) {
@@ -132,6 +140,9 @@ void UsageServiceImpl::flush() {
   }
 }
 
+/** getUpTime returns the time for which the mantid instance has been running 
+ @return time_duration The time for which mantid has been running.
+*/
 Types::Core::time_duration UsageServiceImpl::getUpTime() {
   return Types::Core::DateAndTime::getCurrentTime() - m_startTime;
 }
@@ -284,13 +295,13 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
 /**Async method for sending startup messages
 */
 int UsageServiceImpl::sendStartupAsyncImpl(const std::string &message) {
-  return this->sendReport(message, STARTUP_URL);
+  return this->sendReport(message, m_url+"/api/usage");
 }
 
 /**Async method for sending feature messages
 */
 int UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message) {
-  return this->sendReport(message, FEATURE_URL);
+  return this->sendReport(message, m_url+"/api/feature");
 }
 
 int UsageServiceImpl::sendReport(const std::string &message,

@@ -36,28 +36,41 @@ namespace Kernel {
 
 class MANTID_KERNEL_DLL ErrorReporter {
 public:
+  /// Constructor
   ErrorReporter(std::string application, Types::Core::time_duration startTime,
                 std::string exitCode, bool share);
+  /// Constructor
   ErrorReporter(std::string application, Types::Core::time_duration startTime,
                 std::string exitCode, bool share, std::string name,
                 std::string email);
+  /// Sends an error report
   void sendErrorReport();
 
 protected:
+  /// Generates an error string in json format
   virtual std::string generateErrorMessage();
+  /// Sends report using Internet Helper
   virtual int sendReport(const std::string &message, const std::string &url);
 
 private:
+  /// Asynchronous method for sending post request
   int sendErrorAsyncImpl(const std::string &message);
   const std::string m_application;
 
-  /// Async method for sending startup notifications
+  /// Async method for sending error report
   Poco::ActiveMethod<int, std::string, ErrorReporter> m_errorActiveMethod;
+  /// Stores the exit code of mantid if it has crashed
   const std::string m_exitCode;
+  /// The time mantid has been running
   const Types::Core::time_duration m_upTime;
+  /// Whether to share additional information or not
   const bool m_share;
+  /// User provided name
   const std::string m_name;
+  /// User provided email
   const std::string m_email;
+  /// Target url
+  std::string m_url;
 };
 
 } // namespace Kernel

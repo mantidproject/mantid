@@ -20,24 +20,27 @@ namespace {
 /// static logger
 Logger g_log("ErrorReporter");
 }
-// const std::string
-// ERROR_URL("http://errorreports.mantidproject.org/api/error");
-// const std::string STARTUP_URL(
-//    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
-// http://posttestserver.com/data/
-const std::string ERROR_URL("http://ptsv2.com/t/mantidmat/post");
-// const std::string ERROR_URL("http://localhost:8082/api/error");
 
 //----------------------------------------------------------------------------------------------
 // Constructor for ErrorReporter
+/** Constructor
+*/
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share)
     : m_application(application),
       m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl),
       m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(""),
-      m_email("") {}
+      m_email("") {
+        int retval = Mantid::Kernel::ConfigService::Instance().getValue(
+      "error_root_url", m_url);
+        if(retval == 0) {
+            g_log.error() << "Failed to load error report url\n";
+          }
+      }
 
+/** Constructor
+*/
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share, std::string name,
@@ -45,20 +48,30 @@ ErrorReporter::ErrorReporter(std::string application,
     : m_application(application),
       m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl),
       m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(name),
-      m_email(email) {}
+      m_email(email) {
+        int retval = Mantid::Kernel::ConfigService::Instance().getValue(
+      "error_root_url", m_url);
+        if(retval == 0) {
+          g_log.error() << "Failed to load error report url\n";
+        }
+      }
 
+/** Generates an error message and then calls an internet helper to send it
+*/
 void ErrorReporter::sendErrorReport() {
   try {
     std::string message = this->generateErrorMessage();
 
     // send the report
     // Poco::ActiveResult<int> result = m_errorActiveMethod(message);
-    this->sendReport(message, ERROR_URL);
+    this->sendReport(message, m_url);
   } catch (std::exception &ex) {
     g_log.debug() << "Send error report failure. " << ex.what() << '\n';
   }
 }
 
+/** Generates an error message in json format
+*/
 std::string ErrorReporter::generateErrorMessage() {
   ::Json::Value message;
 
@@ -107,9 +120,13 @@ std::string ErrorReporter::generateErrorMessage() {
 }
 
 int ErrorReporter::sendErrorAsyncImpl(const std::string &message) {
-  return this->sendReport(message, ERROR_URL);
+  return this->sendReport(message, m_url);
 }
 
+/** Submits a post request to the specified url with the message as the body
+ @param message : String containg json formatted error message
+ @param url : The url to send the post request to
+*/
 int ErrorReporter::sendReport(const std::string &message,
                               const std::string &url) {
   int status = -1;
