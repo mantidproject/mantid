@@ -24,6 +24,7 @@ if( ParaView_FOUND AND USE_PARAVIEW )
       RUNTIME_OUTPUT_DIRECTORY ${PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY}/qt${vers}
       FOLDER "MantidVatesParaViewPlugins"
     )
+    set_target_properties( ${_target} PROPERTIES CXX_CLANG_TIDY "" )
   endfunction()
 
   function (install_pvplugin target QT_VERSION vers)

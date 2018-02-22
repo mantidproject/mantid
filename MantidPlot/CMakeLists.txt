@@ -834,6 +834,7 @@ elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
   endif()
 endif ()
 
+set_target_properties( MantidPlot PROPERTIES CXX_CLANG_TIDY "" )
 set_target_properties ( MantidPlot PROPERTIES FOLDER "Qt4" )
 
 ###########################################################################

@@ -13,7 +13,6 @@ using Mantid::API::WEIGHTED;
 using Mantid::API::WEIGHTED_NOTIME;
 
 namespace Policies = Mantid::PythonInterface::Policies;
-namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IEventList)
