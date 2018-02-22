@@ -127,12 +127,13 @@ void SortHKL::exec() {
       counter++;
       auto wavelengths = unique.second.getWavelengths();
       auto intensities = unique.second.getIntensities();
+      auto sigmas = unique.second.getSigmas();
       std::cout << "HKL " << unique.second.getHKL() << "\n";
       std::cout << "Intensities ";
       for (const auto &e : intensities)
         std::cout << e << "  ";
       std::cout << "\n";
-      auto zScores = Kernel::getZscore(intensities);
+      auto zScores = Kernel::getWeightedZscore(intensities, sigmas);
       if (zScores.size() > maxPeaks)
         maxPeaks = zScores.size();
       // Possibly remove outliers.

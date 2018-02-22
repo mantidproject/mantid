@@ -67,7 +67,8 @@ UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical) const {
 
   if (m_peaks.size() > 2) {
     auto intensities = getIntensities();
-    auto zScores = Kernel::getZscore(intensities);
+    auto sigmas = getSigmas();
+    auto zScores = Kernel::getWeightedZscore(intensities, sigmas);
 
     for (size_t i = 0; i < zScores.size(); ++i) {
       if (zScores[i] <= sigmaCritical) {
