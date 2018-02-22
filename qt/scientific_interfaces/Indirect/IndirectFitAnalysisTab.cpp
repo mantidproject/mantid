@@ -181,6 +181,10 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(updateGuessPlots()));
 
+  connect(m_fitPropertyBrowser,
+          SIGNAL(customBoolChanged(const QString &, bool)), this,
+          SLOT(emitCustomBoolChanged(const QString &, bool)));
+
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
           SLOT(startXChanged(double)));
   connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
@@ -230,7 +234,7 @@ IFunction_sptr IndirectFitAnalysisTab::model() const {
     auto index = m_fitPropertyBrowser->backgroundIndex();
 
     if (index)
-      compositeModel->removeFunction(static_cast<size_t>(index.get()));
+      compositeModel->removeFunction(index.get());
     return compositeModel;
   }
   return model;
@@ -337,6 +341,30 @@ const std::string &IndirectFitAnalysisTab::outputWorkspaceName() const {
  */
 void IndirectFitAnalysisTab::setConvolveMembers(bool convolveMembers) {
   m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
+}
+
+/**
+ * Adds the specified tie.
+ *
+ * @param tieString     A string containing the tie.
+ */
+void IndirectFitAnalysisTab::addTie(const QString &tieString) {
+  const auto index = tieString.split(".").first().right(1).toInt();
+  m_fitPropertyBrowser->getHandler()->getHandler(index)->addTie(tieString);
+}
+
+/**
+ * Removes tie from the parameter with the specified name.
+ *
+ * @param tieString A string containing the tie.
+ */
+void IndirectFitAnalysisTab::removeTie(const QString &parameterName) {
+  const auto parts = parameterName.split(".");
+  const auto index = parts.first().right(1).toInt();
+  const auto name = parts.last();
+  const auto handler = m_fitPropertyBrowser->getHandler()->getHandler(index);
+  const auto tieProperty = handler->getTies()[name];
+  handler->removeTie(tieProperty, parameterName.toStdString());
 }
 
 /**
@@ -975,7 +1003,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
@@ -1470,6 +1498,11 @@ void IndirectFitAnalysisTab::emitFunctionChanged() { emit functionChanged(); }
 void IndirectFitAnalysisTab::emitParameterChanged(
     const Mantid::API::IFunction *function) {
   emit parameterChanged(function);
+}
+
+void IndirectFitAnalysisTab::emitCustomBoolChanged(const QString &key,
+                                                   bool value) {
+  emit customBoolChanged(key, value);
 }
 
 } // namespace IDA

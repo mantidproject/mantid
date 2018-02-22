@@ -101,6 +101,13 @@ void IqtFit::setup() {
   connect(this, SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(parameterUpdated(const Mantid::API::IFunction *)));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
+  connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
+          SLOT(customBoolUpdated(const QString &, bool)));
+}
+
+void IqtFit::run() {
+  if (validate())
+    executeSequentialFit();
 }
 
 void IqtFit::fitFunctionChanged() {
@@ -118,11 +125,21 @@ void IqtFit::fitFunctionChanged() {
     setCustomBoolSetting("ConstrainBeta", false);
     setCustomSettingEnabled("ConstrainBeta", false);
   }
+
+  if (!fitFunction()->hasParameter(m_tiedParameter.toStdString()))
+    setCustomBoolSetting("ConstrainIntensities", false);
 }
 
-void IqtFit::run() {
-  if (validate())
-    executeSequentialFit();
+void IqtFit::customBoolUpdated(const QString &key, bool value) {
+  if (key == "Constrain Intensities") {
+    if (value) {
+      const auto tie =
+          QString::fromStdString(createIntensityTie(fitFunction()));
+      m_tiedParameter = tie.split("=")[0];
+      addTie(tie);
+    } else
+      removeTie(m_tiedParameter);
+  }
 }
 
 bool IqtFit::doPlotGuess() const {
@@ -208,25 +225,6 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
                          outputName + "_Parameters");
   iqtFitAlg->setProperty("OutputWorkspaceGroup", outputName + "_Workspaces");
   return iqtFitAlg;
-}
-
-IFunction_sptr IqtFit::fitFunction() const {
-  auto function = IndirectFitAnalysisTab::fitFunction();
-
-  if (!function)
-    return CompositeFunction_sptr(new CompositeFunction);
-  else
-    function = function->clone();
-
-  const bool constrainIntensities = boolSettingValue("ConstrainIntensities");
-
-  if (constrainIntensities) {
-    const auto intensityTie = createIntensityTie(function);
-
-    if (!intensityTie.empty())
-      function->addTies(intensityTie);
-  }
-  return function;
 }
 
 std::string IqtFit::createIntensityTie(IFunction_sptr function) const {
