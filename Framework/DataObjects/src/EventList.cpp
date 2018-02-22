@@ -540,21 +540,17 @@ void EventList::minusHelper(std::vector<T1> &events,
                             const std::vector<T2> &more_events) {
   // Make the end vector big enough in one go (avoids repeated re-allocations).
   events.reserve(events.size() + more_events.size());
-  typename std::vector<T2>::const_iterator itev;
   /* In the event of subtracting in place, calling the end() vector would make
    * it point
    * at the wrong place
    * Using it caused a segault, Ticket #2306.
    * So we cache the end (this speeds up too).
    */
-  auto more_begin = more_events.cbegin();
-  auto more_end = more_events.cend();
-
-  for (itev = more_begin; itev != more_end; itev++) {
+  for (const auto &ev : more_events) {
     // We call the constructor for T1. In the case of WeightedEventNoTime, the
     // pulse time will just be ignored.
-    events.emplace_back(itev->tof(), itev->pulseTime(), itev->weight() * (-1.0),
-                        itev->errorSquared());
+    events.emplace_back(ev.tof(), ev.pulseTime(), ev.weight() * (-1.0),
+                        ev.errorSquared());
   }
 }
 
@@ -1608,7 +1604,7 @@ void EventList::compressEventsParallelHelper(
         events.begin() + (thread + 1) * numPerBlock; // cache for speed
     if (thread == numThreads - 1)
       it_end = events.end();
-    for (; it != it_end; it++) {
+    for (; it != it_end; ++it) {
       if ((it->m_tof - lastTof) <= tolerance) {
         // Carry the error and weight
         weight += it->weight();
@@ -2479,8 +2475,7 @@ void EventList::integrateHelper(std::vector<T> &events, const double minX,
   }
 
   // Sum up all the weights
-  typename std::vector<T>::iterator it;
-  for (it = lowit; it != highit; it++) {
+  for (auto it = lowit; it != highit; ++it) {
     sum += it->weight();
     error += it->errorSquared();
   }
@@ -2589,10 +2584,8 @@ template <class T>
 void EventList::convertTofHelper(std::vector<T> &events,
                                  std::function<double(double)> func) {
   // iterate through all events
-  typename std::vector<T>::iterator itev;
-  auto itev_end = events.end(); // cache for speed
-  for (itev = events.begin(); itev != itev_end; itev++)
-    itev->m_tof = func(itev->m_tof);
+  for (auto &ev : events)
+    ev.m_tof = func(ev.m_tof);
 }
 
 // --------------------------------------------------------------------------
