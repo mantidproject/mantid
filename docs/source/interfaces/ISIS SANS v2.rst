@@ -804,7 +804,7 @@ finder.
 Diagnostic tab
 ---------------
 
-.. image::  ../images/sans_isis_v2_beam_diagnostic.png
+.. image::  ../images/sans_isis_diagnostic.png
    :align: right
    :width: 800px
 
@@ -819,7 +819,7 @@ The diagnistic tab allows quick integrations to be done on a workspace.
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **3** | **Detector**             | The detector to be considered                                                           |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **4** | **Period**               | The period to be considered is applicable if left blank will do all periods             |
+| **4** | **Period**               | The period to be considered if applicable if left blank will do all periods             |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **5** | **Integration buttons**  | These three buttons start an integration on the selected workspace. The horizontal      |
 |       |                          | integral sums up each row, the vertical integral each column and the time integral      |
