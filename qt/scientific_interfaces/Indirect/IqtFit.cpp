@@ -84,12 +84,8 @@ void IqtFit::setup() {
 
   connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
-  connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
-          SLOT(setMinimumSpectrum(int)));
   connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
-  connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
-          SLOT(setMaximumSpectrum(int)));
 
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
@@ -122,8 +118,11 @@ void IqtFit::fitFunctionChanged() {
 }
 
 void IqtFit::run() {
-  if (validate())
+  if (validate()) {
+    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
+    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
     executeSequentialFit();
+  }
 }
 
 bool IqtFit::doPlotGuess() const {
@@ -188,7 +187,7 @@ IAlgorithm_sptr IqtFit::sequentialFitAlgorithm() const {
 
 IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
                                         const size_t &specMax) const {
-  const auto outputName = outputWorkspaceName();
+  const auto outputName = outputWorkspaceName(specMin);
   const bool constrainBeta = boolSettingValue("ConstrainBeta");
   const bool constrainIntens = boolSettingValue("ConstrainIntensities");
   const bool extractMembers = boolSettingValue("ExtractMembers");
@@ -320,14 +319,16 @@ bool IqtFit::validate() {
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSampleInput);
 
-  QString error = uiv.generateErrorMessage();
-  showMessageBox(error);
+  if (isEmptyModel())
+    uiv.addErrorMessage("No fit function has been selected");
+
+  auto error = uiv.generateErrorMessage();
 
   if (!inputWorkspace()) {
-    QString msg = "Input workspace was deleted from the Analysis Data Service "
-                  "before Algorithm could run.";
-    showMessageBox(msg);
+    error = "Input workspace was deleted from the Analysis Data Service "
+            "before Algorithm could run.";
   }
+  showMessageBox(error);
 
   return error.isEmpty();
 }
@@ -380,9 +381,7 @@ void IqtFit::parameterUpdated(const Mantid::API::IFunction *function) {
 }
 
 void IqtFit::updatePreviewPlots() {
-  // If there is a result workspace plot then plot it
-  const auto groupName = outputWorkspaceName() + "_Workspaces";
-  IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm->ppPlotTop,
+  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
 }
 
@@ -455,8 +454,11 @@ void IqtFit::endXChanged(double endX) {
 }
 
 void IqtFit::singleFit() {
-  if (validate())
+  if (validate()) {
+    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
+    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
     executeSingleFit();
+  }
 }
 
 void IqtFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }

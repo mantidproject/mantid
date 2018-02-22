@@ -102,7 +102,7 @@ private:
                          QHash<QString, QString> &functionNameChanges) const;
   void addFunctionNameChanges(
       Mantid::API::CompositeFunction_sptr model, const QString &prefixPrefix,
-      const QString &prefixSuffix, int fromIndex, int toIndex, int offset,
+      const QString &prefixSuffix, size_t fromIndex, size_t toIndex, int offset,
       QHash<QString, QString> &functionNameChanges) const;
 
   std::string fitTypeString() const;

@@ -56,12 +56,8 @@ void MSDFit::setup() {
 
   connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
-  connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
-          SLOT(setMinimumSpectrum(int)));
   connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
-  connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
-          SLOT(setMaximumSpectrum(int)));
 
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -78,13 +74,19 @@ bool MSDFit::doPlotGuess() const {
 }
 
 void MSDFit::run() {
-  if (validate())
+  if (validate()) {
+    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
+    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
     executeSequentialFit();
+  }
 }
 
 void MSDFit::singleFit() {
-  if (validate())
+  if (validate()) {
+    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
+    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
     executeSingleFit();
+  }
 }
 
 std::string MSDFit::createSingleFitOutputName() const {
@@ -141,7 +143,9 @@ IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, int specMin,
   msdAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
   msdAlg->setProperty("XStart", startX());
   msdAlg->setProperty("XEnd", endX());
-  msdAlg->setProperty("OutputWorkspace", outputWorkspaceName());
+  msdAlg->setProperty(
+      "OutputWorkspace",
+      outputWorkspaceName(boost::numeric_cast<size_t>(specMin)));
   return msdAlg;
 }
 
@@ -188,8 +192,7 @@ void MSDFit::algorithmComplete(bool error) {
 }
 
 void MSDFit::updatePreviewPlots() {
-  const auto groupName = outputWorkspaceName() + "_Workspaces";
-  IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm->ppPlotTop,
+  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
 }
 

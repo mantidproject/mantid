@@ -82,7 +82,7 @@ public:
 
   Mantid::API::IFunction_sptr model() const;
 
-  boost::optional<int> backgroundIndex() const;
+  boost::optional<size_t> backgroundIndex() const;
 
   QString selectedFitType() const;
 
@@ -106,7 +106,9 @@ public:
 
   virtual bool doPlotGuess() const = 0;
 
-  const std::string &outputWorkspaceName() const;
+  std::string outputWorkspaceName() const;
+
+  std::string outputWorkspaceName(const size_t &spectrum) const;
 
   void setConvolveMembers(bool convolveMembers);
 
@@ -210,9 +212,8 @@ protected:
 
   void fillPlotTypeComboBox(QComboBox *comboBox);
 
-  void updatePlot(const std::string &workspaceName,
-                  MantidWidgets::PreviewPlot *fitPreviewPlot,
-                  MantidWidgets::PreviewPlot *diffPreviewPlot) override;
+  void updatePlot(MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
@@ -346,13 +347,13 @@ private:
                 double endX, int startIndex, int endIndex) const;
   void deleteWorkspace(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
-  Mantid::API::CompositeFunction_const_sptr m_fitFunction;
+  Mantid::API::IFunction_const_sptr m_fitFunction;
   QHash<size_t, QHash<QString, double>> m_parameterValues;
   QHash<QString, double> m_defaultPropertyValues;
   QHash<QString, QString> m_functionNameChanges;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
 
-  std::string m_outputFitName;
+  QHash<size_t, std::pair<size_t, std::string>> m_outputFitPosition;
   bool m_appendResults;
   bool m_previousModelSelected;
   Mantid::API::MatrixWorkspace_sptr m_inputAndGuessWorkspace;

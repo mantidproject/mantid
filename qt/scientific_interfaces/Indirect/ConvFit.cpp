@@ -141,12 +141,8 @@ void ConvFit::setup() {
 
   connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
-  connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
-          SLOT(setMinimumSpectrum(int)));
   connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
-  connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
-          SLOT(setMaximumSpectrum(int)));
 
   connect(m_uiForm->pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
 
@@ -169,6 +165,8 @@ void ConvFit::setup() {
  */
 void ConvFit::run() {
   if (validate()) {
+    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
+    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
     m_uiForm->ckPlotGuess->setChecked(false);
     m_usedTemperature = boolSettingValue("UseTempCorrection");
     m_temperature = doubleSettingValue("TempCorrection");
@@ -270,10 +268,10 @@ void ConvFit::addFunctionNameChanges(
 
 void ConvFit::addFunctionNameChanges(
     CompositeFunction_sptr model, const QString &prefixPrefix,
-    const QString &prefixSuffix, int fromIndex, int toIndex, int offset,
+    const QString &prefixSuffix, size_t fromIndex, size_t toIndex, int offset,
     QHash<QString, QString> &functionNameChanges) const {
 
-  for (int i = fromIndex; i < toIndex; ++i) {
+  for (auto i = fromIndex; i < toIndex; ++i) {
     const auto &functionPrefix = "f" + QString::number(i) + ".";
     const auto &offsetPrefix = "f" + QString::number(i + offset) + ".";
     const auto &function = model->getFunction(static_cast<size_t>(i));
@@ -353,6 +351,9 @@ IAlgorithm_sptr ConvFit::sequentialFitAlgorithm() const {
 
 IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin,
                                        const int &specMax) const {
+  const auto outputResultName =
+      outputWorkspaceName(boost::numeric_cast<size_t>(specMin)) + "_Result";
+
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
   cfs->setProperty("PassWSIndexToFunction", true);
@@ -360,7 +361,7 @@ IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin,
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("ExtractMembers", boolSettingValue("ExtractMembers"));
-  cfs->setProperty("OutputWorkspace", outputWorkspaceName() + "_Result");
+  cfs->setProperty("OutputWorkspace", outputResultName);
   return cfs;
 }
 
@@ -805,11 +806,7 @@ QString ConvFit::backgroundString(const QString &backgroundType) const {
  * Updates the plot in the GUI window
  */
 void ConvFit::updatePreviewPlots() {
-  const auto inputWS = inputWorkspace();
-
-  // If there is a result workspace plot then plot it
-  const auto baseGroupName = outputWorkspaceName() + "_Workspaces";
-  IndirectFitAnalysisTab::updatePlot(baseGroupName, m_uiForm->ppPlotTop,
+  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
                                      m_uiForm->ppPlotBottom);
 }
 
@@ -848,6 +845,8 @@ void ConvFit::removeGuessPlot() {
 void ConvFit::singleFit() {
   // Validate tab before running a single fit
   if (validate()) {
+    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
+    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
     m_uiForm->ckPlotGuess->setChecked(false);
     executeSingleFit();
   }
