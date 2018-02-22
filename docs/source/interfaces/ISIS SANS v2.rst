@@ -804,7 +804,7 @@ finder.
 Diagnostic tab
 ---------------
 
-.. image::  ../images/sans_isis_diagnostic.png
+.. image::  ../images/sans_isis_v2_diagnostic.png
    :align: right
    :width: 800px
 
