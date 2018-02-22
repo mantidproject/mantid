@@ -1172,9 +1172,9 @@ public:
     double scale = 1.0 / static_cast<double>(dimension - 1);
     output.setX((static_cast<double>(index % dimension)) * scale);
     index /= dimension;
-    output.setY((static_cast<double>(index % dimension)) * scale );
+    output.setY((static_cast<double>(index % dimension)) * scale);
     index /= dimension;
-    output.setZ((static_cast<double>(index % dimension)) * scale );
+    output.setZ((static_cast<double>(index % dimension)) * scale);
     return output;
   }
 
