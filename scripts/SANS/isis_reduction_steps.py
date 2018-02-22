@@ -3724,7 +3724,7 @@ class UserFile(ReductionStep):
     def readFrontMergeRange(self, details, reducer):
         """
             Handle user commands of the type DET/OVERLAP [Q1 Q2] which are used to specify the range to merge
-            
+
             @param details: the contents of the line after DET/
             @param reducer: the object that contains all the settings
         """
@@ -3738,7 +3738,7 @@ class UserFile(ReductionStep):
                 rAnds.q_max = float(values[2])
             else:
                 _issueWarning(
-                    "Command: \"DET/" + details + "\" not valid. Expected format is /DET/OVERLAP [q1 q2]")
+                    "Command: \"DET/" + details + "\" not valid. Expected format is /DET/OVERLAP q1 q2")
 
     def _read_back_line(self, arguments, reducer):
         """
