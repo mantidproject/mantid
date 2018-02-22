@@ -4,7 +4,7 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="MAPS" valid-from   ="2017-06-03 00:00:00"
+ name="MAPS" valid-from   ="2017-06-03 00:00:01"
                         valid-to     ="2100-01-31 23:59:59"
                         last-modified="2017-12-19 09:45:00">
 
@@ -32,7 +32,7 @@
   <!--  SOURCE AND SAMPLE POSITION -->
   
   <component type="undulator">
-    <location z="-12.0" />
+    <location z="-12.042" />
   </component>
   <type name="undulator" is="Source"> </type>
   
@@ -43,7 +43,7 @@
 
 <!-- Chopper position -->
  <component type="chopper-position">
-    <location z="-1.857"/>
+    <location z="-1.899"/>
     <!--description is="The component provides sample-choper distance, used
     to estimate chopper delay time and Tobyfit resolution calculations."/-->
     <parameter name="initial_phase">    
@@ -80,9 +80,9 @@
   
   <type name="monitors">
     <component type="monitor" >
-      <location z="-4.067" />
-      <location z="-2.673" />
-      <location z="-1.674" />
+      <location z="-4.109" />
+      <location z="-2.805" />
+      <location z="-1.716" />
       <location z="8.350" />
     </component>
   </type>  

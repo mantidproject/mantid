@@ -170,8 +170,37 @@ public:
     TS_ASSERT_EQUALS(result[9][0], 4);
   }
 
+  void test_singlePlusAddRange() {
+    ParsedRuns result = parseMultiRunString("1+3-6");
+
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 3);
+    TS_ASSERT_EQUALS(result[0][2], 4);
+    TS_ASSERT_EQUALS(result[0][3], 5);
+    TS_ASSERT_EQUALS(result[0][4], 6);
+  }
+
+  void test_addRangePlusSingle() {
+    ParsedRuns result = parseMultiRunString("1-3+5");
+
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 2);
+    TS_ASSERT_EQUALS(result[0][2], 3);
+    TS_ASSERT_EQUALS(result[0][3], 5);
+  }
+
   void test_nothingReturnedWhenPassedEmptyString() {
     TS_ASSERT_EQUALS(parseMultiRunString("").size(), 0);
+  }
+
+  void test_sumTwoAddRanges() {
+    ParsedRuns result = parseMultiRunString("1-2+4-6");
+
+    TS_ASSERT_EQUALS(result[0][0], 1);
+    TS_ASSERT_EQUALS(result[0][1], 2);
+    TS_ASSERT_EQUALS(result[0][2], 4);
+    TS_ASSERT_EQUALS(result[0][3], 5);
+    TS_ASSERT_EQUALS(result[0][4], 6);
   }
 
   void test_errorThrownWhenPassedUnexpectedChar() {

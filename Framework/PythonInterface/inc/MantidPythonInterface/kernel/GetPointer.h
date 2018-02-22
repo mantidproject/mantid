@@ -1,7 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_KERNEL_GETPOINTER_H_
 #define MANTID_PYTHONINTERFACE_KERNEL_GETPOINTER_H_
 
-#if defined(_MSC_FULL_VER) && _MSC_FULL_VER > 190023918
+#if defined(_MSC_FULL_VER) && _MSC_FULL_VER > 190023918 &&                     \
+    _MSC_FULL_VER < 191125506
 // Visual Studio Update 3 refuses to link boost python exports that use
 // register_ptr_to_python with a virtual base. This is a work around
 #define GET_POINTER_SPECIALIZATION(TYPE)                                       \

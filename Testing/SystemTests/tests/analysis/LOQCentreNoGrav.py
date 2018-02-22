@@ -13,7 +13,6 @@ class LOQCentreNoGrav(stresstesting.MantidStressTest):
     def runTest(self):
 
         LOQ()
-
         Set1D()
         Detector("rear-detector")
         MaskFile('MASK.094AA')

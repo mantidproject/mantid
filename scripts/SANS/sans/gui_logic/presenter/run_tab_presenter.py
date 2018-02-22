@@ -32,6 +32,7 @@ from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from ui.sans_isis.work_handler import WorkHandler
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
+from sans.sans_batch import SANSCentreFinder
 
 try:
     import mantidplot
@@ -107,7 +108,7 @@ class RunTabPresenter(object):
         self._masking_table_presenter = MaskingTablePresenter(self)
 
         # Beam centre presenter
-        self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel)
+        self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel, SANSCentreFinder)
 
         # Workspace Diagnostic page presenter
         self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, create_state, self._facility)

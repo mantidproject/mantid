@@ -20,10 +20,10 @@ QtReflEventView::QtReflEventView(QWidget *parent) {
   m_sliceTypeMap[SliceType::LogValue] = "LogValue";
 
   // Add slicing option buttons to list
-  m_buttonList.push_back(m_ui.uniformEvenButton);
-  m_buttonList.push_back(m_ui.uniformButton);
-  m_buttonList.push_back(m_ui.customButton);
-  m_buttonList.push_back(m_ui.logValueButton);
+  m_buttonList.emplace_back(m_ui.uniformEvenButton);
+  m_buttonList.emplace_back(m_ui.uniformButton);
+  m_buttonList.emplace_back(m_ui.customButton);
+  m_buttonList.emplace_back(m_ui.logValueButton);
 
   // Whenever one of the slicing option buttons is selected, their corresponding
   // entry is enabled, otherwise they remain disabled.
@@ -52,6 +52,24 @@ void QtReflEventView::initLayout() { m_ui.setupUi(this); }
 IReflEventPresenter *QtReflEventView::getPresenter() const {
 
   return m_presenter.get();
+}
+
+void QtReflEventView::enableAll() {
+  m_ui.uniformEvenEdit->setEnabled(true);
+  m_ui.uniformEdit->setEnabled(true);
+  m_ui.logValueEdit->setEnabled(true);
+  m_ui.logValueTypeEdit->setEnabled(true);
+  for (auto *button : m_buttonList)
+    button->setEnabled(true);
+}
+
+void QtReflEventView::disableAll() {
+  m_ui.uniformEvenEdit->setEnabled(false);
+  m_ui.uniformEdit->setEnabled(false);
+  m_ui.logValueEdit->setEnabled(false);
+  m_ui.logValueTypeEdit->setEnabled(false);
+  for (auto *button : m_buttonList)
+    button->setEnabled(false);
 }
 
 /** Returns the time slicing value(s) obtained from the selected widget

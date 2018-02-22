@@ -206,6 +206,46 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
   }
+
+  void test_passes_message_to_child_presenters_when_reduction_paused() {
+    MockSettingsPresenter presenter_0;
+    MockSettingsPresenter presenter_1;
+    MockSettingsPresenter presenter_2;
+
+    std::vector<IReflSettingsPresenter *> settingsPresenters;
+    settingsPresenters.push_back(&presenter_0);
+    settingsPresenters.push_back(&presenter_1);
+    settingsPresenters.push_back(&presenter_2);
+    ReflSettingsTabPresenter presenter(settingsPresenters);
+
+    EXPECT_CALL(presenter_1, onReductionPaused());
+
+    presenter.onReductionPaused(1);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+  }
+
+  void test_passes_message_to_child_presenters_when_reduction_resumed() {
+    MockSettingsPresenter presenter_0;
+    MockSettingsPresenter presenter_1;
+    MockSettingsPresenter presenter_2;
+
+    std::vector<IReflSettingsPresenter *> settingsPresenters;
+    settingsPresenters.push_back(&presenter_0);
+    settingsPresenters.push_back(&presenter_1);
+    settingsPresenters.push_back(&presenter_2);
+    ReflSettingsTabPresenter presenter(settingsPresenters);
+
+    EXPECT_CALL(presenter_1, onReductionResumed());
+
+    presenter.onReductionResumed(1);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTERTEST_H */

@@ -75,7 +75,7 @@ Performance
 Core functionality
 ------------------
 
-- The :ref:`IndexProperty` has been added to the list of property types.
+- The ``IndexProperty`` has been added to the list of property types.
 - The ``blocksize()`` of a workspace now throws an exception if the number of bins is not constant. ``size()`` has been modified to the sum of the number of bins in each ``Histogram``.
 
 
@@ -102,8 +102,6 @@ Python
 ------
 
 - :py:obj:`mantid.kernel.MaterialBuilder` had an issue when setting the mass density with more than one atom in the chemical formula. This is now fixed, so the number density is correctly set in :py:obj:`mantid.kernel.Material` and the cross sections correctly calculated.
-
-- It is now possible to `pickle <https://docs.python.org/2/library/pickle.html>`_ and de-pickle a :ref:`Workspace2D <Workspace2D>` in Python. This has been added to make it easier to transfer your workspaces over a network. Only Workspace2D currently supports the pickling process, and there are limitations to be aware of described :ref:`here <Workspace2D>`.  
 
 Python Algorithms
 #################

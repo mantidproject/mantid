@@ -31,6 +31,7 @@ digraph ConvolutionFitSequential {
     ConvertSpectrumAxis
     PlotPeakByLogValue
     DeleteWorkspace
+    ExtractQENSMembers
     ProcessIndirectFitParameters
     CopyLogs
     RenameWorkspace
@@ -79,5 +80,5 @@ digraph ConvolutionFitSequential {
   ExtractMembers                 -> do_extract_members
   FitWorkspaces                  -> do_extract_members
   InputWorkspace                 -> do_extract_members
-  do_extract_members             -> extract_members                [label="Yes"]
+  do_extract_members             -> ExtractQENSMembers             [label="Yes"]
 }
