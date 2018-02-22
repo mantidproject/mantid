@@ -22,6 +22,10 @@ Instrument definitions
 Algorithms
 ##########
 
+Interfaces
+##########
+
+* PyChop has been updated with new look-up tables for the upgraded MAPS (with guide). Some minor bugs in PyChop have been fixed.
 
 
 Crystal Field
