@@ -314,7 +314,7 @@ class CrystalField(object):
         if len(fieldParams) > 0:
             out += ',%s' % ','.join(['%s=%s' % item for item in fieldParams.items()])
         ties = self._getFieldTies()
-        from .function import PhysicalProperties 
+        from .function import PhysicalProperties
         if ppobj.TypeID == PhysicalProperties.SUSCEPTIBILITY:
             ties += ',' if ties else ''
             ties += 'Lambda=0' if ppobj.Lambda == 0. else ''
