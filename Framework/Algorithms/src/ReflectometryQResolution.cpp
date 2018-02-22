@@ -192,12 +192,14 @@ double ReflectometryQResolution::beamRMSVariation(API::MatrixWorkspace_sptr &ws,
   integrate->setProperty("EndWorkspaceIndex", static_cast<int>(setup.foregroundEndPixel));
   integrate->execute();
   API::MatrixWorkspace_const_sptr integratedWS = integrate->getProperty("OutputWorkspace");
-  const auto &thetaDistribution = integratedWS->y(0);
   double sum{0.};
   double weighedSum{0.};
+  std::vector<double> thetaDistribution(integratedWS->getNumberHistograms());
   for (size_t i = 0; i < thetaDistribution.size(); ++i) {
-    sum += thetaDistribution[i];
-    weighedSum += static_cast<double>(i) * thetaDistribution[i];
+    const auto total = integratedWS->y(i).front();
+    thetaDistribution[i] = total;
+    sum += total;
+    weighedSum += static_cast<double>(i) * total;
   }
   const double massCenter = weighedSum / sum;
   double variance{0.};
