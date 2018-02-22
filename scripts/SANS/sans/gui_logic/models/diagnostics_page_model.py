@@ -23,7 +23,6 @@ def run_integral(integral_ranges, mask, integral, detector, state):
 
     is_multi_range = len (ranges) > 1
 
-
     output_workspaces = []
     for input_workspace in input_workspaces:
         input_workspace_name = input_workspace.name()
