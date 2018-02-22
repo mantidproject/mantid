@@ -140,7 +140,7 @@ private:
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_startupActiveMethod;
   /// Async method for sending feature notifications
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_featureActiveMethod;
-   
+
   /// Stores the base url of the usage system
   std::string m_url;
 };

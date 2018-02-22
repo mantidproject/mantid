@@ -32,12 +32,12 @@ ErrorReporter::ErrorReporter(std::string application,
       m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl),
       m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(""),
       m_email("") {
-        int retval = Mantid::Kernel::ConfigService::Instance().getValue(
+  int retval = Mantid::Kernel::ConfigService::Instance().getValue(
       "error_root_url", m_url);
-        if(retval == 0) {
-            g_log.error() << "Failed to load error report url\n";
-          }
-      }
+  if (retval == 0) {
+    g_log.error() << "Failed to load error report url\n";
+  }
+}
 
 /** Constructor
 */
@@ -49,12 +49,12 @@ ErrorReporter::ErrorReporter(std::string application,
       m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl),
       m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(name),
       m_email(email) {
-        int retval = Mantid::Kernel::ConfigService::Instance().getValue(
+  int retval = Mantid::Kernel::ConfigService::Instance().getValue(
       "error_root_url", m_url);
-        if(retval == 0) {
-          g_log.error() << "Failed to load error report url\n";
-        }
-      }
+  if (retval == 0) {
+    g_log.error() << "Failed to load error report url\n";
+  }
+}
 
 /** Generates an error message and then calls an internet helper to send it
 */
