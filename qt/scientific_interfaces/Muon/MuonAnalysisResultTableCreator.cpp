@@ -115,7 +115,7 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
 
     auto val = valMap[log];
     // multiple files use strings due to x-y format
-    if (val.canConvert<double>() && !log.endsWith(" (text)") ) {
+    if (val.canConvert<double>() && !log.endsWith(" (text)")) {
       addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
 
     } else {
@@ -542,12 +542,10 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
           auto seconds =
               val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
           valuesPerWorkspace.append(QString::number(seconds));
-        }
-		else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
-			valuesPerWorkspace.append(QString::number(val.toDouble()));
+        } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+          valuesPerWorkspace.append(QString::number(val.toDouble()));
 
-		}
-		else {
+        } else {
           valuesPerWorkspace.append(logValues[log].toString());
         }
       }
