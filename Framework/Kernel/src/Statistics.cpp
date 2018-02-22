@@ -68,7 +68,7 @@ double getMedian(const vector<TYPE> &data, const size_t num_data,
     // return the average
     return (left + right) / 2.;
   } else
-      // Odd number
+  // Odd number
   {
     if (sorted) {
       // If sorted and odd, just return the centre value
@@ -111,7 +111,8 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
  * put it in a single function.
  */
 template <typename TYPE>
-std::vector<double> getWeightedZscore(const vector<TYPE> &data, const vector<TYPE> &weights) {
+std::vector<double> getWeightedZscore(const vector<TYPE> &data,
+                                      const vector<TYPE> &weights) {
   if (data.size() < 3) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
@@ -129,9 +130,10 @@ std::vector<double> getWeightedZscore(const vector<TYPE> &data, const vector<TYP
     sumWeights += static_cast<double>(weights[it]);
     sumWeightedData += static_cast<double>(weights[it] * data[it]);
   }
-  double weightedMean = sumWeightedData/sumWeights;
+  double weightedMean = sumWeightedData / sumWeights;
   for (size_t it = 0; it != data.size(); ++it) {
-    weightedVariance += std::pow(data[it] - weightedMean, 2) * std::pow(weights[it]/sumWeights, 2);
+    weightedVariance += std::pow(data[it] - weightedMean, 2) *
+                        std::pow(weights[it] / sumWeights, 2);
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     Zscore.push_back(fabs((*it - weightedMean) / std::sqrt(weightedVariance)));
@@ -190,7 +192,7 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
                        (flags & StatOptions::CorrectedStdDev));
   if (stddev) {
     using namespace boost::accumulators;
-    accumulator_set<double, stats<tag::min, tag::max, tag::variance> > acc;
+    accumulator_set<double, stats<tag::min, tag::max, tag::variance>> acc;
     for (auto &value : data) {
       acc(static_cast<double>(value));
     }
@@ -207,7 +209,7 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
 
   } else if (flags & StatOptions::Mean) {
     using namespace boost::accumulators;
-    accumulator_set<double, stats<tag::mean> > acc;
+    accumulator_set<double, stats<tag::mean>> acc;
     for (auto &value : data) {
       acc(static_cast<double>(value));
     }
@@ -438,8 +440,8 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
   getStatistics<TYPE>(const vector<TYPE> &, const unsigned int);               \
   template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE>(              \
       const vector<TYPE> &);                                                   \
-  template MANTID_KERNEL_DLL std::vector<double> getWeightedZscore<TYPE>(              \
-      const vector<TYPE> &, const vector<TYPE> &);                                                   \
+  template MANTID_KERNEL_DLL std::vector<double> getWeightedZscore<TYPE>(      \
+      const vector<TYPE> &, const vector<TYPE> &);                             \
   template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE>(      \
       const vector<TYPE> &, const bool);                                       \
   template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutOrigin<TYPE>(  \

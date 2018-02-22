@@ -33,11 +33,11 @@ DECLARE_ALGORITHM(SaveHKL)
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("ScalePeaks", 1.0, mustBePositive,
                   "Multiply FSQ and sig(FSQ) by scaleFactor");
@@ -69,7 +69,7 @@ void SaveHKL::init() {
       make_unique<FileProperty>("Filename", "", FileProperty::Save, ".hkl"),
       "Path to an hkl file to save.");
 
-  std::vector<std::string> histoTypes{ "Bank", "RunNumber", "" };
+  std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
   declareProperty("SortBy", histoTypes[2],
                   boost::make_shared<StringListValidator>(histoTypes),
                   "Sort the histograms by bank, run number or both (default).");
@@ -78,7 +78,7 @@ void SaveHKL::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "SaveHKLOutput", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty(
@@ -88,7 +88,7 @@ void SaveHKL::init() {
       "DirectionCosines", false,
       "Extra columns (22 total) in file if true for direction cosines.\n"
       "If false, original 14 columns (default).");
-  const std::vector<std::string> exts{ ".mat", ".ub", ".txt" };
+  const std::vector<std::string> exts{".mat", ".ub", ".txt"};
   declareProperty(Kernel::make_unique<FileProperty>(
                       "UBFilename", "", FileProperty::OptionalLoad, exts),
                   "Path to an ISAW-style UB matrix text file only needed for "
@@ -185,7 +185,7 @@ void SaveHKL::exec() {
   std::string bankPart = "?";
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
-  typedef std::map<int, std::vector<size_t> > bankMap_t;
+  typedef std::map<int, std::vector<size_t>> bankMap_t;
   typedef std::map<int, bankMap_t> runMap_t;
   std::set<int> uniqueBanks;
   std::set<int> uniqueRuns;
@@ -221,8 +221,8 @@ void SaveHKL::exec() {
   }
 
   bool correctPeaks = getProperty("ApplyAnvredCorrections");
-  std::vector<std::vector<double> > spectra;
-  std::vector<std::vector<double> > time;
+  std::vector<std::vector<double>> spectra;
+  std::vector<std::vector<double>> time;
   int iSpec = 0;
   m_smu = getProperty("LinearScatteringCoef"); // in 1/cm
   m_amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
@@ -688,8 +688,8 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
 }
 
 double SaveHKL::spectrumCalc(double TOF, int iSpec,
-                             std::vector<std::vector<double> > time,
-                             std::vector<std::vector<double> > spectra,
+                             std::vector<std::vector<double>> time,
+                             std::vector<std::vector<double>> spectra,
                              size_t id) {
   double spect = 0;
   if (iSpec == 1) {
@@ -717,9 +717,9 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
     for (i = 1; i < spectra[id].size(); ++i)
       if (TOF < time[id][i])
         break;
-    spect = spectra[id][i - 1] + (TOF - time[id][i - 1]) /
-                                     (time[id][i] - time[id][i - 1]) *
-                                     (spectra[id][i] - spectra[id][i - 1]);
+    spect = spectra[id][i - 1] +
+            (TOF - time[id][i - 1]) / (time[id][i] - time[id][i - 1]) *
+                (spectra[id][i] - spectra[id][i - 1]);
   }
 
   return spect;

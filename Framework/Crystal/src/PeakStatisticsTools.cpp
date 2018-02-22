@@ -128,8 +128,8 @@ UniqueReflectionCollection::UniqueReflectionCollection(
 
 /// Assigns the supplied peaks to the proper UniqueReflection. Peaks for which
 /// the reflection family can not be found are ignored.
-void
-UniqueReflectionCollection::addObservations(const std::vector<Peak> &peaks) {
+void UniqueReflectionCollection::addObservations(
+    const std::vector<Peak> &peaks) {
   for (auto const &peak : peaks) {
     V3D hkl = peak.getHKL();
     hkl.round();
@@ -257,8 +257,8 @@ void PeaksStatistics::calculatePeaksStatistics(
         double sumOfDeviationsFromMean =
             std::accumulate(intensities.begin(), intensities.end(), 0.0,
                             [meanIntensity](double sum, double intensity) {
-              return sum + fabs(intensity - meanIntensity);
-            });
+                              return sum + fabs(intensity - meanIntensity);
+                            });
 
         // Accumulate into total sum for numerator of RMerge
         rMergeNumerator += sumOfDeviationsFromMean;
@@ -311,9 +311,9 @@ void PeaksStatistics::calculatePeaksStatistics(
 
 /// Returns the sum of all I/sigma-ratios defined by the two vectors using
 /// std::inner_product.
-double PeaksStatistics::getIOverSigmaSum(const std::vector<double> &sigmas,
-                                         const std::vector<double> &intensities)
-    const {
+double PeaksStatistics::getIOverSigmaSum(
+    const std::vector<double> &sigmas,
+    const std::vector<double> &intensities) const {
   return std::inner_product(intensities.begin(), intensities.end(),
                             sigmas.begin(), 0.0, std::plus<double>(),
                             std::divides<double>());

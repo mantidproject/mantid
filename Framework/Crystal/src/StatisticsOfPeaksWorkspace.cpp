@@ -33,7 +33,7 @@ StatisticsOfPeaksWorkspace::StatisticsOfPeaksWorkspace() {
 /** Initialize the algorithm's properties.
  */
 void StatisticsOfPeaksWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> propOptions;
@@ -54,29 +54,29 @@ void StatisticsOfPeaksWorkspace::init() {
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  std::vector<std::string> sortTypes{ "ResolutionShell", "Bank",
-                                      "RunNumber",       "Overall" };
+  std::vector<std::string> sortTypes{"ResolutionShell", "Bank", "RunNumber",
+                                     "Overall"};
   declareProperty("SortBy", sortTypes[0],
                   boost::make_shared<StringListValidator>(sortTypes),
                   "Sort the peaks by resolution shell in d-Spacing(default), "
                   "bank, run number, or only overall statistics.");
-  std::vector<std::string> equivTypes{ "Mean", "Median" };
+  std::vector<std::string> equivTypes{"Mean", "Median"};
   declareProperty("EquivalentIntensities", equivTypes[0],
                   boost::make_shared<StringListValidator>(equivTypes),
                   "Replace intensities by mean(default), "
                   "or median.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<double> >(
+  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
                       "SigmaCritical", 3.0, Direction::Input),
                   "Removes peaks whose intensity deviates more than "
                   "SigmaCritical from the mean (or median).");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace> >(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
       "Output Equivalent Intensities");
 }
@@ -93,7 +93,7 @@ void StatisticsOfPeaksWorkspace::exec() {
   tempWS->copyExperimentInfoFrom(ws.get());
 
   // We must sort the peaks
-  std::vector<std::pair<std::string, bool> > criteria;
+  std::vector<std::pair<std::string, bool>> criteria;
   if (sortType.compare(0, 2, "Re") == 0)
     criteria.push_back(std::pair<std::string, bool>("DSpacing", false));
   else if (sortType.compare(0, 2, "Ru") == 0)

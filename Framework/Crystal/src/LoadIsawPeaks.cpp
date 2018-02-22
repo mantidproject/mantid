@@ -76,8 +76,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
       getWord(in, false);
     readToEndOfLine(in, true);
     confidence = 95;
-  }
-  catch (std::exception &) {
+  } catch (std::exception &) {
   }
 
   return confidence;
@@ -87,11 +86,11 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadIsawPeaks::init() {
-  const std::vector<std::string> exts{ ".peaks", ".integrate" };
+  const std::vector<std::string> exts{".peaks", ".integrate"};
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Load, exts),
                   "Path to an ISAW-style .peaks filename.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace> >(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
@@ -237,8 +236,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
       if (!alg->execute())
         throw std::runtime_error(
             "MaskDetectors Child Algorithm has not executed successfully");
-    }
-    catch (...) {
+    } catch (...) {
       g_log.error("Can't execute MaskBTP algorithm");
     }
   }
@@ -513,8 +511,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       peak.setWavelength(wl.singleFromTOF(tof));
       // Add the peak to workspace
       outWS->addPeak(peak);
-    }
-    catch (std::runtime_error &e) {
+    } catch (std::runtime_error &e) {
       g_log.error() << "Error reading peak SEQN " << seqNum << " : " << e.what()
                     << '\n';
       throw std::runtime_error("Corrupted input file. ");
