@@ -721,8 +721,9 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(
   enablePlotResult();
   enableSaveResult();
 
-  connect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
-          this, SLOT(updateGuessPlots()));
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+          SLOT(updateGuessPlots()));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 }
@@ -975,7 +976,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
@@ -1006,8 +1007,9 @@ void IndirectFitAnalysisTab::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
  * @param fitAlgorithm      The fit algorithm to run.
  */
 void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
-  disconnect(m_fitPropertyBrowser, SIGNAL(parameterChanged(const IFunction *)),
-             this, SLOT(updateGuessPlots()));
+  disconnect(m_fitPropertyBrowser,
+             SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+             SLOT(updateGuessPlots()));
   m_functionNameChanges = functionNameChanges(model());
   auto function = fitFunction();
   if (!m_functionNameChanges.isEmpty())
