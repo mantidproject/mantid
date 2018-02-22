@@ -987,8 +987,7 @@ bool SANSRunWindow::loadUserFile() {
   QString qMergeRangeUserSelected =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').mergeRange.q_merge_range)")
-          .trimmed();
+                              "FRONT').mergeRange.q_merge_range)").trimmed();
   if (qMergeRangeUserSelected == "True") {
     m_uiForm.mergeQRangeOnOff->setChecked(true);
     m_uiForm.mergeQMin->setText(
