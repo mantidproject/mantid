@@ -16,7 +16,7 @@ Mantid Documentation
    :glob:
    :maxdepth: 1
 
-   training/index
+   tutorials/index
    algorithms/index
    algorithms/*
    concepts/index
