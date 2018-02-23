@@ -216,8 +216,8 @@ protected:
 
   void fillPlotTypeComboBox(QComboBox *comboBox);
 
-  void updatePlot(MantidWidgets::PreviewPlot *fitPreviewPlot,
-                  MantidWidgets::PreviewPlot *diffPreviewPlot);
+  void updatePlots(MantidWidgets::PreviewPlot *fitPreviewPlot,
+                   MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 

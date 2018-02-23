@@ -806,8 +806,8 @@ QString ConvFit::backgroundString(const QString &backgroundType) const {
  * Updates the plot in the GUI window
  */
 void ConvFit::updatePreviewPlots() {
-  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
-                                     m_uiForm->ppPlotBottom);
+  IndirectFitAnalysisTab::updatePlots(m_uiForm->ppPlotTop,
+                                      m_uiForm->ppPlotBottom);
 }
 
 void ConvFit::updatePlotRange() {
