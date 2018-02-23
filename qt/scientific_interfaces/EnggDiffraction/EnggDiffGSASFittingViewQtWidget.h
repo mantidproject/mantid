@@ -2,8 +2,10 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEWQTWIDGET_H_
 
 #include "DllConfig.h"
+#include "EnggDiffMultiRunFittingQtWidget.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
+#include "IEnggDiffractionPythonRunner.h"
 #include "IEnggDiffractionUserMsg.h"
 
 #include <qwt_plot_curve.h>
@@ -21,16 +23,17 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
 
 public:
   EnggDiffGSASFittingViewQtWidget(
-      boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider);
+      boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
+      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
 
   ~EnggDiffGSASFittingViewQtWidget() override;
+
+  void addWidget(IEnggDiffMultiRunFittingWidgetView *widget) override;
 
   void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 
   void displayRwp(const double rwp) const override;
-
-  void setZoomToolEnabled(const bool enabled);
 
   std::vector<std::string> getFocusedFileNames() const override;
 
@@ -48,19 +51,7 @@ public:
 
   GSASRefinementMethod getRefinementMethod() const override;
 
-  RunLabel getSelectedRunLabel() const override;
-
-  void plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
-
-  void resetCanvas() override;
-
-  void resetPlotZoomLevel();
-
   void setEnabled(const bool enabled);
-
-  bool showRefinementResultsSelected() const override;
-
-  void updateRunList(const std::vector<RunLabel> &runLabels) override;
 
   void userError(const std::string &errorTitle,
                  const std::string &errorDescription) const override;
@@ -70,19 +61,22 @@ public:
 
 private slots:
   void browseFocusedRun();
+  void disableLoadIfInputEmpty();
   void loadFocusedRun();
   void selectRun();
 
 private:
-  std::vector<std::unique_ptr<QwtPlotCurve>> m_focusedRunCurves;
+  bool runFileLineEditEmpty() const;
 
-  boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
+  void setLoadEnabled(const bool enabled);
+
+  boost::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
 
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
   Ui::EnggDiffractionQtTabGSAS m_ui;
 
-  std::unique_ptr<QwtPlotZoomer> m_zoomTool;
+  boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
 
   void setFocusedRunFileNames(const QStringList &filenames);
 

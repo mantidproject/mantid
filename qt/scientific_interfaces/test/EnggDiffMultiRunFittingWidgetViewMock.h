@@ -10,10 +10,14 @@ using namespace MantidQt::CustomInterfaces;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
+using namespace MantidQt::CustomInterfaces;
+
 class MockEnggDiffMultiRunFittingWidgetView
     : public IEnggDiffMultiRunFittingWidgetView {
 
 public:
+  MOCK_CONST_METHOD0(hasSelectedRunLabel, bool());
+
   MOCK_CONST_METHOD0(getSelectedRunLabel, RunLabel());
 
   MOCK_METHOD1(plotFittedPeaks,
@@ -22,18 +26,29 @@ public:
   MOCK_METHOD1(plotFocusedRun,
                void(const std::vector<boost::shared_ptr<QwtData>> &curve));
 
+  MOCK_METHOD2(plotToSeparateWindow,
+               void(const std::string &focusedRunName,
+                    const boost::optional<std::string> fittedPeaksName));
+
+  MOCK_METHOD0(reportNoRunSelectedForPlot, void());
+
   MOCK_METHOD1(reportPlotInvalidFittedPeaks, void(const RunLabel &runLabel));
 
   MOCK_METHOD1(reportPlotInvalidFocusedRun, void(const RunLabel &runLabel));
 
   MOCK_METHOD0(resetCanvas, void());
 
+  MOCK_METHOD1(
+      setMessageProvider,
+      void(boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider));
+
+  MOCK_METHOD1(setPresenter,
+               void(boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
+                        presenter));
+
   MOCK_CONST_METHOD0(showFitResultsSelected, bool());
 
   MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
-
-  MOCK_METHOD2(userError, void(const std::string &errorTitle,
-                               const std::string &errorDescription));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

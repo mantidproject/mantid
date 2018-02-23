@@ -6,6 +6,7 @@ set ( SRC_FILES
 	EnggDiffGSASFittingPresenter.cpp
 	EnggDiffGSASFittingViewQtWidget.cpp
 	EnggDiffMultiRunFittingQtWidget.cpp
+	EnggDiffMultiRunFittingWidgetAdder.cpp
 	EnggDiffMultiRunFittingWidgetModel.cpp
 	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
@@ -26,6 +27,7 @@ set ( INC_FILES
 	EnggDiffGSASFittingViewQtWidget.h
 	EnggDiffGSASRefinementMethod.h
 	EnggDiffMultiRunFittingQtWidget.h
+	EnggDiffMultiRunFittingWidgetAdder.h
 	EnggDiffMultiRunFittingWidgetModel.h
 	EnggDiffMultiRunFittingWidgetPresenter.h
 	EnggDiffractionPresWorker.h
@@ -36,7 +38,9 @@ set ( INC_FILES
 	IEnggDiffGSASFittingModel.h
 	IEnggDiffGSASFittingPresenter.h
 	IEnggDiffGSASFittingView.h
+	IEnggDiffMultiRunFittingWidgetAdder.h
 	IEnggDiffMultiRunFittingWidgetModel.h
+	IEnggDiffMultiRunFittingWidgetOwner.h
 	IEnggDiffMultiRunFittingWidgetPresenter.h
 	IEnggDiffMultiRunFittingWidgetView.h
 	IEnggDiffractionPresenter.h

@@ -1,6 +1,11 @@
 #include "EnggDiffGSASFittingViewQtWidget.h"
 #include "EnggDiffGSASFittingModel.h"
 #include "EnggDiffGSASFittingPresenter.h"
+#include "EnggDiffMultiRunFittingQtWidget.h"
+#include "EnggDiffMultiRunFittingWidgetModel.h"
+#include "EnggDiffMultiRunFittingWidgetPresenter.h"
+
+#include <boost/make_shared.hpp>
 
 #include <QFileDialog>
 
@@ -8,37 +13,49 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
-    boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider)
+    boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
+    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner)
     : m_userMessageProvider(userMessageProvider) {
-  setupUI();
 
-  m_zoomTool = Mantid::Kernel::make_unique<QwtPlotZoomer>(
-      QwtPlot::xBottom, QwtPlot::yLeft,
-      QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-      QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
-  m_zoomTool->setRubberBandPen(QPen(Qt::black));
-  setZoomToolEnabled(false);
+  auto multiRunWidgetModel =
+      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetModel>();
+  m_multiRunWidgetView =
+      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingQtWidget>(
+          pythonRunner);
+
+  auto multiRunWidgetPresenter =
+      boost::make_shared<EnggDiffMultiRunFittingWidgetPresenter>(
+          std::move(multiRunWidgetModel), m_multiRunWidgetView.get());
+
+  m_multiRunWidgetView->setPresenter(multiRunWidgetPresenter);
+  m_multiRunWidgetView->setMessageProvider(m_userMessageProvider);
+
+  setupUI();
 
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
   m_presenter = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
-      std::move(model), this);
+      std::move(model), this, multiRunWidgetPresenter);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
 
 EnggDiffGSASFittingViewQtWidget::~EnggDiffGSASFittingViewQtWidget() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::ShutDown);
+}
 
-  for (auto &curves : m_focusedRunCurves) {
-    curves->detach();
-  }
-
-  m_focusedRunCurves.clear();
+void EnggDiffGSASFittingViewQtWidget::addWidget(
+    IEnggDiffMultiRunFittingWidgetView *widget) {
+  QWidget *qWidget = dynamic_cast<QWidget *>(widget);
+  m_ui.gridLayout_multiRunWidget->addWidget(qWidget, 0, 0);
 }
 
 void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
   const auto filenames(
       QFileDialog::getOpenFileNames(this, tr("Find focused run files")));
   setFocusedRunFileNames(filenames);
+}
+
+void EnggDiffGSASFittingViewQtWidget::disableLoadIfInputEmpty() {
+  setLoadEnabled(!runFileLineEditEmpty());
 }
 
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
@@ -93,51 +110,12 @@ EnggDiffGSASFittingViewQtWidget::getRefinementMethod() const {
   throw std::runtime_error("getRefinementMethod not yet implemented");
 }
 
-RunLabel EnggDiffGSASFittingViewQtWidget::getSelectedRunLabel() const {
-  const auto currentItemLabel =
-      m_ui.listWidget_runLabels->currentItem()->text();
-  const auto pieces = currentItemLabel.split("_");
-  if (pieces.size() != 2) {
-    throw std::runtime_error(
-        "Unexpected run label: \"" + currentItemLabel.toStdString() +
-        "\". Please contact the development team with this message");
-  }
-  return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
-}
-
 void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
 }
 
-void EnggDiffGSASFittingViewQtWidget::plotCurve(
-    const std::vector<boost::shared_ptr<QwtData>> &curves) {
-
-  m_focusedRunCurves.reserve(curves.size());
-  for (const auto &curve : curves) {
-    auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
-
-    plotCurve->setData(*curve);
-    plotCurve->attach(m_ui.plotArea);
-    m_focusedRunCurves.push_back(std::move(plotCurve));
-  }
-
-  m_ui.plotArea->replot();
-  m_zoomTool->setZoomBase();
-  setZoomToolEnabled(true);
-}
-
-void EnggDiffGSASFittingViewQtWidget::resetCanvas() {
-  for (auto &curve : m_focusedRunCurves) {
-    curve->detach();
-  }
-  m_focusedRunCurves.clear();
-  resetPlotZoomLevel();
-}
-
-void EnggDiffGSASFittingViewQtWidget::resetPlotZoomLevel() {
-  m_ui.plotArea->setAxisAutoScale(QwtPlot::xBottom);
-  m_ui.plotArea->setAxisAutoScale(QwtPlot::yLeft);
-  m_zoomTool->setZoomBase(true);
+bool EnggDiffGSASFittingViewQtWidget::runFileLineEditEmpty() const {
+  return m_ui.lineEdit_runFile->text().isEmpty();
 }
 
 void EnggDiffGSASFittingViewQtWidget::selectRun() {
@@ -147,7 +125,7 @@ void EnggDiffGSASFittingViewQtWidget::selectRun() {
 void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
   m_ui.lineEdit_runFile->setEnabled(enabled);
   m_ui.pushButton_browseRunFile->setEnabled(enabled);
-  m_ui.pushButton_loadRun->setEnabled(enabled);
+  setLoadEnabled(enabled && !runFileLineEditEmpty());
 
   m_ui.lineEdit_instParamsFile->setEnabled(enabled);
   m_ui.pushButton_browseInstParams->setEnabled(enabled);
@@ -165,13 +143,23 @@ void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
 
   m_ui.lineEdit_pawleyDMin->setEnabled(enabled);
   m_ui.lineEdit_pawleyNegativeWeight->setEnabled(enabled);
-
-  m_ui.checkBox_showRefinementResults->setEnabled(enabled);
 }
 
 void EnggDiffGSASFittingViewQtWidget::setFocusedRunFileNames(
     const QStringList &filenames) {
   m_ui.lineEdit_runFile->setText(filenames.join(tr(",")));
+}
+
+void EnggDiffGSASFittingViewQtWidget::setLoadEnabled(const bool enabled) {
+  if (enabled) {
+    m_ui.pushButton_loadRun->setEnabled(true);
+    m_ui.pushButton_loadRun->setToolTip(tr("Load focused run file"));
+  } else {
+    m_ui.pushButton_loadRun->setEnabled(false);
+    m_ui.pushButton_loadRun->setToolTip(
+        tr("Please specify a file to load via the browse menu or by typing the "
+           "full path to the file in the text field"));
+  }
 }
 
 void EnggDiffGSASFittingViewQtWidget::setupUI() {
@@ -180,26 +168,11 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
           SLOT(browseFocusedRun()));
   connect(m_ui.pushButton_loadRun, SIGNAL(clicked()), this,
           SLOT(loadFocusedRun()));
-  connect(m_ui.listWidget_runLabels, SIGNAL(itemSelectionChanged()), this,
+  connect(m_ui.lineEdit_runFile, SIGNAL(textChanged(const QString &)), this,
+          SLOT(disableLoadIfInputEmpty()));
+
+  connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));
-}
-
-void EnggDiffGSASFittingViewQtWidget::setZoomToolEnabled(const bool enabled) {
-  m_zoomTool->setEnabled(enabled);
-}
-
-bool EnggDiffGSASFittingViewQtWidget::showRefinementResultsSelected() const {
-  return m_ui.checkBox_showRefinementResults->isChecked();
-}
-
-void EnggDiffGSASFittingViewQtWidget::updateRunList(
-    const std::vector<RunLabel> &runLabels) {
-  m_ui.listWidget_runLabels->clear();
-  for (const auto &runLabel : runLabels) {
-    const auto labelStr = QString::number(runLabel.runNumber) + tr("_") +
-                          QString::number(runLabel.bank);
-    m_ui.listWidget_runLabels->addItem(labelStr);
-  }
 }
 
 void EnggDiffGSASFittingViewQtWidget::userError(

@@ -4,6 +4,7 @@
 #include "../EnggDiffraction/EnggDiffGSASFittingPresenter.h"
 #include "EnggDiffGSASFittingModelMock.h"
 #include "EnggDiffGSASFittingViewMock.h"
+#include "EnggDiffMultiRunFittingWidgetPresenterMock.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/make_unique.h"
@@ -25,16 +26,14 @@ public:
     EXPECT_CALL(*m_mockViewPtr, getFocusedFileNames())
         .Times(1)
         .WillOnce(Return(std::vector<std::string>({filename})));
+
+    const Mantid::API::MatrixWorkspace_sptr ws(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
-        .WillOnce(Return(boost::none));
-
-    const std::vector<RunLabel> runLabels({RunLabel(123, 1)});
-
-    EXPECT_CALL(*m_mockModelPtr, getRunLabels())
-        .Times(1)
-        .WillOnce(Return(runLabels));
-    EXPECT_CALL(*m_mockViewPtr, updateRunList(runLabels)).Times(1);
+        .WillOnce(Return(ws));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, addFocusedRun(ws));
 
     EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_, testing::_)).Times(0);
 
@@ -52,100 +51,12 @@ public:
 
     EXPECT_CALL(*m_mockModelPtr, loadFocusedRun(filename))
         .Times(1)
-        .WillOnce(Return(boost::make_optional<std::string>("Failure message")));
-
-    EXPECT_CALL(*m_mockModelPtr, getRunLabels()).Times(0);
-
-    EXPECT_CALL(*m_mockViewPtr, userWarning("Load failed", "Failure message"))
-        .Times(1);
-
-    presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
-    assertMocksUsedCorrectly();
-  }
-
-  void test_selectValidRun() {
-    auto presenter = setUpPresenter();
-    const RunLabel selectedRunLabel(123, 1);
-    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(selectedRunLabel));
-
-    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-
-    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(selectedRunLabel))
-        .Times(1)
-        .WillOnce(Return(sampleWorkspace));
-
-    EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
-    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_, testing::_)).Times(0);
-
-    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
-    assertMocksUsedCorrectly();
-  }
-
-  void test_selectInvalidRun() {
-    auto presenter = setUpPresenter();
-    const RunLabel selectedRunLabel(123, 1);
-    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(selectedRunLabel));
-
-    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(selectedRunLabel))
-        .Times(1)
-        .WillOnce(Return(boost::none));
+        .WillOnce(Throw(std::runtime_error("Failure reason")));
 
     EXPECT_CALL(*m_mockViewPtr,
-                userError("Invalid run identifier",
-                          "Tried to access invalid run, runNumber 123 and "
-                          "bank ID 1. Please contact the development team"));
+                userWarning("Could not load file", "Failure reason")).Times(1);
 
-    EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(0);
-
-    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
-    assertMocksUsedCorrectly();
-  }
-
-  void test_selectValidRunPlotFitResults() {
-    auto presenter = setUpPresenter();
-    const RunLabel selectedRunLabel(123, 1);
-    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(selectedRunLabel));
-
-    const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    EXPECT_CALL(*m_mockModelPtr, getFocusedWorkspace(selectedRunLabel))
-        .Times(1)
-        .WillOnce(Return(sampleWorkspace));
-    EXPECT_CALL(*m_mockViewPtr, showRefinementResultsSelected())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_mockModelPtr, hasFittedPeaksForRun(selectedRunLabel))
-        .Times(1)
-        .WillOnce(Return(true));
-
-    EXPECT_CALL(*m_mockModelPtr, getFittedPeaks(selectedRunLabel))
-        .Times(1)
-        .WillOnce(Return(sampleWorkspace));
-
-    const boost::optional<Mantid::API::ITableWorkspace_sptr> emptyTableWS(
-        Mantid::API::WorkspaceFactory::Instance().createTable());
-
-    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(selectedRunLabel))
-        .Times(1)
-        .WillOnce(Return(emptyTableWS));
-
-    const boost::optional<double> rwp = 50.0;
-    EXPECT_CALL(*m_mockModelPtr, getRwp(selectedRunLabel))
-        .Times(1)
-        .WillOnce(Return(rwp));
-
-    EXPECT_CALL(*m_mockViewPtr, resetCanvas()).Times(1);
-    EXPECT_CALL(*m_mockViewPtr, plotCurve(testing::_)).Times(2);
-    EXPECT_CALL(*m_mockViewPtr, userWarning(testing::_, testing::_)).Times(0);
-
-    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
   }
 
@@ -159,9 +70,16 @@ public:
     const auto pathToGSASII = "GSASHOME";
     const auto GSASIIProjectFile = "GPX.gpx";
 
-    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
+
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> inputWorkspace(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getFocusedRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(inputWorkspace));
+
     EXPECT_CALL(*m_mockViewPtr, getRefinementMethod())
         .Times(1)
         .WillOnce(Return(refinementMethod));
@@ -179,13 +97,13 @@ public:
         .WillOnce(Return(GSASIIProjectFile));
 
     EXPECT_CALL(*m_mockModelPtr,
-                doRietveldRefinement(runLabel, instParams, phaseFiles,
-                                     pathToGSASII, GSASIIProjectFile))
+                doRietveldRefinement(*inputWorkspace, runLabel, instParams,
+                                     phaseFiles, pathToGSASII,
+                                     GSASIIProjectFile))
         .Times(1)
-        .WillOnce(Return(boost::make_optional<std::string>(
-            "Refinement failure description")));
-    EXPECT_CALL(*m_mockViewPtr, userWarning("Refinement failed",
-                                            "Refinement failure description"));
+        .WillOnce(Throw(std::runtime_error("Failure reason")));
+    EXPECT_CALL(*m_mockViewPtr,
+                userError("Refinement failed", "Failure reason"));
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -203,9 +121,16 @@ public:
     const auto dmin = 1.0;
     const auto negativeWeight = 2.0;
 
-    EXPECT_CALL(*m_mockViewPtr, getSelectedRunLabel())
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
+
+    const boost::optional<Mantid::API::MatrixWorkspace_sptr> inputWorkspace(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getFocusedRun(runLabel))
+        .Times(1)
+        .WillOnce(Return(inputWorkspace));
+
     EXPECT_CALL(*m_mockViewPtr, getRefinementMethod())
         .Times(1)
         .WillOnce(Return(refinementMethod));
@@ -229,22 +154,90 @@ public:
         .WillOnce(Return(negativeWeight));
 
     EXPECT_CALL(*m_mockModelPtr,
-                doPawleyRefinement(runLabel, instParams, phaseFiles,
-                                   pathToGSASII, GSASIIProjectFile, dmin,
-                                   negativeWeight))
+                doPawleyRefinement(*inputWorkspace, runLabel, instParams,
+                                   phaseFiles, pathToGSASII, GSASIIProjectFile,
+                                   dmin, negativeWeight))
         .Times(1)
-        .WillOnce(Return(boost::make_optional<std::string>(
-            "Refinement failure description")));
-    EXPECT_CALL(*m_mockViewPtr, userWarning("Refinement failed",
-                                            "Refinement failure description"));
+        .WillOnce(Throw(std::runtime_error("Failure reason")));
+    EXPECT_CALL(*m_mockViewPtr,
+                userError("Refinement failed", "Failure reason"));
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_selectValidRunFitResultsRequested() {
+    auto presenter = setUpPresenter();
+    const RunLabel runLabel(123, 1);
+
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+
+    const double rwp = 50;
+    EXPECT_CALL(*m_mockModelPtr, getRwp(runLabel))
+        .Times(1)
+        .WillOnce(Return(rwp));
+
+    const auto latticeParams =
+        Mantid::API::WorkspaceFactory::Instance().createTable();
+    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
+        .Times(1)
+        .WillOnce(Return(latticeParams));
+
+    EXPECT_CALL(*m_mockViewPtr, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*m_mockViewPtr, displayRwp(rwp)).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, displayLatticeParams(latticeParams)).Times(1);
+
+    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_selectRunInvalid() {
+    auto presenter = setUpPresenter();
+    const RunLabel runLabel(123, 1);
+
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
+        .Times(1)
+        .WillOnce(Return(runLabel));
+
+    EXPECT_CALL(*m_mockModelPtr, getRwp(runLabel))
+        .Times(1)
+        .WillOnce(Return(50));
+    EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
+        .Times(1)
+        .WillOnce(Return(boost::none));
+
+    EXPECT_CALL(*m_mockViewPtr, userError("Invalid run label",
+                                          "Tried to display fit results "
+                                          "for run number 123 and bank ID 1. "
+                                          "Please contact the development "
+                                          "team with this message"));
+
+    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_selectRunFitResultsNotRequested() {
+    auto presenter = setUpPresenter();
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, showFitResultsSelected())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel()).Times(0);
+    presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
     assertMocksUsedCorrectly();
   }
 
 private:
   MockEnggDiffGSASFittingModel *m_mockModelPtr;
   MockEnggDiffGSASFittingView *m_mockViewPtr;
+  MockEnggDiffMultiRunFittingWidgetPresenter *m_mockMultiRunWidgetPtr;
 
   std::unique_ptr<EnggDiffGSASFittingPresenter> setUpPresenter() {
     auto mockModel = Mantid::Kernel::make_unique<
@@ -253,8 +246,12 @@ private:
 
     m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();
 
-    std::unique_ptr<EnggDiffGSASFittingPresenter> pres_uptr(
-        new EnggDiffGSASFittingPresenter(std::move(mockModel), m_mockViewPtr));
+    auto mockMultiRunWidgetPresenter_sptr = boost::make_shared<
+        testing::NiceMock<MockEnggDiffMultiRunFittingWidgetPresenter>>();
+    m_mockMultiRunWidgetPtr = mockMultiRunWidgetPresenter_sptr.get();
+
+    auto pres_uptr = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
+        std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr);
     return pres_uptr;
   }
 

@@ -41,5 +41,18 @@ bool EnggDiffMultiRunFittingWidgetModel::hasFittedPeaksForRun(
   return m_fittedPeaksMap.contains(runLabel);
 }
 
+void EnggDiffMultiRunFittingWidgetModel::removeRun(const RunLabel &runLabel) {
+  if (!m_focusedRunMap.contains(runLabel)) {
+    throw std::runtime_error("Tried to remove non-existent run (run number " +
+                             std::to_string(runLabel.runNumber) +
+                             " and bank ID " + std::to_string(runLabel.bank) +
+                             ")");
+  }
+  m_focusedRunMap.remove(runLabel);
+  if (m_fittedPeaksMap.contains(runLabel)) {
+    m_fittedPeaksMap.remove(runLabel);
+  }
+}
+
 } // namespace MantidQt
 } // namespace CustomInterfaces

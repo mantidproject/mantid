@@ -1,6 +1,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETPRESENTER_H_
 
+#include "IEnggDiffMultiRunFittingWidgetAdder.h"
 #include "RunLabel.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -17,7 +18,10 @@ public:
   // User actions, triggered by the (passive) view,
   // which need handling in implementation
   enum class Notification {
-    SelectRun, ///< The user has selected a new run from the list
+    PlotPeaksStateChanged, ///< Change whether fitted peaks are plotted
+    PlotToSeparateWindow,  ///< Plot currently selected run to a separate window
+    RemoveRun,             ///< Remove a run from the list
+    SelectRun,             ///< The user has selected a new run from the list
   };
 
   /**
@@ -32,11 +36,9 @@ public:
   /**
    Add a focused run to the widget. The run should be added to the list and
    plotting it should be possible
-   @param runLabel Identifier of the workspace to add
    @param ws The workspace to add
   */
-  virtual void addFocusedRun(const RunLabel &runLabel,
-                             const Mantid::API::MatrixWorkspace_sptr ws) = 0;
+  virtual void addFocusedRun(const Mantid::API::MatrixWorkspace_sptr ws) = 0;
 
   /**
    Get fitted peaks workspace corresponding to a given run and bank, if a fit
@@ -56,6 +58,13 @@ public:
   virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const = 0;
 
+  /// Get run number and bank ID of the run currently selected in the list
+  virtual RunLabel getSelectedRunLabel() const = 0;
+
+  /// Get functor to add this widget to a parent
+  virtual std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
+  getWidgetAdder() const = 0;
+
   /**
    * Notifications sent through the presenter when something changes
    * in the view. This plays the role of signals emitted by the view
@@ -65,6 +74,9 @@ public:
    */
   virtual void
   notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) = 0;
+
+  /// Get whether the user has selected to show fit results
+  virtual bool showFitResultsSelected() const = 0;
 };
 
 } // namespace CustomInterfaces

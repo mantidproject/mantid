@@ -5,9 +5,11 @@
 #include "IEnggDiffGSASFittingModel.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
+#include "IEnggDiffMultiRunFittingWidgetPresenter.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace MantidQt {
@@ -18,12 +20,16 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingPresenter
     : public IEnggDiffGSASFittingPresenter {
 
 public:
-  EnggDiffGSASFittingPresenter(std::unique_ptr<IEnggDiffGSASFittingModel> model,
-                               IEnggDiffGSASFittingView *view);
+  EnggDiffGSASFittingPresenter(
+      std::unique_ptr<IEnggDiffGSASFittingModel> model,
+      IEnggDiffGSASFittingView *view,
+      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
+          multiRunWidget);
 
-  EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other);
+  EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other) = default;
 
-  EnggDiffGSASFittingPresenter &operator=(EnggDiffGSASFittingPresenter &&other);
+  EnggDiffGSASFittingPresenter &
+  operator=(EnggDiffGSASFittingPresenter &&other) = default;
 
   ~EnggDiffGSASFittingPresenter() override;
 
@@ -38,6 +44,7 @@ private:
 
   /**
    Perform a Pawley refinement on a run
+   @param inputWS Workspace to run refinement on
    @param runLabel Run number and bank ID of the workspace to refine
    @param instParamFile The instrument parameter file name (.prm) to use for
    refinement
@@ -45,17 +52,18 @@ private:
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
-   @return String describing any failures, empty optional if refinement was
-   successful
+   @return Fitted peaks workspace resulting from refinement
    */
-  boost::optional<std::string>
-  doPawleyRefinement(const RunLabel &runLabel, const std::string &instParamFile,
+  Mantid::API::MatrixWorkspace_sptr
+  doPawleyRefinement(const Mantid::API::MatrixWorkspace_sptr inputWS,
+                     const RunLabel &runLabel, const std::string &instParamFile,
                      const std::vector<std::string> &phaseFiles,
                      const std::string &pathToGSASII,
                      const std::string &GSASIIProjectFile);
 
   /**
    Perform a Rietveld refinement on a run
+   @param inputWS Workspace to run refinement on
    @param runLabel Run number and bank ID of the workspace to refine
    @param instParamFile The instrument parameter file name (.prm) to use for
    refinement
@@ -63,11 +71,11 @@ private:
    @param pathToGSASII Location of the directory containing GSASIIscriptable.py
    (and GSAS-II executables)
    @param GSASIIProjectFile Location to save the .gpx project to
-   @return String describing any failures, empty optional if refinement was
-   successful
+   @return Fitted peaks workspace resulting from refinement
    */
-  boost::optional<std::string> doRietveldRefinement(
-      const RunLabel &runLabel, const std::string &instParamFile,
+  Mantid::API::MatrixWorkspace_sptr doRietveldRefinement(
+      const Mantid::API::MatrixWorkspace_sptr inputWS, const RunLabel &runLabel,
+      const std::string &instParamFile,
       const std::vector<std::string> &phaseFiles,
       const std::string &pathToGSASII, const std::string &GSASIIProjectFile);
 
@@ -78,14 +86,9 @@ private:
   */
   void displayFitResults(const RunLabel &runLabel);
 
-  /**
-   Update the view with the data from a run, and refinement results if they are
-   available and the user has selected to show them
-   @param runLabel Run number and bank ID of the run
-  */
-  void updatePlot(const RunLabel &runLabel);
-
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
+
+  boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_multiRunWidget;
 
   IEnggDiffGSASFittingView *m_view;
 
