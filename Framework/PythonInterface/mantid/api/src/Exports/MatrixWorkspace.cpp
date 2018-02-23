@@ -243,11 +243,6 @@ void export_MatrixWorkspace() {
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
 
-      .def("spectrumInfo", &MatrixWorkspace::spectrumInfo,
-           return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the :class:`~mantid.api.SpectrumInfo` "
-           "object.")
-
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
            "Returns size of the Y data array (deprecated, use "
