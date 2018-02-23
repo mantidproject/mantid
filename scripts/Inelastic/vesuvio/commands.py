@@ -32,9 +32,11 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                        flags['spectra'], vesuvio_loader)
 
     if flags.get('ms_enabled', True):
-        hydrogen_constraints = flags['ms_flags'].pop("HydrogenConstraints", {})
+        hydrogen_constraints = flags['ms_flags'].pop("HydrogenConstraints", None)
         ms_helper = VesuvioMSHelper(**flags['ms_flags'])
-        ms_helper.add_hydrogen_constraints(hydrogen_constraints)
+
+        if hydrogen_constraints is not None:
+            ms_helper.add_hydrogen_constraints(hydrogen_constraints)
     else:
         ms_helper = VesuvioMSHelper()
 
