@@ -1,7 +1,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -242,11 +241,6 @@ void export_MatrixWorkspace() {
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
-
-      .def("spectrumInfo", &MatrixWorkspace::spectrumInfo,
-           return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the :class:`~mantid.api.SpectrumInfo` "
-           "object.")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
