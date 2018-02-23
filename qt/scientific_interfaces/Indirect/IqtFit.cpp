@@ -379,8 +379,8 @@ void IqtFit::parameterUpdated(const Mantid::API::IFunction *function) {
 }
 
 void IqtFit::updatePreviewPlots() {
-  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
-                                     m_uiForm->ppPlotBottom);
+  IndirectFitAnalysisTab::updatePlots(m_uiForm->ppPlotTop,
+                                      m_uiForm->ppPlotBottom);
 }
 
 void IqtFit::updatePlotRange() {
