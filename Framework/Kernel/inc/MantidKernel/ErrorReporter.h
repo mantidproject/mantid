@@ -53,12 +53,8 @@ protected:
   virtual int sendReport(const std::string &message, const std::string &url);
 
 private:
-  /// Asynchronous method for sending post request
-  int sendErrorAsyncImpl(const std::string &message);
   const std::string m_application;
 
-  /// Async method for sending error report
-  Poco::ActiveMethod<int, std::string, ErrorReporter> m_errorActiveMethod;
   /// Stores the exit code of mantid if it has crashed
   const std::string m_exitCode;
   /// The time mantid has been running

@@ -29,7 +29,6 @@ ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share)
     : m_application(application),
-      m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl),
       m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(""),
       m_email("") {
   int retval = Mantid::Kernel::ConfigService::Instance().getValue(
@@ -46,7 +45,6 @@ ErrorReporter::ErrorReporter(std::string application,
                              std::string exitCode, bool share, std::string name,
                              std::string email)
     : m_application(application),
-      m_errorActiveMethod(this, &ErrorReporter::sendErrorAsyncImpl),
       m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(name),
       m_email(email) {
   int retval = Mantid::Kernel::ConfigService::Instance().getValue(
@@ -117,10 +115,6 @@ std::string ErrorReporter::generateErrorMessage() {
 
   ::Json::FastWriter writer;
   return writer.write(message);
-}
-
-int ErrorReporter::sendErrorAsyncImpl(const std::string &message) {
-  return this->sendReport(message, m_url);
 }
 
 /** Submits a post request to the specified url with the message as the body
