@@ -514,7 +514,12 @@ public:
     auto slit1 = instrument->getComponentByName("slit2");
     auto slit2 = instrument->getComponentByName("slit3");
     // The S3 position is missing in the NeXus file; use a hard-coded value.
-    const double S3z = -0.368;
+    const double collimationAngle = output->run().getPropertyValueAsType<double>(
+          "CollAngle.actual_coll_angle") / 180. * M_PI;
+    const double sampleOffset = output->run().getPropertyValueAsType<double>(
+          "Theta.sampleHorizontalOffset") * 1e-3;
+    const double slitZOffset = sampleOffset / std::cos(collimationAngle);
+    const double S3z = -0.368 - slitZOffset;
     const double slitSeparation = output->run().getPropertyValueAsType<double>(
                                       "Theta.inter-slit_distance") *
                                   1e-3;

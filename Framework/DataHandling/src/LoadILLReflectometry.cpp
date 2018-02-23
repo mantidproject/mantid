@@ -817,12 +817,14 @@ void LoadILLReflectometry::placeSlits() {
   double slit1ToSample{0.0};
   double slit2ToSample{0.0};
   if (m_instrument == Supported::Figaro) {
+    const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+    const double offset = m_sampleZOffset / std::cos(inRad(deflectionAngle));
     // For the moment, the position information for S3 is missing in the
     // NeXus files of Figaro. Using a hard-coded distance; should be fixed
     // when the NeXus files are
     const double slitSeparation =
         inMeter(doubleFromRun("Theta.inter-slit_distance"));
-    slit2ToSample = 0.368;
+    slit2ToSample = 0.368 + offset;
     slit1ToSample = slit2ToSample + slitSeparation;
   } else {
     slit1ToSample = inMeter(doubleFromRun("Distance.S2toSample"));
