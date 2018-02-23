@@ -18,6 +18,12 @@ Powder Diffraction
 
   + Scripts now support creation of grouping .cal files from ceria run(s)
   + Absorption corrections enabled for all samples, not just vanadium
+  + ``subtract_empty_instrument`` parameter added for disabling empty subtraction, useful for focusing empties
+- Improvements in ISIS Powder for HRPD:
+
+  + The prompt pulse is now masked out for the long window
+  + Extra TOF windows 10-50 and 180-280 now supported
+  + Default bin widths have been updated
 - 'suffix' parameter added for output filenames from all ISIS_Powder instruments
 - The ``CalibrationFile`` is now optional in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`. In this case time focussing will use :ref:`ConvertUnits <algm-ConvertUnits>` and the instrument geometry. Care must be taken to supply a ``GroupingFile`` otherwise all of the spectra will be kept separate.
 - :ref:`SaveGSS <algm-SaveGSS>` is relaxed to accept non-TOF point data workspaces as well.
@@ -34,6 +40,7 @@ Powder Diffraction
 - Using grouping files with only one bank was enabled in ISIS Powder, and related errors to do with mismatched number of parameters were made more readable
 - It is now possible to set beam parameters (height and width) using instrument_object.set_beam_parameters(height=123, width=456).
 - The ``mode`` parameter for POLARIS in ISIS Powder now behaves as described in the documentation - it persists through function calls and is case insensitive
+- For instruments in ISIS Powder, offset files may now be specified by an absolute path. The default behaviour of assuming they live in calibration/label has been retained
 
 Engineering Diffraction
 -----------------------
@@ -70,7 +77,10 @@ Single Crystal Diffraction
 
 - SCD Event Data Reduction interface now uses the Indexing Tolerance for Index Peaks to index the peaks for the Select Cell options in Choose Cell tab.  Previously it used a constant, 0.12, for the tolerance.
 
+- :ref:`SaveLauenorm <algm-SaveLauenorm>` now has option to save peaks in geasc format for input into exchge and then lauescale from the laue package.
+
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` now has an option to calculate the Goniometer rotation (around y-axis only) for a constant wavelength source.
+
 
 Total Scattering
 ----------------

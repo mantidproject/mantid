@@ -1283,6 +1283,3 @@ The sub-steps of this algorithm are:
     uses the data workspace as well as all of the adjustment workspaces which have been provided earlier
     on. The resulting *OutputWorkspace* and the *SumOfCounts* as well as *SumOfNormFactors* counts
     are provided as outputs.
-
-
-.. categories:: Development

@@ -20,9 +20,8 @@ Mantid Documentation
    algorithms/index
    algorithms/*
    concepts/index
-   development/index
    interfaces/index
-   fitfunctions/*
+   fitfunctions/index
    fitminimizers/index
    techniques/index
    api/index
@@ -38,16 +37,15 @@ This is the documentation for Mantid |release|.
    :width: 200px
    :align: right
 
+
 * `Tutorials <training/index.html>`_
-* `Algorithms <algorithms/index.html>`_
-* `Concepts <concepts/index.html>`_
-* `Interfaces <interfaces/index.html>`_
-* `Fit Functions <fitfunctions/index.html>`_
-* `Fit Minimizers <fitminimizers/index.html>`_
-* `Techniques <techniques/index.html>`_
-* `API <api/index.html>`_
-    - `Python <api/python/index.html>`_
+* :ref:`Algorithms List`
+* :ref:`concepts contents`
+* :ref:`interfaces contents`
+* :ref:`Fit Functions List`
+* :ref:`fitminimizers contents`
+* :ref:`techniques contents`
+* :ref:`api`
+    - :ref:`Python <pythonapi>`
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
-* `Release Notes <release/index.html>`_
-
-
+* :ref:`release_notes`

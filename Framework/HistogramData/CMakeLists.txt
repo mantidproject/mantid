@@ -113,12 +113,15 @@ set_target_properties ( HistogramData PROPERTIES OUTPUT_NAME MantidHistogramData
   COMPILE_DEFINITIONS IN_MANTID_HISTOGRAMDATA )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( HistogramData PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(HistogramData PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(HistogramData PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET HistogramData PROPERTY FOLDER "MantidFramework" )
 
+target_include_directories ( HistogramData PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries ( HistogramData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
                         ${GSL_LIBRARIES} ${MANTIDLIBS} )
 
