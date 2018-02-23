@@ -29,6 +29,7 @@ from HFIR_4Circle_Reduction import PreprocessWindow
 from HFIR_4Circle_Reduction.downloaddialog import DataDownloadDialog
 import HFIR_4Circle_Reduction.refineubfftsetup as refineubfftsetup
 import HFIR_4Circle_Reduction.PeaksIntegrationReport as PeaksIntegrationReport
+import HFIR_4Circle_Reduction.IntegrateSingePtSubWindow as IntegrateSingePtSubWindow
 
 
 # import line for the UI python class
@@ -325,9 +326,7 @@ class MainWindow(QtGui.QMainWindow):
         # menu
         self.connect(self.ui.actionData_Downloading, QtCore.SIGNAL('triggered()'),
                      self.menu_download_data)
-
-        # TODO NEW self.ui.actionSingle_Pt_Integration
-        # TODO ... 1. get all the single Pt. scans... 2. 
+        self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
 
         # Validator ... (NEXT)
 
@@ -3526,6 +3525,18 @@ class MainWindow(QtGui.QMainWindow):
 
         # show the dialog
         self._dataDownloadDialog.show()
+
+        return
+
+    def menu_integrate_peak_single_pt(self):
+        """
+        blabla
+        :return:
+        """
+        # TODO ... 1. get all the single Pt. scans... 2.
+        self._single_pt_peak_integration_window = IntegrateSingePtSubWindow.IntegrateSinglePtIntensityWindow(self)
+
+        self._single_pt_peak_integration_window.show()
 
         return
 

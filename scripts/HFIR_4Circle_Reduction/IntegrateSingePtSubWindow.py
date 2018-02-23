@@ -22,13 +22,14 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """
         # init
         super(IntegrateSinglePtIntensityWindow, self).__init__(parent)
-        self._controller = parent.get_controller()
+        self._controller = parent.controller
 
         # init UI
         self.ui = window_ui.Ui_MainWindow()
         self.ui.setupUi(self)
 
         # initialize widgets
+        self.ui.tableView_summary.setup()
 
         # define event handlers for widgets
         self.ui.pushButton_exportIntensityToFile.clicked.connect(self.do_save_intensity)
@@ -55,6 +56,12 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.close()
 
         return
+
+    def do_export_intensity_to_parent(self):
+        """
+        blabla
+        :return:
+        """
 
     def do_save_intensity(self):
         """

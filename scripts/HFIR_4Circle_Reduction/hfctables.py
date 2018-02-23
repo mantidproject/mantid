@@ -1310,7 +1310,10 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
                    ('PeakHeight', 'float'),
                    ('2theta', 'float'),
                    ('FWHM', 'float'),
-                   ('Intensity', 'float')]
+                   ('Intensity', 'float'),
+                   ('Pt-Sigma', 'float'),
+                   ('Pt-I', 'float'),
+                   ('Pt-B', 'float')]
     # ('Selected', 'checkbox')
 
     def __init__(self, parent):
