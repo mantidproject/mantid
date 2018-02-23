@@ -104,7 +104,7 @@ def _removesingularity(ws, epsilon):
         ys = ws.dataY(i)
         es = ws.dataE(i)
         if len(xs) != len(ys):
-            xs = (xs[1:] + xs[:-1]) * 0.5
+            xs = _points(xs)
         xs = numpy.abs(xs)
         binIndex = numpy.argmin(xs)
         if xs[binIndex] >= -epsilon and xs[binIndex] < epsilon:
@@ -206,8 +206,54 @@ def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     return cMin, cMax
 
 
+def plotprofile(workspace, axes=None, label='', style='l'):
+    """Plot a single line profile."""
+    workspace = _normws(workspace)
+    lineStyle = 'solid' if 'l' in style else 'None'
+    if axes is None:
+        figure, axes = subplots()
+    else:
+        figure = axes.get_figure()
+    if 'm' in style:
+        markers = matplotlib.markers.MarkerStyle.filled_markers
+        size = len(markers)
+        markerIndex = len(axes.get_lines())
+        markerIndex -= size * (markerIndex // size)
+        markerStyle = matplotlib.markers.MarkerStyle.filled_markers[markerIndex] 
+    else:
+        markerStyle = 'None'
+    axes.errorbar(workspace, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+    _profileytitle(workspace, axes)
+    return figure, axes
+
+
+def plotprofileE(workspace, axes=None, label='', style='l'):
+    """Plot an existing constant E line profile."""
+    workspace = _normws(workspace)
+    figure, axes = plotprofile(workspace, axes, label, style)
+    axes.set_xlim(xmin=0.)
+    axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
+    axes.set_ylim(0.)
+    xMin, xMax = axes.get_xlim()
+    print('Auto Q-range: {}...{} \xc5-1'.format(xMin, xMax))
+    return figure, axes
+
+
+def plotprofileQ(workspace, axes=None, label='', style='l'):
+    """Plot an existing constant Q line profile."""
+    workspace = _normws(workspace)
+    figure, axes = plotprofile(workspace, axes, label, style)
+    axes.set_xlim(xmin=-10.)
+    axes.set_xlabel('Energy (meV)')
+    cMax = numpy.nanmax(workspace.readY(0))
+    axes.set_ylim(ymin=0., ymax=cMax / 100.)
+    xMin, xMax = axes.get_xlim()
+    print('Auto E-range: {}...{} meV'.format(xMin, xMax))
+    return figure, axes
+
+
 def plotprofiles(direction, workspaces, cuts, widths, quantity, unit, style='l', keepCutWorkspaces=True):
-    """Plot line profile from given workspaces and cuts."""
+    """Plot multiple line profiles from given workspaces and cuts."""
     workspaces = _normwslist(workspaces)
     if not isinstance(cuts, collections.Iterable):
         cuts = [cuts]

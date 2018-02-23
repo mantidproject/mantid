@@ -162,6 +162,34 @@ class DirectTest(unittest.TestCase):
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
 
+    def test_plotprofile(self):
+        xs = numpy.linspace(-3., 10., 12)
+        ys = numpy.tile(1., len(xs) - 1)
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, StoreInADS=False)
+        kwargs = {'workspace': ws}
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofile, **kwargs)
+        # For some reason one plottin operation creates three lines on the axes.
+        self.assertEqual(len(axes.get_lines()), 3)
+        kwargs.update({'axes': axes})
+        testhelpers.assertRaisesNothing(self, directtools.plotprofile, **kwargs)
+        self.assertEqual(len(axes.get_lines()), 6)
+
+    def test_plotprofileE(self):
+        xs = numpy.linspace(-3., 10., 12)
+        ys = numpy.tile(1., len(xs) - 1)
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, StoreInADS=False)
+        kwargs = {'workspace': ws}
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofileE, **kwargs)
+        self.assertEqual(len(axes.get_lines()), 3)
+
+    def test_plotprofileQ(self):
+        xs = numpy.linspace(-3., 10., 12)
+        ys = numpy.tile(1., len(xs) - 1)
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, StoreInADS=False)
+        kwargs = {'workspace': ws}
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofileQ, **kwargs)
+        self.assertEqual(len(axes.get_lines()), 3)
+
     def test_plotSofQW(self):
         ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {'workspace': 'ws'}

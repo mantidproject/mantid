@@ -13,7 +13,7 @@ Reference
    :members: __init__
 
 .. automodule:: directtools
-   :members: dynamicsusceptibility, nanminmax, plotprofiles, plotconstE, plotconstQ,
-             plotSofQW, subplots, validQ, wsreport
+   :members: dynamicsusceptibility, nanminmax, plotprofile, plotprofileE, plotprofileQ,
+             plotprofiles, plotconstE, plotconstQ, plotSofQW, subplots, validQ, wsreport
 
 .. categories:: Techniques
