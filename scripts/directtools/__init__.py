@@ -219,7 +219,7 @@ def plotprofile(workspace, axes=None, label='', style='l'):
         size = len(markers)
         markerIndex = len(axes.get_lines())
         markerIndex -= size * (markerIndex // size)
-        markerStyle = matplotlib.markers.MarkerStyle.filled_markers[markerIndex] 
+        markerStyle = matplotlib.markers.MarkerStyle.filled_markers[markerIndex]
     else:
         markerStyle = 'None'
     axes.errorbar(workspace, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
