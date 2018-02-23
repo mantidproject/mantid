@@ -17,6 +17,7 @@ namespace {
 namespace Prop {
 static const std::string CHOPPER_OPENING{"ChopperOpening"};
 static const std::string CHOPPER_PAIR_DIST{"ChopperPairDistance"};
+static const std::string CHOPPER_RADIUS{"ChopperRadius"};
 static const std::string CHOPPER_SPEED{"ChopperSpeed"};
 static const std::string DETECTOR_RESOLUTION{"DetectorResolution"};
 static const std::string DIRECT_BEAM_WS{"DirectBeamWorkspace"};
@@ -105,6 +106,7 @@ void ReflectometryQResolution::init() {
   declareProperty(Prop::DETECTOR_RESOLUTION, EMPTY_DBL(), mandatoryDouble, "Detector pixel resolution, in meters.");
   declareProperty(Prop::CHOPPER_SPEED, EMPTY_DBL(), mandatoryDouble, "Chopper speed, in rpm.");
   declareProperty(Prop::CHOPPER_OPENING, EMPTY_DBL(), mandatoryDouble, "The opening angle between the two choppers, in degrees.");
+  declareProperty(Prop::CHOPPER_RADIUS, EMPTY_DBL(), mandatoryDouble, "Chopper radius, in meters.");
   declareProperty(Prop::CHOPPER_PAIR_DIST, EMPTY_DBL(), mandatoryDouble, "The gap between two choppers, in meters.");
   declareProperty(Prop::SLIT1_NAME, "", mandatoryString, "Name of the first slit component.");
   declareProperty(Prop::SLIT1_SIZE_LOG, "", mandatoryString, "The sample log entry for the first slit opening.");
@@ -129,9 +131,9 @@ void ReflectometryQResolution::exec() {
   const auto slit1FWHM = slit1AngularSpread(setup);
   const auto &spectrumInfo = inWS->spectrumInfo();
   for (size_t wsIndex = 0; wsIndex < outWS->getNumberHistograms(); ++wsIndex) {
-    auto dx = Kernel::make_cow<HistogramData::HistogramDx>(outWS->y(0).size(), 0);
-    const auto &wavelengths = inWS->x(wsIndex);
-    const auto &qs = outWS->x(wsIndex);
+    const auto &wavelengths = inWS->points(wsIndex);
+    const auto &qs = outWS->points(wsIndex);
+    auto dx = Kernel::make_cow<HistogramData::HistogramDx>(qs.size(), 0);
     outWS->setSharedDx(wsIndex, dx);
     if (spectrumInfo.isMonitor(wsIndex) || spectrumInfo.isMasked(wsIndex)) {
       // Skip monitors & masked spectra, leave DX to zero.
@@ -140,9 +142,9 @@ void ReflectometryQResolution::exec() {
     auto &resolutions = outWS->mutableDx(wsIndex);
     for (size_t i = 0; i < wavelengths.size(); ++i) {
       const auto wavelength = wavelengths[i] * 1e-10;
-      const auto deltaLambda = wavelengthResolution(*inWS, wsIndex, setup, wavelength);
+      const auto deltaLambdaSq = wavelengthResolutionSquared(*inWS, wsIndex, setup, wavelength);
       const auto deltaThetaSq = angularResolutionSquared(inWS, *directWS, wsIndex, setup, beamFWHM, incidentFWHM, slit1FWHM);
-      resolutions[i] = qs[i] * std::sqrt(pow<2>(deltaLambda) + deltaThetaSq);
+      resolutions[i] = qs[i] * std::sqrt(deltaLambdaSq + deltaThetaSq);
     }
   }
   setProperty(Prop::OUTPUT_WS, outWS);
@@ -236,6 +238,7 @@ const ReflectometryQResolution::Setup ReflectometryQResolution::experimentSetup(
   s.chopperOpening = inRad(getProperty(Prop::CHOPPER_OPENING));
   s.chopperPairDistance = getProperty(Prop::CHOPPER_PAIR_DIST);
   s.chopperPeriod = 1. / (static_cast<double>(getProperty(Prop::CHOPPER_SPEED)) / 60.);
+  s.chopperRadius = getProperty(Prop::CHOPPER_RADIUS);
   s.detectorResolution = getProperty(Prop::DETECTOR_RESOLUTION);
   const std::vector<int> foreground = getProperty(Prop::FOREGROUND);
   const auto lowPixel = static_cast<size_t>(foreground.front());
@@ -257,7 +260,7 @@ const ReflectometryQResolution::Setup ReflectometryQResolution::experimentSetup(
   s.slit2Size = slitSize(ws, slit2SizeEntry);
   const std::string sumType = getProperty(Prop::SUM_TYPE);
   s.sumType = sumType == SumTypeChoice::LAMBDA ? SumType::LAMBDA : SumType::Q;
-  s.tofChannelWidth = getProperty(Prop::TOF_CHANNEL_WIDTH);
+  s.tofChannelWidth = static_cast<double>(getProperty(Prop::TOF_CHANNEL_WIDTH)) * 1e-6;
   return s;
 }
 
@@ -322,16 +325,24 @@ double ReflectometryQResolution::slitSize(const API::MatrixWorkspace &ws, const 
   }
 }
 
-double ReflectometryQResolution::wavelengthResolution(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double wavelength) {
+double ReflectometryQResolution::wavelengthResolutionSquared(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double wavelength) {
   // err_res in COSMOS
   using namespace boost::math;
   using namespace PhysicalConstants;
   const auto &spectrumInfo = ws.spectrumInfo();
-  const auto flightDistance = spectrumInfo.l1() + spectrumInfo.l2(wsIndex);
+  const auto l1 = spectrumInfo.l1();
+  const auto l2 = spectrumInfo.l2(wsIndex);
+  const auto flightDistance =  l1 + l2;
   const auto chopperResolution = (setup.chopperPairDistance + h * setup.chopperOpening * setup.chopperPeriod / (2. * M_PI * NeutronMass * wavelength)) / (2. * flightDistance);
+  // Shouldn't there be a factor of 2 * flightdistance?
   const auto detectorResolution = h * setup.tofChannelWidth / (NeutronMass * wavelength * flightDistance);
-  // Shouldn't the factor be 0.49?
-  return 0.98 * (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) + 3. * chopperResolution * detectorResolution) / (2. * chopperResolution + detectorResolution);
+  const auto partialResolution = 0.98 * (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) + 3. * chopperResolution * detectorResolution) / (2. * chopperResolution + detectorResolution);
+  const auto flightDistRatio = (l1 - setup.slit2SampleDistance) / setup.slit1Slit2Distance;
+  const auto a = flightDistRatio * (setup.slit1Size + setup.slit2Size) + setup.slit1Size;
+  const auto b = flightDistRatio * std::abs(setup.slit1Size - setup.slit2Size) + setup.slit1Size;
+  const auto wavelengthSmearing = 0.49 * (pow<3>(a) - pow<3>(b)) / (pow<2>(a) - pow<2>(b));
+  const auto widthResolution = wavelengthSmearing * setup.chopperPeriod / (2. * M_PI * setup.chopperRadius) * h / (NeutronMass * wavelength * flightDistance);
+  return pow<2>(partialResolution) + pow<2>(widthResolution);
 }
 
 } // namespace Algorithms

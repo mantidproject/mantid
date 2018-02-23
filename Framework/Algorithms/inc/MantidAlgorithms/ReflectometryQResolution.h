@@ -44,6 +44,7 @@ private:
     double chopperOpening{0.};
     double chopperPairDistance{0.};
     double chopperPeriod{0.};
+    double chopperRadius{0.};
     double detectorResolution{0.};
     size_t foregroundStartPixel{0};
     size_t foregroundEndPixel{0};
@@ -71,7 +72,7 @@ private:
   double slit1AngularSpread(const Setup& setup);
   double slit2AngularSpread(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup& setup);
   double slitSize(const API::MatrixWorkspace &ws, const std::string &logEntry);
-  double wavelengthResolution(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double wavelength);
+  double wavelengthResolutionSquared(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double wavelength);
 };
 
 } // namespace Algorithms
