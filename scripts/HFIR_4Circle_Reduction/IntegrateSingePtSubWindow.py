@@ -43,8 +43,16 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         # class variable
         self._working_dir = os.path.expanduser('~')
         self._exp_number = None
-        self._scan_number = None
-        self._pt_number = 1
+        self._roiMutex = False
+
+        return
+
+    def do_close(self):
+        """
+        Quit the window
+        :return:
+        """
+        self.close()
 
         return
 
@@ -62,8 +70,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
-    # TODO FIXME NOW NOW2 - From here
-    def do_integrate_single_pt(self, exp_number, scan_number, pt_number):
+    def do_integrate_single_pt(self):
         """
         integrate the 2D data inside region of interest along both axis-0 and axis-1 individually.
         and the result (as 1D data) will be saved to ascii file.
@@ -74,88 +81,47 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         if len(roi_name) == 0:
             raise RuntimeError('No ROI is selected or set')
 
-        self._controller.integrate_detector_image(self._exp_number, self._scan_number,
-                                                  self._pt_number, roi_name, fit_gaussian=True)
+        for scan_number, pt_number in self.ui.tableView_summary.get_scan_pt_list():
+            # integration on image for I
+            peak_height = self._controller.integrate_detector_image(self._exp_number, scan_number, pt_number, roi_name,
+                                                                    fit_gaussian=True)
 
+            # calculate peak intensity
+            intensity = self._controller.calculate_intensity_single_pt(self._exp_number, scan_number, pt_number,
+                                                                       roi_name)
 
-
-
-
-
-        
-
-    def do_ok(self):
-        """
-        User decide to go on and then send a signal to parent
-        :return:
-        """
-
-        tolerance = self.get_tolerance()
-        if tolerance is None:
-            raise RuntimeError('Tolerance cannot be left blank!')
-
-        # set up a hand-shaking signal
-        signal_value = 1000
-        self.mySignal.emit(signal_value)
-
-        # quit
-        self.do_quit()
+            # add to table
+            self.ui.tableView_summary.set_peak_height(scan_number, pt_number, peak_height)
+            self.ui.tableView_summary.set_intensity(scan_number, pt_number, intensity)
+        # END-FOR
 
         return
 
-    def do_quit(self):
+    def do_refresh_roi(self):
         """
-        Quit the window
+        refresh ROI list from parent
         :return:
         """
-        self.close()
+        roi_list = self._controller.get_roi_list()
+
+        # add ROI
+        self._roiMutex = True
+
+        self.ui.comboBox_roiList.clear()
+        for roi_name in sorted(roi_list):
+            self.ui.comboBox_roiList.addItem(roi_name)
+
+        self._roiMutex = False
 
         return
 
-    def get_unit_cell_type(self):
+    def do_retrieve_fwhm(self):
         """
-        Get the tolerance
+        get FWHM from integrated 'STRONG' peaks according to 2theta value
         :return:
         """
-        unit_cell_type = str(self.ui.comboBox_unitCellTypes.currentText())
-
-        return unit_cell_type
-
-    def get_tolerance(self):
-        """
-        Get the tolerance for refining UB matrix with unit cell type.
-        :return:
-        """
-        tol_str = str(self.ui.lineEdit_tolerance.text()).strip()
-
-        if len(tol_str) == 0:
-            # blank: return None
-            tol = None
-        else:
-            tol = float(tol_str)
-
-        return tol
-
-    def get_ub_source(self):
-        """
-        Get the index of the tab where the UB matrix comes from
-        :return:
-        """
-        source = str(self.ui.comboBox_ubSource.currentText())
-
-        if source == 'Tab - Calculate UB Matrix':
-            tab_index = 3
-        else:
-            tab_index = 4
-
-        return tab_index
-
-    def set_prev_ub_refine_method(self, use_fft=False):
-        """
-
-        :param use_fft:
-        :return:
-        """
-        self._prevIndexByFFT = use_fft
+        for (scan_number, pt_number) in self.ui.tableView_summary.get_scan_pt_list():
+            two_theta = self._controller.get_log_value(self._exp_number, scan_number, pt_number)
+            self.ui.tableView_summary.set_two_theta(scan_number, pt_number, two_theta)
 
         return

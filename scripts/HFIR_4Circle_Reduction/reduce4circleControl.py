@@ -22,6 +22,7 @@ from six.moves import range
 import csv
 import random
 import os
+import numpy
 
 from HFIR_4Circle_Reduction.fourcircle_utility import *
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
@@ -1494,20 +1495,30 @@ class CWSCDReductionControl(object):
         :param fit_gaussian:
         :return:
         """
-        matrix = self.get_detector_image_data(exp_number, scan_number, pt_number)
-        assert isinstance(matrix, np.ndarray), 'A matrix must be an ndarray but not {0}.'.format(type(matrix))
-        roi_lower_left, roi_upper_right = self._controller.get_region_of_interest(roi_name)
+        # check data loaded with mask information
+        does_loaded = self.does_raw_loaded(exp_number, scan_number, pt_number, roi_name)
+        if not does_loaded:
+            # load Pt xml
+            self.load_spice_xml_file(exp_number, scan_number, pt_number)
+        # END-IF
+
+        # Get data and plot
+        raw_det_data = self.get_raw_detector_counts(exp_number, scan_number, pt_number)
+        assert isinstance(raw_det_data, numpy.ndarray), 'A matrix must be an ndarray but not {0}.' \
+                                                        ''.format(type(raw_det_data))
+        roi_lower_left, roi_upper_right = self.get_region_of_interest(roi_name)
 
         # integrate peak along row
-        vec_x = np.array(range(roi_lower_left[1], roi_upper_right[1]))
-        vec_y = matrix[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=1)
+        vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
+        vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=1)
 
         if fit_gaussian:
-            cost, params = fit_to_gaussian(vec_x, vec_y)
+            cost, params = peak_integration_utility.fit_gaussian_function(vec_x, vec_y)
         else:
             cost = -1
             params = dict()
 
+        # register
         self._single_pt_integration[exp_number, scan_number, pt_number, roi_name] = vec_x, vec_y, cost, params
 
         return

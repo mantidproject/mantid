@@ -1304,7 +1304,8 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
     """
     Extended QTable for integration on single Pt with previously calculated FWHM
     """
-    Table_Setup = [('Pt', 'int'),
+    Table_Setup = [('Scan', 'int'),
+                   ('Pt', 'int'),
                    ('HKL', 'str'),
                    ('PeakHeight', 'float'),
                    ('2theta', 'float'),
@@ -1320,6 +1321,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         super(SinglePtIntegrationTable, self).__init__(parent)
 
         # class variables
+        self._scan_index = None
         self._pt_index = None
         self._hkl_index = None
         self._height_index = None
@@ -1331,7 +1333,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
         return
 
-    def add_pt(self, pt_number, hkl_str, two_theta):
+    def add_scan_pt(self, scan_number, pt_number, hkl_str, two_theta):
         """
         add a new pt to ...
         :param pt_number:
@@ -1340,17 +1342,24 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         :return:
         """
         # check
-        if pt_number in self._pt_row_dict:
+        if (scan_number, pt_number) in self._pt_row_dict:
             raise RuntimeError('Pt number {0} exists in the table already.'.format(pt_number))
 
         # check others...
         # blabla
-        self.append_row([pt_number, hkl_str, 0., two_theta, 0., 0.])
+        self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0.])
 
         # register
-        self._pt_row_dict[pt_number] = self.rowCount() - 1
+        self._pt_row_dict[scan_number, pt_number] = self.rowCount() - 1
 
         return
+
+    def get_scan_pt_list(self):
+        """
+        get a list of current scan and pt pair in the table
+        :return:
+        """
+        return self._pt_row_dict.keys()
 
     def save_intensities_to_file(self, out_file_name):
         """
@@ -1382,6 +1391,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         self.init_setup(SinglePtIntegrationTable.Table_Setup)
 
         # set up column index
+        self._scan_index = SinglePtIntegrationTable.Table_Setup.index(('Scan', 'int'))
         self._pt_index = SinglePtIntegrationTable.Table_Setup.index(('Pt', 'int'))
         self._hkl_index = SinglePtIntegrationTable.Table_Setup.index(('HKL', 'str'))
         self._height_index = SinglePtIntegrationTable.Table_Setup.index(('PeakHeight', 'float'))
@@ -1391,53 +1401,53 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
         return
 
-    def set_fwhm(self, pt_number, fwhm):
+    def set_fwhm(self, scan_number, pt_number, fwhm):
         """
 
         :param pt_number:
         :param fwhm:
         :return:
         """
-        row_number = self._pt_row_dict[pt_number]
+        row_number = self._pt_row_dict[scan_number, pt_number]
 
         self.update_cell_value(row_number, self._fwhm_index, fwhm)
 
         return
 
-    def set_intensity(self, pt_number, intensity):
+    def set_intensity(self, scan_number, pt_number, intensity):
         """
         blabla
         :param pt_number:
         :param intensity:
         :return:
         """
-        row_number = self._pt_row_dict[pt_number]
+        row_number = self._pt_row_dict[scan_number, pt_number]
 
         self.update_cell_value(row_number, self._intensity_index, intensity)
 
         return
 
-    def set_peak_height(self, pt_number, peak_height):
+    def set_peak_height(self, scan_number, pt_number, peak_height):
         """
         blabla
         :param pt_number:
         :param peak_height:
         :return:
         """
-        row_number = self._pt_row_dict[pt_number]
+        row_number = self._pt_row_dict[scan_number, pt_number]
 
         self.update_cell_value(row_number, self._height_index, peak_height)
 
         return
 
-    def set_two_theta(self, pt_number, two_theta):
+    def set_two_theta(self, scan_number, pt_number, two_theta):
         """
         blabla
         :param pt_number:
         :param two_theta:
         :return:
         """
-        row_number = self._pt_row_dict[pt_number]
+        row_number = self._pt_row_dict[scan_number, pt_number]
 
         self.update_cell_value(row_number, self._2theta_index, two_theta)
 
