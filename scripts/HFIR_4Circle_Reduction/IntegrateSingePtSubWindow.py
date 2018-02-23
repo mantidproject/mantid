@@ -1,17 +1,18 @@
 #pylint: disable=C0103
 from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
+import HFIR_4Circle_Reduction.ui_SinglePtIntegrationWindow as window_ui
+from PyQt4.QtGui import QMainWindow, QFileDialog
+import numpy as np
+import os
 
-from . import ui_OptimizeLattice
 
-
-class IntegrateSinglePtIntensityWindow(QtGui.QMainWindow):
+class IntegrateSinglePtIntensityWindow(QMainWindow):
     """
     Main window widget to set up parameters to optimize
     """
-
     # establish signal for communicating from App2 to App1 - must be defined before the constructor
-    mySignal = QtCore.pyqtSignal(int)
+    # mySignal = QtCore.pyqtSignal(int)
 
     def __init__(self, parent=None):
         """
@@ -20,77 +21,67 @@ class IntegrateSinglePtIntensityWindow(QtGui.QMainWindow):
         :return:
         """
         # init
-        QtGui.QMainWindow.__init__(self, parent)
+        super(IntegrateSinglePtIntensityWindow, self).__init__(parent)
+        self._controller = parent.get_controller()
 
-        self.ui = ui_OptimizeLattice.Ui_MainWindow()
+        # init UI
+        self.ui = window_ui.Ui_MainWindow()
         self.ui.setupUi(self)
 
         # initialize widgets
-        self.ui.comboBox_unitCellTypes.addItems(['Cubic',
-                                                 'Tetragonal',
-                                                 'Orthorhombic',
-                                                 'Hexagonal',
-                                                 'Rhombohedral',
-                                                 'Monoclinic',
-                                                 'Triclinic'])
 
-        self.ui.comboBox_ubSource.addItems(['Tab - Calculate UB Matrix', 'Tab - Accepted UB Matrix'])
+        # define event handlers for widgets
+        self.ui.pushButton_exportIntensityToFile.clicked.connect(self.do_save_intensity)
+        self.ui.pushButton_exportIntensityToTable.clicked.connect(self.do_export_intensity_to_parent)
+        self.ui.pushButton_refreshROI.clicked.connect(self.do_refresh_roi)
+        self.ui.pushButton_retrieveFWHM.clicked.connect(self.do_retrieve_fwhm)
+        self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_single_pt)
 
-        self.ui.lineEdit_tolerance.setText('0.12')
+        # menu bar
+        self.ui.menuQuit.triggered.connect(self.do_close)
 
-        # define event handling
-        self.connect(self.ui.pushButton_Ok, QtCore.SIGNAL('clicked()'),
-                     self.do_ok)
+        # class variable
+        self._working_dir = os.path.expanduser('~')
+        self._exp_number = None
+        self._scan_number = None
+        self._pt_number = 1
 
-        self.connect(self.ui.pushButton_cancel, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        return
 
-        if parent is not None:
-            # connect to the method to refine UB matrix by constraining lattice parameters
-            self.mySignal.connect(parent.refine_ub_lattice)
+    def do_save_intensity(self):
+        """
+        save intensity to file
+        :return:
+        """
+        # get output file
+        out_file_name = str(QFileDialog.getSaveFileName(self, 'File to save integrated intensities', self._working_dir))
+        if len(out_file_name) == 0:
+            return
 
-        # flag to trace back its previous step
-        self._prevIndexByFFT = False
+        self.ui.tableView_summary.save_intensities_to_file(out_file_name)
 
         return
 
     # TODO FIXME NOW NOW2 - From here
-    def integrate_roi_linear(self, exp_number, scan_number, pt_number, output_dir):
+    def do_integrate_single_pt(self, exp_number, scan_number, pt_number):
         """
         integrate the 2D data inside region of interest along both axis-0 and axis-1 individually.
         and the result (as 1D data) will be saved to ascii file.
         the X values will be the corresponding pixel index either along axis-0 or axis-1
         :return:
         """
-        def save_to_file(base_file_name, axis, array1d, start_index):
-            """
-            save the result (1D data) to an ASCII file
-            :param base_file_name:
-            :param axis:
-            :param array1d:
-            :param start_index:
-            :return:
-            """
-            file_name = '{0}_axis_{1}.dat'.format(base_file_name, axis)
+        roi_name = str(self.ui.comboBox_roiList.currentText())
+        if len(roi_name) == 0:
+            raise RuntimeError('No ROI is selected or set')
 
-            wbuf = ''
-            vec_x = np.arange(len(array1d)) + start_index
-            for x, d in zip(vec_x, array1d):
-                wbuf += '{0} \t{1}\n'.format(x, d)
+        self._controller.integrate_detector_image(self._exp_number, self._scan_number,
+                                                  self._pt_number, roi_name, fit_gaussian=True)
 
-            ofile = open(file_name, 'w')
-            ofile.write(wbuf)
-            ofile.close()
 
-            return
 
-        matrix = self.array2d
-        assert isinstance(matrix, np.ndarray), 'A matrix must be an ndarray but not {0}.'.format(type(matrix))
 
-        # get region of interest
-        if self._roiStart is None:
-            self._roiStart = (0, 0)
-        if self._roiEnd is None:
+
+
         
 
     def do_ok(self):

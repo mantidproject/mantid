@@ -1484,6 +1484,34 @@ class CWSCDReductionControl(object):
 
         return peak_intensity, gauss_bkgd, info_str
 
+    def integrate_detector_image(self, exp_number, scan_number, pt_number, roi_name, fit_gaussian):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :param fit_gaussian:
+        :return:
+        """
+        matrix = self.get_detector_image_data(exp_number, scan_number, pt_number)
+        assert isinstance(matrix, np.ndarray), 'A matrix must be an ndarray but not {0}.'.format(type(matrix))
+        roi_lower_left, roi_upper_right = self._controller.get_region_of_interest(roi_name)
+
+        # integrate peak along row
+        vec_x = np.array(range(roi_lower_left[1], roi_upper_right[1]))
+        vec_y = matrix[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=1)
+
+        if fit_gaussian:
+            cost, params = fit_to_gaussian(vec_x, vec_y)
+        else:
+            cost = -1
+            params = dict()
+
+        self._single_pt_integration[exp_number, scan_number, pt_number, roi_name] = vec_x, vec_y, cost, params
+
+        return
+
     @staticmethod
     def load_scan_survey_file(csv_file_name):
         """ Load scan survey from a csv file
