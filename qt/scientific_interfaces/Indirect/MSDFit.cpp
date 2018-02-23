@@ -192,8 +192,8 @@ void MSDFit::algorithmComplete(bool error) {
 }
 
 void MSDFit::updatePreviewPlots() {
-  IndirectFitAnalysisTab::updatePlot(m_uiForm->ppPlotTop,
-                                     m_uiForm->ppPlotBottom);
+  IndirectFitAnalysisTab::updatePlots(m_uiForm->ppPlotTop,
+                                      m_uiForm->ppPlotBottom);
 }
 
 void MSDFit::updatePlotRange() {

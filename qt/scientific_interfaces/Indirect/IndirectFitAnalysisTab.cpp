@@ -916,7 +916,7 @@ void IndirectFitAnalysisTab::fillPlotTypeComboBox(QComboBox *comboBox) {
  * @param diffPreviewPlot The preview plot widget in which to plot the
  *                        difference between the fit and sample data.
  */
-void IndirectFitAnalysisTab::updatePlot(
+void IndirectFitAnalysisTab::updatePlots(
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   auto spectrum = boost::numeric_cast<size_t>(selectedSpectrum());
