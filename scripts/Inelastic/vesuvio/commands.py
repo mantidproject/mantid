@@ -195,10 +195,11 @@ class VesuvioTOFFitRoutineIteration(object):
             _update_output(vesuvio_output, prefit_result, corrections_result, fit_result)
 
             # Clear ADS of intermediate workspaces and workspace group
-            UnGroupWorkspace(corrections_result[0])
-            UnGroupWorkspace(corrections_result[1])
+            if verbose_output:
+                UnGroupWorkspace(corrections_result[0])
+                UnGroupWorkspace(corrections_result[1])
             mtd.remove(prefit_result[1].getName())
-            mtd.remove(corrections_result[2].getName())
+            mtd.remove(corrections_result[-1].getName())
             mtd.remove(fit_result[1].getName())
 
         return vesuvio_output
@@ -882,10 +883,12 @@ def _update_output(vesuvio_output, prefit_result, corrections_result, fit_result
     vesuvio_output.add_fit_output_workspace(fit_result[0])
     vesuvio_output.add_chi2_value(fit_result[-1])
     vesuvio_output.add_prefit_parameters_workspace(prefit_result[1])
-    vesuvio_output.add_correction_parameters_workspace(corrections_result[2])
+    vesuvio_output.add_correction_parameters_workspace(corrections_result[-1])
     vesuvio_output.add_fit_parameters_workspace(fit_result[1])
-    vesuvio_output.add_corrections_workspaces(list(corrections_result[0]))
-    vesuvio_output.add_corrected_workspaces(list(corrections_result[1]))
+
+    if len(corrections_result) > 1:
+        vesuvio_output.add_corrections_workspaces(list(corrections_result[0]))
+        vesuvio_output.add_corrected_workspaces(list(corrections_result[1]))
 
 
 def _change_in_cost_function(previous_output, current_output):
