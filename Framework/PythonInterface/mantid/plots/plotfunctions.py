@@ -21,6 +21,7 @@ import mantid.kernel
 import mantid.api
 from mantid.plots.helperfunctions import *
 import matplotlib.colors
+import matplotlib.dates as mdates
 
 # ================================================
 # Private 2D Helper functions
@@ -67,12 +68,32 @@ def plot(axes, workspace, *args, **kwargs):
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
+    :param LogName:   if specified, it will plot the corresponding sample log. The x-axis
+                      of the plot is the time difference between the log time and the first
+                      value of the `proton_charge` log (if available) or the sample log's
+                      first time.
+    :param StartFromLog: False by default. If True the time difference will be from the sample log's
+                      first time, even if `proton_charge` log is available.
+    :param FullTime:  False by default. If true, the full date and time will be plotted on the axis
+                      instead of the time difference
+    :param ExperimentInfo: for MD Workspaces with multiple :class:`mantid.api.ExperimentInfo` is the
+                           ExperimentInfo object from which to extract the log. It's 0 by default
 
     For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
     needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     '''
+    if 'LogName' in kwargs:
+        (x, y, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
+        axes.set_ylabel('{0} ({1})'.format(LogName, units))
+        axes.set_xlabel('Time (s)')
+        if FullTime:
+            axes.xaxis_date()
+            axes.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S\n%b-%d'))
+            axes.set_xlabel('Time')
+        kwargs['linestyle']='steps-post'
+        return axes.plot(x, y, *args, **kwargs)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x, y, dy) = get_md_data1d(workspace, normalization)
@@ -445,3 +466,4 @@ def tricontourf(axes, workspace, *args, **kwargs):
     y = y[condition]
     z = z[condition]
     return axes.tricontourf(x, y, z, *args, **kwargs)
+

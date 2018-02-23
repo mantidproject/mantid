@@ -990,6 +990,22 @@ On PEARL this is set to the following:
 
   spline_coefficient: 60
 
+.. _subtract_empty_instrument_pearl_isis-powder-diffraction-ref:
+
+subtract_empty_instrument
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Provides the option to disable subtracting empty instrument runs from
+the run being focused. This is useful for focusing empties, as
+subtracting an empty from itself, or subtracting the previous cycle's
+empty from this cycle's, creates meaningless data. Set to **False** to
+disable empty subtraction.
+
+On PEARL this is set to the following:
+
+.. code-block:: python
+
+  subtract_empty_instrument: True
+
 .. _tt35_grouping_filename_pearl_isis-powder-diffraction-ref:
 
 tt35_grouping_filename

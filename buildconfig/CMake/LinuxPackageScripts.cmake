@@ -23,12 +23,6 @@ if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/mantid${CPACK_PACKAGE_SUFFIX} CACHE PATH "Install path" FORCE )
 endif()
 
-# We are only generating Qt4 packages at the moment
-set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qt4; )
-if ( MAKE_VATES )
-  list ( APPEND CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR} )
-endif ()
-
 # Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
 # Required for Fedora >= 18 and RHEL >= 7
 set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications /usr/share/pixmaps )
@@ -145,9 +139,8 @@ if ( TCMALLOC_FOUND )
 endif ()
 
 # Local dev version
-set ( EXTRA_LDPATH "${ParaView_DIR}/lib" )
 if ( MAKE_VATES )
-  set ( PARAVIEW_PYTHON_PATHS ":${EXTRA_LDPATH}:${EXTRA_LDPATH}/site-packages:${EXTRA_LDPATH}/site-packages/vtk" )
+  set ( PARAVIEW_PYTHON_PATHS ":${ParaView_DIR}/lib:${ParaView_DIR}/lib/site-packages" )
 else ()
   set ( PARAVIEW_PYTHON_PATHS "" )
 endif ()
@@ -172,9 +165,10 @@ execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPyt
                   OUTPUT_QUIET ERROR_QUIET )
 
 # Package version
-set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}:\${INSTALLDIR}/../plugins/qtplugins/mantid" )
+set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
 if ( MAKE_VATES )
-  set ( PARAVIEW_PYTHON_PATHS ":${EXTRA_LDPATH}:${EXTRA_LDPATH}/site-packages:${EXTRA_LDPATH}/site-packages/vtk" )
+  set ( PV_PYTHON_PATH "\${INSTALLDIR}/../lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
+  set ( PARAVIEW_PYTHON_PATHS ":${PV_PYTHON_PATH}:${PV_PYTHON_PATH}/site-packages:${PV_PYTHON_PATH}/site-packages/vtk" )
 else ()
   set ( PARAVIEW_PYTHON_PATHS "" )
 endif ()
