@@ -8,6 +8,8 @@ Direct Inelastic Changes
 New features
 ------------
 
+- A new Python module :ref:`directtools <Directtools Python module>` includes utilities for plotting :math:`S(Q,W)` workspaces and cuts (line profiles) in constant :math:`Q` and :math:`E`.
+
 Algorithms
 ##########
 
