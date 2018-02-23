@@ -22,6 +22,11 @@ def _chooseMarker(markers, index):
 def _clearlatex(s):
     """Return a string from which LaTeX formatting has been removed."""
     s = s.translate(None, '$\\^{}')
+    s = s.replace('$', '')
+    s = s.replace('\\', '')
+    s = s.replace('^', '')
+    s = s.replace('{', '')
+    s = s.replace('}', '')
     return s
 
 
@@ -239,32 +244,31 @@ def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     return cMin, cMax
 
 
-def plotprofiles(workspaces, labels=None, style='l'):
-    """Plot given line profile workspaces."""
-    workspaces = _normwslist(workspaces)
-    if not isinstance(labels, collections.Iterable) or isinstance(labels, str):
-        if labels is None:
-            labels = len(workspaces) * ['']
-        else:
-            labels = [labels]
-    if len(workspaces) != len(labels):
-        raise ValueError('workspaces and labels list lengths do not match.')
-    lineStyle = 'solid' if 'l' in style else 'None'
-    figure, axes = subplots()
-    markers = matplotlib.markers.MarkerStyle.filled_markers
-    markerStyle = 'None'
-    markerIndex = 0
-    for ws, label in zip(workspaces, labels):
-        if 'm' in style:
-            markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
-        axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
-    _profileytitle(workspaces[0], axes)
-    xUnit = workspaces[0].getAxis(0).getUnit().unitID()
-    if xUnit == 'DeltaE':
-        _finalizeprofileQ(workspaces, axes)
-    elif xUnit == 'MomentumTransfer':
-        _finalizeprofileE(axes)
-    return figure, axes
+def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True):
+    """Plot line profiles at constant energy."""
+    figure, axes, cutWSList = plotcuts('Horizontal', workspaces, E, dE, '$E$', 'meV', style, keepCutWorkspaces)
+    _profiletitle(workspaces, '$E$', 'meV', E, dE, figure)
+    axes.legend()
+    axes.set_xlim(xmin=0.)
+    axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
+    axes.set_ylim(0.)
+    xMin, xMax = axes.get_xlim()
+    print('Auto Q-range: {}...{} \xc5-1'.format(xMin, xMax))
+    return figure, axes, cutWSList
+
+
+def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True):
+    """Plot line profiles at constant momentum transfer."""
+    figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, '$Q$', '\\AA$^{-1}$', style, keepCutWorkspaces)
+    _profiletitle(workspaces, '$Q$', '\\AA$^{-1}$', Q, dQ, figure)
+    axes.legend()
+    axes.set_xlim(xmin=-10.)
+    axes.set_xlabel('Energy (meV)')
+    cMin, cMax = _globalnanminmax(workspaces)
+    axes.set_ylim(ymin=0., ymax=cMax / 100.)
+    xMin, xMax = axes.get_xlim()
+    print('Auto E-range: {}...{} meV'.format(xMin, xMax))
+    return figure, axes, cutWSList
 
 
 def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', keepCutWorkspaces=True):
@@ -308,31 +312,32 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
     return figure, axes, cutWSList
 
 
-def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True):
-    """Plot line profiles at constant energy."""
-    figure, axes, cutWSList = plotcuts('Horizontal', workspaces, E, dE, '$E$', 'meV', style, keepCutWorkspaces)
-    _profiletitle(workspaces, '$E$', 'meV', E, dE, figure)
-    axes.legend()
-    axes.set_xlim(xmin=0.)
-    axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
-    axes.set_ylim(0.)
-    xMin, xMax = axes.get_xlim()
-    print('Auto Q-range: {}...{} \xc5-1'.format(xMin, xMax))
-    return figure, axes, cutWSList
-
-
-def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True):
-    """Plot line profiles at constant momentum transfer."""
-    figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, '$Q$', '\\AA$^{-1}$', style, keepCutWorkspaces)
-    _profiletitle(workspaces, '$Q$', '\\AA$^{-1}$', Q, dQ, figure)
-    axes.legend()
-    axes.set_xlim(xmin=-10.)
-    axes.set_xlabel('Energy (meV)')
-    cMin, cMax = _globalnanminmax(workspaces)
-    axes.set_ylim(ymin=0., ymax=cMax / 100.)
-    xMin, xMax = axes.get_xlim()
-    print('Auto E-range: {}...{} meV'.format(xMin, xMax))
-    return figure, axes, cutWSList
+def plotprofiles(workspaces, labels=None, style='l'):
+    """Plot given line profile workspaces."""
+    workspaces = _normwslist(workspaces)
+    if not isinstance(labels, collections.Iterable) or isinstance(labels, str):
+        if labels is None:
+            labels = len(workspaces) * ['']
+        else:
+            labels = [labels]
+    if len(workspaces) != len(labels):
+        raise ValueError('workspaces and labels list lengths do not match.')
+    lineStyle = 'solid' if 'l' in style else 'None'
+    figure, axes = subplots()
+    markers = matplotlib.markers.MarkerStyle.filled_markers
+    markerStyle = 'None'
+    markerIndex = 0
+    for ws, label in zip(workspaces, labels):
+        if 'm' in style:
+            markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
+        axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+    _profileytitle(workspaces[0], axes)
+    xUnit = workspaces[0].getAxis(0).getUnit().unitID()
+    if xUnit == 'DeltaE':
+        _finalizeprofileQ(workspaces, axes)
+    elif xUnit == 'MomentumTransfer':
+        _finalizeprofileE(axes)
+    return figure, axes
 
 
 def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax=None, colormap='jet'):
@@ -386,7 +391,7 @@ def validQ(workspace, E=0.0):
     """Return a :math:`Q` range at given energy transfer where :math:`S(Q,E)` is defined."""
     workspace = _normws(workspace)
     vertBins = workspace.getAxis(1).extractValues()
-    if len(vertBins) > workspace.getNumberHistograms:
+    if len(vertBins) > workspace.getNumberHistograms():
         vertBins = _points(vertBins)
     elasticIndex = numpy.argmin(numpy.abs(vertBins - E))
     ys = workspace.readY(elasticIndex)
