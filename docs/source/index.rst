@@ -51,6 +51,6 @@ This is the documentation for Mantid |release|.
 * :ref:`api`
     - :ref:`Python <pythonapi>`
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
-* :ref:`Plotting`
+* :ref:`Gallery <plotting>`
 * :ref:`release_notes`
 

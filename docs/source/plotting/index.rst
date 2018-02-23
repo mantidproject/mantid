@@ -187,7 +187,51 @@ Simple plots
    plt.grid()
    plt.title(r'Normal: $\mu=%.2f, \sigma=%.2f$'%(x.mean(), x.std()))
    plt.show()
+
+====================
+Plotting Sample Logs
+====================
+
+The :func:`mantid.plots.MantidAxes.plot<mantid.plots.MantidAxes.plot>` function can show sample logs. By default,
+the time axis represents the time since the first proton charge pulse (the
+beginning of the run), but one can also plot absolute time using `FullTime=True`
+
+.. plot::
+   :include-source:
    
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   from mantid.simpleapi import Load
+   
+   w=Load('CNCS_7860')
+   fig = plt.figure()
+   ax1 = fig.add_subplot(211,projection='mantid')
+   ax2 = fig.add_subplot(212,projection='mantid')
+   ax1.plot(w, LogName='ChopperStatus5')
+   ax1.set_title('From run start')
+   ax2.plot(w, LogName='ChopperStatus5',FullTime=True)
+   ax2.set_title('Absolute time')
+   fig.tight_layout()
+   fig.show()
+   
+
+Note that the parasite axes in matplotlib do not accept the projection keyword.
+So one needs to use :func:`mantid.plots.plotfunctions.plot<mantid.plots.plotfunctions.plot>` instead.
+
+.. plot::
+   :include-source:
+   
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   from mantid.simpleapi import Load
+   w=Load('CNCS_7860')
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   ax.plot(w,LogName='ChopperStatus5')
+   axt=ax.twiny()
+   plots.plotfunctions.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
+   fig.show()
+
+
 =============
 Complex plots
 =============
