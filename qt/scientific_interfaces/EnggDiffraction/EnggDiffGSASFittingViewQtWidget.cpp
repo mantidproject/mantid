@@ -91,7 +91,7 @@ void EnggDiffGSASFittingViewQtWidget::browsePhaseFiles() {
 void EnggDiffGSASFittingViewQtWidget::disableLoadIfInputEmpty() {
   setLoadEnabled(!runFileLineEditEmpty());
 }
-  
+
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
     const Mantid::API::ITableWorkspace_sptr latticeParams) const {
   double length_a, length_b, length_c, angle_alpha, angle_beta, angle_gamma;
