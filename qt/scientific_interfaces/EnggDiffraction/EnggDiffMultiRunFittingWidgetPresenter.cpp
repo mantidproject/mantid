@@ -176,6 +176,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::processRemoveRun() {
     const auto selectedRunLabel = m_view->getSelectedRunLabel();
     m_model->removeRun(selectedRunLabel);
     m_view->updateRunList(m_model->getAllWorkspaceLabels());
+    m_view->resetCanvas();
   }
 }
 

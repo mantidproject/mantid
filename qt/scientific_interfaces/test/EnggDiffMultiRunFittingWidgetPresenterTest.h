@@ -254,6 +254,7 @@ public:
         .Times(1)
         .WillOnce(Return(runLabels));
     EXPECT_CALL(*m_mockView, updateRunList(runLabels));
+    EXPECT_CALL(*m_mockView, resetCanvas());
 
     presenter->notify(
         IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
