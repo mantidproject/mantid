@@ -156,7 +156,7 @@
       <item row="5" column="3">
        <widget class="QPushButton" name="pushButton_doRefinement">
         <property name="text">
-         <string>Do Refinement</string>
+         <string>Run Refinement</string>
         </property>
        </widget>
       </item>
