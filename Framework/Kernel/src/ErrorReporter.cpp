@@ -28,9 +28,8 @@ Logger g_log("ErrorReporter");
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share)
-    : m_application(application),
-      m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(""),
-      m_email("") {
+    : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
+      m_share(share), m_name(""), m_email("") {
   int retval = Mantid::Kernel::ConfigService::Instance().getValue(
       "error_root_url", m_url);
   if (retval == 0) {
@@ -44,9 +43,8 @@ ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share, std::string name,
                              std::string email)
-    : m_application(application),
-      m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(name),
-      m_email(email) {
+    : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
+      m_share(share), m_name(name), m_email(email) {
   int retval = Mantid::Kernel::ConfigService::Instance().getValue(
       "error_root_url", m_url);
   if (retval == 0) {

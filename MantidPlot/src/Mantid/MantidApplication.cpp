@@ -37,16 +37,16 @@ void MantidApplication::errorHandling(bool continueWork, int share,
                                       QString name, QString email) {
   if (share == 0) {
     Mantid::Kernel::ErrorReporter errorReporter(
-        "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(),
-        "", true, name.toStdString(), email.toStdString());
+        "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
+        true, name.toStdString(), email.toStdString());
     errorReporter.sendErrorReport();
   } else if (share == 1) {
     Mantid::Kernel::ErrorReporter errorReporter(
-        "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(),
-        "", false, name.toStdString(), email.toStdString());
+        "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
+        false, name.toStdString(), email.toStdString());
     errorReporter.sendErrorReport();
   }
-  
+
   if (!continueWork) {
     g_log.fatal("Terminated by user.");
     quit();
