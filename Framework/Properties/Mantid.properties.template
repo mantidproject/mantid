@@ -54,8 +54,8 @@ CheckMantidVersion.DownloadURL = http://download.mantidproject.org
 
 # Whether to report usage statistics back to central server
 usagereports.enabled = @ENABLE_USAGE_REPORTS@
-error_root_url = http://ptsv2.com/t/mantidmat/post
-usage_root_url = http://ptsv2.com/t/mantidmat/post
+error_root_url = http://errorreports.mantidproject.org/api/error
+usage_root_url = http://reports.mantidproject.org
 
 # Where to load Grouping files (that are shipped with Mantid) from
 groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
