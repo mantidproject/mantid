@@ -140,7 +140,7 @@ void ReflectometryQResolution::exec() {
     auto &resolutions = outWS->mutableDx(wsIndex);
     for (size_t i = 0; i < wavelengths.size(); ++i) {
       const auto wavelength = wavelengths[i] * 1e-10;
-      const auto deltaLambda = wavelengthResolution(*inWS, wsIndex, wavelength);
+      const auto deltaLambda = wavelengthResolution(*inWS, wsIndex, setup, wavelength);
       const auto deltaThetaSq = angularResolutionSquared(inWS, *directWS, wsIndex, setup, beamFWHM, incidentFWHM, slit1FWHM);
       resolutions[i] = qs[i] * std::sqrt(pow<2>(deltaLambda) + deltaThetaSq);
     }
@@ -233,6 +233,9 @@ double ReflectometryQResolution::detectorDA(const API::MatrixWorkspace &ws, cons
 
 const ReflectometryQResolution::Setup ReflectometryQResolution::experimentSetup(const API::MatrixWorkspace &ws) {
   Setup s;
+  s.chopperOpening = inRad(getProperty(Prop::CHOPPER_OPENING));
+  s.chopperPairDistance = getProperty(Prop::CHOPPER_PAIR_DIST);
+  s.chopperPeriod = 1. / (static_cast<double>(getProperty(Prop::CHOPPER_SPEED)) / 60.);
   s.detectorResolution = getProperty(Prop::DETECTOR_RESOLUTION);
   const std::vector<int> foreground = getProperty(Prop::FOREGROUND);
   const auto lowPixel = static_cast<size_t>(foreground.front());
@@ -254,6 +257,7 @@ const ReflectometryQResolution::Setup ReflectometryQResolution::experimentSetup(
   s.slit2Size = slitSize(ws, slit2SizeEntry);
   const std::string sumType = getProperty(Prop::SUM_TYPE);
   s.sumType = sumType == SumTypeChoice::LAMBDA ? SumType::LAMBDA : SumType::Q;
+  s.tofChannelWidth = getProperty(Prop::TOF_CHANNEL_WIDTH);
   return s;
 }
 
@@ -318,19 +322,14 @@ double ReflectometryQResolution::slitSize(const API::MatrixWorkspace &ws, const 
   }
 }
 
-double ReflectometryQResolution::wavelengthResolution(const API::MatrixWorkspace &ws, const size_t wsIndex, const double wavelength) {
+double ReflectometryQResolution::wavelengthResolution(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double wavelength) {
   // err_res in COSMOS
   using namespace boost::math;
   using namespace PhysicalConstants;
   const auto &spectrumInfo = ws.spectrumInfo();
   const auto flightDistance = spectrumInfo.l1() + spectrumInfo.l2(wsIndex);
-  const double pairDistance = getProperty(Prop::CHOPPER_PAIR_DIST);
-  const double chopperSpeed = getProperty(Prop::CHOPPER_SPEED);
-  const auto period = 1. / chopperSpeed;
-  const auto opening = inRad(getProperty(Prop::CHOPPER_OPENING));
-  const auto chopperResolution = (pairDistance + h * opening * period / (2. * M_PI * NeutronMass * wavelength)) / (2. * flightDistance);
-  const double tofWidth = getProperty(Prop::TOF_CHANNEL_WIDTH);
-  const auto detectorResolution = h * tofWidth / (NeutronMass * wavelength * flightDistance);
+  const auto chopperResolution = (setup.chopperPairDistance + h * setup.chopperOpening * setup.chopperPeriod / (2. * M_PI * NeutronMass * wavelength)) / (2. * flightDistance);
+  const auto detectorResolution = h * setup.tofChannelWidth / (NeutronMass * wavelength * flightDistance);
   // Shouldn't the factor be 0.49?
   return 0.98 * (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) + 3. * chopperResolution * detectorResolution) / (2. * chopperResolution + detectorResolution);
 }

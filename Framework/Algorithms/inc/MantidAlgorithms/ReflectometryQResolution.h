@@ -41,6 +41,9 @@ public:
 private:
   enum class SumType { LAMBDA, Q };
   struct Setup {
+    double chopperOpening{0.};
+    double chopperPairDistance{0.};
+    double chopperPeriod{0.};
     double detectorResolution{0.};
     size_t foregroundStartPixel{0};
     size_t foregroundEndPixel{0};
@@ -53,6 +56,7 @@ private:
     double slit2SampleDistance{0.};
     double slit2Size{0.};
     SumType sumType{SumType::LAMBDA};
+    double tofChannelWidth{0.};
   };
   void init() override;
   void exec() override;
@@ -67,7 +71,7 @@ private:
   double slit1AngularSpread(const Setup& setup);
   double slit2AngularSpread(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup& setup);
   double slitSize(const API::MatrixWorkspace &ws, const std::string &logEntry);
-  double wavelengthResolution(const API::MatrixWorkspace &ws, const size_t wsIndex, const double wavelength);
+  double wavelengthResolution(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double wavelength);
 };
 
 } // namespace Algorithms
