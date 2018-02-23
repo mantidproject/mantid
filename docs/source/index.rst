@@ -20,6 +20,7 @@ Mantid Documentation
    :glob:
    :maxdepth: 1
 
+   training/index
    algorithms/index
    algorithms/*
    concepts/index
@@ -30,7 +31,6 @@ Mantid Documentation
    techniques/index
    api/index
    release/index
-   training/index
 
 
 This is the documentation for Mantid |release|.
@@ -42,6 +42,7 @@ This is the documentation for Mantid |release|.
    :width: 200px
    :align: right
 
+* `Tutorials <training/index.html>`_
 * `Algorithms <algorithms/index.html>`_
 * `Concepts <concepts/index.html>`_
 * `Interfaces <interfaces/index.html>`_
