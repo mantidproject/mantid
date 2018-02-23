@@ -544,7 +544,7 @@ std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice,
   int ac = 0;
   int r = 0;
   int total = 0;
-  for (const auto & peak: peaks) {
+  for (const auto &peak : peaks) {
     int h = boost::math::iround(peak.getH());
     int k = boost::math::iround(peak.getK());
     int l = boost::math::iround(peak.getL());
