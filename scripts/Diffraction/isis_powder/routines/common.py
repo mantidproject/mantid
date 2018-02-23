@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from six import iterkeys
+import warnings
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
@@ -385,6 +386,10 @@ def run_normalise_by_current(ws):
     """
     if workspace_has_current(ws):
         ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+    else:
+        warnings.warn(
+            "Run {} had no current. NormaliseByCurrent will not be run on it, and empty will not be subtracted".
+            format(ws.getRunNumber()))
     return ws
 
 
