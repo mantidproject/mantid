@@ -890,7 +890,7 @@ void Peak::setCol(int m_col) { this->m_col = m_col; }
 
 // -------------------------------------------------------------------------------------
 /** Sets the unique peak number
- * @param m_col :: col value   */
+ * @param m_peakNumber :: unique peak number value   */
 void Peak::setPeakNumber(int m_peakNumber) {
   this->m_peakNumber = m_peakNumber;
 }

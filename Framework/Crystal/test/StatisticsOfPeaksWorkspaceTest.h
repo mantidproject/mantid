@@ -81,9 +81,9 @@ public:
     TS_ASSERT_EQUALS(tableOut->String(0, 0), "Overall");
     TS_ASSERT_EQUALS(tableOut->Int(0, 1), 3);
     TS_ASSERT_DELTA(tableOut->Double(0, 2), 3.6, .1);
-    TS_ASSERT_DELTA(tableOut->Double(0, 3), 14.3, .1);
-    TS_ASSERT_DELTA(tableOut->Double(0, 4), 8., .1);
-    TS_ASSERT_DELTA(tableOut->Double(0, 5), 1.4195, .1);
+    TS_ASSERT_DELTA(tableOut->Double(0, 3), 14.03, .1);
+    TS_ASSERT_DELTA(tableOut->Double(0, 4), 5.3, .1);
+    TS_ASSERT_DELTA(tableOut->Double(0, 5), 1.25, .1);
     TS_ASSERT_DELTA(tableOut->Double(0, 6), 0., .1);
     TS_ASSERT_DELTA(tableOut->Double(0, 7), 0., .1);
 
@@ -94,7 +94,7 @@ public:
     TS_ASSERT(wsout);
     if (!wsout)
       return;
-    TS_ASSERT_EQUALS(wsout->getNumberPeaks(), 24);
+    TS_ASSERT_EQUALS(wsout->getNumberPeaks(), 16);
 
     Peak p = wsout->getPeaks()[0];
     TS_ASSERT_EQUALS(p.getH(), 1);

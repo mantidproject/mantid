@@ -210,6 +210,8 @@ UniqueReflectionCollection::getReflections() const {
  * group of equivalent reflections.
  *
  * @param uniqueReflections :: Map of unique reflections and peaks.
+ * @param equivalentIntensities :: Mean or median for statistics of equivalent peaks.
+ * @param sigmaCritical :: Number of standard deviations for outliers.
  */
 void PeaksStatistics::calculatePeaksStatistics(
     const std::map<V3D, UniqueReflection> &uniqueReflections,

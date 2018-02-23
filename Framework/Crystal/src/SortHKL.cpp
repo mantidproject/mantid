@@ -128,11 +128,11 @@ void SortHKL::exec() {
       auto wavelengths = unique.second.getWavelengths();
       auto intensities = unique.second.getIntensities();
       auto sigmas = unique.second.getSigmas();
-      std::cout << "HKL " << unique.second.getHKL() << "\n";
-      std::cout << "Intensities ";
-      for (const auto &e : intensities)
-        std::cout << e << "  ";
-      std::cout << "\n";
+      //std::cout << "HKL " << unique.second.getHKL() << "\n";
+      //std::cout << "Intensities ";
+      //for (const auto &e : intensities)
+        //std::cout << e << "  ";
+      //std::cout << "\n";
       auto zScores = Kernel::getWeightedZscore(intensities, sigmas);
       if (zScores.size() > maxPeaks)
         maxPeaks = zScores.size();
@@ -143,8 +143,8 @@ void SortHKL::exec() {
           Kernel::getStatistics(outliersRemoved.getIntensities(),
                                 StatOptions::Mean | StatOptions::Median);
 
-      std::cout << "Mean = " << intensityStatistics.mean
-                << "  Median = " << intensityStatistics.median << "\n";
+      //std::cout << "Mean = " << intensityStatistics.mean
+                //<< "  Median = " << intensityStatistics.median << "\n";
       // sort wavelengths & intensities
       for (size_t i = 0; i < wavelengths.size(); i++) {
         size_t i0 = i;
@@ -161,7 +161,7 @@ void SortHKL::exec() {
         intensities[i0] = intensities[i];
         intensities[i] = temp;
       }
-      std::cout << "Zscores ";
+      //std::cout << "Zscores ";
       for (size_t i = 0; i < std::min(zScores.size(), static_cast<size_t>(20));
            ++i) {
         UniqX[i] = wavelengths[i];
@@ -172,14 +172,14 @@ void SortHKL::exec() {
           UniqE[i] = intensityStatistics.mean - intensities[i];
         else
           UniqE[i] = intensityStatistics.median - intensities[i];
-        std::cout << zScores[i] << "  ";
+        //std::cout << zScores[i] << "  ";
       }
       for (size_t i = zScores.size(); i < 20; ++i) {
         UniqX[i] = wavelengths[zScores.size() - 1];
         UniqY[i] = intensities[zScores.size() - 1];
         UniqE[i] = 0.0;
       }
-      std::cout << "\n";
+      //std::cout << "\n";
     }
   }
 
