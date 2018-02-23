@@ -33,7 +33,11 @@ public:
   void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 
+  void displayGamma(const double gamma) const override;
+
   void displayRwp(const double rwp) const override;
+
+  void displaySigma(const double sigma) const override;
 
   std::vector<std::string> getFocusedFileNames() const override;
 
@@ -43,15 +47,25 @@ public:
 
   std::string getPathToGSASII() const override;
 
-  double getPawleyDMin() const override;
+  boost::optional<double> getPawleyDMin() const override;
 
-  double getPawleyNegativeWeight() const override;
+  boost::optional<double> getPawleyNegativeWeight() const override;
 
   std::vector<std::string> getPhaseFileNames() const override;
 
   GSASRefinementMethod getRefinementMethod() const override;
 
+  bool getRefineGamma() const override;
+
+  bool getRefineSigma() const override;
+
+  boost::optional<double> getXMax() const override;
+
+  boost::optional<double> getXMin() const override;
+
   void setEnabled(const bool enabled);
+
+  void showStatus(const std::string &status) const override;
 
   void userError(const std::string &errorTitle,
                  const std::string &errorDescription) const override;
@@ -61,7 +75,12 @@ public:
 
 private slots:
   void browseFocusedRun();
+  void browseGSASHome();
+  void browseGSASProj();
+  void browseInstParams();
+  void browsePhaseFiles();
   void disableLoadIfInputEmpty();
+  void doRefinement();
   void loadFocusedRun();
   void selectRun();
 
@@ -69,6 +88,9 @@ private:
   bool runFileLineEditEmpty() const;
 
   void setLoadEnabled(const bool enabled);
+
+  static const char GSAS_HOME_SETTING_NAME[];
+  static const char SETTINGS_NAME[];
 
   boost::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
 

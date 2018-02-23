@@ -4,6 +4,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include <boost/algorithm/string/join.hpp>
+
 using namespace Mantid;
 
 namespace {
@@ -22,9 +24,11 @@ std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
 namespace MantidQt {
 namespace CustomInterfaces {
 void EnggDiffGSASFittingModel::addFitResultsToMaps(
-    const RunLabel &runLabel, const double rwp,
-    const std::string &latticeParamsTableName) {
+    const RunLabel &runLabel, const double rwp, const double sigma,
+    const double gamma, const std::string &latticeParamsTableName) {
   addRwp(runLabel, rwp);
+  addSigma(runLabel, sigma);
+  addGamma(runLabel, gamma);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto latticeParams =
@@ -37,9 +41,19 @@ void EnggDiffGSASFittingModel::addLatticeParams(
   m_latticeParamsMap.add(runLabel, table);
 }
 
+void EnggDiffGSASFittingModel::addGamma(const RunLabel &runLabel,
+                                        const double gamma) {
+  m_gammaMap.add(runLabel, gamma);
+}
+
 void EnggDiffGSASFittingModel::addRwp(const RunLabel &runLabel,
                                       const double rwp) {
   m_rwpMap.add(runLabel, rwp);
+}
+
+void EnggDiffGSASFittingModel::addSigma(const RunLabel &runLabel,
+                                        const double sigma) {
+  m_sigmaMap.add(runLabel, sigma);
 }
 
 namespace {
@@ -56,20 +70,16 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
 }
 
 API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doPawleyRefinement(
-    const API::MatrixWorkspace_sptr inputWS, const RunLabel &runLabel,
-    const std::string &instParamFile,
-    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
-    const std::string &GSASIIProjectFile, const double dMin,
-    const double negativeWeight) {
-  const auto outputWSName = generateFittedPeaksWSName(runLabel);
-  const auto latticeParamsName = generateLatticeParamsName(runLabel);
+    const GSASIIRefineFitPeaksParameters &params) {
+  const auto outputWSName = generateFittedPeaksWSName(params.runLabel);
+  const auto latticeParamsName = generateLatticeParamsName(params.runLabel);
 
-  const auto rwp = doGSASRefinementAlgorithm(
-      inputWS, outputWSName, latticeParamsName, "Pawley refinement",
-      instParamFile, phaseFiles, pathToGSASII, GSASIIProjectFile, dMin,
-      negativeWeight);
+  const auto outputProperties = doGSASRefinementAlgorithm(
+      outputWSName, latticeParamsName, params, "Pawley refinement");
 
-  addFitResultsToMaps(runLabel, rwp, latticeParamsName);
+  addFitResultsToMaps(params.runLabel, outputProperties.rwp,
+                      outputProperties.sigma, outputProperties.gamma,
+                      latticeParamsName);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
@@ -77,46 +87,59 @@ API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doPawleyRefinement(
   return fittedPeaks;
 }
 
-double EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
-    API::MatrixWorkspace_sptr inputWorkspace,
+GSASIIRefineFitPeaksOutputProperties
+EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const std::string &outputWorkspaceName,
-    const std::string &latticeParamsName, const std::string &refinementMethod,
-    const std::string &instParamFile,
-    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
-    const std::string &GSASIIProjectFile, const double dMin,
-    const double negativeWeight) {
+    const std::string &latticeParamsName,
+    const GSASIIRefineFitPeaksParameters &params,
+    const std::string &refinementMethod) {
   auto gsasAlg =
       API::AlgorithmManager::Instance().create("GSASIIRefineFitPeaks");
+
   gsasAlg->setProperty("RefinementMethod", refinementMethod);
-  gsasAlg->setProperty("InputWorkspace", inputWorkspace);
+  gsasAlg->setProperty("InputWorkspace", params.inputWorkspace);
+  gsasAlg->setProperty("InstrumentFile", params.instParamsFile);
+  gsasAlg->setProperty("PhaseInfoFiles",
+                       boost::algorithm::join(params.phaseFiles, ","));
+  gsasAlg->setProperty("PathToGSASII", params.gsasHome);
+
+  if (params.dMin) {
+    gsasAlg->setProperty("PawleyDMin", *(params.dMin));
+  }
+  if (params.negativeWeight) {
+    gsasAlg->setProperty("PawleyNegativeWeight", *(params.negativeWeight));
+  }
+  if (params.xMin) {
+    gsasAlg->setProperty("XMin", *(params.xMin));
+  }
+  if (params.xMax) {
+    gsasAlg->setProperty("XMax", *(params.xMax));
+  }
+  gsasAlg->setProperty("RefineSigma", params.refineSigma);
+  gsasAlg->setProperty("RefineGamma", params.refineGamma);
+
   gsasAlg->setProperty("OutputWorkspace", outputWorkspaceName);
   gsasAlg->setProperty("LatticeParameters", latticeParamsName);
-  gsasAlg->setProperty("InstrumentFile", instParamFile);
-  gsasAlg->setProperty("PhaseInfoFiles", phaseFiles);
-  gsasAlg->setProperty("PathToGSASII", pathToGSASII);
-  gsasAlg->setProperty("SaveGSASIIProjectFile", GSASIIProjectFile);
-  gsasAlg->setProperty("PawleyDMin", dMin);
-  gsasAlg->setProperty("PawleyNegativeWeight", negativeWeight);
+  gsasAlg->setProperty("SaveGSASIIProjectFile", params.gsasProjectFile);
   gsasAlg->execute();
 
   const double rwp = gsasAlg->getProperty("Rwp");
-  return rwp;
+  const double sigma = gsasAlg->getProperty("Sigma");
+  const double gamma = gsasAlg->getProperty("Gamma");
+  return GSASIIRefineFitPeaksOutputProperties(rwp, sigma, gamma);
 }
 
 API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doRietveldRefinement(
-    const API::MatrixWorkspace_sptr inputWS, const RunLabel &runLabel,
-    const std::string &instParamFile,
-    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
-    const std::string &GSASIIProjectFile) {
-  const auto outputWSName = generateFittedPeaksWSName(runLabel);
-  const auto latticeParamsName = generateLatticeParamsName(runLabel);
+    const GSASIIRefineFitPeaksParameters &params) {
+  const auto outputWSName = generateFittedPeaksWSName(params.runLabel);
+  const auto latticeParamsName = generateLatticeParamsName(params.runLabel);
 
-  const auto rwp = doGSASRefinementAlgorithm(
-      inputWS, outputWSName, latticeParamsName, "Rietveld refinement",
-      instParamFile, phaseFiles, pathToGSASII, GSASIIProjectFile,
-      DEFAULT_PAWLEY_DMIN, DEFAULT_PAWLEY_NEGATIVE_WEIGHT);
+  const auto outputProperties = doGSASRefinementAlgorithm(
+      outputWSName, latticeParamsName, params, "Rietveld refinement");
 
-  addFitResultsToMaps(runLabel, rwp, latticeParamsName);
+  addFitResultsToMaps(params.runLabel, outputProperties.rwp,
+                      outputProperties.sigma, outputProperties.gamma,
+                      latticeParamsName);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
@@ -130,8 +153,24 @@ EnggDiffGSASFittingModel::getLatticeParams(const RunLabel &runLabel) const {
 }
 
 boost::optional<double>
+EnggDiffGSASFittingModel::getGamma(const RunLabel &runLabel) const {
+  return getFromRunMapOptional(m_gammaMap, runLabel);
+}
+
+boost::optional<double>
 EnggDiffGSASFittingModel::getRwp(const RunLabel &runLabel) const {
   return getFromRunMapOptional(m_rwpMap, runLabel);
+}
+
+boost::optional<double>
+EnggDiffGSASFittingModel::getSigma(const RunLabel &runLabel) const {
+  return getFromRunMapOptional(m_sigmaMap, runLabel);
+}
+
+bool EnggDiffGSASFittingModel::hasFitResultsForRun(
+    const RunLabel &runLabel) const {
+  return m_rwpMap.contains(runLabel) && m_sigmaMap.contains(runLabel) &&
+         m_gammaMap.contains(runLabel);
 }
 
 Mantid::API::MatrixWorkspace_sptr

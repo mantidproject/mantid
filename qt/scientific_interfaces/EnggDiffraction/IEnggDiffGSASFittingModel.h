@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGMODEL_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGMODEL_H_
 
+#include "GSASIIRefineFitPeaksParameters.h"
 #include "RunLabel.h"
 
 #include "MantidAPI/ITableWorkspace.h"
@@ -22,47 +23,21 @@ public:
 
   /**
    Perform a Pawley refinement on a run
-   @param inputWS The workspace to run refinement on
-   @param runLabel Run number and bank ID of the workspace to refine
-   @param instParamFile The instrument parameter file name (.prm) to use for
-   refinement
-   @param phaseFiles Vector of file paths to phases to use in refinement
-   @param pathToGSASII Location of the directory containing GSASIIscriptable.py
-   (and GSAS-II executables)
-   @param GSASIIProjectFile Location to save the .gpx project to
-   @param dMin The minimum d-spacing to use for refinement
-   @param negativeWeight The weight of the penalty function
+   @param params Parameters to be passed to GSASIIRefineFitPeaks
    @return Fitted peaks workspace resulting from refinement
    @throws If GSASIIRefineFitPeaks throws
    */
   virtual Mantid::API::MatrixWorkspace_sptr
-  doPawleyRefinement(const Mantid::API::MatrixWorkspace_sptr inputWS,
-                     const RunLabel &runLabel, const std::string &instParamFile,
-                     const std::vector<std::string> &phaseFiles,
-                     const std::string &pathToGSASII,
-                     const std::string &GSASIIProjectFile, const double dMin,
-                     const double negativeWeight) = 0;
+  doPawleyRefinement(const GSASIIRefineFitPeaksParameters &params) = 0;
 
   /**
    Perform a Rietveld refinement on a run
-   @param inputWS The workspace to run refinement on
-   @param runLabel Run number and bank ID of the workspace to refine
-   @param instParamFile The instrument parameter file name (.prm) to use for
-   refinement
-   @param phaseFiles Vector of file paths to phases to use in refinement
-   @param pathToGSASII Location of the directory containing GSASIIscriptable.py
-   (and GSAS-II executables)
-   @param GSASIIProjectFile Location to save the .gpx project to
+   @param params Parameters to be passed to GSASIIRefineFitPeaks
    @return Fitted peaks workspace resulting from refinement
    @throws If GSASIIRefineFitPeaks throws
    */
   virtual Mantid::API::MatrixWorkspace_sptr
-  doRietveldRefinement(const Mantid::API::MatrixWorkspace_sptr inputWS,
-                       const RunLabel &runLabel,
-                       const std::string &instParamFile,
-                       const std::vector<std::string> &phaseFiles,
-                       const std::string &pathToGSASII,
-                       const std::string &GSASIIProjectFile) = 0;
+  doRietveldRefinement(const GSASIIRefineFitPeaksParameters &params) = 0;
 
   /**
    Get refined lattice parameters for a run
@@ -73,6 +48,10 @@ public:
   virtual boost::optional<Mantid::API::ITableWorkspace_sptr>
   getLatticeParams(const RunLabel &runLabel) const = 0;
 
+  /// Get gamma peak broadening term for a given run, if a fit has been done on
+  /// that run
+  virtual boost::optional<double> getGamma(const RunLabel &runLabel) const = 0;
+
   /**
    Get the weighted profile R-factor discrepancy index for goodness of fit on a
    run
@@ -81,6 +60,13 @@ public:
    been performed on this run)
   */
   virtual boost::optional<double> getRwp(const RunLabel &runLabel) const = 0;
+
+  /// Get sigma peak broadening term for a given run, if a fit has been done on
+  /// that run
+  virtual boost::optional<double> getSigma(const RunLabel &runLabel) const = 0;
+
+  /// Get whether the model contains fit results for a given run
+  virtual bool hasFitResultsForRun(const RunLabel &runLabel) const = 0;
 
   /**
    Load a focused run from a file

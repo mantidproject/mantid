@@ -30,15 +30,13 @@ public:
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const override;
 
-  RunLabel getSelectedRunLabel() const override;
+  boost::optional<RunLabel> getSelectedRunLabel() const override;
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
   getWidgetAdder() const override;
 
   void
   notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) override;
-
-  bool showFitResultsSelected() const override;
 
 private:
   void processPlotPeaksStateChanged();

@@ -59,7 +59,7 @@ public:
   getFocusedRun(const RunLabel &runLabel) const = 0;
 
   /// Get run number and bank ID of the run currently selected in the list
-  virtual RunLabel getSelectedRunLabel() const = 0;
+  virtual boost::optional<RunLabel> getSelectedRunLabel() const = 0;
 
   /// Get functor to add this widget to a parent
   virtual std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
@@ -74,9 +74,6 @@ public:
    */
   virtual void
   notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) = 0;
-
-  /// Get whether the user has selected to show fit results
-  virtual bool showFitResultsSelected() const = 0;
 };
 
 } // namespace CustomInterfaces

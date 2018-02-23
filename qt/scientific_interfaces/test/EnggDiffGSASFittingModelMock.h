@@ -13,28 +13,27 @@ using namespace MantidQt::CustomInterfaces;
 class MockEnggDiffGSASFittingModel : public IEnggDiffGSASFittingModel {
 
 public:
-  MOCK_METHOD8(doPawleyRefinement,
+  MOCK_METHOD1(doPawleyRefinement,
                Mantid::API::MatrixWorkspace_sptr(
-                   const Mantid::API::MatrixWorkspace_sptr inputWS,
-                   const RunLabel &runLabel, const std::string &instParamFile,
-                   const std::vector<std::string> &phaseFiles,
-                   const std::string &pathToGSASII,
-                   const std::string &GSASIIProjectFile, const double dMin,
-                   const double negativeWeight));
+                   const GSASIIRefineFitPeaksParameters &params));
 
-  MOCK_METHOD6(doRietveldRefinement,
+  MOCK_METHOD1(doRietveldRefinement,
                Mantid::API::MatrixWorkspace_sptr(
-                   const Mantid::API::MatrixWorkspace_sptr inputWS,
-                   const RunLabel &runLabel, const std::string &instParamFile,
-                   const std::vector<std::string> &phaseFiles,
-                   const std::string &pathToGSASII,
-                   const std::string &GSASIIProjectFile));
+                   const GSASIIRefineFitPeaksParameters &params));
+
+  MOCK_CONST_METHOD1(getGamma,
+                     boost::optional<double>(const RunLabel &runLabel));
 
   MOCK_CONST_METHOD1(getLatticeParams,
                      boost::optional<Mantid::API::ITableWorkspace_sptr>(
                          const RunLabel &runLabel));
 
   MOCK_CONST_METHOD1(getRwp, boost::optional<double>(const RunLabel &runLabel));
+
+  MOCK_CONST_METHOD1(getSigma,
+                     boost::optional<double>(const RunLabel &runLabel));
+
+  MOCK_CONST_METHOD1(hasFitResultsForRun, bool(const RunLabel &runLabel));
 
   MOCK_CONST_METHOD1(loadFocusedRun, Mantid::API::MatrixWorkspace_sptr(
                                          const std::string &filename));

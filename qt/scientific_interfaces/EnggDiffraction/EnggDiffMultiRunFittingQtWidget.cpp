@@ -27,17 +27,26 @@ void EnggDiffMultiRunFittingQtWidget::cleanUpPlot() {
     curve->detach();
   }
   m_focusedRunCurves.clear();
+  for (auto &curve : m_fittedPeaksCurves) {
+    curve->detach();
+  }
+  m_fittedPeaksCurves.clear();
 }
 
-RunLabel EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
-  const auto currentLabel = m_ui.listWidget_runLabels->currentItem()->text();
-  const auto pieces = currentLabel.split("_");
-  if (pieces.size() != 2) {
-    throw std::runtime_error(
-        "Unexpected run label: \"" + currentLabel.toStdString() +
-        "\". Please contact the development team with this message");
+boost::optional<RunLabel>
+EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
+  if (hasSelectedRunLabel()) {
+    const auto currentLabel = m_ui.listWidget_runLabels->currentItem()->text();
+    const auto pieces = currentLabel.split("_");
+    if (pieces.size() != 2) {
+      throw std::runtime_error(
+          "Unexpected run label: \"" + currentLabel.toStdString() +
+          "\". Please contact the development team with this message");
+    }
+    return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
+  } else {
+    return boost::none;
   }
-  return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
 }
 
 void EnggDiffMultiRunFittingQtWidget::reportNoRunSelectedForPlot() {
@@ -73,9 +82,18 @@ void EnggDiffMultiRunFittingQtWidget::plotFittedPeaksStateChanged() {
 }
 
 void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
-    const std::vector<boost::shared_ptr<QwtData>> &curve) {
-  UNUSED_ARG(curve);
-  throw std::runtime_error("plotFittedPeaks not yet implemented");
+    const std::vector<boost::shared_ptr<QwtData>> &curves) {
+  for (const auto &curve : curves) {
+    auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
+
+    plotCurve->setPen(QColor(Qt::red));
+    plotCurve->setData(*curve);
+    plotCurve->attach(m_ui.plotArea);
+    m_fittedPeaksCurves.emplace_back(std::move(plotCurve));
+  }
+  m_ui.plotArea->replot();
+  m_zoomTool->setZoomBase();
+  m_zoomTool->setEnabled(true);
 }
 
 void EnggDiffMultiRunFittingQtWidget::processPlotToSeparateWindow() {
