@@ -1,5 +1,5 @@
-#ifndef MANTID_TESTOBJECT__
-#define MANTID_TESTOBJECT__
+#ifndef MANTID_TESTCSGOBJECT__
+#define MANTID_TESTCSGOBJECT__
 
 #include "MantidGeometry/Objects/CSGObject.h"
 
@@ -139,8 +139,19 @@ public:
     geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
   }
 
+  void testCloneWithMaterial() {
+    using Mantid::Kernel::Material;
+    auto testMaterial =
+        Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+    auto geom_obj = createUnitCube();
+    TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
+    auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
+                     cloned_obj->material().numberDensity(), 1e-12);
+  }
+
   void testIsOnSideCappedCylinder() {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 0, 0)), false); // origin
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 2.9, 0)), false);
@@ -174,7 +185,7 @@ public:
   }
 
   void testIsValidCappedCylinder() {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 0, 0)), true); // origin
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 2.9, 0)), true);
@@ -287,7 +298,7 @@ public:
   }
 
   void testCalcValidTypeCappedCylinder() {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // entry on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(1, 0, 0)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(-1, 0, 0)),
@@ -362,7 +373,7 @@ public:
 
   void testInterceptSurfaceCappedCylinderY() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
 
@@ -372,7 +383,7 @@ public:
 
   void testInterceptSurfaceCappedCylinderX() {
     std::vector<Link> expectedResults;
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -384,7 +395,7 @@ public:
   void testInterceptSurfaceCappedCylinderMiss() {
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -392,19 +403,21 @@ public:
 
   void checkTrackIntercept(Track &track,
                            const std::vector<Link> &expectedResults) {
-    int index = 0;
+    size_t index = 0;
     for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
          ++it) {
-      TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
-                      1e-6);
-      TS_ASSERT_DELTA(it->distInsideObject,
-                      expectedResults[index].distInsideObject, 1e-6);
-      TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
-      TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
-      TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
+      if (index < expectedResults.size()) {
+        TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
+                        1e-6);
+        TS_ASSERT_DELTA(it->distInsideObject,
+                        expectedResults[index].distInsideObject, 1e-6);
+        TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
+        TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
+        TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
+      }
       ++index;
     }
-    TS_ASSERT_EQUALS(index, static_cast<int>(expectedResults.size()));
+    TS_ASSERT_EQUALS(index, expectedResults.size());
   }
 
   void checkTrackIntercept(IObject_sptr obj, Track &track,
@@ -955,7 +968,7 @@ public:
   Test bounding box for a object capped cylinder
   */
   {
-    IObject_sptr geom_obj = createCappedCylinder();
+    auto geom_obj = createCappedCylinder();
     double xmax, ymax, zmax, xmin, ymin, zmin;
     xmax = ymax = zmax = 100;
     xmin = ymin = zmin = -100;
@@ -1531,17 +1544,15 @@ public:
 
   void test_generatePointInside_Solid_Primitive() {
     const size_t maxAttempts(500);
-    V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
-      dummy = solid->generatePointInObject(rng, maxAttempts);
+      solid->generatePointInObject(rng, maxAttempts);
     }
   }
 
   void test_Point_Inside_Solid_Composite_With_Hole() {
     const size_t maxAttempts(500);
-    V3D dummy;
     for (size_t i = 0; i < npoints; ++i) {
-      dummy = shell->generatePointInObject(rng, maxAttempts);
+      shell->generatePointInObject(rng, maxAttempts);
     }
   }
 
@@ -1552,4 +1563,4 @@ private:
   IObject_sptr shell;
 };
 
-#endif // MANTID_TESTOBJECT__
+#endif // MANTID_TESTCSGOBJECT__

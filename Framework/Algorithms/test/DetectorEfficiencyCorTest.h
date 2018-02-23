@@ -7,6 +7,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

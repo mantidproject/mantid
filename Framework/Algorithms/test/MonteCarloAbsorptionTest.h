@@ -39,7 +39,7 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
   // Define a sample shape
   auto sampleShape =
       ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
-  // And a material
+  // And a material assuming it's a CSG Object
   sampleShape->setMaterial(
       Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
   ws->mutableSample().setShape(sampleShape);
@@ -52,11 +52,13 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
     const V3D axis(0.0, 1.0, 0.0);
 
     ShapeFactory shapeMaker;
-    auto can = boost::make_shared<Container>(
+    auto canShape =
         shapeMaker.createShape(ComponentCreationHelper::cappedCylinderXML(
-            radius, height, baseCentre, axis, id)));
-    can->setMaterial(Material("CanMaterial",
-                              PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+            radius, height, baseCentre, axis, id));
+    // Set material assuming it's a CSG Object
+    canShape->setMaterial(Material(
+        "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+    auto can = boost::make_shared<Container>(canShape);
     SampleEnvironment *env = new SampleEnvironment("can", can);
     ws->mutableSample().setEnvironment(env);
   } else if (environment == Environment::UserBeamSize) {

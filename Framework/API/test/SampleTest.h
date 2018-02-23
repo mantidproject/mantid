@@ -260,7 +260,7 @@ public:
     Material vanBlock("vanBlock",
                       Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    IObject_sptr shape = Mantid::Geometry::ShapeFactory().createShape("");
+    auto shape = Mantid::Geometry::ShapeFactory().createShape("");
     shape->setMaterial(vanBlock);
     sample.setShape(shape);
 

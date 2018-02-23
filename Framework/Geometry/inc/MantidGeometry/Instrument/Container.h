@@ -62,13 +62,14 @@ public:
     return m_shape->calcValidType(Pt, uVec);
   }
   bool hasValidShape() const override { return m_shape->hasValidShape(); }
-  int setObject(const int ON, const std::string &Ln) override {
-    return m_shape->setObject(ON, Ln);
-  }
+
   IObject *clone() const override { return new Container(*this); }
 
+  IObject *cloneWithMaterial(const Kernel::Material &material) const override {
+    return m_shape->cloneWithMaterial(material);
+  }
+
   int getName() const override { return m_shape->getName(); }
-  void setName(const int nx) override { m_shape->setName(nx); }
 
   int interceptSurface(Geometry::Track &t) const override {
     return m_shape->interceptSurface(t);
@@ -106,7 +107,7 @@ public:
                      double &myradius, double &myheight) const override {
     m_shape->GetObjectGeom(type, vectors, myradius, myheight);
   }
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() override {
+  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override {
     return m_shape->getGeometryHandler();
   }
 
@@ -114,22 +115,11 @@ public:
 
   void draw() const override { m_shape->draw(); }
   void initDraw() const override { m_shape->initDraw(); }
-  void setVtkGeometryCacheReader(
-      boost::shared_ptr<vtkGeometryCacheReader> reader) override {
-    m_shape->setVtkGeometryCacheReader(reader);
-  }
-  void setVtkGeometryCacheWriter(
-      boost::shared_ptr<vtkGeometryCacheWriter> writer) override {
-    m_shape->setVtkGeometryCacheWriter(writer);
-  }
 
-  void setMaterial(const Kernel::Material &material) override {
-    m_shape->setMaterial(material);
-  }
   const Kernel::Material material() const override {
     return m_shape->material();
   }
-  void setID(const std::string &id) override { m_shape->setID(id); }
+  void setID(const std::string &id);
   const std::string &id() const override { return m_shape->id(); }
 
 private:
