@@ -28,7 +28,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     vesuvio_loader = VesuvioLoadHelper(flags['diff_mode'], flags['fit_mode'],
                                        flags['ip_file'], flags.get('bin_parameters', None),
                                        flags.get('load_log_files', True))
-    vesuvio_input = VesuvioTOFFitInput(runs, flags['container_runs'],
+    vesuvio_input = VesuvioTOFFitInput(runs, flags.get('container_runs', None),
                                        flags['spectra'], vesuvio_loader)
 
     if flags.get('ms_enabled', True):
