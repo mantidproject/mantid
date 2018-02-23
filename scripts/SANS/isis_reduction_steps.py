@@ -3731,14 +3731,13 @@ class UserFile(ReductionStep):
         values = details.split()
         rAnds = reducer.instrument.getDetector('FRONT').mergeRange
         rAnds.q_merge_range = False
-        if details.startswith('OVERLAP'):
-            if len(values) == 3:
-                rAnds.q_merge_range = True
-                rAnds.q_min = float(values[1])
-                rAnds.q_max = float(values[2])
-            else:
-                _issueWarning(
-                    "Command: \"DET/" + details + "\" not valid. Expected format is /DET/OVERLAP q1 q2")
+        if len(values) == 3:
+            rAnds.q_merge_range = True
+            rAnds.q_min = float(values[1])
+            rAnds.q_max = float(values[2])
+        else:
+            _issueWarning(
+                "Command: \"DET/" + details + "\" not valid. Expected format is /DET/OVERLAP q1 q2")
 
     def _read_back_line(self, arguments, reducer):
         """
