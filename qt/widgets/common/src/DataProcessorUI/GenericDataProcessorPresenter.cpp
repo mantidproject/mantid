@@ -324,7 +324,7 @@ void GenericDataProcessorPresenter::process() {
 
   // Don't continue if there are no items selected
   if (m_selectedData.size() == 0) {
-    m_mainPresenter->confirmReductionPaused();
+    m_mainPresenter->confirmReductionPaused(m_group);
     return;
   }
 

@@ -72,7 +72,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
             self._black_list = get_black_list()
         return self._black_list
 
-    def confirmReductionPaused(self):
+    def confirmReductionPaused(self, group):
         self._presenters[PresenterEnum.RunTabPresenter].on_processing_finished()
 
     # ------------------------------------------------------------------------------------------------------------------

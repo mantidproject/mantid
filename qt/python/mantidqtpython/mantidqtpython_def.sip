@@ -1598,8 +1598,8 @@ DataProcessorMainPresenter();
 virtual QVariantMap getPreprocessingOptions() const;
 virtual QVariantMap getProcessingOptions() const;
 virtual QString getPostprocessingOptionsAsString() const;
-virtual void confirmReductionPaused() const;
-virtual void confirmReductionResumed() const;
+virtual void confirmReductionPaused(int);
+virtual void confirmReductionResumed(int);
 
 virtual void notifyADSChanged(const QSet<QString> &);
 };
