@@ -74,7 +74,7 @@ Improvements
     - A new property, *BeamCentre* allows user to manually specify the beam position on the detector.
     - The *BeamPosition* property was renamed to *DirectBeamPosition* to better reflect its usage.
     - The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector will be rotated such that the reflected peak on the detector will be at twice *BraggAngle*.
-
+- Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``.
 
 Bug fixes
 #########
