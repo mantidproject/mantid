@@ -7,10 +7,6 @@
 
 .. _contents:
 
-.. image:: images/Mantid_Logo_Transparent.png
-   :alt: The logo for the Mantid Project
-   :align: center
-
 ====================
 Mantid Documentation
 ====================
