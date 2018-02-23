@@ -243,7 +243,7 @@ bool SpectrumView::replaceExistingWorkspace(
     const auto xPoint = targetSpectrumDisplay->getPointedAtX();
     const auto yPoint = targetSpectrumDisplay->getPointedAtY();
     auto newDataSource =
-        MatrixWSDataSource_sptr(new MatrixWSDataSource(matrixWorkspace));
+        boost::make_shared<MatrixWSDataSource>(matrixWorkspace);
     targetSpectrumDisplay->setDataSource(newDataSource);
     targetSpectrumDisplay->setPointedAtXY(xPoint, yPoint);
     // Handle range and image updates
