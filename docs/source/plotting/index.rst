@@ -177,16 +177,151 @@ Here are some of the highlights:
 Simple plots
 ============
 
+For matrix workspaces, if we use the `mantid` projection, one can plot the data in a similar
+fashion as the plotting of arrays in matplotlib. Moreover, one can combine the two in the same figure
+
 .. plot::
    :include-source:
-   
-   import matplotlib.pyplot as plt
+      
    import numpy as np
-   x = np.random.randn(1000)
-   plt.hist( x, 20)
-   plt.grid()
-   plt.title(r'Normal: $\mu=%.2f, \sigma=%.2f$'%(x.mean(), x.std()))
-   plt.show()
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   from mantid.simpleapi import CreateWorkspace
+   
+   # Create a workspace that has a Gaussian peak
+   x = np.arange(20)
+   y0 = 10.+50*np.exp(-(x-10)**2/20)
+   err=np.sqrt(y0)
+   y = 10.+50*np.exp(-(x-10)**2/20)
+   for i in range(20):
+       y[i] += err[i]*np.random.normal()
+   err = np.sqrt(y)
+   w = CreateWorkspace(DataX=x, DataY=y, DataE=err, NSpec=1, UnitX='DeltaE')
+   
+   # Plot - note that the projection='mantid' keyword is passed to all axes
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   ax.errorbar(w,'rs') # plot the workspace with errorbars, using red squares
+   ax.plot(x,y0,'k-', label='Initial guess') # plot the initial guess with black line
+   ax.legend() # show the legend
+   fig.show()
+
+Some data should be visualized as two dimensional colormaps
+
+.. plot::
+   :include-source:
+
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   from mantid.simpleapi import Load, ConvertToMD, BinMD, ConvertUnits, Rebin
+   from matplotlib.colors import LogNorm
+
+   # generate a nice 2D multi-dimensional workspace
+   data = Load('CNCS_7860')
+   data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
+   data = Rebin(InputWorkspace=data, Params='-3,0.025,3')
+   md = ConvertToMD(InputWorkspace=data,
+                    QDimensions='|Q|',
+                    dEAnalysisMode='Direct')
+   sqw = BinMD(InputWorkspace=md,
+               AlignedDim0='|Q|,0,3,100',
+               AlignedDim1='DeltaE,-3,3,100')
+    
+   #2D plot
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   c = ax.pcolormesh(sqw, norm=LogNorm())
+   cbar=fig.colorbar(c)
+   cbar.set_label('Intensity (arb. units)') #add text to colorbar
+   fig.show()
+
+One can then change properties of the plot. Here is an example that
+changes the label of the data, changes the label of the x and y axis,
+changes the limits for the y axis, adds a title, change tick orientations,
+and adds a grid
+
+
+.. plot::
+   :include-source:
+      
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   from mantid.simpleapi import CreateWorkspace
+   
+   # Create a workspace that has a Gaussian peak
+   x = np.arange(20)
+   y0 = 10.+50*np.exp(-(x-10)**2/20)
+   err=np.sqrt(y0)
+   y = 10.+50*np.exp(-(x-10)**2/20)
+   for i in range(20):
+       y[i] += err[i]*np.random.normal()
+   err = np.sqrt(y)
+   w = CreateWorkspace(DataX=x, DataY=y, DataE=err, NSpec=1, UnitX='DeltaE')
+   
+   # Plot - note that the projection='mantid' keyword is passed to all axes
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   ax.errorbar(w,'rs', label='Data')
+   ax.plot(x,y0,'k-', label='Initial guess')
+   ax.legend()
+   ax.set_xlabel('Better energy estimate ($10^3\mu eV$)')
+   ax.set_ylabel('Neutron counts')
+   ax.set_ylim(-10,100)
+   ax.set_title('Gaussian example')
+   ax.tick_params(axis='x', direction='in')
+   ax.tick_params(axis='y', direction='out')
+   ax.grid(True)
+   fig.show()
+
+
+Let's create now a figure with two panels. In the upper part we show the workspace as
+above, but we add a fit, In the bottom part we add the difference.
+
+.. plot::
+   :include-source:
+      
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   from mantid.simpleapi import CreateWorkspace, Fit
+   
+   # Create a workspace that has a Gaussian peak
+   x = np.arange(20)
+   y0 = 10.+50*np.exp(-(x-10)**2/20)
+   err=np.sqrt(y0)
+   y = 10.+50*np.exp(-(x-10)**2/20)
+   for i in range(20):
+       y[i] += err[i]*np.random.normal()
+   err = np.sqrt(y)
+   w = CreateWorkspace(DataX=x, DataY=y, DataE=err, NSpec=1, UnitX='DeltaE')
+   result = Fit(Function='name=LinearBackground,A0=10,A1=0.;name=Gaussian,Height=60.,PeakCentre=10.,Sigma=3.', 
+                InputWorkspace='w', 
+                Output='w', 
+                OutputCompositeMembers=True)
+   # The handle to the output workspace is result.OutputWorkspace. The first spectrum is the data,
+   # the second is the fit, the third is the difference. Subsequent spectra are the calculated
+   # functions of each of the components of the fit (here LinearBackground and Gaussian)
+   # Note that the difference spectrum has 0 errors. One can copy the errors from data
+   result.OutputWorkspace.setE(2,result.OutputWorkspace.readE(0))
+
+   #do the plotting   
+   fig, [ax_top, ax_bottom] = plt.subplots(figsize=(9, 6),
+                                           nrows=2, 
+                                           ncols=1, 
+                                           sharex=True,
+                                           gridspec_kw={'height_ratios':[2,1]},
+                                           subplot_kw={'projection':'mantid'})
+
+   ax_top.errorbar(result.OutputWorkspace,'rs',wkspIndex=0, label='Data')
+   ax_top.plot(result.OutputWorkspace,'b-',wkspIndex=1, label='Fit')
+   ax_top.legend()
+   ax_top.set_xlabel('')
+   ax_top.set_ylabel('Neutron counts')
+   ax_top.tick_params(axis='both', direction='in')
+   ax_bottom.errorbar(result.OutputWorkspace,'ko',wkspIndex=2)
+   ax_bottom.tick_params(axis='both', direction='in')
+   ax_bottom.set_ylabel('Difference')
+   fig.tight_layout()
+   fig.show()
+   
 
 ====================
 Plotting Sample Logs
@@ -236,12 +371,43 @@ So one needs to use :func:`mantid.plots.plotfunctions.plot<mantid.plots.plotfunc
 Complex plots
 =============
 
+Plotting dispersion curves can also be done using matplotlib
+
 .. plot::
    :include-source:
    
    import matplotlib.pyplot as plt
    import numpy as np
    from matplotlib.gridspec import GridSpec
+   from mantid.simpleapi import CreateMDHistoWorkspace
+   from mantid import plots
+   
+   # Generate nice (fake) dispersion data
+   q = np.arange(0,0.333,0.01)
+   e = np.arange(0,60)
+   x,y = np.meshgrid(q,e)
+   def omega_hh(q):
+       return 20.* np.sin(np.pi*q)
+   def I(q):
+       return np.exp(-q*5.)
+   signal = I(x) * np.exp(-(y-omega_hh(x))**2)
+   ws1=CreateMDHistoWorkspace(Dimensionality=2,
+                              Extents='0,0.3333,0,60',
+                              SignalInput=signal,
+                              ErrorInput=np.sqrt(signal),
+                              NumberOfBins='{0},{1}'.format(len(q),len(e)),
+                              Names='Dim1,Dim2',
+                              Units='MomentumTransfer,EnergyTransfer')
+   def omega_hm2h(q):
+       return 20*np.sin(np.pi*(q*2.+1./3))
+   signal = np.exp(-(y-omega_hm2h(x))**2)
+   ws2=CreateMDHistoWorkspace(Dimensionality=2,
+                              Extents='0.3333,0.5,0,60',
+                              SignalInput=signal,
+                              ErrorInput=np.sqrt(signal),
+                              NumberOfBins='{0},{1}'.format(len(q),len(e)),
+                              Names='Dim1,Dim2',
+                              Units='MomentumTransfer,EnergyTransfer')
    
    
    d=6.7
@@ -255,18 +421,18 @@ Complex plots
    m_k=2.*np.pi/3/a
    gamma_k=4.*np.pi/3/a
    
-   plt.figure(figsize=(12,5))
+   fig=plt.figure(figsize=(12,5))
    gs = GridSpec(1, 4,
                  width_ratios=[gamma_k,m_k,gamma_m,gamma_a],
                  wspace=0)
    
-   ax1 = plt.subplot(gs[0])
-   ax2 = plt.subplot(gs[1],sharey=ax1)
+   ax1 = plt.subplot(gs[0],projection='mantid')
+   ax2 = plt.subplot(gs[1],sharey=ax1,projection='mantid')
    ax3 = plt.subplot(gs[2],sharey=ax1)
    ax4 = plt.subplot(gs[3],sharey=ax1)
    
-   ax1.plot([0,0.33],[0,30])
-   ax2.plot([0.33,0.5],[20,20])
+   ax1.pcolormesh(ws1)
+   ax2.pcolormesh(ws2)
    ax3.plot([0,0.5],[0,20])
    ax4.plot([0,0.5],[0,10])
    
@@ -304,4 +470,4 @@ Complex plots
    ax4.set_xticks([1./2])
    ax4.set_xticklabels(['$A$'])
    ax4.tick_params(direction='in')
-   plt.show()
+   fig.show()
