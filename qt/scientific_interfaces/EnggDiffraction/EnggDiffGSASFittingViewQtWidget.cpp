@@ -54,6 +54,10 @@ void EnggDiffGSASFittingViewQtWidget::browseFocusedRun() {
   setFocusedRunFileNames(filenames);
 }
 
+void EnggDiffGSASFittingViewQtWidget::disableLoadIfInputEmpty() {
+  setLoadEnabled(!runFileLineEditEmpty());
+}
+
 void EnggDiffGSASFittingViewQtWidget::displayLatticeParams(
     const Mantid::API::ITableWorkspace_sptr latticeParams) const {
   UNUSED_ARG(latticeParams);
@@ -110,6 +114,10 @@ void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
 }
 
+bool EnggDiffGSASFittingViewQtWidget::runFileLineEditEmpty() const {
+  return m_ui.lineEdit_runFile->text().isEmpty();
+}
+
 void EnggDiffGSASFittingViewQtWidget::selectRun() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::SelectRun);
 }
@@ -117,7 +125,7 @@ void EnggDiffGSASFittingViewQtWidget::selectRun() {
 void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
   m_ui.lineEdit_runFile->setEnabled(enabled);
   m_ui.pushButton_browseRunFile->setEnabled(enabled);
-  m_ui.pushButton_loadRun->setEnabled(enabled);
+  setLoadEnabled(enabled && !runFileLineEditEmpty());
 
   m_ui.lineEdit_instParamsFile->setEnabled(enabled);
   m_ui.pushButton_browseInstParams->setEnabled(enabled);
@@ -142,12 +150,26 @@ void EnggDiffGSASFittingViewQtWidget::setFocusedRunFileNames(
   m_ui.lineEdit_runFile->setText(filenames.join(tr(",")));
 }
 
+void EnggDiffGSASFittingViewQtWidget::setLoadEnabled(const bool enabled) {
+  if (enabled) {
+    m_ui.pushButton_loadRun->setEnabled(true);
+    m_ui.pushButton_loadRun->setToolTip(tr("Load focused run file"));
+  } else {
+    m_ui.pushButton_loadRun->setEnabled(false);
+    m_ui.pushButton_loadRun->setToolTip(
+        tr("Please specify a file to load via the browse menu or by typing the "
+           "full path to the file in the text field"));
+  }
+}
+
 void EnggDiffGSASFittingViewQtWidget::setupUI() {
   m_ui.setupUi(this);
   connect(m_ui.pushButton_browseRunFile, SIGNAL(clicked()), this,
           SLOT(browseFocusedRun()));
   connect(m_ui.pushButton_loadRun, SIGNAL(clicked()), this,
           SLOT(loadFocusedRun()));
+  connect(m_ui.lineEdit_runFile, SIGNAL(textChanged(const QString &)), this,
+          SLOT(disableLoadIfInputEmpty()));
 
   connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));

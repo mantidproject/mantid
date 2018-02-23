@@ -61,10 +61,15 @@ public:
 
 private slots:
   void browseFocusedRun();
+  void disableLoadIfInputEmpty();
   void loadFocusedRun();
   void selectRun();
 
 private:
+  bool runFileLineEditEmpty() const;
+
+  void setLoadEnabled(const bool enabled);
+
   boost::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
 
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
