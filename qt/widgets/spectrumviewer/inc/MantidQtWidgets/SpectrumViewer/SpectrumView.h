@@ -118,9 +118,9 @@ private:
   void updateHandlers();
   void loadSettings();
   void saveSettings() const;
-  bool
-  replaceExistingWorkspace(const std::string &wsName,
-                           const boost::shared_ptr<Mantid::API::Workspace> ws);
+  bool replaceExistingWorkspace(
+      const std::string &wsName,
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
 
   std::vector<MatrixWSDataSource_sptr> m_dataSource;
   QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;

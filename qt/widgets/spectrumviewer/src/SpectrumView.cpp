@@ -213,7 +213,8 @@ void SpectrumView::afterReplaceHandle(
     const std::string &wsName,
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
   // We would only ever be replacing a workspace here
-  replaceExistingWorkspace(wsName, ws);
+  replaceExistingWorkspace(
+      wsName, boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
 }
 
 /**
@@ -222,35 +223,32 @@ void SpectrumView::afterReplaceHandle(
  *is made.
  *
  * @param wsName : Name of the workspace to replace
- * @param ws : Pointer to the workspace object
+ * @param matrixWorkspace : Pointer to the workspace object
  * @return : True only if a replacement was completed
  */
 bool SpectrumView::replaceExistingWorkspace(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    boost::shared_ptr<const Mantid::API::MatrixWorkspace> matrixWorkspace) {
 
   bool replacementMade = false;
-  if (auto matrixWorkspace =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws)) {
 
-    auto existingDataSource =
-        std::find_if(m_dataSource.begin(), m_dataSource.end(), [&](auto &item) {
-          return wsName == item->getWorkspace()->getName();
-        });
-    if (existingDataSource != m_dataSource.end()) {
-      auto index = std::distance(m_dataSource.begin(), existingDataSource);
-      auto targetSpectrumDisplay = m_spectrumDisplay[static_cast<int>(index)];
-      // Keep the current coordinates
-      const auto xPoint = targetSpectrumDisplay->getPointedAtX();
-      const auto yPoint = targetSpectrumDisplay->getPointedAtY();
-      auto newDataSource =
-          MatrixWSDataSource_sptr(new MatrixWSDataSource(matrixWorkspace));
-      targetSpectrumDisplay->setDataSource(newDataSource);
-      targetSpectrumDisplay->setPointedAtXY(xPoint, yPoint);
-      // Handle range and image updates
-      targetSpectrumDisplay->updateRange();
-      replacementMade = true;
-    }
+  auto existingDataSource =
+      std::find_if(m_dataSource.begin(), m_dataSource.end(), [&](auto &item) {
+        return wsName == item->getWorkspace()->getName();
+      });
+  if (existingDataSource != m_dataSource.end()) {
+    auto index = std::distance(m_dataSource.begin(), existingDataSource);
+    auto targetSpectrumDisplay = m_spectrumDisplay[static_cast<int>(index)];
+    // Keep the current coordinates
+    const auto xPoint = targetSpectrumDisplay->getPointedAtX();
+    const auto yPoint = targetSpectrumDisplay->getPointedAtY();
+    auto newDataSource =
+        MatrixWSDataSource_sptr(new MatrixWSDataSource(matrixWorkspace));
+    targetSpectrumDisplay->setDataSource(newDataSource);
+    targetSpectrumDisplay->setPointedAtXY(xPoint, yPoint);
+    // Handle range and image updates
+    targetSpectrumDisplay->updateRange();
+    replacementMade = true;
   }
   return replacementMade;
 }
