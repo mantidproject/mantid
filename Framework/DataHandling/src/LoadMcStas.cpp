@@ -143,7 +143,7 @@ void LoadMcStas::exec() {
 /**
 * Group workspaces
 * @param workspaces workspace names to group
-* @return OutputWorkspace workspace group
+* @return Workspace group
 */
 API::WorkspaceGroup_sptr
 LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
@@ -163,7 +163,7 @@ LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
  * @param eventEntries map of the file e bin/MantidPlot -xq
  * docs/runsphinx_doctest.py -R Rebinntries that have events
  * @param nxFile Reads data from inside first top entry
- * @return scatteringWSNames names of workspaces to include in the output group
+ * @return Names of workspaces to include in the output group
  */
 std::vector<std::string> LoadMcStas::readEventData(
     const std::map<std::string, std::string> &eventEntries,
@@ -442,7 +442,7 @@ std::vector<std::string> LoadMcStas::readEventData(
  * Read histogram data
  * @param histogramEntries map of the file entries that have histogram
  * @param nxFile Reads data from inside first first top entry
- * @return histoWSNames names of workspaces to include in output group
+ * @return Names of workspaces to include in output group
  */
 std::vector<std::string> LoadMcStas::readHistogramData(
     const std::map<std::string, std::string> &histogramEntries,
@@ -581,7 +581,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
+ * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
 int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
