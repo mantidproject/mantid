@@ -2192,6 +2192,24 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def process_single_pt_scan_intensity(self, scan_pt_list):
+        """
+        process integrated single pt scan
+        :param scan_pt_list:
+        :return:
+        """
+        # check inputs
+        assert isinstance(scan_pt_list, list), 'Input scan-pt pairs {0} must be in a list but not a {1}' \
+                                               ''.format(scan_pt_list, type(scan_pt_list))
+
+        # get intensities
+        for scan_number, pt_number in scan_pt_list:
+            intensity = self._single_pt_scan_intensity_dict[scan_number, pt_number]
+            self.add_single_pt_scan(scan_number, pt_number, intensity)
+        # END-FOR
+
+        return
+
     # add slot for UB refinement configuration window's signal to connect to
     @QtCore.pyqtSlot(int)
     def refine_ub_lattice(self, val):

@@ -1,9 +1,8 @@
 #pylint: disable=C0103
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
+from PyQt4.QtCore import pyqtSignal
 import HFIR_4Circle_Reduction.ui_SinglePtIntegrationWindow as window_ui
 from PyQt4.QtGui import QMainWindow, QFileDialog
-import numpy as np
 import os
 
 
@@ -12,7 +11,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
     Main window widget to set up parameters to optimize
     """
     # establish signal for communicating from App2 to App1 - must be defined before the constructor
-    # mySignal = QtCore.pyqtSignal(int)
+    scanIntegratedSignal = pyqtSignal(dict, name='SinglePtIntegrated')
 
     def __init__(self, parent=None):
         """
@@ -22,7 +21,13 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """
         # init
         super(IntegrateSinglePtIntensityWindow, self).__init__(parent)
+
+        assert parent is not None, 'Parent window cannot be None to set'
+        self._parent_window = parent
         self._controller = parent.controller
+
+        # connect signal handler
+        self.scanIntegratedSignal.connect(self._parent_window.process_single_pt_scan_intensity)
 
         # init UI
         self.ui = window_ui.Ui_MainWindow()
@@ -30,6 +35,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         # initialize widgets
         self.ui.tableView_summary.setup()
+        self.ui.graphicsView_integration1DView.set_parent_window(self)
 
         # define event handlers for widgets
         self.ui.pushButton_exportIntensityToFile.clicked.connect(self.do_save_intensity)
@@ -37,6 +43,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.pushButton_refreshROI.clicked.connect(self.do_refresh_roi)
         self.ui.pushButton_retrieveFWHM.clicked.connect(self.do_retrieve_fwhm)
         self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_single_pt)
+        self.ui.pushButton_plot.clicked.connect(self.do_plot_integrated_pt)
 
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
@@ -45,6 +52,9 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self._working_dir = os.path.expanduser('~')
         self._exp_number = None
         self._roiMutex = False
+
+        # other things to do
+        self.do_refresh_roi()
 
         return
 
@@ -59,7 +69,27 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
     def do_export_intensity_to_parent(self):
         """
-        blabla
+        export the integrated intensity to parent window's peak processing table
+        :return:
+        """
+        # collect all scan/pt from table
+        scan_pt_list = self.ui.tableView_summary.get_scan_pt_list()
+
+        # collect necessary parameters including peak intensity and etc
+        scan_intensity_dict = dict()
+        for scan_pt in scan_pt_list:
+            scan_number, pt_number = scan_pt
+            peak_intensity = self.ui.tableView_summary.get_intensity(scan_number, pt_number)
+            scan_intensity_dict[scan_number] = peak_intensity
+
+        # add to table including calculate peak center in Q-space
+        self.
+
+        return
+
+    def do_plot_integrated_pt(self):
+        """
+        plot integrated Pt with model
         :return:
         """
 
@@ -109,7 +139,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         refresh ROI list from parent
         :return:
         """
-        roi_list = self._controller.get_roi_list()
+        roi_list = self._controller.get_region_of_interest_list()
 
         # add ROI
         self._roiMutex = True
@@ -132,3 +162,5 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             self.ui.tableView_summary.set_two_theta(scan_number, pt_number, two_theta)
 
         return
+
+

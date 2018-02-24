@@ -190,3 +190,109 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         self.setXYLimit(ymin=y_lower_limit, ymax=y_upper_limit)
 
         return
+
+
+class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
+    """
+    Single Pt peak integration viewer.  Extended from regular 1D view
+    """
+    def __init__(self, parent):
+        """
+        initialization
+        """
+        super(SinglePtIntegrationView, self).__init__(parent)
+
+        # define interaction with the canvas
+        self._myCanvas.mpl_connect('button_press_event', self.on_mouse_press_event)
+
+        # class variables
+        self._rawDataID = None
+        self._fitDataID = None
+
+        self._parent_window = None
+
+        return
+
+    def add_observed_data(self, vec_x, vec_y, label):
+        """
+        add observed data
+        :param vec_x:
+        :param vec_y:
+        :param label:
+        :return:
+        """
+        self._rawDataID = self.add_plot_1d(vec_x, vec_y,  color='blue')
+        self.set_smart_y_limit(vec_y)
+
+        return
+
+    def add_fit_data(self, vec_x, vec_y, label):
+        """
+        add fitted data
+        :param vec_x:
+        :param vec_y:
+        :param label:
+        :return:
+        """
+        self._rawDataID = self.add_plot_1d(vec_x, vec_y,  color='red')
+        self.set_smart_y_limit(vec_y)
+
+        return
+
+    def on_mouse_press_event(self, event):
+        """
+        plot the next
+        :return:
+        """
+        if self._parent_window is not None:
+            # if parent window is defined
+            if event.button == 1:
+                scan_index_increment = -1
+            elif event.button == 3:
+                scan_index_increment = 1
+
+
+
+    def set_parent_window(self, parent_window):
+        """
+        set the parent window but not the UI parent
+        :param parent_window:
+        :return:
+        """
+        assert parent_window is not None, 'Parent window cannot be None'
+
+        self._parent_window = parent_window
+
+        return
+
+    def set_smart_y_limit(self, vec_y):
+        """
+        Set limit on Y axis automatically (in a 'smart' way), i.e.,
+        - to the smaller of zero and 10 percent delta Y under minimum Y
+        - to 10 percent delta Y above maximum Y
+        :return:
+        """
+        # check
+        assert isinstance(vec_y, numpy.ndarray) and len(vec_y) > 0, 'Vector Y must be a numpy array and not empty.'
+
+        # find y's minimum and maximum
+        try:
+            min_y = numpy.min(vec_y)
+            max_y = numpy.max(vec_y)
+        except ValueError as value_err:
+            raise RuntimeError(str(value_err))
+
+        d_y = max_y - min_y
+
+        # set Y to the smaller of zero and 10 percent delta Y under minimum Y
+        if min_y > 0:
+            y_lower_limit = 0
+        else:
+            y_lower_limit = min_y - 0.1 * d_y
+
+        # set Y to 10 percent delta Y above maximum Y
+        y_upper_limit = max_y + 0.1 * d_y
+
+        self.setXYLimit(ymin=y_lower_limit, ymax=y_upper_limit)
+
+        return

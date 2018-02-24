@@ -163,7 +163,7 @@ class CWSCDReductionControl(object):
 
         # reference workspace for LoadMask
         self._refWorkspaceForMask = None
-        # Region of interest: key = (experiment, scan), value = RegionOfInterest instance
+        # Region of interest: key = roi name, value = RegionOfInterest instance
         self._roiDict = dict()
 
         # register startup
@@ -976,6 +976,13 @@ class CWSCDReductionControl(object):
             raise RuntimeError('ROI positions not set')
 
         return lower_left_corner, upper_right_corner
+
+    def get_region_of_interest_list(self):
+        """
+        Get the list of all the ROIs defined
+        :return:
+        """
+        return sorted(self._roiDict.keys())
 
     def get_sample_log_value(self, exp_number, scan_number, pt_number, log_name):
         """
@@ -2717,28 +2724,6 @@ class CWSCDReductionControl(object):
 
         return
 
-    # def save_roi(self, roi_name, region_of_interest):
-    #     """
-    #     Save region of interest to controller for future use
-    #     :param roi_name:
-    #     :param region_of_interest: a 2-tuple for 2-tuple as lower-left and upper-right corners of the region
-    #     :return:
-    #     """
-    #     # check
-    #     assert isinstance(roi_name, str), 'Tag {0} must be a string {1}'.format(roi_name, type(roi_name))
-    #
-    #
-    #     # save ROI to ROI dictionary
-    #     self._roiDict[roi_name] = region_of_interest
-    #
-    #     # if ROI already been used to mask detectors, then need to change mask workspace dictionary
-    #     if self.RESERVED_ROI_NAME in self._maskWorkspaceDict:
-    #         self._maskWorkspaceDict[roi_name] = self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
-    #         del self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
-    #     # END-IF
-    #
-    #     return
-
     def save_roi_to_file(self, exp_number, scan_number, tag, file_name):
         """
         save ROI to file
@@ -2750,10 +2735,6 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check input
-        # assert isinstance(exp_number, int), 'Experiment number {0} shall be an integer but not a {1}' \
-        #                                     ''.format(exp_number, type(exp_number))
-        # assert isinstance(scan_number, int), 'Scan number {0} shall be an integer but not a {1}' \
-        #                                      ''.format(scan_number, type(scan_number))
         assert isinstance(tag, str), 'Tag {0} shall be a string but not a {1}'.format(tag, type(tag))
         assert isinstance(file_name, str), 'File name {0} shall be a string but not a {1}' \
                                            ''.format(file_name, type(file_name))
@@ -3050,7 +3031,7 @@ class CWSCDReductionControl(object):
                     tsample_col_index = None
 
                 max_count = 0
-                max_row = 0
+                max_pt = 0
                 max_h = max_k = max_l = 0
                 max_tsample = 0.
 
@@ -3063,7 +3044,7 @@ class CWSCDReductionControl(object):
                     det_count = float(det_count)/count_time
                     if det_count > max_count:
                         max_count = det_count
-                        max_row = i_row
+                        max_pt = spice_table_ws.cell(i_row, 0)  # pt_col_index is always 0
                         max_h = spice_table_ws.cell(i_row, h_col_index)
                         max_k = spice_table_ws.cell(i_row, k_col_index)
                         max_l = spice_table_ws.cell(i_row, l_col_index)
@@ -3085,7 +3066,7 @@ class CWSCDReductionControl(object):
                     q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
 
                 # appending to list
-                scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l,
+                scan_sum_list.append([max_count, scan_number, max_pt, max_h, max_k, max_l,
                                       q_range, max_tsample])
 
             except RuntimeError as e:
