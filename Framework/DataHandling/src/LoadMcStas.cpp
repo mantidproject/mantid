@@ -160,8 +160,7 @@ LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
 
 /**
  * Read Event Data
- * @param eventEntries map of the file e bin/MantidPlot -xq
- * docs/runsphinx_doctest.py -R Rebinntries that have events
+ * @param eventEntries map of the file entries that have events
  * @param nxFile Reads data from inside first top entry
  * @return Names of workspaces to include in the output group
  */
