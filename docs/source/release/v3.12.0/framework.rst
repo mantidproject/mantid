@@ -68,6 +68,11 @@ Core Functionality
 - Fixed the behaviour of ``UpdateInstrumentDefinitions.OnStartup`` in the :ref:`properties file <Properties File>`. It was not being used correctly for using the updated ``Facilities.xml`` file.
 - ``MultiFileProperty`` now accepts complex summation ranges for run numbers, such as ``111-113+115`` and ``111-115+123-132``.
 
+Live Data
+---------
+
+- `KafkaEventListener` is a new live listener for neutron event and sample environment data which is in development for the ESS and already in use at ISIS.
+
 Performance
 -----------
 
