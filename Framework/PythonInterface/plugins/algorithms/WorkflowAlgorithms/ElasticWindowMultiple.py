@@ -292,6 +292,7 @@ def _extract_sensor_name(sample_log_name, run, instrument):
             logger.warning('Invalid position (' + str(position) + ') found in workspace.')
     else:
         logger.information('Position not found in workspace.')
+    return ''
 
 
 def _set_numeric_y_axis(workspace, length, unit, get_axis_value):
