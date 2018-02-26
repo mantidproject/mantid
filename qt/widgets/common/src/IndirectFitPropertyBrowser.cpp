@@ -918,20 +918,7 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
     if (i >= 0) {
       functionHandlers.remove(i);
       m_customFunctionCount[handler->function()->name()] -= 1;
-
-      if (m_functionsAsSpinner.contains(prop)) {
-        MantidQt::API::SignalBlocker<QObject> blocker(m_intManager);
-        m_intManager->setValue(prop, m_intManager->value(prop) - 1);
-        FitPropertyBrowser::intChanged(prop);
-      } else if (m_functionsAsCheckBox.contains(prop)) {
-        MantidQt::API::SignalBlocker<QObject> blocker(m_boolManager);
-        m_boolManager->setValue(prop, false);
-        FitPropertyBrowser::boolChanged(prop);
-      } else if (prop == m_functionsInComboBox) {
-        MantidQt::API::SignalBlocker<QObject> blocker(m_enumManager);
-        m_enumManager->setValue(m_functionsInComboBox, 0);
-        FitPropertyBrowser::enumChanged(prop);
-      }
+      customFunctionRemoved(prop);
     }
   }
 
@@ -940,6 +927,38 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
 
   if (handler == m_backgroundHandler)
     m_enumManager->setValue(m_backgroundSelection, 0);
+}
+
+/**
+ * Called when a custom function has been removed from this fit property
+ * browser.
+ *
+ * @param prop  The property of the removed custom function.
+ */
+void IndirectFitPropertyBrowser::customFunctionRemoved(QtProperty *prop) {
+
+  if (m_functionsAsSpinner.contains(prop)) {
+    disconnect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
+               SLOT(intChanged(QtProperty *)));
+    m_intManager->setValue(prop, m_intManager->value(prop) - 1);
+    connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
+            SLOT(intChanged(QtProperty *)));
+    FitPropertyBrowser::intChanged(prop);
+  } else if (m_functionsAsCheckBox.contains(prop)) {
+    disconnect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
+               SLOT(boolChanged(QtProperty *)));
+    m_boolManager->setValue(prop, false);
+    connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
+            SLOT(boolChanged(QtProperty *)));
+    FitPropertyBrowser::boolChanged(prop);
+  } else if (prop == m_functionsInComboBox) {
+    disconnect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
+               SLOT(enumChanged(QtProperty *)));
+    m_enumManager->setValue(m_functionsInComboBox, 0);
+    connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
+            SLOT(enumChanged(QtProperty *)));
+    FitPropertyBrowser::enumChanged(prop);
+  }
 }
 
 /**
