@@ -1201,6 +1201,28 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
         return scan_list
 
+    def get_selected_scan_pt(self):
+        """
+        blabla
+        :return:
+        """
+        selected_row_list = self.get_selected_rows()
+
+        selected_scan_pt_list = list()
+        for row_number in selected_row_list:
+            scan_number = self.get_cell_value(row_number, 0)
+            pt_number = self.get_cell_value(row_number, 1)
+            h_i = self.get_cell_value(row_number, self._colIndexH)
+            k_i = self.get_cell_value(row_number, self._colIndexK)
+            l_i = self.get_cell_value(row_number, self._colIndexL)
+            hkl_str = '{0}, {1}, {2}'.format(h_i, k_i, l_i)
+
+            selected_scan_pt_list.append((scan_number, pt_number, hkl_str, 123.456))
+
+        # END-FOR
+
+        return selected_scan_pt_list
+
     def get_selected_run_surveyed(self, required_size=1):
         """
         Purpose: Get selected pt number and run number that is set as selected
@@ -1344,13 +1366,16 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         :param two_theta:
         :return:
         """
+        print ('[DB...BAT] Am I called? {0}, {1}'.format(scan_number, pt_number))
         # check
         if (scan_number, pt_number) in self._pt_row_dict:
             raise RuntimeError('Pt number {0} exists in the table already.'.format(pt_number))
 
         # check others...
         # blabla
-        self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0.])
+        status, error_msg = self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0.])
+        if not status:
+            raise RuntimeError(error_msg)
 
         # register
         self._pt_row_dict[scan_number, pt_number] = self.rowCount() - 1

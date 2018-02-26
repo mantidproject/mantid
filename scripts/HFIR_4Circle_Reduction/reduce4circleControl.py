@@ -137,6 +137,10 @@ class CWSCDReductionControl(object):
         self._myLastPeakUB = None
         # Flag for data storage
         self._cacheDataOnly = False
+        # Single PT scan integration:
+        # example:  key = exp_number, scan_number, pt_number, roi_name]
+        #           value = vec_x, vec_y, cost, params
+        self._single_pt_integration_dict = dict()
 
         # Dictionary to store survey information
         self._scanSummaryList = list()
@@ -356,6 +360,37 @@ class CWSCDReductionControl(object):
             return True, det_size
 
         return False, 'Unable to find first Pt file {0}'.format(first_xm_file)
+
+    def calculate_intensity_single_pt(self, exp_number, scan_number, pt_number, roi_name):
+        """
+        blabla
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :return:
+        """
+        # check inputs
+        # blabla
+
+        # check whether the detector counts has been calculated and get the value
+        if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
+            raise RuntimeError('blabla')
+
+        vec_x, vec_y, cost, params = \
+            self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+
+        # get 2theta value from
+        two_theta = self.get_sample_log_value(exp_number, scan_number, pt_number, 'twotheta')
+        integrated_peak_params = self.get_integrated_scan_params(exp_number, scan_number, two_theta,
+                                                                 resolution=0.01)
+        if integrated_peak_params is not None:
+            sigma = integrated_peak_params['sigma']
+            peak_intensity = peak_integration_utility.calculate_single_pt_scan_peak_intensity(params['Intensity'], sigma)
+        else:
+            peak_intensity = 0.
+
+        return peak_intensity
 
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
@@ -1042,7 +1077,7 @@ class CWSCDReductionControl(object):
 
     def get_peak_info(self, exp_number, scan_number, pt_number=None):
         """
-        get PeakInfo instance
+        get PeakInfo instance, which including
         :param exp_number: experiment number
         :param scan_number:
         :param pt_number:
@@ -1517,16 +1552,17 @@ class CWSCDReductionControl(object):
 
         # integrate peak along row
         vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
-        vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=1)
+        vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=0)
 
         if fit_gaussian:
-            cost, params = peak_integration_utility.fit_gaussian_function(vec_x, vec_y)
+            cost, params, cov_matrix = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y,
+                                                                                               numpy.sqrt(vec_y))
         else:
             cost = -1
             params = dict()
 
         # register
-        self._single_pt_integration[exp_number, scan_number, pt_number, roi_name] = vec_x, vec_y, cost, params
+        self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = vec_x, vec_y, cost, params
 
         return
 

@@ -75,15 +75,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         # collect all scan/pt from table
         scan_pt_list = self.ui.tableView_summary.get_scan_pt_list()
 
-        # collect necessary parameters including peak intensity and etc
-        scan_intensity_dict = dict()
-        for scan_pt in scan_pt_list:
-            scan_number, pt_number = scan_pt
-            peak_intensity = self.ui.tableView_summary.get_intensity(scan_number, pt_number)
-            scan_intensity_dict[scan_number] = peak_intensity
-
         # add to table including calculate peak center in Q-space
-        self.
+        self.scanIntegratedSignal.emit(scan_pt_list)
 
         return
 
@@ -163,4 +156,31 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
+    def add_scans(self, scan_pt_list):
+        """
+        add scans' information to table, i.e., add line
+        :param scan_pt_list:
+        :return:
+        """
+        # check ... blabla
+        print('[DB...BAT] Add scan_pt_info: {0}'.format(scan_pt_list))
 
+        for scan_pt_info in scan_pt_list:
+            scan_number, pt_number, hkl, two_theta = scan_pt_info
+            print ('[DB...BAT] Add scan_pt_info')
+            self.ui.tableView_summary.add_scan_pt(scan_number, pt_number, hkl, two_theta)
+        # END-FOR
+
+        return
+
+    def set_experiment(self, exp_number):
+        """
+        blabla
+        :param exp_number:
+        :return:
+        """
+        # check .. blabla
+
+        self._exp_number = exp_number
+
+        return

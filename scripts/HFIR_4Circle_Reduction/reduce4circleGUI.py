@@ -88,6 +88,7 @@ class MainWindow(QtGui.QMainWindow):
         self._preProcessWindow = None
         self._singlePeakIntegrationDialogBuffer = ''
         self._dataDownloadDialog = None
+        self._single_pt_peak_integration_window = None
 
         # Make UI scrollable
         if NO_SCROLL is False:
@@ -333,6 +334,7 @@ class MainWindow(QtGui.QMainWindow):
         # Declaration of class variable
         # IPTS number
         self._iptsNumber = None
+        self._current_exp_number = None
 
         # some configuration
         self._homeSrcDir = os.getcwd()
@@ -2573,6 +2575,9 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_exp.setStyleSheet('color: red')
             return
 
+        # register experiment number
+        self._current_exp_number = exp_number
+
         self.ui.tabWidget.setCurrentIndex(0)
 
         # set the instrument geometry constants
@@ -3551,9 +3556,13 @@ class MainWindow(QtGui.QMainWindow):
         blabla
         :return:
         """
-        # TODO ... 1. get all the single Pt. scans... 2.
-        self._single_pt_peak_integration_window = IntegrateSingePtSubWindow.IntegrateSinglePtIntensityWindow(self)
+        if self._single_pt_peak_integration_window is None:
+            self._single_pt_peak_integration_window = IntegrateSingePtSubWindow.IntegrateSinglePtIntensityWindow(self)
 
+        #  collect selected Scan/Pt combo
+        scan_pt_tup_list = self.ui.tableWidget_surveyTable.get_selected_scan_pt()
+        self._single_pt_peak_integration_window.set_experiment(self._current_exp_number)
+        self._single_pt_peak_integration_window.add_scans(scan_pt_tup_list)
         self._single_pt_peak_integration_window.show()
 
         return

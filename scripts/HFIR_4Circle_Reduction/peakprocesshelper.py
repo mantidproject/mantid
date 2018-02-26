@@ -14,7 +14,7 @@ __author__ = 'wzz'
 class PeakProcessRecord(object):
     """ Class containing a peak's information for GUI
     In order to manage some operations for a peak
-    It does not contain peak workspace but will hold
+    It does not contain peak workspace but will hold all the parameters about peak integration
     """
 
     def __init__(self, exp_number, scan_number, peak_ws_name):
@@ -59,8 +59,9 @@ class PeakProcessRecord(object):
         self._gaussStdDev = 0.
         self._lorenzFactor = None
 
-        # peak integration result
+        # peak integration result: all the fitted parameters such as Sigma are in this dictionary
         self._integrationDict = None
+        # intensity dictionary BUT NOT USED TO READ OUT
         self._ptIntensityDict = None
 
         # some motor/goniometer information for further correction
@@ -260,6 +261,12 @@ class PeakProcessRecord(object):
         peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
         assert peak_ws
         return peak_ws
+
+    def get_integration_gauss_fit_params(self):
+        """
+        get the parameters of the Gaussian fit on 3D scan peak integration
+        :return:
+        """
 
     def get_hkl(self, user_hkl):
         """ Get HKL from the peak process record

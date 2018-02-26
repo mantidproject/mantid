@@ -44,10 +44,11 @@ class NTableWidget(QtGui.QTableWidget):
         :return: 2-tuple as (boolean, message)
         """
         # Check input
-        assert isinstance(row_value_list, list)
+        assert isinstance(row_value_list, list), 'blabla'
         if type_list is not None:
-            assert isinstance(type_list, list)
-            assert len(row_value_list) == len(type_list)
+            assert isinstance(type_list, list), 'blabla'
+            if len(row_value_list) != len(type_list):
+                raise RuntimeError('blabla')
         else:
             type_list = self._myColumnTypeList
         if len(row_value_list) != self.columnCount():
