@@ -773,10 +773,19 @@ void MultiDatasetFit::setParameterNamesForPlotting() {
 /// Remove old output from Fit.
 void MultiDatasetFit::removeOldOutput() {
   auto outWS = m_outputWorkspaceName.toStdString();
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(outWS) &&
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::WorkspaceGroup>(outWS)) {
-    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup(outWS);
+  auto &ADS = Mantid::API::AnalysisDataService::Instance();
+  boost::shared_ptr<Mantid::API::WorkspaceGroup> group;
+  auto nSpectra = static_cast<size_t>(getNumberOfSpectra());
+  if (ADS.doesExist(outWS) &&
+      (group = ADS.retrieveWS<Mantid::API::WorkspaceGroup>(outWS)) &&
+      group->size() > nSpectra) {
+    // If size of output group decreases the extra workspaces will pop out
+    // to the top level. Remove them.
+    outWS.erase(outWS.size() - 1);
+    for (auto i = nSpectra; i < group->size(); ++i) {
+      auto wsName = outWS + "_" + std::to_string(i);
+      ADS.remove(wsName);
+    }
   }
 }
 

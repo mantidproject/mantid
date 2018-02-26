@@ -9,7 +9,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, In
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace,
-                              CreateWorkspace, CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Minus,
+                              CreateWorkspace, CropWorkspace, DeleteWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Minus,
                               NormaliseToMonitor, Scale, LoadAndMerge)
 import numpy
 
@@ -798,6 +798,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                            ReferenceWorkspace=mainWS,
                            EnableLogging=subalgLogging)
             self.setProperty(common.PROP_OUTPUT_RAW_WS, rawWS)
+            DeleteWorkspace(Workspace=rawWS,
+                            EnableLogging=subalgLogging)
 
     def _separateMons(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Extract monitors to a separate workspace."""

@@ -8,6 +8,8 @@ Direct Inelastic Changes
 New features
 ------------
 
+* The `MSlice <https://github.com/mantidproject/mslice>`_ user interface can now be lauched from the MantidPlot Interfaces menu.
+
 Algorithms
 ##########
 
@@ -22,10 +24,16 @@ Instrument definitions
 Algorithms
 ##########
 
-
+- Fixed a bug in :ref:`algm-DirectILLApplySelfShielding` which could cause confusion among workspaces when the algorithm was run without both self shielding correction and empty container workspaces.
 
 Crystal Field
 #############
+
+Multi-site calculations and fitting are now supported by the crystal field (Python commandline) interface. 
+
+Calculation of dipole transition matrix elements has been added, together with the addition of a :math:`\chi_0` term in the :ref:`CrystalFieldSusceptibility <func-CrystalFieldSusceptibility>` function. 
+
+Several bugs in the Python and C++ code has been fixed - see the `github page <https://github.com/mantidproject/mantid/pull/21604>`_ for details.
 
 Features Removed
 ----------------
