@@ -268,6 +268,8 @@ protected:
   virtual void disablePlotResult() = 0;
   virtual void enableSaveResult() = 0;
   virtual void disableSaveResult() = 0;
+  virtual void enablePlotPreview() = 0;
+  virtual void disablePlotPreview() = 0;
 
 signals:
   void functionChanged();

@@ -43,6 +43,7 @@ void MSDFit::setup() {
   addComboBoxFunctionGroup("Yi", {yi});
 
   disablePlotGuess();
+  disablePlotPreview();
 
   connect(m_uiForm->dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
@@ -217,6 +218,12 @@ void MSDFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 void MSDFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
 void MSDFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
+
+void MSDFit::enablePlotPreview() { m_uiForm->pbPlotPreview->setEnabled(true); }
+
+void MSDFit::disablePlotPreview() {
+  m_uiForm->pbPlotPreview->setEnabled(false);
+}
 
 void MSDFit::addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);

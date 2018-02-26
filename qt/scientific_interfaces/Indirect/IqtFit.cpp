@@ -39,6 +39,7 @@ void IqtFit::setup() {
 
   m_uiForm->ckPlotGuess->setChecked(false);
   disablePlotGuess();
+  disablePlotPreview();
 
   // Create custom function groups
   const auto exponential =
@@ -274,6 +275,12 @@ void IqtFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 void IqtFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
 void IqtFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
+
+void IqtFit::enablePlotPreview() { m_uiForm->pbPlotPreview->setEnabled(true); }
+
+void IqtFit::disablePlotPreview() {
+  m_uiForm->pbPlotPreview->setEnabled(false);
+}
 
 /**
  * Plot workspace based on user input
