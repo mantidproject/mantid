@@ -610,5 +610,5 @@ def workspace_has_current(ws):
     """
     Gat whether the total charge for this run was greater than 0
     """
-    charge = ws.run().getProtonCharge().value
+    charge = ws.run().getProtonCharge()
     return charge is not None and charge > 0
