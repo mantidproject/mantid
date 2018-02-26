@@ -64,6 +64,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     vesuvio_output, result, exit_iteration = vesuvio_fit_routine(vesuvio_input, iterations, convergence_threshold,
                                                                  flags.get('output_verbose_corrections', False),
                                                                  flags.get('calculate_caad', False))
+    result = result if len(result) > 1 else result[0]
     return result, vesuvio_output.prefit_parameters_workspace, vesuvio_output.fit_parameters_workspace, exit_iteration
 
 

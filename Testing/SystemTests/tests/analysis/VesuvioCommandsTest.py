@@ -184,7 +184,8 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertEqual(4, len(self._fit_results))
 
         fitted_wsg = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup))
+        self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup),
+                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_wsg)) + "'.")
         self.assertEqual(1, len(fitted_wsg))
 
         fitted_ws = fitted_wsg[0]
@@ -263,7 +264,8 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertEqual(4, len(self._fit_results))
 
         fitted_wsg = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup))
+        self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup),
+                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_wsg)) + "'.")
         self.assertEqual(1, len(fitted_wsg))
 
         fitted_ws = fitted_wsg[0]
@@ -317,7 +319,8 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertEquals(4, len(self._fit_results))
 
         fitted_banks = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_banks, WorkspaceGroup))
+        self.assertTrue(isinstance(fitted_banks, WorkspaceGroup),
+                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_banks)) + "'.")
         self.assertEqual(8, len(fitted_banks))
 
         bank1 = fitted_banks[0]
@@ -364,7 +367,8 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertEquals(4, len(self._fit_results))
 
         fitted_spec = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_spec, WorkspaceGroup))
+        self.assertTrue(isinstance(fitted_spec, WorkspaceGroup),
+                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_spec)) + "'.")
         self.assertEqual(2, len(fitted_spec))
 
         spec143 = fitted_spec[0]
@@ -409,7 +413,8 @@ class PassPreLoadedWorkspaceToFitTOF(stresstesting.MantidStressTest):
         self.assertEquals(4, len(self._fit_results))
 
         fitted_spec = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_spec, WorkspaceGroup))
+        self.assertTrue(isinstance(fitted_spec, WorkspaceGroup),
+                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_spec)) + "'.")
         self.assertEqual(2, len(fitted_spec))
 
         spec143 = fitted_spec[0]
@@ -458,7 +463,8 @@ class CalculateCumulativeAngleAveragedData(stresstesting.MantidStressTest):
         self.assertEquals(4, len(self._fit_results))
 
         fitted_banks = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_banks, WorkspaceGroup))
+        self.assertTrue(isinstance(fitted_banks, WorkspaceGroup),
+                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_banks)) + "'.")
         self.assertEqual(8, len(fitted_banks))
 
         bank1 = fitted_banks[0]
