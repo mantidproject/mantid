@@ -26,6 +26,12 @@ set_property ( TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIR_4Circle_Reduction PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIFrequency_Domain_Analysis PROPERTY FOLDER "CompilePyUI" )
 
+# External GUIs
+add_subdirectory ( ExternalInterfaces )
+
+# -------------------------------------------------------------------
+# Testing
+# -------------------------------------------------------------------
 set ( TEST_PY_FILES
       test/AbinsAtomsDataTest.py
       test/AbinsCalculateDWSingleCrystalTest.py

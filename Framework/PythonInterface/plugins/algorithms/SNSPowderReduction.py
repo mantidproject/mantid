@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 
 import mantid.simpleapi as api
-from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
+from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDataProcessorAlgorithm, \
     FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
     ITableWorkspace, MatrixWorkspace
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
@@ -106,7 +106,7 @@ def getBasename(filename):
 #pylint: disable=too-many-instance-attributes
 
 
-class SNSPowderReduction(DataProcessorAlgorithm):
+class SNSPowderReduction(DistributedDataProcessorAlgorithm):
     COMPRESS_TOL_TOF = .01
     _resampleX = None
     _binning = None

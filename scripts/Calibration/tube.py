@@ -420,7 +420,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         margin = param_helper.get_parameter(MARGIN, kwargs)
         fit_par.setMargin(margin)
 
-    range_list = param_helper.get_parameter(RANGELIST, kwargs, default_range_list=tubeSet.getNumTubes())
+    range_list = param_helper.get_parameter(RANGELIST, kwargs, default_range_list=list(range(tubeSet.getNumTubes())))
     calib_table = param_helper.get_parameter(CALIBTABLE, kwargs)
     plot_tube = param_helper.get_parameter(PLOTTUBE, kwargs)
     exclude_short_tubes = param_helper.get_parameter(EXCLUDESHORT, kwargs)

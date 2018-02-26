@@ -127,20 +127,6 @@ public:
     m_pPtr = static_cast<T *>(this);
   }
 
-  /// Copy constructor
-  WrappedObject(const WrappedObject<T> &A) : T(A) {
-    m_pPtr = static_cast<T *>(this);
-  }
-
-  /// Overloaded = operator sets the pointer to the wrapped class
-  /// and copies over the contents
-  WrappedObject<T> &operator=(const WrappedObject<T> &rhs) {
-    if (this != &rhs) {
-      m_pPtr = static_cast<T *>(this);
-      *m_pPtr = rhs;
-    }
-    return *this;
-  }
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
   /// Overloaded * operator returns the wrapped object pointer

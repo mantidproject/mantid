@@ -19,14 +19,18 @@ def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_d
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
-def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm, absorb, sample_details):
+def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
 
-    # Subtract empty instrument runs
-    input_workspace = common.subtract_summed_runs(ws_to_correct=ws, instrument=instrument,
-                                                  empty_sample_ws_string=run_details.empty_runs)
+    # Subtract empty instrument runs, as long as this run isn't an empty and user hasn't turned empty subtraction off
+    if not common.runs_overlap(run_number, run_details.empty_runs) and \
+            (not hasattr(instrument._inst_settings, "subtract_empty_inst") or
+             instrument._inst_settings.subtract_empty_inst):
+        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
+                                                      empty_sample_ws_string=run_details.empty_runs)
+
     # Subtract a sample empty if specified
     if run_details.sample_empty:
         input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
@@ -99,7 +103,7 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
                                                           instrument=instrument)
     output = None
     for ws in read_ws_list:
-        output = _focus_one_ws(ws=ws, run_number=run_number_string, instrument=instrument,
+        output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
                                sample_details=sample_details)
     return output
@@ -139,7 +143,7 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
     output = None
     for run in run_numbers:
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
-        output = _focus_one_ws(ws=ws[0], run_number=run, instrument=instrument, absorb=absorb,
+        output = _focus_one_ws(input_workspace=ws[0], run_number=run, instrument=instrument, absorb=absorb,
                                perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details)
     return output
 

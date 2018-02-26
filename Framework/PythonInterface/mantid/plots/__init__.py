@@ -68,7 +68,7 @@ class MantidAxes(Axes):
             ax.plot(x,y,'bo')                 #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.functions.plot`.
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.plot`.
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -93,7 +93,7 @@ class MantidAxes(Axes):
             ax.scatter(x,y,'bo')                 #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.scatter`             
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.scatter`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -118,7 +118,7 @@ class MantidAxes(Axes):
             ax.errorbar(x,y,yerr,'bo')            #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.errorbar`             
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.errorbar`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -143,7 +143,7 @@ class MantidAxes(Axes):
             ax.pcolor(x,y,C)     #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.pcolor`             
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolor`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -168,7 +168,7 @@ class MantidAxes(Axes):
             ax.pcolorfast(x,y,C)     #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.pcolorfast`             
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolorfast`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -193,7 +193,7 @@ class MantidAxes(Axes):
             ax.pcolormesh(x,y,C)     #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.pcolormesh`             
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolormesh`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -218,7 +218,7 @@ class MantidAxes(Axes):
             ax.contour(x,y,z)     #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.contour`             
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.contour`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -243,7 +243,7 @@ class MantidAxes(Axes):
             ax.contourf(x,y,z)     #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.contourf`             
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.contourf`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -268,7 +268,7 @@ class MantidAxes(Axes):
             ax.tripcolor(x,y,C)     #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.tripcolor`             
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.tripcolor`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -293,7 +293,7 @@ class MantidAxes(Axes):
             ax.tricontour(x,y,z)     #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.tricontour`
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.tricontour`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -318,7 +318,7 @@ class MantidAxes(Axes):
             ax.tricontourf(x,y,z)     #for arrays
             fig.show()
         
-        For keywords related to workspaces, see :func:`mantid.plots.functions.tricontourf`             
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.tricontourf`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
@@ -365,7 +365,7 @@ class MantidAxes3D(Axes3D):
             ax.plot(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.functions.plot3D`
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions3D.plot3D`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
@@ -390,7 +390,7 @@ class MantidAxes3D(Axes3D):
             ax.scatter(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.functions.scatter`
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions3D.scatter`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
@@ -415,7 +415,7 @@ class MantidAxes3D(Axes3D):
             ax.plot_wireframe(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.functions.wireframe`
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions3D.wireframe`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
@@ -440,7 +440,7 @@ class MantidAxes3D(Axes3D):
             ax.plot_surface(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.functions.plot_surface`
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions3D.plot_surface`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
@@ -465,7 +465,7 @@ class MantidAxes3D(Axes3D):
             ax.contour(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.functions.contour`
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions3D.contour`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')
@@ -490,7 +490,7 @@ class MantidAxes3D(Axes3D):
             ax.contourf(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.functions.contourf`
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions3D.contourf`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions3D')

@@ -9,11 +9,12 @@ class LoadUtils(object):
     The current run is the same as the one in MonAnalysis
     """
     def __init__(self, parent=None):
-        if self.MuonAnalysisExists():
+        exists,tmpWS = self.MuonAnalysisExists()
+        if exists:
             # get everything from the ADS
             self.options = mantid.AnalysisDataService.getObjectNames()
             self.options = [item.replace(" ","") for item in self.options]
-            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
+            self.N_points = len(tmpWS.readX(0))
             self.instrument=tmpWS.getInstrument().getName()
             self.runName=self.instrument+str(tmpWS.getRunNumber()).zfill(8)
 
@@ -21,6 +22,9 @@ class LoadUtils(object):
             mantid.logger.error("Muon Analysis workspace does not exist - no data loaded")
 
     # get methods
+    def getNPoints(self):
+        return self.N_points
+
     def getCurrentWS(self):
         return self.runName, self.options
 
@@ -34,10 +38,14 @@ class LoadUtils(object):
     def MuonAnalysisExists(self):
         # if period data look for the first period
         if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
-            return True
-        else:
+            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
+            return True, tmpWS
             # if its not period data
-            return mantid.AnalysisDataService.doesExist("MuonAnalysis")
+        elif mantid.AnalysisDataService.doesExist("MuonAnalysis"):
+            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
+            return True,tmpWS
+        else:
+            return False,None
 
     # Get the groups/pairs for active WS
     # ignore raw files
@@ -48,5 +56,16 @@ class LoadUtils(object):
         # only keep the relevant WS (same run as Muon Analysis)
         for pick in options:
             if ";" in pick and "Raw" not in pick and runName in pick:
+                final_options.append(pick)
+        return final_options
+
+    # Get the groups/pairs for active WS
+    def getGroupedWorkspaceNames(self):
+        # gets all WS in the ADS
+        runName,options = self.getCurrentWS()
+        final_options=[]
+        # only keep the relevant WS (same run as Muon Analysis)
+        for pick in options:
+            if "MuonAnalysisGrouped_" in pick:
                 final_options.append(pick)
         return final_options

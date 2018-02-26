@@ -107,6 +107,27 @@ class MRInspectData(PythonAlgorithm):
         mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='low_res_max',
                                       LogText=str(data_info.low_res_range[1]),
                                       LogType='Number', LogUnit='pixel')
+        # Add process ROI information
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_peak_min',
+                                      LogText=str(data_info.roi_peak[0]),
+                                      LogType='Number', LogUnit='pixel')
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_peak_max',
+                                      LogText=str(data_info.roi_peak[1]),
+                                      LogType='Number', LogUnit='pixel')
+
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_low_res_min',
+                                      LogText=str(data_info.roi_low_res[0]),
+                                      LogType='Number', LogUnit='pixel')
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_low_res_max',
+                                      LogText=str(data_info.roi_low_res[1]),
+                                      LogType='Number', LogUnit='pixel')
+
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_background_min',
+                                      LogText=str(data_info.roi_background[0]),
+                                      LogType='Number', LogUnit='pixel')
+        mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='roi_background_max',
+                                      LogText=str(data_info.roi_background[1]),
+                                      LogType='Number', LogUnit='pixel')
 
 
 def _as_ints(a): return [int(a[0]), int(a[1])]
@@ -174,6 +195,7 @@ class DataInfo(object):
         self.update_peak_range = update_peak_range
 
         self.tof_range = self.get_tof_range(ws)
+        self.calculated_scattering_angle = 0.0
         self.determine_data_type(ws)
 
     def log(self):
@@ -188,6 +210,7 @@ class DataInfo(object):
     def get_tof_range(self, ws):
             """
                 Determine TOF range from the data
+                :param workspace ws: workspace to work with
             """
             run_object = ws.getRun()
             sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
@@ -210,6 +233,7 @@ class DataInfo(object):
         """
             Process the ROI information and determine the peak
             range, the low-resolution range, and the background range.
+            :param workspace ws: workspace to work with
         """
         roi_peak = [0,0]
         roi_low_res = [0,0]
@@ -294,6 +318,12 @@ class DataInfo(object):
             self.roi_background = self.forced_bck_roi
 
     def determine_peak_range(self, ws, specular=True, max_pixel=250):
+        """
+            Find the reflectivity peak
+            :param workspace ws: workspace to work with
+            :param bool specular: if True, we are looking for a specular peak
+            :param int max_pixel: max pixel above which to exclude peaks
+        """
         ws_summed = mantid.simpleapi.RefRoi(InputWorkspace=ws, IntegrateY=specular,
                                             NXPixel=self.n_x_pixel, NYPixel=self.n_y_pixel,
                                             ConvertToQ=False,
@@ -330,6 +360,12 @@ class DataInfo(object):
 
     @classmethod
     def fit_peak(cls, signal_x, signal_y, peak):
+        """
+            Fit a Gaussian peak to a curve
+            :param array signal_x: list of x values
+            :param array signal_y: list of y values
+            :param array peak: initial guess for the peak (one-sigma min and max)
+        """
         def gauss(x, *p):
             A, mu, sigma, bck = p
             if A < 0 or sigma < 5:
@@ -348,6 +384,8 @@ class DataInfo(object):
     def scattering_angle(cls, ws, peak_position=None):
         """
             Determine the scattering angle
+            :param workspace ws: Workspace to inspect
+            :param float peak_position: reflectivity peak position
         """
         dangle = ws.getRun().getProperty("DANGLE").getStatistics().mean
         dangle0 = ws.getRun().getProperty("DANGLE0").getStatistics().mean
@@ -362,6 +400,8 @@ class DataInfo(object):
     def check_direct_beam(self, ws, peak_position=None):
         """
             Determine whether this data is a direct beam
+            :param workspace ws: Workspace to inspect
+            :param float peak_position: reflectivity peak position
         """
         huber_x = ws.getRun().getProperty("HuberX").getStatistics().mean
         #dangle = ws.getRun().getProperty("DANGLE").getStatistics().mean
@@ -373,6 +413,7 @@ class DataInfo(object):
         """
             Inspect the data and determine peak locations
             and data type.
+            :param workspace ws: Workspace to inspect
         """
         # Skip empty data entries
         if ws.getNumberEvents() < self.n_events_cutoff:
