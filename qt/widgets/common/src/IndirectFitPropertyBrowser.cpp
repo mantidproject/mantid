@@ -922,12 +922,15 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
       if (m_functionsAsSpinner.contains(prop)) {
         MantidQt::API::SignalBlocker<QObject> blocker(m_intManager);
         m_intManager->setValue(prop, m_intManager->value(prop) - 1);
+        FitPropertyBrowser::intChanged(prop);
       } else if (m_functionsAsCheckBox.contains(prop)) {
         MantidQt::API::SignalBlocker<QObject> blocker(m_boolManager);
         m_boolManager->setValue(prop, false);
+        FitPropertyBrowser::boolChanged(prop);
       } else if (prop == m_functionsInComboBox) {
         MantidQt::API::SignalBlocker<QObject> blocker(m_enumManager);
         m_enumManager->setValue(m_functionsInComboBox, 0);
+        FitPropertyBrowser::enumChanged(prop);
       }
     }
   }
