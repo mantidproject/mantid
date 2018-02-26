@@ -129,7 +129,9 @@ class VesuvioTOFFitRoutine(object):
 
             _add_parameters_to_ads(vesuvio_output, fit_namer)
             fit_output = _add_fit_output_to_ads(vesuvio_output, fit_namer)
-            corrections_output = _group_corrections(vesuvio_output, vesuvio_input.sample_runs, iteration)
+
+            if verbose_output:
+                corrections_output = _group_corrections(vesuvio_output, vesuvio_input.sample_runs, iteration)
 
             if fit_output is not None and compute_caad:
                 _add_and_group_caad(fit_namer, vesuvio_input, fit_output[0].getAxis(1).extractValues(),
