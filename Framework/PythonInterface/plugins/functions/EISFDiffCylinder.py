@@ -42,7 +42,6 @@ class EISFDiffCylinder(IFunction1D):
     sin_theta = np.sin(theta)
     cos_theta = np.cos(theta)
 
-
     def category(self):
         return 'QuasiElastic'
 
