@@ -87,9 +87,7 @@
 </parameter>
 
 <parameter name="Workflow.TemperatureSensorNames" type="string">
-	<value val="Bottom_can" />
-	<value val="Middle_can" />
-	<value val="Top_can" />
+	<value val="Bottom_can,Middle_can,Top_can" />
 </parameter>
 
 <parameter name="Workflow.Diffraction.Correction" type="string">
