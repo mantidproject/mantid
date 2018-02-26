@@ -233,9 +233,10 @@ bool SpectrumView::replaceExistingWorkspace(
   bool replacementMade = false;
 
   auto existingDataSource =
-      std::find_if(m_dataSource.begin(), m_dataSource.end(), [&](auto &item) {
-        return wsName == item->getWorkspace()->getName();
-      });
+      std::find_if(m_dataSource.begin(), m_dataSource.end(),
+                   [&wsName](const MatrixWSDataSource_sptr &item) {
+                     return wsName == item->getWorkspace()->getName();
+                   });
   if (existingDataSource != m_dataSource.end()) {
     auto index = std::distance(m_dataSource.begin(), existingDataSource);
     auto targetSpectrumDisplay = m_spectrumDisplay[static_cast<int>(index)];
