@@ -28,6 +28,37 @@ def _is_old_boost_version():
     return False
 
 
+def _make_names_unique(names):
+    name_count = dict()
+
+    for name in names:
+        if name in name_count:
+            name_count[name] = name_count[name] + 1
+            yield name + str(name_count[name])
+        else:
+            name_count[name] = 1
+            yield name
+
+
+def _test_caad_workspace(self, workspace_name, functions):
+
+    try:
+        caad_workspace = mtd[workspace_name]
+    except RuntimeError:
+        self.fail("CAAD Workspace with name " + workspace_name + " does not exist in the ADS.")
+
+    self.assertTrue(isinstance(caad_workspace, WorkspaceGroup),
+                    "CAAD Workspace, '" + workspace_name + "', is not a WorkspaceGroup.")
+
+    fit_caad_name = workspace_name + "_Calc"
+    self.assertTrue(caad_workspace.contains(fit_caad_name),
+                    "Calculated fit workspace, '" + fit_caad_name + "', not found in CAAD WorkspaceGroup.")
+
+    for suffix in _make_names_unique(functions):
+        name = workspace_name + "_" + suffix
+        self.assertTrue(caad_workspace.contains(name), "'" + name + "' not found in CAAD WorkspaceGroup.")
+
+
 def _create_test_flags(background, multivariate=False):
     flags = dict()
     flags['fit_mode'] = 'spectrum'
@@ -405,3 +436,56 @@ class PassPreLoadedWorkspaceToFitTOF(stresstesting.MantidStressTest):
 
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
+
+
+# ====================================================================================
+
+
+class CalculateCumulativeAngleAveragedData(stresstesting.MantidStressTest):
+    _fit_results = None
+
+    def runTest(self):
+        flags = _create_test_flags(background=False)
+        flags['fit_mode'] = 'bank'
+        flags['spectra'] = 'forward'
+        flags['calculate_caad'] = True
+        flags['load_log_files'] = False
+        runs = "15039-15045"
+        self._fit_results = fit_tof(runs, flags)
+
+    def validate(self):
+        self.assertTrue(isinstance(self._fit_results, tuple))
+        self.assertEquals(4, len(self._fit_results))
+
+        fitted_banks = self._fit_results[0]
+        self.assertTrue(isinstance(fitted_banks, WorkspaceGroup))
+        self.assertEqual(8, len(fitted_banks))
+
+        bank1 = fitted_banks[0]
+        self.assertTrue(isinstance(bank1, MatrixWorkspace))
+
+        self.assertAlmostEqual(50.0, bank1.readX(0)[0])
+        self.assertAlmostEqual(562.0, bank1.readX(0)[-1])
+
+        _equal_within_tolerance(self, 8.23840378769e-05, bank1.readY(1)[0])
+        _equal_within_tolerance(self, 0.000556695665501, bank1.readY(1)[-1])
+
+        bank8 = fitted_banks[7]
+        self.assertTrue(isinstance(bank8, MatrixWorkspace))
+
+        self.assertAlmostEqual(50.0, bank8.readX(0)[0])
+        self.assertAlmostEqual(562.0, bank8.readX(0)[-1])
+
+        _equal_within_tolerance(self, 0.00025454613205, bank8.readY(1)[0])
+        _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
+
+        chisq_values = self._fit_results[2]
+        self.assertTrue(isinstance(chisq_values, list))
+        self.assertEqual(8, len(chisq_values))
+
+        exit_iteration = self._fit_results[3]
+        self.assertTrue(isinstance(exit_iteration, int))
+
+        functions = ['GramCharlier']
+        _test_caad_workspace(self, '15039-15045_normalised_iteration_' + str(exit_iteration), functions)
+        _test_caad_workspace(self, '15039-15045_sum_iteration_' + str(exit_iteration), functions)

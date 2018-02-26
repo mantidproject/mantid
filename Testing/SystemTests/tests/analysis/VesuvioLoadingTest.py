@@ -5,10 +5,10 @@ and that mantid can be imported
 import stresstesting
 
 from vesuvio.loading import VesuvioLoadHelper, VesuvioTOFFitInput
-from mantid.api import (WorkspaceGroup, MatrixWorkspace)
+from mantid.api import MatrixWorkspace
 
 
-class LoadSingleRunSingleSpectrumTest(stresstesting.MantidStress):
+class LoadSingleRunSingleSpectrumTest(stresstesting.MantidStressTest):
     _tof_input = None
 
     def runTest(self):
@@ -27,7 +27,7 @@ class LoadSingleRunSingleSpectrumTest(stresstesting.MantidStress):
                          "for spectra field: '" + self._tof_input.spectra + "'.")
 
 
-class LoadMultipleRunSingleSpectrumTest(stresstesting.MantidStress):
+class LoadMultipleRunSingleSpectrumTest(stresstesting.MantidStressTest):
     _tof_input = None
 
     def runTest(self):
@@ -46,7 +46,7 @@ class LoadMultipleRunSingleSpectrumTest(stresstesting.MantidStress):
                          "for spectra field: '" + self._tof_input.spectra + "'.")
 
 
-class LoadMultipleRunMultipleSpectrumTest(stresstesting.MantidStress):
+class LoadMultipleRunMultipleSpectrumTest(stresstesting.MantidStressTest):
     _tof_input = None
 
     def runTest(self):
@@ -65,7 +65,7 @@ class LoadMultipleRunMultipleSpectrumTest(stresstesting.MantidStress):
                          "but found different value for spectra field: '" + self._tof_input.spectra + "'.")
 
 
-class LoadBackScatteringSpectrumTest(stresstesting.MantidStress):
+class LoadBackScatteringSpectrumTest(stresstesting.MantidStressTest):
     _tof_input = None
 
     def runTest(self):

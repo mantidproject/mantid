@@ -57,8 +57,10 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     mass_profile_collection = MassProfileCollection2D.from_collection(MassProfileCollection(profiles),
                                                                       vesuvio_input.spectra_number)
 
+    fit_namer = VesuvioFitNamer.from_vesuvio_input(vesuvio_input, flags['fit_mode'])
+
     vesuvio_fit_routine = VesuvioTOFFitRoutine(ms_helper, fit_helper, corrections_helper,
-                                               mass_profile_collection, flags['fit_mode'])
+                                               mass_profile_collection, fit_namer)
     vesuvio_output, result, exit_iteration = vesuvio_fit_routine(vesuvio_input, iterations, convergence_threshold,
                                                                  flags.get('output_verbose_corrections', False),
                                                                  flags.get('calculate_caad', False))
@@ -80,23 +82,21 @@ class VesuvioTOFFitRoutine(object):
         _fit_mode                    The fit mode to use in the fitting routine.
     """
 
-    def __init__(self, ms_helper, fit_helper, corrections_helper, mass_profile_collection, fit_mode):
+    def __init__(self, ms_helper, fit_helper, corrections_helper, mass_profile_collection, fit_namer):
         self._ms_helper = ms_helper
         self._fit_helper = fit_helper
         self._corrections_helper = corrections_helper
         self._mass_profile_collection = mass_profile_collection
-        self._fit_mode = fit_mode
+        self._fit_namer = fit_namer
 
     def __call__(self, vesuvio_input, iterations, convergence_threshold, verbose_output=False, compute_caad=False):
         if iterations < 1:
             raise ValueError('Must perform at least one iteration')
-        fit_namer = VesuvioFitNamer.from_vesuvio_input(vesuvio_input, self._fit_mode)
 
         # Creation of a fit routine iteration
         tof_iteration = VesuvioTOFFitRoutineIteration(self._ms_helper, self._fit_helper,
-                                                      self._corrections_helper, fit_namer,
-                                                      self._mass_profile_collection,
-                                                      self._fit_mode)
+                                                      self._corrections_helper, self._fit_namer,
+                                                      self._mass_profile_collection)
 
         update_filter = ignore_hydrogen_filter if vesuvio_input.using_back_scattering_spectra else None
         exit_iteration = 0
@@ -106,7 +106,7 @@ class VesuvioTOFFitRoutine(object):
         corrections_output = None
 
         for iteration in range(1, iterations + 1):
-            fit_namer.set_iteration(iteration)
+            self._fit_namer.set_iteration(iteration)
 
             # Update the mass profiles using the previous result if it exists
             if previous_output is not None:
@@ -127,14 +127,14 @@ class VesuvioTOFFitRoutine(object):
                           .format(exit_iteration))
                     break
 
-            _add_parameters_to_ads(vesuvio_output, fit_namer)
-            fit_output = _add_fit_output_to_ads(vesuvio_output, fit_namer)
+            _add_parameters_to_ads(vesuvio_output, self._fit_namer)
+            fit_output = _add_fit_output_to_ads(vesuvio_output, self._fit_namer)
 
             if verbose_output:
                 corrections_output = _group_corrections(vesuvio_output, vesuvio_input.sample_runs, iteration)
 
             if fit_output is not None and compute_caad:
-                _add_and_group_caad(fit_namer, vesuvio_input, fit_output[0].getAxis(1).extractValues(),
+                _add_and_group_caad(self._fit_namer, vesuvio_input, fit_output[0].getAxis(1).extractValues(),
                                     *_compute_caad(fit_output))
 
             previous_output = vesuvio_output
@@ -158,13 +158,12 @@ class VesuvioTOFFitRoutineIteration(object):
         _fit_mode                    The fit mode to use in the fitting routine.
     """
 
-    def __init__(self, ms_helper, fit_helper, corrections_helper, fit_namer, mass_profile_collection, fit_mode):
+    def __init__(self, ms_helper, fit_helper, corrections_helper, fit_namer, mass_profile_collection):
         self._ms_corrections_args = ms_helper.to_dict()
         self._fit_helper = fit_helper
         self._fit_namer = fit_namer
         self._corrections_helper = corrections_helper
         self._mass_profile_collection = mass_profile_collection
-        self._fit_mode = fit_mode
 
     def __call__(self, vesuvio_input, iteration, verbose_output=False):
         vesuvio_output = VesuvioTOFFitOutput(lambda index:
