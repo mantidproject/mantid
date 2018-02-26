@@ -7,10 +7,6 @@
 
 .. _contents:
 
-.. image:: images/Mantid_Logo_Transparent.png
-   :alt: The logo for the Mantid Project
-   :align: center
-
 ====================
 Mantid Documentation
 ====================
@@ -20,6 +16,7 @@ Mantid Documentation
    :glob:
    :maxdepth: 1
 
+   tutorials/index
    algorithms/index
    algorithms/*
    concepts/index
@@ -29,7 +26,6 @@ Mantid Documentation
    techniques/index
    api/index
    release/index
-   training/index
 
 
 This is the documentation for Mantid |release|.
@@ -41,6 +37,7 @@ This is the documentation for Mantid |release|.
    :width: 200px
    :align: right
 
+* :ref:`Training`
 * :ref:`Algorithms List`
 * :ref:`concepts contents`
 * :ref:`interfaces contents`
