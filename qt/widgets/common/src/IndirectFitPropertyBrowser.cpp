@@ -769,7 +769,7 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
     addCustomFunctions(prop, m_groupToFunctionList[groupName]);
   }
 
-  if(multiples > 0)
+  if (multiples > 0)
     emit functionChanged();
 }
 
