@@ -125,6 +125,7 @@ void ConvFit::setup() {
       m_dblManager->addProperty("InstrumentResolution");
 
   disablePlotGuess();
+  disablePlotPreview();
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -736,8 +737,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -829,6 +830,12 @@ void ConvFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 void ConvFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
 void ConvFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
+
+void ConvFit::enablePlotPreview() { m_uiForm->pbPlotPreview->setEnabled(true); }
+
+void ConvFit::disablePlotPreview() {
+  m_uiForm->pbPlotPreview->setEnabled(false);
+}
 
 void ConvFit::addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);

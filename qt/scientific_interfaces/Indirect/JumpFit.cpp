@@ -40,6 +40,7 @@ void JumpFit::setup() {
   addComboBoxFunctionGroup("TeixeiraWater", {teixeiraWater});
 
   disablePlotGuess();
+  disablePlotPreview();
 
   // Create range selector
   auto qRangeSelector = m_uiForm->ppPlotTop->addRangeSelector("JumpFitQ");
@@ -345,6 +346,12 @@ void JumpFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
 void JumpFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
 
 void JumpFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
+
+void JumpFit::enablePlotPreview() { m_uiForm->pbPlotPreview->setEnabled(true); }
+
+void JumpFit::disablePlotPreview() {
+  m_uiForm->pbPlotPreview->setEnabled(false);
+}
 
 void JumpFit::addGuessPlot(MatrixWorkspace_sptr workspace) {
   m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);

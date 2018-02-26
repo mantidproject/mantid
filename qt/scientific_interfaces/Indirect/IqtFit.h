@@ -49,6 +49,8 @@ protected:
   void disablePlotResult() override;
   void enableSaveResult() override;
   void disableSaveResult() override;
+  void enablePlotPreview() override;
+  void disablePlotPreview() override;
   void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
   void removeGuessPlot() override;
 

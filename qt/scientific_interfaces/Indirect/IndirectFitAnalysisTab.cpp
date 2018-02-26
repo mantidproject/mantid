@@ -793,6 +793,7 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
   setInputWorkspace(inputWs);
+  enablePlotPreview();
   disablePlotResult();
   disableSaveResult();
   m_defaultPropertyValues = createDefaultValues();
