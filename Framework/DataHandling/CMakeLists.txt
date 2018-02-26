@@ -446,6 +446,7 @@ set ( TEST_FILES
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
 	LoadSESANSTest.h
+	LoadShapeTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
