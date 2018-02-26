@@ -163,7 +163,7 @@ To understand the matplotlib vocabulary, a useful tool is the `"anatomy of a fig
    ax.text(4.0, -0.4, "Made with http://matplotlib.org",
            fontsize=10, ha="right", color='.5')
 
-   fig.show()
+   #fig.show()
 
 
 Here are some of the highlights:
@@ -172,6 +172,54 @@ Here are some of the highlights:
 * **Axes** is the coordinate system. It contains most of the figure elements, such as Axis, Line2D, Text. 
   One can have multiple Axes objects in one Figure
 * **Axis** is the container for the ticks and labels for the x and y axis of the plot
+
+======================
+Showing/saving figures
+======================
+
+There are two main ways that one can visualize images produced by matplotlib. The first one
+is to pop up a window with the required graph. For that, we use the `show()` function of the figure.
+
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
+   fig,ax=plt.subplots()
+   #some code to generate figure
+   fig.show()
+
+If one wants to save the output, the figure object has a function called `savefig`.
+The main argument of savefig is the filename. Matplotlib will figure out the format of the figure
+from the file extension. The 'png', 'ps', 'eps', and 'pdf' extensions will work with
+almost any backend. For more information, see the documentation of
+`Figure.savefig <https://matplotlib.org/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure.savefig>`_
+Just replace the code above with:
+
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
+   fig,ax=plt.subplots()
+   #some code to generate figure
+   fig.savefig('plot1.png')
+   fig.savefig('plot1.eps')
+
+
+Sometimes one wants to save a multi-page pdf document. Here is how to do this:
+
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
+   from matplotlib.backends.backend_pdf import PdfPages
+
+   with PdfPages('/home/andrei/Desktop/multipage_pdf.pdf') as pdf:
+       #page1
+       fig,ax=plt.subplots()
+       ax.set_title('Page1')
+       pdf.savefig(fig)
+       #page2
+       fig,ax=plt.subplots()
+       ax.set_title('Page2')
+       pdf.savefig(fig)
+
 
 ============
 Simple plots
@@ -182,7 +230,8 @@ fashion as the plotting of arrays in matplotlib. Moreover, one can combine the t
 
 .. plot::
    :include-source:
-      
+
+   from __future__ import division
    import numpy as np
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -193,8 +242,7 @@ fashion as the plotting of arrays in matplotlib. Moreover, one can combine the t
    y0 = 10.+50*np.exp(-(x-10)**2/20)
    err=np.sqrt(y0)
    y = 10.+50*np.exp(-(x-10)**2/20)
-   for i in range(20):
-       y[i] += err[i]*np.random.normal()
+   y += err*np.random.normal(size=len(err))
    err = np.sqrt(y)
    w = CreateWorkspace(DataX=x, DataY=y, DataE=err, NSpec=1, UnitX='DeltaE')
    
@@ -203,7 +251,7 @@ fashion as the plotting of arrays in matplotlib. Moreover, one can combine the t
    ax.errorbar(w,'rs') # plot the workspace with errorbars, using red squares
    ax.plot(x,y0,'k-', label='Initial guess') # plot the initial guess with black line
    ax.legend() # show the legend
-   fig.show()
+   #fig.show()
 
 Some data should be visualized as two dimensional colormaps
 
@@ -231,7 +279,7 @@ Some data should be visualized as two dimensional colormaps
    c = ax.pcolormesh(sqw, norm=LogNorm())
    cbar=fig.colorbar(c)
    cbar.set_label('Intensity (arb. units)') #add text to colorbar
-   fig.show()
+   #fig.show()
 
 One can then change properties of the plot. Here is an example that
 changes the label of the data, changes the label of the x and y axis,
@@ -241,7 +289,8 @@ and adds a grid
 
 .. plot::
    :include-source:
-      
+
+   from __future__ import division
    import numpy as np
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -249,11 +298,10 @@ and adds a grid
    
    # Create a workspace that has a Gaussian peak
    x = np.arange(20)
-   y0 = 10.+50*np.exp(-(x-10)**2/20)
+   y0 = 10.+50.*np.exp(-(x-10.)**2/20.)
    err=np.sqrt(y0)
-   y = 10.+50*np.exp(-(x-10)**2/20)
-   for i in range(20):
-       y[i] += err[i]*np.random.normal()
+   y = 10.+50*np.exp(-(x-10)**2/20.)
+   y += err*np.random.normal(size=len(err))
    err = np.sqrt(y)
    w = CreateWorkspace(DataX=x, DataY=y, DataE=err, NSpec=1, UnitX='DeltaE')
    
@@ -269,7 +317,7 @@ and adds a grid
    ax.tick_params(axis='x', direction='in')
    ax.tick_params(axis='y', direction='out')
    ax.grid(True)
-   fig.show()
+   #fig.show()
 
 
 Let's create now a figure with two panels. In the upper part we show the workspace as
@@ -277,7 +325,8 @@ above, but we add a fit, In the bottom part we add the difference.
 
 .. plot::
    :include-source:
-      
+
+   from __future__ import division
    import numpy as np
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -288,8 +337,7 @@ above, but we add a fit, In the bottom part we add the difference.
    y0 = 10.+50*np.exp(-(x-10)**2/20)
    err=np.sqrt(y0)
    y = 10.+50*np.exp(-(x-10)**2/20)
-   for i in range(20):
-       y[i] += err[i]*np.random.normal()
+   y += err*np.random.normal(size=len(err))
    err = np.sqrt(y)
    w = CreateWorkspace(DataX=x, DataY=y, DataE=err, NSpec=1, UnitX='DeltaE')
    result = Fit(Function='name=LinearBackground,A0=10,A1=0.;name=Gaussian,Height=60.,PeakCentre=10.,Sigma=3.', 
@@ -320,7 +368,7 @@ above, but we add a fit, In the bottom part we add the difference.
    ax_bottom.tick_params(axis='both', direction='in')
    ax_bottom.set_ylabel('Difference')
    fig.tight_layout()
-   fig.show()
+   #fig.show()
    
 
 ====================
@@ -347,7 +395,7 @@ beginning of the run), but one can also plot absolute time using `FullTime=True`
    ax2.plot(w, LogName='ChopperStatus5',FullTime=True)
    ax2.set_title('Absolute time')
    fig.tight_layout()
-   fig.show()
+   #fig.show()
    
 
 Note that the parasite axes in matplotlib do not accept the projection keyword.
@@ -364,18 +412,57 @@ So one needs to use :func:`mantid.plots.plotfunctions.plot<mantid.plots.plotfunc
    ax.plot(w,LogName='ChopperStatus5')
    axt=ax.twiny()
    plots.plotfunctions.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
-   fig.show()
+   #fig.show()
 
 
 =============
 Complex plots
 =============
 
-Plotting dispersion curves can also be done using matplotlib
+One common type of a slightly more complex figure involves drawing an inset.
 
 .. plot::
    :include-source:
-   
+
+   import matplotlib.pyplot as plt
+   import numpy as np
+   from mantid import plots
+   from mantid.simpleapi import CreateWorkspace, FFT
+   from matplotlib import rcParams
+   import warnings
+
+   x=np.linspace(0,10,250)
+   y=np.cos(2*np.pi*1.1*x)*np.exp(-x/7.)
+   err=np.sqrt(0.01+x/200.)
+   w=CreateWorkspace(x,y,err,UnitX='tof')
+   fft=FFT(w)
+
+   # make all ticks point in
+   rcParams['xtick.direction'] = 'in'
+   rcParams['ytick.direction'] = 'in'
+
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   ax.errorbar(w,'ks')
+   ax.set_ylabel('Asymmetry')
+   ax.set_ylim(-1.5,2)
+   ax_inset=fig.add_axes([0.7,0.72,0.2,0.2],projection='mantid')
+   ax_inset.plot(fft,specNum=6)
+   ax_inset.set_xlim(0,2)
+   ax_inset.set_xlabel('Frequency (MHz)')
+   ax_inset.set_ylabel('|FFT|')
+   # note that thight_layout will produce a warning here "This figure includes
+   # Axes that are not compatible with tight_layout, so its results might be incorrect."
+   with warnings.catch_warnings():
+       warnings.simplefilter("ignore", category=UserWarning)
+       fig.tight_layout()
+   #fig.show()
+
+
+Plotting dispersion curves  on multiple panels can also be done using matplotlib:
+
+.. plot::
+   :include-source:
+
    import matplotlib.pyplot as plt
    import numpy as np
    from matplotlib.gridspec import GridSpec
@@ -383,14 +470,14 @@ Plotting dispersion curves can also be done using matplotlib
    from mantid import plots
    
    # Generate nice (fake) dispersion data
+   # Gamma to K
    q = np.arange(0,0.333,0.01)
    e = np.arange(0,60)
    x,y = np.meshgrid(q,e)
-   def omega_hh(q):
-       return 20.* np.sin(np.pi*q)
-   def I(q):
-       return np.exp(-q*5.)
-   signal = I(x) * np.exp(-(y-omega_hh(x))**2)
+   omega_hh = 20. * np.sin(np.pi*x*1.5)
+   I_hh = np.exp(-x*5.)
+   signal = I_hh * np.exp(-(y-omega_hh)**2)
+   signal[y>25+100*x**2]=np.nan
    ws1=CreateMDHistoWorkspace(Dimensionality=2,
                               Extents='0,0.3333,0,60',
                               SignalInput=signal,
@@ -398,9 +485,12 @@ Plotting dispersion curves can also be done using matplotlib
                               NumberOfBins='{0},{1}'.format(len(q),len(e)),
                               Names='Dim1,Dim2',
                               Units='MomentumTransfer,EnergyTransfer')
-   def omega_hm2h(q):
-       return 20*np.sin(np.pi*(q*2.+1./3))
-   signal = np.exp(-(y-omega_hm2h(x))**2)
+   # K to M
+   q = np.arange (0.333,0.5, 0.01)
+   x,y = np.meshgrid(q,e)
+   omega_hm2h=20. * np.cos(np.pi*(x-0.333))
+   signal = np.exp(-(y-omega_hm2h)**2)
+   signal[y>35]=np.nan
    ws2=CreateMDHistoWorkspace(Dimensionality=2,
                               Extents='0.3333,0.5,0,60',
                               SignalInput=signal,
@@ -433,7 +523,7 @@ Plotting dispersion curves can also be done using matplotlib
    
    ax1.pcolormesh(ws1)
    ax2.pcolormesh(ws2)
-   ax3.plot([0,0.5],[0,20])
+   ax3.plot([0,0.5],[0,17.])
    ax4.plot([0,0.5],[0,10])
    
    
@@ -470,4 +560,4 @@ Plotting dispersion curves can also be done using matplotlib
    ax4.set_xticks([1./2])
    ax4.set_xticklabels(['$A$'])
    ax4.tick_params(direction='in')
-   fig.show()
+   #fig.show()
