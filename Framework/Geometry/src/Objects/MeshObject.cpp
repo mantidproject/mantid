@@ -122,19 +122,18 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
       V3D{1, 0, 0}}; // directions to look for intersections
   // We have to look in several directions in case a point is on a face
   // or edge parallel to the first direction or also the second direction.
-  for (size_t i = 0; i < directions.size(); ++i) {
-    std::vector<V3D> intesectionPoints;
+  for (auto direction : directions) {
+    std::vector<V3D> intersectionPoints;
     std::vector<int> entryExitFlags;
 
-    getIntersections(point, directions[i], intesectionPoints, entryExitFlags);
+    getIntersections(point, direction, intersectionPoints, entryExitFlags);
 
-    if (intesectionPoints.empty()) {
+    if (intersectionPoints.empty()) {
       return false;
     }
 
-    size_t k = intesectionPoints.size();
-    for (size_t i = 0; i < k; ++i) {
-      if (point.distance(intesectionPoints[i]) < M_TOLERANCE) {
+    for (auto intersectionPoint : intersectionPoints) {
+      if (point.distance(intersectionPoint) < M_TOLERANCE) {
         return true;
       }
     }
@@ -155,16 +154,16 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
     return 0;
   }
 
-  std::vector<V3D> intesectionPoints;
+  std::vector<V3D> intersectionPoints;
   std::vector<int> entryExitFlags;
 
-  getIntersections(UT.startPoint(), UT.direction(), intesectionPoints,
+  getIntersections(UT.startPoint(), UT.direction(), intersectionPoints,
                    entryExitFlags);
-  if (intesectionPoints.empty())
+  if (intersectionPoints.empty())
     return 0; // Quit if no intersections found
 
-  for (size_t i = 0; i < intesectionPoints.size(); ++i) {
-    UT.addPoint(entryExitFlags[i], intesectionPoints[i], *this);
+  for (size_t i = 0; i < intersectionPoints.size(); ++i) {
+    UT.addPoint(entryExitFlags[i], intersectionPoints[i], *this);
   }
   UT.buildLink();
 
@@ -226,11 +225,11 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
   s = start - v1;
   u = f * (s.scalar_prod(h));
   if (u < 0.0 || u > 1.0)
-    return false; // Intesection with plane outside triangle
+    return false; // Intersection with plane outside triangle
   q = s.cross_prod(edge1);
   v = f * direction.scalar_prod(q);
   if (v < 0.0 || u + v > 1.0)
-    return false; // Intesection with plane outside triangle
+    return false; // Intersection with plane outside triangle
 
   // At this stage we can compute t to find out where the intersection point is
   // on the line.
@@ -382,10 +381,10 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
 {
   std::vector<V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
-  for (size_t i = 0; i < m_vertices.size(); ++i) {
-    scaledVertices.push_back(V3D(scaleFactor.X() * m_vertices[i].X(),
-                                 scaleFactor.Y() * m_vertices[i].Y(),
-                                 scaleFactor.Z() * m_vertices[i].Z()));
+  for (auto vertex : m_vertices) {
+    scaledVertices.push_back(V3D(scaleFactor.X() * vertex.X(),
+                                 scaleFactor.Y() * vertex.Y(),
+                                 scaleFactor.Z() * vertex.Z()));
   }
   MeshObject scaledObject(m_triangles, scaledVertices, m_material);
   return scaledObject.solidAngle(observer);
@@ -437,10 +436,10 @@ const BoundingBox &MeshObject::getBoundingBox() const {
       maxX = maxY = maxZ = -huge;
 
       // Loop over all vertices and determine minima and maxima on each axis
-      for (size_t i = 0; i < m_vertices.size(); ++i) {
-        auto vx = m_vertices[i].X();
-        auto vy = m_vertices[i].Y();
-        auto vz = m_vertices[i].Z();
+      for (auto vertex : m_vertices) {
+        auto vx = vertex.X();
+        auto vy = vertex.Y();
+        auto vz = vertex.Z();
 
         minX = std::min(minX, vx);
         maxX = std::max(maxX, vx);
