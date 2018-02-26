@@ -44,7 +44,9 @@ set_target_properties ( RemoteJobManagers PROPERTIES OUTPUT_NAME MantidRemoteJob
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( RemoteJobManagers PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
-endif () 
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties ( RemoteJobManagers PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET RemoteJobManagers PROPERTY FOLDER "MantidFramework" )

@@ -51,7 +51,7 @@ set ( SRC_FILES
 	src/WorkspaceSingleValue.cpp
 )
 
-set ( SRC_UNITY_IGNORE_FILES 
+set ( SRC_UNITY_IGNORE_FILES
 	src/Workspace2D.cpp
 	src/WorkspaceSingleValue.cpp
 	src/EventWorkspace.cpp
@@ -209,11 +209,13 @@ enable_precompiled_headers( inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES 
 # Add the target for this directory
 add_library ( DataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects 
+set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects
                                                COMPILE_DEFINITIONS IN_MANTID_DATAOBJECTS )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(DataObjects PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Intensive use of templated libaries can cause large objects to be generated. These require
@@ -235,4 +237,3 @@ add_subdirectory ( test )
 ###########################################################################
 
 install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
-

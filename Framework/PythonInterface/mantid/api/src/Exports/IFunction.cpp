@@ -209,6 +209,9 @@ void export_IFunction() {
            (void (IFunction::*)(const std::string &)) & IFunction::removeTie,
            (arg("self"), arg("name")), "Remove the tie of the named parameter")
 
+      .def("getTies", &IFunction::writeTies, arg("self"),
+           "Returns the list of current ties as a string")
+
       .def("addConstraints", &IFunction::addConstraints,
            addConstraints_Overloads(
                (arg("self"), arg("constraints"), arg("isDefault")),
@@ -217,6 +220,9 @@ void export_IFunction() {
       .def("removeConstraint", &IFunction::removeConstraint,
            (arg("self"), arg("name")),
            "Remove the constraint on the named parameter")
+
+      .def("getConstraints", &IFunction::writeConstraints, arg("self"),
+           "Returns the list of current constraints as a string")
 
       .def("getNumberDomains", &IFunction::getNumberDomains, (arg("self")),
            "Get number of domains of a multi-domain function")
