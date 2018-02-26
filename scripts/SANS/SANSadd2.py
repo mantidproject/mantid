@@ -70,11 +70,11 @@ def add_runs(runs, # noqa: C901
             lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(
                 userEntry, defType, inst, ADD_FILES_SUM_TEMPORARY, rawTypes, period)
 
-            is_not_allowed_instrument = inst.upper() != 'SANS2D' and inst.upper() != 'LARMOR'
+            is_not_allowed_instrument = inst.upper() not in {'SANS2D', 'LARMOR', 'ZOOM'}
             if is_not_allowed_instrument and isFirstDataSetEvent:
                 error = 'Adding event data not supported for ' + inst + ' for now'
                 print(error)
-                logger.notice(error)
+                sanslog.error(error)
                 for workspaceName in (ADD_FILES_SUM_TEMPORARY,ADD_FILES_SUM_TEMPORARY_MONITORS):
                     if workspaceName in mtd:
                         DeleteWorkspace(workspaceName)
@@ -88,7 +88,7 @@ def add_runs(runs, # noqa: C901
                 if isDataSetEvent != isFirstDataSetEvent:
                     error = 'Datasets added must be either ALL histogram data or ALL event data'
                     print(error)
-                    logger.notice(error)
+                    sanslog.error(error)
                     for workspaceName in (ADD_FILES_SUM_TEMPORARY, ADD_FILES_SUM_TEMPORARY_MONITORS,
                                           ADD_FILES_NEW_TEMPORARY, ADD_FILES_NEW_TEMPORARY_MONITORS):
                         if workspaceName in mtd:
@@ -111,14 +111,14 @@ def add_runs(runs, # noqa: C901
         except ValueError as e:
             error = 'Error opening file ' + userEntry+': ' + str(e)
             print(error)
-            logger.notice(error)
+            sanslog.error(error)
             if ADD_FILES_SUM_TEMPORARY in mtd :
                 DeleteWorkspace(ADD_FILES_SUM_TEMPORARY)
             return ""
         except Exception as e:
             error = 'Error finding files: ' + str(e)
             print(error)
-            logger.notice(error)
+            sanslog.error(error)
             for workspaceName in (ADD_FILES_SUM_TEMPORARY, ADD_FILES_NEW_TEMPORARY):
                 if workspaceName in mtd:
                     DeleteWorkspace(workspaceName)
@@ -132,7 +132,7 @@ def add_runs(runs, # noqa: C901
     # now save the added file
         outFile = lastFile+'-add.'+'nxs' if outFile is None else outFile
         outFile_monitors = lastFile+'-add_monitors.'+'nxs' if outFile_monitors is None else outFile_monitors
-        logger.notice('writing file:   '+outFile)
+        sanslog.notice('writing file:   '+outFile)
 
         if period == 1 or period == _NO_INDIVIDUAL_PERIODS:
         #replace the file the first time around
@@ -197,7 +197,7 @@ def handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_dat
                 binning = binning + "," + str(monX[j-1]) + "," + str(binGap)
         binning = binning + "," + str(monX[len(monX)-1])
 
-    logger.notice(binning)
+    sanslog.notice(binning)
     Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY,OutputWorkspace='AddFilesSumTempory_Rebin',Params=binning,
           PreserveEvents=False)
 
@@ -280,7 +280,7 @@ def remove_unwanted_workspaces(workspace_name, temp_workspace_name, period):
 
 def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     filename, ext = _makeFilename(entry, ext, inst)
-    logger.notice('reading file:     '+filename)
+    sanslog.notice('reading file:     '+filename)
 
     isDataSetEvent = False
     workspace_type = get_workspace_type(filename)
@@ -380,11 +380,11 @@ def _copyLog(lastPath, logFile, pathout):
         if os.path.exists(logFile):
             copyfile(logFile, os.path.join(pathout, os.path.basename(logFile)))
         else:
-            logger.notice("Could not find log file %s" % logFile)
+            sanslog.notice("Could not find log file %s" % logFile)
     except Exception:
         error = 'Error copying log file ' + logFile + ' to directory ' + pathout+'\n'
         print(error)
-        logger.notice(error)
+        sanslog.error(error)
 
 
 if __name__ == '__main__':

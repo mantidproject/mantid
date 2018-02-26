@@ -18,6 +18,7 @@ Powder Diffraction
 
   + Scripts now support creation of grouping .cal files from ceria run(s)
   + Absorption corrections enabled for all samples, not just vanadium
+  + ``subtract_empty_instrument`` parameter added for disabling empty subtraction, useful for focusing empties
 - Improvements in ISIS Powder for HRPD:
 
   + The prompt pulse is now masked out for the long window
@@ -41,6 +42,7 @@ Powder Diffraction
 - The ``mode`` parameter for POLARIS in ISIS Powder now behaves as described in the documentation - it persists through function calls and is case insensitive
 - For instruments in ISIS Powder, offset files may now be specified by an absolute path. The default behaviour of assuming they live in calibration/label has been retained
 - ISIS Powder scripts no longer crash when current-normalising a workspace with no current. Instead, no normalisation or empty calibration is applied, and processing continues as normal
+- The names of output workspaces from ISIS Powder for all instruments except PEARL were altered slightly to allow more convenient renaming of GroupWorkspaces
 
 Engineering Diffraction
 -----------------------
@@ -77,7 +79,10 @@ Single Crystal Diffraction
 
 - SCD Event Data Reduction interface now uses the Indexing Tolerance for Index Peaks to index the peaks for the Select Cell options in Choose Cell tab.  Previously it used a constant, 0.12, for the tolerance.
 
+- :ref:`SaveLauenorm <algm-SaveLauenorm>` now has option to save peaks in geasc format for input into exchge and then lauescale from the laue package.
+
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` now has an option to calculate the Goniometer rotation (around y-axis only) for a constant wavelength source.
+
 
 Total Scattering
 ----------------
