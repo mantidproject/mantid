@@ -94,6 +94,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
                                                                            pt_number=1, roi_name=roi_name)
 
         self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, 'counts...')
+
         self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, 'model... ')
 
         return
