@@ -26,6 +26,7 @@ class LoadSingleRunSingleSpectrumTest(stresstesting.MantidStress):
                          "Passed '143' as spectra to VesuvioTOFFitInput but found different value "
                          "for spectra field: '" + self._tof_input.spectra + "'.")
 
+
 class LoadMultipleRunSingleSpectrumTest(stresstesting.MantidStress):
     _tof_input = None
 
@@ -63,6 +64,7 @@ class LoadMultipleRunMultipleSpectrumTest(stresstesting.MantidStress):
                          "Passed 'forward' as spectra to VesuvioTOFFitInput, expected '135-198' "
                          "but found different value for spectra field: '" + self._tof_input.spectra + "'.")
 
+
 class LoadBackScatteringSpectrumTest(stresstesting.MantidStress):
     _tof_input = None
 
@@ -80,4 +82,3 @@ class LoadBackScatteringSpectrumTest(stresstesting.MantidStress):
         self.assertEqual(self._tof_input.spectra, '3-134',
                          "Passed 'backward' as spectra to VesuvioTOFFitInput, expected '3-134' "
                          "but found different value for spectra field: '" + self._tof_input.spectra + "'.")
-
