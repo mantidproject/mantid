@@ -87,7 +87,7 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
   }
 
   // True if point is on surface
-  for (auto intersectionPoint : intersectionPoints) {
+  for (const auto &intersectionPoint : intersectionPoints) {
     if (point.distance(intersectionPoint) < M_TOLERANCE) {
       return true;
     }
@@ -122,7 +122,7 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
       V3D{1, 0, 0}}; // directions to look for intersections
   // We have to look in several directions in case a point is on a face
   // or edge parallel to the first direction or also the second direction.
-  for (auto direction : directions) {
+  for (const auto &direction : directions) {
     std::vector<V3D> intersectionPoints;
     std::vector<int> entryExitFlags;
 
@@ -132,7 +132,7 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
       return false;
     }
 
-    for (auto intersectionPoint : intersectionPoints) {
+    for (const auto &intersectionPoint : intersectionPoints) {
       if (point.distance(intersectionPoint) < M_TOLERANCE) {
         return true;
       }
@@ -381,7 +381,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
 {
   std::vector<V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
-  for (auto vertex : m_vertices) {
+  for (const auto &vertex : m_vertices) {
     scaledVertices.emplace_back(scaleFactor.X() * vertex.X(),
                                 scaleFactor.Y() * vertex.Y(),
                                 scaleFactor.Z() * vertex.Z());
@@ -436,7 +436,7 @@ const BoundingBox &MeshObject::getBoundingBox() const {
       maxX = maxY = maxZ = -huge;
 
       // Loop over all vertices and determine minima and maxima on each axis
-      for (auto vertex : m_vertices) {
+      for (const auto &vertex : m_vertices) {
         auto vx = vertex.X();
         auto vy = vertex.Y();
         auto vz = vertex.Z();
