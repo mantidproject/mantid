@@ -930,135 +930,136 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
         m_enumManager->setValue(m_functionsInComboBox, 0);
       }
     }
-
-    if (handler->parentHandler() != nullptr)
-      FitPropertyBrowser::removeFunction(handler);
-
-    if (handler == m_backgroundHandler)
-      m_enumManager->setValue(m_backgroundSelection, 0);
   }
 
-  /**
-   * Schedules a fit.
-   */
-  void IndirectFitPropertyBrowser::fit() { emit fitScheduled(); }
+  if (handler->parentHandler() != nullptr)
+    FitPropertyBrowser::removeFunction(handler);
 
-  /**
-   * Schedules a sequential fit.
-   */
-  void IndirectFitPropertyBrowser::sequentialFit() {
-    emit sequentialFitScheduled();
+  if (handler == m_backgroundHandler)
+    m_enumManager->setValue(m_backgroundSelection, 0);
+}
+
+/**
+ * Schedules a fit.
+ */
+void IndirectFitPropertyBrowser::fit() { emit fitScheduled(); }
+
+/**
+ * Schedules a sequential fit.
+ */
+void IndirectFitPropertyBrowser::sequentialFit() {
+  emit sequentialFitScheduled();
+}
+
+/**
+ * Called when an enum value changes in this indirect fit property browser.
+ *
+ * @param prop  The property containing the enum value which was changed.
+ */
+void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
+
+  if (prop == m_functionsInComboBox) {
+    clearCustomFunctions(prop, false);
+    addCustomFunctions(prop, enumValue(prop));
+  } else if (prop == m_backgroundSelection) {
+    setBackground(enumValue(prop).toStdString());
+  } else if (m_customSettings.values().contains(prop)) {
+    emit customEnumChanged(prop->propertyName(), enumValue(prop));
+    emit customSettingChanged(prop);
+  }
+  FitPropertyBrowser::enumChanged(prop);
+}
+
+/**
+ * Called when a boolean value changes in this indirect fit property browser.
+ *
+ * @param prop  The property containing the boolean value which was changed.
+ */
+void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
+  const auto propertyName = prop->propertyName();
+
+  if (m_optionProperties.contains(prop)) {
+    if (m_boolManager->value(prop))
+      prop->addSubProperty(m_optionalProperties[prop]);
+    else
+      prop->removeSubProperty(m_optionalProperties[prop]);
   }
 
-  /**
-   * Called when an enum value changes in this indirect fit property browser.
-   *
-   * @param prop  The property containing the enum value which was changed.
-   */
-  void IndirectFitPropertyBrowser::enumChanged(QtProperty * prop) {
-
-    if (prop == m_functionsInComboBox) {
-      clearCustomFunctions(prop, false);
-      addCustomFunctions(prop, enumValue(prop));
-    } else if (prop == m_backgroundSelection) {
-      setBackground(enumValue(prop).toStdString());
-    } else if (m_customSettings.values().contains(prop)) {
-      emit customEnumChanged(prop->propertyName(), enumValue(prop));
-      emit customSettingChanged(prop);
-    }
-    FitPropertyBrowser::enumChanged(prop);
+  if (m_functionsAsCheckBox.contains(prop)) {
+    if (m_boolManager->value(prop))
+      addCustomFunctions(prop, propertyName);
+    else
+      clearCustomFunctions(prop, true);
+  } else if (m_customSettings.values().contains(prop)) {
+    emit customBoolChanged(propertyName, m_boolManager->value(prop));
+    emit customSettingChanged(prop);
   }
+  FitPropertyBrowser::boolChanged(prop);
+}
 
-  /**
-   * Called when a boolean value changes in this indirect fit property browser.
-   *
-   * @param prop  The property containing the boolean value which was changed.
-   */
-  void IndirectFitPropertyBrowser::boolChanged(QtProperty * prop) {
-    const auto propertyName = prop->propertyName();
+/**
+ * Called when an integer value changes in this indirect fit property browser.
+ *
+ * @param prop  The property containing the integer value which was changed.
+ */
+void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
 
-    if (m_optionProperties.contains(prop)) {
-      if (m_boolManager->value(prop))
-        prop->addSubProperty(m_optionalProperties[prop]);
-      else
-        prop->removeSubProperty(m_optionalProperties[prop]);
-    }
-
-    if (m_functionsAsCheckBox.contains(prop)) {
-      if (m_boolManager->value(prop))
-        addCustomFunctions(prop, propertyName);
-      else
-        clearCustomFunctions(prop, true);
-    } else if (m_customSettings.values().contains(prop)) {
-      emit customBoolChanged(propertyName, m_boolManager->value(prop));
-      emit customSettingChanged(prop);
-    }
-    FitPropertyBrowser::boolChanged(prop);
+  if (m_functionsAsSpinner.contains(prop)) {
+    auto multiples = m_intManager->value(prop);
+    clearCustomFunctions(prop, multiples == 0);
+    addCustomFunctions(prop, prop->propertyName(), multiples);
+  } else if (m_customSettings.values().contains(prop)) {
+    emit customIntChanged(prop->propertyName(), m_intManager->value(prop));
+    emit customSettingChanged(prop);
   }
+  FitPropertyBrowser::intChanged(prop);
+}
 
-  /**
-   * Called when an integer value changes in this indirect fit property browser.
-   *
-   * @param prop  The property containing the integer value which was changed.
-   */
-  void IndirectFitPropertyBrowser::intChanged(QtProperty * prop) {
-
-    if (m_functionsAsSpinner.contains(prop)) {
-      auto multiples = m_intManager->value(prop);
-      clearCustomFunctions(prop, multiples == 0);
-      addCustomFunctions(prop, prop->propertyName(), multiples);
-    } else if (m_customSettings.values().contains(prop)) {
-      emit customIntChanged(prop->propertyName(), m_intManager->value(prop));
-      emit customSettingChanged(prop);
-    }
-    FitPropertyBrowser::intChanged(prop);
+/**
+ * Called when a double value changes in this indirect fit property browser.
+ *
+ * @param prop  The property containing the double value which was changed.
+ */
+void IndirectFitPropertyBrowser::doubleChanged(QtProperty *prop) {
+  if (m_customSettings.values().contains(prop)) {
+    emit customDoubleChanged(prop->propertyName(),
+                             m_doubleManager->value(prop));
+    emit customSettingChanged(prop);
   }
+  FitPropertyBrowser::doubleChanged(prop);
+}
 
-  /**
-   * Called when a double value changes in this indirect fit property browser.
-   *
-   * @param prop  The property containing the double value which was changed.
-   */
-  void IndirectFitPropertyBrowser::doubleChanged(QtProperty * prop) {
-    if (m_customSettings.values().contains(prop)) {
-      emit customDoubleChanged(prop->propertyName(),
-                               m_doubleManager->value(prop));
-      emit customSettingChanged(prop);
-    }
-    FitPropertyBrowser::doubleChanged(prop);
-  }
+/**
+ * Called when a custom setting changes in this indirect fit property browser.
+ *
+ * @param prop The custom setting property which was changed.
+ */
+void IndirectFitPropertyBrowser::customChanged(QtProperty *prop) {
+  if (m_functionChangingSettings.contains(prop))
+    emit functionChanged();
+}
 
-  /**
-   * Called when a custom setting changes in this indirect fit property browser.
-   *
-   * @param prop The custom setting property which was changed.
-   */
-  void IndirectFitPropertyBrowser::customChanged(QtProperty * prop) {
-    if (m_functionChangingSettings.contains(prop))
-      emit functionChanged();
-  }
+/**
+ * @param prop  The property whose enum value to extract.
+ * @return      The enum value of the specified property.
+ */
+QString IndirectFitPropertyBrowser::enumValue(QtProperty *prop) const {
+  const auto values = m_enumManager->enumNames(prop);
+  if (values.isEmpty())
+    return "";
+  const auto selectedIndex = m_enumManager->value(prop);
+  return values[selectedIndex];
+}
 
-  /**
-   * @param prop  The property whose enum value to extract.
-   * @return      The enum value of the specified property.
-   */
-  QString IndirectFitPropertyBrowser::enumValue(QtProperty * prop) const {
-    const auto values = m_enumManager->enumNames(prop);
-    if (values.isEmpty())
-      return "";
-    const auto selectedIndex = m_enumManager->value(prop);
-    return values[selectedIndex];
-  }
-
-  /**
-   * Called when the browser visibility has changed.
-   *
-   * @param isVisible True if the browser is visible, false otherwise.
-   */
-  void IndirectFitPropertyBrowser::browserVisibilityChanged(bool isVisible) {
-    if (!isVisible)
-      emit browserClosed();
-  }
+/**
+ * Called when the browser visibility has changed.
+ *
+ * @param isVisible True if the browser is visible, false otherwise.
+ */
+void IndirectFitPropertyBrowser::browserVisibilityChanged(bool isVisible) {
+  if (!isVisible)
+    emit browserClosed();
+}
 
 } // namespace MantidWidgets
-} // namespace MantidWidgets
+} // namespace MantidQt
