@@ -28,7 +28,7 @@ An error report will be sent to errorreports.mantidproject.org. It will contain 
 - The mantid application you were using, currently this will always be mantidplot.
 - The default facility you have set.
 - The paraview version.
-- The ammount of time mantid was running prior to the crash.
+- The amount of time mantid was running prior to the crash.
 - A hashed user id and a hashed host id.
 
 *Yes, share information*
