@@ -32,7 +32,7 @@ MeshObject::MeshObject(std::vector<uint16_t> &&faces,
                        std::vector<V3D> &&vertices,
                        const Kernel::Material &&material)
     : m_boundingBox(), m_id("MeshObject"), m_triangles(std::move(faces)),
-      m_vertices(std::move(vertices)), m_material(std::move(material)) {
+      m_vertices(std::move(vertices)), m_material(material) {
 
   initialize();
 }
