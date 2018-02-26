@@ -230,6 +230,7 @@
     <technique>TOF Indirect Geometry Diffraction</technique>
     <livedata>
       <connection name="histo" address="NDXVESUVIO:6789" listener="ISISHistoDataListener" />
+      <connection name="kafka_event" address="livedata.isis.cclrc.ac.uk:9092" listener="KafkaEventListener" />
     </livedata>
   </instrument>
 
@@ -366,6 +367,9 @@
   <instrument name="ZOOM">
     <technique>Small Angle Scattering</technique>
     <zeropadding size="8"/>
+    <livedata>
+      <connection name="kafka_event" address="livedata.isis.cclrc.ac.uk:9092" listener="KafkaEventListener" />
+    </livedata>
   </instrument>
 
 </facility>
