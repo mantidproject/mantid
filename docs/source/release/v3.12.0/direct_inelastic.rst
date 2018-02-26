@@ -8,6 +8,8 @@ Direct Inelastic Changes
 New features
 ------------
 
+* The `MSlice <https://github.com/mantidproject/mslice>`_ user interface can now be lauched from the MantidPlot Interfaces menu.
+
 Algorithms
 ##########
 
