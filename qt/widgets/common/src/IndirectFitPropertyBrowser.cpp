@@ -355,13 +355,17 @@ void IndirectFitPropertyBrowser::setParameterValue(
  */
 void IndirectFitPropertyBrowser::setBackground(
     const std::string &backgroundName) {
-  if (m_backgroundHandler != nullptr && backgroundIndex())
+  if (m_backgroundHandler != nullptr && backgroundIndex()) {
+    MantidQt::API::SignalBlocker<QObject> blocker(this);
     FitPropertyBrowser::removeFunction(m_backgroundHandler);
+  }
 
-  if (backgroundName != "None")
+  if (backgroundName != "None") {
+    MantidQt::API::SignalBlocker<QObject> blocker(this);
     m_backgroundHandler = addFunction(backgroundName);
-  else
+  } else
     m_backgroundHandler = nullptr;
+  emit functionChanged();
 }
 
 /**
@@ -759,8 +763,14 @@ void IndirectFitPropertyBrowser::addCustomFunctionGroup(
 void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
                                                     const QString &groupName,
                                                     const int &multiples) {
-  for (int i = 0; i < multiples; ++i)
-    addCustomFunctions(prop, groupName);
+  for (int i = 0; i < multiples; ++i) {
+    if (!m_functionHandlers.contains(prop))
+      m_functionHandlers.insert(prop, QVector<PropertyHandler *>());
+    addCustomFunctions(prop, m_groupToFunctionList[groupName]);
+  }
+
+  if(multiples > 0)
+    emit functionChanged();
 }
 
 /**
@@ -909,6 +919,7 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
       functionHandlers.remove(i);
       m_customFunctionCount[handler->function()->name()] -= 1;
 
+      MantidQt::API::SignalBlocker<QObject> blocker(this);
       if (m_functionsAsSpinner.contains(prop))
         m_intManager->setValue(prop, m_intManager->value(prop) - 1);
       else if (m_functionsAsCheckBox.contains(prop))

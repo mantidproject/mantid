@@ -72,6 +72,8 @@ private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
 
+  void updateIntensityTie();
+  void updateIntensityTie(const QString &intensityTie);
   std::string createIntensityTie(Mantid::API::IFunction_sptr function) const;
   std::vector<std::string>
   getParameters(Mantid::API::IFunction_sptr function,

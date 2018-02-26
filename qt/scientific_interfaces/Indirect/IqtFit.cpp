@@ -53,6 +53,7 @@ void IqtFit::setup() {
   addBoolCustomSetting("ConstrainBeta", "Make Beta Global");
   addBoolCustomSetting("ExtractMembers", "Extract Members");
   setCustomSettingEnabled("ConstrainBeta", false);
+  setCustomSettingEnabled("ConstrainIntensities", false);
 
   // Set available background options
   setBackgroundOptions({"None", "FlatBackground"});
@@ -118,19 +119,43 @@ void IqtFit::fitFunctionChanged() {
     setCustomSettingEnabled("ConstrainBeta", false);
   }
 
-  if (!fitFunction()->hasParameter(m_tiedParameter.toStdString()))
-    setCustomBoolSetting("ConstrainIntensities", false);
+  updateIntensityTie();
 }
 
 void IqtFit::customBoolUpdated(const QString &key, bool value) {
   if (key == "Constrain Intensities") {
-    if (value) {
-      const auto tie =
-          QString::fromStdString(createIntensityTie(fitFunction()));
-      m_tiedParameter = tie.split("=")[0];
-      addTie(tie);
-    } else
+    if (value)
+      updateIntensityTie();
+    else
       removeTie(m_tiedParameter);
+  }
+}
+
+void IqtFit::updateIntensityTie() {
+  const auto function = fitFunction();
+
+  if (function) {
+    removeTie(m_tiedParameter);
+    const auto tie = QString::fromStdString(createIntensityTie(fitFunction()));
+    updateIntensityTie(tie);
+  } else {
+    setCustomBoolSetting("ConstrainIntensities", false);
+    setCustomSettingEnabled("ConstrainIntensities", false);
+  }
+}
+
+void IqtFit::updateIntensityTie(const QString &intensityTie) {
+
+  if (intensityTie.isEmpty()) {
+    setCustomBoolSetting("ConstrainIntensities", false);
+    setCustomSettingEnabled("ConstrainIntensities", false);
+  } else {
+    setCustomSettingEnabled("ConstrainIntensities", true);
+
+    if (boolSettingValue("ConstrainIntensities")) {
+      m_tiedParameter = intensityTie.split("=")[0];
+      addTie(intensityTie);
+    }
   }
 }
 
@@ -238,7 +263,7 @@ std::string IqtFit::createIntensityTie(IFunction_sptr function) const {
 
   const auto intensityParameters = getParameters(function, "Height");
 
-  if (intensityParameters.empty())
+  if (intensityParameters.size() < 2)
     return "";
 
   for (auto i = 1u; i < intensityParameters.size(); ++i)

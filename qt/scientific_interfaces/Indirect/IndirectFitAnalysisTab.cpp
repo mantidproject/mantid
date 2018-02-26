@@ -360,7 +360,10 @@ void IndirectFitAnalysisTab::setConvolveMembers(bool convolveMembers) {
  */
 void IndirectFitAnalysisTab::addTie(const QString &tieString) {
   const auto index = tieString.split(".").first().right(1).toInt();
-  m_fitPropertyBrowser->getHandler()->getHandler(index)->addTie(tieString);
+  const auto handler = m_fitPropertyBrowser->getHandler()->getHandler(index);
+
+  if (handler)
+    handler->addTie(tieString);
 }
 
 /**
@@ -373,8 +376,11 @@ void IndirectFitAnalysisTab::removeTie(const QString &parameterName) {
   const auto index = parts.first().right(1).toInt();
   const auto name = parts.last();
   const auto handler = m_fitPropertyBrowser->getHandler()->getHandler(index);
-  const auto tieProperty = handler->getTies()[name];
-  handler->removeTie(tieProperty, parameterName.toStdString());
+
+  if (handler) {
+    const auto tieProperty = handler->getTies()[name];
+    handler->removeTie(tieProperty, parameterName.toStdString());
+  }
 }
 
 /**
@@ -1022,7 +1028,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
