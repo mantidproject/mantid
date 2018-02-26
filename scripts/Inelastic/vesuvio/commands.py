@@ -883,10 +883,10 @@ def _update_output(vesuvio_output, prefit_result, corrections_result, fit_result
     vesuvio_output.add_fit_output_workspace(fit_result[0])
     vesuvio_output.add_chi2_value(fit_result[-1])
     vesuvio_output.add_prefit_parameters_workspace(prefit_result[1])
-    vesuvio_output.add_correction_parameters_workspace(corrections_result[-1])
+    vesuvio_output.add_correction_parameters_workspace(corrections_result[-2])
     vesuvio_output.add_fit_parameters_workspace(fit_result[1])
 
-    if len(corrections_result) > 1:
+    if len(corrections_result) > 2:
         vesuvio_output.add_corrections_workspaces(list(corrections_result[0]))
         vesuvio_output.add_corrected_workspaces(list(corrections_result[1]))
 
