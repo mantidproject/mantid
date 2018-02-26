@@ -1335,7 +1335,8 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
                    ('Intensity', 'float'),
                    ('Pt-Sigma', 'float'),
                    ('Pt-I', 'float'),
-                   ('Pt-B', 'float')]
+                   ('Pt-B', 'float'),
+                   ('Scans Same 2Theta', 'str')]
     # ('Selected', 'checkbox')
 
     def __init__(self, parent):
@@ -1353,6 +1354,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         self._2theta_index = None
         self._fwhm_index = None
         self._intensity_index = None
+        self._2thta_scans_index = None
 
         self._pt_row_dict = dict()
 
@@ -1373,7 +1375,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
         # check others...
         # blabla
-        status, error_msg = self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0.])
+        status, error_msg = self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0., ''])
         if not status:
             raise RuntimeError(error_msg)
 

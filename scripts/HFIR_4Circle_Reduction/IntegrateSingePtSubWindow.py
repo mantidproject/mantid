@@ -85,6 +85,18 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         plot integrated Pt with model
         :return:
         """
+        # get scan number
+        scan_number = int(self.ui.lineEdit_Scan.text())
+        roi_name = str(self.ui.comboBox_roiList.currentText())
+
+        # get data
+        vec_x, vec_y, model_y = self._controller.get_single_scan_pt_result(self._exp_number, scan_number,
+                                                                           pt_number=1, roi_name=roi_name)
+
+        self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, 'counts...')
+        self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, 'model... ')
+
+        return
 
     def do_save_intensity(self):
         """
@@ -115,6 +127,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             # integration on image for I
             peak_height = self._controller.integrate_detector_image(self._exp_number, scan_number, pt_number, roi_name,
                                                                     fit_gaussian=True)
+            print ('[DB...BAT] SinglePt-Gaussian-Intensity = {0}'.format(peak_height))
 
             # calculate peak intensity
             intensity = self._controller.calculate_intensity_single_pt(self._exp_number, scan_number, pt_number,
@@ -151,7 +164,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         for (scan_number, pt_number) in self.ui.tableView_summary.get_scan_pt_list():
-            two_theta = self._controller.get_log_value(self._exp_number, scan_number, pt_number)
+            two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, pt_number)
             self.ui.tableView_summary.set_two_theta(scan_number, pt_number, two_theta)
 
         return

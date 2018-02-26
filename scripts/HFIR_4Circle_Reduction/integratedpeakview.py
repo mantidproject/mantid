@@ -251,7 +251,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
             elif event.button == 3:
                 scan_index_increment = 1
 
-
+        return
 
     def set_parent_window(self, parent_window):
         """

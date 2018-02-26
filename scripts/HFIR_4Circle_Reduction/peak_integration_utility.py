@@ -18,6 +18,22 @@ def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
     return corrected_intensity
 
 
+def calculate_gaussian(param_dict, vec_x):
+    """
+
+    :param param_dict:
+    :param vec_x:
+    :return:
+    """
+    # TODO Shall be...
+
+    print ('Gaussian dict: {0}'.format(param_dict))
+
+    vec_y = numpy.exp(-(vec_x-5)**2)
+
+    return vec_y
+
+
 def calculate_lorentz_correction_factor(q_sample, wavelength, motor_step):
     """
 
@@ -172,11 +188,6 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     assert isinstance(vec_x, numpy.ndarray), 'Input vec_x must be a numpy.ndarray but not a {0}.'.format(vec_x)
     assert isinstance(vec_y, numpy.ndarray), 'Input vec_y must be a numpy.ndarray but not a {0}.'.format(vec_y)
     assert isinstance(vec_e, numpy.ndarray), 'Input vec_e must be a numpy.ndarray but not a {0}.'.format(vec_e)
-
-    print ('Fitting: ')
-    print (vec_x)
-    print (vec_y)
-    print (vec_e)
 
     # starting value
     if isinstance(start_value_list, list):

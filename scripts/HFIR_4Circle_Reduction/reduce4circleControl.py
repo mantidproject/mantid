@@ -9,6 +9,7 @@
 #
 ################################################################################
 from __future__ import (absolute_import, division, print_function)
+import bisect
 try:
     # python3
     from urllib.request import urlopen
@@ -133,6 +134,8 @@ class CWSCDReductionControl(object):
 
         # Peak Info
         self._myPeakInfoDict = dict()
+        # Sample log value look up table
+        self._2thetaLookupTable = dict()
         # Last UB matrix calculated
         self._myLastPeakUB = None
         # Flag for data storage
@@ -377,20 +380,44 @@ class CWSCDReductionControl(object):
         if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
             raise RuntimeError('blabla')
 
-        vec_x, vec_y, cost, params = \
-            self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+        value_list = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+        params = value_list[3]
 
         # get 2theta value from
-        two_theta = self.get_sample_log_value(exp_number, scan_number, pt_number, 'twotheta')
-        integrated_peak_params = self.get_integrated_scan_params(exp_number, scan_number, two_theta,
-                                                                 resolution=0.01)
+        two_theta = self.get_sample_log_value(exp_number, scan_number, pt_number, '2theta')
+        ref_exp_number, ref_scan_number, integrated_peak_params = self.get_integrated_scan_params(exp_number,
+                                                                                                  two_theta,
+                                                                                                  resolution=0.01)
         if integrated_peak_params is not None:
             sigma = integrated_peak_params['sigma']
-            peak_intensity = peak_integration_utility.calculate_single_pt_scan_peak_intensity(params['Intensity'], sigma)
+            value_list[4] = ref_exp_number, ref_scan_number
+            value_list[5] = sigma
+            peak_intensity = peak_integration_utility.calculate_single_pt_scan_peak_intensity(params['Intensity'],
+                                                                                              sigma)
         else:
             peak_intensity = 0.
 
+        value_list[6] = peak_intensity
+
         return peak_intensity
+
+    def get_single_scan_pt_result(self, exp_number, scan_number, pt_number, roi_name):
+
+
+        if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
+            raise RuntimeError('{0}, {1}, {2}, {3} not in single-pt-scan dict.  Keys are {4}'
+                               ''.format(exp_number, scan_number, pt_number, roi_name,
+                                         self._single_pt_integration_dict.keys()))
+
+        value_list = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+        vec_x = value_list[0]
+        vec_y = value_list[1]
+        params = value_list[3]
+
+        # calculate model
+        model_y = peak_integration_utility.calculate_gaussian(params, vec_x)
+
+        return vec_x, vec_y, model_y
 
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
@@ -1021,7 +1048,7 @@ class CWSCDReductionControl(object):
 
     def get_sample_log_value(self, exp_number, scan_number, pt_number, log_name):
         """
-        Get sample log's value
+        Get sample log's value from merged data!
         :param exp_number:
         :param scan_number:167
         :param pt_number:
@@ -1032,16 +1059,71 @@ class CWSCDReductionControl(object):
         assert isinstance(scan_number, int)
         assert isinstance(pt_number, int)
         assert isinstance(log_name, str)
-        try:
-            status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
-            assert status
-            md_ws_name = get_merged_md_name(self._instrumentName, exp_number,
-                                            scan_number, pt_number_list)
-            md_ws = AnalysisDataService.retrieve(md_ws_name)
-        except KeyError as ke:
-            return 'Unable to find log value %s due to %s.' % (log_name, str(ke))
 
-        return md_ws.getExperimentInfo(0).run().getProperty(log_name).value
+        # access data from SPICE table
+        # TODO FIXME THIS IS A HACK!
+        if log_name == '2theta':
+            spice_table_name = get_spice_table_name(exp_number, scan_number)
+            spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
+            log_value = spice_table_ws.toDict()[log_name][0]
+
+        else:
+
+            try:
+                status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
+                assert status
+                md_ws_name = get_merged_md_name(self._instrumentName, exp_number,
+                                                scan_number, pt_number_list)
+                md_ws = AnalysisDataService.retrieve(md_ws_name)
+            except KeyError as ke:
+                return 'Unable to find log value %s due to %s.' % (log_name, str(ke))
+
+            log_value = md_ws.getExperimentInfo(0).run().getProperty(log_name).value
+
+        return log_value
+
+    def get_integrated_scan_params(self, exp_number, two_theta, resolution=0.01):
+        """ for single Pt-scan peak integration
+        :param exp_number:
+        :param two_theta:
+        :param resolution:
+        :return:
+        """
+        param_dict = None
+
+        # get calculated 2theta
+        in_mem_2theta_list = sorted(self._2thetaLookupTable.keys())
+
+        # locate two_theta
+        index = bisect.bisect_left(in_mem_2theta_list, two_theta)
+        nearest_2theta = None
+        if index > 0 and two_theta - in_mem_2theta_list[index-1] < resolution:
+            # close to left side of input
+            nearest_2theta = in_mem_2theta_list[index-1]
+        elif index < len(in_mem_2theta_list) and in_mem_2theta_list[index] - two_theta < resolution:
+            # close to right side of input
+            nearest_2theta = in_mem_2theta_list[index]
+        # END-IF-ELSE
+
+        print ('[DB...BAT] List of integrated peaks 2theta: {0}.  Try to find a match for {1}'
+               ''.format(in_mem_2theta_list, two_theta))
+
+        # get parameter dictionary
+        if nearest_2theta is not None:
+            full_measure_exp, full_measure_scan = self._2thetaLookupTable[nearest_2theta]
+            assert exp_number == full_measure_exp, 'blabla 33'
+            peak_info = self.get_peak_info(full_measure_exp, full_measure_scan)
+            if peak_info is None:
+                raise NotImplementedError('Peak info cannot be None.... Keys: {0}'.format(self._myPeakInfoDict.keys()))
+            param_dict = dict()
+
+        else:
+            full_measure_exp = 0
+            full_measure_scan = 0
+
+        # END-IF
+
+        return full_measure_exp, full_measure_scan, param_dict
 
     def get_merged_data(self, exp_number, scan_number, pt_number_list):
         """
@@ -1540,6 +1622,8 @@ class CWSCDReductionControl(object):
         # check data loaded with mask information
         does_loaded = self.does_raw_loaded(exp_number, scan_number, pt_number, roi_name)
         if not does_loaded:
+            # load SPICE table
+            self.load_spice_scan_file(exp_number, scan_number)
             # load Pt xml
             self.load_spice_xml_file(exp_number, scan_number, pt_number)
         # END-IF
@@ -1554,15 +1638,25 @@ class CWSCDReductionControl(object):
         vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
         vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=0)
 
+        # TODO/DEBUG/FIXME
+        mantidsimple.CreateWorkspace(DataX=vec_x, DataY=vec_y, DataE=numpy.sqrt(vec_y), NSpec=1,
+                                     OutputWorkspace='SinglePt_Exp{0}_Scan{1}'.format(exp_number, scan_number))
+
         if fit_gaussian:
             cost, params, cov_matrix = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y,
                                                                                                numpy.sqrt(vec_y))
+            print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}'.format(cost, params))
         else:
             cost = -1
             params = dict()
 
         # register
-        self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = vec_x, vec_y, cost, params
+        value_list = [None] * 10  # safe mode
+        value_list[0] = vec_x
+        value_list[1] = vec_y
+        value_list[2] = cost
+        value_list[3] = params
+        self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = value_list
 
         return
 
@@ -2891,6 +2985,8 @@ class CWSCDReductionControl(object):
         # create a PeakInfo instance if it does not exist
         peak_info = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
         self._myPeakInfoDict[(exp_number, scan_number)] = peak_info
+        two_theta = self.get_sample_log_value(exp_number, scan_number, 1, '2theta')
+        self._2thetaLookupTable[two_theta] = exp_number, scan_number
 
         # set the other information
         peak_info.set_data_ws_name(md_ws_name)
