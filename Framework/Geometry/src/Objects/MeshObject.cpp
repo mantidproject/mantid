@@ -77,28 +77,28 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
   }
 
   V3D direction(0.0, 0.0, 1.0); // direction to look for intersections
-  std::vector<V3D> intesectionPoints;
+  std::vector<V3D> intersectionPoints;
   std::vector<int> entryExitFlags;
 
-  getIntersections(point, direction, intesectionPoints, entryExitFlags);
+  getIntersections(point, direction, intersectionPoints, entryExitFlags);
 
-  if (intesectionPoints.size() == 0) {
+  if (intersectionPoints.empty()) {
     return false;
   }
 
   // True if point is on surface
-  for (size_t i = 0; i < intesectionPoints.size(); ++i) {
-    if (point.distance(intesectionPoints[i]) < M_TOLERANCE) {
+  for (size_t i = 0; i < intersectionPoints.size(); ++i) {
+    if (point.distance(intersectionPoints[i]) < M_TOLERANCE) {
       return true;
     }
   }
 
   // Look for nearest point then check its entry-exit flag
-  double nearestPointDistance = point.distance(intesectionPoints[0]);
+  double nearestPointDistance = point.distance(intersectionPoints[0]);
   size_t nearestPointIndex = 0;
-  for (size_t i = 1; i < intesectionPoints.size(); ++i) {
-    if (point.distance(intesectionPoints[i]) < nearestPointDistance) {
-      nearestPointDistance = point.distance(intesectionPoints[i]);
+  for (size_t i = 1; i < intersectionPoints.size(); ++i) {
+    if (point.distance(intersectionPoints[i]) < nearestPointDistance) {
+      nearestPointDistance = point.distance(intersectionPoints[i]);
       nearestPointIndex = i;
     }
   }
