@@ -530,6 +530,7 @@ Plotting dispersion curves  on multiple panels can also be done using matplotlib
    #Adjust plotting parameters
    
    ax1.set_ylabel('E (meV)')
+   ax1.set_xlabel('')
    ax1.set_xlim(0,1./3)
    ax1.set_ylim(0.,40.)
    ax1.set_title(r'$[\epsilon,\epsilon,0], 0 \leq \epsilon \leq 1/3$') 
@@ -540,6 +541,7 @@ Plotting dispersion curves  on multiple panels can also be done using matplotlib
    
    ax2.get_yaxis().set_visible(False)
    ax2.set_xlim(1./3,1./2)
+   ax2.set_xlabel('')
    ax2.set_title(r'$[1/3+\epsilon,1/3-2\epsilon,0], 0 \leq \epsilon \leq 1/6$') 
    ax2.set_xticks([1./2])
    ax2.set_xticklabels(['$M$'])
