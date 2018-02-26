@@ -36,13 +36,12 @@ class EISFDiffCylinder(IFunction1D):
     """
 
     # For integration over all directions of vector Q
-    n_theta = 128  # this could be made an attribute
+    n_theta = 128
     d_theta = (np.pi / 2.0) / n_theta
     theta = d_theta * np.arange(1, n_theta)
     sin_theta = np.sin(theta)
     cos_theta = np.cos(theta)
 
-    min_param = 1e-6
 
     def category(self):
         return 'QuasiElastic'
@@ -73,13 +72,12 @@ class EISFDiffCylinder(IFunction1D):
         length = self.getParameterValue('L')
         x = np.asarray(xvals)  # Q values
         z = length * np.outer(x, self.cos_theta)
-        z = np.where(0, 1e-9, z)  # prevent division by zero
         # EISF along cylinder Z-axis
-        a = np.square(np.sin(z)/z)
+        a = np.square(np.where(z < 1e-9, 1 - z * z / 6, np.sin(z) / z))
         z = radius * np.outer(x, self.sin_theta)
-        z = np.where(0, 1e-6, z)   # prevent division by zero
         #  EISF on cylinder cross-section (diffusion on a disc)
-        b = np.square(3*(np.sin(z) - z * np.cos(z)) / (z * z * z))
+        b = np.square(np.where(z < 1e-6, 1 - z * z / 10,
+                               3 * (np.sin(z) - z * np.cos(z)) / (z * z * z)))
         # integrate in theta
         eisf = self.d_theta * np.sum(self.sin_theta * a * b, axis=1)
         return self.getParameterValue('A') * eisf
