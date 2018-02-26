@@ -97,6 +97,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadShape.cpp
 	src/LoadSESANS.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
@@ -273,6 +274,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
 	inc/MantidDataHandling/LoadSESANS.h
+	inc/MantidDataHandling/LoadShape.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
