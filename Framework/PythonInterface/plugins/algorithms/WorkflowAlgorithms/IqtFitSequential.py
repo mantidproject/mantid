@@ -66,8 +66,7 @@ class IqtFitSequential(PythonAlgorithm):
 
         self.declareProperty(name='ExtractMembers', defaultValue=False,
                              doc="If true, then each member of the fit will be extracted, into their "
-                                 "own workspace. These workspaces will have a histogram for each spectrum "
-                                 "(Q-value) and will be grouped.")
+                                 "own workspace")
 
         self.declareProperty(MatrixWorkspaceProperty('OutputResultWorkspace', '', direction=Direction.Output),
                              doc='The output workspace containing the results of the fit data')
