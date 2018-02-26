@@ -211,7 +211,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
                                        const V3D &v1, const V3D &v2,
                                        const V3D &v3, V3D &intersection,
                                        int &entryExit) const {
-  // Implements MˆllerñTrumbore intersection algorithm
+  // Implements Möller–Trumbore intersection algorithm
   V3D edge1, edge2, h, s, q;
   double a, f, u, v;
   edge1 = v2 - v1;
