@@ -102,11 +102,6 @@ void IqtFit::setup() {
           SLOT(customBoolUpdated(const QString &, bool)));
 }
 
-void IqtFit::run() {
-  if (validate())
-    executeSequentialFit();
-}
-
 void IqtFit::fitFunctionChanged() {
   auto backRangeSelector =
       m_uiForm->ppPlotTop->getRangeSelector("IqtFitBackRange");
