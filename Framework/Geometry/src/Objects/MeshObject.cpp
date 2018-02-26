@@ -19,54 +19,39 @@ using Kernel::Material;
 using Kernel::V3D;
 using Kernel::Quat;
 
-/**
-*  Default constuctor
-*/
-MeshObject::MeshObject() {} // Should never be called
-
-// Flexible constructor
 MeshObject::MeshObject(const std::vector<uint16_t> &faces,
                        const std::vector<V3D> &vertices,
                        const Kernel::Material &material)
-    : m_boundingBox(), m_material(), m_id("MeshObject"), m_triangles(faces),
-      m_vertices(vertices) {
+    : m_boundingBox(), m_id("MeshObject"), m_triangles(faces),
+      m_vertices(vertices), m_material(material) {
 
-  setup(material);
+  initialize();
 }
 
-// Efficient constructor
 MeshObject::MeshObject(std::vector<uint16_t> &&faces,
                        std::vector<V3D> &&vertices,
-                       const Kernel::Material &material)
-    : m_boundingBox(), m_material(), m_id("MeshObject"),
-      m_triangles(std::move(faces)), m_vertices(std::move(vertices)) {
+                       const Kernel::Material &&material)
+    : m_boundingBox(), m_id("MeshObject"), m_triangles(std::move(faces)),
+      m_vertices(std::move(vertices)), m_material(std::move(material)) {
 
-  setup(material);
+  initialize();
 }
 
-MeshObject::~MeshObject() = default;
-
 // Do things that need to be done in constructor
-void MeshObject::setup(const Kernel::Material &material) {
+void MeshObject::initialize() {
 
   if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
     throw std::invalid_argument(
         "Too many vertices (" + std::to_string(m_vertices.size()) +
         "). MeshObject cannot have more than 65535 vertices.");
   }
-  m_material = Mantid::Kernel::make_unique<Material>(material);
   m_handler = boost::make_shared<CacheGeometryHandler>(this);
 }
 
 /**
  * @return The Material that the object is composed from
  */
-const Kernel::Material MeshObject::material() const {
-  if (m_material)
-    return *m_material;
-  else
-    return Material();
-}
+const Kernel::Material MeshObject::material() const { return m_material; }
 
 /**
 * Returns whether this object has a valid shape
@@ -132,10 +117,9 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
     return false;
   }
 
-  std::vector<V3D> directions; // directions to look for intersections
-  directions.push_back(V3D(0, 0, 1));
-  directions.push_back(V3D(0, 1, 0));
-  directions.push_back(V3D(1, 0, 0));
+  const std::vector<V3D> directions = {
+      V3D{0, 0, 1}, V3D{0, 1, 0},
+      V3D{1, 0, 0}}; // directions to look for intersections
   // We have to look in several directions in case a point is on a face
   // or edge parallel to the first direction or also the second direction.
   for (size_t i = 0; i < directions.size(); ++i) {
@@ -227,7 +211,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
                                        const V3D &v1, const V3D &v2,
                                        const V3D &v3, V3D &intersection,
                                        int &entryExit) const {
-  // Implements Möller–Trumbore intersection algorithm
+  // Implements MË†llerÃ±Trumbore intersection algorithm
   V3D edge1, edge2, h, s, q;
   double a, f, u, v;
   edge1 = v2 - v1;
@@ -405,7 +389,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
                                  scaleFactor.Y() * m_vertices[i].Y(),
                                  scaleFactor.Z() * m_vertices[i].Z()));
   }
-  MeshObject scaledObject(m_triangles, scaledVertices, *m_material);
+  MeshObject scaledObject(m_triangles, scaledVertices, m_material);
   return scaledObject.solidAngle(observer);
 }
 
@@ -677,13 +661,6 @@ void MeshObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
   if (m_handler == nullptr)
     return;
   m_handler->GetObjectGeom(type, vectors, myradius, myheight);
-}
-
-/** Getter for the shape xml
-@return the shape xml.
-*/
-std::string MeshObject::getShapeXML() const {
-  throw std::runtime_error("getShapeXML not available for MeshObject");
 }
 
 } // NAMESPACE Geometry

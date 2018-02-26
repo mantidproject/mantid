@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
-
+#include "MantidKernel/Material.h"
 #include "BoundingBox.h"
 #include <map>
 #include <memory>
@@ -17,7 +17,6 @@ namespace Mantid {
 //----------------------------------------------------------------------
 namespace Kernel {
 class PseudoRandomNumberGenerator;
-class Material;
 class V3D;
 }
 
@@ -63,24 +62,24 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
-  /// Flexible constructor
+  /// Constructor
   MeshObject(const std::vector<uint16_t> &faces,
              const std::vector<Mantid::Kernel::V3D> &vertices,
              const Kernel::Material &material);
-  // Efficient constructor
+  /// Constructor
   MeshObject(std::vector<uint16_t> &&faces,
              std::vector<Mantid::Kernel::V3D> &&vertices,
-             const Kernel::Material &material);
+             const Kernel::Material &&material);
 
   /// Copy constructor
   MeshObject(const MeshObject &) = delete;
   /// Assignment operator
   MeshObject &operator=(const MeshObject &) = delete;
   /// Destructor
-  virtual ~MeshObject();
+  virtual ~MeshObject() = default;
   /// Clone
   IObject *clone() const override {
-    return new MeshObject(m_triangles, m_vertices, *m_material);
+    return new MeshObject(m_triangles, m_vertices, m_material);
   }
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
     return new MeshObject(m_triangles, m_vertices, material);
@@ -142,8 +141,6 @@ public:
 
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                      double &myradius, double &myheight) const override;
-  /// Getter for the shape xml
-  std::string getShapeXML() const override;
 
   /// Read access to mesh object for rendering
   int numberOfVertices() const;
@@ -154,10 +151,7 @@ public:
   void updateGeometryHandler();
 
 private:
-  /// Default constructor - should never be called
-  MeshObject();
-  // Setup object, called only in constructor
-  void setup(const Kernel::Material &material);
+  void initialize();
   /// Get intersections
   void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
                         std::vector<Kernel::V3D> &intersectionPoints,
@@ -186,9 +180,6 @@ private:
   // String from which object may be defined
   std::string m_string;
 
-  /// material composition
-  std::unique_ptr<Kernel::Material> m_material;
-
   /// string to return as ID
   std::string m_id;
 
@@ -201,6 +192,8 @@ private:
   /// Triangles are specified by indices into a list of vertices.
   std::vector<uint16_t> m_triangles;
   std::vector<Kernel::V3D> m_vertices;
+  /// material composition
+  Kernel::Material m_material;
 };
 
 } // NAMESPACE Geometry

@@ -92,9 +92,6 @@ public:
   virtual void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;
 
-  /// Getter for the shape xml
-  virtual std::string getShapeXML() const = 0;
-
   // Rendering
   virtual void draw() const = 0;
   virtual void initDraw() const = 0;
