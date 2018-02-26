@@ -31,7 +31,7 @@ ErrorReporter::ErrorReporter(std::string application,
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
       m_share(share), m_name(""), m_email("") {
   int retval = Mantid::Kernel::ConfigService::Instance().getValue(
-      "error_root_url", m_url);
+      "errorreports.rooturl", m_url);
   if (retval == 0) {
     g_log.error() << "Failed to load error report url\n";
   }
@@ -46,7 +46,7 @@ ErrorReporter::ErrorReporter(std::string application,
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
       m_share(share), m_name(name), m_email(email) {
   int retval = Mantid::Kernel::ConfigService::Instance().getValue(
-      "error_root_url", m_url);
+      "errorreports.rooturl", m_url);
   if (retval == 0) {
     g_log.error() << "Failed to load error report url\n";
   }
@@ -60,7 +60,7 @@ void ErrorReporter::sendErrorReport() {
 
     // send the report
     // Poco::ActiveResult<int> result = m_errorActiveMethod(message);
-    this->sendReport(message, m_url);
+    this->sendReport(message, m_url + "/api/error");
   } catch (std::exception &ex) {
     g_log.debug() << "Send error report failure. " << ex.what() << '\n';
   }

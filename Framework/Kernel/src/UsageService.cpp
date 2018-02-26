@@ -18,15 +18,6 @@ namespace Kernel {
 /// static logger
 Kernel::Logger g_log("UsageServiceImpl");
 
-// const std::string STARTUP_URL("http://reports.mantidproject.org/api/usage");
-// const std::string
-//     STARTUP_URL(("http://ptsv2.com/t/mantidmat/post")); // dev location
-// http://posttestserver.com/data/
-// const std::string
-// FEATURE_URL("http://reports.mantidproject.org/api/feature");
-// const std::string
-//     FEATURE_URL(("http://ptsv2.com/t/mantidmat/post")); // dev location
-
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
 */
@@ -75,7 +66,7 @@ UsageServiceImpl::UsageServiceImpl()
       m_featureActiveMethod(this, &UsageServiceImpl::sendFeatureAsyncImpl) {
   setInterval(60);
   int retval = Mantid::Kernel::ConfigService::Instance().getValue(
-      "usage_root_url", m_url);
+      "usagereports.rooturl", m_url);
   if (retval == 0) {
     g_log.error() << "Failed to load usage report url\n";
   } else {
