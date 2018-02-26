@@ -100,6 +100,7 @@ endif()
 
 configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
 configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.bat ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY )
 
 ###########################################################################
 # Configure Mantid startup scripts

@@ -1,18 +1,18 @@
 from __future__ import (absolute_import, division, print_function)
 
-
 import numpy as np
-import mantid.api
-import mantid.plots.plotfunctions as funcs
 import matplotlib
+matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import unittest
 
+import mantid.api
+import mantid.plots.plotfunctions as funcs
 from mantid.kernel import config
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWorkspace,\
-                             ConjoinWorkspaces
+                             ConjoinWorkspaces, AddTimeSeriesLog
 
-matplotlib.use('AGG')
+
 
 
 class PlotFunctionsTest(unittest.TestCase):
@@ -65,6 +65,9 @@ class PlotFunctionsTest(unittest.TestCase):
                                                 DataY=[1, 2, 3],
                                                 NSpec=1,
                                                 OutputWorkspace='ws2d_histo_uneven')
+        AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:00:00", Value=100)
+        AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:30:00", Value=15)
+        AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:50:00", Value=100.2)
 
     @classmethod
     def tearDownClass(cls):
@@ -79,6 +82,12 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.plot(ax, self.ws2d_histo, 'rs', specNum=1)
         funcs.plot(ax, self.ws2d_histo, specNum=2, linewidth=6)
         funcs.plot(ax, self.ws_MD_1d, 'bo')
+
+    def test_1d_log(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws2d_histo, LogName='my_log')
+        ax1 = ax.twiny()
+        funcs.plot(ax1, self.ws2d_histo, LogName='my_log', FullTime=True)
 
     def test_1d_errorbars(self):
         fig, ax = plt.subplots()
