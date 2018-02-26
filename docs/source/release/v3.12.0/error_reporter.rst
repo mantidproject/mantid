@@ -7,8 +7,8 @@ Error Reporting
 
 Error reporting has been enabled in place of the new last chance error handler. If mantid catches an unknown exception it will now display the dialog box below. Currently there is no automatic error reporting enabled if Mantid crashes to desktop but the same system is planned to be implemented in this case as well.
 
-.. image::  /images/errorReporter.png
-   :align: centre
+.. image::  ../../images/errorReporter.png
+   :align: right
    :width: 800px
 
 The three options do the following:
