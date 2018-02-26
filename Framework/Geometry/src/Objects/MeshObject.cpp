@@ -87,8 +87,8 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
   }
 
   // True if point is on surface
-  for (size_t i = 0; i < intersectionPoints.size(); ++i) {
-    if (point.distance(intersectionPoints[i]) < M_TOLERANCE) {
+  for (auto intersectionPoint : intersectionPoints) {
+    if (point.distance(intersectionPoint) < M_TOLERANCE) {
       return true;
     }
   }
@@ -128,7 +128,7 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
 
     getIntersections(point, directions[i], intesectionPoints, entryExitFlags);
 
-    if (intesectionPoints.size() == 0) {
+    if (intesectionPoints.empty()) {
       return false;
     }
 
@@ -160,7 +160,7 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
 
   getIntersections(UT.startPoint(), UT.direction(), intesectionPoints,
                    entryExitFlags);
-  if (intesectionPoints.size() == 0)
+  if (intesectionPoints.empty())
     return 0; // Quit if no intersections found
 
   for (size_t i = 0; i < intesectionPoints.size(); ++i) {
@@ -348,8 +348,6 @@ void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
   ymax = bb.yMax();
   zmin = bb.zMin();
   zmax = bb.zMax();
-
-  return;
 }
 
 /**
@@ -537,7 +535,6 @@ bool MeshObject::searchForObject(Kernel::V3D &point) const {
   // Method - check if point in object, if not search directions along
   // principle axes using interceptSurface
   //
-  Kernel::V3D testPt;
   if (isValid(point))
     return true;
   for (const auto &dir :
