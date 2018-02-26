@@ -66,7 +66,7 @@ digraph IqtFitSequential {
   SampleLogs                    -> AddSampleLogMultiple         [label="Additional SampleLogs based on Fit data"]
   AddSampleLogMultiple          -> ResultWorkspace2             [label="Outputworkspace"]
   AddSampleLogMultiple2         -> FitGroup2                    [label="OutputWorkspace"]
-  ExtractMembers                -> ExtractQENSMembers           [label="Extract members when true"]
+  ExtractMembers                -> ExtractQENSMembers           [label="Extract members?"]
   InputWorkspace                -> ExtractQENSMembers
   FitGroup                      -> ExtractQENSMembers
 }
