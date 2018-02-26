@@ -297,6 +297,7 @@ void SpectrumView::respondToTabCloseReqest(int tab) {
     m_svConnections->removeSpectrumDisplay(displayToRemove.get());
     m_spectrumDisplay.removeAll(displayToRemove);
     m_ui->imageTabs->removeTab(tab);
+    m_dataSource.erase(m_dataSource.begin() + tab);
     m_hGraph->clear();
     m_vGraph->clear();
   }
