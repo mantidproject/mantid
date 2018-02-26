@@ -492,6 +492,7 @@ class CalculateCumulativeAngleAveragedData(stresstesting.MantidStressTest):
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
-        functions = ['GramCharlier']
+        functions = ['GramCharlierComptonProfile', 'GaussianComptonProfile',
+                     'GaussianComptonProfile', 'GaussianComptonProfile']
         _test_caad_workspace(self, '15039-15045_normalised_iteration_' + str(exit_iteration), functions)
         _test_caad_workspace(self, '15039-15045_sum_iteration_' + str(exit_iteration), functions)
