@@ -75,7 +75,7 @@ def create_test_workspace(model, num_bins):
     return workspace
 
 
-def do_a_fit(x, function, guess, target, fix=None, atol=0.01):
+def do_a_fit(x, function, guess, target, fixes=None, atol=0.01):
     r"""Carry out a fit and compare to target parameters
 
     Parameters
@@ -88,7 +88,7 @@ def do_a_fit(x, function, guess, target, fix=None, atol=0.01):
         Parameter names with their initial values.
     target : dict
         Parameter names with the values to be obtained after the fit.
-    fix : list
+    fixes : list
         List of fitting parameters to fix during the fit
     atol : float
         Absolute tolerance parameter when evaluating expected_output against
@@ -105,7 +105,8 @@ def do_a_fit(x, function, guess, target, fix=None, atol=0.01):
     e = np.ones(len(x))
     w = CreateWorkspace(x, y, e, Nspec=1)
     model = FunctionWrapper(function, **guess)
-    [model.fix(p) for p in fix if fix is not None]
+    if fixes is not None:
+        [model.fix(p) for p in fixes]
     fit = Fit(model, w, NIterations=2000)
     otarget = OrderedDict(target)
     return np.allclose([fit.Function[p] for p in otarget.keys()],

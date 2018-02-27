@@ -32,7 +32,7 @@ class EISFDiffCylinderTest(unittest.TestCase):
         fixes = (['A', 'R'], ['A', 'L'])
         for (guess, fix) in zip(guesses, fixes):
             status, fit = do_a_fit(np.arange(0.1, 2.2, 0.2),
-                                   'EISFDiffCylinder', guess=guess, fix=fix,
+                                   'EISFDiffCylinder', guess=guess, fixes=fix,
                                    target=target, atol=0.01)
             if not status:
                 msg_p = 'param {} target value was {}, obtained = {}'
