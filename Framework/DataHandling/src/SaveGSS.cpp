@@ -193,6 +193,9 @@ void SaveGSS::exec() {
     entry = makeStringStream();
   }
 
+  // process user special headers
+  processUserSpecifiedHeaders();
+
   // Check the user input
   validateUserInput();
 
@@ -215,6 +218,7 @@ void SaveGSS::processUserSpecifiedHeaders() {
 
   // user specified GSAS
   user_specified_gsas_header_ = getProperty("UserSpecifiedGSASHeader");
+
   if (user_specified_gsas_header_.size() == 0) {
     overwrite_std_gsas_header_ = false;
   } else {
@@ -228,6 +232,12 @@ void SaveGSS::processUserSpecifiedHeaders() {
   } else {
     overwrite_std_bank_header_ = true;
   }
+
+  g_log.warning() << "User specifed GSAS header has length: "
+                  << user_specified_gsas_header_.size() << "\n"
+                  << "Overwrite GSAS heade = " << overwrite_std_bank_header_
+                  << ", Overwrite bank = " << overwrite_std_bank_header_
+                  << "\n";
 
   return;
 }
@@ -405,6 +415,21 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
 */
 void SaveGSS::generateInstrumentHeader(std::stringstream &out,
                                        double l1) const {
+
+  // write user header first
+  if (user_specified_gsas_header_.size() > 0) {
+    for (auto iter = user_specified_gsas_header_.begin();
+         iter != user_specified_gsas_header_.end(); ++iter) {
+      out << *iter << "\n";
+    }
+  }
+
+  // quit method if user plan to use his own header completely
+  if (overwrite_std_gsas_header_) {
+    return;
+  }
+
+  // write standard header
   const Run &runinfo = m_inputWS->run();
   const std::string format = getPropertyValue("Format");
 
@@ -840,31 +865,7 @@ void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
   }
 }
 
-void SaveGSS::writeSLOGHeader(size_t bank, size_t datasize, double bc1,
-                              double bc2, double bc3,
-                              std::stringstream &out_stream) {
-  // write user header first
-  if (user_specified_gsas_header_.size() > 0) {
-    for (auto iter = user_specified_gsas_header_.begin();
-         iter != user_specified_gsas_header_.end(); ++iter) {
-      out_stream << *iter << "\n";
-    }
-  }
-
-  // write standard header
-  if (!overwrite_std_gsas_header_) {
-    // need to write the standard header too
-    writeBankHeader(out_stream, "SLOG", bank, datasize);
-    out_stream << std::fixed << " " << std::setprecision(0) << std::setw(10)
-               << bc1 << std::fixed << " " << std::setprecision(0)
-               << std::setw(10) << bc2 << std::fixed << " "
-               << std::setprecision(7) << std::setw(10) << bc3 << std::fixed
-               << " 0 FXYE\n";
-  }
-
-  return;
-}
-
+// ----------------------------------------------------------------------------
 /** write slog data
  * @brief SaveGSS::writeSLOGdata
  * @param bank

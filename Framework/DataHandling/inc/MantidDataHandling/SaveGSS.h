@@ -158,10 +158,6 @@ private:
                      std::stringstream &out,
                      const HistogramData::Histogram &histo) const;
 
-  /// write SLOG header
-  void writeSLOGHeader(size_t bank, size_t datasize, double bc1, double bc2,
-                       double bc3, std::stringstream &out_stream);
-
   /// Workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
   /// The output buffer. This is either n spectra in one file,

@@ -6,8 +6,9 @@ import mantid.simpleapi as api
 # from mantid.kernel import *
 from mantid.api import AnalysisDataService
 from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
-from mantid.api import FileProperty, FileAction, MatrixWorkspace
+from mantid.api import FileProperty, FileAction, MatrixWorkspace, ITableWorkspace
 from mantid.kernel import Direction
+import numpy
 
 
 class SaveVulcanGSS(PythonAlgorithm):
@@ -117,6 +118,11 @@ class SaveVulcanGSS(PythonAlgorithm):
                 if bin_params is None:
                     continue
                 # rebin
+                # check
+                if len(bin_params) % 2 == 0:
+                    # odd number and cannot be binning parameters
+                    raise RuntimeError('Binning parameter {0} cannot be accepted.'.format(bin_params))
+
                 api.Rebin(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name,
                           Params=bin_params, PreserveEvents=True)
                 # convert to point data
@@ -126,7 +132,7 @@ class SaveVulcanGSS(PythonAlgorithm):
                 if len(bin_params) == len(temp_out_ws.readX(0)):
                     # good to align
                     for tof_i in range(len(bin_params)):
-                        temp_out_ws.dataX[tof_i] = int(bin_params[i] * 10) / 10.
+                        temp_out_ws.dataX[tof_i] = int(bin_params[tof_i] * 10) / 10.
                     # END-FOR (tof-i)
                 # END-IF (align)
             # END-FOR
@@ -166,7 +172,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         # processing binning parameters
         if bin_par_ws_exist:
-            binning_parameter_list = self.process_binning_param_table(bin_par_ws_name)
+            binning_parameter_list = self.process_binning_param_table(input_workspace, bin_par_ws_name)
         else:
             binning_parameter_list = None
 
@@ -223,6 +229,7 @@ class SaveVulcanGSS(PythonAlgorithm):
     def process_binning_param_table(self, input_workspace, bin_par_ws_name):
         """
         process the binning parameters given in an ITableWorkspace
+        :param input_workspace:
         :param bin_par_ws_name:
         :return:
         """
@@ -263,10 +270,10 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         bin_par_workspace = AnalysisDataService.retrieve(bin_par_ws_name)
         # check inputs
-        assert isinstance(bin_par_workspace, api.ITableWorkspace), 'Input binning workspace {0} must be ' \
-                                                                   'an ITableWorkspace but not a {1}' \
-                                                                   ''.format(bin_par_workspace,
-                                                                             type(bin_par_workspace))
+        assert isinstance(bin_par_workspace, ITableWorkspace), 'Input binning workspace {0} must be ' \
+                                                               'an ITableWorkspace but not a {1}' \
+                                                               ''.format(bin_par_workspace,
+                                                                         type(bin_par_workspace))
 
         # check whether it is valid TableWorkspace
         if bin_par_workspace.columnCount() < 2:
@@ -314,7 +321,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         """
         if bin_par_str.count(':') == 0:
             # parse regular binning parameters
-            terms = bin_par_str  # in string format
+            terms = bin_par_str.split(',')  # in string format
             bin_param = list()
             try:
                 for term in terms:
@@ -335,11 +342,20 @@ class SaveVulcanGSS(PythonAlgorithm):
                 raise RuntimeError('blabla')
 
             ref_tof_ws = AnalysisDataService.retrieve(ref_ws_name)
-            if ws_index < 0 or ws_index >= ref_tof_ws.getNumberOfHistograms():
+            if ws_index < 0 or ws_index >= ref_tof_ws.getNumberHistograms():
                 raise RuntimeError('blabla2')
 
-            bin_param = self._bin
+            ref_tof_vec = ref_tof_ws.readX(ws_index)
+            delta_tof_vec = ref_tof_vec[1:] - ref_tof_vec[:-1]
 
+            bin_param = numpy.empty((ref_tof_vec.size + delta_tof_vec.size), dtype=ref_tof_vec.dtype)
+            bin_param[0::2] = ref_tof_vec
+            bin_param[1::2] = delta_tof_vec
+
+        else:
+            raise RuntimeError('Not .... blabla3')
+
+        return bin_param
 
     def _loadRefLogBinFile(self, logbinfilename):
         """ Create a vector of bin in TOF value

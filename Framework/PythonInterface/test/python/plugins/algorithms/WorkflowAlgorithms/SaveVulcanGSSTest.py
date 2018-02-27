@@ -22,14 +22,15 @@ class SaveVulcanGSSTest(unittest.TestCase):
         data_ws_name = "Test_1Spec_Workspace"
         self._create_data_workspace(data_ws_name, num_spec=1)
 
-        bin_table = self._create_simple_binning_table()
+        bin_ws_name = 'SimpleBinRefTable'
+        bin_table = self._create_simple_binning_table(bin_ws_name)
 
         # Execute
         alg_test = run_algorithm("SaveVulcanGSS",
                                  InputWorkspace=data_ws_name,
-                                 BinningTable=bin_table,
+                                 BinningTable=bin_ws_name,
                                  OutputWorkspace=data_ws_name + "_rebinned",
-                                 GSSFilename="tempout.gda",
+                                 GSSFilename="/tmp/tempout.gda",
                                  IPTS=12345,
                                  GSSParmFileName='test.prm')
 
@@ -51,13 +52,21 @@ class SaveVulcanGSSTest(unittest.TestCase):
 
     def test_save_gss_vdrive(self):
         """ Test to save a multiple spectra GSS file with various binning workspace
+        Data:   tof0 = 4900.
+                delta = 0.001
+                num_pts = 200
         :return:
         """
         # Create a testing data file and workspace
         data_ws_name = "Test_3Spec_Workspace"
         self._create_data_workspace(data_ws_name, num_spec=3)
 
-        low_bin_ws = self._create_binning_workspace()
+        # create binning workspaces
+        low_res_bin_name = 'LowerBankBinning'
+        self._create_binning_workspace(low_res_bin_name, tof0=4900, delta=0.002, num_pts=100)
+
+        high_res_bin_name = 'HigherBankBinning'
+        self._create_binning_workspace(high_res_bin_name, tof0=4500, delta=0.0005, num_pts=400)
 
         bin_table = self._create_vulcan_binning_table('vulcan_sim_table', low_res_bin_name, high_res_bin_name)
 
@@ -85,34 +94,34 @@ class SaveVulcanGSSTest(unittest.TestCase):
         AnalysisDataService.remove(data_ws_name+"_rebinned")
 
 
-    def test_saveGSS_no_binning(self):
-        """ Test to Save a GSAS file without rebin to Vdrive's standard binning
-        """
-        # Create a test data file and workspace
-        binfilename = "testbin.dat"
-        self._createBinFile(binfilename)
-
-        datawsname = "TestInputWorkspace"
-        self._create_data_workspace(datawsname)
-
-        # Execute
-        alg_test = run_algorithm("SaveVulcanGSS", 
-                InputWorkspace = datawsname,
-                OutputWorkspace = datawsname+"_rebinned",
-                GSSFilename = "tempout.gda")
-
-        self.assertTrue(alg_test.isExecuted())
-
-        # Verify ....
-        outputws = AnalysisDataService.retrieve(datawsname+"_rebinned")
-        #self.assertEqual(4, tablews.rowCount())
-
-        # Delete the test hkl file
-        os.remove(binfilename)
-        AnalysisDataService.remove("InputWorkspace")
-        AnalysisDataService.remove(datawsname+"_rebinned")
-
-        return
+    # def test_saveGSS_no_binning(self):
+    #     """ Test to Save a GSAS file without rebin to Vdrive's standard binning
+    #     """
+    #     # Create a test data file and workspace
+    #     binfilename = "testbin.dat"
+    #     self._createBinFile(binfilename)
+    #
+    #     datawsname = "TestInputWorkspace"
+    #     self._create_data_workspace(datawsname)
+    #
+    #     # Execute
+    #     alg_test = run_algorithm("SaveVulcanGSS",
+    #             InputWorkspace = datawsname,
+    #             OutputWorkspace = datawsname+"_rebinned",
+    #             GSSFilename = "tempout.gda")
+    #
+    #     self.assertTrue(alg_test.isExecuted())
+    #
+    #     # Verify ....
+    #     outputws = AnalysisDataService.retrieve(datawsname+"_rebinned")
+    #     #self.assertEqual(4, tablews.rowCount())
+    #
+    #     # Delete the test hkl file
+    #     os.remove(binfilename)
+    #     AnalysisDataService.remove("InputWorkspace")
+    #     AnalysisDataService.remove(datawsname+"_rebinned")
+    #
+    #     return
 
     @staticmethod
     def _create_binning_workspace(bin_ws_name, tof0, delta, num_pts):
@@ -150,14 +159,14 @@ class SaveVulcanGSSTest(unittest.TestCase):
         :return:
         """
         # create a TableWorkspace
-        api.CreateEmptyTableWorkspace(Workspace=binning_table_name)
+        api.CreateEmptyTableWorkspace(OutputWorkspace=binning_table_name)
 
         bin_table_ws = AnalysisDataService.retrieve(binning_table_name)
-        bin_table_ws.addColumn('str', 'WorkspaceIndexes')s
+        bin_table_ws.addColumn('str', 'WorkspaceIndexes')
         bin_table_ws.addColumn('str', 'BinningParameters')
 
         # add a row for simple case
-        bin_table_ws.appendRow(['0', '100, -0.02, 1000'])
+        bin_table_ws.addRow(['0', '100, -0.02, 1000'])
 
         return bin_table_ws
 
@@ -170,15 +179,15 @@ class SaveVulcanGSSTest(unittest.TestCase):
         :return:
         """
         # create a TableWorkspace
-        api.CreateEmptyTableWorkspace(Workspace=binning_table_name)
+        api.CreateEmptyTableWorkspace(OutputWorkspace=binning_table_name)
 
         bin_table_ws = AnalysisDataService.retrieve(binning_table_name)
         bin_table_ws.addColumn('str', 'WorkspaceIndexes')
         bin_table_ws.addColumn('str', 'BinningParameters')
 
         # add a row for simple case
-        bin_table_ws.appendRow(['0, 1', '{0}: {1}'.format(binning_workspace_low_res, 0)])
-        bin_table_ws.appendRow(['2', '{0}: {1}'.format(binning_workspace_high_res, 0)])
+        bin_table_ws.addRow(['0, 1', '{0}: {1}'.format(binning_workspace_low_res, 0)])
+        bin_table_ws.addRow(['2', '{0}: {1}'.format(binning_workspace_high_res, 0)])
 
         return bin_table_ws
 
