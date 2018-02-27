@@ -36,6 +36,16 @@ public:
                       (size_t)(loadShape.getProperties().size()));
   }
 
+  void testConfidence() {
+    LoadShape testLoad;
+    testLoad.initialize();
+    testLoad.setPropertyValue("Filename", "cube.stl");
+    std::string path = testLoad.getPropertyValue("Filename");
+    auto *descriptor = new Kernel::FileDescriptor(path);
+    TS_ASSERT_EQUALS(90, testLoad.confidence(*descriptor));
+    delete descriptor;
+  }
+
 
 private:
   LoadShape loadShape; 
