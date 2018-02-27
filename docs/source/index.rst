@@ -25,6 +25,7 @@ Mantid Documentation
    fitminimizers/index
    techniques/index
    api/index
+   plotting/index
    release/index
 
 
@@ -47,4 +48,6 @@ This is the documentation for Mantid |release|.
 * :ref:`api`
     - :ref:`Python <pythonapi>`
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
+* :ref:`Gallery <plotting>`
 * :ref:`release_notes`
+
