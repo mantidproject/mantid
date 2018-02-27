@@ -22,22 +22,13 @@ public:
   virtual ~IEnggDiffGSASFittingModel() = default;
 
   /**
-   Perform a Pawley refinement on a run
+   Perform a refinement on a run
    @param params Parameters to be passed to GSASIIRefineFitPeaks
    @return Fitted peaks workspace resulting from refinement
    @throws If GSASIIRefineFitPeaks throws
    */
   virtual Mantid::API::MatrixWorkspace_sptr
-  doPawleyRefinement(const GSASIIRefineFitPeaksParameters &params) = 0;
-
-  /**
-   Perform a Rietveld refinement on a run
-   @param params Parameters to be passed to GSASIIRefineFitPeaks
-   @return Fitted peaks workspace resulting from refinement
-   @throws If GSASIIRefineFitPeaks throws
-   */
-  virtual Mantid::API::MatrixWorkspace_sptr
-  doRietveldRefinement(const GSASIIRefineFitPeaksParameters &params) = 0;
+  doRefinement(const GSASIIRefineFitPeaksParameters &params) = 0;
 
   /**
    Get refined lattice parameters for a run

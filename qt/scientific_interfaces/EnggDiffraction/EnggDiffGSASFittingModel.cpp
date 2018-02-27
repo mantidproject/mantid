@@ -19,6 +19,16 @@ std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
   return filenameSegments[0];
 }
 
+std::string refinementMethodToString(
+    const MantidQt::CustomInterfaces::GSASRefinementMethod &method) {
+  switch (method) {
+  case MantidQt::CustomInterfaces::GSASRefinementMethod::PAWLEY:
+    return "Pawley refinement";
+  case MantidQt::CustomInterfaces::GSASRefinementMethod::RIETVELD:
+    return "Rietveld refinement";
+  }
+}
+
 } // anonymous namespace
 
 namespace MantidQt {
@@ -69,24 +79,6 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
 }
 }
 
-API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doPawleyRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
-  const auto outputWSName = generateFittedPeaksWSName(params.runLabel);
-  const auto latticeParamsName = generateLatticeParamsName(params.runLabel);
-
-  const auto outputProperties = doGSASRefinementAlgorithm(
-      outputWSName, latticeParamsName, params, "Pawley refinement");
-
-  addFitResultsToMaps(params.runLabel, outputProperties.rwp,
-                      outputProperties.sigma, outputProperties.gamma,
-                      latticeParamsName);
-
-  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
-
-  return fittedPeaks;
-}
-
 GSASIIRefineFitPeaksOutputProperties
 EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const std::string &outputWorkspaceName,
@@ -129,13 +121,14 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   return GSASIIRefineFitPeaksOutputProperties(rwp, sigma, gamma);
 }
 
-API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doRietveldRefinement(
+API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doRefinement(
     const GSASIIRefineFitPeaksParameters &params) {
   const auto outputWSName = generateFittedPeaksWSName(params.runLabel);
   const auto latticeParamsName = generateLatticeParamsName(params.runLabel);
 
   const auto outputProperties = doGSASRefinementAlgorithm(
-      outputWSName, latticeParamsName, params, "Rietveld refinement");
+      outputWSName, latticeParamsName, params,
+      refinementMethodToString(params.refinementMethod));
 
   addFitResultsToMaps(params.runLabel, outputProperties.rwp,
                       outputProperties.sigma, outputProperties.gamma,

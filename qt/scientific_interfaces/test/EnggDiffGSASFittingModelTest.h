@@ -239,9 +239,8 @@ public:
 
     API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        fittedPeaks =
-            model.doPawleyRefinement(createGSASIIRefineFitPeaksParameters(
-                inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
+        fittedPeaks = model.doRefinement(createGSASIIRefineFitPeaksParameters(
+            inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
     TS_ASSERT(fittedPeaks);
 
     const auto rwp = model.getRwp(runLabel);
@@ -271,9 +270,8 @@ public:
 
     API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        fittedPeaks =
-            model.doRietveldRefinement(createGSASIIRefineFitPeaksParameters(
-                inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
+        fittedPeaks = model.doRefinement(createGSASIIRefineFitPeaksParameters(
+            inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
     TS_ASSERT(fittedPeaks);
 
     const auto rwp = model.getRwp(runLabel);

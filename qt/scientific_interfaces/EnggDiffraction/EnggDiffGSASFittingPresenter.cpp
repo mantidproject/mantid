@@ -47,8 +47,9 @@ void EnggDiffGSASFittingPresenter::notify(
 
 GSASIIRefineFitPeaksParameters
 EnggDiffGSASFittingPresenter::collectInputParameters(
-    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr inputWS,
-    const GSASRefinementMethod refinementMethod) const {
+    const RunLabel &runLabel,
+    const Mantid::API::MatrixWorkspace_sptr inputWS) const {
+  const auto refinementMethod = m_view->getRefinementMethod();
   const auto instParamFile = m_view->getInstrumentFileName();
   const auto phaseFiles = m_view->getPhaseFileNames();
   const auto pathToGSASII = m_view->getPathToGSASII();
@@ -89,16 +90,9 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
   m_view->displayGamma(*gamma);
 }
 
-Mantid::API::MatrixWorkspace_sptr
-EnggDiffGSASFittingPresenter::doPawleyRefinement(
+Mantid::API::MatrixWorkspace_sptr EnggDiffGSASFittingPresenter::doRefinement(
     const GSASIIRefineFitPeaksParameters &params) {
-  return m_model->doPawleyRefinement(params);
-}
-
-Mantid::API::MatrixWorkspace_sptr
-EnggDiffGSASFittingPresenter::doRietveldRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
-  return m_model->doRietveldRefinement(params);
+  return m_model->doRefinement(params);
 }
 
 void EnggDiffGSASFittingPresenter::processDoRefinement() {
@@ -121,23 +115,11 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   }
 
   m_view->showStatus("Refining run");
-  const auto refinementMethod = m_view->getRefinementMethod();
   const auto refinementParams =
-      collectInputParameters(*runLabel, *inputWSOptional, refinementMethod);
+      collectInputParameters(*runLabel, *inputWSOptional);
 
   try {
-    Mantid::API::MatrixWorkspace_sptr fittedPeaks;
-
-    switch (refinementMethod) {
-
-    case GSASRefinementMethod::PAWLEY:
-      fittedPeaks = doPawleyRefinement(refinementParams);
-      break;
-
-    case GSASRefinementMethod::RIETVELD:
-      fittedPeaks = doRietveldRefinement(refinementParams);
-      break;
-    }
+    const auto fittedPeaks = doRefinement(refinementParams);
 
     m_multiRunWidget->addFittedPeaks(*runLabel, fittedPeaks);
     displayFitResults(*runLabel);

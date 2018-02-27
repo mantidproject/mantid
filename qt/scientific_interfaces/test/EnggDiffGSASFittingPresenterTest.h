@@ -54,7 +54,8 @@ public:
         .WillOnce(Throw(std::runtime_error("Failure reason")));
 
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Could not load file", "Failure reason")).Times(1);
+                userWarning("Could not load file", "Failure reason"))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -110,7 +111,7 @@ public:
         .Times(1)
         .WillOnce(Return(params.refineGamma));
 
-    EXPECT_CALL(*m_mockModelPtr, doRietveldRefinement(params))
+    EXPECT_CALL(*m_mockModelPtr, doRefinement(params))
         .Times(1)
         .WillOnce(Throw(std::runtime_error("Failure reason")));
     EXPECT_CALL(*m_mockViewPtr,
@@ -170,7 +171,7 @@ public:
         .Times(1)
         .WillOnce(Return(params.refineGamma));
 
-    EXPECT_CALL(*m_mockModelPtr, doPawleyRefinement(params))
+    EXPECT_CALL(*m_mockModelPtr, doRefinement(params))
         .Times(1)
         .WillOnce(Throw(std::runtime_error("Failure reason")));
     EXPECT_CALL(*m_mockViewPtr,

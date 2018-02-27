@@ -14,10 +14,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
 
 public:
   Mantid::API::MatrixWorkspace_sptr
-  doPawleyRefinement(const GSASIIRefineFitPeaksParameters &params) override;
-
-  Mantid::API::MatrixWorkspace_sptr
-  doRietveldRefinement(const GSASIIRefineFitPeaksParameters &params) override;
+  doRefinement(const GSASIIRefineFitPeaksParameters &params) override;
 
   boost::optional<Mantid::API::ITableWorkspace_sptr>
   getLatticeParams(const RunLabel &runLabel) const override;

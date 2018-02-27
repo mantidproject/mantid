@@ -46,24 +46,15 @@ private:
   /// presenter's various children
   GSASIIRefineFitPeaksParameters
   collectInputParameters(const RunLabel &runLabel,
-                         const Mantid::API::MatrixWorkspace_sptr ws,
-                         const GSASRefinementMethod refinementMethod) const;
+                         const Mantid::API::MatrixWorkspace_sptr ws) const;
 
   /**
-   Perform a Pawley refinement on a run
+   Perform a refinement on a run
    @param params Input parameters for GSASIIRefineFitPeaks
    @return Fitted peaks workspace resulting from refinement
    */
   Mantid::API::MatrixWorkspace_sptr
-  doPawleyRefinement(const GSASIIRefineFitPeaksParameters &params);
-
-  /**
-   Perform a Rietveld refinement on a run
-   @param params Input parameters for GSASIIRefineFitPeaks
-   @return Fitted peaks workspace resulting from refinement
-   */
-  Mantid::API::MatrixWorkspace_sptr
-  doRietveldRefinement(const GSASIIRefineFitPeaksParameters &params);
+  doRefinement(const GSASIIRefineFitPeaksParameters &params);
 
   /**
    Overplot fitted peaks for a run, and display lattice parameters and Rwp in
