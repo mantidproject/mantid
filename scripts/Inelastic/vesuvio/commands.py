@@ -27,7 +27,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     # Retrieve vesuvio input data
     vesuvio_loader = VesuvioLoadHelper(flags['diff_mode'], flags['fit_mode'],
                                        flags['ip_file'], flags.get('bin_parameters', None),
-                                       flags.get('load_log_files', True))
+                                       _extract_bool_from_flags('load_log_files', flags))
     vesuvio_input = VesuvioTOFFitInput(runs, flags.get('container_runs', None),
                                        flags['spectra'], vesuvio_loader)
 
@@ -46,8 +46,8 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                      intensity_string, _create_user_defined_ties_str(flags['masses']),
                                      flags.get('max_fit_iterations', 5000), flags['fit_minimizer'])
 
-    corrections_helper = VesuvioCorrectionsHelper(flags.get('gamma_correct', False),
-                                                  flags.get('ms_enabled', True),
+    corrections_helper = VesuvioCorrectionsHelper(_extract_bool_from_flags('gamma_correct', flags, False),
+                                                  _extract_bool_from_flags('ms_enabled', flags),
                                                   flags.get('fixed_gamma_scaling', 0.0),
                                                   flags.get('fixed_container_scaling', 0.0),
                                                   intensity_string)
@@ -62,8 +62,10 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     vesuvio_fit_routine = VesuvioTOFFitRoutine(ms_helper, fit_helper, corrections_helper,
                                                mass_profile_collection, fit_namer)
     vesuvio_output, result, exit_iteration = vesuvio_fit_routine(vesuvio_input, iterations, convergence_threshold,
-                                                                 flags.get('output_verbose_corrections', False),
-                                                                 flags.get('calculate_caad', False))
+                                                                 _extract_bool_from_flags('output_verbose_corrections',
+                                                                                          flags, False),
+                                                                 _extract_bool_from_flags('calculate_caad', flags,False)
+                                                                 )
     result = result if len(result) > 1 else result[0]
     return result, vesuvio_output.fit_parameters_workspace, vesuvio_output.chi2_values, exit_iteration
 
@@ -993,6 +995,15 @@ def _normalise_by_integral(workspace):
                              StoreInADS=False, EnableLogging=False)
     return Divide(LHSWorkspace=workspace, RHSWorkspace=integrated,
                   OutputWorkspace="__divided", StoreInADS=False, EnableLogging=False)
+
+
+def _extract_bool_from_flags(key, flags, default=True):
+    value = flags.get(key, default)
+
+    if isinstance(value, bool):
+        return value
+    else:
+        raise RuntimeError("Expected boolean for '" + key + "', " + str(type(key)) + " found.")
 
 
 def _parse_hydrogen_constraint(constraint):
