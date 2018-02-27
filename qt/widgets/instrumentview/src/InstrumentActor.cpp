@@ -132,32 +132,26 @@ void InstrumentActor::setUpWorkspace(
   const size_t nHist = sharedWorkspace->getNumberHistograms();
   m_WkspBinMinValue = DBL_MAX;
   m_WkspBinMaxValue = -DBL_MAX;
-  for (size_t i = 0; i < nHist; ++i) {
-    const auto &values = sharedWorkspace->x(i);
+  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
+  m_detIndex2WsIndex.resize(componentInfo().size(), INVALID_INDEX);
+  for (size_t wi = 0; wi < spectrumInfo.size(); wi++) {
+    const auto &values = sharedWorkspace->x(wi);
     double xtest = values.front();
     if (!std::isinf(xtest)) {
-      if (xtest < m_WkspBinMinValue) {
+      if (xtest < m_WkspBinMinValue)
         m_WkspBinMinValue = xtest;
-      } else if (xtest > m_WkspBinMaxValue) {
+      else if (xtest > m_WkspBinMaxValue)
         m_WkspBinMaxValue = xtest;
-      } else {
-      }
     }
 
     xtest = values.back();
     if (!std::isinf(xtest)) {
-      if (xtest < m_WkspBinMinValue) {
+      if (xtest < m_WkspBinMinValue)
         m_WkspBinMinValue = xtest;
-      } else if (xtest > m_WkspBinMaxValue) {
+      else if (xtest > m_WkspBinMaxValue)
         m_WkspBinMaxValue = xtest;
-      } else {
-      }
     }
-  }
 
-  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
-  m_detIndex2WsIndex.resize(componentInfo().size(), INVALID_INDEX);
-  for (size_t wi = 0; wi < spectrumInfo.size(); wi++) {
     const auto &specDef = spectrumInfo.spectrumDefinition(wi);
     for (auto info : specDef)
       m_detIndex2WsIndex[info.first] = wi;
@@ -168,9 +162,9 @@ void InstrumentActor::setUpWorkspace(
   m_DataMinValue = -DBL_MAX;
   m_DataMaxValue = DBL_MAX;
 
-  if (!m_autoscaling) {
+  if (!m_autoscaling)
     setDataMinMaxRange(scaleMin, scaleMax);
-  }
+ 
   setDataIntegrationRange(m_WkspBinMinValue, m_WkspBinMaxValue);
   resetColors();
 
@@ -1075,7 +1069,7 @@ void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
     auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
-    wsIndices.push_back(index);
+    wsIndices.emplace_back(index);
   }
   if (!indices.empty()) {
     m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, wsIndices);
@@ -1110,7 +1104,7 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
       mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
     }
     // get the vector out and add the name
-    mapCmptToNameVector[paramCompId].push_back(paramName);
+    mapCmptToNameVector[paramCompId].emplace_back(paramName);
   }
 
   // walk out from the selected component

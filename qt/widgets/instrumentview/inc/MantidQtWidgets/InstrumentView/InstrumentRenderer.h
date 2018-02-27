@@ -53,6 +53,7 @@ private:
   void draw(const std::vector<bool> &visibleComps, bool showGuides,
             bool picking);
   void drawRectangularBank(size_t bankIndex, bool picking);
+  void drawStructuredBank(size_t bankIndex, bool picking);
   void drawTube(size_t bankIndex, bool picking);
   void drawSingleDetector(size_t detIndex, bool picking);
   void generateRectangularTexture(std::vector<char> &texture,

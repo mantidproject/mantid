@@ -4,9 +4,11 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidGeometry/Rendering/Renderer.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Quat.h"
+#include "MantidQtWidgets/InstrumentView/BankRenderingHelpers.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
@@ -51,9 +53,12 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
       numTextures++;
     }
   }
-  m_textureIDs.resize(numTextures, 0);
-  colorTextures.resize(numTextures);
-  pickTextures.resize(numTextures);
+
+  if (numTextures > 0) {
+    m_textureIDs.resize(numTextures, 0);
+    colorTextures.resize(numTextures);
+    pickTextures.resize(numTextures);
+  }
 }
 
 InstrumentRenderer::~InstrumentRenderer() {
@@ -113,6 +118,14 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
       continue;
     }
 
+    if (compInfo.componentType(i) ==
+        Mantid::Beamline::ComponentType::Structured) {
+      updateVisited(visited, compInfo.componentsInSubtree(i));
+      if (visibleComps[i])
+        drawStructuredBank(i, picking);
+      continue;
+    }
+
     if (!compInfo.isDetector(i) && !showGuides) {
       visited[i] = true;
       continue;
@@ -131,22 +144,38 @@ void InstrumentRenderer::drawRectangularBank(size_t bankIndex, bool picking) {
 
   auto bank = compInfo.quadrilateralComponent(bankIndex);
   auto pos = compInfo.position(bank.bottomLeft);
-  auto rot = compInfo.rotation(bank.bottomLeft);
+
   auto scale = compInfo.scaleFactor(bankIndex);
   glTranslated(pos.X(), pos.Y(), pos.Z());
   glScaled(scale[0], scale[1], scale[2]);
-  double deg, ax0, ax1, ax2;
-  rot.getAngleAxis(deg, ax0, ax1, ax2);
-  glRotated(deg, ax0, ax1, ax2);
 
   auto ti = m_reverseTextureIndexMap[bankIndex];
   glBindTexture(GL_TEXTURE_2D, m_textureIDs[ti]);
   uploadRectangularTexture(picking ? pickTextures[ti] : colorTextures[ti],
                            bankIndex);
 
-  Mantid::Geometry::detail::Renderer::renderRectangularBank(compInfo,
-                                                            bankIndex);
+  BankRenderingHelpers::renderRectangularBank(compInfo, bankIndex);
+
   glBindTexture(GL_TEXTURE_2D, 0);
+  glPopMatrix();
+}
+
+void InstrumentRenderer::drawStructuredBank(size_t bankIndex, bool picking) {
+  const auto &compInfo = m_actor.componentInfo();
+  glPushMatrix();
+
+  auto bank = compInfo.quadrilateralComponent(bankIndex);
+  const auto &shapeInfo =
+      compInfo.shape(bank.bottomLeft).getGeometryHandler()->shapeInfo();
+  auto pos = shapeInfo.points()[0];
+  pos.setZ(compInfo.position(bank.bottomLeft).Z());
+  auto scale = compInfo.scaleFactor(bankIndex);
+  glTranslated(pos.X(), pos.Y(), pos.Z());
+  glScaled(scale[0], scale[1], scale[2]);
+
+  BankRenderingHelpers::renderStructuredBank(compInfo, bankIndex,
+                                             picking ? m_pickColors : m_colors);
+
   glPopMatrix();
 }
 
@@ -323,8 +352,7 @@ void InstrumentRenderer::generateRectangularTexture(
   const auto &compInfo = m_actor.componentInfo();
   auto bank = compInfo.quadrilateralComponent(bankIndex);
   // Round size up to nearest power of 2
-  auto res = Mantid::Geometry::detail::Renderer::getCorrectedTextureSize(
-      bank.nX, bank.nY);
+  auto res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, bank.nY);
   auto texSizeX = res.first;
   auto texSizeY = res.second;
 
@@ -364,8 +392,7 @@ void InstrumentRenderer::generateTubeTexture(std::vector<char> &texture,
 void InstrumentRenderer::uploadRectangularTexture(
     const std::vector<char> &texture, size_t textureIndex) const {
   auto bank = m_actor.componentInfo().quadrilateralComponent(textureIndex);
-  auto res = Mantid::Geometry::detail::Renderer::getCorrectedTextureSize(
-      bank.nX, bank.nY);
+  auto res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, bank.nY);
   auto xsize = res.first;
   auto ysize = res.second;
 
@@ -406,5 +433,6 @@ void InstrumentRenderer::uploadTubeTexture(const std::vector<char> &texture,
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
+
 } // namespace MantidWidgets
 } // namespace MantidQt

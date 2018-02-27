@@ -1,8 +1,9 @@
 #include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -136,105 +137,6 @@ void render(const TopoDS_Shape &ObjSurf) {
 }
 #endif
 
-std::pair<size_t, size_t>
-Renderer::getCorrectedTextureSize(const size_t width, const size_t height) {
-  return {roundToNearestPowerOfTwo(width), roundToNearestPowerOfTwo(height)};
-}
-
-void Renderer::renderRectangularBank(const Geometry::ComponentInfo &compInfo,
-                                     size_t index) {
-  auto bank = compInfo.quadrilateralComponent(index);
-  auto xstep = (compInfo.position(bank.bottomRight).X() -
-                compInfo.position(bank.bottomLeft).X()) /
-               bank.nX;
-  auto ystep = (compInfo.position(bank.topRight).Y() -
-                compInfo.position(bank.bottomLeft).Y()) /
-               bank.nY;
-  // Because texture colours are combined with the geometry colour
-  // make sure the current colour is white
-  glColor3f(1.0f, 1.0f, 1.0f);
-
-  // Nearest-neighbor scaling
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glEnable(GL_TEXTURE_2D); // enable texture mapping
-
-  size_t texx, texy;
-  auto res = getCorrectedTextureSize(bank.nX, bank.nY);
-  texx = res.first;
-  texy = res.second;
-  double tex_frac_x = (1.0 * bank.nX) / (texx);
-  double tex_frac_y = (1.0 * bank.nY) / (texy);
-
-  glBegin(GL_QUADS);
-
-  auto basePos = compInfo.position(bank.bottomLeft);
-  glTexCoord2f(0.0, 0.0);
-  auto pos = compInfo.position(bank.bottomLeft) - basePos;
-  addVertex(pos, xstep, ystep);
-
-  glTexCoord2f(static_cast<GLfloat>(tex_frac_x), 0.0);
-  pos = compInfo.position(bank.bottomRight) - basePos;
-  addVertex(pos, xstep, ystep);
-
-  glTexCoord2f(static_cast<GLfloat>(tex_frac_x),
-               static_cast<GLfloat>(tex_frac_y));
-  pos = compInfo.position(bank.topRight) - basePos;
-  addVertex(pos, xstep, ystep);
-
-  glTexCoord2f(0.0, static_cast<GLfloat>(tex_frac_y));
-  pos = compInfo.position(bank.topLeft) - basePos;
-  addVertex(pos, xstep, ystep);
-
-  glEnd();
-
-  glDisable(
-      GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
-}
-
-void render(const StructuredDetector &structDet) {
-  const auto &xVerts = structDet.getXValues();
-  const auto &yVerts = structDet.getYValues();
-  const auto &r = structDet.getR();
-  const auto &g = structDet.getG();
-  const auto &b = structDet.getB();
-
-  if (xVerts.size() != yVerts.size())
-    return;
-
-  auto w = structDet.xPixels() + 1;
-  auto h = structDet.yPixels() + 1;
-
-  glBegin(GL_QUADS);
-
-  for (size_t iy = 0; iy < h - 1; iy++) {
-    for (size_t ix = 0; ix < w - 1; ix++) {
-
-      glColor3ub((GLubyte)r[(iy * (w - 1)) + ix],
-                 (GLubyte)g[(iy * (w - 1)) + ix],
-                 (GLubyte)b[(iy * (w - 1)) + ix]);
-      V3D pos;
-      pos = V3D(xVerts[(iy * w) + ix + w], yVerts[(iy * w) + ix + w], 0.0);
-      glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-                 static_cast<GLfloat>(pos.Z()));
-      pos = V3D(xVerts[(iy * w) + ix + w + 1], yVerts[(iy * w) + ix + w + 1],
-                0.0);
-      glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-                 static_cast<GLfloat>(pos.Z()));
-      pos = V3D(xVerts[(iy * w) + ix + 1], yVerts[(iy * w) + ix + 1], 0.0);
-      glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-                 static_cast<GLfloat>(pos.Z()));
-      pos = V3D(xVerts[(iy * w) + ix], yVerts[(iy * w) + ix], 0.0);
-      glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-                 static_cast<GLfloat>(pos.Z()));
-    }
-  }
-
-  glEnd();
-
-  if (glGetError() > 0)
-    std::cout << "OpenGL error in doRender(const StructuredDetector &) \n";
-}
 
 void renderSphere(const detail::ShapeInfo &shapeInfo) {
   // create glu sphere

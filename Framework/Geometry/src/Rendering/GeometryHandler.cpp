@@ -24,9 +24,6 @@ GeometryHandler::GeometryHandler(boost::shared_ptr<MeshObject> obj)
 GeometryHandler::GeometryHandler(MeshObject *obj)
     : m_triangulator(new detail::GeometryTriangulator(obj)), m_meshObj(obj) {}
 
-GeometryHandler::GeometryHandler(StructuredDetector *comp)
-    : m_structDet(comp) {}
-
 GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
   if (handler.m_csgObj) {
     m_csgObj = handler.m_csgObj;
@@ -37,8 +34,6 @@ GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
     m_objComp = handler.m_objComp;
   if (handler.m_shapeInfo)
     m_shapeInfo = handler.m_shapeInfo;
-  if (handler.m_structDet)
-    m_structDet = handler.m_structDet;
 }
 
 /// Destructor
@@ -49,9 +44,7 @@ boost::shared_ptr<GeometryHandler> GeometryHandler::clone() const {
 }
 
 void GeometryHandler::render() const {
-
-    RenderingHelpers::renderStructured(*m_structDet);
-  else if (m_shapeInfo)
+  if (m_shapeInfo)
     RenderingHelpers::renderShape(*m_shapeInfo);
   else if (m_objComp != nullptr)
     RenderingHelpers::renderIObjComponent(*m_objComp);

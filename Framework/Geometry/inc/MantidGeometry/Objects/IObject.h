@@ -96,6 +96,8 @@ public:
   virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                              std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;
+  virtual boost::shared_ptr<const GeometryHandler>
+  getGeometryHandler() const = 0;
 
   // Rendering
   virtual void draw() const = 0;
