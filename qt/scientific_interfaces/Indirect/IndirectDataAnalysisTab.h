@@ -124,7 +124,7 @@ protected slots:
   void plotCurrentPreview();
 
   /// Sets the selected spectrum
-  virtual void setSelectedSpectrum(size_t spectrum);
+  virtual void setSelectedSpectrum(int spectrum);
 
   /// Sets the maximum spectrum
   void setMaximumSpectrum(size_t spectrum);

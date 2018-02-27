@@ -619,12 +619,12 @@ void IndirectFitAnalysisTab::setCustomSettingChangesFunction(
 /**
  * Sets the selected spectrum for this indirect fit analysis tab.
  */
-void IndirectFitAnalysisTab::setSelectedSpectrum(size_t spectrum) {
+void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
   disconnect(m_fitPropertyBrowser,
              SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
              SLOT(updateGuessPlots()));
 
-  m_fitPropertyBrowser->setWorkspaceIndex(static_cast<int>(spectrum));
+  m_fitPropertyBrowser->setWorkspaceIndex(spectrum);
   IndirectDataAnalysisTab::setSelectedSpectrum(spectrum);
   updateParameterValues();
   updatePreviewPlots();

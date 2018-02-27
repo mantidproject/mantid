@@ -104,8 +104,8 @@ int IndirectDataAnalysisTab::selectedSpectrum() const {
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setSelectedSpectrum(size_t spectrum) {
-  m_selectedSpectrum = spectrum;
+void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
+  m_selectedSpectrum = boost::numeric_cast<size_t>(spectrum);
 }
 
 /**
@@ -158,9 +158,8 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
     }
-  } else if (inputWs &&
-             boost::numeric_cast<size_t>(m_selectedSpectrum) <
-                 inputWs->getNumberHistograms()) {
+  } else if (inputWs && boost::numeric_cast<size_t>(m_selectedSpectrum) <
+                            inputWs->getNumberHistograms()) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
   }

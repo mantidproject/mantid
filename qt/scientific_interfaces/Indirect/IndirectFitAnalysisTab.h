@@ -288,7 +288,7 @@ signals:
 protected slots:
   void clearGuessWindowPlot();
 
-  void setSelectedSpectrum(size_t spectrum) override;
+  void setSelectedSpectrum(int spectrum) override;
 
   virtual void startXChanged(double startX) = 0;
 
