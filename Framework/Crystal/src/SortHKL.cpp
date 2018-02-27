@@ -38,18 +38,24 @@ SortHKL::SortHKL() {
 SortHKL::~SortHKL() = default;
 
 void SortHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
 
   /* TODO: These two properties with string lists keep appearing -
    * Probably there should be a dedicated Property type or validator. */
   std::vector<std::string> pgOptions;
-  pgOptions.reserve(2 * m_pointGroups.size());
+  pgOptions.reserve(2 * m_pointGroups.size() + 5);
   for (auto &pointGroup : m_pointGroups)
     pgOptions.push_back(pointGroup->getSymbol());
   for (auto &pointGroup : m_pointGroups)
     pgOptions.push_back(pointGroup->getName());
+  // Scripts may have Orthorhombic misspelled from past bug in PointGroupFactory
+  pgOptions.push_back("222 (Orthorombic)");
+  pgOptions.push_back("mm2 (Orthorombic)");
+  pgOptions.push_back("2mm (Orthorombic)");
+  pgOptions.push_back("m2m (Orthorombic)");
+  pgOptions.push_back("mmm (Orthorombic)");
   declareProperty("PointGroup", pgOptions[0],
                   boost::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");
@@ -64,15 +70,15 @@ void SortHKL::init() {
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty("OutputChi2", 0.0, "Chi-square is available as output",
                   Direction::Output);
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace> >(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(make_unique<PropertyWithValue<std::string> >(
                       "RowName", "Overall", Direction::Input),
                   "name of row");
   declareProperty("Append", false,
@@ -128,10 +134,9 @@ SortHKL::getNonZeroPeaks(const std::vector<Peak> &inputPeaks) const {
 
   std::remove_copy_if(inputPeaks.begin(), inputPeaks.end(),
                       std::back_inserter(peaks), [](const Peak &peak) {
-                        return peak.getIntensity() <= 0.0 ||
-                               peak.getSigmaIntensity() <= 0.0 ||
-                               peak.getHKL() == V3D(0, 0, 0);
-                      });
+    return peak.getIntensity() <= 0.0 || peak.getSigmaIntensity() <= 0.0 ||
+           peak.getHKL() == V3D(0, 0, 0);
+  });
 
   return peaks;
 }
@@ -230,9 +235,9 @@ SortHKL::getStatisticsTable(const std::string &name) const {
 
 /// Inserts statistics the supplied PeaksStatistics-objects into the supplied
 /// TableWorkspace.
-void SortHKL::insertStatisticsIntoTable(
-    const ITableWorkspace_sptr &table,
-    const PeaksStatistics &statistics) const {
+void
+SortHKL::insertStatisticsIntoTable(const ITableWorkspace_sptr &table,
+                                   const PeaksStatistics &statistics) const {
   if (!table) {
     throw std::runtime_error("Can't store statistics into Null-table.");
   }
@@ -266,8 +271,9 @@ PeaksWorkspace_sptr SortHKL::getOutputPeaksWorkspace(
 /// Sorts the peaks in the workspace by H, K and L.
 void SortHKL::sortOutputPeaksByHKL(IPeaksWorkspace_sptr outputPeaksWorkspace) {
   // Sort by HKL
-  std::vector<std::pair<std::string, bool>> criteria{
-      {"H", true}, {"K", true}, {"L", true}};
+  std::vector<std::pair<std::string, bool> > criteria{ { "H", true },
+                                                       { "K", true },
+                                                       { "L", true } };
   outputPeaksWorkspace->sort(criteria);
 }
 
