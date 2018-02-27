@@ -194,7 +194,8 @@ void PeakColumn::read(const size_t index, std::istringstream &in) {
   double val;
   try {
     in >> val;
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Could not convert input to a number. " << e.what()
                   << '\n';
     return;
@@ -293,6 +294,7 @@ const void *PeakColumn::void_pointer(size_t index) const {
         &value); // Given a pointer it will return a pointer
   } else if (m_name == "RunNumber") {
     value = peak.getRunNumber();
+    return boost::get<int>(&value);
   } else if (m_name == "PeakNumber") {
     value = peak.getPeakNumber();
     return boost::get<int>(&value);

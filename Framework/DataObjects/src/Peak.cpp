@@ -424,6 +424,15 @@ double Peak::getScattering() const {
 }
 
 // -------------------------------------------------------------------------------------
+/** Calculate the azimuthal angle of the peak  */
+double Peak::getAzimuthal() const {
+  // The detector is at 2 theta scattering angle
+  V3D detDir = detPos - samplePos;
+
+  return atan2(detDir.Y(), detDir.X());
+}
+
+// -------------------------------------------------------------------------------------
 /** Calculate the d-spacing of the peak, in 1/Angstroms  */
 double Peak::getDSpacing() const {
   // The detector is at 2 theta scattering angle

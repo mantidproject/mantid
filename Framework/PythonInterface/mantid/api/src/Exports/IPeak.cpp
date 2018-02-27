@@ -63,6 +63,8 @@ void export_IPeak() {
            "Return the run number this peak was measured at")
       .def("getPeakNumber", &IPeak::getPeakNumber, arg("self"),
            "Return the peak number for this peak")
+      .def("getBankName", &IPeak::getBankName, arg("self"),
+           "Return the bank name for this peak")
       .def("setRunNumber", &IPeak::setRunNumber,
            (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")
@@ -127,6 +129,8 @@ void export_IPeak() {
            "Return the incident wavelength")
       .def("getScattering", &IPeak::getScattering, arg("self"),
            "Calculate the scattering angle of the peak")
+      .def("getAzimuthal", &IPeak::getAzimuthal, arg("self"),
+           "Calculate the azimuthal angle of the peak")
       .def("getDSpacing", &IPeak::getDSpacing, arg("self"),
            "Calculate the d-spacing of the peak, in 1/Angstroms")
       .def("getTOF", &IPeak::getTOF, arg("self"),
