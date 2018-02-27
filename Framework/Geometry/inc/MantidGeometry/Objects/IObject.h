@@ -2,9 +2,10 @@
 #define MANTID_GEOMETRY_IOBJECT_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include <boost/shared_ptr.hpp>
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace Mantid {
 
@@ -89,7 +90,8 @@ public:
                         const BoundingBox &activeRegion,
                         const size_t) const = 0;
 
-  virtual void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+  virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                             std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;
   virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() = 0;
 

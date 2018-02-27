@@ -102,8 +102,9 @@ public:
     return m_shape->generatePointInObject(rng, activeRegion, i);
   }
 
-  void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) const override {
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                     std::vector<Kernel::V3D> &vectors, double &myradius,
+                     double &myheight) const override {
     m_shape->GetObjectGeom(type, vectors, myradius, myheight);
   }
   boost::shared_ptr<GeometryHandler> getGeometryHandler() override {

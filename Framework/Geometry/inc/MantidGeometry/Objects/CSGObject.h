@@ -190,7 +190,7 @@ public:
       boost::shared_ptr<vtkGeometryCacheReader>) override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                      std::vector<Kernel::V3D> &vectors, double &myradius,
-                     double &myheight) const;
+                     double &myheight) const override;
   /// Getter for the shape xml
   std::string getShapeXML() const override;
 

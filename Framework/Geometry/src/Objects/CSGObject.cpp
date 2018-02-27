@@ -59,7 +59,7 @@ CSGObject::CSGObject(const std::string &shapeXML)
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
-  handle = boost::make_shared<GeometryHandler>(this);
+  m_handler = boost::make_shared<GeometryHandler>(this);
 }
 
 /**
@@ -2059,7 +2059,7 @@ void CSGObject::draw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  handle->render();
+  m_handler->render();
 }
 
 /**
@@ -2071,7 +2071,7 @@ void CSGObject::initDraw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  handle->initialize();
+  m_handler->initialize();
 }
 /**
 * set vtkGeometryCache writer
@@ -2125,14 +2125,14 @@ void CSGObject::updateGeometryHandler() {
 // Initialize Draw Object
 
 size_t CSGObject::numberOfTriangles() const {
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return 0;
-  return m_handler->NumberOfTriangles();
+  return m_handler->numberOfTriangles();
 }
 size_t CSGObject::numberOfVertices() const {
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return 0;
-  return m_handler->NumberOfPoints();
+  return m_handler->numberOfPoints();
 }
 /**
 * get vertices
@@ -2157,9 +2157,9 @@ const std::vector<int> &CSGObject::getTriangleFaces() const {
 /**
 * get info on standard shapes
 */
-void Object::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                           std::vector<Kernel::V3D> &vectors, double &myradius,
-                           double &myheight) const {
+void CSGObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                              std::vector<Kernel::V3D> &vectors,
+                              double &myradius, double &myheight) const {
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
