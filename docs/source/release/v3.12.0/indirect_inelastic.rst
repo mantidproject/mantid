@@ -28,6 +28,10 @@ Improved
 Vesuvio
 -------
 
+New
+###
+- Cumulative Angle-Averaged Data (sum of fits normalised by their integral) can be calculated and produced as output by setting the 'calculate_caad' flag to True.
+
 Improved
 ########
 - A pre-loaded runs workspace can now be passed to the fit_tof VESUVIO routine, which will skip the loading subroutine given this input
@@ -44,13 +48,14 @@ New
 ###
 - ConvFit, IqtFit, MSDFit and JumpFit now have a second mini-plot for the difference. The sample and calculated fit are found in the top mini-plot, the difference is found in the bottom mini-plot.
 - The function browser in each of the Fitting tabs (ConvFit, IqtFit, MSDFit, JumpFit) has been replaced with a new IndirectFitPropertyBrowser widget (which can be separated and embedded into the fit interfaces).
-- The IndirectFitPropertyBrowser widgets provides the following new functionality:
+- The IndirectFitPropertyBrowser widget provides the following additional functionality to the Indirect Fit Interfaces (MSDFit, IqtFit, ConvFit, JumpFit):
   - Ties can now be used to tie parameters between all functions and custom ties (involving mathematical expressions) are now available.
   - It is now possible to add constraints to parameters.
   - Any additional functions can be added from the library of available MANTID functions by right-clicking and selecting 'Add Function'.
   - Function setups can now be saved and re-loaded (Custom Setups).
-  - Right-clicking on function in the browser and selecting 'Help' will bring up the documentation of that function.
   - Functions can be copied and loaded from the clipboard.
+  - Right-clicking on any function in the browser and selecting 'Help' will open a window containing the documentation for that function.
+  - The guess can be plot in a separate window from the interface (automatically updates as the fit model is changed).
 
 Improved
 ########
@@ -58,6 +63,7 @@ Improved
 - The Plot Guess Feature in the MSDFit Interface is now implemented for the three models introduced in release v3.11 (MsdGauss, MsdPeters and MsdYi).
 - The ExtractMembers option in the ConvFit Interface will now function correctly for diffusion functions.
 - The ExtractMembers option is now available in the IqtFit interface.
+- The parameter ties created by the 'Constrain Intensities' option in the IqtFit interface, are now shown in the function browser.
 
 Bugfixes
 ########
@@ -68,8 +74,8 @@ Bugfixes
 - In the Calculate Paalman Pings tab of the Indirect Correction interface the container back thickness is now set correctly.
 
 
-Indirect Diffraction
---------------------
+Diffraction
+-----------
 
 Improved
 ########
