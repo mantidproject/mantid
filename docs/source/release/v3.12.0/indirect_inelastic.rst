@@ -23,6 +23,7 @@ Improved
 - :ref:`BASISReduction <algm-BASISReduction>` option *noMonitorNorm* changed to *MonitorNorm*.
 - :ref:`BASISReduction <algm-BASISReduction>` now contains log entry *asString* storing the options passed to to the algorithm.
 - :ref:`IqtFitSequential <algm-IqtFitSequential>` and `IqtFitMultiple <algm-IqtFitMultiple>` can now both extract members from the fit (when the ExtractMembers property is set to True).
+- Loading the sample log files into a workspace can be disabled when calling the :ref:`LoadVesuvio <algm-LoadVesuvio>` algorithm by supplying `LoadLogFiles=False` to the algorithm call
 
 Vesuvio
 -------
@@ -30,7 +31,6 @@ Vesuvio
 Improved
 ########
 - A pre-loaded runs workspace can now be passed to the fit_tof VESUVIO routine, which will skip the loading subroutine given this input
-- Loading the sample log files into a workspace can be disabled when calling the :ref:`LoadVesuvio <algm-LoadVesuvio>` algorithm by supplying `LoadLogFiles=False` to the algorithm call
 - Loading the sample log files into a workspace can be disabled within a Vesuvio Driver Script, by setting the 'load_log_files' flag to False
 
 Bugfixes
