@@ -12,6 +12,8 @@ New
 ###
 
 - :ref:`algm-ExtractQENSMembers` can be used to extract the fit members from any QENS fit.
+- New algorithm :ref:`BASISDiffraction <algm-BASISDiffraction-v1>` to determine the orientation of crystal samples for the BASIS beamline.
+
 
 Improved
 ########
@@ -23,9 +25,6 @@ Improved
 
 Vesuvio
 -------
-
-New
-###
 
 Improved
 ########
@@ -66,17 +65,6 @@ Bugfixes
 - Plotting individual parameters of the fit in the interface ('Plot Options'), will no longer produce an error in the ConvFit interface, when plotting 'FWHM'.
 - In the Calculate Paalman Pings tab of the Indirect Correction interface the container back thickness is now set correctly.
 
-Data Reduction Interfaces
--------------------------
-
-New
-###
-
-Improved
-########
-
-Bugfixes
-########
 
 Indirect Diffraction
 --------------------
@@ -88,16 +76,10 @@ Improved
 Corrections Interfaces
 ----------------------
 
-New
-###
-
 Improved
 ########
 - The Apply Paalman Pings interface has been renamed to Apply Absorption Correction.
 - The Apply Absorption Correction interface no longer requires workspaces to be in units of wavelength (this is done within :ref:`algm-ApplyPaalmanPingsCorrection`).
-
-Bugfixes
-########
 
 Abins
 -----
