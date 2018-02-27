@@ -47,6 +47,7 @@ const static double PI = 3.1415926535;
 const static double DEGREES_IN_SEMICIRCLE = 180;
 // Nexus shape types
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
+const H5std_string NX_OFF = "NXoff_geometry";
 } // namespace
 
 /// Constructor opens the nexus file
@@ -129,8 +130,8 @@ NexusGeometryParser::openSubGroups(Group &parentGroup,
       // Open the sub group
       Group childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
-      for (uint32_t attribute_index = 0; attribute_index < childGroup.getNumAttrs();
-           ++attribute_index) {
+      for (uint32_t attribute_index = 0;
+           attribute_index < childGroup.getNumAttrs(); ++attribute_index) {
         // Test attribute at current index for NX_class
         Attribute attribute = childGroup.openAttribute(attribute_index);
         if (attribute.getName() == NX_CLASS) {
@@ -394,6 +395,8 @@ objectHolder NexusGeometryParser::parseNexusShape(Group &detectorGroup) {
   // Give shape group to correct shape parser
   if (shapeType == NX_CYLINDER) {
     return this->parseNexusCylinder(shapeGroup);
+  } else if (shapeType == NX_OFF) {
+    return this->parseNexusMesh(shapeGroup);
   } else {
     throw std::runtime_error(
         "Shape type not recognised by NexusGeometryParser");
@@ -417,6 +420,72 @@ objectHolder NexusGeometryParser::parseNexusCylinder(Group &shapeGroup) {
     vSorted.col(cPoints[i]) = vertices.col(i);
   }
   return this->sAbsCreator.createCylinder(vSorted);
+}
+
+// Parse OFF (mesh) nexus geometry
+objectHolder NexusGeometryParser::parseNexusMesh(Group &shapeGroup) {
+
+  std::vector<int> faceIndices = this->get1DDataset<int>("faces", shapeGroup);
+  std::vector<uint16_t> windingOrder =
+      this->get1DDataset<uint16_t>("winding_order", shapeGroup);
+
+  std::vector<uint16_t> triangularFaces =
+      createTriangularFaces(faceIndices, windingOrder);
+
+  // 1D reads row first, then columns
+  std::vector<double> nexusVertices =
+      this->get1DDataset<double>("vertices", shapeGroup);
+  auto numberOfVertices = nexusVertices.size() / 3;
+  std::vector<Mantid::Kernel::V3D> vertices(numberOfVertices);
+  for (int vertexNumber; vertexNumber < numberOfVertices - 2;
+       vertexNumber += 3) {
+    vertices.emplace_back(nexusVertices[vertexNumber],
+                          nexusVertices[vertexNumber + 1],
+                          nexusVertices[vertexNumber + 2]);
+  }
+
+  return this->sAbsCreator.createMesh(triangularFaces, vertices);
+}
+
+std::vector<uint16_t> NexusGeometryParser::createTriangularFaces(
+    std::vector<int> &faceIndices, std::vector<uint16_t> &windingOrder) const {
+
+  // Elements 0 to 2 are the indices of the vertices vector corresponding to the
+  // vertices of the first triangle.
+  // Elements 3 to 5 are for the second triangle, and so on.
+  // The order of the vertices is the winding order of the triangle, determining
+  // the face normal by right-hand rule
+  std::vector<uint16_t> triangularFaces;
+
+  int startOfFace = 0;
+  int endOfFace = 0;
+  for (auto it = faceIndices.begin() + 1; it != faceIndices.end(); ++it) {
+    endOfFace = *it;
+    createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace,
+                               endOfFace);
+  }
+
+  // and the last face
+  endOfFace = static_cast<int>(windingOrder.size());
+  createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace,
+                             endOfFace);
+
+  return triangularFaces;
+}
+
+void NexusGeometryParser::createTrianglesFromPolygon(
+    std::vector<uint16_t> &windingOrder, std::vector<uint16_t> &triangularFaces,
+    int &startOfFace, int &endOfFace) const {
+  int polygonOrder = endOfFace - startOfFace;
+  auto first = windingOrder.begin() + startOfFace;
+
+  for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
+       ++polygonVertex) {
+    triangularFaces.push_back(*first);
+    triangularFaces.push_back(*(windingOrder.begin() + polygonVertex));
+    triangularFaces.push_back(*(windingOrder.begin() + polygonVertex + 1));
+  }
+  startOfFace = endOfFace + 1; // start of the next face
 }
 
 // Parse source and add to instrument
