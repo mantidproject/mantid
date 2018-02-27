@@ -163,7 +163,6 @@ void TransformMD::exec() {
         std::iota(std::begin(axes), std::end(axes), 0); // Fill with 0, 1, ...
         axes[0] = i;
         axes[i] = 0;
-        // const std::vector<int> axes = { 1, 0 };
         histo = transposeMD(histo, axes);
         signal_t *signals = histo->getSignalArray();
         signal_t *errorsSq = histo->getErrorSquaredArray();
@@ -185,6 +184,9 @@ void TransformMD::exec() {
 
         histo = transposeMD(histo, axes);
       }
+
+    // Pass on the display normalization from the input workspace
+    histo->setDisplayNormalization(inWS->displayNormalizationHisto());
 
     this->setProperty("OutputWorkspace", histo);
   } else if (event) {

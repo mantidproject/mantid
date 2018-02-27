@@ -123,7 +123,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
       affineMatrix =
           Mantid::Kernel::Matrix<Mantid::coord_t>(nDims, nDims, true);
     }
-  } catch (...) {
+  } catch (std::runtime_error &) {
     // Create identity matrix of dimension+1
     std::size_t nDims = workspace.getNumDims() + 1;
     Mantid::Kernel::Matrix<Mantid::coord_t> temp(nDims, nDims, true);
