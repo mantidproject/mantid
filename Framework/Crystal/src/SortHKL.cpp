@@ -47,6 +47,8 @@ void SortHKL::init() {
   std::vector<std::string> pgOptions;
   pgOptions.reserve(m_pointGroups.size());
   for (auto &pointGroup : m_pointGroups)
+    pgOptions.push_back(pointGroup->getSymbol());
+  for (auto &pointGroup : m_pointGroups)
     pgOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", pgOptions[0],
                   boost::make_shared<StringListValidator>(pgOptions),
@@ -54,6 +56,8 @@ void SortHKL::init() {
 
   std::vector<std::string> centeringOptions;
   centeringOptions.reserve(m_refConds.size());
+  for (auto &refCond : m_refConds)
+    centeringOptions.push_back(refCond->getSymbol());
   for (auto &refCond : m_refConds)
     centeringOptions.push_back(refCond->getName());
   declareProperty("LatticeCentering", centeringOptions[0],

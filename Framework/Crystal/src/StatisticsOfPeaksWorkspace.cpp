@@ -38,6 +38,8 @@ void StatisticsOfPeaksWorkspace::init() {
   std::vector<std::string> propOptions;
   propOptions.reserve(m_pointGroups.size());
   for (auto &pointGroup : m_pointGroups)
+    propOptions.push_back(pointGroup->getSymbol());
+  for (auto &pointGroup : m_pointGroups)
     propOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", propOptions[0],
                   boost::make_shared<StringListValidator>(propOptions),
@@ -47,6 +49,8 @@ void StatisticsOfPeaksWorkspace::init() {
   std::vector<ReflectionCondition_sptr> reflectionConditions =
       getAllReflectionConditions();
   centeringOptions.reserve(reflectionConditions.size());
+  for (auto &reflectionCondition : reflectionConditions)
+    centeringOptions.push_back(reflectionCondition->getSymbol());
   for (auto &reflectionCondition : reflectionConditions)
     centeringOptions.push_back(reflectionCondition->getName());
   declareProperty("LatticeCentering", centeringOptions[0],
