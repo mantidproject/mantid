@@ -426,8 +426,8 @@ void GenericDataProcessorPresenter::nextRow() {
     // Skip reducing rows that are already processed
     if (!isProcessed(m_rowItem.first, groupIndex)) {
       startAsyncRowReduceThread(&m_rowItem, groupIndex);
+      return;
     }
-    return;
   } else {
     pop_front(m_group_queue);
     // Set next action flag
@@ -441,10 +441,9 @@ void GenericDataProcessorPresenter::nextRow() {
         return;
       }
     }
-
-    // Row / group skipped, perform next action
-    doNextAction();
   }
+  // Row / group skipped, perform next action
+  doNextAction();
 }
 
 void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
