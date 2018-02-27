@@ -39,6 +39,10 @@ This is the documentation for Mantid |release|.
    :align: right
 
 * :ref:`training`
+    - `Mantid Basic Course <http://www.mantidproject.org/Mantid_Basic_Course>`_
+    - `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
+    - `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
+    - `Extending Mantid with Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
     - :ref:`ill_training`
 * :ref:`Algorithms List`
 * :ref:`concepts contents`
