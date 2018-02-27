@@ -65,8 +65,8 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                                                  flags.get('output_verbose_corrections', False),
                                                                  flags.get('calculate_caad', False))
     result = result if len(result) > 1 else result[0]
-    return result, vesuvio_output.prefit_parameters_workspace, vesuvio_output.fit_parameters_workspace, \
-           vesuvio_output.chi2_values, exit_iteration
+    return (result, vesuvio_output.prefit_parameters_workspace, vesuvio_output.fit_parameters_workspace,
+            vesuvio_output.chi2_values, exit_iteration)
 
 
 # -----------------------------------------------------------------------------------------
