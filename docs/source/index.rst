@@ -45,7 +45,7 @@ This is the documentation for Mantid |release|.
     - `Mantid Basic Course <http://www.mantidproject.org/Mantid_Basic_Course>`_
     - `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
     - `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
-    - `Extending Mantid with Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
+    - `Extending Mantid With Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
     - :ref:`ill_training`
 * :ref:`Algorithms List`
 * :ref:`concepts contents`
@@ -57,6 +57,6 @@ This is the documentation for Mantid |release|.
 * :ref:`api`
     - :ref:`Python <pythonapi>`
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
-* :ref:`Gallery <plotting>`
+* :ref:`Matplotlib Plot Gallery <plotting>`
 * :ref:`release_notes`
 
