@@ -164,7 +164,7 @@ void InstrumentActor::setUpWorkspace(
 
   if (!m_autoscaling)
     setDataMinMaxRange(scaleMin, scaleMax);
- 
+
   setDataIntegrationRange(m_WkspBinMinValue, m_WkspBinMaxValue);
   resetColors();
 
