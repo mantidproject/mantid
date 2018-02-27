@@ -45,7 +45,7 @@ void SortHKL::init() {
   /* TODO: These two properties with string lists keep appearing -
    * Probably there should be a dedicated Property type or validator. */
   std::vector<std::string> pgOptions;
-  pgOptions.reserve(m_pointGroups.size());
+  pgOptions.reserve(2 * m_pointGroups.size());
   for (auto &pointGroup : m_pointGroups)
     pgOptions.push_back(pointGroup->getSymbol());
   for (auto &pointGroup : m_pointGroups)
@@ -55,7 +55,7 @@ void SortHKL::init() {
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
-  centeringOptions.reserve(m_refConds.size());
+  centeringOptions.reserve(2 * m_refConds.size());
   for (auto &refCond : m_refConds)
     centeringOptions.push_back(refCond->getSymbol());
   for (auto &refCond : m_refConds)

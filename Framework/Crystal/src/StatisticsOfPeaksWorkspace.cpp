@@ -36,7 +36,7 @@ void StatisticsOfPeaksWorkspace::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> propOptions;
-  propOptions.reserve(m_pointGroups.size());
+  propOptions.reserve(2 * m_pointGroups.size());
   for (auto &pointGroup : m_pointGroups)
     propOptions.push_back(pointGroup->getSymbol());
   for (auto &pointGroup : m_pointGroups)
@@ -48,7 +48,7 @@ void StatisticsOfPeaksWorkspace::init() {
   std::vector<std::string> centeringOptions;
   std::vector<ReflectionCondition_sptr> reflectionConditions =
       getAllReflectionConditions();
-  centeringOptions.reserve(reflectionConditions.size());
+  centeringOptions.reserve(2 * reflectionConditions.size());
   for (auto &reflectionCondition : reflectionConditions)
     centeringOptions.push_back(reflectionCondition->getSymbol());
   for (auto &reflectionCondition : reflectionConditions)
