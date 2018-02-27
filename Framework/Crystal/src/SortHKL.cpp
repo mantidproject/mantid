@@ -38,7 +38,7 @@ SortHKL::SortHKL() {
 SortHKL::~SortHKL() = default;
 
 void SortHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
 
@@ -60,31 +60,31 @@ void SortHKL::init() {
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty("OutputChi2", 0.0, "Chi-square is available as output",
                   Direction::Output);
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace> >(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(make_unique<PropertyWithValue<std::string> >(
                       "RowName", "Overall", Direction::Input),
                   "name of row");
   declareProperty("Append", false,
                   "Append to output table workspace if true.\n"
                   "If false, new output table workspace (default).");
-  std::vector<std::string> equivTypes{"Mean", "Median"};
+  std::vector<std::string> equivTypes{ "Mean", "Median" };
   declareProperty("EquivalentIntensities", equivTypes[0],
                   boost::make_shared<StringListValidator>(equivTypes),
                   "Replace intensities by mean(default), "
                   "or median.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(Kernel::make_unique<PropertyWithValue<double> >(
                       "SigmaCritical", 3.0, Direction::Input),
                   "Removes peaks whose intensity deviates more than "
                   "SigmaCritical from the mean (or median).");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      make_unique<WorkspaceProperty<MatrixWorkspace> >(
           "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
       "Output Equivalent Intensities");
 }
@@ -128,11 +128,11 @@ void SortHKL::exec() {
       auto wavelengths = unique.second.getWavelengths();
       auto intensities = unique.second.getIntensities();
       auto sigmas = unique.second.getSigmas();
-      // std::cout << "HKL " << unique.second.getHKL() << "\n";
-      // std::cout << "Intensities ";
-      // for (const auto &e : intensities)
-      // std::cout << e << "  ";
-      // std::cout << "\n";
+      g_log.debug() << "HKL " << unique.second.getHKL() << "\n";
+      g_log.debug() << "Intensities ";
+      for (const auto &e : intensities)
+        g_log.debug() << e << "  ";
+      g_log.debug() << "\n";
       auto zScores = Kernel::getWeightedZscore(intensities, sigmas);
       if (zScores.size() > maxPeaks)
         maxPeaks = zScores.size();
@@ -143,8 +143,8 @@ void SortHKL::exec() {
           Kernel::getStatistics(outliersRemoved.getIntensities(),
                                 StatOptions::Mean | StatOptions::Median);
 
-      // std::cout << "Mean = " << intensityStatistics.mean
-      //<< "  Median = " << intensityStatistics.median << "\n";
+      g_log.debug() << "Mean = " << intensityStatistics.mean
+                    << "  Median = " << intensityStatistics.median << "\n";
       // sort wavelengths & intensities
       for (size_t i = 0; i < wavelengths.size(); i++) {
         size_t i0 = i;
@@ -161,7 +161,7 @@ void SortHKL::exec() {
         intensities[i0] = intensities[i];
         intensities[i] = temp;
       }
-      // std::cout << "Zscores ";
+      g_log.debug() << "Zscores ";
       for (size_t i = 0; i < std::min(zScores.size(), static_cast<size_t>(20));
            ++i) {
         UniqX[i] = wavelengths[i];
@@ -172,14 +172,14 @@ void SortHKL::exec() {
           UniqE[i] = intensityStatistics.mean - intensities[i];
         else
           UniqE[i] = intensityStatistics.median - intensities[i];
-        // std::cout << zScores[i] << "  ";
+        g_log.debug() << zScores[i] << "  ";
       }
       for (size_t i = zScores.size(); i < 20; ++i) {
         UniqX[i] = wavelengths[zScores.size() - 1];
         UniqY[i] = intensities[zScores.size() - 1];
         UniqE[i] = 0.0;
       }
-      // std::cout << "\n";
+      g_log.debug() << "\n";
     }
   }
 
@@ -229,10 +229,9 @@ SortHKL::getNonZeroPeaks(const std::vector<Peak> &inputPeaks) const {
 
   std::remove_copy_if(inputPeaks.begin(), inputPeaks.end(),
                       std::back_inserter(peaks), [](const Peak &peak) {
-                        return peak.getIntensity() <= 0.0 ||
-                               peak.getSigmaIntensity() <= 0.0 ||
-                               peak.getHKL() == V3D(0, 0, 0);
-                      });
+    return peak.getIntensity() <= 0.0 || peak.getSigmaIntensity() <= 0.0 ||
+           peak.getHKL() == V3D(0, 0, 0);
+  });
 
   return peaks;
 }
@@ -331,9 +330,9 @@ SortHKL::getStatisticsTable(const std::string &name) const {
 
 /// Inserts statistics the supplied PeaksStatistics-objects into the supplied
 /// TableWorkspace.
-void SortHKL::insertStatisticsIntoTable(
-    const ITableWorkspace_sptr &table,
-    const PeaksStatistics &statistics) const {
+void
+SortHKL::insertStatisticsIntoTable(const ITableWorkspace_sptr &table,
+                                   const PeaksStatistics &statistics) const {
   if (!table) {
     throw std::runtime_error("Can't store statistics into Null-table.");
   }
@@ -367,8 +366,9 @@ PeaksWorkspace_sptr SortHKL::getOutputPeaksWorkspace(
 /// Sorts the peaks in the workspace by H, K and L.
 void SortHKL::sortOutputPeaksByHKL(IPeaksWorkspace_sptr outputPeaksWorkspace) {
   // Sort by HKL
-  std::vector<std::pair<std::string, bool>> criteria{
-      {"H", true}, {"K", true}, {"L", true}};
+  std::vector<std::pair<std::string, bool> > criteria{ { "H", true },
+                                                       { "K", true },
+                                                       { "L", true } };
   outputPeaksWorkspace->sort(criteria);
 }
 
