@@ -201,9 +201,9 @@ protected:
     tab->properties->addWidget(m_fitPropertyBrowser);
   }
 
-  virtual size_t minimumSpectrum() const = 0;
+  virtual int minimumSpectrum() const = 0;
 
-  virtual size_t maximumSpectrum() const = 0;
+  virtual int maximumSpectrum() const = 0;
 
   void setDefaultPropertyValue(const QString &propertyName,
                                const double &propertyValue);

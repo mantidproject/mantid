@@ -72,9 +72,9 @@ size_t JumpFit::getWidth() const {
   return m_spectraList.at(m_uiForm->cbWidth->currentText().toStdString());
 }
 
-size_t JumpFit::minimumSpectrum() const { return getWidth(); }
+int JumpFit::minimumSpectrum() const { return static_cast<int>(getWidth()); }
 
-size_t JumpFit::maximumSpectrum() const { return getWidth(); }
+int JumpFit::maximumSpectrum() const { return static_cast<int>(getWidth()); }
 
 bool JumpFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&
@@ -158,8 +158,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
   if (m_spectraList.size() > 0) {
     m_uiForm->cbWidth->setEnabled(true);
-    const auto currentWidth = m_uiForm->cbWidth->currentText().toStdString();
-    const auto width = static_cast<int>(m_spectraList[currentWidth]);
+    const auto width = static_cast<int>(getWidth());
     setMinimumSpectrum(width);
     setMaximumSpectrum(width);
     setSelectedSpectrum(width);
@@ -185,9 +184,8 @@ void JumpFit::findAllWidths(MatrixWorkspace_const_sptr ws) {
 
     for (const auto &iter : m_spectraList)
       m_uiForm->cbWidth->addItem(QString::fromStdString(iter.first));
-  } else {
+  } else
     m_spectraList.clear();
-  }
 }
 
 std::map<std::string, size_t> JumpFit::findAxisLabelsWithSubstrings(

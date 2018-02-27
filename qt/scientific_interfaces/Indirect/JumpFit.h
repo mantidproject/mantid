@@ -45,8 +45,8 @@ protected slots:
 
 protected:
   size_t getWidth() const;
-  size_t minimumSpectrum() const override;
-  size_t maximumSpectrum() const override;
+  int minimumSpectrum() const override;
+  int maximumSpectrum() const override;
 
   std::string createSingleFitOutputName() const override;
   Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;

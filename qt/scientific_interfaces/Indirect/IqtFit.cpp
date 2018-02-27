@@ -104,13 +104,9 @@ void IqtFit::setup() {
           SLOT(customBoolUpdated(const QString &, bool)));
 }
 
-size_t IqtFit::minimumSpectrum() const {
-  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMin->value());
-}
+int IqtFit::minimumSpectrum() const { return m_uiForm->spSpectraMin->value(); }
 
-size_t IqtFit::maximumSpectrum() const {
-  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMax->value());
-}
+int IqtFit::maximumSpectrum() const { return m_uiForm->spSpectraMax->value(); }
 
 void IqtFit::fitFunctionChanged() {
   auto backRangeSelector =

@@ -105,7 +105,7 @@ int IndirectDataAnalysisTab::selectedSpectrum() const {
  * @param spectrum  The spectrum to set.
  */
 void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
-  m_selectedSpectrum = boost::numeric_cast<size_t>(spectrum);
+  m_selectedSpectrum = spectrum;
 }
 
 /**
@@ -120,7 +120,7 @@ int IndirectDataAnalysisTab::minimumSpectrum() const { return m_minSpectrum; }
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setMinimumSpectrum(size_t spectrum) {
+void IndirectDataAnalysisTab::setMinimumSpectrum(int spectrum) {
   m_minSpectrum = spectrum;
 }
 
@@ -136,7 +136,7 @@ int IndirectDataAnalysisTab::maximumSpectrum() const { return m_maxSpectrum; }
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setMaximumSpectrum(size_t spectrum) {
+void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
   m_maxSpectrum = spectrum;
 }
 
@@ -153,7 +153,7 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
 
     if (inputWs && previewWs->getName() == inputWs->getName()) {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
-                                m_selectedSpectrum);
+                                static_cast<int>(m_selectedSpectrum));
     } else {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
@@ -161,7 +161,7 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
   } else if (inputWs && boost::numeric_cast<size_t>(m_selectedSpectrum) <
                             inputWs->getNumberHistograms()) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
-                              m_selectedSpectrum);
+                              static_cast<int>(m_selectedSpectrum));
   }
 }
 

@@ -69,13 +69,9 @@ void MSDFit::setup() {
           SLOT(updatePlotGuess()));
 }
 
-size_t MSDFit::minimumSpectrum() const {
-  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMin->value());
-}
+int MSDFit::minimumSpectrum() const { return m_uiForm->spSpectraMin->value(); }
 
-size_t MSDFit::maximumSpectrum() const {
-  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMax->value());
-}
+int MSDFit::maximumSpectrum() const { return m_uiForm->spSpectraMax->value(); }
 
 bool MSDFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&

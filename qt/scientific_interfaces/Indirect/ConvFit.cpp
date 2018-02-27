@@ -160,13 +160,9 @@ void ConvFit::setup() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
-size_t ConvFit::minimumSpectrum() const {
-  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMin->value());
-}
+int ConvFit::minimumSpectrum() const { return m_uiForm->spSpectraMin->value(); }
 
-size_t ConvFit::maximumSpectrum() const {
-  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMax->value());
-}
+int ConvFit::maximumSpectrum() const { return m_uiForm->spSpectraMax->value(); }
 
 void ConvFit::runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   m_uiForm->ckPlotGuess->setChecked(false);
@@ -734,8 +730,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }

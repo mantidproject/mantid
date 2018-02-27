@@ -37,8 +37,8 @@ protected slots:
   void updatePlotOptions() override;
 
 protected:
-  size_t minimumSpectrum() const override;
-  size_t maximumSpectrum() const override;
+  int minimumSpectrum() const override;
+  int maximumSpectrum() const override;
 
   std::string createSingleFitOutputName() const override;
   std::string createSequentialFitOutputName() const override;
