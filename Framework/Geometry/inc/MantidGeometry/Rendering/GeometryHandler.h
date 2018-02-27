@@ -63,9 +63,9 @@ protected:
       nullptr;                ///< ObjComponent that uses this geometry handler
   CSGObject *m_obj = nullptr; ///< Object that uses this geometry handler
 public:
-  GeometryHandler(IObjComponent *comp);           ///< Constructor
+  GeometryHandler(IObjComponent *comp);              ///< Constructor
   GeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
-  GeometryHandler(CSGObject *obj);                ///< Constructor
+  GeometryHandler(CSGObject *obj);                   ///< Constructor
   GeometryHandler(RectangularDetector *comp);
   GeometryHandler(StructuredDetector *comp);
   GeometryHandler(const GeometryHandler &handler);
