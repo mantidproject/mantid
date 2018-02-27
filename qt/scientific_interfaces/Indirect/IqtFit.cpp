@@ -123,7 +123,6 @@ void IqtFit::fitFunctionChanged() {
     setCustomBoolSetting("ConstrainBeta", false);
     setCustomSettingEnabled("ConstrainBeta", false);
   }
-
   updateIntensityTie();
 }
 
