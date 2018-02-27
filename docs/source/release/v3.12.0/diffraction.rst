@@ -89,9 +89,6 @@ Total Scattering
 - A basic analysis for total scattering method ``create_total_scattering_pdf`` has been added to POLARIS. More information can be found on the POLARIS reference page.
 
 
-Imaging
--------
-
 Features Removed
 ----------------
 
