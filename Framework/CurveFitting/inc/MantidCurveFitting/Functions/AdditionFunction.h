@@ -1,23 +1,20 @@
-#ifndef MANTID_CURVEFITTING_PRODUCTFUNCTION_H_
-#define MANTID_CURVEFITTING_PRODUCTFUNCTION_H_
+#ifndef MANTID_CURVEFITTING_ADDITIONFUNCTION_H_
+#define MANTID_CURVEFITTING_ADDITIONFUNCTION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#endif /*MANTID_CURVEFITTING_ADDITIONFUNCTION_H_*/
+
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/AssociativeCompositeFunction.h"
-#include <boost/shared_array.hpp>
-#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 /**
-Allow user to create a fit function which is the product of two or
-more other fit functions.
+Same as CompositeFunction but enforcing the associative property
+of the + operator
 
-@author Anders Markvardsen, ISIS, RAL
-@date 4/4/2011
+@author Jose Borreguero, NScD Oak Ridge
+@date 2017/08/16
 
 Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -40,22 +37,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ProductFunction : public API::AssociativeCompositeFunction {
+
+class DLLExport AdditionFunction : public API::AssociativeCompositeFunction {
 public:
   /// overwrite IFunction base class methods
-  std::string name() const override { return "ProductFunction"; }
+  std::string name() const override { return "AdditionFunction"; }
   /// if f is of the same class then its component functions
   /// are treated separately
   bool isAssociative(API::IFunction_sptr f) const override;
-  /// Function you want to fit to.
-  /// @param domain :: The space on which the function acts
-  /// @param values :: The buffer for writing the calculated values. Must be big
-  /// enough to accept dataSize() values
-  void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const override;
-  /// Calculate the derivatives
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
@@ -65,5 +54,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_PRODUCTFUNCTION_H_*/
