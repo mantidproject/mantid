@@ -23,11 +23,11 @@ void addVertex(Mantid::Kernel::V3D &pos, double xstep, double ystep) {
              static_cast<GLfloat>(pos.Z()));
 }
 
-std::vector<Mantid::Kernel::V3D>
-extractHexahedron(const Mantid::Geometry::IObject &shape) {
+void extractHexahedron(const Mantid::Geometry::IObject &shape,
+                       std::vector<Mantid::Kernel::V3D> &hex) {
   const auto &shapeInfo = shape.getGeometryHandler()->shapeInfo();
   const auto &points = shapeInfo.points();
-  return std::vector<Mantid::Kernel::V3D>(points.begin(), points.begin() + 4);
+  hex.assign(points.begin(), points.begin() + 4);
 }
 
 void rotateHexahedron(std::vector<Mantid::Kernel::V3D> &hex,
@@ -119,11 +119,12 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
   auto baseIndex = compInfo.children(columns[0])[0];
   auto basePos =
       compInfo.shape(baseIndex).getGeometryHandler()->shapeInfo().points()[0];
+  std::vector<Mantid::Kernel::V3D> hex(4);
   for (size_t x = 0; x < colWidth; x += 3) {
     auto index = x / 3;
     const auto &column = compInfo.children(columns[index]);
     for (size_t y = 0; y < column.size() - 1; ++y) {
-      auto &hex = extractHexahedron(compInfo.shape(column[y]));
+      extractHexahedron(compInfo.shape(column[y]), hex);
       offsetHexahedronPosition(hex, -basePos);
       rotateHexahedron(hex, compInfo.rotation(column[y]));
       offsetHexahedronPosition(hex, compInfo.position(column[y]));
