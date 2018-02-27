@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>581</width>
-    <height>533</height>
+    <width>733</width>
+    <height>715</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -56,81 +56,6 @@
     <layout class="QHBoxLayout" name="horizontalLayout_25">
      <item>
       <layout class="QVBoxLayout" name="vlTreeProp">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_8">
-         <item>
-          <widget class="QLabel" name="lbFitType">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Fit Type:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="cbFitType">
-           <item>
-            <property name="text">
-             <string>1 Exponential</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>2 Exponentials</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>1 Stretched Exponential</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>1 Stretched Exponential and 1 Exponential</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QGridLayout" name="gridLayout_5">
-         <item row="0" column="1">
-          <widget class="QCheckBox" name="ckPlotGuess">
-           <property name="text">
-            <string>Plot Guess</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="ckConstrainIntensities">
-           <property name="text">
-            <string>Constrain Intensities</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="ckConstrainBeta">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Constrain Beta Over All Q</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
        <item>
         <layout class="QHBoxLayout" name="properties"/>
        </item>
@@ -220,6 +145,29 @@
           <widget class="QPushButton" name="pbPlotPreview">
            <property name="text">
             <string>Plot Current Preview</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="ckPlotGuess">
+           <property name="text">
+            <string>Plot Guess</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
@@ -20,6 +21,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -653,10 +655,6 @@ double MatrixWorkspace::getXMax() const {
 }
 
 void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
-  if (m_indexInfo->size() != m_indexInfo->globalSize())
-    throw std::runtime_error(
-        "MatrixWorkspace: Parallel support for XMin and XMax not implemented.");
-
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
@@ -674,6 +672,14 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
       if (xback > xmax)
         xmax = xback;
     }
+  }
+  if (m_indexInfo->size() != m_indexInfo->globalSize()) {
+    auto &comm = m_indexInfo->communicator();
+    std::vector<double> extrema(comm.size());
+    Parallel::all_gather(comm, xmin, extrema);
+    xmin = *std::min_element(extrema.begin(), extrema.end());
+    Parallel::all_gather(comm, xmax, extrema);
+    xmax = *std::max_element(extrema.begin(), extrema.end());
   }
 }
 
@@ -1618,6 +1624,11 @@ void MatrixWorkspace::clearMDMasking() {
 Mantid::Kernel::SpecialCoordinateSystem
 MatrixWorkspace::getSpecialCoordinateSystem() const {
   return Mantid::Kernel::None;
+}
+
+// Check if this class has an oriented lattice on a sample object
+bool MatrixWorkspace::hasOrientedLattice() const {
+  return Mantid::API::ExperimentInfo::sample().hasOrientedLattice();
 }
 
 /**

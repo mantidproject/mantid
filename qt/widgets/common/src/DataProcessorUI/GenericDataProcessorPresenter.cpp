@@ -17,8 +17,10 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 
@@ -30,65 +32,28 @@
 #include <iterator>
 #include <sstream>
 
-#include <iostream>
-
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
-
-std::map<QString, QString> convertStringToMap(const QString &options) {
-  std::map<QString, QString> optionsMap;
-  auto optionsVec = options.split(";");
-
-  for (auto const &option : optionsVec) {
-    auto opt = option.split(",");
-    auto const key = opt[0];
-    opt.removeFirst();
-    optionsMap[key] = opt.join(",");
-  }
-
-  return optionsMap;
-}
-
-QHash<QString, std::set<QString>>
-convertStringToMapWithSet(const QString &properties) {
-  // The provided string has the form
-  // key1: value11, value12; key2: value21;
-  // The keys are keys in a map which maps to a set of values
-  QHash<QString, std::set<QString>> props;
-
-  if (properties.isEmpty()) {
-    return props;
-  }
-
-  // Split by each map pair
-  auto propVec = properties.split(";");
-  for (const auto &prop : propVec) {
-    // Split the key and values
-    auto elements = prop.split(":");
-    auto vals = elements[1].split(",");
-    std::set<QString> values(vals.begin(), vals.end());
-    props[elements[0]] = values;
-  }
-  return props;
-}
-
 void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
                           std::string const &value) {
-  alg->setProperty(name, value);
+  if (!value.empty())
+    alg->setProperty(name, value);
 }
 
 void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
                           std::string const &value) {
-  setAlgorithmProperty(alg, name.toStdString(), value);
+  if (!value.empty())
+    setAlgorithmProperty(alg, name.toStdString(), value);
 }
 
 void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
                           QString const &value) {
-  setAlgorithmProperty(alg, name.toStdString(), value.toStdString());
+  if (!value.isEmpty())
+    setAlgorithmProperty(alg, name.toStdString(), value.toStdString());
 }
 
 bool workspaceExists(QString const &workspaceName) {
@@ -111,6 +76,8 @@ namespace DataProcessor {
 * @param processor : A ProcessingAlgorithm
 * @param postprocessor : A PostprocessingAlgorithm
 * workspaces
+* @param group : The zero based index of this presenter within the tab
+* (reflectometry).
 * @param postprocessMap : A map containing instructions for post-processing.
 * This map links column name to properties of the post-processing algorithm
 * @param loader : The algorithm responsible for loading data
@@ -119,7 +86,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
     ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
-    std::map<QString, QString> postprocessMap, QString loader)
+    int group, std::map<QString, QString> postprocessMap, QString loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(std::move(loader)),
       m_postprocessing(postprocessor.name().isEmpty()
@@ -127,11 +94,12 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                            : PostprocessingStep(QString(),
                                                 std::move(postprocessor),
                                                 std::move(postprocessMap))),
-      m_preprocessing(QString(), std::move(preprocessMap)),
-      m_whitelist(std::move(whitelist)), m_processor(std::move(processor)),
-      m_progressReporter(nullptr), m_promptUser(true), m_tableDirty(false),
-      m_pauseReduction(false), m_reductionPaused(true),
-      m_nextActionFlag(ReductionFlag::StopReduceFlag) {
+
+      m_preprocessing(ColumnOptionsMap(), std::move(preprocessMap)),
+      m_group(group), m_whitelist(std::move(whitelist)),
+      m_processor(std::move(processor)), m_progressReporter(nullptr),
+      m_promptUser(true), m_tableDirty(false), m_pauseReduction(false),
+      m_reductionPaused(true), m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -178,23 +146,27 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * @param processor : A ProcessingAlgorithm
 * @param postprocessor : A PostprocessingAlgorithm
 * workspaces
+* @param group : The zero based index of this presenter within the tab
+* (reflectometry).
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist, ProcessingAlgorithm processor,
-    PostprocessingAlgorithm postprocessor)
+    PostprocessingAlgorithm postprocessor, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
-          std::move(processor), std::move(postprocessor)) {}
+          std::move(processor), std::move(postprocessor), group) {}
 
 /**
  * Delegating constructor (only whitelist specified)
  * @param whitelist : The set of properties we want to show as columns
+ * @param group : The zero based index of this presenter within the tab
+ * (reflectometry)
  */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    WhiteList whitelist)
+    WhiteList whitelist, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
-          ProcessingAlgorithm(), PostprocessingAlgorithm()) {}
+          ProcessingAlgorithm(), PostprocessingAlgorithm(), group) {}
 
 /**
 * Delegating constructor (no post-processing needed)
@@ -202,26 +174,30 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * @param preprocessMap : A map containing instructions for pre-processing
 * @param processor : A ProcessingAlgorithm
 * workspaces
+* @param group : The zero based index of this presenter within the tab
+* (reflectometry)
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
-    ProcessingAlgorithm processor)
+    ProcessingAlgorithm processor, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::move(preprocessMap), std::move(processor),
-          PostprocessingAlgorithm()) {}
+          PostprocessingAlgorithm(), group) {}
 
 /**
 * Delegating constructor (no pre-processing needed, no post-processing needed)
 * @param whitelist : The set of properties we want to show as columns
 * @param processor : A ProcessingAlgorithm
 * workspaces
+* @param group : The zero based index of this presenter within the tab
+* (reflectometry)
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    WhiteList whitelist, ProcessingAlgorithm processor)
+    WhiteList whitelist, ProcessingAlgorithm processor, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
-          std::move(processor), PostprocessingAlgorithm()) {}
+          std::move(processor), PostprocessingAlgorithm(), group) {}
 
 /**
 * Destructor
@@ -251,6 +227,11 @@ void GenericDataProcessorPresenter::acceptViews(
 
   // Add actions to toolbar
   addCommands();
+
+  if (m_manager->isMultiLevel())
+    m_view->enableGrouping();
+  else
+    m_view->disableGrouping();
 
   // Initialise options
   // Load saved values from disk
@@ -293,25 +274,40 @@ void GenericDataProcessorPresenter::acceptViews(
   updateWidgetEnabledState(false);
 }
 
-bool GenericDataProcessorPresenter::areOptionsUpdated() {
-  auto newPreprocessingOptions =
-      m_mainPresenter->getPreprocessingOptionsAsString();
-  auto newProcessingOptions = m_mainPresenter->getProcessingOptions();
-  auto newPostprocessingOptions = m_mainPresenter->getPostprocessingOptions();
+/**
+Returns the name of the reduced workspace for a given row
+@param data :: [input] The data for this row
+@param prefix : A prefix to be appended to the generated ws name
+@throws std::runtime_error if the workspace could not be prepared
+@returns : The name of the workspace
+*/
+QString GenericDataProcessorPresenter::getReducedWorkspaceName(
+    const QStringList &data, const QString &prefix) const {
+  return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
+      data, m_whitelist, prefix);
+}
 
-  auto settingsChanged =
-      m_preprocessing.m_options != newPreprocessingOptions ||
-      m_processingOptions != newProcessingOptions ||
-      (hasPostprocessing() &&
-       m_postprocessing->m_options != newPostprocessingOptions);
-
-  m_preprocessing.m_options = newPreprocessingOptions;
-  m_processingOptions = newProcessingOptions;
+void GenericDataProcessorPresenter::settingsChanged() {
+  m_preprocessing.m_options =
+      convertColumnOptionsFromQMap(m_mainPresenter->getPreprocessingOptions());
+  m_processingOptions =
+      convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
 
   if (hasPostprocessing())
-    m_postprocessing->m_options = newPostprocessingOptions;
+    m_postprocessing->m_options =
+        m_mainPresenter->getPostprocessingOptionsAsString();
 
-  return settingsChanged;
+  m_manager->invalidateAllProcessed();
+}
+
+bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
+  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
+    auto outputWorkspaceName =
+        getReducedWorkspaceName(row.second, m_processor.prefix(i));
+    if (!workspaceExists(outputWorkspaceName))
+      return false;
+  }
+  return true;
 }
 
 /**
@@ -330,10 +326,6 @@ void GenericDataProcessorPresenter::process() {
   if (m_selectedData.size() == 0)
     return;
 
-  // Set the global settings. If any have been changed, set all groups and rows
-  // as unprocessed
-  auto settingsHaveChanged = areOptionsUpdated();
-
   // Clear the group queue
   m_group_queue = GroupQueue();
 
@@ -345,7 +337,7 @@ void GenericDataProcessorPresenter::process() {
         hasPostprocessing() &&
         !workspaceExists(getPostprocessedWorkspaceName(group.second));
 
-    if (settingsHaveChanged || groupOutputNotFound)
+    if (groupOutputNotFound)
       m_manager->setProcessed(false, group.first);
 
     // Groups that are already processed or cannot be post-processed (only 1
@@ -361,16 +353,8 @@ void GenericDataProcessorPresenter::process() {
       rowQueue.push(row);
 
       // Set group as unprocessed if settings have changed or the expected
-      // output
-      // workspaces cannot be found
-      bool rowOutputFound = true;
-      for (auto i = 0u;
-           i < m_processor.numberOfOutputProperties() && rowOutputFound; i++) {
-        rowOutputFound = workspaceExists(
-            getReducedWorkspaceName(row.second, m_processor.prefix(i)));
-      }
-
-      if (settingsHaveChanged || !rowOutputFound)
+      // output workspaces cannot be found
+      if (!rowOutputExists(row))
         m_manager->setProcessed(false, row.first, group.first);
 
       // Rows that are already processed do not count in progress
@@ -418,7 +402,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
   if (m_pauseReduction) {
     // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused();
+    m_mainPresenter->confirmReductionPaused(m_group);
     m_reductionPaused = true;
     return;
   }
@@ -464,7 +448,7 @@ void GenericDataProcessorPresenter::nextGroup() {
 
   if (m_pauseReduction) {
     // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused();
+    m_mainPresenter->confirmReductionPaused(m_group);
     m_reductionPaused = true;
     return;
   }
@@ -523,7 +507,7 @@ void GenericDataProcessorPresenter::endReduction() {
 
   pause();
   m_reductionPaused = true;
-  m_mainPresenter->confirmReductionPaused();
+  m_mainPresenter->confirmReductionPaused(m_group);
 }
 
 /**
@@ -555,19 +539,16 @@ there
 @param data : the processed data
 */
 void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
-  assert(hasPostprocessing() &&
-         "Postprocessing details required by notebook generator.");
-
   QString filename = m_view->requestNotebookPath();
   if (!filename.isEmpty()) {
     // Global pre-processing options as a map where keys are column
-    // name and values are pre-processing options as a string
-    const auto preprocessingOptionsMap =
-        convertStringToMap(m_preprocessing.m_options);
+    // name and values are pre-processing options as a map of
+    // property name to value
+    const auto preprocessingOptionsMap = m_preprocessing.m_options;
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist,
-        m_preprocessing.m_map, m_processor, *m_postprocessing,
+        m_preprocessing.m_map, m_processor, m_postprocessing,
         preprocessingOptionsMap, m_processingOptions);
     auto generatedNotebook =
         std::string(notebook->generateNotebook(data).toStdString());
@@ -582,6 +563,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 bool GenericDataProcessorPresenter::hasPostprocessing() const {
   return bool(m_postprocessing);
 }
+
 /**
 Post-processes the workspaces created by the given rows together.
 @param groupData : the data in a given group as received from the tree manager
@@ -604,22 +586,20 @@ desired workspace
 */
 Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     const QString &runStr, const PreprocessingAlgorithm &preprocessor,
-    const std::map<std::string, std::string> &optionsMap) {
+    const OptionsMap &optionsMap) {
   auto const instrument = m_view->getProcessInstrument();
 
-  auto runs = runStr.split(QRegExp("[+,]"));
+  auto runs = preprocessingStringToList(runStr);
+
   if (runs.isEmpty())
     throw std::runtime_error("No runs given");
-
-  // Remove leading/trailing whitespace from each run
-  std::transform(runs.begin(), runs.end(), runs.begin(),
-                 [](QString in) -> QString { return in.trimmed(); });
 
   // If we're only given one run, just return that
   if (runs.size() == 1)
     return getRun(runs[0], instrument, preprocessor.prefix());
 
-  auto const outputName = preprocessor.prefix() + runs.join("_");
+  auto const outputName =
+      preprocessingListToString(runs, preprocessor.prefix());
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
   * but that doesn't preserve history nicely, so we'll just take care of tidying
@@ -640,10 +620,12 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     // Iterate through all the remaining runs, adding them to the first run
     for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt) {
 
+      // Loop all options and set them on the algorithm unless they
+      // are the LHS or RHS property
       for (auto &kvp : optionsMap) {
         try {
-          if (kvp.first != preprocessor.lhsProperty().toStdString() &&
-              kvp.first != preprocessor.rhsProperty().toStdString())
+          if (kvp.first != preprocessor.lhsProperty() &&
+              kvp.first != preprocessor.rhsProperty())
             setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // We can't apply this option to this pre-processing alg
@@ -651,6 +633,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
         }
       }
 
+      // Now set this run as the RHS property
       setAlgorithmProperty(
           alg.get(), preprocessor.rhsProperty(),
           getRun(*runIt, instrument, preprocessor.prefix())->getName());
@@ -671,55 +654,6 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   return AnalysisDataService::Instance().retrieveWS<Workspace>(
       outputName.toStdString());
 }
-
-/**
-Returns the name of the reduced workspace for a given row
-@param data :: [input] The data for this row
-@param prefix : A prefix to be appended to the generated ws name
-@throws std::runtime_error if the workspace could not be prepared
-@returns : The name of the workspace
-*/
-QString
-GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
-                                                       const QString &prefix) {
-  if (data.size() != static_cast<int>(m_whitelist.size()))
-    throw std::invalid_argument("Can't find reduced workspace name");
-
-  /* This method calculates, for a given row, the name of the output
-  * (processed)
-  * workspace. This is done using the white list, which contains information
-  * about the columns that should be included to create the ws name. In
-  * Reflectometry for example, we want to include values in the 'Run(s)' and
-  * 'Transmission Run(s)' columns. We may also use a prefix associated with
-  * the column when specified. Finally, to construct the ws name we may also
-  * use a 'global' prefix associated with the processing algorithm (for
-  * instance 'IvsQ_' in Reflectometry) this is given by the second argument to
-  * this method */
-
-  // Temporary vector of strings to construct the name
-  QStringList names;
-
-  auto columnIt = m_whitelist.cbegin();
-  auto runNumbersIt = data.constBegin();
-  for (; columnIt != m_whitelist.cend(); ++columnIt, ++runNumbersIt) {
-    auto column = *columnIt;
-    // Do we want to use this column to generate the name of the output ws?
-    if (column.isShown()) {
-      auto const runNumbers = *runNumbersIt;
-
-      if (!runNumbers.isEmpty()) {
-        // But we may have things like '1+2' which we want to replace with '1_2'
-        auto value = runNumbers.split("+", QString::SkipEmptyParts);
-        names.append(column.prefix() + value.join("_"));
-      }
-    }
-  } // Columns
-
-  auto wsname = prefix;
-  wsname += names.join("_");
-  return wsname;
-}
-
 /**
 Returns the name of the reduced workspace for a given group
 @param groupData : The data in a given group
@@ -727,8 +661,9 @@ Returns the name of the reduced workspace for a given group
 */
 QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData) {
-  assert(hasPostprocessing() &&
-         "Only call this function if you have postprocessing.");
+  if (!hasPostprocessing())
+    throw std::runtime_error("Attempted to get postprocessing workspace but no "
+                             "postprocessing is specified.");
   return m_postprocessing->getPostprocessedWorkspaceName(m_whitelist,
                                                          groupData);
 }
@@ -842,149 +777,66 @@ GenericDataProcessorPresenter::createProcessingAlgorithm() const {
   return alg;
 }
 
-namespace {
-template <typename SetProperty>
-void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
-                                     std::string const &properties,
-                                     std::string const &columnName,
-                                     SetProperty setProperty) {
-  auto propertiesMap = parseKeyValueString(properties);
-  for (const auto &kvp : propertiesMap) {
-    try {
-      setProperty(alg.get(), kvp.first, kvp.second);
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      throw std::runtime_error("Invalid property in " + columnName +
-                               " column: " + kvp.first);
-    }
-  }
-}
-}
-
-void GenericDataProcessorPresenter::setPropertiesFromKeyValueString(
-    Mantid::API::IAlgorithm_sptr alg, std::string const &properties,
-    std::string const &columnName) {
-  ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
-      alg, properties, columnName,
-      [](Mantid::API::IAlgorithm *const alg, std::string key, std::string value)
-          -> void { ::setAlgorithmProperty(alg, key, value); });
-}
-
-/** Reduce a row
- *
- * @param data :: [input] The data in this row as a vector where elements
- * correspond to column contents
- * @throws std::runtime_error if reduction fails
+/** Preprocess the property value from the given column if
+ * preprocessing is applicable for this column (does nothing
+ * otherwise)
+ * @param columnName [in] :: the name of the column
+ * @param columnValue [inout] :: the original value in the column;
+ * this gets updated to the new (preprocessed) value for the column
+ * if preprocessing was performed
+ * @param data [in] :: the data in the row
  */
-void GenericDataProcessorPresenter::reduceRow(RowData *data) {
+void GenericDataProcessorPresenter::preprocessColumnValue(
+    const QString &columnName, QString &columnValue, RowData *data) {
+  // Check if preprocessing is required for this column
+  if (!m_preprocessing.hasPreprocessing(columnName))
+    return;
 
-  auto alg = createProcessingAlgorithm();
+  // Get the options for the preprocessing algorithm
+  auto preprocessor = m_preprocessing.m_map.at(columnName);
+  OptionsMap options;
+  if (m_preprocessing.hasOptions(columnName)) {
+    auto globalOptions = m_preprocessing.m_options.at(columnName);
+    options = getCanonicalOptions(data, globalOptions, m_whitelist, false);
+  }
 
-  /* Read input properties from the table */
-  /* excluding 'Group' and 'Options' */
+  // Run the preprocessing algorithm
+  auto runWS = prepareRunWorkspace(columnValue, preprocessor, options);
 
-  // Global pre-processing options as a map
-  std::map<QString, QString> globalOptions;
-  if (!m_preprocessing.m_map.empty())
-    globalOptions = convertStringToMap(m_preprocessing.m_options);
+  // Update the column value with the result of preprocessing
+  columnValue = QString::fromStdString(runWS->getName());
+}
 
-  // Pre-processing properties
-  auto preProcessPropMap =
-      convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties());
-
-  // Properties not to be used in processing
-  std::set<QString> restrictedProps;
-
-  // Loop over all columns in the whitelist except 'Options' and 'Hidden
-  // Options'
-  auto columnIt = m_whitelist.cbegin();
-  auto runNumbersIt = data->constBegin();
-  for (; columnIt != m_whitelist.cend() - 2; ++columnIt, ++runNumbersIt) {
+/** Perform preprocessing on algorithm property values where applicable
+ * @param options : the algorithm properties as a map of property name
+ * to value
+ * @param data : the data in the row
+*/
+void GenericDataProcessorPresenter::preprocessOptionValues(OptionsMap &options,
+                                                           RowData *data) {
+  // Loop through all columns (excluding the Options and Hidden options
+  // columns)
+  for (auto columnIt = m_whitelist.cbegin(); columnIt != m_whitelist.cend() - 2;
+       ++columnIt) {
     auto column = *columnIt;
     auto &propertyName = column.algorithmProperty();
-    auto &columnName = column.name();
 
-    // The value for which preprocessing can be conducted on
-    QString preProcessValue;
-
-    if (globalOptions.count(columnName) &&
-        !globalOptions[columnName].isEmpty()) {
-      auto tmpOptionsMap =
-          parseKeyValueString(globalOptions[columnName].toStdString());
-      QStringList valueList;
-      for (auto &optionMapEntry : tmpOptionsMap) {
-        valueList.append(QString::fromStdString(optionMapEntry.second));
-      }
-      preProcessValue = valueList.join(",");
-    } else if (!(*runNumbersIt).isEmpty()) {
-      preProcessValue = (*runNumbersIt);
-    } else {
-      continue;
-    }
-
-    if (m_preprocessing.hasPreprocessing(columnName)) {
-      // This column needs pre-processing
-
-      // We do not want the associated properties to be set again in
-      // processing
-      if (preProcessPropMap.count(columnName) > 0) {
-        for (auto &prop : preProcessPropMap[columnName]) {
-          restrictedProps.insert(prop);
-        }
-      }
-
-      auto preprocessor = m_preprocessing.m_map.at(columnName);
-
-      auto const globalOptionsForColumn = globalOptions.count(columnName) > 0
-                                              ? globalOptions.at(columnName)
-                                              : "";
-
-      auto optionsMap =
-          parseKeyValueString(globalOptionsForColumn.toStdString());
-      auto runWS =
-          prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
-      setAlgorithmProperty(alg.get(), propertyName.toStdString(),
-                           runWS->getName());
-    } else {
-      // No pre-processing needed
-      auto propertyValue = *runNumbersIt;
-      if (!propertyValue.isEmpty())
-        alg->setPropertyValue(propertyName.toStdString(),
-                              propertyValue.toStdString());
+    // Check if the column has a value
+    if (options.find(propertyName) != options.end()) {
+      preprocessColumnValue(column.name(), options[propertyName], data);
     }
   }
+}
 
-  auto isUnrestrictedProperty =
-      [&restrictedProps](QString const &propertyName) -> bool {
-        return std::find(restrictedProps.begin(), restrictedProps.end(),
-                         propertyName) == restrictedProps.end();
-      };
-
-  // Parse and set any user-specified options
-  ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
-      alg, m_processingOptions.toStdString(), "options",
-      [&](Mantid::API::IAlgorithm *const alg, std::string key,
-          std::string value) -> void {
-        if (isUnrestrictedProperty(QString::fromStdString(key)))
-          ::setAlgorithmProperty(alg, key, value);
-      });
-
-  const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
-  setPropertiesFromKeyValueString(alg, userOptions.toStdString(), "options");
-
-  const auto hiddenOptions = data->back();
-  setPropertiesFromKeyValueString(alg, hiddenOptions.toStdString(),
-                                  "hidden options");
-
-  /* We need to give a name to the output workspaces */
-  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
-    setAlgorithmProperty(alg.get(), m_processor.outputPropertyName(i),
-                         getReducedWorkspaceName(*data, m_processor.prefix(i)));
-  }
-
-  /* Now run the processing algorithm */
-  alg->execute();
+/** Some columns in the model should be updated with outputs
+ * from the algorithm if they were not set by the user. This is
+ * so that the view can be updated show the user what values were used.
+ */
+void GenericDataProcessorPresenter::updateModelFromAlgorithm(
+    IAlgorithm_sptr alg, RowData *data) {
 
   auto newData = data;
+
   if (alg->isExecuted()) {
     auto runNumbersIt2 = data->constBegin();
     auto newDataIt = newData->begin();
@@ -1016,6 +868,44 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       }
     }
   }
+}
+
+/** Create an algorithm with the given properties and execute it
+ * @param options : the options as a map of property name to value
+ * @throws std::runtime_error if reduction fails
+ * @returns : the algorithm
+ */
+IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
+    const OptionsMap &options) {
+  auto alg = createProcessingAlgorithm();
+
+  for (auto &kvp : options) {
+    setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
+  }
+
+  alg->execute();
+
+  return alg;
+}
+
+/** Reduce a row
+ *
+ * @param data :: [input] The data in this row as a vector where elements
+ * correspond to column contents
+ * @throws std::runtime_error if reduction fails
+ */
+void GenericDataProcessorPresenter::reduceRow(RowData *data) {
+
+  // Get the algorithm input properties as an options map
+  OptionsMap options = getCanonicalOptions(
+      data, m_processingOptions, m_whitelist, true,
+      m_processor.outputProperties(), m_processor.prefixes());
+  // Perform any preprocessing on the input properties
+  preprocessOptionValues(options, data);
+  // Run the algorithm
+  const auto alg = createAndRunAlgorithm(options);
+  // Populate any missing values in the model with output from the algorithm
+  updateModelFromAlgorithm(alg, data);
 }
 
 /**
@@ -1581,7 +1471,7 @@ void GenericDataProcessorPresenter::resume() {
 
   m_pauseReduction = false;
   m_reductionPaused = false;
-  m_mainPresenter->confirmReductionResumed();
+  m_mainPresenter->confirmReductionResumed(m_group);
 
   doNextAction();
 }
@@ -1626,6 +1516,8 @@ void GenericDataProcessorPresenter::accept(
   m_mainPresenter = mainPresenter;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
+  settingsChanged();
+
   m_mainPresenter->notifyADSChanged(m_workspaceList);
   // Presenter should initially be in the paused state
   m_mainPresenter->pause();

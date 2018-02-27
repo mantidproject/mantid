@@ -69,6 +69,7 @@ TwoLevelTreeManager::TwoLevelTreeManager(DataProcessorPresenter *presenter,
 */
 TwoLevelTreeManager::~TwoLevelTreeManager() {}
 
+bool TwoLevelTreeManager::isMultiLevel() const { return true; }
 /**
 * Publishes a list of available commands
 * @return : The list of available commands
@@ -109,6 +110,13 @@ std::vector<Command_uptr> TwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<DeleteRowCommand>(m_presenter));
   addCommand(commands, make_unique<DeleteGroupCommand>(m_presenter));
   return commands;
+}
+
+void TwoLevelTreeManager::invalidateAllProcessed() {
+  forEachGroup(*m_model,
+               [this](int group) -> void { setProcessed(false, group); });
+  forEachRow(*m_model, [this](int group, int row)
+                           -> void { setProcessed(false, row, group); });
 }
 
 /**

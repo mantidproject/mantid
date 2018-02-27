@@ -4,8 +4,11 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidKernel/PropertyManager.h"
 #include <vector>
 
@@ -39,11 +42,13 @@ namespace API {
    File change history is stored at: <https://github.com/mantidproject/mantid>
    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport DataProcessorAlgorithm : public Algorithm {
+template <class Base>
+class DLLExport GenericDataProcessorAlgorithm : public Base {
 public:
-  DataProcessorAlgorithm();
+  GenericDataProcessorAlgorithm();
   std::string getPropertyValue(const std::string &name) const override;
-  TypedValue getProperty(const std::string &name) const override;
+  Kernel::PropertyManagerOwner::TypedValue
+  getProperty(const std::string &name) const override;
 
 protected:
   boost::shared_ptr<Algorithm> createChildAlgorithm(
@@ -110,8 +115,8 @@ private:
     auto alg = createChildAlgorithm(algorithmName);
     alg->initialize();
 
-    alg->setProperty<LHSType>("LHSWorkspace", lhs);
-    alg->setProperty<RHSType>("RHSWorkspace", rhs);
+    alg->template setProperty<LHSType>("LHSWorkspace", lhs);
+    alg->template setProperty<RHSType>("RHSWorkspace", rhs);
     alg->execute();
 
     if (alg->isExecuted()) {
@@ -137,7 +142,27 @@ private:
   std::string m_propertyManagerPropertyName;
   /// Map property names to names in supplied properties manager
   std::map<std::string, std::string> m_nameToPMName;
+
+  // This method is a workaround for the C4661 compiler warning in visual
+  // studio. This allows the template declaration and definition to be separated
+  // in different files. See stack overflow article for a more detailed
+  // explanation:
+  // https://stackoverflow.com/questions/44160467/warning-c4661no-suitable-definition-provided-for-explicit-template-instantiatio
+  // https://stackoverflow.com/questions/33517902/how-to-export-a-class-derived-from-an-explicitly-instantiated-template-in-visual
+  void visualStudioC4661Workaround();
 };
+
+template <>
+MANTID_API_DLL void
+GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround();
+
+using DataProcessorAlgorithm = GenericDataProcessorAlgorithm<Algorithm>;
+using SerialDataProcessorAlgorithm =
+    GenericDataProcessorAlgorithm<SerialAlgorithm>;
+using ParallelDataProcessorAlgorithm =
+    GenericDataProcessorAlgorithm<ParallelAlgorithm>;
+using DistributedDataProcessorAlgorithm =
+    GenericDataProcessorAlgorithm<DistributedAlgorithm>;
 
 } // namespace API
 } // namespace Mantid

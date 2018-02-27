@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHMS_NORMALISEBYCURRENT_H_
 #define MANTID_ALGORITHMS_NORMALISEBYCURRENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include <boost/shared_ptr.hpp>
 namespace Mantid {
 namespace API {
@@ -50,7 +47,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport NormaliseByCurrent : public API::Algorithm {
+class DLLExport NormaliseByCurrent : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseByCurrent"; }

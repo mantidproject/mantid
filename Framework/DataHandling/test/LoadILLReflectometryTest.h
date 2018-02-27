@@ -41,7 +41,6 @@ private:
     // check the sum of all detector counts against Nexus file entry detsum
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("PSD.detsum"),
                      detCounts(output));
-    TS_ASSERT(output->run().hasProperty("stheta"))
   }
 
   static double detCounts(MatrixWorkspace_sptr output) {
@@ -118,7 +117,9 @@ public:
     loadSpecific(m_d17File, m_outWSName, emptyProperties());
   }
 
-  // D17
+  void testExecFigaro() {
+    loadSpecific(m_figaroFile, m_outWSName, emptyProperties());
+  }
 
   void testTOFD17() {
     MatrixWorkspace_sptr output;
@@ -144,19 +145,56 @@ public:
     const auto openOffset =
         run.getPropertyValueAsType<double>("VirtualChopper.open_offset");
     const auto tof0 =
-        tofDelay - 0.5 * channelWidth -
+        tofDelay -
         60e6 * (pOffset - 45 + chopper2Phase - chopper1Phase + openOffset) /
             (2 * 360 * chopper1Speed);
     TS_ASSERT_EQUALS(output->blocksize(), channelCount);
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
-      for (size_t j = 0; j < 1; ++j) {
+      const auto &xs = output->x(i);
+      for (size_t j = 0; j < xs.size(); ++j) {
         const auto tof = tof0 + static_cast<double>(j) * channelWidth;
-        TS_ASSERT_DELTA(output->x(i)[j], tof, 1e-12)
+        TS_ASSERT_DELTA(xs[j], tof, 1e-12)
       }
     }
   }
 
-  void testSourcePositionD17() {
+  void testTOFFigaro() {
+    MatrixWorkspace_sptr output;
+    auto prop = emptyProperties();
+    prop.emplace_back("XUnit", "TimeOfFlight");
+    getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "TOF");
+    const auto &run = output->run();
+    const auto channelWidth =
+        run.getPropertyValueAsType<double>("PSD.time_of_flight_0");
+    const auto channelCount = static_cast<size_t>(
+        run.getPropertyValueAsType<double>("PSD.time_of_flight_1"));
+    const auto tofDelay =
+        run.getPropertyValueAsType<double>("PSD.time_of_flight_2") +
+        run.getPropertyValueAsType<double>("Theta.edelay_delay");
+    // Using choppers 1 and 4.
+    const auto chopper1Speed =
+        run.getPropertyValueAsType<double>("CH1.rotation_speed");
+    const double chopper1Phase{0.}; // The value in NeXus is trash.
+    const auto chopper2Phase = run.getPropertyValueAsType<double>("CH4.phase");
+    const auto pOffset = run.getPropertyValueAsType<double>("CollAngle.poff");
+    const auto openOffset =
+        run.getPropertyValueAsType<double>("CollAngle.openOffset");
+    const auto tof0 =
+        tofDelay -
+        60e6 * (pOffset - 45. + chopper2Phase - chopper1Phase + openOffset) /
+            (2. * 360. * chopper1Speed);
+    TS_ASSERT_EQUALS(output->blocksize(), channelCount);
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      const auto &xs = output->x(i);
+      for (size_t j = 0; j < xs.size(); ++j) {
+        const auto tof = tof0 + static_cast<double>(j) * channelWidth;
+        TS_ASSERT_DELTA(xs[j], tof, 1e-12)
+      }
+    }
+  }
+
+  void testSampleAndSourcePositionsD17() {
     MatrixWorkspace_sptr output;
     auto prop = emptyProperties();
     prop.emplace_back("Xunit", "TimeOfFlight");
@@ -180,6 +218,37 @@ public:
     TS_ASSERT_EQUALS(sourcePos.Z(), -sourceSample)
   }
 
+  void testSampleAndSourcePositionsFigaro() {
+    MatrixWorkspace_sptr output;
+    auto prop = emptyProperties();
+    prop.emplace_back("Xunit", "TimeOfFlight");
+    getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
+    const auto &run = output->run();
+    const auto chopperCentre =
+        run.getPropertyValueAsType<double>(
+            "ChopperSetting.chopperpair_sample_distance") *
+        1e-3;
+    const auto incomingDeflectionAngle =
+        run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle");
+    const auto sampleZOffset =
+        run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
+        1e-3;
+    const auto sourceSample =
+        chopperCentre +
+        sampleZOffset / std::cos(incomingDeflectionAngle / 180. * M_PI);
+    const auto &spectrumInfo = output->spectrumInfo();
+    const auto l1 = spectrumInfo.l1();
+    TS_ASSERT_DELTA(sourceSample, l1, 1e-12)
+    const auto samplePos = spectrumInfo.samplePosition();
+    const auto sourcePos = spectrumInfo.sourcePosition();
+    TS_ASSERT_EQUALS(samplePos.X(), 0)
+    TS_ASSERT_EQUALS(samplePos.Y(), 0)
+    TS_ASSERT_EQUALS(samplePos.Z(), 0)
+    TS_ASSERT_EQUALS(sourcePos.X(), 0)
+    TS_ASSERT_EQUALS(sourcePos.Y(), 0)
+    TS_ASSERT_EQUALS(sourcePos.Z(), -sourceSample)
+  }
+
   void testDetectorPositionAndRotationD17() {
     MatrixWorkspace_sptr output;
     getWorkspaceFor(output, m_d17File, m_outWSName, emptyProperties());
@@ -197,10 +266,58 @@ public:
       TS_ASSERT_EQUALS(p.Y(), 0)
       const auto pixOffset = (127.5 - static_cast<double>(i)) * pixWidth;
       const auto pixAngle = detAngle + std::atan2(pixOffset, detDist);
-      const auto pixDist = std::sqrt(pixOffset * pixOffset + detDist * detDist);
+      const auto pixDist = std::hypot(pixOffset, detDist);
       const auto idealX = pixDist * std::sin(pixAngle);
       const auto idealZ = pixDist * std::cos(pixAngle);
       TS_ASSERT_DELTA(p.X(), idealX, 1e-8)
+      TS_ASSERT_DELTA(p.Z(), idealZ, 1e-8)
+    }
+  }
+
+  void testDetectorPositionAndRotationFigaro() {
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_figaroFile, m_outWSName, emptyProperties());
+    const auto &spectrumInfo = output->spectrumInfo();
+    const auto &run = output->run();
+    const auto detectorRestZ =
+        run.getPropertyValueAsType<double>("DTR.value") * 1e-3;
+    const auto DH1Y = run.getPropertyValueAsType<double>("DH1.value") * 1e-3;
+    const double DH1Z{1.135};
+    const auto DH2Y = run.getPropertyValueAsType<double>("DH2.value") * 1e-3;
+    const double DH2Z{2.077};
+    const auto detAngle = std::atan2(DH2Y - DH1Y, DH2Z - DH1Z);
+    const double detectorRestY{0.509};
+    const auto detectorY =
+        std::sin(detAngle) * (detectorRestZ - DH1Z) + DH1Y - detectorRestY;
+    const auto detectorZ = std::cos(detAngle) * (detectorRestZ - DH1Z) + DH1Z;
+    const auto pixWidth = run.getPropertyValueAsType<double>("PSD.mppy") * 1e-3;
+    const auto pixelOffset = detectorRestY - 0.5 * pixWidth;
+    const auto beamY = detectorY + pixelOffset * std::cos(detAngle);
+    const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
+    const auto sht1 = run.getPropertyValueAsType<double>("SHT1.value") * 1e-3;
+    const auto sampleZOffset =
+        run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
+        1e-3;
+    const auto collimationAngle =
+        run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
+        180. * M_PI;
+    const auto detDist = std::hypot(beamY - sht1, beamZ) -
+                         sampleZOffset / std::cos(collimationAngle);
+    const auto sampleAngle =
+        run.getPropertyValueAsType<double>("Theta.actual_theta") / 180. * M_PI;
+    for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+      if (spectrumInfo.isMonitor(i)) {
+        continue;
+      }
+      const auto p = spectrumInfo.position(i);
+      TS_ASSERT_EQUALS(p.X(), 0)
+      const auto pixOffset = (static_cast<double>(i) - 127.5) * pixWidth;
+      const auto pixAngle = detAngle + collimationAngle + sampleAngle +
+                            std::atan2(pixOffset, detDist);
+      const auto pixDist = std::hypot(pixOffset, detDist);
+      const auto idealY = pixDist * std::sin(pixAngle);
+      const auto idealZ = pixDist * std::cos(pixAngle);
+      TS_ASSERT_DELTA(p.Y(), idealY, 1e-8)
       TS_ASSERT_DELTA(p.Z(), idealZ, 1e-8)
     }
   }
@@ -214,9 +331,6 @@ public:
     const auto dan = output->run().getPropertyValueAsType<double>("dan.value");
     TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI, dan)
     TS_ASSERT_LESS_THAN_EQUALS(dan, spectrumInfo.twoTheta(127) * 180 / M_PI)
-    const auto san = output->run().getPropertyValueAsType<double>("san.value");
-    const auto stheta = output->run().getPropertyValueAsType<double>("stheta");
-    TS_ASSERT_DELTA(stheta * 180 / M_PI, san, 0.03)
   }
 
   void testUserAngleD17() {
@@ -232,14 +346,32 @@ public:
                                detectorAngle)
     TS_ASSERT_LESS_THAN_EQUALS(detectorAngle,
                                spectrumInfo.twoTheta(127) * 180 / M_PI)
-    const auto stheta = output->run().getPropertyValueAsType<double>("stheta");
-    TS_ASSERT_EQUALS(stheta * 180 / M_PI, angle)
+  }
+
+  void testUserAngleFigaro() {
+    MatrixWorkspace_sptr output;
+    const double angle = 23.23;
+    auto prop = emptyProperties();
+    const int detector{0};
+    prop.emplace_back("BeamCentre", std::to_string(detector));
+    prop.emplace_back("BraggAngle", std::to_string(angle));
+    getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
+    const double detectorAngle = 2 * angle;
+    const auto &spectrumInfo = output->spectrumInfo();
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(detector) * 180. / M_PI,
+                    detectorAngle, 1e-6)
   }
 
   void testPropertiesD17() {
     MatrixWorkspace_sptr output;
     getWorkspaceFor(output, m_d17File, m_outWSName, emptyProperties());
     commonProperties(output, "D17");
+  }
+
+  void testPropertiesFigaro() {
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_figaroFile, m_outWSName, emptyProperties());
+    commonProperties(output, "Figaro");
   }
 
   void testDirectBeamOutput() {
@@ -288,7 +420,7 @@ public:
             dbBeamPosWSName);
     MatrixWorkspace_sptr refOutput;
     prop.clear();
-    prop.emplace_back("BeamPosition", dbBeamPosWSName);
+    prop.emplace_back("DirectBeamPosition", dbBeamPosWSName);
     getWorkspaceFor(refOutput, m_d17File, m_outWSName, prop);
     const auto dbDetAngle =
         dbOutput->run().getPropertyValueAsType<double>("dan.value");
@@ -323,7 +455,7 @@ public:
     const std::string refBeamPosWSName{
         "LoadILLReflectometryTest_RefBeamPositionWS"};
     prop.clear();
-    prop.emplace_back("BeamPosition", dbBeamPosWSName);
+    prop.emplace_back("DirectBeamPosition", dbBeamPosWSName);
     prop.emplace_back("BraggAngle", std::to_string(userAngle));
     prop.emplace_back("OutputBeamPosition", refBeamPosWSName);
     getWorkspaceFor(refOutput, m_d17File, m_outWSName, prop);
@@ -344,6 +476,18 @@ public:
                                userDetectorAngle)
     TS_ASSERT_LESS_THAN_EQUALS(userDetectorAngle,
                                spectrumInfo.twoTheta(127) * 180 / M_PI)
+  }
+
+  void testPeakCentre() {
+    MatrixWorkspace_sptr output;
+    constexpr double peakPosition{42};
+    constexpr double angle{23.23};
+    auto prop = emptyProperties();
+    prop.emplace_back("BeamCentre", std::to_string(peakPosition));
+    prop.emplace_back("BraggAngle", std::to_string(angle));
+    getWorkspaceFor(output, m_d17File, m_outWSName, prop);
+    const auto &spectrumInfo = output->spectrumInfo();
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(42) * 180 / M_PI, 2 * angle, 1e-6)
   }
 };
 

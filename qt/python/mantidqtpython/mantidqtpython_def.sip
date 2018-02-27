@@ -581,42 +581,43 @@ private:
     PeaksPresenter();
     PeaksPresenter(const MantidQt::SliceViewer::PeaksPresenter&);
 public:
+    virtual void setForegroundColor(const QColor) = 0;
 %Docstring
 void PeaksPresenter::setForegroundColor(const QColor color)
-------------------------------------------------------
+-----------------------------------------------------------
     Sets the Foreground color of the peaks workspace as displayed in the peaks overlay.
 
     Args:
         color :: color to change foreground to
 %End
-    virtual void setForegroundColor(const QColor) = 0;
+    virtual void setBackgroundColor(const QColor) = 0;
 %Docstring
 void PeaksPresenter::setBackgroundColor(const QColor color)
-------------------------------------------------------
+-----------------------------------------------------------
     Sets the Background color of the peaks workspace as displayed in the peaks overlay.
 
     Args:
         color :: color to change background to
 %End
-    virtual void setBackgroundColor(const QColor) = 0;
+    virtual void showBackgroundRadius(const bool shown) = 0;
 %Docstring
 void PeaksPresenter::showBackgroundRadius(const bool shown)
-------------------------------------------------------
+-----------------------------------------------------------
     Toggle the background radius on and off.
 
     Args:
         shown :: True to show the background radius, otherwise false.
 %End
-    virtual void showBackgroundRadius(const bool shown) = 0;
+    virtual void setShown(const bool shown) = 0;
 %Docstring
 void PeaksPresenter::setShown(const bool shown)
-------------------------------------------------------
+-----------------------------------------------
     Toggle the overplotted state of this PeaksWorkspace in the PeaksOverlay
 
     Args:
         shown :: True to show. False to hide.
 %End
-    virtual void setShown(const bool shown) = 0;
+    virtual void zoomToPeak(const int index) = 0;
 %Docstring
 void PeaksPresenter::zoomToPeak(const int index)
 ------------------------------------------------------
@@ -625,7 +626,6 @@ void PeaksPresenter::zoomToPeak(const int index)
     Args:
         index :: Index into the peaks workspace (0 based) to zoom to.
 %End
-    virtual void zoomToPeak(const int index) = 0;
 };
 
 /***************************************************************************/
@@ -1549,22 +1549,22 @@ class QDataProcessorWidget : QWidget
 public:
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 void accept(MantidQt::MantidWidgets::DataProcessor::DataProcessorMainPresenter *);
 void setInstrumentList(const QString &instruments, const QString &defaultInstrument);
 QString getCurrentInstrument() const;
@@ -1575,6 +1575,7 @@ QString getCell(int, int, int parentRow = 0, int parentColumn = 0);
 int getNumberOfRows();
 void clearTable();
 void skipProcessing();
+void settingsChanged();
 
 signals:
 void runPythonCode(const QString &);
@@ -1594,9 +1595,9 @@ class DataProcessorMainPresenter
 public:
 DataProcessorMainPresenter();
 
-virtual QString getPreprocessingOptionsAsString() const;
-virtual QString getProcessingOptions() const;
-virtual QString getPostprocessingOptions() const;
+virtual QVariantMap getPreprocessingOptions() const;
+virtual QVariantMap getProcessingOptions() const;
+virtual QString getPostprocessingOptionsAsString() const;
 
 virtual void notifyADSChanged(const QSet<QString> &);
 };
@@ -2459,4 +2460,41 @@ private:
 };
 
 };//end namespace MantidWidgets
+
+
+namespace SpectrumView
+{
+class SpectrumView : QMainWindow
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
+%End
+
+%Docstring
+    This is the QMainWindow for the SpectrumView data viewer.  Data is
+    displayed in an SpectrumView, by constructing the SpectrumView object and
+    specifying a particular data source.
+%End
+public:
+    SpectrumView(QWidget *parent=nullptr);
+    void renderWorkspace(const QString &wsName);
+%Docstring
+    Renders a workspace in the SpectrumViewer
+
+    Args:
+        wsName The name of the workspace to be rendered.
+%End
+
+    void selectData(int spectrumNumber, double dataVal);
+%Docstring
+    Programmatically set horizontal and vertical graph data.
+
+    Args:
+        spectrumNumber SpectrumNumber in the workspace to be displayed.
+        dataVal Data value to be displayed (based on workspace units).
+%End
+private:
+    SpectrumView(const MantidQt::SpectrumView::SpectrumView &);
+};
+};//end namespace SpectrumView
 };//end namespace MantidQt

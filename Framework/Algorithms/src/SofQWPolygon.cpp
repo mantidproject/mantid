@@ -40,7 +40,8 @@ void SofQWPolygon::exec() {
   }
 
   MatrixWorkspace_sptr outputWS =
-      SofQW::setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout);
+      SofQW::setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout,
+                                  getProperty("EAxisBinning"));
   setProperty("OutputWorkspace", outputWS);
   const size_t nenergyBins = inputWS->blocksize();
 

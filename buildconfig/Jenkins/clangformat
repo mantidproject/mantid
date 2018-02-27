@@ -1,0 +1,45 @@
+#!/bin/bash
+# Check that the source conforms to the clang-format style
+# Assumes that this will run on a node where the clang-format
+# binaries have a version suffix and BUILD_URL is set in the
+# running environment
+
+# clang-format executable
+CLANG_FORMAT_EXE=clang-format-3.6
+CLANG_FORMAT=$(which $CLANG_FORMAT_EXE)
+if [ -z "$CLANG_FORMAT" ]; then
+  echo "Cannot find ${CLANG_FORMAT_EXE} executable"
+  exit 1
+else
+  ${CLANG_FORMAT} --version
+fi
+
+# git needs to have a minimal coniguration for git commit to work
+git config user.name mantid-builder
+git config user.email "mantid-buildserver@mantidproject.org"
+
+# sources to format
+sources=`find Framework MantidPlot qt \( -name '*.cpp' -o -name '*.h' \)`
+sha=`git rev-parse --short HEAD`
+
+# format
+${CLANG_FORMAT} -i $sources
+git add -A
+echo
+if git diff --cached --quiet
+then
+    echo "code is formatted correctly"
+    exit 0
+else
+    echo "code is not formatted correctly!"
+    echo ".cpp/.h files are required to be formatted with ${CLANG_FORMAT_EXE}"
+    git commit --no-verify --quiet -m "clang-format PR${PR} ${sha}"
+    git format-patch --quiet HEAD~
+    echo
+    echo "To fix download ${BUILD_URL}artifact/0001-clang-format-PR${PR}-${sha}.patch"
+    echo "then run the following in your mantid directory:"
+    echo "'git apply /path/to/0001-clang-format-PR${PR}-${sha}.patch'"
+    echo "and commit the changes."
+    echo
+    exit 1
+fi

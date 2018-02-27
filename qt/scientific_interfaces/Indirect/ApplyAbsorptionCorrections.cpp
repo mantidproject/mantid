@@ -64,6 +64,12 @@ void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   m_ppSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
 
+  // Check if supplied workspace is a MatrixWorkspace
+  if (!m_ppSampleWS) {
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
+    return;
+  }
+
   // Plot the curve
   plotInPreview("Sample", m_ppSampleWS, Qt::black);
   m_uiForm.spPreviewSpec->setMaximum(
@@ -83,6 +89,13 @@ void ApplyAbsorptionCorrections::newContainer(const QString &dataName) {
   // get Workspace
   m_ppContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
+
+  // Check if supplied workspace is a MatrixWorkspace
+  if (!m_ppContainerWS) {
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
+    return;
+  }
+
   // Clone for use in plotting and alg
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
@@ -420,7 +433,16 @@ bool ApplyAbsorptionCorrections::validate() {
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 
-  MatrixWorkspace_sptr sampleWs;
+  const auto sampleName = m_uiForm.dsSample->getCurrentDataName();
+  const auto sampleWsName = sampleName.toStdString();
+  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
+
+  if (sampleExists &&
+      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sampleWsName)) {
+    uiv.addErrorMessage(
+        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  }
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
 
@@ -431,7 +453,6 @@ bool ApplyAbsorptionCorrections::validate() {
     uiv.addErrorMessage(
         "Correction selector must contain a corrections file or workspace.");
   } else {
-
     QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
     WorkspaceGroup_sptr corrections =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(

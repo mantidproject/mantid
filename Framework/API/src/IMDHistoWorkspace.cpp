@@ -1,4 +1,6 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/System.h"

@@ -102,11 +102,9 @@ class TiledWindow;
 #endif
 
 namespace MantidQt {
-namespace API {
-class Message;
-}
 namespace MantidWidgets {
 class FitPropertyBrowser;
+class Message;
 class MessageDisplay;
 }
 }
@@ -1066,7 +1064,7 @@ public slots:
   void savetoNexusFile();
 
   // Slot for writing to log window
-  void writeToLogWindow(const MantidQt::API::Message &message);
+  void writeToLogWindow(const MantidQt::MantidWidgets::Message &message);
 
   /// Activate a subwindow (docked or floating) other than current active one
   void activateNewWindow();
@@ -1143,7 +1141,7 @@ private:
   void handleConfigDir();
   /// Save the working directory to QSettings
   void cacheWorkingDirectory() const;
-
+  void patchPaletteForLinux(QPalette &palette) const;
 private slots:
   //! \name Initialization
   //@{

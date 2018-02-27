@@ -47,7 +47,7 @@
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
 
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
-#include "MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -232,10 +232,18 @@ MantidUI::MantidUI(ApplicationWindow *aw)
     qRegisterMetaType<std::string>();
   }
 
-  m_exploreMantid = boost::make_shared<QWorkspaceDockView>(this, aw);
-  m_exploreMantid->init();
+  m_exploreMantid = new WorkspaceTreeWidget(this);
   m_exploreMantid->enableDeletePrompt(
       appWindow()->isDeleteWorkspacePromptEnabled());
+
+  // Add QWorkspaceWidget to a QDockWidget
+  m_workspaceDockWidget = new QDockWidget(tr("Workspaces"), aw);
+  m_workspaceDockWidget->setObjectName("exploreMantid");
+  m_workspaceDockWidget->setMinimumHeight(150);
+  m_workspaceDockWidget->setMinimumWidth(200);
+  m_workspaceDockWidget->setWidget(m_exploreMantid);
+  aw->addDockWidget(Qt::RightDockWidgetArea, m_workspaceDockWidget);
+
   m_exploreAlgorithms = new AlgorithmDockWidget(this, aw);
 
   actionCopyRowToTable = new QAction(this);
@@ -355,7 +363,7 @@ void MantidUI::updateAlgorithms() { m_exploreAlgorithms->update(); }
 void MantidUI::updateWorkspaces() { m_exploreMantid->refreshWorkspaces(); }
 
 void MantidUI::addMenuItems(QMenu *menu) {
-  actionToggleMantid = m_exploreMantid->toggleViewAction();
+  actionToggleMantid = m_workspaceDockWidget->toggleViewAction();
   actionToggleMantid->setIcon(getQPixmap("mantid_matrix_xpm"));
   actionToggleMantid->setShortcut(tr("Ctrl+Shift+M"));
   menu->addAction(actionToggleMantid);
@@ -2251,8 +2259,7 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Plot spectrum...", this);
-  connect(action, SIGNAL(triggered()), m_exploreMantid.get(),
-          SLOT(plotSpectra()));
+  connect(action, SIGNAL(triggered()), m_exploreMantid, SLOT(plotSpectra()));
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Plot as waterfall", this);
@@ -2283,7 +2290,7 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addSeparator();
 
   action = new QAction("Delete", this);
-  connect(action, SIGNAL(triggered()), m_exploreMantid.get(),
+  connect(action, SIGNAL(triggered()), m_exploreMantid,
           SLOT(deleteWorkspaces()));
   menuMantidMatrix->addAction(action);
 }

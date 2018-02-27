@@ -33,19 +33,19 @@ auto find(T &map, const Key key) -> decltype(map.begin()) {
 
 SpectrumNumberTranslator::SpectrumNumberTranslator(
     const std::vector<SpectrumNumber> &spectrumNumbers,
-    std::unique_ptr<Partitioner> partitioner, const PartitionIndex &partition)
+    const Partitioner &partitioner, const PartitionIndex &partition)
     : m_partition(partition), m_globalSpectrumNumbers(spectrumNumbers) {
-  partitioner->checkValid(m_partition);
+  partitioner.checkValid(m_partition);
 
   size_t currentIndex = 0;
   for (size_t i = 0; i < m_globalSpectrumNumbers.size(); ++i) {
-    auto partition = partitioner->indexOf(GlobalSpectrumIndex(i));
+    auto partition = partitioner.indexOf(GlobalSpectrumIndex(i));
     auto number = m_globalSpectrumNumbers[i];
     m_spectrumNumberToPartition.emplace(number, partition);
     if (partition == m_partition) {
       m_spectrumNumberToIndex.emplace_back(number, currentIndex);
       m_globalToLocal.emplace_back(GlobalSpectrumIndex(i), currentIndex);
-      if (partitioner->numberOfPartitions() > 1)
+      if (partitioner.numberOfPartitions() > 1)
         m_spectrumNumbers.emplace_back(number);
       ++currentIndex;
     }
@@ -81,6 +81,11 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
       ++currentIndex;
     }
   }
+}
+
+const std::vector<SpectrumNumber> &
+SpectrumNumberTranslator::globalSpectrumNumbers() const {
+  return m_globalSpectrumNumbers;
 }
 
 SpectrumNumberTranslator::SpectrumNumberTranslator(
@@ -151,6 +156,14 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
       indices.push_back(it->second);
   }
   return SpectrumIndexSet(indices, m_globalToLocal.size());
+}
+
+PartitionIndex SpectrumNumberTranslator::partitionOf(
+    const GlobalSpectrumIndex globalIndex) const {
+  checkUniqueSpectrumNumbers();
+  const auto spectrumNumber =
+      m_globalSpectrumNumbers[static_cast<size_t>(globalIndex)];
+  return m_spectrumNumberToPartition.at(spectrumNumber);
 }
 
 void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {

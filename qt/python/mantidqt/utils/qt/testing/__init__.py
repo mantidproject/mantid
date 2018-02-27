@@ -14,6 +14,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# flake8: noqa
 """A selection of utility functions related to testing of Qt-based GUI elements.
 """
 from __future__ import absolute_import
@@ -24,13 +25,43 @@ from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils.qt.plugins import setup_library_paths
+from .modal_tester import ModalTester
 
 
 # Reference to created QApplication instance so that item is kept alive
 QAPP = None
 
 
-def gui_test(test_method):
+def requires_qapp(cls):
+    """
+    Converts a unittest.TestCase class to a GUI test case by wrapping all
+    test methods in a decorator that makes sure that a QApplication is created.
+    Qt widgets don't work without QApplication.
+    Usage:
+
+        @requires_qapp
+        class MyWidgetTest(unittest.TestCase):
+
+            def test_something(self):
+                ...
+
+            def test_something_else(self):
+                ...
+
+    :param cls: Class instance
+    """
+    def is_test_method(name, x):
+        # Python 3 returns a functions type for methods not bound to an instance
+        return name.startswith('test') and (isfunction(x) or ismethod(x))
+
+    for name in dir(cls):
+        attr = getattr(cls, name)
+        if is_test_method(name, attr):
+            setattr(cls, name, _requires_qapp_impl(attr))
+    return cls
+
+
+def _requires_qapp_impl(test_method):
     """
     Decorator for GUI test methods. Creates a QApplication before
     executing the test.
@@ -45,45 +76,6 @@ def gui_test(test_method):
         QAPP.closeAllWindows()
 
     return _wrapper
-
-
-def gui_test_case(cls):
-    """
-    Converts a unittest.TestCase class to a GUI test case by wrapping all
-    test methods in gui_test decorator. Usage:
-
-        @gui_test_case
-        class MyWidgetTest(unittest.TestCase):
-
-            def test_something(self):
-                ...
-
-            def test_something_else(self):
-                ...
-
-    Which is equivalent to the definition:
-
-        class MyWidgetTest(unittest.TestCase):
-
-            @gui_test
-            def test_something(self):
-                ...
-
-            @gui_test
-            def test_something_else(self):
-                ...
-
-    :param cls: Class instance
-    """
-    def is_test_method(name, x):
-        # Python 3 returns a functions type for methods not bound to an instance
-        return name.startswith('test') and (isfunction(x) or ismethod(x))
-
-    for name in dir(cls):
-        attr = getattr(cls, name)
-        if is_test_method(name, attr):
-            setattr(cls, name, gui_test(attr))
-    return cls
 
 
 def select_item_in_tree(tree, item_label):

@@ -5,6 +5,7 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "DllConfig.h"
 #include "EnggDiffFittingViewQtWidget.h"
+#include "EnggDiffGSASFittingViewQtWidget.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
@@ -64,9 +65,6 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionViewQtGUI
 public:
   /// Default Constructor
   EnggDiffractionViewQtGUI(QWidget *parent = nullptr);
-  /// Destructor
-  ~EnggDiffractionViewQtGUI() override;
-
   /// Interface name
   static std::string name() { return "Engineering Diffraction"; }
   /// This interface's categories.
@@ -265,6 +263,7 @@ private:
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   // Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
   EnggDiffFittingViewQtWidget *m_fittingWidget;
+  EnggDiffGSASFittingViewQtWidget *m_gsasWidget;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector

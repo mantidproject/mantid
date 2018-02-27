@@ -71,10 +71,6 @@ namespace Algorithms {
  */
 class DLLExport CompareWorkspaces : public API::Algorithm {
 public:
-  CompareWorkspaces()
-      : API::Algorithm(), m_result(false), m_parallelComparison(true) {}
-  ~CompareWorkspaces() override {}
-
   /// Algorithm's name
   const std::string name() const override { return "CompareWorkspaces"; }
 
@@ -90,6 +86,12 @@ public:
            "intended for use by the Mantid development team as part of the "
            "testing process.";
   }
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
+  void execMasterOnly() override;
 
 private:
   /// Initialise algorithm
@@ -143,7 +145,7 @@ private:
   bool relErr(double x1, double x2, double errorVal) const;
 
   /// Result of comparison (true if equal, false otherwise)
-  bool m_result;
+  bool m_result{false};
 
   /// Mismatch messages that resulted from comparison
   API::ITableWorkspace_sptr m_messages;
@@ -156,7 +158,7 @@ private:
   /// comparison make things complicated as
   /// logs from different threads are mixed together.  In this case, it is
   /// better not to do parallell comparison.
-  bool m_parallelComparison;
+  bool m_parallelComparison{false};
 };
 
 } // namespace Algorithms

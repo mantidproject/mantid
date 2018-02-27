@@ -82,8 +82,8 @@ MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws,
   for (size_t spec = 0; spec < nspec; spec++) {
     outWS->setPoints(spec, Points(maxIt, LinearGenerator(0.0, 1.0)));
     auto Data = ws->readY(spec);
-    outWS->setCounts(spec, std::move(std::vector<double>(
-                               Data.begin(), Data.begin() + maxIt)));
+    outWS->setCounts(spec,
+                     std::vector<double>(Data.begin(), Data.begin() + maxIt));
   }
   return outWS;
 }

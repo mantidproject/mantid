@@ -18,8 +18,6 @@ using namespace Mantid::DataHandling;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveFocusedXYE)
 
-SaveFocusedXYE::SaveFocusedXYE() : API::Algorithm(), m_headerType(XYE) {}
-
 /**
  * Initialise the algorithm
  */

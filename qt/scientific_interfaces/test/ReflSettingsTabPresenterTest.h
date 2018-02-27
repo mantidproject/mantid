@@ -59,26 +59,26 @@ public:
 
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
-    EXPECT_CALL(presenter_0, getTransmissionRuns(false)).Times(1);
-    EXPECT_CALL(presenter_1, getTransmissionRuns(false)).Times(0);
-    EXPECT_CALL(presenter_2, getTransmissionRuns(false)).Times(0);
-    presenter.getTransmissionRuns(0, false);
+    EXPECT_CALL(presenter_0, getTransmissionRuns()).Times(1);
+    EXPECT_CALL(presenter_1, getTransmissionRuns()).Times(0);
+    EXPECT_CALL(presenter_2, getTransmissionRuns()).Times(0);
+    presenter.getTransmissionRuns(0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
-    EXPECT_CALL(presenter_0, getTransmissionRuns(false)).Times(0);
-    EXPECT_CALL(presenter_1, getTransmissionRuns(false)).Times(1);
-    EXPECT_CALL(presenter_2, getTransmissionRuns(false)).Times(0);
-    presenter.getTransmissionRuns(1, false);
+    EXPECT_CALL(presenter_0, getTransmissionRuns()).Times(0);
+    EXPECT_CALL(presenter_1, getTransmissionRuns()).Times(1);
+    EXPECT_CALL(presenter_2, getTransmissionRuns()).Times(0);
+    presenter.getTransmissionRuns(1);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
-    EXPECT_CALL(presenter_0, getTransmissionRuns(false)).Times(0);
-    EXPECT_CALL(presenter_1, getTransmissionRuns(false)).Times(0);
-    EXPECT_CALL(presenter_2, getTransmissionRuns(false)).Times(1);
-    presenter.getTransmissionRuns(2, false);
+    EXPECT_CALL(presenter_0, getTransmissionRuns()).Times(0);
+    EXPECT_CALL(presenter_1, getTransmissionRuns()).Times(0);
+    EXPECT_CALL(presenter_2, getTransmissionRuns()).Times(1);
+    presenter.getTransmissionRuns(2);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
@@ -96,7 +96,9 @@ public:
 
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
-    EXPECT_CALL(presenter_0, getTransmissionOptions()).Times(1);
+    EXPECT_CALL(presenter_0, getTransmissionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(presenter_1, getTransmissionOptions()).Times(0);
     EXPECT_CALL(presenter_2, getTransmissionOptions()).Times(0);
     presenter.getTransmissionOptions(0);
@@ -105,7 +107,9 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
     EXPECT_CALL(presenter_0, getTransmissionOptions()).Times(0);
-    EXPECT_CALL(presenter_1, getTransmissionOptions()).Times(1);
+    EXPECT_CALL(presenter_1, getTransmissionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(presenter_2, getTransmissionOptions()).Times(0);
     presenter.getTransmissionOptions(1);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
@@ -114,7 +118,9 @@ public:
 
     EXPECT_CALL(presenter_0, getTransmissionOptions()).Times(0);
     EXPECT_CALL(presenter_1, getTransmissionOptions()).Times(0);
-    EXPECT_CALL(presenter_2, getTransmissionOptions()).Times(1);
+    EXPECT_CALL(presenter_2, getTransmissionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
     presenter.getTransmissionOptions(2);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
@@ -133,7 +139,9 @@ public:
 
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
-    EXPECT_CALL(presenter_0, getReductionOptions()).Times(1);
+    EXPECT_CALL(presenter_0, getReductionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(presenter_1, getReductionOptions()).Times(0);
     EXPECT_CALL(presenter_2, getReductionOptions()).Times(0);
     presenter.getReductionOptions(0);
@@ -142,7 +150,9 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
     EXPECT_CALL(presenter_0, getReductionOptions()).Times(0);
-    EXPECT_CALL(presenter_1, getReductionOptions()).Times(1);
+    EXPECT_CALL(presenter_1, getReductionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(presenter_2, getReductionOptions()).Times(0);
     presenter.getReductionOptions(1);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
@@ -151,7 +161,9 @@ public:
 
     EXPECT_CALL(presenter_0, getReductionOptions()).Times(0);
     EXPECT_CALL(presenter_1, getReductionOptions()).Times(0);
-    EXPECT_CALL(presenter_2, getReductionOptions()).Times(1);
+    EXPECT_CALL(presenter_2, getReductionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
     presenter.getReductionOptions(2);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
@@ -190,6 +202,46 @@ public:
     EXPECT_CALL(presenter_1, getStitchOptions()).Times(0);
     EXPECT_CALL(presenter_2, getStitchOptions()).Times(1);
     presenter.getStitchOptions(2);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+  }
+
+  void test_passes_message_to_child_presenters_when_reduction_paused() {
+    MockSettingsPresenter presenter_0;
+    MockSettingsPresenter presenter_1;
+    MockSettingsPresenter presenter_2;
+
+    std::vector<IReflSettingsPresenter *> settingsPresenters;
+    settingsPresenters.push_back(&presenter_0);
+    settingsPresenters.push_back(&presenter_1);
+    settingsPresenters.push_back(&presenter_2);
+    ReflSettingsTabPresenter presenter(settingsPresenters);
+
+    EXPECT_CALL(presenter_1, onReductionPaused());
+
+    presenter.onReductionPaused(1);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+  }
+
+  void test_passes_message_to_child_presenters_when_reduction_resumed() {
+    MockSettingsPresenter presenter_0;
+    MockSettingsPresenter presenter_1;
+    MockSettingsPresenter presenter_2;
+
+    std::vector<IReflSettingsPresenter *> settingsPresenters;
+    settingsPresenters.push_back(&presenter_0);
+    settingsPresenters.push_back(&presenter_1);
+    settingsPresenters.push_back(&presenter_2);
+    ReflSettingsTabPresenter presenter(settingsPresenters);
+
+    EXPECT_CALL(presenter_1, onReductionResumed());
+
+    presenter.onReductionResumed(1);
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));

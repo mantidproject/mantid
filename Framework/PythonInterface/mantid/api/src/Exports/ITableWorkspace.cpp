@@ -1,21 +1,25 @@
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidKernel/V3D.h"
+#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/NdArray.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
-#include <boost/python/class.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/dict.hpp>
-#include <boost/python/converter/builtin_converters.hpp>
 #include <boost/preprocessor/list/for_each.hpp>
 #include <boost/preprocessor/tuple/to_list.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/converter/builtin_converters.hpp>
+#include <boost/python/dict.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/make_constructor.hpp>
 #include <cstring>
 #include <vector>
 
@@ -26,6 +30,7 @@
 #include <numpy/arrayobject.h>
 
 using namespace Mantid::API;
+using namespace Mantid::PythonInterface::Policies;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
 
@@ -238,7 +243,7 @@ void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype) {
  * called on
  * @param value A python object containing a column name or index
  */
-PyObject *column(ITableWorkspace &self, const bpl::object &value) {
+PyObject *column(const ITableWorkspace &self, const bpl::object &value) {
   // Find the column and row
   Mantid::API::Column_const_sptr column;
   if (STR_CHECK(value.ptr())) {
@@ -416,13 +421,13 @@ void getCellLoc(ITableWorkspace &self, const bpl::object &col_or_row,
 }
 
 /**
-  * Returns an appropriate Python object for the value at the given cell
-  * @param self A reference to the TableWorkspace python object that we were
+ * Returns an appropriate Python object for the value at the given cell
+ * @param self A reference to the TableWorkspace python object that we were
  * called on
-  * @param value A python object containing either a row index or a column name
-  * @param row_or_col An integer giving the row if value is a string or the
+ * @param value A python object containing either a row index or a column name
+ * @param row_or_col An integer giving the row if value is a string or the
  * column if value is an index
-  */
+ */
 PyObject *cell(ITableWorkspace &self, const bpl::object &value,
                int row_or_col) {
   // Find the column and row
@@ -448,7 +453,117 @@ void setCell(ITableWorkspace &self, const bpl::object &col_or_row,
   getCellLoc(self, col_or_row, row_or_col, column, row);
   setValue(column, row, value);
 }
+} // namespace
+
+/**
+ * Get the contents of the workspace as a python dictionary
+ *
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ * @returns a boost python dictionary object with keys that are column names and
+ * values which are lists of the column values.
+ */
+bpl::dict toDict(const ITableWorkspace &self) {
+  bpl::dict result;
+
+  for (const auto &name : self.getColumnNames()) {
+    bpl::handle<> handle(column(self, bpl::object(name)));
+    bpl::object values(handle);
+    result[name] = values;
+  }
+
+  return result;
 }
+
+/** Constructor function for ITableWorkspaces */
+ITableWorkspace_sptr makeTableWorkspace() {
+  const auto ws = WorkspaceFactory::Instance().createTable();
+  Mantid::API::AnalysisDataService::Instance().add(ws->getName(), ws);
+  return ws;
+}
+
+class ITableWorkspacePickleSuite : public boost::python::pickle_suite {
+public:
+  static dict getstate(const ITableWorkspace &ws) {
+    dict data;
+    data["data"] = toDict(ws);
+    data["meta_data"] = writeMetaData(ws);
+    return data;
+  }
+
+  static void setstate(ITableWorkspace &ws, dict state) {
+    readMetaData(ws, state);
+    readData(ws, state);
+  }
+
+private:
+  /** Write the meta data from a table workspace to a python dict
+   *
+   * @param ws :: the workspace to load data into
+   */
+  static dict writeMetaData(const ITableWorkspace &ws) {
+    list columnTypes;
+    list columnNames;
+
+    const auto &names = ws.getColumnNames();
+    for (const auto &name : names) {
+      const auto &column = ws.getColumn(name);
+      columnNames.append(name);
+      columnTypes.append(column->type());
+    }
+
+    dict metaData;
+    metaData["column_names"] = columnNames;
+    metaData["column_types"] = columnTypes;
+    return metaData;
+  }
+
+  /** Read the meta data from a python dict into the table workspace
+   *
+   * This will read information relating to the column names and data
+   * types to be stored in the new table
+   *
+   * @param ws :: the workspace to load data into
+   * @param state :: the pickled state of the table
+   */
+  static void readMetaData(ITableWorkspace &ws, const dict &state) {
+    const auto &metaData = state["meta_data"];
+    const auto &columnNames = metaData["column_names"];
+    const auto &columnTypes = metaData["column_types"];
+
+    const bpl::ssize_t numColumns = len(columnNames);
+    for (bpl::ssize_t colIndex = 0; colIndex < numColumns; ++colIndex) {
+      const auto &key = columnNames[colIndex];
+      const auto &value = columnTypes[colIndex];
+      const auto &name = extract<std::string>(key);
+      const auto &type = extract<std::string>(value);
+      ws.addColumn(type, name);
+    }
+  }
+
+  /** Read the data from a python dict into the table workspace
+   *
+   * @param ws :: the workspace to load data into
+   * @param state :: the pickled state of the table
+   */
+  static void readData(ITableWorkspace &ws, const dict &state) {
+    const auto &data = state["data"];
+    const auto &names = ws.getColumnNames();
+
+    if (names.empty()) {
+      return;
+    }
+
+    bpl::ssize_t numRows = len(data[names[0]]);
+    for (int rowIndex = 0; rowIndex < numRows; ++rowIndex) {
+      ws.appendRow();
+      for (const auto &name : names) {
+        setValue(ws.getColumn(name), static_cast<int>(rowIndex),
+                 data[name][rowIndex]);
+      }
+    }
+  }
+};
 
 void export_ITableWorkspace() {
   using Mantid::PythonInterface::Policies::VectorToNumpy;
@@ -463,6 +578,8 @@ void export_ITableWorkspace() {
 
   class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
       "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
+      .def_pickle(ITableWorkspacePickleSuite())
+      .def("__init__", make_constructor(&makeTableWorkspace))
       .def("addColumn", &addColumnSimple,
            (arg("self"), arg("type"), arg("name")),
            "Add a named column with the given type. Recognized types are: "
@@ -487,55 +604,60 @@ void export_ITableWorkspace() {
            "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
 
       .def("removeColumn", &ITableWorkspace::removeColumn,
-           (arg("self"), arg("name")), "Remove the named column")
+           (arg("self"), arg("name")), "Remove the named column.")
 
       .def("columnCount", &ITableWorkspace::columnCount, arg("self"),
-           "Returns the number of columns in the workspace")
+           "Returns the number of columns in the workspace.")
 
       .def("rowCount", &ITableWorkspace::rowCount, arg("self"),
-           "Returns the number of rows within the workspace")
+           "Returns the number of rows within the workspace.")
 
       .def("setRowCount", &ITableWorkspace::setRowCount,
            (arg("self"), arg("count")),
-           "Resize the table to contain count rows")
+           "Resize the table to contain count rows.")
 
       .def("__len__", &ITableWorkspace::rowCount, arg("self"),
-           "Returns the number of rows within the workspace")
+           "Returns the number of rows within the workspace.")
 
       .def("getColumnNames", &ITableWorkspace::getColumnNames, arg("self"),
            boost::python::return_value_policy<VectorToNumpy>(),
-           "Return a list of the column names")
+           "Return a list of the column names.")
 
       .def("keys", &ITableWorkspace::getColumnNames, arg("self"),
            boost::python::return_value_policy<VectorToNumpy>(),
-           "Return a list of the column names")
+           "Return a list of the column names.")
 
       .def("column", &column, (arg("self"), arg("column")),
-           "Return all values of a specific column as a list")
+           "Return all values of a specific column as a list.")
 
       .def("row", &row, (arg("self"), arg("row")),
-           "Return all values of a specific row as a dict")
+           "Return all values of a specific row as a dict.")
 
       // FromSequence must come first since it takes an object parameter
       // Otherwise, FromDict will never be called as object accepts anything
       .def("addRow", &addRowFromSequence, (arg("self"), arg("row_items_seq")),
            "Appends a row with the values from the given sequence. "
            "It it assumed that the items are in the correct order for the "
-           "defined columns")
+           "defined columns.")
 
       .def("addRow", &addRowFromDict, (arg("self"), arg("row_items_dict")),
-           "Appends a row with the values from the dictionary")
+           "Appends a row with the values from the dictionary.")
 
       .def("cell", &cell, (arg("self"), arg("value"), arg("row_or_column")),
-           "Return the given cell. If the first argument is a "
+           "Return the value in the given cell. If the value argument is a "
            "number then it is interpreted as a row otherwise it "
-           "is interpreted as a column name")
+           "is interpreted as a column name.")
 
       .def("setCell", &setCell, (arg("self"), arg("row_or_column"),
                                  arg("column_or_row"), arg("value")),
-           "Sets the value of a given cell. If the first argument is a "
-           "number then it is interpreted as a row otherwise it is interpreted "
-           "as a column name");
+           "Sets the value of a given cell. If the row_or_column argument is a "
+           "number then it is interpreted as a row otherwise it "
+           "is interpreted as a column name.")
+
+      .def("toDict", &toDict, (arg("self")),
+           "Gets the values of this workspace as a dictionary. The keys of the "
+           "dictionary will be the names of the columns of the table. The "
+           "values of the entries will be lists of values for each column.");
 
   //-------------------------------------------------------------------------------------------------
 

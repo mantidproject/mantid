@@ -31,7 +31,7 @@ public:
     auto numbers = {2, 1, 4, 5};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     return Kernel::make_unique<SpectrumNumberTranslator>(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              ranks, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -57,7 +57,7 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -67,7 +67,7 @@ public:
   void test_construct_empty() {
     std::vector<SpectrumNumber> spectrumNumbers;
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -79,7 +79,7 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     // This works, but functionality is limited, see tests below.
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -90,7 +90,7 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator parent(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -111,7 +111,7 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator parent(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -127,7 +127,7 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator parent(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -142,7 +142,7 @@ public:
     auto numbers = {1, 2, 3, 3};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -169,7 +169,7 @@ public:
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -195,7 +195,7 @@ public:
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+        spectrumNumbers, RoundRobinPartitioner(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
