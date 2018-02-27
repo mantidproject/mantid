@@ -324,7 +324,7 @@ void IndirectDataAnalysisTab::updatePlot(
     setPreviewPlotWorkspace(outputWS);
     fitPreviewPlot->addSpectrum("Sample", outputWS, 0, Qt::black);
     fitPreviewPlot->addSpectrum("Fit", outputWS, 1, Qt::red);
-    diffPreviewPlot->addSpectrum("Diff", outputWS, 2, Qt::blue);
+    diffPreviewPlot->addSpectrum("Difference", outputWS, 2, Qt::blue);
   } else
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }
