@@ -12,7 +12,7 @@ namespace Geometry {
 
 /**
   Models a Container is used to hold a sample in the beam. It gets most
-  of its functionality from Geometry::Object but can also hold a
+  of its functionality from wrapped Geometry::IObject but can also hold a
   definition of what the sample geometry itself would be. If the sample shape
   definition is set then we term this a constriained sample geometry.
 
@@ -110,8 +110,6 @@ public:
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override {
     return m_shape->getGeometryHandler();
   }
-
-  std::string getShapeXML() const override { return m_shape->getShapeXML(); }
 
   void draw() const override { m_shape->draw(); }
   void initDraw() const override { m_shape->initDraw(); }
