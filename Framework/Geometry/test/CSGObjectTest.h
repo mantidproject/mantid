@@ -88,9 +88,9 @@ public:
     ShapeInfo::GeometryShape objType;
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
-    auto handler = original->getGeometryHandler();
+    auto handler = original.getGeometryHandler();
     TS_ASSERT(handler->hasShapeInfo());
-    original->GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, radius, height);
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject copy(original);
@@ -114,9 +114,9 @@ public:
     ShapeInfo::GeometryShape objType;
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
-    auto handler = original->getGeometryHandler();
+    auto handler = original.getGeometryHandler();
     TS_ASSERT(handler->hasShapeInfo());
-    original->GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, radius, height);
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject lhs;  // initialize
