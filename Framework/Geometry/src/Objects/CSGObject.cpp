@@ -2158,8 +2158,8 @@ const std::vector<int> &CSGObject::getTriangleFaces() const {
 * get info on standard shapes
 */
 void Object::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                              std::vector<Kernel::V3D> &vectors,
-                              double &myradius, double &myheight) const {
+                           std::vector<Kernel::V3D> &vectors, double &myradius,
+                           double &myheight) const {
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
