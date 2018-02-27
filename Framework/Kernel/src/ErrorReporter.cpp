@@ -28,8 +28,7 @@ Logger g_log("ErrorReporter");
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share)
-    : ErrorReporter(application, upTime, exitCode, share, "", ""){
-}
+    : ErrorReporter(application, upTime, exitCode, share, "", "") {}
 
 /** Constructor
 */
