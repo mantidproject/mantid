@@ -28,13 +28,7 @@ Logger g_log("ErrorReporter");
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share)
-    : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
-      m_share(share), m_name(""), m_email("") {
-  int retval = Mantid::Kernel::ConfigService::Instance().getValue(
-      "errorreports.rooturl", m_url);
-  if (retval == 0) {
-    g_log.error() << "Failed to load error report url\n";
-  }
+    : ErrorReporter(application, upTime, exitCode, share, "", ""){
 }
 
 /** Constructor
@@ -48,7 +42,7 @@ ErrorReporter::ErrorReporter(std::string application,
   int retval = Mantid::Kernel::ConfigService::Instance().getValue(
       "errorreports.rooturl", m_url);
   if (retval == 0) {
-    g_log.error() << "Failed to load error report url\n";
+    g_log.debug() << "Failed to load error report url\n";
   }
 }
 

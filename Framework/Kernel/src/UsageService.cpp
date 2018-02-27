@@ -68,10 +68,11 @@ UsageServiceImpl::UsageServiceImpl()
   int retval = Mantid::Kernel::ConfigService::Instance().getValue(
       "usagereports.rooturl", m_url);
   if (retval == 0) {
-    g_log.error() << "Failed to load usage report url\n";
+    g_log.debug() << "Failed to load usage report url\n";
   } else {
-    g_log.information() << "Root usage reporting url is " << m_url << "\n";
+    g_log.debug() << "Root usage reporting url is " << m_url << "\n";
   }
+  m_startTime = Types::Core::DateAndTime::getCurrentTime();
 }
 
 void UsageServiceImpl::setApplication(const std::string &name) {
@@ -151,7 +152,6 @@ void UsageServiceImpl::shutdown() {
 
 void UsageServiceImpl::sendStartupReport() {
   try {
-    m_startTime = Types::Core::DateAndTime::getCurrentTime();
     std::string message = this->generateStartupMessage();
     // send the report
     Poco::ActiveResult<int> result = m_startupActiveMethod(message);

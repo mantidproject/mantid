@@ -1,9 +1,9 @@
 #ifndef MANTID_KERNEL_USAGESERVICE_H_
 #define MANTID_KERNEL_USAGESERVICE_H_
 
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <MantidTypes/Core/DateAndTime.h>
 
 #include <json/value.h>
 
