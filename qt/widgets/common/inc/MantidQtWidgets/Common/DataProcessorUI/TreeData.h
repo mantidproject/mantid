@@ -102,7 +102,7 @@ public:
   RowData_sptr getSlice(const size_t sliceIndex);
   /// Add a child slice
   RowData_sptr addSlice(const QString &sliceSuffix,
-                        std::vector<QString> &workspaceProperties);
+                        const std::vector<QString> &workspaceProperties);
   /// Clear all slices from the row
   void clearSlices();
 

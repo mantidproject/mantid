@@ -140,6 +140,7 @@ public slots:
 private:
   /// Initialise the interface
   void initLayout();
+  void initTransmissionRunsTable();
   void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerInstrumentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);

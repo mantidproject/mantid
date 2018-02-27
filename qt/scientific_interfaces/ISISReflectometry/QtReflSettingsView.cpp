@@ -1,9 +1,10 @@
 #include "QtReflSettingsView.h"
-#include "ReflSettingsPresenter.h"
-#include "MantidQtWidgets/Common/HintingLineEdit.h"
-#include <QMessageBox>
-#include <boost/algorithm/string/join.hpp>
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include "ReflSettingsPresenter.h"
+#include <QMessageBox>
+#include <QScrollBar>
+#include <boost/algorithm/string/join.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -35,23 +36,7 @@ Initialise the Interface
 */
 void QtReflSettingsView::initLayout() {
   m_ui.setupUi(this);
-
-  // Transmission runs table has 2 columns: angle and runs
-  int numCols = 2;
-  m_ui.transmissionRunsTable->setColumnCount(numCols);
-  m_ui.transmissionRunsTable->setColumnWidth(0, 40);
-  m_ui.transmissionRunsTable->setColumnWidth(1, 133);
-  m_ui.transmissionRunsTable->setHorizontalHeaderLabels(
-      {QString::fromStdString("Angle"),
-       QString::fromStdString("Transmission Run(s)")});
-  // Hard code the number of rows for now (typically we'll have 2 or 3 angles)
-  int numRows = 3;
-  m_ui.transmissionRunsTable->setRowCount(numRows);
-  auto headerHeight =
-      m_ui.transmissionRunsTable->horizontalHeader()->height() + 2;
-  auto rowHeight = m_ui.transmissionRunsTable->rowHeight(0);
-  m_ui.transmissionRunsTable->setMinimumHeight(rowHeight * numRows +
-                                               headerHeight);
+  initTransmissionRunsTable();
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
@@ -61,10 +46,28 @@ void QtReflSettingsView::initLayout() {
           SLOT(setPolarisationOptionsEnabled(bool)));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(summationTypeChanged(int)));
-  connect(m_ui.getAddTransmissionRowButton, SIGNAL(clicked()), this,
+  connect(m_ui.addTransmissionRowButton, SIGNAL(clicked()), this,
           SLOT(addTransmissionTableRow()));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
+}
+
+void QtReflSettingsView::initTransmissionRunsTable() {
+  auto table = m_ui.transmissionRunsTable;
+  const auto columnHeadings = QStringList({"Angle", "Transmission Run(s)"});
+  table->setColumnCount(columnHeadings.size());
+  table->setHorizontalHeaderLabels(columnHeadings);
+  table->setColumnWidth(0, 40);
+  auto header = table->horizontalHeader();
+  header->setStretchLastSection(true);
+  const int typicalNumberOfRows = 3;
+  table->setRowCount(typicalNumberOfRows);
+  int totalRowHeight = 0;
+  for (int i = 0; i < typicalNumberOfRows; ++i) {
+    totalRowHeight += table->rowHeight(i);
+  }
+  const int padding = 2;
+  table->setMinimumHeight(totalRowHeight + header->height() + padding);
 }
 
 void QtReflSettingsView::connectSettingsChange(QLineEdit &edit) {
@@ -421,19 +424,13 @@ void QtReflSettingsView::createStitchHints(
 
   // We want to add the stitch params box next to the stitch
   // label, so first find the label's position
-  for (int i = 0; i < m_ui.expSettingsLayout0->count(); ++i) {
-    if (m_ui.expSettingsLayout0->itemAt(i)->widget() == m_ui.stitchLabel) {
-      // Get the label's position
-      int row, col, rowSpan, colSpan;
-      m_ui.expSettingsLayout0->getItemPosition(i, &row, &col, &rowSpan,
-                                               &colSpan);
-      // Create the new edit box and add it to the right of the label
-      m_stitchEdit = new HintingLineEdit(this, hints);
-      m_ui.expSettingsLayout0->addWidget(m_stitchEdit, row, col + colSpan, 1,
-                                         3);
-      return;
-    }
-  }
+  auto stitchLabelIndex = m_ui.expSettingsLayout0->indexOf(m_ui.stitchLabel);
+  int row, col, rowSpan, colSpan;
+  m_ui.expSettingsLayout0->getItemPosition(stitchLabelIndex, &row, &col,
+                                           &rowSpan, &colSpan);
+  // Create the new edit box and add it to the right of the label
+  m_stitchEdit = new HintingLineEdit(this, hints);
+  m_ui.expSettingsLayout0->addWidget(m_stitchEdit, row, col + colSpan, 1, 3);
 }
 
 /** Return selected analysis mode

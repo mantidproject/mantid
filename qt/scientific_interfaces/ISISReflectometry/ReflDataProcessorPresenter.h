@@ -70,6 +70,8 @@ private:
                   const QString &prefix, const QString &loader, bool &runFound);
   // Loads a group of runs
   bool loadGroup(const GroupData &group);
+  // Get the property names of workspaces affected by slicing
+  std::vector<QString> getSlicedWorkspacePropertyNames() const;
   // Process a group of runs which are event workspaces
   bool processGroupAsEventWS(int groupID, const GroupData &group,
                              const QString &timeSlicingType,

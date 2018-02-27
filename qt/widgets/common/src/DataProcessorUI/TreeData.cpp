@@ -198,7 +198,7 @@ RowData_sptr RowData::getSlice(const size_t sliceIndex) {
  * @return : the row data for the new slice
  */
 RowData_sptr RowData::addSlice(const QString &sliceSuffix,
-                               std::vector<QString> &workspaceProperties) {
+                               const std::vector<QString> &workspaceProperties) {
   // Create a copy
   auto sliceData = std::make_shared<RowData>(this);
   for (auto const &propertyName : workspaceProperties) {

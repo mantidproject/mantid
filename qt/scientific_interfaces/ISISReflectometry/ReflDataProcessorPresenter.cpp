@@ -188,6 +188,22 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
   return true;
 }
 
+/** Get a list of workspace property names for the workspaces
+ * that will be affected by slicing, i.e. the input run and
+ * all of the output workspaces will be sliced.
+ *
+ */
+std::vector<QString>
+ReflDataProcessorPresenter::getSlicedWorkspacePropertyNames() const {
+  // For the input properties, the InputWorkspace is the only one that is
+  // sliced. Transmission workspaces are not sliced.
+  auto workspaceProperties = std::vector<QString>{"InputWorkspace"};
+  auto outputProperties = m_processor.outputProperties();
+  workspaceProperties.insert(workspaceProperties.end(),
+                             outputProperties.begin(), outputProperties.end());
+  return workspaceProperties;
+}
+
 /** Processes a group of runs
 *
 * @param groupID :: An integer number indicating the id of this group
@@ -241,16 +257,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     }
 
     size_t numSlices = startTimes.size();
-
-    // Get a list of workspace-name properties. These will need to be updated
-    // with the slice suffix for each slice.
-    // For the input properties, the InputWorkspace is the only one that is
-    // sliced
-    auto workspaceProperties = std::vector<QString>{"InputWorkspace"};
-    auto outputProperties = m_processor.outputProperties();
-    workspaceProperties.insert(workspaceProperties.end(),
-                               outputProperties.begin(),
-                               outputProperties.end());
+    const auto slicedWorkspaceProperties = getSlicedWorkspacePropertyNames();
 
     // Clear slices from any previous reduction because they will be
     // recreated
@@ -261,7 +268,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
         // Create the slice
         QString sliceSuffix =
             takeSlice(runName, i, startTimes[i], stopTimes[i], logFilter);
-        auto slice = rowData->addSlice(sliceSuffix, workspaceProperties);
+        auto slice = rowData->addSlice(sliceSuffix, slicedWorkspaceProperties);
         // Run the algorithm
         const auto alg = createAndRunAlgorithm(slice->preprocessedOptions());
         // Populate any empty values in the row with output from the algorithm.
