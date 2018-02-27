@@ -190,7 +190,7 @@ PointGroup_sptr SortHKL::getPointgroup() const {
   size_t pos = pointGroupName.find("Orthorombic");
   if (pos != std::string::npos) {
     g_log.warning() << "Orthorhomic is misspelled in your script.\n";
-    pointGroupName.replace(pos,11,"Orthorhombic");
+    pointGroupName.replace(pos, 11, "Orthorhombic");
     g_log.warning() << "Please correct to " << pointGroupName << ".\n";
   }
   for (const auto &m_pointGroup : m_pointGroups)
