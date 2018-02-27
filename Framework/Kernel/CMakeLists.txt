@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
 	src/EqualBinsChecker.cpp
+	src/ErrorReporter.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
 	src/FileDescriptor.cpp
@@ -184,6 +185,7 @@ set ( INC_FILES
 	inc/MantidKernel/EmptyValues.h
 	inc/MantidKernel/EnabledWhenProperty.h
 	inc/MantidKernel/EnvironmentHistory.h
+	inc/MantidKernel/ErrorReporter.h
 	inc/MantidKernel/EqualBinsChecker.h
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
@@ -355,6 +357,7 @@ set ( TEST_FILES
 	EigenConversionHelpersTest.h
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
+	ErrorReporterTest.h
 	EqualBinsCheckerTest.h
 	FacilitiesTest.h
 	FileDescriptorTest.h
