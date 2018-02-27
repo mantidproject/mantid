@@ -112,6 +112,10 @@ public:
 
   void setConvolveMembers(bool convolveMembers);
 
+  void addTie(const QString &tieString);
+
+  void removeTie(const QString &parameterName);
+
   void setCustomSettingEnabled(const QString &customName, bool enabled);
 
   void moveCustomFunctionsToEnd();
@@ -272,6 +276,8 @@ signals:
 
   void parameterChanged(const Mantid::API::IFunction *);
 
+  void customBoolChanged(const QString &key, bool value);
+
 protected slots:
   void clearGuessWindowPlot();
 
@@ -314,6 +320,8 @@ protected slots:
   void emitFunctionChanged();
 
   void emitParameterChanged(const Mantid::API::IFunction *);
+
+  void emitCustomBoolChanged(const QString &key, bool value);
 
   void updateResultOptions();
 
@@ -360,8 +368,6 @@ private:
   bool m_previousModelSelected;
   Mantid::API::MatrixWorkspace_sptr m_inputAndGuessWorkspace;
 
-  QtLazyAsyncRunner<std::function<Mantid::API::MatrixWorkspace_sptr()>>
-      m_createGuessRunner;
   QtLazyAsyncRunner<std::function<void()>> m_plotWindowGuessRunner;
 };
 
