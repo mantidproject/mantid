@@ -73,12 +73,19 @@ private:
   objectHolder parseNexusShape(H5::Group &detectorGroup);
   /// Parse cylinder nexus geometry
   objectHolder parseNexusCylinder(H5::Group &shapeGroup);
+  /// Parse OFF (mesh) nexus geometry
+  objectHolder parseNexusMesh(H5::Group &shapeGroup);
   /// Parse source
   void parseAndAddSource();
   /// Parse sample
   void parseAndAddSample();
   /// Parse monitors
   void parseMonitors();
+
+  /// From the NeXus-OFF polygonal mesh, create a triangular mesh
+  std::vector<uint16_t>
+  createTriangularFaces(std::vector<int> &faceIndices,
+                        std::vector<uint16_t> &windingOrder) const;
 };
 
 } // namespace NexusGeometry
