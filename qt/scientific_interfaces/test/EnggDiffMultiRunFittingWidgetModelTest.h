@@ -79,6 +79,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(retrievedLabels = model.getAllWorkspaceLabels());
     TS_ASSERT_EQUALS(expectedLabels2, retrievedLabels);
   }
+
+  void test_removeRun() {
+    EnggDiffMultiRunFittingWidgetModel model;
+
+    Mantid::API::MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
+
+    const RunLabel label1(123, 1);
+    model.addFocusedRun(label1, ws);
+
+    TS_ASSERT_THROWS_NOTHING(model.removeRun(label1));
+    TS_ASSERT(!model.getFocusedRun(label1));
+
+    TS_ASSERT_THROWS_ANYTHING(model.removeRun(RunLabel(456, 2)));
+  }
 };
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODELTEST_H_

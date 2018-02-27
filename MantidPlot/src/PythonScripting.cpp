@@ -43,6 +43,7 @@
 #include <Qsci/qscilexerpython.h>
 
 #include <cassert>
+#include <array>
 
 #include "sipAPI_qti.h"
 
@@ -268,8 +269,18 @@ void PythonScripting::setupSip() {
   // Our use of the IPython console requires that we use the v2 api for these
   // PyQt types. This has to be set before the very first import of PyQt
   // which happens on importing _qti
-  PyRun_SimpleString(
-      "import sip\nsip.setapi('QString',2)\nsip.setapi('QVariant',2)");
+  PyObject *sipmod = PyImport_ImportModule("sip");
+  if (sipmod) {
+    constexpr std::array<const char *, 7> v2Types = {
+        {"QString", "QVariant", "QDate", "QDateTime", "QTextStream", "QTime",
+         "QUrl"}};
+    for (const auto &className : v2Types) {
+      PyObject_CallMethod(sipmod, STR_LITERAL("setapi"), STR_LITERAL("(si)"),
+                          className, 2);
+    }
+    Py_DECREF(sipmod);
+  }
+  // the global Python error handler is checked after this is called...
 }
 
 QString PythonScripting::toString(PyObject *object, bool decref) {

@@ -5,10 +5,6 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 
 Interfaces
 ----------
@@ -24,6 +20,7 @@ Interface
 - The data plot style in the settings tab of Muon Analysis, only alters the plot range. It no longer crops the data.  
 - Results table in Muon Analysis now sets relevant columns to numeric. 
 - The Frequency Domain Analysis GUI now uses :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` to create the phase table for PhaseQuad FFTs. 
+- The Frequency Domain Analysis GUI now uses :ref:`MuonMaxent <algm-MuonMaxent>` to calculate the frequency spectrum in MaxEnt mode.  
 
 Algorithms
 ----------

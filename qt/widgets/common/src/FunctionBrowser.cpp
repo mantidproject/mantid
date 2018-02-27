@@ -2063,7 +2063,11 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
             "Index of a dataset in FunctionBrowser cannot be negative.");
       }
       if (index < m_numberOfDatasets) {
-        par.value().remove(index);
+        auto &v = par.value();
+        // value may not have been populated
+        if (index < v.size()) {
+          v.remove(index);
+        }
       } else {
         throw std::runtime_error(
             "Index of a dataset in FunctionBrowser is out of range.");

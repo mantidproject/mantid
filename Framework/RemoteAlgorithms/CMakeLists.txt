@@ -95,8 +95,10 @@ set_target_properties ( RemoteAlgorithms PROPERTIES OUTPUT_NAME MantidRemoteAlgo
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( RemoteAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
-endif () 
+  set_target_properties(RemoteAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(RemoteAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET RemoteAlgorithms PROPERTY FOLDER "MantidFramework" )

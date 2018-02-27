@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init, invalid-name, bare-except
 """
     Magnetism reflectometry reduction
 """
@@ -42,8 +42,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty(StringArrayProperty("RunNumbers"), "List of run numbers to process")
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
                                                Direction.Input, PropertyMode.Optional),
-                             "Optionally, we can provide a workspace directly")
+                             "Optionally, we can provide a scattering workspace directly")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
+        self.declareProperty(WorkspaceProperty("NormalizationWorkspace", "",
+                                               Direction.Input, PropertyMode.Optional),
+                             "Optionally, we can provide a normalization workspace directly")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the data peak")
@@ -103,7 +106,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         dataBackRange = self.getProperty("SignalBackgroundPixelRange").value
 
         # NORMALIZATION
-        normalizationRunNumber = self.getProperty("NormalizationRunNumber").value
         normBackRange = self.getProperty("NormBackgroundPixelRange").value
         normPeakRange = self.getProperty("NormPeakPixelRange").value
 
@@ -126,7 +128,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         perform_normalization = self.getProperty("ApplyNormalization").value
         if perform_normalization:
             # Load normalization
-            ws_event_norm = self.load_direct_beam(normalizationRunNumber)
+            ws_event_norm = self.load_direct_beam()
+            run_number = str(ws_event_norm.getRunNumber())
             crop_request = self.getProperty("CutLowResNormAxis").value
             low_res_range = self.getProperty("LowResNormAxisPixelRange").value
             bck_request = self.getProperty("SubtractNormBackground").value
@@ -145,7 +148,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             # Normalize the data
             normalized_data = data_cropped / norm_summed
 
-            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=str(normalizationRunNumber))
+            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=run_number)
             AddSampleLog(Workspace=normalized_data, LogName='normalization_file_path',
                          LogText=norm_summed.getRun().getProperty("Filename").value)
             norm_dirpix = norm_summed.getRun().getProperty('DIRPIX').getStatistics().mean
@@ -180,10 +183,15 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
     def load_data(self):
         """
             Load the data. We can either load it from the specified
-            run numbers, or use the input workspace if no runs are specified.
+            run numbers, or use the input workspace.
+
+            Supplying a workspace takes precedence over supplying a list of runs
         """
         dataRunNumbers = self.getProperty("RunNumbers").value
         ws_event_data = self.getProperty("InputWorkspace").value
+
+        if ws_event_data is not None:
+            return ws_event_data
 
         if len(dataRunNumbers) > 0:
             # If we have multiple files, add them
@@ -200,16 +208,23 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             entry_name = self.getProperty("EntryName").value
             ws_event_data = LoadEventNexus(Filename=runs, NXentryName=entry_name,
                                            OutputWorkspace="%s_%s" % (INSTRUMENT_NAME, dataRunNumbers[0]))
-        elif ws_event_data is None:
+        else:
             raise RuntimeError("No input data was specified")
         return ws_event_data
 
-    def load_direct_beam(self, normalizationRunNumber):
+    def load_direct_beam(self):
         """
-            Load a direct beam file. This method will disappear once we move to the new DAS.
-            It is necessary at the moment only because the direct beam data is occasionally
-            stored in another entry than entry_Off-Off.
+            Load a direct beam file. We can either load it from the specified
+            run number, or use the input workspace.
+
+            Supplying a workspace takes precedence over supplying a run number.
         """
+        normalizationRunNumber = self.getProperty("NormalizationRunNumber").value
+        ws_event_norm = self.getProperty("NormalizationWorkspace").value
+
+        if ws_event_norm is not None:
+            return ws_event_norm
+
         for entry in ['entry', 'entry-Off_Off', 'entry-On_Off', 'entry-Off_On', 'entry-On_On']:
             try:
                 ws_event_norm = LoadEventNexus("%s_%s" % (INSTRUMENT_NAME, normalizationRunNumber),

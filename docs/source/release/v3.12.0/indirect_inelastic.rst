@@ -12,6 +12,8 @@ New
 ###
 
 - :ref:`algm-ExtractQENSMembers` can be used to extract the fit members from any QENS fit.
+- New algorithm :ref:`BASISDiffraction <algm-BASISDiffraction-v1>` to determine the orientation of crystal samples for the BASIS beamline.
+
 
 Improved
 ########
@@ -44,6 +46,14 @@ Data Analysis Interfaces
 New
 ###
 - ConvFit, IqtFit, MSDFit and JumpFit now have a second mini-plot for the difference. The sample and calculated fit are found in the top mini-plot, the difference is found in the bottom mini-plot.
+- The function browser in each of the Fitting tabs (ConvFit, IqtFit, MSDFit, JumpFit) has been replaced with a new IndirectFitPropertyBrowser widget (which can be separated and embedded into the fit interfaces).
+- The IndirectFitPropertyBrowser widgets provides the following new functionality:
+  - Ties can now be used to tie parameters between all functions and custom ties (involving mathematical expressions) are now available.
+  - It is now possible to add constraints to parameters.
+  - Any additional functions can be added from the library of available MANTID functions by right-clicking and selecting 'Add Function'.
+  - Function setups can now be saved and re-loaded (Custom Setups).
+  - Right-clicking on function in the browser and selecting 'Help' will bring up the documentation of that function.
+  - Functions can be copied and loaded from the clipboard.
 
 Improved
 ########
@@ -59,17 +69,6 @@ Bugfixes
 - Plotting individual parameters of the fit in the interface ('Plot Options'), will no longer produce an error in the ConvFit interface, when plotting 'FWHM'.
 - In the Calculate Paalman Pings tab of the Indirect Correction interface the container back thickness is now set correctly.
 
-Data Reduction Interfaces
--------------------------
-
-New
-###
-
-Improved
-########
-
-Bugfixes
-########
 
 Indirect Diffraction
 --------------------
@@ -81,16 +80,10 @@ Improved
 Corrections Interfaces
 ----------------------
 
-New
-###
-
 Improved
 ########
 - The Apply Paalman Pings interface has been renamed to Apply Absorption Correction.
 - The Apply Absorption Correction interface no longer requires workspaces to be in units of wavelength (this is done within :ref:`algm-ApplyPaalmanPingsCorrection`).
-
-Bugfixes
-########
 
 Abins
 -----

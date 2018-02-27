@@ -1,10 +1,7 @@
 #ifndef DATAHANDING_SAVEGSS_H_
 #define DATAHANDING_SAVEGSS_H_
 
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
@@ -71,10 +68,8 @@ namespace DataHandling {
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport SaveGSS : public Mantid::API::Algorithm {
+class DLLExport SaveGSS : public Mantid::API::SerialAlgorithm {
 public:
-  /// Constructor
-  SaveGSS();
   /// Algorithm's name
   const std::string name() const override { return "SaveGSS"; }
   /// Summary of algorithms purpose

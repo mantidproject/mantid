@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHMS_FindPeakBackground_H_
 #define MANTID_ALGORITHMS_FindPeakBackground_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
@@ -38,7 +38,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FindPeakBackground : public API::Algorithm {
+class DLLExport FindPeakBackground : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindPeakBackground"; }
