@@ -68,6 +68,14 @@ void JumpFit::setup() {
           SLOT(updatePlotGuess()));
 }
 
+size_t JumpFit::getWidth() const {
+  return m_spectraList.at(m_uiForm->cbWidth->currentText().toStdString());
+}
+
+size_t JumpFit::minimumSpectrum() const { return getWidth(); }
+
+size_t JumpFit::maximumSpectrum() const { return getWidth(); }
+
 bool JumpFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&
          m_uiForm->ckPlotGuess->isChecked();
@@ -98,20 +106,6 @@ bool JumpFit::validate() {
   }
 
   return true;
-}
-
-/**
- * Collect the settings on the GUI and build a python
- * script that runs JumpFit
- */
-void JumpFit::run() {
-  const auto widthName = m_uiForm->cbWidth->currentText().toStdString();
-  const auto width = static_cast<int>(m_spectraList[widthName]);
-  setMinimumSpectrum(width);
-  setMaximumSpectrum(width);
-
-  if (validate())
-    executeSequentialFit();
 }
 
 /**

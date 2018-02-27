@@ -31,11 +31,13 @@ public:
 
 private:
   void setup() override;
-  void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
 protected:
+  size_t minimumSpectrum() const override;
+  size_t maximumSpectrum() const override;
+
   QHash<QString, double> createDefaultValues() const override;
   std::string createSingleFitOutputName() const override;
   std::string createSequentialFitOutputName() const override;

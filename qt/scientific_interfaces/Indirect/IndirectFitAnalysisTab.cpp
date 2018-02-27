@@ -619,12 +619,12 @@ void IndirectFitAnalysisTab::setCustomSettingChangesFunction(
 /**
  * Sets the selected spectrum for this indirect fit analysis tab.
  */
-void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
+void IndirectFitAnalysisTab::setSelectedSpectrum(size_t spectrum) {
   disconnect(m_fitPropertyBrowser,
              SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
              SLOT(updateGuessPlots()));
 
-  m_fitPropertyBrowser->setWorkspaceIndex(spectrum);
+  m_fitPropertyBrowser->setWorkspaceIndex(static_cast<int>(spectrum));
   IndirectDataAnalysisTab::setSelectedSpectrum(spectrum);
   updateParameterValues();
   updatePreviewPlots();
@@ -994,9 +994,15 @@ IAlgorithm_sptr IndirectFitAnalysisTab::sequentialFitAlgorithm() const {
  * Executes the single fit algorithm defined in this indirect fit analysis tab.
  */
 void IndirectFitAnalysisTab::executeSingleFit() {
-  const auto index = boost::numeric_cast<size_t>(selectedSpectrum());
-  m_outputFitPosition[index] = std::make_pair(0u, createSingleFitOutputName());
-  runFitAlgorithm(singleFitAlgorithm());
+  if (validateTab()) {
+    setMinimumSpectrum(minimumSpectrum());
+    setMaximumSpectrum(maximumSpectrum());
+
+    const auto index = boost::numeric_cast<size_t>(selectedSpectrum());
+    m_outputFitPosition[index] =
+        std::make_pair(0u, createSingleFitOutputName());
+    runFitAlgorithm(singleFitAlgorithm());
+  }
 }
 
 /**
@@ -1004,13 +1010,18 @@ void IndirectFitAnalysisTab::executeSingleFit() {
  * tab.
  */
 void IndirectFitAnalysisTab::executeSequentialFit() {
-  const auto name = createSequentialFitOutputName();
-  for (auto i = minimumSpectrum(); i <= maximumSpectrum(); ++i) {
-    const auto index = boost::numeric_cast<size_t>(i - minimumSpectrum());
-    m_outputFitPosition[boost::numeric_cast<size_t>(i)] =
-        std::make_pair(index, name);
+  if (validateTab()) {
+    setMinimumSpectrum(minimumSpectrum());
+    setMaximumSpectrum(maximumSpectrum());
+
+    const auto name = createSequentialFitOutputName();
+    for (auto i = minimumSpectrum(); i <= maximumSpectrum(); ++i) {
+      const auto index = boost::numeric_cast<size_t>(i - minimumSpectrum());
+      m_outputFitPosition[boost::numeric_cast<size_t>(i)] =
+          std::make_pair(index, name);
+    }
+    runFitAlgorithm(sequentialFitAlgorithm());
   }
-  runFitAlgorithm(sequentialFitAlgorithm());
 }
 
 /**
@@ -1029,7 +1040,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
@@ -1051,6 +1062,11 @@ void IndirectFitAnalysisTab::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
                                               int maxIterations) const {
   setAlgorithmProperty(fitAlgorithm, "MaxIterations", maxIterations);
 }
+
+/**
+ * Called when the 'Run' button is called in the IndirectTab.
+ */
+void IndirectFitAnalysisTab::run() { executeSequentialFit(); }
 
 /*
  * Runs the specified fit algorithm and calls the algorithmComplete
@@ -1145,23 +1161,34 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
  * @param parameters  The parameters.
  */
 void IndirectFitAnalysisTab::setPlotOptions(
-    QComboBox *cbPlotType, const std::vector<std::string> &parameters) {
+    QComboBox *cbPlotType, const std::vector<std::string> &parameters) const {
   cbPlotType->clear();
   QSet<QString> plotOptions;
 
-  for (const auto parameter : parameters) {
+  for (const auto &parameter : parameters) {
     auto plotOption = QString::fromStdString(parameter);
     auto index = plotOption.lastIndexOf(".");
     if (index >= 0)
       plotOption = plotOption.remove(0, index + 1);
     plotOptions << plotOption;
   }
+  setPlotOptions(cbPlotType, plotOptions);
+}
+
+/**
+ * Fills the specified combo box, with the specified options.
+ *
+ * @param cbPlotType  The combo box.
+ * @param parameters  The options.
+ */
+void IndirectFitAnalysisTab::setPlotOptions(
+    QComboBox *cbPlotType, const QSet<QString> &options) const {
+  cbPlotType->clear();
 
   QStringList plotList;
-  if (!parameters.empty())
+  if (!options.isEmpty())
     plotList << "All";
-  plotList.append(plotOptions.toList());
-
+  plotList.append(options.toList());
   cbPlotType->addItems(plotList);
 }
 

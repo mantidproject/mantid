@@ -19,7 +19,6 @@ public:
   // Inherited methods from IndirectDataAnalysisTab
   void setup() override;
   bool validate() override;
-  void run() override;
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
 
@@ -44,6 +43,10 @@ protected slots:
   void updatePlotOptions() override;
 
 protected:
+  size_t getWidth() const;
+  size_t minimumSpectrum() const override;
+  size_t maximumSpectrum() const override;
+
   std::string createSingleFitOutputName() const override;
   Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
 

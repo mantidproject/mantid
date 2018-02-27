@@ -69,25 +69,21 @@ void MSDFit::setup() {
           SLOT(updatePlotGuess()));
 }
 
+size_t MSDFit::minimumSpectrum() const {
+  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMin->value());
+}
+
+size_t MSDFit::maximumSpectrum() const {
+  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMax->value());
+}
+
 bool MSDFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&
          m_uiForm->ckPlotGuess->isChecked();
 }
 
-void MSDFit::run() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
-    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
-    executeSequentialFit();
-  }
-}
-
 void MSDFit::singleFit() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
-    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
-    executeSingleFit();
-  }
+  executeSingleFit();
 }
 
 std::string MSDFit::createSingleFitOutputName() const {

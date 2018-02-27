@@ -124,13 +124,13 @@ protected slots:
   void plotCurrentPreview();
 
   /// Sets the selected spectrum
-  virtual void setSelectedSpectrum(int spectrum);
+  virtual void setSelectedSpectrum(size_t spectrum);
 
   /// Sets the maximum spectrum
-  void setMaximumSpectrum(int spectrum);
+  void setMaximumSpectrum(size_t spectrum);
 
   /// Sets the minimum spectrum
-  void setMinimumSpectrum(int spectrum);
+  void setMinimumSpectrum(size_t spectrum);
 
 private:
   /// Overidden by child class.
@@ -147,9 +147,9 @@ private:
   IndirectDataAnalysis *m_parent;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
-  int m_selectedSpectrum;
-  int m_minSpectrum;
-  int m_maxSpectrum;
+  size_t m_selectedSpectrum;
+  size_t m_minSpectrum;
+  size_t m_maxSpectrum;
 };
 
 } // namespace IDA

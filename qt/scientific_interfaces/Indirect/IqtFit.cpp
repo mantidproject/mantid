@@ -104,6 +104,14 @@ void IqtFit::setup() {
           SLOT(customBoolUpdated(const QString &, bool)));
 }
 
+size_t IqtFit::minimumSpectrum() const {
+  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMin->value());
+}
+
+size_t IqtFit::maximumSpectrum() const {
+  return boost::numeric_cast<size_t>(m_uiForm->spSpectraMax->value());
+}
+
 void IqtFit::fitFunctionChanged() {
   auto backRangeSelector =
       m_uiForm->ppPlotTop->getRangeSelector("IqtFitBackRange");
@@ -157,14 +165,6 @@ void IqtFit::updateIntensityTie(const QString &intensityTie) {
       m_tiedParameter = intensityTie.split("=")[0];
       addTie(intensityTie);
     }
-  }
-}
-
-void IqtFit::run() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
-    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
-    executeSequentialFit();
   }
 }
 
@@ -353,11 +353,6 @@ bool IqtFit::validate() {
     uiv.addErrorMessage("No fit function has been selected");
 
   auto error = uiv.generateErrorMessage();
-
-  if (!inputWorkspace()) {
-    error = "Input workspace was deleted from the Analysis Data Service "
-            "before Algorithm could run.";
-  }
   showMessageBox(error);
 
   return error.isEmpty();
@@ -483,13 +478,7 @@ void IqtFit::endXChanged(double endX) {
   rangeSelector->setMaximum(endX);
 }
 
-void IqtFit::singleFit() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
-    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
-    executeSingleFit();
-  }
-}
+void IqtFit::singleFit() { executeSingleFit(); }
 
 void IqtFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 
