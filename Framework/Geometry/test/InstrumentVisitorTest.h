@@ -165,7 +165,7 @@ public:
     TSM_ASSERT_EQUALS("Detector has parent of instrument",
                       compInfo->parent(detectorIndex), instrumentIndex);
     TSM_ASSERT_EQUALS("Instrument has single detector",
-                      compInfo->detectorsInFullSubtree(instrumentIndex),
+                      compInfo->detectorsInSubtree(instrumentIndex),
                       std::vector<size_t>{detectorIndex});
   }
 
@@ -238,8 +238,7 @@ public:
     compInfo->setDetectorInfo(detInfo.get());
     detInfo->setComponentInfo(compInfo.get());
 
-    TS_ASSERT_EQUALS(compInfo->detectorsInFullSubtree(3),
-                     std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(compInfo->detectorsInSubtree(3), std::vector<size_t>{0});
   }
 
   void test_visitor_component_ranges_check() {
