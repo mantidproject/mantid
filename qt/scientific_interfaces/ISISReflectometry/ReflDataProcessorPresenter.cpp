@@ -20,7 +20,6 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-
 // unnamed namespace
 namespace {
 
@@ -30,11 +29,12 @@ namespace {
 size_t getMinimumSlicesForGroup(const GroupData &group) {
   if (group.size() < 1)
     return 0;
-  
+
   size_t minNumberOfSlices = std::numeric_limits<size_t>::max();
 
   for (const auto &row : group) {
-    minNumberOfSlices = std::min(minNumberOfSlices, row.second->numberOfSlices());
+    minNumberOfSlices =
+        std::min(minNumberOfSlices, row.second->numberOfSlices());
   }
 
   return minNumberOfSlices;
@@ -125,7 +125,6 @@ void TimeSlicingInfo::parseLogValue() {
 
   parseCustom();
 }
-
 
 /**
 * Constructor
