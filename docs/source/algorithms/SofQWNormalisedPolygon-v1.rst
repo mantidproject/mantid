@@ -12,25 +12,49 @@ Description
 Converts a 2D workspace from :ref:`units <Unit Factory>` 
 of spectrum number/**energy transfer** 
 to the intensity as a function of **momentum transfer** :math:`Q` 
-and **energy transfer** :math:`\Delta E`. The rebinning is done as a 
-weighted sum of overlapping polygons with
-fractional area tracking. The result is stored in a new workspace type:
-**RebinnedOutput**. The new workspace presents the data as the
-fractional counts divided by the fractional area. The biggest
-consequence of this method is that in places where there are no counts
-and no acceptance (no fractional areas), **nan**\ -s will result.
+and **energy transfer** :math:`\Delta E`. 
 
+.. figure:: /images/RebinnedOutput.png
+   :align: center
+
+As shown in the figure, the input grid (pink-shaded parallelopiped,
+aligned in scattering angle and energy transfer) is not parallel to the
+output grid (square grid, aligned in :math:`Q` and energy). This means
+that the output bins will only ever partially overlap the input data. To
+account for this, the signal :math:`Y` and errors :math:`E` in the output
+bin is calculated as the sum of all the input bins which overlap the
+output bin, weighted by the fractional overlap area :math:`F_i`:
+
+.. math:: Y^{\mathrm{out}} = (\sum_i Y^{\mathrm{in}}_i F_i) / \sum_i F_i
+.. math:: E^{\mathrm{out}} = \sqrt{\sum_i (E^{\mathrm{in}}_i F_i)^2} / \sum_i F_i
+
+.. warning:: Note that because the output bins contain fractions of multiple
+   input bins, the errors calculated for each output bins are no longer
+   independent, and so cannot be combined in quadrature. This means that
+   rebinning, summing, or integrating the output of this algorithm will 
+   give *incorrect error values* because those Mantid algorithms use the
+   quadrature formular and assume independent bins. The *signal*, on the
+   other hand should still be correct on rebinning. Unary operations, such
+   as scaling the signal will not encounter this problem.
+   
 The algorithm operates in non-PSD mode by default. This means that all
 azimuthal angles and widths are forced to zero. PSD mode will determine
 the azimuthal angles and widths from the instrument geometry. This mode
-is activated by placing the following named parameter in a Parameter
+is activated by placing the following named parameter in the instrument definition 
 file: *detector-neighbour-offset*. The integer value of this parameter
 should be the number of pixels that separates two pixels at the same
-vertical position in adjacent tubes.
+vertical position in adjacent tubes. Note that in both non-PSD and PSD
+modes, the scattering angle widths are determined from the detector
+geometry and may vary from detector to detector as defined by the
+instrument definition files.
 
-
-See  :ref:`algm-SofQWCentre` for centre-point binning  or :ref:`algm-SofQWPolygon`
-for simpler and less precise but faster binning strategies.
+See :ref:`algm-SofQWCentre` for centre-point binning or :ref:`algm-SofQWPolygon`
+for simpler and less precise but faster binning strategies. The speed-up
+is from ignoring the azimuthal positions of the detectors (as for the non-PSD
+mode in this algorithm) but in addition, :ref:`algm-SofQWPolygon` treats 
+all detectors as being the same, and characterised by a single width in
+scattering angle. Thereafter, it weights the signal and error by the fractional
+overlap, but does not then scale the weighted sum by :math:`\sum_i F_i`.
 
 Usage
 -----

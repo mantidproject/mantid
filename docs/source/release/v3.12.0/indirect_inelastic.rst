@@ -43,6 +43,14 @@ Data Analysis Interfaces
 New
 ###
 - ConvFit, IqtFit, MSDFit and JumpFit now have a second mini-plot for the difference. The sample and calculated fit are found in the top mini-plot, the difference is found in the bottom mini-plot.
+- The function browser in each of the Fitting tabs (ConvFit, IqtFit, MSDFit, JumpFit) has been replaced with a new IndirectFitPropertyBrowser widget (which can be separated and embedded into the fit interfaces).
+- The IndirectFitPropertyBrowser widgets provides the following new functionality:
+  - Ties can now be used to tie parameters between all functions and custom ties (involving mathematical expressions) are now available.
+  - It is now possible to add constraints to parameters.
+  - Any additional functions can be added from the library of available MANTID functions by right-clicking and selecting 'Add Function'.
+  - Function setups can now be saved and re-loaded (Custom Setups).
+  - Right-clicking on function in the browser and selecting 'Help' will bring up the documentation of that function.
+  - Functions can be copied and loaded from the clipboard.
 
 Improved
 ########

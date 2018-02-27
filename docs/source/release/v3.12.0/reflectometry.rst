@@ -31,8 +31,9 @@ New features
 
 Improvements
 ############
+
 - Grid lines are now displayed in the runs tab.
-- Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows is also disabled during processing.
+- Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows and settings is also disabled during processing.
 - Removed the 'DirectBeam' box from the settings tab of the ISIS Reflectometry interface because this is not used.
 - Properties on the Runs tab now take precedence over properties on the Settings tab.
 - Output workspace names have been improved. Names now use '+' to indicate preprocessed (i.e. summed) workspaces, rather than '_', which is used to indicate postprocessed (i.e. stitched) workspaces.
@@ -66,6 +67,7 @@ New features
 - The new algorithm :ref:`algm-PolarizationEfficiencyCor` corrects for efficiencies in polarization analysis.
 - The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
 - The new algorithm :ref:`algm-MRInspectData` takes in raw event data and determines reduction parameters.
+- The new algorithm :ref:`algm-MRFilterCrossSections` loads a MR (SNS) data file into a workspace group comprising of a workspace for each cross-section.
 
 
 Improvements

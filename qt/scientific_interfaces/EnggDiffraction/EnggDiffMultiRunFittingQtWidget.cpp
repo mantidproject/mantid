@@ -6,9 +6,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
-    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter,
-    boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider)
-    : m_presenter(presenter), m_userMessageProvider(messageProvider) {
+    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner)
+    : m_pythonRunner(pythonRunner) {
   setupUI();
 
   m_zoomTool = Mantid::Kernel::make_unique<QwtPlotZoomer>(
@@ -28,17 +27,31 @@ void EnggDiffMultiRunFittingQtWidget::cleanUpPlot() {
     curve->detach();
   }
   m_focusedRunCurves.clear();
+  for (auto &curve : m_fittedPeaksCurves) {
+    curve->detach();
+  }
+  m_fittedPeaksCurves.clear();
 }
 
-RunLabel EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
-  const auto currentLabel = m_ui.listWidget_runLabels->currentItem()->text();
-  const auto pieces = currentLabel.split("_");
-  if (pieces.size() != 2) {
-    throw std::runtime_error(
-        "Unexpected run label: \"" + currentLabel.toStdString() +
-        "\". Please contact the development team with this message");
+boost::optional<RunLabel>
+EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
+  if (hasSelectedRunLabel()) {
+    const auto currentLabel = m_ui.listWidget_runLabels->currentItem()->text();
+    const auto pieces = currentLabel.split("_");
+    if (pieces.size() != 2) {
+      throw std::runtime_error(
+          "Unexpected run label: \"" + currentLabel.toStdString() +
+          "\". Please contact the development team with this message");
+    }
+    return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
+  } else {
+    return boost::none;
   }
-  return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
+}
+
+void EnggDiffMultiRunFittingQtWidget::reportNoRunSelectedForPlot() {
+  userError("No run selected",
+            "Please select a run from the list before plotting");
 }
 
 void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFittedPeaks(
@@ -59,10 +72,33 @@ void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFocusedRun(
                 ". Please contact the development team with this message");
 }
 
+bool EnggDiffMultiRunFittingQtWidget::hasSelectedRunLabel() const {
+  return m_ui.listWidget_runLabels->selectedItems().size() != 0;
+}
+
+void EnggDiffMultiRunFittingQtWidget::plotFittedPeaksStateChanged() {
+  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
+                          PlotPeaksStateChanged);
+}
+
 void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
-    const std::vector<boost::shared_ptr<QwtData>> &curve) {
-  UNUSED_ARG(curve);
-  throw std::runtime_error("plotFittedPeaks not yet implemented");
+    const std::vector<boost::shared_ptr<QwtData>> &curves) {
+  for (const auto &curve : curves) {
+    auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
+
+    plotCurve->setPen(QColor(Qt::red));
+    plotCurve->setData(*curve);
+    plotCurve->attach(m_ui.plotArea);
+    m_fittedPeaksCurves.emplace_back(std::move(plotCurve));
+  }
+  m_ui.plotArea->replot();
+  m_zoomTool->setZoomBase();
+  m_zoomTool->setEnabled(true);
+}
+
+void EnggDiffMultiRunFittingQtWidget::processPlotToSeparateWindow() {
+  m_presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
+                          PlotToSeparateWindow);
 }
 
 void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
@@ -79,7 +115,49 @@ void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
   m_zoomTool->setEnabled(true);
 }
 
+void EnggDiffMultiRunFittingQtWidget::plotToSeparateWindow(
+    const std::string &focusedRunName,
+    const boost::optional<std::string> fittedPeaksName) {
+
+  std::string plotCode = "ws1 = \"" + focusedRunName + "\"\n";
+
+  plotCode += "workspaceToPlot = \"engg_gui_separate_plot_ws\"\n"
+
+              "if (mtd.doesExist(workspaceToPlot)):\n"
+              "    DeleteWorkspace(workspaceToPlot)\n"
+
+              "ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=0, "
+              "OutputWorkspace=workspaceToPlot)\n"
+
+              "spectra_to_plot = [0]\n";
+
+  if (fittedPeaksName) {
+    plotCode += "ws2 = \"" + *fittedPeaksName + "\"\n";
+    plotCode +=
+        "ws2_spectrum = ExtractSingleSpectrum(InputWorkspace=ws2, "
+        "WorkspaceIndex=0, StoreInADS=False)\n"
+
+        "AppendSpectra(InputWorkspace1=workspaceToPlot, "
+        "InputWorkspace2=ws2_spectrum, OutputWorkspace=workspaceToPlot)\n"
+
+        "DeleteWorkspace(ws2_spectrum)\n"
+        "spectra_to_plot = [0, 1]\n";
+  }
+
+  plotCode +=
+      "plot = plotSpectrum(workspaceToPlot, spectra_to_plot).activeLayer()\n"
+      "plot.setTitle(\"Engg GUI Fitting Workspaces\")\n";
+  m_pythonRunner->enggRunPythonCode(plotCode);
+}
+
+void EnggDiffMultiRunFittingQtWidget::processRemoveRun() {
+  emit removeRunClicked();
+  m_presenter->notify(
+      IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
+}
+
 void EnggDiffMultiRunFittingQtWidget::processSelectRun() {
+  emit runSelected();
   m_presenter->notify(
       IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
 }
@@ -96,11 +174,27 @@ void EnggDiffMultiRunFittingQtWidget::resetPlotZoomLevel() {
   m_zoomTool->setZoomBase(true);
 }
 
+void EnggDiffMultiRunFittingQtWidget::setMessageProvider(
+    boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) {
+  m_userMessageProvider = messageProvider;
+}
+
+void EnggDiffMultiRunFittingQtWidget::setPresenter(
+    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) {
+  m_presenter = presenter;
+}
+
 void EnggDiffMultiRunFittingQtWidget::setupUI() {
   m_ui.setupUi(this);
 
   connect(m_ui.listWidget_runLabels, SIGNAL(itemSelectionChanged()), this,
           SLOT(processSelectRun()));
+  connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged(int)), this,
+          SLOT(plotFittedPeaksStateChanged()));
+  connect(m_ui.pushButton_removeRun, SIGNAL(clicked()), this,
+          SLOT(processRemoveRun()));
+  connect(m_ui.pushButton_plotToSeparateWindow, SIGNAL(clicked()), this,
+          SLOT(processPlotToSeparateWindow()));
 }
 
 bool EnggDiffMultiRunFittingQtWidget::showFitResultsSelected() const {

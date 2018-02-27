@@ -17,13 +17,12 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingWidgetPresenter
 public:
   EnggDiffMultiRunFittingWidgetPresenter(
       std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> model,
-      std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> view);
+      IEnggDiffMultiRunFittingWidgetView *view);
 
   void addFittedPeaks(const RunLabel &runLabel,
                       const Mantid::API::MatrixWorkspace_sptr ws) override;
 
-  void addFocusedRun(const RunLabel &runLabel,
-                     const Mantid::API::MatrixWorkspace_sptr ws) override;
+  void addFocusedRun(const Mantid::API::MatrixWorkspace_sptr ws) override;
 
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFittedPeaks(const RunLabel &runLabel) const override;
@@ -31,10 +30,18 @@ public:
   boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const override;
 
+  boost::optional<RunLabel> getSelectedRunLabel() const override;
+
+  std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
+  getWidgetAdder() const override;
+
   void
   notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) override;
 
 private:
+  void processPlotPeaksStateChanged();
+  void processPlotToSeparateWindow();
+  void processRemoveRun();
   void processSelectRun();
 
   /// Display fitted peaks and any other fit information for a certain run
@@ -46,7 +53,7 @@ private:
 
   std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> m_model;
 
-  std::unique_ptr<IEnggDiffMultiRunFittingWidgetView> m_view;
+  IEnggDiffMultiRunFittingWidgetView *m_view;
 };
 
 } // namespace CustomInterfaces

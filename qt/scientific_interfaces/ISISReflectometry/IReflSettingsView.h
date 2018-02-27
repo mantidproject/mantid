@@ -100,6 +100,8 @@ public:
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) = 0;
   virtual void setDetectorCorrectionEnabled(bool enable) = 0;
+  virtual void disableAll() = 0;
+  virtual void enableAll() = 0;
 };
 }
 }
