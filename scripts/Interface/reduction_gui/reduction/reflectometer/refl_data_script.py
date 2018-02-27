@@ -81,7 +81,7 @@ class DataSets(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        raise RuntimeError("reflectometer.DataSets.to_script is deprecated")
+        raise RuntimeError("refl_data_script.DataSets.to_script is deprecated")
 
     def update(self):
         """
