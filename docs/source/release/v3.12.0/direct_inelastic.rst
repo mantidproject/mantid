@@ -26,6 +26,11 @@ Algorithms
 
 - Fixed a bug in :ref:`algm-DirectILLApplySelfShielding` which could cause confusion among workspaces when the algorithm was run without both self shielding correction and empty container workspaces.
 
+Interfaces
+##########
+
+* PyChop has been updated with new look-up tables for the upgraded MAPS (with guide). Some minor bugs in PyChop have been fixed.
+
 Crystal Field
 #############
 
