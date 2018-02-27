@@ -89,22 +89,25 @@ private:
 
 public:
   ComponentInfo();
-  ComponentInfo(boost::shared_ptr<const std::vector<size_t>>
-                    assemblySortedDetectorIndices,
-                boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-                    detectorRanges,
-                boost::shared_ptr<const std::vector<size_t>>
-                    assemblySortedComponentIndices,
-                boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-                    componentRanges,
-                boost::shared_ptr<const std::vector<size_t>> parentIndices,
-                boost::shared_ptr<std::vector<std::vector<size_t>>> children,
-                boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-                boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
-                boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-                boost::shared_ptr<std::vector<ComponentType>> componentType,
-                boost::shared_ptr<const std::vector<std::string>> names,
-                int64_t sourceIndex, int64_t sampleIndex);
+  ComponentInfo(
+      boost::shared_ptr<const std::vector<size_t>>
+          assemblySortedDetectorIndices,
+      boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+          detectorRanges,
+      boost::shared_ptr<const std::vector<size_t>>
+          assemblySortedComponentIndices,
+      boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+          componentRanges,
+      boost::shared_ptr<const std::vector<size_t>> parentIndices,
+      boost::shared_ptr<std::vector<std::vector<size_t>>> children,
+      boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
+      boost::shared_ptr<std::vector<
+          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>
+          rotations,
+      boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
+      boost::shared_ptr<std::vector<ComponentType>> componentType,
+      boost::shared_ptr<const std::vector<std::string>> names,
+      int64_t sourceIndex, int64_t sampleIndex);
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
   /// Clone method
