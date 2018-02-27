@@ -265,7 +265,7 @@ bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
 
   // Check we have some entries in the table
   auto runsPerAngle = m_view->getTransmissionRuns();
-  if (runsPerAngle.size() < 1)
+  if (runsPerAngle.empty())
     return false;
 
   // To save confusion, we only allow EITHER a default transmission runs string

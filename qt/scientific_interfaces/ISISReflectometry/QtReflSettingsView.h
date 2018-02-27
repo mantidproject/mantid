@@ -135,7 +135,7 @@ public slots:
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
   /// Adds another row to the transmission runs table
-  void addTransmissionTableRow() const;
+  void addTransmissionTableRow();
 
 private:
   /// Initialise the interface

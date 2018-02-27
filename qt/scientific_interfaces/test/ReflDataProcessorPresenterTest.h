@@ -695,11 +695,12 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto mockTreeManager = new MockTreeManager;
+    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
-    presenter->acceptTreeManager(mockTreeManager);
+    presenter->acceptTreeManager(std::move(mockTreeManager));
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -729,7 +730,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
 
     // The user hits "plot rows" with the first group selected
-    EXPECT_CALL(*mockTreeManager, selectedData(false))
+    EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
         .Times(1)
         .WillOnce(Return(tree));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
@@ -771,11 +772,12 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto mockTreeManager = new MockTreeManager;
+    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
-    presenter->acceptTreeManager(mockTreeManager);
+    presenter->acceptTreeManager(std::move(mockTreeManager));
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -805,7 +807,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
 
     // The user hits "plot rows" with the first group selected
-    EXPECT_CALL(*mockTreeManager, selectedData(false))
+    EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
         .Times(1)
         .WillOnce(Return(tree));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
@@ -847,11 +849,12 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto mockTreeManager = new MockTreeManager;
+    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
-    presenter->acceptTreeManager(mockTreeManager);
+    presenter->acceptTreeManager(std::move(mockTreeManager));
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -874,7 +877,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(1);
 
     // The user hits "plot rows" with the first row selected
-    EXPECT_CALL(*mockTreeManager, selectedData(false))
+    EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
         .Times(1)
         .WillOnce(Return(tree));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())

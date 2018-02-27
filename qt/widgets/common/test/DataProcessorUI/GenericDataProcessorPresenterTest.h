@@ -3109,11 +3109,11 @@ public:
   void testPlotRowPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    auto *mockTreeManager = new MockTreeManager;
-
+    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter->acceptTreeManager(mockTreeManager);
+    presenter->acceptTreeManager(std::move(mockTreeManager));
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
@@ -3130,7 +3130,7 @@ public:
     // The user hits "plot rows" with the first row selected
     expectNoWarningsOrErrors(mockDataProcessorView);
 
-    EXPECT_CALL(*mockTreeManager, selectedData(false))
+    EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
         .Times(1)
         .WillOnce(Return(tree));
 
@@ -3154,11 +3154,11 @@ public:
   void testPlotGroupPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    auto mockTreeManager = new MockTreeManager;
-
+    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter->acceptTreeManager(mockTreeManager);
+    presenter->acceptTreeManager(std::move(mockTreeManager));
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
@@ -3174,7 +3174,7 @@ public:
     // The user hits "plot rows" with the first row selected
     expectNoWarningsOrErrors(mockDataProcessorView);
 
-    EXPECT_CALL(*mockTreeManager, selectedData(false))
+    EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
         .Times(1)
         .WillOnce(Return(tree));
 

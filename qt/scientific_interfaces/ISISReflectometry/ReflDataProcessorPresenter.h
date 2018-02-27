@@ -11,7 +11,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-
 /** Utility class to store information about time slicing
  */
 class TimeSlicingInfo {
@@ -35,6 +34,7 @@ public:
   void clearSlices();
   void parseCustom();
   void parseLogValue();
+
 private:
   // the slicing type specified by the user
   QString m_type;

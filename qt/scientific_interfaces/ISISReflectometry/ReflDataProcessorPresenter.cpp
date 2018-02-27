@@ -20,7 +20,6 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-
 // unnamed namespace
 namespace {
 
@@ -30,14 +29,39 @@ namespace {
 size_t getMinimumSlicesForGroup(const GroupData &group) {
   if (group.size() < 1)
     return 0;
-  
+
   size_t minNumberOfSlices = std::numeric_limits<size_t>::max();
 
   for (const auto &row : group) {
-    minNumberOfSlices = std::min(minNumberOfSlices, row.second->numberOfSlices());
+    minNumberOfSlices =
+        std::min(minNumberOfSlices, row.second->numberOfSlices());
   }
 
   return minNumberOfSlices;
+}
+
+/** Check whether the given row data contains a value for an angle
+ */
+bool hasAngle(RowData_sptr data) {
+  // The angle is the second value in the row
+  return (data->size() > 1 && !data->value(1).isEmpty());
+}
+
+/** Get the angle from the given row as a double. Throws if not specified
+ */
+double angle(RowData_sptr data) {
+  if (!hasAngle(data))
+    throw std::runtime_error(
+        std::string("Error parsing angle: angle was not set"));
+
+  bool ok = false;
+  double angle = data->value(1).toDouble(&ok);
+
+  if (!ok)
+    throw std::runtime_error("Error parsing angle: " +
+                             data->value(1).toStdString());
+
+  return angle;
 }
 }
 
@@ -102,7 +126,6 @@ void TimeSlicingInfo::parseLogValue() {
   parseCustom();
 }
 
-
 /**
 * Constructor
 * @param whitelist : The set of properties we want to show as columns
@@ -145,7 +168,7 @@ void ReflDataProcessorPresenter::process() {
   // If slicing is not specified, process normally, delegating to
   // GenericDataProcessorPresenter
   TimeSlicingInfo slicing(m_mainPresenter->getTimeSlicingType(),
-                              m_mainPresenter->getTimeSlicingValues());
+                          m_mainPresenter->getTimeSlicingValues());
   if (!slicing.hasSlicing()) {
     // Check if any input event workspaces still exist in ADS
     if (proceedIfWSTypeInADS(newSelected, true)) {
@@ -825,7 +848,7 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
   auto options = m_processingOptions;
 
   // Get the angle for the current row. The angle is the second data item
-  if (data->size() < 2 || data->value(1).isEmpty()) {
+  if (!hasAngle(data)) {
     if (m_mainPresenter->hasPerAngleTransmissionRuns()) {
       // The user has specified per-angle transmission runs on the settings
       // tab. In theory this is fine, but it could cause confusion when the
@@ -846,16 +869,9 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
     }
   }
 
-  double angle = 0.0;
-  try {
-    // Convert to double
-    angle = std::stod(data->value(1).toStdString());
-  } catch (std::invalid_argument &e) {
-    throw std::runtime_error(std::string("Error parsing angle: ") + e.what());
-  }
-
   // Insert the transmission runs as the "FirstTransmissionRun" property
-  auto transmissionRuns = m_mainPresenter->getTransmissionRunsForAngle(angle);
+  auto transmissionRuns =
+      m_mainPresenter->getTransmissionRunsForAngle(angle(data));
   if (!transmissionRuns.isEmpty()) {
     options["FirstTransmissionRun"] = transmissionRuns;
   }

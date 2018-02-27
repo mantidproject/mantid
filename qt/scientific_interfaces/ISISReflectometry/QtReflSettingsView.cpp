@@ -346,7 +346,7 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
 
 /** Add a new row to the transmission runs table
  * */
-void QtReflSettingsView::addTransmissionTableRow() const {
+void QtReflSettingsView::addTransmissionTableRow() {
   auto numRows = m_ui.transmissionRunsTable->rowCount() + 1;
   m_ui.transmissionRunsTable->setRowCount(numRows);
   // Select the first cell in the new row

@@ -277,8 +277,9 @@ void GenericDataProcessorPresenter::acceptViews(
 /** Set a different tree manager to the default (only used by tests to set a
  * mock)
  */
-void GenericDataProcessorPresenter::acceptTreeManager(TreeManager *manager) {
-  m_manager.reset(manager);
+void GenericDataProcessorPresenter::acceptTreeManager(
+    std::unique_ptr<TreeManager> manager) {
+  m_manager = std::move(manager);
 }
 
 /**

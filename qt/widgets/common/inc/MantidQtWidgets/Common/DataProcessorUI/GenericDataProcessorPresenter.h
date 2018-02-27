@@ -147,7 +147,7 @@ public:
   void acceptViews(DataProcessorView *tableView,
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
-  void acceptTreeManager(TreeManager *manager);
+  void acceptTreeManager(std::unique_ptr<TreeManager> manager);
   void setModel(QString const &name) override;
   bool hasPostprocessing() const;
 
