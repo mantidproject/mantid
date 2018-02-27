@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=bare-except,no-init,invalid-name,dangerous-default-value
 from __future__ import (absolute_import, division, print_function)
 import sys
 from mantid.api import *
@@ -55,6 +55,8 @@ class MRInspectData(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("BckROI", [0, 0],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the background")
+        self.declareProperty("EventThreshold", 10000,
+                             "Minimum number of events needed to call a data set a valid direct beam")
 
     def PyExec(self):
         nxs_data = self.getProperty("Workspace").value
@@ -71,7 +73,8 @@ class MRInspectData(PythonAlgorithm):
                              force_low_res_roi=self.getProperty("ForceLowResPeakROI").value,
                              low_res_roi=self.getProperty("LowResPeakROI").value,
                              force_bck_roi=self.getProperty("ForceBckROI").value,
-                             bck_roi=self.getProperty("BckROI").value)
+                             bck_roi=self.getProperty("BckROI").value,
+                             event_threshold=self.getProperty("EventThreshold").value)
 
         # Store information in logs
         mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='calculated_scatt_angle',
@@ -142,14 +145,13 @@ class DataInfo(object):
     peak_range_offset = 0
     tolerance = 0.02
     pixel_width = 0.0007
-    n_events_cutoff = 10000
     huber_x_cut = 4.95
 
     def __init__(self, ws, cross_section='', use_roi=True, update_peak_range=False, use_roi_bck=False,
                  use_tight_bck=False, bck_offset=3, huber_x_cut=4.95,
                  force_peak_roi=False, peak_roi=[0,0],
                  force_low_res_roi=False, low_res_roi=[0,0],
-                 force_bck_roi=False, bck_roi=[0,0]):
+                 force_bck_roi=False, bck_roi=[0,0], event_threshold=10000):
         self.cross_section = cross_section
         self.run_number = ws.getRunNumber()
         self.is_direct_beam = False
@@ -159,6 +161,7 @@ class DataInfo(object):
         self.low_res_range = [0,0]
         self.background = [0,0]
         self.huber_x_cut = huber_x_cut
+        self.n_events_cutoff = event_threshold
 
         # ROI information
         self.roi_peak = [0,0]
@@ -196,38 +199,39 @@ class DataInfo(object):
 
         self.tof_range = self.get_tof_range(ws)
         self.calculated_scattering_angle = 0.0
+        self.theta_d = 0.0
         self.determine_data_type(ws)
 
     def log(self):
         """
             Log useful diagnostics
         """
-        logging.info("| Run: %s [direct beam: %s]" % (self.run_number, self.is_direct_beam))
-        logging.info("|   Peak position: %s" % self.peak_position)
-        logging.info("|   Reflectivity peak: %s" % str(self.peak_range))
-        logging.info("|   Low-resolution pixel range: %s" % str(self.low_res_range))
+        logging.info("| Run: %s [direct beam: %s]", self.run_number, self.is_direct_beam)
+        logging.info("|   Peak position: %s", self.peak_position)
+        logging.info("|   Reflectivity peak: %s", str(self.peak_range))
+        logging.info("|   Low-resolution pixel range: %s", str(self.low_res_range))
 
     def get_tof_range(self, ws):
-            """
-                Determine TOF range from the data
-                :param workspace ws: workspace to work with
-            """
-            run_object = ws.getRun()
-            sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
-            source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
-            source_detector_distance = source_sample_distance + sample_detector_distance
+        """
+            Determine TOF range from the data
+            :param workspace ws: workspace to work with
+        """
+        run_object = ws.getRun()
+        sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
+        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
+        source_detector_distance = source_sample_distance + sample_detector_distance
 
-            h = 6.626e-34  # m^2 kg s^-1
-            m = 1.675e-27  # kg
-            wl = run_object.getProperty('LambdaRequest').value[0]
-            chopper_speed = run_object.getProperty('SpeedRequest1').value[0]
-            wl_offset = 0
-            cst = source_detector_distance / h * m
-            tof_min = cst * (wl + wl_offset * 60.0 / chopper_speed - 1.4 * 60.0 / chopper_speed) * 1e-4
-            tof_max = cst * (wl + wl_offset * 60.0 / chopper_speed + 1.4 * 60.0 / chopper_speed) * 1e-4
+        h = 6.626e-34  # m^2 kg s^-1
+        m = 1.675e-27  # kg
+        wl = run_object.getProperty('LambdaRequest').value[0]
+        chopper_speed = run_object.getProperty('SpeedRequest1').value[0]
+        wl_offset = 0
+        cst = source_detector_distance / h * m
+        tof_min = cst * (wl + wl_offset * 60.0 / chopper_speed - 1.4 * 60.0 / chopper_speed) * 1e-4
+        tof_max = cst * (wl + wl_offset * 60.0 / chopper_speed + 1.4 * 60.0 / chopper_speed) * 1e-4
 
-            self.tof_range = [tof_min, tof_max]
-            return [tof_min, tof_max]
+        self.tof_range = [tof_min, tof_max]
+        return [tof_min, tof_max]
 
     def process_roi(self, ws):
         """
@@ -341,7 +345,7 @@ class DataInfo(object):
         try:
             specular_peak, low_res, _ = mantid.simpleapi.LRPeakSelection(InputWorkspace=ws_short)
         except:
-            logging.error("Peak finding error [specular=%s]: %s" % (specular, sys.exc_value))
+            logging.error("Peak finding error [specular=%s]: %s", specular, sys.exc_value)
             return integrated, [0,0], [0,0]
         if specular:
             peak = [specular_peak[0]+self.peak_range_offset, specular_peak[1]+self.peak_range_offset]
@@ -418,20 +422,20 @@ class DataInfo(object):
         # Skip empty data entries
         if ws.getNumberEvents() < self.n_events_cutoff:
             self.data_type = -1
-            logging.info("No data for %s %s" % (self.run_number, self.cross_section))
+            logging.info("No data for %s %s", self.run_number, self.cross_section)
             return
 
         # Find reflectivity peak and low resolution ranges
         # Those will be our defaults
         integrated, peak, broad_range = self.determine_peak_range(ws, specular=True)
         self.found_peak = copy.copy(peak)
-        logging.info("Run %s [%s]: Peak found %s" % (self.run_number, self.cross_section, peak))
+        logging.info("Run %s [%s]: Peak found %s", self.run_number, self.cross_section, peak)
         signal_y = integrated.readY(0)
         mantid.simpleapi.DeleteWorkspace(integrated)
         signal_x = range(len(signal_y))
 
         _, low_res, _ = self.determine_peak_range(ws, specular=False)
-        logging.info("Run %s [%s]: Low-res found %s" % (self.run_number, self.cross_section, str(low_res)))
+        logging.info("Run %s [%s]: Low-res found %s", self.run_number, self.cross_section, str(low_res))
         self.found_low_res = low_res
         bck_range = None
 
@@ -465,7 +469,8 @@ class DataInfo(object):
             # If we are more than two sigmas away from the middle of the range,
             # there's clearly a problem.
             if np.abs(peak_position - (peak[1]+peak[0])/2.0)  > np.abs(peak[1]-peak[0]):
-                logging.error("Found peak position outside of given range [x=%s], switching to full detector" % peak_position)
+                logging.error("Found peak position outside of given range [x=%s], switching to full detector",
+                              peak_position)
                 peak_position = (peak[1]+peak[0])/2.0
                 peak_width = (peak[1]-peak[0])/2.0
                 raise RuntimeError("Bad peak position")
@@ -473,7 +478,8 @@ class DataInfo(object):
             # If we can't find a peak, try fitting over the full detector.
             # If we do find a peak, then update the ranges rather than using
             # what we currently have (which is probably given by the ROI).
-            logging.warning("Run %s [%s]: Could not fit a peak in the supplied peak range" % (self.run_number, self.cross_section))
+            logging.warning("Run %s [%s]: Could not fit a peak in the supplied peak range",
+                            self.run_number, self.cross_section)
             logging.error(sys.exc_value)
             try:
                 # Define a good default that is wide enough for the fit to work
@@ -481,7 +487,7 @@ class DataInfo(object):
                 default_width = max(default_width, 10.0)
                 default_center = (self.found_peak[1]+self.found_peak[0])/2.0
                 default_peak = [default_center-default_width, default_center+default_width]
-                logging.info("Run %s [%s]: Broad data region %s" % (self.run_number, self.cross_section, broad_range))
+                logging.info("Run %s [%s]: Broad data region %s", self.run_number, self.cross_section, broad_range)
                 x_min = broad_range[0]+10
                 x_max = broad_range[1]-10
                 peak_position, peak_width = self.fit_peak(signal_x[x_min:x_max], signal_y[x_min:x_max], default_peak)
@@ -489,16 +495,14 @@ class DataInfo(object):
                 #low_res = [5, self.n_x_pixel-5]
                 low_res = self.found_low_res
                 self.use_roi_actual = False
-                logging.warning("Run %s [%s]: Peak not in supplied range! Found peak: %s low: %s" % (self.run_number,
-                                                                                                     self.cross_section,
-                                                                                                     peak, low_res))
-                logging.warning("Run %s [%s]: Peak position: %s  Peak width: %s" % (self.run_number,
-                                                                                    self.cross_section,
-                                                                                    peak_position, peak_width))
+                logging.warning("Run %s [%s]: Peak not in supplied range! Found peak: %s low: %s",
+                                self.run_number, self.cross_section, peak, low_res)
+                logging.warning("Run %s [%s]: Peak position: %s  Peak width: %s", self.run_number,
+                                self.cross_section, peak_position, peak_width)
             except:
                 logging.error(sys.exc_value)
-                logging.error("Run %s [%s]: Gaussian fit failed to determine peak position" % (self.run_number,
-                                                                                               self.cross_section))
+                logging.error("Run %s [%s]: Gaussian fit failed to determine peak position",
+                              self.run_number, self.cross_section)
 
         # Update the specular peak range if needed
         if self.update_peak_range:
