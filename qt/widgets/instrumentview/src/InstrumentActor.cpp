@@ -128,8 +128,6 @@ InstrumentActor::~InstrumentActor() { saveSettings(); }
 void InstrumentActor::setUpWorkspace(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
     double scaleMin, double scaleMax) {
-
-  const size_t nHist = sharedWorkspace->getNumberHistograms();
   m_WkspBinMinValue = DBL_MAX;
   m_WkspBinMaxValue = -DBL_MAX;
   const auto &spectrumInfo = sharedWorkspace->spectrumInfo();

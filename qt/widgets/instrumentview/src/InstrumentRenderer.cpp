@@ -97,7 +97,6 @@ void InstrumentRenderer::renderInstrument(const std::vector<bool> &visibleComps,
 void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
                               bool showGuides, bool picking) {
   const auto &compInfo = m_actor.componentInfo();
-  const auto &detInfo = m_actor.detectorInfo();
   std::vector<bool> visited(compInfo.size(), false);
 
   for (size_t i = compInfo.root(); i != std::numeric_limits<size_t>::max();
