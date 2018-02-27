@@ -17,12 +17,15 @@ Mantid Documentation
    :maxdepth: 1
 
    tutorials/index
+   tutorials/ill_training/index
    algorithms/index
    algorithms/*
    concepts/index
    interfaces/index
-   fitfunctions/index
-   fitminimizers/index
+   fitting/index
+   fitting/fitfunctions/index
+   fitting/fitfunctions/*
+   fitting/fitminimizers/index
    techniques/index
    api/index
    plotting/index
@@ -47,8 +50,9 @@ This is the documentation for Mantid |release|.
 * :ref:`Algorithms List`
 * :ref:`concepts contents`
 * :ref:`interfaces contents`
-* :ref:`Fit Functions List`
-* :ref:`fitminimizers contents`
+* :ref:`Fitting`
+    - :ref:`Fit Functions List`
+    - :ref:`fitminimizers`
 * :ref:`techniques contents`
 * :ref:`api`
     - :ref:`Python <pythonapi>`

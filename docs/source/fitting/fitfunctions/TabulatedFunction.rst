@@ -26,7 +26,7 @@ a workspace which must be a MatrixWorkspace.
 Usage
 -----
 
-.. include:: ../usagedata-note.txt
+.. include:: ../../usagedata-note.txt
 
 **Example - Fit two structure factors that are shifted and scaled with respect to each other:**
 

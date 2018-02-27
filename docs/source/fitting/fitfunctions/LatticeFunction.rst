@@ -21,7 +21,7 @@ parameter as this is often taken care of in earlier steps of the data reduction.
 Usage
 -----
 
-.. include:: ../usagedata-note.txt
+.. include:: ../../usagedata-note.txt
 
 The following script demonstrates how the function can be used. The algorithm :ref:`algm-PoldiCreatePeaksFromCell` is
 used to generate Bragg reflections that are expected for the crystal structure of Silicon.
