@@ -38,7 +38,8 @@ This is the documentation for Mantid |release|.
    :width: 200px
    :align: right
 
-* :ref:`Training`
+* :ref:`training`
+    - :ref:`ill_training`
 * :ref:`Algorithms List`
 * :ref:`concepts contents`
 * :ref:`interfaces contents`
