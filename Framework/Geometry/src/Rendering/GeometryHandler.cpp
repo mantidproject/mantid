@@ -1,6 +1,6 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
 #include "MantidGeometry/Rendering/Renderer.h"
 #include <boost/make_shared.hpp>
