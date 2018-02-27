@@ -9,6 +9,7 @@ from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, A
 from mantid.api import FileProperty, FileAction, MatrixWorkspace
 from mantid.kernel import Direction
 
+
 class SaveVulcanGSS(PythonAlgorithm):
     """ Save GSS file for VULCAN.  This is a workflow algorithm
     """
@@ -62,30 +63,30 @@ class SaveVulcanGSS(PythonAlgorithm):
         # Rebin workspace
         output_workspace = self.rebin_workspace(input_ws, binning_param_list, output_ws_name)
 
+        # #
         #
-
-        # rebin the input workspace if TOF binning file is given
-        if len(log_tof_file_name) > 0:
-            # Load reference bin file
-            vec_refT = self._loadRefLogBinFile(log_tof_file_name)
-
-            # Rebin
-            gsa_ws = self._rebinVdrive(inputws, vec_refT, output_ws_name)
-        else:
-            # no binning file is specified. do nothing
-            gsa_ws = inputws
-
-        # Generate GSAS file
-        output_ws = self._saveGSAS(gsa_ws, gss_file_name)
-
-        # Convert header and bank information
-        ipts = self.getPropertyValue("IPTS")
-        parm_file_name = self.getPropertyValue("GSSParmFileName")
-        new_header = self._generate_vulcan_gda_header(output_ws, gss_file_name, ipts, parm_file_name)
-        self._rewrite_gda_file(gss_file_name, new_header)
+        # # rebin the input workspace if TOF binning file is given
+        # if len(log_tof_file_name) > 0:
+        #     # Load reference bin file
+        #     vec_refT = self._loadRefLogBinFile(log_tof_file_name)
+        #
+        #     # Rebin
+        #     gsa_ws = self._rebinVdrive(inputws, vec_refT, output_ws_name)
+        # else:
+        #     # no binning file is specified. do nothing
+        #     gsa_ws = inputws
+        #
+        # # Generate GSAS file
+        # output_ws = self._saveGSAS(gsa_ws, gss_file_name)
+        #
+        # # Convert header and bank information
+        # ipts = self.getPropertyValue("IPTS")
+        # parm_file_name = self.getPropertyValue("GSSParmFileName")
+        # new_header = self._generate_vulcan_gda_header(output_ws, gss_file_name, ipts, parm_file_name)
+        # self._rewrite_gda_file(gss_file_name, new_header)
 
         # Set property
-        self.setProperty("OutputWorkspace", output_ws_name)
+        self.setProperty("OutputWorkspace", output_workspace)
 
         return
 
@@ -158,14 +159,14 @@ class SaveVulcanGSS(PythonAlgorithm):
         # event workspace is required for re-binning
         input_workspace = AnalysisDataService.retrieve(input_ws_name)
         if input_workspace.id() != 'EventWorkspace' and bin_par_ws_exist:
-            raise RuntimeError('Input workspace {0} must be an EventWorkspace if rebin is required by {1}'
+            self.log().warning('Input workspace {0} must be an EventWorkspace if rebin is required by {1}'
                                ''.format(input_workspace, bin_par_ws_name))
         elif input_workspace.getAxis(0).getUnit().unitID() != "TOF":
             raise NotImplementedError("InputWorkspace must be in unit as TOF.")
 
         # processing binning parameters
         if bin_par_ws_exist:
-            binning_parameter_list = self._process_binning_parameters(bin_par_ws_name)
+            binning_parameter_list = self.process_binning_param_table(bin_par_ws_name)
         else:
             binning_parameter_list = None
 
@@ -219,9 +220,9 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return params
 
-    def process_binning_parameters(self, input_workspace, bin_par_ws_name):
+    def process_binning_param_table(self, input_workspace, bin_par_ws_name):
         """
-
+        process the binning parameters given in an ITableWorkspace
         :param bin_par_ws_name:
         :return:
         """
@@ -261,6 +262,11 @@ class SaveVulcanGSS(PythonAlgorithm):
         # END-DEF
 
         bin_par_workspace = AnalysisDataService.retrieve(bin_par_ws_name)
+        # check inputs
+        assert isinstance(bin_par_workspace, api.ITableWorkspace), 'Input binning workspace {0} must be ' \
+                                                                   'an ITableWorkspace but not a {1}' \
+                                                                   ''.format(bin_par_workspace,
+                                                                             type(bin_par_workspace))
 
         # check whether it is valid TableWorkspace
         if bin_par_workspace.columnCount() < 2:
@@ -314,7 +320,7 @@ class SaveVulcanGSS(PythonAlgorithm):
                 for term in terms:
                     bin_param.append(float(term))
             except ValueError:
-                raise RuntimeError('blabla3')
+                raise RuntimeError('Binning parameters {0} have non-float terms.'.format(bin_par_str))
 
         elif bin_par_str.count(':') == 1:
             # in workspace name : workspace index mode
