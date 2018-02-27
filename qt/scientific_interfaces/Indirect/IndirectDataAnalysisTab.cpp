@@ -158,8 +158,9 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
     }
-  } else if (inputWs && boost::numeric_cast<size_t>(m_selectedSpectrum) <
-                            inputWs->getNumberHistograms()) {
+  } else if (inputWs &&
+             boost::numeric_cast<size_t>(m_selectedSpectrum) <
+                 inputWs->getNumberHistograms()) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
   }

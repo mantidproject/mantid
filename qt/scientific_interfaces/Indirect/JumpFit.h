@@ -18,6 +18,7 @@ public:
 
   // Inherited methods from IndirectDataAnalysisTab
   void setup() override;
+
   bool validate() override;
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;

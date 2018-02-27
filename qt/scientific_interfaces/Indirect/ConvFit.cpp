@@ -481,8 +481,8 @@ void ConvFit::addSampleLogsToWorkspace(const std::string &workspaceName,
 bool ConvFit::validate() {
   UserInputValidator uiv;
 
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSampleInput);
-  uiv.checkDataSelectorIsValid("Resolution", m_uiForm->dsResInput);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSampleInput);
+  uiv.checkDataSelectorIsValid("Resolution Input", m_uiForm->dsResInput);
 
   uiv.checkValidRange("Fitting Range", std::make_pair(startX(), endX()));
 
@@ -496,12 +496,9 @@ bool ConvFit::validate() {
            compositeModel->getFunction(0)->name() == "DeltaFunction")
     uiv.addErrorMessage(
         "Fit function is invalid; only a Delta Function has been supplied");
-  else if (fitTypeString() == "")
-    uiv.addErrorMessage("No fit type has been selected");
 
   const auto error = uiv.generateErrorMessage();
-  showMessageBox(error);
-
+  emit showMessageBox(error);
   return error.isEmpty();
 }
 
@@ -737,8 +734,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)->getNumberParameter(
-          "resolution")[0];
+      resolution = inst->getComponentByName(analyser)
+                       ->getNumberParameter("resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }

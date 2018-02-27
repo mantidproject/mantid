@@ -88,24 +88,19 @@ bool JumpFit::doPlotGuess() const {
  */
 bool JumpFit::validate() {
   UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSample);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSample);
 
   // this workspace doesn't have any valid widths
-  if (m_spectraList.size() == 0) {
+  if (m_spectraList.empty())
     uiv.addErrorMessage(
-        "Input workspace doesn't appear to contain any width data.");
-  }
+        "Sample Input: Workspace doesn't appear to contain any width data");
 
   if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
 
-  QString errors = uiv.generateErrorMessage();
-  if (!errors.isEmpty()) {
-    emit showMessageBox(errors);
-    return false;
-  }
-
-  return true;
+  const auto errors = uiv.generateErrorMessage();
+  emit showMessageBox(errors);
+  return errors.isEmpty();
 }
 
 /**

@@ -82,9 +82,7 @@ bool MSDFit::doPlotGuess() const {
          m_uiForm->ckPlotGuess->isChecked();
 }
 
-void MSDFit::singleFit() {
-  executeSingleFit();
-}
+void MSDFit::singleFit() { executeSingleFit(); }
 
 std::string MSDFit::createSingleFitOutputName() const {
   return constructBaseName() + std::to_string(selectedSpectrum());
@@ -149,15 +147,15 @@ IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, int specMin,
 bool MSDFit::validate() {
   UserInputValidator uiv;
 
-  uiv.checkDataSelectorIsValid("Sample input", m_uiForm->dsSampleInput);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSampleInput);
 
   auto range = std::make_pair(startX(), endX());
-  uiv.checkValidRange("a range", range);
+  uiv.checkValidRange("Fitting Range", range);
 
   int specMin = m_uiForm->spSpectraMin->value();
   int specMax = m_uiForm->spSpectraMax->value();
   auto specRange = std::make_pair(specMin, specMax + 1);
-  uiv.checkValidRange("spectrum range", specRange);
+  uiv.checkValidRange("Spectrum Range", specRange);
 
   if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");

@@ -347,14 +347,13 @@ void IqtFit::algorithmComplete(bool error) {
 bool IqtFit::validate() {
   UserInputValidator uiv;
 
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSampleInput);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSampleInput);
 
   if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
 
   auto error = uiv.generateErrorMessage();
-  showMessageBox(error);
-
+  emit showMessageBox(error);
   return error.isEmpty();
 }
 
