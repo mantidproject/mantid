@@ -86,6 +86,10 @@ private:
   std::vector<uint16_t>
   createTriangularFaces(std::vector<int> &faceIndices,
                         std::vector<uint16_t> &windingOrder) const;
+
+  void createTrianglesFromPolygon(std::vector<uint16_t> &windingOrder,
+                                  std::vector<uint16_t> &triangularFaces,
+                                  int &startOfFace, int &endOfFace) const;
 };
 
 } // namespace NexusGeometry

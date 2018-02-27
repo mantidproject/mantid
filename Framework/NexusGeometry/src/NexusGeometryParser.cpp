@@ -458,21 +458,34 @@ std::vector<uint16_t> NexusGeometryParser::createTriangularFaces(
   std::vector<uint16_t> triangularFaces;
 
   int startOfFace = 0;
+  int endOfFace = 0;
   for (auto it = faceIndices.begin() + 1; it != faceIndices.end(); ++it) {
-    int endOfFace = *it;
-    int polygonOrder = endOfFace - startOfFace;
-
-    auto first = windingOrder.begin() + startOfFace;
-
-    for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
-         ++polygonVertex) {
-      triangularFaces.push_back(*first);
-      triangularFaces.push_back(*(windingOrder.begin() + polygonVertex));
-      triangularFaces.push_back(*(windingOrder.begin() + polygonVertex + 1));
-    }
-    startOfFace = endOfFace + 1;
+    endOfFace = *it;
+    createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace,
+                               endOfFace);
   }
+
+  // and the last face
+  endOfFace = static_cast<int>(windingOrder.size());
+  createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace,
+                             endOfFace);
+
   return triangularFaces;
+}
+
+void NexusGeometryParser::createTrianglesFromPolygon(
+    std::vector<uint16_t> &windingOrder, std::vector<uint16_t> &triangularFaces,
+    int &startOfFace, int &endOfFace) const {
+  int polygonOrder = endOfFace - startOfFace;
+  auto first = windingOrder.begin() + startOfFace;
+
+  for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
+       ++polygonVertex) {
+    triangularFaces.push_back(*first);
+    triangularFaces.push_back(*(windingOrder.begin() + polygonVertex));
+    triangularFaces.push_back(*(windingOrder.begin() + polygonVertex + 1));
+  }
+  startOfFace = endOfFace + 1; // start of the next face
 }
 
 // Parse source and add to instrument
