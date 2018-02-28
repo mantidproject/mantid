@@ -32,12 +32,12 @@ Vesuvio
 
 New
 ###
-- Cumulative Angle-Averaged Data (sum of fits normalised by their integral) can be calculated and produced as output by setting the 'calculate_caad' flag to True.
+- Cumulative Angle-Averaged Data (sum of fits normalised by their integral) can be calculated and produced as output by setting the *calculate_caad* flag to True.
 
 Improved
 ########
 - A pre-loaded runs workspace can now be passed to the fit_tof VESUVIO routine, which will skip the loading subroutine, given this input.
-- Loading the sample log files into a workspace can be disabled within a Vesuvio Driver Script, by setting the 'load_log_files' flag to False.
+- Loading the sample log files into a workspace can be disabled within a Vesuvio Driver Script, by setting the *load_log_files* flag to False.
 
 Bugfixes
 ########
@@ -75,7 +75,7 @@ Improved
 - The Plot Guess Feature in the MSDFit Interface is now implemented for the three models introduced in release v3.11 (MsdGauss, MsdPeters and MsdYi).
 - The ExtractMembers option in the ConvFit Interface will now function correctly for diffusion functions.
 - The ExtractMembers option is now available in the IqtFit interface.
-- The parameter ties created by the 'Constrain Intensities' option in the IqtFit interface, are now shown in the function browser.
+- The parameter ties created by the *Constrain Intensities* option in the IqtFit interface, are now shown in the function browser.
 - 'Plot Current Preview' plots input if a fit has yet to be calculated and is disabled if no input workspace has been provided.
 
 Bugfixes
@@ -83,7 +83,7 @@ Bugfixes
 - The X-Limits for all of the Indirect Data Analysis interfaces are now correctly updated when data is loaded.
 - In the IqtFit interface, the *AO* parameter now defaults to 0.
 - The mini preview plot now updates correctly in the Indirect Data Analysis interfaces, when the fit function is changed; when changed to a function that wasn't used in the most recent fit, will plot only the sample, else will plot the sample, fit and difference.
-- Plotting individual parameters of the fit in the interface ('Plot Options'), will no longer produce an error in the ConvFit interface, when plotting *FWHM*.
+- Plotting individual parameters of the fit in the interface (*Plot Options*), will no longer produce an error in the ConvFit interface, when plotting *FWHM*.
 
 
 Diffraction
