@@ -287,25 +287,20 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
         wsCount += 1
         for cut in cuts:
             for width in widths:
-                # TODO: Use StoreInADS=False after issue #21731 has been fixed.
                 wsStr = str(ws)
                 if wsStr == '':
                     wsStr = str(wsCount)
                 quantityStr = _clearlatex(quantity)
                 unitStr = _clearlatex(unit)
                 wsName = 'cut_{}_{}={}+-{}{}'.format(wsStr, quantityStr, cut, width, unitStr)
-                if not keepCutWorkspaces:
-                    wsName = '__' + wsName
-                else:
+                if keepCutWorkspaces:
                     cutWSList.append(wsName)
                 line = LineProfile(ws, cut, width, Direction=direction,
-                                   OutputWorkspace=wsName, EnableLogging=False)
+                                   OutputWorkspace=wsName, StoreInADS=keepCutWorkspaces, EnableLogging=False)
                 if 'm' in style:
                     markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
                 label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
                 axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
-                if not keepCutWorkspaces:
-                    DeleteWorkspace(line, EnableLogging=False)
     _profileytitle(workspaces[0], axes)
     return figure, axes, cutWSList
 

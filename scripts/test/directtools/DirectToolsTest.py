@@ -217,6 +217,38 @@ class DirectTest(unittest.TestCase):
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
 
+    def test_plotcuts_keepCutWorkspaces(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
+        kwargs = {
+            'direction' : 'Vertical',
+            'workspaces' : ws,
+            'cuts' : 500.,
+            'widths': 10.,
+            'quantity': 'TOF',
+            'unit': 'microseconds',
+            'keepCutWorkspaces': True
+        }
+        self.assertEquals(mtd.size(), 0)
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotcuts, **kwargs)
+        self.assertEquals(len(cuts), 1)
+        self.assertEquals(mtd.size(), 1)
+
+    def test_plotcuts_doNotKeepCutWorkspaces(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
+        kwargs = {
+            'direction' : 'Vertical',
+            'workspaces' : ws,
+            'cuts' : 500.,
+            'widths': 10.,
+            'quantity': 'TOF',
+            'unit': 'microseconds',
+            'keepCutWorkspaces': False
+        }
+        self.assertEquals(mtd.size(), 0)
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotcuts, **kwargs)
+        self.assertEquals(len(cuts), 0)
+        self.assertEquals(mtd.size(), 0)
+
     def test_plotprofiles_noXUnitsExecutes(self):
         xs = numpy.linspace(-3., 10., 12)
         ys = numpy.tile(1., len(xs) - 1)
