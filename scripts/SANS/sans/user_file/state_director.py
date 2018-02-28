@@ -932,6 +932,12 @@ class StateDirectorISIS(object):
             self._wavelength_builder.set_wavelength_high(wavelength_limits.stop)
             self._wavelength_builder.set_wavelength_step(wavelength_limits.step)
             self._wavelength_builder.set_wavelength_step_type(wavelength_limits.step_type)
+        if OtherId.wavelength_range in user_file_items:
+            wavelength_range = user_file_items[OtherId.wavelength_range]
+            self._wavelength_builder.set_wavelength_range(wavelength_range[0])
+        if OtherId.wavelength_scale in user_file_items:
+            wavelength_scale = user_file_items[OtherId.wavelength_scale]
+            self._wavelength_builder.set_wavelength_scale(wavelength_scale[0])
 
     def _set_up_slice_event_state(self, user_file_items):
         # Setting up the slice limits is current

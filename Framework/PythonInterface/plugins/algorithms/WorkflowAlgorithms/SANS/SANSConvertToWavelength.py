@@ -39,8 +39,7 @@ class SANSConvertToWavelength(DistributedDataProcessorAlgorithm):
 
         # Input workspace
         workspace = get_input_workspace_as_copy_if_not_same_as_output_workspace(self)
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+        
         wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
                               "WavelengthLow": wavelength_state.wavelength_low,
@@ -49,7 +48,7 @@ class SANSConvertToWavelength(DistributedDataProcessorAlgorithm):
                               "WavelengthStepType": RangeStepType.to_string(
                                   wavelength_state.wavelength_step_type),
                               "RebinMode": RebinType.to_string(wavelength_state.rebin_type),
-                              "WavelengthRangeString": wavelength_state.wavelength_range_string}
+                              "WavelengthRangeString": wavelength_state.wavelength_range}
         wavelength_alg = create_unmanaged_algorithm(wavelength_name, **wavelength_options)
         wavelength_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
         wavelength_alg.setProperty("OutputWorkspace", workspace)

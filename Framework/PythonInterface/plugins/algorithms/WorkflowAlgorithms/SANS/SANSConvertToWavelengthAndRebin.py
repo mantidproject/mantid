@@ -37,7 +37,8 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
 
         # Step type
         allowed_step_types = StringListValidator([RangeStepType.to_string(RangeStepType.Log),
-                                                  RangeStepType.to_string(RangeStepType.Lin)])
+                                                  RangeStepType.to_string(RangeStepType.Lin),
+                                                  RangeStepType.to_string(RangeStepType.RangeLin)])
         self.declareProperty('WavelengthStepType', RangeStepType.to_string(RangeStepType.Lin),
                              validator=allowed_step_types, direction=Direction.Input,
                              doc='The step type for rebinning.')

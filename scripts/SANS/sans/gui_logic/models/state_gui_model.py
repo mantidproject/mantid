@@ -401,6 +401,22 @@ class StateGuiModel(object):
     def wavelength_step(self, value):
         self._update_wavelength(step=value)
 
+    @property
+    def wavelength_range(self):
+        return self.get_simple_element(element_id=OtherId.wavelength_range, default_value="")
+
+    @wavelength_range.setter
+    def wavelength_range(self, value):
+        self.set_simple_element(element_id=OtherId.wavelength_range, value=value)
+
+    @property
+    def wavelength_scale(self):
+        return self.get_simple_element(element_id=OtherId.wavelength_scale, default_value="")
+
+    @wavelength_scale.setter
+    def wavelength_scale(self, value):
+        self.set_simple_element(element_id=OtherId.wavelength_scale, value=value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Scale properties
     # While the absolute scale can be set in the

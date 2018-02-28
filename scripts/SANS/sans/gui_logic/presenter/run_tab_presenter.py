@@ -264,7 +264,6 @@ class RunTabPresenter(object):
         2. Adds a dummy input workspace
         3. Adds row index information
         """
-
         try:
             self.sans_logger.information("Starting processing of batch table.")
             # 0. Validate rows
@@ -706,6 +705,8 @@ class RunTabPresenter(object):
         self._set_on_state_model("wavelength_min", state_model)
         self._set_on_state_model("wavelength_max", state_model)
         self._set_on_state_model("wavelength_step", state_model)
+        self._set_on_state_model("wavelength_range", state_model)
+        self._set_on_state_model("wavelength_scale", state_model)
 
         self._set_on_state_model("absolute_scale", state_model)
         self._set_on_state_model("sample_shape", state_model)
