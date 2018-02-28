@@ -163,6 +163,8 @@ public:
                      8); // 8 unique vertices in cube
     auto shapeBB = monitorShape.getBoundingBox();
     TS_ASSERT_DELTA(shapeBB.xMax() - shapeBB.xMin(), 2.0, 1e-9);
+    TS_ASSERT_DELTA(shapeBB.yMax() - shapeBB.yMin(), 2.0, 1e-9);
+    TS_ASSERT_DELTA(shapeBB.zMax() - shapeBB.zMin(), 2.0, 1e-9);
   }
 
 private:
