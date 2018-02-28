@@ -21,6 +21,7 @@ ISIS SANS
    :align: right
    :class: screenshot
    :width: 800px
+
 New features
 ############
 - BeamCentreFinder has been implemented to work with the new backend in the python script window.
