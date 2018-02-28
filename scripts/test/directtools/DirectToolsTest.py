@@ -4,6 +4,7 @@ import directtools
 from mantid.api import mtd
 from mantid.simpleapi import LoadILLTOF, CreateSampleWorkspace, CreateWorkspace
 import matplotlib
+matplotlib.use('AGG')
 import numpy
 import numpy.testing
 import testhelpers
