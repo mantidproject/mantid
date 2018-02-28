@@ -18,14 +18,6 @@ namespace Kernel {
 /// static logger
 Kernel::Logger g_log("UsageServiceImpl");
 
-const std::string STARTUP_URL("http://reports.mantidproject.org/api/usage");
-// const std::string STARTUP_URL(
-//    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
-// http://posttestserver.com/data/
-const std::string FEATURE_URL("http://reports.mantidproject.org/api/feature");
-// const std::string FEATURE_URL(
-//    "http://posttestserver.com/post.php?dir=Mantid"); // dev location
-
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
 */
@@ -73,6 +65,14 @@ UsageServiceImpl::UsageServiceImpl()
       m_startupActiveMethod(this, &UsageServiceImpl::sendStartupAsyncImpl),
       m_featureActiveMethod(this, &UsageServiceImpl::sendFeatureAsyncImpl) {
   setInterval(60);
+  int retval = Mantid::Kernel::ConfigService::Instance().getValue(
+      "usagereports.rooturl", m_url);
+  if (retval == 0) {
+    g_log.debug() << "Failed to load usage report url\n";
+  } else {
+    g_log.debug() << "Root usage reporting url is " << m_url << "\n";
+  }
+  m_startTime = Types::Core::DateAndTime::getCurrentTime();
 }
 
 void UsageServiceImpl::setApplication(const std::string &name) {
@@ -131,6 +131,13 @@ void UsageServiceImpl::flush() {
   }
 }
 
+/** getUpTime returns the time for which the mantid instance has been running
+ @return time_duration The time for which mantid has been running.
+*/
+Types::Core::time_duration UsageServiceImpl::getUpTime() {
+  return Types::Core::DateAndTime::getCurrentTime() - m_startTime;
+}
+
 void UsageServiceImpl::shutdown() {
   try {
     // stop the timer
@@ -146,7 +153,6 @@ void UsageServiceImpl::shutdown() {
 void UsageServiceImpl::sendStartupReport() {
   try {
     std::string message = this->generateStartupMessage();
-
     // send the report
     Poco::ActiveResult<int> result = m_startupActiveMethod(message);
   } catch (std::exception &ex) {
@@ -227,8 +233,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["mantidSha1"] = MantidVersion::revisionFull();
 
   // mantid version and sha1
-  message["dateTime"] =
-      Types::Core::DateAndTime::getCurrentTime().toISO8601String();
+  message["dateTime"] = m_startTime.toISO8601String();
 
   message["application"] = m_application;
 
@@ -280,13 +285,13 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
 /**Async method for sending startup messages
 */
 int UsageServiceImpl::sendStartupAsyncImpl(const std::string &message) {
-  return this->sendReport(message, STARTUP_URL);
+  return this->sendReport(message, m_url + "/api/usage");
 }
 
 /**Async method for sending feature messages
 */
 int UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message) {
-  return this->sendReport(message, FEATURE_URL);
+  return this->sendReport(message, m_url + "/api/feature");
 }
 
 int UsageServiceImpl::sendReport(const std::string &message,

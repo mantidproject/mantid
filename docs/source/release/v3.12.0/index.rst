@@ -56,9 +56,10 @@ Changes
    LowQ <lowq>
    Muon Analysis <muon>
    Reflectometry <reflectometry>
-   Spectroscopy <spectroscopy>
+   SANS <sans>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
+   Error Reporting <error_reporter> 
 
 Full Change Listings
 --------------------

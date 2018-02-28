@@ -29,3 +29,6 @@ html_theme_options = {
     # Ensure the nav bar always stays on top of page.
     'navbar_fixed_top': "false",
 }
+
+plot_html_show_formats = False
+plot_html_show_source_link = False

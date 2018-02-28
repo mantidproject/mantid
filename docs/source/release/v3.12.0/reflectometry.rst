@@ -5,10 +5,6 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 
 ISIS Reflectometry Interface
 ----------------------------
@@ -67,6 +63,7 @@ New features
 - The new algorithm :ref:`algm-PolarizationEfficiencyCor` corrects for efficiencies in polarization analysis.
 - The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
 - The new algorithm :ref:`algm-MRInspectData` takes in raw event data and determines reduction parameters.
+- The new algorithm :ref:`algm-MRFilterCrossSections` loads a MR (SNS) data file into a workspace group comprising of a workspace for each cross-section.
 
 
 Improvements

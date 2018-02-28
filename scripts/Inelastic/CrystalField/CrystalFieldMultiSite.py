@@ -1,6 +1,7 @@
 import numpy as np
 
 from CrystalField import CrystalField, Function
+from .fitting import islistlike
 
 
 def makeWorkspace(xArray, yArray, child=True, ws_name='dummy'):
@@ -66,9 +67,13 @@ class CrystalFieldMultiSite(object):
         self.Symmetries = Symmetries
         self._plot_window = {}
         self.chi2 = None
+        self._resolutionModel = None
 
         parameter_dict = kwargs.pop('parameters', None)
         attribute_dict = kwargs.pop('attributes', None)
+        ties_dict = kwargs.pop('ties', None)
+        constraints_list = kwargs.pop('constraints', None)
+        fix_list = kwargs.pop('fixedParameters', None)
 
         kwargs = self._setMandatoryArguments(kwargs)
 
@@ -78,22 +83,32 @@ class CrystalFieldMultiSite(object):
 
         self._setRemainingArguments(kwargs)
 
+        self.default_spectrum_size = 200
+
         if attribute_dict is not None:
             for name, value in attribute_dict.items():
                 self.function.setAttributeValue(name, value)
         if parameter_dict is not None:
             for name, value in parameter_dict.items():
                 self.function.setParameter(name, value)
+        if ties_dict:
+            for name, value in parameter_dict.items():
+                self.function.tie(name, value)
+        if constraints_list:
+            self.function.addConstraints(','.join(constraints_list))
+        if fix_list:
+            for param in fix_list:
+                self.function.fixParameter(param)
 
     def _setMandatoryArguments(self, kwargs):
-        if 'Temperatures' in kwargs:
-            self.Temperatures = kwargs.pop('Temperatures')
-            if 'FWHMs' in kwargs:
-                self.FWHMs = kwargs.pop('FWHMs')
+        if 'Temperatures' in kwargs or 'Temperature' in kwargs:
+            self.Temperatures = kwargs.pop('Temperatures') if 'Temperatures' in kwargs else kwargs.pop('Temperature')
+            if 'FWHM' in kwargs or 'FWHMs' in kwargs:
+                self.FWHM = kwargs.pop('FWHMs') if 'FWHMs' in kwargs else kwargs.pop('FWHM')
             elif 'ResolutionModel' in kwargs:
                 self.ResolutionModel = kwargs.pop('ResolutionModel')
             else:
-                raise RuntimeError("If temperatures are set, must also set FWHMs or ResolutionModel")
+                raise RuntimeError("If temperatures are set, must also set FWHM or ResolutionModel")
         return kwargs
 
     def _setRemainingArguments(self, kwargs):
@@ -137,6 +152,16 @@ class CrystalFieldMultiSite(object):
 
         return self._calcSpectrum(i, ws, ws_index)
 
+    def calc_xmin_xmax(self, i=0):
+        peaks = np.array([])
+        for idx in range(len(self.Ions)):
+            blm = {}
+            for bparam in CrystalField.field_parameter_names:
+                blm[bparam] = self.function.getParameterValue('ion{}.'.format(idx) + bparam)
+            _cft = CrystalField(self.Ions[idx], 'C1', Temperature=self.Temperatures[i], **blm)
+            peaks = np.append(peaks, _cft.getPeakList()[0])
+        return np.min(peaks), np.max(peaks)
+
     def getSpectrum(self, *args):
         """
         Get a specified spectrum calculated with the current field and peak parameters.
@@ -144,14 +169,16 @@ class CrystalFieldMultiSite(object):
         Alternatively can be called getSpectrum(workspace, ws_index). Spectrum index is assumed zero.
 
         Examples:
+            cf.getSpectrum()         # Calculate the first spectrum using automatically generated x-values
+            cf.getSpectrum(1)        # Calculate the second spectrum using automatically generated x-values
             cf.getSpectrum(1, ws, 5) # Calculate the second spectrum using the x-values from the 6th spectrum
                                      # in workspace ws.
-            cf.getSpectrum(ws) # Calculate the first spectrum using the x-values from the 1st spectrum
-                               # in workspace ws.
-            cf.getSpectrum(ws, 3) # Calculate the first spectrum using the x-values from the 4th spectrum
-                                  # in workspace ws.
-            cf.getSpectrum(3, ws) # Calculate the third spectrum using the x-values from the 1st spectrum
-                                  # in workspace ws.
+            cf.getSpectrum(ws)       # Calculate the first spectrum using the x-values from the 1st spectrum
+                                     # in workspace ws.
+            cf.getSpectrum(ws, 3)    # Calculate the first spectrum using the x-values from the 4th spectrum
+                                     # in workspace ws.
+            cf.getSpectrum(2, ws)    # Calculate the third spectrum using the x-values from the 1st spectrum
+                                     # in workspace ws.
 
         @return: A tuple of (x, y) arrays
         """
@@ -160,11 +187,18 @@ class CrystalFieldMultiSite(object):
                 raise RuntimeError('You must first define a temperature for the spectrum')
             return self._calcSpectrum(args[0], args[1], args[2])
         elif len(args) == 1:
-            return self._calcSpectrum(0, args[0], 0)
+            if isinstance(args[0], int):
+                x_min, x_max = self.calc_xmin_xmax(args[0])
+                xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
+                return self._calcSpectrum(args[0], xArray, 0)
+            else:
+                return self._calcSpectrum(0, args[0], 0)
         elif len(args) == 2:
             return self._getSpectrumTwoArgs(*args)
         else:
-            raise RuntimeError('getSpectrum expected 1-3 arguments, got {}s'.format(len(args)))
+            x_min, x_max = self.calc_xmin_xmax()
+            xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
+            return self._calcSpectrum(0, xArray, 0)
 
     def _convertToWS(self, wksp_list):
         """
@@ -350,7 +384,7 @@ class CrystalFieldMultiSite(object):
         params = get_parameters_for_add_from_multisite(self, 0)
         params.update(get_parameters_for_add_from_multisite(other, len(self.Ions)))
         new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
-                                       FWHMs=self.FWHMs, parameters=params, abundances=abundances)
+                                       FWHM=self.FWHM, parameters=params, abundances=abundances)
         return new_cf
 
     def __getitem__(self, item):
@@ -378,7 +412,7 @@ class CrystalFieldMultiSite(object):
         params = get_parameters_for_add_from_multisite(self, 0)
         params.update(get_parameters_for_add(other, len(self.Ions)))
         new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
-                                       FWHMs=self.FWHMs, parameters=params, abundances=abundances)
+                                       FWHM=self.FWHM, parameters=params, abundances=abundances)
         return new_cf
 
     def __radd__(self, other):
@@ -395,12 +429,30 @@ class CrystalFieldMultiSite(object):
         params = get_parameters_for_add(other, 0)
         params.update(get_parameters_for_add_from_multisite(self, 1))
         new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
-                                       FWHMs=self.FWHMs, parameters=params, abundances=abundances)
+                                       FWHM=self.FWHM, parameters=params, abundances=abundances)
         return new_cf
 
     @property
     def background(self):
         return self._background
+
+    @background.setter
+    def background(self, value):
+        if hasattr(value, 'peak') and hasattr(value, 'background'):
+            # Input is a CrystalField.Background object
+            if value.peak and value.background:
+                self._setBackground(peak=str(value.peak.function), background=str(value.background.function))
+            elif value.peak:
+                self._setBackground(peak=str(value.peak.function))
+            else:
+                self._setBackground(background=str(value.background.function))
+        elif hasattr(value, 'function'):
+            self._setBackground(background=str(value.function))
+        else:
+            self._setBackground(background=value)
+        # Need this for a weird python bug: "IndexError: Function index (2) out of range (2)"
+        # if user calls print(self.function) after setting background
+        _ = self.function.getTies() # noqa: F841
 
     @property
     def Ions(self):
@@ -457,6 +509,14 @@ class CrystalFieldMultiSite(object):
         self.function.setAttributeValue('Temperatures', value)
 
     @property
+    def Temperature(self):
+        return list(self.function.getAttributeValue("Temperatures"))
+
+    @Temperature.setter
+    def Temperatures(self, value):
+        self.function.setAttributeValue('Temperatures', value)
+
+    @property
     def FWHMs(self):
         fwhm = self.function.getAttributeValue('FWHMs')
         nDatasets = len(self.Temperatures)
@@ -466,10 +526,46 @@ class CrystalFieldMultiSite(object):
 
     @FWHMs.setter
     def FWHMs(self, value):
-        if len(value) == 1:
-            value = value[0]
+        if islistlike(value):
+            if len(value) != len(self.Temperatures):
+                value = [value[0]] * len(self.Temperatures)
+        else:
             value = [value] * len(self.Temperatures)
         self.function.setAttributeValue('FWHMs', value)
+        self._resolutionModel = None
+
+    @property
+    def FWHM(self):
+        return self.FWHMs
+
+    @FWHM.setter
+    def FWHM(self, value):
+        self.FWHMs = value
+
+    @property
+    def ResolutionModel(self):
+        return self._resolutionModel
+
+    @ResolutionModel.setter
+    def ResolutionModel(self, value):
+        from .function import ResolutionModel
+        if hasattr(value, 'model'):
+            self._resolutionModel = value
+        else:
+            self._resolutionModel = ResolutionModel(value)
+        nSpec = len(self.Temperatures)
+        if nSpec > 1:
+            if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != nSpec:
+                raise RuntimeError('Resolution model is expected to have %s functions, found %s' %
+                                   (nSpec, self._resolutionModel.NumberOfSpectra))
+            for i in range(nSpec):
+                model = self._resolutionModel.model[i]
+                self.function.setAttributeValue('sp%i.FWHMX' % i, model[0])
+                self.function.setAttributeValue('sp%i.FWHMY' % i, model[1])
+        else:
+            model = self._resolutionModel.model
+            self.function.setAttributeValue('FWHMX', model[0])
+            self.function.setAttributeValue('FWHMY', model[1])
 
     @property
     def FWHMVariation(self):
