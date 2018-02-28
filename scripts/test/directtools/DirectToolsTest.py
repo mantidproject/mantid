@@ -15,20 +15,37 @@ class DirectTest(unittest.TestCase):
     def tearDown(self):
         mtd.clear()
 
-    def test_box2D(self):
+    def _box2DSetup(self):
         xs = numpy.tile(numpy.array([-1, 0, 2, 4, 5]), (3, 1))
+        vertAxis = numpy.array([-2, -1, 0, 1])
+        return xs, vertAxis
+
+    def test_box2D_defaults(self):
+        xs, vertAxis = self._box2DSetup()
         vertAxis = numpy.array([-2, -1, 0, 1])
         box = directtools.box2D(xs, vertAxis)
         numpy.testing.assert_equal(xs[box], xs)
+
+    def test_box2D_horMin(self):
+        xs, vertAxis = self._box2DSetup()
         box = directtools.box2D(xs, vertAxis, horMin=0)
         expected = numpy.tile(numpy.array([0, 2, 4, 5]), (3, 1))
         numpy.testing.assert_equal(xs[box], expected)
+
+    def test_box2D_horMax(self):
+        xs, vertAxis = self._box2DSetup()
         box = directtools.box2D(xs, vertAxis, horMax=5)
         expected = numpy.tile(numpy.array([-1, 0, 2, 4]), (3, 1))
         numpy.testing.assert_equal(xs[box], expected)
+
+    def test_box2D_vertMin(self):
+        xs, vertAxis = self._box2DSetup()
         box = directtools.box2D(xs, vertAxis, vertMin=-1)
         expected = numpy.tile(numpy.array([-1, 0, 2, 4, 5]), (2, 1))
         numpy.testing.assert_equal(xs[box], expected)
+
+    def test_box2D_vertMax(self):
+        xs, vertAxis = self._box2DSetup()
         box = directtools.box2D(xs, vertAxis, vertMax=-1)
         expected = numpy.tile(numpy.array([-1, 0, 2, 4, 5]), (1, 1))
         numpy.testing.assert_equal(xs[box], expected)
@@ -78,31 +95,51 @@ class DirectTest(unittest.TestCase):
 
     def test_mantidsubplotsetup(self):
         result = directtools.mantidsubplotsetup()
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result['projection'], 'mantid')
+        self.assertEqual(result, {'projection': 'mantid'})
 
-    def test_nanminmax(self):
+    def _nanminmaxSetup(self):
         xs = numpy.tile(numpy.array([-1, 0, 2, 4, 5]), 3)
         ys = numpy.linspace(-5, 3, 4 * 3)
         vertAxis = numpy.array([-3, -1, 2, 4])
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=3, VerticalAxisUnit='Degrees', VerticalAxisValues=vertAxis, StoreInADS=False)
-        cMin, cMax = directtools.nanminmax(ws)
-        self.assertEqual(cMin, ys[0])
-        self.assertEqual(cMax, ys[-1])
-        cMin, cMax = directtools.nanminmax(ws, horMin=0)
-        self.assertEqual(cMin, ys[1])
-        self.assertEqual(cMax, ys[-1])
-        cMin, cMax = directtools.nanminmax(ws, horMax=4)
-        self.assertEqual(cMin, ys[0])
-        self.assertEqual(cMax, ys[-2])
-        cMin, cMax = directtools.nanminmax(ws, vertMin=-1)
-        self.assertEqual(cMin, ys[4])
-        self.assertEqual(cMax, ys[-1])
-        cMin, cMax = directtools.nanminmax(ws, vertMax=2)
-        self.assertEqual(cMin, ys[0])
-        self.assertEqual(cMax, ys[-5])
+        return ws
 
-    def test_plotconstE(self):
+    def test_nanminmax_defaults(self):
+        ws = self._nanminmaxSetup()
+        ys = ws.extractY()
+        cMin, cMax = directtools.nanminmax(ws)
+        self.assertEqual(cMin, ys[0, 0])
+        self.assertEqual(cMax, ys[2, -1])
+
+    def test_nanminmax_horMin(self):
+        ws = self._nanminmaxSetup()
+        ys = ws.extractY()
+        cMin, cMax = directtools.nanminmax(ws, horMin=0)
+        self.assertEqual(cMin, ys[0, 1])
+        self.assertEqual(cMax, ys[2, -1])
+
+    def test_nanminmax_horMax(self):
+        ws = self._nanminmaxSetup()
+        ys = ws.extractY()
+        cMin, cMax = directtools.nanminmax(ws, horMax=4)
+        self.assertEqual(cMin, ys[0, 0])
+        self.assertEqual(cMax, ys[2, -2])
+
+    def test_nanminmax_vertMin(self):
+        ws = self._nanminmaxSetup()
+        ys = ws.extractY()
+        cMin, cMax = directtools.nanminmax(ws, vertMin=-1)
+        self.assertEqual(cMin, ys[1, 0])
+        self.assertEqual(cMax, ys[2, -1])
+
+    def test_nanminmax_vertMax(self):
+        ws = self._nanminmaxSetup()
+        ys = ws.extractY()
+        cMin, cMax = directtools.nanminmax(ws, vertMax=2)
+        self.assertEqual(cMin, ys[0, 0])
+        self.assertEqual(cMax, ys[1, -1])
+
+    def test_plotconstE_nonListArgsExecutes(self):
         ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {
             'workspaces': ws,
@@ -110,6 +147,9 @@ class DirectTest(unittest.TestCase):
             'dE' : 1.5
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+
+    def test_plotconstE_wsListExecutes(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {
             'workspaces': [ws, ws],
             'E' : 13.,
@@ -117,6 +157,9 @@ class DirectTest(unittest.TestCase):
             'style' : 'l'
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+
+    def test_plotconstE_EListExecutes(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {
             'workspaces': ws,
             'E' : [13., 23.],
@@ -124,6 +167,9 @@ class DirectTest(unittest.TestCase):
             'style' : 'm'
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+
+    def test_plotconstE_dEListExecutes(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {
             'workspaces': ws,
             'E' : 13.,
@@ -132,7 +178,7 @@ class DirectTest(unittest.TestCase):
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
 
-    def test_plotconstQ(self):
+    def test_plotconstQ_nonListArgsExecutes(self):
         ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {
             'workspaces': ws,
@@ -140,6 +186,9 @@ class DirectTest(unittest.TestCase):
             'dQ' : 42.
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+
+    def test_plotconstQ_wsListExecutes(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {
             'workspaces': [ws, ws],
             'Q' : 523.,
@@ -147,6 +196,9 @@ class DirectTest(unittest.TestCase):
             'style' : 'l'
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+
+    def test_plotconstQ_QListExecutes(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {
             'workspaces': ws,
             'Q' : [472., 623.],
@@ -154,6 +206,9 @@ class DirectTest(unittest.TestCase):
             'style' : 'm'
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+
+    def test_plotconstQ_dQListExecutes(self):
+        ws = LoadILLTOF('ILL/IN4/084446.nxs')
         kwargs = {
             'workspaces': ws,
             'Q' : 523.,
@@ -162,18 +217,26 @@ class DirectTest(unittest.TestCase):
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
 
-    def test_plotprofiles(self):
+    def test_plotprofiles_noXUnitsExecutes(self):
         xs = numpy.linspace(-3., 10., 12)
         ys = numpy.tile(1., len(xs) - 1)
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        # For some reason one plottin operation creates three lines on the axes.
+        # For some reason one plotting operation creates three lines on the axes.
         self.assertEqual(len(axes.get_lines()), 3)
+
+    def test_plotprofiles_DeltaEXUnitsExecutes(self):
+        xs = numpy.linspace(-3., 10., 12)
+        ys = numpy.tile(1., len(xs) - 1)
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='DeltaE', StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
         self.assertEqual(len(axes.get_lines()), 3)
+
+    def test_plotprofiles_MomentumTransferXUnitsExecutes(self):
+        xs = numpy.linspace(-3., 10., 12)
+        ys = numpy.tile(1., len(xs) - 1)
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='MomentumTransfer', StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
