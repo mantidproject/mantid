@@ -22,8 +22,8 @@ Improved
 - :ref:`BASISReduction  <algm-BASISReduction>` now permits the user to exclude a contiguous time segment from the reduction process.
 - :ref:`BASISReduction <algm-BASISReduction>` option *noMonitorNorm* changed to *MonitorNorm*.
 - :ref:`BASISReduction <algm-BASISReduction>` now contains log entry *asString* storing the options passed to to the algorithm.
-- :ref:`IqtFitSequential <algm-IqtFitSequential>` and `IqtFitMultiple <algm-IqtFitMultiple>` can now both extract members from the fit (when the ExtractMembers property is set to True).
-- Loading the sample log files into a workspace can be disabled when calling the :ref:`LoadVesuvio <algm-LoadVesuvio>` algorithm by supplying `LoadLogFiles=False` to the algorithm call
+- :ref:`IqtFitSequential <algm-IqtFitSequential>` and :ref:`IqtFitMultiple <algm-IqtFitMultiple>` can now both extract members from the fit (when the ExtractMembers property is set to True).
+- Loading the sample log files into a workspace can be disabled when calling the :ref:`LoadVesuvio <algm-LoadVesuvio>` algorithm by supplying *LoadLogFiles=False* to the algorithm call
 - :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` no longer has options *DetectDRange* and *DRange*, D-Ranges are now always calculated automatically within the algorithm.
 
 
@@ -41,7 +41,7 @@ Improved
 
 Bugfixes
 ########
-- Previously, running a script which only applied a single correction (e.g. container subtraction), would produce an error 'f0.Scaling', this has now been fixed.
+- Previously, running a script which only applied a single correction (e.g. container subtraction), would produce an error *f0.Scaling*, this has now been fixed.
 
 
 Data Analysis Interfaces
@@ -63,11 +63,11 @@ New
 
   * Ties can now be used to tie parameters between all functions and custom ties (involving mathematical expressions) are now available.
   * It is now possible to add constraints to parameters.
-  * Any additional functions can be added from the library of available MANTID functions by right-clicking on 'Functions' in the browser and selecting 'Add Function'.
-  * Function setups can now be saved and re-loaded (Custom Setups) from the 'Setup' menu.
+  * Any additional functions can be added from the library of available MANTID functions by right-clicking on *Functions* in the browser and selecting *Add Function*.
+  * Function setups can now be saved and re-loaded (Custom Setups) from the *Setup* menu.
   * Functions can be copied and loaded from the clipboard.
-  * Right-clicking on any function in the browser and selecting 'Help' will open a window containing the documentation for that function.
-  * The guess can be plot in a separate window from the interface (automatically updates as the fit model is changed), accessible through the 'Display' menu.
+  * Right-clicking on any function in the browser and selecting *Help* will open a window containing the documentation for that function.
+  * The guess can be plot in a separate window from the interface (automatically updates as the fit model is changed), accessible through the *Display* menu.
 
 Improved
 ########
@@ -81,9 +81,9 @@ Improved
 Bugfixes
 ########
 - The X-Limits for all of the Indirect Data Analysis interfaces are now correctly updated when data is loaded.
-- In the IqtFit interface, the 'AO' parameter now defaults to 0.
+- In the IqtFit interface, the *AO* parameter now defaults to 0.
 - The mini preview plot now updates correctly in the Indirect Data Analysis interfaces, when the fit function is changed; when changed to a function that wasn't used in the most recent fit, will plot only the sample, else will plot the sample, fit and difference.
-- Plotting individual parameters of the fit in the interface ('Plot Options'), will no longer produce an error in the ConvFit interface, when plotting 'FWHM'.
+- Plotting individual parameters of the fit in the interface ('Plot Options'), will no longer produce an error in the ConvFit interface, when plotting *FWHM*.
 
 
 Diffraction
