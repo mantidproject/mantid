@@ -23,13 +23,13 @@ Mantid Documentation
    algorithms/index
    algorithms/*
    concepts/index
-   development/index
    interfaces/index
    fitfunctions/*
    fitminimizers/index
    techniques/index
    api/index
    release/index
+   training/index
 
 
 This is the documentation for Mantid |release|.
@@ -51,5 +51,3 @@ This is the documentation for Mantid |release|.
     - `Python <api/python/index.html>`_
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
 * `Release Notes <release/index.html>`_
-
-

@@ -4,47 +4,44 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 template <size_t NumBanks, typename T>
-void RunMap<NumBanks, T>::add(const int runNumber, const size_t bank,
-                              const T &itemToAdd) {
-  validateBankID(bank);
-  m_map[bank - 1][runNumber] = itemToAdd;
+void RunMap<NumBanks, T>::add(const RunLabel &runLabel, const T &itemToAdd) {
+  validateBankID(runLabel.bank);
+  m_map[runLabel.bank - 1][runLabel.runNumber] = itemToAdd;
 }
 
 template <size_t NumBanks, typename T>
-bool RunMap<NumBanks, T>::contains(const int runNumber,
-                                   const size_t bank) const {
-  return bank > 0 && bank <= NumBanks &&
-         m_map[bank - 1].find(runNumber) != m_map[bank - 1].end();
+bool RunMap<NumBanks, T>::contains(const RunLabel &runLabel) const {
+  return runLabel.bank > 0 && runLabel.bank <= NumBanks &&
+         m_map[runLabel.bank - 1].find(runLabel.runNumber) !=
+             m_map[runLabel.bank - 1].end();
 }
 
 template <size_t NumBanks, typename T>
-const T &RunMap<NumBanks, T>::get(const int runNumber,
-                                  const size_t bank) const {
-  validateBankID(bank);
-  if (!contains(runNumber, bank)) {
+const T &RunMap<NumBanks, T>::get(const RunLabel &runLabel) const {
+  validateBankID(runLabel.bank);
+  if (!contains(runLabel)) {
     throw std::invalid_argument("Tried to access invalid run number " +
-                                std::to_string(runNumber) + " for bank " +
-                                std::to_string(bank));
+                                std::to_string(runLabel.runNumber) +
+                                " for bank " + std::to_string(runLabel.bank));
   }
-  return m_map[bank - 1].at(runNumber);
+  return m_map[runLabel.bank - 1].at(runLabel.runNumber);
 }
 
 template <size_t NumBanks, typename T>
-void RunMap<NumBanks, T>::remove(const int runNumber, const size_t bank) {
-  validateBankID(bank);
-  m_map[bank - 1].erase(runNumber);
+void RunMap<NumBanks, T>::remove(const RunLabel &runLabel) {
+  validateBankID(runLabel.bank);
+  m_map[runLabel.bank - 1].erase(runLabel.runNumber);
 }
 
 template <size_t NumBanks, typename T>
-std::vector<std::pair<int, size_t>>
-RunMap<NumBanks, T>::getRunNumbersAndBankIDs() const {
-  std::vector<std::pair<int, size_t>> pairs;
+std::vector<RunLabel> RunMap<NumBanks, T>::getRunLabels() const {
+  std::vector<RunLabel> pairs;
 
   const auto runNumbers = getAllRunNumbers();
   for (const auto runNumber : runNumbers) {
     for (size_t i = 0; i < NumBanks; ++i) {
       if (m_map[i].find(runNumber) != m_map[i].end()) {
-        pairs.push_back(std::pair<int, size_t>(runNumber, i + 1));
+        pairs.push_back(RunLabel(runNumber, i + 1));
       }
     }
   }
@@ -56,9 +53,8 @@ std::set<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
   std::set<int> runNumbers;
 
   for (const auto &bank : m_map) {
-    for (const auto &runBankPair : bank) {
-      const auto runNumber = runBankPair.first;
-      runNumbers.insert(runNumber);
+    for (const auto &runLabel : bank) {
+      runNumbers.insert(runLabel.first);
     }
   }
 

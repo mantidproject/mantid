@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   AlignComponentsTest.py
   AngularAutoCorrelationsSingleAxisTest.py
   AngularAutoCorrelationsTwoAxesTest.py
+  ApplyDetectorScanEffCorrTest.py
   BinWidthAtXTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
@@ -40,7 +41,6 @@ set ( TEST_PY_FILES
   FindEPPTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
-  GSASIIRefineFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
   IndirectTransmissionTest.py
@@ -64,6 +64,7 @@ set ( TEST_PY_FILES
   MedianBinWidthTest.py
   MergeCalFilesTest.py
   MuscatSofQWTest.py
+  MuonMaxEntTest.py
   NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
   RetrieveRunInfoTest.py

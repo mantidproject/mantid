@@ -13,6 +13,7 @@ class V3D;
 
 namespace Geometry {
 // Forward declarations
+class CSGObject;
 class IComponent;
 class ParameterMap;
 
@@ -62,7 +63,7 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
                         const std::vector<Kernel::V3D> &vecdetpos,
                         const std::vector<detid_t> &vecdetid);
 
-MANTID_GEOMETRY_DLL boost::shared_ptr<IObject>
+MANTID_GEOMETRY_DLL boost::shared_ptr<Geometry::CSGObject>
 createSphere(double radius, const Kernel::V3D &centre, const std::string &id);
 
 MANTID_GEOMETRY_DLL std::string

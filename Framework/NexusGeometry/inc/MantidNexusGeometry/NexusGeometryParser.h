@@ -84,10 +84,10 @@ private:
 
   /// From the NeXus-OFF polygonal mesh, create a triangular mesh
   std::vector<uint16_t>
-  createTriangularFaces(std::vector<int> &faceIndices,
-                        std::vector<uint16_t> &windingOrder) const;
+  createTriangularFaces(const std::vector<uint16_t> &faceIndices,
+                        const std::vector<uint16_t> &windingOrder) const;
 
-  void createTrianglesFromPolygon(std::vector<uint16_t> &windingOrder,
+  void createTrianglesFromPolygon(const std::vector<uint16_t> &windingOrder,
                                   std::vector<uint16_t> &triangularFaces,
                                   int &startOfFace, int &endOfFace) const;
 };

@@ -1,10 +1,12 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidNexusGeometry/ShapeGeometryAbstraction.h"
+#include "MantidKernel/Material.h"
 
 #include <boost/make_shared.hpp>
 
@@ -64,6 +66,14 @@ objectHolder ShapeGeometryAbstraction::createCylinder(
   // std::string algebra = "(-0 -1 2)";
   std::string algebra = "(-0 -1 2)";
   return this->createShape(surfaceShapes, algebra, boundingBoxSimplified);
+}
+
+objectHolder ShapeGeometryAbstraction::createMesh(
+    std::vector<uint16_t> &&triangularFaces,
+    std::vector<Mantid::Kernel::V3D> &&vertices) {
+
+  return boost::make_shared<Geometry::MeshObject>(
+      std::move(triangularFaces), std::move(vertices), Kernel::Material{});
 }
 
 /// Finalise shape

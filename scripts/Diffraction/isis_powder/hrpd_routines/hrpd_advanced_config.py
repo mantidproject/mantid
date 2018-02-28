@@ -39,11 +39,11 @@ window_30_130_params = {
 }
 
 window_100_200_params = {
-    "vanadium_tof_cropping": (1e5, 2.15e5),
+    "vanadium_tof_cropping": (1e5, 200500),
     "focused_cropping_values": [
-        (1e5, 2e5),      # Bank 1
-        (8.7e4, 2.1e5),  # Bank 2
-        (9.9e4, 2.1e5)   # Bank 3
+        (100200, 1.99e5),  # Bank 1
+        (100100, 1.99e5),  # Bank 2
+        (100100, 1.99e5)   # Bank 3
     ]
 }
 
@@ -64,9 +64,9 @@ file_names = {
 general_params = {
     "spline_coefficient": 70,
     "focused_bin_widths": [
-        -0.0005,  # Bank 1
-        -0.0005,  # Bank 2
-        -0.001    # Bank 3
+        -0.0003,  # Bank 1
+        -0.0007,  # Bank 2
+        -0.0012   # Bank 3
     ],
     "mode": "coupled"
 }

@@ -4,6 +4,7 @@
 // Includes
 //------------------
 
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidNexusGeometry/DllConfig.h"
@@ -25,6 +26,8 @@ class DLLExport ShapeGeometryAbstraction
     : public ShapeAbstractCreator<ShapeGeometryAbstraction, objectHolder> {
 public:
   objectHolder createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef);
+  objectHolder createMesh(std::vector<uint16_t> &&triangularFaces,
+                          std::vector<Mantid::Kernel::V3D> &&vertices);
 
 private:
   objectHolder createShape(const std::map<int, surfaceHolder> &surfaces,

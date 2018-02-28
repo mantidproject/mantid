@@ -83,7 +83,7 @@ ParsingErrors NexusGeometryParser::parseNexusGeometry() {
   // Get path to all detector groups
   try {
     std::vector<Group> detectorGroups = this->openDetectorGroups();
-    for (auto detectorGroup : detectorGroups) {
+    for (auto &detectorGroup : detectorGroups) {
       // Get the pixel offsets
       Pixels pixelOffsets = this->getPixelOffsets(detectorGroup);
       // Get the transformations
@@ -131,7 +131,8 @@ NexusGeometryParser::openSubGroups(Group &parentGroup,
       Group childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
       for (uint32_t attribute_index = 0;
-           attribute_index < childGroup.getNumAttrs(); ++attribute_index) {
+           attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
+           ++attribute_index) {
         // Test attribute at current index for NX_class
         Attribute attribute = childGroup.openAttribute(attribute_index);
         if (attribute.getName() == NX_CLASS) {
@@ -320,7 +321,8 @@ NexusGeometryParser::getTransformations(Group &detectorGroup) {
     Eigen::Vector3d transformVector(0.0, 0.0, 0.0);
     H5std_string transformType;
     H5std_string transformUnits;
-    for (uint32_t i = 0; i < transformation.getNumAttrs(); i++) {
+    for (uint32_t i = 0;
+         i < static_cast<uint32_t>(transformation.getNumAttrs()); i++) {
       // Open attribute at current index
       Attribute attribute = transformation.openAttribute(i);
       H5std_string attributeName = attribute.getName();
@@ -385,7 +387,8 @@ objectHolder NexusGeometryParser::parseNexusShape(Group &detectorGroup) {
   }
 
   H5std_string shapeType;
-  for (uint32_t i = 0; i < shapeGroup.getNumAttrs(); ++i) {
+  for (uint32_t i = 0; i < static_cast<uint32_t>(shapeGroup.getNumAttrs());
+       ++i) {
     Attribute attribute = shapeGroup.openAttribute(i);
     H5std_string attributeName = attribute.getName();
     if (attributeName == NX_CLASS) {
@@ -425,30 +428,31 @@ objectHolder NexusGeometryParser::parseNexusCylinder(Group &shapeGroup) {
 // Parse OFF (mesh) nexus geometry
 objectHolder NexusGeometryParser::parseNexusMesh(Group &shapeGroup) {
 
-  std::vector<int> faceIndices = this->get1DDataset<int>("faces", shapeGroup);
-  std::vector<uint16_t> windingOrder =
+  const std::vector<uint16_t> faceIndices =
+      this->get1DDataset<uint16_t>("faces", shapeGroup);
+  const std::vector<uint16_t> windingOrder =
       this->get1DDataset<uint16_t>("winding_order", shapeGroup);
-
   std::vector<uint16_t> triangularFaces =
       createTriangularFaces(faceIndices, windingOrder);
 
   // 1D reads row first, then columns
-  std::vector<double> nexusVertices =
-      this->get1DDataset<double>("vertices", shapeGroup);
+  const auto nexusVertices = this->get1DDataset<double>("vertices", shapeGroup);
   auto numberOfVertices = nexusVertices.size() / 3;
   std::vector<Mantid::Kernel::V3D> vertices(numberOfVertices);
-  for (int vertexNumber; vertexNumber < numberOfVertices - 2;
+  for (size_t vertexNumber = 0; vertexNumber < numberOfVertices - 2;
        vertexNumber += 3) {
     vertices.emplace_back(nexusVertices[vertexNumber],
                           nexusVertices[vertexNumber + 1],
                           nexusVertices[vertexNumber + 2]);
   }
 
-  return this->sAbsCreator.createMesh(triangularFaces, vertices);
+  return this->sAbsCreator.createMesh(std::move(triangularFaces),
+                                      std::move(vertices));
 }
 
 std::vector<uint16_t> NexusGeometryParser::createTriangularFaces(
-    std::vector<int> &faceIndices, std::vector<uint16_t> &windingOrder) const {
+    const std::vector<uint16_t> &faceIndices,
+    const std::vector<uint16_t> &windingOrder) const {
 
   // Elements 0 to 2 are the indices of the vertices vector corresponding to the
   // vertices of the first triangle.
@@ -474,8 +478,9 @@ std::vector<uint16_t> NexusGeometryParser::createTriangularFaces(
 }
 
 void NexusGeometryParser::createTrianglesFromPolygon(
-    std::vector<uint16_t> &windingOrder, std::vector<uint16_t> &triangularFaces,
-    int &startOfFace, int &endOfFace) const {
+    const std::vector<uint16_t> &windingOrder,
+    std::vector<uint16_t> &triangularFaces, int &startOfFace,
+    int &endOfFace) const {
   int polygonOrder = endOfFace - startOfFace;
   auto first = windingOrder.begin() + startOfFace;
 

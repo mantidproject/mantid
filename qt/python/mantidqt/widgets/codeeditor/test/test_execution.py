@@ -65,6 +65,10 @@ class PythonCodeExecutionTest(unittest.TestCase):
         executor.reset_context()
         self.assertEqual(0, len(executor.globals_ns))
 
+    def test_startup_code_executed_by_default(self):
+        executor = PythonCodeExecution(startup_code="x=100")
+        self.assertEqual(100, executor.globals_ns['x'])
+
     # ---------------------------------------------------------------------------
     # Successful execution tests
     # ---------------------------------------------------------------------------
@@ -107,7 +111,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
         code = """
 def foo():
     def bar():
-        # raises a NameError
+        \"""raises a NameError\"""
         y = _local + 1
     # call inner
     bar()
@@ -216,7 +220,7 @@ squared = sum*sum
         executor = PythonCodeExecution()
         self.assertRaises(expected_exc_type, executor.execute, code)
 
-    def _run_async_code(self, code, with_progress=False, filename=''):
+    def _run_async_code(self, code, with_progress=False, filename=None):
         executor = PythonCodeExecution()
         if with_progress:
             recv = ReceiverWithProgress()
