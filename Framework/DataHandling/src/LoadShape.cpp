@@ -94,10 +94,14 @@ void LoadShape::exec() {
     throw std::runtime_error("Unable to obtain instrument to add loaded shape to");
   }
 
-  std::string destinationComponent = "";
+  boost::shared_ptr<Component> component = nullptr;
   bool attachToSample = getProperty("Attach to sample");
   if (!attachToSample) {
-    destinationComponent = getProperty("Component name");
+    std::string compName = getProperty("Component name");
+    component = outputInstr->getComponentByName(compName);
+  }
+  else {
+    component = outputInstr->getSample();
   }
 
   std::string filename = getProperty("Filename");
@@ -108,6 +112,8 @@ void LoadShape::exec() {
   }
 
   boost::shared_ptr<MeshObject> mShape = getMeshObject(file);
+
+  // Still to figure out how to add shape to instrument at componenent.
 
 }
 
