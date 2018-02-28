@@ -4,6 +4,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -19,6 +21,7 @@ DECLARE_ALGORITHM(LoadShape)
 
 using namespace Kernel;
 using namespace API;
+using namespace Geometry;
 
 void LoadShape::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -78,6 +81,21 @@ int LoadShape::confidence(Kernel::FileDescriptor &descriptor) const {
 
 void LoadShape::exec() {
 
+  API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+  Instrument_const_sptr instr = ws->getInstrument();
+
+  std::string filename = getProperty("Filename");
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    g_log.error("Unable to open file: " + filename);
+    throw Exception::FileError("Unable to open file: ", filename);
+  }
+
+  boost::shared_ptr<MeshObject> mShape = getMeshObject(file);
+}
+
+boost::shared_ptr<MeshObject> LoadShape::getMeshObject(std::ifstream& file) {
+  return nullptr;
 }
 
 } // end DataHandling namespace

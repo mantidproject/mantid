@@ -2,6 +2,7 @@
 #define DATAHANDLING_LOAD_SHAPE_H_
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -61,6 +62,7 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
+  boost::shared_ptr<Geometry::MeshObject> getMeshObject(std::ifstream &file);
 };
 
 
