@@ -75,6 +75,8 @@ Performance
 - Up to 30% performance improvement for :ref:`CropToComponent <algm-CropToComponent>` based on ongoing work on Instrument-2.0.
 - Improved rate of convergence for :ref:`MaxEnt <algm-MaxEnt>`. The  ``ChiTarget`` property has been replaced by  ``ChiTargetOverN``.
 
+A `bug <https://github.com/mantidproject/mantid/pull/20953>`_ in the handling of fractional bin weights in a specialised form (`RebinnedOutput <http://doxygen.mantidproject.org/nightly/d4/d31/classMantid_1_1DataObjects_1_1RebinnedOutput.html>`_) of :ref:`Workspace2D <Workspace2D>` has been fixed. This mainly affects the algorithms :ref:`algm-SofQWNormalisedPolygon` and :ref:`algm-Rebin2D`, which underlies the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_.
+
 Python
 ------
 In `mantid.simpleapi`, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.

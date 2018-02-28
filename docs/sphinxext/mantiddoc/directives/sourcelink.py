@@ -266,7 +266,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             ['git', 'log', '-n 1', '--pretty=format:%cd', '--date=short', filename],
             cwd=self.source_root,
             stdout=subprocess.PIPE)
-        return proc.stdout.read()
+        return str(proc.stdout.read().decode('utf-8'))
 
 
 def setup(app):

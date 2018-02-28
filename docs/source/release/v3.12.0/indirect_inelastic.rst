@@ -12,6 +12,8 @@ New
 ###
 
 - :ref:`algm-ExtractQENSMembers` can be used to extract the fit members from any QENS fit.
+- New algorithm :ref:`BASISDiffraction <algm-BASISDiffraction-v1>` to determine the orientation of crystal samples for the BASIS beamline.
+
 
 Improved
 ########
@@ -20,12 +22,14 @@ Improved
 - :ref:`BASISReduction  <algm-BASISReduction>` now permits the user to exclude a contiguous time segment from the reduction process.
 - :ref:`BASISReduction <algm-BASISReduction>` option *noMonitorNorm* changed to *MonitorNorm*.
 - :ref:`BASISReduction <algm-BASISReduction>` now contains log entry *asString* storing the options passed to to the algorithm.
+- :ref:`IqtFitSequential <algm-IqtFitSequential>` and `IqtFitMultiple <algm-IqtFitMultiple>` can now both extract members from the fit (when the ExtractMembers property is set to True).
 
 Vesuvio
 -------
 
 New
 ###
+- Cumulative Angle-Averaged Data (sum of fits normalised by their integral) can be calculated and produced as output by setting the 'calculate_caad' flag to True.
 
 Improved
 ########
@@ -57,6 +61,7 @@ Improved
 - The Plot Guess Feature in the ConvFit Interface is now enabled for the diffusion functions.
 - The Plot Guess Feature in the MSDFit Interface is now implemented for the three models introduced in release v3.11 (MsdGauss, MsdPeters and MsdYi).
 - The ExtractMembers option in the ConvFit Interface will now function correctly for diffusion functions.
+- The ExtractMembers option is now available in the IqtFit interface.
 
 Bugfixes
 ########
@@ -66,17 +71,6 @@ Bugfixes
 - Plotting individual parameters of the fit in the interface ('Plot Options'), will no longer produce an error in the ConvFit interface, when plotting 'FWHM'.
 - In the Calculate Paalman Pings tab of the Indirect Correction interface the container back thickness is now set correctly.
 
-Data Reduction Interfaces
--------------------------
-
-New
-###
-
-Improved
-########
-
-Bugfixes
-########
 
 Indirect Diffraction
 --------------------
@@ -88,16 +82,10 @@ Improved
 Corrections Interfaces
 ----------------------
 
-New
-###
-
 Improved
 ########
 - The Apply Paalman Pings interface has been renamed to Apply Absorption Correction.
 - The Apply Absorption Correction interface no longer requires workspaces to be in units of wavelength (this is done within :ref:`algm-ApplyPaalmanPingsCorrection`).
-
-Bugfixes
-########
 
 Abins
 -----

@@ -5,10 +5,6 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 Powder Diffraction
 ------------------
 - :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>` has been amended to write the metadata (e.g. temperature) value in the header, in the form of the Fullprof readable keyword.
@@ -85,14 +81,12 @@ Single Crystal Diffraction
 
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now can accept long or short names for the point group and reflection condition.
 
+- New algorithm :ref:`LoadWAND <algm-LoadWAND>` that will load event data for WAND² integrating out the events and correctly setting the units.
 
 Total Scattering
 ----------------
 - A basic analysis for total scattering method ``create_total_scattering_pdf`` has been added to POLARIS. More information can be found on the POLARIS reference page.
 
-
-Imaging
--------
 
 Features Removed
 ----------------

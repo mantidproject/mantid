@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import ComputeIncoherentDOS, CreateSampleWorkspace, LoadInstrument, ScaleX, Scale, SetSampleMaterial, SofQW, Transpose
+from mantid.simpleapi import ComputeIncoherentDOS, CreateSampleWorkspace, LoadInstrument, ScaleX, Scale, SetSampleMaterial, SofQW3, Transpose
 import numpy as np
 from scipy import constants
 
@@ -14,7 +14,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap = True)
         with self.assertRaises(RuntimeError):
             ws_DOS = ComputeIncoherentDOS(ws)
-        ws = SofQW(ws, [0, 0.05, 8], 'Direct', 25)
+        ws = SofQW3(ws, [0, 0.05, 8], 'Direct', 25)
         qq = np.arange(0, 8, 0.05)+0.025
         for i in range(ws.getNumberHistograms()):
             ws.setY(i, ws.readY(i)*qq[i]**2)
@@ -57,7 +57,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         # Checks that the Bose factor correction is ok.
         dos_eplus = np.max(ws_DOS.readY(0)[100:200])
         dos_eminus = np.max(ws_DOS.readY(0)[:100])
-        self.assertAlmostEqual(dos_eplus, dos_eminus, places=1)
+        self.assertAlmostEqual(dos_eplus / dos_eminus, 1., places=1)
         # Check that unit conversion from cm^-1 to meV works and also that conversion to states/meV is done
         ws = self.convertToWavenumber(ws)
         SetSampleMaterial(ws, 'Al')
@@ -66,7 +66,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         self.assertEquals(ws_DOSn.getAxis(0).getUnit().unitID(), 'DeltaE')
         material = ws.sample().getMaterial()
         factor = material.relativeMolecularMass() / (material.totalScatterXSection() * 1000) * 4 * np.pi
-        self.assertAlmostEqual(np.max(ws_DOSn.readY(0)), np.max(ws_DOS.readY(0))*factor, places=2)
+        self.assertAlmostEqual(np.max(ws_DOSn.readY(0)) / (np.max(ws_DOS.readY(0))*factor), 1., places=1)
 
 if __name__=="__main__":
     unittest.main()
