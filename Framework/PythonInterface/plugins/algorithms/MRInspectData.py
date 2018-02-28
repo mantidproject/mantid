@@ -6,7 +6,6 @@ from mantid.kernel import *
 import mantid.simpleapi
 import math
 import copy
-import logging
 import numpy as np
 from scipy.optimize import curve_fit
 
@@ -206,10 +205,10 @@ class DataInfo(object):
         """
             Log useful diagnostics
         """
-        logging.info("| Run: %s [direct beam: %s]", self.run_number, self.is_direct_beam)
-        logging.info("|   Peak position: %s", self.peak_position)
-        logging.info("|   Reflectivity peak: %s", str(self.peak_range))
-        logging.info("|   Low-resolution pixel range: %s", str(self.low_res_range))
+        logger.notice("| Run: %s [direct beam: %s]" % (self.run_number, self.is_direct_beam))
+        logger.notice("|   Peak position: %s" % self.peak_position)
+        logger.notice("|   Reflectivity peak: %s" % str(self.peak_range))
+        logger.notice("|   Low-resolution pixel range: %s" % str(self.low_res_range))
 
     def get_tof_range(self, ws):
         """
@@ -312,13 +311,13 @@ class DataInfo(object):
         self.roi_background = roi_background
 
         if self.force_peak_roi:
-            logging.error("Forcing peak ROI: %s", self.forced_peak_roi)
+            logger.notice("Forcing peak ROI: %s" % self.forced_peak_roi)
             self.roi_peak = self.forced_peak_roi
         if self.force_low_res_roi:
-            logging.error("Forcing low-res ROI: %s", self.forced_low_res_roi)
+            logger.notice("Forcing low-res ROI: %s" % self.forced_low_res_roi)
             self.roi_low_res = self.forced_low_res_roi
         if self.force_bck_roi:
-            logging.error("Forcing background ROI: %s", self.forced_bck_roi)
+            logger.notice("Forcing background ROI: %s" % self.forced_bck_roi)
             self.roi_background = self.forced_bck_roi
 
     def determine_peak_range(self, ws, specular=True, max_pixel=250):
@@ -345,7 +344,7 @@ class DataInfo(object):
         try:
             specular_peak, low_res, _ = mantid.simpleapi.LRPeakSelection(InputWorkspace=ws_short)
         except:
-            logging.error("Peak finding error [specular=%s]: %s", specular, sys.exc_value)
+            logger.notice("Peak finding error [specular=%s]: %s" % (specular, sys.exc_value))
             return integrated, [0,0], [0,0]
         if specular:
             peak = [specular_peak[0]+self.peak_range_offset, specular_peak[1]+self.peak_range_offset]
@@ -422,20 +421,20 @@ class DataInfo(object):
         # Skip empty data entries
         if ws.getNumberEvents() < self.n_events_cutoff:
             self.data_type = -1
-            logging.info("No data for %s %s", self.run_number, self.cross_section)
+            logger.notice("No data for %s %s" % (self.run_number, self.cross_section))
             return
 
         # Find reflectivity peak and low resolution ranges
         # Those will be our defaults
         integrated, peak, broad_range = self.determine_peak_range(ws, specular=True)
         self.found_peak = copy.copy(peak)
-        logging.info("Run %s [%s]: Peak found %s", self.run_number, self.cross_section, peak)
+        logger.notice("Run %s [%s]: Peak found %s" % (self.run_number, self.cross_section, peak))
         signal_y = integrated.readY(0)
         mantid.simpleapi.DeleteWorkspace(integrated)
         signal_x = range(len(signal_y))
 
         _, low_res, _ = self.determine_peak_range(ws, specular=False)
-        logging.info("Run %s [%s]: Low-res found %s", self.run_number, self.cross_section, str(low_res))
+        logger.notice("Run %s [%s]: Low-res found %s" %(self.run_number, self.cross_section, str(low_res)))
         self.found_low_res = low_res
         bck_range = None
 
@@ -451,7 +450,7 @@ class DataInfo(object):
                 low_res = copy.copy(self.roi_low_res)
             if not self.roi_background == [0,0]:
                 bck_range = copy.copy(self.roi_background)
-            logging.info("Using ROI peak range: [%s %s]", peak[0], peak[1])
+            logger.notice("Using ROI peak range: [%s %s]" % (peak[0], peak[1]))
             self.use_roi_actual = True
 
         # Determine reflectivity peak position (center)
@@ -469,8 +468,7 @@ class DataInfo(object):
             # If we are more than two sigmas away from the middle of the range,
             # there's clearly a problem.
             if np.abs(peak_position - (peak[1]+peak[0])/2.0)  > np.abs(peak[1]-peak[0]):
-                logging.error("Found peak position outside of given range [x=%s], switching to full detector",
-                              peak_position)
+                logger.notice("Found peak position outside of given range [x=%s], switching to full detector" % peak_position)
                 peak_position = (peak[1]+peak[0])/2.0
                 peak_width = (peak[1]-peak[0])/2.0
                 raise RuntimeError("Bad peak position")
@@ -478,16 +476,16 @@ class DataInfo(object):
             # If we can't find a peak, try fitting over the full detector.
             # If we do find a peak, then update the ranges rather than using
             # what we currently have (which is probably given by the ROI).
-            logging.warning("Run %s [%s]: Could not fit a peak in the supplied peak range",
-                            self.run_number, self.cross_section)
-            logging.error(sys.exc_value)
+            logger.notice("Run %s [%s]: Could not fit a peak in the supplied peak range" % \
+                          (self.run_number, self.cross_section))
+            logger.notice(sys.exc_value)
             try:
                 # Define a good default that is wide enough for the fit to work
                 default_width = (self.found_peak[1]-self.found_peak[0])/2.0
                 default_width = max(default_width, 10.0)
                 default_center = (self.found_peak[1]+self.found_peak[0])/2.0
                 default_peak = [default_center-default_width, default_center+default_width]
-                logging.info("Run %s [%s]: Broad data region %s", self.run_number, self.cross_section, broad_range)
+                logger.notice("Run %s [%s]: Broad data region %s" % (self.run_number, self.cross_section, broad_range))
                 x_min = broad_range[0]+10
                 x_max = broad_range[1]-10
                 peak_position, peak_width = self.fit_peak(signal_x[x_min:x_max], signal_y[x_min:x_max], default_peak)
@@ -495,20 +493,20 @@ class DataInfo(object):
                 #low_res = [5, self.n_x_pixel-5]
                 low_res = self.found_low_res
                 self.use_roi_actual = False
-                logging.warning("Run %s [%s]: Peak not in supplied range! Found peak: %s low: %s",
-                                self.run_number, self.cross_section, peak, low_res)
-                logging.warning("Run %s [%s]: Peak position: %s  Peak width: %s", self.run_number,
-                                self.cross_section, peak_position, peak_width)
+                logger.notice("Run %s [%s]: Peak not in supplied range! Found peak: %s low: %s" % \
+                              (self.run_number, self.cross_section, peak, low_res))
+                logger.notice("Run %s [%s]: Peak position: %s  Peak width: %s" % \
+                              (self.run_number, self.cross_section, peak_position, peak_width))
             except:
-                logging.error(sys.exc_value)
-                logging.error("Run %s [%s]: Gaussian fit failed to determine peak position",
-                              self.run_number, self.cross_section)
+                logger.notice(sys.exc_value)
+                logger.notice("Run %s [%s]: Gaussian fit failed to determine peak position" % \
+                              (self.run_number, self.cross_section))
 
         # Update the specular peak range if needed
         if self.update_peak_range:
             peak[0] = math.floor(peak_position-peak_width)
             peak[1] = math.ceil(peak_position+peak_width)
-            logging.info("Updating peak range to: [%s %s]", peak[0], peak[1])
+            logger.notice("Updating peak range to: [%s %s]" % (peak[0], peak[1]))
             self.use_roi_actual = False
 
         # Store the information we found
