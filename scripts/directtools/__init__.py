@@ -10,6 +10,13 @@ from scipy import constants
 import time
 
 
+def _applyIfTimeSeries(logValue, function):
+    """Apply function to logValue, if it is time series log, otherwise return logValue as is."""
+    if isinstance(logValue, collections.Iterable):
+        return function(logValue)
+    return logValue
+
+
 def _chooseMarker(markers, index):
     """Pick a marker from markers and return next cyclic index."""
     if index >= len(markers):
@@ -75,7 +82,7 @@ def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
     wsLabel = ''
     if not singleWS:
         logs = SampleLogs(ws)
-        T = numpy.mean(logs.sample.temperature)
+        T = _applyIfTimeSeries(logs.sample.temperature, numpy.mean)
         wsLabel = '\\#{:06d} $T$ = {:0.1f} K $E_i$ = {:0.2f} meV'.format(logs.run_number, T, logs.Ei)
     cutLabel = ''
     if not singleCut or not singleWidth:
@@ -162,7 +169,7 @@ def _singledatatitle(workspace):
     """Return title for a single data dataset."""
     workspace = _normws(workspace)
     logs = SampleLogs(workspace)
-    T = numpy.mean(logs.sample.temperature)
+    T = _applyIfTimeSeries(logs.sample.temperature, numpy.mean)
     wsName = _sanitizeforlatex(str(workspace))
     title = (wsName + ' ' + logs.instrument.name + ' \\#{:06d}'.format(logs.run_number) + '\n'
              + _plottingtime() + '\n'
@@ -407,11 +414,11 @@ def wsreport(workspace):
     print('Run Number: {:06d}'.format(logs.run_number))
     print('Start Time: {}'.format(logs.start_time))
     print('Ei = {:0.2f} meV    lambda = {:0.2f} \xc5'.format(logs.Ei, logs.wavelength))
-    meanT = numpy.mean(logs.sample.temperature)
-    stdT = numpy.std(logs.sample.temperature)
+    meanT = _applyIfTimeSeries(logs.sample.temperature, numpy.mean)
+    stdT = _applyIfTimeSeries(logs.sample.temperature, numpy.std)
     print('T = {:0.2f} +- {:4.2f} K'.format(meanT, stdT))
-    minT = numpy.amin(logs.sample.temperature)
-    maxT = numpy.amax(logs.sample.temperature)
+    minT = _applyIfTimeSeries(logs.sample.temperature, numpy.amin)
+    maxT = _applyIfTimeSeries(logs.sample.temperature, numpy.amax)
     print('T in [{:0.2f},{:0.2f}]'.format(minT, maxT))
     fermiHertz = logs.FC.rotation_speed / 60.
     print('Fermi = {:0.0f} rpm = {:0.1f} Hz'.format(logs.FC.rotation_speed, fermiHertz))
