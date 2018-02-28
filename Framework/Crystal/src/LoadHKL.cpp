@@ -27,7 +27,7 @@ void LoadHKL::init() {
                                                     FileProperty::Load, ".hkl"),
                   "Path to an hkl file to save.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
@@ -158,8 +158,9 @@ void LoadHKL::exec() {
     radius1 = x1;
   else if (x2 > 0)
     radius1 = x2;
-  double frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) *
-                            5.; // theta%5.
+  double frac =
+      theta -
+      static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
   frac = frac / 5.;
   radius = radius * (1 - frac) + radius1 * frac;
   radius /= mu1;

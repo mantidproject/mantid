@@ -111,12 +111,12 @@ public:
   Mantid::Kernel::V3D getDetectorPosition() const override;
   Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
 
-  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
-                       boost::optional<double> detectorDistance =
-                           boost::none) override;
-  void setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
-                    boost::optional<double> detectorDistance =
-                        boost::none) override;
+  void setQSampleFrame(
+      const Mantid::Kernel::V3D &QSampleFrame,
+      boost::optional<double> detectorDistance = boost::none) override;
+  void
+  setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+               boost::optional<double> detectorDistance = boost::none) override;
 
   void setWavelength(double wavelength) override;
   double getWavelength() const override;
