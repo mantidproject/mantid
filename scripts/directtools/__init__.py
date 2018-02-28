@@ -214,7 +214,7 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     workspace = _normws(workspace)
     horAxis = workspace.getAxis(0)
     horUnit = horAxis.getUnit().unitID()
-    doTranspose = False if horUnit == 'DeltaE' else True
+    doTranspose = horUnit != 'DeltaE'
     if outputName is None:
         outputName = 'CHIofQW_{}'.format(str(workspace))
     if doTranspose:
