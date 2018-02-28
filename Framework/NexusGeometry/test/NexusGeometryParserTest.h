@@ -11,6 +11,8 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include <string>
 
@@ -112,32 +114,55 @@ public:
     auto affine = Eigen::Transform<double, 3, Eigen::Affine>::Identity();
     // Rotation of bank
     affine = Eigen::Quaterniond(
-        Eigen::AngleAxisd(rotation * M_PI / 180, rotationAxis)) * affine;
+                 Eigen::AngleAxisd(rotation * M_PI / 180, rotationAxis)) *
+             affine;
     // Translation of bank
     affine = Eigen::Translation3d(magnitude * unitVectorTranslation) * affine;
     auto expectedPosition = affine * offset;
     TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-3));
   }
 
-  void test_shape() {
+  void test_shape_cylinder_shape() {
+
+    auto beamline = extractBeamline();
+    auto componentInfo = std::move(beamline.first);
+    const auto &det1Shape = componentInfo->shape(1);
+    const auto &det2Shape = componentInfo->shape(2);
+    TSM_ASSERT_EQUALS("Pixel shapes should be the same within bank", &det1Shape,
+                      &det2Shape);
+
+    const auto *csgShape1 =
+        dynamic_cast<const Mantid::Geometry::CSGObject *>(&det1Shape);
+    TSM_ASSERT("Expected pixel shape as CSGObject", csgShape1 != nullptr);
+    const auto *csgShape2 =
+        dynamic_cast<const Mantid::Geometry::CSGObject *>(&det2Shape);
+    TSM_ASSERT("Expected monitors shape as CSGObject", csgShape2 != nullptr);
+    auto shapeBB = det1Shape.getBoundingBox();
+    TS_ASSERT_DELTA(shapeBB.xMax() - shapeBB.xMin(), 0.03125 - (-0.03125),
+                    1e-9); // Cylinder length fixed in file
+    TS_ASSERT_DELTA(shapeBB.yMax() - shapeBB.yMin(), 2 * 0.00405,
+                    1e-9); // Cylinder radius fixed in file
+  }
+
+  void test_mesh_shape() {
 
     auto beamline = extractBeamline();
     auto componentInfo = std::move(beamline.first);
     auto detectorInfo = std::move(beamline.second);
     const size_t monitorIndex = 0; // Fixed in file
     TS_ASSERT(detectorInfo->isMonitor(monitorIndex));
-    TSM_ASSERT("Monitor has no shape",
-               !componentInfo->hasValidShape(monitorIndex));
-    const auto &det1Shape = componentInfo->shape(1);
-    const auto &det2Shape = componentInfo->shape(2);
-    TSM_ASSERT_EQUALS("Pixel shapes should be the same within bank", &det1Shape,
-                      &det2Shape);
+    TSM_ASSERT("Monitor shape", componentInfo->hasValidShape(monitorIndex));
+    const auto &monitorShape = componentInfo->shape(monitorIndex);
+    const auto *meshShape =
+        dynamic_cast<const Mantid::Geometry::MeshObject *>(&monitorShape);
+    TSM_ASSERT("Expected monitors shape as mesh", meshShape != nullptr);
 
-    auto shapeBB = det1Shape.getBoundingBox();
-    TS_ASSERT_DELTA(shapeBB.xMax() - shapeBB.xMin(), 0.03125 - (-0.03125),
-                    1e-9); // Cylinder length fixed in file
-    TS_ASSERT_DELTA(shapeBB.yMax() - shapeBB.yMin(), 2 * 0.00405,
-                    1e-9); // Cylinder radius fixed in file
+    TS_ASSERT_EQUALS(meshShape->numberOfTriangles(),
+                     6 * 2); // Each face of cube split into 2 triangles
+    TS_ASSERT_EQUALS(meshShape->numberOfVertices(),
+                     8); // 8 unique vertices in cube
+    auto shapeBB = monitorShape.getBoundingBox();
+    TS_ASSERT_DELTA(shapeBB.xMax() - shapeBB.xMin(), 2.0, 1e-9);
   }
 
 private:

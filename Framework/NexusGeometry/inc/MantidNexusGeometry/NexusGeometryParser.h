@@ -72,9 +72,9 @@ private:
   /// Parse shape - choose what type shape
   objectHolder parseNexusShape(const H5::Group &detectorGroup);
   /// Parse cylinder nexus geometry
-  objectHolder parseNexusCylinder(H5::Group &shapeGroup);
+  objectHolder parseNexusCylinder(const H5::Group &shapeGroup);
   /// Parse OFF (mesh) nexus geometry
-  objectHolder parseNexusMesh(H5::Group &shapeGroup);
+  objectHolder parseNexusMesh(const H5::Group &shapeGroup);
   /// Parse source
   void parseAndAddSource();
   /// Parse sample

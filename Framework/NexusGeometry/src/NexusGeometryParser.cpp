@@ -19,7 +19,7 @@ using namespace H5;
 // Eigen typedefs
 typedef Eigen::Matrix<double, 3, Eigen::Dynamic> Pixels;
 
-// Anonymous namespace for H5 constants
+// Anonymous namespace
 namespace {
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
 const H5std_string NX_CLASS = "NX_class";
@@ -49,6 +49,15 @@ const static double DEGREES_IN_SEMICIRCLE = 180;
 // Nexus shape types
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
 const H5std_string NX_OFF = "NXoff_geometry";
+
+std::vector<uint16_t> vecUnsignedInt16(const std::vector<int32_t> &toConvert) {
+  std::vector<uint16_t> target(toConvert.size());
+  for (size_t i = 0; i < target.size(); ++i) {
+    target[i] = uint16_t(toConvert[i]);
+  }
+  return target;
+}
+
 } // namespace
 
 /// Constructor opens the nexus file
@@ -431,12 +440,12 @@ objectHolder NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) {
 }
 
 // Parse OFF (mesh) nexus geometry
-objectHolder NexusGeometryParser::parseNexusMesh(Group &shapeGroup) {
+objectHolder NexusGeometryParser::parseNexusMesh(const Group &shapeGroup) {
 
   const std::vector<uint16_t> faceIndices =
-      this->get1DDataset<uint16_t>("faces", shapeGroup);
-  const std::vector<uint16_t> windingOrder =
-      this->get1DDataset<uint16_t>("winding_order", shapeGroup);
+      vecUnsignedInt16(this->get1DDataset<int32_t>("faces", shapeGroup));
+  const std::vector<uint16_t> windingOrder = vecUnsignedInt16(
+      this->get1DDataset<int32_t>("winding_order", shapeGroup));
   std::vector<uint16_t> triangularFaces =
       createTriangularFaces(faceIndices, windingOrder);
 
@@ -444,11 +453,11 @@ objectHolder NexusGeometryParser::parseNexusMesh(Group &shapeGroup) {
   const auto nexusVertices = this->get1DDataset<double>("vertices", shapeGroup);
   auto numberOfVertices = nexusVertices.size() / 3;
   std::vector<Mantid::Kernel::V3D> vertices(numberOfVertices);
-  for (size_t vertexNumber = 0; vertexNumber < numberOfVertices - 2;
+  for (size_t vertexNumber = 0; vertexNumber < nexusVertices.size();
        vertexNumber += 3) {
-    vertices.emplace_back(nexusVertices[vertexNumber],
-                          nexusVertices[vertexNumber + 1],
-                          nexusVertices[vertexNumber + 2]);
+    vertices[vertexNumber / 3] = Mantid::Kernel::V3D(
+        nexusVertices[vertexNumber], nexusVertices[vertexNumber + 1],
+        nexusVertices[vertexNumber + 2]);
   }
 
   return this->sAbsCreator.createMesh(std::move(triangularFaces),
@@ -492,10 +501,10 @@ void NexusGeometryParser::createTrianglesFromPolygon(
   for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
        ++polygonVertex) {
     triangularFaces.push_back(*first);
-    triangularFaces.push_back(*(windingOrder.begin() + polygonVertex));
-    triangularFaces.push_back(*(windingOrder.begin() + polygonVertex + 1));
+    triangularFaces.push_back(*(first + polygonVertex));
+    triangularFaces.push_back(*(first + polygonVertex + 1));
   }
-  startOfFace = endOfFace + 1; // start of the next face
+  startOfFace = endOfFace; // start of the next face
 }
 
 // Parse source and add to instrument
