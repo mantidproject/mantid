@@ -49,6 +49,9 @@ public:
   /// Returns time-slicing type
   std::string getTimeSlicingType() const override;
 
+  void onReductionPaused() override;
+  void onReductionResumed() override;
+
 private:
   /// The view we are managing
   IReflEventView *m_view;

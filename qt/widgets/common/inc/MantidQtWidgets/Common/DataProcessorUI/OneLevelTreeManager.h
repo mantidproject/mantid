@@ -51,6 +51,7 @@ public:
   /// Destructor
   ~OneLevelTreeManager() override;
 
+  bool isMultiLevel() const override;
   /// Publish commands
   std::vector<std::unique_ptr<Command>> publishCommands() override;
   /// Append a row

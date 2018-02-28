@@ -19,7 +19,7 @@ html_theme_options = {
     'navbar_links': [
         ("Home", "http://www.mantidproject.org", True),
         ("Download", "http://download.mantidproject.org", True),
-        ("Documentation", "http://www.mantidproject.org/Documentation", True),
+        ("Documentation", "http://docs.mantidproject.org/nightly/", True),
         ("Contact Us", "http://www.mantidproject.org/Contact", True),
     ],
     # Do not show the "Show source" button.
@@ -32,5 +32,4 @@ html_theme_options = {
     'bootstrap_version': "3",
     # Ensure the nav bar always stays on top of page.
     'navbar_fixed_top': "false",
-
 }

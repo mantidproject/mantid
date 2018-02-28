@@ -636,6 +636,14 @@
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
 
+  <instrument name="D11">
+    <technique>SANS</technique>
+  </instrument>
+
+  <instrument name="D22">
+    <technique>SANS</technique>
+  </instrument>
+
   <instrument name="D33">
     <technique>SANS</technique>
   </instrument>
@@ -796,6 +804,15 @@
   <instrument name="EXED">
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Single Crystal Diffraction</technique>
+  </instrument>
+  <instrument name="V20_4-tubes_90deg">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+  <instrument name="V20_4-tubes_150deg">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+  <instrument name="V20_IMAGING">
+    <technique>Neutron Imaging</technique>
   </instrument>
 </facility>
 

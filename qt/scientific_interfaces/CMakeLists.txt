@@ -32,6 +32,7 @@ set ( TEST_FILES
   test/ALCPeakFittingPresenterTest.h
   test/EnggDiffGSASFittingModelTest.h
   test/EnggDiffGSASFittingPresenterTest.h
+  test/EnggDiffMultiRunFittingWidgetModelTest.h
   test/EnggDiffMultiRunFittingWidgetPresenterTest.h
   test/EnggDiffFittingModelTest.h
   test/EnggDiffFittingPresenterTest.h

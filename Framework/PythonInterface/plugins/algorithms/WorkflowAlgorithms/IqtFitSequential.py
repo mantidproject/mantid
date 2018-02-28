@@ -64,6 +64,10 @@ class IqtFitSequential(PythonAlgorithm):
         self.declareProperty(name='ConstrainIntensities', defaultValue=False,
                              doc="If the Intensities should be constrained during the fit")
 
+        self.declareProperty(name='ExtractMembers', defaultValue=False,
+                             doc="If true, then each member of the fit will be extracted, into their "
+                                 "own workspace")
+
         self.declareProperty(MatrixWorkspaceProperty('OutputResultWorkspace', '', direction=Direction.Output),
                              doc='The output workspace containing the results of the fit data')
 
@@ -89,6 +93,7 @@ class IqtFitSequential(PythonAlgorithm):
         self._spec_min = self.getProperty('SpecMin').value
         self._spec_max = self.getProperty('SpecMax').value
         self._intensities_constrained = self.getProperty('ConstrainIntensities').value
+        self._do_extract_members = self.getProperty('ExtractMembers').value
         self._minimizer = self.getProperty('Minimizer').value
         self._max_iterations = self.getProperty('MaxIterations').value
         self._result_name = self.getPropertyValue('OutputResultWorkspace')
@@ -145,7 +150,8 @@ class IqtFitSequential(PythonAlgorithm):
                               StartX=self._start_x,
                               EndX=self._end_x,
                               FitType='Sequential',
-                              CreateOutput=True)
+                              CreateOutput=True,
+                              OutputCompositeMembers=self._do_extract_members)
         fit_prog.report('Fitting complete')
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
@@ -195,6 +201,11 @@ class IqtFitSequential(PythonAlgorithm):
         conclusion_prog.report('Copying and transferring sample logs')
         self._transfer_sample_logs()
 
+        if self._do_extract_members:
+            ms.ExtractQENSMembers(InputWorkspace=self._input_ws,
+                                  ResultWorkspace=self._fit_group_name,
+                                  OutputWorkspace=self._fit_group_name.rsplit('_', 1)[0] + "_Members")
+
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         self.setProperty('OutputResultWorkspace', self._result_ws)
@@ -228,6 +239,9 @@ class IqtFitSequential(PythonAlgorithm):
         add_sample_log_multi.setProperty("LogNames", log_names)
         add_sample_log_multi.setProperty("LogValues", log_values)
         add_sample_log_multi.execute()
+
+    def _extract_members(self):
+        ms.ExtractMembers()
 
 
 AlgorithmFactory.subscribe(IqtFitSequential)

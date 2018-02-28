@@ -1141,7 +1141,7 @@ private:
   void handleConfigDir();
   /// Save the working directory to QSettings
   void cacheWorkingDirectory() const;
-
+  void patchPaletteForLinux(QPalette &palette) const;
 private slots:
   //! \name Initialization
   //@{

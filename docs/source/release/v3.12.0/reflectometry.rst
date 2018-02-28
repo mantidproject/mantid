@@ -5,10 +5,6 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 
 ISIS Reflectometry Interface
 ----------------------------
@@ -32,11 +28,14 @@ New features
 Improvements
 ############
 
-- Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows is also disabled during processing.
+- Grid lines are now displayed in the runs tab.
+- Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows and settings is also disabled during processing.
 - Removed the 'DirectBeam' box from the settings tab of the ISIS Reflectometry interface because this is not used.
 - Properties on the Runs tab now take precedence over properties on the Settings tab.
 - Output workspace names have been improved. Names now use '+' to indicate preprocessed (i.e. summed) workspaces, rather than '_', which is used to indicate postprocessed (i.e. stitched) workspaces.
 - The Python code generated when you tick `Output Notebook` has been improved to support special characters (e.g. `+`) in workspace names. Output workspaces are now set using the output properties of the algorithm rather than by variable assignment. This avoids the possibility of invalid characters being used in Python variable names.
+- Added a new `?` button to the ISIS Reflectometry Interface which links to the documentation page.
+- Added extra tooltips to the ISIS Reflectometry Interface.
 
 
 Bug fixes
@@ -61,8 +60,10 @@ Algorithms
 New features
 ############
 
+- The new algorithm :ref:`algm-PolarizationEfficiencyCor` corrects for efficiencies in polarization analysis.
 - The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
 - The new algorithm :ref:`algm-MRInspectData` takes in raw event data and determines reduction parameters.
+- The new algorithm :ref:`algm-MRFilterCrossSections` loads a MR (SNS) data file into a workspace group comprising of a workspace for each cross-section.
 
 
 Improvements

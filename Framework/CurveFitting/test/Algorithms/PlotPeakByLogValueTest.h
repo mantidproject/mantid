@@ -36,7 +36,6 @@ using Mantid::HistogramData::LinearGenerator;
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
 
-namespace {
 struct Fun {
   double operator()(double, int i) { return double(i + 1); }
 };
@@ -72,7 +71,6 @@ public:
 private:
   std::string m_name;
 };
-}
 
 class PlotPeak_Expression {
 public:

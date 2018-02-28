@@ -250,8 +250,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                     new_combineDet = ReductionSingleton().instrument.get_detector_selection()
                     combineDet = su.get_correct_combinDet_setting(ins_name, new_combineDet)
         except (RuntimeError, ValueError) as e:
-            sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(
-                str(run['user_file']), str(e)))
+            raise RuntimeError("Error in Batchmode user files: Could not reset the specified user file {0}. More info: {1}"
+                               .format(str(run['user_file']), str(e)))
 
         local_settings = copy.deepcopy(ReductionSingleton().reference())
         local_prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
@@ -320,7 +320,6 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         # | both           |    +_rear      |    +_front   |     -        |
         # | merged         |    +_rear      |    +_front   |     +_merged |
         # This is not great since it uses SANS2D terminology for all instruments
-
         names = [final_name]
         if combineDet == 'rear':
             new_name = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, reduced)
@@ -566,21 +565,26 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
     """
     user_file_to_set = ""
 
-    # Try to find the user file in the default paths
-    if not os.path.isfile(new_user_file):
-        # Find the user file in the Mantid path. we make sure that the user file has a txt extension.
-        user_file_names_with_extension = su.get_user_file_name_options_with_txt_extension(new_user_file)
-        for user_file_name_with_extension in user_file_names_with_extension:
-            user_file = FileFinder.getFullPath(user_file_name_with_extension)
-            if user_file:
-                break
-
-        if not os.path.isfile(user_file):
-            user_file_to_set = original_user_file
-        else:
-            user_file_to_set = user_file
+    if new_user_file == '':
+        user_file_to_set = original_user_file
     else:
-        user_file_to_set = new_user_file
+        # Try to find the user file in the default paths
+        if not os.path.isfile(new_user_file):
+            # Find the user file in the Mantid path. we make sure that the user file has a txt extension.
+            user_file_names_with_extension = su.get_user_file_name_options_with_txt_extension(new_user_file)
+            for user_file_name_with_extension in user_file_names_with_extension:
+                user_file = FileFinder.getFullPath(user_file_name_with_extension)
+                if user_file:
+                    break
+
+            if not os.path.isfile(user_file):
+                message = "Error could not find specified user file {0}"\
+                    .format(new_user_file)
+                raise RuntimeError(message)
+            else:
+                user_file_to_set = user_file
+        else:
+            user_file_to_set = new_user_file
 
     # Set the user file in the reducer and load the user file
     if user_file_to_set != current_user_file:
@@ -591,9 +595,11 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
             ReductionSingleton().settings = original_prop_man_settings.clone(REDUCTION_SETTINGS_OBJ_NAME)
         else:
             instrument = copy.deepcopy(ReductionSingleton().get_instrument())
+            output_type = ReductionSingleton().to_Q.output_type
             ReductionSingleton().clean(isis_reducer.ISISReducer)
             ReductionSingleton().set_instrument(instrument)
             ReductionSingleton().user_settings = UserFile(user_file_to_set)
+            ReductionSingleton().to_Q.output_type = output_type
             ReductionSingleton().user_settings.execute(ReductionSingleton())
         current_user_file = user_file_to_set
     return current_user_file
