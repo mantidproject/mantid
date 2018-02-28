@@ -9,6 +9,8 @@ from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, A
 from mantid.api import FileProperty, FileAction, MatrixWorkspace, ITableWorkspace
 from mantid.kernel import Direction
 import numpy
+from datetime import datetime
+import os.path
 
 
 class SaveVulcanGSS(PythonAlgorithm):
@@ -63,6 +65,9 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         # Rebin workspace
         output_workspace = self.rebin_workspace(input_ws, binning_param_list, output_ws_name)
+
+        # Save GSAS
+        self.save_gsas(output_workspace)
 
         # #
         #
@@ -436,19 +441,38 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return gsaws
 
-    def _saveGSAS(self, gsaws, gdafilename):
-        """ Save file
+    def save_gsas(self, output_workspace, gsas_file_name, ipts_number, parm_file_name):
         """
-        # Convert from PointData to Histogram
-        gsaws = api.ConvertToHistogram(InputWorkspace=gsaws, OutputWorkspace=str(gsaws))
+        save (rebinned) workspace to GSAS file
+        :param output_workspace:
+        :param gsas_file_name:
+        :param ipts_number:
+        :param parm_file_name:
+        :return:
+        """
+        # check that workspace shall be point data
+        if output_workspace.isHistogramData():
+            raise RuntimeError('Output workspace shall be point data at this stage.')
+
+        # construct the headers
+        vulcan_gsas_header = self.create_vulcan_gsas_header(output_workspace, ipts_number, parm_file_name)
+
+        vulcan_bank_headers = list()
+        for ws_index in range(output_workspace.getNumberHistograms()):
+            bank_id = ws_index + 1
+            bank_header = self.create_bank_header(bank_id, output_workspace.readX(ws_index))
+            vulcan_bank_headers.append(bank_header)
+        # END-F
 
         # Save
-        api.SaveGSS(InputWorkspace=gsaws, Filename=gdafilename, SplitFiles=False, Append=False,
-                    Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True)
+        api.SaveGSS(InputWorkspace=output_workspace, Filename=gsas_file_name, SplitFiles=False, Append=False,
+                    Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True,
+                    UserSpecifiedGSASHeader=vulcan_gsas_header,
+                    UserSpecifiedBankHeader=vulcan_bank_headers)
 
-        return gsaws
+        return
 
-    def _rewrite_gda_file(self, gssfilename, newheader):
+    def NOT_USED_rewrite_gda_file(self, gssfilename, newheader):
         """
         Re-write GSAS file including header and header for each bank
         :param gssfilename:
@@ -502,69 +526,93 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return
 
-    def _generate_vulcan_gda_header(self, ws, gssfilename, ipts, parmfname):
+    def create_vulcan_gsas_header(self, workspace, gssfilename, ipts, parmfname):
         """
         """
-        from datetime import datetime
-        import os.path
 
-        # Get necessary information
-        title = ws.getTitle()
+        # Get necessary information including title, run start, duration and etc.
+        title = workspace.getTitle()
 
-        run = ws.getRun()
+        # Get run object for sample log information
+        run = workspace.getRun()
 
         # Get information on start/stop
-        processtime = True
         if run.hasProperty("run_start") and run.hasProperty("duration"):
-            runstart = run.getProperty("run_start").value
+            # have run start and duration information
+            run_start = run.getProperty("run_start").value
             duration = float(run.getProperty("duration").value)
-        else:
-            processtime = False
 
-        if processtime is True:
+            # separate second and sub-seconds
+            run_start_seconds = run_start.split(".")[0]
+            run_start_sub_seconds = run_start.split(".")[1]
+            self.log().warning('Run start {0} is split to {1} and {2}'.format(run_start, run_start_seconds,
+                                                                              run_start_sub_seconds))
+
             # property run_start and duration exist
-            runstart_sec = runstart.split(".")[0]
-            runstart_ns = runstart.split(".")[1]
+            utctime = datetime.strptime(run_start_seconds, '%Y-%m-%dT%H:%M:%S')
+            time0 = datetime.strptime("1990-01-01T0:0:0", '%Y-%m-%dT%H:%M:%S')
 
-            utctime = datetime.strptime(runstart_sec, '%Y-%m-%dT%H:%M:%S')
-            time0=datetime.strptime("1990-01-01T0:0:0",'%Y-%m-%dT%H:%M:%S')
-
-            delta = utctime-time0
+            # convert from string version of time to total nano second
+            # TODO FIXME Mantid might have better solution
+            delta = utctime - time0
             try:
-                total_nanosecond_start =  int(delta.total_seconds()*int(1.0E9)) + int(runstart_ns)
+                total_nanosecond_start = int(delta.total_seconds()*int(1.0E9)) + int(run_start_sub_seconds)
             except AttributeError:
                 total_seconds = delta.days*24*3600 + delta.seconds
-                total_nanosecond_start = total_seconds * int(1.0E9) + int(runstart_ns)
+                total_nanosecond_start = total_seconds * int(1.0E9) + int(run_start_sub_seconds)
             total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
+
         else:
             # not both property is found
             total_nanosecond_start = 0
             total_nanosecond_stop = 0
+        # END-IF
 
         self.log().debug("Start = %d, Stop = %d" % (total_nanosecond_start, total_nanosecond_stop))
 
         # Construct new header
-        newheader = ""
+        vulcan_gsas_header = []
 
         if len(title) > 80:
             title = title[0:80]
-        newheader += "%-80s\n" % title
+        vulcan_gsas_header.append("%-80s\n" % title)
 
-        newheader += "%-80s\n" % ("Instrument parameter file: %s" % parmfname)
+        vulcan_gsas_header.append("%-80s\n" % ("Instrument parameter file: %s" % parmfname))
 
-        newheader += "%-80s\n" % ("#IPTS: %s" % str(ipts))
+        vulcan_gsas_header.append("%-80s\n" % ("#IPTS: %s" % str(ipts)))
 
-        newheader += "%-80s\n" % "#binned by: Mantid"
+        vulcan_gsas_header.append("%-80s\n" % "#binned by: Mantid")
 
-        newheader += "%-80s\n" % ("#GSAS file name: %s" % os.path.basename(gssfilename))
+        vulcan_gsas_header.append("%-80s\n" % ("#GSAS file name: %s" % os.path.basename(gssfilename)))
 
-        newheader += "%-80s\n" % ("#GSAS IPARM file: %s" % parmfname)
+        vulcan_gsas_header.append("%-80s\n" % ("#GSAS IPARM file: %s" % parmfname))
 
-        newheader += "%-80s\n" % ("#Pulsestart:    %d" % total_nanosecond_start)
+        vulcan_gsas_header.append("%-80s\n" % ("#Pulsestart:    %d" % total_nanosecond_start))
 
-        newheader += "%-80s\n" % ("#Pulsestop:     %d" % total_nanosecond_stop)
+        vulcan_gsas_header.append("%-80s\n" % ("#Pulsestop:     %d" % total_nanosecond_stop))
 
-        return newheader
+        return vulcan_gsas_header
+
+    def create_bank_header(self, bank_id, vec_x):
+        """
+        create bank header of VDRIVE/GSAS convention
+        as: BANK bank_id data_size data_size  binning_type 'SLOG' tof_min tof_max deltaT/T
+        :param bank_id:
+        :param vec_x:
+        :return:
+        """
+        tof_min = vec_x[0]
+        tof_max = vec_x[-1]
+        delta_tof = (vec_x[1] - tof_min) / tof_min  # deltaT/T
+        data_size = len(vec_x)
+
+        bank_header = 'BANK {0} {1} {2} {3} {4} {5:.1f} {6:.7f}'.format(bank_id, data_size, data_size, 'SLOG',
+                                                                        tof_min, tof_max, delta_tof)
+
+        bank_header = '{0:80s}'.format(bank_header)
+
+        return bank_header
+
 
     def _rewriteOneBankData(self, banklines):
         """ first line is for bank information

@@ -86,6 +86,16 @@ std::unique_ptr<std::stringstream> makeStringStream() {
   return Mantid::Kernel::make_unique<std::stringstream>();
 }
 
+//----------------------------------------------------------------------------------------------
+/** Write standard bank header in format as
+ * BANK bank_id data_size data_size  binning_type
+ * This part is same for SLOG and RALF
+ * @brief writeBankHeader
+ * @param out
+ * @param bintype :: GSAS binning type as SLOG or RALF
+ * @param banknum
+ * @param datasize
+ */
 void writeBankHeader(std::stringstream &out, const std::string &bintype,
                      const int banknum, const size_t datasize) {
   std::ios::fmtflags fflags(out.flags());
@@ -97,6 +107,7 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 }
 } // End of anonymous namespace
 
+//----------------------------------------------------------------------------------------------
 // Constructor
 SaveGSS::SaveGSS()
     : Mantid::API::Algorithm(), overwrite_std_gsas_header_(false),
@@ -214,6 +225,9 @@ void SaveGSS::exec() {
 }
 
 //----------------------------------------------------------------------------------------------
+/** process user specified headers
+*@brief SaveGSS::processUserSpecifiedHeaders
+*/
 void SaveGSS::processUserSpecifiedHeaders() {
 
   // user specified GSAS
@@ -233,15 +247,10 @@ void SaveGSS::processUserSpecifiedHeaders() {
     overwrite_std_bank_header_ = true;
   }
 
-  g_log.warning() << "User specifed GSAS header has length: "
-                  << user_specified_gsas_header_.size() << "\n"
-                  << "Overwrite GSAS heade = " << overwrite_std_bank_header_
-                  << ", Overwrite bank = " << overwrite_std_bank_header_
-                  << "\n";
-
   return;
 }
 
+//----------------------------------------------------------------------------------------------
 /**
   * Returns if each spectra contains a valid detector
   * and implicitly if the instrument is valid
@@ -277,6 +286,7 @@ bool SaveGSS::areAllDetectorsValid() const {
   return allValid;
 }
 
+//----------------------------------------------------------------------------------------------
 /**
   * Generates a string stream in GSAS format containing the
   * data for the specified bank from the workspace. This
@@ -899,11 +909,19 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
   g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << '\n';
 
   // Write bank header
-  writeBankHeader(out, "SLOG", bank, datasize);
-  out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1
-      << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc2
-      << std::fixed << " " << std::setprecision(7) << std::setw(10) << bc3
-      << std::fixed << " 0 FXYE\n";
+  if (overwrite_std_bank_header_) {
+    // write user header only!
+    out << std::fixed << " " << std::setw(80)
+        << user_specified_gsas_header_[bank - 1] << "\n";
+  } else {
+    // write general bank header part
+    writeBankHeader(out, "SLOG", bank, datasize);
+    // write the SLOG specific type
+    out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1
+        << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc2
+        << std::fixed << " " << std::setprecision(7) << std::setw(10) << bc3
+        << std::fixed << " 0 FXYE\n";
+  }
 
   std::vector<std::unique_ptr<std::stringstream>> outLines;
   outLines.resize(datasize);

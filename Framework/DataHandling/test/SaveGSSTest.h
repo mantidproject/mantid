@@ -115,14 +115,15 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  //----------------------------------------------------------------------------------------------
   /** test writing a 2-bank GSAS file with user input header
    * @brief test_2BankInstrumentSLOGUserHeader
    */
   void test_2BankInstrumentSLOGUserHeader() {
     // Save a 2 banks diffraction data with instrument using SLOG format
     const std::string wsName = "SaveGSS_2BankSLOG";
-    auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
-                                              m_defaultNumBins);
+    generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
+                                m_defaultNumBins);
     // Get the output file handle
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string outPath = outputFileHandle.path();
@@ -156,6 +157,9 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  /**
+   * @brief test_2BankInstrumentRALF
+   */
   void test_2BankInstrumentRALF() {
     // Save a 2 banks diffraction data with RALF format
     const std::string wsName = "SaveGSS_2BankRALF";
