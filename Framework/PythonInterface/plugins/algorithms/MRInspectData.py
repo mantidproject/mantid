@@ -476,7 +476,7 @@ class DataInfo(object):
             # If we can't find a peak, try fitting over the full detector.
             # If we do find a peak, then update the ranges rather than using
             # what we currently have (which is probably given by the ROI).
-            logger.notice("Run %s [%s]: Could not fit a peak in the supplied peak range" % \
+            logger.notice("Run %s [%s]: Could not fit a peak in the supplied peak range" %
                           (self.run_number, self.cross_section))
             logger.notice(sys.exc_value)
             try:
@@ -493,13 +493,13 @@ class DataInfo(object):
                 #low_res = [5, self.n_x_pixel-5]
                 low_res = self.found_low_res
                 self.use_roi_actual = False
-                logger.notice("Run %s [%s]: Peak not in supplied range! Found peak: %s low: %s" % \
+                logger.notice("Run %s [%s]: Peak not in supplied range! Found peak: %s low: %s" %
                               (self.run_number, self.cross_section, peak, low_res))
-                logger.notice("Run %s [%s]: Peak position: %s  Peak width: %s" % \
+                logger.notice("Run %s [%s]: Peak position: %s  Peak width: %s" %
                               (self.run_number, self.cross_section, peak_position, peak_width))
             except:
                 logger.notice(sys.exc_value)
-                logger.notice("Run %s [%s]: Gaussian fit failed to determine peak position" % \
+                logger.notice("Run %s [%s]: Gaussian fit failed to determine peak position" %
                               (self.run_number, self.cross_section))
 
         # Update the specular peak range if needed
