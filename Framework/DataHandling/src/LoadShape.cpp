@@ -81,8 +81,24 @@ int LoadShape::confidence(Kernel::FileDescriptor &descriptor) const {
 
 void LoadShape::exec() {
 
-  API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
-  Instrument_const_sptr instr = ws->getInstrument();
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+
+  if (inputWS != outputWS) {
+    outputWS = inputWS->clone();
+  }
+  Instrument_const_sptr inputInstr = inputWS->getInstrument();
+  Instrument* outputInstr = inputInstr->clone();
+  if (outputInstr == nullptr) {
+    throw std::runtime_error("Unable to obtain instrument to add loaded shape to");
+  }
+
+  std::string destinationComponent = "";
+  bool attachToSample = getProperty("Attach to sample");
+  if (!attachToSample) {
+    destinationComponent = getProperty("Component name");
+  }
 
   std::string filename = getProperty("Filename");
   std::ifstream file(filename.c_str());
@@ -92,6 +108,7 @@ void LoadShape::exec() {
   }
 
   boost::shared_ptr<MeshObject> mShape = getMeshObject(file);
+
 }
 
 boost::shared_ptr<MeshObject> LoadShape::getMeshObject(std::ifstream& file) {
