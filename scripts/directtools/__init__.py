@@ -104,7 +104,7 @@ def _plottingtime():
     return time.strftime('%d.%m.%Y %H:%M:%S')
 
 
-def _points(edges):
+def _binCentres(edges):
     """Return bin centers."""
     return (edges[:-1] + edges[1:]) / 2
 
@@ -135,16 +135,14 @@ def _profileytitle(workspace, axes):
 
 
 def _removesingularity(ws, epsilon):
-    """Set bins at -epsilon <= x < epsilon  to zero."""
-    Xs = ws.extractX()
+    """Find the bin nearest to X = 0, and if -epsilon <= bin centre < epsilon, set Y and E to zero."""
     for i in range(ws.getNumberHistograms()):
-        xs = Xs[i, :]
+        xs = ws.readX(i)
         ys = ws.dataY(i)
         es = ws.dataE(i)
         if len(xs) != len(ys):
-            xs = _points(xs)
-        xs = numpy.abs(xs)
-        binIndex = numpy.argmin(xs)
+            xs = _binCentres(xs)
+        binIndex = numpy.argmin(numpy.abs(xs))
         if xs[binIndex] >= -epsilon and xs[binIndex] < epsilon:
             ys[binIndex] = 0.
             es[binIndex] = 0.
@@ -182,7 +180,7 @@ def _SofQWtitle(workspace, figure):
 def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf, vertMax=numpy.inf):
     """Return slicing for a 2D numpy array limited by given min and max values."""
     if len(vertAxis) > xs.shape[0]:
-        vertAxis = _points(vertAxis)
+        vertAxis = _binCentres(vertAxis)
     horBegin = numpy.argwhere(xs[0, :] >= horMin)[0][0]
     horEnd = numpy.argwhere(xs[0, :] < horMax)[-1][0] + 1
     vertBegin = numpy.argwhere(vertAxis >= vertMin)[0][0]
@@ -235,7 +233,7 @@ def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     xs = workspace.extractX()
     ys = workspace.extractY()
     if xs.shape[1] > ys.shape[1]:
-        xs = _points(xs)
+        xs = _binCentres(xs)
     vertAxis = workspace.getAxis(1).extractValues()
     box = box2D(xs, vertAxis, horMin, horMax, vertMin, vertMax)
     ys = ys[box]
@@ -392,7 +390,7 @@ def validQ(workspace, E=0.0):
     workspace = _normws(workspace)
     vertBins = workspace.getAxis(1).extractValues()
     if len(vertBins) > workspace.getNumberHistograms():
-        vertBins = _points(vertBins)
+        vertBins = _binCentres(vertBins)
     elasticIndex = numpy.argmin(numpy.abs(vertBins - E))
     ys = workspace.readY(elasticIndex)
     validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
