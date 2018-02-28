@@ -68,7 +68,6 @@ class SaveReflectionsTest(unittest.TestCase):
 
         # Create columns in the table workspace
         for name, column_type in zip(names, types):
-            print name, column_type
             indexed.addColumn(column_type, name)
 
         # Copy all columns from original workspace, ignoring HKLs
