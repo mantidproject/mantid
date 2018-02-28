@@ -691,8 +691,8 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
 void SaveGSS::validateUserInput() const {
   // Check whether it is PointData or Histogram
   if (!m_inputWS->isHistogramData())
-    g_log.notice("Input workspace is NOT histogram! SaveGSS may not work "
-                 "well with PointData.");
+    g_log.warning("Input workspace is NOT histogram! SaveGSS may not work "
+                  "well with PointData.");
 
   // Check the number of histogram/spectra < 99
   const auto nHist = static_cast<int>(m_inputWS->getNumberHistograms());
@@ -901,6 +901,9 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
         "Cannot write out logarithmic data starting at zero or less");
   }
   if (isConstantDelta(xVals)) {
+    g_log.error() << "Constant delta - T binning : " << xVals.front() << ", "
+                  << *(xVals.begin() + 1) << ", " << *(xVals.begin() + 2)
+                  << "... " << std::endl;
     throw std::runtime_error("While writing SLOG format : Found constant "
                              "delta - T binning for bank " +
                              std::to_string(bank));
@@ -911,8 +914,16 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
   // Write bank header
   if (overwrite_std_bank_header_) {
     // write user header only!
-    out << std::fixed << " " << std::setw(80)
-        << user_specified_gsas_header_[bank - 1] << "\n";
+    int ws_index = bank - 1;
+    if (ws_index < 0)
+      throw std::runtime_error(
+          "Bank does not start from 1.  Unabel to use user-"
+          "specified bank header");
+    else if (ws_index >= static_cast<int>(user_specified_bank_headers_.size()))
+      throw std::runtime_error(
+          "Bank ID is out of range for user specified bank headers");
+    out << std::fixed << std::setw(80) << user_specified_bank_headers_[ws_index]
+        << "\n";
   } else {
     // write general bank header part
     writeBankHeader(out, "SLOG", bank, datasize);
@@ -935,6 +946,8 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
     const double eValue{
         fixErrorValue(MultiplyByBinWidth ? eVals[i] * binWidth : eVals[i])};
 
+    // FIXME - Next step is to make the precision to be flexible from user
+    // inputs
     outLine << "  " << std::fixed << std::setprecision(9) << std::setw(20)
             << xPoints[i] << "  " << std::fixed << std::setprecision(9)
             << std::setw(20) << yValue << "  " << std::fixed

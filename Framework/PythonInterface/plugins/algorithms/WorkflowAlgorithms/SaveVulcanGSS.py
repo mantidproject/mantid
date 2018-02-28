@@ -61,43 +61,20 @@ class SaveVulcanGSS(PythonAlgorithm):
         """ Main Execution Body
         """
         # Process input properties
-        input_ws, binning_param_list, gsas_file_name, output_ws_name = self.process_inputs()
+        input_ws, binning_param_list, gsas_file_name, output_ws_name, ipts_number, parm_file = self.process_inputs()
 
         # Rebin workspace
         output_workspace = self.rebin_workspace(input_ws, binning_param_list, output_ws_name)
 
         # Save GSAS
-        self.save_gsas(output_workspace)
-
-        # #
-        #
-        # # rebin the input workspace if TOF binning file is given
-        # if len(log_tof_file_name) > 0:
-        #     # Load reference bin file
-        #     vec_refT = self._loadRefLogBinFile(log_tof_file_name)
-        #
-        #     # Rebin
-        #     gsa_ws = self._rebinVdrive(inputws, vec_refT, output_ws_name)
-        # else:
-        #     # no binning file is specified. do nothing
-        #     gsa_ws = inputws
-        #
-        # # Generate GSAS file
-        # output_ws = self._saveGSAS(gsa_ws, gss_file_name)
-        #
-        # # Convert header and bank information
-        # ipts = self.getPropertyValue("IPTS")
-        # parm_file_name = self.getPropertyValue("GSSParmFileName")
-        # new_header = self._generate_vulcan_gda_header(output_ws, gss_file_name, ipts, parm_file_name)
-        # self._rewrite_gda_file(gss_file_name, new_header)
+        self.save_gsas(output_workspace, gsas_file_name, ipts_number=ipts_number, parm_file_name=parm_file)
 
         # Set property
         self.setProperty("OutputWorkspace", output_workspace)
 
         return
 
-    @staticmethod
-    def rebin_workspace(input_ws, binning_param_list, output_ws_name):
+    def rebin_workspace(self, input_ws, binning_param_list, output_ws_name):
         """
         rebin input workspace with user specified binning parameters
         :param input_ws:
@@ -130,14 +107,27 @@ class SaveVulcanGSS(PythonAlgorithm):
 
                 api.Rebin(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name,
                           Params=bin_params, PreserveEvents=True)
+                rebinned_ws = AnalysisDataService.retrieve(temp_out_name)
+                self.log().warning('Rebinnd workspace Size(x) = {0}, Size(y) = {1}'.format(len(rebinned_ws.readX(0)),
+                                                                                           len(rebinned_ws.readY(0))))
+
+                # Upon this point, the workspace is still HistogramData.
+                # Check whether it is necessary to reset the X-values to reference TOF from VDRIVE
+                temp_out_ws = AnalysisDataService.retrieve(temp_out_name)
+                if len(bin_params) == 2*len(temp_out_ws.readX(0)) - 1:
+                    reset_bins = True
+                else:
+                    reset_bins = False
+
                 # convert to point data
                 api.ConvertToPointData(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name)
                 # align the bin boundaries if necessary
                 temp_out_ws = AnalysisDataService.retrieve(temp_out_name)
-                if len(bin_params) == len(temp_out_ws.readX(0)):
-                    # good to align
-                    for tof_i in range(len(bin_params)):
-                        temp_out_ws.dataX[tof_i] = int(bin_params[tof_i] * 10) / 10.
+
+                if reset_bins:
+                    # good to align:
+                    for tof_i in range(len(temp_out_ws.readX(0))):
+                        temp_out_ws.dataX(0)[tof_i] = int(bin_params[2*tof_i] * 10) / 10.
                     # END-FOR (tof-i)
                 # END-IF (align)
             # END-FOR
@@ -157,7 +147,8 @@ class SaveVulcanGSS(PythonAlgorithm):
     def process_inputs(self):
         """
         process input properties
-        :return: input event workspace, binning parameter workspace, gsas file name, output workspace name
+        :return: input event workspace, binning parameter workspace, gsas file name, output workspace name,
+                ipts number
         """
         # get input properties
         input_ws_name = self.getPropertyValue("InputWorkspace")
@@ -187,7 +178,13 @@ class SaveVulcanGSS(PythonAlgorithm):
         # output workspace name
         output_ws_name = self.getPropertyValue("OutputWorkspace")
 
-        return input_workspace, binning_parameter_list, gss_file_name, output_ws_name
+        # IPTS
+        ipts = self.getPropertyValue("IPTS")
+
+        # GSAS parm file name
+        parm_file_name = self.getPropertyValue("GSSParmFileName")
+
+        return input_workspace, binning_parameter_list, gss_file_name, output_ws_name, ipts, parm_file_name
 
     @staticmethod
     def generate_bin_parameters_from_workspace(ref_tof_ws, ws_index):
@@ -310,13 +307,16 @@ class SaveVulcanGSS(PythonAlgorithm):
         # END-IF-ELSE
 
         # check whether there is any spectrum that does not have been listed
-        if None in binning_parameter_list:
-            raise RuntimeError('Not all the spectra that have binning parameters set.')
+        for index, bin_param in enumerate(binning_parameter_list):
+            if bin_param is None:
+                raise RuntimeError('Not all the spectra that have binning parameters set.'
+                                   '{0}-th binning parameter is None.  FYI, there are '
+                                   '{1} parameters as {2}'.format(index, len(binning_parameter_list),
+                                                                  binning_parameter_list))
 
         return binning_parameter_list
 
-    @staticmethod
-    def _process_binning_parameters(bin_par_str):
+    def _process_binning_parameters(self, bin_par_str):
         """
         process binning parameters in string.  there are two types of binning parameters that are accepted
         1. regular x0, dx0, x1, dx1, etc or
@@ -356,6 +356,8 @@ class SaveVulcanGSS(PythonAlgorithm):
             bin_param = numpy.empty((ref_tof_vec.size + delta_tof_vec.size), dtype=ref_tof_vec.dtype)
             bin_param[0::2] = ref_tof_vec
             bin_param[1::2] = delta_tof_vec
+
+            self.log().warning('Binning parameters: size = {0}\n{1}'.format(len(bin_param), bin_param))
 
         else:
             raise RuntimeError('Not .... blabla3')
@@ -455,7 +457,8 @@ class SaveVulcanGSS(PythonAlgorithm):
             raise RuntimeError('Output workspace shall be point data at this stage.')
 
         # construct the headers
-        vulcan_gsas_header = self.create_vulcan_gsas_header(output_workspace, ipts_number, parm_file_name)
+        vulcan_gsas_header = self.create_vulcan_gsas_header(output_workspace, gsas_file_name, ipts_number,
+                                                            parm_file_name)
 
         vulcan_bank_headers = list()
         for ws_index in range(output_workspace.getNumberHistograms()):
@@ -468,7 +471,8 @@ class SaveVulcanGSS(PythonAlgorithm):
         api.SaveGSS(InputWorkspace=output_workspace, Filename=gsas_file_name, SplitFiles=False, Append=False,
                     Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True,
                     UserSpecifiedGSASHeader=vulcan_gsas_header,
-                    UserSpecifiedBankHeader=vulcan_bank_headers)
+                    UserSpecifiedBankHeader=vulcan_bank_headers,
+                    Bank=1)
 
         return
 
@@ -575,21 +579,23 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         if len(title) > 80:
             title = title[0:80]
-        vulcan_gsas_header.append("%-80s\n" % title)
+        vulcan_gsas_header.append("%-80s" % title)
 
-        vulcan_gsas_header.append("%-80s\n" % ("Instrument parameter file: %s" % parmfname))
+        vulcan_gsas_header.append("%-80s" % ("Instrument parameter file: %s" % parmfname))
 
-        vulcan_gsas_header.append("%-80s\n" % ("#IPTS: %s" % str(ipts)))
+        vulcan_gsas_header.append("%-80s" % ("#IPTS: %s" % str(ipts)))
 
-        vulcan_gsas_header.append("%-80s\n" % "#binned by: Mantid")
+        vulcan_gsas_header.append("%-80s" % "#binned by: Mantid")
 
-        vulcan_gsas_header.append("%-80s\n" % ("#GSAS file name: %s" % os.path.basename(gssfilename)))
+        vulcan_gsas_header.append("%-80s" % ("#GSAS file name: %s" % os.path.basename(gssfilename)))
 
-        vulcan_gsas_header.append("%-80s\n" % ("#GSAS IPARM file: %s" % parmfname))
+        vulcan_gsas_header.append("%-80s" % ("#GSAS IPARM file: %s" % parmfname))
 
-        vulcan_gsas_header.append("%-80s\n" % ("#Pulsestart:    %d" % total_nanosecond_start))
+        vulcan_gsas_header.append("%-80s" % ("#Pulsestart:    %d" % total_nanosecond_start))
 
-        vulcan_gsas_header.append("%-80s\n" % ("#Pulsestop:     %d" % total_nanosecond_stop))
+        vulcan_gsas_header.append("%-80s" % ("#Pulsestop:     %d" % total_nanosecond_stop))
+
+        vulcan_gsas_header.append('{0:80s}'.format('#'))
 
         return vulcan_gsas_header
 
@@ -606,13 +612,13 @@ class SaveVulcanGSS(PythonAlgorithm):
         delta_tof = (vec_x[1] - tof_min) / tof_min  # deltaT/T
         data_size = len(vec_x)
 
-        bank_header = 'BANK {0} {1} {2} {3} {4} {5:.1f} {6:.7f}'.format(bank_id, data_size, data_size, 'SLOG',
-                                                                        tof_min, tof_max, delta_tof)
+        bank_header = 'BANK {0} {1} {2} {3} {4} {5:.1f} {6:.7f} 0 FXYE' \
+                      ''.format(bank_id, data_size, data_size, 'SLOG', tof_min, tof_max, delta_tof)
 
         bank_header = '{0:80s}'.format(bank_header)
+        print ('[DB...BAT] Bank header: "{0}"'.format(bank_header))
 
         return bank_header
-
 
     def _rewriteOneBankData(self, banklines):
         """ first line is for bank information

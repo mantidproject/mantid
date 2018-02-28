@@ -21,6 +21,8 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Create a testing data file and workspace
         data_ws_name = "Test_1Spec_Workspace"
         self._create_data_workspace(data_ws_name, num_spec=1)
+        # data_ws = AnalysisDataService.retrieve(data_ws_name)
+        # print ('VecX: {0}'.format(data_ws.readX(0)))
 
         bin_ws_name = 'SimpleBinRefTable'
         bin_table = self._create_simple_binning_table(bin_ws_name)
@@ -41,7 +43,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         output_workspace = AnalysisDataService.retrieve(data_ws_name+"_rebinned")
 
         self.assertEqual(output_workspace.getNumberHistograms(), 1)
-        self.assertEqual(len(output_workspace.readX(0)), 100)
+        self.assertEqual(len(output_workspace.readX(0)), 132)
 
         # Delete the TESTING file
         AnalysisDataService.remove("InputWorkspace")
@@ -158,6 +160,12 @@ class SaveVulcanGSSTest(unittest.TestCase):
         create a binning table
         :return:
         """
+        # TODO FIXME : more flexible!
+        """
+        tof0 = 10000.
+        delta = 0.001
+        num_pts = 200
+        """
         # create a TableWorkspace
         api.CreateEmptyTableWorkspace(OutputWorkspace=binning_table_name)
 
@@ -166,7 +174,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         bin_table_ws.addColumn('str', 'BinningParameters')
 
         # add a row for simple case
-        bin_table_ws.addRow(['0', '100, -0.02, 1000'])
+        bin_table_ws.addRow(['0', '10000, -0.002, 13000'])
 
         return bin_table_ws
 
@@ -192,7 +200,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         return bin_table_ws
 
     @staticmethod
-    def _create_data_workspace(data_ws_name, num_spec):
+    def _create_data_workspace(data_ws_name, num_spec, tof0=None, delta=None, num_pts=None):
         """
         Create a multiple spectra data workspace
         :param data_ws_name:
@@ -200,7 +208,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         :return:
         """
         # get base data sets for the workspace as Histograms
-        tof0 = 4900.
+        tof0 = 10000.
         delta = 0.001
         num_pts = 200
 
@@ -214,7 +222,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
             list_y.append(math.sin(tof0))
             list_e.append(1.)
 
-            tof = tof * (1+delta)
+            tof *= 1+delta
         # END-FOR
         list_x.append(tof)
 
@@ -230,7 +238,9 @@ class SaveVulcanGSSTest(unittest.TestCase):
 
             for spec_index in range(1, num_spec):
                 vec_x = numpy.append(vec_x, vec_x_orig)
-                vec_y = numpy.append(vec_y, vec_y_orig * 2.0)
+                vec_i = vec_y_orig[:]
+                vec_i *= 2 * (spec_index + 1)
+                vec_y = numpy.append(vec_y, vec_i)
                 vec_e = numpy.append(vec_e, vec_e_orig)
         # END-FOR
 
