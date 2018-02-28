@@ -163,7 +163,8 @@ void TransformMD::exec() {
         std::iota(std::begin(axes), std::end(axes), 0); // Fill with 0, 1, ...
         axes[0] = i;
         axes[i] = 0;
-        if (i > 0) histo = transposeMD(histo, axes);
+        if (i > 0)
+          histo = transposeMD(histo, axes);
         signal_t *signals = histo->getSignalArray();
         signal_t *errorsSq = histo->getErrorSquaredArray();
         signal_t *numEvents = histo->getNumEventsArray();
