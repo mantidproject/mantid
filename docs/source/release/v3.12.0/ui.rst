@@ -82,11 +82,11 @@ Error reporting has been enabled in place of the new last chance error handler. 
 
 The three options do the following:
 
-*Don't share any information*
+**Don't share any information**
 
 The dialog box will close having sent no information. Mantid will either continue or terminate depending on which option has been selected at the top of the dialog.
 
-*Share non-identifiable information*
+**Share non-identifiable information**
 
 An error report will be sent to errorreports.mantidproject.org. It will contain the following information:
  
@@ -100,7 +100,7 @@ An error report will be sent to errorreports.mantidproject.org. It will contain 
 - The amount of time mantid was running prior to the crash.
 - A hashed user id and a hashed host id.
 
-*Yes, share information*
+**Yes, share information**
 
 All the information from the non-identifiable information will be shared. In addition the optional name and email will be shared if given.
 
