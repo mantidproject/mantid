@@ -45,8 +45,8 @@ def _finalizeprofileQ(workspaces, axes):
     axes.set_xlim(xmin=-10.)
     axes.set_xlabel('Energy (meV)')
     cMax = 0.
-    for i in range(len(workspaces)):
-        c = numpy.nanmax(workspaces[0].readY(0))
+    for ws in workspaces:
+        c = numpy.nanmax(ws.readY(0))
         if c > cMax:
             cMax = c
     axes.set_ylim(ymin=0., ymax=cMax / 100.)
