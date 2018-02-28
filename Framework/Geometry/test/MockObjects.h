@@ -89,6 +89,7 @@ public:
   MOCK_METHOD1(setWavelength, void(double wavelength));
   MOCK_CONST_METHOD0(getWavelength, double());
   MOCK_CONST_METHOD0(getScattering, double());
+  MOCK_CONST_METHOD0(getAzimuthal, double());
   MOCK_CONST_METHOD0(getDSpacing, double());
   MOCK_CONST_METHOD0(getTOF, double());
   MOCK_CONST_METHOD0(getInitialEnergy, double());
