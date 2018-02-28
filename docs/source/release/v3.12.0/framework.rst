@@ -71,7 +71,7 @@ Core Functionality
 Live Data
 ---------
 
-- `KafkaEventListener` is a new live listener for neutron event and sample environment data which is in development for the ESS, and also for ISIS where it may be used on instruments using event-mode data acquisition and IBEX.
+- `KafkaEventListener` is a new live listener for neutron event and sample environment data which is in development for the ESS and ISIS.
 
 Performance
 -----------
