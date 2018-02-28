@@ -78,7 +78,6 @@ def _globalnanminmax(workspaces):
 def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
     """Return a line label for a line profile."""
     ws = _normws(ws)
-    logs = SampleLogs(ws)
     wsLabel = ''
     if not singleWS:
         logs = SampleLogs(ws)
