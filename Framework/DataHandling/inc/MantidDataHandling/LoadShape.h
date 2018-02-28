@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -62,7 +63,14 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  boost::shared_ptr<Geometry::MeshObject> getMeshObject(std::ifstream &file);
+  boost::shared_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file, std::string &name);
+  boost::shared_ptr<Geometry::MeshObject> readSTLMeshObject(std::ifstream &file);
+  bool readSTLTriangle(std::ifstream &file, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3);
+  uint16_t addSTLVertex(Kernel::V3D &vertex, std::vector<Kernel::V3D> vertices);
+  bool areEqualVertices(Kernel::V3D &v1, Kernel::V3D &v2) {
+    Kernel::V3D diff = v1 - v2;
+    return diff.norm() < 0.0000001;
+  }
 };
 
 
