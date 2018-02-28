@@ -618,13 +618,14 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              x_end, areaInfo);
   }
 
+  const double variance = error * error;
   for (const auto &ai : areaInfo) {
     const size_t xi = std::get<0>(ai);
     const size_t yi = std::get<1>(ai);
     const double weight = std::get<2>(ai) / inputQArea;
     PARALLEL_CRITICAL(overlap) {
       outputWS->mutableY(yi)[xi] += signal * weight;
-      outputWS->mutableE(yi)[xi] += pow(error * weight, 2);
+      outputWS->mutableE(yi)[xi] += variance * weight;
       outputWS->dataF(yi)[xi] += weight;
     }
   }
