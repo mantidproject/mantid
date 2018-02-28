@@ -59,6 +59,7 @@ New
    The new design of the Indirect Fitting tabs, shown here within ConvFit (the IndirectFitPropertyBrowser is seen on the left and can be ejected into a separate window).
 
 - The IndirectFitPropertyBrowser widget provides the following additional functionality to the Indirect Fit Interfaces (MSDFit, IqtFit, ConvFit, JumpFit):
+
   * Ties can now be used to tie parameters between all functions and custom ties (involving mathematical expressions) are now available.
   * It is now possible to add constraints to parameters.
   * Any additional functions can be added from the library of available MANTID functions by right-clicking on 'Functions' in the browser and selecting 'Add Function'.
