@@ -196,7 +196,7 @@ void SortHKL::exec() {
   if (counter > 0) {
     MatrixWorkspace_sptr UniqWksp2 =
         Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", counter,
-                                                       maxPeaks, maxPeaks);
+                                                         maxPeaks, maxPeaks);
     for (int64_t i = 0; i < counter; ++i) {
       auto &outSpec = UniqWksp2->getSpectrum(i);
       const auto &inSpec = UniqWksp->getSpectrum(i);
