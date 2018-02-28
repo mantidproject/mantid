@@ -193,18 +193,22 @@ void SortHKL::exec() {
     }
   }
 
-  MatrixWorkspace_sptr UniqWksp2 =
-      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", counter,
+  if (counter > 0) {
+    MatrixWorkspace_sptr UniqWksp2 =
+        Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", counter,
                                                        maxPeaks, maxPeaks);
-  for (int64_t i = 0; i < counter; ++i) {
-    auto &outSpec = UniqWksp2->getSpectrum(i);
-    const auto &inSpec = UniqWksp->getSpectrum(i);
-    outSpec.setHistogram(inSpec.histogram());
-    // Copy the spectrum number/detector IDs
-    outSpec.copyInfoFrom(inSpec);
+    for (int64_t i = 0; i < counter; ++i) {
+      auto &outSpec = UniqWksp2->getSpectrum(i);
+      const auto &inSpec = UniqWksp->getSpectrum(i);
+      outSpec.setHistogram(inSpec.histogram());
+      // Copy the spectrum number/detector IDs
+      outSpec.copyInfoFrom(inSpec);
+    }
+    UniqWksp2->replaceAxis(1, taxis);
+    setProperty("EquivalentsWorkspace", UniqWksp2);
+  } else {
+    setProperty("EquivalentsWorkspace", UniqWksp);
   }
-  UniqWksp2->replaceAxis(1, taxis);
-  setProperty("EquivalentsWorkspace", UniqWksp2);
 
   PeaksStatistics peaksStatistics(uniqueReflections, equivalentIntensities,
                                   sigmaCritical);
