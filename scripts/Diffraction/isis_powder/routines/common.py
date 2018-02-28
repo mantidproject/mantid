@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from six import iterkeys
+import warnings
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
@@ -379,11 +380,16 @@ def remove_intermediate_workspace(workspaces):
 
 def run_normalise_by_current(ws):
     """
-    Runs the Normalise By Current algorithm on the input workspace
+    Runs the Normalise By Current algorithm on the input workspace. If the workspace has no current, return it unchanged
     :param ws: The workspace to run normalise by current on
     :return: The current normalised workspace
     """
-    ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+    if workspace_has_current(ws):
+        ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+    else:
+        warnings.warn(
+            "Run {} had no current. NormaliseByCurrent will not be run on it, and empty will not be subtracted".
+            format(ws.getRunNumber()))
     return ws
 
 
@@ -439,8 +445,9 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     :param scale_factor: The percentage to scale the loaded runs by
     :return: The workspace with the empty runs subtracted
     """
-    # If an empty string was not specified just return to skip this step
-    if empty_sample_ws_string is None:
+    # Skip this step if an empty string was not specified
+    # or if the workspace has no current, as subtracting empty would give us negative counts
+    if empty_sample_ws_string is None or not workspace_has_current(ws_to_correct):
         return ws_to_correct
 
     empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
@@ -605,3 +612,11 @@ def generate_sample_material(sample_details):
         material_json["ScatteringXSection"] = material.scattering_cross_section
 
     return material_json
+
+
+def workspace_has_current(ws):
+    """
+    Gat whether the total charge for this run was greater than 0
+    """
+    charge = ws.run().getProtonCharge()
+    return charge is not None and charge > 0

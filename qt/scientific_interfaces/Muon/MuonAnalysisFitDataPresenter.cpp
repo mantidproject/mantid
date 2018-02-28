@@ -604,7 +604,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
       const auto fitTable = generateParametersTable(wsName, paramsTable);
       if (fitTable) {
         const std::string fitTableName = newName.str() + "_Parameters";
-        ads.add(fitTableName, fitTable);
+        ads.addOrReplace(fitTableName, fitTable);
         // If user has specified a group to add to, add to that.
         // Otherwise the group is called the same thing as the base name.
         const std::string groupToAddTo =
