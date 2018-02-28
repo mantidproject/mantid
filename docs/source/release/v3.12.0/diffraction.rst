@@ -55,6 +55,14 @@ Engineering Diffraction
   + Enabled multi-run fitting and plotting in the Fitting tab
   + Improved unit conversions when using the peak picker
 
+.. figure:: ../../images/engineering_gsas_gui.png
+   :class: screenshot
+   :width: 385px
+   :align: center
+
+   The Engineering diffraction GSAS-II GUI
+  
+  
 Single Crystal Diffraction
 --------------------------
 - :ref:`FilterPeaks <algm-FilterPeaks>` now supports filtering peaks by TOF, d-spacing, and wavelength.
