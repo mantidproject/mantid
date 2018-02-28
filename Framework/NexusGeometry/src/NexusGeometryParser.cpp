@@ -58,6 +58,17 @@ std::vector<uint16_t> vecUnsignedInt16(const std::vector<int32_t> &toConvert) {
   return target;
 }
 
+template <typename ExpectedT> void validateStorageType(const DataSet &data) {
+  const size_t storageType = data.getDataType().getSize();
+  // Early check to prevent reinterpretation of underlying data. This is only a
+  // basic size check. Check does not cover bit layout.
+  if (storageType != sizeof(ExpectedT)) {
+    throw std::runtime_error(
+        "Storage type mismatch. Nexus stored has byte size:" +
+        std::to_string(storageType));
+  }
+}
+
 } // namespace
 
 /// Constructor opens the nexus file
@@ -263,10 +274,11 @@ std::vector<valueType>
 NexusGeometryParser::get1DDataset(const H5std_string &dataset) {
   // Open data set
   DataSet data = this->nexusFile.openDataSet(dataset);
+  validateStorageType<valueType>(data);
   DataSpace dataSpace = data.getSpace();
   std::vector<valueType> values;
   values.resize(dataSpace.getSelectNpoints());
-  // Read data into vector
+  // Read data into vectoh
   data.read(values.data(), data.getDataType(), dataSpace);
 
   // Return the data vector
@@ -280,6 +292,14 @@ NexusGeometryParser::get1DDataset(const H5std_string &dataset,
                                   const H5::Group &group) {
   // Open data set
   DataSet data = group.openDataSet(dataset);
+  validateStorageType<valueType>(data);
+  const size_t storageType = data.getDataType().getSize();
+  // Early check to prevent reinterpretation of underlying data
+  if (storageType != sizeof(valueType)) {
+    throw std::runtime_error(
+        "Storage type mismatch. Value type stored has byte size:" +
+        std::to_string(storageType));
+  }
   DataSpace dataSpace = data.getSpace();
   std::vector<valueType> values;
   values.resize(dataSpace.getSelectNpoints());
@@ -450,7 +470,7 @@ objectHolder NexusGeometryParser::parseNexusMesh(const Group &shapeGroup) {
       createTriangularFaces(faceIndices, windingOrder);
 
   // 1D reads row first, then columns
-  const auto nexusVertices = this->get1DDataset<double>("vertices", shapeGroup);
+  const auto nexusVertices = this->get1DDataset<float>("vertices", shapeGroup);
   auto numberOfVertices = nexusVertices.size() / 3;
   std::vector<Mantid::Kernel::V3D> vertices(numberOfVertices);
   for (size_t vertexNumber = 0; vertexNumber < nexusVertices.size();
@@ -539,11 +559,10 @@ void NexusGeometryParser::parseMonitors() {
     for (auto &inst : instrumentGroups) {
       std::vector<Group> monitorGroups = this->openSubGroups(inst, NX_MONITOR);
       for (auto &monitor : monitorGroups) {
-
-        int detectorId = get1DDataset<int>(DETECTOR_ID, monitor)[0];
-
+        auto detectorId = get1DDataset<int64_t>(DETECTOR_ID, monitor)[0];
         objectHolder monitorShape = parseNexusShape(monitor);
-        this->iBuilder_sptr->addMonitor(std::to_string(detectorId), detectorId,
+        this->iBuilder_sptr->addMonitor(std::to_string(detectorId),
+                                        static_cast<int32_t>(detectorId),
                                         Eigen::Vector3d{0, 0, 0}, monitorShape);
       }
     }
