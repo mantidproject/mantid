@@ -53,13 +53,11 @@ Changes
    Framework <framework>
    User Interface & Usability <ui>
    Diffraction <diffraction>
-   LowQ <lowq>
    Muon Analysis <muon>
    Reflectometry <reflectometry>
    SANS <sans>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
-   Error Reporting <error_reporter> 
 
 Full Change Listings
 --------------------
