@@ -37,9 +37,9 @@ A description about the implemented working equations can be found :ref:`here <D
 
 Abins is in constant development and suggestions
 how to make it better are very welcome. For any suggestions of enhancements please contact
-Krzysztof Dymkowski (krzysztof.dymkowski@stfc.ac.uk).
+Dr. Sanghamitra Mukhopadhyay (sanghamitra.mukhopadhyay@stfc.ac.uk).
 
-If abINS is used as part of your data analysis routines, please cite the relevant reference [1]_.
+If Abins is used as part of your data analysis routines, please cite the relevant reference [1]_.
 
 
 Usage
