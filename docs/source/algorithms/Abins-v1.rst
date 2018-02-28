@@ -39,6 +39,8 @@ Abins is in constant development and suggestions
 how to make it better are very welcome. For any suggestions of enhancements please contact
 Krzysztof Dymkowski (krzysztof.dymkowski@stfc.ac.uk).
 
+If abINS is used as part of your data analysis routines, please cite the relevant reference [1]_.
+
 
 Usage
 -----
@@ -115,3 +117,9 @@ Output:
 .. sourcelink::
   :cpp: None
   :h: None
+
+
+References
+----------
+
+.. [1] K. Dymkowski, S. F. Parker, F. Fernandez-Alonso and S. Mukhopadhyay,  “AbINS: The modern software for INS interpretation” , Physica B, doi:10.1016/j.physb.2018.02.034 (2018).
