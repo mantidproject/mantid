@@ -24,6 +24,7 @@ Improved
 - :ref:`BASISReduction <algm-BASISReduction>` now contains log entry *asString* storing the options passed to to the algorithm.
 - :ref:`IqtFitSequential <algm-IqtFitSequential>` and `IqtFitMultiple <algm-IqtFitMultiple>` can now both extract members from the fit (when the ExtractMembers property is set to True).
 - Loading the sample log files into a workspace can be disabled when calling the :ref:`LoadVesuvio <algm-LoadVesuvio>` algorithm by supplying `LoadLogFiles=False` to the algorithm call
+- :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` no longer has options *DetectDRange* and *DRange*, D-Ranges are now always calculated automatically within the algorithm.
 
 
 Vesuvio
