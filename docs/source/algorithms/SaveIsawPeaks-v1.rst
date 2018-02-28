@@ -30,6 +30,8 @@ Usage
   # Add two peaks to the peaks workspace
   AddPeak( pws, ws, TOF=100, DetectorID=101, Height=1 )
   AddPeak( pws, ws, TOF=200, DetectorID=102, Height=2 )
+  peak = pws.getPeak(1).setPeakNumber(1)
+  peak = pws.getPeak(2).setPeakNumber(2)
 
   # Save the peaks workspace to a file in the user's home directory
   isawPeaksFilePath = os.path.expanduser('~/MantidUsageExample_ISawFile.peaks')

@@ -54,7 +54,7 @@ and rhombohedral centering:
                                CellType='Hexagonal', Apply=True, Tolerance=0.2)
 
     # Run the SortHKL algorithm
-    sorted, chi2, statistics_table = SortHKL(peaks, PointGroup='-3m1 (Trigonal - Hexagonal)',
+    sorted, chi2, statistics_table, equivI = SortHKL(peaks, PointGroup='-3m1 (Trigonal - Hexagonal)',
                                              LatticeCentering='Rhombohedrally centred, obverse')
 
     statistics = statistics_table.row(0)

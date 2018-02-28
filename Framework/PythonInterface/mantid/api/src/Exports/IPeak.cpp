@@ -68,6 +68,9 @@ void export_IPeak() {
       .def("setRunNumber", &IPeak::setRunNumber,
            (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")
+      .def("setPeakNumber", &IPeak::setPeakNumber,
+           (arg("self"), arg("peak_number")),
+           "Set the peak number for this peak")
       .def("getMonitorCount", &IPeak::getMonitorCount, arg("self"),
            "Get the monitor count set for this peak")
       .def("setMonitorCount", &IPeak::setMonitorCount,
