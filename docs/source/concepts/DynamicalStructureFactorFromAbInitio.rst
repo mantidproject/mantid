@@ -156,7 +156,7 @@ Calculation of theoretical S from ab-initio results is implemented in :ref:`Abin
 Referencing Abins
 -----------------
 
-If abINS is used as part of your data analysis routines, please cite the relevant reference [5]_.
+If Abins is used as part of your data analysis routines, please cite the relevant reference [5]_.
 
 References
 ----------
