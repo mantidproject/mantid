@@ -35,6 +35,7 @@ const H5std_string Z_PIXEL_OFFSET = "z_pixel_offset";
 const H5std_string DEPENDS_ON = "depends_on";
 const H5std_string NO_DEPENDENCY = ".";
 const H5std_string PIXEL_SHAPE = "pixel_shape";
+const H5std_string SHAPE = "shape";
 // Transformation types
 const H5std_string TRANSFORMATION_TYPE = "transformation_type";
 const H5std_string TRANSLATION = "translation";
@@ -110,7 +111,7 @@ ParsingErrors NexusGeometryParser::parseNexusGeometry() {
     this->parseAndAddSource();
     this->parseAndAddSample();
     this->parseMonitors();
-  } catch (H5::Exception &) {
+  } catch (H5::Exception &ex) {
     this->exitStatus = UNKNOWN_ERROR;
   }
 
@@ -294,7 +295,7 @@ std::string NexusGeometryParser::get1DStringDataset(const std::string &dataset,
 // Function to get the transformations from the nexus file, and create the Eigen
 // transform object
 Eigen::Transform<double, 3, Eigen::Affine>
-NexusGeometryParser::getTransformations(Group &detectorGroup) {
+NexusGeometryParser::getTransformations(const Group &detectorGroup) {
   H5std_string dependency;
   // Get absolute dependency path
   try {
@@ -377,13 +378,17 @@ NexusGeometryParser::getTransformations(Group &detectorGroup) {
 }
 
 /// Choose what shape type to parse
-objectHolder NexusGeometryParser::parseNexusShape(Group &detectorGroup) {
+objectHolder NexusGeometryParser::parseNexusShape(const Group &detectorGroup) {
   Group shapeGroup;
   try {
     shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
   } catch (...) {
     // TODO. Current assumption. Can we have pixels without specifying a shape?
-    return objectHolder(nullptr);
+    try {
+      shapeGroup = detectorGroup.openGroup(SHAPE);
+    } catch (...) {
+      return objectHolder(nullptr);
+    }
   }
 
   H5std_string shapeType;
@@ -407,8 +412,8 @@ objectHolder NexusGeometryParser::parseNexusShape(Group &detectorGroup) {
 }
 
 // Parse cylinder nexus geometry
-objectHolder NexusGeometryParser::parseNexusCylinder(Group &shapeGroup) {
-  H5std_string pointsToVertices = "cylinder";
+objectHolder NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) {
+  H5std_string pointsToVertices = "cylinders";
   std::vector<int> cPoints =
       this->get1DDataset<int>(pointsToVertices, shapeGroup);
 
@@ -528,7 +533,7 @@ void NexusGeometryParser::parseMonitors() {
 
         int detectorId = get1DDataset<int>(DETECTOR_ID, monitor)[0];
 
-        objectHolder monitorShape(nullptr); // HACK
+        objectHolder monitorShape = parseNexusShape(monitor);
         this->iBuilder_sptr->addMonitor(std::to_string(detectorId), detectorId,
                                         Eigen::Vector3d{0, 0, 0}, monitorShape);
       }

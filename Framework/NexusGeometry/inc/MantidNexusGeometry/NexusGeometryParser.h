@@ -57,7 +57,7 @@ private:
   getPixelOffsets(H5::Group &detectorGroup);
   /// Gets the transformations applied to the detector's pixelOffsets
   Eigen::Transform<double, 3, Eigen::Affine>
-  getTransformations(H5::Group &detectorGroup);
+  getTransformations(const H5::Group &detectorGroup);
   /// Gets the data from a string dataset
   H5std_string get1DStringDataset(const H5std_string &dataset,
                                   const H5::Group &group);
@@ -68,9 +68,9 @@ private:
   std::vector<valueType> get1DDataset(const H5std_string &dataset,
                                       const H5::Group &group);
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
-  parsePixelShape(H5::Group &detectorGroup);
+  parsePixelShape(const H5::Group &detectorGroup);
   /// Parse shape - choose what type shape
-  objectHolder parseNexusShape(H5::Group &detectorGroup);
+  objectHolder parseNexusShape(const H5::Group &detectorGroup);
   /// Parse cylinder nexus geometry
   objectHolder parseNexusCylinder(H5::Group &shapeGroup);
   /// Parse OFF (mesh) nexus geometry
