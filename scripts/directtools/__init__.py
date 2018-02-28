@@ -387,9 +387,9 @@ def validQ(workspace, E=0.0):
     if len(vertBins) > workspace.getNumberHistograms():
         vertBins = _binCentres(vertBins)
     elasticIndex = numpy.argmin(numpy.abs(vertBins - E))
-    ys = workspace.readY(elasticIndex)
+    ys = workspace.readY(int(elasticIndex))
     validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
-    xs = workspace.readX(elasticIndex)
+    xs = workspace.readX(int(elasticIndex))
     lower = xs[numpy.amin(validIndices)]
     upperIndex = numpy.amax(validIndices)
     if len(xs) > len(ys):
