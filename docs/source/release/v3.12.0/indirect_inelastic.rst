@@ -35,8 +35,8 @@ New
 
 Improved
 ########
-- A pre-loaded runs workspace can now be passed to the fit_tof VESUVIO routine, which will skip the loading subroutine given this input
-- Loading the sample log files into a workspace can be disabled within a Vesuvio Driver Script, by setting the 'load_log_files' flag to False
+- A pre-loaded runs workspace can now be passed to the fit_tof VESUVIO routine, which will skip the loading subroutine, given this input.
+- Loading the sample log files into a workspace can be disabled within a Vesuvio Driver Script, by setting the 'load_log_files' flag to False.
 
 Bugfixes
 ########
@@ -59,13 +59,13 @@ New
    The new design of the Indirect Fitting tabs, shown here within ConvFit (the IndirectFitPropertyBrowser is seen on the left and can be ejected into a separate window).
 
 - The IndirectFitPropertyBrowser widget provides the following additional functionality to the Indirect Fit Interfaces (MSDFit, IqtFit, ConvFit, JumpFit):
-  - Ties can now be used to tie parameters between all functions and custom ties (involving mathematical expressions) are now available.
-  - It is now possible to add constraints to parameters.
-  - Any additional functions can be added from the library of available MANTID functions by right-clicking on 'Functions' in the browser and selecting 'Add Function'.
-  - Function setups can now be saved and re-loaded (Custom Setups) from the 'Setup' menu.
-  - Functions can be copied and loaded from the clipboard.
-  - Right-clicking on any function in the browser and selecting 'Help' will open a window containing the documentation for that function.
-  - The guess can be plot in a separate window from the interface (automatically updates as the fit model is changed), accessible through the 'Display' menu.
+  * Ties can now be used to tie parameters between all functions and custom ties (involving mathematical expressions) are now available.
+  * It is now possible to add constraints to parameters.
+  * Any additional functions can be added from the library of available MANTID functions by right-clicking on 'Functions' in the browser and selecting 'Add Function'.
+  * Function setups can now be saved and re-loaded (Custom Setups) from the 'Setup' menu.
+  * Functions can be copied and loaded from the clipboard.
+  * Right-clicking on any function in the browser and selecting 'Help' will open a window containing the documentation for that function.
+  * The guess can be plot in a separate window from the interface (automatically updates as the fit model is changed), accessible through the 'Display' menu.
 
 Improved
 ########
