@@ -27,6 +27,10 @@ Improved
 Vesuvio
 -------
 
+New
+###
+- Cumulative Angle-Averaged Data (sum of fits normalised by their integral) can be calculated and produced as output by setting the 'calculate_caad' flag to True.
+
 Improved
 ########
 - A pre-loaded runs workspace can now be passed to the fit_tof VESUVIO routine, which will skip the loading subroutine given this input
