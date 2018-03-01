@@ -137,19 +137,19 @@ void EnggDiffGSASFittingModel::doRefinement(
   worker->moveToThread(m_workerThread);
 
   qRegisterMetaType<
-      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>();
+      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>("GSASIIRefineFitPeaksOutputProperties");
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(doRefinement()));
-  connect(worker, SIGNAL(refinementSuccessful(
-                      const GSASIIRefineFitPeaksOutputProperties &)),
+  connect(worker,
+          SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
           this, SLOT(processRefinementSuccessful(
                     const GSASIIRefineFitPeaksOutputProperties &)));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), this,
           SLOT(processRefinementFailed(const std::string &)));
   connect(m_workerThread, SIGNAL(finished()), m_workerThread,
           SLOT(deleteLater()));
-  connect(worker, SIGNAL(refinementSuccessful(
-                      const GSASIIRefineFitPeaksOutputProperties &)),
+  connect(worker,
+          SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
           worker, SLOT(deleteLater()));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), worker,
           SLOT(deleteLater()));

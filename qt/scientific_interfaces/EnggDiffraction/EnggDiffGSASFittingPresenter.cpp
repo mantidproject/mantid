@@ -97,14 +97,18 @@ void EnggDiffGSASFittingPresenter::doRefinement(
 
 void EnggDiffGSASFittingPresenter::notifyRefinementFailed(
     const std::string &failureMessage) {
-  m_view->userWarning("Refinement failed", failureMessage);
+  if (!m_viewHasClosed) {
+    m_view->userWarning("Refinement failed", failureMessage);
+  }
 }
 
 void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
-  m_multiRunWidget->addFittedPeaks(refinementResults.runLabel,
-                                   refinementResults.fittedPeaksWS);
-  displayFitResults(refinementResults.runLabel);
+  if (!m_viewHasClosed) {
+    m_multiRunWidget->addFittedPeaks(refinementResults.runLabel,
+                                     refinementResults.fittedPeaksWS);
+    displayFitResults(refinementResults.runLabel);
+  }
 }
 
 void EnggDiffGSASFittingPresenter::processDoRefinement() {

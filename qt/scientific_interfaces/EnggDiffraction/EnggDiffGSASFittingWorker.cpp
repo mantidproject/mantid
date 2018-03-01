@@ -11,13 +11,16 @@ EnggDiffGSASFittingWorker::EnggDiffGSASFittingWorker(
 
 void EnggDiffGSASFittingWorker::doRefinement() {
   try {
+    qRegisterMetaType<
+        MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
+        "GSASIIRefineFitPeaksOutputProperties");
     const auto outputProperties =
         m_model->doGSASRefinementAlgorithm(m_refinementParams);
-    qRegisterMetaType<
-        MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>();
     emit refinementSuccessful(outputProperties);
   } catch (const std::exception &e) {
     emit refinementFailed(e.what());
+  } catch (...) {
+    emit refinementFailed("Unknown error. Please contact the development team");
   }
 }
 

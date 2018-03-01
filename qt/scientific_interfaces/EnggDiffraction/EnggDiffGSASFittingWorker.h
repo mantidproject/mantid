@@ -26,10 +26,9 @@ public slots:
   void doRefinement();
 
 signals:
-  void refinementSuccessful(
-      const GSASIIRefineFitPeaksOutputProperties &outputProperties);
+  void refinementSuccessful(GSASIIRefineFitPeaksOutputProperties);
 
-  void refinementFailed(const std::string &errorMessage);
+  void refinementFailed(std::string);
 
 private:
   EnggDiffGSASFittingModel *m_model;
