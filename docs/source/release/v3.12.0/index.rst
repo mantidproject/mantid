@@ -4,9 +4,9 @@
 Mantid 3.12.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/Release3-12.png
    :class: screenshot
-   :width: 385px
+   :width: 800px
    :align: right
 
 .. contents:: Table of Contents
