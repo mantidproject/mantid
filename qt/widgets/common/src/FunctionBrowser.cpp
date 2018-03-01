@@ -2268,7 +2268,6 @@ void FunctionBrowser::updateMultiDatasetParameters(
     const Mantid::API::IFunction &fun) {
   auto cfun = dynamic_cast<const Mantid::API::CompositeFunction *>(&fun);
   if (cfun && cfun->nFunctions() > 0) {
-    const auto localParameters = getLocalParameters();
 
     // Multiple datasets
     if (const auto *multiFun =
@@ -2279,17 +2278,32 @@ void FunctionBrowser::updateMultiDatasetParameters(
         throw std::invalid_argument("Function has incorrect number of domains");
       }
       // update function
+      {
+        auto sfun = multiFun->getFunction(0);
+        const auto globalParameters = getGlobalParameters();
+        for (int j = 0; j < globalParameters.size(); ++j) {
+          auto paramName = globalParameters[j];
+          auto paramIndex = sfun->parameterIndex(paramName.toStdString());
+          setParameter(paramName, sfun->getParameter(paramIndex));
+          setParamError(paramName, sfun->getError(paramIndex));
+        }
+      }
       size_t currentIndex = static_cast<size_t>(m_currentDataset);
+      const auto localParameters = getLocalParameters();
       for (size_t i = 0; i < multiFun->nFunctions(); ++i) {
         auto sfun = multiFun->getFunction(i);
-        if (i == currentIndex) {
-          updateParameters(*sfun);
-        }
         for (int j = 0; j < localParameters.size(); ++j) {
-          auto paramIndex = sfun->parameterIndex(localParameters[j].toStdString());
+          auto paramName = localParameters[j];
+          auto paramIndex = sfun->parameterIndex(paramName.toStdString());
+          auto value = sfun->getParameter(paramIndex);
+          auto error = sfun->getError(paramIndex);
           setLocalParameterValue(
               localParameters[j], static_cast<int>(i),
-              sfun->getParameter(paramIndex), sfun->getError(paramIndex));
+              value, error);
+          if (i == currentIndex) {
+            setParameter(paramName, value);
+            setParamError(paramName, error);
+          }
         }
       }
     } else { // composite function, 1 domain only
