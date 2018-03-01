@@ -63,7 +63,6 @@ void QtReflSaveTabView::enableAutosaveControls() {
 void QtReflSaveTabView::enableFileFormatAndLocationControls() {
   m_ui.fileFormatGroup->setEnabled(true);
   m_ui.fileLocationGroup->setEnabled(true);
-
 }
 
 void QtReflSaveTabView::disableFileFormatAndLocationControls() {

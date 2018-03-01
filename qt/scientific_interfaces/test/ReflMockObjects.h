@@ -134,10 +134,15 @@ public:
 class MockEventView : public IReflEventView {
 public:
   // Global options
-  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
-  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
-  MOCK_METHOD0(enableAll, void());
-  MOCK_METHOD0(disableAll, void());
+  MOCK_METHOD1(enableSliceType, void(SliceType));
+  MOCK_METHOD1(disableSliceType, void(SliceType));
+  MOCK_METHOD0(enableSliceTypeSelection, void());
+  MOCK_METHOD0(disableSliceTypeSelection, void());
+  MOCK_CONST_METHOD0(getLogValueTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getCustomTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getUniformTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getUniformEvenTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getLogValueTimeSlicingType, std::string());
 
   // Calls we don't care about
   IReflEventPresenter *getPresenter() const override { return nullptr; }
@@ -163,6 +168,10 @@ public:
   MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD0(getAutosavePrefixInput, std::string());
   MOCK_METHOD0(disallowAutosave, void());
+  MOCK_METHOD0(disableAutosaveControls, void());
+  MOCK_METHOD0(enableAutosaveControls, void());
+  MOCK_METHOD0(enableFileFormatAndLocationControls, void());
+  MOCK_METHOD0(disableFileFormatAndLocationControls, void());
 
   // Calls we don't care about
   IReflSaveTabPresenter *getPresenter() const override { return nullptr; }
@@ -201,6 +210,7 @@ public:
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
   MOCK_METHOD0(onReductionPaused, void());
   MOCK_METHOD0(onReductionResumed, void());
+  MOCK_METHOD1(notifySliceTypeChanged, void(SliceType));
   ~MockEventPresenter() override{};
 };
 

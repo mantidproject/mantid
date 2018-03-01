@@ -30,7 +30,8 @@ private:
 
 template <typename... Ts>
 QWidgetGroup<sizeof...(Ts)> makeQWidgetGroup(Ts... widgets) {
-  return QWidgetGroup<sizeof...(Ts)>(std::array<QWidget *, sizeof...(Ts)>({widgets...}));
+  return QWidgetGroup<sizeof...(Ts)>(
+      std::array<QWidget *, sizeof...(Ts)>({widgets...}));
 }
 
 // Forward decs

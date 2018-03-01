@@ -34,7 +34,8 @@ std::string ReflEventPresenter::getTimeSlicingValues() const {
     auto slicingValues = m_view->getLogValueTimeSlicingValues();
     auto logFilter = m_view->getLogValueTimeSlicingType();
     return logFilterAndSliceValues(slicingValues, logFilter);
-  } default:
+  }
+  default:
     return "";
   }
 }
