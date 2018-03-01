@@ -112,7 +112,6 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   } else {
     addColumnToTable(table, "str", "workspace_Name", PLOT_TYPE_LABEL);
   }
- 
 
   // Cache the start time of the first run
   m_firstStart_ns = getFirstStartTimeNanosec(workspacesByLabel);
@@ -123,16 +122,15 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   const auto valMap = m_logValues->value(m_logValues->keys()[0]);
   for (const auto &log : m_logs) {
 
-	  auto val = valMap[log];
-	  // multiple files use strings due to x-y format
-	  if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+    auto val = valMap[log];
+    // multiple files use strings due to x-y format
+    if (val.canConvert<double>() && !log.endsWith(" (text)")) {
 
-		  addColumnToResultsTable(table, wsParamsByLabel, log);//
+      addColumnToResultsTable(table, wsParamsByLabel, log); //
 
-	  }
-	  else {
-		  addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
-	  }
+    } else {
+      addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+    }
   }
   const auto &paramsToDisplay = addParameterColumns(table, wsParamsByLabel);
 
@@ -521,45 +519,42 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
 * @param paramsToDisplay :: [input] List of parameters to display in table
 */
 void MuonAnalysisResultTableCreator::addColumnToResultsTable(
-	ITableWorkspace_sptr &table,
-	const QMap<QString, WSParameterList> &paramsByLabel, const QString &log) const{
-	// if its a single fit we know its a double
-	if (!m_multiple) {
-		addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
-		return;
-	}
-        const auto &labelName = m_items[0];
+    ITableWorkspace_sptr &table,
+    const QMap<QString, WSParameterList> &paramsByLabel,
+    const QString &log) const {
+  // if its a single fit we know its a double
+  if (!m_multiple) {
+    addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
+    return;
+  }
+  const auto &labelName = m_items[0];
 
-		    
-			QStringList valuesPerWorkspace;
-			for (const auto &wsName : paramsByLabel[labelName].keys()) {
-				const auto &logValues = m_logValues->value(wsName);
-				const auto &val = logValues[log];
+  QStringList valuesPerWorkspace;
+  for (const auto &wsName : paramsByLabel[labelName].keys()) {
+    const auto &logValues = m_logValues->value(wsName);
+    const auto &val = logValues[log];
 
-				// Special case: if log is time in sec, subtract the first start time
-				if (log.endsWith(" (s)")) {
-					auto seconds =
-						val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
-					valuesPerWorkspace.append(QString::number(seconds));
-				}
-				else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+    // Special case: if log is time in sec, subtract the first start time
+    if (log.endsWith(" (s)")) {
+      auto seconds =
+          val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
+      valuesPerWorkspace.append(QString::number(seconds));
+    } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
 
-					valuesPerWorkspace.append(QString::number(val.toDouble()));
+      valuesPerWorkspace.append(QString::number(val.toDouble()));
 
-				}
-				else {
-					valuesPerWorkspace.append(logValues[log].toString());
-				}
-			}
-			valuesPerWorkspace.sort();
-			const auto &min = valuesPerWorkspace.front().toDouble();
-			const auto &max = valuesPerWorkspace.back().toDouble();
-			if (min == max) {
-				addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
-				return;
-			}
-			addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
-
+    } else {
+      valuesPerWorkspace.append(logValues[log].toString());
+    }
+  }
+  valuesPerWorkspace.sort();
+  const auto &min = valuesPerWorkspace.front().toDouble();
+  const auto &max = valuesPerWorkspace.back().toDouble();
+  if (min == max) {
+    addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
+    return;
+  }
+  addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
 }
 
 /**
@@ -597,7 +592,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
               val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
           valuesPerWorkspace.append(QString::number(seconds));
         } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
-			
+
           valuesPerWorkspace.append(QString::number(val.toDouble()));
 
         } else {
@@ -615,7 +610,8 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
         row << min;
       } else {
         std::ostringstream oss;
-        oss << valuesPerWorkspace.front().toStdString() << "-" << valuesPerWorkspace.back().toStdString();
+        oss << valuesPerWorkspace.front().toStdString() << "-"
+            << valuesPerWorkspace.back().toStdString();
         row << oss.str();
       }
       columnIndex++;
