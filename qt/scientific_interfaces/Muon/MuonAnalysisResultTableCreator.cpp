@@ -110,24 +110,28 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   } else {
     addColumnToTable(table, "str", "workspace_Name", PLOT_TYPE_LABEL);
   }
-  const auto valMap = m_logValues->value(m_logValues->keys()[0]);
-  for (const auto &log : m_logs) {
-
-    auto val = valMap[log];
-    // multiple files use strings due to x-y format
-    if (val.canConvert<double>() && !log.endsWith(" (text)")) {
-      addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
-
-    } else {
-      addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
-    }
-  }
+ 
 
   // Cache the start time of the first run
   m_firstStart_ns = getFirstStartTimeNanosec(workspacesByLabel);
 
   // Get param information and add columns to table
   const auto &wsParamsByLabel = getParametersByLabel(workspacesByLabel);
+
+  const auto valMap = m_logValues->value(m_logValues->keys()[0]);
+  for (const auto &log : m_logs) {
+
+	  auto val = valMap[log];
+	  // multiple files use strings due to x-y format
+	  if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+
+		  addColumnToResultsTable(table, wsParamsByLabel, log);//
+
+	  }
+	  else {
+		  addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+	  }
+  }
   const auto &paramsToDisplay = addParameterColumns(table, wsParamsByLabel);
 
   // Write log and parameter data to the table
@@ -507,6 +511,61 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
     }
   }
 }
+/**
+* Write log and parameter values to the table for the case of multiple fits.
+* @param table :: [input, output] Table to write to
+* @param paramsByLabel :: [input] Map of <label name, <workspace name,
+* <parameter, value>>>
+* @param paramsToDisplay :: [input] List of parameters to display in table
+*/
+void MuonAnalysisResultTableCreator::addColumnToResultsTable(
+	ITableWorkspace_sptr &table,
+	const QMap<QString, WSParameterList> &paramsByLabel, const QString &log) const{
+	// if its a single fit we know its a double
+	if (!m_multiple) {
+		addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
+		return;
+	}
+	// loop over workspaces
+	for (const auto &labelName : m_items) {
+
+		    
+			QStringList valuesPerWorkspace;
+			for (const auto &wsName : paramsByLabel[labelName].keys()) {
+				const auto &logValues = m_logValues->value(wsName);
+				const auto &val = logValues[log];
+
+				// Special case: if log is time in sec, subtract the first start time
+				if (log.endsWith(" (s)")) {
+					auto seconds =
+						val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
+					valuesPerWorkspace.append(QString::number(seconds));
+				}
+				else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+					std::string aaa = log.toStdString();
+					auto asdf = val.toDouble();
+					auto gfdgdsgds = wsName.toStdString();
+					valuesPerWorkspace.append(QString::number(val.toDouble()));
+
+				}
+				else {
+					valuesPerWorkspace.append(logValues[log].toString());
+				}
+			}
+			valuesPerWorkspace.sort();
+			const auto &min = valuesPerWorkspace.front().toDouble();
+			const auto &max = valuesPerWorkspace.back().toDouble();
+			if (min == max) {
+				addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
+				return;
+			}
+			addColumnToTable(table, "string", log.toStdString(), PLOT_TYPE_X);
+		}
+
+		
+
+
+}
 
 /**
  * Write log and parameter values to the table for the case of multiple fits.
@@ -543,6 +602,9 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
               val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
           valuesPerWorkspace.append(QString::number(seconds));
         } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+			std::string aaa = log.toStdString();
+			auto asdf = val.toDouble();
+			auto gfdgdsgds = wsName.toStdString();
           valuesPerWorkspace.append(QString::number(val.toDouble()));
 
         } else {
