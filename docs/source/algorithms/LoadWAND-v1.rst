@@ -14,7 +14,7 @@ file after which it will integrate out the events, apply a standard
 mask, change units to wavelength and set the wavelength, set the
 goniometer, and set the proton charge to be the number of monitor
 counts. The standard mask includes the top and bottom 2 rows of pixels
-and the last 32 columns.
+and the last 6 columns.
 
 After this algorithm loads the workspace it can be correctly converted
 to Q sample or HKL using :ref:`algm-ConvertToMD`.
