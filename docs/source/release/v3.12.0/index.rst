@@ -4,9 +4,9 @@
 Mantid 3.12.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/Release3-12.png
    :class: screenshot
-   :width: 385px
+   :width: 800px
    :align: right
 
 .. contents:: Table of Contents
@@ -53,10 +53,9 @@ Changes
    Framework <framework>
    User Interface & Usability <ui>
    Diffraction <diffraction>
-   LowQ <lowq>
    Muon Analysis <muon>
    Reflectometry <reflectometry>
-   Spectroscopy <spectroscopy>
+   SANS <sans>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
 

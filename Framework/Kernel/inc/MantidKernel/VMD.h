@@ -64,7 +64,6 @@ public:
   TYPE &operator[](const size_t index);
   const TYPE *getBareArray() const;
   std::string toString(const std::string &separator = " ") const;
-  template <class T> std::vector<T> toVector() const;
   bool operator==(const VMDBase &v) const;
   bool operator!=(const VMDBase &v) const;
   VMDBase operator+(const VMDBase &v) const;

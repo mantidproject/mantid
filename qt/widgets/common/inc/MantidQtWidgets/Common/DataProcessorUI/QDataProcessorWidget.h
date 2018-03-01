@@ -55,16 +55,19 @@ class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
 public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = nullptr);
-  QDataProcessorWidget(const WhiteList &, QWidget *parent);
+  QDataProcessorWidget(const WhiteList &, QWidget *parent, int group = 0);
   QDataProcessorWidget(const WhiteList &, const ProcessingAlgorithm &,
-                       QWidget *parent);
+                       QWidget *parent, int group = 0);
   QDataProcessorWidget(const WhiteList &, const PreprocessMap &,
-                       const ProcessingAlgorithm &, QWidget *parent);
+                       const ProcessingAlgorithm &, QWidget *parent,
+                       int group = 0);
   QDataProcessorWidget(const WhiteList &, const ProcessingAlgorithm &,
-                       const PostprocessingAlgorithm &, QWidget *parent);
+                       const PostprocessingAlgorithm &, QWidget *parent,
+                       int group = 0);
   QDataProcessorWidget(const WhiteList &, const PreprocessMap &,
                        const ProcessingAlgorithm &,
-                       const PostprocessingAlgorithm &, QWidget *parent);
+                       const PostprocessingAlgorithm &, QWidget *parent,
+                       int group = 0);
   ~QDataProcessorWidget() override;
 
   // Add actions to the toolbar
