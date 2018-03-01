@@ -87,7 +87,7 @@ class VesuvioTOFFitInput(object):
 
         self.sample_runs, self.sample_data = self._try_load_data(sample_runs, self.spectra,
                                                                  loader, "Unable to load Sample Runs:")
-        mtd.addOrReplace(self._tof_workspace_suffix(self.sample_runs, spectra),
+        mtd.addOrReplace(self._tof_workspace_suffix(self.sample_runs, self.spectra),
                          self.sample_data)
 
         if container_runs is not None:
