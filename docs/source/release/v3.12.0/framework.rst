@@ -51,6 +51,7 @@ Fitting
 -------
 - :ref:`EISFDiffSphere <func-EISFDiffSphere>` fits the Q-dependence on the EISF of a particle undergoing continuous diffusion but confined to a spherical volume.
 - :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>` fits the Q-dependence on the EISF of an alkyl molecule, like a membrane lipd.
+- :ref:`EISFDiffCylinder <func-EISFDiffCylinder>` models the elastic incoherent scattering intensity of a particle diffusing within a cylinder.
 
 Core Functionality
 ------------------
