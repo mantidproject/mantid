@@ -500,5 +500,5 @@ class CalculateCumulativeAngleAveragedData(stresstesting.MantidStressTest):
 
         functions = ['GramCharlierComptonProfile', 'GaussianComptonProfile',
                      'GaussianComptonProfile', 'GaussianComptonProfile']
-        _test_caad_workspace(self, '15039-15045_normalised_iteration_' + str(exit_iteration), functions)
-        _test_caad_workspace(self, '15039-15045_sum_iteration_' + str(exit_iteration), functions)
+        _test_caad_workspace(self, '15039-15045_CAAD_normalised_iteration_' + str(exit_iteration), functions)
+        _test_caad_workspace(self, '15039-15045_CAAD_sum_iteration_' + str(exit_iteration), functions)
