@@ -1997,6 +1997,22 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
   }
 }
 
+void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
+                                             double value, double error) {
+  checkLocalParameter(parName);
+  m_localParameterValues[parName][i].value = value;
+  m_localParameterValues[parName][i].error = error;
+  if (i == m_currentDataset) {
+    setParameter(parName, value);
+    setParamError(parName, error);
+  }
+}
+  /// Get error of a local parameter
+double FunctionBrowser::getLocalParameterError(const QString &parName, int i) const {
+  checkLocalParameter(parName);
+  return m_localParameterValues[parName][i].error;
+}
+
 /**
  * Init a local parameter. Define initial values for all datasets.
  * @param parName :: Name of parametere to init.
@@ -2042,6 +2058,7 @@ void FunctionBrowser::setCurrentDataset(int i) {
   auto localParameters = getLocalParameters();
   foreach (QString par, localParameters) {
     setParameter(par, getLocalParameterValue(par, m_currentDataset));
+    setParamError(par, getLocalParameterError(par, m_currentDataset));
     updateLocalTie(par);
   }
 }
@@ -2269,9 +2286,10 @@ void FunctionBrowser::updateMultiDatasetParameters(
           updateParameters(*sfun);
         }
         for (int j = 0; j < localParameters.size(); ++j) {
+          auto paramIndex = sfun->parameterIndex(localParameters[j].toStdString());
           setLocalParameterValue(
               localParameters[j], static_cast<int>(i),
-              sfun->getParameter(localParameters[j].toStdString()));
+              sfun->getParameter(paramIndex), sfun->getError(paramIndex));
         }
       }
     } else { // composite function, 1 domain only
