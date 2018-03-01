@@ -29,7 +29,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                        flags['ip_file'], flags.get('bin_parameters', None),
                                        _extract_bool_from_flags('load_log_files', flags))
     vesuvio_input = VesuvioTOFFitInput(runs, flags.get('container_runs', None),
-                                       flags['spectra'], vesuvio_loader)
+                                       flags.get('spectra', None), vesuvio_loader)
 
     if flags.get('ms_enabled', True):
         hydrogen_constraints = flags['ms_flags'].pop("HydrogenConstraints", None)

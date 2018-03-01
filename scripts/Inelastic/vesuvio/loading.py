@@ -83,7 +83,7 @@ class VesuvioTOFFitInput(object):
 
     def __init__(self, sample_runs, container_runs, spectra, loader):
         # Load sample and container runs
-        self.spectra = _parse_spectra(loader.fit_mode, spectra)
+        self.spectra = _parse_spectra(loader.fit_mode, spectra, sample_runs)
 
         self.sample_runs, self.sample_data = self._try_load_data(sample_runs, self.spectra,
                                                                  loader, "Unable to load Sample Runs:")
@@ -146,7 +146,16 @@ class VesuvioTOFFitInput(object):
         return runs + "_" + spectra + "_tof"
 
 
-def _parse_spectra(fit_mode, spectra):
+def _parse_spectra(fit_mode, spectra, sample_runs):
+    if isinstance(sample_runs, MatrixWorkspace):
+        return _spectra_from_workspace(sample_runs)
+    elif spectra is not None:
+        return _spectra_from_string(fit_mode, spectra)
+    else:
+        raise RuntimeError("No spectra have been defined; unable to run fit routines.")
+
+
+def _spectra_from_string(fit_mode, spectra):
     if fit_mode == 'bank':
         return _parse_spectra_bank(spectra)
     else:
@@ -156,6 +165,12 @@ def _parse_spectra(fit_mode, spectra):
             return "{0}-{1}".format(*VESUVIO().backward_spectra)
         else:
             return spectra
+
+
+def _spectra_from_workspace(workspace):
+    first_spectrum = workspace.getSpectrum(0).getSpectrumNo()
+    last_spectrum = workspace.getSpectrum(workspace.getNumberHistograms() - 1).getSpectrumNo()
+    return "{0}-{1}".format(first_spectrum, last_spectrum)
 
 
 def _parse_spectra_bank(spectra_bank):
