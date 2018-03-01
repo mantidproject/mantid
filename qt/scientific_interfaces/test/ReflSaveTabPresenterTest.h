@@ -74,8 +74,9 @@ public:
 
   void expectHasValidSaveDirectory(MockSaveTabView &mockView) {
     ON_CALL(mockView, getSavePath())
-        .WillByDefault(Return(
-            ::Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory")));
+        .WillByDefault(
+            Return(::Mantid::Kernel::ConfigService::Instance().getString(
+                "defaultsave.directory")));
   }
 
   void testDisablesFileFormatControlsWhenProcessingAndAutosaveEnabled() {

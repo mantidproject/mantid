@@ -57,6 +57,7 @@ set ( INC_FILES
     QtReflSaveTabView.h
     QtReflSettingsTabView.h
     QtReflSettingsView.h
+    QWidgetGroup.h
     ReflCatalogSearcher.h
     ReflDataProcessorMainPresenter.h
     ReflDataProcessorPresenter.h
