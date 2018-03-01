@@ -528,8 +528,6 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
 		addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
 		return;
 	}
-	// loop over workspaces
-	//for (const auto &labelName : m_items) {
         const auto &labelName = m_items[0];
 
 		    
@@ -545,9 +543,7 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
 					valuesPerWorkspace.append(QString::number(seconds));
 				}
 				else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
-					std::string aaa = log.toStdString();
-					auto asdf = val.toDouble();
-					auto gfdgdsgds = wsName.toStdString();
+
 					valuesPerWorkspace.append(QString::number(val.toDouble()));
 
 				}
@@ -563,10 +559,6 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
 				return;
 			}
 			addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
-	
-
-		
-
 
 }
 
@@ -605,9 +597,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
               val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
           valuesPerWorkspace.append(QString::number(seconds));
         } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
-			std::string aaa = log.toStdString();
-			auto asdf = val.toDouble();
-			auto gfdgdsgds = wsName.toStdString();
+			
           valuesPerWorkspace.append(QString::number(val.toDouble()));
 
         } else {
