@@ -558,16 +558,33 @@ void MuonSequentialFitDialog::finishAfterRun(
           "Could not find output parameters table for simultaneous fit");
     }
     // Group output together
-    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Workspaces");
+    ads.add(wsBaseName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(wsBaseName, wsBaseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(wsBaseName, wsBaseName + "_Parameters");
+    ads.addToGroup(wsBaseName, wsBaseName + "_Workspaces");
+    ads.addToGroup(labelGroupName, wsBaseName);
   } else {
-    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
+    ads.add(wsBaseName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(wsBaseName, wsBaseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(wsBaseName, wsBaseName + "_Parameters");
+    ads.addToGroup(wsBaseName, wsBaseName + "_Workspace");
     auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
     fitWs->copyExperimentInfoFrom(firstWS.get());
+    ads.addToGroup(labelGroupName, wsBaseName);
   }
+}
+
+/**
+ * Helper function to create a groupWorkspace and add fit output to it
+ * Assumes that the fit output workspace extensions are present
+ */
+void createGroupAndAddFitOutput(const std::string &groupName,
+                                const std::string &wsBaseName) {
+  auto &ads = AnalysisDataService::Instance();
+  ads.add(wsBaseName, boost::make_shared<WorkspaceGroup>());
+  ads.addToGroup(wsBaseName, wsBaseName + "_NormalisedCovarianceMatrix");
+  ads.addToGroup(wsBaseName, wsBaseName + "_Parameters");
+  ads.addToGroup(wsBaseName, wsBaseName + "_Workspaces");
 }
 
 /**
