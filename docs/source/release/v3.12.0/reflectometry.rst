@@ -53,6 +53,10 @@ Bug fixes
   - I0MonitorIndex
   - TransRunStartOverlap and TransRunEndOverlap if on SURF or CRISP.
 
+Features Removed
+################
+
+* The REFL Reduction, REFL SF Calculator and REFM Reduction graphical interface have been removed, they were not in active use, and were a source of bugs as well as using testing effort that is better directed elsewhere.
 
 Algorithms
 ----------
