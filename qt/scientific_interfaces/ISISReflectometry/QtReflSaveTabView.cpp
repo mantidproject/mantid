@@ -10,7 +10,6 @@ namespace CustomInterfaces {
 * @param parent :: The parent of this view
 */
 QtReflSaveTabView::QtReflSaveTabView(QWidget *parent) : m_presenter() {
-
   UNUSED_ARG(parent);
   initLayout();
 }
@@ -53,11 +52,29 @@ void QtReflSaveTabView::onAutosaveChanged(int state) {
     m_presenter->notify(IReflSaveTabPresenter::Flag::autosaveDisabled);
 }
 
+void QtReflSaveTabView::disableAutosaveControls() {
+  m_ui.autosaveGroup->setEnabled(false);
+}
+
+void QtReflSaveTabView::enableAutosaveControls() {
+  m_ui.autosaveGroup->setEnabled(true);
+}
+
+void QtReflSaveTabView::enableFileFormatAndLocationControls() {
+  m_ui.fileFormatGroup->setEnabled(true);
+  m_ui.fileLocationGroup->setEnabled(true);
+
+}
+
+void QtReflSaveTabView::disableFileFormatAndLocationControls() {
+  m_ui.fileFormatGroup->setEnabled(false);
+  m_ui.fileLocationGroup->setEnabled(false);
+}
+
 /** Returns the presenter managing this view
 * @return :: A pointer to the presenter
 */
 IReflSaveTabPresenter *QtReflSaveTabView::getPresenter() const {
-
   return m_presenter.get();
 }
 

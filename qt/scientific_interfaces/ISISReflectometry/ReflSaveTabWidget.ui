@@ -27,7 +27,7 @@
     <number>10</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox_3">
+    <widget class="QGroupBox" name="fileLocationGroup">
      <property name="title">
       <string>File Names and Location</string>
      </property>

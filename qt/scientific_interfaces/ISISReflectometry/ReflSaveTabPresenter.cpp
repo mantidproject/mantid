@@ -43,9 +43,17 @@ void ReflSaveTabPresenter::acceptMainPresenter(
   m_mainPresenter = mainPresenter;
 }
 
-void ReflSaveTabPresenter::onAnyReductionPaused() { populateWorkspaceList(); }
+void ReflSaveTabPresenter::onAnyReductionPaused() {
+  populateWorkspaceList();
+  m_view->enableAutosaveControls();
+  m_view->enableFileFormatAndLocationControls();
+}
 
-void ReflSaveTabPresenter::onAnyReductionResumed() {}
+void ReflSaveTabPresenter::onAnyReductionResumed() {
+  m_view->disableAutosaveControls();
+  if (shouldAutosave())
+    m_view->disableFileFormatAndLocationControls();
+}
 
 void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
   switch (flag) {

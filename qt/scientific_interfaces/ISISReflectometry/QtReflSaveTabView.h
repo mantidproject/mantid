@@ -82,6 +82,13 @@ public:
   void setParametersList(const std::vector<std::string> &) const override;
 
   void disallowAutosave() override;
+
+  void disableAutosaveControls() override;
+  void enableAutosaveControls() override;
+
+  void enableFileFormatAndLocationControls() override;
+  void disableFileFormatAndLocationControls() override;
+
 public slots:
   /// Populate the 'List of workspaces' widget
   void populateListOfWorkspaces() const;

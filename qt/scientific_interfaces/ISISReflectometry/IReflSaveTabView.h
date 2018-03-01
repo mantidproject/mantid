@@ -65,6 +65,12 @@ public:
   virtual void setWorkspaceList(const std::vector<std::string> &) const = 0;
   virtual void setParametersList(const std::vector<std::string> &) const = 0;
   virtual void disallowAutosave() = 0;
+
+  virtual void disableAutosaveControls() = 0;
+  virtual void enableAutosaveControls() = 0;
+
+  virtual void enableFileFormatAndLocationControls() = 0;
+  virtual void disableFileFormatAndLocationControls() = 0;
 };
 }
 }
