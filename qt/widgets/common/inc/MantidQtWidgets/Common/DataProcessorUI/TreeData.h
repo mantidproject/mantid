@@ -50,11 +50,10 @@ using RowData_sptr = std::shared_ptr<RowData>;
 class DLLExport RowData {
 public:
   // Constructors
-  RowData() = delete;
-  RowData(const int columnCount);
-  RowData(QStringList data);
-  RowData(const std::vector<std::string> &data);
-  RowData(const RowData *src);
+  explicit RowData(const int columnCount);
+  explicit RowData(QStringList data);
+  explicit RowData(const std::vector<std::string> &data);
+  explicit RowData(const RowData &src);
 
   // Iterators
   QList<QString>::iterator begin();

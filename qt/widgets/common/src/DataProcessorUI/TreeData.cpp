@@ -15,12 +15,12 @@ RowData::RowData(QStringList data)
 
 RowData::RowData(const std::vector<std::string> &data) : m_isProcessed{false} {
   for (auto &value : data)
-    m_data << QString::fromStdString(value);
+    m_data.append(QString::fromStdString(value));
 }
 
-RowData::RowData(const RowData *src)
-    : m_data(src->m_data), m_options(src->m_options),
-      m_preprocessedOptions(src->m_preprocessedOptions), m_isProcessed{false} {}
+RowData::RowData(const RowData &src)
+    : m_data(src.m_data), m_options(src.m_options),
+      m_preprocessedOptions(src.m_preprocessedOptions), m_isProcessed{false} {}
 
 // Iterators
 
@@ -225,7 +225,7 @@ RowData_sptr
 RowData::addSlice(const QString &sliceSuffix,
                   const std::vector<QString> &workspaceProperties) {
   // Create a copy
-  auto sliceData = std::make_shared<RowData>(this);
+  auto sliceData = std::make_shared<RowData>(*this);
   for (auto const &propertyName : workspaceProperties) {
     // Add the slice suffix to the reduced workspace name
     sliceData->setReducedName(reducedName() + sliceSuffix);
