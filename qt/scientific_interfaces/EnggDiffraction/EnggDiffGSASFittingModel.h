@@ -23,6 +23,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
   friend void EnggDiffGSASFittingWorker::doRefinement();
 
 public:
+  ~EnggDiffGSASFittingModel();
+
   void setObserver(
       boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) override;
 
@@ -86,6 +88,14 @@ private:
                       const double sigma, const double gamma,
                       const Mantid::API::ITableWorkspace_sptr latticeParams);
 
+  void deleteWorkerThread();
+
+  /// Run GSASIIRefineFitPeaks
+  /// Note this must be virtual so that it can be mocked out by the helper class
+  /// in EnggDiffGSASFittingModelTest
+  virtual GSASIIRefineFitPeaksOutputProperties
+  doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params);
+
   template <typename T>
   boost::optional<T> getFromRunMapOptional(const RunMap<MAX_BANKS, T> &map,
                                            const RunLabel &runLabel) const {
@@ -94,12 +104,6 @@ private:
     }
     return boost::none;
   }
-
-  /// Run GSASIIRefineFitPeaks
-  /// Note this must be virtual so that it can be mocked out by the helper class
-  /// in EnggDiffGSASFittingModelTest
-  virtual GSASIIRefineFitPeaksOutputProperties
-  doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params);
 };
 
 } // CustomInterfaces

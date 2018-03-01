@@ -36,6 +36,8 @@ std::string refinementMethodToString(
 namespace MantidQt {
 namespace CustomInterfaces {
 
+EnggDiffGSASFittingModel::~EnggDiffGSASFittingModel() { deleteWorkerThread(); }
+
 void EnggDiffGSASFittingModel::addFitResultsToMaps(
     const RunLabel &runLabel, const double rwp, const double sigma,
     const double gamma, const API::ITableWorkspace_sptr latticeParams) {
@@ -76,6 +78,13 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
   return std::to_string(runLabel.runNumber) + "_" +
          std::to_string(runLabel.bank) + "_lattice_params";
 }
+}
+
+void EnggDiffGSASFittingModel::deleteWorkerThread() {
+  if (m_workerThread) {
+    delete m_workerThread;
+    m_workerThread = nullptr;
+  }
 }
 
 GSASIIRefineFitPeaksOutputProperties
@@ -128,16 +137,15 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
 
 void EnggDiffGSASFittingModel::doRefinement(
     const GSASIIRefineFitPeaksParameters &params) {
-  if (m_workerThread) {
-    delete m_workerThread;
-  }
+  deleteWorkerThread();
   m_workerThread = new QThread(this);
   EnggDiffGSASFittingWorker *worker =
       new EnggDiffGSASFittingWorker(this, params);
   worker->moveToThread(m_workerThread);
 
   qRegisterMetaType<
-      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>("GSASIIRefineFitPeaksOutputProperties");
+      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
+      "GSASIIRefineFitPeaksOutputProperties");
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(doRefinement()));
   connect(worker,
@@ -198,6 +206,7 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
 
 void EnggDiffGSASFittingModel::processRefinementFailed(
     const std::string &failureMessage) {
+  deleteWorkerThread();
   if (m_observer) {
     m_observer->notifyRefinementFailed(failureMessage);
   }
@@ -205,6 +214,7 @@ void EnggDiffGSASFittingModel::processRefinementFailed(
 
 void EnggDiffGSASFittingModel::processRefinementSuccessful(
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
+  deleteWorkerThread();
   addFitResultsToMaps(refinementResults.runLabel, refinementResults.rwp,
                       refinementResults.sigma, refinementResults.gamma,
                       refinementResults.latticeParamsWS);
