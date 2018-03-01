@@ -11,8 +11,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
+#include "MantidTestHelpers/DataProcessorTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace DataProcessorTestHelper;
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
@@ -108,85 +110,6 @@ private:
   void createSampleEventWS(const QString &wsName) {
     auto tinyWS = WorkspaceCreationHelper::createEventWorkspace2();
     AnalysisDataService::Instance().addOrReplace(wsName.toStdString(), tinyWS);
-  }
-
-  void addRowValue(RowData_sptr rowData, const QStringList &list,
-                   const int index, const char *property,
-                   const char *prefix = "") {
-    if (index >= list.size())
-      return;
-    // Set the option based on the row value
-    rowData->setOptionValue(property, list[index]);
-    // Set the preprocessed option based on the value and prefix
-    rowData->setPreprocessedOptionValue(property, prefix + list[index]);
-  }
-
-  void addRowValue(RowData_sptr rowData, const char *property,
-                   const QString value) {
-    // Set the value and preprocessed value to the given value
-    rowData->setOptionValue(property, value);
-    rowData->setPreprocessedOptionValue(property, value);
-  }
-
-  void appendStringWithPrefix(QString &stringToEdit, const QStringList &list,
-                              std::vector<const char *> &prefixes,
-                              const size_t i, const char *separator = "") {
-    // do nothing if string to add is empty
-    const auto idx = static_cast<int>(i);
-    if (idx >= list.size() || list[idx].isEmpty())
-      return;
-
-    // add separator and string with/without prefix
-    const auto len = prefixes.size();
-    if (i < len && prefixes[i] != 0)
-      stringToEdit += QString(separator) + QString(prefixes[i]) + list[idx];
-    else
-      stringToEdit += separator + list[idx];
-  }
-
-  // Utility to create a row data class from a string list of simple inputs
-  // (does not support multiple input runs or transmission runs, or entries
-  // in the options/hidden columns). Assumes input workspaces are prefixed
-  // with TOF_ and transmission runs with TRANS_
-  RowData_sptr makeRowData(const QStringList &list,
-                           std::vector<const char *> prefixes = {"TOF_", "",
-                                                                 "TRANS_"},
-                           const size_t numSlices = 0) {
-    // Create the data and add default options
-    auto rowData = std::make_shared<RowData>(list);
-
-    if (list.size() < 1)
-      return rowData;
-
-    QString reducedName;
-    appendStringWithPrefix(reducedName, list, prefixes, 0);
-    appendStringWithPrefix(reducedName, list, prefixes, 2, "_");
-
-    rowData->setReducedName(reducedName);
-    addRowValue(rowData, "OutputWorkspace", "IvsQ_" + reducedName);
-    addRowValue(rowData, "OutputWorkspaceBinned", "IvsQ_binned_" + reducedName);
-    addRowValue(rowData, "OutputWorkspaceWavelength", "IvsLam_" + reducedName);
-
-    // Set other options from the row data values
-    addRowValue(rowData, list, 0, "InputWorkspace", "TOF_");
-    addRowValue(rowData, list, 1, "ThetaIn");
-    addRowValue(rowData, list, 2, "FirstTransmissionRun", "TRANS_");
-    addRowValue(rowData, list, 3, "MomentumTransferMin");
-    addRowValue(rowData, list, 4, "MomentumTransferMax");
-    addRowValue(rowData, list, 5, "MomentumTransferStep");
-    addRowValue(rowData, list, 6, "ScaleFactor");
-
-    // Add some slices if requested
-    std::vector<QString> workspaceProperties = {
-        "InputWorkspace", "OutputWorkspace", "OutputWorkspaceBinned",
-        "OutputWorkspaceWavelength"};
-    for (size_t i = 0; i < numSlices; ++i) {
-      QString sliceName =
-          QString("_slice_") + QString::fromStdString(std::to_string(i));
-      rowData->addSlice(sliceName, workspaceProperties);
-    }
-
-    return rowData;
   }
 
   ReflGenericDataProcessorPresenterFactory presenterFactory;

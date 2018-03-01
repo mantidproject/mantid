@@ -13,6 +13,11 @@ RowData::RowData(const int columnCount) : m_isProcessed{false} {
 RowData::RowData(QStringList data)
     : m_data(std::move(data)), m_isProcessed{false} {}
 
+RowData::RowData(const std::vector<std::string> &data) : m_isProcessed{false} {
+  for (auto &value : data)
+    m_data << QString::fromStdString(value);
+}
+
 RowData::RowData(const RowData *src)
     : m_data(src->m_data), m_options(src->m_options),
       m_preprocessedOptions(src->m_preprocessedOptions), m_isProcessed{false} {}
@@ -155,6 +160,15 @@ void RowData::setOptionValue(const QString &name, const QString &value) {
   m_options[name] = value;
 }
 
+/** Set the value for the given property
+ * @param name [in] : the property to set
+ * @param value [in] : the value
+ */
+void RowData::setOptionValue(const std::string &name,
+                             const std::string &value) {
+  setOptionValue(QString::fromStdString(name), QString::fromStdString(value));
+}
+
 /** Set the preprocessed value for the given property
  * @param name [in] : the property to set
  * @param value [in] : the value
@@ -162,6 +176,16 @@ void RowData::setOptionValue(const QString &name, const QString &value) {
 void RowData::setPreprocessedOptionValue(const QString &name,
                                          const QString &value) {
   m_preprocessedOptions[name] = value;
+}
+
+/** Set the preprocessed value for the given property
+ * @param name [in] : the property to set
+ * @param value [in] : the value
+ */
+void RowData::setPreprocessedOptionValue(const std::string &name,
+                                         const std::string &value) {
+  setPreprocessedOptionValue(QString::fromStdString(name),
+                             QString::fromStdString(value));
 }
 
 /** Get the number of slices for this row

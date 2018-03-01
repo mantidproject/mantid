@@ -13,7 +13,9 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
+#include "MantidTestHelpers/DataProcessorTestHelper.h"
 
+using namespace DataProcessorTestHelper;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
@@ -72,75 +74,6 @@ private:
     return whitelist;
   }
 
-  void addRowValue(RowData_sptr rowData, const QStringList &list,
-                   const int index, const char *property,
-                   const char *prefix = "") {
-    if (index >= list.size() || list[index].isEmpty())
-      return;
-    // Set the option based on the row value
-    rowData->setOptionValue(property, list[index]);
-    // Set the preprocessed option based on the value and prefix
-    rowData->setPreprocessedOptionValue(property, prefix + list[index]);
-  }
-
-  void addRowValue(RowData_sptr rowData, const char *property,
-                   const QString value) {
-    // Set the value and preprocessed value to the given value
-    rowData->setOptionValue(property, value);
-    rowData->setPreprocessedOptionValue(property, value);
-  }
-
-  void appendStringWithPrefix(QString &stringToEdit, const QStringList &list,
-                              std::vector<const char *> &prefixes,
-                              const size_t i, const char *separator = "") {
-    // do nothing if string to add is empty
-    const auto idx = static_cast<int>(i);
-    if (idx >= list.size() || list[idx].isEmpty())
-      return;
-
-    // add separator and string with/without prefix
-    const auto len = prefixes.size();
-    if (i < len && prefixes[i] != 0)
-      stringToEdit += QString(separator) + QString(prefixes[i]) + list[idx];
-    else
-      stringToEdit += separator + list[idx];
-  }
-
-  // Utility to create a row data class from a string list of simple inputs
-  // (does not support multiple input runs or transmission runs, or entries
-  // in the options/hidden columns). Assumes input workspaces are prefixed
-  // with TOF_ and transmission runs with TRANS_
-  RowData_sptr makeRowData(const QStringList &list,
-                           std::vector<const char *> prefixes = {"TOF_", "",
-                                                                 "TRANS_"}) {
-    // Create the data and add default options
-    auto rowData = std::make_shared<RowData>(list);
-    addRowValue(rowData, "AnalysisMode", "MultiDetectorAnalysis");
-
-    if (list.size() < 1)
-      return rowData;
-
-    QString reducedName;
-    appendStringWithPrefix(reducedName, list, prefixes, 0);
-    appendStringWithPrefix(reducedName, list, prefixes, 2, "_");
-
-    rowData->setReducedName(reducedName);
-    addRowValue(rowData, "OutputWorkspace", "IvsQ_" + reducedName);
-    addRowValue(rowData, "OutputWorkspaceBinned", "IvsQ_binned_" + reducedName);
-    addRowValue(rowData, "OutputWorkspaceWavelength", "IvsLam_" + reducedName);
-
-    // Set other options from the row data values
-    addRowValue(rowData, list, 0, "InputWorkspace", "TOF_");
-    addRowValue(rowData, list, 1, "ThetaIn");
-    addRowValue(rowData, list, 2, "FirstTransmissionRun", "TRANS_");
-    addRowValue(rowData, list, 3, "MomentumTransferMin");
-    addRowValue(rowData, list, 4, "MomentumTransferMax");
-    addRowValue(rowData, list, 5, "MomentumTransferStep");
-    addRowValue(rowData, list, 6, "ScaleFactor");
-
-    return rowData;
-  }
-
   // Creates reflectometry data
   TreeData reflData() {
     // Create some rows in 2 groups
@@ -153,6 +86,12 @@ private:
         makeRowData({"24681", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
     treeData[1][1] =
         makeRowData({"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 2; ++j)
+        addPropertyValue(treeData[i][j], "AnalysisMode",
+                         "MultiDetectorAnalysis");
+
     return treeData;
   }
 
@@ -370,6 +309,7 @@ public:
     // Create a row
     const auto rowData =
         makeRowData({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+    addPropertyValue(rowData, "AnalysisMode", "MultiDetectorAnalysis");
 
     auto output = reduceRowString(rowData, m_instrument, reflWhitelist(),
                                   reflPreprocessMap("TOF_"), reflProcessor(),
@@ -412,14 +352,15 @@ public:
 
     // Create a row
     const auto data = makeRowData({"1000+1001", "0.5", "", "", "", "", "", ""});
+    addPropertyValue(data, "AnalysisMode", "MultiDetectorAnalysis");
 
     // Set the expected output properties (these include the angle as specified
     // in the whitelist)
-    addRowValue(data, "OutputWorkspace", "IvsQ_1000+1001_angle_0.5");
-    addRowValue(data, "OutputWorkspaceBinned",
-                "IvsQ_binned_1000+1001_angle_0.5");
-    addRowValue(data, "OutputWorkspaceWavelength",
-                "IvsLam_1000+1001_angle_0.5");
+    addPropertyValue(data, "OutputWorkspace", "IvsQ_1000+1001_angle_0.5");
+    addPropertyValue(data, "OutputWorkspaceBinned",
+                     "IvsQ_binned_1000+1001_angle_0.5");
+    addPropertyValue(data, "OutputWorkspaceWavelength",
+                     "IvsLam_1000+1001_angle_0.5");
 
     auto output = reduceRowString(data, "INST", whitelist, preprocessMap,
                                   reflProcessor(), userPreProcessingOptions);
@@ -453,6 +394,7 @@ public:
     // Create a row
     const auto data =
         makeRowData({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+    addPropertyValue(data, "AnalysisMode", "MultiDetectorAnalysis");
 
     auto output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
@@ -862,6 +804,8 @@ public:
         makeRowData({"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
     auto rowData1 =
         makeRowData({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+    addPropertyValue(rowData0, "AnalysisMode", "MultiDetectorAnalysis");
+    addPropertyValue(rowData1, "AnalysisMode", "MultiDetectorAnalysis");
     TreeData treeData = {{0, {{0, rowData0}}}, {1, {{0, rowData1}}}};
 
     auto generatedNotebook = notebook->generateNotebook(treeData);

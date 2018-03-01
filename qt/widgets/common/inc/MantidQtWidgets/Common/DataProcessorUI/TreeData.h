@@ -53,6 +53,7 @@ public:
   RowData() = delete;
   RowData(const int columnCount);
   RowData(QStringList data);
+  RowData(const std::vector<std::string> &data);
   RowData(const RowData *src);
 
   // Iterators
@@ -92,8 +93,13 @@ public:
   QString preprocessedOptionValue(const QString &name) const;
   /// Set a property value
   void setOptionValue(const QString &name, const QString &value);
+  /// Set a property value
+  void setOptionValue(const std::string &name, const std::string &value);
   /// Set a preprocessed property value
   void setPreprocessedOptionValue(const QString &name, const QString &value);
+  /// Set a preprocessed property value
+  void setPreprocessedOptionValue(const std::string &name,
+                                  const std::string &value);
   /// Get the number of slices for this row
   size_t numberOfSlices() const;
   /// Check whether a slice exists by index

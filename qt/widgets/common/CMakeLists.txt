@@ -544,6 +544,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
     ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
   LINK_LIBS
