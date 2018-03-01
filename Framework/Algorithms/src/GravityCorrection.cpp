@@ -2,7 +2,6 @@
 
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/HistogramValidator.h"
-
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
@@ -71,6 +70,7 @@ using boost::make_shared;
 using std::find_if;
 using std::map;
 using std::pair;
+using std::pow;
 using std::runtime_error;
 using std::string;
 using std::vector;
@@ -89,11 +89,11 @@ void GravityCorrection::init() {
   this->declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
                                        wsValidator),
-      "The name of the input Workspace2D. X and Y values must be "
+      "The name of the input Workspace2D. Values of X and Y must be "
       "TOF and counts, respectively.");
   this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                          Direction::Output),
-                        "The name of the output Workspace2D");
+                        "The name of the output Workspace2D.");
   this->declareProperty("FirstSlitName", "slit1",
                         "Component name of the first slit.");
   this->declareProperty("SecondSlitName", "slit2",
@@ -114,9 +114,11 @@ map<string, string> GravityCorrection::validateInputs() {
   const WorkspaceHistory history = this->m_ws->getHistory();
   const AlgorithmHistories &histories = history.getAlgorithmHistories();
   // iterator to first occurence of the algorithm name
-  const auto it =
-      find_if(histories.cbegin(), histories.cend(),
-              [this](const auto &i) { return i->name() == this->name(); });
+  const auto it = find_if(
+      histories.cbegin(), histories.cend(),
+      [this](const boost::shared_ptr<Mantid::API::AlgorithmHistory> &i) {
+        return i->name() == this->name();
+      });
   if (it != histories.end())
     result["InputWorkspace"] = "GravityCorrection did already execute "
                                "(check workspace history).";
@@ -153,9 +155,10 @@ map<string, string> GravityCorrection::validateInputs() {
 /**
  * @brief GravityCorrection::coordinate
  * @param componentName :: name of the instrument component
- * @param direction :: direction of the coordinate
+ * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
+ * PointingAlong::Y, PointingAlong::Z)
  * @param instrument :: instrument containing the component
- * @return coordinate of the instrument component
+ * @return the coordinate of the instrument component
  */
 double GravityCorrection::coordinate(
     const string componentName, PointingAlong direction,
@@ -179,9 +182,10 @@ double GravityCorrection::coordinate(
 /**
  * @brief GravityCorrection::coordinate
  * @param detectorInfo :: reference detectorInfo
- * @param i :: spectrum index
- * @param direction :: direction of the coordinate
- * @param instrument :: instrument containing the component
+ * @param i :: detector index
+ * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
+ * PointingAlong::Y, PointingAlong::Z)
+ * @return the coordinate of a detector at index i
  */
 double GravityCorrection::coordinate(DetectorInfo &detectorInfo, size_t i,
                                      PointingAlong direction) const {
@@ -191,9 +195,12 @@ double GravityCorrection::coordinate(DetectorInfo &detectorInfo, size_t i,
 
 /**
  * @brief GravityCorrection::coordinate
- * @param detectorInfo :: reference spectrumInfo
+ * @param spectrumInfo :: reference spectrumInfo
  * @param i :: spectrum index
- * @param direction :: direction of the coordinate
+ * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
+ * PointingAlong::Y, PointingAlong::Z)
+ * @return the coordinate of a detector or group of detectors of a spectrum at
+ * index 1
  */
 double GravityCorrection::coordinate(SpectrumInfo &spectrumInfo, size_t i,
                                      PointingAlong direction) const {
@@ -201,6 +208,13 @@ double GravityCorrection::coordinate(SpectrumInfo &spectrumInfo, size_t i,
   return this->coordinate(position, direction);
 }
 
+/**
+ * @brief GravityCorrection::coordinate
+ * @param pos :: a V3D holding a position in Cartesian coordinates
+ * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
+ * PointingAlong::Y, PointingAlong::Z)
+ * @return the coordinate of the position in direction
+ */
 double GravityCorrection::coordinate(V3D &pos, PointingAlong direction) const {
   double position{0.};
   switch (direction) {
@@ -225,6 +239,7 @@ double GravityCorrection::coordinate(V3D &pos, PointingAlong direction) const {
  * @brief GravityCorrection::setCoordinate
  * @param pos :: holds the position vector to be updated
  * @param direction :: direction of the coordinate of the position to be updated
+ * (i.e. PointingAlong::X, PointingAlong::Y, PointingAlong::Z)
  * @param coor :: coordinate to be added to the position vector
  */
 void GravityCorrection::setCoordinate(V3D &pos, PointingAlong direction,
@@ -247,8 +262,9 @@ void GravityCorrection::setCoordinate(V3D &pos, PointingAlong direction,
 }
 
 /**
- * @brief GravityCorrection::slitCheck
- * @return true if slit position is between source and sample
+ * @brief GravityCorrection::slitCheck attempts to set the class member
+ * variables m_slit1Name and m_slit2Name according to their position.
+ * Errors get logged in case of insenible slit positions.
  */
 void GravityCorrection::slitCheck() {
   const string sourceName = this->m_virtualInstrument->getSource()->getName();
@@ -304,20 +320,16 @@ double GravityCorrection::finalAngle(const double k, size_t i) {
   tanAngle < 0. ? sign = -1 : sign = 1;
   const double beamDiff = beam1 - beam2;
   // potential divide by zero avoided by input validation beam1 != beam2
-  double beamShift = (k * (std::pow(beam1, 2.) - std::pow(beam2, 2.)) +
+  double beamShift = (k * (pow(beam1, 2.) - pow(beam2, 2.)) +
                       (beamDiff * tanAngle)) /
                      (2 * k * beamDiff);
-  if (beamDiff == 0.)
-    g_log.error("Zero final scattering angle.");
-  const double up1 = beam1 * tanAngle; // sign
-  double upShift = up1 + k * std::pow(beam1 - beamShift, 2.);
+  const double up2 = beam2 * tanAngle; // sign
+  double upShift = up2 + k * pow(beam2 - beamShift, 2.);
   // set sample coordinates
   this->setCoordinate(m_sample3D, this->m_beamDirection, beamShift); // sign
   this->setCoordinate(m_sample3D, this->m_upDirection, upShift);     // sign
   // calculate final angle
   return sign * atan(2. * k * sqrt(std::abs(upShift / k)));
-  // return atan(2 * k * beamShift);
-  // return atan(-2 * beamShift * sqrt(k));
 }
 
 /**
@@ -490,21 +502,22 @@ size_t GravityCorrection::spectrumNumber(const double angle,
   // up and n cannot be smaller than 0, only larger than
   // m_ws->getNumberHistograms()
 
-  // better place for: ?
-  auto tol = 0.;
-  if (spectrumInfo.size() <= i + 1)
-    tol =
-        (spectrumInfo.signedTwoTheta(i) - spectrumInfo.signedTwoTheta(i + 1)) /
-        2.;
+  const double signedCurrentAngle = spectrumInfo.signedTwoTheta(i) / 2.;
+  // a starting index for an effective search that exists
+  auto it = this->m_finalAngles.find(signedCurrentAngle);
 
-  if (this->spectrumCheck(spectrumInfo, i)) {
-    double currentAngle = spectrumInfo.signedTwoTheta(i) / 2.;
-    // a starting index for an effective search that exists
-    auto it = this->m_finalAngles.find(currentAngle);
-    while (this->m_smallerThan((*it++).first - tol, angle) &&
-           (it != this->m_finalAngles.end()))
-      n = (*it).second;
+  double tol = 0.;
+  // the upper range for the updated final angle
+  if ((spectrumInfo.size() >= it->second + 1) &&
+      (this->spectrumCheck(spectrumInfo, it->second + 1))) {
+    double signedNextAngle = spectrumInfo.signedTwoTheta(it->second + 1) / 2;
+    tol = 0.5 * (signedNextAngle - signedCurrentAngle);
   }
+  tol = 0.; // crazy
+  while (this->m_smallerThan((*it++).first + tol, angle) &&
+         (it != this->m_finalAngles.end()))
+    n = it->second;
+
   return n;
 }
 
@@ -519,7 +532,7 @@ size_t GravityCorrection::spectrumNumber(const double angle,
 double GravityCorrection::parabolaArcLength(const double arg,
                                             double constant) const {
   constant = std::abs(constant);
-  double a = std::pow(arg, 2.);
+  double a = pow(arg, 2.);
   double b = log((arg / sqrt(constant)) + sqrt(1 + a / constant));
   return 0.5 * (arg * sqrt(constant + a) + constant * b);
 }
@@ -538,9 +551,8 @@ void GravityCorrection::exec() {
 
   this->m_progress->report("Setup OutputWorkspace ...");
   MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
-  if (!outWS)
-    outWS = DataObjects::create<MatrixWorkspace>(
-        *this->m_ws, BinEdges(this->m_ws->blocksize() + 1));
+  outWS = DataObjects::create<MatrixWorkspace>(
+      *this->m_ws, BinEdges(this->m_ws->blocksize() + 1));
   outWS->setTitle(this->m_ws->getTitle() + " cancelled gravitation ");
 
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
@@ -599,7 +611,7 @@ void GravityCorrection::exec() {
 
       double v{(spectrumInfo.l1() + spectrumInfo.l2(i)) /
                *tofit}; // (metre / mu seconds!)
-      double k = g / (2. * std::pow(v * 1.e6, 2.));
+      double k = g / (2. * pow(v * 1.e6, 2.));
       double angle = this->finalAngle(k, i);
       if (cos(angle) == 0.) {
         this->g_log.error("Cannot divide by zero for calculating new tof "
@@ -635,7 +647,7 @@ void GravityCorrection::exec() {
       // need to set the counts to spectrum according to finalAngle & *tofit
       outWS->mutableY(j)[i_tofit] += this->m_ws->y(i)[i_tofit];
       outWS->mutableE(j)[i_tofit] += this->m_ws->e(i)[i_tofit];
-      ++i_tofit;
+      i_tofit++;
       this->m_progress->report();
     }
 
@@ -648,7 +660,7 @@ void GravityCorrection::exec() {
       for (maskit = maskIn.begin(); maskit != maskIn.end(); ++maskit) {
         // determine offset for new bin index
         HistogramX::iterator t =
-            find_if(tof2.begin(), tof2.end(), [&](const auto &ii) {
+            find_if(tof2.begin(), tof2.end(), [&](const double &ii) {
               return ii > this->m_ws->x(i)[maskit->first];
             });
         if (t != tof2.end()) {

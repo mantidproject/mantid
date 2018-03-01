@@ -40,7 +40,7 @@ public:
 
   void testCategory() {
     GravityCorrection gc1;
-    TS_ASSERT_EQUALS(gc1.category(), "Reflectometry")
+    TS_ASSERT_EQUALS(gc1.category(), "ILL\\Reflectometry;Reflectometry")
   }
 
   void testInit() {
@@ -294,22 +294,32 @@ public:
         Mantid::API::AnalysisDataService::Instance().clear());
   }
 
-  // Physics test
+  // Real data tests
 
   void testInputWorkspace1D() {
     Mantid::API::IAlgorithm *lAlg;
     TS_ASSERT_THROWS_NOTHING(
         lAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
             "LoadILLReflectometry");
-        lAlg->setRethrows(true); lAlg->setChild(true); lAlg->initialize();
-        lAlg->setProperty("Filename", file);
+        lAlg->setRethrows(true); lAlg->setProperty("Filename", directBeamFile);
         lAlg->setProperty("OutputWorkspace", "ws");
-        lAlg->setProperty("XUnit", "TimeOfFlight"); lAlg->execute();)
+        lAlg->setProperty("XUnit", "TimeOfFlight"); lAlg->setChild(true);
+        lAlg->initialize(); lAlg->execute();)
     TS_ASSERT(lAlg->isExecuted());
     Mantid::API::MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = lAlg->getProperty("OutputWorkspace"));
     GravityCorrection gc00;
-    this->runGravityCorrection(gc00, ws, "OutputWorkspace", "slit2", "slit3");
+    auto corrected = this->runGravityCorrection(gc00, ws, "OutputWorkspace",
+                                                "slit2", "slit3");
+    // no loss of counts
+    double totalCounts{0.}, totalCountsCorrected{0.};
+    for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
+      for (size_t k = 0; k < ws->blocksize(); k++) {
+        totalCounts += ws->y(i)[k];
+        totalCountsCorrected += corrected->y(i)[k];
+      }
+    }
+    TS_ASSERT_EQUALS(totalCounts, totalCountsCorrected);
   }
 
   void testInputWorkspace2D() {}
@@ -343,11 +353,9 @@ public:
                 detector1, detector2)};
 
     // input final angle not corrected
-    //TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4),
+    // TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4),
     //                2. * tan(detector1.getPos().X() / detector1.getPos().Y()),
     //                1e-6);
-
-
 
     // input counts
     // error: no match for ‘operator==’ (operand types are
@@ -409,7 +417,8 @@ public:
   }
 
 private:
-  const std::string file{"ILL/Figaro/592724.nxs"};
+  const std::string directBeamFile{/home/cs/reimund/Desktop/Figaro/GravityCorrection/ReflectionUp/exp_9-12-488/rawdata/596071.nxs}
+  //const std::string directBeamFile{"ILL/Figaro/592724.nxs"};
   const std::string outWSName{"GravityCorrectionTest_OutputWorkspace"};
   const std::string inWSName{"GravityCorrectionTest_InputWorkspace"};
   const std::string TRUE{"1"};
