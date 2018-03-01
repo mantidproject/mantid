@@ -154,6 +154,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
                      self.evt_show_survey)
 
+        # TODO FIXME NOW NOW2
+        # self.ui.checkBox_singlePtScans.clicked.connect()
+
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
                      self.do_load_scan_info)

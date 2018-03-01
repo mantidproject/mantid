@@ -213,7 +213,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -846,24 +846,8 @@ p, li { white-space: pre-wrap; }
                    </widget>
                   </item>
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_18">
-                    <item>
-                     <spacer name="horizontalSpacer_32">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Ignored</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                    <item>
+                   <layout class="QGridLayout" name="gridLayout_12">
+                    <item row="0" column="0">
                      <widget class="QCheckBox" name="checkBox_surveySelectNuclearPeaks">
                       <property name="font">
                        <font>
@@ -878,25 +862,22 @@ p, li { white-space: pre-wrap; }
                        <bool>true</bool>
                       </property>
                       <property name="text">
-                       <string>     nuclear peaks</string>
+                       <string>Nuclear Peaks</string>
                       </property>
                      </widget>
                     </item>
-                    <item>
-                     <spacer name="horizontalSpacer_33">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
+                    <item row="1" column="0">
+                     <widget class="QCheckBox" name="checkBox_singlePtScans">
+                      <property name="font">
+                       <font>
+                        <pointsize>9</pointsize>
+                        <italic>true</italic>
+                       </font>
                       </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Ignored</enum>
+                      <property name="text">
+                       <string>Single Pt Scans</string>
                       </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
+                     </widget>
                     </item>
                    </layout>
                   </item>
