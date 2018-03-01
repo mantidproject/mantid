@@ -55,9 +55,7 @@ public:
 
 private:
   inline GSASIIRefineFitPeaksOutputProperties
-  doGSASRefinementAlgorithm(const std::string &fittedPeaksWSName,
-                            const std::string &latticeParamsWSName,
-                            const GSASIIRefineFitPeaksParameters &params,
+  doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params,
                             const std::string &refinementMethod) override;
 };
 
@@ -85,8 +83,6 @@ TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel,
 
 inline GSASIIRefineFitPeaksOutputProperties
 TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
-    const std::string &fittedPeaksWSName,
-    const std::string &latticeParamsWSName,
     const GSASIIRefineFitPeaksParameters &params,
     const std::string &refinementMethod) {
   // Mock method - just create some dummy output and ignore all the parameters
@@ -100,13 +96,13 @@ TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
       createDummyTable(columnHeadings, targetTableValues);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  ADS.add(latticeParamsWSName, latticeParams);
+  ADS.add("LATTICEPARAMS", latticeParams);
 
   API::MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
-  ADS.add(fittedPeaksWSName, ws);
+  ADS.add("FITTEDPEAKS", ws);
 
-  return GSASIIRefineFitPeaksOutputProperties(1, 2, 3);
+  return GSASIIRefineFitPeaksOutputProperties(1, 2, 3, ws, latticeParams);
 }
 
 } // Anonymous namespace

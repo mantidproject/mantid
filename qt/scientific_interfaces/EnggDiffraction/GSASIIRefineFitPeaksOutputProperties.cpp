@@ -4,12 +4,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 GSASIIRefineFitPeaksOutputProperties::GSASIIRefineFitPeaksOutputProperties(
-    const double _rwp, const double _sigma, const double _gamma)
-    : rwp(_rwp), sigma(_sigma), gamma(_gamma) {}
+    const double _rwp, const double _sigma, const double _gamma,
+    const Mantid::API::MatrixWorkspace_sptr _fittedPeaksWS,
+    const Mantid::API::ITableWorkspace_sptr _latticeParamsWS)
+    : rwp(_rwp), sigma(_sigma), gamma(_gamma), fittedPeaksWS(_fittedPeaksWS),
+      latticeParamsWS(_latticeParamsWS) {}
 
 bool operator==(const GSASIIRefineFitPeaksOutputProperties &lhs,
                 const GSASIIRefineFitPeaksOutputProperties &rhs) {
-  return lhs.rwp == rhs.rwp && lhs.sigma == rhs.sigma && lhs.gamma == rhs.gamma;
+  return lhs.rwp == rhs.rwp && lhs.sigma == rhs.sigma &&
+         lhs.gamma == rhs.gamma && lhs.fittedPeaksWS == rhs.fittedPeaksWS &&
+         lhs.latticeParamsWS == rhs.latticeParamsWS;
 }
 
 bool operator!=(const GSASIIRefineFitPeaksOutputProperties &lhs,

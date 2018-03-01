@@ -59,9 +59,10 @@ private:
 
   /// Add Rwp, sigma, gamma and lattice params table to their
   /// respective RunMaps
-  void addFitResultsToMaps(const RunLabel &runLabel, const double rwp,
-                           const double sigma, const double gamma,
-                           const std::string &latticeParamsTableName);
+  void
+  addFitResultsToMaps(const RunLabel &runLabel, const double rwp,
+                      const double sigma, const double gamma,
+                      const Mantid::API::ITableWorkspace_sptr latticeParams);
 
   template <typename T>
   boost::optional<T> getFromRunMapOptional(const RunMap<MAX_BANKS, T> &map,
@@ -76,9 +77,7 @@ private:
   /// Note this must be virtual so that it can be mocked out by the helper class
   /// in EnggDiffGSASFittingModelTest
   virtual GSASIIRefineFitPeaksOutputProperties
-  doGSASRefinementAlgorithm(const std::string &fittedPeaksWSName,
-                            const std::string &latticeParamsWSName,
-                            const GSASIIRefineFitPeaksParameters &params,
+  doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params,
                             const std::string &refinementMethod);
 };
 

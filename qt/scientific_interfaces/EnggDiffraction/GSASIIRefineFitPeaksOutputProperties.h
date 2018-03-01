@@ -3,16 +3,23 @@
 
 #include "DllConfig.h"
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
 struct MANTIDQT_ENGGDIFFRACTION_DLL GSASIIRefineFitPeaksOutputProperties {
-  GSASIIRefineFitPeaksOutputProperties(const double _rwp, const double _sigma,
-                                       const double _gamma);
+  GSASIIRefineFitPeaksOutputProperties(
+      const double _rwp, const double _sigma, const double _gamma,
+      const Mantid::API::MatrixWorkspace_sptr _fittedPeaksWS,
+      const Mantid::API::ITableWorkspace_sptr _latticeParamsWS);
 
   const double rwp;
   const double sigma;
   const double gamma;
+  const Mantid::API::MatrixWorkspace_sptr fittedPeaksWS;
+  const Mantid::API::ITableWorkspace_sptr latticeParamsWS;
 };
 
 MANTIDQT_ENGGDIFFRACTION_DLL bool
