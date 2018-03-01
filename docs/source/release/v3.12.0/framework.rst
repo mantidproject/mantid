@@ -71,7 +71,7 @@ Core Functionality
 Live Data
 ---------
 
-- `KafkaEventListener` is a new live listener for neutron event and sample environment data which is in development for the ESS and ISIS.
+- ``KafkaEventListener`` is a new live listener for neutron event and sample environment data which is in development for the ESS and ISIS.
 
 Performance
 -----------
@@ -82,8 +82,8 @@ Performance
 
 Python
 ------
-In `mantid.simpleapi`, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.
-`StoreInADS=False` can be passed to function calls to not to store their output on the ADS.
+In ``mantid.simpleapi``, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.
+``StoreInADS=False`` can be passed to function calls to not to store their output on the ADS.
 
 - The standard Python operators, e.g. ``+``, ``+=``, etc., now work also with workspaces not in the ADS.
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
