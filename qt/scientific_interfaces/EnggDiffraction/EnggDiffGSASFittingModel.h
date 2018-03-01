@@ -23,8 +23,6 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
   friend void EnggDiffGSASFittingWorker::doRefinement();
 
 public:
-  ~EnggDiffGSASFittingModel();
-
   void setObserver(
       boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) override;
 
@@ -79,7 +77,7 @@ private:
 
   boost::shared_ptr<IEnggDiffGSASFittingObserver> m_observer;
 
-  QThread *m_workerThread;
+  std::unique_ptr<QThread> m_workerThread;
 
   /// Add Rwp, sigma, gamma and lattice params table to their
   /// respective RunMaps

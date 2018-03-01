@@ -36,8 +36,6 @@ std::string refinementMethodToString(
 namespace MantidQt {
 namespace CustomInterfaces {
 
-EnggDiffGSASFittingModel::~EnggDiffGSASFittingModel() { deleteWorkerThread(); }
-
 void EnggDiffGSASFittingModel::addFitResultsToMaps(
     const RunLabel &runLabel, const double rwp, const double sigma,
     const double gamma, const API::ITableWorkspace_sptr latticeParams) {
@@ -78,13 +76,6 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
   return std::to_string(runLabel.runNumber) + "_" +
          std::to_string(runLabel.bank) + "_lattice_params";
 }
-}
-
-void EnggDiffGSASFittingModel::deleteWorkerThread() {
-  if (m_workerThread) {
-    delete m_workerThread;
-    m_workerThread = nullptr;
-  }
 }
 
 GSASIIRefineFitPeaksOutputProperties
@@ -137,24 +128,24 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
 
 void EnggDiffGSASFittingModel::doRefinement(
     const GSASIIRefineFitPeaksParameters &params) {
-  deleteWorkerThread();
-  m_workerThread = new QThread(this);
+  m_workerThread = Mantid::Kernel::make_unique<QThread>(this);
   EnggDiffGSASFittingWorker *worker =
       new EnggDiffGSASFittingWorker(this, params);
-  worker->moveToThread(m_workerThread);
+  worker->moveToThread(m_workerThread.get());
 
   qRegisterMetaType<
       MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
       "GSASIIRefineFitPeaksOutputProperties");
 
-  connect(m_workerThread, SIGNAL(started()), worker, SLOT(doRefinement()));
+  connect(m_workerThread.get(), SIGNAL(started()), worker,
+          SLOT(doRefinement()));
   connect(worker,
           SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
           this, SLOT(processRefinementSuccessful(
                     const GSASIIRefineFitPeaksOutputProperties &)));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), this,
           SLOT(processRefinementFailed(const std::string &)));
-  connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+  connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
           SLOT(deleteLater()));
   connect(worker,
           SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
@@ -206,7 +197,6 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
 
 void EnggDiffGSASFittingModel::processRefinementFailed(
     const std::string &failureMessage) {
-  deleteWorkerThread();
   if (m_observer) {
     m_observer->notifyRefinementFailed(failureMessage);
   }
@@ -214,7 +204,6 @@ void EnggDiffGSASFittingModel::processRefinementFailed(
 
 void EnggDiffGSASFittingModel::processRefinementSuccessful(
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
-  deleteWorkerThread();
   addFitResultsToMaps(refinementResults.runLabel, refinementResults.rwp,
                       refinementResults.sigma, refinementResults.gamma,
                       refinementResults.latticeParamsWS);
