@@ -46,8 +46,7 @@ public:
   void testDisablesControlsOnReductionResumed() {
     MockEventView mockView;
     ReflEventPresenter presenter(&mockView);
-    EXPECT_CALL(mockView, disableSliceType(_))
-        .Times(AtLeast(1));
+    EXPECT_CALL(mockView, disableSliceType(_)).Times(AtLeast(1));
     EXPECT_CALL(mockView, disableSliceTypeSelection()).Times(AtLeast(1));
 
     presenter.onReductionResumed();
