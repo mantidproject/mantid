@@ -512,11 +512,12 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
   }
 }
 /**
-* Write log and parameter values to the table for the case of multiple fits.
+* Add column for a log to the table for the case of multiple fits.
+* Have to check multiple values are not returned
 * @param table :: [input, output] Table to write to
 * @param paramsByLabel :: [input] Map of <label name, <workspace name,
 * <parameter, value>>>
-* @param paramsToDisplay :: [input] List of parameters to display in table
+* @param log :: [input] the log we are going to add to the table
 */
 void MuonAnalysisResultTableCreator::addColumnToResultsTable(
     ITableWorkspace_sptr &table,
