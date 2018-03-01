@@ -77,8 +77,7 @@ private:
   /// Note this must be virtual so that it can be mocked out by the helper class
   /// in EnggDiffGSASFittingModelTest
   virtual GSASIIRefineFitPeaksOutputProperties
-  doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params,
-                            const std::string &refinementMethod);
+  doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params);
 };
 
 } // CustomInterfaces

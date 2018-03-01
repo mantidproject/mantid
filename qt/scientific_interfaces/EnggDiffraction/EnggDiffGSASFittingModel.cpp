@@ -79,12 +79,12 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
 
 GSASIIRefineFitPeaksOutputProperties
 EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
-    const GSASIIRefineFitPeaksParameters &params,
-    const std::string &refinementMethod) {
+    const GSASIIRefineFitPeaksParameters &params) {
   auto gsasAlg =
       API::AlgorithmManager::Instance().create("GSASIIRefineFitPeaks");
 
-  gsasAlg->setProperty("RefinementMethod", refinementMethod);
+  gsasAlg->setProperty("RefinementMethod",
+                       refinementMethodToString(params.refinementMethod));
   gsasAlg->setProperty("InputWorkspace", params.inputWorkspace);
   gsasAlg->setProperty("InstrumentFile", params.instParamsFile);
   gsasAlg->setProperty("PhaseInfoFiles",
@@ -127,8 +127,7 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
 
 API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doRefinement(
     const GSASIIRefineFitPeaksParameters &params) {
-  const auto outputProperties = doGSASRefinementAlgorithm(
-      params, refinementMethodToString(params.refinementMethod));
+  const auto outputProperties = doGSASRefinementAlgorithm(params);
 
   addFitResultsToMaps(params.runLabel, outputProperties.rwp,
                       outputProperties.sigma, outputProperties.gamma,

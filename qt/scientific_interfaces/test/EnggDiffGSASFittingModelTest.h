@@ -54,9 +54,8 @@ public:
   void addSigmaValue(const RunLabel &runLabel, const double sigma);
 
 private:
-  inline GSASIIRefineFitPeaksOutputProperties
-  doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params,
-                            const std::string &refinementMethod) override;
+  inline GSASIIRefineFitPeaksOutputProperties doGSASRefinementAlgorithm(
+      const GSASIIRefineFitPeaksParameters &params) override;
 };
 
 inline void
@@ -83,11 +82,9 @@ TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel,
 
 inline GSASIIRefineFitPeaksOutputProperties
 TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
-    const GSASIIRefineFitPeaksParameters &params,
-    const std::string &refinementMethod) {
+    const GSASIIRefineFitPeaksParameters &params) {
   // Mock method - just create some dummy output and ignore all the parameters
   UNUSED_ARG(params);
-  UNUSED_ARG(refinementMethod);
 
   const static std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
   const static std::array<std::array<double, 3>, 1> targetTableValues = {
