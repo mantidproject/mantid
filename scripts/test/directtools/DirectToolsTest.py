@@ -1,10 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 
+# Set matplotlib backend to AGG before anything else. Otherwise some build servers
+# need to have extra packages (tkinter) installed.
+import matplotlib
+matplotlib.use('AGG')
+
 import directtools
 from mantid.api import mtd
 from mantid.simpleapi import LoadILLTOF, CreateSampleWorkspace, CreateWorkspace
-import matplotlib
-matplotlib.use('AGG')
 import numpy
 import numpy.testing
 import testhelpers
