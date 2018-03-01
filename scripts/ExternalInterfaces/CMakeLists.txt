@@ -30,4 +30,4 @@ endif()
 
 # Installation
 install ( DIRECTORY ${_mslice_external_root}/src/mslice/mslice/
-          DESTINATION scripts/ExternalInterfaces/mslice )
+          DESTINATION ${INBUNDLE}scripts/ExternalInterfaces/mslice )
