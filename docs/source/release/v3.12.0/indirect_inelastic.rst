@@ -52,10 +52,10 @@ New
 - ConvFit, IqtFit, MSDFit and JumpFit now have a second mini-plot for the difference. The sample and calculated fit are found in the top mini-plot, the difference is found in the bottom mini-plot.
 - The function browser in each of the Fitting tabs (ConvFit, IqtFit, MSDFit, JumpFit) has been replaced with a new IndirectFitPropertyBrowser widget (which can be separated and embedded into the fit interfaces).
 
-   .. figure:: ../../images/Indirect_ConvFit_3_12_release.png
-      :class: screenshot
-      :align: center
-      :width: 500 px
+.. figure:: ../../images/Indirect_ConvFit_3_12_release.png
+   :class: screenshot
+   :align: center
+   :width: 500 px
 
    The new design of the Indirect Fitting tabs, shown here within ConvFit (the IndirectFitPropertyBrowser is seen on the left and can be ejected into a separate window).
 
