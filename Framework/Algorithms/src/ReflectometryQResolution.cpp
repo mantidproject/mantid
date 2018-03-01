@@ -333,10 +333,10 @@ double ReflectometryQResolution::wavelengthResolutionSquared(const API::MatrixWo
   const auto l1 = spectrumInfo.l1();
   const auto l2 = spectrumInfo.l2(wsIndex);
   const auto flightDistance =  l1 + l2;
-  const auto chopperResolution = (setup.chopperPairDistance + h * setup.chopperOpening * setup.chopperPeriod / (2. * M_PI * NeutronMass * wavelength)) / (2. * flightDistance);
+  const auto chopperResolution = setup.chopperPairDistance + h * setup.chopperOpening * setup.chopperPeriod / (2. * M_PI * NeutronMass * wavelength);
   // Shouldn't there be a factor of 2 * flightdistance?
-  const auto detectorResolution = h * setup.tofChannelWidth / (NeutronMass * wavelength * flightDistance);
-  const auto partialResolution = 0.98 * (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) + 3. * chopperResolution * detectorResolution) / (2. * chopperResolution + detectorResolution);
+  const auto detectorResolution = h * setup.tofChannelWidth / (NeutronMass * wavelength);
+  const auto partialResolution = 0.49 * (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) + 3. * chopperResolution * detectorResolution) / (2. * chopperResolution + detectorResolution) / flightDistance;
   const auto flightDistRatio = (l1 - setup.slit2SampleDistance) / setup.slit1Slit2Distance;
   const auto a = flightDistRatio * (setup.slit1Size + setup.slit2Size) + setup.slit1Size;
   const auto b = flightDistRatio * std::abs(setup.slit1Size - setup.slit2Size) + setup.slit1Size;
