@@ -14,25 +14,19 @@ ExternalProject_Add ( mslice
   TEST_COMMAND ""
   INSTALL_COMMAND ""
 )
-
-if ( NOT EXISTS ${_mslice_external_root}/src/mslice/.git )
-  message ( STATUS "Fetching mslice" )
-  execute_process ( COMMAND ${CMAKE_COMMAND} ARGS -P ${_mslice_external_root}/tmp/mslice-gitclone.cmake
-                  RESULT_VARIABLE exit_code ERROR_VARIABLE error_contents )
-  if ( error_code )
-    message ( WARNING "Failed to clone mslice: ${error_contents}" )
-    if ( EXISTS ${_mslice_external_root}/src/.git )
-      # Remove .git to ensure next try succeeds if it can
-      execute_process ( COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${_mslice_external_root}/src/.git )
-    endif ()
+set ( _mslice_src ${_mslice_external_root}/src/mslice )
+message ( STATUS "Fetching/updating mslice" )
+execute_process ( COMMAND ${CMAKE_COMMAND} ARGS -P ${_mslice_external_root}/tmp/mslice-gitclone.cmake
+                  RESULT_VARIABLE _exit_code )
+if ( _exit_code EQUAL 0 )
+  execute_process ( COMMAND ${CMAKE_COMMAND} ARGS -P ${_mslice_external_root}/tmp/mslice-gitupdate.cmake
+                    RESULT_VARIABLE _exit_code )
+  if ( NOT _exit_code EQUAL 0 )
+      message ( FATAL_ERROR "Unable to update mslice." )
   endif ()
 else ()
-  execute_process ( COMMAND ${CMAKE_COMMAND} ARGS -P ${_mslice_external_root}/tmp/mslice-gitupdate.cmake
-                    RESULT_VARIABLE error_code ERROR_VARIABLE error_contents )
-  if ( error_code )
-    message ( WARNING "Failed to update mslice: ${error_contents}" )
-  endif ()
-endif ()
+  message ( FATAL_ERROR "Unable to clone mslice" )
+endif()
 
 # Installation
 install ( DIRECTORY ${_mslice_external_root}/src/mslice/mslice/

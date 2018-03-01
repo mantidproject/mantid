@@ -68,6 +68,11 @@ Core Functionality
 - Fixed the behaviour of ``UpdateInstrumentDefinitions.OnStartup`` in the :ref:`properties file <Properties File>`. It was not being used correctly for using the updated ``Facilities.xml`` file.
 - ``MultiFileProperty`` now accepts complex summation ranges for run numbers, such as ``111-113+115`` and ``111-115+123-132``.
 
+Live Data
+---------
+
+- ``KafkaEventListener`` is a new live listener for neutron event and sample environment data which is in development for the ESS and ISIS.
+
 Performance
 -----------
 
@@ -79,8 +84,8 @@ A `bug <https://github.com/mantidproject/mantid/pull/20953>`_ in the handling of
 
 Python
 ------
-In `mantid.simpleapi`, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.
-`StoreInADS=False` can be passed to function calls to not to store their output on the ADS.
+In ``mantid.simpleapi``, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.
+``StoreInADS=False`` can be passed to function calls to not to store their output on the ADS.
 
 - The standard Python operators, e.g. ``+``, ``+=``, etc., now work also with workspaces not in the ADS.
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.

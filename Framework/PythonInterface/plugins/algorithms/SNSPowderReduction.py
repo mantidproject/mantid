@@ -336,7 +336,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # get the user-option whether an existing event workspace will be reloaded or not
         reload_event_file = self.getProperty('ReloadIfWorkspaceExists').value
 
-        if self.getProperty("Sum").value:
+        if self.getProperty("Sum").value and len(samRuns) > 1:
+            self.log().information('Ignoring value of "Sum" property')
             # Sum input sample runs and then do reduction
             if self._splittersWS is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
@@ -674,7 +675,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         :param filename_list: list of filenames
         :param outName:
-        :param filterWall:
         :return:
         """
         # Check requirements
@@ -798,7 +798,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         Load, (optional) split and focus data in chunks
         @param filename: integer for run number
         @param filter_wall:  Enabled if splitwksp is defined
-        @param normalisebycurrent: Set to False if summing runs for correct math
         @param splitwksp: SplittersWorkspace (if None then no split)
         @param preserveEvents:
         @return: a string as the returned workspace's name or a list of strings as the returned workspaces' names
