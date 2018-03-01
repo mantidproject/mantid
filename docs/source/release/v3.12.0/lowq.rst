@@ -25,6 +25,8 @@ Small Angle Scattering
 - Added functionality to specify q values between which merged data is used and outside of which pure HAB and LAB are used.
 - Have added the functionality to show diagnostic transmission workspaces to new GUI.
 - Have added functionality to continually plot latest results to new GUI.
+- Have added the DET/OVERLAP command to user file parser which specifies the merge range.
+- Fixed a bug which was preventing running a merged event slice reduction in the old GUI.
 - Added find beam centre tab to SANS GUI V2.
 - Fixed an issue where merged or all reductions were overwriting each other as they were being given the same name.
 - Fixed a bug where specifying fit range was not working for merged reductions. Previously the user specified range was being ignored.
