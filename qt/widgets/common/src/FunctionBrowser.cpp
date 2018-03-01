@@ -2007,8 +2007,9 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
     setParamError(parName, error);
   }
 }
-  /// Get error of a local parameter
-double FunctionBrowser::getLocalParameterError(const QString &parName, int i) const {
+/// Get error of a local parameter
+double FunctionBrowser::getLocalParameterError(const QString &parName,
+                                               int i) const {
   checkLocalParameter(parName);
   return m_localParameterValues[parName][i].error;
 }
@@ -2297,9 +2298,8 @@ void FunctionBrowser::updateMultiDatasetParameters(
           auto paramIndex = sfun->parameterIndex(paramName.toStdString());
           auto value = sfun->getParameter(paramIndex);
           auto error = sfun->getError(paramIndex);
-          setLocalParameterValue(
-              localParameters[j], static_cast<int>(i),
-              value, error);
+          setLocalParameterValue(localParameters[j], static_cast<int>(i), value,
+                                 error);
           if (i == currentIndex) {
             setParameter(paramName, value);
             setParamError(paramName, error);
