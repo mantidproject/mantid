@@ -18,6 +18,7 @@ using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
 
 namespace {
+
 /**
  * Converts QStringList -> std::vector<std::string>
  * @param qsl :: [input] QStringList to convert
@@ -40,6 +41,7 @@ std::vector<std::string> qStringListToVector(const QStringList &qsl) {
  */
 void addColumnToTable(ITableWorkspace_sptr &table, const std::string &dataType,
                       const std::string &name, const int plotType) {
+
   auto column = table->addColumn(dataType, name);
   column->setPlotType(plotType);
   column->setReadOnly(false);
@@ -527,7 +529,8 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
 		return;
 	}
 	// loop over workspaces
-	for (const auto &labelName : m_items) {
+	//for (const auto &labelName : m_items) {
+        const auto &labelName = m_items[0];
 
 		    
 			QStringList valuesPerWorkspace;
@@ -560,7 +563,7 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
 				return;
 			}
 			addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
-		}
+	
 
 		
 
