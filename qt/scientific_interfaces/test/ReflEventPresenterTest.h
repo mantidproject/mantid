@@ -46,12 +46,23 @@ public:
   void testDisablesControlsOnReductionResumed() {
     MockEventView mockView;
     ReflEventPresenter presenter(&mockView);
-    EXPECT_CALL(mockView, disableSliceType(SliceType::UniformEven))
+    EXPECT_CALL(mockView, disableSliceType(_))
         .Times(AtLeast(1));
     EXPECT_CALL(mockView, disableSliceTypeSelection()).Times(AtLeast(1));
 
     presenter.onReductionResumed();
 
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testDisablesCorrectControlsOnReductionResumed() {
+    MockEventView mockView;
+    ReflEventPresenter presenter(&mockView);
+    presenter.notifySliceTypeChanged(SliceType::Custom);
+    EXPECT_CALL(mockView, disableSliceType(SliceType::Custom))
+        .Times(AtLeast(1));
+
+    presenter.onReductionResumed();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 

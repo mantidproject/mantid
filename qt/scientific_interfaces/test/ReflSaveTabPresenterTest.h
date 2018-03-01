@@ -10,6 +10,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/Run.h"
 #include "ReflMockObjects.h"
 #include "Poco/File.h"
@@ -60,6 +61,53 @@ public:
     presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testDisablesAutosaveControlsWhenProcessing() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, disableAutosaveControls());
+    presenter.onAnyReductionResumed();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void expectHasValidSaveDirectory(MockSaveTabView &mockView) {
+    ON_CALL(mockView, getSavePath())
+        .WillByDefault(Return(
+            ::Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory")));
+  }
+
+  void testDisablesFileFormatControlsWhenProcessingAndAutosaveEnabled() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+    expectHasValidSaveDirectory(mockView);
+    presenter.notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
+
+    EXPECT_CALL(mockView, disableFileFormatAndLocationControls());
+    presenter.onAnyReductionResumed();
+  }
+
+  void testEnablesFileFormatControlsWhenProcessingFinishedAndAutosaveEnabled() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+    expectHasValidSaveDirectory(mockView);
+    presenter.notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
+
+    presenter.onAnyReductionResumed();
+    EXPECT_CALL(mockView, enableFileFormatAndLocationControls());
+    presenter.onAnyReductionPaused();
+  }
+
+  void testEnablesAutosaveControlsWhenProcessingFinished() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+    expectHasValidSaveDirectory(mockView);
+    presenter.notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
+
+    presenter.onAnyReductionResumed();
+    EXPECT_CALL(mockView, enableFileFormatAndLocationControls());
+    presenter.onAnyReductionPaused();
   }
 
   void testRefreshWorkspaceList() {
