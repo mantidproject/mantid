@@ -443,7 +443,7 @@ class DetParser(UserFileComponentParser):
                 merge_range = extract_float_range(merge_range_string)
                 value = det_fit_range(start=merge_range[0], stop=merge_range[1], use_fit=True)
             else:
-                value = det_fit_range(start=None, stop=None, use_fit=True)
+                raise RuntimeError("DetParser: Could not extract line: {0}".format(line))
             return {DetectorId.merge_range: value}
         else:
             raise RuntimeError("DetParser: Could not extract line: {0}".format(line))

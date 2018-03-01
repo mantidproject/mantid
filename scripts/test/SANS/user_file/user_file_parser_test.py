@@ -132,6 +132,20 @@ class DetParserTest(unittest.TestCase):
                             " DET/CoRR/FRONT/ SidE -i3": RuntimeError}
 
         det_parser = DetParser()
+
+        do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
+
+    def test_that_DET_OVERLAP_option_is_parsed_correctly(self):
+        valid_settings = {"DET/OVERLAP 0.13 0.15": {DetectorId.merge_range: det_fit_range(start=0.13, stop=0.15, use_fit=True)},
+                          "DeT/OverLAP 0.13 0.15": {DetectorId.merge_range: det_fit_range(start=0.13, stop=0.15, use_fit=True)}
+                          }
+
+        invalid_settings = {"DET/OVERLAP 0.13 0.15 0.17": RuntimeError,
+                            "DET/OVERLAP 0.13": RuntimeError,
+                            "DET/OVERLAP": RuntimeError,
+                            "DET/OVERLAP 0.13 five": RuntimeError}
+
+        det_parser = DetParser()
         do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
 
