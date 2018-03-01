@@ -62,7 +62,7 @@ Engineering Diffraction
   + Improved unit conversions when using the peak picker
 - GSAS Fitting tab was added to the GUI to allow convenient GSAS-style refinement using GSASIIRefineFitPeaks
 
-.. figure:: ../../images/engineering_gsas_gui.png
+.. figure:: ../../images/engineering_gsas_gui.PNG
    :class: screenshot
    :width: 385px
    :align: center
