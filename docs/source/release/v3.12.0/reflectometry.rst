@@ -80,6 +80,7 @@ Improvements
   - The *BeamPosition* property was renamed to *DirectBeamPosition* to better reflect its usage.
   - The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector will be rotated such that the reflected peak on the detector will be at twice *BraggAngle*.
   - Slits S2 and S3 have been added to D17 and Figaro IDFs; the loader will adjust their positions according to the NeXus files.
+  - The MagnetismReflectometryReduction now computes a Q-resolution estimate based on slit openings.
 
 Bug fixes
 #########
