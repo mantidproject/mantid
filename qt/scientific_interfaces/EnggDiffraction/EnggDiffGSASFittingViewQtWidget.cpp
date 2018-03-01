@@ -35,8 +35,10 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
   setupUI();
 
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
-  m_presenter = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
+  auto *model_ptr = model.get();
+  m_presenter = boost::make_shared<EnggDiffGSASFittingPresenter>(
       std::move(model), this, multiRunWidgetPresenter);
+  model_ptr->setObserver(m_presenter);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
 

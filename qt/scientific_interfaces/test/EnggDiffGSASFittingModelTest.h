@@ -99,7 +99,8 @@ TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
       WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
   ADS.add("FITTEDPEAKS", ws);
 
-  return GSASIIRefineFitPeaksOutputProperties(1, 2, 3, ws, latticeParams);
+  return GSASIIRefineFitPeaksOutputProperties(1, 2, 3, ws, latticeParams,
+                                              params.runLabel);
 }
 
 } // Anonymous namespace
@@ -230,11 +231,9 @@ public:
     API::MatrixWorkspace_sptr inputWS =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
 
-    API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        fittedPeaks = model.doRefinement(createGSASIIRefineFitPeaksParameters(
+        model.doRefinement(createGSASIIRefineFitPeaksParameters(
             inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
-    TS_ASSERT(fittedPeaks);
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);
@@ -261,11 +260,9 @@ public:
     API::MatrixWorkspace_sptr inputWS =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
 
-    API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        fittedPeaks = model.doRefinement(createGSASIIRefineFitPeaksParameters(
+        model.doRefinement(createGSASIIRefineFitPeaksParameters(
             inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
-    TS_ASSERT(fittedPeaks);
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);

@@ -2,19 +2,31 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_
 
 #include "DllConfig.h"
+#include "EnggDiffGSASFittingWorker.h"
 #include "GSASIIRefineFitPeaksOutputProperties.h"
 #include "IEnggDiffGSASFittingModel.h"
+#include "IEnggDiffGSASFittingObserver.h"
 #include "RunMap.h"
+
+#include <QObject>
+#include <QThread>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
-    : public IEnggDiffGSASFittingModel {
+    : public QObject, // Must be a QObject to run GSASIIRefineFitPeaksWorker
+                      // asynchronously
+      public IEnggDiffGSASFittingModel {
+  Q_OBJECT
+
+  friend void EnggDiffGSASFittingWorker::doRefinement();
 
 public:
-  Mantid::API::MatrixWorkspace_sptr
-  doRefinement(const GSASIIRefineFitPeaksParameters &params) override;
+  void setObserver(
+      boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) override;
+
+  void doRefinement(const GSASIIRefineFitPeaksParameters &params) override;
 
   boost::optional<Mantid::API::ITableWorkspace_sptr>
   getLatticeParams(const RunLabel &runLabel) const override;
@@ -47,6 +59,12 @@ protected:
   /// Add a sigma value to the sigma map
   void addSigma(const RunLabel &runLabel, const double sigma);
 
+private slots:
+  void processRefinementFailed(const std::string &failureMessage);
+
+  void processRefinementSuccessful(
+      const GSASIIRefineFitPeaksOutputProperties &refinementResults);
+
 private:
   static constexpr double DEFAULT_PAWLEY_DMIN = 1;
   static constexpr double DEFAULT_PAWLEY_NEGATIVE_WEIGHT = 0;
@@ -56,6 +74,10 @@ private:
   RunMap<MAX_BANKS, Mantid::API::ITableWorkspace_sptr> m_latticeParamsMap;
   RunMap<MAX_BANKS, double> m_rwpMap;
   RunMap<MAX_BANKS, double> m_sigmaMap;
+
+  boost::shared_ptr<IEnggDiffGSASFittingObserver> m_observer;
+
+  QThread *m_workerThread;
 
   /// Add Rwp, sigma, gamma and lattice params table to their
   /// respective RunMaps

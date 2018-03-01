@@ -35,6 +35,7 @@ std::string refinementMethodToString(
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 void EnggDiffGSASFittingModel::addFitResultsToMaps(
     const RunLabel &runLabel, const double rwp, const double sigma,
     const double gamma, const API::ITableWorkspace_sptr latticeParams) {
@@ -122,18 +123,37 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   const auto latticeParams =
       ADS.retrieveWS<API::ITableWorkspace>(latticeParamsName);
   return GSASIIRefineFitPeaksOutputProperties(rwp, sigma, gamma, fittedPeaks,
-                                              latticeParams);
+                                              latticeParams, params.runLabel);
 }
 
-API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doRefinement(
+void EnggDiffGSASFittingModel::doRefinement(
     const GSASIIRefineFitPeaksParameters &params) {
-  const auto outputProperties = doGSASRefinementAlgorithm(params);
+  if (m_workerThread) {
+    delete m_workerThread;
+  }
+  m_workerThread = new QThread(this);
+  EnggDiffGSASFittingWorker *worker =
+      new EnggDiffGSASFittingWorker(this, params);
+  worker->moveToThread(m_workerThread);
 
-  addFitResultsToMaps(params.runLabel, outputProperties.rwp,
-                      outputProperties.sigma, outputProperties.gamma,
-                      outputProperties.latticeParamsWS);
+  qRegisterMetaType<
+      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>();
 
-  return outputProperties.fittedPeaksWS;
+  connect(m_workerThread, SIGNAL(started()), worker, SLOT(doRefinement()));
+  connect(worker, SIGNAL(refinementSuccessful(
+                      const GSASIIRefineFitPeaksOutputProperties &)),
+          this, SLOT(processRefinementSuccessful(
+                    const GSASIIRefineFitPeaksOutputProperties &)));
+  connect(worker, SIGNAL(refinementFailed(const std::string &)), this,
+          SLOT(processRefinementFailed(const std::string &)));
+  connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+          SLOT(deleteLater()));
+  connect(worker, SIGNAL(refinementSuccessful(
+                      const GSASIIRefineFitPeaksOutputProperties &)),
+          worker, SLOT(deleteLater()));
+  connect(worker, SIGNAL(refinementFailed(const std::string &)), worker,
+          SLOT(deleteLater()));
+  m_workerThread->start();
 }
 
 boost::optional<API::ITableWorkspace_sptr>
@@ -174,6 +194,28 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(wsName);
   return ws;
+}
+
+void EnggDiffGSASFittingModel::processRefinementFailed(
+    const std::string &failureMessage) {
+  if (m_observer) {
+    m_observer->notifyRefinementFailed(failureMessage);
+  }
+}
+
+void EnggDiffGSASFittingModel::processRefinementSuccessful(
+    const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
+  addFitResultsToMaps(refinementResults.runLabel, refinementResults.rwp,
+                      refinementResults.sigma, refinementResults.gamma,
+                      refinementResults.latticeParamsWS);
+  if (m_observer) {
+    m_observer->notifyRefinementSuccessful(refinementResults);
+  }
+}
+
+void EnggDiffGSASFittingModel::setObserver(
+    boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) {
+  m_observer = observer;
 }
 
 } // CustomInterfaces

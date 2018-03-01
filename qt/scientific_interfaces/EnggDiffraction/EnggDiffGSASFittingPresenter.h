@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_
 
 #include "DllConfig.h"
+#include "GSASIIRefineFitPeaksOutputProperties.h"
 #include "IEnggDiffGSASFittingModel.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
@@ -35,6 +36,11 @@ public:
 
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
 
+  void notifyRefinementSuccessful(
+      const GSASIIRefineFitPeaksOutputProperties &refinementResults) override;
+
+  void notifyRefinementFailed(const std::string &failureMessage) override;
+
 private:
   void processDoRefinement();
   void processLoadRun();
@@ -51,10 +57,8 @@ private:
   /**
    Perform a refinement on a run
    @param params Input parameters for GSASIIRefineFitPeaks
-   @return Fitted peaks workspace resulting from refinement
    */
-  Mantid::API::MatrixWorkspace_sptr
-  doRefinement(const GSASIIRefineFitPeaksParameters &params);
+  void doRefinement(const GSASIIRefineFitPeaksParameters &params);
 
   /**
    Overplot fitted peaks for a run, and display lattice parameters and Rwp in

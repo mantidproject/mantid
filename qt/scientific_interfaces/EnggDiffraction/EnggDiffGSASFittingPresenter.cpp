@@ -90,9 +90,21 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
   m_view->displayGamma(*gamma);
 }
 
-Mantid::API::MatrixWorkspace_sptr EnggDiffGSASFittingPresenter::doRefinement(
+void EnggDiffGSASFittingPresenter::doRefinement(
     const GSASIIRefineFitPeaksParameters &params) {
-  return m_model->doRefinement(params);
+  m_model->doRefinement(params);
+}
+
+void EnggDiffGSASFittingPresenter::notifyRefinementFailed(
+    const std::string &failureMessage) {
+  m_view->userWarning("Refinement failed", failureMessage);
+}
+
+void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
+    const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
+  m_multiRunWidget->addFittedPeaks(refinementResults.runLabel,
+                                   refinementResults.fittedPeaksWS);
+  displayFitResults(refinementResults.runLabel);
 }
 
 void EnggDiffGSASFittingPresenter::processDoRefinement() {
@@ -118,15 +130,7 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   const auto refinementParams =
       collectInputParameters(*runLabel, *inputWSOptional);
 
-  try {
-    const auto fittedPeaks = doRefinement(refinementParams);
-
-    m_multiRunWidget->addFittedPeaks(*runLabel, fittedPeaks);
-    displayFitResults(*runLabel);
-  } catch (const std::exception &ex) {
-    m_view->showStatus("An error occurred in refinement");
-    m_view->userError("Refinement failed", ex.what());
-  }
+  doRefinement(refinementParams);
   m_view->showStatus("Ready");
 }
 

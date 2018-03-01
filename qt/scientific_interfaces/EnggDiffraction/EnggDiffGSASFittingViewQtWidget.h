@@ -8,6 +8,7 @@
 #include "IEnggDiffractionPythonRunner.h"
 #include "IEnggDiffractionUserMsg.h"
 
+#include <boost/shared_ptr.hpp>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 
@@ -94,7 +95,7 @@ private:
 
   boost::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
 
-  std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
+  boost::shared_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
   Ui::EnggDiffractionQtTabGSAS m_ui;
 
