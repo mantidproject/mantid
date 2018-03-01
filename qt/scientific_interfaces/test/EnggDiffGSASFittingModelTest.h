@@ -54,7 +54,7 @@ public:
   void addSigmaValue(const RunLabel &runLabel, const double sigma);
 
 private:
-  inline GSASIIRefineFitPeaksOutputProperties doGSASRefinementAlgorithm(
+  GSASIIRefineFitPeaksOutputProperties doGSASRefinementAlgorithm(
       const GSASIIRefineFitPeaksParameters &params) override;
 };
 
@@ -80,7 +80,7 @@ TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel,
   addSigma(runLabel, sigma);
 }
 
-inline GSASIIRefineFitPeaksOutputProperties
+GSASIIRefineFitPeaksOutputProperties
 TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const GSASIIRefineFitPeaksParameters &params) {
   // Mock method - just create some dummy output and ignore all the parameters

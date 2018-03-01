@@ -23,6 +23,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
   friend void EnggDiffGSASFittingWorker::doRefinement();
 
 public:
+  ~EnggDiffGSASFittingModel();
+
   void setObserver(
       boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) override;
 

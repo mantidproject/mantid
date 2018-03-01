@@ -36,6 +36,14 @@ std::string refinementMethodToString(
 namespace MantidQt {
 namespace CustomInterfaces {
 
+EnggDiffGSASFittingModel::~EnggDiffGSASFittingModel() {
+  if (m_workerThread) {
+    if (m_workerThread->isRunning()) {
+      m_workerThread->wait(10);
+    }
+  }
+}
+
 void EnggDiffGSASFittingModel::addFitResultsToMaps(
     const RunLabel &runLabel, const double rwp, const double sigma,
     const double gamma, const API::ITableWorkspace_sptr latticeParams) {
