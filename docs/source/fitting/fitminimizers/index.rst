@@ -9,9 +9,9 @@
 
 .. _fitminimizers contents:
 
-==================
-Fitting Minimizers
-==================
+==============
+Fit Minimizers
+==============
 
 .. toctree::
    :glob:
@@ -23,5 +23,3 @@ Fitting Minimizers
    :alt: A preying mantis with arms upraised
    :width: 200px
    :align: right
-
-
