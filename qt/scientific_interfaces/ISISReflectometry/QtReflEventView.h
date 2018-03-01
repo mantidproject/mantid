@@ -4,6 +4,7 @@
 #include "IReflEventView.h"
 #include "ui_ReflEventWidget.h"
 #include <memory>
+#include <array>
 
 namespace MantidQt {
 namespace CustomInterfaces {
