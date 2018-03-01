@@ -27,13 +27,9 @@ def _chooseMarker(markers, index):
 
 
 def _clearlatex(s):
-    """Return a string from which LaTeX formatting has been removed."""
-    s = s.translate(None, '$\\^{}')
-    s = s.replace('$', '')
-    s = s.replace('\\', '')
-    s = s.replace('^', '')
-    s = s.replace('{', '')
-    s = s.replace('}', '')
+    """Return string s with special LaTeX characters removed."""
+    for c in ['%', '_', '$', '&', '\\', '^', '{', '}',]:
+        s = s.replace(c, '')
     return s
 
 
