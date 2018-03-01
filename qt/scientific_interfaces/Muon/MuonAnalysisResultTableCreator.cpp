@@ -559,7 +559,7 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
 				addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
 				return;
 			}
-			addColumnToTable(table, "string", log.toStdString(), PLOT_TYPE_X);
+			addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
 		}
 
 		
@@ -622,7 +622,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
         row << min;
       } else {
         std::ostringstream oss;
-        oss << min << "-" << max;
+        oss << valuesPerWorkspace.front().toStdString() << "-" << valuesPerWorkspace.back().toStdString();
         row << oss.str();
       }
       columnIndex++;
