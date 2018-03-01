@@ -415,7 +415,10 @@ class CWSCDReductionControl(object):
         params = value_list[3]
 
         # calculate model
-        model_y = peak_integration_utility.calculate_gaussian(params, vec_x)
+        x0, sigma, gaussian_a, linear_b = params
+        print ('[DB...BAT] Gaussian parameters: {0}'.format(params))
+        model_y = peak_integration_utility.gaussian_linear_background(vec_x, x0, sigma, gaussian_a, linear_b)
+        print ('[DB...BAT] Calculated guassian: {0}'.format(model_y))
 
         return vec_x, vec_y, model_y
 
@@ -1645,20 +1648,27 @@ class CWSCDReductionControl(object):
         if fit_gaussian:
             cost, params, cov_matrix = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y,
                                                                                                numpy.sqrt(vec_y))
-            print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}'.format(cost, params))
+            gaussian_a = params[2]
+            gaussian_sigma = params[1]
+            integrated_intensity, intensity_error = \
+                peak_integration_utility.calculate_peak_intensity_gauss(gaussian_a, gaussian_sigma)
+            print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}, integrated = {2} +/- {3}'
+                   ''.format(cost, params, integrated_intensity, intensity_error))
+
         else:
             cost = -1
             params = dict()
+            integrated_intensity = 0.
 
         # register
         value_list = [None] * 10  # safe mode
         value_list[0] = vec_x
         value_list[1] = vec_y
         value_list[2] = cost
-        value_list[3] = params
+        value_list[3] = params  # as x0, sigma, a, b
         self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = value_list
 
-        return
+        return integrated_intensity
 
     @staticmethod
     def load_scan_survey_file(csv_file_name):

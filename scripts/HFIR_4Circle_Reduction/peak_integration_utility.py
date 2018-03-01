@@ -18,22 +18,6 @@ def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
     return corrected_intensity
 
 
-def calculate_gaussian(param_dict, vec_x):
-    """
-
-    :param param_dict:
-    :param vec_x:
-    :return:
-    """
-    # TODO Shall be...
-
-    print ('Gaussian dict: {0}'.format(param_dict))
-
-    vec_y = numpy.exp(-(vec_x-5)**2)
-
-    return vec_y
-
-
 def calculate_lorentz_correction_factor(q_sample, wavelength, motor_step):
     """
 
