@@ -358,12 +358,18 @@ void MuonAnalysis::initLayout() {
 }
 
 void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
+	return;
   const auto wsParams =
       MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
 
   const QString &groupToSet = QString::fromStdString(wsParams.itemName);
+  auto safd = groupToSet.toStdString();
   const QString &periodToSet = QString::fromStdString(wsParams.periods);
   const auto &groups = m_dataSelector->getChosenGroups();
+  std::vector<std::string> fsa;
+  for (auto name : groups) {
+	  fsa.push_back(name.toStdString());
+  }
   const auto &periods = m_dataSelector->getPeriodSelections();
   if (!groups.contains(groupToSet)) {
     m_uiForm.fitBrowser->setChosenGroup(groupToSet);
@@ -478,8 +484,8 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
 void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
                             PlotType plotType) {
   m_updating = true;
-  m_uiForm.fitBrowser->clearChosenGroups();
-  m_uiForm.fitBrowser->clearChosenPeriods();
+  //m_uiForm.fitBrowser->clearChosenGroups();
+  //m_uiForm.fitBrowser->clearChosenPeriods();
   try {
     auto wsName = addItem(itemType, tableRow, plotType);
 
