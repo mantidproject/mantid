@@ -214,13 +214,16 @@ public:
   void update(int, int, const QStringList &) override{};
   int rowCount() const override { return 0; };
   int rowCount(int) const override { return 0; };
+  bool rowIsEmpty(int, int) const override { return false; };
   bool isProcessed(int) const override { return false; };
   bool isProcessed(int, int) const override { return false; };
   void setProcessed(bool, int) override{};
   void setProcessed(bool, int, int) override{};
   void invalidateAllProcessed() override{};
   void setCell(int, int, int, int, const std::string &) override{};
-  std::string getCell(int, int, int, int) override { return std::string(); };
+  std::string getCell(int, int, int, int) const override {
+    return std::string();
+  };
   int getNumberOfRows() override { return 0; };
   bool isValidModel(Mantid::API::Workspace_sptr, size_t) const override {
     return false;

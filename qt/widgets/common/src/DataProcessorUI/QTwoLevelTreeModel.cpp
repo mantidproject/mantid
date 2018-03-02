@@ -686,6 +686,23 @@ void QTwoLevelTreeModel::tableDataUpdated(const QModelIndex &,
                                           const QModelIndex &) {
   updateAllGroupData();
 }
+
+int QTwoLevelTreeModel::findOrAddGroup(const std::string &groupName) {
+  // Return the index of the group if it exists
+  auto groupIter = std::find_if(m_groups.begin(), m_groups.end(),
+                                [&groupName](const GroupInfo &group) -> bool {
+                                  return group.name() == groupName;
+                                });
+
+  if (groupIter == m_groups.end()) {
+    // Not found. Add a new group and return its index
+    m_groups.emplace_back(GroupInfo(groupName));
+    return static_cast<int>(m_groups.size()) - 1;
+  } else {
+    // Return the existing group's index
+    return static_cast<int>(groupIter - m_groups.begin());
+  }
+}
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

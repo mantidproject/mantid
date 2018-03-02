@@ -89,10 +89,11 @@ public:
   /// Get the number of rows of a given parent
   int rowCount() const override;
   int rowCount(int parent) const override;
+  bool rowIsEmpty(int row, int column) const override;
   void setCell(int row, int column, int parentRow, int parentColumn,
                const std::string &value) override;
   std::string getCell(int row, int column, int parentRow,
-                      int parentColumn) override;
+                      int parentColumn) const override;
   int getNumberOfRows() override;
   /// Get the 'processed' status of a data item
   bool isProcessed(int position) const override;
@@ -119,8 +120,12 @@ private:
   /// The model
   boost::shared_ptr<QTwoLevelTreeModel> m_model;
 
-  /// Insert a row in the model
+  /// Insert an empty row in the model
   void insertRow(int groupIndex, int rowIndex);
+  /// Insert a row in the model with values
+  void insertRow(int groupIndex, int rowIndex,
+                 const std::map<QString, QString> &rowValues,
+                 const WhiteList &whitelist);
   /// Insert a group in the model
   void insertGroup(int groupIndex);
   /// Get the number of rows in a group

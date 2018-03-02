@@ -91,6 +91,7 @@ public:
   /// Get the number of rows of a given parent
   virtual int rowCount() const = 0;
   virtual int rowCount(int parent) const = 0;
+  virtual bool rowIsEmpty(int row, int column) const = 0;
   /// Get the 'processed' status of a data item
   virtual bool isProcessed(int position) const = 0;
   virtual bool isProcessed(int position, int parent) const = 0;
@@ -102,7 +103,7 @@ public:
   virtual void setCell(int row, int column, int parentRow, int parentColumn,
                        const std::string &value) = 0;
   virtual std::string getCell(int row, int column, int parentRow,
-                              int parentColumn) = 0;
+                              int parentColumn) const = 0;
   virtual int getNumberOfRows() = 0;
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,

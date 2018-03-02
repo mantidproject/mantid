@@ -78,6 +78,8 @@ public:
 
   // Get the parent
   QModelIndex parent(const QModelIndex &index) const override;
+  // Find or create a group
+  int findOrAddGroup(const std::string &groupName);
 
   // Functions to edit model
 
@@ -93,6 +95,8 @@ public:
   // Set the 'processed' status of a row / group
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;
+  // Insert rows
+  bool insertRows(int position, int count, int parent);
 private slots:
   void tableDataUpdated(const QModelIndex &, const QModelIndex &);
 
@@ -100,7 +104,6 @@ private:
   void updateAllGroupData();
   void setupModelData(Mantid::API::ITableWorkspace_sptr table);
   bool insertGroups(int position, int count);
-  bool insertRows(int position, int count, int parent);
   bool removeGroups(int position, int count);
   bool removeRows(int position, int count, int parent);
 
