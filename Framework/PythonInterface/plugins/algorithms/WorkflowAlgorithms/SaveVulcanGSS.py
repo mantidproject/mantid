@@ -6,7 +6,7 @@ import mantid.simpleapi as api
 # from mantid.kernel import *
 from mantid.api import AnalysisDataService
 from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
-from mantid.api import FileProperty, FileAction, MatrixWorkspace, ITableWorkspace
+from mantid.api import FileProperty, FileAction, ITableWorkspace
 from mantid.kernel import Direction
 import numpy
 from datetime import datetime
