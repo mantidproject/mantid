@@ -1,12 +1,8 @@
 #ifndef MANTID_ALGORITHMS_FINDPEAKS_H_
 #define MANTID_ALGORITHMS_FINDPEAKS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidKernel/System.h"
-// #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -67,7 +63,7 @@ namespace Algorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport FindPeaks : public API::Algorithm {
+class DLLExport FindPeaks : public API::ParallelAlgorithm {
 public:
   /// Constructor
   FindPeaks();

@@ -220,6 +220,7 @@ set ( SRC_FILES
 	src/PointByPointVCorrection.cpp
 	src/PoissonErrors.cpp
 	src/PolarizationCorrection.cpp
+	src/PolarizationEfficiencyCor.cpp
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
@@ -556,6 +557,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PointByPointVCorrection.h
 	inc/MantidAlgorithms/PoissonErrors.h
 	inc/MantidAlgorithms/PolarizationCorrection.h
+	inc/MantidAlgorithms/PolarizationEfficiencyCor.h
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
@@ -894,6 +896,7 @@ set ( TEST_FILES
 	PointByPointVCorrectionTest.h
 	PoissonErrorsTest.h
 	PolarizationCorrectionTest.h
+	PolarizationEfficiencyCorTest.h
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
@@ -943,6 +946,7 @@ set ( TEST_FILES
 	SmoothDataTest.h
 	SmoothNeighboursTest.h
 	SofQWCentreTest.h
+	SofQWCutTest.h
 	SofQWNormalisedPolygonTest.h
 	SofQWPolygonTest.h
 	SofQWTest.h
@@ -1004,7 +1008,9 @@ set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties(Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Algorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS

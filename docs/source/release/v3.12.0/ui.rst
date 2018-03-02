@@ -5,22 +5,14 @@ UI & Usability Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-Installation
-------------
-
-Workbench
----------
 
 General
 -------
 - Fixed a bug where MantidPlot could freeze when performing a long running search for files.
 - Fixed a bug where MantidPlot would crash if the sample log fields used for run start and end contained non-ISO8601 conforming values.
 - Fixed an issue where updating a workspace changes the number format from decimal to scientific notation if the workspace is being viewed.
-- Added :mod:`mantid.plots` to provide convenience functions for plotting mantid workspaces with matplotlib
+- Added :mod:`mantid.plots` to provide convenience functions for plotting mantid workspaces with matplotlib.
+  An example :ref:`gallery <plotting>` is available.
 
 SliceViewer and Vates Simple Interface
 --------------------------------------
@@ -31,6 +23,7 @@ SliceViewer and Vates Simple Interface
 - Users can now sort by the I/sigma and energy columns in the SliceViewer when viewing a peaks workspace.
 - Fixed bug which would cause slice viewer to crash when deleting an overlaid peaks workspace.
 - Fixed a bug where overwriting peaks workspaces with overlaid in the slice viewer with peak backgrounds shown cause Mantid to crash.
+- Fixed an issue preventing sorting of the VSI peaks table.
 
 .. figure:: ../../images/VatesMultiSliceView.png
    :class: screenshot
@@ -41,6 +34,7 @@ MultiDataset Fitting Interface
 
 - After a simultaneous fit the parameters are saved in a TableWorkspace made to simplify plotting their values against the datasets.
   The parameters are organised into columns and each row corresponds to a dataset.
+- Changed the behaviour of the exported graphs: on fit re-runs they update instead of closing.
 
 SpectrumView
 ------------
@@ -64,5 +58,51 @@ SpectrumView
    sv.renderWorkspace("wsOut")
    sv.show()
    app.exec_()
+
+HFIR HB3A Interface
+-------------------
+
+- Various issues reported from users have been fixed.  These issues include
+  * How to define, modify and delete region of interest on 2D image.
+  * User-specified wave length is not reflected to UB matrix calculation table.
+  * Peak integration report window cannot be launched.
+- User can load back previously saved region of interest.
+- UI sets up default value of scale factor related to normalization type.
+- User can choose to save peak intensities in Fullprof in  (3i4,2f8.2,i4) or (3i4,2f18.5,i4).
+- The 'Max Counts' in survey tab is now normalized by counting time.
+- In scans processing tab, the column name of corrected will be changed to 'F2;'Error' will be modified to 'F2 Error'.
+
+Error Reporting
+---------------
+
+Error reporting has been enabled in place of the new last chance error handler. If mantid catches an unknown exception it will now display the dialog box below. Currently there is no automatic error reporting enabled if Mantid crashes to desktop but the same system is planned to be implemented in this case as well.
+
+.. image::  ../../images/errorReporter.png
+   :align: right
+   :width: 800px
+
+The three options do the following:
+
+**Don't share any information**
+
+The dialog box will close having sent no information. Mantid will either continue or terminate depending on which option has been selected at the top of the dialog.
+
+**Share non-identifiable information**
+
+An error report will be sent to errorreports.mantidproject.org. It will contain the following information:
+ 
+- Operating System including version.
+- Mantid version including git Sha1.
+- System architecture.
+- The date and time at which the crash occured.
+- The mantid application you were using, currently this will always be mantidplot.
+- The default facility you have set.
+- The paraview version.
+- The amount of time mantid was running prior to the crash.
+- A hashed user id and a hashed host id.
+
+**Yes, share information**
+
+All the information from the non-identifiable information will be shared. In addition the optional name and email will be shared if given.
 
 :ref:`Release 3.12.0 <v3.12.0>`

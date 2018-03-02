@@ -87,14 +87,20 @@ void SpectrumView::resizeEvent(QResizeEvent *event) {
 }
 
 /**
- * Renders a new workspace on the spectrum viewer.
+ * Renders a new workspace on the spectrum viewer. If there is a workspace being
+ *tracked, update that data source.
  *
  * @param wksp The matrix workspace to render
  */
 void SpectrumView::renderWorkspace(
     Mantid::API::MatrixWorkspace_const_sptr wksp) {
+
+  // Handle rendering of a workspace we already track
+  if (replaceExistingWorkspace(wksp->getName(), wksp))
+    return;
+
   auto dataSource = MatrixWSDataSource_sptr(new MatrixWSDataSource(wksp));
-  m_dataSource.append(dataSource);
+  m_dataSource.push_back(dataSource);
 
   // If we have a MatrixWSDataSource give it the handler for the
   // EMode, so the user can set EMode and EFixed.  NOTE: we could avoid
@@ -206,10 +212,46 @@ void SpectrumView::preDeleteHandle(
 void SpectrumView::afterReplaceHandle(
     const std::string &wsName,
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
-  if (m_spectrumDisplay.front()->hasData(wsName, ws)) {
-    renderWorkspace(
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
+  // We would only ever be replacing a workspace here
+  replaceExistingWorkspace(
+      wsName, boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
+}
+
+/**
+ * Replace and existing workspace by finding the data source matching the
+ *workspace name and updating the data source. Returns true only if replacment
+ *is made.
+ *
+ * @param wsName : Name of the workspace to replace
+ * @param matrixWorkspace : Pointer to the workspace object
+ * @return : True only if a replacement was completed
+ */
+bool SpectrumView::replaceExistingWorkspace(
+    const std::string &wsName,
+    boost::shared_ptr<const Mantid::API::MatrixWorkspace> matrixWorkspace) {
+
+  bool replacementMade = false;
+
+  auto existingDataSource =
+      std::find_if(m_dataSource.begin(), m_dataSource.end(),
+                   [&wsName](const MatrixWSDataSource_sptr &item) {
+                     return wsName == item->getWorkspace()->getName();
+                   });
+  if (existingDataSource != m_dataSource.end()) {
+    auto index = std::distance(m_dataSource.begin(), existingDataSource);
+    auto targetSpectrumDisplay = m_spectrumDisplay[static_cast<int>(index)];
+    // Keep the current coordinates
+    const auto xPoint = targetSpectrumDisplay->getPointedAtX();
+    const auto yPoint = targetSpectrumDisplay->getPointedAtY();
+    auto newDataSource =
+        boost::make_shared<MatrixWSDataSource>(matrixWorkspace);
+    targetSpectrumDisplay->setDataSource(newDataSource);
+    targetSpectrumDisplay->setPointedAtXY(xPoint, yPoint);
+    // Handle range and image updates
+    targetSpectrumDisplay->updateRange();
+    replacementMade = true;
   }
+  return replacementMade;
 }
 
 void SpectrumView::dropEvent(QDropEvent *de) {
@@ -217,6 +259,7 @@ void SpectrumView::dropEvent(QDropEvent *de) {
   auto ws =
       Mantid::API::AnalysisDataService::Instance()
           .retrieveWS<Mantid::API::MatrixWorkspace>(words[1].toStdString());
+
   renderWorkspace(ws);
 }
 
@@ -254,6 +297,7 @@ void SpectrumView::respondToTabCloseReqest(int tab) {
     m_svConnections->removeSpectrumDisplay(displayToRemove.get());
     m_spectrumDisplay.removeAll(displayToRemove);
     m_ui->imageTabs->removeTab(tab);
+    m_dataSource.erase(m_dataSource.begin() + tab);
     m_hGraph->clear();
     m_vGraph->clear();
   }

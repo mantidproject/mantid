@@ -298,7 +298,7 @@ public:
     // grouped
     // inside the members group workspace.
     std::unordered_set<std::string> members = {
-        "Data", "Calc", "Diff", "LinearBackground", "Lorentzian1"};
+        "Data", "Calc", "Diff", "LinearBackground", "Lorentzian"};
     for (size_t i = 0; i < membersGroupWs->size(); i++) {
       MatrixWorkspace_const_sptr ws =
           boost::dynamic_pointer_cast<const MatrixWorkspace>(

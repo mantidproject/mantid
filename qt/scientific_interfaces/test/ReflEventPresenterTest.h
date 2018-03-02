@@ -45,6 +45,26 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
+
+  void testDisablesControlsOnReductionResumed() {
+    MockEventView mockView;
+    ReflEventPresenter presenter(&mockView);
+    EXPECT_CALL(mockView, disableAll()).Times(AtLeast(1));
+
+    presenter.onReductionResumed();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testEnabledControlsOnReductionPaused() {
+    MockEventView mockView;
+    ReflEventPresenter presenter(&mockView);
+    EXPECT_CALL(mockView, enableAll()).Times(AtLeast(1));
+
+    presenter.onReductionPaused();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTERTEST_H */

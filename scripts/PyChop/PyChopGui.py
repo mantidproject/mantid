@@ -28,7 +28,7 @@ class PyChopGui(QtGui.QMainWindow):
 
     instruments = ['MAPS', 'MARI', 'MERLIN', 'LET']
     choppers = {
-        'MAPS':['A', 'S'],
+        'MAPS':['A', 'B', 'S'],
         'MARI':['A', 'B', 'R', 'G', 'S'],
         'MERLIN':['G', 'S'],
         'LET':['High Flux', 'Intermediate', 'High Resolution']
@@ -456,12 +456,13 @@ class PyChopGui(QtGui.QMainWindow):
             txt += '#             v_van2 = (geom*v_mod)**2 + ((1+geom)*v_chop)**2\n'
             txt += '#             geom = x1/x0 + ((ei/ef)**1.5)*(x2/x0)\n'
             txt += '# Which in this case is:\n'
-            txt += '#     512.17*sqrt(ef**3 * ( %.5e*(0.169+0.4*(ei/ef)**1.5)**2 \n' % (v_mod**2)
-            txt += '#                         + %.5e*(1.169+0.4*(ei/ef)**1.5)**2) )\n' % (v_chop**2)
+            txt += '#     %.2f*sqrt(ef**3 * ( %.5e*(%.3f+%.3f*(ei/ef)**1.5)**2 \n' % (2059.956975/x2, v_mod**2, x1/x0, x2/x0)
+            txt += '#                         + %.5e*(%.3f+%.3f*(ei/ef)**1.5)**2) )\n' % (v_chop**2, 1+x1/x0, x2/x0)
             txt += '#  EN (meV)   Full dE (meV)   Approx dE (meV)\n'
             for ii in range(len(res)):
                 ef = ei-en[ii]
-                approx = 512.17*np.sqrt(ef**3 * ((v_mod**2)*(0.169+0.4*(ei/ef)**1.5)**2 + (v_chop**2)*(1.169+0.4*(ei/ef)**1.5)**2))
+                approx = (2059.956975/x2)*np.sqrt(ef**3 * ((v_mod**2)*((x1/x0)+(x2/x0)*(ei/ef)**1.5)**2
+                                                           + (v_chop**2)*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5)**2))
                 txt += '%12.5f %12.5f %12.5f\n' % (en[ii], res[ii], approx)
         return txt
 

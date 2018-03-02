@@ -21,7 +21,11 @@ import sys
 
 # third-party library imports
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
-from IPython.core.usage import quick_guide, release as ipy_release
+try:
+    from IPython.core.usage import quick_guide
+except ImportError: # quick_guide was removed in IPython 6.0
+    quick_guide = ''
+from IPython.core.usage import release as ipy_release
 from matplotlib import __version__ as mpl_version
 from numpy.version import version as np_version
 from qtpy.QtWidgets import QVBoxLayout

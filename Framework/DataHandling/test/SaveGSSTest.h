@@ -115,6 +115,28 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  void test_unwritablePath() {
+    if (Poco::File("/usr").exists()) {
+      // Save a 2 banks diffraction data with instrument using SLOG format
+      const std::string wsName = "unwritablePath";
+      auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
+                                                m_defaultNumBins);
+      // Get the output file handle
+      const std::string outPath =
+          "/usr/unwritablePath.gss"; // outputFileHandle.path();
+
+      // Execute
+      auto alg = setupSaveGSSAlg(outPath, wsName, "SLOG");
+      TS_ASSERT_THROWS_ANYTHING(alg->execute());
+
+      // Clean
+      AnalysisDataService::Instance().remove(wsName);
+    } else {
+      std::cout << "skipping test_unwritablePath because /usr does not exist"
+                << std::endl;
+    }
+  }
+
   void test_2BankInstrumentRALF() {
     // Save a 2 banks diffraction data with RALF format
     const std::string wsName = "SaveGSS_2BankRALF";

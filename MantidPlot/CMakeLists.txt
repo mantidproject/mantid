@@ -825,6 +825,13 @@ add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  if(MAKE_VATES)
+    set_target_properties(MantidPlot PROPERTIES
+                          INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}")
+  else()
+    set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  endif()
 endif ()
 
 set_target_properties ( MantidPlot PROPERTIES FOLDER "Qt4" )

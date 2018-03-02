@@ -36,6 +36,9 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         self._myImageIndex = 0
         self._myImageDict = dict()
 
+        # current 2D plot
+        self._2dPlot = None
+
         return
 
     @property
@@ -58,9 +61,9 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         :param y_tick_label:
         :return:
         """
-        self._myCanvas.add_2d_plot(array2d, x_min, x_max, y_min, y_max, hold_prev_image, y_tick_label)
+        self._2dPlot = self._myCanvas.add_2d_plot(array2d, x_min, x_max, y_min, y_max, hold_prev_image, y_tick_label)
 
-        return
+        return self._2dPlot
 
     def add_image(self, imagefilename):
         """ Add an image to canvas from an image file
@@ -96,6 +99,17 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         :return:
         """
         # There is no operation that is defined now
+        return
+
+    def remove_last_plot(self):
+        """
+
+        :return:
+        """
+        if self._2dPlot is not None:
+            self._2dPlot.remove()
+            self._2dPlot = None
+
         return
 
     @property
@@ -154,9 +168,6 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         # legend and color bar
         self._colorBar = None
 
-        # polygon
-        self._myPolygon = None
-
         # Buffer of data
         self._currentArray2D = None
 
@@ -189,7 +200,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         :param x_max:
         :param y_min:
         :param y_max:
-        :param hold_prev: hold previous image
+        :param hold_prev: hold previous image.  If False, all 2D image and polygon patches will be removed
         :param yticklabels: list of string for y ticks
         :return:
         """
@@ -236,11 +247,22 @@ class Qt4Mpl2dCanvas(FigureCanvas):
 
         return self._currIndex
 
+    def add_patch(self, patch):
+        """
+        add an artist patch such as polygon
+        :param patch:
+        :return:
+        """
+        self.axes.add_artist(patch)
+
+        # Flush...
+        self._flush()
+
+        return
+
     def addImage(self, imagefilename):
         """ Add an image by file
         """
-        #import matplotlib.image as mpimg
-
         # set aspect to auto mode
         self.axes.set_aspect('auto')
 
@@ -277,10 +299,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
             self.fig.clear()
             # Re-create subplot
             self.axes = self.fig.add_subplot(111)
-
-        # clear polygon
-        if self._myPolygon is not None:
-            self._myPolygon.remove()
+        # END-FOR
 
         # flush/commit
         self._flush()
