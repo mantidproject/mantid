@@ -399,8 +399,9 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     int j = m_enumManager->value(m_workspace);
     std::string option = m_workspaceNames[j].toStdString();
     setOutputName(option);
-	// only do this if in single fit mode
-    if (m_periodBoxes.size() > 1 && !m_browser->isItemVisible(m_multiFitSettingsGroup)) {
+    // only do this if in single fit mode
+    if (m_periodBoxes.size() > 1 &&
+        !m_browser->isItemVisible(m_multiFitSettingsGroup)) {
       size_t end = 0;
       // assumed structure of name
       // isolate the period
