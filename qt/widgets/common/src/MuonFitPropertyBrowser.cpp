@@ -171,6 +171,8 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettingsGroup->addSubProperty(m_showGroup);
 
   m_enumManager->setEnumNames(m_showGroup, m_showGroupValue);
+  m_enumManager->setValue(m_groupsToFit, 2);
+  clearChosenGroups();
   QString tmp = "fwd";
   addGroupCheckbox(tmp);
   tmp = "bwd";
@@ -384,6 +386,8 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     } else {
       for (auto iter = m_periodBoxes.constBegin();
            iter != m_periodBoxes.constEnd(); ++iter) {
+		  auto sadf = option.toStdString();
+		  auto fsdaf = iter.key().toStdString();
         if (option == iter.key()) {
           m_boolManager->setValue(iter.value(), true);
         } else {
@@ -436,6 +440,8 @@ void MuonFitPropertyBrowser::updatePeriodDisplay() {
   auto tmp = getChosenPeriods();
   tmp.replaceInStrings(QRegExp(","), "+");
   m_showPeriodValue << tmp.join(",");
+  auto tttt = tmp.size();
+  auto tmmm = m_showPeriodValue[0].toStdString();
   m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
   if (m_periodsToFitOptions.size() > 1) {
     m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
