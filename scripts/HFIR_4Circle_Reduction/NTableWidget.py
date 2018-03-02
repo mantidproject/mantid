@@ -153,7 +153,11 @@ class NTableWidget(QtGui.QTableWidget):
         # get cell type
         cell_data_type = self._myColumnTypeList[col_index]
 
-        if cell_data_type == 'checkbox':
+        if cell_data_type.startswith('str'):
+            # string: use original value
+            pass
+
+        elif cell_data_type == 'checkbox':
             # Check box
             cell_i_j = self.cellWidget(row_index, col_index)
             assert isinstance(cell_i_j, QtGui.QCheckBox)
@@ -165,6 +169,9 @@ class NTableWidget(QtGui.QTableWidget):
             assert isinstance(item_i_j, QtGui.QTableWidgetItem)
 
             return_value = str(item_i_j.text())
+
+            else:
+                # other type
             if return_value == 'None':
                 return_value = None
             elif cell_data_type == 'int':

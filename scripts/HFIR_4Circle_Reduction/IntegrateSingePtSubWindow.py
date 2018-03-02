@@ -45,6 +45,9 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_single_pt)
         self.ui.pushButton_plot.clicked.connect(self.do_plot_integrated_pt)
 
+        # TODO Implement
+        # pushButton_loadPeakInfoFile  : do_load_saved_integrated_table
+
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
 

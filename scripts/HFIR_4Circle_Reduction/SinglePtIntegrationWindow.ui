@@ -51,6 +51,16 @@
        </spacer>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_loadPeakInfoFile">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load a CSV file that an integration table was exported to.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Load Peak Info</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButton_retrieveFWHM">
         <property name="text">
          <string>Retrieve FWHM</string>
@@ -153,7 +163,7 @@
      <x>0</x>
      <y>0</y>
      <width>1440</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuQuit">
