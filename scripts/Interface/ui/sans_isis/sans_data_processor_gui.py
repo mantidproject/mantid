@@ -203,13 +203,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         runs_icon = QtGui.QIcon(runs_icon_path)
         _ = QtGui.QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
-        add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
-        _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
-
         settings_icon_path = os.path.join(path, "icons", "settings.png")
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
+
+        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
+        add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
+        _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
         settings_icon_path = os.path.join(path, "icons", "settings.png")
         settings_icon = QtGui.QIcon(settings_icon_path)
@@ -236,6 +236,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.instrument_combo_box.currentIndexChanged.connect(self._instrument_changed)
 
         self.process_button.clicked.connect(self._on_python_process)
+
+        self.help_button.clicked.connect(self._on_help_button_clicked)
 
         # --------------------------------------------------------------------------------------------------------------
         # Settings tabs
@@ -371,6 +373,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _instrument_changed(self):
         self._call_settings_listeners(lambda listener: listener.on_instrument_changed())
+
+    def _on_help_button_clicked(self):
+        MantidQt.API.MantidDesktopServices.openUrl(
+            QtCore.QUrl("http://docs.mantidproject.org/nightly/interfaces/ISIS%20SANS%20v2.html"))
 
     def _on_user_file_load(self):
         """
