@@ -386,8 +386,6 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     } else {
       for (auto iter = m_periodBoxes.constBegin();
            iter != m_periodBoxes.constEnd(); ++iter) {
-		  auto sadf = option.toStdString();
-		  auto fsdaf = iter.key().toStdString();
         if (option == iter.key()) {
           m_boolManager->setValue(iter.value(), true);
         } else {
@@ -440,8 +438,6 @@ void MuonFitPropertyBrowser::updatePeriodDisplay() {
   auto tmp = getChosenPeriods();
   tmp.replaceInStrings(QRegExp(","), "+");
   m_showPeriodValue << tmp.join(",");
-  auto tttt = tmp.size();
-  auto tmmm = m_showPeriodValue[0].toStdString();
   m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
   if (m_periodsToFitOptions.size() > 1) {
     m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
@@ -1251,10 +1247,9 @@ bool MuonFitPropertyBrowser::hasGuess() const {
 * By default sets all unchecked
 * @param groups :: [input] List of group names
 */
-void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups){
-//  m_enumManager->setValue(m_groupsToFit, 0);
+void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
   // If it's the same list, do nothing
-	auto selected = getChosenGroups();
+  auto selected = getChosenGroups();
   if (groups.size() == m_groupBoxes.size()) {
     auto existingGroups = m_groupBoxes.keys();
     auto newGroups = groups;
@@ -1269,15 +1264,15 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups){
   for (const auto &group : groups) {
     addGroupCheckbox(group);
   }
-  //sets the same selection as before
+  // sets the same selection as before
   for (const auto &group : selected) {
 
-	  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		  ++iter) {
-		  if (iter.key().toStdString() == group.toStdString()) {
-			  m_boolManager->setValue(iter.value(), true);
-		  }
-	  }
+    for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+         ++iter) {
+      if (iter.key().toStdString() == group.toStdString()) {
+        m_boolManager->setValue(iter.value(), true);
+      }
+    }
   }
 }
 /**
@@ -1312,11 +1307,6 @@ void MuonFitPropertyBrowser::addGroupCheckbox(const QString &name) {
   m_groupBoxes.insert(name, m_boolManager->addProperty(name));
   int j = m_enumManager->value(m_groupsToFit);
   auto option = m_groupsToFitOptions[j].toStdString();
-  /*if (option == "All groups") {
-    setAllGroups();
-  } else if (option == "All Pairs") {
-    setAllPairs();
-  }*/
 }
 /**
 * Returns a list of the selected groups (checked boxes)
@@ -1658,55 +1648,46 @@ void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
 */
 void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
 
-	auto index = m_enumManager->value(m_groupsToFit);
-	QString name = m_groupsToFitOptions[index];
-	if (name == CUSTOM_LABEL) {
-		bool match = false;
-		auto vals = getChosenGroups();
-		auto tt = vals.size();
-		clearChosenGroups();
-		for (const auto &group : vals) {
+  auto index = m_enumManager->value(m_groupsToFit);
+  QString name = m_groupsToFitOptions[index];
+  if (name == CUSTOM_LABEL) {
+    bool match = false;
+    auto vals = getChosenGroups();
+    clearChosenGroups();
+    for (const auto &group : vals) {
 
-			for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-				++iter) {
-				auto a = iter.key().toStdString();
-				auto b = group.toStdString();
-				if (iter.key().toStdString() == group.toStdString()) {
-					m_boolManager->setValue(iter.value(), true);
-					match = true;
-				}
-			}
+      for (auto iter = m_groupBoxes.constBegin();
+           iter != m_groupBoxes.constEnd(); ++iter) {
+        if (iter.key().toStdString() == group.toStdString()) {
+          m_boolManager->setValue(iter.value(), true);
+          match = true;
+        }
+      }
+    }
+  } else if (name == ALL_GROUPS_LABEL) {
+    m_enumManager->setValue(m_groupsToFit, 0);
+    setAllGroups();
+    if (getChosenGroups().size() > 0) {
+      return;
+    }
+  } else if (name == ALL_PAIRS_LABEL) { // all pairs is index 1
+    m_enumManager->setValue(m_groupsToFit, 1);
+    setAllPairs();
+  }
+  if (getChosenGroups().size() > 0) {
+    return;
+  } else {
 
-		}
-	}
-	else if (name == ALL_GROUPS_LABEL) {
-		m_enumManager->setValue(m_groupsToFit, 0);
-		setAllGroups();
-		if (getChosenGroups().size() > 0) { return; }
-	}
-	else if (name == ALL_PAIRS_LABEL)
-	{			// all pairs is index 1
-		m_enumManager->setValue(m_groupsToFit, 1);
-		setAllPairs();
-
-	}
-	if (getChosenGroups().size() > 0) {
-		return;
-	}
-	else {
-
-
-		if (isItGroup) {
-			// all groups is index 0
-			m_enumManager->setValue(m_groupsToFit, 0);
-			setAllGroups();
-		}
-		else {
-			// all pairs is index 1
-			m_enumManager->setValue(m_groupsToFit, 1);
-			setAllPairs();
-		}
-	}
+    if (isItGroup) {
+      // all groups is index 0
+      m_enumManager->setValue(m_groupsToFit, 0);
+      setAllGroups();
+    } else {
+      // all pairs is index 1
+      m_enumManager->setValue(m_groupsToFit, 1);
+      setAllPairs();
+    }
+  }
 }
 void MuonFitPropertyBrowser::setGroupNames(
     std::vector<std::string> groupNames) {
