@@ -97,7 +97,9 @@ private:
   void processUserSpecifiedHeaders();
 
   /// Turns the data associated with this spectra into a string stream
-  void generateBankData(std::stringstream &outBuf, size_t specIndex) const;
+  void generateBankData(std::stringstream &outBuf, size_t specIndex,
+                        const std::string &outputFormat,
+                        const std::vector<int> &slog_xye_precisions) const;
 
   /// Generates the bank header and returns this as a string stream
   void generateBankHeader(std::stringstream &out,
@@ -123,6 +125,9 @@ private:
 
   /// Opens a new file stream at the path specified.
   void openFileStream(const std::string &outFilePath, std::ofstream &outStream);
+
+  /// Parse the user-specified SLOG XYE float precisions
+  std::vector<int> parseSLOGPrecision(const std::string &output_format);
 
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
@@ -151,7 +156,8 @@ private:
   /// Write out the data in SLOG format
   void writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
                      std::stringstream &out,
-                     const HistogramData::Histogram &histo) const;
+                     const HistogramData::Histogram &histo,
+                     const std::vector<int> &xye_precision) const;
 
   /// Workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

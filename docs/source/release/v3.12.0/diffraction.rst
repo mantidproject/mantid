@@ -44,6 +44,7 @@ Powder Diffraction
 - :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` supports D2B and D20 (when doing a detector scan) powder diffraction reduction at the ILL.
 - New algorithm :ref:`algm-SumOverlappingTubes` combines a detector scan for D2B into a single workspace.
 - :ref:`CalculateDIFC <algm-CalculateDIFC>` has been extended to allow for calibration workspaces from :ref:`PDCalibration <algm-PDCalibration>`
+- :ref:`SaveGSS <algm-SaveGSS>` has been extended to allow user to specify GSAS general header, each bank's header and XYE decimal precision for SLOG.
 
 Engineering Diffraction
 -----------------------

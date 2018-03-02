@@ -182,6 +182,13 @@ void SaveGSS::init() {
       "Each string will be used to replaced the standard GSAS bank header."
       "Number of strings in the give array must be same as number of banks."
       "And the order is preserved.");
+
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("SLOGXYEPrecision"),
+      "Enter 3 integers as the precisions of output X, Y and E for SLOG data "
+      "only."
+      "Default is (9, 9, 9) if it is left empty.  Otherwise it is not "
+      "allowed.");
 }
 
 // Execute the algorithm
@@ -294,15 +301,18 @@ bool SaveGSS::areAllDetectorsValid() const {
   *
   * @param outBuf :: The string stream to write to
   * @param specIndex :: The index of the bank to convert into
+  * @param outputFormat :: output format
+  * @param slog_xye_precisions :: the precision of output XYE for SLOG data only
   * a string stream
   */
-void SaveGSS::generateBankData(std::stringstream &outBuf,
-                               size_t specIndex) const {
+void SaveGSS::generateBankData(
+    std::stringstream &outBuf, size_t specIndex,
+    const std::string &outputFormat,
+    const std::vector<int> &slog_xye_precisions) const {
   // Determine bank number into GSAS file
   const bool useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
   const bool multiplyByBinWidth = getProperty("MultiplyByBinWidth");
   const int userStartingBankNumber = getProperty("Bank");
-  const std::string outputFormat = getPropertyValue("Format");
   const std::string ralfDataFormat = getPropertyValue("DataFormat");
 
   int bankid;
@@ -324,7 +334,8 @@ void SaveGSS::generateBankData(std::stringstream &outBuf,
       throw std::runtime_error("Unknown RALF data format" + ralfDataFormat);
     }
   } else if (outputFormat == SLOG) {
-    writeSLOGdata(bankid, multiplyByBinWidth, outBuf, histogram);
+    writeSLOGdata(bankid, multiplyByBinWidth, outBuf, histogram,
+                  slog_xye_precisions);
   } else {
     throw std::runtime_error("Cannot write to the unknown " + outputFormat +
                              "output format");
@@ -387,6 +398,9 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
 
   const auto numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
 
+  const std::string outputFormat = getPropertyValue("Format");
+  std::vector<int> slog_xye_precisions = parseSLOGPrecision(outputFormat);
+
   // Create the various output files we will need in a loop
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {
@@ -408,7 +422,8 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
       // Add bank header and details to buffer
       generateBankHeader(*m_outputBuffer[index], spectrumInfo, index);
       // Add data to buffer
-      generateBankData(*m_outputBuffer[index], index);
+      generateBankData(*m_outputBuffer[index], index, outputFormat,
+                       slog_xye_precisions);
       m_progress->report();
     }
   }
@@ -655,6 +670,41 @@ void SaveGSS::openFileStream(const std::string &outFilePath,
   // Stream is good at this point
 }
 
+//----------------------------------------------------------------------------
+/** Parse SLOG precision
+ * @brief SaveGSS::parseSLOGPrecision
+ * @return
+ */
+std::vector<int> SaveGSS::parseSLOGPrecision(const std::string &output_format) {
+  std::vector<int> precision_vector = getProperty("SLOGXYEPrecision");
+
+  if (output_format == SLOG) {
+    // it only matters with SLOG file format
+    if (precision_vector.size() == 0) {
+      // precision is 9 as default
+      precision_vector.resize(3, 9);
+    } else if (precision_vector.size() == 3) {
+      // check whether the user-specified precisions are within valid range
+      for (size_t i = 0; i < 3; ++i) {
+        if (precision_vector[i] < 0 || precision_vector[i] >= 9) {
+          g_log.warning() << "User specified " << i << "-th precision"
+                          << precision_vector[i]
+                          << "is out of allowed range.  Reset to 9 instead"
+                          << "\n";
+          precision_vector[i] = 9;
+        }
+      }
+    } else {
+      // not supported case
+      throw std::invalid_argument(
+          "SLOG XYE precision vector must be either empty or have 3 items.");
+    }
+  }
+
+  return precision_vector;
+}
+
+//----------------------------------------------------------------------------
 /** Ensures that when a workspace group is passed as output to this workspace
 *  everything is saved to one file and the bank number increments for each
 *  group member.
@@ -895,17 +945,24 @@ void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
   }
 }
 
-// ----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 /** write slog data
  * @brief SaveGSS::writeSLOGdata
  * @param bank
  * @param MultiplyByBinWidth
  * @param out
  * @param histo
+ * @param xye_precision
  */
 void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
                             std::stringstream &out,
-                            const HistogramData::Histogram &histo) const {
+                            const HistogramData::Histogram &histo,
+                            const std::vector<int> &xye_precision) const {
+  // check inputs
+  if (xye_precision.size() != 3)
+    throw std::runtime_error(
+        "SLOG XYE precisions are not given in a 3-item vector.");
+
   const auto &xVals = histo.binEdges();
   const auto &xPoints = histo.points();
   const auto &yVals = histo.y();
@@ -968,11 +1025,11 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
 
     // FIXME - Next step is to make the precision to be flexible from user
     // inputs
-    outLine << "  " << std::fixed << std::setprecision(9) << std::setw(20)
-            << xPoints[i] << "  " << std::fixed << std::setprecision(9)
-            << std::setw(20) << yValue << "  " << std::fixed
-            << std::setprecision(9) << std::setw(20) << eValue << std::setw(12)
-            << " "
+    outLine << "  " << std::fixed << std::setprecision(xye_precision[0])
+            << std::setw(20) << xPoints[i] << "  " << std::fixed
+            << std::setprecision(xye_precision[1]) << std::setw(20) << yValue
+            << "  " << std::fixed << std::setprecision(xye_precision[2])
+            << std::setw(20) << eValue << std::setw(12) << " "
             << "\n"; // let it flush its own buffer
   }
 

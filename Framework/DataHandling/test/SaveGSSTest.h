@@ -116,7 +116,8 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** test writing a 2-bank GSAS file with user input header
+  /** test writing a 2-bank GSAS file with user input header and user specified
+   * precision on XYE
    * @brief test_2BankInstrumentSLOGUserHeader
    */
   void test_2BankInstrumentSLOGUserHeader() {
@@ -139,6 +140,9 @@ public:
     user_bank_headers.push_back("Bank 1 some information");
     user_bank_headers.push_back("Bank 2 some information different");
 
+    // SLOG XYE precision
+    std::vector<int> slog_xye_precision(3, 1);
+
     // Execute
     auto alg = setupSaveGSSAlg(outPath, wsName, "SLOG");
     TS_ASSERT_THROWS_NOTHING(
@@ -146,6 +150,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OverwriteStandardHeader", true));
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("UserSpecifiedBankHeader", user_bank_headers));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("SLOGXYEPrecision", slog_xye_precision))
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
