@@ -186,48 +186,6 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return input_workspace, binning_parameter_list, gss_file_name, output_ws_name, ipts, parm_file_name
 
-    @staticmethod
-    def generate_bin_parameters_from_workspace(ref_tof_ws, ws_index):
-        """
-        generate a vector as binning parameters from reference TOF binning workspace
-        :param ref_tof_ws:
-        :param ws_index:
-        :return:
-        """
-        # Check input
-        assert isinstance(ref_tof_ws, MatrixWorkspace), 'TOF reference workspace must be a MatrixWorkspace but ' \
-                                                        'not a {0}'.format(ref_tof_ws.__class__.__name__)
-        assert isinstance(ws_index, int), 'Workspace index {0} must be an integer but not a {1}' \
-                                          ''.format(ws_index, type(ws_index))
-
-        # Create a complicated bin parameter
-        if ws_index < 0 or ws_index >= ref_tof_ws.getNumberOfHistograms():
-            raise RuntimeError('Workspace {0} is out of workspace indexes range [0, {1})'
-                               ''.format(ws_index, ref_tof_ws.getNumberOfHistograms()))
-        else:
-            # get the TOF vector
-            vec_ref_tof = ref_tof_ws.readX(ws_index)
-
-        params = list()
-        dx = None
-        for ibin in range(len(vec_ref_tof) - 1):
-            x0 = vec_ref_tof[ibin]
-            xf = vec_ref_tof[ibin + 1]
-            dx = xf - x0
-            params.append(x0)
-            params.append(dx)
-
-        # last bin: last bin is not defined by input TOF reference workspace. Set a reasonably one with 2*dX
-        assert dx is not None, 'Vector of refT has less than 2 values.  It is not supported.'
-        x0 = vec_ref_tof[-1]
-        xf = 2 * dx + x0  # last bin is out of defined range
-        params.extend([x0, 2 * dx, xf])
-
-        # Rebin ...
-        # tempws = api.Rebin(InputWorkspace=input_ws, Params=params, PreserveEvents=True)
-
-        return params
-
     def process_binning_param_table(self, input_workspace, bin_par_ws_name):
         """
         process the binning parameters given in an ITableWorkspace
@@ -344,11 +302,13 @@ class SaveVulcanGSS(PythonAlgorithm):
             try:
                 ws_index = int(terms[1].strip())
             except ValueError:
-                raise RuntimeError('blabla')
+                raise RuntimeError('{0} is supposed to be an integer for workspace index but not of type {1}.'
+                                   ''.format(terms[1], type(terms[1])))
 
             ref_tof_ws = AnalysisDataService.retrieve(ref_ws_name)
             if ws_index < 0 or ws_index >= ref_tof_ws.getNumberHistograms():
-                raise RuntimeError('blabla2')
+                raise RuntimeError('Workspace index {0} must be in range [0, {1})'
+                                   ''.format(ws_index, ref_tof_ws.getNumberHistograms()))
 
             ref_tof_vec = ref_tof_ws.readX(ws_index)
             delta_tof_vec = ref_tof_vec[1:] - ref_tof_vec[:-1]
@@ -360,88 +320,9 @@ class SaveVulcanGSS(PythonAlgorithm):
             self.log().warning('Binning parameters: size = {0}\n{1}'.format(len(bin_param), bin_param))
 
         else:
-            raise RuntimeError('Not .... blabla3')
+            raise RuntimeError('Binning format {0} is not supported.'.format(bin_par_str))
 
         return bin_param
-
-    def _loadRefLogBinFile(self, logbinfilename):
-        """ Create a vector of bin in TOF value
-        Arguments:
-         - logbinfilename : name of file containing log_10(TOF) bins
-        """
-        import math
-
-        bfile = open(logbinfilename, "r")
-        lines = bfile.readlines()
-        bfile.close()
-
-        vecX = []
-        for line in lines:
-            line = line.strip()
-            if len(line) == 0:
-                continue
-            if line[0] == "#":
-                continue
-
-            terms = line.split()
-            for it in range(len(terms)):
-                x = float(terms[it])
-                vecX.append(x)
-            # ENDFOR
-        # ENDFOR
-
-        vecPow10X = []
-        for i in range(len(vecX)):
-            p10x = math.pow(10, vecX[i])
-            vecPow10X.append(p10x)
-
-        return vecPow10X
-
-    def _rebinVdrive(self, inputws, vec_refT, outputwsname):
-        """ Rebin to match VULCAN's VDRIVE-generated GSAS file
-        Arguments:
-         - inputws : focussed workspace
-         - vec_refT: list of TOF bins
-        """
-        # Create a complicated bin parameter
-        params = []
-        dx = None
-        for ibin in range(len(vec_refT)-1):
-            x0 = vec_refT[ibin]
-            xf = vec_refT[ibin+1]
-            dx = xf-x0
-            params.append(x0)
-            params.append(dx)
-
-        # last bin
-        assert dx is not None, 'Vector of refT has less than 2 values.  It is not supported.'
-        x0 = vec_refT[-1]
-        xf = 2*dx + x0
-        params.extend([x0, 2*dx, xf])
-
-        # Rebin
-        tempws = api.Rebin(InputWorkspace=inputws, Params=params, PreserveEvents=False)
-
-        # Map to a new workspace with 'vdrive-bin', which is the integer value of log bins
-        numhist = tempws.getNumberHistograms()
-        newvecx = []
-        newvecy = []
-        newvece = []
-        for iws in range(numhist):
-            vecx = tempws.readX(iws)
-            vecy = tempws.readY(iws)
-            vece = tempws.readE(iws)
-            for i in range( len(vecx)-1 ):
-                newvecx.append(int(vecx[i]*10)/10.)
-                newvecy.append(vecy[i])
-                newvece.append(vece[i])
-            # ENDFOR (i)
-        # ENDFOR (iws)
-        api.DeleteWorkspace(Workspace=tempws)
-        gsaws = api.CreateWorkspace(DataX=newvecx, DataY=newvecy, DataE=newvece, NSpec=numhist,
-                                    UnitX="TOF", ParentWorkspace=inputws, OutputWorkspace=outputwsname)
-
-        return gsaws
 
     def save_gsas(self, output_workspace, gsas_file_name, ipts_number, parm_file_name):
         """
@@ -472,68 +353,20 @@ class SaveVulcanGSS(PythonAlgorithm):
                     Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True,
                     UserSpecifiedGSASHeader=vulcan_gsas_header,
                     UserSpecifiedBankHeader=vulcan_bank_headers,
-                    Bank=1)
+                    Bank=1,
+                    SLOGXYEPrecision=[1, 1, 2])
 
         return
 
-    def NOT_USED_rewrite_gda_file(self, gssfilename, newheader):
+    def create_vulcan_gsas_header(self, workspace, gsas_file_name, ipts, parm_file_name):
         """
-        Re-write GSAS file including header and header for each bank
-        :param gssfilename:
-        :param newheader:
+        create specific GSAS header required by VULCAN team/VDRIVE
+        :param workspace:
+        :param gsas_file_name:
+        :param ipts:
+        :param parm_file_name:
         :return:
         """
-        # Get all lines
-        gfile = open(gssfilename, "r")
-        lines = gfile.readlines()
-        gfile.close()
-
-        # New file
-        filebuffer = ""
-        filebuffer += newheader
-
-        inbank = False
-        banklines = []
-        for line in lines:
-            cline = line.strip()
-            if len(cline) == 0:
-                continue
-
-            if line.startswith("BANK"):
-                # Indicate a new bank
-                if len(banklines) == 0:
-                    # bank line for first bank
-                    inbank = True
-                    banklines.append(line.strip("\n"))
-                else:
-                    # bank line for non-first bank.
-                    tmpbuffer = self._rewriteOneBankData(banklines)
-                    filebuffer += tmpbuffer
-                    banklines = [line]
-                # ENDIFELSE
-            elif inbank is True and cline.startswith("#") is False:
-                # Write data line
-                banklines.append(line.strip("\n"))
-
-        # ENDFOR
-
-        if len(banklines) > 0:
-            tmpbuffer = self._rewriteOneBankData(banklines)
-            filebuffer += tmpbuffer
-        else:
-            raise NotImplementedError("Impossible to have this")
-
-        # Overwrite the original file
-        ofile = open(gssfilename, "w")
-        ofile.write(filebuffer)
-        ofile.close()
-
-        return
-
-    def create_vulcan_gsas_header(self, workspace, gssfilename, ipts, parmfname):
-        """
-        """
-
         # Get necessary information including title, run start, duration and etc.
         title = workspace.getTitle()
 
@@ -575,21 +408,21 @@ class SaveVulcanGSS(PythonAlgorithm):
         self.log().debug("Start = %d, Stop = %d" % (total_nanosecond_start, total_nanosecond_stop))
 
         # Construct new header
-        vulcan_gsas_header = []
+        vulcan_gsas_header = list()
 
         if len(title) > 80:
             title = title[0:80]
         vulcan_gsas_header.append("%-80s" % title)
 
-        vulcan_gsas_header.append("%-80s" % ("Instrument parameter file: %s" % parmfname))
+        vulcan_gsas_header.append("%-80s" % ("Instrument parameter file: %s" % parm_file_name))
 
         vulcan_gsas_header.append("%-80s" % ("#IPTS: %s" % str(ipts)))
 
         vulcan_gsas_header.append("%-80s" % "#binned by: Mantid")
 
-        vulcan_gsas_header.append("%-80s" % ("#GSAS file name: %s" % os.path.basename(gssfilename)))
+        vulcan_gsas_header.append("%-80s" % ("#GSAS file name: %s" % os.path.basename(gsas_file_name)))
 
-        vulcan_gsas_header.append("%-80s" % ("#GSAS IPARM file: %s" % parmfname))
+        vulcan_gsas_header.append("%-80s" % ("#GSAS IPARM file: %s" % parm_file_name))
 
         vulcan_gsas_header.append("%-80s" % ("#Pulsestart:    %d" % total_nanosecond_start))
 
@@ -599,7 +432,8 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return vulcan_gsas_header
 
-    def create_bank_header(self, bank_id, vec_x):
+    @staticmethod
+    def create_bank_header(bank_id, vec_x):
         """
         create bank header of VDRIVE/GSAS convention
         as: BANK bank_id data_size data_size  binning_type 'SLOG' tof_min tof_max deltaT/T
@@ -616,54 +450,8 @@ class SaveVulcanGSS(PythonAlgorithm):
                       ''.format(bank_id, data_size, data_size, 'SLOG', tof_min, tof_max, delta_tof)
 
         bank_header = '{0:80s}'.format(bank_header)
-        print ('[DB...BAT] Bank header: "{0}"'.format(bank_header))
 
         return bank_header
-
-    def _rewriteOneBankData(self, banklines):
-        """ first line is for bank information
-        """
-        wbuf = ""
-
-        # Rewrite bank lines
-        bankline = banklines[0].strip()
-        terms = bankline.split()
-        tofmin = float(banklines[1].split()[0])
-        tofmax = float(banklines[-1].split()[0])
-
-        terms[5] = "%.1f" % (tofmin)
-        terms[6] = "%.1f" % (tofmax)
-
-        newbankline = ""
-
-        # title
-        for t in terms:
-            newbankline += "%s " % (t)
-        wbuf = "%-80s\n" % (newbankline)
-
-        # data
-        for i in range(1, len(banklines)):
-            cline = banklines[i]
-
-            terms = cline.split()
-            try:
-                tof = float(terms[0])
-                y = float(terms[1])
-                e = float(terms[2])
-
-                x_s = "%.1f" % (tof)
-                y_s = "%.1f" % (y)
-                e_s = "%.2f" % (e)
-
-                temp = "%12s%12s%12s" % (x_s, y_s, e_s)
-
-            except TypeError:
-                temp = "%-80s\n" % (cline.rstrip())
-
-            wbuf += "%-80s\n" % (temp)
-        # ENDFOR
-
-        return wbuf
 
 
 # Register algorithm with Mantid

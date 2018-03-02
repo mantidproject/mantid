@@ -109,7 +109,7 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 
 //----------------------------------------------------------------------------------------------
 //// Constructor
-//SaveGSS::SaveGSS()
+// SaveGSS::SaveGSS()
 //    : Mantid::API::Algorithm(), overwrite_std_gsas_header_(false),
 //      overwrite_std_bank_header_(false) {}
 

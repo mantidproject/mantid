@@ -47,7 +47,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
 
         # Delete the TESTING file
         AnalysisDataService.remove("InputWorkspace")
-        AnalysisDataService.remove(bin_table)
+        AnalysisDataService.remove(bin_ws_name)
         AnalysisDataService.remove(data_ws_name+"_rebinned")
 
         return
@@ -88,11 +88,11 @@ class SaveVulcanGSSTest(unittest.TestCase):
         output_workspace = AnalysisDataService.retrieve(data_ws_name+"_rebinned")
 
         self.assertEqual(output_workspace.getNumberHistograms(), 3)
-        self.assertEqual(len(output_workspace.readX(0)), 100)
+        self.assertEqual(len(output_workspace.readX(0)), 99)
 
         # Delete the TESTING file
         AnalysisDataService.remove("InputWorkspace")
-        AnalysisDataService.remove(bin_table)
+        AnalysisDataService.remove('vulcan_sim_table')
         AnalysisDataService.remove(data_ws_name+"_rebinned")
 
 
