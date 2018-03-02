@@ -2283,7 +2283,7 @@ void FunctionBrowser::updateMultiDatasetParameters(
         auto sfun = multiFun->getFunction(0);
         const auto globalParameters = getGlobalParameters();
         for (int j = 0; j < globalParameters.size(); ++j) {
-          auto paramName = globalParameters[j];
+          auto const &paramName = globalParameters[j];
           auto paramIndex = sfun->parameterIndex(paramName.toStdString());
           setParameter(paramName, sfun->getParameter(paramIndex));
           setParamError(paramName, sfun->getError(paramIndex));
@@ -2294,7 +2294,7 @@ void FunctionBrowser::updateMultiDatasetParameters(
       for (size_t i = 0; i < multiFun->nFunctions(); ++i) {
         auto sfun = multiFun->getFunction(i);
         for (int j = 0; j < localParameters.size(); ++j) {
-          auto paramName = localParameters[j];
+          auto const &paramName = localParameters[j];
           auto paramIndex = sfun->parameterIndex(paramName.toStdString());
           auto value = sfun->getParameter(paramIndex);
           auto error = sfun->getError(paramIndex);
