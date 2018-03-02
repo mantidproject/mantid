@@ -154,7 +154,7 @@ private:
                          const HistogramData::Histogram &histo) const;
 
   /// Write out the data in SLOG format
-  void writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
+  void writeSLOGdata(const size_t ws_index, const int bank, const bool MultiplyByBinWidth,
                      std::stringstream &out,
                      const HistogramData::Histogram &histo,
                      const std::vector<int> &xye_precision) const;

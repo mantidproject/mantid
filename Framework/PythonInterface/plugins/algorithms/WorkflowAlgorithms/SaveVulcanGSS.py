@@ -343,18 +343,22 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         vulcan_bank_headers = list()
         for ws_index in range(output_workspace.getNumberHistograms()):
-            bank_id = ws_index + 1
+            bank_id = output_workspace.getSpectrum(ws_index).getSpectrumNo()
             bank_header = self.create_bank_header(bank_id, output_workspace.readX(ws_index))
             vulcan_bank_headers.append(bank_header)
         # END-F
 
         # Save
-        api.SaveGSS(InputWorkspace=output_workspace, Filename=gsas_file_name, SplitFiles=False, Append=False,
-                    Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True,
-                    UserSpecifiedGSASHeader=vulcan_gsas_header,
-                    UserSpecifiedBankHeader=vulcan_bank_headers,
-                    Bank=1,
-                    SLOGXYEPrecision=[1, 1, 2])
+        try:
+            api.SaveGSS(InputWorkspace=output_workspace, Filename=gsas_file_name, SplitFiles=False, Append=False,
+                        Format="SLOG", MultiplyByBinWidth=False,
+                        ExtendedHeader=False,
+                        UserSpecifiedGSASHeader=vulcan_gsas_header,
+                        UserSpecifiedBankHeader=vulcan_bank_headers,
+                        UseSpectrumNumberAsBankID=True,
+                        SLOGXYEPrecision=[1, 1, 2])
+        except RuntimeError as run_err:
+            raise RuntimeError('Failed to call SaveGSS() due to {0}'.format(run_err))
 
         return
 
