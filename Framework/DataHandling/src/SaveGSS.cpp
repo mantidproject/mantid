@@ -943,15 +943,16 @@ void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
 //----------------------------------------------------------------------------
 /** write slog data
  * @brief SaveGSS::writeSLOGdata
- * @param ws_index :: workspace index for the spectrum to be written.  It is essential for using user-specified bank header
+ * @param ws_index :: workspace index for the spectrum to be written.  It is
+ * essential for using user-specified bank header
  * @param bank
  * @param MultiplyByBinWidth
  * @param out
  * @param histo
  * @param xye_precision
  */
-void SaveGSS::writeSLOGdata(const size_t ws_index,
-                            const int bank, const bool MultiplyByBinWidth,
+void SaveGSS::writeSLOGdata(const size_t ws_index, const int bank,
+                            const bool MultiplyByBinWidth,
                             std::stringstream &out,
                             const HistogramData::Histogram &histo,
                             const std::vector<int> &xye_precision) const {
@@ -991,8 +992,7 @@ void SaveGSS::writeSLOGdata(const size_t ws_index,
     if (ws_index >= user_specified_bank_headers_.size()) {
       g_log.error() << "Workspace index " << ws_index << " is out of range of "
                     << "user specified bank headers (size = "
-                    << user_specified_bank_headers_.size()
-                    << "\n";
+                    << user_specified_bank_headers_.size() << "\n";
       throw std::runtime_error(
           "Bank ID is out of range for user specified bank headers");
     }
