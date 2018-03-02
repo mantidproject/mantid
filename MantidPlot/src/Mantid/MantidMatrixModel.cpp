@@ -8,10 +8,15 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
+#include "MantidQtWidgets/Common/QStringUtils.h"
+
 #include <QApplication>
 #include <QObject>
 #include <QPalette>
 #include <QVariant>
+
+using MantidQt::API::toQStringInternal;
+
 // ----------   MantidMatrixModel   ------------------ //
 
 /**   MantidMatrixModel constructor.
@@ -39,8 +44,7 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace *ws, int rows,
   m_colNumCorr = 1;
   m_endRow = m_rows - 1;
   m_startRow = start >= 0 ? start : 0;
-  m_mon_color =
-      QApplication::palette().color(QPalette::Active, QPalette::ToolTipBase);
+  m_mon_color = QColor(255, 253, 209);
   m_mask_color =
       QApplication::palette().color(QPalette::Disabled, QPalette::Background);
 
@@ -132,7 +136,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
       }
     }
 
-    QString unit = QString::fromStdWString(axis->unit()->label().utf8());
+    QString unit = toQStringInternal(axis->unit()->label().utf8());
 
     // Handle RefAxis for X axis
     Mantid::API::RefAxis *refAxis = dynamic_cast<Mantid::API::RefAxis *>(axis);

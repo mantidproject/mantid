@@ -83,6 +83,8 @@ public:
   IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
             const Parallel::StorageMode storageMode,
             const Parallel::Communicator &communicator);
+  template <class IndexType>
+  IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent);
 
   IndexInfo(const IndexInfo &other);
   IndexInfo(IndexInfo &&other);
@@ -94,6 +96,7 @@ public:
   size_t globalSize() const;
 
   SpectrumNumber spectrumNumber(const size_t index) const;
+  const std::vector<SpectrumNumber> &spectrumNumbers() const;
 
   void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers);
   void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max);
@@ -114,10 +117,13 @@ public:
   SpectrumIndexSet
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
+  std::vector<GlobalSpectrumIndex> globalSpectrumIndicesFromDetectorIndices(
+      const std::vector<size_t> &detectorIndices) const;
+
   bool isOnThisPartition(GlobalSpectrumIndex globalIndex) const;
 
   Parallel::StorageMode storageMode() const;
-  Parallel::Communicator communicator() const;
+  const Parallel::Communicator &communicator() const;
 
 private:
   void makeSpectrumNumberTranslator(

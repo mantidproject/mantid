@@ -98,6 +98,7 @@ public:
   /// Set the 'process' status of a data item
   void setProcessed(bool processed, int position) override;
   void setProcessed(bool processed, int position, int parent) override;
+  void invalidateAllProcessed() override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,
@@ -107,6 +108,8 @@ public:
   boost::shared_ptr<AbstractTreeModel> getModel() override;
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
+
+  bool isMultiLevel() const override;
 
 private:
   /// The DataProcessor presenter

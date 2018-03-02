@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from math import (pi, cos, sin)
+from sans.common.enums import MaskingQuadrant
 
 
 def add_xml_shape(xml, complete_xml_element):
@@ -128,3 +129,40 @@ def create_line_mask(start_point, length, width, angle):
     """
     return finite_cylinder(start_point, width / 2., length, [cos(angle * pi / 180.0), sin(angle * pi / 180.0), 0.0],
                            "arm")
+
+
+def quadrant_xml(centre,rmin,rmax,quadrant):
+    cin_id = 'cyl-in'
+    xmlstring = infinite_cylinder(centre, rmin, [0,0,1], cin_id)
+    cout_id = 'cyl-out'
+    xmlstring+= infinite_cylinder(centre, rmax, [0,0,1], cout_id)
+    plane1Axis=None
+    plane2Axis=None
+    if quadrant is MaskingQuadrant.Left:
+        plane1Axis = [-1,1,0]
+        plane2Axis = [-1,-1,0]
+    elif quadrant is MaskingQuadrant.Right:
+        plane1Axis = [1,-1,0]
+        plane2Axis = [1,1,0]
+    elif quadrant is MaskingQuadrant.Top:
+        plane1Axis = [1,1,0]
+        plane2Axis = [-1,1,0]
+    elif quadrant is MaskingQuadrant.Bottom:
+        plane1Axis = [-1,-1,0]
+        plane2Axis = [1,-1,0]
+    else:
+        return ''
+    p1id = 'pl-a'
+    xmlstring += infinite_plane(p1id, centre, plane1Axis)
+    p2id = 'pl-b'
+    xmlstring += infinite_plane(p2id, centre, plane2Axis)
+
+    # The composition of the shape is "(cyl-out (#cyl-in) (pl-a:pl-b))". The breakdown is:
+    # 1. Create an infinite hollow cylinder by performing "cyl-out (#cyl-in)". This is the intersection of the
+    #    outer radius cylinder with the inverse inner radius cylinder. We have a shell-like selection
+    # 2. Create a three-quarter wedge selection by performing (pl-a:pl-b). This selects everything except
+    #    for the slice region we don't want to be masked.
+    # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
+    #    cylinder.
+    xmlstring += '<algebra val="(#(' + cout_id + ' (#' + cin_id  + ')) : (' + p1id + ':' + p2id + '))"/>\n'
+    return xmlstring

@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <map>
 #include <memory>
@@ -15,7 +16,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-class Command;
 class WhiteList;
 
 /** @class TreeManager
@@ -52,7 +52,7 @@ public:
   virtual ~TreeManager(){};
 
   /// Actions/commands
-
+  virtual bool isMultiLevel() const = 0;
   /// Publish actions/commands
   virtual std::vector<std::unique_ptr<Command>> publishCommands() = 0;
   /// Append a row
@@ -97,6 +97,7 @@ public:
   /// Set the 'processed' status of a data item
   virtual void setProcessed(bool processed, int position) = 0;
   virtual void setProcessed(bool processed, int position, int parent) = 0;
+  virtual void invalidateAllProcessed() = 0;
   /// Access cells
   virtual void setCell(int row, int column, int parentRow, int parentColumn,
                        const std::string &value) = 0;

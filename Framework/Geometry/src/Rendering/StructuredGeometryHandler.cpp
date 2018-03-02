@@ -25,7 +25,7 @@ StructuredGeometryHandler::StructuredGeometryHandler(StructuredDetector *comp)
 }
 
 StructuredGeometryHandler::StructuredGeometryHandler()
-    : GeometryHandler(static_cast<Object *>(nullptr)), m_Det(nullptr) {}
+    : GeometryHandler(static_cast<CSGObject *>(nullptr)), m_Det(nullptr) {}
 
 ///< Create an instance of concrete geometry handler for ObjComponent
 StructuredGeometryHandler *
@@ -35,12 +35,12 @@ StructuredGeometryHandler::createInstance(IObjComponent *) {
 
 ///< Create an instance of concrete geometry handler for Object
 StructuredGeometryHandler *
-    StructuredGeometryHandler::createInstance(boost::shared_ptr<Object>) {
+    StructuredGeometryHandler::createInstance(boost::shared_ptr<CSGObject>) {
   return new StructuredGeometryHandler();
 }
 
 ///< Create an instance of concrete geometry handler for Object
-GeometryHandler *StructuredGeometryHandler::createInstance(Object *) {
+GeometryHandler *StructuredGeometryHandler::createInstance(CSGObject *) {
   return new StructuredGeometryHandler();
 }
 

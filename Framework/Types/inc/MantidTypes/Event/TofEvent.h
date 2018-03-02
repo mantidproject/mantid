@@ -15,7 +15,6 @@ class LoadEventNexus;
 }
 namespace Types {
 namespace Event {
-//==========================================================================================
 /** Info about a single neutron detection event:
 *
 *  - the time of flight of the neutron (can be converted to other units)
@@ -82,9 +81,20 @@ public:
 };
 #pragma pack(pop)
 
-//==========================================================================================
-// TofEvent inlined member function definitions
-//==========================================================================================
+/** Constructor, specifying the time of flight only
+ * @param tof :: time of flight, in microseconds
+ */
+inline TofEvent::TofEvent(const double tof) : m_tof(tof), m_pulsetime(0) {}
+
+/** Constructor, specifying the time of flight and the frame id
+ * @param tof :: time of flight, in microseconds
+ * @param pulsetime :: absolute pulse time of the neutron.
+ */
+inline TofEvent::TofEvent(const double tof, const Core::DateAndTime pulsetime)
+    : m_tof(tof), m_pulsetime(pulsetime) {}
+
+/// Empty constructor
+inline TofEvent::TofEvent() : m_tof(0), m_pulsetime(0) {}
 
 /** () operator: return the tof (X value) of the event.
 *  This is useful for std operations like comparisons and std::lower_bound

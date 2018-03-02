@@ -32,9 +32,6 @@ using namespace API;
 using Geometry::Instrument;
 using Geometry::Instrument_sptr;
 
-/// Empty default constructor
-LoadParameterFile::LoadParameterFile() : Algorithm() {}
-
 /// Initialisation method.
 void LoadParameterFile::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the

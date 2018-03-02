@@ -45,15 +45,25 @@ void SortHKL::init() {
   /* TODO: These two properties with string lists keep appearing -
    * Probably there should be a dedicated Property type or validator. */
   std::vector<std::string> pgOptions;
-  pgOptions.reserve(m_pointGroups.size());
+  pgOptions.reserve(2 * m_pointGroups.size() + 5);
+  for (auto &pointGroup : m_pointGroups)
+    pgOptions.push_back(pointGroup->getSymbol());
   for (auto &pointGroup : m_pointGroups)
     pgOptions.push_back(pointGroup->getName());
+  // Scripts may have Orthorhombic misspelled from past bug in PointGroupFactory
+  pgOptions.push_back("222 (Orthorombic)");
+  pgOptions.push_back("mm2 (Orthorombic)");
+  pgOptions.push_back("2mm (Orthorombic)");
+  pgOptions.push_back("m2m (Orthorombic)");
+  pgOptions.push_back("mmm (Orthorombic)");
   declareProperty("PointGroup", pgOptions[0],
                   boost::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
-  centeringOptions.reserve(m_refConds.size());
+  centeringOptions.reserve(2 * m_refConds.size());
+  for (auto &refCond : m_refConds)
+    centeringOptions.push_back(refCond->getSymbol());
   for (auto &refCond : m_refConds)
     centeringOptions.push_back(refCond->getName());
   declareProperty("LatticeCentering", centeringOptions[0],
@@ -177,6 +187,12 @@ PointGroup_sptr SortHKL::getPointgroup() const {
       PointGroupFactory::Instance().createPointGroup("-1");
 
   std::string pointGroupName = getPropertyValue("PointGroup");
+  size_t pos = pointGroupName.find("Orthorombic");
+  if (pos != std::string::npos) {
+    g_log.warning() << "Orthorhomic is misspelled in your script.\n";
+    pointGroupName.replace(pos, 11, "Orthorhombic");
+    g_log.warning() << "Please correct to " << pointGroupName << ".\n";
+  }
   for (const auto &m_pointGroup : m_pointGroups)
     if (m_pointGroup->getName() == pointGroupName)
       pointGroup = m_pointGroup;

@@ -138,6 +138,9 @@ public:
   /// To query whether algorithm is a child. Default to false
   virtual bool isChild() const = 0;
 
+  /// To query whether the output is stored in the analysis data service.
+  virtual bool getAlwaysStoreInADS() const = 0;
+
   /** To set whether algorithm is a child.
    *  @param isChild :: True - the algorithm is a child algorithm.  False - this
    * is a full managed algorithm.

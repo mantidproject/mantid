@@ -3,9 +3,9 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
-#include <QtGui/qwidget.h>
+#include <QColor>
+#include <QWidget>
 #include <qwt_plot.h>
-#include <qcolor.h>
 
 namespace MantidQt {
 namespace SliceViewer {

@@ -9,8 +9,9 @@ MD Workspace
 
 The MD Workspace [MDWorkspace] (short for "Multi-Dimensional" Workspace) is a generic
 data structure holdings points (MDEvents) that are defined by their
-position in several dimensions. See also
-:ref:`MDHistoWorkspace <MDHistoWorkspace>`.
+position in several dimensions.
+
+.. seealso:: :ref:`MDHistoWorkspace <MDHistoWorkspace>`
 
 Description of MDWorkspace
 --------------------------
@@ -47,7 +48,7 @@ contain too many events, it will be split into smaller boxes.
    :alt: MDWorkspace_structure.png
 
    MDWorkspace\_structure.png
-   
+
 The threshold for splitting is defined in
 :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>` as the SplitThreshold
 parameter. Each parent box will get split into N sub-boxes in each
@@ -225,7 +226,7 @@ To access the data of an MDWorkspace you need to convert it to a regular grid, o
 
 .. testcode:: MDWorkspaceConvertToHisto
 
-   # Setup 
+   # Setup
    mdWS = CreateMDWorkspace(Dimensions=4, Extents=[-1,1,-1,1,-1,1,-10,10], Names="H,K,L,E", Units="U,U,U,V")
    FakeMDEventData(InputWorkspace=mdWS, PeakParams='500000,0,0,0,0,3')
 

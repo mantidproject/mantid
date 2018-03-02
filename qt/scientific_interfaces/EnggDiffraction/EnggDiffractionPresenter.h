@@ -312,10 +312,6 @@ private:
   /// paths the user has "browsed to", to add them to the search path
   std::vector<std::string> m_browsedToPaths;
 
-  /// The message to tell the user that an RB number is needed
-  const static std::string g_shortMsgRBNumberRequired;
-  const static std::string g_msgRBNumberRequired;
-
   /// string to use for invalid run number error message
   const static std::string g_runNumberErrorStr;
 

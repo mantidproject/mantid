@@ -41,7 +41,7 @@ DECLARE_ALGORITHM(FindPeaks)
 /** Constructor
   */
 FindPeaks::FindPeaks()
-    : API::Algorithm(), m_peakParameterNames(), m_bkgdParameterNames(),
+    : API::ParallelAlgorithm(), m_peakParameterNames(), m_bkgdParameterNames(),
       m_bkgdOrder(0), m_outPeakTableWS(), m_dataWS(), m_inputPeakFWHM(0),
       m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
       m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""),
@@ -1473,7 +1473,7 @@ void FindPeaks::createFunctions() {
   // FIXME (No In This Ticket)  Need to have a uniformed routine to name
   // background function
   std::string backgroundposix;
-  if (m_backgroundType.compare("Quadratic")) {
+  if (m_backgroundType != "Quadratic") {
     // FlatBackground, LinearBackground, Quadratic
     backgroundposix = "Background";
   }

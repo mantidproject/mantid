@@ -50,14 +50,14 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
 
         return
 
-    def add_new_scans(self, scan_numbers, append):
+    def add_new_scans(self, scan_numbers):
         """
         add scans to the
         :param scan_numbers:
         :return:
         """
         # check input
-        assert isinstance(scan_numbers, list), 'blabla'
+        assert isinstance(scan_numbers, list), 'Scan numbers must be given in a list.'
 
         # sort
         scan_numbers.sort()
@@ -70,7 +70,6 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
                 continue
 
             # append scan
-            print '[DB...BAT] Append row for scan {0}'.format(scan_number)
             status, msg = self.append_row([scan_number, '', '', ''])
             if not status:
                 raise RuntimeError('Failed to append a new row due to {0}'.format(msg))
@@ -98,7 +97,11 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         :param status:
         :return:
         """
-        # check ... blabla
+        # check inputs
+        assert isinstance(row_number, int), 'Row number {0} must be an integer.'.format(row_number)
+        status = str(status)
+        if not isinstance(status, str):
+            print ('[DB] status is an instance of {0}.'.format(type(status)))
 
         self.update_cell_value(row_number, self._iColStatus, status)
 

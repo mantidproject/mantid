@@ -2,8 +2,8 @@
 
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -20,6 +20,7 @@ namespace Mantid {
 namespace DataHandling {
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveGSS)
@@ -95,16 +96,11 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 }
 } // End of anonymous namespace
 
-// Constructor
-SaveGSS::SaveGSS() : Mantid::API::Algorithm() {}
-
 // Initialise the algorithm
 void SaveGSS::init() {
-  // Data must be in TOF
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Kernel::Direction::Input,
-                      boost::make_shared<API::WorkspaceUnitValidator>("TOF")),
-                  "The input workspace, which must be in time-of-flight");
+                      "InputWorkspace", "", Kernel::Direction::Input),
+                  "The input workspace");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save),
@@ -614,12 +610,13 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
 void SaveGSS::validateUserInput() const {
   // Check whether it is PointData or Histogram
   if (!m_inputWS->isHistogramData())
-    g_log.warning("Input workspace is NOT histogram! SaveGSS may not work "
-                  "well with PointData.");
+    g_log.notice("Input workspace is NOT histogram! SaveGSS may not work "
+                 "well with PointData.");
 
   // Check the number of histogram/spectra < 99
   const auto nHist = static_cast<int>(m_inputWS->getNumberHistograms());
-  if (nHist > 99) {
+  const bool split = getProperty("SplitFiles");
+  if (nHist > 99 && !split) {
     std::string outError = "Number of Spectra(" + std::to_string(nHist) +
                            ") cannot be larger than 99 for GSAS file";
     g_log.error(outError);
@@ -641,6 +638,21 @@ void SaveGSS::validateUserInput() const {
   }
 }
 
+namespace { // anonymous
+// throw an exception if file cannot be written
+void checkWritable(const std::string &filename) {
+  const auto fileobj = Poco::File(filename);
+  if (fileobj.exists()) {
+    if (!fileobj.canWrite())
+      throw std::runtime_error("Cannot write to " + filename);
+  } else {
+    const auto pathobj = Poco::Path(filename).makeAbsolute().parent();
+    if (!Poco::File(pathobj.toString()).canWrite())
+      throw std::runtime_error("Cannot write to " + pathobj.toString());
+  }
+}
+} // anonymous
+
 /**
   * Writes all the spectra to the file(s) from the buffer to the
   * list of output file paths.
@@ -656,6 +668,11 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   assertNumFilesAndSpectraIsValid(numOutFiles, numSpectra);
 
   const auto numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
+
+  // verify that all paths can be written to
+  for (const auto &filename : m_outFileNames) {
+    checkWritable(filename);
+  }
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {

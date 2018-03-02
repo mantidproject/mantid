@@ -4,7 +4,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include <qlistwidget.h>
+#include <QListWidget>
 #include <QLabel>
 
 namespace MantidQt {

@@ -22,4 +22,7 @@ if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
   if [ -h /etc/profile.d/mantid.csh ]; then
       rm /etc/profile.d/mantid.csh
   fi
+  if [ -h @PYTHON_SITE@/mantid.pth ]; then
+      rm @PYTHON_SITE@/mantid.pth
+  fi
 fi

@@ -25,6 +25,11 @@
 			<value val="sqrt(e/25.3)" />
 		</parameter>
 
+                <!-- name of the sample log to store monitor counts. Algorithm: MonitorEfficiencyCorUser -->
+                <parameter name="monitor_counts_log" type="string">
+                        <value val="monitor_counts" />
+                </parameter>
+
                 <!-- parameters to merge sample logs by MergeRuns algorithm -->
                 <parameter name="sample_logs_sum" type="string">
                     <value val="monitor_counts, duration" />

@@ -1,8 +1,7 @@
+#include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
+
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
-#include <QtGui>
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
@@ -11,8 +10,14 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
-#include <vector>
+
+#include <QCoreApplication>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QScrollArea>
+
 #include <algorithm>
+#include <vector>
 
 using namespace Mantid::Kernel;
 using Mantid::API::IWorkspaceProperty;

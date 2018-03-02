@@ -207,7 +207,7 @@ void CalMuonDeadTime::exec() {
     // time bin - assumed constant for histogram
     const double time_bin = inputWS->x(i)[1] - inputWS->x(i)[0];
 
-    if (!fitStatus.compare("success")) {
+    if (fitStatus == "success") {
       const double A0 = result->getParameter(0);
       const double A1 = result->getParameter(1);
 

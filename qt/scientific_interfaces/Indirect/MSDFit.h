@@ -1,17 +1,21 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 
-#include "IndirectDataAnalysisTab.h"
+#include "IndirectFitAnalysisTab.h"
 #include "ui_MSDFit.h"
+
+#include "MantidAPI/IFunction.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport MSDFit : public IndirectDataAnalysisTab {
+class DLLExport MSDFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
   MSDFit(QWidget *parent = nullptr);
+
+  bool doPlotGuess() const override;
 
 private:
   void setup() override;
@@ -19,38 +23,43 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
-private slots:
+protected slots:
   void singleFit();
   void newDataLoaded(const QString wsName);
   void specMinChanged(int value);
   void specMaxChanged(int value);
-  void minChanged(double val);
-  void maxChanged(double val);
-  void updateRS(QtProperty *prop, double val);
+  void startXChanged(double startX) override;
+  void endXChanged(double endX) override;
   void saveClicked();
   void plotClicked();
-  void algorithmComplete(bool error);
-  void modelSelection(int selected);
-  void updatePlot(int specNo);
-  void updatePlotRange();
-  void updateProperties(int specNo);
+  void algorithmComplete(bool error) override;
+  void updatePreviewPlots() override;
+  void updatePlotRange() override;
+  void updatePlotOptions() override;
+
+protected:
+  std::string createSingleFitOutputName() const override;
+  std::string createSequentialFitOutputName() const override;
+  std::string constructBaseName() const;
+  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
+  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
+  void enablePlotResult() override;
+  void disablePlotResult() override;
+  void enableSaveResult() override;
+  void disableSaveResult() override;
+  void enablePlotPreview() override;
+  void disablePlotPreview() override;
+  void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
+  void removeGuessPlot() override;
 
 private:
+  void disablePlotGuess() override;
+  void enablePlotGuess() override;
   Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
-                                               long specMin, long specMax);
-  QtProperty *createModel(const QString &modelName,
-                          const std::vector<QString> &modelParameters);
-  void plotResult(const std::string &groupWsName, size_t specNo);
-  QHash<QString, QString> createParameterToPropertyMap(const QString &model);
-  std::string modelToAlgorithmProperty(const QString &model);
+                                               int specMin, int specMax) const;
+  std::string modelToAlgorithmProperty(const QString &model) const;
 
-  Ui::MSDFit m_uiForm;
-  QtTreePropertyBrowser *m_msdTree;
-  size_t m_runMin;
-  size_t m_runMax;
-
-  QHash<QString, QHash<size_t, double>> m_parameterValues;
-  QHash<QString, QString> m_parameterToProperty;
+  std::unique_ptr<Ui::MSDFit> m_uiForm;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -29,6 +29,7 @@ enum EventSortType {
   TOF_SORT,
   PULSETIME_SORT,
   PULSETIMETOF_SORT,
+  PULSETIMETOF_DELTA_SORT,
   TIMEATSAMPLE_SORT
 };
 
@@ -83,6 +84,8 @@ public:
   EventList(const std::vector<WeightedEventNoTime> &events);
 
   ~EventList() override;
+
+  void copyDataFrom(const ISpectrum &source) override;
 
   void createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
                            bool GenerateMultipleEvents, int MaxEventsPerBin);
@@ -222,6 +225,9 @@ public:
   virtual size_t histogram_size() const;
 
   void compressEvents(double tolerance, EventList *destination);
+  void compressFatEvents(const double tolerance,
+                         const Types::Core::DateAndTime &timeStart,
+                         const double seconds, EventList *destination);
   // get EventType declaration
   void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override;
@@ -362,6 +368,10 @@ protected:
   void checkIsYAndEWritable() const override;
 
 private:
+  using ISpectrum::copyDataInto;
+  void copyDataInto(EventList &sink) const override;
+  void copyDataInto(Histogram1D &sink) const override;
+
   const HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
   }
@@ -422,6 +432,9 @@ private:
 
   void switchToWeightedEvents();
   void switchToWeightedEventsNoTime();
+  // should not be called externally
+  void sortPulseTimeTOFDelta(const Types::Core::DateAndTime &start,
+                             const double seconds) const;
 
   // helper functions are all internal to simplify the code
   template <class T1, class T2>
@@ -435,6 +448,12 @@ private:
   void compressEventsParallelHelper(const std::vector<T> &events,
                                     std::vector<WeightedEventNoTime> &out,
                                     double tolerance);
+  template <class T>
+  static void compressFatEventsHelper(
+      const std::vector<T> &events, std::vector<WeightedEvent> &out,
+      const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
+      const double seconds);
+
   template <class T>
   static void histogramForWeightsHelper(const std::vector<T> &events,
                                         const MantidVec &X, MantidVec &Y,

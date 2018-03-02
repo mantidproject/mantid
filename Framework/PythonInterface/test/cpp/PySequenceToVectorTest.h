@@ -19,12 +19,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(PySequenceToVectorDouble converter(testList));
   }
 
-  void test_construction_throws_when_not_given_a_PySequence() {
-    boost::python::dict testDict;
-    TS_ASSERT_THROWS(PySequenceToVectorDouble converter(testDict),
-                     std::invalid_argument);
-  }
-
   void test_that_a_python_list_of_all_matching_types_is_converted_correctly() {
     boost::python::list testlist = createHomogeneousPythonList();
     const size_t ntestvals = boost::python::len(testlist);

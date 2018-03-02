@@ -40,7 +40,7 @@
 #include "PlotCurve.h"
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtWidgets/Common/MantidColorMap.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 

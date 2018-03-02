@@ -47,6 +47,11 @@ public:
                           Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS,
                           Mantid::DataObjects::MaskWorkspace_sptr maskWS);
 
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
+
 private:
   /// Initialise the properties
   void init() override;

@@ -78,6 +78,7 @@ public:
   size_t size() const;
   size_t scanSize() const;
   bool isScanning() const;
+  bool isSyncScan() const;
 
   bool isMonitor(const size_t index) const;
   bool isMonitor(const std::pair<size_t, size_t> &index) const;

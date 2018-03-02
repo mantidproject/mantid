@@ -10,7 +10,6 @@ from abc import ABCMeta, abstractmethod
 
 from PyQt4 import QtGui
 from six import with_metaclass
-
 import ui_masking_table
 
 
@@ -34,7 +33,6 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
     def __init__(self, parent=None):
         super(MaskingTable, self).__init__(parent)
         self.setupUi(self)
-
         # Hook up signal and slots
         self.connect_signals()
         self._masking_tab_listeners = []

@@ -6,6 +6,7 @@
 #include "Poco/Path.h"
 
 #include <fstream>
+#include <sstream>
 
 namespace Mantid {
 namespace Geometry {

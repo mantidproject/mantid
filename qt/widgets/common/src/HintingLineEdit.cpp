@@ -1,7 +1,11 @@
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 
 #include <boost/algorithm/string.hpp>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QStyle>
 #include <QToolTip>
+#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -17,7 +21,6 @@ HintingLineEdit::HintingLineEdit(
   m_hintLabel->setWordWrap(true);
   m_hintLabel->setIndent(1);
   m_hintLabel->setAutoFillBackground(true);
-  m_hintLabel->setPalette(QToolTip::palette());
   m_hintLabel->setForegroundRole(QPalette::ToolTipText);
   m_hintLabel->setBackgroundRole(QPalette::ToolTipBase);
   m_hintLabel->ensurePolished();

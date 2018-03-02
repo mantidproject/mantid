@@ -37,6 +37,7 @@ template <class Derived, class Int,
           class = typename std::enable_if<std::is_integral<Int>::value>::type>
 class IndexType {
 public:
+  using underlying_type = Int;
   IndexType() noexcept : m_data(0) {}
   IndexType(Int data) noexcept : m_data(data) {}
   explicit operator Int() const noexcept { return m_data; }

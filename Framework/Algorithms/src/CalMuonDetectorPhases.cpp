@@ -202,7 +202,7 @@ void CalMuonDetectorPhases::extractDetectorInfo(
   double asym = paramTab->Double(0, 1);
   double phase = paramTab->Double(2, 1);
   // If asym<0, take the absolute value and add \pi to phase
-  // f(x) = A * cos( w * x + p) = -A * cos( w * x + p - PI)
+  // f(x) = A * cos( w * x - p) = -A * cos( w * x - p - PI)
   if (asym < 0) {
     asym = -asym;
     phase = phase - M_PI;
@@ -217,7 +217,7 @@ void CalMuonDetectorPhases::extractDetectorInfo(
   row << static_cast<int>(spectrumNumber) << asym << phase;
 }
 
-/** Creates the fitting function f(x) = A * cos( w*x + p) + B as string
+/** Creates the fitting function f(x) = A * cos( w*x - p) + B as string
 * Two modes:
 * 1) Fixed frequency, no background - for main sequential fit
 * 2) Varying frequency, flat background - for finding frequency from asymmetry
@@ -229,15 +229,15 @@ void CalMuonDetectorPhases::extractDetectorInfo(
 std::string CalMuonDetectorPhases::createFittingFunction(double freq,
                                                          bool fixFreq) {
   // The fitting function is:
-  // f(x) = A * sin ( w * x + p ) [+ B]
+  // f(x) = A * sin ( w * x - p ) [+ B]
   std::ostringstream ss;
   ss << "name=UserFunction,";
   if (fixFreq) {
     // no background
-    ss << "Formula=A*cos(w*x+p),";
+    ss << "Formula=A*cos(w*x-p),";
   } else {
     // flat background
-    ss << "Formula=A*cos(w*x+p)+B,";
+    ss << "Formula=A*cos(w*x-p)+B,";
     ss << "B=0.5,";
   }
   ss << "A=0.5,";

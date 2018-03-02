@@ -3,10 +3,9 @@
 
 #include "DllOption.h"
 #include "MantidKernel/System.h"
-#include <QtCore/QtCore>
-#include <QtGui/qwidget.h>
+#include <QWidget>
+#include <QPainter>
 #include <qwt_plot.h>
-#include <qpainter.h>
 
 namespace MantidQt {
 namespace SliceViewer {

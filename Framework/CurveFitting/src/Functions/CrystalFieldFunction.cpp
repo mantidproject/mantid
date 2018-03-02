@@ -488,9 +488,14 @@ void CrystalFieldFunction::setAttribute(const std::string &attName,
     // This will throw an exception because attribute doesn't exist
     IFunction::setAttribute(attName, attr);
   } else if (attRef.first == &m_control) {
+    cacheSourceParameters();
     m_source.reset();
   }
   attRef.first->setAttribute(attRef.second, attr);
+  if (attName.find("FWHM") != std::string::npos ||
+      attName.find("Background") != std::string::npos) {
+    m_dirtyTarget = true;
+  }
 }
 
 /// Check if attribute attName exists
@@ -627,6 +632,16 @@ void CrystalFieldFunction::buildSourceFunction() const {
   setSource(m_control.buildSource());
   m_nControlParams = m_control.nParams();
   m_nControlSourceParams = m_nControlParams + m_source->nParams();
+  if (!m_parameterResetCache.empty() &&
+      m_parameterResetCache.size() == m_source->nParams()) {
+    for (size_t i = 0; i < m_parameterResetCache.size(); ++i) {
+      m_source->setParameter(i, m_parameterResetCache[i]);
+      if (m_fixResetCache[i])
+        m_source->fix(i);
+    }
+  }
+  m_parameterResetCache.clear();
+  m_fixResetCache.clear();
 }
 
 /// Update spectrum function if necessary.
@@ -733,9 +748,9 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   for (size_t i = 0; i < nSpec; ++i) {
     auto intensityScaling =
         m_control.getFunction(i)->getParameter("IntensityScaling");
-    fun->addFunction(buildSpectrum(nre, energies, waveFunctions,
-                                   temperatures[i], FWHMs[i], i, addBackground,
-                                   intensityScaling));
+    fun->addFunction(buildSpectrum(
+        nre, energies, waveFunctions, temperatures[i],
+        FWHMs.size() > i ? FWHMs[i] : 0., i, addBackground, intensityScaling));
     fun->setDomainIndex(i, i);
   }
   auto &physProps = m_control.physProps();
@@ -835,9 +850,10 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
     for (size_t i = 0; i < nSpec; ++i) {
       auto spectrumIntensityScaling =
           m_control.getFunction(i)->getParameter("IntensityScaling");
-      spectra[i]->addFunction(buildSpectrum(
-          nre, energies, waveFunctions, temperatures[i], FWHMs[i], i,
-          addBackground, ionIntensityScaling * spectrumIntensityScaling));
+      spectra[i]->addFunction(
+          buildSpectrum(nre, energies, waveFunctions, temperatures[i],
+                        FWHMs.size() > i ? FWHMs[i] : 0., i, addBackground,
+                        ionIntensityScaling * spectrumIntensityScaling));
     }
 
     size_t i = 0;
@@ -926,7 +942,7 @@ API::IFunction_sptr CrystalFieldFunction::buildSpectrum(
   }
 
   auto xVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
-  auto yVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getFunction(iSpec)->getAttribute("FWHMY").asVector();
   CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, xVec,
                                            yVec, fwhmVariation, fwhm,
                                            nRequiredPeaks, fixAllPeaks);
@@ -1044,7 +1060,7 @@ void CrystalFieldFunction::updateSingleSiteSingleSpectrum() const {
   auto peakShape = m_control.getAttribute("PeakShape").asString();
   bool fixAllPeaks = m_control.getAttribute("FixAllPeaks").asBool();
   auto xVec = m_control.getAttribute("FWHMX").asVector();
-  auto yVec = m_control.getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getAttribute("FWHMY").asVector();
   auto &FWHMs = m_control.FWHMs();
   auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
   size_t indexShift = hasBackground() ? 1 : 0;
@@ -1077,7 +1093,8 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
   auto &FWHMs = m_control.FWHMs();
   for (size_t iSpec = 0; iSpec < temperatures.size(); ++iSpec) {
     updateSpectrum(*fun.getFunction(iSpec), nre, energies, waveFunctions,
-                   temperatures[iSpec], FWHMs[iSpec], iSpec, iFirst);
+                   temperatures[iSpec],
+                   FWHMs.size() > iSpec ? FWHMs[iSpec] : 0., iSpec, iFirst);
   }
 
   for (auto &prop : m_mapPrefixes2PhysProps) {
@@ -1091,7 +1108,7 @@ void CrystalFieldFunction::updateMultiSiteSingleSpectrum() const {
   auto peakShape = getAttribute("PeakShape").asString();
   bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   auto xVec = m_control.getAttribute("FWHMX").asVector();
-  auto yVec = m_control.getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getAttribute("FWHMY").asVector();
   auto &FWHMs = m_control.FWHMs();
   auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
 
@@ -1134,7 +1151,8 @@ void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
       auto &ionSpectrum =
           dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
       updateSpectrum(ionSpectrum, nre, energies, waveFunctions,
-                     temperatures[iSpec], FWHMs[iSpec], iSpec, iFirst);
+                     temperatures[iSpec],
+                     FWHMs.size() > iSpec ? FWHMs[iSpec] : 0., iSpec, iFirst);
     }
 
     std::string prefix("ion");
@@ -1166,7 +1184,7 @@ void CrystalFieldFunction::updateSpectrum(
   const auto peakShape = getAttribute("PeakShape").asString();
   const bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   auto xVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
-  auto yVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getFunction(iSpec)->getAttribute("FWHMY").asVector();
   auto intensityScaling =
       m_control.getFunction(iSpec)->getParameter("IntensityScaling");
   FunctionValues values;
@@ -1369,6 +1387,23 @@ void CrystalFieldFunction::makeMapsMultiSiteMultiSpectrum() const {
       prefix.append(std::to_string(ion)).append(".").append(physPropPrefix);
       i += makeMapsForFunction(*spectrum.getFunction(ion), i, prefix);
     }
+  }
+}
+
+/// Temporary cache parameter values of the source function if it's
+/// initialised
+void CrystalFieldFunction::cacheSourceParameters() const {
+  if (!m_source) {
+    // No function - nothing to cache
+    m_parameterResetCache.clear();
+    return;
+  }
+  auto np = m_source->nParams();
+  m_parameterResetCache.resize(np);
+  m_fixResetCache.resize(np);
+  for (size_t i = 0; i < np; ++i) {
+    m_parameterResetCache[i] = m_source->getParameter(i);
+    m_fixResetCache[i] = m_source->isFixed(i);
   }
 }
 

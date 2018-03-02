@@ -4,11 +4,11 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -447,12 +447,13 @@ public:
     Mantid::Algorithms::ConvertSpectrumAxis2 testee;
     testee.initialize();
     testee.setChild(true);
+    testee.setRethrows(true);
     const MatrixWorkspace_sptr ws = creator.getProperty("OutputWorkspace");
     testee.setProperty("InputWorkspace", ws);
     testee.setProperty("OrderAxis", false);
     testee.setProperty("Target", "Theta");
     testee.setProperty("OutputWorkspace", "__unused2");
-    TS_ASSERT_THROWS_NOTHING(testee.execute());
+    testee.execute();
     TS_ASSERT(testee.isExecuted());
     const MatrixWorkspace_sptr output = testee.getProperty("OutputWorkspace");
     TS_ASSERT(output);

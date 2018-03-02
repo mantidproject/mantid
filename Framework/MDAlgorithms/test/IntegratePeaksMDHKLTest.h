@@ -180,7 +180,19 @@ public:
         "IntegratePeaksMDHKLTest_peaks", peakWS);
 
     // Set background from 2.0 to 3.0.
-    doRun("IntegratePeaksMDHKLTest_peaks");
+    IntegratePeaksMDHKL alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "PeaksWorkspace", "IntegratePeaksMDHKLTest_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "OutputWorkspace", "IntegratePeaksMDHKLTest_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterRadius", 0.2));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerRadius", 0.16));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 29.4275, 0.1);
     // Error is larger, since it is error of peak + error of background
     TSM_ASSERT_DELTA("Error has increased",

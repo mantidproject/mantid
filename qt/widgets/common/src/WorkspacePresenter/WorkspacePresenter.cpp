@@ -9,14 +9,14 @@ using namespace Mantid;
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspacePresenter::WorkspacePresenter(DockView_wptr view)
+WorkspacePresenter::WorkspacePresenter(IWorkspaceDockView *view)
     : m_view(std::move(view)), m_adapter(Kernel::make_unique<ADSAdapter>()) {}
 
 WorkspacePresenter::~WorkspacePresenter() {}
 
 /// Initialises the view weak pointer for the Workspace Provider.
 void WorkspacePresenter::init() {
-  m_adapter->registerPresenter(m_view.lock()->getPresenterWeakPtr());
+  m_adapter->registerPresenter(m_view->getPresenterWeakPtr());
 }
 
 /// Handle WorkspaceProvider (ADS) notifications
@@ -155,37 +155,29 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   }
 }
 
-void WorkspacePresenter::loadWorkspace() {
-  auto view = lockView();
-  view->showLoadDialog();
-}
+void WorkspacePresenter::loadWorkspace() { m_view->showLoadDialog(); }
 
-void WorkspacePresenter::loadLiveData() {
-  auto view = lockView();
-  view->showLiveDataDialog();
-}
+void WorkspacePresenter::loadLiveData() { m_view->showLiveDataDialog(); }
 
 void WorkspacePresenter::renameWorkspace() {
-  auto view = lockView();
-  view->showRenameDialog(view->getSelectedWorkspaceNames());
+  m_view->showRenameDialog(m_view->getSelectedWorkspaceNames());
 }
 
 void WorkspacePresenter::groupWorkspaces() {
-  auto view = lockView();
-  auto selected = view->getSelectedWorkspaceNames();
+  auto selected = m_view->getSelectedWorkspaceNames();
 
   std::string groupName("NewGroup");
   // get selected workspaces
   if (selected.size() < 2) {
-    view->showCriticalUserMessage("Cannot Group Workspaces",
-                                  "Select at least two workspaces to group ");
+    m_view->showCriticalUserMessage("Cannot Group Workspaces",
+                                    "Select at least two workspaces to group ");
     return;
   }
 
   if (m_adapter->doesWorkspaceExist(groupName)) {
-    if (!view->askUserYesNo("",
-                            "Workspace " + groupName +
-                                " already exists. Do you want to replace it?"))
+    if (!m_view->askUserYesNo(
+            "", "Workspace " + groupName +
+                    " already exists. Do you want to replace it?"))
       return;
   }
 
@@ -199,22 +191,21 @@ void WorkspacePresenter::groupWorkspaces() {
     // execute the algorithm
     bool bStatus = alg->execute();
     if (!bStatus) {
-      view->showCriticalUserMessage("MantidPlot - Algorithm error",
-                                    " Error in GroupWorkspaces algorithm");
+      m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+                                      " Error in GroupWorkspaces algorithm");
     }
   } catch (...) {
-    view->showCriticalUserMessage("MantidPlot - Algorithm error",
-                                  " Error in GroupWorkspaces algorithm");
+    m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+                                    " Error in GroupWorkspaces algorithm");
   }
 }
 
 void WorkspacePresenter::ungroupWorkspaces() {
-  auto view = lockView();
-  auto selected = view->getSelectedWorkspaceNames();
+  auto selected = m_view->getSelectedWorkspaceNames();
 
   if (selected.size() == 0) {
-    view->showCriticalUserMessage("Error Ungrouping Workspaces",
-                                  "Select a group workspace to Ungroup.");
+    m_view->showCriticalUserMessage("Error Ungrouping Workspaces",
+                                    "Select a group workspace to Ungroup.");
     return;
   }
 
@@ -231,167 +222,111 @@ void WorkspacePresenter::ungroupWorkspaces() {
     // execute the algorithm
     bool bStatus = alg->execute();
     if (!bStatus) {
-      view->showCriticalUserMessage("MantidPlot - Algorithm error",
-                                    " Error in UnGroupWorkspace algorithm");
+      m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+                                      " Error in UnGroupWorkspace algorithm");
     }
   } catch (...) {
-    view->showCriticalUserMessage("MantidPlot - Algorithm error",
-                                  " Error in UnGroupWorkspace algorithm");
+    m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+                                    " Error in UnGroupWorkspace algorithm");
   }
 }
 
 void WorkspacePresenter::sortWorkspaces() {
-  auto view = lockView();
-
-  view->sortWorkspaces(view->getSortCriteria(), view->getSortDirection());
+  m_view->sortWorkspaces(m_view->getSortCriteria(), m_view->getSortDirection());
 }
 
 void WorkspacePresenter::deleteWorkspaces() {
-  auto view = lockView();
   bool deleteWs = true;
-  auto selected = view->getSelectedWorkspaceNames();
+  auto selected = m_view->getSelectedWorkspaceNames();
 
   // Ensure all workspaces exist in the ADS
   if (!std::all_of(selected.cbegin(), selected.cend(),
                    [=](const std::string &ws) {
                      return m_adapter->doesWorkspaceExist(ws);
                    })) {
-    view->showCriticalUserMessage(
+    m_view->showCriticalUserMessage(
         "Delete Workspaces",
         "Unabel to delete workspaces. Invalid workspace names provided.");
     return;
   }
 
-  if (view->isPromptDelete())
-    deleteWs = view->deleteConfirmation();
+  if (m_view->isPromptDelete())
+    deleteWs = m_view->deleteConfirmation();
 
   if (deleteWs)
-    view->deleteWorkspaces(selected);
+    m_view->deleteWorkspaces(selected);
 }
 
 void WorkspacePresenter::saveSingleWorkspace() {
-  auto view = lockView();
-  view->saveWorkspace(view->getSaveFileType());
+  m_view->saveWorkspace(m_view->getSaveFileType());
 }
 
 void WorkspacePresenter::saveWorkspaceCollection() {
-  auto view = lockView();
-  view->saveWorkspaces(view->getSelectedWorkspaceNames());
+  m_view->saveWorkspaces(m_view->getSelectedWorkspaceNames());
 }
 
 void WorkspacePresenter::filterWorkspaces() {
-  auto view = lockView();
-  view->filterWorkspaces(view->getFilterText());
+  m_view->filterWorkspaces(m_view->getFilterText());
 }
 
 void WorkspacePresenter::populateAndShowWorkspaceContextMenu() {
-  auto view = lockView();
-  view->popupContextMenu();
+  m_view->popupContextMenu();
 }
 
-void WorkspacePresenter::showWorkspaceData() {
-  auto view = lockView();
-  view->showWorkspaceData();
-}
+void WorkspacePresenter::showWorkspaceData() { m_view->showWorkspaceData(); }
 
-void WorkspacePresenter::showInstrumentView() {
-  auto view = lockView();
-  view->showInstrumentView();
-}
+void WorkspacePresenter::showInstrumentView() { m_view->showInstrumentView(); }
 
-void WorkspacePresenter::saveToProgram() {
-  auto view = lockView();
-  view->saveToProgram();
-}
+void WorkspacePresenter::saveToProgram() { m_view->saveToProgram(); }
 
-void WorkspacePresenter::plotSpectrum() {
-  auto view = lockView();
-  view->plotSpectrum("Simple");
-}
+void WorkspacePresenter::plotSpectrum() { m_view->plotSpectrum("Simple"); }
 
 void WorkspacePresenter::plotSpectrumWithErrors() {
-  auto view = lockView();
-  view->plotSpectrum("Errors");
+  m_view->plotSpectrum("Errors");
 }
 
 void WorkspacePresenter::plotSpectrumAdvanced() {
-  auto view = lockView();
-  view->plotSpectrum("Advanced");
+  m_view->plotSpectrum("Advanced");
 }
 
-void WorkspacePresenter::showColourFillPlot() {
-  auto view = lockView();
-  view->showColourFillPlot();
-}
+void WorkspacePresenter::showColourFillPlot() { m_view->showColourFillPlot(); }
 
-void WorkspacePresenter::showDetectorsTable() {
-  auto view = lockView();
-  view->showDetectorsTable();
-}
+void WorkspacePresenter::showDetectorsTable() { m_view->showDetectorsTable(); }
 
-void WorkspacePresenter::showBoxDataTable() {
-  auto view = lockView();
-  view->showBoxDataTable();
-}
+void WorkspacePresenter::showBoxDataTable() { m_view->showBoxDataTable(); }
 
-void WorkspacePresenter::showVatesGUI() {
-  auto view = lockView();
-  view->showVatesGUI();
-}
+void WorkspacePresenter::showVatesGUI() { m_view->showVatesGUI(); }
 
-void WorkspacePresenter::showMDPlot() {
-  auto view = lockView();
-  view->showMDPlot();
-}
+void WorkspacePresenter::showMDPlot() { m_view->showMDPlot(); }
 
-void WorkspacePresenter::showListData() {
-  auto view = lockView();
-  view->showListData();
-}
+void WorkspacePresenter::showListData() { m_view->showListData(); }
 
-void WorkspacePresenter::showSpectrumViewer() {
-  auto view = lockView();
-  view->showSpectrumViewer();
-}
+void WorkspacePresenter::showSpectrumViewer() { m_view->showSpectrumViewer(); }
 
-void WorkspacePresenter::showSliceViewer() {
-  auto view = lockView();
-  view->showSliceViewer();
-}
+void WorkspacePresenter::showSliceViewer() { m_view->showSliceViewer(); }
 
-void WorkspacePresenter::showLogs() {
-  auto view = lockView();
-  view->showLogs();
-}
+void WorkspacePresenter::showLogs() { m_view->showLogs(); }
 
 void WorkspacePresenter::showSampleMaterialWindow() {
-  auto view = lockView();
-  view->showSampleMaterialWindow();
+  m_view->showSampleMaterialWindow();
 }
 
 void WorkspacePresenter::showAlgorithmHistory() {
-  auto view = lockView();
-  view->showAlgorithmHistory();
+  m_view->showAlgorithmHistory();
 }
 
-void WorkspacePresenter::showTransposed() {
-  auto view = lockView();
-  view->showTransposed();
-}
+void WorkspacePresenter::showTransposed() { m_view->showTransposed(); }
 
 void WorkspacePresenter::convertToMatrixWorkspace() {
-  auto view = lockView();
-  view->convertToMatrixWorkspace();
+  m_view->convertToMatrixWorkspace();
 }
 
 void WorkspacePresenter::convertMDHistoToMatrixWorkspace() {
-  auto view = lockView();
-  view->convertMDHistoToMatrixWorkspace();
+  m_view->convertMDHistoToMatrixWorkspace();
 }
 
 void WorkspacePresenter::clearUBMatrix() {
-  auto view = lockView();
-  auto wsNames = view->getSelectedWorkspaceNames();
+  auto wsNames = m_view->getSelectedWorkspaceNames();
 
   for (auto &ws : wsNames) {
     auto alg = Mantid::API::AlgorithmManager::Instance().create("ClearUB", -1);
@@ -400,7 +335,7 @@ void WorkspacePresenter::clearUBMatrix() {
       alg->setPropertyValue("Workspace", ws);
       // Run in this manner due to Qt dependencies within this method.
       // otherwise it would have been implemented here.
-      view->executeAlgorithmAsync(alg);
+      m_view->executeAlgorithmAsync(alg);
     } else
       break;
   }
@@ -411,9 +346,9 @@ void WorkspacePresenter::refreshWorkspaces() { updateView(); }
 void WorkspacePresenter::workspaceLoaded() { updateView(); }
 
 void WorkspacePresenter::workspaceRenamed() {
-  auto view = lockView();
-  view->recordWorkspaceRename(m_adapter->getOldName(), m_adapter->getNewName());
-  view->updateTree(m_adapter->topLevelItems());
+  m_view->recordWorkspaceRename(m_adapter->getOldName(),
+                                m_adapter->getNewName());
+  m_view->updateTree(m_adapter->topLevelItems());
 }
 
 void WorkspacePresenter::workspacesGrouped() { updateView(); }
@@ -422,25 +357,11 @@ void WorkspacePresenter::workspaceGroupUpdated() { updateView(); }
 
 void WorkspacePresenter::workspacesDeleted() { updateView(); }
 
-void WorkspacePresenter::workspacesCleared() {
-  auto view = lockView();
-  view->clearView();
-}
-
-/// Lock the view weak_ptr and return the shared_ptr generated.
-DockView_sptr WorkspacePresenter::lockView() {
-  auto view_sptr = m_view.lock();
-
-  if (view_sptr == nullptr)
-    throw std::runtime_error("Could not obtain pointer to DockView.");
-
-  return view_sptr;
-}
+void WorkspacePresenter::workspacesCleared() { m_view->clearView(); }
 
 /// Update the view by publishing the ADS contents.
 void WorkspacePresenter::updateView() {
-  auto view = lockView();
-  view->updateTree(m_adapter->topLevelItems());
+  m_view->updateTree(m_adapter->topLevelItems());
 }
 
 } // namespace MantidQt

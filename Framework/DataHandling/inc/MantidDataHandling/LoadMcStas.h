@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/IEventWorkspace.h"
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
@@ -51,17 +52,15 @@ private:
   void init() override;
   void exec() override;
 
-  void readEventData(const std::map<std::string, std::string> &eventEntries,
-                     API::WorkspaceGroup_sptr &outputGroup,
-                     ::NeXus::File &nxFile);
-  void
-  readHistogramData(const std::map<std::string, std::string> &histogramEntries,
-                    API::WorkspaceGroup_sptr &outputGroup,
-                    ::NeXus::File &nxFile);
+  API::WorkspaceGroup_sptr
+  groupWorkspaces(const std::vector<std::string> &workspaces) const;
 
-  // used as part of given useful names to workspaces added to output
-  // groupworkspace
-  size_t m_countNumWorkspaceAdded{1};
+  std::vector<std::string>
+  readEventData(const std::map<std::string, std::string> &eventEntries,
+                ::NeXus::File &nxFile);
+  std::vector<std::string>
+  readHistogramData(const std::map<std::string, std::string> &histogramEntries,
+                    ::NeXus::File &nxFile);
 };
 
 } // namespace DataHandling

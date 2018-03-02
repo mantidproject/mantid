@@ -15,6 +15,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/Unit.h"
+#include "MantidParallel/Communicator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -1178,6 +1179,29 @@ bool CompareWorkspaces::relErr(double x1, double x2, double errorVal) const {
     return (num > errorVal);
 
   return (num / den > errorVal);
+}
+
+Parallel::ExecutionMode CompareWorkspaces::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  using namespace Parallel;
+  if (storageModes.at("Workspace1") == StorageMode::Cloned) {
+    if (storageModes.at("Workspace2") == StorageMode::Cloned)
+      return getCorrespondingExecutionMode(StorageMode::Cloned);
+    if (storageModes.at("Workspace2") == StorageMode::MasterOnly)
+      return getCorrespondingExecutionMode(StorageMode::MasterOnly);
+  }
+  if (storageModes.at("Workspace1") == StorageMode::MasterOnly) {
+    if (storageModes.at("Workspace2") != StorageMode::Distributed)
+      return getCorrespondingExecutionMode(StorageMode::MasterOnly);
+  }
+  return ExecutionMode::Invalid;
+}
+
+void CompareWorkspaces::execMasterOnly() {
+  if (communicator().rank() == 0)
+    exec();
+  else
+    setProperty("Result", true);
 }
 
 } // namespace Algorithms

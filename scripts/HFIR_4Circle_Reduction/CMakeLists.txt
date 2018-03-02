@@ -11,6 +11,7 @@ set( UI_FILES
   UBSelectPeaksDialog.ui
   AddUBPeaksDialog.ui
   PeakIntegrationSpreadSheet.ui
+  httpserversetup.ui
   preprocess_window.ui
   peak_integration_info.ui
 )

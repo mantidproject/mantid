@@ -366,6 +366,9 @@
   <instrument name="ZOOM">
     <technique>Small Angle Scattering</technique>
     <zeropadding size="8"/>
+    <livedata>
+      <connection name="kafka_event" address="livedata.isis.cclrc.ac.uk:9092" listener="KafkaEventListener" />
+    </livedata>
   </instrument>
 
 </facility>
@@ -389,8 +392,13 @@
       <technique>technique</technique>
    </instrument>
 
-   <instrument name="WAND">
-      <technique>technique</technique>
+   <instrument name="WAND" shortname="HB2C">
+     <technique>Neutron Diffraction</technique>
+     <technique>Powder Diffraction</technique>
+     <technique>Single Crystal Diffraction</technique>
+     <livedata>
+       <connection name="event" address="hb2c-daq1.ornl.gov:31415" listener="SNSLiveEventDataListener" />
+     </livedata>
    </instrument>
 
    <instrument name="HB2D">
@@ -596,7 +604,7 @@
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer IN5</technique>
+    <technique>Disk chopper time-of-flight spectrometer IN4</technique>
   </instrument>
 
   <instrument name="IN5">
@@ -629,6 +637,14 @@
   <instrument name="IN16B">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="D11">
+    <technique>SANS</technique>
+  </instrument>
+
+  <instrument name="D22">
+    <technique>SANS</technique>
   </instrument>
 
   <instrument name="D33">
@@ -792,6 +808,15 @@
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Single Crystal Diffraction</technique>
   </instrument>
+  <instrument name="V20_4-tubes_90deg">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+  <instrument name="V20_4-tubes_150deg">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+  <instrument name="V20_IMAGING">
+    <technique>Neutron Imaging</technique>
+  </instrument>
 </facility>
 
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
@@ -799,14 +824,14 @@
   <instrument name="ISIS_Histogram">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="histo" address="localhost:56789" listener="ISISHistoDataListener" />
+      <connection name="histo" address="127.0.0.1:56789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
 
   <instrument name="ISIS_Event">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="event" address="localhost:59876" listener="ISISLiveEventDataListener" />
+      <connection name="event" address="127.0.0.1:59876" listener="ISISLiveEventDataListener" />
     </livedata>
   </instrument>
 

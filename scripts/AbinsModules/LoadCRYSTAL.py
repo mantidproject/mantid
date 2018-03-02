@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import io
+import six
 import numpy as np
 import AbinsModules
 from mantid.kernel import Atom, logger
@@ -53,12 +54,15 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
                 lattice_vectors = [[0, 0, 0]] * 3
 
             coord_lines = self._read_atomic_coordinates(file_obj=crystal_file)
+            masses = self._read_masses_from_file(file_obj=crystal_file)
+
             freq, coordinates, weights, k_coordinates = self._read_modes(file_obj=crystal_file,
                                                                          phonon_dispersion=phonon_dispersion)
 
         # put data into Abins data structure
         data = {}
-        self._create_atoms_data(data=data, coord_lines=coord_lines[:self._num_atoms])
+        self._create_atoms_data(data=data, coord_lines=coord_lines[:self._num_atoms],
+                                atoms_masses=masses[:self._num_atoms])
         self._create_kpoints_data(data=data, freq=freq, atomic_displacements=coordinates,
                                   atomic_coordinates=coord_lines[:self._num_atoms], weights=weights,
                                   k_coordinates=k_coordinates, unit_cell=lattice_vectors)
@@ -367,20 +371,25 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
                 return num_k
             num_k += 1
 
-    def _create_atoms_data(self, data=None, coord_lines=None):
+    def _create_atoms_data(self, data=None, coord_lines=None, atoms_masses=None):
         """
         Creates Python dictionary with atoms data which can be easily converted to AbinsData object.
+        :param atoms_masses: atom masses from output ab-initio file
         :param data: Python dictionary to which found atoms data should be added
         :param coord_lines: list with information about atoms
         """
         data.update({"atoms": dict()})
+
         for i, line in enumerate(coord_lines):
             l = line.split()
             symbol = str(l[2].decode("utf-8").capitalize())
+
             atom = Atom(symbol=symbol)
             data["atoms"]["atom_{}".format(i)] = {
                 "symbol": symbol, "mass": atom.mass, "sort": i,
                 "coord": np.asarray(l[3:6]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)}
+
+        self.check_isotopes_substitution(atoms=data["atoms"], masses=atoms_masses, approximate=True)
 
     def _create_kpoints_data(self, data=None, freq=None, atomic_displacements=None, atomic_coordinates=None,
                              weights=None, k_coordinates=None, unit_cell=None):
@@ -513,3 +522,29 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         local_displacements = np.transpose(np.asarray([x, y, z]))
 
         return local_displacements
+
+    def _read_masses_from_file(self, file_obj):
+        masses = []
+        pos = file_obj.tell()
+        self._parser.find_first(file_obj=file_obj,
+                                msg="ATOMS ISOTOPIC MASS (AMU) FOR FREQUENCY CALCULATION ")
+        file_obj.readline()  # blank line
+        end_message = ["INFORMATION", "*******************************************************************************",
+                       "GAMMA"]
+
+        if not six.PY2:
+            for i, item in enumerate(end_message):
+                end_message[i] = bytes(item, "utf8")
+
+        while not self._parser.file_end(file_obj=file_obj):
+
+            line = file_obj.readline()
+            if any([word in line for word in end_message]):
+                break
+
+            items = line.split()
+            length = len(items)
+            for i in range(2, length, 3):
+                masses.append(float(items[i]))
+        file_obj.seek(pos)  # revert position of file pointer to the initial state
+        return masses

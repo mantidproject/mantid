@@ -60,6 +60,11 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Rebin"; }
 
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
+
 private:
   /// Initialisation code
   void init() override;

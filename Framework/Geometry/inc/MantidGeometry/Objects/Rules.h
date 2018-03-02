@@ -10,7 +10,7 @@ namespace Mantid {
 
 namespace Geometry {
 
-class Object;
+class CSGObject;
 class Surface;
 
 /**
@@ -297,8 +297,8 @@ Care must be taken to avoid a cyclic loop
 
 class MANTID_GEOMETRY_DLL CompObj : public Rule {
 private:
-  int objN;    ///< Object number
-  Object *key; ///< Object Pointer
+  int objN;       ///< Object number
+  CSGObject *key; ///< Object Pointer
   CompObj *doClone() const override;
 
 protected:
@@ -323,14 +323,14 @@ public:
   } ///< Always returns true (1)
 
   void setObjN(const int Ky); ///< set object Number
-  void setObj(Object *);      ///< Set a Object state
+  void setObj(CSGObject *);   ///< Set a Object state
   bool isValid(const Kernel::V3D &) const override;
   bool isValid(const std::map<int, int> &) const override;
   /// Get object number of component
   int getObjN() const { return objN; }
   int simplify() override;
 
-  Object *getObj() const { return key; } ///< Get Object Ptr
+  CSGObject *getObj() const { return key; } ///< Get Object Ptr
   std::string display() const override;
   std::string displayAddress() const override;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,

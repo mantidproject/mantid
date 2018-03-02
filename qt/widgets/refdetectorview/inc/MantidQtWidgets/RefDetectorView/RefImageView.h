@@ -2,7 +2,6 @@
 #define REF_IMAGE_VIEW_H
 
 #include <QMainWindow>
-#include <QtGui>
 
 #include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
 #include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"

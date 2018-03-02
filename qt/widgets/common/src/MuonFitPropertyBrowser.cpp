@@ -969,10 +969,6 @@ void MuonFitPropertyBrowser::runFit() {
     const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
     if (nWorkspaces > 1) {
       alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]);
-      // Remove existing results with the same name
-      if (AnalysisDataService::Instance().doesExist(outputName())) {
-        AnalysisDataService::Instance().deepRemoveGroup(outputName());
-      }
       for (int i = 1; i < nWorkspaces; i++) {
         std::string suffix = boost::lexical_cast<std::string>(i);
         alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
@@ -1106,13 +1102,10 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
   // Group output together
   std::string groupName = fitAlg->getPropertyValue("Output");
   const std::string &baseName = groupName;
-  if (ads.doesExist(groupName)) {
-    ads.deepRemoveGroup(groupName);
-  }
 
   // Create a group for label
   try {
-    ads.add(groupName, boost::make_shared<WorkspaceGroup>());
+    ads.addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
     ads.addToGroup(groupName, baseName + "_NormalisedCovarianceMatrix");
     ads.addToGroup(groupName, baseName + "_Parameters");
     ads.addToGroup(groupName, baseName + "_Workspaces");
@@ -1465,11 +1458,9 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
   if (m_periodBoxes.size() > 1) {
-    for (auto iter = m_periodBoxes.constBegin();
+    for (auto iter = std::next(m_periodBoxes.constBegin());
          iter != m_periodBoxes.constEnd(); ++iter) {
-      if (iter != m_periodBoxes.constBegin()) {
-        delete (iter);
-      }
+      delete (*iter);
     }
   }
   m_periodsToFitOptions.clear();

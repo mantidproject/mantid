@@ -54,7 +54,6 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using Types::Event::TofEvent;
 using Types::Core::DateAndTime;
-using std::cout;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;

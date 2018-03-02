@@ -59,8 +59,11 @@ namespace CustomDialogs {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+class PreventLoadRequests;
+
 class LoadDialog : public API::AlgorithmDialog {
   Q_OBJECT
+  friend PreventLoadRequests;
 
 public:
   /// Default constructor
@@ -94,6 +97,10 @@ private:
   /// Create the widgets for a given property
   int createWidgetsForProperty(const Mantid::Kernel::Property *prop,
                                QVBoxLayout *propertyLayout, QWidget *parent);
+  /// Ignore requests to load until they are re-enabled.
+  void disableLoadRequests();
+  /// Accept requests to load until they are disabled.
+  void enableLoadRequests();
 
 private:
   /// Form

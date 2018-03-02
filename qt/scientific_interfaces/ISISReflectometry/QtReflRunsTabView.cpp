@@ -52,7 +52,7 @@ void QtReflRunsTabView::initLayout() {
 
   QDataProcessorWidget *qDataProcessorWidget_1 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessor::DataProcessorPresenter>(
-          presenterFactory.create()),
+          presenterFactory.create(0)),
       this);
   ui.toolbox->addItem(qDataProcessorWidget_1, "Group 1");
   connect(qDataProcessorWidget_1,
@@ -61,7 +61,7 @@ void QtReflRunsTabView::initLayout() {
 
   QDataProcessorWidget *qDataProcessorWidget_2 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessor::DataProcessorPresenter>(
-          presenterFactory.create()),
+          presenterFactory.create(1)),
       this);
   ui.toolbox->addItem(qDataProcessorWidget_2, "Group 2");
   connect(qDataProcessorWidget_2,
@@ -132,7 +132,6 @@ void QtReflRunsTabView::addToMenu(QMenu *menu,
 void QtReflRunsTabView::setTableCommands(
     std::vector<DataProcessor::Command_uptr> tableCommands) {
 
-  ui.menuTable->clear();
   for (auto &command : tableCommands) {
     addToMenu(ui.menuTable, std::move(command));
   }
@@ -151,7 +150,6 @@ void QtReflRunsTabView::setTableCommands(
 void QtReflRunsTabView::setRowCommands(
     std::vector<DataProcessor::Command_uptr> rowCommands) {
 
-  ui.menuRows->clear();
   for (auto &command : rowCommands) {
     addToMenu(ui.menuRows, std::move(command));
   }
@@ -168,16 +166,22 @@ void QtReflRunsTabView::setAllSearchRowsSelected() {
 /**
 * Clears all the actions (commands)
 */
-void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
+void QtReflRunsTabView::clearCommands() {
+  ui.menuRows->clear();
+  ui.menuTable->clear();
+  m_commands.clear();
+}
 
 /**
-* Sets a specific action in the "Edit" menu enabled or disabled
-* @param index : The index of the action in the "Edit" menu
-* @param enabled : Whether to enable or disable the action
+* Updates actions in the menus to be enabled or disabled
+* according to whether processing is running or not.
+* @param isProcessing: Whether processing is running
 */
-void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
+void QtReflRunsTabView::updateMenuEnabledState(bool isProcessing) {
 
-  ui.menuRows->actions()[index]->setEnabled(enabled);
+  for (auto &command : m_commands) {
+    command->updateEnabledState(isProcessing);
+  }
 }
 
 /**
@@ -187,6 +191,24 @@ void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
 void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
 
   ui.buttonAutoreduce->setEnabled(enabled);
+}
+
+/**
+* Sets the "Transfer" button enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setTransferButtonEnabled(bool enabled) {
+
+  ui.buttonTransfer->setEnabled(enabled);
+}
+
+/**
+* Sets the "Instrument" combo box enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
+
+  ui.comboSearchInstrument->setEnabled(enabled);
 }
 
 /**

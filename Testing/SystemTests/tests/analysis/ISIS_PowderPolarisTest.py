@@ -7,7 +7,7 @@ import shutil
 import mantid.simpleapi as mantid
 from mantid import config
 
-from isis_powder import Polaris
+from isis_powder import Polaris, SampleDetails
 
 DIRS = config['datasearch.directories'].split(';')
 
@@ -25,6 +25,7 @@ output_folder_name = "output"
 calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "polaris_system_test_mapping.yaml")
 spline_rel_path = os.path.join("17_1", "VanSplined_98532_cycle_16_3_silicon_all_spectra.cal.nxs")
+unsplined_van_rel_path = os.path.join("17_1", "Van_98532_cycle_16_3_silicon_all_spectra.cal.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -36,6 +37,9 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
+unsplined_van_path = os.path.join(calibration_dir, unsplined_van_rel_path)
+
+total_scattering_input_file = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_TotalScatteringInput.nxs")
 
 
 class CreateVanadiumTest(stresstesting.MantidStressTest):
@@ -51,7 +55,11 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
         self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
-        return calibration_validator(self.calibration_results)
+        splined_ws, unsplined_ws = self.calibration_results
+        for ws in splined_ws+unsplined_ws:
+            self.assertEqual(ws.sample().getMaterial().name(), 'V')
+        return (unsplined_ws.getName(), "ISIS_Powder-POLARIS00098533_unsplined.nxs",
+                splined_ws.getName(), "ISIS_Powder-POLARIS00098533_splined.nxs")
 
     def cleanup(self):
         try:
@@ -66,6 +74,7 @@ class FocusTest(stresstesting.MantidStressTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
+    tolerance = 1e-11
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -76,7 +85,9 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        return focus_validation(self.focus_results)
+        for ws in self.focus_results:
+            self.assertEqual(ws.sample().getMaterial().name(), 'Si')
+        return self.focus_results.getName(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
 
     def cleanup(self):
         try:
@@ -87,6 +98,34 @@ class FocusTest(stresstesting.MantidStressTest):
             mantid.mtd.clear()
 
 
+class TotalScatteringTest(stresstesting.MantidStressTest):
+
+    pdf_output = None
+
+    def runTest(self):
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        self.pdf_output = run_total_scattering('98533', False)
+
+    def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
+        # After rebin this is at X index 37
+        expected_peak_values = [0.0002294,
+                                0.0606328,
+                                0.2007917,
+                                0.1436630,
+                                0.9823244]
+        for index, ws in enumerate(self.pdf_output):
+            self.assertAlmostEqual(ws.dataY(0)[37], expected_peak_values[index], places=3)
+
+
+def run_total_scattering(run_number, merge_banks):
+    pdf_inst_obj = setup_inst_object(mode="PDF")
+    return pdf_inst_obj.create_total_scattering_pdf(run_number=run_number,
+                                                    merge_banks=merge_banks)
+
+
 def _gen_required_files():
     required_run_numbers = ["98531", "98532",  # create_van : PDF mode
                             "98533"]  # File to focus (Si)
@@ -94,6 +133,7 @@ def _gen_required_files():
     # Generate file names of form "INSTxxxxx.nxs"
     input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
     input_files.append(calibration_map_path)
+    input_files.append(total_scattering_input_file)
     return input_files
 
 
@@ -110,8 +150,9 @@ def run_vanadium_calibration():
     if not os.path.exists(spline_path):
         raise RuntimeError("Could not find output spline at the following path: " + spline_path)
     splined_ws = mantid.Load(Filename=spline_path)
+    unsplined_ws = mantid.Load(Filename=unsplined_van_path)
 
-    return splined_ws
+    return splined_ws, unsplined_ws
 
 
 def run_focus():
@@ -131,30 +172,6 @@ def run_focus():
                              sample_empty_scale=sample_empty_scale)
 
 
-def calibration_validator(results):
-    # Get the name of the grouped workspace list
-    reference_file_name = "ISIS_Powder-POLARIS00098533_splined.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def focus_validation(results):
-    reference_file_name = "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def _compare_ws(reference_file_name, results):
-    ref_ws = mantid.Load(Filename=reference_file_name)
-
-    is_valid = True if len(results) > 0 else False
-
-    for ws, ref in zip(results, ref_ws):
-        if not (mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref)):
-            is_valid = False
-            print (ws.getName() + " was not equal to: " + ref.getName())
-
-    return is_valid
-
-
 def setup_mantid_paths():
     config['datasearch.directories'] += ";" + input_dir
 
@@ -164,6 +181,11 @@ def setup_inst_object(mode):
 
     inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
                        calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
+
+    sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape='cylinder')
+    sample_details.set_material(chemical_formula='Si')
+    inst_obj.set_sample_details(sample=sample_details)
+
     return inst_obj
 
 

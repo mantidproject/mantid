@@ -6,8 +6,8 @@
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "qboxlayout.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include <QtCore/qvariant.h>
-#include <QtCore/qstringlist.h>
+#include <QVariant>
+#include <QStringList>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/DateAndTime.h"
@@ -15,7 +15,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/LiveListenerInfo.h"
-#include <QtGui>
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
 using namespace MantidQt::CustomDialogs;

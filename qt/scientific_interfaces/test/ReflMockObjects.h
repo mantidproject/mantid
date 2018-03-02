@@ -4,6 +4,7 @@
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "../ISISReflectometry/IReflEventPresenter.h"
 #include "../ISISReflectometry/IReflEventTabPresenter.h"
 #include "../ISISReflectometry/IReflEventView.h"
@@ -17,11 +18,15 @@
 #include "../ISISReflectometry/IReflSettingsTabPresenter.h"
 #include "../ISISReflectometry/IReflSettingsView.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
+#include "../ISISReflectometry/ExperimentOptionDefaults.h"
+#include "../ISISReflectometry/InstrumentOptionDefaults.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -62,8 +67,10 @@ public:
   MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
-  MOCK_METHOD2(setRowActionEnabled, void(int, bool));
+  MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
+  MOCK_METHOD1(setTransferButtonEnabled, void(bool));
+  MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
@@ -79,6 +86,7 @@ public:
   MOCK_CONST_METHOD0(getEndOverlap, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
+  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
   MOCK_CONST_METHOD0(getDirectBeam, std::string());
   MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
@@ -97,15 +105,23 @@ public:
   MOCK_CONST_METHOD0(getLambdaMax, std::string());
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
   MOCK_CONST_METHOD0(getProcessingInstructions, std::string());
-  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
+  MOCK_CONST_METHOD0(getSummationType, std::string());
+  MOCK_CONST_METHOD0(getReductionType, std::string());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
-  MOCK_CONST_METHOD1(setPolarisationOptionsEnabled, void(bool));
-  MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string> &));
-  MOCK_CONST_METHOD2(setInstDefaults, void(const std::vector<double> &,
-                                           const std::vector<std::string> &));
+  MOCK_METHOD1(setReductionTypeEnabled, void(bool));
+  MOCK_METHOD1(setPolarisationOptionsEnabled, void(bool));
+  MOCK_METHOD1(setDetectorCorrectionEnabled, void(bool));
+  MOCK_METHOD1(setExpDefaults, void(ExperimentOptionDefaults));
+  MOCK_METHOD1(setInstDefaults, void(InstrumentOptionDefaults));
+  MOCK_METHOD0(disableAll, void());
+  MOCK_METHOD0(enableAll, void());
   MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
   MOCK_CONST_METHOD0(experimentSettingsEnabled, bool());
   MOCK_CONST_METHOD0(instrumentSettingsEnabled, bool());
+  MOCK_METHOD2(showOptionLoadErrors,
+               void(std::vector<InstrumentParameterTypeMissmatch> const &,
+                    std::vector<MissingInstrumentParameterValue> const &));
+  MOCK_CONST_METHOD0(detectorCorrectionEnabled, bool());
   // Calls we don't care about
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override {
@@ -119,6 +135,8 @@ public:
   // Global options
   MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
+  MOCK_METHOD0(enableAll, void());
+  MOCK_METHOD0(disableAll, void());
 
   // Calls we don't care about
   IReflEventPresenter *getPresenter() const override { return nullptr; }
@@ -166,10 +184,11 @@ public:
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
   MOCK_CONST_METHOD0(startNewAutoreduction, bool());
+  MOCK_METHOD1(settingsChanged, void(int));
   void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
-  };
+  }
   ~MockRunsTabPresenter() override{};
 };
 
@@ -177,6 +196,8 @@ class MockEventPresenter : public IReflEventPresenter {
 public:
   MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
+  MOCK_METHOD0(onReductionPaused, void());
+  MOCK_METHOD0(onReductionResumed, void());
   ~MockEventPresenter() override{};
 };
 
@@ -185,34 +206,48 @@ public:
   std::string getTimeSlicingValues(int group) const override {
     UNUSED_ARG(group)
     return std::string();
-  };
+  }
   std::string getTimeSlicingType(int group) const override {
     UNUSED_ARG(group)
     return std::string();
-  };
+  }
+
+  MOCK_METHOD1(onReductionPaused, void(int));
+  MOCK_METHOD1(onReductionResumed, void(int));
+
   ~MockEventTabPresenter() override{};
 };
 
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
-  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(bool));
-  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
-  MOCK_CONST_METHOD0(getReductionOptions, std::string());
+  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
+  MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
+  MOCK_CONST_METHOD0(getReductionOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
+  MOCK_METHOD0(onReductionPaused, void());
+  MOCK_METHOD0(onReductionResumed, void());
+  MOCK_METHOD1(acceptTabPresenter, void(IReflSettingsTabPresenter *));
   MOCK_METHOD1(setInstrumentName, void(const std::string &));
   void notify(IReflSettingsPresenter::Flag flag) override { UNUSED_ARG(flag); }
+  IAlgorithm_sptr createReductionAlg() override {
+    return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  }
   ~MockSettingsPresenter() override{};
 };
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
-  MOCK_CONST_METHOD2(getTransmissionRuns, std::string(int, bool));
-  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
-  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
+  MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
+  MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
+  MOCK_METHOD1(acceptMainPresenter, void(IReflMainWindowPresenter *));
+  MOCK_METHOD1(settingsChanged, void(int));
   void setInstrumentName(const std::string &instName) override {
     UNUSED_ARG(instName);
   };
+  MOCK_METHOD1(onReductionPaused, void(int));
+  MOCK_METHOD1(onReductionResumed, void(int));
   ~MockSettingsTabPresenter() override{};
 };
 
@@ -222,18 +257,23 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   };
+
+  MOCK_METHOD0(onAnyReductionPaused, void());
+  MOCK_METHOD0(onAnyReductionResumed, void());
   ~MockSaveTabPresenter() override{};
 };
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
   MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
-  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
-  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
+  MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD1(notify, void(IReflMainWindowPresenter::Flag));
+  MOCK_METHOD1(notifyReductionPaused, void(int));
+  MOCK_METHOD1(notifyReductionResumed, void(int));
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
                            const std::string &));
@@ -243,6 +283,7 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+  MOCK_METHOD1(settingsChanged, void(int));
   // Other calls we don't care about
   std::string getTimeSlicingValues(int group) const override {
     UNUSED_ARG(group);

@@ -30,14 +30,14 @@ individual pixels. This means that algorithms based on solid angle
 calculations might be off. Ray-tracing (e.g. peak finding) are
 unaffected.
 
-See also :ref:`algm-MoveInstrumentComponent` and
-:ref:`algm-RotateInstrumentComponent` for other ways
-to move components.
+.. seealso:: :ref:`algm-MoveInstrumentComponent` and
+             :ref:`algm-RotateInstrumentComponent` for other ways
+             to move components.
 
 Usage
 -----
 
-**Example - Resize bank 1:**  
+**Example - Resize bank 1:**
 
 .. testcode:: ExScaleBank1
 
@@ -56,7 +56,7 @@ Usage
 Output:
 
 .. testoutput:: ExScaleBank1
-   
+
 	bank 1 was scaled and is now 0.16 by 0.04
 	bank 2 was not scaled and remains 0.08 by 0.08
 

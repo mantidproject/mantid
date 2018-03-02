@@ -50,8 +50,8 @@ set ( SRC_FILES
 	src/Instrument/ComponentInfo.cpp
 	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
-	src/Instrument/DetectorInfo.cpp
 	src/Instrument/DetectorGroup.cpp
+	src/Instrument/DetectorInfo.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
 	src/Instrument/IDFObject.cpp
@@ -102,8 +102,8 @@ set ( SRC_FILES
 	src/Math/Triple.cpp
 	src/Math/mathSupport.cpp
 	src/Objects/BoundingBox.cpp
+	src/Objects/CSGObject.cpp
 	src/Objects/InstrumentRayTracer.cpp
-	src/Objects/Object.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
@@ -266,8 +266,9 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/Triple.h
 	inc/MantidGeometry/Math/mathSupport.h
 	inc/MantidGeometry/Objects/BoundingBox.h
+	inc/MantidGeometry/Objects/CSGObject.h
+	inc/MantidGeometry/Objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
-	inc/MantidGeometry/Objects/Object.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
@@ -308,6 +309,7 @@ set ( TEST_FILES
 	BraggScattererFactoryTest.h
 	BraggScattererInCrystalStructureTest.h
 	BraggScattererTest.h
+	CSGObjectTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentInfoTest.h
@@ -362,7 +364,6 @@ set ( TEST_FILES
 	NullImplicitFunctionTest.h
 	ObjCompAssemblyTest.h
 	ObjComponentTest.h
-	ObjectTest.h
 	OrientedLatticeTest.h
 	ParCompAssemblyTest.h
 	ParComponentFactoryTest.h
@@ -465,7 +466,9 @@ set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 if (ENABLE_OPENCASCADE)

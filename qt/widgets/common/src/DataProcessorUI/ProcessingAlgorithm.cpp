@@ -10,10 +10,11 @@ namespace DataProcessor {
 * workspaces' names
 * @param blacklist : The list of properties we do not want to show
 */
-ProcessingAlgorithm::ProcessingAlgorithm(const QString &name,
-                                         const std::vector<QString> &prefix,
-                                         const std::set<QString> &blacklist)
-    : ProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
+ProcessingAlgorithm::ProcessingAlgorithm(QString name,
+                                         std::vector<QString> prefix,
+                                         std::set<QString> blacklist)
+    : ProcessingAlgorithmBase(std::move(name), std::move(blacklist)),
+      m_prefix(std::move(prefix)) {
 
   m_inputProperties = getInputWsProperties();
   if (!m_inputProperties.size())
@@ -43,10 +44,9 @@ ProcessingAlgorithm::ProcessingAlgorithm(const QString &name,
 * workspaces' names, as a string
 * @param blacklist : The list of properties we do not want to show, as a string
 */
-ProcessingAlgorithm::ProcessingAlgorithm(const QString &name,
-                                         const QString &prefix,
-                                         const QString &blacklist)
-    : ProcessingAlgorithm(name, convertStringToVector(prefix),
+ProcessingAlgorithm::ProcessingAlgorithm(QString name, QString const &prefix,
+                                         QString const &blacklist)
+    : ProcessingAlgorithm(std::move(name), convertStringToVector(prefix),
                           convertStringToSet(blacklist)) {}
 
 /**
@@ -83,6 +83,16 @@ QString ProcessingAlgorithm::inputPropertyName(size_t index) const {
 QString ProcessingAlgorithm::outputPropertyName(size_t index) const {
   return m_outputProperties[index];
 }
+
+/** Returns the list of output property names
+ */
+std::vector<QString> ProcessingAlgorithm::outputProperties() const {
+  return m_outputProperties;
+}
+
+/** Returns the list of prefixes associated with the output properties
+ */
+std::vector<QString> ProcessingAlgorithm::prefixes() const { return m_prefix; }
 }
 }
 }

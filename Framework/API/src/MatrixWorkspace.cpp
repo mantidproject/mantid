@@ -1,9 +1,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
@@ -20,6 +21,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -581,6 +583,11 @@ MatrixWorkspace::getIndexFromSpectrumNumber(const specnum_t specNo) const {
  */
 std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(
     const std::vector<detid_t> &detIdList) const {
+  if (m_indexInfo->size() != m_indexInfo->globalSize())
+    throw std::runtime_error("MatrixWorkspace: Using getIndicesFromDetectorIDs "
+                             "in a parallel run is most likely incorrect. "
+                             "Aborting.");
+
   std::map<detid_t, std::set<size_t>> detectorIDtoWSIndices;
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto detIDs = getSpectrum(i).getDetectorIDs();
@@ -648,10 +655,6 @@ double MatrixWorkspace::getXMax() const {
 }
 
 void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
-  if (m_indexInfo->size() != m_indexInfo->globalSize())
-    throw std::runtime_error(
-        "MatrixWorkspace: Parallel support for XMin and XMax not implemented.");
-
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
@@ -669,6 +672,14 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
       if (xback > xmax)
         xmax = xback;
     }
+  }
+  if (m_indexInfo->size() != m_indexInfo->globalSize()) {
+    auto &comm = m_indexInfo->communicator();
+    std::vector<double> extrema(comm.size());
+    Parallel::all_gather(comm, xmin, extrema);
+    xmin = *std::min_element(extrema.begin(), extrema.end());
+    Parallel::all_gather(comm, xmax, extrema);
+    xmax = *std::max_element(extrema.begin(), extrema.end());
   }
 }
 
@@ -1082,6 +1093,16 @@ MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
   }
 
   return it->second;
+}
+
+/** Set the list of masked bins for given workspaceIndex. Not thread safe.
+ *
+ * No data is masked and previous masking for any bin for this workspace index
+ * is overridden, so this should only be used for copying flags into a new
+ * workspace, not for performing masking operations. */
+void MatrixWorkspace::setMaskedBins(const size_t workspaceIndex,
+                                    const MaskList &maskedBins) {
+  m_masks[workspaceIndex] = maskedBins;
 }
 
 /** Sets the internal monitor workspace to the provided workspace.
@@ -1605,6 +1626,11 @@ MatrixWorkspace::getSpecialCoordinateSystem() const {
   return Mantid::Kernel::None;
 }
 
+// Check if this class has an oriented lattice on a sample object
+bool MatrixWorkspace::hasOrientedLattice() const {
+  return Mantid::API::ExperimentInfo::sample().hasOrientedLattice();
+}
+
 /**
  * Creates a 2D image.
  * @param read :: Pointer to a method returning a MantidVec to provide data for
@@ -1896,7 +1922,7 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
 }
 
 void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
-  if (storageMode() == Parallel::StorageMode::Distributed &&
+  if (m_isInitialized && storageMode() == Parallel::StorageMode::Distributed &&
       m_indexInfo->communicator().size() > 1)
     throw std::logic_error("Setting spectrum numbers in MatrixWorkspace via "
                            "ISpectrum::setSpectrumNo is not possible in MPI "
@@ -2008,40 +2034,6 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
 
 } // namespace API
 } // Namespace Mantid
-
-// Explicit Instantiations of IndexProperty Methods in Algorithm
-namespace Mantid {
-namespace API {
-template DLLExport void
-Algorithm::declareWorkspaceInputProperties<MatrixWorkspace>(
-    const std::string &propertyName, const int allowedIndexTypes,
-    PropertyMode::Type optional, LockMode::Type lock, const std::string &doc);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
-    const std::string &name, const MatrixWorkspace_sptr &wksp, IndexType type,
-    const std::vector<int> &list);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-    const std::string &name, const MatrixWorkspace_sptr &wksp, IndexType type,
-    const std::string &list);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
-    const std::string &name, const std::string &wsName, IndexType type,
-    const std::vector<int> &list);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-    const std::string &name, const std::string &wsName, IndexType type,
-    const std::string &list);
-
-template DLLExport
-    std::tuple<boost::shared_ptr<MatrixWorkspace>, Indexing::SpectrumIndexSet>
-    Algorithm::getWorkspaceAndIndices(const std::string &name) const;
-} // namespace API
-} // namespace Mantid
 
 ///\cond TEMPLATE
 namespace Mantid {

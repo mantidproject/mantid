@@ -7,6 +7,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+#include "InstrumentParameters.h"
+#include "ValueOr.h"
+#include "ExperimentOptionDefaults.h"
+#include "InstrumentOptionDefaults.h"
+#include <type_traits>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -14,12 +19,15 @@ namespace CustomInterfaces {
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::Geometry;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 /** Constructor
 * @param view :: The view we are handling
+* @param group :: The number of the group this settings presenter's settings
+* correspond to.
 */
-ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view)
-    : m_view(view) {
+ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view, int group)
+    : m_view(view), m_group(group) {
 
   // Create the 'HintingLineEdits'
   createStitchHints();
@@ -41,9 +49,34 @@ void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
   case IReflSettingsPresenter::InstDefaultsFlag:
     getInstDefaults();
     break;
+  case IReflSettingsPresenter::SettingsChangedFlag:
+    handleSettingsChanged();
+    break;
+  case IReflSettingsPresenter::SummationTypeChanged:
+    handleSummationTypeChange();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
+}
+
+void ReflSettingsPresenter::handleSettingsChanged() {
+  m_tabPresenter->settingsChanged(m_group);
+}
+
+void ReflSettingsPresenter::acceptTabPresenter(
+    IReflSettingsTabPresenter *tabPresenter) {
+  m_tabPresenter = tabPresenter;
+}
+
+bool ReflSettingsPresenter::hasReductionTypes(
+    const std::string &summationType) const {
+  return summationType == "SumInQ";
+}
+
+void ReflSettingsPresenter::handleSummationTypeChange() {
+  auto summationType = m_view->getSummationType();
+  m_view->setReductionTypeEnabled(hasReductionTypes(summationType));
 }
 
 /** Sets the current instrument name and changes accessibility status of
@@ -57,275 +90,165 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
   m_view->setPolarisationOptionsEnabled(enable);
 }
 
-/** Returns global options for 'CreateTransmissionWorkspaceAuto'
+OptionsQMap ReflSettingsPresenter::transmissionOptionsMap() const {
+  OptionsQMap options;
+  addTransmissionOptions(options, {"AnalysisMode", "StartOverlap", "EndOverlap",
+                                   "MonitorIntegrationWavelengthMin",
+                                   "MonitorIntegrationWavelengthMax",
+                                   "MonitorBackgroundWavelengthMin",
+                                   "MonitorBackgroundWavelengthMax",
+                                   "WavelengthMin", "WavelengthMax",
+                                   "I0MonitorIndex", "ProcessingInstructions"});
+  return options;
+}
+
+/** Returns global options for 'CreateTransmissionWorkspaceAuto'. Note that
+ * this must include all applicable options, even if they are empty, because
+ * the GenericDataProcessorPresenter has no other way of knowing which options
+ * are applicable to the preprocessing algorithm (e.g. for options that might
+ * be specified on the Runs tab instead). We get around this by providing the
+ * full list here and overriding them if they also exist on the Runs tab.
+ *
+ * @todo This is not idea and really we should just be passing through the
+ * non-preprocessed transmission runs to ReflectometryReductionOneAuto, which
+ * would then run CreateTransmissionWorkspaceAuto as a child algorithm and do
+ * all of this for us. However, the transmission runs would need to be loaded
+ * prior to running the processing algorithm, which is not currently possible.
  * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
  */
-std::string ReflSettingsPresenter::getTransmissionOptions() const {
+OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
 
-  std::vector<std::string> options;
+  // This step is necessessary until the issue above is addressed.
+  // Otherwise either group of options may be missed out by
+  // experimentSettingsEnabled or instrumentSettingsEnabled being disabled.
+  OptionsQMap options = transmissionOptionsMap();
 
   if (m_view->experimentSettingsEnabled()) {
-
-    // Add analysis mode
-    auto analysisMode = m_view->getAnalysisMode();
-    if (!analysisMode.empty())
-      options.push_back("AnalysisMode=" + analysisMode);
-
-    // Add start overlap
-    auto startOv = m_view->getStartOverlap();
-    if (!startOv.empty())
-      options.push_back("StartOverlap=" + startOv);
-
-    // Add end overlap
-    auto endOv = m_view->getEndOverlap();
-    if (!endOv.empty())
-      options.push_back("EndOverlap=" + endOv);
+    setTransmissionOption(options, "AnalysisMode", m_view->getAnalysisMode());
+    setTransmissionOption(options, "StartOverlap", m_view->getStartOverlap());
+    setTransmissionOption(options, "EndOverlap", m_view->getEndOverlap());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
-    // Add monitor integral min
-    auto monIntMin = m_view->getMonitorIntegralMin();
-    if (!monIntMin.empty())
-      options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
-
-    // Add monitor integral max
-    auto monIntMax = m_view->getMonitorIntegralMax();
-    if (!monIntMax.empty())
-      options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
-
-    // Add monitor background min
-    auto monBgMin = m_view->getMonitorBackgroundMin();
-    if (!monBgMin.empty())
-      options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
-
-    // Add monitor background max
-    auto monBgMax = m_view->getMonitorBackgroundMax();
-    if (!monBgMax.empty())
-      options.push_back("MonitorBackgroundWavelengthMax=" + monBgMax);
-
-    // Add lambda min
-    auto lamMin = m_view->getLambdaMin();
-    if (!lamMin.empty())
-      options.push_back("WavelengthMin=" + lamMin);
-
-    // Add lambda max
-    auto lamMax = m_view->getLambdaMax();
-    if (!lamMax.empty())
-      options.push_back("WavelengthMax=" + lamMax);
-
-    // Add I0MonitorIndex
-    auto I0MonitorIndex = m_view->getI0MonitorIndex();
-    if (!I0MonitorIndex.empty())
-      options.push_back("I0MonitorIndex=" + I0MonitorIndex);
-
-    // Add detector limits
-    auto procInst = m_view->getProcessingInstructions();
-    if (!procInst.empty()) {
-      wrapWithQuotes(procInst);
-      options.push_back("ProcessingInstructions=" + procInst);
-    }
+    setTransmissionOption(options, "MonitorIntegrationWavelengthMin",
+                          m_view->getMonitorIntegralMin());
+    setTransmissionOption(options, "MonitorIntegrationWavelengthMax",
+                          m_view->getMonitorIntegralMax());
+    setTransmissionOption(options, "MonitorBackgroundWavelengthMin",
+                          m_view->getMonitorBackgroundMin());
+    setTransmissionOption(options, "MonitorBackgroundWavelengthMax",
+                          m_view->getMonitorBackgroundMax());
+    setTransmissionOption(options, "WavelengthMin", m_view->getLambdaMin());
+    setTransmissionOption(options, "WavelengthMax", m_view->getLambdaMax());
+    setTransmissionOption(options, "I0MonitorIndex",
+                          m_view->getI0MonitorIndex());
+    setTransmissionOption(options, "ProcessingInstructions",
+                          m_view->getProcessingInstructions());
   }
 
-  return boost::algorithm::join(options, ",");
+  return options;
 }
+
+void ReflSettingsPresenter::setTransmissionOption(OptionsQMap &options,
+                                                  const QString &key,
+                                                  const QString &value) const {
+  options[key] = value;
+}
+
+void ReflSettingsPresenter::setTransmissionOption(
+    OptionsQMap &options, const QString &key, const std::string &value) const {
+  options[key] = QString::fromStdString(value);
+}
+
+void ReflSettingsPresenter::addTransmissionOptions(
+    OptionsQMap &options, std::initializer_list<QString> keys) const {
+  for (auto &&key : keys)
+    setTransmissionOption(options, key, QString());
+}
+
+void ReflSettingsPresenter::addIfNotEmpty(OptionsQMap &options,
+                                          const QString &key,
+                                          const QString &value) const {
+  if (!value.isEmpty())
+    setTransmissionOption(options, key, value);
+}
+
+void ReflSettingsPresenter::addIfNotEmpty(OptionsQMap &options,
+                                          const QString &key,
+                                          const std::string &value) const {
+  if (!value.empty())
+    setTransmissionOption(options, key, value);
+}
+
+QString ReflSettingsPresenter::asAlgorithmPropertyBool(bool value) {
+  return value ? "1" : "0";
+}
+
+void ReflSettingsPresenter::onReductionResumed() { m_view->disableAll(); }
+
+void ReflSettingsPresenter::onReductionPaused() { m_view->enableAll(); }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
  * @return :: Global options for 'ReflectometryReductionOneAuto'
  */
-std::string ReflSettingsPresenter::getReductionOptions() const {
+OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
-  std::vector<std::string> options;
+  OptionsQMap options;
 
   if (m_view->experimentSettingsEnabled()) {
+    addIfNotEmpty(options, "AnalysisMode", m_view->getAnalysisMode());
+    addIfNotEmpty(options, "CRho", m_view->getCRho());
+    addIfNotEmpty(options, "CAlpha", m_view->getCAlpha());
+    addIfNotEmpty(options, "CAp", m_view->getCAp());
+    addIfNotEmpty(options, "CPp", m_view->getCPp());
+    addIfNotEmpty(options, "PolarizationAnalysis",
+                  m_view->getPolarisationCorrections());
+    addIfNotEmpty(options, "ScaleFactor", m_view->getScaleFactor());
+    addIfNotEmpty(options, "MomentumTransferStep",
+                  m_view->getMomentumTransferStep());
+    addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
+    addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
+    addIfNotEmpty(options, "FirstTransmissionRun",
+                  m_view->getTransmissionRuns());
 
-    // Add analysis mode
-    auto analysisMode = m_view->getAnalysisMode();
-    if (!analysisMode.empty())
-      options.push_back("AnalysisMode=" + analysisMode);
+    auto summationType = m_view->getSummationType();
+    addIfNotEmpty(options, "SummationType", summationType);
 
-    // Add CRho
-    auto crho = m_view->getCRho();
-    if (!crho.empty()) {
-      wrapWithQuotes(crho);
-      options.push_back("CRho=" + crho);
-    }
-
-    // Add CAlpha
-    auto calpha = m_view->getCAlpha();
-    if (!calpha.empty()) {
-      wrapWithQuotes(calpha);
-      options.push_back("CAlpha=" + calpha);
-    }
-
-    // Add CAp
-    auto cap = m_view->getCAp();
-    if (!cap.empty()) {
-      wrapWithQuotes(cap);
-      options.push_back("CAp=" + cap);
-    }
-
-    // Add CPp
-    auto cpp = m_view->getCPp();
-    if (!cpp.empty()) {
-      wrapWithQuotes(cpp);
-      options.push_back("CPp=" + cpp);
-    }
-
-    // Add direct beam
-    auto dbnr = m_view->getDirectBeam();
-    if (!dbnr.empty()) {
-      wrapWithQuotes(dbnr);
-      options.push_back("RegionOfDirectBeam=" + dbnr);
-    }
-
-    // Add polarisation corrections
-    auto polCorr = m_view->getPolarisationCorrections();
-    if (!polCorr.empty())
-      options.push_back("PolarizationAnalysis=" + polCorr);
-
-    // Add scale factor
-    auto scaleFactor = m_view->getScaleFactor();
-    if (!scaleFactor.empty())
-      options.push_back("ScaleFactor=" + scaleFactor);
-
-    // Add momentum transfer limits
-    auto qTransStep = m_view->getMomentumTransferStep();
-    if (!qTransStep.empty()) {
-      options.push_back("MomentumTransferStep=" + qTransStep);
-    }
-
-    // Add start overlap
-    auto startOv = m_view->getStartOverlap();
-    if (!startOv.empty())
-      options.push_back("StartOverlap=" + startOv);
-
-    // Add end overlap
-    auto endOv = m_view->getEndOverlap();
-    if (!endOv.empty())
-      options.push_back("EndOverlap=" + endOv);
-
-    // Add transmission runs
-    auto transRuns = this->getTransmissionRuns(true);
-    if (!transRuns.empty()) {
-      std::vector<std::string> splitRuns;
-      boost::split(splitRuns, transRuns, boost::is_any_of(","));
-      options.push_back(splitRuns[0]);
-      if (splitRuns.size() > 1)
-        options.push_back(splitRuns[1]);
-    }
+    if (hasReductionTypes(summationType))
+      addIfNotEmpty(options, "ReductionType", m_view->getReductionType());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
-
-    // Add integrated monitors option
-    auto intMonCheck = m_view->getIntMonCheck();
-    if (!intMonCheck.empty())
-      options.push_back("NormalizeByIntegratedMonitors=" + intMonCheck);
-
-    // Add monitor integral min
-    auto monIntMin = m_view->getMonitorIntegralMin();
-    if (!monIntMin.empty())
-      options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
-
-    // Add monitor integral max
-    auto monIntMax = m_view->getMonitorIntegralMax();
-    if (!monIntMax.empty())
-      options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
-
-    // Add monitor background min
-    auto monBgMin = m_view->getMonitorBackgroundMin();
-    if (!monBgMin.empty())
-      options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
-
-    // Add monitor background max
-    auto monBgMax = m_view->getMonitorBackgroundMax();
-    if (!monBgMax.empty())
-      options.push_back("MonitorBackgroundWavelengthMax=" + monBgMax);
-
-    // Add lambda min
-    auto lamMin = m_view->getLambdaMin();
-    if (!lamMin.empty())
-      options.push_back("WavelengthMin=" + lamMin);
-
-    // Add lambda max
-    auto lamMax = m_view->getLambdaMax();
-    if (!lamMax.empty())
-      options.push_back("WavelengthMax=" + lamMax);
-
-    // Add I0MonitorIndex
-    auto I0MonitorIndex = m_view->getI0MonitorIndex();
-    if (!I0MonitorIndex.empty())
-      options.push_back("I0MonitorIndex=" + I0MonitorIndex);
-
-    // Add detector limits
-    auto procInst = m_view->getProcessingInstructions();
-    if (!procInst.empty()) {
-      wrapWithQuotes(procInst);
-      options.push_back("ProcessingInstructions=" + procInst);
-    }
-
-    // Add correction type
-    auto correctionType = m_view->getDetectorCorrectionType();
-    if (!correctionType.empty())
-      options.push_back("DetectorCorrectionType=" + correctionType);
+    addIfNotEmpty(options, "NormalizeByIntegratedMonitors",
+                  m_view->getIntMonCheck());
+    addIfNotEmpty(options, "MonitorIntegrationWavelengthMin",
+                  m_view->getMonitorIntegralMin());
+    addIfNotEmpty(options, "MonitorIntegrationWavelengthMax",
+                  m_view->getMonitorIntegralMax());
+    addIfNotEmpty(options, "MonitorBackgroundWavelengthMin",
+                  m_view->getMonitorBackgroundMin());
+    addIfNotEmpty(options, "MonitorBackgroundWavelengthMax",
+                  m_view->getMonitorBackgroundMax());
+    addIfNotEmpty(options, "WavelengthMin", m_view->getLambdaMin());
+    addIfNotEmpty(options, "WavelengthMax", m_view->getLambdaMax());
+    addIfNotEmpty(options, "I0MonitorIndex", m_view->getI0MonitorIndex());
+    addIfNotEmpty(options, "ProcessingInstructions",
+                  m_view->getProcessingInstructions());
+    addIfNotEmpty(options, "DetectorCorrectionType",
+                  m_view->getDetectorCorrectionType());
+    auto const correctDetectors =
+        asAlgorithmPropertyBool(m_view->detectorCorrectionEnabled());
+    options["CorrectDetectors"] = correctDetectors;
   }
 
-  return boost::algorithm::join(options, ",");
+  return options;
 }
 
-/** Receives specified transmission runs from the view and loads them into the
-*ADS. Returns a string with transmission runs so that they are considered in the
-*reduction
-*
-* @param loadRuns :: If true, will try to load transmission runs as well
-* @return :: transmission run(s) as a string that will be used for the reduction
-*/
-std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
-  auto transmissionRunsString = m_view->getTransmissionRuns();
-  if (transmissionRunsString.empty())
+std::string ReflSettingsPresenter::getTransmissionRuns() const {
+  if (m_view->experimentSettingsEnabled())
+    return m_view->getTransmissionRuns();
+  else
     return "";
-
-  std::vector<std::string> transmissionRuns;
-  boost::split(transmissionRuns, transmissionRunsString, boost::is_any_of(","));
-
-  if (loadRuns)
-    loadTransmissionRuns(transmissionRuns);
-
-  switch (transmissionRuns.size()) {
-  case 1:
-    return firstTransmissionRunLabelled(transmissionRuns);
-  case 2:
-    return firstTransmissionRunLabelled(transmissionRuns) + "," +
-           secondTransmissionRunLabelled(transmissionRuns);
-  default:
-    throw std::invalid_argument("Only one transmission run or two "
-                                "transmission runs separated by ',' "
-                                "are allowed.");
-  }
-}
-
-std::string ReflSettingsPresenter::firstTransmissionRunLabelled(
-    std::vector<std::string> const &runNumbers) const {
-  return "FirstTransmissionRun=" + runNumbers[0];
-}
-
-std::string ReflSettingsPresenter::secondTransmissionRunLabelled(
-    std::vector<std::string> const &runNumbers) const {
-  return "SecondTransmissionRun=" + runNumbers[1];
-}
-
-void ReflSettingsPresenter::loadTransmissionRuns(
-    std::vector<std::string> const &transmissionRuns) const {
-  for (const auto &run : transmissionRuns) {
-    if (!AnalysisDataService::Instance().doesExist("TRANS_" + run)) {
-      // Load transmission runs and put them in the ADS
-      IAlgorithm_sptr alg =
-          AlgorithmManager::Instance().create("LoadISISNexus");
-      alg->setProperty("Filename", run);
-      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
-      alg->execute();
-    }
-  }
 }
 
 /** Returns global options for 'Stitch1DMany'
@@ -335,8 +258,8 @@ std::string ReflSettingsPresenter::getStitchOptions() const {
 
   if (m_view->experimentSettingsEnabled())
     return m_view->getStitchOptions();
-
-  return std::string();
+  else
+    return "";
 }
 
 /** Creates hints for 'Stitch1DMany'
@@ -346,85 +269,102 @@ void ReflSettingsPresenter::createStitchHints() {
   // The algorithm
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Stitch1DMany");
   // The blacklist
-  std::set<std::string> blacklist = {"InputWorkspaces", "OutputWorkspace",
-                                     "OutputWorkspace"};
+  std::set<std::string> blacklist{"InputWorkspaces", "OutputWorkspace"};
   AlgorithmHintStrategy strategy(alg, blacklist);
 
   m_view->createStitchHints(strategy.createHints());
 }
-
 /** Fills experiment settings with default values
 */
 void ReflSettingsPresenter::getExpDefaults() {
-  // Algorithm and instrument
   auto alg = createReductionAlg();
-  auto inst = createEmptyInstrument(m_currentInstrumentName);
+  auto instrument = createEmptyInstrument(m_currentInstrumentName);
+  auto parameters = InstrumentParameters(instrument);
 
-  // Collect all default values and set them in view
-  std::vector<std::string> defaults(8);
-  defaults[0] = alg->getPropertyValue("AnalysisMode");
-  defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
+  auto defaults = ExperimentOptionDefaults();
 
-  auto cRho = inst->getStringParameter("crho");
-  if (!cRho.empty())
-    defaults[2] = cRho[0];
+  defaults.AnalysisMode =
+      value_or(parameters.optional<std::string>("AnalysisMode"),
+               alg->getPropertyValue("AnalysisMode"));
+  defaults.PolarizationAnalysis =
+      value_or(parameters.optional<std::string>("PolarizationAnalysis"),
+               alg->getPropertyValue("PolarizationAnalysis"));
 
-  auto cAlpha = inst->getStringParameter("calpha");
-  if (!cAlpha.empty())
-    defaults[3] = cAlpha[0];
+  defaults.SummationType =
+      value_or(parameters.optional<std::string>("SummationType"),
+               alg->getPropertyValue("SummationType"));
 
-  auto cAp = inst->getStringParameter("cAp");
-  if (!cAp.empty())
-    defaults[4] = cAp[0];
+  defaults.ReductionType =
+      value_or(parameters.optional<std::string>("ReductionType"),
+               alg->getPropertyValue("ReductionType"));
 
-  auto cPp = inst->getStringParameter("cPp");
-  if (!cPp.empty())
-    defaults[5] = cPp[0];
+  defaults.CRho = value_or(parameters.optional<std::string>("crho"), "1");
+  defaults.CAlpha = value_or(parameters.optional<std::string>("calpha"), "1");
+  defaults.CAp = value_or(parameters.optional<std::string>("cAp"), "1");
+  defaults.CPp = value_or(parameters.optional<std::string>("cPp"), "1");
+
+  defaults.MomentumTransferStep = parameters.optional<double>("dQ/Q");
+  defaults.ScaleFactor = parameters.optional<double>("Scale");
+  defaults.StitchParams = parameters.optional<std::string>("Stitch1DMany");
 
   if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
-    defaults[6] = boost::lexical_cast<std::string>(
-        inst->getNumberParameter("TransRunStartOverlap")[0]);
-
-    defaults[7] = boost::lexical_cast<std::string>(
-        inst->getNumberParameter("TransRunEndOverlap")[0]);
+    defaults.TransRunStartOverlap =
+        parameters.mandatory<double>("TransRunStartOverlap");
+    defaults.TransRunEndOverlap =
+        parameters.mandatory<double>("TransRunEndOverlap");
+  } else {
+    defaults.TransRunStartOverlap =
+        parameters.optional<double>("TransRunStartOverlap");
+    defaults.TransRunEndOverlap =
+        parameters.optional<double>("TransRunEndOverlap");
   }
 
-  m_view->setExpDefaults(defaults);
-}
+  m_view->setExpDefaults(std::move(defaults));
 
-/** Wraps string with quote marks if it does not already have them
-* @param str :: [input] The string to be wrapped
-*/
-void ReflSettingsPresenter::wrapWithQuotes(std::string &str) const {
-  if (str.front() != '\"')
-    str = "\"" + str;
-  if (str.back() != '\"')
-    str = str + "\"";
+  if (parameters.hasTypeErrors() || parameters.hasMissingValues()) {
+    m_view->showOptionLoadErrors(parameters.typeErrors(),
+                                 parameters.missingValues());
+  }
 }
 
 /** Fills instrument settings with default values
 */
 void ReflSettingsPresenter::getInstDefaults() {
-  // Algorithm and instrument
   auto alg = createReductionAlg();
-  auto inst = createEmptyInstrument(m_currentInstrumentName);
+  auto instrument = createEmptyInstrument(m_currentInstrumentName);
+  auto parameters = InstrumentParameters(instrument);
+  auto defaults = InstrumentOptionDefaults();
 
-  // Collect all default values
-  std::vector<double> defaults_double(8);
-  defaults_double[0] = boost::lexical_cast<double>(
-      alg->getPropertyValue("NormalizeByIntegratedMonitors"));
-  defaults_double[1] = inst->getNumberParameter("MonitorIntegralMin")[0];
-  defaults_double[2] = inst->getNumberParameter("MonitorIntegralMax")[0];
-  defaults_double[3] = inst->getNumberParameter("MonitorBackgroundMin")[0];
-  defaults_double[4] = inst->getNumberParameter("MonitorBackgroundMax")[0];
-  defaults_double[5] = inst->getNumberParameter("LambdaMin")[0];
-  defaults_double[6] = inst->getNumberParameter("LambdaMax")[0];
-  defaults_double[7] = inst->getNumberParameter("I0MonitorIndex")[0];
+  defaults.NormalizeByIntegratedMonitors =
+      value_or(parameters.optional<bool>("IntegratedMonitors"),
+               alg->getProperty("NormalizeByIntegratedMonitors"));
+  defaults.MonitorIntegralMin =
+      parameters.mandatory<double>("MonitorIntegralMin");
+  defaults.MonitorIntegralMax =
+      parameters.mandatory<double>("MonitorIntegralMax");
+  defaults.MonitorBackgroundMin =
+      parameters.mandatory<double>("MonitorBackgroundMin");
+  defaults.MonitorBackgroundMax =
+      parameters.mandatory<double>("MonitorBackgroundMax");
+  defaults.LambdaMin = parameters.mandatory<double>("LambdaMin");
+  defaults.LambdaMax = parameters.mandatory<double>("LambdaMax");
+  defaults.I0MonitorIndex =
+      parameters.mandatoryVariant<int, double>("I0MonitorIndex");
+  defaults.ProcessingInstructions =
+      parameters.optional<std::string>("ProcessingInstructions");
+  defaults.CorrectDetectors =
+      value_or(parameters.optional<bool>("CorrectDetectors"),
+               alg->getProperty("CorrectDetectors"));
+  defaults.DetectorCorrectionType =
+      value_or(parameters.optional<std::string>("DetectorCorrectionType"),
+               alg->getPropertyValue("DetectorCorrectionType"));
 
-  std::vector<std::string> defaults_str(1);
-  defaults_str[0] = alg->getPropertyValue("DetectorCorrectionType");
+  m_view->setInstDefaults(std::move(defaults));
 
-  m_view->setInstDefaults(defaults_double, defaults_str);
+  if (parameters.hasTypeErrors() || parameters.hasMissingValues()) {
+    m_view->showOptionLoadErrors(parameters.typeErrors(),
+                                 parameters.missingValues());
+  }
 }
 
 /** Generates and returns an instance of the ReflectometryReductionOneAuto

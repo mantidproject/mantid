@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, SampleId, MonId, TransId, GravityId,
                                           QResolutionId, FitId, MaskId, event_binning_string_values, set_scales_entry,
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,
-                                          q_rebin_values, fit_general, mask_angle_entry, range_entry)
+                                          q_rebin_values, fit_general, mask_angle_entry, range_entry, position_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
                                DetectorType, DataType, FitType)
 
@@ -84,6 +84,59 @@ class StateGuiModel(object):
     def save_types(self, value):
         self.set_simple_element(element_id=OtherId.save_types, value=value)
 
+    # ==================================================================================================================
+    # ==================================================================================================================
+    # BeamCentre TAB
+    # ==================================================================================================================
+    # ==================================================================================================================
+    @property
+    def lab_pos_1(self):
+        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos1")
+
+    @lab_pos_1.setter
+    def lab_pos_1(self, value):
+        self._update_centre(pos_1=value)
+
+    @property
+    def lab_pos_2(self):
+        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos2")
+
+    @lab_pos_2.setter
+    def lab_pos_2(self, value):
+        self._update_centre(pos_2=value)
+
+    @property
+    def hab_pos_1(self):
+        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos1")
+
+    @hab_pos_1.setter
+    def hab_pos_1(self, value):
+        self._update_centre(pos_1=value)
+
+    @property
+    def hab_pos_2(self):
+        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos2")
+
+    @hab_pos_2.setter
+    def hab_pos_2(self, value):
+        self._update_centre(pos_2=value)
+
+    def _update_centre(self, pos_1=None, pos_2=None, detector_type=None):
+        if SetId.centre in self._user_file_items:
+            settings = self._user_file_items[SetId.centre]
+        else:
+            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overriden
+            # and if not we want it to fail.
+            settings = [position_entry(pos1=0.0, pos2=0.0, detector_type=DetectorType.LAB)]
+
+        new_settings = []
+        for setting in settings:
+            new_pos1 = pos_1 if pos_1 else setting.pos1
+            new_pos2 = pos_2 if pos_2 else setting.pos2
+            new_detector_type = detector_type if detector_type else setting.detector_type
+            new_setting = position_entry(pos1=new_pos1, pos2=new_pos2, detector_type=new_detector_type)
+            new_settings.append(new_setting)
+        self._user_file_items.update({SetId.centre: new_settings})
     # ==================================================================================================================
     # ==================================================================================================================
     # General TAB
@@ -171,6 +224,25 @@ class StateGuiModel(object):
         q_range_stop = max(q_stop) if q_stop else default_value
         return q_range_start, q_range_stop
 
+    def get_merge_overlap(self, default_value):
+        q_start = []
+        q_stop = []
+
+        settings = []
+        if DetectorId.merge_range in self._user_file_items:
+            settings.extend(self._user_file_items[DetectorId.merge_range])
+
+        for setting in settings:
+            if setting.start is not None:
+                q_start.append(setting.start)
+
+            if setting.stop is not None:
+                q_stop.append(setting.stop)
+
+        q_range_start = min(q_start) if q_start else default_value
+        q_range_stop = max(q_stop) if q_stop else default_value
+        return q_range_start, q_range_stop
+
     @property
     def reduction_mode(self):
         return self.get_simple_element_with_attribute(element_id=DetectorId.reduction_mode,
@@ -246,6 +318,34 @@ class StateGuiModel(object):
         self._update_merged_fit(element_id=DetectorId.shift_fit, q_stop=value)
         # Update for the scale
         self._update_merged_fit(element_id=DetectorId.rescale_fit, q_stop=value)
+
+    @property
+    def merge_mask(self):
+        return self.get_simple_element_with_attribute(element_id=DetectorId.merge_range,
+                                                      default_value=False,
+                                                      attribute="use_fit")
+
+    @merge_mask.setter
+    def merge_mask(self, value):
+        self._update_merged_fit(element_id=DetectorId.merge_range, use_fit=value)
+
+    @property
+    def merge_max(self):
+        _, q_range_stop = self.get_merge_overlap(default_value=None)
+        return q_range_stop
+
+    @merge_max.setter
+    def merge_max(self, value):
+        self._update_merged_fit(element_id=DetectorId.merge_range, q_stop=value)
+
+    @property
+    def merge_min(self):
+        q_range_start, _ = self.get_merge_overlap(default_value=None)
+        return q_range_start
+
+    @merge_min.setter
+    def merge_min(self, value):
+        self._update_merged_fit(element_id=DetectorId.merge_range, q_start=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode
@@ -637,6 +737,14 @@ class StateGuiModel(object):
     @transmission_can_wavelength_max.setter
     def transmission_can_wavelength_max(self, value):
         self._set_transmission_fit(data_type=DataType.Can, stop=value)
+
+    @property
+    def show_transmission(self):
+        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=False)
+
+    @show_transmission.setter
+    def show_transmission(self, value):
+        self.set_simple_element(element_id=OtherId.show_transmission, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength- and pixel-adjustment files

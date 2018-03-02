@@ -12,7 +12,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidIndexing/IndexInfo.h"
 
+using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -141,6 +143,28 @@ public:
           boost::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
       TSM_ASSERT_EQUALS("Child workspaces should all have the width set", width,
                         memberWS->sample().getWidth());
+    }
+  }
+
+  void test_setIndexInfo() {
+    EventWorkspaceCollection collection;
+    auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
+    const size_t periods = 2;
+    collection.setNPeriods(periods, periodLog);
+    // Set some arbitrary data to ensure that it is preserved.
+    const float thickness = static_cast<float>(1.23);
+    collection.setThickness(thickness);
+
+    collection.setIndexInfo(Indexing::IndexInfo({3, 1, 2}));
+    const auto ws = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        collection.combinedWorkspace());
+    for (size_t i = 0; i < periods; ++i) {
+      auto eventWS =
+          boost::dynamic_pointer_cast<EventWorkspace>(ws->getItem(i));
+      TS_ASSERT_EQUALS(eventWS->getSpectrum(0).getSpectrumNo(), 3);
+      TS_ASSERT_EQUALS(eventWS->getSpectrum(1).getSpectrumNo(), 1);
+      TS_ASSERT_EQUALS(eventWS->getSpectrum(2).getSpectrumNo(), 2);
+      TS_ASSERT_EQUALS(eventWS->sample().getThickness(), thickness);
     }
   }
 };

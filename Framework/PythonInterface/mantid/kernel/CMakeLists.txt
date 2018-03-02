@@ -9,6 +9,8 @@ set ( MODULE_TEMPLATE src/kernel.cpp.in )
 #    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
   src/Exports/ConfigService.cpp
+  src/Exports/ConfigObserver.cpp
+  src/Exports/ConfigPropertyObserver.cpp
   src/Exports/DataItem.cpp
   src/Exports/IPropertyManager.cpp
   src/Exports/Property.cpp
@@ -36,6 +38,7 @@ set ( EXPORT_FILES
   src/Exports/ListValidator.cpp
   src/Exports/ArrayLengthValidator.cpp
   src/Exports/ArrayBoundedValidator.cpp
+  src/Exports/ArrayOrderedPairsValidator.cpp
   src/Exports/MandatoryValidator.cpp
   src/Exports/CompositeValidator.cpp
   src/Exports/LogFilter.cpp
@@ -67,11 +70,13 @@ create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
 set ( SRC_FILES
   src/NdArray.cpp
   src/Converters/CloneToNumpy.cpp
+  src/Converters/DateAndTime.cpp
   src/Converters/NDArrayToVector.cpp
   src/Converters/NDArrayTypeIndex.cpp
   src/Converters/NumpyFunctions.cpp
   src/Converters/PyArrayType.cpp
   src/Converters/PyObjectToMatrix.cpp
+  src/Converters/PyObjectToString.cpp
   src/Converters/PyObjectToV3D.cpp
   src/Converters/PyObjectToVMD.cpp
   src/Converters/WrapWithNumpy.cpp
@@ -89,6 +94,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/NdArray.h
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/CloneToNumpy.h
+  ${HEADER_DIR}/kernel/Converters/DateAndTime.h
   ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NumpyFunctions.h
@@ -98,6 +104,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/VectorToNDArray.h
   ${HEADER_DIR}/kernel/Converters/PyArrayType.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
+  ${HEADER_DIR}/kernel/Converters/PyObjectToString.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToVMD.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
@@ -189,11 +196,13 @@ set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
 target_link_libraries ( PythonKernelModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} Types Kernel ${Boost_LIBRARIES}
-                        ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES} ${TBB_LIBRARIES} 
+                        ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES} ${TBB_LIBRARIES}
 			${TBB_MALLOC_LIBRARIES} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( PythonKernelModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS")
+  set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR}")
 endif ()
 
 ###########################################################################

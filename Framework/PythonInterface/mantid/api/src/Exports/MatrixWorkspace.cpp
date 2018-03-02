@@ -1,7 +1,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -9,6 +8,8 @@
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/NdArray.h"
+#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
@@ -19,6 +20,10 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+
+#define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -58,6 +63,7 @@ GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
+
 /**
  * Set the values from an python array-style object into the given spectrum in
  * the workspace
@@ -69,25 +75,13 @@ GCC_DIAG_ON(conversion)
  */
 void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
                              const size_t wsIndex,
-                             const NumPy::NdArray &values) {
-  const auto pydim = values.get_nd();
-  if (pydim != 1) {
-    throw std::invalid_argument(
-        "Invalid shape for setting 1D spectrum array, array is " +
-        std::to_string(values.get_nd()) + "D");
-  }
-  const auto pylen = values.get_shape()[0];
-  Mantid::MantidVec &wsref = (self.*accessor)(wsIndex);
-  const int wslen = static_cast<int>(wsref.size());
-
-  if (pylen != wslen) {
-    throw std::invalid_argument(
-        "Length mismatch between workspace array & python array. ws=" +
-        std::to_string(wslen) + ", python=" + std::to_string(pylen));
-  }
-  double *pydata = (double *)values.get_data();
-  for (int i = 0; i < wslen; ++i) {
-    wsref[i] = pydata[i];
+                             const boost::python::object &values) {
+  if (NumPy::NdArray::check(values)) {
+    NDArrayToVector<double> converter(values);
+    converter.copyTo((self.*accessor)(wsIndex));
+  } else {
+    PySequenceToVector<double> converter(values);
+    converter.copyTo((self.*accessor)(wsIndex));
   }
 }
 
@@ -129,7 +123,7 @@ void clearMonitorWorkspace(MatrixWorkspace &self) {
  * @param values :: A numpy array. The length must match the size of the
  */
 void setXFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      const NumPy::NdArray &values) {
+                      const boost::python::object &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataX, wsIndex, values);
 }
 
@@ -140,7 +134,7 @@ void setXFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      const NumPy::NdArray &values) {
+                      const boost::python::object &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataY, wsIndex, values);
 }
 
@@ -162,7 +156,7 @@ void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                       const NumPy::NdArray &values) {
+                       const boost::python::object &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
 }
 
@@ -247,11 +241,6 @@ void export_MatrixWorkspace() {
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
-
-      .def("spectrumInfo", &MatrixWorkspace::spectrumInfo,
-           return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the :class:`~mantid.api.SpectrumInfo` "
-           "object.")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),

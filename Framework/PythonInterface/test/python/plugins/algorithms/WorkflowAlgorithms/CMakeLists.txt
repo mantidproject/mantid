@@ -35,10 +35,12 @@ set ( TEST_PY_FILES
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
+  LoadWANDTest.py
   MDNormSCDPreprocessIncoherentTest.py
   MolDynTest.py
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py
+  PowderDiffILLReductionTest.py
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py

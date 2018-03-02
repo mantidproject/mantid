@@ -1,7 +1,10 @@
 #include "IndirectDataAnalysisTab.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "boost/shared_ptr.hpp"
 
 #include <QSettings>
@@ -22,7 +25,7 @@ namespace IDA {
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
     : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr),
       m_parent(nullptr), m_inputWorkspace(), m_previewPlotWorkspace(),
-      m_selectedSpectrum(0) {
+      m_selectedSpectrum(0), m_minSpectrum(0), m_maxSpectrum(0) {
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
 
   // Create Editor Factories
@@ -51,7 +54,7 @@ void IndirectDataAnalysisTab::inputChanged() { validate(); }
  *
  * @return  The input workspace to be used in data analysis.
  */
-MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() {
+MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
   return m_inputWorkspace.lock();
 }
 
@@ -92,7 +95,9 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
  *
  * @return  The selected spectrum.
  */
-int IndirectDataAnalysisTab::selectedSpectrum() { return m_selectedSpectrum; }
+int IndirectDataAnalysisTab::selectedSpectrum() const {
+  return m_selectedSpectrum;
+}
 
 /**
  * Sets the selected spectrum.
@@ -101,6 +106,38 @@ int IndirectDataAnalysisTab::selectedSpectrum() { return m_selectedSpectrum; }
  */
 void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
   m_selectedSpectrum = spectrum;
+}
+
+/**
+ * Retrieves the selected minimum spectrum.
+ *
+ * @return  The selected minimum spectrum.
+ */
+int IndirectDataAnalysisTab::minimumSpectrum() const { return m_minSpectrum; }
+
+/**
+ * Sets the selected spectrum.
+ *
+ * @param spectrum  The spectrum to set.
+ */
+void IndirectDataAnalysisTab::setMinimumSpectrum(int spectrum) {
+  m_minSpectrum = spectrum;
+}
+
+/**
+ * Retrieves the selected maximum spectrum.
+ *
+ * @return  The selected maximum spectrum.
+ */
+int IndirectDataAnalysisTab::maximumSpectrum() const { return m_maxSpectrum; }
+
+/**
+ * Sets the selected maximum spectrum.
+ *
+ * @param spectrum  The spectrum to set.
+ */
+void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
+  m_maxSpectrum = spectrum;
 }
 
 /**
@@ -122,10 +159,203 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
                                 2);
     }
   } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+             boost::numeric_cast<size_t>(m_selectedSpectrum) <
+                 inputWs->getNumberHistograms()) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
+  }
+}
+
+/**
+ * Plots the selected spectrum of the input workspace in this indirect data
+ * analysis tab.
+ *
+ * @param previewPlot The preview plot widget in which to plot the input
+ *                    input workspace.
+ */
+void IndirectDataAnalysisTab::plotInput(
+    MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
+  previewPlot->clear();
+  auto inputWS = inputWorkspace();
+  auto spectrum = selectedSpectrum();
+
+  if (inputWS && inputWS->x(spectrum).size() > 1)
+    previewPlot->addSpectrum("Sample", inputWorkspace(), spectrum);
+}
+
+/**
+ * Clears all plots and plots the selected spectrum of the input workspace in
+ * this indirect data analysis tab.
+ *
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
+void IndirectDataAnalysisTab::clearAndPlotInput(
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+  m_previewPlotWorkspace.reset();
+  plotInput(fitPreviewPlot);
+  diffPreviewPlot->clear();
+}
+
+/**
+ * Plots the workspace at the specified index in the specified workspace
+ * group. Plots the sample and fit spectrum in the specified top preview
+ * plot. Plots the diff spectra in the specified difference preview plot.
+ *
+ * @param outputWSName      The name of the output workspace group.
+ * @param index             The index of the workspace (in the group)
+ *                          to plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
+void IndirectDataAnalysisTab::updatePlot(
+    const std::string &outputWSName, size_t index,
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+
+  if (AnalysisDataService::Instance().doesExist(outputWSName)) {
+    auto workspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        outputWSName);
+
+    if (workspace) {
+      updatePlot(workspace, index, fitPreviewPlot, diffPreviewPlot);
+      return;
+    }
+  }
+  clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
+}
+
+/**
+ * Plots the workspace at the specified index in the specified workspace
+ * group. Plots the sample and fit spectrum in the specified top preview
+ * plot. Plots the diff spectra in the specified difference preview plot.
+ *
+ * @param outputWS          The output workspace group.
+ * @param index             The index of the workspace (in the group)
+ *                          to plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
+void IndirectDataAnalysisTab::updatePlot(
+    WorkspaceGroup_sptr outputWS, size_t index,
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+  // Check whether the specified index is within the bounds of the
+  // fitted spectrum.
+  if (outputWS && index < outputWS->size()) {
+    auto workspace =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
+    updatePlot(workspace, fitPreviewPlot, diffPreviewPlot);
+  } else
+    clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
+}
+
+/**
+ * Plots the data in the workspace with the specified name. Plots the
+ * sample and fit  spectrum in the specified top preview plot. Plots
+ * the diff spectra in the specified difference preview plot.
+ *
+ * @param workspaceName     The name of the workspace to plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
+void IndirectDataAnalysisTab::updatePlot(
+    const std::string &workspaceName,
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+
+  if (AnalysisDataService::Instance().doesExist(workspaceName)) {
+    auto groupWorkspace =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            workspaceName);
+    // Check whether the specified workspace is a workspace group.
+    if (groupWorkspace) {
+      updatePlot(groupWorkspace, fitPreviewPlot, diffPreviewPlot);
+    } else {
+      auto matWorkspace =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              workspaceName);
+      updatePlot(matWorkspace, fitPreviewPlot, diffPreviewPlot);
+    }
+  } else
+    clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
+}
+
+/**
+ * Plots the workspace at the index specified by the selected
+ * spectrum, in the specified workspace group. Plots the sample
+ * and fit  spectrum in the specified top preview plot. Plots
+ * the diff spectra in the specified difference preview plot.
+ *
+ * @param outputWS          The group workspace containing the
+ *                          workspaced to plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
+void IndirectDataAnalysisTab::updatePlot(
+    WorkspaceGroup_sptr outputWS,
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+  if (outputWS && selectedSpectrum() >= minimumSpectrum() &&
+      selectedSpectrum() <= maximumSpectrum())
+    updatePlot(outputWS, selectedSpectrum() - minimumSpectrum(), fitPreviewPlot,
+               diffPreviewPlot);
+  else
+    clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
+}
+
+/**
+ * Plots the data in the specified workspace. Plots the sample
+ * and fit  spectrum in the specified top preview plot. Plots
+ * the diff spectra in the specified difference preview plot.
+ *
+ * @param outputWS          The workspace to plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
+void IndirectDataAnalysisTab::updatePlot(
+    MatrixWorkspace_sptr outputWS,
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+  fitPreviewPlot->clear();
+  diffPreviewPlot->clear();
+
+  if (outputWS) {
+    setPreviewPlotWorkspace(outputWS);
+    fitPreviewPlot->addSpectrum("Sample", outputWS, 0, Qt::black);
+    fitPreviewPlot->addSpectrum("Fit", outputWS, 1, Qt::red);
+    diffPreviewPlot->addSpectrum("Diff", outputWS, 2, Qt::blue);
+  } else
+    clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
+}
+
+/*
+ * Updates the plot range with the specified name, to match the range of
+ * the sample curve.
+ *
+ * @param rangeName           The name of the range to update.
+ * @param previewPlot         The preview plot widget, in which the range
+ *                            is specified.
+ * @param startRangePropName  The name of the property specifying the start
+ *                            value for the range.
+ * @parma endRangePropName    The name of the property specifying the end
+ *                            value for the range.
+ */
+void IndirectDataAnalysisTab::updatePlotRange(
+    const QString &rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+    const QString &startRangePropName, const QString &endRangePropName) {
+
+  if (inputWorkspace()) {
+    try {
+      const QPair<double, double> curveRange =
+          previewPlot->getCurveRange("Sample");
+      auto rangeSelector = previewPlot->getRangeSelector(rangeName);
+      setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
+                           m_properties[endRangePropName], curveRange);
+    } catch (std::exception &exc) {
+      showMessageBox(exc.what());
+    }
   }
 }
 

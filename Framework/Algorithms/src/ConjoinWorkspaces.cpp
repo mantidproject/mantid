@@ -20,14 +20,12 @@ DECLARE_ALGORITHM(ConjoinWorkspaces)
 //----------------------------------------------------------------------------------------------
 /** Initialize the properties */
 void ConjoinWorkspaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace1", "", Direction::InOut,
-                      boost::make_shared<CommonBinsValidator>()),
-                  "The name of the first input workspace");
-  declareProperty(make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace2", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
-                  "The name of the second input workspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Direction::InOut),
+      "The name of the first input workspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Direction::Input),
+      "The name of the second input workspace");
   declareProperty(make_unique<PropertyWithValue<bool>>("CheckOverlapping", true,
                                                        Direction::Input),
                   "Verify that the supplied data do not overlap");
@@ -170,7 +168,7 @@ API::MatrixWorkspace_sptr
 ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace &ws1,
                                      const API::MatrixWorkspace &ws2) {
   // Check that the input workspaces meet the requirements for this algorithm
-  this->validateInputs(ws1, ws2);
+  this->validateInputs(ws1, ws2, false);
 
   if (this->getProperty("CheckOverlapping")) {
     this->checkForOverlap(ws1, ws2, true);
@@ -249,10 +247,10 @@ void ConjoinWorkspaces::setYUnitAndLabel(API::MatrixWorkspace &ws) const {
 
   // Unit must be moved before label, as changing the unit resets the label
   if (!yUnit.empty())
-    ws.setYUnit(std::move(yUnit));
+    ws.setYUnit(yUnit);
 
   if (!yLabel.empty())
-    ws.setYUnitLabel(std::move(yLabel));
+    ws.setYUnitLabel(yLabel);
 }
 
 } // namespace Algorithm

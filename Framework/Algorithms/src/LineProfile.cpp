@@ -297,7 +297,7 @@ void LineProfile::init() {
                       PropertyNames::INPUT_WORKSPACE, "", Direction::Input,
                       inputWorkspaceValidator),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
                   "A single histogram workspace containing the profile.");
   declareProperty(PropertyNames::CENTRE, EMPTY_DBL(), mandatoryDouble,
