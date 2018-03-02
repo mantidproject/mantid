@@ -361,7 +361,6 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
   const auto wsParams =
       MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
 
-  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
   const QString &periodToSet = QString::fromStdString(wsParams.periods);
   const auto &periods = m_dataSelector->getPeriodSelections();
 
@@ -369,6 +368,7 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
     m_uiForm.fitBrowser->setChosenPeriods(periodToSet);
   }
   return; /*
+  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
 
 const auto &groups = m_dataSelector->getChosenGroups();
      if (!groups.contains(groupToSet)) {

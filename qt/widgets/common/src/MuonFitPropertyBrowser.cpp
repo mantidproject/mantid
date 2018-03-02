@@ -1651,7 +1651,6 @@ void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
   auto index = m_enumManager->value(m_groupsToFit);
   QString name = m_groupsToFitOptions[index];
   if (name == CUSTOM_LABEL) {
-    bool match = false;
     auto vals = getChosenGroups();
     clearChosenGroups();
     for (const auto &group : vals) {
@@ -1660,7 +1659,6 @@ void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
            iter != m_groupBoxes.constEnd(); ++iter) {
         if (iter.key().toStdString() == group.toStdString()) {
           m_boolManager->setValue(iter.value(), true);
-          match = true;
         }
       }
     }
