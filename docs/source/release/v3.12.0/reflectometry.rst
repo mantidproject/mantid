@@ -59,6 +59,7 @@ Bug fixes
   - LambdaMax,
   - I0MonitorIndex
   - TransRunStartOverlap and TransRunEndOverlap if on SURF or CRISP.
+- Fixed a bug where the processed state of rows was being reset when transferring additional rows into the table.
 
 
 Algorithms
