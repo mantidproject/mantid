@@ -211,11 +211,11 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
         _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        settings_icon_path = os.path.join(path, "icons", "settings.png")
+        settings_icon_path = os.path.join(path, "icons", "centre.png")
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        settings_icon_path = os.path.join(path, "icons", "settings.png")
+        settings_icon_path = os.path.join(path, "icons", "diagnostic.png")
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
