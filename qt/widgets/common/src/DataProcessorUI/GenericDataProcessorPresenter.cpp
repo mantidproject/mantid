@@ -103,7 +103,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_group(group), m_whitelist(std::move(whitelist)),
       m_processor(std::move(processor)), m_progressReporter(nullptr),
       m_promptUser(true), m_tableDirty(false), m_pauseReduction(false),
-      m_reductionPaused(true), m_nextActionFlag(ReductionFlag::StopReduceFlag) {
+      m_reductionPaused(true) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -374,45 +374,43 @@ void GenericDataProcessorPresenter::process() {
     return;
   }
 
-  // Clear the group queue
-  m_group_queue = GroupQueue();
-
   // Progress: each group and each row within count as a progress step.
   int maxProgress = 0;
 
-  for (const auto &group : m_selectedData) {
+  for (const auto &groupItem : m_selectedData) {
+    const auto groupIndex = groupItem.first;
+    auto groupData = groupItem.second;
+
     auto groupOutputNotFound =
         hasPostprocessing() &&
-        !workspaceExists(getPostprocessedWorkspaceName(group.second));
+        !workspaceExists(getPostprocessedWorkspaceName(groupData));
 
     if (groupOutputNotFound)
-      m_manager->setProcessed(false, group.first);
+      m_manager->setProcessed(false, groupIndex);
 
     // Groups that are already processed or cannot be post-processed (only 1
     // child row selected) do not count in progress
-    if (!isProcessed(group.first) && group.second.size() > 1)
+    if ((!isGroupProcessed(groupIndex) || m_forceProcessing) &&
+        groupData.size() > 1)
       maxProgress++;
 
-    RowQueue rowQueue;
+    for (const auto &rowItem : groupData) {
+      const auto rowIndex = rowItem.first;
+      auto rowData = rowItem.second;
 
-    for (const auto &row : group.second) {
       // Set up all data required for processing the row
-      if (!initRowForProcessing(row.second))
+      if (!initRowForProcessing(rowData))
         return;
-
-      // Add all row items to queue
-      rowQueue.emplace_back(row);
 
       // Set group as unprocessed if settings have changed or the expected
       // output workspaces cannot be found
-      if (!rowOutputExists(row))
-        m_manager->setProcessed(false, row.first, group.first);
+      if (!rowOutputExists(rowItem))
+        m_manager->setProcessed(false, rowIndex, groupIndex);
 
       // Rows that are already processed do not count in progress
-      if (!isProcessed(row.first, group.first))
+      if (!rowData->isProcessed())
         maxProgress++;
     }
-    m_group_queue.emplace_back(group.first, rowQueue);
   }
 
   // Create progress reporter bar
@@ -422,34 +420,13 @@ void GenericDataProcessorPresenter::process() {
                                                maxProgress, m_progressView);
   }
   // Start processing the first group
-  m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
   resume();
 }
 
 /**
-Decide which processing action to take next
+Process the next item in the selection
 */
-void GenericDataProcessorPresenter::doNextAction() {
-
-  switch (m_nextActionFlag) {
-  case ReductionFlag::ReduceRowFlag:
-    nextRow();
-    break;
-  case ReductionFlag::ReduceGroupFlag:
-    nextGroup();
-    break;
-  case ReductionFlag::StopReduceFlag:
-    endReduction();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
-}
-
-/**
-Process a new row
-*/
-void GenericDataProcessorPresenter::nextRow() {
+void GenericDataProcessorPresenter::processNextItem() {
 
   if (m_pauseReduction) {
     // Notify presenter that reduction is paused
@@ -458,39 +435,44 @@ void GenericDataProcessorPresenter::nextRow() {
     return;
   }
 
-  // Add processed row data to the group
-  int rowIndex = m_rowItem.first;
-  m_groupData[rowIndex] = m_rowItem.second;
-  int groupIndex = m_group_queue.front().first;
-  auto &rqueue = m_group_queue.front().second;
+  // We always loop through all groups in the selection and process the
+  // first one that has not yet been processed. We only process one and
+  // then return.
+  for (auto &groupItem : m_selectedData) {
+    const auto groupIndex = groupItem.first;
+    auto groupData = groupItem.second;
 
-  if (!rqueue.empty()) {
-    // Set next action flag
-    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
-    // Reduce next row
-    m_rowItem = rqueue.front();
-    pop_front(rqueue);
-    // Skip reducing rows that are already processed
-    if (!isProcessed(m_rowItem.first, groupIndex)) {
-      startAsyncRowReduceThread(&m_rowItem, groupIndex);
-      return;
-    }
-  } else {
-    pop_front(m_group_queue);
-    // Set next action flag
-    m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
+    // Skip if the entire group has already been marked as processed
+    if (!m_forceProcessing && isGroupProcessed(groupIndex))
+      continue;
 
-    // Skip post-processing groups that are already processed or only contain a
-    // single row
-    if (!isProcessed(groupIndex)) {
-      if (m_groupData.size() > 1) {
-        startAsyncGroupReduceThread(m_groupData, groupIndex);
+    // Process all rows in the group
+    for (auto &rowItem : groupData) {
+      const auto rowIndex = rowItem.first;
+      auto rowData = rowItem.second;
+
+      if (m_forceProcessing || !rowData->isProcessed()) {
+        // Start a thread to process this item and then return. The next
+        // item will be processed after this thread has finished.
+        startAsyncRowReduceThread(rowData, rowIndex, groupIndex);
         return;
       }
     }
+
+    // Start a thread to perform any remaining processing required on the group
+    // (i.e. post-processing) and then return. The next item will be processed
+    // after this thread has finished. Note that we skip post-processing of
+    // groups that only contain a single row because there is an assumption
+    // that post-processing only applies to multi-row groups.
+    if (groupData.size() > 1) {
+      startAsyncGroupReduceThread(groupData, groupIndex);
+      return;
+    }
   }
-  // Row / group skipped, perform next action
-  doNextAction();
+
+  // If we get here then we did not have anything left to process, so the
+  // reduction is complete.
+  endReduction(true);
 }
 
 void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
@@ -499,53 +481,14 @@ void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
 void GenericDataProcessorPresenter::completedRowReductionSuccessfully(
     GroupData const &, std::string const &) {}
 
-/**
-Process a new group
-*/
-void GenericDataProcessorPresenter::nextGroup() {
-
-  if (m_pauseReduction) {
-    // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused(m_group);
-    m_reductionPaused = true;
-    return;
-  }
-
-  if (!m_group_queue.empty()) {
-    // Set next action flag
-    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
-    // Reduce first row
-    auto &rqueue = m_group_queue.front().second;
-    m_rowItem = rqueue.front();
-    // Clear group data from any previously processed groups
-    m_groupData.clear();
-    for (auto &&row : rqueue)
-      m_groupData[row.first] = row.second;
-    pop_front(rqueue);
-
-    // Skip reducing rows that are already processed
-    if (!isProcessed(m_rowItem.first, m_group_queue.front().first)) {
-      startAsyncRowReduceThread(&m_rowItem, m_group_queue.front().first);
-    } else {
-      doNextAction();
-    }
-  } else {
-    // If "Output Notebook" checkbox is checked then create an ipython
-    // notebook
-    if (m_view->getEnableNotebook())
-      saveNotebook(m_selectedData);
-    endReduction();
-  }
-}
-
 /*
 Reduce the current row asynchronously
 */
-void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
-                                                              int groupIndex) {
+void GenericDataProcessorPresenter::startAsyncRowReduceThread(
+    RowData_sptr rowData, const int rowIndex, const int groupIndex) {
 
   auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-      this, rowItem, groupIndex);
+      this, rowData, rowItem, groupIndex);
 
   connect(worker, SIGNAL(finished(int)), this, SLOT(rowThreadFinished(int)));
   connect(worker, SIGNAL(reductionErrorSignal(QString)), this,
@@ -571,9 +514,18 @@ void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
 
 /**
 End reduction
+*
+* @param reductionSuccessful : true if the reduction completed successfully,
+* false if there were any errors
 */
-void GenericDataProcessorPresenter::endReduction() {
+void GenericDataProcessorPresenter::endReduction(
+    const bool reductionSuccessful) {
 
+  // Create an ipython notebook if "Output Notebook" is checked.
+  if (reductionSuccessful && m_view->getEnableNotebook())
+    saveNotebook(m_selectedData);
+
+  // Stop the reduction
   pause();
   m_reductionPaused = true;
   m_mainPresenter->confirmReductionPaused(m_group);
@@ -598,10 +550,10 @@ void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
 
   if (exitCode == 0) { // Success
     m_progressReporter->report();
-    doNextAction();
+    processNextItem();
   } else { // Error
     m_progressReporter->clear();
-    endReduction();
+    endReduction(false);
   }
 }
 
@@ -658,12 +610,14 @@ Post-processes the workspaces created by the given rows together.
 */
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
-  if (hasPostprocessing()) {
-    const auto outputWSName = getPostprocessedWorkspaceName(groupData);
-    m_postprocessing->postProcessGroup(
-        outputWSName, m_processor.postprocessedOutputPropertyName(),
-        m_whitelist, groupData);
-  }
+  // Nothing to do if there is no postprocessing algorithm
+  if (!hasPostprocessing())
+    return;
+
+  const auto outputWSName = getPostprocessedWorkspaceName(groupData);
+  m_postprocessing->postProcessGroup(outputWSName,
+                                     m_processor.postprocessedOutputPropertyName(),
+                                     m_whitelist, groupData);
 }
 
 /**
@@ -1580,7 +1534,7 @@ void GenericDataProcessorPresenter::resume() {
   m_reductionPaused = false;
   m_mainPresenter->confirmReductionResumed(m_group);
 
-  doNextAction();
+  processNextItem();
 }
 
 /**
@@ -1687,34 +1641,12 @@ bool GenericDataProcessorPresenter::isProcessing() const {
   return !m_reductionPaused;
 }
 
-/** Checks if a row in the table has been processed.
- * @param position :: the row to check
- * @return :: true if the row has already been processed else false.
+/** Checks if a group in the table has been processed.
+ * @param groupIndex :: the group index to check
+ * @return :: true if the group has already been processed else false.
  */
-bool GenericDataProcessorPresenter::isProcessed(int position) const {
-  // processing truth table
-  // isProcessed      manager    force
-  //    0               1          1
-  //    0               0          1
-  //    1               1          0
-  //    0               0          0
-  return m_manager->isProcessed(position) && !m_forceProcessing;
-}
-
-/** Checks if a row in the table has been processed.
- * @param position :: the row to check
- * @param parent :: the parent
- * @return :: true if the row has already been processed else false.
- */
-bool GenericDataProcessorPresenter::isProcessed(int position,
-                                                int parent) const {
-  // processing truth table
-  // isProcessed      manager    force
-  //    0               1          1
-  //    0               0          1
-  //    1               1          0
-  //    0               0          0
-  return m_manager->isProcessed(position, parent) && !m_forceProcessing;
+bool GenericDataProcessorPresenter::isGroupProcessed(int groupIndex) const {
+  return m_manager->isProcessed(groupIndex);
 }
 
 /** Set the forced reprocessing flag

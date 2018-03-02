@@ -41,18 +41,18 @@ class GenericDataProcessorPresenterRowReducerWorker : public QObject {
 
 public:
   GenericDataProcessorPresenterRowReducerWorker(
-      GenericDataProcessorPresenter *presenter, RowItem *rowItem,
-      int groupIndex)
-      : m_presenter(presenter), m_rowItem(rowItem), m_groupIndex(groupIndex) {}
+      GenericDataProcessorPresenter *presenter, RowData_sptr rowData,
+      const int rowIndex, const int groupIndex)
+      : m_presenter(presenter), m_rowData(rowData), m_rowIndex(rowIndex),
+        m_groupIndex(groupIndex) {}
 
 private slots:
   void startWorker() {
     try {
-      m_presenter->reduceRow(m_rowItem->second);
-      m_presenter->m_manager->update(m_groupIndex, m_rowItem->first,
-                                     m_rowItem->second->data());
-      m_presenter->m_manager->setProcessed(true, m_rowItem->first,
-                                           m_groupIndex);
+      m_presenter->reduceRow(m_rowData);
+      m_presenter->m_manager->update(m_groupIndex, m_rowIndex,
+                                     m_rowData->data());
+      m_presenter->m_manager->setProcessed(true, m_rowIndex, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
       emit reductionErrorSignal(QString(ex.what()));
@@ -66,7 +66,8 @@ signals:
 
 private:
   GenericDataProcessorPresenter *m_presenter;
-  RowItem *m_rowItem;
+  RowData_sptr m_rowData;
+  int m_rowIndex;
   int m_groupIndex;
 };
 

@@ -261,12 +261,6 @@ private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
 
-  // The current queue of groups to be reduced
-  GroupQueue m_group_queue;
-  // The current group we are reducing row data for
-  GroupData m_groupData;
-  // The current row item being reduced
-  RowItem m_rowItem;
   // The progress reporter
   ProgressPresenter *m_progressReporter;
   // A boolean indicating whether to prompt the user when getting selected runs
@@ -281,10 +275,6 @@ private:
   bool m_pauseReduction;
   // A boolean indicating whether data reduction is confirmed paused
   bool m_reductionPaused;
-  // Enumeration of the reduction actions that can be taken
-  enum class ReductionFlag { ReduceRowFlag, ReduceGroupFlag, StopReduceFlag };
-  // A flag of the next action due to be carried out
-  ReductionFlag m_nextActionFlag;
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr
   getRun(const QString &run, const QString &instrument, const QString &prefix);
@@ -336,29 +326,25 @@ private:
   // actions/commands
   void addCommands();
 
-  // decide between processing next row or group
-  void doNextAction();
-
-  // process next row/group
-  void nextRow();
-  void nextGroup();
-
-  // start thread for performing reduction on current row/group asynchronously
-  virtual void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex);
+  // start thread for performing reduction on a row/group asynchronously
+  virtual void startAsyncRowReduceThread(RowData_sptr rowData,
+                                         const int rowIndex,
+                                         const int groupIndex);
   virtual void startAsyncGroupReduceThread(GroupData &groupData,
                                            int groupIndex);
 
+  // process the next group/row
+  void processNextItem();
   // end reduction
-  void endReduction();
+  void endReduction(const bool success);
 
   // pause/resume reduction
   void pause();
   void resume();
   void updateWidgetEnabledState(const bool isProcessing) const;
 
-  // Check if run has been processed
-  bool isProcessed(int position) const;
-  bool isProcessed(int position, int parent) const;
+  // Check if a group has been processed
+  bool isGroupProcessed(int groupIndex) const;
   bool m_forceProcessing = false;
   bool m_skipProcessing = false;
 

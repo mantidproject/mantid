@@ -94,11 +94,12 @@ public:
 
 private:
   // non-async row reduce
-  void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex) override {
+  void startAsyncRowReduceThread(RowData_sptr rowData, const int rowIndex,
+                                 const int groupIndex) override {
     try {
-      reduceRow(rowItem->second);
-      m_manager->update(groupIndex, rowItem->first, rowItem->second->data());
-      m_manager->setProcessed(true, rowItem->first, groupIndex);
+      reduceRow(rowData);
+      m_manager->update(groupIndex, rowIndex, rowData->data());
+      m_manager->setProcessed(true, rowIndex, groupIndex);
     } catch (std::exception &ex) {
       reductionError(QString(ex.what()));
       rowThreadFinished(1);
