@@ -156,7 +156,7 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     // Check file is identical
-    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+    TS_ASSERT(!FileComparisonHelper::isEqualToReferenceFile(
         "SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
 
     // Clean
