@@ -618,7 +618,22 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              x_end, areaInfo);
   }
 
-  const double variance = error * error;
+  // If the input is a RebinnedOutput workspace with frac. area we need
+  // to account for the weight of the input bin in the output bin weights
+  double inputWeight = 1.;
+  double variance = error * error;
+  auto inputRB = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
+  if (inputRB) {
+    const auto &inF = inputRB->dataF(i);
+    inputWeight = inF[j];
+    // If the signal/error has been "finalized" (scaled by 1/inF) then
+    // we need to undo this before carrying on.
+    if (inputRB->isFinalized()) {
+      signal *= inF[j];
+      variance *= inF[j] * inF[j]; // It was the _error_ which was scaled.
+    }
+  }
+
   for (const auto &ai : areaInfo) {
     const size_t xi = std::get<0>(ai);
     const size_t yi = std::get<1>(ai);
@@ -626,7 +641,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     PARALLEL_CRITICAL(overlap) {
       outputWS->mutableY(yi)[xi] += signal * weight;
       outputWS->mutableE(yi)[xi] += variance * weight;
-      outputWS->dataF(yi)[xi] += weight;
+      outputWS->dataF(yi)[xi] += weight * inputWeight;
     }
   }
 }
