@@ -98,7 +98,7 @@ class VesuvioTOFFitInput(object):
         else:
             self.container_runs, self.container_data = None, None
 
-        self._back_scattering = is_back_scattering_spectra(spectra)
+        self._back_scattering = is_back_scattering_spectra(self.spectra)
 
     @property
     def spectra_number(self):
