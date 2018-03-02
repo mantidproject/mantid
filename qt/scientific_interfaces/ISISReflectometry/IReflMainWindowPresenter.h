@@ -1,7 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 
-#include <map>
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+
 #include <string>
 
 namespace MantidQt {
@@ -38,15 +39,23 @@ class IReflMainWindowPresenter {
 public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
+  enum class Flag {
+    ConfirmReductionPausedFlag,
+    ConfirmReductionResumedFlag,
+    HelpPressed
+  };
 
-  enum class Flag { ConfirmReductionPausedFlag, ConfirmReductionResumedFlag };
   virtual void notify(Flag flag) = 0;
+  virtual void notifyReductionPaused(int group) = 0;
+  virtual void notifyReductionResumed(int group) = 0;
 
   /// Pre-processing
   virtual std::string getTransmissionRuns(int group) const = 0;
-  virtual std::string getTransmissionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getTransmissionOptions(int group) const = 0;
   /// Processing
-  virtual std::string getReductionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getReductionOptions(int group) const = 0;
   /// Post-processing
   virtual std::string getStitchOptions(int group) const = 0;
   /// Time-slicing values
@@ -64,6 +73,8 @@ public:
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check
   virtual bool checkIfProcessing() const = 0;
+
+  virtual void settingsChanged(int group) = 0;
 };
 }
 }

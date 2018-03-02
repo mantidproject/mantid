@@ -28,7 +28,7 @@ This loader will update the detector position from what is defined in the instru
 
 The rotation angle can be one of the following:
 
-* The detector angle in the sample logs. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`DirectBeamPosition` is given. For Figaro, the value of :literal:`CollAngle.actual_coll_angle` is added to the angle to normalize the z-axis as the direct beam axis.
+* The detector angle in the sample logs. For Figaro this will be calculated from the motor positions. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`DirectBeamPosition` is given.
 
 * The detector angle calibrated by the direct beam measurement. This behavior is triggered when :literal:`DirectBeamPosition` is given.
 
@@ -75,11 +75,6 @@ where :math:`i_{centre}` is the workspace index of the detector centre (127.5 fo
 
 The value of :math:`i_{fit}` can be overridden by the :literal:`BeamCentre` property. This effectively disables the fitting procedure.
 
-Sample position
----------------
-
-In the case of Figaro, the loader will move the sample component along the z-axis by the amount specified by the :literal:`Theta.sampleHorizontalOffset` entry in sample logs.
-
 Source position
 ---------------
 
@@ -104,7 +99,7 @@ Usage
    config['default.instrument'] = 'D17'
 
    # Load ILL D17 data file (TOF mode) into a workspace 2D using default input options:
-   ws1 = Load('ILL/D17/317370.nxs')
+   ws1 = LoadILLReflectometry('ILL/D17/317370.nxs')
 
    print("Workspace {} has {} dimensions and {} histograms.".format(ws1.name(), ws1.getNumDims(), ws1.getNumberHistograms()))
 
@@ -125,7 +120,7 @@ Output:
    import numpy
    
    # Load ILL d17 data file (TOF mode) into a workspace 2D using a user-defined angle of 30 degrees:
-   ws2 = Load('ILL/D17/317370.nxs', BraggAngle=5.5)
+   ws2 = LoadILLReflectometry('ILL/D17/317370.nxs', BraggAngle=5.5)
    
    # The original detector angle can be found in the sample logs:
    angleOrig = ws2.getRun().getProperty("dan.value").value
@@ -155,17 +150,17 @@ Output:
 
    import numpy
 
-   directBeamWS = Load('ILL/D17/317369.nxs', OutputBeamPosition='beamPositionWS')
+   directBeamWS = LoadILLReflectometry('ILL/D17/317369.nxs', OutputBeamPosition='beamPositionWS')
 
    beamPosWS = mtd['beamPositionWS']
    peakCentre = beamPosWS.cell('PeakCentre', 0)
    print('Fitted direct beam maximum (in workspace indices): {:.5}'.format(peakCentre))
 
-   reflectedBeamWS = Load('ILL/D17/317370.nxs', DirectBeamPosition=beamPosWS)
+   reflectedBeamWS = LoadILLReflectometry('ILL/D17/317370.nxs', DirectBeamPosition=beamPosWS)
 
    # Lets load the data without detector angle calibration just for reference
 
-   refWS = Load('ILL/D17/317370.nxs')
+   refWS = LoadILLReflectometry('ILL/D17/317370.nxs')
 
    det = reflectedBeamWS.getDetector(int(peakCentre))
    detAngle = numpy.degrees(reflectedBeamWS.detectorTwoTheta(det))

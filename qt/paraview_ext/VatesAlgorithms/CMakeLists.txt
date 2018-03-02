@@ -38,16 +38,19 @@ ${MANTID_SUBPROJECT_LIBS}
 VatesAPI
 vtkCommonCore
 vtkCommonDataModel
-vtkIOLegacy
-vtkFiltersExtraction
-vtkFiltersSources
 ${vtkjsoncpp_LIBRARIES}
-vtkPVVTKExtensionsDefault
+vtkIOLegacy
+vtkIOXML
+vtkInteractionStyle
+vtkRenderingFreeType
+vtkRenderingOpenGL2
 ${POCO_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( VatesAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS;@loader_path/../Libraries")
+  set_target_properties(VatesAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS;@loader_path/../Libraries")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(VatesAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Create test file projects
@@ -62,20 +65,10 @@ set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper
 cxxtest_add_test( VatesAlgorithmsTest ${TEST_FILES} )
 target_link_libraries( VatesAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${MANTID_SUBPROJECT_LIBS}
-  VatesAlgorithms
-  DataHandling
-  Kernel
-  DataObjects
   Indexing
-  vtkCommonCore
-  vtkCommonDataModel
-  vtkIOLegacy
-  vtkFiltersExtraction
-  vtkFiltersSources
-  vtkPVVTKExtensionsDefault
-  ${vtkjsoncpp_LIBRARIES}
+  VatesAPI
+  VatesAlgorithms
   ${POCO_LIBRARIES}
-  ${Boost_LIBRARIES}
   ${GMOCK_LIBRARIES}
   ${GTEST_LIBRARIES}
   )

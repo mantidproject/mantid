@@ -4,6 +4,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -98,7 +99,7 @@ void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box) {
   // Compile time deduction of the correct function call
   addDetectors(peak, box, IsFullEvent<MDE, nd>());
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindPeaksMD)
@@ -187,6 +188,21 @@ void FindPeaksMD::init() {
                           Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
                           numberOfEventsNormalization));
 
+  declareProperty("CalculateGoniometerForCW", false,
+                  "This will calculate the goniometer rotation (around y-axis "
+                  "only) for a constant wavelength. This only works for Q "
+                  "sample workspaces.");
+
+  auto nonNegativeDbl = boost::make_shared<BoundedValidator<double>>();
+  nonNegativeDbl->setLower(0);
+  declareProperty("Wavelength", DBL_MAX, nonNegativeDbl,
+                  "Wavelength to use when calculating goniometer angle");
+
+  setPropertySettings("Wavelength",
+                      make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW",
+                          Mantid::Kernel::ePropertyCriterion::IS_NOT_DEFAULT));
+
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace with the peaks' found positions.");
@@ -242,10 +258,12 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
  *
  * @param Q :: Q_lab or Q_sample, depending on workspace
  * @param binCount :: bin count to give to the peak.
+ * @param tracer :: Ray tracer to use for detector finding
  */
-void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
+void FindPeaksMD::addPeak(const V3D &Q, const double binCount,
+                          const Geometry::InstrumentRayTracer &tracer) {
   try {
-    auto p = this->createPeak(Q, binCount);
+    auto p = this->createPeak(Q, binCount, tracer);
     if (m_edge > 0) {
       if (edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
         return;
@@ -262,7 +280,8 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
  * Creates a Peak object from Q & bin count
  * */
 boost::shared_ptr<DataObjects::Peak>
-FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
+FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
+                        const Geometry::InstrumentRayTracer &tracer) {
   boost::shared_ptr<DataObjects::Peak> p;
   if (dimType == QLAB) {
     // Build using the Q-lab-frame constructor
@@ -271,14 +290,46 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
     p->setGoniometerMatrix(m_goniometer);
   } else if (dimType == QSAMPLE) {
     // Build using the Q-sample-frame constructor
-    p = boost::make_shared<Peak>(inst, Q, m_goniometer);
+    bool calcGoniometer = getProperty("CalculateGoniometerForCW");
+
+    if (calcGoniometer) {
+      // Calculate Q lab from Q sample and wavelength
+      double wavelength = getProperty("Wavelength");
+      double wv = 2.0 * M_PI / wavelength;
+      double norm_q2 = Q.norm2();
+      double theta = acos(1 - norm_q2 / (2 * wv * wv));
+      double phi = asin(-Q[1] / wv * sin(theta));
+      V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi),
+                wv * (1 - cos(theta)));
+
+      // Solve to find rotation matrix, assuming only rotation around y-axis
+      // A * X = B
+      Matrix<double> A({Q[0], Q[2], Q[2], -Q[0]}, 2, 2);
+      A.Invert();
+      std::vector<double> B{Q_lab[0], Q_lab[2]};
+      std::vector<double> X = A * B;
+      double rot = atan2(X[1], X[0]);
+      g_log.information() << "Found goniometer rotation to be "
+                          << rot * 180 / M_PI
+                          << " degrees for peak at Q sample = " << Q << "\n";
+
+      Matrix<double> goniometer(3, 3, true);
+      goniometer[0][0] = cos(rot);
+      goniometer[0][2] = sin(rot);
+      goniometer[2][0] = -sin(rot);
+      goniometer[2][2] = cos(rot);
+      p = boost::make_shared<Peak>(inst, Q, goniometer);
+
+    } else {
+      p = boost::make_shared<Peak>(inst, Q, m_goniometer);
+    }
   } else {
     throw std::invalid_argument(
         "Cannot Integrate peaks unless the dimension is QLAB or QSAMPLE");
   }
 
   try { // Look for a detector
-    p->findDetector();
+    p->findDetector(tracer);
   } catch (...) { /* Ignore errors in ray-tracer */
   }
 
@@ -322,6 +373,8 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
     ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
     this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+
+    Geometry::InstrumentRayTracer tracer(inst);
     // Copy the instrument, sample, run to the peaks workspace.
     peakWS->copyExperimentInfoFrom(ei.get());
 
@@ -386,7 +439,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // e.g. from highest density down to lowest density.
     typename std::multimap<double, boxPtr>::reverse_iterator it2;
     auto it2_end = sortedBoxes.rend();
-    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++) {
+    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; ++it2) {
       signal_t density = it2->first;
       boxPtr box = it2->second;
 #ifndef MDBOX_TRACK_CENTROID
@@ -472,7 +525,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         binCount = static_cast<double>(box->getNPoints());
 
       try {
-        auto p = this->createPeak(Q, binCount);
+        auto p = this->createPeak(Q, binCount, tracer);
         if (m_addDetectors) {
           auto mdBox = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
           if (!mdBox) {
@@ -527,6 +580,7 @@ void FindPeaksMD::findPeaksHisto(
   for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
     ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
     this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    Geometry::InstrumentRayTracer tracer(inst);
 
     // Copy the instrument, sample, run to the peaks workspace.
     peakWS->copyExperimentInfoFrom(ei.get());
@@ -630,7 +684,7 @@ void FindPeaksMD::findPeaksHisto(
       double binCount = ws->getSignalNormalizedAt(index) * m_densityScaleFactor;
 
       // Create the peak
-      addPeak(Q, binCount);
+      addPeak(Q, binCount, tracer);
 
       // Report progres for each box found.
       prog->report("Adding Peaks");
@@ -645,6 +699,7 @@ void FindPeaksMD::findPeaksHisto(
 /** Execute the algorithm.
  */
 void FindPeaksMD::exec() {
+
   bool AppendPeaks = getProperty("AppendPeaks");
 
   // Output peaks workspace, create if needed
@@ -714,8 +769,14 @@ std::map<std::string, std::string> FindPeaksMD::validateInputs() {
                                     "can only be used with an MDEventWorkspace "
                                     "as the input.";
   }
+
+  double wavelength = getProperty("Wavelength");
+  if (getProperty("CalculateGoniometerForCW") && wavelength == DBL_MAX)
+    result["Wavelength"] =
+        "Must set wavelength when using CalculateGoniometerForCW option";
+
   return result;
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

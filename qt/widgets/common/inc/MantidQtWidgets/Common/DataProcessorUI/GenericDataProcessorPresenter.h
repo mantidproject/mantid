@@ -7,11 +7,12 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
@@ -22,6 +23,7 @@
 #include <boost/optional.hpp>
 
 #include <QSet>
+#include <map>
 #include <queue>
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -67,15 +69,20 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct PreprocessingAttributes {
-  PreprocessingAttributes(const QString &options) : m_options(options) {}
-  PreprocessingAttributes(const QString &options,
+  PreprocessingAttributes(const ColumnOptionsMap &options)
+      : m_options(options) {}
+  PreprocessingAttributes(const ColumnOptionsMap &options,
                           std::map<QString, PreprocessingAlgorithm> map)
       : m_options(options), m_map(map) {}
-  QString m_options;
+  ColumnOptionsMap m_options;
   std::map<QString, PreprocessingAlgorithm> m_map;
 
   bool hasPreprocessing(const QString &columnName) const {
     return m_map.count(columnName) > 0;
+  }
+
+  bool hasOptions(const QString &columnName) const {
+    return m_options.count(columnName) > 0;
   }
 
   // IAlgorithm_sptr createAlgorithmFor(const QString& columnName) const {
@@ -101,31 +108,34 @@ public:
       WhiteList whitelist,
       std::map<QString, PreprocessingAlgorithm> preprocessMap,
       ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
+      int group,
       std::map<QString, QString> postprocessMap = std::map<QString, QString>(),
       QString loader = "Load");
   // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
                                 ProcessingAlgorithm processor,
-                                PostprocessingAlgorithm postprocessor);
+                                PostprocessingAlgorithm postprocessor,
+                                int group);
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       WhiteList whitelist,
       std::map<QString, PreprocessingAlgorithm> preprocessMap,
-      ProcessingAlgorithm processor);
+      ProcessingAlgorithm processor, int group);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
-                                ProcessingAlgorithm processor);
+                                ProcessingAlgorithm processor, int group);
   // Constructor: only whitelist
-  GenericDataProcessorPresenter(WhiteList whitelist);
+  GenericDataProcessorPresenter(WhiteList whitelist, int group);
   // Delegating constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
                                 PreprocessMap preprocessMap,
-                                ProcessingAlgorithm processor);
+                                ProcessingAlgorithm processor, int group);
   // Delegating Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
                                 PreprocessMap preprocessMap,
                                 ProcessingAlgorithm processor,
-                                PostprocessingAlgorithm postprocessor);
+                                PostprocessingAlgorithm postprocessor,
+                                int group);
   virtual ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<QString, QVariant> &options() const override;
@@ -140,12 +150,14 @@ public:
   void setModel(QString const &name) override;
   bool hasPostprocessing() const;
 
+  void settingsChanged() override;
+
   // The following methods are public only for testing purposes
   // Get the whitelist
   WhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
   QString getReducedWorkspaceName(const QStringList &data,
-                                  const QString &prefix = "");
+                                  const QString &prefix = "") const;
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
@@ -171,23 +183,26 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
-  void setPreprocessingOptions(QString const &options) {
-    m_preprocessing.m_options = options;
-  }
-
-  void setPostprocessingOptions(QString const &options) {
-    m_postprocessing->m_options = options;
-  }
 
   boost::optional<PostprocessingStep> m_postprocessing;
 
   // Pre-processing options
   PreprocessingAttributes m_preprocessing;
   // Data processor options
-  QString m_processingOptions;
+  OptionsMap m_processingOptions;
   void updateProcessedStatus(const std::pair<int, GroupData> &group);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
+  // Preprocess the given column value if applicable
+  void preprocessColumnValue(const QString &columnName, QString &columnValue,
+                             RowData *data);
+  // Preprocess all option values where applicable
+  void preprocessOptionValues(OptionsMap &options, RowData *data);
+  // Update the model with results from the algorithm
+  void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
+                                RowData *data);
+  // Create and execute the algorithm with the given properties
+  Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
   void reduceRow(RowData *data);
   // Finds a run in the AnalysisDataService
@@ -204,6 +219,9 @@ protected:
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData);
+  bool rowOutputExists(RowItem const &row) const;
+  // Refl GUI Group.
+  int m_group;
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);
@@ -211,7 +229,6 @@ protected slots:
                             QSet<QString> const &missingWorkspaces);
 
 private:
-  bool areOptionsUpdated();
   void applyDefaultOptions(std::map<QString, QVariant> &options);
   void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
                                        const std::string &hiddenOptions,
@@ -257,7 +274,7 @@ private:
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const QString &run, const PreprocessingAlgorithm &alg,
-                      const std::map<std::string, std::string> &optionsMap);
+                      const OptionsMap &optionsMap);
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model
@@ -317,6 +334,7 @@ private:
   // pause/resume reduction
   void pause();
   void resume();
+  void updateWidgetEnabledState(const bool isProcessing) const;
 
   // Check if run has been processed
   bool isProcessed(int position) const;

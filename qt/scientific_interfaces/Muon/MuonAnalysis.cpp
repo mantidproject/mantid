@@ -74,6 +74,44 @@ using Mantid::API::Grouping;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MuonAnalysis");
+
+void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
+  Workspace_sptr ws_ptr =
+      AnalysisDataService::Instance().retrieve(wsName.toStdString());
+  MatrixWorkspace_sptr matrix_workspace =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+  const auto &xData = matrix_workspace->x(0);
+
+  const auto xMin = *min_element(xData.begin(), xData.end());
+  const auto xMax = *max_element(xData.begin(), xData.end());
+  // make our own y limits for plot (not all of the data)
+  if (xMin < params["XAxisMin"].toDouble() ||
+      xMax > params["XAxisMin"].toDouble()) {
+
+    std::vector<double> yPlusEData, yMinusEData;
+    for (size_t index = 0; index < matrix_workspace->e(0).size(); index++) {
+      const auto &yData = matrix_workspace->y(0)[index];
+      const auto &eData = matrix_workspace->e(0)[index];
+      yPlusEData.push_back(yData + eData);
+      yMinusEData.push_back(yData - eData);
+    }
+
+    auto xN = std::distance(xData.begin(),
+                            std::upper_bound(xData.begin(), xData.end(),
+                                             params["XAxisMax"].toDouble()));
+    auto x0 = std::distance(xData.begin(),
+                            std::lower_bound(xData.begin(), xData.end(),
+                                             params["XAxisMin"].toDouble()));
+    params["YAxisMax"] = QString::number(
+        *max_element(yPlusEData.begin() + x0, yPlusEData.begin() + xN));
+    params["YAxisMin"] = QString::number(
+        *min_element(yMinusEData.begin() + x0, yMinusEData.begin() + xN));
+    params["YAxisAuto"] = "False";
+  } else {
+    // make sure auto scale is on
+    params["YAxisAuto"] = "True";
+  }
+}
 }
 
 // Static constants
@@ -403,6 +441,33 @@ void MuonAnalysis::plotSelectedGroupPair() {
 
   plotItem(itemType, tableRow, plotType);
 }
+/**
+* Creates workspace for specified group/pair and adds it to the ADS;
+* @param itemType :: Whether it's a group or pair
+* @param tableRow :: Row in the group/pair table which contains the item
+* @param plotType :: What kind of plot we want to analyse
+*/
+std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
+                                  PlotType plotType) {
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+
+  // Create workspace and a raw (unbinned) version of it
+  auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
+  auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
+
+  // Find names for new workspaces
+  const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
+  const std::string wsRawName = wsName + "_Raw";
+
+  // Make sure they end up in the ADS
+  ads.addOrReplace(wsName, ws);
+  ads.addOrReplace(wsRawName, wsRaw);
+
+  // Make sure they are grouped
+  std::vector<std::string> wsNames = {wsName, wsRawName};
+  MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
+  return wsName;
+}
 
 /**
  * Creates workspace for specified group/pair and plots it;
@@ -415,26 +480,8 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
   m_updating = true;
   m_uiForm.fitBrowser->clearChosenGroups();
   m_uiForm.fitBrowser->clearChosenPeriods();
-
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-
   try {
-    // Create workspace and a raw (unbinned) version of it
-    auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
-    auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
-
-    // Find names for new workspaces
-    const std::string wsName =
-        getNewAnalysisWSName(itemType, tableRow, plotType);
-    const std::string wsRawName = wsName + "_Raw";
-
-    // Make sure they end up in the ADS
-    ads.addOrReplace(wsName, ws);
-    ads.addOrReplace(wsRawName, wsRaw);
-
-    // Make sure they are grouped
-    std::vector<std::string> wsNames = {wsName, wsRawName};
-    MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
+    auto wsName = addItem(itemType, tableRow, plotType);
 
     QString wsNameQ = QString::fromStdString(wsName);
 
@@ -446,7 +493,8 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
     QMessageBox::critical(this, "MuonAnalysis - Error",
                           "Unable to plot the item. Check log for details.");
   }
-
+  loadAllGroups();
+  loadAllPairs();
   m_updating = false;
 }
 
@@ -1519,6 +1567,8 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
     currentI = 0;
   }
   setGroupsAndPairs();
+  loadAllGroups();
+  loadAllPairs();
   if (updateIndexAndPlot) {
     setGroupOrPairIndexToPlot(currentI);
     plotCurrentGroupAndPairs();
@@ -1743,7 +1793,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Format the graph scale, title, legends and colours
   // Data (most recently added curve) should be black
-  s << "def format_graph(graph, ws_name, log_scale, y_auto, y_min, y_max):";
+  s << "def format_graph(graph, ws_name, log_scale, y_auto, y_min, "
+       "y_max,x_min,x_max):";
   s << "  layer = graph.activeLayer()";
   s << "  num_curves = layer.numCurves()";
   s << "  layer.setCurveTitle(num_curves, ws_name)";
@@ -1751,6 +1802,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  for i in range(0, num_curves):";
   s << "    color = i + 1 if i != num_curves - 1 else 0";
   s << "    layer.setCurveLineColor(i, color)";
+
   s << "  if log_scale:";
   s << "    layer.logYlinX()";
   s << "  else:";
@@ -1762,6 +1814,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "      layer.setAxisScale(Layer.Left, float(y_min), float(y_max))";
   s << "    except ValueError:";
   s << "      layer.setAutoScale()";
+  s << "  layer.setScale(2,float(x_min),float(x_max))";
+
   s << "";
 
   // Plot the data!
@@ -1776,7 +1830,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  if layer.numCurves()>1:";
   s << "     layer.removeCurve(0)";
 
-  s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
+  s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', "
+       "'%YMAX%','%XMIN%','%XMAX%')";
 
   QString pyS;
 
@@ -1800,6 +1855,9 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   pyS.replace("%YAUTO%", params["YAxisAuto"]);
   pyS.replace("%YMIN%", params["YAxisMin"]);
   pyS.replace("%YMAX%", params["YAxisMax"]);
+  pyS.replace("%XMIN%", params["XAxisMin"]);
+  pyS.replace("%XMAX%", params["XAxisMax"]);
+
   if (policy == MuonAnalysisOptionTab::PreviousWindow) {
     pyS.replace("%FITSTOKEEP%", m_uiForm.spinBoxNPlotsToKeep->text());
   } else {
@@ -1820,6 +1878,11 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
+
+  params["XAxisMin"] =
+      QString::number(m_uiForm.timeAxisStartAtInput->text().toDouble());
+  params["XAxisMax"] =
+      QString::number(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
   // If autoscale disabled
   if (params["YAxisAuto"] == "False") {
@@ -1843,6 +1906,8 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
         params["YAxisMax"] =
             QString::number(*max_element(yData.begin(), yData.end()));
     }
+  } else {
+    zoomYAxis(wsName, params);
   }
 
   return params;
@@ -2118,6 +2183,7 @@ double MuonAnalysis::finishTime() const {
  * Load auto saved values
  */
 void MuonAnalysis::loadAutoSavedValues(const QString &group) {
+
   QSettings prevInstrumentValues;
   prevInstrumentValues.beginGroup(group + "instrument");
   QString instrumentName =
@@ -2620,6 +2686,10 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(updateCurrentPlotStyle()));
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
+  connect(m_optionTab, SIGNAL(loadAllGroupChanged(int)), this,
+          SLOT(loadAllGroups(int)));
+  connect(m_optionTab, SIGNAL(loadAllPairsChanged(int)), this,
+          SLOT(loadAllPairs(int)));
 }
 
 /**
@@ -2967,7 +3037,6 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
     groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
-
     groupAlg->execute();
     bool addToTable = getIfTFAsymmStore();
     m_fitDataPresenter->storeNormalization(wsName, addToTable);
@@ -3176,6 +3245,57 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+}
+/**
+* Checks if the run is set and if the plot name is valid.
+* If they are not valid then the loadAllGroups and loadAllPairs
+* methods should do nothing.
+*/
+
+bool MuonAnalysis::safeToLoadAllGroupsOrPairs() {
+  std::string plotTypeName =
+      m_uiForm.frontPlotFuncs->currentText().toStdString();
+  if (m_currentLabel == "NoLabelSet") {
+    return false;
+  } else if (plotTypeName != "Asymmetry" && plotTypeName != "Counts" &&
+             plotTypeName != "Logarithm") {
+    return false;
+  }
+  return true;
+}
+
+/**
+* Load all of the pairs if the all pairs tickbox is ticked
+* @param state :: [input] (not used) Setting of combo box
+*/
+void MuonAnalysis::loadAllGroups(int state) {
+  Q_UNUSED(state);
+
+  if (m_uiForm.loadAllGroupsCheckBox->isChecked() &&
+      safeToLoadAllGroupsOrPairs()) {
+    ItemType itemType = Group;
+    PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
+    for (int j = 0; j < numGroups(); j++) {
+      addItem(itemType, j, plotType);
+    }
+  }
+}
+/**
+* Load all of the pairs if the all pairs tickbox is ticked
+* @param state :: [input] (not used) Setting of combo box
+*/
+void MuonAnalysis::loadAllPairs(int state) {
+
+  Q_UNUSED(state);
+  if (m_uiForm.loadAllPairsCheckBox->isChecked() &&
+      safeToLoadAllGroupsOrPairs()) {
+    ItemType itemType = Pair;
+    PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
+    for (int j = 0; j < numPairs(); j++) {
+
+      addItem(itemType, j, plotType);
+    }
+  }
 }
 /**
  * Update the fit data presenter with current overwrite setting

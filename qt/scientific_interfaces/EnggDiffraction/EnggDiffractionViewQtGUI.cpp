@@ -61,8 +61,6 @@ EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_fittingWidget(nullptr),
       m_currentInst("ENGINX"), m_splashMsg(nullptr), m_presenter(nullptr) {}
 
-EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
-
 void EnggDiffractionViewQtGUI::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
@@ -93,6 +91,9 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_fittingWidget = new EnggDiffFittingViewQtWidget(
       m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
+
+  m_gsasWidget = new EnggDiffGSASFittingViewQtWidget(sharedView, sharedView);
+  m_ui.tabMain->addTab(m_gsasWidget, QString("GSAS-II Refinement"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
@@ -274,6 +275,7 @@ void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
 void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(g_settingsGroup));
+  auto fname = qs.fileName();
 
   m_ui.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
@@ -655,6 +657,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
 
   // fitting
   m_fittingWidget->enable(enable);
+  m_gsasWidget->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {

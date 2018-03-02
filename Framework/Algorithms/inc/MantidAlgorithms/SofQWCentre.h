@@ -68,7 +68,8 @@ public:
   static API::MatrixWorkspace_sptr
   setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
                        const std::vector<double> &binParams,
-                       std::vector<double> &newAxis);
+                       std::vector<double> &newAxis,
+                       const std::vector<double> &ebinParams);
   /// Convert the workspace to a distribution
   void makeDistribution(API::MatrixWorkspace_sptr outputWS,
                         const std::vector<double> qAxis);

@@ -20,17 +20,17 @@ def split_into_tof_d_spacing_groups(run_details, processed_spectra):
     ext = run_details.file_extension if run_details.file_extension else ""
 
     for name_index, ws in enumerate(processed_spectra, start=1):
-        d_spacing_out_name = run_number + ext + "-ResultD-" + str(name_index)
-        tof_out_name = run_number + ext + "-ResultTOF-" + str(name_index)
+        d_spacing_out_name = run_number + ext + "-ResultD_" + str(name_index)
+        tof_out_name = run_number + ext + "-ResultTOF_" + str(name_index)
 
         d_spacing_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=d_spacing_out_name,
                                                     Target="dSpacing"))
         tof_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=tof_out_name, Target="TOF"))
 
     # Group the outputs
-    d_spacing_group_name = run_number + ext + "-Results-D-Grp"
+    d_spacing_group_name = run_number + ext + "-ResultD"
     d_spacing_group = mantid.GroupWorkspaces(InputWorkspaces=d_spacing_output, OutputWorkspace=d_spacing_group_name)
-    tof_group_name = run_number + ext + "-Results-TOF-Grp"
+    tof_group_name = run_number + ext + "-ResultTOF"
     tof_group = mantid.GroupWorkspaces(InputWorkspaces=tof_output, OutputWorkspace=tof_group_name)
 
     return d_spacing_group, tof_group

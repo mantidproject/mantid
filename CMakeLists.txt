@@ -120,7 +120,7 @@ if (ENABLE_MANTIDPLOT)
 endif()
 
 if ( ENABLE_WORKBENCH )
-  find_package ( Qt5 COMPONENTS Core Gui Widgets REQUIRED )
+  find_package ( Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED )
   if ( Qt5_FOUND )
     message ( STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}" )
   endif()
@@ -202,9 +202,27 @@ endif()
 
 add_subdirectory ( scripts )
 
-if ( ENABLE_MANTIDPLOT )
-  add_subdirectory ( docs )
-endif()
+# Docs requirements
+find_package ( Sphinx 1.2 )
+if ( SPHINX_FOUND )
+  # run python to see if the theme is installed
+  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import sphinx_bootstrap_theme"
+                    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
+                    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_STRIP_TRAILING_WHITESPACE )
+  if (SPHINX_BOOTSTRAP_THEME_ERR)
+    message (ERROR " Did not find sphinx_bootstrap_theme")
+    message (STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+    message (STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
+    message (FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/")
+  endif ()
+
+  add_subdirectory ( dev-docs )
+  if ( ENABLE_MANTIDPLOT )
+    add_subdirectory ( docs )
+  endif()
+endif ()
 
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )
@@ -276,7 +294,8 @@ if ( ENABLE_CPACK )
       set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},sip >= 4.18" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML" )
       # scipy
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy" )

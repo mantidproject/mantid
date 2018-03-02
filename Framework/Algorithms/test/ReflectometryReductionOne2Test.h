@@ -174,29 +174,6 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void test_IvsLam_direct_beam() {
-    // Test IvsLam workspace
-    // No monitor normalization
-    // Direct beam normalization: 2-3
-    // No transmission correction
-    // Processing instructions : 2
-
-    ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
-    alg.setPropertyValue("RegionOfDirectBeam", "2-3");
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
-
-    TS_ASSERT_DELTA(outLam->y(0)[0], 0.4991, 0.0001);
-  }
-
-  void test_bad_direct_beam() {
-    // Direct beam : 4-5
-    ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1");
-    alg.setPropertyValue("RegionOfDirectBeam", "4-5");
-    TS_ASSERT_THROWS_ANYTHING(alg.execute());
-  }
-
   void test_IvsLam_no_monitors() {
     // Test IvsLam workspace
     // No monitor normalization
@@ -478,29 +455,6 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[0], 3.141858, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[3], 3.141885, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 3.141920, 1e-6);
-  }
-
-  void test_sum_in_q_direct_beam() {
-    // Test IvsLam workspace
-    // No monitor normalization
-    // Direct beam normalization: 2-3
-    // No transmission correction
-    // Processing instructions : 2
-
-    ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
-    alg.setPropertyValue("RegionOfDirectBeam", "2-3");
-    alg.setProperty("SummationType", "SumInQ");
-    alg.setProperty("ReductionType", "DivergentBeam");
-    alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
-
-    TS_ASSERT_DELTA(outLam->x(0)[0], 0.920496, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[3], 5.159104, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 10.810581, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 0.446571, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[3], 0.449843, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 0.448591, 1e-6);
   }
 
   void test_sum_in_q_monitor_normalization() {

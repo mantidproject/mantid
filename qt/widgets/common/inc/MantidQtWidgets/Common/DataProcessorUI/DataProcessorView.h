@@ -10,7 +10,6 @@
 #include <string>
 
 class AbstractTreeModel;
-
 namespace MantidQt {
 namespace MantidWidgets {
 class HintStrategy;
@@ -83,12 +82,14 @@ public:
   // Select all rows/groups
   virtual void selectAll() = 0;
 
-  // Handle pause/resume of data reduction
-  virtual void pause() = 0;
-  virtual void resume() = 0;
+  // Update enabled/disabled state of menu items and widgets
+  virtual void updateMenuEnabledState(const bool isProcessing) = 0;
+  virtual void setProcessButtonEnabled(const bool enabled) = 0;
+  virtual void setInstrumentComboEnabled(const bool enabled) = 0;
+  virtual void setTreeEnabled(const bool enabled) = 0;
+  virtual void setOutputNotebookEnabled(const bool enabled) = 0;
 
   // Setter methods
-  virtual void setTableList(const QSet<QString> &tables) = 0;
   virtual void setInstrumentList(const QString &instruments,
                                  const QString &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &groups) = 0;
@@ -115,6 +116,8 @@ public:
 
   //
   virtual void skipProcessing() = 0;
+  virtual void enableGrouping() = 0;
+  virtual void disableGrouping() = 0;
 };
 }
 }

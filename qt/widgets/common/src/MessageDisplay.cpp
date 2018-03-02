@@ -20,20 +20,51 @@
 #include <Poco/Message.h>
 #include <Poco/SplitterChannel.h>
 
+namespace {
+// Track number of attachments to generate a unique channel name
+int ATTACH_COUNT = 0;
+}
+
+using Mantid::Kernel::ConfigService;
+
 namespace MantidQt {
 namespace MantidWidgets {
-using API::Message;
 
 //-------------------------------------------
 // Public member functions
 //-------------------------------------------
+
 /**
- * Constructs a widget that does not allow control over the global log level
+ * Load settings from the persistent store. The client is expected to call
+ * this method with the QSettings object opened at the approriate group
+ * @param storage A pointer to an existing QSettings instance opened
+ * at the group containing the values
+ */
+void MessageDisplay::readSettings(const QSettings &storage) {
+  const int logLevel = storage.value("MessageDisplayPriority", 0).toInt();
+  if (logLevel > 0) {
+    ConfigService::Instance().setFilterChannelLogLevel(m_filterChannelName,
+                                                       logLevel, true);
+  }
+}
+
+/**
+ * Load settings from the persistent store. The client is expected to call
+ * this method with the QSettings object opened at the approriate group
+ * @param storage A pointer to an existing QSettings instance opened
+ * at the group where the values should be stored.
+ */
+void MessageDisplay::writeSettings(QSettings *storage) {
+  Q_ASSERT(storage);
+  storage->setValue("MessageDisplayPriority",
+                    static_cast<int>(m_filterChannel->getPriority()));
+}
+
+/**
  * @param parent An optional parent widget
  */
 MessageDisplay::MessageDisplay(QWidget *parent)
-    : QWidget(parent), m_logLevelControl(DisableLogLevelControl),
-      m_logChannel(new API::QtSignalChannel),
+    : QWidget(parent), m_logChannel(new QtSignalChannel),
       m_filterChannel(new Poco::FilterChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(),
       m_loglevels(new QActionGroup(this)),
@@ -42,30 +73,7 @@ MessageDisplay::MessageDisplay(QWidget *parent)
       m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)),
       m_information(new QAction(tr("&Information"), this)),
-      m_debug(new QAction(tr("&Debug"), this)) {
-  initActions();
-  initFormats();
-  setupTextArea();
-}
-
-/**
- * @param logLevelControl Controls whether this display shows the right-click
- * option to change
- * the global log level
- * @param parent An optional parent widget
- */
-MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
-    : QWidget(parent), m_logLevelControl(logLevelControl),
-      m_logChannel(new API::QtSignalChannel),
-      m_filterChannel(new Poco::FilterChannel),
-      m_textDisplay(new QPlainTextEdit(this)),
-      m_loglevels(new QActionGroup(this)),
-      m_logLevelMapping(new QSignalMapper(this)),
-      m_error(new QAction(tr("&Error"), this)),
-      m_warning(new QAction(tr("&Warning"), this)),
-      m_notice(new QAction(tr("&Notice"), this)),
-      m_information(new QAction(tr("&Information"), this)),
-      m_debug(new QAction(tr("&Debug"), this)) {
+      m_debug(new QAction(tr("&Debug"), this)), m_filterChannelName() {
   initActions();
   initFormats();
   setupTextArea();
@@ -74,9 +82,6 @@ MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
 /**
  */
 MessageDisplay::~MessageDisplay() {
-  QSettings settings;
-  settings.setValue("MessageDisplayPriority",
-                    static_cast<int>(m_filterChannel->getPriority()));
   // The Channel class is ref counted and will
   // delete itself when required
   m_filterChannel->release();
@@ -85,11 +90,14 @@ MessageDisplay::~MessageDisplay() {
 }
 
 /**
- * Attaches the Mantid logging framework
- * (Note the ConfigService must have already been started)
+ * Attaches the Mantid logging framework. Starts the ConfigService if
+ * required
+ * @param logLevel If > 0 then set the filter channel level to this. A
+ * number =< 0 uses the channel
  */
-void MessageDisplay::attachLoggingChannel() {
-  // Setup logging
+void MessageDisplay::attachLoggingChannel(int logLevel) {
+  // Setup logging. ConfigService needs to be started
+  auto &configSvc = ConfigService::Instance();
   auto &rootLogger = Poco::Logger::root();
   auto *rootChannel = Poco::Logger::root().getChannel();
   // The root channel might be a SplitterChannel
@@ -99,18 +107,14 @@ void MessageDisplay::attachLoggingChannel() {
     Poco::Logger::setChannel(rootLogger.name(), m_filterChannel);
   }
   m_filterChannel->addChannel(m_logChannel);
-
-  QSettings settings;
-  int priority = settings.value(QString::fromStdString(m_FilterChannelName),
-                                Message::Priority::PRIO_NOTICE).toInt();
-
-  auto &configService = Mantid::Kernel::ConfigService::Instance();
-  configService.registerLoggingFilterChannel(m_FilterChannelName,
-                                             m_filterChannel);
-  configService.setFilterChannelLogLevel(m_FilterChannelName, priority);
-
+  m_filterChannelName = "MessageDisplayChannel" + std::to_string(ATTACH_COUNT);
+  configSvc.registerLoggingFilterChannel(m_filterChannelName, m_filterChannel);
   connect(m_logChannel, SIGNAL(messageReceived(const Message &)), this,
           SLOT(append(const Message &)));
+  if (logLevel > 0) {
+    configSvc.setFilterChannelLogLevel(m_filterChannelName, logLevel, true);
+  }
+  ++ATTACH_COUNT;
 }
 
 /**
@@ -240,9 +244,9 @@ void MessageDisplay::scrollToBottom() {
       m_textDisplay->verticalScrollBar()->maximum());
 }
 
-//----------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Protected members
-//----------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // Private slot member functions
@@ -253,34 +257,31 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
   if (!m_textDisplay->document()->isEmpty())
     menu->addAction("Clear", m_textDisplay, SLOT(clear()));
 
-  if (m_logLevelControl == MessageDisplay::EnableLogLevelControl) {
-    menu->addSeparator();
-    QMenu *logLevelMenu = menu->addMenu("&Log Level");
-    logLevelMenu->addAction(m_error);
-    logLevelMenu->addAction(m_warning);
-    logLevelMenu->addAction(m_notice);
-    logLevelMenu->addAction(m_information);
-    logLevelMenu->addAction(m_debug);
+  menu->addSeparator();
+  QMenu *logLevelMenu = menu->addMenu("&Log Level");
+  logLevelMenu->addAction(m_error);
+  logLevelMenu->addAction(m_warning);
+  logLevelMenu->addAction(m_notice);
+  logLevelMenu->addAction(m_information);
+  logLevelMenu->addAction(m_debug);
 
-    // check the right level
-    int level = m_filterChannel->getPriority();
-    // get the root logger logging level
-    int rootLevel = Poco::Logger::root().getLevel();
-    if (rootLevel < level) {
-      level = rootLevel;
-    }
-
-    if (level == Poco::Message::PRIO_ERROR)
-      m_error->setChecked(true);
-    if (level == Poco::Message::PRIO_WARNING)
-      m_warning->setChecked(true);
-    if (level == Poco::Message::PRIO_NOTICE)
-      m_notice->setChecked(true);
-    if (level == Poco::Message::PRIO_INFORMATION)
-      m_information->setChecked(true);
-    if (level >= Poco::Message::PRIO_DEBUG)
-      m_debug->setChecked(true);
+  // check the right level
+  int level = m_filterChannel->getPriority();
+  // get the root logger logging level
+  int rootLevel = Poco::Logger::root().getLevel();
+  if (rootLevel < level) {
+    level = rootLevel;
   }
+  if (level == Poco::Message::PRIO_ERROR)
+    m_error->setChecked(true);
+  if (level == Poco::Message::PRIO_WARNING)
+    m_warning->setChecked(true);
+  if (level == Poco::Message::PRIO_NOTICE)
+    m_notice->setChecked(true);
+  if (level == Poco::Message::PRIO_INFORMATION)
+    m_information->setChecked(true);
+  if (level >= Poco::Message::PRIO_DEBUG)
+    m_debug->setChecked(true);
 
   menu->exec(this->mapToGlobal(mousePos));
   delete menu;
@@ -290,19 +291,14 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
  * @param priority An integer that must match the Poco::Message priority
  * enumeration
  */
-void MessageDisplay::setGlobalLogLevel(int priority) {
-  // set Local filter level
-
-  Mantid::Kernel::ConfigService::Instance().setFilterChannelLogLevel(
-      m_FilterChannelName, priority);
-  m_filterChannel->setPriority(priority);
+void MessageDisplay::setLogLevel(int priority) {
+  ConfigService::Instance().setFilterChannelLogLevel(m_filterChannelName,
+                                                     priority);
 }
 
 //-----------------------------------------------------------------------------
 // Private non-slot member functions
 //-----------------------------------------------------------------------------
-/*
- */
 void MessageDisplay::initActions() {
   m_error->setCheckable(true);
   m_warning->setCheckable(true);
@@ -328,8 +324,7 @@ void MessageDisplay::initActions() {
   connect(m_information, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
   connect(m_debug, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
 
-  connect(m_logLevelMapping, SIGNAL(mapped(int)), this,
-          SLOT(setGlobalLogLevel(int)));
+  connect(m_logLevelMapping, SIGNAL(mapped(int)), this, SLOT(setLogLevel(int)));
 }
 
 /**
@@ -363,10 +358,9 @@ void MessageDisplay::setupTextArea() {
   m_textDisplay->setMouseTracking(true);
   m_textDisplay->setUndoRedoEnabled(false);
 
-  this->setLayout(new QHBoxLayout(this));
-  QLayout *layout = this->layout();
-  layout->setContentsMargins(0, 0, 0, 0);
-  layout->addWidget(m_textDisplay);
+  auto layoutBox = new QHBoxLayout(this);
+  layoutBox->setContentsMargins(0, 0, 0, 0);
+  layoutBox->addWidget(m_textDisplay);
 
   this->setFocusProxy(m_textDisplay);
   m_textDisplay->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -378,8 +372,7 @@ void MessageDisplay::setupTextArea() {
  * @param priority An enumeration for the log level
  * @return format for given log level
  */
-QTextCharFormat
-MessageDisplay::format(const API::Message::Priority priority) const {
+QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
   return m_formats.value(priority, QTextCharFormat());
 }
 }

@@ -17,7 +17,8 @@
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
-//using Mantid::DataHandling::LoadEmptyInstrument;
+using Mantid::Kernel::V3D;
+
 
 class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
@@ -228,10 +229,14 @@ public:
         run.getPropertyValueAsType<double>(
             "ChopperSetting.chopperpair_sample_distance") *
         1e-3;
+    const auto incomingDeflectionAngle =
+        run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle");
     const auto sampleZOffset =
         run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
         1e-3;
-    const auto sourceSample = chopperCentre + sampleZOffset;
+    const auto sourceSample =
+        chopperCentre +
+        sampleZOffset / std::cos(incomingDeflectionAngle / 180. * M_PI);
     const auto &spectrumInfo = output->spectrumInfo();
     const auto l1 = spectrumInfo.l1();
     TS_ASSERT_DELTA(sourceSample, l1, 1e-12)
@@ -239,10 +244,10 @@ public:
     const auto sourcePos = spectrumInfo.sourcePosition();
     TS_ASSERT_EQUALS(samplePos.X(), 0)
     TS_ASSERT_EQUALS(samplePos.Y(), 0)
-    TS_ASSERT_EQUALS(samplePos.Z(), sampleZOffset)
+    TS_ASSERT_EQUALS(samplePos.Z(), 0)
     TS_ASSERT_EQUALS(sourcePos.X(), 0)
     TS_ASSERT_EQUALS(sourcePos.Y(), 0)
-    TS_ASSERT_EQUALS(sourcePos.Z(), -chopperCentre)
+    TS_ASSERT_EQUALS(sourcePos.Z(), -sourceSample)
   }
 
   void testDetectorPositionAndRotationD17() {
@@ -290,10 +295,17 @@ public:
     const auto pixelOffset = detectorRestY - 0.5 * pixWidth;
     const auto beamY = detectorY + pixelOffset * std::cos(detAngle);
     const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
-    const auto detDist = std::hypot(beamY, beamZ);
+    const auto sht1 = run.getPropertyValueAsType<double>("SHT1.value") * 1e-3;
+    const auto sampleZOffset =
+        run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
+        1e-3;
     const auto collimationAngle =
         run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
         180. * M_PI;
+    const auto detDist = std::hypot(beamY - sht1, beamZ) -
+                         sampleZOffset / std::cos(collimationAngle);
+    const auto sampleAngle =
+        run.getPropertyValueAsType<double>("Theta.actual_theta") / 180. * M_PI;
     for (size_t i = 0; i < spectrumInfo.size(); ++i) {
       if (spectrumInfo.isMonitor(i)) {
         continue;
@@ -301,8 +313,8 @@ public:
       const auto p = spectrumInfo.position(i);
       TS_ASSERT_EQUALS(p.X(), 0)
       const auto pixOffset = (static_cast<double>(i) - 127.5) * pixWidth;
-      const auto pixAngle =
-          detAngle + collimationAngle + std::atan2(pixOffset, detDist);
+      const auto pixAngle = detAngle + collimationAngle + sampleAngle +
+                            std::atan2(pixOffset, detDist);
       const auto pixDist = std::hypot(pixOffset, detDist);
       const auto idealY = pixDist * std::sin(pixAngle);
       const auto idealZ = pixDist * std::cos(pixAngle);
@@ -477,6 +489,46 @@ public:
     getWorkspaceFor(output, m_d17File, m_outWSName, prop);
     const auto &spectrumInfo = output->spectrumInfo();
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(42) * 180 / M_PI, 2 * angle, 1e-6)
+  }
+
+  void testSlitConfigurationD17() {
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_d17File, m_outWSName, emptyProperties());
+    auto instrument = output->getInstrument();
+    auto slit1 = instrument->getComponentByName("slit2");
+    auto slit2 = instrument->getComponentByName("slit3");
+    const double S2z =
+        -output->run().getPropertyValueAsType<double>("Distance.S2toSample") *
+        1e-3;
+    TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z))
+    const double S3z =
+        -output->run().getPropertyValueAsType<double>("Distance.S3toSample") *
+        1e-3;
+    TS_ASSERT_EQUALS(slit2->getPos(), V3D(0.0, 0.0, S3z))
+  }
+
+  void testSlitConfigurationFigaro() {
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_figaroFile, m_outWSName, emptyProperties());
+    auto instrument = output->getInstrument();
+    auto slit1 = instrument->getComponentByName("slit2");
+    auto slit2 = instrument->getComponentByName("slit3");
+    // The S3 position is missing in the NeXus file; use a hard-coded value.
+    const double collimationAngle =
+        output->run().getPropertyValueAsType<double>(
+            "CollAngle.actual_coll_angle") /
+        180. * M_PI;
+    const double sampleOffset = output->run().getPropertyValueAsType<double>(
+                                    "Theta.sampleHorizontalOffset") *
+                                1e-3;
+    const double slitZOffset = sampleOffset / std::cos(collimationAngle);
+    const double S3z = -0.368 - slitZOffset;
+    const double slitSeparation = output->run().getPropertyValueAsType<double>(
+                                      "Theta.inter-slit_distance") *
+                                  1e-3;
+    const double S2z = S3z - slitSeparation;
+    TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z))
+    TS_ASSERT_EQUALS(slit2->getPos(), V3D(0.0, 0.0, S3z))
   }
 };
 

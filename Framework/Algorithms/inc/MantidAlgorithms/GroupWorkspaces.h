@@ -1,9 +1,6 @@
 #ifndef MANTID_ALGORITHM_GROUP_H_
 #define MANTID_ALGORITHM_GROUP_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -43,8 +40,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport GroupWorkspaces : public API::Algorithm {
 public:
-  /// Default constructor
-  GroupWorkspaces();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GroupWorkspaces"; }
   /// Summary of algorithms purpose
@@ -58,6 +53,11 @@ public:
   const std::string category() const override {
     return "Transforms\\Grouping;Utility\\Workspaces";
   }
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 
 private:
   /// Overridden Init method

@@ -199,6 +199,7 @@
 #include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidQtWidgets/Common/CatalogSearch.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 #include "MantidQtWidgets/Common/MessageDisplay.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/TrackedAction.h"
@@ -363,10 +364,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   addDockWidget(Qt::TopDockWidgetArea, logWindow);
 
   using MantidQt::MantidWidgets::MessageDisplay;
-  using MantidQt::API::Message;
+  using MantidQt::MantidWidgets::Message;
   qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
-  resultsLog =
-      new MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
+  resultsLog = new MessageDisplay(logWindow);
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow,
           SLOT(show()));
@@ -378,6 +378,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
 
   ConfigService::Instance();          // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
+  // Read settings early so that the log level is set before the framework
+  // starts
+  resultsLog->readSettings(settings);
   // Load Mantid core libraries by starting the framework
   FrameworkManager::Instance();
 #ifdef MAKE_VATES
@@ -4704,7 +4707,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
     return true;
 
   if (m_bad_script_envs.contains(lang)) {
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     writeToLogWindow(
         Message("Previous initialization of " + lang + " failed, cannot retry.",
                 Message::Priority::PRIO_ERROR));
@@ -4819,12 +4822,6 @@ void ApplicationWindow::readSettings() {
   changeAppStyle(settings.value("/Style", appStyle).toString());
   autoSave = settings.value("/AutoSave", false).toBool();
   autoSaveTime = settings.value("/AutoSaveTime", 15).toInt();
-  // set logging level to the last saved level
-  int lastLoggingLevel =
-      settings.value("/LastLoggingLevel",
-                     Mantid::Kernel::Logger::Priority::PRIO_NOTICE).toInt();
-  Mantid::Kernel::Logger::setLevelForAll(lastLoggingLevel);
-
   d_backup_files = settings.value("/BackupProjects", true).toBool();
   d_init_window_type =
       (WindowType)settings.value("/InitWindow", NoWindow).toInt();
@@ -5346,9 +5343,11 @@ void ApplicationWindow::saveSettings() {
                       //"ProIndependent", "MantidPlot");
 #endif
 
-  /* ---------------- group General --------------- */
-  settings.beginGroup("/General");
+  // Root level is named "General" by Qt
+  resultsLog->writeSettings(&settings);
 
+  // Our named group General, displayed as %General in the file
+  settings.beginGroup("/General");
   settings.beginGroup("/ApplicationGeometry");
   d_app_rect = QRect(this->pos(), this->size());
   if (this->isMaximized())
@@ -5368,9 +5367,6 @@ void ApplicationWindow::saveSettings() {
   settings.setValue("/Style", appStyle);
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
-  // save current logger level from the root logger ""
-  int lastLoggingLevel = Mantid::Kernel::Logger("").getLevel();
-  settings.setValue("/LastLoggingLevel", lastLoggingLevel);
 
   settings.setValue("/BackupProjects", d_backup_files);
   settings.setValue("/InitWindow", static_cast<int>(d_init_window_type));
@@ -7976,7 +7972,7 @@ void ApplicationWindow::showResults(bool ok) {
       text = currentFolder()->logInfo();
     else
       text = "Sorry, there are no results to display!";
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     resultsLog->replace(Message(text, Message::Priority::PRIO_INFORMATION));
   }
   logWindow->setVisible(ok);
@@ -7986,7 +7982,7 @@ void ApplicationWindow::showResults(const QString &s, bool ok) {
   currentFolder()->appendLogInfo(s);
   QString logInfo = currentFolder()->logInfo();
   if (!logInfo.isEmpty()) {
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     resultsLog->replace(Message(logInfo, Message::Priority::PRIO_INFORMATION));
   }
   showResults(ok);
@@ -9843,6 +9839,9 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
 
   ce->accept();
   qApp->closeAllWindows();
+
+  // Delete the file finding thread pool if it still exists.
+  MantidQt::API::FindFilesThreadPoolManager::destroyThreadPool();
 }
 
 void ApplicationWindow::customEvent(QEvent *e) {
@@ -11559,6 +11558,32 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   }
 }
 
+/** Fixes the colour pallete so that the hints are readable.
+
+  On Linux (tested on Fedora 26 and Ubuntu 14.4) the palette colour for
+  ToolTipBase has no effect on the colour of tooltips, but does change
+  the colour of 'What's This' boxes and and Line Edit hints. The palette
+  colour for ToolTipText on the other hand affects all three of
+  these.
+
+  The default pallete shows light text on a pale background which, although not
+  affecting tooltips, makes LineEdit hints and 'What's This' boxes difficuilt
+  if not impossible to read.
+
+  Changing the tooltip text to a darker colour fixes the problem for 'LineEdit'
+  hints and 'What's This' boxes but creates one for ordinary tooltips.
+  Instead we set the background colour to a darker one, consistent with
+  ordinary tooltips.
+*/
+void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
+  auto tooltipColorApprox =
+      palette.color(QPalette::ColorGroup::Active, QPalette::Text);
+  palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipBase,
+                   tooltipColorApprox);
+  palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipBase,
+                   tooltipColorApprox);
+}
+
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
                                      const QColor &tpc, bool force) {
   if (force || workspaceColor != wc) {
@@ -11573,6 +11598,11 @@ void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
   panelsTextColor = tpc;
 
   QPalette palette;
+
+#ifdef Q_OS_LINUX
+  patchPaletteForLinux(palette);
+#endif
+
   palette.setColor(QPalette::Base, QColor(panelsColor));
   qApp->setPalette(palette);
 
@@ -13505,14 +13535,12 @@ ApplicationWindow *ApplicationWindow::importOPJ(const QString &filename,
     app->recentProjects.push_front(filename);
     app->updateRecentProjectsList();
 
-    // cppcheck-suppress unusedScopedObject
     ImportOPJ(app, filename);
 
     QApplication::restoreOverrideCursor();
     return app;
   } else if (filename.endsWith(".ogm", Qt::CaseInsensitive) ||
              filename.endsWith(".ogw", Qt::CaseInsensitive)) {
-    // cppcheck-suppress unusedScopedObject
     ImportOPJ(this, filename);
     recentProjects.removeAll(filename);
     recentProjects.push_front(filename);
@@ -15242,7 +15270,6 @@ void ApplicationWindow::scriptsDirPathChanged(const QString &path) {
 }
 
 void ApplicationWindow::makeToolbarsMenu() {
-  // cppcheck-suppress publicAllocationError
   actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
   toolbarsMenu->addAction(actionFileTools);
@@ -15551,7 +15578,6 @@ void ApplicationWindow::showUserDirectoryDialog() {
   ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
-  // cppcheck-suppress memleak
 }
 
 void ApplicationWindow::addCustomAction(QAction *action,
@@ -16052,7 +16078,8 @@ void ApplicationWindow::setGeometry(MdiSubWindow *usr_win,
  * @param message :: A string containing the message
  * @param error :: A boolean indicating if this is an error
  */
-void ApplicationWindow::writeToLogWindow(const MantidQt::API::Message &msg) {
+void ApplicationWindow::writeToLogWindow(
+    const MantidQt::MantidWidgets::Message &msg) {
   resultsLog->append(msg);
 }
 

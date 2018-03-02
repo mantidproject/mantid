@@ -72,13 +72,12 @@ public:
   //@}
 
   /// the fitting hard work that a worker / thread will run
-  void doFitting(const int runNumber, const size_t bank,
-                 const std::string &expectedPeaks);
+  void doFitting(const RunLabel &runLabel, const std::string &expectedPeaks);
 
   void plotFocusedFile(bool plotSinglePeaks,
                        Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
 
-  void plotFitPeaksCurves();
+  void plotAlignedWorkspace(const bool plotFittedPeaks);
 
 protected:
   void processStart();
@@ -87,6 +86,8 @@ protected:
   void processFitAllPeaks();
   void processShutDown();
   void processLogMsg();
+  void processUpdatePlotFitPeaks();
+  void processRemoveRun();
 
   /// clean shut down of model, view, etc.
   void cleanup();
@@ -96,14 +97,15 @@ protected slots:
   void fittingFinished();
 
 private:
+  void updatePlot();
+
   bool isDigit(const std::string &text) const;
 
   void warnFileNotFound(const std::exception &ex);
 
   // Methods related single peak fits
-  virtual void startAsyncFittingWorker(
-      const std::vector<std::pair<int, size_t>> &runNumberBankPairs,
-      const std::string &expectedPeaks);
+  virtual void startAsyncFittingWorker(const std::vector<RunLabel> &runLabels,
+                                       const std::string &expectedPeaks);
 
   std::string getBaseNameFromStr(const std::string &filePath) const;
 

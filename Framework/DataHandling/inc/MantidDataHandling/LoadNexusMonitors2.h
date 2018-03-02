@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LOADNEXUSMONITORS2_H_
 #define MANTID_DATAHANDLING_LOADNEXUSMONITORS2_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_array.hpp>
@@ -49,7 +49,7 @@ namespace DataHandling {
 *
 * File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DLLExport LoadNexusMonitors2 : public API::Algorithm {
+class DLLExport LoadNexusMonitors2 : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadNexusMonitors"; }
@@ -98,6 +98,17 @@ private:
                         size_t &numPeriods,
                         std::map<int, std::string> &monitorNumber2Name,
                         std::vector<bool> &isEventMonitors);
+
+  bool isEventMonitor(::NeXus::File &monitorFileHandle) const;
+  std::size_t sizeOfUnopenedEntry(::NeXus::File &file,
+                                  const std::string &entryName) const;
+  bool eventIdNotEmptyIfExists(
+      ::NeXus::File &monitorFileHandle,
+      std::map<std::string, std::string> const &entries) const;
+  bool hasAllEventLikeAttributes(
+      std::map<std::string, std::string> const &entries) const;
+  bool keyExists(std::string const &key,
+                 std::map<std::string, std::string> const &entries) const;
 
   bool
   createOutputWorkspace(size_t numHistMon, size_t numEventMon,

@@ -36,7 +36,7 @@ std::unique_ptr<Rebin> prepare_rebin(const Parallel::Communicator &comm,
   auto create = ParallelTestHelpers::create<Algorithms::CreateWorkspace>(comm);
   std::vector<double> dataEYX(2000);
   for (size_t i = 0; i < dataEYX.size(); ++i)
-    dataEYX[i] = static_cast<double>(i % 2 + 1);
+    dataEYX[i] = static_cast<double>(i % 2);
   int nspec = 1000;
   create->setProperty<int>("NSpec", nspec);
   create->setProperty<std::vector<double>>("DataX", dataEYX);
@@ -52,26 +52,29 @@ std::unique_ptr<Rebin> prepare_rebin(const Parallel::Communicator &comm,
 
 void run_rebin(const Parallel::Communicator &comm,
                const std::string &storageMode) {
+  using namespace Parallel;
   auto rebin = prepare_rebin(comm, storageMode);
   rebin->setProperty("Params", "1,1,3");
   TS_ASSERT_THROWS_NOTHING(rebin->execute());
   MatrixWorkspace_const_sptr ws = rebin->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(ws->storageMode(), Parallel::fromString(storageMode));
+  if (comm.rank() == 0 || fromString(storageMode) != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(ws->storageMode(), fromString(storageMode));
+  } else {
+    TS_ASSERT_EQUALS(ws, nullptr);
+  }
 }
 
 void run_rebin_params_only_bin_width(const Parallel::Communicator &comm,
                                      const std::string &storageMode) {
+  using namespace Parallel;
   auto rebin = prepare_rebin(comm, storageMode);
   rebin->setProperty("Params", "0.5");
-  if (Parallel::fromString(storageMode) == Parallel::StorageMode::Distributed &&
-      comm.size() > 1) {
-    TS_ASSERT_THROWS_EQUALS(
-        rebin->execute(), const std::runtime_error &e, std::string(e.what()),
-        "MatrixWorkspace: Parallel support for XMin and XMax not implemented.");
+  TS_ASSERT_THROWS_NOTHING(rebin->execute());
+  MatrixWorkspace_const_sptr ws = rebin->getProperty("OutputWorkspace");
+  if (comm.rank() == 0 || fromString(storageMode) != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(ws->storageMode(), fromString(storageMode));
   } else {
-    TS_ASSERT_THROWS_NOTHING(rebin->execute());
-    MatrixWorkspace_const_sptr ws = rebin->getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(ws->storageMode(), Parallel::fromString(storageMode));
+    TS_ASSERT_EQUALS(ws, nullptr);
   }
 }
 }

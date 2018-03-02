@@ -106,6 +106,8 @@ public:
 
   bool listWidgetHasSelectedRow() const override;
 
+  void updateFittingListWidget(const std::vector<std::string> &rows) override;
+
   void setFittingListWidgetCurrentRow(int idx) const override;
 
   std::string getExpectedPeaksInput() const override;
@@ -161,6 +163,8 @@ public:
     m_currentInst = newInstrument;
   }
 
+  bool plotFittedPeaksEnabled() const override;
+
 protected:
   void initLayout();
 
@@ -183,6 +187,8 @@ private slots:
   void plotSeparateWindow();
   void showToolTipHelp();
   void listWidget_fitting_run_num_clicked(QListWidgetItem *listWidget);
+  void plotFittedPeaksStateChanged();
+  void removeRunClicked();
 
 private:
   /// Setup the interface (tab UI)

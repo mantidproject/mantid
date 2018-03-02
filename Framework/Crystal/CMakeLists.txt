@@ -57,7 +57,6 @@ set ( SRC_FILES
 	src/SaveIsawPeaks.cpp
 	src/SaveIsawUB.cpp
 	src/SaveLauenorm.cpp
-	src/SavePeaksFile.cpp
 	src/SelectCellOfType.cpp
 	src/SelectCellWithForm.cpp
 	src/SetGoniometer.cpp
@@ -134,7 +133,6 @@ set ( INC_FILES
 	inc/MantidCrystal/SaveIsawPeaks.h
 	inc/MantidCrystal/SaveIsawUB.h
 	inc/MantidCrystal/SaveLauenorm.h
-	inc/MantidCrystal/SavePeaksFile.h
 	inc/MantidCrystal/SelectCellOfType.h
 	inc/MantidCrystal/SelectCellWithForm.h
 	inc/MantidCrystal/SetGoniometer.h
@@ -203,7 +201,6 @@ set ( TEST_FILES
 	SaveIsawPeaksTest.h
 	SaveIsawUBTest.h
 	SaveLauenormTest.h
-	SavePeaksFileTest.h
 	SelectCellOfTypeTest.h
 	SelectCellWithFormTest.h
 	SetGoniometerTest.h
@@ -231,9 +228,13 @@ endif()
 # Add the target for this directory
 add_library ( Crystal ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal
-  INSTALL_RPATH "@loader_path/../Contents/MacOS/"
-)
+set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal )
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS/" )
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Crystal PROPERTY FOLDER "MantidFramework" )
 

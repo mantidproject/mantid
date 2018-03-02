@@ -336,6 +336,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
         maskWSName = wsNames.withSuffix('combined_mask')
         maskWS = _createMaskWS(mainWS, maskWSName, subalgLogging)
+        wsCleanup.cleanupLater(maskWS)
 
         reportWS = None
         if not self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).isDefault:
@@ -419,7 +420,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             defaultValue='',
             validator=inputWorkspaceValidator,
             direction=Direction.Input),
-            doc='Raw input workspace.')
+            doc="A 'raw' workspace from DirectILLCollectData to calculate the diagnostics from.")
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
@@ -483,8 +484,8 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              defaultValue=3.3,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Error bar multiplier for significance ' +
-                                 'test in the elastic peak diagnostics.')
+                             doc='To fail the elastic peak diagnostics, the intensity must also exceed ' +
+                                 'this number of error bars with respect to the median intensity.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                               PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS,
@@ -524,8 +525,8 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              defaultValue=3.3,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Error bar multiplier for significance ' +
-                                 'test in the noisy background diagnostics.')
+                             doc='To fail the background diagnostics, the background level must also exceed ' +
+                                 'this number of error bars with respect to the median level.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
                               PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BEAM_STOP_DIAGNOSTICS,

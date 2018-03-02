@@ -53,7 +53,9 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsRefDetectorView
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsRefDetectorViewQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties( MantidQtWidgetsRefDetectorViewQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties( MantidQtWidgetsRefDetectorViewQt4 PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 ###########################################################################
@@ -62,6 +64,8 @@ endif ()
 mtd_add_qt_executable (TARGET_NAME RefDetectorViewDemo
   QT_VERSION 4
   SRC src/RefDetectorViewDemo.cpp
+  INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
       ${TCMALLOC_LIBRARIES_LINKTIME}
       ${Boost_LIBRARIES}
