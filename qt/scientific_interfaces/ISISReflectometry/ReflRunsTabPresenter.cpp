@@ -134,10 +134,10 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     search();
     break;
   case IReflRunsTabPresenter::NewAutoreductionFlag:
-    autoreduce(true);
+    startAutoreduction();
     break;
   case IReflRunsTabPresenter::ResumeAutoreductionFlag:
-    autoreduce(false);
+    resumeAutoreduction();
     break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
@@ -259,26 +259,32 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
 * runs to table and processes them
-* @param startNew : Boolean on whether to start a new autoreduction
 */
-void ReflRunsTabPresenter::autoreduce(bool startNew) {
-  m_autoSearchString = m_view->getSearchString();
-  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+void ReflRunsTabPresenter::startAutoreduction() {
 
   // If a new autoreduction is being made, we must remove all existing rows and
   // transfer the new ones (obtained by ICAT search) in
-  if (startNew) {
-    notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
+  notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
 
-    // Select all rows / groups in existing table and delete them
-    tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
-    tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
+  // Select all rows / groups in existing table and delete them
+  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+  tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
+  tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
 
-    // Select and transfer all rows to the table
-    m_view->setAllSearchRowsSelected();
-    if (m_view->getSelectedSearchRows().size() > 0)
-      transfer();
-  }
+  // Select and transfer all rows to the table
+  m_view->setAllSearchRowsSelected();
+  if (m_view->getSelectedSearchRows().size() > 0)
+    transfer();
+
+  // Start processing
+  resumeAutoreduction();
+}
+
+/** Start or resume autoreduction based on the runs currently in the table
+*/
+void ReflRunsTabPresenter::resumeAutoreduction() {
+  m_autoSearchString = m_view->getSearchString();
+  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
 
   tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
   if (tablePresenter->selectedParents().size() > 0)
