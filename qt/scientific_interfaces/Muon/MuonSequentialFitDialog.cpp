@@ -575,19 +575,6 @@ void MuonSequentialFitDialog::finishAfterRun(
 }
 
 /**
- * Helper function to create a groupWorkspace and add fit output to it
- * Assumes that the fit output workspace extensions are present
- */
-void createGroupAndAddFitOutput(const std::string &groupName,
-                                const std::string &wsBaseName) {
-  auto &ads = AnalysisDataService::Instance();
-  ads.add(wsBaseName, boost::make_shared<WorkspaceGroup>());
-  ads.addToGroup(wsBaseName, wsBaseName + "_NormalisedCovarianceMatrix");
-  ads.addToGroup(wsBaseName, wsBaseName + "_Parameters");
-  ads.addToGroup(wsBaseName, wsBaseName + "_Workspaces");
-}
-
-/**
  * Stop fitting process.
  */
 void MuonSequentialFitDialog::stopFit() {

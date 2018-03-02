@@ -83,10 +83,6 @@ private:
                       bool simultaneous,
                       const Mantid::API::MatrixWorkspace_sptr &firstWS) const;
 
-  /// Add output to group workspace
-  void createGroupAndAddFitOutput(const std::string &groupName,
-                                  const std::string &wsBaseName);
-
   // -- MEMBER VARIABLES -----------------------------------------------
 
   /// UI form
