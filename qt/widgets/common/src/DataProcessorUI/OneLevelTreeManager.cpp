@@ -259,6 +259,50 @@ void OneLevelTreeManager::insertRow(int rowIndex) {
   m_model->insertRow(rowIndex);
 }
 
+/** Check whether the given row in the model matches the given row values
+ * @param rowIndex : the row to check in the model
+ * @param rowValues : the cell values to check against
+ * @return : true if the cell matches the given value
+ */
+bool OneLevelTreeManager::rowMatches(
+    int rowIndex, const std::map<QString, QString> &rowValues,
+    const WhiteList &whitelist) const {
+
+  // Just check whether the first cell in the row matches (this is an
+  // assumption that this contains the uniquely-identifying info for the row
+  // i.e. the run number)
+  int columnIndex = 0;
+  auto const &columnName = whitelist.name(columnIndex);
+  // Only check non-blank values in the given row values
+  if (rowValues.count(columnName)) {
+    const auto newValue = rowValues.at(columnName);
+    const auto oldValue =
+        m_model->data(m_model->index(rowIndex, columnIndex));
+
+    if (newValue != oldValue)
+      return false;
+  }
+  
+  return true;
+}
+
+/** Check whether a row with given values already exists in the model
+ * @param rowValues : the values to check
+ * @param whitelist : the list of columns
+ */
+bool OneLevelTreeManager::rowExists(const std::map<QString, QString> &rowValues,
+                                    const WhiteList &whitelist) const {
+  // Loop through all existing rows
+  for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex) {
+    // Return true if we find any match
+    if (rowMatches(rowIndex, rowValues, whitelist))
+      return true;
+  }
+
+  return false;
+}
+
+
 TreeData OneLevelTreeManager::handleEmptyTable(bool prompt) {
   if (prompt)
     m_presenter->giveUserWarning("Cannot process an empty Table", "Warning");

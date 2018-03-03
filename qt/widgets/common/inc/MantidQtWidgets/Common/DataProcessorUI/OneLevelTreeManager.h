@@ -122,6 +122,12 @@ private:
   /// The model
   boost::shared_ptr<QOneLevelTreeModel> m_model;
 
+  /// Check whether a row matches the given row in the model
+  bool rowMatches(int rowIndex, const std::map<QString, QString> &rowValues,
+                  const WhiteList &whitelist) const;
+  /// Check whether a row with the given values exists
+  bool rowExists(const std::map<QString, QString> &rowValues,
+                 const WhiteList &whitelist) const;
   /// Insert an empty row in the model
   void insertRow(int rowIndex);
   /// Create a default table workspace

@@ -404,6 +404,53 @@ void TwoLevelTreeManager::insertRow(int groupIndex, int rowIndex) {
   m_model->insertRow(rowIndex, m_model->index(groupIndex, 0));
 }
 
+/** Check whether the given row in the model matches the given row values
+ * @param groupIndex : the group to check in the model
+ * @param rowIndex : the row to check in the model
+ * @param rowValues : the cell values to check against
+ * @return : true if the cell matches the given value
+ */
+bool TwoLevelTreeManager::rowMatches(
+    int groupIndex, int rowIndex, const std::map<QString, QString> &rowValues,
+    const WhiteList &whitelist) const {
+
+  // Just check whether the first cell in the row matches (this is an
+  // assumption that this contains the uniquely-identifying info for the row
+  // i.e. the run number)
+  int columnIndex = 0;
+  auto const &columnName = whitelist.name(columnIndex);
+  // Only check non-blank values in the given row values
+  if (rowValues.count(columnName)) {
+    const auto newValue = rowValues.at(columnName);
+    const auto oldValue = m_model->data(m_model->index(
+        rowIndex, columnIndex, m_model->index(groupIndex, columnIndex)));
+    
+    if (newValue != oldValue)
+      return false;
+  }
+  
+  return true;
+}
+
+/** Check whether a row with given values already exists in the model
+ * @param rowValues : the values to check
+ * @param whitelist : the list of columns
+ */
+bool TwoLevelTreeManager::rowExists(const std::map<QString, QString> &rowValues,
+                                    const WhiteList &whitelist) const {
+  // Loop through all existing rows
+  for (int groupIndex = 0; groupIndex < rowCount(); ++groupIndex) {
+    for (int rowIndex = 0; rowIndex < rowCount(groupIndex); ++rowIndex) {
+      // Return true if we find any match
+      if (rowMatches(groupIndex, rowIndex, rowValues, whitelist))
+        return true;
+    }
+  }
+
+  return false;
+}
+
+
 /**
 Inserts a new group in the specified location
 @param groupIndex :: The index to insert the new row after
