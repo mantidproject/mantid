@@ -20,6 +20,7 @@ except ImportError:
     from urllib2 import HTTPError
     from urllib2 import URLError
 from six.moves import range
+import math
 import csv
 import random
 import os
@@ -656,13 +657,13 @@ class CWSCDReductionControl(object):
 
         return mask_ws_name
 
-    def does_file_exist(self, exp_number, scan_number, pt_number=None):
+    def does_spice_files_exist(self, exp_number, scan_number, pt_number=None):
         """
         Check whether data file for a scan or pt number exists on the
         :param exp_number: experiment number or None (default to current experiment number)
         :param scan_number:
         :param pt_number: if None, check SPICE file; otherwise, detector xml file
-        :return:
+        :return: boolean (exist?) and string (file name)
         """
         # check inputs
         assert isinstance(exp_number, int) or pt_number is None
@@ -682,14 +683,15 @@ class CWSCDReductionControl(object):
             except AttributeError:
                 raise AttributeError('Unable to create SPICE file name from directory %s and file name %s.'
                                      '' % (self._dataDir, spice_file_name))
+
         else:
-            # pt number given, then check
+            # pt number given, then check whether the XML file for Pt exists
             xml_file_name = get_det_xml_file_name(self._instrumentName, exp_number, scan_number,
                                                   pt_number)
             file_name = os.path.join(self._dataDir, xml_file_name)
         # END-IF
 
-        return os.path.exists(file_name)
+        return os.path.exists(file_name), file_name
 
     @staticmethod
     def estimate_background(pt_intensity_dict, bg_pt_list):
@@ -3124,99 +3126,37 @@ class CWSCDReductionControl(object):
         error_message = ''
 
         # Download and
+        spice_table_name_list = list()
+
         for scan_number in range(start_scan, end_scan+1):
             # check whether file exists
-            if self.does_file_exist(exp_number, scan_number) is False:
-                # SPICE file does not exist in data directory. Download!
-                # set up URL and target file name
-                spice_file_url = get_spice_file_url(self._myServerURL, self._instrumentName, exp_number, scan_number)
-                spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
-                spice_file_name = os.path.join(self._dataDir, spice_file_name)
-
-                # download file and load
-                try:
-                    mantidsimple.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
-                except RuntimeError as download_error:
-                    error_message += 'Unable to access/download scan {0} from {1} due to {2}.\n' \
-                                     ''.format(scan_number, spice_file_url, download_error)
-                    continue
-            else:
-                spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
-                spice_file_name = os.path.join(self._dataDir, spice_file_name)
+            file_exist, spice_file_name = self.does_spice_files_exist(exp_number, scan_number)
+            if not file_exist:
+                # SPICE file does not exist in data directory. Download
+                # NOTE Download SPICE file is disabled.  An error message will be sent
+                # out for user to download the data explicitly
+                error_message += 'SPICE file for Exp {0} Scan {1} does not exist.' \
+                                 '\n'.format(exp_number, scan_number)
 
             # Load SPICE file and retrieve information
+            spice_table_ws_name = fourcircle_utility.get_spice_table_name(exp_number, scan_number)
             try:
-                spice_table_ws_name = 'TempTable'
-                mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
-                                            OutputWorkspace=spice_table_ws_name,
-                                            RunInfoWorkspace='TempInfo')
-                spice_table_ws = AnalysisDataService.retrieve(spice_table_ws_name)
-                num_rows = spice_table_ws.rowCount()
-
-                if num_rows == 0:
-                    # it is an empty table
-                    error_message += 'Scan %d: empty spice table.\n' % scan_number
-                    continue
-
-                col_name_list = spice_table_ws.getColumnNames()
-                h_col_index = col_name_list.index('h')
-                k_col_index = col_name_list.index('k')
-                l_col_index = col_name_list.index('l')
-                col_2theta_index = col_name_list.index('2theta')
-                m1_col_index = col_name_list.index('m1')
-                time_col_index = col_name_list.index('time')
-                det_count_col_index = col_name_list.index('detector')
-                # optional as T-Sample
-                if 'tsample' in col_name_list:
-                    tsample_col_index = col_name_list.index('tsample')
-                else:
-                    tsample_col_index = None
-
-                max_count = 0
-                max_pt = 0
-                max_h = max_k = max_l = 0
-                max_tsample = 0.
-
-                two_theta = m1 = -1
-
-                for i_row in range(num_rows):
-                    det_count = spice_table_ws.cell(i_row, det_count_col_index)
-                    count_time = spice_table_ws.cell(i_row, time_col_index)
-                    # normalize max count to count time
-                    det_count = float(det_count)/count_time
-                    if det_count > max_count:
-                        max_count = det_count
-                        max_pt = spice_table_ws.cell(i_row, 0)  # pt_col_index is always 0
-                        max_h = spice_table_ws.cell(i_row, h_col_index)
-                        max_k = spice_table_ws.cell(i_row, k_col_index)
-                        max_l = spice_table_ws.cell(i_row, l_col_index)
-                        two_theta = spice_table_ws.cell(i_row, col_2theta_index)
-                        m1 = spice_table_ws.cell(i_row, m1_col_index)
-                        # t-sample is not a mandatory sample log in SPICE
-                        if tsample_col_index is None:
-                            max_tsample = 0.
-                        else:
-                            max_tsample = spice_table_ws.cell(i_row, tsample_col_index)
-                # END-FOR
-
-                # calculate wavelength
-                wavelength = get_hb3a_wavelength(m1)
-                if wavelength is None:
-                    q_range = 0.
-                    error_message += 'Scan number {0} has invalid m1 for wavelength.\n'.format(scan_number)
-                else:
-                    q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
-
-                # appending to list
-                scan_sum_list.append([max_count, scan_number, max_pt, max_h, max_k, max_l,
-                                      q_range, max_tsample])
-
+                info_list, error_i = self.process_spice_table(scan_number, spice_file_name, spice_table_ws_name)
+                scan_sum_list.append(info_list)
+                error_message += error_i
+                spice_table_name_list.append(spice_table_ws_name)
             except RuntimeError as e:
                 return False, None, str(e)
+
             except ValueError as e:
                 # Unable to import a SPICE file without necessary information
                 error_message += 'Scan %d: unable to locate column h, k, or l. See %s.' % (scan_number, str(e))
+
         # END-FOR (scan_number)
+
+        # group all the SPICE tables
+        mantidsimple.GroupWorkspaces(InputWorkspaces=spice_table_name_list,
+                                     OutputWorkspace=fourcircle_utility.get_spice_group_name(exp_number, scan_number))
 
         if error_message != '':
             print('[Error]\n%s' % error_message)
@@ -3224,6 +3164,93 @@ class CWSCDReductionControl(object):
         self._scanSummaryList = scan_sum_list
 
         return True, scan_sum_list, error_message
+
+    @staticmethod
+    def process_spice_table(scan_number, spice_file_name, spice_table_ws_name):
+        """
+        process SPICE table
+        :param scan_number:
+        :param spice_file_name:
+        :param spice_table_ws_name:
+        :return: list/None (information for scan) and string (error message)
+        """
+        # check inputs
+        if os.path.exists(spice_file_name) is False:
+            raise RuntimeError('Parsing error')
+
+        error_message = ''
+
+        # Load SPICE file if the workspace does not exist
+        if AnalysisDataService.doesExist(spice_table_ws_name) is False:
+            mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
+                                        OutputWorkspace=spice_table_ws_name,
+                                        RunInfoWorkspace='TempInfo')
+
+        # Get workspace
+        spice_table_ws = AnalysisDataService.retrieve(spice_table_ws_name)
+        num_rows = spice_table_ws.rowCount()
+
+        if num_rows == 0:
+            # it is an empty table
+            error_message += 'Scan %d: empty spice table.\n' % scan_number
+            return None, error_message
+
+        # process the columns
+        col_name_list = spice_table_ws.getColumnNames()
+        h_col_index = col_name_list.index('h')
+        k_col_index = col_name_list.index('k')
+        l_col_index = col_name_list.index('l')
+        col_2theta_index = col_name_list.index('2theta')
+        m1_col_index = col_name_list.index('m1')
+        time_col_index = col_name_list.index('time')
+        det_count_col_index = col_name_list.index('detector')
+        # optional as T-Sample
+        if 'tsample' in col_name_list:
+            tsample_col_index = col_name_list.index('tsample')
+        else:
+            tsample_col_index = None
+
+        # do some simple statistics
+        max_count = 0
+        max_pt = 0
+        max_h = max_k = max_l = 0
+        max_tsample = 0.
+
+        two_theta = m1 = -1
+
+        for i_row in range(num_rows):
+            det_count = spice_table_ws.cell(i_row, det_count_col_index)
+            count_time = spice_table_ws.cell(i_row, time_col_index)
+            # normalize max count to count time
+            det_count = float(det_count) / count_time
+            if det_count > max_count:
+                max_count = det_count
+                max_pt = spice_table_ws.cell(i_row, 0)  # pt_col_index is always 0
+                max_h = spice_table_ws.cell(i_row, h_col_index)
+                max_k = spice_table_ws.cell(i_row, k_col_index)
+                max_l = spice_table_ws.cell(i_row, l_col_index)
+                two_theta = spice_table_ws.cell(i_row, col_2theta_index)
+                m1 = spice_table_ws.cell(i_row, m1_col_index)
+                # t-sample is not a mandatory sample log in SPICE
+                if tsample_col_index is None:
+                    max_tsample = 0.
+                else:
+                    max_tsample = spice_table_ws.cell(i_row, tsample_col_index)
+        # END-FOR
+
+        # calculate wavelength
+        wavelength = get_hb3a_wavelength(m1)
+        if wavelength is None:
+            q_range = 0.
+            error_message += 'Scan number {0} has invalid m1 for wavelength.\n'.format(scan_number)
+        else:
+            q_range = 4. * math.pi * math.sin(two_theta / 180. * math.pi * 0.5) / wavelength
+
+        # appending to list
+        info_list = [max_count, scan_number, max_pt, max_h, max_k, max_l,
+                     q_range, max_tsample]
+
+        return info_list, error_message
 
     def save_project(self, project_file_name, ui_dict):
         """ Export project

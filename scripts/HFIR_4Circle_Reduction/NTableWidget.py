@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import csv
 from PyQt4 import QtGui, QtCore
+from PyQt4.QtGui import QCheckBox, QTableWidgetItem
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -17,6 +18,9 @@ class NTableWidget(QtGui.QTableWidget):
     NdavTableWidget inherits from QTableWidget by extending the features
     for easy application.
     """
+    # List of supported cell types (all in lower cases)
+    Supported_Cell_Types = ['checkbox', 'string', 'str', 'integer', 'int',
+                            'float', 'double']
 
     def __init__(self, parent):
         """
@@ -39,18 +43,24 @@ class NTableWidget(QtGui.QTableWidget):
 
     def append_row(self, row_value_list, type_list=None):
         """
-
-        :param row_value_list:
-        :return: 2-tuple as (boolean, message)
+        append a row to the table
+        :param row_value_list: row_value_list
+        :param type_list:
+        :return:  2-tuple as (boolean, message)
         """
         # Check input
-        assert isinstance(row_value_list, list), 'blabla'
+        assert isinstance(row_value_list, list), 'Row values {0} must be given by a list but ' \
+                                                 'not a {1}'.format(row_value_list, type(row_value_list))
         if type_list is not None:
-            assert isinstance(type_list, list), 'blabla'
+            assert isinstance(type_list, list), 'Value types {0} must be given by a list but ' \
+                                                'not a {1}'.format(type_list, type(type_list))
             if len(row_value_list) != len(type_list):
-                raise RuntimeError('blabla')
+                raise RuntimeError('If value types are given, then they must have the same '
+                                   'numbers ({0}) and values ({1})'.format(len(row_value_list),
+                                                                           len(type_list)))
         else:
             type_list = self._myColumnTypeList
+
         if len(row_value_list) != self.columnCount():
             ret_msg = 'Input number of values (%d) is different from ' \
                       'column number (%d).' % (len(row_value_list), self.columnCount())
@@ -95,8 +105,8 @@ class NTableWidget(QtGui.QTableWidget):
         return
 
     def export_table_csv(self, csv_file_name):
-        """
-
+        """ Export table to a CSV fie
+        :param csv_file_name:
         :return:
         """
         # get title as header
@@ -145,38 +155,52 @@ class NTableWidget(QtGui.QTableWidget):
         :return:
         """
         # check
-        assert isinstance(row_index, int), 'TODO'
-        assert isinstance(col_index, int), 'TODO'
-        assert 0 <= row_index < self.rowCount(), 'TODO'
-        assert 0 <= col_index < self.columnCount(), 'TODO'
+        assert isinstance(row_index, int), 'Row index {0} must be an integer'.format(row_index)
+        assert isinstance(col_index, int), 'Column index {0} must be an integer'.format(col_index)
+        if not 0 <= row_index < self.rowCount():
+            raise RuntimeError('Row index {0} is out of range [0, {1})'
+                               ''.format(row_index, self.rowCount()))
+        if not 0 <= col_index < self.columnCount():
+            raise RuntimeError('Column index {0} is out of range [0, {1})'
+                               ''.format(col_index, self.columnCount()))
 
         # get cell type
         cell_data_type = self._myColumnTypeList[col_index]
 
-        if cell_data_type.startswith('str'):
-            # string: use original value
-            pass
-
-        elif cell_data_type == 'checkbox':
+        if cell_data_type == 'checkbox':
             # Check box
             cell_i_j = self.cellWidget(row_index, col_index)
-            assert isinstance(cell_i_j, QtGui.QCheckBox)
+            # PyQt5 compatible issue!
+            assert isinstance(cell_i_j, QCheckBox), 'Cell {0} {1} must be of type QCheckBox but not a {2}' \
+                                                          ''.format(row_index, col_index, type(cell_i_j))
 
             return_value = cell_i_j.isChecked()
         else:
-            # Regular cell for int, float and string
+            # Regular cell for int, float or string
             item_i_j = self.item(row_index, col_index)
-            assert isinstance(item_i_j, QtGui.QTableWidgetItem)
+            assert isinstance(item_i_j, QTableWidgetItem), 'Cell {0} {1} must be of type QTableWidgetItem' \
+                                                                 'but not a {2}'.format(row_index, col_index,
+                                                                                        type(item_i_j))
 
-            return_value = str(item_i_j.text())
+            # get the string of the cell
+            return_value = str(item_i_j.text()).strip()
 
-            else:
-                # other type
-            if return_value == 'None':
+            # cast to supported
+            if return_value == 'None' or len(return_value) == 0:
+                # None case
                 return_value = None
-            elif cell_data_type == 'int':
-                return_value = int(return_value)
+            elif cell_data_type.startswith('str'):
+                # case as str of string
+                pass
+            elif cell_data_type.startswith('int'):
+                # integer
+                try:
+                    return_value = int(return_value)
+                except ValueError as val_err:
+                    raise RuntimeError('Unable to convert cell ({0}, {1}) with value "{2}" to integer due to {3}.'
+                                       ''.format(row_index, col_index, return_value, val_err))
             elif cell_data_type == 'float' or cell_data_type == 'double':
+                # float or double
                 try:
                     return_value = float(return_value)
                 except ValueError as val_err:

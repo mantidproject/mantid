@@ -436,6 +436,16 @@ def get_spice_file_url(server_url, instrument_name, exp_number, scan_number):
     return file_url
 
 
+def get_spice_group_name(exp_number, scan_number):
+    """
+    get SPICE TableWorkspaces group name
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    return 'HB3A_Exp{0}_Scan{1}_SPICES'.format(exp_number, scan_number)
+
+
 def get_spice_table_name(exp_number, scan_number):
     """ Form the name of the table workspace for SPICE
     :param exp_number:
