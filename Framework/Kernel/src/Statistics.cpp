@@ -132,11 +132,11 @@ std::vector<double> getWeightedZscore(const vector<TYPE> &data,
   }
   double weightedMean = sumWeightedData / sumWeights;
   for (size_t it = 0; it != data.size(); ++it) {
-    weightedVariance += std::pow(data[it] - weightedMean, 2) *
-                        std::pow(weights[it] / sumWeights, 2);
+    weightedVariance += std::pow(static_cast<double>(data[it]) - weightedMean, 2) *
+                        std::pow(static_cast<double>(weights[it]) / sumWeights, 2);
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
-    Zscore.push_back(fabs((*it - weightedMean) / std::sqrt(weightedVariance)));
+    Zscore.push_back(fabs((static_cast<double>(*it) - weightedMean) / std::sqrt(weightedVariance)));
   }
   return Zscore;
 }

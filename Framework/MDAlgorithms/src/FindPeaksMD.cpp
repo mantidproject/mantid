@@ -114,7 +114,7 @@ const std::string FindPeaksMD::numberOfEventsNormalization =
 FindPeaksMD::FindPeaksMD()
     : peakWS(), peakRadiusSquared(), DensityThresholdFactor(0.0), m_maxPeaks(0),
       m_addDetectors(true), m_densityScaleFactor(1e-6), prog(nullptr), inst(),
-      m_runNumber(-1), m_peakNumber(1), dimType(), m_goniometer() {}
+      m_runNumber(-1), dimType(), m_goniometer() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

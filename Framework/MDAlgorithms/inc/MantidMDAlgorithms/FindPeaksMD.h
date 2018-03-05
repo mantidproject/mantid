@@ -100,8 +100,6 @@ private:
   Mantid::Geometry::Instrument_const_sptr inst;
   /// Run number of the peaks
   int m_runNumber;
-  /// Unique peak number
-  int m_peakNumber;
   /// Dimension type
   eDimensionType dimType;
   /// Goniometer matrix
