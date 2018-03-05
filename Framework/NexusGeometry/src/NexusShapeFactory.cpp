@@ -8,6 +8,7 @@
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 
@@ -19,11 +20,10 @@ using namespace Eigen;
 namespace {
 
 /// Finalise shape
-boost::shared_ptr<const Geometry::IObject>
+std::unique_ptr<const Geometry::IObject>
 createShape(const std::map<int, boost::shared_ptr<Geometry::Surface>> &surfaces,
             const std::string &algebra, std::vector<double> &boundingBox) {
-  boost::shared_ptr<Geometry::CSGObject> shape =
-      boost::make_shared<Geometry::CSGObject>();
+  auto shape = Mantid::Kernel::make_unique<Geometry::CSGObject>();
   shape->setObject(21, algebra);
   shape->populate(surfaces);
   // Boundingbox x,y,z:max; x,y,z:min
@@ -32,7 +32,7 @@ createShape(const std::map<int, boost::shared_ptr<Geometry::Surface>> &surfaces,
   return shape;
 }
 }
-boost::shared_ptr<const Geometry::IObject>
+std::unique_ptr<const Geometry::IObject>
 createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
   // Calculate cylinder parameters
   auto centre = (pointsDef.col(2) + pointsDef.col(0)) / 2;
@@ -85,11 +85,11 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
   return createShape(surfaceShapes, algebra, boundingBoxSimplified);
 }
 
-boost::shared_ptr<const Geometry::IObject>
+std::unique_ptr<const Geometry::IObject>
 createMesh(std::vector<uint16_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices) {
 
-  return boost::make_shared<Geometry::MeshObject>(
+  return Mantid::Kernel::make_unique<Geometry::MeshObject>(
       std::move(triangularFaces), std::move(vertices), Kernel::Material{});
 }
 }

@@ -7,8 +7,7 @@
 #include "MantidNexusGeometry/DllConfig.h"
 
 #include "Eigen/Core"
-
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <map>
 #include <vector>
 
@@ -22,9 +21,9 @@ class IObject;
 namespace NexusGeometry {
 
 namespace NexusShapeFactory {
-DLLExport boost::shared_ptr<const Geometry::IObject>
+DLLExport std::unique_ptr<const Geometry::IObject>
 createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef);
-DLLExport boost::shared_ptr<const Geometry::IObject>
+DLLExport std::unique_ptr<const Geometry::IObject>
 createMesh(std::vector<uint16_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices);
 }
