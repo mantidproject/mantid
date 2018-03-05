@@ -60,7 +60,7 @@ class LoadEXED(PythonAlgorithm):
                                                defaultValue="",
                                                direction=Direction.Output,
                                                optional = PropertyMode.Optional),
-                                               doc="Workspace containing the measured monitor spectra.")
+                             doc="Workspace containing the measured monitor spectra.")
 
     def PyExec(self):
         fn = self.getPropertyValue("Filename")
