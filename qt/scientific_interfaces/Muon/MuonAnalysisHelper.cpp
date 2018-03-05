@@ -172,8 +172,12 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Add average temperature.
   out << "\nAverage Temperature: ";
   if (run.hasProperty("Temp_Sample")) {
+    // Filter the temperatures by the start and end times for the run.
+    Mantid::API::Run runTemp(run);
+    runTemp.getProperty("Temp_Sample")->filterByTime(start, end);
+
     // Get average of the values
-    double average = run.getPropertyAsSingleValue("Temp_Sample");
+    double average = runTemp.getPropertyAsSingleValue("Temp_Sample");
 
     if (average != 0.0) {
       out << average;
