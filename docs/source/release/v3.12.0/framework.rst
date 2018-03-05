@@ -47,10 +47,19 @@ Algorithms
 - :ref:`SaveReflections <algm-LoadLamp>` is a new algorithm to save PeaksWorkspaces to Fullprof, Jana, GSAS, and SHELX text formats.
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` will now accept workspaces with varying x-axes per spectrum.
 
+Known Issues
+^^^^^^^^^^^^
+
+- :ref:`LoadEventNexus <algm-LoadEventNexus>` is incorrectly ignoring the `FilterMonBy*` properties. When loading monitors as events the output
+  `*_monitors` workspace then contains all recorded events rather than those accepted by the filters. To work around this issue run the
+  :ref:`FilterByTime <algm-FilterByTime>` algorithm on the output `*_monitors` workspace with the same values as passed to the `FilterMonBy*`
+  properties.
+
 Fitting
 -------
 - :ref:`EISFDiffSphere <func-EISFDiffSphere>` fits the Q-dependence on the EISF of a particle undergoing continuous diffusion but confined to a spherical volume.
 - :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>` fits the Q-dependence on the EISF of an alkyl molecule, like a membrane lipd.
+- :ref:`EISFDiffCylinder <func-EISFDiffCylinder>` models the elastic incoherent scattering intensity of a particle diffusing within a cylinder.
 
 Core Functionality
 ------------------
