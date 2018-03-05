@@ -383,7 +383,7 @@ NexusGeometryParser::getTransformations(const H5File &file,
 }
 
 /// Choose what shape type to parse
-objectHolder
+boost::shared_ptr<const Geometry::IObject>
 NexusGeometryParser::parseNexusShape(const Group &detectorGroup) const {
   Group shapeGroup;
   try {
@@ -393,7 +393,7 @@ NexusGeometryParser::parseNexusShape(const Group &detectorGroup) const {
     try {
       shapeGroup = detectorGroup.openGroup(SHAPE);
     } catch (...) {
-      return objectHolder(nullptr);
+      return boost::shared_ptr<const Geometry::IObject>(nullptr);
     }
   }
 
@@ -418,7 +418,7 @@ NexusGeometryParser::parseNexusShape(const Group &detectorGroup) const {
 }
 
 // Parse cylinder nexus geometry
-objectHolder
+boost::shared_ptr<const Geometry::IObject>
 NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) const {
   H5std_string pointsToVertices = "cylinders";
   std::vector<int> cPoints =
@@ -438,7 +438,7 @@ NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) const {
 }
 
 // Parse OFF (mesh) nexus geometry
-objectHolder
+boost::shared_ptr<const Geometry::IObject>
 NexusGeometryParser::parseNexusMesh(const Group &shapeGroup) const {
 
   const std::vector<uint16_t> faceIndices =
@@ -548,7 +548,8 @@ void NexusGeometryParser::parseMonitors(const H5::Group &root,
       std::vector<Group> monitorGroups = this->openSubGroups(inst, NX_MONITOR);
       for (auto &monitor : monitorGroups) {
         auto detectorId = get1DDataset<int64_t>(DETECTOR_ID, monitor)[0];
-        objectHolder monitorShape = parseNexusShape(monitor);
+        boost::shared_ptr<const Geometry::IObject> monitorShape =
+            parseNexusShape(monitor);
         builder.addMonitor(std::to_string(detectorId),
                            static_cast<int32_t>(detectorId),
                            Eigen::Vector3d{0, 0, 0}, monitorShape);
