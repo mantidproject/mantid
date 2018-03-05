@@ -543,14 +543,14 @@ void rebinToOutput(const Quadrilateral &inputQ,
       if (intersection(outputQ, inputQ, intersectOverlap)) {
         const double weight = intersectOverlap.area() / inputQ.area();
         yValue *= weight;
-        double eValue = inE[j] * weight;
+        double eValue = inE[j];
         if (inputWS->isDistribution()) {
           const double overlapWidth =
               intersectOverlap.maxX() - intersectOverlap.minX();
           yValue *= overlapWidth;
           eValue *= overlapWidth;
         }
-        eValue = eValue * eValue;
+        eValue = eValue * eValue * weight;
         PARALLEL_CRITICAL(overlap_sum) {
           outputWS->mutableY(y)[xi] += yValue;
           outputWS->mutableE(y)[xi] += eValue;
@@ -621,7 +621,6 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   // If the input is a RebinnedOutput workspace with frac. area we need
   // to account for the weight of the input bin in the output bin weights
   double inputWeight = 1.;
-  double variance = error * error;
   auto inputRB = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   if (inputRB) {
     const auto &inF = inputRB->dataF(i);
@@ -630,10 +629,11 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     // we need to undo this before carrying on.
     if (inputRB->isFinalized()) {
       signal *= inF[j];
-      variance *= inF[j] * inF[j]; // It was the _error_ which was scaled.
+      error *= inF[j];
     }
   }
 
+  const double variance = error * error;
   for (const auto &ai : areaInfo) {
     const size_t xi = std::get<0>(ai);
     const size_t yi = std::get<1>(ai);
