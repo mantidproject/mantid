@@ -173,6 +173,7 @@
 #include <QUrl>
 #include <QVarLengthArray>
 #include <QtAlgorithms>
+#include <QtGlobal>
 #include <qwt_scale_engine.h>
 #include <zlib.h>
 
@@ -11560,7 +11561,7 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
 
 /** Fixes the colour pallete so that the hints are readable.
 
-  On Linux (tested on Fedora 26-7 and Ubuntu 14.4) the palette colour for
+  On Linux Fedora 26+ and Ubuntu 14.4+ the palette colour for
   ToolTipBase has no effect on the colour of tooltips, but does change
   the colour of 'What's This' boxes and and Line Edit hints. The palette
   colour for ToolTipText on the other hand affects all three of
@@ -11573,26 +11574,45 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   Changing the tooltip text to a darker colour fixes the problem for 'LineEdit'
   hints and 'What's This' boxes but creates one for ordinary tooltips.
 
-  Setting the background colour to a darker colour works fine on
+  Setting the tooltip background colour to a darker colour works fine on
   Fedora 26-7+ and Ubuntu 14.04 but not for RHEL7 where the tooltip text
   colour is also dark.
 
-  At the moment the fix is to simply hardcode the values to a dark on
-  light colour scheme which works consistently on Fedora 26-7 and Ubuntu
-  14.04 where ToolTipBase has no effect.
+  One option is to simply hardcode the values to a dark-on-light colour
+  scheme which works consistently on Fedora, Ubuntu and RHEL7.
+  However, RHEL7 users were not happy with this solution.
+
+  Further investigation revealed that the issue may be related to
+  https://bugs.launchpad.net/ubuntu/+source/qt4-x11/+bug/877236 and the
+  fact that in the qt source gui/styles/qgtkstyle.cpp ~line 299 only loads
+  the ToolTipText colour, leaving ToolTibBase to the default from
+  CleanLooksStyle.
+
+  This problem can be worked around on fedora by switching to the
+  Adwaita theme in Mantid Preferences. However, the adwaita-qt
+  theme is not available on certain versions of Ubuntu.
+
+  Any easy solution for now is to detect unity clients and apply the
+  fix only to them.
 */
 void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
-  auto tooltipBaseColor = QColor("black");
-  auto tooltipTextColor = QColor("white");
+  if (isUnityDesktop()) {
+    auto tooltipBaseColor = QColor("black");
+    auto tooltipTextColor = QColor("white");
 
-  palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipBase,
-                   tooltipBaseColor);
-  palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipBase,
-                   tooltipBaseColor);
-  palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipText,
-                   tooltipTextColor);
-  palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipText,
-                   tooltipTextColor);
+    palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipBase,
+                     tooltipBaseColor);
+    palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipBase,
+                     tooltipBaseColor);
+    palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipText,
+                     tooltipTextColor);
+    palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipText,
+                     tooltipTextColor);
+  }
+}
+
+bool ApplicationWindow::isUnityDesktop() const {
+  return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity";
 }
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
