@@ -16663,8 +16663,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
   foreach (QMdiSubWindow *w, wl) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->widget());
     if (tw) {
-      QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRegion();
+      QPoint mdiOrigin = mapToGlobal(w->pos());
+      auto r = w->visibleRegion().boundingRect();
       r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;
@@ -16675,8 +16675,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
   foreach (FloatingWindow *w, m_floatingWindows) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->mdiSubWindow());
     if (tw) {
-      QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRegion();
+      QPoint mdiOrigin = mapToGlobal(w->pos());
+      auto r = w->visibleRegion().boundingRect();
       r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;
