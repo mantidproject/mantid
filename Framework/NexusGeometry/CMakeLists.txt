@@ -1,5 +1,5 @@
 set ( SRC_FILES
-    src/InstrumentGeometryAbstraction.cpp
+    src/InstrumentBuilder.cpp
     src/NexusGeometryParser.cpp
     src/ParsingErrors.cpp
     src/ShapeGeometryAbstraction.cpp
@@ -7,8 +7,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
     inc/MantidNexusGeometry/DllConfig.h
-    inc/MantidNexusGeometry/InstrumentAbstractBuilder.h
-    inc/MantidNexusGeometry/InstrumentGeometryAbstraction.h
+    inc/MantidNexusGeometry/InstrumentBuilder.h
     inc/MantidNexusGeometry/NexusGeometryParser.h
     inc/MantidNexusGeometry/ParsingErrors.h
     inc/MantidNexusGeometry/ShapeAbstractCreator.h
@@ -16,7 +15,7 @@ set ( INC_FILES
         )
 
 set ( TEST_FILES
-    InstrumentGeometryAbstractionTest.h
+    InstrumentBuilderTest.h
     NexusGeometryParserTest.h
         )
 

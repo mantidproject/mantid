@@ -12,7 +12,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidNexusGeometry/InstrumentGeometryAbstraction.h"
+#include "MantidNexusGeometry/InstrumentBuilder.h"
 
 #include "Eigen/Core"
 

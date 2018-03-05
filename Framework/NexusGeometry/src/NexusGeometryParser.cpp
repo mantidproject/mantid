@@ -1,5 +1,5 @@
 #include "MantidNexusGeometry/NexusGeometryParser.h"
-#include "MantidNexusGeometry/InstrumentGeometryAbstraction.h"
+#include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument.h"
 
