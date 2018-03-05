@@ -367,7 +367,7 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
   if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
     m_uiForm.fitBrowser->setChosenPeriods(periodToSet);
   }
-  return; 
+  return;
 }
 
 /**
