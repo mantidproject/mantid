@@ -377,6 +377,8 @@ class CWSCDReductionControl(object):
         # check inputs
         # blabla
 
+        # TODO FIXME NOW NOW2 - convert 'value list' to a scan!
+
         # check whether the detector counts has been calculated and get the value
         if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
             raise RuntimeError('blabla')
@@ -403,7 +405,15 @@ class CWSCDReductionControl(object):
         return peak_intensity
 
     def get_single_scan_pt_result(self, exp_number, scan_number, pt_number, roi_name):
+        """
 
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :return:
+        """
+        # TODO FIXME NOW NOW2 - Need revisit!
 
         if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
             raise RuntimeError('{0}, {1}, {2}, {3} not in single-pt-scan dict.  Keys are {4}'
@@ -3145,6 +3155,8 @@ class CWSCDReductionControl(object):
                 scan_sum_list.append(info_list)
                 error_message += error_i
                 spice_table_name_list.append(spice_table_ws_name)
+                # TODO FIXME NOW NOW2 - Need a dict [exp] = list() to record all the surveyed scans
+
             except RuntimeError as e:
                 return False, None, str(e)
 
@@ -3155,8 +3167,9 @@ class CWSCDReductionControl(object):
         # END-FOR (scan_number)
 
         # group all the SPICE tables
+        # TODO FIXME NOW NOW2 - If workspace group exists, then add new group but not calling GroupWorkspaces
         mantidsimple.GroupWorkspaces(InputWorkspaces=spice_table_name_list,
-                                     OutputWorkspace=fourcircle_utility.get_spice_group_name(exp_number, scan_number))
+                                     OutputWorkspace=fourcircle_utility.get_spice_group_name(exp_number))
 
         if error_message != '':
             print('[Error]\n%s' % error_message)

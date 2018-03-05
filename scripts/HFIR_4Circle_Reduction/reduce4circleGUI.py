@@ -2458,9 +2458,19 @@ class MainWindow(QtGui.QMainWindow):
                         self.ui.tableWidget_surveyTable.select_row(i_row, True)
                     else:
                         self.ui.tableWidget_surveyTable.select_row(i_row, False)
+            elif self.ui.checkBox_singlePtScans.isChecked():
+                # TODO FIXME NOW NOW2 -  select all the single one...
+                pass
             else:
                 # all peaks
                 self.ui.tableWidget_surveyTable.select_all_rows(True)
+
+            # FIXME FIXME - This structure is bad in logic... it is better to have multiple layer of filtering
+            # step 1: filter by HKL
+            # step 2: filter by single...
+            # step 3: filter by blabla
+            # step n: select_by_row_number
+
         else:
             # de-select all peaks
             self.ui.tableWidget_surveyTable.select_all_rows(False)
@@ -3365,6 +3375,7 @@ class MainWindow(QtGui.QMainWindow):
             # do nothing if the table is empty
             return
 
+        # TODO FIXME NOW NOW2 - Allow an empty for all scans
         max_number = int(self.ui.lineEdit_numSurveyOutput.text())
 
         # ignore the situation that this line edit is cleared
@@ -3561,12 +3572,20 @@ class MainWindow(QtGui.QMainWindow):
         """
         if self._single_pt_peak_integration_window is None:
             self._single_pt_peak_integration_window = IntegrateSingePtSubWindow.IntegrateSinglePtIntensityWindow(self)
-
-        #  collect selected Scan/Pt combo
-        scan_pt_tup_list = self.ui.tableWidget_surveyTable.get_selected_scan_pt()
-        self._single_pt_peak_integration_window.set_experiment(self._current_exp_number)
-        self._single_pt_peak_integration_window.add_scans(scan_pt_tup_list)
         self._single_pt_peak_integration_window.show()
+
+        # set experiment
+        self._single_pt_peak_integration_window.set_experiment(self._current_exp_number)
+
+        # collect selected Scan/Pt combo
+        scan_pt_tup_list = self.ui.tableWidget_surveyTable.get_selected_scan_pt()
+        # get other information
+        for scan_number, pt_number in scan_pt_tup_list:
+            # TODO FIXME NOW NOW2 - Make this section work!
+            h_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, 'h')
+            hkl_str = blabla
+            two_theta = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '2theta')
+            self._single_pt_peak_integration_window.add_scan(scan_number, pt_number, hkl, two_theta)
 
         return
 

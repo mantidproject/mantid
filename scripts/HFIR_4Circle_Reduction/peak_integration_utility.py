@@ -672,6 +672,14 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     return peak_int_dict
 
 
+def read_peak_integration_table_csv(peak_file_name):
+    # TODO FIXME NOW NOW2 - Make it work and noted
+    with open(file_name, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter='\t', quotechar='#')
+        for row in reader:
+            lines.append(row)
+
+
 def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_center=None,
                           peak_sigma=None, motor_pos_dict=None, sigma_range=2.):
     """

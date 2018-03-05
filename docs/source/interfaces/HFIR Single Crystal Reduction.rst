@@ -147,7 +147,7 @@ It is a common practice to have one measurement in a scan for a peak.  The only 
 
 1. A user specifies the range of scan numbers that include all the neutron peaks regardless whether they are single-point measurement or multiple-points measurement.
 
-2. The user pushes button *Survey* with check box *2theta* .  Mantid will load all the SPICE files of the scans.
+2. The user pushes button *Survey*.  Mantid will load all the SPICE files of the scans.
 
 3. The users selects *All* single-point-measurement scans by checking *Single Pt Scans*.
 

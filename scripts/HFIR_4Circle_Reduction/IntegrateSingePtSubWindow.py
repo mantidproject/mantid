@@ -45,8 +45,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_single_pt)
         self.ui.pushButton_plot.clicked.connect(self.do_plot_integrated_pt)
 
-        # TODO Implement
-        # pushButton_loadPeakInfoFile  : do_load_saved_integrated_table
+        # TODO Implement NOW NOW2
+        # pushButton_loadPeakInfoFile  : do_load_saved_integrated_table : load method is in peak integration tool
 
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
@@ -75,6 +75,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         export the integrated intensity to parent window's peak processing table
         :return:
         """
+        # TODO NOW2 NEED TEST
         # collect all scan/pt from table
         scan_pt_list = self.ui.tableView_summary.get_scan_pt_list()
 
@@ -164,12 +165,16 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
     def do_retrieve_fwhm(self):
         """
-        get FWHM from integrated 'STRONG' peaks according to 2theta value
+        Get FWHM from integrated 'STRONG' peaks according to 2theta value
         :return:
         """
-        for (scan_number, pt_number) in self.ui.tableView_summary.get_scan_pt_list():
-            two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, pt_number)
-            self.ui.tableView_summary.set_two_theta(scan_number, pt_number, two_theta)
+        # TODO FIXME NOW NOW2 - It needs to be rewritten!
+        # If strong peak scan column is not filled, find a scan with same 2theta
+        # If strong peak is integrated, find FWHM and store the result in a dictionary
+
+        # for (scan_number, pt_number) in self.ui.tableView_summary.get_scan_pt_list():
+        #     two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, pt_number)
+        #     self.ui.tableView_summary.set_two_theta(scan_number, pt_number, two_theta)
 
         return
 

@@ -1206,19 +1206,14 @@ class ScanSurveyTable(tableBase.NTableWidget):
         blabla
         :return:
         """
+        # TODO NOW2 blabla
         selected_row_list = self.get_selected_rows()
 
         selected_scan_pt_list = list()
         for row_number in selected_row_list:
             scan_number = self.get_cell_value(row_number, 0)
             pt_number = self.get_cell_value(row_number, 1)
-            h_i = self.get_cell_value(row_number, self._colIndexH)
-            k_i = self.get_cell_value(row_number, self._colIndexK)
-            l_i = self.get_cell_value(row_number, self._colIndexL)
-            hkl_str = '{0}, {1}, {2}'.format(h_i, k_i, l_i)
-
-            selected_scan_pt_list.append((scan_number, pt_number, hkl_str, 123.456))
-
+            selected_scan_pt_list.append((scan_number, pt_number))
         # END-FOR
 
         return selected_scan_pt_list
