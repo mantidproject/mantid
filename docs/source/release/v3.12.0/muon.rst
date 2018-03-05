@@ -26,7 +26,6 @@ Interface
 - The Frequency Domain Analysis GUI now uses :ref:`MuonMaxent <algm-MuonMaxent>` to calculate the frequency spectrum in MaxEnt mode.
 - The ALC interface now allows background sections with negative values.  
 
-
 Algorithms
 ----------
 - :ref:`MuonProcess <algm-MuonProcess>` now has a flag to determine if to crop the input workspace (default is true). In the Muon Analysis interface this flag has been set to false.
