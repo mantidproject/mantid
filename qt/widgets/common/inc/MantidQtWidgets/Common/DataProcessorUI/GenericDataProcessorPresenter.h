@@ -183,6 +183,12 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
+
+  // Pause reduction
+  void pause();
+  // A boolean indicating whether data reduction is confirmed paused
+  bool m_reductionPaused;
+
   // Get the processing options for this row
   virtual OptionsMap getProcessingOptions(RowData_sptr data) {
     UNUSED_ARG(data);
@@ -273,8 +279,6 @@ private:
   std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
   // A boolean that can be set to pause reduction of the current item
   bool m_pauseReduction;
-  // A boolean indicating whether data reduction is confirmed paused
-  bool m_reductionPaused;
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr
   getRun(const QString &run, const QString &instrument, const QString &prefix);
@@ -336,10 +340,9 @@ private:
   // process the next group/row
   void processNextItem();
   // end reduction
-  void endReduction(const bool success);
+  virtual void endReduction(const bool success);
 
-  // pause/resume reduction
-  void pause();
+  // resume reduction
   void resume();
   void updateWidgetEnabledState(const bool isProcessing) const;
 

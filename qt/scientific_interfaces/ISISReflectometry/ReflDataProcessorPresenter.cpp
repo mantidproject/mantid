@@ -1015,5 +1015,30 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
 
   return optionsForAngle;
 }
+
+/**
+End reduction
+*
+* @param reductionSuccessful : true if the reduction completed successfully,
+* false if there were any errors
+*/
+void ReflDataProcessorPresenter::endReduction(
+    const bool reductionSuccessful) {
+
+  // Create an ipython notebook if "Output Notebook" is checked.
+  if (reductionSuccessful && m_view->getEnableNotebook())
+    saveNotebook(m_selectedData);
+
+  if (m_mainPresenter->autoreductionInProgress()) {
+    // Signal reduction has finished but leave the GUI in the "processing"
+    // state
+    m_mainPresenter->confirmReductionFinished(m_group);
+  } else {
+    // Stop the reduction
+    pause();
+    m_reductionPaused = true;
+    m_mainPresenter->confirmReductionPaused(m_group);
+  }
+}
 }
 }

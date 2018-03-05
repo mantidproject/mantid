@@ -104,6 +104,8 @@ public:
   // The following methods are public for testing purposes only
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
+  // end reduction
+  void endReduction(const bool success) override;
 
   void
   completedRowReductionSuccessfully(GroupData const &groupData,

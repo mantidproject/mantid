@@ -75,11 +75,15 @@ public:
   /// Return true if there are per-angle transmission runs set
   virtual bool hasPerAngleOptions() const { return false; }
 
+  /// Return true if autoreduction is in progress
+  virtual bool autoreductionInProgress() const { return false; }
+  
   /// Handle data reduction paused/resumed
   virtual void pause() const {}
   virtual void resume() const {}
 
   /// Handle data reduction paused/resumed confirmation
+  virtual void confirmReductionFinished(int group) { UNUSED_ARG(group); }
   virtual void confirmReductionPaused(int group) { UNUSED_ARG(group); }
   virtual void confirmReductionResumed(int group) { UNUSED_ARG(group); }
   virtual void completedGroupReductionSuccessfully(GroupData const &,

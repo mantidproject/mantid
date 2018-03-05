@@ -132,6 +132,7 @@ public:
   MOCK_CONST_METHOD0(resume, void());
 
   // Calls we don't care about
+  MOCK_METHOD1(confirmReductionFinished, void(int));
   MOCK_METHOD1(confirmReductionPaused, void(int));
   MOCK_METHOD1(confirmReductionResumed, void(int));
 };

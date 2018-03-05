@@ -86,7 +86,8 @@ public:
   void resume() const override;
   /// Determine whether to start a new autoreduction
   bool startNewAutoreduction() const override;
-  /// Reduction paused/resumed confirmation handler
+  /// Reduction finished/paused/resumed confirmation handler
+  void confirmReductionFinished(int group) override;
   void confirmReductionPaused(int group) override;
   void confirmReductionResumed(int group) override;
   void settingsChanged(int group) override;
@@ -96,6 +97,7 @@ public:
   void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceNames) override;
+  bool autoreductionInProgress() const override;
 
 private:
   /// The search model

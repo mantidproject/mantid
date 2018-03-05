@@ -300,6 +300,12 @@ void ReflRunsTabPresenter::runAutoreduction() {
     tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
+/** Check whether the user started an autoreduction process
+ */
+bool ReflRunsTabPresenter::autoreductionInProgress() const {
+  return m_autoreductionInProgress;
+}
+
 /** Transfers the selected runs in the search results to the processing table
 * @return : The runs to transfer as a vector of maps
 */
@@ -549,15 +555,22 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
   return searchNumChanged || transferMethodChanged || m_instrumentChanged;
 }
 
+/** Notifies main presenter that data reduction is confirmed to be finished
+* i.e. after all rows have been reduced
+*/
+void ReflRunsTabPresenter::confirmReductionFinished(int group) {
+  UNUSED_ARG(group);
+  
+  // Start a timer to re-run autoreduction periodically
+  m_view->startTimer(1000);
+}
+
 /** Notifies main presenter that data reduction is confirmed to be paused
+* via a user command to pause reduction
 */
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
+  m_autoreductionInProgress = false;
   m_mainPresenter->notifyReductionPaused(group);
-
-  // If we are running autoreduction, start the timer to check for new files
-  // after a period of time
-  if (m_autoreductionInProgress)
-    m_view->startTimer(1000);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
