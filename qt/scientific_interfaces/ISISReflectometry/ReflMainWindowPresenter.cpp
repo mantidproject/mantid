@@ -23,10 +23,10 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, IReflRunsTabPresenter *runsPresenter,
     IReflEventTabPresenter *eventPresenter,
     IReflSettingsTabPresenter *settingsPresenter,
-    IReflSaveTabPresenter *savePresenter)
+    std::unique_ptr<IReflSaveTabPresenter> savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
       m_eventPresenter(eventPresenter), m_settingsPresenter(settingsPresenter),
-      m_savePresenter(savePresenter), m_isProcessing(false) {
+      m_savePresenter(std::move(savePresenter)), m_isProcessing(false) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);

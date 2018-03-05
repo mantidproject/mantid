@@ -5,6 +5,7 @@
 #include "IReflSaveTabPresenter.h"
 #include <vector>
 #include <string>
+#include <memory>
 #include <MantidKernel/ConfigPropertyObserver.h>
 #include <boost/optional.hpp>
 
@@ -45,7 +46,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSaveTabPresenter
     : public IReflSaveTabPresenter {
 public:
   /// Constructor
-  ReflSaveTabPresenter(IReflSaveTabView *view);
+  ReflSaveTabPresenter(std::unique_ptr<IReflSaveTabView> view);
   /// Destructor
   ~ReflSaveTabPresenter() override;
   /// Accept a main presenter
@@ -95,7 +96,7 @@ private:
   bool shouldAutosave() const;
 
   /// The view
-  IReflSaveTabView *m_view;
+  std::unique_ptr<IReflSaveTabView> m_view;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
   bool m_shouldAutosave;

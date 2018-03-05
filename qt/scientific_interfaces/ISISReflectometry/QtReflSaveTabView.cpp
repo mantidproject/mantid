@@ -9,9 +9,15 @@ namespace CustomInterfaces {
 /** Constructor
 * @param parent :: The parent of this view
 */
-QtReflSaveTabView::QtReflSaveTabView(QWidget *parent) : m_presenter() {
+QtReflSaveTabView::QtReflSaveTabView(QWidget *parent) : m_presenter(nullptr) {
   UNUSED_ARG(parent);
   initLayout();
+}
+
+void QtReflSaveTabView::subscribe(IReflSaveTabPresenter *presenter) {
+  m_presenter = presenter;
+  populateListOfWorkspaces();
+  suggestSaveDir();
 }
 
 /** Destructor
@@ -36,9 +42,6 @@ void QtReflSaveTabView::initLayout() {
   connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this,
           SLOT(onSavePathChanged()));
 
-  m_presenter.reset(new ReflSaveTabPresenter(this));
-  populateListOfWorkspaces();
-  suggestSaveDir();
 }
 
 void QtReflSaveTabView::onSavePathChanged() {
@@ -68,13 +71,6 @@ void QtReflSaveTabView::enableFileFormatAndLocationControls() {
 void QtReflSaveTabView::disableFileFormatAndLocationControls() {
   m_ui.fileFormatGroup->setEnabled(false);
   m_ui.fileLocationGroup->setEnabled(false);
-}
-
-/** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
-IReflSaveTabPresenter *QtReflSaveTabView::getPresenter() const {
-  return m_presenter.get();
 }
 
 /** Returns the save path

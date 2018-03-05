@@ -44,8 +44,8 @@ public:
   QtReflSaveTabView(QWidget *parent = nullptr);
   /// Destructor
   ~QtReflSaveTabView() override;
-  /// Returns the presenter managing this view
-  IReflSaveTabPresenter *getPresenter() const override;
+
+  void subscribe(IReflSaveTabPresenter* presenter) override;
 
   /// Returns the save path
   std::string getSavePath() const override;
@@ -108,7 +108,7 @@ private:
   /// Initialize the interface
   void initLayout();
   /// The presenter
-  std::unique_ptr<IReflSaveTabPresenter> m_presenter;
+  IReflSaveTabPresenter* m_presenter;
   /// The widget
   Ui::ReflSaveTabWidget m_ui;
 };

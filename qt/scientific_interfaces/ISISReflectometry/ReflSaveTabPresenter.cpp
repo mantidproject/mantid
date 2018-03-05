@@ -23,8 +23,11 @@ using namespace Mantid::API;
 /** Constructor
 * @param view :: The view we are handling
 */
-ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
-    : m_view(view), m_mainPresenter(), m_shouldAutosave(false) {
+ReflSaveTabPresenter::ReflSaveTabPresenter(
+    std::unique_ptr<IReflSaveTabView> view)
+    : m_view(std::move(view)), m_mainPresenter(), m_shouldAutosave(false) {
+
+  m_view->subscribe(this);
 
   m_saveAlgs = {"SaveReflCustomAscii", "SaveReflThreeColumnAscii",
                 "SaveANSTOAscii", "SaveILLCosmosAscii"};
