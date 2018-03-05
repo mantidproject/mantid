@@ -7,87 +7,93 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidNexusGeometry/InstrumentGeometryAbstraction.h"
 #include "MantidNexusGeometry/ShapeGeometryAbstraction.h"
-
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidKernel/make_unique.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace NexusGeometry {
 
 /// Constructor
-InstrumentGeometryAbstraction::InstrumentGeometryAbstraction(
-    const std::string &instrumentName) {
-  Geometry::Instrument_sptr inst_sptr(new Geometry::Instrument(instrumentName));
-  this->instrument_sptr = inst_sptr;
-
+InstrumentBuilder::InstrumentBuilder(const std::string &instrumentName)
+    : m_instrument(
+          Mantid::Kernel::make_unique<Geometry::Instrument>(instrumentName)) {
   // Default view
   std::string defaultViewAxis = "z";
   Geometry::PointingAlong pointingUp(Geometry::Y), alongBeam(Geometry::Z),
       thetaSign(Geometry::X);
   Geometry::Handedness handedness(Geometry::Right);
   std::string origin;
-  this->instrument_sptr->setDefaultViewAxis(defaultViewAxis);
-  this->instrument_sptr->setReferenceFrame(
-      boost::make_shared<Geometry::ReferenceFrame>(
-          pointingUp, alongBeam, thetaSign, handedness, origin));
+  m_instrument->setDefaultViewAxis(defaultViewAxis);
+  // Reference frame definitely does not need to be shared, and the copy
+  // operations in instrument make a new one anyway, but at present i'm not
+  // chaning the instruemnt API, particularly since getReferenceFrame on
+  // instrument returns the shared pointer
+  m_instrument->setReferenceFrame(boost::make_shared<Geometry::ReferenceFrame>(
+      pointingUp, alongBeam, thetaSign, handedness, origin));
 }
 
 /// Adds component to instrument
 Geometry::IComponent *
-InstrumentGeometryAbstraction::addComponent(const std::string &compName,
-                                            const Eigen::Vector3d &position) {
+InstrumentBuilder::addComponent(const std::string &compName,
+                                const Eigen::Vector3d &position) {
   Geometry::IComponent *component(new Geometry::ObjCompAssembly(compName));
   component->setPos(position(0), position(1), position(2));
-  this->instrument_sptr->add(component);
+  m_instrument->add(component);
   return component;
 }
 
 /// Adds detector to instrument
-void InstrumentGeometryAbstraction::addDetector(const std::string &detName,
-                                                int detId,
-                                                const Eigen::Vector3d &position,
-                                                objectHolder &shape) {
+void InstrumentBuilder::addDetector(const std::string &detName, int detId,
+                                    const Eigen::Vector3d &position,
+                                    objectHolder &shape) {
   auto *detector(new Geometry::Detector(
-      detName, detId, const_cast<Geometry::IComponent *>(
-                          this->instrument_sptr->getBaseComponent())));
+      detName, detId,
+      const_cast<Geometry::IComponent *>(m_instrument->getBaseComponent())));
   detector->setPos(position(0), position(1), position(2));
 
   detector->setShape(shape);
 
-  this->instrument_sptr->add(detector);
-  this->instrument_sptr->markAsDetectorIncomplete(detector);
+  m_instrument->add(detector);
+  m_instrument->markAsDetectorIncomplete(detector);
 }
 
-void InstrumentGeometryAbstraction::addMonitor(const std::string &detName,
-                                               int detId,
-                                               const Eigen::Vector3d &position,
-                                               objectHolder &shape) {
+void InstrumentBuilder::addMonitor(const std::string &detName, int detId,
+                                   const Eigen::Vector3d &position,
+                                   objectHolder &shape) {
   auto *detector(new Geometry::Detector(
-      detName, detId, const_cast<Geometry::IComponent *>(
-                          this->instrument_sptr->getBaseComponent())));
+      detName, detId,
+      const_cast<Geometry::IComponent *>(m_instrument->getBaseComponent())));
   detector->setPos(position(0), position(1), position(2));
 
   detector->setShape(shape);
 
-  this->instrument_sptr->add(detector);
-  this->instrument_sptr->markAsMonitor(detector);
+  m_instrument->add(detector);
+  m_instrument->markAsMonitor(detector);
 }
 
 /// Sorts detectors
-void InstrumentGeometryAbstraction::sortDetectors() {
-  this->instrument_sptr->markAsDetectorFinalize();
+void InstrumentBuilder::sortDetectors() const {
+  m_instrument->markAsDetectorFinalize();
 }
 
 /// Add sample
-void InstrumentGeometryAbstraction::addSample(const std::string &sampleName,
-                                              const Eigen::Vector3d &position) {
+void InstrumentBuilder::addSample(const std::string &sampleName,
+                                  const Eigen::Vector3d &position) {
   auto *sample(this->addComponent(sampleName, position));
-  this->instrument_sptr->markAsSamplePos(sample);
+  m_instrument->markAsSamplePos(sample);
 }
 /// Add source
-void InstrumentGeometryAbstraction::addSource(const std::string &sourceName,
-                                              const Eigen::Vector3d &position) {
+void InstrumentBuilder::addSource(const std::string &sourceName,
+                                  const Eigen::Vector3d &position) {
   auto *source(this->addComponent(sourceName, position));
-  this->instrument_sptr->markAsSource(source);
+  m_instrument->markAsSource(source);
+}
+
+std::unique_ptr<const Geometry::Instrument>
+InstrumentBuilder::createInstrument() const {
+  sortDetectors();
+  return std::unique_ptr<const Geometry::Instrument>(m_instrument->clone());
 }
 }
 }

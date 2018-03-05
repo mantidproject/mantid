@@ -6,6 +6,7 @@ set ( SRC_FILES
         )
 
 set ( INC_FILES
+    inc/MantidNexusGeometry/DllConfig.h
     inc/MantidNexusGeometry/InstrumentAbstractBuilder.h
     inc/MantidNexusGeometry/InstrumentGeometryAbstraction.h
     inc/MantidNexusGeometry/NexusGeometryParser.h

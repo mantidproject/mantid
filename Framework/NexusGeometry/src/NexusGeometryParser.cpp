@@ -1,13 +1,7 @@
-#include <iostream>
-//
-// Created by michael on 23/08/17.
-//
-
-//----------------------
-// Includes
-//----------------------
-
 #include "MantidNexusGeometry/NexusGeometryParser.h"
+#include "MantidNexusGeometry/InstrumentGeometryAbstraction.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -71,77 +65,53 @@ template <typename ExpectedT> void validateStorageType(const DataSet &data) {
 
 } // namespace
 
-/// Constructor opens the nexus file
-NexusGeometryParser::NexusGeometryParser(
-    const H5std_string &fileName, iAbstractBuilder_sptr iAbsBuilder_sptr) {
+/// OFF NEXUS GEOMETRY PARSER
+std::unique_ptr<const Mantid::Geometry::Instrument>
+NexusGeometryParser::extractInstrument(const H5File &file,
+                                       const Group &root) const {
+  InstrumentBuilder builder(instrumentName(root));
+  // Get path to all detector groups
+  const std::vector<Group> detectorGroups = this->openDetectorGroups(root);
+  for (auto &detectorGroup : detectorGroups) {
+    // Get the pixel offsets
+    Pixels pixelOffsets = this->getPixelOffsets(detectorGroup);
+    // Get the transformations
+    Eigen::Transform<double, 3, 2> transforms =
+        this->getTransformations(file, detectorGroup);
+    // Calculate pixel positions
+    Pixels detectorPixels = transforms * pixelOffsets;
+    // Get the pixel detIds
+    std::vector<int> detectorIds = this->getDetectorIds(detectorGroup);
+    // Extract shape
+    auto shape = this->parseNexusShape(detectorGroup);
 
-  // Disable automatic printing, so Load algorithm can deal with errors
-  // appropriately
-  Exception::dontPrint();
-  try {
-    H5File file(fileName, H5F_ACC_RDONLY);
-    this->nexusFile = file;
-    this->rootGroup = this->nexusFile.openGroup("/");
-  } catch (FileIException &e) {
-    this->exitStatus = OPENING_FILE_ERROR;
-  } catch (GroupIException &e) {
-    this->exitStatus = OPENING_ROOT_GROUP_ERROR;
+    for (size_t i = 0; i < detectorIds.size(); ++i) {
+      auto index = static_cast<int>(i);
+      std::string name = std::to_string(index);
+      Eigen::Vector3d detPos = detectorPixels.col(index);
+      builder.addDetector(name, detectorIds[index], detPos, shape);
+    }
   }
-  // Initialize the instrumentAbstractBuilder
-  this->iBuilder_sptr = std::move(iAbsBuilder_sptr);
+  // Sort the detectors
+  // Parse source and sample and add to instrument
+  this->parseAndAddSample(file, root, builder);
+  this->parseAndAddSource(file, root, builder);
+  this->parseMonitors(root, builder);
+  return builder.createInstrument();
 }
 
-/// OFF NEXUS GEOMETRY PARSER
-ParsingErrors NexusGeometryParser::parseNexusGeometry() {
-  // Determine if nexusFile was successfully opened
-  switch (this->exitStatus) {
-  case NO_ERROR:
-    break;
-  default:
-    return this->exitStatus;
-  }
+std::unique_ptr<const Geometry::Instrument>
+NexusGeometryParser::createInstrument(const std::string &fileName) const {
 
-  // Get path to all detector groups
-  try {
-    std::vector<Group> detectorGroups = this->openDetectorGroups();
-    for (auto &detectorGroup : detectorGroups) {
-      // Get the pixel offsets
-      Pixels pixelOffsets = this->getPixelOffsets(detectorGroup);
-      // Get the transformations
-      Eigen::Transform<double, 3, 2> transforms =
-          this->getTransformations(detectorGroup);
-      // Calculate pixel positions
-      Pixels detectorPixels = transforms * pixelOffsets;
-      // Get the pixel detIds
-      std::vector<int> detectorIds = this->getDetectorIds(detectorGroup);
-      // Extract shape
-      auto shape = this->parseNexusShape(detectorGroup);
-
-      for (size_t i = 0; i < detectorIds.size(); ++i) {
-        auto index = static_cast<int>(i);
-        std::string name = std::to_string(index);
-        Eigen::Vector3d detPos = detectorPixels.col(index);
-        this->iBuilder_sptr->addDetector(name, detectorIds[index], detPos,
-                                         shape);
-      }
-    }
-    // Sort the detectors
-    this->iBuilder_sptr->sortDetectors();
-    // Parse source and sample and add to instrument
-    this->parseAndAddSource();
-    this->parseAndAddSample();
-    this->parseMonitors();
-  } catch (H5::Exception &ex) {
-    this->exitStatus = UNKNOWN_ERROR;
-  }
-
-  return this->exitStatus;
+  const H5File file(fileName, H5F_ACC_RDONLY);
+  auto rootGroup = file.openGroup("/");
+  return extractInstrument(file, rootGroup);
 }
 
 /// Open subgroups of parent group
 std::vector<Group>
-NexusGeometryParser::openSubGroups(Group &parentGroup,
-                                   const H5std_string &CLASS_TYPE) {
+NexusGeometryParser::openSubGroups(const Group &parentGroup,
+                                   const H5std_string &CLASS_TYPE) const {
   std::vector<Group> subGroups;
 
   // Iterate over children, and determine if a group
@@ -174,9 +144,9 @@ NexusGeometryParser::openSubGroups(Group &parentGroup,
 }
 
 // Open all detector groups into a vector
-std::vector<Group> NexusGeometryParser::openDetectorGroups() {
-  std::vector<Group> rawDataGroupPaths =
-      this->openSubGroups(this->rootGroup, NX_ENTRY);
+std::vector<Group>
+NexusGeometryParser::openDetectorGroups(const Group &root) const {
+  std::vector<Group> rawDataGroupPaths = this->openSubGroups(root, NX_ENTRY);
 
   // Open all instrument groups within rawDataGroups
   std::vector<Group> instrumentGroupPaths;
@@ -202,7 +172,8 @@ std::vector<Group> NexusGeometryParser::openDetectorGroups() {
 }
 
 // Function to return the detector ids in the same order as the offsets
-std::vector<int> NexusGeometryParser::getDetectorIds(Group &detectorGroup) {
+std::vector<int>
+NexusGeometryParser::getDetectorIds(const Group &detectorGroup) const {
 
   std::vector<int> detIds;
 
@@ -216,7 +187,7 @@ std::vector<int> NexusGeometryParser::getDetectorIds(Group &detectorGroup) {
 }
 
 // Function to return the (x,y,z) offsets of pixels in the chosen detectorGroup
-Pixels NexusGeometryParser::getPixelOffsets(Group &detectorGroup) {
+Pixels NexusGeometryParser::getPixelOffsets(const Group &detectorGroup) const {
 
   // Initialise matrix
   Pixels offsetData;
@@ -271,9 +242,10 @@ Pixels NexusGeometryParser::getPixelOffsets(Group &detectorGroup) {
 // Function to read in a dataset into a vector
 template <typename valueType>
 std::vector<valueType>
-NexusGeometryParser::get1DDataset(const H5std_string &dataset) {
+NexusGeometryParser::get1DDataset(const H5File &file,
+                                  const H5std_string &dataset) const {
   // Open data set
-  DataSet data = this->nexusFile.openDataSet(dataset);
+  DataSet data = file.openDataSet(dataset);
   validateStorageType<valueType>(data);
   DataSpace dataSpace = data.getSpace();
   std::vector<valueType> values;
@@ -289,7 +261,7 @@ NexusGeometryParser::get1DDataset(const H5std_string &dataset) {
 template <typename valueType>
 std::vector<valueType>
 NexusGeometryParser::get1DDataset(const H5std_string &dataset,
-                                  const H5::Group &group) {
+                                  const H5::Group &group) const {
   // Open data set
   DataSet data = group.openDataSet(dataset);
   validateStorageType<valueType>(data);
@@ -311,7 +283,7 @@ NexusGeometryParser::get1DDataset(const H5std_string &dataset,
 }
 
 std::string NexusGeometryParser::get1DStringDataset(const std::string &dataset,
-                                                    const Group &group) {
+                                                    const Group &group) const {
   // Open data set
   DataSet data = group.openDataSet(dataset);
   auto dataType = data.getDataType();
@@ -324,12 +296,15 @@ std::string NexusGeometryParser::get1DStringDataset(const std::string &dataset,
 // Function to get the transformations from the nexus file, and create the Eigen
 // transform object
 Eigen::Transform<double, 3, Eigen::Affine>
-NexusGeometryParser::getTransformations(const Group &detectorGroup) {
+NexusGeometryParser::getTransformations(const H5File &file,
+                                        const Group &detectorGroup) const {
   H5std_string dependency;
   // Get absolute dependency path
-  try {
+  auto status =
+      H5Gget_objinfo(detectorGroup.getId(), DEPENDS_ON.c_str(), 0, NULL);
+  if (status == 0) {
     dependency = this->get1DStringDataset(DEPENDS_ON, detectorGroup);
-  } catch (H5::GroupIException &) {
+  } else {
     return Eigen::Transform<double, 3, Eigen::Affine>::Identity();
   }
 
@@ -343,10 +318,10 @@ NexusGeometryParser::getTransformations(const Group &detectorGroup) {
   // (they are _passive_ transformations)
   while (dependency != NO_DEPENDENCY) {
     // Open the transformation data set
-    DataSet transformation = this->nexusFile.openDataSet(dependency);
+    DataSet transformation = file.openDataSet(dependency);
 
     // Get magnitude of current transformation
-    double magnitude = this->get1DDataset<double>(dependency)[0];
+    double magnitude = this->get1DDataset<double>(file, dependency)[0];
     // Containers for transformation data
     Eigen::Vector3d transformVector(0.0, 0.0, 0.0);
     H5std_string transformType;
@@ -407,7 +382,8 @@ NexusGeometryParser::getTransformations(const Group &detectorGroup) {
 }
 
 /// Choose what shape type to parse
-objectHolder NexusGeometryParser::parseNexusShape(const Group &detectorGroup) {
+objectHolder
+NexusGeometryParser::parseNexusShape(const Group &detectorGroup) const {
   Group shapeGroup;
   try {
     shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
@@ -441,7 +417,8 @@ objectHolder NexusGeometryParser::parseNexusShape(const Group &detectorGroup) {
 }
 
 // Parse cylinder nexus geometry
-objectHolder NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) {
+objectHolder
+NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) const {
   H5std_string pointsToVertices = "cylinders";
   std::vector<int> cPoints =
       this->get1DDataset<int>(pointsToVertices, shapeGroup);
@@ -460,7 +437,8 @@ objectHolder NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) {
 }
 
 // Parse OFF (mesh) nexus geometry
-objectHolder NexusGeometryParser::parseNexusMesh(const Group &shapeGroup) {
+objectHolder
+NexusGeometryParser::parseNexusMesh(const Group &shapeGroup) const {
 
   const std::vector<uint16_t> faceIndices =
       vecUnsignedInt16(this->get1DDataset<int32_t>("faces", shapeGroup));
@@ -528,29 +506,38 @@ void NexusGeometryParser::createTrianglesFromPolygon(
 }
 
 // Parse source and add to instrument
-void NexusGeometryParser::parseAndAddSource() {
+void NexusGeometryParser::parseAndAddSource(const H5File &file,
+                                            const Group &root,
+                                            InstrumentBuilder &builder) const {
   H5std_string sourcePath = "raw_data_1/instrument/source";
-  Group sourceGroup = this->rootGroup.openGroup(sourcePath);
+  Group sourceGroup = root.openGroup(sourcePath);
   auto sourceName = this->get1DStringDataset("name", sourceGroup);
-  auto sourceTransformations = this->getTransformations(sourceGroup);
+  auto sourceTransformations = this->getTransformations(file, sourceGroup);
   auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
-  this->iBuilder_sptr->addSource(sourceName,
-                                 sourceTransformations * defaultPos);
+  builder.addSource(sourceName, sourceTransformations * defaultPos);
 }
 // Parse sample and add to instrument
-void NexusGeometryParser::parseAndAddSample() {
+void NexusGeometryParser::parseAndAddSample(const H5File &file,
+                                            const Group &root,
+                                            InstrumentBuilder &builder) const {
   std::string sampleName = "sample";
   H5std_string samplePath = "raw_data_1/sample";
-  Group sampleGroup = this->rootGroup.openGroup(samplePath);
-  auto sampleTransforms = this->getTransformations(sampleGroup);
+  Group sampleGroup = root.openGroup(samplePath);
+  auto sampleTransforms = this->getTransformations(file, sampleGroup);
   auto samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
-
-  this->iBuilder_sptr->addSample(sampleName, samplePos);
+  builder.addSample(sampleName, samplePos);
 }
 
-void NexusGeometryParser::parseMonitors() {
-  std::vector<Group> rawDataGroupPaths =
-      this->openSubGroups(this->rootGroup, NX_ENTRY);
+std::string NexusGeometryParser::instrumentName(const Group &root) const {
+  H5std_string instrumentPath = "raw_data_1/instrument";
+  const Group instrumentGroup = root.openGroup(instrumentPath);
+
+  return get1DStringDataset("name", instrumentGroup);
+}
+
+void NexusGeometryParser::parseMonitors(const H5::Group &root,
+                                        InstrumentBuilder &builder) const {
+  std::vector<Group> rawDataGroupPaths = this->openSubGroups(root, NX_ENTRY);
 
   // Open all instrument groups within rawDataGroups
   for (auto rawDataGroupPath : rawDataGroupPaths) {
@@ -561,9 +548,9 @@ void NexusGeometryParser::parseMonitors() {
       for (auto &monitor : monitorGroups) {
         auto detectorId = get1DDataset<int64_t>(DETECTOR_ID, monitor)[0];
         objectHolder monitorShape = parseNexusShape(monitor);
-        this->iBuilder_sptr->addMonitor(std::to_string(detectorId),
-                                        static_cast<int32_t>(detectorId),
-                                        Eigen::Vector3d{0, 0, 0}, monitorShape);
+        builder.addMonitor(std::to_string(detectorId),
+                           static_cast<int32_t>(detectorId),
+                           Eigen::Vector3d{0, 0, 0}, monitorShape);
       }
     }
   }

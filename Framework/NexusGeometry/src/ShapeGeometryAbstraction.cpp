@@ -16,7 +16,7 @@ namespace NexusGeometry {
 using namespace Eigen;
 
 objectHolder ShapeGeometryAbstraction::createCylinder(
-    const Eigen::Matrix<double, 3, 3> &pointsDef) {
+    const Eigen::Matrix<double, 3, 3> &pointsDef) const {
   // Calculate cylinder parameters
   auto centre = (pointsDef.col(2) + pointsDef.col(0)) / 2;
   auto axisVector = pointsDef.col(2) - pointsDef.col(0);
@@ -70,7 +70,7 @@ objectHolder ShapeGeometryAbstraction::createCylinder(
 
 objectHolder ShapeGeometryAbstraction::createMesh(
     std::vector<uint16_t> &&triangularFaces,
-    std::vector<Mantid::Kernel::V3D> &&vertices) {
+    std::vector<Mantid::Kernel::V3D> &&vertices) const {
 
   return boost::make_shared<Geometry::MeshObject>(
       std::move(triangularFaces), std::move(vertices), Kernel::Material{});
@@ -79,7 +79,7 @@ objectHolder ShapeGeometryAbstraction::createMesh(
 /// Finalise shape
 objectHolder ShapeGeometryAbstraction::createShape(
     const std::map<int, surfaceHolder> &surfaces, const std::string &algebra,
-    std::vector<double> &boundingBox) {
+    std::vector<double> &boundingBox) const {
   boost::shared_ptr<Geometry::CSGObject> shape =
       boost::make_shared<Geometry::CSGObject>();
   shape->setObject(21, algebra);

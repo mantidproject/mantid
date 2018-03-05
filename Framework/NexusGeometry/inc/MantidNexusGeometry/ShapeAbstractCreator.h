@@ -16,13 +16,13 @@ class ShapeAbstractCreator {
 public:
   /// Make a cylinder
   shapeAbstractionObject
-  createCylinder(Eigen::Matrix<double, 3, 3> &pointsDef) {
+  createCylinder(Eigen::Matrix<double, 3, 3> &pointsDef) const {
     this->shapeImp().createCylinder(pointsDef);
   }
 
 private:
   /// Factor out the static_cast
-  shapeAbstractionClass &shapeImp() {
+  shapeAbstractionClass &shapeImp() const {
     return static_cast<shapeAbstractionClass &>(*this);
   }
 };

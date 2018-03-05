@@ -11,6 +11,7 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidNexusGeometry/InstrumentGeometryAbstraction.h"
 
 #include "Eigen/Core"
@@ -20,51 +21,41 @@
 using namespace Mantid;
 using namespace NexusGeometry;
 
-class InstrumentGeometryAbstractionTest : public CxxTest::TestSuite {
+class InstrumentBuilderTest : public CxxTest::TestSuite {
 public:
-  void testConstructor_and_test_unAbstractInstrument() {
-    InstrumentGeometryAbstraction iGeoAbstract(this->iTestName);
-    TS_ASSERT(iGeoAbstract._unAbstractInstrument()->getName() ==
-              this->iTestName);
-  }
   void testAddComponent() {
-    InstrumentGeometryAbstraction iGeoAbstract(this->iTestName);
+    InstrumentBuilder builder(this->iTestName);
+
     TS_ASSERT_THROWS_NOTHING(
-        iGeoAbstract.addComponent(this->cTestName, this->testPos1));
-    auto iVisitor =
-        Geometry::InstrumentVisitor(iGeoAbstract._unAbstractInstrument());
+        builder.addComponent(this->cTestName, this->testPos1));
+    builder.addSample("sample", {0, 0, 0});
+    builder.addSource("source", {-10, 0, 0});
+    auto iVisitor = Geometry::InstrumentVisitor(builder.createInstrument());
     iVisitor.walkInstrument();
     auto iCompInfo = iVisitor.componentInfo();
-    TS_ASSERT(iCompInfo->position(0) == this->testPos1);
+    TS_ASSERT_EQUALS(iCompInfo->position(0), this->testPos1);
   }
 
   void testAddDetector_and_testSortDetectors() {
-    InstrumentGeometryAbstraction iGeoAbstract(this->iTestName);
-    TS_ASSERT_THROWS_NOTHING(iGeoAbstract.addDetector(
-        this->dTestName, 2, this->testPos2, this->shape));
-    iGeoAbstract.addDetector(this->dTestName, 1, this->testPos1, this->shape);
-    for (int i = 0; i < 2; ++i) {
-      auto iVisitor =
-          Geometry::InstrumentVisitor(iGeoAbstract._unAbstractInstrument());
-      iVisitor.walkInstrument();
-      auto iDetInfo = iVisitor.detectorInfo();
-      if (i == 0) {
-        TS_ASSERT(iDetInfo->position(0) == this->testPos2);
-      } else {
-        TS_ASSERT(iDetInfo->position(0) == this->testPos1);
-      }
-      TS_ASSERT_THROWS_NOTHING(iGeoAbstract.sortDetectors());
-    }
+    InstrumentBuilder builder(this->iTestName);
+    builder.addSample("sample", {0, 0, 0});
+    builder.addSource("source", {-10, 0, 0});
+    builder.addDetector(this->dTestName, 1, this->testPos2, this->shape);
+    builder.addDetector(this->dTestName, 2, this->testPos1, this->shape);
+    auto iVisitor = Geometry::InstrumentVisitor(builder.createInstrument());
+    iVisitor.walkInstrument();
+    auto iDetInfo = iVisitor.detectorInfo();
+    TS_ASSERT_EQUALS(iDetInfo->position(0), this->testPos2);
+    TS_ASSERT_EQUALS(iDetInfo->position(1), this->testPos1);
   }
 
   void testAddSample_and_testAddSource() {
-    InstrumentGeometryAbstraction iGeoAbstract(this->iTestName);
+    InstrumentBuilder builder(this->iTestName);
     TS_ASSERT_THROWS_NOTHING(
-        iGeoAbstract.addSample(this->sampleName, this->testPos1));
+        builder.addSample(this->sampleName, this->testPos1));
     TS_ASSERT_THROWS_NOTHING(
-        iGeoAbstract.addSource(this->sourceName, this->testPos2));
-    auto iVisitor =
-        Geometry::InstrumentVisitor(iGeoAbstract._unAbstractInstrument());
+        builder.addSource(this->sourceName, this->testPos2));
+    auto iVisitor = Geometry::InstrumentVisitor(builder.createInstrument());
     iVisitor.walkInstrument();
     auto iCompInfo = iVisitor.componentInfo();
     TS_ASSERT(iCompInfo->hasSample());
@@ -82,7 +73,8 @@ private:
   Eigen::Vector3d testPos1 = Eigen::Vector3d(1.0, -0.5, 2.9);
   Eigen::Vector3d testPos2 = Eigen::Vector3d(-1.2, 0.5, 1.9);
   // Placeholder empty shape
-  objectHolder shape = objectHolder();
+  boost::shared_ptr<Geometry::IObject> shape =
+      boost::make_shared<Geometry::CSGObject>();
 };
 
 #endif // INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_

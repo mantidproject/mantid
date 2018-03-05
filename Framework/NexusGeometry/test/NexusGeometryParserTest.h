@@ -21,26 +21,13 @@ using namespace NexusGeometry;
 
 class NexusGeometryParserTest : public CxxTest::TestSuite {
 public:
-  Geometry::Instrument_sptr extractInstrument() {
-    // Initialise abstract instrument builder
-    iAbstractBuilder_sptr iAbsBuilder_sptr(
-        new iAbstractBuilder(this->testInstName));
-    this->iAbsBuilder_sptr = iAbsBuilder_sptr;
-    // Initialise the parser
-    auto fullpath = Kernel::ConfigService::Instance().getFullPath(
-        this->nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
+  std::unique_ptr<const Mantid::Geometry::Instrument> extractInstrument() {
+    H5std_string nexusFilename = "SMALLFAKE_example_geometry.hdf5";
+    const auto fullpath = Kernel::ConfigService::Instance().getFullPath(
+        nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
 
-    NexusGeometryParser parser(fullpath, this->iAbsBuilder_sptr);
-    // Parse the nexus file
-    this->exitStatus = parser.parseNexusGeometry();
-    TS_ASSERT(this->exitStatus == NO_ERROR);
-
-    // Check correct number of detectors, skip monitors
-    TS_ASSERT(
-        this->iAbsBuilder_sptr->_unAbstractInstrument()->getNumberDetectors(
-            true) == 256);
-
-    return this->iAbsBuilder_sptr->_unAbstractInstrument();
+    NexusGeometryParser parser;
+    return parser.createInstrument(fullpath);
   }
 
   std::unique_ptr<Geometry::DetectorInfo> extractDetectorInfo() {
@@ -166,10 +153,4 @@ public:
     TS_ASSERT_DELTA(shapeBB.yMax() - shapeBB.yMin(), 2.0, 1e-9);
     TS_ASSERT_DELTA(shapeBB.zMax() - shapeBB.zMin(), 2.0, 1e-9);
   }
-
-private:
-  std::string testInstName = "testInstrument";
-  H5std_string nexusFilename = "SMALLFAKE_example_geometry.hdf5";
-  iAbstractBuilder_sptr iAbsBuilder_sptr;
-  ParsingErrors exitStatus;
 };
