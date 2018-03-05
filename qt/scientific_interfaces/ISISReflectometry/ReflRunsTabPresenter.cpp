@@ -60,7 +60,8 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
-      m_searcher(searcher), m_instrumentChanged(false) {
+      m_searcher(searcher), m_instrumentChanged(false),
+      m_autoreductionInProgress(false) {
   assert(m_view != nullptr);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
@@ -133,11 +134,11 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   case IReflRunsTabPresenter::SearchFlag:
     search();
     break;
-  case IReflRunsTabPresenter::NewAutoreductionFlag:
+  case IReflRunsTabPresenter::StartAutoreductionFlag:
     startAutoreduction();
     break;
-  case IReflRunsTabPresenter::ResumeAutoreductionFlag:
-    resumeAutoreduction();
+  case IReflRunsTabPresenter::TimerEventFlag:
+    runAutoreduction();
     break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
@@ -258,31 +259,39 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 }
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
-* runs to table and processes them
+* runs to table and processes them. Clears any existing table data first.
 */
 void ReflRunsTabPresenter::startAutoreduction() {
 
+  if (startNewAutoreduction()) {
+    // If starting a brand new autoreduction, select all rows / groups in
+    // existing table and delete them first
+    auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+    tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
+    tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
+  }
+
+  m_autoreductionInProgress = true;
+  runAutoreduction();
+}
+
+/** Run a single autoreduction process. Called periodially to add and process
+ *  any new runs in the table.
+ */
+void ReflRunsTabPresenter::runAutoreduction() {
+
+  // Stop any more notifications during processing
+  m_view->stopTimer();
+  
   // If a new autoreduction is being made, we must remove all existing rows and
   // transfer the new ones (obtained by ICAT search) in
   notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
-
-  // Select all rows / groups in existing table and delete them
-  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
-  tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
-  tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
 
   // Select and transfer all rows to the table
   m_view->setAllSearchRowsSelected();
   if (m_view->getSelectedSearchRows().size() > 0)
     transfer();
 
-  // Start processing
-  resumeAutoreduction();
-}
-
-/** Start or resume autoreduction based on the runs currently in the table
-*/
-void ReflRunsTabPresenter::resumeAutoreduction() {
   m_autoSearchString = m_view->getSearchString();
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
 
@@ -544,6 +553,11 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
 */
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
   m_mainPresenter->notifyReductionPaused(group);
+
+  // If we are running autoreduction, start the timer to check for new files
+  // after a period of time
+  if (m_autoreductionInProgress)
+    m_view->startTimer(1000);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed

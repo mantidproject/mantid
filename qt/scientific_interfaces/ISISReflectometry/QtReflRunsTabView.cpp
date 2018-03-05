@@ -297,15 +297,10 @@ This slot conducts a search operation before notifying the presenter that the
 "autoreduce" button has been pressed
 */
 void QtReflRunsTabView::on_actionAutoreduce_triggered() {
-  // No need to search first if not starting a new autoreduction
-  if (m_presenter->startNewAutoreduction()) {
-    m_algoRunner.get()->disconnect(); // disconnect any other connections
-    m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
-    connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-            SLOT(newAutoreduction()), Qt::UniqueConnection);
-  } else {
-    m_presenter->notify(IReflRunsTabPresenter::ResumeAutoreductionFlag);
-  }
+  m_algoRunner.get()->disconnect(); // disconnect any other connections
+  m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
+  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(startAutoreduction()), Qt::UniqueConnection);
 }
 
 /**
@@ -314,6 +309,27 @@ This slot notifies the presenter that the "transfer" button has been pressed
 void QtReflRunsTabView::on_actionTransfer_triggered() {
   m_presenter->notify(IReflRunsTabPresenter::Flag::TransferFlag);
 }
+
+/**
+   This slot is called each time the timer times out
+*/
+void QtReflRunsTabView::timerEvent(QTimerEvent *event) {
+  if (event->timerId() == m_timer.timerId()) {
+    m_presenter->notify(IReflRunsTabPresenter::TimerEventFlag);
+  } else {
+    QWidget::timerEvent(event);
+  }
+}
+
+/** start the timer
+ */
+void QtReflRunsTabView::startTimer(const int millisecs) {
+  m_timer.start(millisecs, this);
+}
+
+/** stop
+ */
+void QtReflRunsTabView::stopTimer() { m_timer.stop(); }
 
 /**
 This slot shows the slit calculator
@@ -355,8 +371,8 @@ void QtReflRunsTabView::instrumentChanged(int index) {
 /**
 This notifies the presenter that a new autoreduction has been started
 */
-void QtReflRunsTabView::newAutoreduction() {
-  m_presenter->notify(IReflRunsTabPresenter::NewAutoreductionFlag);
+void QtReflRunsTabView::startAutoreduction() {
+  m_presenter->notify(IReflRunsTabPresenter::StartAutoreductionFlag);
 }
 
 /**

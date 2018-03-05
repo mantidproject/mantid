@@ -120,12 +120,14 @@ private:
   std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
+  /// Whether autoreduction is in progress
+  bool m_autoreductionInProgress;
 
   /// searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void startAutoreduction();
-  void resumeAutoreduction();
+  void runAutoreduction();
   void transfer();
   void pushCommands();
   /// transfer strategy

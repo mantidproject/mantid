@@ -43,8 +43,8 @@ public:
 
   enum Flag {
     SearchFlag,
-    NewAutoreductionFlag,
-    ResumeAutoreductionFlag,
+    StartAutoreductionFlag,
+    TimerEventFlag,
     ICATSearchCompleteFlag,
     TransferFlag,
     InstrumentChangedFlag,

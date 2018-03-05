@@ -82,6 +82,10 @@ public:
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
+
+  // Timer methods
+  virtual void startTimer(const int millisecs) = 0;
+  virtual void stopTimer() = 0;
 };
 }
 }

@@ -9,6 +9,8 @@
 
 #include "ui_ReflRunsTabWidget.h"
 
+#include <QBasicTimer>
+
 namespace MantidQt {
 
 namespace MantidWidgets {
@@ -100,11 +102,17 @@ public:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
+  // Timer methods
+  void startTimer(const int millisecs) override;
+  void stopTimer() override;
+
 private:
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessor::Command> command);
+  // Implement our own timer event to trigger autoreduction
+  void timerEvent(QTimerEvent *event) override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -118,6 +126,8 @@ private:
   Ui::ReflRunsTabWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
+  // Timer for triggering periodic autoreduction
+  QBasicTimer m_timer;
 
 private slots:
   void on_actionSearch_triggered();
@@ -128,7 +138,7 @@ private slots:
   void instrumentChanged(int index);
   void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
-  void newAutoreduction();
+  void startAutoreduction();
 };
 
 } // namespace Mantid
