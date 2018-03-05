@@ -128,9 +128,20 @@ void LoadShape::exec() {
 
 boost::shared_ptr<Geometry::MeshObject> LoadShape::readSTLSolid(std::ifstream &file, std::string &name) {
   // Read Solid name
-  name = "Don't read solid name yet";
-  // Read Solid shape
-  return readSTLMeshObject( file );
+  // We expect line after trimming to be "solid "+name.
+  std::string line;
+  if (getline(file, line)) {
+    boost::trim(line);
+    if (line.size() < 5 || line.substr(0, 5) != "solid") {
+      throw std::runtime_error("Expected start of solid");
+    }
+    else {
+      name = line.substr(6, std::string::npos);
+    }
+    // Read Solid shape
+    return readSTLMeshObject(file);
+  }
+  return nullptr;
 }
 
 boost::shared_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream& file) {
@@ -144,8 +155,57 @@ boost::shared_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream& file) 
   return nullptr;
 }
 
+/* Reads triangle for STL file and returns true if triangle is found */
 bool LoadShape::readSTLTriangle(std::ifstream &file, V3D &v1, V3D &v2, V3D &v3) {
+
+  std::string line;
+  bool ok = false;
+  if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
+      bool ok = (
+        readSTLVertex(file, v1) &&
+        readSTLVertex(file, v2) &&
+        readSTLVertex(file, v3));
+      if (!ok) {
+        throw std::runtime_error("Error on reading STL triangle");
+      }
+  } else {
+    return false; // End of file
+  }
+  return readSTLLine(file, "endloop") && readSTLLine(file, "endfacet");
+}
+
+/* Reads vertex from STL file and returns true if vertex is found */
+bool LoadShape::readSTLVertex(std::ifstream &file, V3D &vertex) {
+  std::string line;
+  if (getline(file, line)) {
+    boost::trim(line);
+    std::vector<std::string> tokens;
+    boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
+    if (tokens.size() == 4 && tokens[0] == "vertex") {
+      vertex.setX(boost::lexical_cast<double>(tokens[1]));
+      vertex.setY(boost::lexical_cast<double>(tokens[2]));
+      vertex.setZ(boost::lexical_cast<double>(tokens[3]));
+      return true;
+    } else {
+      throw std::runtime_error("Error on reading STL vertex");
+    }
+  }
   return false;
+}
+
+// Read, check and ignore line in STL file. Return true if line is read
+bool LoadShape::readSTLLine(std::ifstream &file, std::string const &type) {
+  std::string line;
+  if (getline(file, line)) {
+    boost::trim(line);
+    if (line.size() < type.size() || line.substr(0, type.size()) != type) {
+      throw std::runtime_error("Expected STL line begining with "+type);
+    }
+    return true; // expected line read, then ignored
+  }
+  else {
+    return false; // end of file
+  }
 }
 
 // Adds vertex to list if distinct and returns index to vertex added or equal
