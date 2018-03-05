@@ -478,7 +478,7 @@ class DataInfo(object):
             # what we currently have (which is probably given by the ROI).
             logger.notice("Run %s [%s]: Could not fit a peak in the supplied peak range" %
                           (self.run_number, self.cross_section))
-            logger.notice(sys.exc_value)
+            logger.notice(str(sys.exc_value))
             try:
                 # Define a good default that is wide enough for the fit to work
                 default_width = (self.found_peak[1]-self.found_peak[0])/2.0
@@ -498,7 +498,7 @@ class DataInfo(object):
                 logger.notice("Run %s [%s]: Peak position: %s  Peak width: %s" %
                               (self.run_number, self.cross_section, peak_position, peak_width))
             except:
-                logger.notice(sys.exc_value)
+                logger.notice(str(sys.exc_value))
                 logger.notice("Run %s [%s]: Gaussian fit failed to determine peak position" %
                               (self.run_number, self.cross_section))
 
