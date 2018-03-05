@@ -38,11 +38,12 @@ Improvements
 - Have added functionality to continually plot latest results to Isis Gui v2.
 - Added more prominent instrument selection and process buttons to Isis Gui v2.
 - Added manage directories button to Isis Gui v2.
+- Added link to documentation at the bottom left of Isis Gui v2.
 
 Bug fixes
 #########
 
-- Fixed a bug  in Isis backend v2 where merged or all reductions were overwriting each other as they were being given the same name.
+- Fixed a bug in the new Isis backend where merged or all reductions were overwriting each other as they were being given the same name.
 - Fixed a bug where specifying fit range was not working for merged reductions. Previously the user specified range was being ignored.
 - Fixed a bug in the old GUI where loading files on UNIX systems would not work unless the file name was in uppercase letters.
 - Fixed a bug in the old GUI where merged reductions of time sliced data was not working.
