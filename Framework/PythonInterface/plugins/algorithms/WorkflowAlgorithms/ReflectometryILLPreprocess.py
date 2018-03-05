@@ -23,7 +23,6 @@ class Prop:
     CLEANUP = 'Cleanup'
     DIRECT_BEAM_POS = 'DirectBeamPosition'
     FLUX_NORM_METHOD = 'FluxNormalisation'
-    FOREGROUND_CENTRE = 'ForegroundCentre'
     FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
     HIGH_BKG_OFFSET = 'HighAngleBkgOffset'
     HIGH_BKG_WIDTH = 'HighAngleBkgWidth'
@@ -193,10 +192,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(Prop.WAVELENGTH_RANGE,
                                                 validator=FloatArrayLengthValidator(0, 2)),
                              doc='The wavelength bounds of the output workspace.')
-        self.declareProperty(Prop.FOREGROUND_CENTRE,
-                             defaultValue=Property.EMPTY_INT,
-                             validator=positiveInt,
-                             doc='Spectrum number of the foreground centre pixel.')
         self.declareProperty(Prop.FOREGROUND_HALF_WIDTH,
                              defaultValue=Property.EMPTY_INT,
                              validator=nonnegativeInt,
@@ -242,9 +237,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
                 issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background widths are zero.'
             if not self.getProperty(Prop.INPUT_WS).isDefault and self.getProperty(Prop.BEAM_POS).isDefault \
-                    and self.getProperty(Prop.FOREGROUND_CENTRE).isDefault:
+                    and self.getProperty(Prop.BEAM_CENTRE).isDefault:
                 issues[Prop.BEAM_POS] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
-                issues[Prop.FOREGROUND_CENTRE] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
+                issues[Prop.BEAM_CENTRE] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
         wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
         if len(wRange) == 2 and wRange[1] < wRange[0]:
             issues[Prop.WAVELENGTH_RANGE] = 'Upper limit is smaller than the lower limit.'
@@ -287,8 +282,18 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             self._cleanup.cleanup(ws)
         return wavelengthWS
 
+    def _createFakePeakPositionTable(self, peakPos):
+        """Create a peak position TableWorkspace with a single column for peakPos."""
+        tableName = self._names.withSuffix('peak_position_table')
+        table = CreateEmptyTableWorkspace(OutputWorkspace=tableName,
+                                          EnableLogging=self._subalgLogging)
+        table.addColumn('double', 'PeakCentre')
+        table.addRow((peakPos,))
+        return table
+
     def _rawOutput(self, ws):
         """Set ws as RAW_OUTPUT, if desired."""
+        # TODO: Move this method to its alpabetic place.
         if not self.getProperty(Prop.RAW_OUTPUT).isDefault:
             rawWS = self._convertToWavelength(ws, False)
             self.setProperty(Prop.RAW_OUTPUT, rawWS)
@@ -342,17 +347,12 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                         EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(transposedWS)
         peakPos = fitResult.Function.PeakCentre
-        posTableName = self._names.withSuffix('peak_position_table')
-        posTable = CreateEmptyTableWorkspace(OutputWorkspace=posTableName,
-                                             EnableLogging=self._subalgLogging)
-        posTable.addColumn('double', 'PeakCentre')
-        posTable.addRow((peakPos,))
+        posTable = self._createFakePeakPositionTable(peakPos)
         return posTable
 
     def _flatBkgRanges(self, ws, peakPosWS):
         """Return ranges for flat background fitting."""
-        peakPos = self._foregroundCentre(ws, peakPosWS)
-        peakPos = ws.getSpectrum(peakPos).getSpectrumNo()
+        peakPos = self._foregroundCentre(peakPosWS)
         peakHalfWidth = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
         if peakHalfWidth == Property.EMPTY_INT:
             peakHalfWidth = 0
@@ -368,19 +368,16 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         highRange = [highStartIndex - 0.5, highEndIndex - 0.5]
         return highRange + lowRange
 
-    def _foregroundCentre(self, ws, beamPosWS):
+    def _foregroundCentre(self, beamPosWS):
         """Return the detector id of the foreground centre pixel."""
-        if self.getProperty(Prop.FOREGROUND_CENTRE).isDefault:
-            return int(numpy.rint(beamPosWS.cell('PeakCentre', 0)))
-        spectrumNo = self.getProperty(Prop.FOREGROUND_CENTRE).value
-        return ws.getIndexFromSpectrumNumber(spectrumNo)
+        return int(numpy.rint(beamPosWS.cell('PeakCentre', 0)))
 
     def _groupForeground(self, ws, beamPosWS):
         """Group detectors in the foreground region."""
         if self.getProperty(Prop.FOREGROUND_HALF_WIDTH).isDefault:
             return ws
         hw = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
-        beamPos = self._foregroundCentre(ws, beamPosWS)
+        beamPos = self._foregroundCentre(beamPosWS)
         groupIndices = [i for i in range(beamPos - hw, beamPos + hw + 1)]
         foregroundWSName = self._names.withSuffix('foreground_grouped')
         foregroundWS = GroupDetectors(InputWorkspace=ws,
@@ -445,7 +442,12 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             beamPosWS = self.getProperty(Prop.BEAM_POS).value
             self._cleanup.protect(beamPosWS)
         else:
-            beamPosWS = None
+            if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
+                peakPos = self.getProperty(Prop.BEAM_CENTRE).value
+                beamPosWS = self._createFakePeakPositionTable(peakPos)
+            else:
+                # Beam position will be fitted later.
+                beamPosWS = None
         return ws, beamPosWS
 
     def _normaliseToFlux(self, detWS, monWS):

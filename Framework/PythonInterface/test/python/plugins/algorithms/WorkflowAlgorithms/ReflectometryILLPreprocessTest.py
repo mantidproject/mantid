@@ -35,7 +35,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'ForegroundCentre': 50,
+            'BeamCentre': 50,
             'FluxNormalisation': 'Normalisation OFF',
             'rethrow': True,
             'child': True
@@ -86,7 +86,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
             'SumOutput': 'Summation OFF',
-            'ForegroundCentre': 31,
+            'BeamCentre': 31,
             'ForegroundHalfWidth': 1,
             'LowAngleBkgOffset': len(lowerExclusionIndices),
             'LowAngleBkgWidth': len(lowerBkgIndices),
@@ -147,8 +147,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
+            'BeamCentre': 50,
             'WavelengthRange': [2.0],
-            'ForegroundCentre': 50,
             'ForegroundHalfWidth': 1,
             'FluxNormalisation': 'Normalisation OFF',
             'FlatBackground': 'Background OFF',
@@ -164,8 +164,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
+            'BeamCentre': 50,
             'WavelengthRange': [2.0, 4.0],
-            'ForegroundCentre': 50,
             'ForegroundHalfWidth':1,
             'FluxNormalisation': 'Normalisation OFF',
             'FlatBackground': 'Background OFF',
@@ -222,7 +222,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'Cleanup': 'Cleanup OFF',
             'WavelengthRange': [5., 10.],
             'WaterReference': waterName,
-            'ForegroundCentre': 31,
             'ForegroundHalfWidth': 1,
             'LowAngleBkgOffset': 5,
             'LowAngleBkgWidth': 10,
