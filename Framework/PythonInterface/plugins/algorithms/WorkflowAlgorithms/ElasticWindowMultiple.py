@@ -131,8 +131,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         # Perform the ElasticWindow algorithms
         for input_ws in self._input_workspaces:
-            logger.information('Running ElasticWindow for workspace: %s' % input_ws.getName())
-            progress.report('ElasticWindow for workspace: %s' % input_ws.getName())
+            logger.information('Running ElasticWindow for workspace: {}'.format(input_ws.getName()))
+            progress.report('ElasticWindow for workspace: {}'.format(input_ws.getName()))
 
             q_workspace, q2_workspace = ElasticWindow(InputWorkspace=input_ws,
                                                       IntegrationRangeStart=self._integration_range_start,
@@ -174,7 +174,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         v_axis_is_sample = self._input_size == len(sample_param)
 
         if v_axis_is_sample:
-            logger.notice('Vertical axis is in units of %s' % unit)
+            logger.notice('Vertical axis is in units of {}'.format(unit))
             unit = (self._sample_log_name, unit)
 
             def axis_value(index):
@@ -255,9 +255,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             sample, unit = _extract_temperature_from_log(workspace, self._sample_log_name, log_filename, run_name)
 
         if sample is not None and unit is not None:
-            logger.debug('%d %s found for run: %s' % (sample, unit, run_name))
+            logger.debug('{0} {1} found for run: {2}'.format(sample, unit, run_name))
         else:
-            logger.warning('No sample units found for run: %s' % run_name)
+            logger.warning('No sample units found for run: {}'.format(run_name))
         return sample, unit
 
 
@@ -265,7 +265,7 @@ def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_
     log_path = FileFinder.getFullPath(log_filename)
 
     if not log_path:
-        logger.warning('Log file for run %s not found' % run_name)
+        logger.warning('Log file for run {} not found'.format(run_name))
         return None, None
 
     LoadLog(Workspace=workspace, Filename=log_filename, EnableLogging=False)
@@ -276,7 +276,7 @@ def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_
         unit = run[sample_log_name].units
         return temperature, unit
 
-    logger.warning('Log entry %s for run %s not found' % (sample_log_name, run_name))
+    logger.warning('Log entry {0} for run {1} not found'.format(sample_log_name, run_name))
     return None, None
 
 
@@ -289,7 +289,7 @@ def _extract_sensor_name(sample_log_name, run, instrument):
         if position < len(sensor_names):
             return sensor_names[position]
         else:
-            logger.warning('Invalid position (' + str(position) + ') found in workspace.')
+            logger.warning('Invalid position ({}) found in workspace.'.format(position))
     else:
         logger.information('Position not found in workspace.')
     return ''
