@@ -81,7 +81,7 @@ Single Crystal Diffraction
 
 - PeaksWorkspace now has a column for the unique peak number so peaks can be found after sorting or filtering.
 
-- :ref:`StatisticsOfPeakWorkspacesMD <algm-StatisticsOfPeakWorkspacesMD>` now uses a weighted Z score for determining which peaks are outliers and has a new output workspace for plotting intensities of equivalent peaks.
+- :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now uses a weighted Z score for determining which peaks are outliers and has a new output workspace for plotting intensities of equivalent peaks.
 
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now can accept long or short names for the point group and reflection condition.
 

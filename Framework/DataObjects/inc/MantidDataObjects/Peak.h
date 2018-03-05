@@ -150,7 +150,7 @@ public:
   int getCol() const override;
   void setRow(int m_row);
   void setCol(int m_col);
-  void setPeakNumber(int m_peakNumber);
+  void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
