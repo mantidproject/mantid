@@ -594,8 +594,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
       addSpecialLogs(oldName, wsDetails);
       // Generate new name and rename workspace
       std::ostringstream newName;
-      newName << baseName << "_" << wsDetails.label << "_"
-              << wsDetails.itemName;
+      newName << baseName << "_" << wsDetails.itemName;
       if (!wsDetails.periods.empty()) {
         newName << "_" << wsDetails.periods;
       }
@@ -607,8 +606,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
         ads.addOrReplace(fitTableName, fitTable);
         // If user has specified a group to add to, add to that.
         // Otherwise the group is called the same thing as the base name.
-        const std::string groupToAddTo =
-            groupName.empty() ? baseName : groupName;
+        const std::string groupToAddTo = baseName;
         ads.addToGroup(groupToAddTo, fitTableName);
       }
     }
@@ -633,7 +631,7 @@ void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
   const auto resultsGroup = ads.retrieveWS<WorkspaceGroup>(resultsGroupName);
   // If user has specified a group to add to, add to that.
   // Otherwise the group is called the same thing as the base name.
-  const std::string groupToAddTo = groupName.empty() ? baseName : groupName;
+  const std::string groupToAddTo = baseName;
   if (ads.doesExist(groupToAddTo) && resultsGroup) {
     for (const auto &name : resultsGroup->getNames()) {
       ads.removeFromGroup(resultsGroupName, name);
