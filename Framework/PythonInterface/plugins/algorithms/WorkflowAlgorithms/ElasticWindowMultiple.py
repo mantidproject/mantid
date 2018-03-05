@@ -281,6 +281,7 @@ def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_
 
 
 def _extract_sensor_name(sample_log_name, run, instrument):
+    default_names = ['Bot_Can_Top', 'Middle_Can_Top', 'Top_Can_Top']
     sensor_names = instrument.getStringParameter("Workflow.TemperatureSensorNames")
 
     if sample_log_name in run:
@@ -288,6 +289,10 @@ def _extract_sensor_name(sample_log_name, run, instrument):
 
         if position < len(sensor_names):
             return sensor_names[position]
+        elif position < len(default_names):
+            logger.warning("Position {0} not found within instrument parameters, "
+                           "using default '{1}'.".format(position, default_names[position]))
+            return default_names[position]
         else:
             logger.warning('Invalid position ({}) found in workspace.'.format(position))
     else:
