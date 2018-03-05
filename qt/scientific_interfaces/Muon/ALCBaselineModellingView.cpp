@@ -248,9 +248,8 @@ void ALCBaselineModellingView::sectionsContextMenu(const QPoint &widgetPoint) {
 void ALCBaselineModellingView::setSelectorValues(
     RangeSelector *selector,
     IALCBaselineModellingView::SectionSelector values) {
-  // TODO: range sould be set to something meaningful
-  selector->setRange(std::numeric_limits<double>::min(),
-                     std::numeric_limits<double>::max());
+  selector->setRange(values.first,
+                      values.second);
 
   selector->setMinimum(values.first);
   selector->setMaximum(values.second);
