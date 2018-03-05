@@ -23,6 +23,7 @@ Interface
 - Results table in Muon Analysis now sets relevant columns to numeric. 
 - The Frequency Domain Analysis GUI now uses :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` to create the phase table for PhaseQuad FFTs. 
 - The Frequency Domain Analysis GUI now uses :ref:`MuonMaxent <algm-MuonMaxent>` to calculate the frequency spectrum in MaxEnt mode.  
+- The group/pair selection in Muon Analysis no longer resets when changing tabs or loading data.
 
 Algorithms
 ----------
