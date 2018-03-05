@@ -17,6 +17,7 @@ try:
 except AttributeError:
     UnicodeType=str
 
+
 class LoadEXED(PythonAlgorithm):
     __doc__ = """This algorithm reads Exed raw files and creates two workspaces.
     One for the detectors and another for the monitor.
@@ -47,15 +48,18 @@ class LoadEXED(PythonAlgorithm):
                              doc="Instrument definition file. If no file is specified, the default idf is used.")
 
         self.declareProperty('AngleOverride', -255.0,
-                                    doc = "Rotation angle of the EXED magnet.\nThis should be read from the data file!\nOnly change the value if the file has an incomplete header!")
+                             doc = "Rotation angle of the EXED magnet.\nThis should be read from the data file!\n"
+                                   "Only change the value if the file has an incomplete header!")
 
         self.declareProperty(MatrixWorkspaceProperty(name="OutputWorkspace",
                                                      defaultValue = "",
                                                      direction=Direction.Output),
                              doc="Mantid workspace containing the measured data.")
 
-        self.declareProperty(WorkspaceProperty(name="OutputMonitorWorkspace",defaultValue="",
-                                               direction=Direction.Output, optional = PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty(name="OutputMonitorWorkspace",
+                                               defaultValue="",
+                                               direction=Direction.Output,
+                                               optional = PropertyMode.Optional),
                                                doc="Workspace containing the measured monitor spectra.")
 
     def PyExec(self):
@@ -114,10 +118,15 @@ class LoadEXED(PythonAlgorithm):
         else:
             LoadInstrument(Workspace=wsn, Filename = self.fxml, RewriteSpectraMap= True)
         try:
-            RotateInstrumentComponent(Workspace=wsn,ComponentName='Tank',Y=1,
-                                  Angle=-float(parms_dict['phi'].encode('ascii','ignore')), RelativeRotation=False)
+            RotateInstrumentComponent(Workspace=wsn,
+                                      ComponentName='Tank',
+                                      Y=1,
+                                      Angle=-float(parms_dict['phi'].encode('ascii','ignore')),
+                                      RelativeRotation=False)
         except:
-            self.log().warning("The instrument does not contain a 'Tank' component. This means that you are using a custom XML instrument definition. OMEGA_MAG will be ignored.")
+            self.log().warning("The instrument does not contain a 'Tank' component. "
+                               "This means that you are using a custom XML instrument definition. "
+                               "OMEGA_MAG will be ignored.")
             self.log().warning("Please make sure that the detector positions in the instrument definition are correct.")
         # Separate monitors into seperate workspace
         __temp_monitors = ExtractSpectra(InputWorkspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]),
