@@ -88,9 +88,10 @@ set ( TEST_PY_FILES
       test/VesuvioProfileTest.py
       )
 
-# Addition tests for SANS components
-add_subdirectory(test/SANS)
+# Additional tests
+add_subdirectory(test/directtools)
 add_subdirectory(test/Muon)
+add_subdirectory(test/SANS)
 
 # python unit tests
 if (PYUNITTEST_FOUND)
