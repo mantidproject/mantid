@@ -286,9 +286,10 @@ def _extract_sensor_name(sample_log_name, run, instrument):
 
     if sample_log_name in run:
         position = run[sample_log_name].value[-1]
+        sensor = sensor_names[position]
 
-        if position < len(sensor_names):
-            return sensor_names[position]
+        if position < len(sensor_names) and sensor in run:
+            return sensor
         elif position < len(default_names):
             logger.warning("Position {0} not found within instrument parameters, "
                            "using default '{1}'.".format(position, default_names[position]))
