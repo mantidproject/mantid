@@ -85,7 +85,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'SumOutput': 'Summation OFF',
+            'SummationType': 'SumInQ',  # Don't sum the output.
             'BeamCentre': 31,
             'ForegroundHalfWidth': 1,
             'LowAngleBkgOffset': len(lowerExclusionIndices),

@@ -35,7 +35,7 @@ class Prop:
     RUN = 'Run'
     SLIT_NORM = 'SlitNormalisation'
     SUBALG_LOGGING = 'SubalgorithmLogging'
-    SUM_OUTPUT = 'SumOutput'
+    SUM_TYPE = 'SummationType'
     WATER_REFERENCE = 'WaterReference'
     WAVELENGTH_RANGE = 'WavelengthRange'
 
@@ -62,10 +62,9 @@ class SubalgLogging:
     ON = 'Logging ON'
 
 
-class Summation:
-    COHERENT = 'Coherent'
-    INCOHERENT = 'Incoherent'
-    OFF = 'Summation OFF'
+class SumType:
+    IN_LAMBDA = 'SumInLambda'
+    IN_Q = 'SumInQ'
 
 
 def normalisationMonitorWorkspaceIndex(ws):
@@ -166,9 +165,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=common.WSCleanup.ON,
                              validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
                              doc='Enable or disable intermediate workspace cleanup.')
-        self.declareProperty(Prop.SUM_OUTPUT,
-                             defaultValue=Summation.COHERENT,
-                             validator=StringListValidator([Summation.COHERENT, Summation.INCOHERENT, Summation.OFF]),
+        self.declareProperty(Prop.SUM_TYPE,
+                             defaultValue=SumType.IN_LAMBDA,
+                             validator=StringListValidator([SumType.IN_LAMBDA, SumType.IN_Q]),
                              doc='Foreground summation method.')
         self.declareProperty(ITableWorkspaceProperty(Prop.DIRECT_BEAM_POS,
                                                      defaultValue='',
@@ -547,17 +546,15 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def _sumForeground(self, ws, peakPosWS):
         """Select and apply foreground summation."""
-        method = self.getProperty(Prop.SUM_OUTPUT).value
-        if method == Summation.OFF:
+        method = self.getProperty(Prop.SUM_TYPE).value
+        if method == SumType.IN_Q:
             return ws
-        elif method == Summation.COHERENT:
+        elif method == SumType.IN_LAMBDA:
             ws = self._groupForeground(ws, peakPosWS)
             if not ws.isDistribution():
                 ConvertToDistribution(Workspace=ws,
                                       EnableLogging=self._subalgLogging)
             return ws
-        else:
-            raise RuntimeError('Selected output summation method is not implemented.')
 
     def _waterCalibration(self, ws):
         """Divide ws by a (water) reference workspace."""
