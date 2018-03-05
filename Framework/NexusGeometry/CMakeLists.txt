@@ -1,7 +1,6 @@
 set ( SRC_FILES
     src/InstrumentBuilder.cpp
     src/NexusGeometryParser.cpp
-    src/ParsingErrors.cpp
     src/NexusShapeFactory.cpp
         )
 
@@ -9,7 +8,6 @@ set ( INC_FILES
     inc/MantidNexusGeometry/DllConfig.h
     inc/MantidNexusGeometry/InstrumentBuilder.h
     inc/MantidNexusGeometry/NexusGeometryParser.h
-    inc/MantidNexusGeometry/ParsingErrors.h
     inc/MantidNexusGeometry/NexusShapeFactory.h
         )
 
