@@ -269,14 +269,6 @@ public:
     TS_ASSERT_EQUALS(data[3][3]->data(), fourthRow);
   }
 
-  void test_transfer_fails_wrong_whitelist() {
-    NiceMock<MockDataProcessorPresenter> presenter;
-    OneLevelTreeManager manager(&presenter, reflWhitelist());
-
-    Runs runs = {{{"Group", "0"}, {"Runs", "12345"}}};
-    TS_ASSERT_THROWS_ANYTHING(manager.transfer(runs, WhiteList()));
-  }
-
   void test_transfer_good_data() {
     NiceMock<MockDataProcessorPresenter> presenter;
     OneLevelTreeManager manager(&presenter, reflWhitelist());
@@ -313,7 +305,7 @@ public:
                   {"dQ/Q", "0.02"},
                   {"Scale", "2"},
                   {"Options", ""}}};
-    TS_ASSERT_THROWS_NOTHING(manager.transfer(runs, reflWhitelist()));
+    TS_ASSERT_THROWS_NOTHING(manager.transfer(runs));
 
     // Check that runs have been transferred correctly
     EXPECT_CALL(presenter, selectedParents())

@@ -84,14 +84,13 @@ public:
   /// Return selected data
   virtual TreeData selectedData(bool prompt = false) = 0;
   /// Transfer new data to model
-  virtual void transfer(const std::vector<std::map<QString, QString>> &runs,
-                        const WhiteList &whitelist) = 0;
+  virtual void
+  transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
   /// Update row with new data
   virtual void update(int parent, int child, const QStringList &data) = 0;
   /// Get the number of rows of a given parent
   virtual int rowCount() const = 0;
   virtual int rowCount(int parent) const = 0;
-  virtual bool rowIsEmpty(int row, int column) const = 0;
   /// Get the 'processed' status of a data item
   virtual bool isProcessed(int position) const = 0;
   virtual bool isProcessed(int position, int parent) const = 0;

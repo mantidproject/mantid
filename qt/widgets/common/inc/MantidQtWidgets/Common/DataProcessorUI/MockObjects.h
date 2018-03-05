@@ -209,12 +209,10 @@ public:
   void newTable(const WhiteList &) override{};
   void newTable(Mantid::API::ITableWorkspace_sptr,
                 const WhiteList &) override{};
-  void transfer(const std::vector<std::map<QString, QString>> &,
-                const WhiteList &) override{};
+  void transfer(const std::vector<std::map<QString, QString>> &) override{};
   void update(int, int, const QStringList &) override{};
   int rowCount() const override { return 0; };
   int rowCount(int) const override { return 0; };
-  bool rowIsEmpty(int, int) const override { return false; };
   bool isProcessed(int) const override { return false; };
   bool isProcessed(int, int) const override { return false; };
   void setProcessed(bool, int) override{};

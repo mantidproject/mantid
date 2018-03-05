@@ -62,6 +62,9 @@ public:
                             const QModelIndex &parent = QModelIndex()) = 0;
   // Get the row metadata
   virtual RowData_sptr rowData(const QModelIndex &index) = 0;
+  // Transfer rows into the table
+  virtual void
+  transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
 
 protected:
   /// Collection of data for viewing.

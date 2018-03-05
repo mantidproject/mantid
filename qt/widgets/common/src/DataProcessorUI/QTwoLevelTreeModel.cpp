@@ -703,6 +703,79 @@ int QTwoLevelTreeModel::findOrAddGroup(const std::string &groupName) {
     return static_cast<int>(groupIter - m_groups.begin());
   }
 }
+
+/** Checks whether the existing row is empty
+ * @return : true if all of the values in the row are empty
+ */
+bool QTwoLevelTreeModel::rowIsEmpty(int row, int parent) const {
+  // Loop through all columns and return false if any are not empty
+  for (int columnIndex = 0; columnIndex < columnCount(); ++columnIndex) {
+    auto value = data(index(row, columnIndex, index(parent, 0)))
+                     .toString()
+                     .toStdString();
+    if (!value.empty())
+      return false;
+  }
+
+  // All cells in the row were empty
+  return true;
+}
+
+/**
+Inserts a new row with given values to the specified group in the specified
+location
+@param groupIndex :: The index to insert the new row after
+@param rowIndex :: The index to insert the new row after
+@param rowValues :: the values to set in the row cells
+*/
+void QTwoLevelTreeModel::insertRowWithValues(
+    int groupIndex, int rowIndex, const std::map<QString, QString> &rowValues) {
+
+  insertRow(rowIndex, index(groupIndex, 0));
+
+  // Loop through all the cells and update the values
+  int colIndex = 0;
+  for (auto const &columnName : m_whitelist.names()) {
+    if (rowValues.count(columnName)) {
+      const auto value = rowValues.at(columnName).toStdString();
+      const auto absolutePosition =
+          m_groups[groupIndex].rowAbsoluteIndex(rowIndex);
+      m_tWS->String(absolutePosition, colIndex + 1) = value;
+    }
+    ++colIndex;
+  }
+
+  updateAllGroupData();
+}
+
+/** Transfer data to the model
+* @param runs :: [input] Data to transfer as a vector of maps
+*/
+void QTwoLevelTreeModel::transfer(
+    const std::vector<std::map<QString, QString>> &runs) {
+  // If the table only has one row, check if it is empty and if so, remove it.
+  // This is to make things nicer when transferring, as the default table has
+  // one empty row
+  if (rowCount() == 1 && rowCount(index(0, 0)) == 1 && rowIsEmpty(0, 0))
+    removeRows(0, 1);
+
+  for (const auto &row : runs) {
+    // The first cell in the row contains the group name. It must be set.
+    // (Potentially we could allow it to be empty but it's probably safer to
+    // enforce this.)
+    if (!row.count("Group") || row.at("Group").isEmpty()) {
+      throw std::invalid_argument("Data cannot be transferred to the "
+                                  "processing table. Group information is "
+                                  "missing.");
+    }
+    const auto groupName = row.at("Group").toStdString();
+    // Get the group index. Create the groups if it doesn't exist
+    const auto groupIndex = findOrAddGroup(groupName);
+    // Add a new row with the given values to the end of the group
+    const int rowIndex = rowCount(index(groupIndex, 0));
+    insertRowWithValues(groupIndex, rowIndex, row);
+  }
+}
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

@@ -400,33 +400,6 @@ void TwoLevelTreeManager::insertRow(int groupIndex, int rowIndex) {
 }
 
 /**
-Inserts a new row with given values to the specified group in the specified
-location
-@param groupIndex :: The index to insert the new row after
-@param rowIndex :: The index to insert the new row after
-@param rowValues :: the values to set in the row cells
-@param whitelist :: the list of columns
-*/
-void TwoLevelTreeManager::insertRow(int groupIndex, int rowIndex,
-                                    const std::map<QString, QString> &rowValues,
-                                    const WhiteList &whitelist) {
-
-  m_model->insertRow(rowIndex, m_model->index(groupIndex, 0));
-
-  // Loop through all the cells and update the values
-  int colIndex = 0;
-  for (auto const &columnName : whitelist.names()) {
-    if (rowValues.count(columnName)) {
-      const auto value = rowValues.at(columnName);
-      m_model->setData(
-          m_model->index(rowIndex, colIndex, m_model->index(groupIndex, 0)),
-          value);
-    }
-    ++colIndex;
-  }
-}
-
-/**
 Inserts a new group in the specified location
 @param groupIndex :: The index to insert the new row after
 */
@@ -550,40 +523,10 @@ TreeData TwoLevelTreeManager::selectedData(bool prompt) {
 
 /** Transfer data to the model
 * @param runs :: [input] Data to transfer as a vector of maps
-* @param whitelist :: [input] Whitelist containing number of columns
 */
 void TwoLevelTreeManager::transfer(
-    const std::vector<std::map<QString, QString>> &runs,
-    const WhiteList &whitelist) {
-
-  if (static_cast<int>(whitelist.size()) != m_model->columnCount()) {
-    throw std::invalid_argument(
-        "Invalid table workspace. Table workspace must "
-        "have the same number of columns as the white list");
-  }
-
-  // If the table only has one row, check if it is empty and if so, remove it.
-  // This is to make things nicer when transferring, as the default table has
-  // one empty row
-  if (rowCount() == 1 && rowCount(0) == 1 && rowIsEmpty(0, 0))
-    m_model->removeRows(0, 1);
-
-  for (const auto &row : runs) {
-    // The first cell in the row contains the group name. It must be set.
-    // (Potentially we could allow it to be empty but it's probably safer to
-    // enforce this.)
-    if (!row.count("Group") || row.at("Group").isEmpty()) {
-      throw std::invalid_argument("Data cannot be transferred to the "
-                                  "processing table. Group information is "
-                                  "missing.");
-    }
-    const auto groupName = row.at("Group").toStdString();
-    // Get the group index. Create the groups if it doesn't exist
-    const auto groupIndex = m_model->findOrAddGroup(groupName);
-    // Add a new row with the given values to the end of the group
-    const int rowIndex = rowCount(groupIndex);
-    insertRow(groupIndex, rowIndex, row, whitelist);
-  }
+    const std::vector<std::map<QString, QString>> &runs) {
+  m_model->transfer(runs);
 }
 
 /** Updates a row with new data
@@ -613,22 +556,6 @@ int TwoLevelTreeManager::rowCount() const { return m_model->rowCount(); }
 */
 int TwoLevelTreeManager::rowCount(int parent) const {
   return m_model->rowCount(m_model->index(parent, 0));
-}
-
-/** Checks whether the existing row is empty
- * @return : true if all of the values in the row are empty
- */
-bool TwoLevelTreeManager::rowIsEmpty(int row, int parent) const {
-  // Loop through all columns and return false if any are not empty
-  for (int columnIndex = 0; columnIndex < m_model->columnCount();
-       ++columnIndex) {
-    auto value = getCell(row, columnIndex, parent, 0);
-    if (!value.empty())
-      return false;
-  }
-
-  // All cells in the row were empty
-  return true;
 }
 
 /** Gets the 'process' status of a group

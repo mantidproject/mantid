@@ -1305,7 +1305,7 @@ void GenericDataProcessorPresenter::pasteSelected() {
 void GenericDataProcessorPresenter::transfer(
     const std::vector<std::map<QString, QString>> &runs) {
 
-  m_manager->transfer(runs, m_whitelist);
+  m_manager->transfer(runs);
   m_view->showTable(m_manager->getModel());
 }
 

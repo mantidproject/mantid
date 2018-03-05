@@ -81,14 +81,12 @@ public:
   /// Return selected data
   TreeData selectedData(bool prompt) override;
   /// Transfer new data to model
-  void transfer(const std::vector<std::map<QString, QString>> &runs,
-                const WhiteList &whitelist) override;
+  void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   /// Update row with new data
   void update(int parent, int child, const QStringList &data) override;
   /// Get the number of rows of a given parent
   int rowCount() const override;
   int rowCount(int parent) const override;
-  bool rowIsEmpty(int row, int parent) const override;
   void setCell(int row, int column, int parentRow, int parentColumn,
                const std::string &value) override;
   int getNumberOfRows() override;
@@ -126,9 +124,6 @@ private:
 
   /// Insert an empty row in the model
   void insertRow(int rowIndex);
-  /// Insert a row with values in the model
-  void insertRow(int rowIndex, const std::map<QString, QString> &rowValues,
-                 const WhiteList &whitelist);
   /// Create a default table workspace
   Mantid::API::ITableWorkspace_sptr
   createDefaultWorkspace(const WhiteList &whitelist);

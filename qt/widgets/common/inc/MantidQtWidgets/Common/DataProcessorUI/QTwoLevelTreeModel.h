@@ -97,11 +97,16 @@ public:
                     const QModelIndex &parent = QModelIndex()) override;
   // Insert rows
   bool insertRows(int position, int count, int parent);
+  // Transfer rows into the table
+  void transfer(const std::vector<std::map<QString, QString>> &runs) override;
 private slots:
   void tableDataUpdated(const QModelIndex &, const QModelIndex &);
 
 private:
   void updateAllGroupData();
+  void insertRowWithValues(int groupIndex, int rowIndex,
+                           const std::map<QString, QString> &rowValues);
+  bool rowIsEmpty(int row, int parent) const;
   void setupModelData(Mantid::API::ITableWorkspace_sptr table);
   bool insertGroups(int position, int count);
   bool removeGroups(int position, int count);

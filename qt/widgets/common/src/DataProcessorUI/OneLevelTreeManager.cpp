@@ -259,30 +259,6 @@ void OneLevelTreeManager::insertRow(int rowIndex) {
   m_model->insertRow(rowIndex);
 }
 
-/**
-Inserts a new row with given values to the specified group in the specified
-location
-@param rowIndex :: The index to insert the new row after
-@param rowValues :: the values to set in the row cells
-@param whitelist :: the list of columns
-*/
-void OneLevelTreeManager::insertRow(int rowIndex,
-                                    const std::map<QString, QString> &rowValues,
-                                    const WhiteList &whitelist) {
-
-  m_model->insertRow(rowIndex);
-
-  // Loop through all columns and update the value in the row
-  int colIndex = 0;
-  for (auto const &columnName : whitelist.names()) {
-    if (rowValues.count(columnName)) {
-      const auto value = rowValues.at(columnName);
-      m_model->setData(m_model->index(rowIndex, colIndex), value);
-    }
-    ++colIndex;
-  }
-}
-
 TreeData OneLevelTreeManager::handleEmptyTable(bool prompt) {
   if (prompt)
     m_presenter->giveUserWarning("Cannot process an empty Table", "Warning");
@@ -366,30 +342,10 @@ TreeData OneLevelTreeManager::selectedData(bool prompt) {
 
 /** Transfer data to the model
 * @param runs :: [input] Data to transfer as a vector of maps
-* @param whitelist :: [input] Whitelist containing number of columns
 */
 void OneLevelTreeManager::transfer(
-    const std::vector<std::map<QString, QString>> &runs,
-    const WhiteList &whitelist) {
-
-  if (static_cast<int>(whitelist.size()) != m_model->columnCount()) {
-    throw std::invalid_argument(
-        "Invalid table workspace. Table workspace must "
-        "have the same number of columns as the white list");
-  }
-
-  // If the table only has one row, check if it is empty and if so, remove it.
-  // This is to make things nicer when transferring, as the default table has
-  // one empty row
-  if (rowCount() == 1 && rowCount(0) == 1 && rowIsEmpty(0, 0))
-    m_model->removeRows(0, 1);
-
-  // Loop over the rows (vector elements)
-  for (const auto &row : runs) {
-    // Add a new row to the model at the end of the current list
-    const int rowIndex = rowCount();
-    insertRow(rowIndex, row, whitelist);
-  }
+    const std::vector<std::map<QString, QString>> &runs) {
+  m_model->transfer(runs);
 }
 
 /** Updates a row with new data
@@ -421,22 +377,6 @@ int OneLevelTreeManager::rowCount() const { return m_model->rowCount(); }
 int OneLevelTreeManager::rowCount(int parent) const {
   UNUSED_ARG(parent);
   return m_model->rowCount();
-}
-
-/** Checks whether the existing row is empty
- * @return : true if all of the values in the row are empty
- */
-bool OneLevelTreeManager::rowIsEmpty(int row, int parent) const {
-  // Loop through all columns and return false if any are not empty
-  for (int columnIndex = 0; columnIndex < m_model->columnCount();
-       ++columnIndex) {
-    auto value = getCell(row, columnIndex, parent, 0);
-    if (!value.empty())
-      return false;
-  }
-
-  // All cells in the row were empty
-  return true;
 }
 
 /** Gets the 'process' status of a row

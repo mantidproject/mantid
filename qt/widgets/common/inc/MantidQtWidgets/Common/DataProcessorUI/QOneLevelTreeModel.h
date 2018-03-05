@@ -89,11 +89,19 @@ public:
   // Set the 'processed' status of a row
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;
+  // Transfer rows into the table
+  void transfer(const std::vector<std::map<QString, QString>> &runs) override;
 private slots:
   void tableDataUpdated(const QModelIndex &, const QModelIndex &);
 
 private:
+  /// Update all cached row data from the table data
   void updateAllRowData();
+  /// Insert a row with given values into the table
+  void insertRowWithValues(int rowIndex,
+                           const std::map<QString, QString> &rowValues);
+  /// Check whether a row's cell values are all empty
+  bool rowIsEmpty(int row) const;
   /// Vector containing process status for each row
   std::vector<RowData_sptr> m_rows;
 };

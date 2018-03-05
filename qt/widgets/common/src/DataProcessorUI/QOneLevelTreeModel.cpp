@@ -295,6 +295,65 @@ void QOneLevelTreeModel::tableDataUpdated(const QModelIndex &,
                                           const QModelIndex &) {
   updateAllRowData();
 }
+
+/** Checks whether the existing row is empty
+ * @return : true if all of the values in the row are empty
+ */
+bool QOneLevelTreeModel::rowIsEmpty(int row) const {
+  // Loop through all columns and return false if any are not empty
+  for (int columnIndex = 0; columnIndex < columnCount(); ++columnIndex) {
+    auto value = data(index(row, columnIndex)).toString().toStdString();
+    if (!value.empty())
+      return false;
+  }
+
+  // All cells in the row were empty
+  return true;
+}
+
+/**
+Inserts a new row with given values to the specified group in the specified
+location
+@param rowIndex :: The index to insert the new row after
+@param rowValues :: the values to set in the row cells
+*/
+void QOneLevelTreeModel::insertRowWithValues(
+    int rowIndex, const std::map<QString, QString> &rowValues) {
+
+  insertRow(rowIndex);
+
+  // Loop through all columns and update the value in the row
+  int colIndex = 0;
+  for (auto const &columnName : m_whitelist.names()) {
+    if (rowValues.count(columnName)) {
+      const auto value = rowValues.at(columnName).toStdString();
+      m_tWS->String(rowIndex, colIndex) = value;
+    }
+    ++colIndex;
+  }
+
+  updateAllRowData();
+}
+
+/** Transfer data to the table
+* @param runs :: [input] Data to transfer as a vector of maps
+*/
+void QOneLevelTreeModel::transfer(
+    const std::vector<std::map<QString, QString>> &runs) {
+
+  // If the table only has one row, check if it is empty and if so, remove it.
+  // This is to make things nicer when transferring, as the default table has
+  // one empty row
+  if (rowCount() == 1 && rowIsEmpty(0))
+    removeRows(0, 1);
+
+  // Loop over the rows (vector elements)
+  for (const auto &row : runs) {
+    // Add a new row to the model at the end of the current list
+    const int rowIndex = rowCount();
+    insertRowWithValues(rowIndex, row);
+  }
+}
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

@@ -82,14 +82,12 @@ public:
   /// Return selected data
   TreeData selectedData(bool prompt) override;
   /// Transfer new data to model
-  void transfer(const std::vector<std::map<QString, QString>> &runs,
-                const WhiteList &whitelist) override;
+  void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   /// Update row with new data
   void update(int parent, int child, const QStringList &data) override;
   /// Get the number of rows of a given parent
   int rowCount() const override;
   int rowCount(int parent) const override;
-  bool rowIsEmpty(int row, int column) const override;
   void setCell(int row, int column, int parentRow, int parentColumn,
                const std::string &value) override;
   std::string getCell(int row, int column, int parentRow,
@@ -122,10 +120,6 @@ private:
 
   /// Insert an empty row in the model
   void insertRow(int groupIndex, int rowIndex);
-  /// Insert a row in the model with values
-  void insertRow(int groupIndex, int rowIndex,
-                 const std::map<QString, QString> &rowValues,
-                 const WhiteList &whitelist);
   /// Insert a group in the model
   void insertGroup(int groupIndex);
   /// Get the number of rows in a group
