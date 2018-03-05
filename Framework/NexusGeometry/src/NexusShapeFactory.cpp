@@ -5,7 +5,7 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidNexusGeometry/ShapeGeometryAbstraction.h"
+#include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 

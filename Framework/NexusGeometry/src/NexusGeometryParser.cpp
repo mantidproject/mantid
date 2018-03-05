@@ -1,6 +1,6 @@
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
-#include "MantidNexusGeometry/ShapeGeometryAbstraction.h"
+#include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument.h"
 
