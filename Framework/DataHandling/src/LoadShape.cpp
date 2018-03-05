@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
@@ -126,7 +127,7 @@ void LoadShape::exec() {
 
 }
 
-boost::shared_ptr<Geometry::MeshObject> LoadShape::readSTLSolid(std::ifstream &file, std::string &name) {
+std::unique_ptr<Geometry::MeshObject> LoadShape::readSTLSolid(std::ifstream &file, std::string &name) {
   // Read Solid name
   // We expect line after trimming to be "solid "+name.
   std::string line;
@@ -144,15 +145,21 @@ boost::shared_ptr<Geometry::MeshObject> LoadShape::readSTLSolid(std::ifstream &f
   return nullptr;
 }
 
-boost::shared_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream& file) {
-  std::vector<uint16_t> triangle_indices;
+std::unique_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream& file) {
+  std::vector<uint16_t> triangleIndices;
   std::vector<V3D> vertices;
   V3D t1, t2, t3;
 
   while (readSTLTriangle(file, t1, t2, t3)) {
-
+    triangleIndices.push_back(addSTLVertex(t1, vertices));
+    triangleIndices.push_back(addSTLVertex(t2, vertices));
+    triangleIndices.push_back(addSTLVertex(t3, vertices));
   }
-  return nullptr;
+  // Use efficient constructor of MeshObject
+  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
+    new MeshObject(std::move(triangleIndices), std::move(vertices),
+      Mantid::Kernel::Material()));
+  return retVal;
 }
 
 /* Reads triangle for STL file and returns true if triangle is found */

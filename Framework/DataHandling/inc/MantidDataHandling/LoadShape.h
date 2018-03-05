@@ -63,8 +63,8 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  boost::shared_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file, std::string &name);
-  boost::shared_ptr<Geometry::MeshObject> readSTLMeshObject(std::ifstream &file);
+  std::unique_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file, std::string &name);
+  std::unique_ptr<Geometry::MeshObject> readSTLMeshObject(std::ifstream &file);
   bool readSTLTriangle(std::ifstream &file, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3);
   bool readSTLVertex(std::ifstream &file, Kernel::V3D &v);
   bool readSTLLine(std::ifstream & file, std::string const &linetype);
