@@ -153,5 +153,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsInstrumentViewQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+  set_target_properties(MantidQtWidgetsInstrumentViewQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(MantidQtWidgetsInstrumentViewQt4 PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()

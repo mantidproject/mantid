@@ -2,8 +2,12 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEW_H_
 
 #include "EnggDiffGSASRefinementMethod.h"
+#include "IEnggDiffMultiRunFittingWidgetOwner.h"
+#include "IEnggDiffMultiRunFittingWidgetView.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "RunLabel.h"
 
+#include <boost/optional.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -13,10 +17,13 @@ class QwtData;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IEnggDiffGSASFittingView {
+class IEnggDiffGSASFittingView : public IEnggDiffMultiRunFittingWidgetOwner {
 
 public:
   virtual ~IEnggDiffGSASFittingView() = default;
+
+  virtual void
+  addWidget(IEnggDiffMultiRunFittingWidgetView *widget) override = 0;
 
   /**
    Display lattice parameters to the user
@@ -25,17 +32,23 @@ public:
   virtual void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const = 0;
 
+  /// Display gamma broadening term to the user
+  virtual void displayGamma(const double gamma) const = 0;
+
   /**
    Display Rwp value to the user
    @param rwp for the run to display
   */
   virtual void displayRwp(const double rwp) const = 0;
 
+  /// Display sigma broadening term to the user
+  virtual void displaySigma(const double sigma) const = 0;
+
   /**
-   Get the name of the focused run file the user has requested to load
-   @return Filename to load
+   Get the names of the focused run files the user has requested to load
+   @return Vector of filenames to load
    */
-  virtual std::string getFocusedFileName() const = 0;
+  virtual std::vector<std::string> getFocusedFileNames() const = 0;
 
   /**
    Get the path to export the created GSAS-II project file to
@@ -56,14 +69,15 @@ public:
   virtual std::string getPathToGSASII() const = 0;
 
   /**
-   @return The minimum d-spacing to use in Pawley refinement
+   @return The minimum d-spacing to use in Pawley refinement, if it is set
    */
-  virtual double getPawleyDMin() const = 0;
+  virtual boost::optional<double> getPawleyDMin() const = 0;
 
   /**
-   @return The weight for penalty function applied during Pawley refinement
+   @return The weight for penalty function applied during Pawley refinement, if
+   it is set
    */
-  virtual double getPawleyNegativeWeight() const = 0;
+  virtual boost::optional<double> getPawleyNegativeWeight() const = 0;
 
   /**
    Get paths to all phase files selected for refinement
@@ -71,44 +85,42 @@ public:
    */
   virtual std::vector<std::string> getPhaseFileNames() const = 0;
 
+  /// Get whether the user has selected to refine gamma broadening term
+  virtual bool getRefineGamma() const = 0;
+
+  /// Get whether the user has selected to refine sigma broadening term
+  virtual bool getRefineSigma() const = 0;
+
   /**
    Get the selected refinement method (Pawley or Rietveld)
    @return Refinement method
    */
   virtual GSASRefinementMethod getRefinementMethod() const = 0;
 
-  /// Get the run label (run number and bank id) currently selected in the list
-  virtual RunLabel getSelectedRunLabel() const = 0;
+  /// Get XMax parameter, if it is set
+  virtual boost::optional<double> getXMax() const = 0;
+
+  /// Get XMin parameter, if it is set
+  virtual boost::optional<double> getXMin() const = 0;
+
+  /// Update the view with current status
+  virtual void showStatus(const std::string &status) const = 0;
 
   /**
-   Plot a Qwt curve in the canvas
-   @param curve The curve to plot
-   */
-  virtual void
-  plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) = 0;
-
-  /**
-   Reset canvas to avoid multiple plotting
-   */
-  virtual void resetCanvas() = 0;
-
-  /**
-   @return Whether the user has selected to show the refinement results for
-   the current run
+   Display an error to the user
+   @param errorTitle Title of the error
+   @param errorDescription Longer description of the error
   */
-  virtual bool showRefinementResultsSelected() = 0;
-
-  /**
-   Update the run list with labels of all runs loaded into the model
-   @param runLabels Vector of run labels
-   */
-  virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
+  virtual void userError(const std::string &errorTitle,
+                         const std::string &errorDescription) const = 0;
 
   /**
    Display a warning to the user
-   @param warningDescription The warning to show
+   @param warningTitle Title of the warning
+   @param warningDescription Longer description of the warning
    */
-  virtual void userWarning(const std::string &warningDescription) const = 0;
+  virtual void userWarning(const std::string &warningTitle,
+                           const std::string &warningDescription) const = 0;
 };
 
 } // namespace CustomInterfaces

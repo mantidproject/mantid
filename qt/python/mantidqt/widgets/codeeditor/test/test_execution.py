@@ -111,7 +111,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
         code = """
 def foo():
     def bar():
-        # raises a NameError
+        \"""raises a NameError\"""
         y = _local + 1
     # call inner
     bar()
@@ -220,7 +220,7 @@ squared = sum*sum
         executor = PythonCodeExecution()
         self.assertRaises(expected_exc_type, executor.execute, code)
 
-    def _run_async_code(self, code, with_progress=False, filename=''):
+    def _run_async_code(self, code, with_progress=False, filename=None):
         executor = PythonCodeExecution()
         if with_progress:
             recv = ReceiverWithProgress()

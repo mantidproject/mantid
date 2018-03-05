@@ -1105,14 +1105,14 @@ class CrystalFieldFitTest(unittest.TestCase):
     def test_ResolutionModel_func_multi(self):
         from CrystalField import ResolutionModel
         def func0(x):
-            return np.sin(x)
+            return np.sin(np.array(x))
 
         class CalcWidth:
             def __call__(self, x):
-                return np.cos(x / 2)
+                return np.cos(np.array(x) / 2)
 
             def model(self, x):
-                return np.tan(x / 2)
+                return np.tan(np.array(x) / 2)
         func1 = CalcWidth()
         func2 = func1.model
         rm = ResolutionModel([func0, func1, func2], -np.pi/2, np.pi/2, accuracy = 0.01)

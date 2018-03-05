@@ -45,11 +45,13 @@ Algorithms
 - :ref:`LoadLamp <algm-LoadLamp>` is a new algorithm to load processed HDF5 files produced by LAMP program at ILL.
 - :ref:`SaveNexus <algm-SaveNexus>` will no longer crash when passed a ``PeaksWorkspace`` with integrated peaks that have missing radius information.
 - :ref:`SaveReflections <algm-LoadLamp>` is a new algorithm to save PeaksWorkspaces to Fullprof, Jana, GSAS, and SHELX text formats.
+- :ref:`ConjoinXRuns <algm-ConjoinXRuns>` will now accept workspaces with varying x-axes per spectrum.
 
 Fitting
 -------
 - :ref:`EISFDiffSphere <func-EISFDiffSphere>` fits the Q-dependence on the EISF of a particle undergoing continuous diffusion but confined to a spherical volume.
 - :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>` fits the Q-dependence on the EISF of an alkyl molecule, like a membrane lipd.
+- :ref:`EISFDiffCylinder <func-EISFDiffCylinder>` models the elastic incoherent scattering intensity of a particle diffusing within a cylinder.
 
 Core Functionality
 ------------------
@@ -64,6 +66,13 @@ Core Functionality
 - TableWorkspaces can new be converted to a python dictionary by calling the ``table.toDict()`` function.
 - Added new classes ``ConfigObserver`` for listening for changes to any configuration property and ``ConfigPropertyObserver`` for listening to changes to an individual config property of interest.
 - Fixed the calculation of scattering length and scattering length squared for :py:obj:`Material <mantid.kernel.Material>`
+- Fixed the behaviour of ``UpdateInstrumentDefinitions.OnStartup`` in the :ref:`properties file <Properties File>`. It was not being used correctly for using the updated ``Facilities.xml`` file.
+- ``MultiFileProperty`` now accepts complex summation ranges for run numbers, such as ``111-113+115`` and ``111-115+123-132``.
+
+Live Data
+---------
+
+- ``KafkaEventListener`` is a new live listener for neutron event and sample environment data which is in development for the ESS and ISIS.
 
 Performance
 -----------
@@ -72,15 +81,18 @@ Performance
 - Up to 30% performance improvement for :ref:`CropToComponent <algm-CropToComponent>` based on ongoing work on Instrument-2.0.
 - Improved rate of convergence for :ref:`MaxEnt <algm-MaxEnt>`. The  ``ChiTarget`` property has been replaced by  ``ChiTargetOverN``.
 
+A `bug <https://github.com/mantidproject/mantid/pull/20953>`_ in the handling of fractional bin weights in a specialised form (`RebinnedOutput <http://doxygen.mantidproject.org/nightly/d4/d31/classMantid_1_1DataObjects_1_1RebinnedOutput.html>`_) of :ref:`Workspace2D <Workspace2D>` has been fixed. This mainly affects the algorithms :ref:`algm-SofQWNormalisedPolygon` and :ref:`algm-Rebin2D`, which underlies the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_.
+
 Python
 ------
-In `mantid.simpleapi`, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.
-`StoreInADS=False` can be passed to function calls to not to store their output on the ADS.
+In ``mantid.simpleapi``, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.
+``StoreInADS=False`` can be passed to function calls to not to store their output on the ADS.
 
 - The standard Python operators, e.g. ``+``, ``+=``, etc., now work also with workspaces not in the ADS.
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
 - The previously mentioned ``ConfigObserver`` and ``ConfigPropertyObserver`` classes are also exposed to python.
 - ``mantid.kernel.V3D`` vectors now support negation through the usual ``-`` operator.
+- It is now possible to `pickle <https://docs.python.org/2/library/pickle.html>`_ and de-pickle :ref:`Workspace2D <Workspace2D>` and :ref:`TableWorkspace <Table Workspaces>` in Python. This has been added to make it easier to transfer your workspaces over a network. Only these two workspace types currently supports the pickling process, and there are limitations to be aware of described :ref:`here <Workspace2D>`.
 - ``mantid.api.IPeak`` has three new functions:
     - ``getEnergyTransfer`` which returns the difference between the initial and final energy.
     - ``getIntensityOverSigma`` which returns the peak intensity divided by the error in intensity.

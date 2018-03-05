@@ -26,6 +26,15 @@ be no gaps between bins. Rebin ensures that any of these space filling
 bins cannot be less than 25% or more than 125% of the width that was
 specified.
 
+In both cases, where a new bin only partially overlaps one or more input 
+bins, the new counts are calculated as the sum of the old bins weighted 
+by the fractional overlaping widths of the new bin over the old bin:
+
+.. math:: Y^{\mathrm{new}} = \sum_i Y^{\mathrm{old}}_i F_i
+.. math:: E^{\mathrm{new}} = \sqrt{\sum_i (E^{\mathrm{old}}_i)^2 F_i}
+
+where :math:`F_i = w^{\mathrm{overlap}}_i / w^{\mathrm{old}}_i` is the
+ratio of the overlap width of the new and old bin over the old bin width.
 
 .. _rebin-example-strings:
 
@@ -77,7 +86,6 @@ following will happen:
 -  **From 4** rebin in bins of size 3 **up to 10**.
 
 Hence the actual *Param* string used is "0, 2, 4, 3, 10".
-
 
 
 .. _rebin-usage:

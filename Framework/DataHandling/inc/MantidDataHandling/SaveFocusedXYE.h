@@ -1,10 +1,7 @@
 #ifndef DATAHANDING_SAVEFOCUSEDXYE_H_
 #define DATAHANDING_SAVEFOCUSEDXYE_H_
 
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -58,11 +55,9 @@ namespace DataHandling {
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport SaveFocusedXYE : public API::Algorithm {
+class DLLExport SaveFocusedXYE : public API::SerialAlgorithm {
 public:
   enum HeaderType { XYE, MAUD, TOPAS };
-  /// Constructor
-  SaveFocusedXYE();
   /// Algorithm's name
   const std::string name() const override { return "SaveFocusedXYE"; }
   /// Summary of algorithms purpose
@@ -116,7 +111,7 @@ private:
                           int perioidNum) override;
 
   /// Header type
-  HeaderType m_headerType;
+  HeaderType m_headerType{XYE};
   /// Comment character
   std::string m_comment;
 };

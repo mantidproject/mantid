@@ -72,6 +72,10 @@ public:
   MOCK_METHOD1(setForcedReProcessing, void(bool));
   MOCK_METHOD0(skipProcessing, void());
 
+  // Grouping options
+  MOCK_METHOD0(enableGrouping, void());
+  MOCK_METHOD0(disableGrouping, void());
+
   // Accessor
   MOCK_CONST_METHOD0(getCurrentInstrument, QString());
 
@@ -124,8 +128,8 @@ public:
   MOCK_CONST_METHOD0(resume, void());
 
   // Calls we don't care about
-  void confirmReductionPaused() const override{};
-  void confirmReductionResumed() const override{};
+  MOCK_METHOD1(confirmReductionPaused, void(int));
+  MOCK_METHOD1(confirmReductionResumed, void(int));
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
