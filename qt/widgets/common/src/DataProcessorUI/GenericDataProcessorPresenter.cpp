@@ -524,7 +524,10 @@ Handle thread completion
 */
 void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
 
-  m_workerThread.release();
+  if (m_workerThread) {
+    m_workerThread->exit();
+    m_workerThread.release();
+  }
 
   if (exitCode == 0) { // Success
     m_progressReporter->report();
