@@ -375,8 +375,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self._call_settings_listeners(lambda listener: listener.on_instrument_changed())
 
     def _on_help_button_clicked(self):
-        MantidQt.API.MantidDesktopServices.openUrl(
-            QtCore.QUrl("http://docs.mantidproject.org/nightly/interfaces/ISIS%20SANS%20v2.html"))
+        pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_user_file_load(self):
         """
