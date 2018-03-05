@@ -344,7 +344,7 @@ class DataInfo(object):
         try:
             specular_peak, low_res, _ = mantid.simpleapi.LRPeakSelection(InputWorkspace=ws_short)
         except:
-            logger.notice("Peak finding error [specular=%s]: %s" % (specular, sys.exc_value))
+            logger.notice("Peak finding error [specular=%s]: %s" % (specular, sys.exc_info()[1]))
             return integrated, [0,0], [0,0]
         if specular:
             peak = [specular_peak[0]+self.peak_range_offset, specular_peak[1]+self.peak_range_offset]
@@ -478,7 +478,7 @@ class DataInfo(object):
             # what we currently have (which is probably given by the ROI).
             logger.notice("Run %s [%s]: Could not fit a peak in the supplied peak range" %
                           (self.run_number, self.cross_section))
-            logger.notice(str(sys.exc_value))
+            logger.notice(str(sys.exc_info()[1]))
             try:
                 # Define a good default that is wide enough for the fit to work
                 default_width = (self.found_peak[1]-self.found_peak[0])/2.0
@@ -498,7 +498,7 @@ class DataInfo(object):
                 logger.notice("Run %s [%s]: Peak position: %s  Peak width: %s" %
                               (self.run_number, self.cross_section, peak_position, peak_width))
             except:
-                logger.notice(str(sys.exc_value))
+                logger.notice(str(sys.exc_info()[1]))
                 logger.notice("Run %s [%s]: Gaussian fit failed to determine peak position" %
                               (self.run_number, self.cross_section))
 
