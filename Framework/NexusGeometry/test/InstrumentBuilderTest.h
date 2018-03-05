@@ -73,8 +73,8 @@ private:
   Eigen::Vector3d testPos1 = Eigen::Vector3d(1.0, -0.5, 2.9);
   Eigen::Vector3d testPos2 = Eigen::Vector3d(-1.2, 0.5, 1.9);
   // Placeholder empty shape
-  boost::shared_ptr<Geometry::IObject> shape =
-      boost::make_shared<Geometry::CSGObject>();
+  boost::shared_ptr<const Geometry::IObject> shape =
+      boost::make_shared<const Geometry::CSGObject>();
 };
 
 #endif // INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_

@@ -4,11 +4,7 @@
 // Includes
 //------------------
 
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/Objects/IObject.h"
-#include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidNexusGeometry/DllConfig.h"
-#include "MantidNexusGeometry/ShapeAbstractCreator.h"
 
 #include "Eigen/Core"
 
@@ -17,24 +13,26 @@
 #include <vector>
 
 namespace Mantid {
+namespace Kernel {
+class V3D;
+}
+namespace Geometry {
+class Surface;
+class IObject;
+}
 namespace NexusGeometry {
 
-typedef boost::shared_ptr<Geometry::IObject> objectHolder;
+// TODO delete
+typedef boost::shared_ptr<const Geometry::IObject> objectHolder;
+// TODO delete
 typedef boost::shared_ptr<Geometry::Surface> surfaceHolder;
 
-class DLLExport ShapeGeometryAbstraction
-    : public ShapeAbstractCreator<ShapeGeometryAbstraction, objectHolder> {
-public:
-  objectHolder
-  createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) const;
-  objectHolder createMesh(std::vector<uint16_t> &&triangularFaces,
-                          std::vector<Mantid::Kernel::V3D> &&vertices) const;
-
-private:
-  objectHolder createShape(const std::map<int, surfaceHolder> &surfaces,
-                           const std::string &algebra,
-                           std::vector<double> &boundingBox) const;
-};
+namespace NexusShapeFactory {
+DLLExport objectHolder
+createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef);
+DLLExport objectHolder createMesh(std::vector<uint16_t> &&triangularFaces,
+                                  std::vector<Mantid::Kernel::V3D> &&vertices);
+}
 }
 }
 #endif // SHAPE_GEOMETRY_ABSTRACTION_H_

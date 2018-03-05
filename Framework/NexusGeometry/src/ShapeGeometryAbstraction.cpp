@@ -7,16 +7,31 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidNexusGeometry/ShapeGeometryAbstraction.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/V3D.h"
 
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace NexusGeometry {
-
+namespace NexusShapeFactory {
 using namespace Eigen;
+namespace {
 
-objectHolder ShapeGeometryAbstraction::createCylinder(
-    const Eigen::Matrix<double, 3, 3> &pointsDef) const {
+/// Finalise shape
+objectHolder createShape(const std::map<int, surfaceHolder> &surfaces,
+                         const std::string &algebra,
+                         std::vector<double> &boundingBox) {
+  boost::shared_ptr<Geometry::CSGObject> shape =
+      boost::make_shared<Geometry::CSGObject>();
+  shape->setObject(21, algebra);
+  shape->populate(surfaces);
+  // Boundingbox x,y,z:max; x,y,z:min
+  shape->defineBoundingBox(boundingBox[0], boundingBox[2], boundingBox[4],
+                           boundingBox[1], boundingBox[3], boundingBox[5]);
+  return shape;
+}
+}
+objectHolder createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
   // Calculate cylinder parameters
   auto centre = (pointsDef.col(2) + pointsDef.col(0)) / 2;
   auto axisVector = pointsDef.col(2) - pointsDef.col(0);
@@ -65,29 +80,15 @@ objectHolder ShapeGeometryAbstraction::createCylinder(
   }
   // std::string algebra = "(-0 -1 2)";
   std::string algebra = "(-0 -1 2)";
-  return this->createShape(surfaceShapes, algebra, boundingBoxSimplified);
+  return createShape(surfaceShapes, algebra, boundingBoxSimplified);
 }
 
-objectHolder ShapeGeometryAbstraction::createMesh(
-    std::vector<uint16_t> &&triangularFaces,
-    std::vector<Mantid::Kernel::V3D> &&vertices) const {
+objectHolder createMesh(std::vector<uint16_t> &&triangularFaces,
+                        std::vector<Mantid::Kernel::V3D> &&vertices) {
 
   return boost::make_shared<Geometry::MeshObject>(
       std::move(triangularFaces), std::move(vertices), Kernel::Material{});
 }
-
-/// Finalise shape
-objectHolder ShapeGeometryAbstraction::createShape(
-    const std::map<int, surfaceHolder> &surfaces, const std::string &algebra,
-    std::vector<double> &boundingBox) const {
-  boost::shared_ptr<Geometry::CSGObject> shape =
-      boost::make_shared<Geometry::CSGObject>();
-  shape->setObject(21, algebra);
-  shape->populate(surfaces);
-  // Boundingbox x,y,z:max; x,y,z:min
-  shape->defineBoundingBox(boundingBox[0], boundingBox[2], boundingBox[4],
-                           boundingBox[1], boundingBox[3], boundingBox[5]);
-  return shape;
 }
 }
 }

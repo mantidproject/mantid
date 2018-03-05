@@ -1,5 +1,6 @@
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
+#include "MantidNexusGeometry/ShapeGeometryAbstraction.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -433,7 +434,7 @@ NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) const {
   for (int i = 0; i < 3; ++i) {
     vSorted.col(cPoints[i]) = vertices.col(i);
   }
-  return this->sAbsCreator.createCylinder(vSorted);
+  return NexusShapeFactory::createCylinder(vSorted);
 }
 
 // Parse OFF (mesh) nexus geometry
@@ -458,8 +459,8 @@ NexusGeometryParser::parseNexusMesh(const Group &shapeGroup) const {
         nexusVertices[vertexNumber + 2]);
   }
 
-  return this->sAbsCreator.createMesh(std::move(triangularFaces),
-                                      std::move(vertices));
+  return NexusShapeFactory::createMesh(std::move(triangularFaces),
+                                       std::move(vertices));
 }
 
 std::vector<uint16_t> NexusGeometryParser::createTriangularFaces(

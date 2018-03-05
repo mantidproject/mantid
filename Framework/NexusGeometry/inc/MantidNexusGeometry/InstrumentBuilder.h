@@ -28,11 +28,11 @@ public:
   /// Adds detector to instrument
   void addDetector(const std::string &detName, int detId,
                    const Eigen::Vector3d &position,
-                   boost::shared_ptr<Mantid::Geometry::IObject> &shape);
+                   boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
   /// Adds detector to instrument
   void addMonitor(const std::string &detName, int detId,
                   const Eigen::Vector3d &position,
-                  boost::shared_ptr<Mantid::Geometry::IObject> &shape);
+                  boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
   /// Add sample
   void addSample(const std::string &sampleName,
                  const Eigen::Vector3d &position);
