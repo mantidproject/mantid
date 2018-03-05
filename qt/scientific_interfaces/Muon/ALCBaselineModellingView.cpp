@@ -200,6 +200,8 @@ void ALCBaselineModellingView::addSectionSelector(
   m_rangeSelectors[index] = newSelector;
 
   // Set initial values
+  newSelector->setRange(values.first,
+    values.second);
   setSelectorValues(newSelector, values);
 
   m_ui.dataPlot->replot();
@@ -248,9 +250,6 @@ void ALCBaselineModellingView::sectionsContextMenu(const QPoint &widgetPoint) {
 void ALCBaselineModellingView::setSelectorValues(
     RangeSelector *selector,
     IALCBaselineModellingView::SectionSelector values) {
-  selector->setRange(values.first,
-                      values.second);
-
   selector->setMinimum(values.first);
   selector->setMaximum(values.second);
 }
