@@ -433,7 +433,6 @@ bool OneLevelTreeManager::rowIsEmpty(int row, int parent) const {
     auto value = getCell(row, columnIndex, parent, 0);
     if (!value.empty())
       return false;
-    ++columnIndex;
   }
 
   // All cells in the row were empty
