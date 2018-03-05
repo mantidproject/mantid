@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2018-03-01 12:56:31.737829" name="WAND" valid-from="2018-02-20 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2018-03-02 15:21:25.797236" name="WAND" valid-from="2018-02-20 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Ross Whitfield-->
   <defaults>
     <length unit="metre"/>
@@ -23,7 +23,7 @@
   <component idlist="bank1" type="bank1">
     <location>
       <parameter name="y">
-        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+        <logfile eq="rint(value*100)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
       </parameter>
     </location>
   </component>
@@ -45,7 +45,7 @@
   <component idlist="bank2" type="bank2">
     <location>
       <parameter name="y">
-        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+        <logfile eq="rint(value*100)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
       </parameter>
     </location>
   </component>
@@ -67,7 +67,7 @@
   <component idlist="bank3" type="bank3">
     <location>
       <parameter name="y">
-        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+        <logfile eq="rint(value*100)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
       </parameter>
     </location>
   </component>
@@ -89,7 +89,7 @@
   <component idlist="bank4" type="bank4">
     <location>
       <parameter name="y">
-        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+        <logfile eq="rint(value*100)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
       </parameter>
     </location>
   </component>
@@ -111,7 +111,7 @@
   <component idlist="bank5" type="bank5">
     <location>
       <parameter name="y">
-        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+        <logfile eq="rint(value*100)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
       </parameter>
     </location>
   </component>
@@ -133,7 +133,7 @@
   <component idlist="bank6" type="bank6">
     <location>
       <parameter name="y">
-        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+        <logfile eq="rint(value*100)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
       </parameter>
     </location>
   </component>
@@ -155,7 +155,7 @@
   <component idlist="bank7" type="bank7">
     <location>
       <parameter name="y">
-        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+        <logfile eq="rint(value*100)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
       </parameter>
     </location>
   </component>
@@ -177,7 +177,7 @@
   <component idlist="bank8" type="bank8">
     <location>
       <parameter name="y">
-        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+        <logfile eq="rint(value*100)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
       </parameter>
     </location>
   </component>
