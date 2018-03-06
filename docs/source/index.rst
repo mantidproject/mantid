@@ -50,7 +50,7 @@ This is the documentation for Mantid |release|.
 * :ref:`Algorithms List`
 * :ref:`concepts contents`
 * :ref:`interfaces contents`
-* :ref:`fitting`
+* :ref:`fitting contents`
     - :ref:`Fit Functions List`
     - :ref:`fitminimizers`
 * :ref:`techniques contents`
