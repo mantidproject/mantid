@@ -4,10 +4,11 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty,
                         MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceUnitValidator)
-from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty,
-                           IntBoundedValidator, Property, StringListValidator)
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator, FloatArrayProperty,
+                           IntArrayLengthValidator, IntArrayBoundedValidator, IntArrayProperty, IntBoundedValidator, Property,
+                           StringListValidator)
 from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertToDistribution, ConvertUnits,
-                              CreateEmptyTableWorkspace, CropWorkspace, Divide, ExtractMonitors, Fit, GroupDetectors,
+                              CreateEmptyTableWorkspace, CropWorkspace, Divide, ExtractMonitors, ExtractSingleSpectrum, Fit, GroupDetectors,
                               Integration, LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor,
                               RebinToWorkspace, Scale, Transpose)
 import numpy
@@ -132,6 +133,16 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Initialize the input and output properties of the algorithm."""
         nonnegativeInt = IntBoundedValidator(lower=0)
         positiveInt = IntBoundedValidator(lower=1)
+        nonnegativeIntArray = IntArrayBoundedValidator()
+        nonnegativeIntArray.setLower(0)
+        nonnegativeFloatArray = FloatArrayBoundedValidator()
+        nonnegativeFloatArray.setLower(0.)
+        twoNonnegativeFloats = CompositeValidator()
+        twoNonnegativeFloats.add(FloatArrayLengthValidator(length=2))
+        twoNonnegativeFloats.add(nonnegativeFloatArray)
+        maxTwoNonnegativeInts = CompositeValidator()
+        maxTwoNonnegativeInts.add(IntArrayLengthValidator(lenmin=0, lenmax=2))
+        maxTwoNonnegativeInts.add(nonnegativeIntArray)
         self.declareProperty(MultipleFileProperty(Prop.RUN,
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
@@ -189,12 +200,12 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              validator=StringListValidator([FluxNormMethod.TIME, FluxNormMethod.MONITOR, FluxNormMethod.OFF]),
                              doc='Neutron flux normalisation method.')
         self.declareProperty(FloatArrayProperty(Prop.WAVELENGTH_RANGE,
-                                                validator=FloatArrayLengthValidator(0, 2)),
+                                                values=[0, Property.EMPTY_DBL],
+                                                validator=twoNonnegativeFloats),
                              doc='The wavelength bounds of the output workspace.')
-        self.declareProperty(Prop.FOREGROUND_HALF_WIDTH,
-                             defaultValue=Property.EMPTY_INT,
-                             validator=nonnegativeInt,
-                             doc='Number of pixels to include to the foreground region on either side of the centre pixel.')
+        self.declareProperty(IntArrayProperty(Prop.FOREGROUND_HALF_WIDTH,
+                                              validator=maxTwoNonnegativeInts),
+                             doc='Number of foreground pixels at lower and higher angles from the centre pixel.')
         self.declareProperty(Prop.BKG_METHOD,
                              defaultValue=BkgMethod.CONSTANT,
                              validator=StringListValidator([BkgMethod.CONSTANT, BkgMethod.LINEAR, BkgMethod.OFF]),
@@ -350,41 +361,51 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         return posTable
 
     def _flatBkgRanges(self, ws, peakPosWS):
-        """Return ranges for flat background fitting."""
+        """Return spectrum number ranges for flat background fitting."""
+        sign = self._workspaceIndexDirection(ws)
         peakPos = self._foregroundCentre(peakPosWS)
-        peakHalfWidth = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
-        if peakHalfWidth == Property.EMPTY_INT:
-            peakHalfWidth = 0
+        # Convert to spectum numbers
+        peakPos = ws.getSpectrum(peakPos).getSpectrumNo()
+        peakHalfWidths = self._foregroundWidths()
+        lowPeakHalfWidth = peakHalfWidths[0]
         lowOffset = self.getProperty(Prop.LOW_BKG_OFFSET).value
         lowWidth = self.getProperty(Prop.LOW_BKG_WIDTH).value
-        lowStartIndex = peakPos + peakHalfWidth + lowOffset
-        lowEndIndex = lowStartIndex + lowWidth
-        lowRange = [lowStartIndex + 0.5, lowEndIndex + 0.5]
+        lowStartIndex = peakPos - sign * (lowPeakHalfWidth + lowOffset + lowWidth)
+        lowEndIndex = lowStartIndex + sign * lowWidth
+        highPeakHalfWidth = peakHalfWidths[1]
         highOffset = self.getProperty(Prop.HIGH_BKG_OFFSET).value
         highWidth = self.getProperty(Prop.HIGH_BKG_WIDTH).value
-        highEndIndex = peakPos - peakHalfWidth - highOffset
-        highStartIndex = highEndIndex - highWidth
-        highRange = [highStartIndex - 0.5, highEndIndex - 0.5]
+        highStartIndex = peakPos + sign * (highPeakHalfWidth + highOffset)
+        highEndIndex = highStartIndex + sign * highWidth
+        if sign > 0:
+            lowRange = [lowStartIndex - sign * 0.5, lowEndIndex - sign * 0.5]
+            highRange = [highStartIndex + sign * 0.5, highEndIndex + sign * 0.5]
+            return lowRange + highRange
+        # Indices decrease with increasing bragg angle. Swap everything.
+        lowRange = [lowEndIndex - sign * 0.5, lowStartIndex - sign * 0.5]
+        highRange = [highEndIndex + sign * 0.5, highStartIndex + sign * 0.5]
         return highRange + lowRange
+
+    def _workspaceIndexDirection(self, ws):
+        """Return 1 if workspace indices increase with Bragg angle, otherwise return -1."""
+        firstDet = ws.getDetector(0)
+        firstAngle = ws.detectorTwoTheta(firstDet)
+        lastDet = ws.getDetector(ws.getNumberHistograms() - 1)
+        lastAngle = ws.detectorTwoTheta(lastDet)
+        return 1 if firstAngle < lastAngle else -1
 
     def _foregroundCentre(self, beamPosWS):
         """Return the detector id of the foreground centre pixel."""
         return int(numpy.rint(beamPosWS.cell('PeakCentre', 0)))
 
-    def _groupForeground(self, ws, beamPosWS):
-        """Group detectors in the foreground region."""
-        if self.getProperty(Prop.FOREGROUND_HALF_WIDTH).isDefault:
-            return ws
-        hw = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
-        beamPos = self._foregroundCentre(beamPosWS)
-        groupIndices = [i for i in range(beamPos - hw, beamPos + hw + 1)]
-        foregroundWSName = self._names.withSuffix('foreground_grouped')
-        foregroundWS = GroupDetectors(InputWorkspace=ws,
-                                      OutputWorkspace=foregroundWSName,
-                                      WorkspaceIndexList=groupIndices,
-                                      EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(ws)
-        return foregroundWS
+    def _foregroundWidths(self):
+        """Return an array of [low angle width, high angle width]."""
+        halfWidths = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
+        if len(halfWidths) == 0:
+            halfWidths = [0, 0]
+        elif len(halfWidths) == 1:
+            halfWidths = [halfWidths[0], halfWidths[0]]
+        return halfWidths
 
     def _inputWS(self):
         """Return a raw input workspace and beam position table as tuple."""
@@ -510,7 +531,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         method = self.getProperty(Prop.BKG_METHOD).value
         if method == BkgMethod.OFF:
             return ws
-
         clonedWSName = self._names.withSuffix('cloned_for_flat_bkg')
         clonedWS = CloneWorkspace(InputWorkspace=ws,
                                   OutputWorkspace=clonedWSName,
@@ -550,11 +570,43 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if method == SumType.IN_Q:
             return ws
         elif method == SumType.IN_LAMBDA:
-            ws = self._groupForeground(ws, peakPosWS)
+            ws = self._sumForegroundIntoSingleHistogram(ws, peakPosWS)
             if not ws.isDistribution():
                 ConvertToDistribution(Workspace=ws,
                                       EnableLogging=self._subalgLogging)
             return ws
+
+    def _sumForegroundIntoSingleHistogram(self, ws, beamPosWS):
+        """Sum the foreground region into a single histogram."""
+        hws = self._foregroundWidths()
+        beamPosIndex = self._foregroundCentre(beamPosWS)
+        sign = self._workspaceIndexDirection(ws)
+        start = beamPosIndex - sign * hws[0]
+        end = beamPosIndex + sign * hws[1]
+        if start > end:
+            end, start = start, end
+        sumIndices = [i for i in range(start, end + 1)]
+        foregroundWSName = self._names.withSuffix('foreground_grouped')
+        foregroundWS = ExtractSingleSpectrum(InputWorkspace=ws,
+                                             OutputWorkspace=foregroundWSName,
+                                             WorkspaceIndex=beamPosIndex,
+                                             EnableLogging=self._subalgLogging)
+        maxIndex = ws.getNumberHistograms() - 1
+        foregroundYs = foregroundWS.dataY(0)
+        foregroundEs = foregroundWS.dataE(0)
+        numpy.square(foregroundEs, out=foregroundEs)
+        for i in sumIndices:
+            if i == beamPosIndex:
+                continue
+            if i < 0 or i > maxIndex:
+                self.log().warning('')
+            ys = ws.readY(i)
+            foregroundYs += ys
+            es = ws.readE(i)
+            foregroundEs += es**2
+        numpy.sqrt(foregroundEs, out=foregroundEs)
+        self._cleanup.cleanup(ws)
+        return foregroundWS
 
     def _waterCalibration(self, ws):
         """Divide ws by a (water) reference workspace."""

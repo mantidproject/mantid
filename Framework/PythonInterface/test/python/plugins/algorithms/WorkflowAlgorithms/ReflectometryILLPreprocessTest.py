@@ -35,7 +35,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'BeamCentre': 50,
+            'SummationType': 'SumInQ',  # Don't sum the output.
+            'BeamCentre': 49,
             'FluxNormalisation': 'Normalisation OFF',
             'rethrow': True,
             'child': True
@@ -49,22 +50,20 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             if i != 49:
                 numpy.testing.assert_equal(ys, 0)
             else:
-                xs = outWS.readX(i)
-                dx = xs[1] - xs[0]
-                numpy.testing.assert_almost_equal(ys, 10 / dx)
+                numpy.testing.assert_almost_equal(ys, 10.)
 
     def testForegroundBackgroundRanges(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
         self.create_sample_workspace(inWSName)
         ws = mtd[inWSName]
         # Add special background fitting zones around the exclude zones.
-        upperBkgIndices = [26]
-        for i in upperBkgIndices:
+        lowerBkgIndices = [26]
+        for i in lowerBkgIndices:
             ys = ws.dataY(i)
             ys += 5.0
         # Add negative 'exclude zone' around the peak.
-        upperExclusionIndices = [27, 28]
-        for i in upperExclusionIndices:
+        lowerExclusionIndices = [27, 28]
+        for i in lowerExclusionIndices:
             ys = ws.dataY(i)
             ys -= 1000.0
         # Add a peak to the sample workspace.
@@ -73,21 +72,21 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             ys = ws.dataY(i)
             ys += 1000.0
         # The second exclusion zone is wider.
-        lowerExclusionIndices = [32, 33, 34]
-        for i in lowerExclusionIndices:
+        upperExclusionIndices = [32, 33, 34]
+        for i in upperExclusionIndices:
             ys = ws.dataY(i)
             ys -= 1000.0
         # The second fitting zone is wider.
-        lowerBkgIndices = [35, 36]
-        for i in lowerBkgIndices:
+        upperBkgIndices = [35, 36]
+        for i in upperBkgIndices:
             ys = ws.dataY(i)
             ys += 5.0
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
             'SummationType': 'SumInQ',  # Don't sum the output.
-            'BeamCentre': 31,
-            'ForegroundHalfWidth': 1,
+            'BeamCentre': 30,
+            'ForegroundHalfWidth': [1],
             'LowAngleBkgOffset': len(lowerExclusionIndices),
             'LowAngleBkgWidth': len(lowerBkgIndices),
             'HighAngleBkgOffset': len(upperExclusionIndices),
@@ -102,18 +101,57 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertEquals(outWS.getNumberHistograms(), 100)
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
-            if i in upperBkgIndices:
+            if i in lowerBkgIndices:
                 numpy.testing.assert_equal(ys, 0)
-            elif i in upperExclusionIndices:
+            elif i in lowerExclusionIndices:
                 numpy.testing.assert_equal(ys, -1005)
             elif i in foregroundIndices:
                 numpy.testing.assert_equal(ys, 995)
-            elif i in lowerExclusionIndices:
+            elif i in upperExclusionIndices:
                 numpy.testing.assert_equal(ys, -1005)
-            elif i in lowerBkgIndices:
+            elif i in upperBkgIndices:
                 numpy.testing.assert_equal(ys, 0)
             else:
                 numpy.testing.assert_equal(ys, -5)
+
+    def testAsymmetricForegroundRanges(self):
+        inWSName = 'ReflectometryILLPreprocess_test_ws'
+        self.create_sample_workspace(inWSName)
+        ws = mtd[inWSName]
+        # Add special background fitting zones around the exclude zones.
+        foregroundIndices = [21, 22, 23, 24]
+        for i in range(ws.getNumberHistograms()):
+            ys = ws.dataY(i)
+            es = ws.dataE(i)
+            if i in foregroundIndices:
+                ys.fill(1000.0)
+                es.fill(numpy.sqrt(1000.0))
+            else:
+                ys.fill(-100)
+                es.fill(numpy.sqrt(100))
+        args = {
+            'InputWorkspace': inWSName,
+            'OutputWorkspace': 'unused_for_child',
+            'BeamCentre': 23,
+            'ForegroundHalfWidth': [2, 1],
+            'FlatBackground': 'Background OFF',
+            'FluxNormalisation': 'Normalisation OFF',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getNumberHistograms(), 1)
+        args = {
+            'Workspace': outWS
+        }
+        alg = create_algorithm('ConvertFromDistribution', **args)
+        assertRaisesNothing(self, alg.execute)
+        ys = outWS.readY(0)
+        numpy.testing.assert_almost_equal(ys, 4000.)
+        es = outWS.readE(0)
+        numpy.testing.assert_almost_equal(es, numpy.sqrt(4000.))
 
     def testWaterReference(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
@@ -127,6 +165,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
             'WaterReference': inWSName,
+            'SummationType': 'SumInQ',  # Don't sum the output.
             'FluxNormalisation': 'Normalisation OFF',
             'FlatBackground': 'Background OFF',
             'rethrow': True,
@@ -148,7 +187,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
             'BeamCentre': 50,
-            'WavelengthRange': [2.0],
+            'WavelengthRange': [0., 2.0],
             'ForegroundHalfWidth': 1,
             'FluxNormalisation': 'Normalisation OFF',
             'FlatBackground': 'Background OFF',
@@ -159,7 +198,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getNumberHistograms(), 1)
-        self.assertAlmostEquals(outWS.readX(0)[0], 2.0, places=2)
+        self.assertAlmostEquals(outWS.readX(0)[0], 0.0, places=2)
+        self.assertAlmostEquals(outWS.readX(0)[-1], 2.0, places=1)
         # Check both range begin and end.
         args = {
             'InputWorkspace': inWSName,
@@ -222,7 +262,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'Cleanup': 'Cleanup OFF',
             'WavelengthRange': [5., 10.],
             'WaterReference': waterName,
-            'ForegroundHalfWidth': 1,
+            'ForegroundHalfWidth': [1],
             'LowAngleBkgOffset': 5,
             'LowAngleBkgWidth': 10,
             'HighAngleBkgOffset': 5,
@@ -245,6 +285,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'NumBanks': 1,
         }
         alg = create_algorithm('CreateSampleWorkspace', **args)
+        alg.setLogging(False)
         alg.execute()
 
 
