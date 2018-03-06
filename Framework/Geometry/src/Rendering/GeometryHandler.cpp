@@ -2,7 +2,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
-#include "MantidGeometry/Rendering/Renderer.h"
+#include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
@@ -44,17 +44,16 @@ boost::shared_ptr<GeometryHandler> GeometryHandler::clone() const {
 GeometryHandler::~GeometryHandler() {}
 
 void GeometryHandler::render() const {
-  detail::Renderer renderer;
   if (m_rectDet)
-    renderer.renderBitmap(*m_rectDet);
+    RenderingHelpers::renderBitmap(*m_rectDet);
   else if (m_structDet)
-    renderer.renderStructured(*m_structDet);
+    RenderingHelpers::renderStructured(*m_structDet);
   else if (m_shapeInfo)
-    renderer.renderShape(*m_shapeInfo);
+    RenderingHelpers::renderShape(*m_shapeInfo);
   else if (m_objComp != nullptr)
-    renderer.renderIObjComponent(*m_objComp);
+    RenderingHelpers::renderIObjComponent(*m_objComp);
   else if (canTriangulate())
-    renderer.renderTriangulated(*m_triangulator);
+    RenderingHelpers::renderTriangulated(*m_triangulator);
 }
 
 void GeometryHandler::initialize() const {
