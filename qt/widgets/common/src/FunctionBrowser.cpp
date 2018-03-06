@@ -1912,18 +1912,27 @@ void FunctionBrowser::attributeVectorDoubleChanged(QtProperty *prop) {
 }
 
 void FunctionBrowser::parameterChanged(QtProperty *prop) {
+  bool isGlobal = true;
+  QString newTie;
   if (m_currentDataset < getNumberOfDatasets() &&
       !prop->checkOption(globalOptionName)) {
     setLocalParameterValue(getParameterName(prop), m_currentDataset,
                            m_parameterManager->value(prop));
+    isGlobal = false;
+    newTie = getLocalParameterTie(getParameterName(prop), m_currentDataset);
   }
+
   auto tieProp = getTieProperty(prop);
   if (tieProp && !tieProp->isEnabled()) {
-    // it is a fixed tie
-    auto newTie = QString("%1=%2")
-                      .arg(prop->propertyName())
-                      .arg(m_parameterManager->value(prop));
-    m_tieManager->setValue(tieProp, newTie);
+    if (isGlobal) {
+      // it is a fixed tie
+      newTie = QString("%1=%2")
+                        .arg(prop->propertyName())
+                        .arg(m_parameterManager->value(prop));
+    }
+    if (!newTie.isEmpty()) {
+      m_tieManager->setValue(tieProp, newTie);
+    }
   }
   emit parameterChanged(getIndex(prop), prop->propertyName());
 }
