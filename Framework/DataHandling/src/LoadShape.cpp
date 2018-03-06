@@ -88,9 +88,9 @@ void LoadShape::exec() {
   }
 
   std::string solidName = "";
-  boost::shared_ptr<MeshObject> mShape = nullptr;  
+  boost::shared_ptr<MeshObject> shape = nullptr;  
   try {
-    mShape = readSTLSolid(file, solidName);
+    shape = readSTLSolid(file, solidName);
   }
   catch (std::exception &) {
     throw Exception::FileError("Failed to recognize this file as a valid STL file: ", filename);
@@ -98,7 +98,7 @@ void LoadShape::exec() {
 
   // Put shape into sample.
   Sample sample = outputWS->mutableSample();
-  sample.setShape(mShape);
+  sample.setShape(shape);
 
 }
 

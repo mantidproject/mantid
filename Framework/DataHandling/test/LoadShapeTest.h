@@ -32,22 +32,65 @@ public:
     TS_ASSERT_THROWS_NOTHING(loadShape.initialize());
     TS_ASSERT(loadShape.isInitialized());
 
-    TSM_ASSERT_EQUALS("should be 5 properties here", 5,
+    TSM_ASSERT_EQUALS("should be 3 properties here", 3,
                       (size_t)(loadShape.getProperties().size()));
   }
 
   void testConfidence() {
-    LoadShape testLoad;
-    testLoad.initialize();
-    testLoad.setPropertyValue("Filename", "cube.stl");
-    std::string path = testLoad.getPropertyValue("Filename");
+    LoadShape testLoadShape;
+    testLoadShape.initialize();
+    testLoadShape.setPropertyValue("Filename", "cube.stl");
+    std::string path = testLoadShape.getPropertyValue("Filename");
     auto *descriptor = new Kernel::FileDescriptor(path);
-    TS_ASSERT_EQUALS(90, testLoad.confidence(*descriptor));
+    TS_ASSERT_EQUALS(90, testLoadShape.confidence(*descriptor));
     delete descriptor;
   }
 
+  void testExec_2WS() {
+    LoadShape testLoadShape;
+    testLoadShape.initialize();
+    testLoadShape.setPropertyValue("Filename", "cube.stl");
+    prepareWorkspaces(testLoadShape, "InputWS", "OutputWS");
+    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
+    TS_ASSERT(testLoadShape.isExecuted());
+    clearWorkspaces("InputWS", "OutputWS");
+  }
+
+  void testExec_1WS() {
+    LoadShape testLoadShape;
+    testLoadShape.initialize();
+    testLoadShape.setPropertyValue("Filename", "cube.stl");
+    prepareWorkspaces(testLoadShape, "InputWS", "InputWS");
+    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
+    TS_ASSERT(testLoadShape.isExecuted());
+    clearWorkspaces("InputWS", "InputWS");
+  }
 
 private:
+
+  // Create workspaces and add them to algorithm properties
+  void prepareWorkspaces(LoadShape &alg, const std::string &inputWS, const std::string &outputWS) {
+    auto inWs = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
+    Mantid::API::AnalysisDataService::Instance().add(
+      inputWS, inWs);
+    alg.setPropertyValue("InputWorkspace", inputWS);
+    if (outputWS != inputWS) {
+      auto outWs = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
+      Mantid::API::AnalysisDataService::Instance().add(
+        outputWS, outWs);
+    }
+    alg.setPropertyValue("OutputWorkspace", outputWS);
+  }
+
+  void clearWorkspaces(const std::string &inputWS, const std::string &outputWS) {
+    TS_ASSERT_THROWS_NOTHING(
+      Mantid::API::AnalysisDataService::Instance().remove(inputWS));
+    if (outputWS != inputWS) {
+      TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().remove(outputWS));
+    }
+  }
+
   LoadShape loadShape; 
 };
 #endif /* LOAD_SHAPETEST_H_ */
