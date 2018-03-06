@@ -11,6 +11,7 @@
 #include <QString>
 #include <QStringList>
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace API {
@@ -196,8 +197,10 @@ public slots:
   void setFileTextWithoutSearch(const QString &text);
   /// Clear the search from the widget
   void clear();
-  /// Find the files within the text edit field and cache their full paths
+  /// Find the files if the text edit field is modified
   void findFiles();
+  /// Find the files within the text edit field and cache their full paths
+  void findFiles(bool isModified);
   boost::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();
 
 public:
@@ -226,6 +229,12 @@ private:
   void refreshValidator();
   /// Turn on/off display of validator red star (default is on)
   void setValidatorDisplay(bool display);
+  ///gets text to use for find files search parameters
+  const QString findFilesGetSearchText(QString &searchText);
+  ///Checks if the find files search text is a directory and handles relevant errors 
+  boost::optional<QString> findFilesDirectory(const QString &searchText);
+  ///handles findFiles background thread
+  void runFindFiles(const QString &searchText);
   /// Helper method to create a FindFilesSearchParameters object
   FindFilesSearchParameters
   createFindFilesSearchParameters(const std::string &text) const;

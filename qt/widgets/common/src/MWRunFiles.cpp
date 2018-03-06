@@ -478,6 +478,7 @@ QString MWRunFiles::getInstrumentOverride() { return m_defaultInstrumentName; }
  */
 void MWRunFiles::setInstrumentOverride(const QString &instName) {
   m_defaultInstrumentName = instName;
+  findFiles(true);
 }
 
 /**
@@ -511,70 +512,110 @@ void MWRunFiles::clear() {
 }
 
 /**
-* Finds the files specified by the user in a background thread.
+* Finds the files if the user has changed the parameter text.
 */
 void MWRunFiles::findFiles() {
-  // Set the values for the thread, and start it running.
-  QString searchText = m_uiForm.fileEditor->text();
+  findFiles(m_uiForm.fileEditor->isModified());
+}
 
+/**
+* Finds the files specified by the user in a background thread.
+*/
+void MWRunFiles::findFiles(bool isModified) {
+  auto searchText = m_uiForm.fileEditor->text();
+  const auto directory = findFilesDirectory(searchText);
+
+  // Set the values for the thread, and start it running.
+  if (directory)
+    m_foundFiles.append(directory.get());
+  else {
+    if (isModified) {
+      // Reset modified flag.
+      m_uiForm.fileEditor->setModified(false);
+      searchText = findFilesGetSearchText(searchText);
+    }
+    runFindFiles(searchText);
+  }
+}
+
+/**
+* Gets the search text to find files with.
+* @param searchText :: text entered by user
+* @return search text to create search params with
+*/
+const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
+
+  emit findingFiles();
+
+  // If we have an override instrument then add it in appropriate places to
+  // the search text
+  if (!m_defaultInstrumentName.isEmpty()) {
+    // Regex to match a selection of run numbers as defined here:
+    // mantidproject.org/MultiFileLoading
+    // Also allowing spaces between delimiters as this seems to work fine
+    const std::string runNumberString =
+      "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
+    boost::regex runNumbers(runNumberString, boost::regex::extended);
+    // Regex to match a list of run numbers delimited by commas
+    const std::string runListString =
+      "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
+    boost::regex runNumberList(runListString, boost::regex::extended);
+
+    // See if we can just prepend the instrument and be done
+    if (boost::regex_match(searchText.toStdString(), runNumbers)) {
+      searchText = m_defaultInstrumentName + searchText;
+    }
+    // If it is a list we need to prepend the instrument to all run numbers
+    else if (boost::regex_match(searchText.toStdString(), runNumberList)) {
+      QStringList runNumbers = searchText.split(",", QString::SkipEmptyParts);
+      QStringList newRunNumbers;
+
+      for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it)
+        newRunNumbers << m_defaultInstrumentName + (*it).simplified();
+
+      searchText = newRunNumbers.join(",");
+    }
+  }
+  return searchText;
+}
+
+/**
+* Checks if the find files search text is a directory and handles relevant errors
+* @param searchText :: text entered by user
+* @return string to append to foundFiles or none
+*/
+boost::optional<QString> MWRunFiles::findFilesDirectory(const QString &searchText) {
   if (m_isForDirectory) {
     m_foundFiles.clear();
     if (searchText.isEmpty()) {
       setFileProblem("A directory must be provided");
-    } else {
+    }
+    else {
       setFileProblem("");
-      m_foundFiles.append(searchText);
+      return searchText;
     }
-    return;
   }
+  return boost::none;
+}
 
-  if (m_uiForm.fileEditor->isModified()) {
-    // Reset modified flag.
-    m_uiForm.fileEditor->setModified(false);
+/**
+* creates background thread for find files
+* @param searchText :: text to create search parameters from 
+*/
+void MWRunFiles::runFindFiles(const QString &searchText) {
 
-    emit findingFiles();
+  if (!searchText.isEmpty()) {
+    const auto parameters =
+      createFindFilesSearchParameters(searchText.toStdString());
+    m_pool.createWorker(this, parameters);
 
-    // If we have an override instrument then add it in appropriate places to
-    // the search text
-    if (!m_defaultInstrumentName.isEmpty()) {
-      // Regex to match a selection of run numbers as defined here:
-      // mantidproject.org/MultiFileLoading
-      // Also allowing spaces between delimiters as this seems to work fine
-      const std::string runNumberString =
-          "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
-      boost::regex runNumbers(runNumberString, boost::regex::extended);
-      // Regex to match a list of run numbers delimited by commas
-      const std::string runListString =
-          "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
-      boost::regex runNumberList(runListString, boost::regex::extended);
-
-      // See if we can just prepend the instrument and be done
-      if (boost::regex_match(searchText.toStdString(), runNumbers)) {
-        searchText = m_defaultInstrumentName + searchText;
-      }
-      // If it is a list we need to prepend the instrument to all run numbers
-      else if (boost::regex_match(searchText.toStdString(), runNumberList)) {
-        QStringList runNumbers = searchText.split(",", QString::SkipEmptyParts);
-        QStringList newRunNumbers;
-
-        for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it)
-          newRunNumbers << m_defaultInstrumentName + (*it).simplified();
-
-        searchText = newRunNumbers.join(",");
-      }
-    }
-
-    if (!searchText.isEmpty()) {
-      const auto parameters =
-          createFindFilesSearchParameters(searchText.toStdString());
-      m_pool.createWorker(this, parameters);
-    }
-
-  } else {
+  }
+  else {
     // Make sure errors are correctly set if we didn't run
     inspectThreadResult(m_cachedResults);
   }
 }
+
 
 /** Calls cancel on a running instance of MonitorLiveData.
  *  Requires that a handle to the MonitorLiveData instance has been set via
