@@ -176,7 +176,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
     auto Temp = run.getProperty("Temp_Sample");
     auto *log = dynamic_cast<TimeSeriesProperty<double> *>(Temp);
     auto logTemp = log->clone();
-    
+
     logTemp->filterByTime(start, end);
     double average = logTemp->timeAverageValue();
 
