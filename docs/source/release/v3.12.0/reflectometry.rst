@@ -29,6 +29,7 @@ New features
 Improvements
 ############
 
+- Output workspace names for time sliced data now contain the time periods, rather than just a slice index number.
 - Grid lines are now displayed in the runs tab.
 - Plotting results in event handling mode now plots the `IvsQ_binned_` workspaces rather than `IvsQ_`, to make the behaviour consistent with non-event mode.
 - Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows and settings is also disabled during processing.
