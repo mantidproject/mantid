@@ -128,6 +128,11 @@ public:
   /// Set value of a local parameter
   void setLocalParameterValue(const QString &parName, int i,
                               double value) override;
+  /// Set value and error of a local parameter
+  void setLocalParameterValue(const QString &parName, int i, double value,
+                              double error);
+  /// Get error of a local parameter
+  double getLocalParameterError(const QString &parName, int i) const;
   /// Check if a local parameter is fixed
   bool isLocalParameterFixed(const QString &parName, int i) const override;
   /// Fix/unfix local parameter
@@ -399,8 +404,10 @@ protected:
   boost::optional<QString> m_currentFunctionIndex;
 
   struct LocalParameterData {
-    explicit LocalParameterData(double v = 0.0) : value(v), fixed(false) {}
+    explicit LocalParameterData(double v = 0.0, double e = 0.0)
+        : value(v), error(e), fixed(false) {}
     double value;
+    double error;
     bool fixed;
     QString tie;
   };

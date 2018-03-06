@@ -5,10 +5,6 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 
 ISIS Reflectometry Interface
 ----------------------------
@@ -57,6 +53,10 @@ Bug fixes
   - I0MonitorIndex
   - TransRunStartOverlap and TransRunEndOverlap if on SURF or CRISP.
 
+Features Removed
+################
+
+* The REFL Reduction, REFL SF Calculator and REFM Reduction graphical interface have been removed, they were not in active use, and were a source of bugs as well as using testing effort that is better directed elsewhere.
 
 Algorithms
 ----------
@@ -75,16 +75,15 @@ Improvements
 
 - Removed the ``RegionOfDirectBeam`` property from :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` because this is not used.
 - Improvements to :ref:`algm-LoadILLReflectometry`:
-    - Figaro NeXus files are now properly handled.
-    - A new property, *BeamCentre* allows user to manually specify the beam position on the detector.
-    - The *BeamPosition* property was renamed to *DirectBeamPosition* to better reflect its usage.
-    - The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector will be rotated such that the reflected peak on the detector will be at twice *BraggAngle*.
-
+  - Figaro NeXus files are now properly handled.
+  - A new property, *BeamCentre* allows user to manually specify the beam position on the detector.
+  - The *BeamPosition* property was renamed to *DirectBeamPosition* to better reflect its usage.
+  - The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector will be rotated such that the reflected peak on the detector will be at twice *BraggAngle*.
+  - Slits S2 and S3 have been added to D17 and Figaro IDFs; the loader will adjust their positions according to the NeXus files.
+  - The MagnetismReflectometryReduction now computes a Q-resolution estimate based on slit openings.
 
 Bug fixes
 #########
-
-- The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector will be rotated such that the reflected peak will be at twice *BraggAngle*.
 
 
 :ref:`Release 3.12.0 <v3.12.0>`

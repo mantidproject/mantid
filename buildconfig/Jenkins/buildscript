@@ -14,7 +14,7 @@ SCRIPT_DIR=$(dirname "$0")
 ###############################################################################
 # System discovery
 ###############################################################################
-if [[ ${NODE_LABELS} == *rhel7* ]]; then
+if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]]; then
   ON_RHEL7=true
 fi
 if [[ ${NODE_LABELS} == *ubuntu* ]]; then

@@ -1997,6 +1997,23 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
   }
 }
 
+void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
+                                             double value, double error) {
+  checkLocalParameter(parName);
+  m_localParameterValues[parName][i].value = value;
+  m_localParameterValues[parName][i].error = error;
+  if (i == m_currentDataset) {
+    setParameter(parName, value);
+    setParamError(parName, error);
+  }
+}
+/// Get error of a local parameter
+double FunctionBrowser::getLocalParameterError(const QString &parName,
+                                               int i) const {
+  checkLocalParameter(parName);
+  return m_localParameterValues[parName][i].error;
+}
+
 /**
  * Init a local parameter. Define initial values for all datasets.
  * @param parName :: Name of parametere to init.
@@ -2042,6 +2059,7 @@ void FunctionBrowser::setCurrentDataset(int i) {
   auto localParameters = getLocalParameters();
   foreach (QString par, localParameters) {
     setParameter(par, getLocalParameterValue(par, m_currentDataset));
+    setParamError(par, getLocalParameterError(par, m_currentDataset));
     updateLocalTie(par);
   }
 }
@@ -2251,7 +2269,6 @@ void FunctionBrowser::updateMultiDatasetParameters(
     const Mantid::API::IFunction &fun) {
   auto cfun = dynamic_cast<const Mantid::API::CompositeFunction *>(&fun);
   if (cfun && cfun->nFunctions() > 0) {
-    const auto localParameters = getLocalParameters();
 
     // Multiple datasets
     if (const auto *multiFun =
@@ -2262,16 +2279,31 @@ void FunctionBrowser::updateMultiDatasetParameters(
         throw std::invalid_argument("Function has incorrect number of domains");
       }
       // update function
+      {
+        auto sfun = multiFun->getFunction(0);
+        const auto globalParameters = getGlobalParameters();
+        for (int j = 0; j < globalParameters.size(); ++j) {
+          auto const &paramName = globalParameters[j];
+          auto paramIndex = sfun->parameterIndex(paramName.toStdString());
+          setParameter(paramName, sfun->getParameter(paramIndex));
+          setParamError(paramName, sfun->getError(paramIndex));
+        }
+      }
       size_t currentIndex = static_cast<size_t>(m_currentDataset);
+      const auto localParameters = getLocalParameters();
       for (size_t i = 0; i < multiFun->nFunctions(); ++i) {
         auto sfun = multiFun->getFunction(i);
-        if (i == currentIndex) {
-          updateParameters(*sfun);
-        }
         for (int j = 0; j < localParameters.size(); ++j) {
-          setLocalParameterValue(
-              localParameters[j], static_cast<int>(i),
-              sfun->getParameter(localParameters[j].toStdString()));
+          auto const &paramName = localParameters[j];
+          auto paramIndex = sfun->parameterIndex(paramName.toStdString());
+          auto value = sfun->getParameter(paramIndex);
+          auto error = sfun->getError(paramIndex);
+          setLocalParameterValue(localParameters[j], static_cast<int>(i), value,
+                                 error);
+          if (i == currentIndex) {
+            setParameter(paramName, value);
+            setParamError(paramName, error);
+          }
         }
       }
     } else { // composite function, 1 domain only

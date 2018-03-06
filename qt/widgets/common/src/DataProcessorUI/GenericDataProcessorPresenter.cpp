@@ -314,7 +314,7 @@ bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
 Process selected data
 */
 void GenericDataProcessorPresenter::process() {
-  // Emit a signal hat the process is starting
+  // Emit a signal that the process is starting
   m_view->emitProcessClicked();
   if (GenericDataProcessorPresenter::m_skipProcessing) {
     m_skipProcessing = false;
@@ -323,8 +323,10 @@ void GenericDataProcessorPresenter::process() {
   m_selectedData = m_manager->selectedData(m_promptUser);
 
   // Don't continue if there are no items selected
-  if (m_selectedData.size() == 0)
+  if (m_selectedData.size() == 0) {
+    m_mainPresenter->confirmReductionPaused(m_group);
     return;
+  }
 
   // Clear the group queue
   m_group_queue = GroupQueue();
@@ -522,7 +524,10 @@ Handle thread completion
 */
 void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
 
-  m_workerThread.release();
+  if (m_workerThread) {
+    m_workerThread->exit();
+    m_workerThread.release();
+  }
 
   if (exitCode == 0) { // Success
     m_progressReporter->report();

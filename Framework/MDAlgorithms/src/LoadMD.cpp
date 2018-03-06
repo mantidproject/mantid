@@ -428,6 +428,7 @@ void LoadMD::loadDimensions2() {
         axis.size() - 1));
   }
   m_file->closeGroup();
+  m_numDims = m_dims.size();
 }
 
 void LoadMD::loadVisualNormalization(
