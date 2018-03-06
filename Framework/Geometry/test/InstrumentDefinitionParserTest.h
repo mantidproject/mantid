@@ -1031,9 +1031,22 @@ public:
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InstrumentDefinitionParserTestPerformance *createSuite() {
+    return new InstrumentDefinitionParserTestPerformance();
+  }
+  static void destroySuite(InstrumentDefinitionParserTestPerformance *suite) {
+    delete suite;
+  }
+
+  InstrumentDefinitionParserTestPerformance()
+      : m_instrumentDirectoryPath(
+            ConfigService::Instance().getInstrumentDirectory()) {}
+
   void testLoadingAndParsing() {
     const std::string filename =
-        ConfigService::Instance().getInstrumentDirectory() +
+        m_instrumentDirectoryPath +
         "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
     const std::string xmlText = Strings::loadFile(filename);
 
@@ -1047,6 +1060,24 @@ public:
       Poco::File(vtpFilename).remove();
     }
   }
+
+  void test_load_wish() {
+    const auto definition =
+        m_instrumentDirectoryPath + "/WISH_Definition_10Panels.xml";
+    auto start = std::chrono::high_resolution_clock::now();
+    std::string contents = Strings::loadFile(definition);
+    InstrumentDefinitionParser parser(definition, "dummy", contents);
+    auto wishInstrument = parser.parseXML(nullptr);
+    auto stop = std::chrono::high_resolution_clock::now();
+    TS_ASSERT_EQUALS(wishInstrument->detectorInfo().size(),
+                     778245); // Sanity check
+    std::cout << "Creating WISH instrument took: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     stop - start).count() << " ms" << std::endl;
+  }
+
+private:
+  const std::string m_instrumentDirectoryPath;
 };
 
 #endif /* MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_ */

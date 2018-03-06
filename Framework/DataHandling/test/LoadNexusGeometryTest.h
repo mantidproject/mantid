@@ -29,11 +29,9 @@ public:
     LoadNexusGeometry alg;
     const std::string outputWorkspaceName = "LoadNexusGeometryTestWS";
     const std::string inputFile = "SMALLFAKE_example_geometry.hdf5";
-    const std::string instrumentName = "SmallFakeTubeInstrument";
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     alg.setPropertyValue("FileName", inputFile);
-    alg.setPropertyValue("InstrumentName", instrumentName);
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outputWorkspaceName))
     TS_ASSERT_THROWS_NOTHING(alg.execute();)

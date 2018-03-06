@@ -6,7 +6,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataHandling/LoadNexusGeometry.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
-#include "MantidNexusGeometry/ParsingErrors.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -46,7 +45,6 @@ void LoadNexusGeometry::init() {
                       "Filename", "", FileProperty::Load, extensions),
                   "The name of the Nexus file to read geometry from, as a full "
                   "or relative path.");
-  declareProperty("InstrumentName", "", "Name of Instrument");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -61,18 +59,9 @@ void LoadNexusGeometry::exec() {
   std::string instName = getProperty("InstrumentName");
   auto workspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
 
-  NexusGeometry::iAbstractBuilder_sptr iAbsBuilder_sptr =
-      std::shared_ptr<NexusGeometry::iAbstractBuilder>(
-          new NexusGeometry::iAbstractBuilder(instName));
-
-  NexusGeometry::NexusGeometryParser OFFparser =
-      NexusGeometry::NexusGeometryParser(fileName, iAbsBuilder_sptr);
-  // Parse nexus geometry
-  NexusGeometry::ParsingErrors exitStatus = OFFparser.parseNexusGeometry();
-  std::cout << exitStatus << std::endl;
-  // Add instrument to the workspace
-  iAbsBuilder_sptr->_unAbstractInstrument()->parseTreeAndCacheBeamline();
-  workspace->setInstrument(iAbsBuilder_sptr->_unAbstractInstrument());
+  auto instrument =
+      NexusGeometry::NexusGeometryParser::createInstrument(fileName);
+  workspace->setInstrument(std::move(instrument));
   workspace->populateInstrumentParameters();
   setProperty("OutputWorkspace", workspace);
 }
