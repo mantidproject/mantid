@@ -181,7 +181,7 @@ void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
     double canBackThickness = m_uiForm.spFlatCanBackThickness->value();
     alg->setProperty("ContainerBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
-    double canInnerRadius = m_uiForm.spCylCanInnerRadius->value();
+    double canInnerRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("ContainerInnerRadius", canInnerRadius);
 
     double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
