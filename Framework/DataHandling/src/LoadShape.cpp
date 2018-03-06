@@ -42,17 +42,6 @@ void LoadShape::init() {
       "The name of the file containing the shape. "
       "Extension must be .stl");
 
-  // attach to sample
-  declareProperty("Attach to sample", false,
-    "If true, the shape will be attached to the sample,"
-    "else you need to specify the component to which it is attached.");
-
-  // component name
-  declareProperty<std::string>("Component name", "",
-    "Name of component, to which to attach shape.");
-  setPropertySettings("Component name", make_unique<EnabledWhenProperty>(
-    "Attach to Sample", IS_EQUAL_TO, "0"));
-
   // Output workspace
   declareProperty(
        make_unique<WorkspaceProperty<Workspace>>(
@@ -89,23 +78,6 @@ void LoadShape::exec() {
   if (inputWS != outputWS) {
     outputWS = inputWS->clone();
   }
-  Instrument_const_sptr inputInstr = inputWS->getInstrument();
-  Instrument* outputInstr = inputInstr->clone();
-  if (outputInstr == nullptr) {
-    throw std::runtime_error("Unable to obtain instrument to add loaded shape to");
-  }
-
-  /* Does not yet compile
-  boost::shared_ptr<Component> component = nullptr;
-  bool attachToSample = getProperty("Attach to sample");
-  if (!attachToSample) {
-    std::string compName = getProperty("Component name");
-    component = outputInstr->getComponentByName(compName);
-  }
-  else {
-    component = outputInstr->getSample();
-  }
-  */
 
   std::string filename = getProperty("Filename");
   std::ifstream file(filename.c_str());
