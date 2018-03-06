@@ -9,14 +9,15 @@
 Description
 -----------
 
-This algorithm fits a set of specified peaks in a set of specified spectra in a MatrixWorkspace,
-returnig a list of the successfully fitted peaks along with
+This algorithm fits a set of specified peaks in a set of specified spectra in a :py:obj:mantid.api.MatrixWorkspace,
+returning a list of the successfully fitted peaks along with
 optional output for fitting information.
 
 The list of candidate peaks found is passed to a fitting routine and
 those that are successfully fitted are kept and returned in the output
 workspace (and logged at information level). The output
-`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ contains the following columns,
+``TableWorkspace`` :class:`table <mantid.api.ITableWorkspace>`
+contains the following columns,
 which reflect the fact that the peak has been fitted to a Gaussian atop
 a linear background: spectrum, centre, width, height,
 backgroundintercept & backgroundslope.
@@ -34,10 +35,10 @@ Required pre-knowledge
 
 The following information are required.
 
-* Assumed position of each peak;
-* Peak profile;
-* Background type (flat or linear);
-* Starting values of peak parameters;
+* Assumed position of each peak
+* Peak profile function
+* Background type (flat or linear)
+* Starting values of peak parameters
 
 For better results
 ==================
@@ -45,8 +46,8 @@ For better results
 * Peak fit window: this is an option
 
   a. specified by user
-  b. figured out by FindPeakBackground, first moments and second moments (NEED TO FIND OUT THE ALGORITHM)
-  c. if the workspace is in unit dSpacing and :math:`\Delta(d)/d`
+  b. figured out by :ref:FindPeakBackground, first moments and second moments (NEED TO FIND OUT THE ALGORITHM)
+  c. if the workspace is in unit dSpacing and :math:`\Delta d/d`
 
 * Peak position tolerance: there could be three cases for how the peak position tolerance is specified.
 
@@ -57,8 +58,8 @@ For better results
 
 
 
-Descrption of algorithm
-#######################
+Description of algorithm
+########################
 
 For each spectrum, it is assumed that there are N peaks to fit.
 The fitting starts from either the peak at the smallest X value or the largest X values depending on the 
@@ -101,7 +102,7 @@ Peak positions
 
 One of only one of the following will be taken.
 
- * A MatrixWorkspace
+ * A :py:obj:mantid.api.MatrixWorkspace
    * Number of spectra shall be the same as the number of spectra of the workspace containing peaks to fit for.  Or the number of spectra is the same as the number of spectra of the input workspace.
    * X value is the index of the peak.
    * Y value is the position of the peaks to fit.
@@ -115,7 +116,7 @@ One of only one of the following will be taken.
 
  **Peaks' positions must be given in ascending order**
 
- Parameter **FitFromRight** is used as the flag to fit from right most peak or left most peak.
+ Parameter ``FitFromRight`` deontes start fits from right most peak rather than left most peak.
 
 
 
@@ -137,7 +138,7 @@ but found by highest value within peak window. (Is this correct???)
 
 Further down the road, here are the fitting setup that can be affected.
 
-  * Peak positions are uniform among all spectra;
+  * Peak positions are uniform among all spectra
 
     - Peak window information will be retrieved from **m_peakWindowVector**
 
@@ -164,8 +165,8 @@ Algorithm Configurations
 
  * Peak profile starting value will be given as 
 
-    - an array **PeakParameterValues** such that the starting values are uniform among all spectra.
-    - a table (workspace) **PeakParameterValueTable** such that the starting values are not necessary same among all spectra.
+    - an array ``PeakParameterValues`` such that the starting values are uniform among all spectra.
+    - a table (workspace) ``PeakParameterValueTable`` such that the starting values are not necessary same among all spectra.
 
 
 Calculation of starting value of peak profile and background parameters
@@ -177,9 +178,10 @@ FitPeaks supports estimating peak parameter names as starting values.
 Workflow
 ########
 
-1. Call `algm-FindPeakBackground` to estimate the background of peak with a numerical approach.
+1. Call :ref:FindPeakBackground to estimate the background of peak with a numerical approach. 
+   * Some tests have made to show that most time :ref:FindPeakBackground failed to do a valid estimation.  Therefore this feature is temporarily disabled.
 
-2. If `algm-FindPeakBackground` fails, *estimate-peak-background* will be used for simple approximation.
+2. If :ref:FindPeakBackground` fails, *estimate-peak-background* will be used for simple approximation.
 
 3. Estimate the peak parameter, *estimate-peak-parameter*, by using the estimated peak background obtained in either step 1 or step 2.
 
@@ -201,9 +203,9 @@ Estimate peak parameters
 
 Here is the approach to estimate the peak parameters
 
-1. Remove background;
+1. Remove background.
 
-2. Find maximum Y value as the *observed* peak center and peak height :math:`H_{obs}`;
+2. Find maximum Y value as the *observed* peak center and peak height :math:`H_{obs}`.
 
 3. Check peak height with user-specified minimum height and peak center that must be at least more than 3 data points away from the boundary of fit window.
 
@@ -264,9 +266,9 @@ Therefore, *FitPeaks* supports various fexible and informative outputs.
 OutputWorkspace
 ###############
 
-It is a MatrixWorkspace containing the peak positions expected and fitted.
+It is a py:obj:mantid.api.MatrixWorkspace containing the peak positions expected and fitted.
 
-- The output workspace has *N* spectra corresponding to the spectra that are specified by user via **MinimumWorkspaceIndex** and **MaximumWorkspaceIndex**.
+- The output workspace has *N* spectra corresponding to the spectra that are specified by user via ``MinimumWorkspaceIndex`` and ``MaximumWorkspaceIndex``.
 - If there are *m* peaks that are required to fit for, then each spectrum in the output workspace has *m* data points.
 - In each spectrum, *x(i)* is the expected position of *i-th* peak; *y(i)* is the fitted position of *i-th* peak; and *e(i)* is the cost from fitting.
 - There are several cases that the fitting could fail.  A negative peak position *y(i)* combined with *e(i)* equal to *DBL_MAX* denote such failure.
@@ -288,7 +290,7 @@ The order of the peaks will be exactly the sequence of peaks as the order of the
 FittingCostWorkspace
 ####################
 
-It is a MatrixWorkspace recording the cost of each peak that is fitted.
+It is a :py:obj:mantid.api.MatrixWorkspace recording the cost of each peak that is fitted.
 It is in the exactly same order as the given positions of peaks to fit.
 Its X values store the fitted peak positions and Y values are for :math:`\chi^2`.
 
@@ -299,7 +301,7 @@ while its :math:`\chi^2` shall be some special value.
 FittedPeaksWorkspace
 ####################
 
-It is an optional output MatrixWorkspace.
+It is an optional output :py:obj:mantid.api.MatrixWorkspace.
 
 For each spectrum, in each fit window, the Y values will be replaced by the calcualted peak and background value.
 If fitting is bad, then only background is calculated.
