@@ -137,7 +137,6 @@ void render(const TopoDS_Shape &ObjSurf) {
 }
 #endif
 
-
 void renderSphere(const detail::ShapeInfo &shapeInfo) {
   // create glu sphere
   GLUquadricObj *qobj = gluNewQuadric();
@@ -326,13 +325,6 @@ void renderShape(const detail::ShapeInfo &shapeInfo) {
     return;
   }
 }
-
-void renderBitmap(const RectangularDetector &rectDet) { render(rectDet); }
-
-void renderStructured(const StructuredDetector &structDet) {
-  render(structDet);
-}
-
 } // namespace RenderingHelpers
 } // namespace Geometry
 } // namespace Mantid
