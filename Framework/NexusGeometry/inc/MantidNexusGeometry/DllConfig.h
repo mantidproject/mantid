@@ -1,7 +1,7 @@
 #ifndef MANTID_NEXUSGEOMETRY_DLLCONFIG_H_
 #define MANTID_NEXUSGEOMETRY_DLLCONFIG_H_
 
-/** DLLConfig : Import Export configurations for Nexus Geometry 
+/** DLLConfig : Import Export configurations for Nexus Geometry
 
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

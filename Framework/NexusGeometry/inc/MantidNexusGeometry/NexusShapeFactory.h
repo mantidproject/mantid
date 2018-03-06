@@ -17,7 +17,8 @@ class IObject;
 }
 namespace NexusGeometry {
 
-/** NexusShapeFactory : Namespace containing free factory functions for creating IObjects (Shapes) from Nexus Geometry related formats 
+/** NexusShapeFactory : Namespace containing free factory functions for creating
+  IObjects (Shapes) from Nexus Geometry related formats
 
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
