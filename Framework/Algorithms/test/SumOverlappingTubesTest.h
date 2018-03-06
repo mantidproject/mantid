@@ -567,6 +567,7 @@ public:
     alg.setProperty("Normalise", false);
     if (oneDimensional)
       alg.setProperty("OutputType", "1D");
+    alg.setProperty("MirrorScatteringAngles", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(

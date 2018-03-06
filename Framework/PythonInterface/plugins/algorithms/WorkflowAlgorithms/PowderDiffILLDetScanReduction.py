@@ -59,6 +59,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                              defaultValue=True,
                              doc='Output a 1D workspace with counts against scattering angle.')
 
+        self.declareProperty(name='CropNegativeScatteringAngles', defaultValue=True,
+                             doc='Whether or not to crop the negative scattering angles.')
+
         self.declareProperty(FloatArrayProperty(name='HeightRange', values=[],
                                                 validator=CompositeValidator([FloatArrayOrderedPairsValidator(),
                                                                               FloatArrayLengthValidator(0, 2)])),
@@ -83,9 +86,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         # We might already have a group, but group just in case
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
 
-        instrument_name = input_group[0].getInstrument().getName()
+        instrument = input_group[0].getInstrument()
         supported_instruments = ['D2B', 'D20']
-        if instrument_name not in supported_instruments:
+        if instrument.getName() not in supported_instruments:
             self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
                              + str(supported_instruments))
 
@@ -98,8 +101,10 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
             self._progress.report('Applying detector efficiencies')
             LoadNexusProcessed(Filename=calib_file, OutputWorkspace='__det_eff')
             for ws in input_group:
-                ApplyDetectorScanEffCorr(InputWorkspace=ws, DetectorEfficiencyWorkspace='__det_eff',
-                                         OutputWorkspace=ws.getName())
+                name = ws.getName()
+                ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name, MonitorWorkspace='__mon')
+                DeleteWorkspace('__mon')
+                ApplyDetectorScanEffCorr(InputWorkspace=name,DetectorEfficiencyWorkspace='__det_eff',OutputWorkspace=name)
 
         height_range = ''
         height_range_prop = self.getProperty('HeightRange').value
@@ -109,11 +114,18 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         output_workspaces = []
         output_workspace_name = self.getPropertyValue('OutputWorkspace')
 
+        mirror_angles = True
+        crop_negative = self.getProperty('CropNegativeScatteringAngles').value
+        if instrument.hasParameter("mirror_scattering_angles"):
+            mirror_angles = instrument.getBoolParameter("mirror_scattering_angles")[0]
+
         self._progress.report('Doing Output2DTubes Option')
         if self.getProperty('Output2DTubes').value:
             output2DTubes = SumOverlappingTubes(InputWorkspaces=input_group,
                                                 OutputType='2DTubes',
                                                 HeightAxis=height_range,
+                                                MirrorScatteringAngles=mirror_angles,
+                                                CropNegativeScatteringAngles=crop_negative,
                                                 OutputWorkspace=output_workspace_name + '_2DTubes')
             output_workspaces.append(output2DTubes)
 
@@ -121,8 +133,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         if self.getProperty('Output2D').value:
             output2D = SumOverlappingTubes(InputWorkspaces=input_group,
                                            OutputType='2D',
-                                           CropNegativeScatteringAngles=True,
                                            HeightAxis=height_range,
+                                           MirrorScatteringAngles=mirror_angles,
+                                           CropNegativeScatteringAngles=crop_negative,
                                            OutputWorkspace = output_workspace_name + '_2D')
             output_workspaces.append(output2D)
 
@@ -130,8 +143,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         if self.getProperty('Output1D').value:
             output1D = SumOverlappingTubes(InputWorkspaces=input_group,
                                            OutputType='1D',
-                                           CropNegativeScatteringAngles=True,
                                            HeightAxis=height_range,
+                                           MirrorScatteringAngles=mirror_angles,
+                                           CropNegativeScatteringAngles=crop_negative,
                                            OutputWorkspace=output_workspace_name + '_1D')
             output_workspaces.append(output1D)
         DeleteWorkspace('input_group')

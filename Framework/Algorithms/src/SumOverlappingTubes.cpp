@@ -2,6 +2,7 @@
 
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAPI/ADSValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -79,10 +80,15 @@ void SumOverlappingTubes::init() {
   declareProperty("ScatteringAngleTolerance", 0.0, toleranceValidator,
                   "The relative tolerance for the scattering angles before the "
                   "counts are split.");
+  declareProperty(make_unique<PropertyWithValue<bool>>("MirrorScatteringAngles",
+                                                       true, Direction::Input),
+                  "A flag to mirror the signed 2thetas. ");
 }
 
 void SumOverlappingTubes::exec() {
   getInputParameters();
+
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_workspaceList.size());
 
   HistogramData::Points x(m_numPoints, LinearGenerator(m_startScatteringAngle,
                                                        m_stepScatteringAngle));
@@ -102,52 +108,43 @@ void SumOverlappingTubes::exec() {
   Unit_sptr xUnit = outputWS->getAxis(0)->unit();
   boost::shared_ptr<Units::Label> xLabel =
       boost::dynamic_pointer_cast<Units::Label>(xUnit);
-  xLabel->setLabel("Tube Angle", "degrees");
+  xLabel->setLabel("Scattering Angle", "degrees");
 
   const auto normalisation = performBinning(outputWS);
 
-  auto maxEntry = 0.0;
-  for (const auto &vector : normalisation)
-    maxEntry =
-        std::max(*std::max_element(vector.begin(), vector.end()), maxEntry);
   if (getProperty("Normalise"))
     for (size_t i = 0; i < m_numPoints; ++i)
       for (size_t j = 0; j < m_numHistograms; ++j) {
         // Avoid spurious normalisation for low counting cells
         if (normalisation[j][i] < 1e-15)
           continue;
-        outputWS->mutableY(j)[i] *= maxEntry / normalisation[j][i];
-        outputWS->mutableE(j)[i] *= maxEntry / normalisation[j][i];
+        outputWS->mutableY(j)[i] /= normalisation[j][i];
+        outputWS->mutableE(j)[i] /= normalisation[j][i];
       }
 
   setProperty("OutputWorkspace", outputWS);
 }
 
 void SumOverlappingTubes::getInputParameters() {
+
+  // This is flag for flipping the sign of 2theta
+  m_mirrorDetectors = 1;
+  if (getProperty("MirrorScatteringAngles")) {
+    m_mirrorDetectors = -1;
+  }
+
   const std::vector<std::string> inputWorkspaces =
       getProperty("InputWorkspaces");
   auto workspaces = RunCombinationHelper::unWrapGroups(inputWorkspaces);
   RunCombinationHelper combHelper;
   m_workspaceList = combHelper.validateInputWorkspaces(workspaces, g_log);
-
   m_outputType = getPropertyValue("OutputType");
   const auto &instrument = m_workspaceList.front()->getInstrument();
-
-  // For D2B at the ILL the detectors are flipped when comparing with other
-  // powder diffraction instruments such as D20. It is still desired to show
-  // angles as positive however, so here we check if we need to multiple angle
-  // calculations by -1.
-  m_mirrorDetectors = 1;
-  auto mirrorDetectors = instrument->getBoolParameter("mirror_detector_angles");
-  if (!mirrorDetectors.empty() && mirrorDetectors[0])
-    m_mirrorDetectors = -1;
-
   std::string componentName = "";
   auto componentNameParam =
       instrument->getStringParameter("detector_for_height_axis");
   if (!componentNameParam.empty())
     componentName = componentNameParam[0];
-
   getScatteringAngleBinning();
   getHeightAxis(componentName);
 }
@@ -267,8 +264,10 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
   std::vector<std::vector<double>> normalisation(
       m_numHistograms, std::vector<double>(m_numPoints, 0.0));
 
+  PARALLEL_FOR_IF(threadSafe(*outputWS))
   // loop over all workspaces
   for (auto &ws : m_workspaceList) {
+    m_progress->report("Processing workspace "+std::string(ws->getName()));
     // loop over spectra
     const auto &specInfo = ws->spectrumInfo();
     for (size_t i = 0; i < specInfo.size(); ++i) {
@@ -298,8 +297,8 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         angle = specInfo.signedTwoTheta(i);
       angle *= m_mirrorDetectors * 180.0 / M_PI;
 
-      int angleIndex =
-          int((angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
+      int angleIndex = int(
+          std::floor((angle - m_startScatteringAngle) / m_stepScatteringAngle));
 
       // point is out of range, a warning should have been generated already for
       // the theta index

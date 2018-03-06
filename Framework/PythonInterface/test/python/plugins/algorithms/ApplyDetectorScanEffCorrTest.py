@@ -44,5 +44,15 @@ class ApplyDetectorScanEffCorrTest(unittest.TestCase):
         self.assertRaises(ValueError, ApplyDetectorScanEffCorr, InputWorkspace=input_ws,
                           DetectorEfficiencyWorkspace=calibration_ws, OutputWorkspace='')
 
+    def test_2d_scanning_workspace(self):
+        input_ws = CreateSampleWorkspace(NumMonitors=0, NumBanks=3, BankPixelWidth=2, XMin=0, XMax=5, BinWidth=1, NumScanPoints=7)
+
+        calibration_x = np.array([0,1,2,0,1,2,0,1,2,0,1,2])
+        calibration_y = np.arange(12)
+        calibration_ws = CreateWorkspace(DataX=calibration_x, DataY=calibration_y, Nspec=4)
+
+        calibrated_ws = ApplyDetectorScanEffCorr(input_ws, calibration_ws)
+
+
 if __name__ == "__main__":
     unittest.main()

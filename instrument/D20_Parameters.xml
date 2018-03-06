@@ -6,5 +6,9 @@
 			<value val="panel_1" />
 		</parameter>
 
+		<parameter name="mirror_scattering_angles" type="bool">
+			<value val="False" />
+	  </parameter>
+
 	</component-link>
 </parameter-file>

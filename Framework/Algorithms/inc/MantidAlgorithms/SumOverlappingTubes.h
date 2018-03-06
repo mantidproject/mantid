@@ -4,7 +4,8 @@
 #include "MantidAlgorithms/DllConfig.h"
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Progress.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -72,7 +73,9 @@ private:
 
   double distanceFromAngle(const int angleIndex, const double angle) const;
 
-  int m_mirrorDetectors;
+  int m_mirrorDetectors; /// holds the sign flipper for 2theta
+
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithms
