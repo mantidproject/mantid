@@ -46,7 +46,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this,
           SIGNAL(fileTextChanged(const QString &)));
   connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this,
-          SIGNAL(fileEditingFinished()));
+    SIGNAL(fileEditingFinished()));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
   connect(m_uiForm.browseIco, SIGNAL(clicked()), this, SLOT(browseClicked()));
 
@@ -514,9 +514,7 @@ void MWRunFiles::clear() {
 /**
 * Finds the files if the user has changed the parameter text.
 */
-void MWRunFiles::findFiles() {
-  findFiles(m_uiForm.fileEditor->isModified());
-}
+void MWRunFiles::findFiles() { findFiles(m_uiForm.fileEditor->isModified()); }
 
 /**
 * Finds the files specified by the user in a background thread.
@@ -553,12 +551,11 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
     // Regex to match a selection of run numbers as defined here:
     // mantidproject.org/MultiFileLoading
     // Also allowing spaces between delimiters as this seems to work fine
-    const std::string runNumberString =
-      "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
+    const std::string runNumberString = "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
     boost::regex runNumbers(runNumberString, boost::regex::extended);
     // Regex to match a list of run numbers delimited by commas
     const std::string runListString =
-      "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
+        "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
     boost::regex runNumberList(runListString, boost::regex::extended);
 
     // See if we can just prepend the instrument and be done
@@ -580,17 +577,18 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
 }
 
 /**
-* Checks if the find files search text is a directory and handles relevant errors
+* Checks if the find files search text is a directory and handles relevant
+* errors
 * @param searchText :: text entered by user
 * @return string to append to foundFiles or none
 */
-boost::optional<QString> MWRunFiles::findFilesDirectory(const QString &searchText) {
+boost::optional<QString>
+MWRunFiles::findFilesDirectory(const QString &searchText) {
   if (m_isForDirectory) {
     m_foundFiles.clear();
     if (searchText.isEmpty()) {
       setFileProblem("A directory must be provided");
-    }
-    else {
+    } else {
       setFileProblem("");
       return searchText;
     }
@@ -600,22 +598,20 @@ boost::optional<QString> MWRunFiles::findFilesDirectory(const QString &searchTex
 
 /**
 * creates background thread for find files
-* @param searchText :: text to create search parameters from 
+* @param searchText :: text to create search parameters from
 */
 void MWRunFiles::runFindFiles(const QString &searchText) {
 
   if (!searchText.isEmpty()) {
     const auto parameters =
-      createFindFilesSearchParameters(searchText.toStdString());
+        createFindFilesSearchParameters(searchText.toStdString());
     m_pool.createWorker(this, parameters);
 
-  }
-  else {
+  } else {
     // Make sure errors are correctly set if we didn't run
     inspectThreadResult(m_cachedResults);
   }
 }
-
 
 /** Calls cancel on a running instance of MonitorLiveData.
  *  Requires that a handle to the MonitorLiveData instance has been set via

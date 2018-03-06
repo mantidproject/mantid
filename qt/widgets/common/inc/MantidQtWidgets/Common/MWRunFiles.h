@@ -229,11 +229,12 @@ private:
   void refreshValidator();
   /// Turn on/off display of validator red star (default is on)
   void setValidatorDisplay(bool display);
-  ///gets text to use for find files search parameters
+  /// gets text to use for find files search parameters
   const QString findFilesGetSearchText(QString &searchText);
-  ///Checks if the find files search text is a directory and handles relevant errors 
+  /// Checks if the find files search text is a directory and handles relevant
+  /// errors
   boost::optional<QString> findFilesDirectory(const QString &searchText);
-  ///handles findFiles background thread
+  /// handles findFiles background thread
   void runFindFiles(const QString &searchText);
   /// Helper method to create a FindFilesSearchParameters object
   FindFilesSearchParameters
