@@ -46,7 +46,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this,
           SIGNAL(fileTextChanged(const QString &)));
   connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this,
-    SIGNAL(fileEditingFinished()));
+          SIGNAL(fileEditingFinished()));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
   connect(m_uiForm.browseIco, SIGNAL(clicked()), this, SLOT(browseClicked()));
 
