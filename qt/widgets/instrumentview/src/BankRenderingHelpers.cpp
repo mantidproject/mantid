@@ -58,10 +58,10 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
   auto bank = compInfo.quadrilateralComponent(index);
   auto xstep = (compInfo.position(bank.bottomRight).X() -
                 compInfo.position(bank.bottomLeft).X()) /
-               bank.nX;
+               static_cast<double>(bank.nX);
   auto ystep = (compInfo.position(bank.topRight).Y() -
                 compInfo.position(bank.bottomLeft).Y()) /
-               bank.nY;
+               static_cast<double>(bank.nY);
   // Because texture colours are combined with the geometry colour
   // make sure the current colour is white
   glColor3f(1.0f, 1.0f, 1.0f);
@@ -75,8 +75,8 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
   auto res = getCorrectedTextureSize(bank.nX, bank.nY);
   texx = res.first;
   texy = res.second;
-  double tex_frac_x = (1.0 * bank.nX) / (texx);
-  double tex_frac_y = (1.0 * bank.nY) / (texy);
+  double tex_frac_x = static_cast<double>(bank.nX) / static_cast<double>(texx);
+  double tex_frac_y = static_cast<double>(bank.nY) / static_cast<double>(texy);
 
   glBegin(GL_QUADS);
 
@@ -109,8 +109,6 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
                           size_t index, const std::vector<GLColor> &color) {
   auto bank = compInfo.quadrilateralComponent(index);
   auto res = getCorrectedTextureSize(bank.nX, bank.nY);
-  auto texx = res.first;
-  auto texy = res.second;
 
   glBegin(GL_QUADS);
 

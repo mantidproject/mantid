@@ -240,17 +240,16 @@ void InstrumentRenderer::reset() {
   if (m_textureIDs.size() > 0) {
     const auto &compInfo = m_actor.componentInfo();
     for (size_t i = 0; i < m_textureIDs.size(); i++) {
-      switch (compInfo.componentType(m_textureIndices[i])) {
-      case Mantid::Beamline::ComponentType::Rectangular:
+      auto type = compInfo.componentType(m_textureIndices[i]);
+
+      if (type == Mantid::Beamline::ComponentType::Rectangular) {
         generateRectangularTexture(colorTextures[i], m_colors,
                                    m_textureIndices[i]);
         generateRectangularTexture(pickTextures[i], m_pickColors,
                                    m_textureIndices[i]);
-        break;
-      case Mantid::Beamline::ComponentType::OutlineComposite:
+      } else if (type == Mantid::Beamline::ComponentType::OutlineComposite) {
         generateTubeTexture(colorTextures[i], m_colors, m_textureIndices[i]);
         generateTubeTexture(pickTextures[i], m_pickColors, m_textureIndices[i]);
-        break;
       }
     }
   }
