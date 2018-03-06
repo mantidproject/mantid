@@ -70,7 +70,7 @@ void vtkGeometryCacheReader::readCacheForObject(IObject *obj) {
   // Read the cache from the element
   int noOfTriangles = 0, noOfPoints = 0;
   std::vector<double> Points;
-  std::vector<int> Faces;
+  std::vector<uint32_t> Faces;
   std::stringstream buff;
   // Read number of points
   buff << pEle->getAttribute("NumberOfPoints");
@@ -141,7 +141,7 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
  */
 void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle,
                                            int noOfTriangles,
-                                           std::vector<int> &faces) {
+                                           std::vector<uint32_t> &faces) {
   if (pEle == nullptr) {
     noOfTriangles = 0;
     return;

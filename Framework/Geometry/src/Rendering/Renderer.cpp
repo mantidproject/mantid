@@ -63,9 +63,8 @@ void Renderer::renderIObjComponent(const IObjComponent &objComp,
 void Renderer::renderTriangulated(detail::GeometryTriangulator &triangulator,
                                   RenderMode mode) const {
 #ifdef ENABLE_OPENCASCADE
-  auto surface = triangulator.getOCSurface();
-  if (surface && !surface->IsNull())
-    render(mode, *surface);
+  if (triangulator.hasOCSurface() && !triangulator.getOCSurface().IsNull())
+    render(mode, triangulator.getOCSurface());
   else
     render(mode, triangulator);
 #else

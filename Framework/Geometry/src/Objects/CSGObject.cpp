@@ -2147,8 +2147,8 @@ const std::vector<double> &CSGObject::getTriangleVertices() const {
 /**
  * get faces
  */
-const std::vector<int> &CSGObject::getTriangleFaces() const {
-  static const std::vector<int> empty;
+const std::vector<uint32_t> &CSGObject::getTriangleFaces() const {
+  static const std::vector<uint32_t> empty;
   if (m_handler == nullptr)
     return empty;
   return m_handler->getTriangleFaces();

@@ -2,7 +2,7 @@
 #define MANTID_GEOMETRY_SURFACETRIANGULATOR_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 class TopoDS_Shape;
@@ -42,7 +42,7 @@ private:
   size_t m_nFaces;
   size_t m_nPoints;
   std::vector<double> m_points; ///< double array or points
-  std::vector<int> m_faces;     ///< Integer array of faces
+  std::vector<uint32_t> m_faces; ///< Integer array of faces
   const CSGObject *m_obj;       ///< Input Object
   void checkTriangulated();
 
@@ -51,7 +51,8 @@ public:
   ~GeometryTriangulator();
   void triangulate();
   void setGeometryCache(size_t nPoints, size_t nFaces,
-                        std::vector<double> &&points, std::vector<int> &&faces);
+                        std::vector<double> &&points,
+                        std::vector<uint32_t> &&faces);
   /// Return the number of triangle faces
   size_t numTriangleFaces();
   /// Return the number of triangle vertices
@@ -61,10 +62,10 @@ public:
   const std::vector<double> &getTriangleVertices();
   /// get a pointer to the 3x(NumberOFaces) integers describing points forming
   /// faces (p1,p2,p3)(p4,p5,p6).
-  const std::vector<int> &getTriangleFaces();
+  const std::vector<uint32_t> &getTriangleFaces();
 #ifdef ENABLE_OPENCASCADE
 private:
-  boost::shared_ptr<TopoDS_Shape>
+  std::unique_ptr<TopoDS_Shape>
       m_objSurface; ///< Storage for the output surface
                     /// Analyze the object
                     /// OpenCascade analysis of object surface
@@ -76,7 +77,8 @@ private:
 
 public:
   /// Return OpenCascade surface.
-  boost::shared_ptr<TopoDS_Shape> getOCSurface();
+  bool hasOCSurface() const;
+  const TopoDS_Shape &getOCSurface();
 #endif
 };
 } // namespace detail

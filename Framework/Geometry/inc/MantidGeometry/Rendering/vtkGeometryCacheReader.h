@@ -56,7 +56,7 @@ private:
   void readPoints(Poco::XML::Element *pEle, int noOfPoints,
                   std::vector<double> &points);
   void readTriangles(Poco::XML::Element *pEle, int noOfTriangles,
-                     std::vector<int> &faces);
+                     std::vector<uint32_t> &faces);
 
 public:
   vtkGeometryCacheReader(std::string filename);

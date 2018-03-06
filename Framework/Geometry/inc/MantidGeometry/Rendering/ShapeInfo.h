@@ -13,7 +13,10 @@ class RectangularDetector;
 class StructuredDetector;
 class IObjComponent;
 
-/** ShapeInfo : Stored Object related shape information for rendering.
+/** ShapeInfo : Stores shape types and information relevant to drawing the
+shape. For cylinders, spheres and cones, height and radius are stored. Points
+are stored in the winding order shown in the IDF here
+http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html.
 
 Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

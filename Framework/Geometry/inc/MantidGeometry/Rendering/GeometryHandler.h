@@ -14,10 +14,8 @@ namespace Mantid {
 
 namespace Geometry {
 class IObjComponent;
-class ObjComponent;
 class CSGObject;
 namespace detail {
-class Renderer;
 class GeometryTriangulator;
 }
 
@@ -54,7 +52,6 @@ private:
   static Kernel::Logger &PLog; ///< The official logger
 
 protected:
-  std::unique_ptr<detail::Renderer> m_renderer;
   std::shared_ptr<detail::ShapeInfo> m_shapeInfo;
   std::unique_ptr<detail::GeometryTriangulator> m_triangulator;
   RectangularDetector *m_rectDet = nullptr;
@@ -85,10 +82,10 @@ public:
   /// Extract the vertices of the triangles
   const std::vector<double> &getTriangleVertices() const;
   /// Extract the Faces of the triangles
-  const std::vector<int> &getTriangleFaces() const;
+  const std::vector<uint32_t> &getTriangleFaces() const;
   /// Sets the geometry cache using the triangulation information provided
   void setGeometryCache(size_t nPts, size_t nFaces, std::vector<double> &&pts,
-                        std::vector<int> &&faces);
+                        std::vector<uint32_t> &&faces);
   /// return the actual type and points of one of the "standard" objects,
   /// cuboid/cone/cyl/sphere
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &mytype,

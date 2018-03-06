@@ -76,10 +76,13 @@ void GeometryTriangulator::triangulate() {
 }
 
 #ifdef ENABLE_OPENCASCADE
+bool GeometryTriangulator::hasOCSurface() const {
+  return m_objSurface != nullptr;
+}
 /// Return OpenCascade surface.
-boost::shared_ptr<TopoDS_Shape> GeometryTriangulator::getOCSurface() {
+const TopoDS_Shape &GeometryTriangulator::getOCSurface() {
   checkTriangulated();
-  return m_objSurface;
+  return *m_objSurface;
 }
 #endif
 
@@ -108,7 +111,7 @@ const std::vector<double> &GeometryTriangulator::getTriangleVertices() {
 }
 /// get a pointer to the 3x(NumberOFaces) integers describing points forming
 /// faces (p1,p2,p3)(p4,p5,p6).
-const std::vector<int> &GeometryTriangulator::getTriangleFaces() {
+const std::vector<uint32_t> &GeometryTriangulator::getTriangleFaces() {
   checkTriangulated();
   return m_faces;
 }
@@ -208,9 +211,9 @@ void GeometryTriangulator::setupFaces() {
         Poly_Triangle trian = tri.Value(i);
         Standard_Integer index1, index2, index3;
         trian.Get(index1, index2, index3);
-        m_faces[index * 3 + 0] = maxindex + index1 - 1;
-        m_faces[index * 3 + 1] = maxindex + index2 - 1;
-        m_faces[index * 3 + 2] = maxindex + index3 - 1;
+        m_faces[index * 3 + 0] = static_cast<uint32_t>(maxindex + index1 - 1);
+        m_faces[index * 3 + 1] = static_cast<uint32_t>(maxindex + index2 - 1);
+        m_faces[index * 3 + 2] = static_cast<uint32_t>(maxindex + index3 - 1);
         index++;
       }
       maxindex += facing->NbNodes();
@@ -221,7 +224,7 @@ void GeometryTriangulator::setupFaces() {
 
 void GeometryTriangulator::setGeometryCache(size_t nPoints, size_t nFaces,
                                             std::vector<double> &&points,
-                                            std::vector<int> &&faces) {
+                                            std::vector<uint32_t> &&faces) {
   m_nPoints = nPoints;
   m_nFaces = nFaces;
   m_points = std::move(points);

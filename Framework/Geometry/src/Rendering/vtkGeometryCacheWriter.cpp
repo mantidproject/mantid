@@ -122,7 +122,7 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   AutoPtr<Element> pFaces = mDoc->createElement("Polys");
   AutoPtr<Element> pTrisDataArray = mDoc->createElement("DataArray");
   // add attribute
-  pTrisDataArray->setAttribute("type", "Int32");
+  pTrisDataArray->setAttribute("type", "UInt32");
   pTrisDataArray->setAttribute("Name", "connectivity");
   pTrisDataArray->setAttribute("format", "ascii");
 
@@ -137,7 +137,7 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   // set the offsets
   AutoPtr<Element> pTrisOffsetDataArray = mDoc->createElement("DataArray");
   // add attribute
-  pTrisOffsetDataArray->setAttribute("type", "Int32");
+  pTrisOffsetDataArray->setAttribute("type", "UInt32");
   pTrisOffsetDataArray->setAttribute("Name", "offsets");
   pTrisOffsetDataArray->setAttribute("format", "ascii");
   buf.str("");
