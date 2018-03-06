@@ -271,6 +271,8 @@ protected:
   bool hasLowerBound(QtProperty *prop) const;
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty *prop) const;
+  /// Get a constraint string
+  QString getConstraint(const AConstraint& ac) const;
 
   /// Initialize storage and values for local parameters
   void initLocalParameter(const QString &parName) const;
@@ -278,6 +280,7 @@ protected:
   void checkLocalParameter(const QString &parName) const;
   /// Make sure that properties are in sync with the cached ties
   void updateLocalTie(const QString &parName);
+  void updateLocalConstraint(const QString &parName);
 
   /// Ask user for function type
   virtual QString getUserFunctionFromDialog();
@@ -326,6 +329,8 @@ protected slots:
   void parameterButtonClicked(QtProperty *);
   /// Called when a tie property changes
   void tieChanged(QtProperty *);
+  /// Called when a constraint property changes
+  void constraintChanged(QtProperty *);
   /// Called when "Global" check-box was clicked
   void globalChanged(QtProperty *, const QString &, bool);
   /// Set value of an attribute (as a property) to a function
@@ -410,6 +415,7 @@ protected:
     double error;
     bool fixed;
     QString tie;
+    QString constraint;
   };
 
   /// Set true if the constructed function is intended to be used in a

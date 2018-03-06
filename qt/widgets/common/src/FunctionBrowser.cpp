@@ -175,6 +175,8 @@ void FunctionBrowser::createBrowser() {
           SLOT(attributeVectorSizeChanged(QtProperty *)));
   connect(m_tieManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(tieChanged(QtProperty *)));
+  connect(m_constraintManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(constraintChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(valueChanged(QtProperty *, double)),
           SLOT(parameterChanged(QtProperty *)));
 
@@ -1079,6 +1081,18 @@ FunctionBrowser::addConstraintProperties(QtProperty *prop, QString constraint) {
     }
   }
 
+  
+  // In case of multi-dataset fitting store the tie for a local parameter
+  if (prop->hasOption(globalOptionName) &&
+      !prop->checkOption(globalOptionName)) {
+    auto parName = getParameterName(prop);
+    auto &localValues = m_localParameterValues[parName];
+    if (m_currentDataset >= localValues.size()) {
+      initLocalParameter(parName);
+    }
+    localValues[m_currentDataset].constraint = constraint;
+  }
+
   // add properties
   QList<FunctionBrowser::AProperty> plist;
   AConstraint ac;
@@ -1158,6 +1172,21 @@ bool FunctionBrowser::hasUpperBound(QtProperty *prop) const {
       return true;
   }
   return false;
+}
+
+/// Get a constraint string
+QString FunctionBrowser::getConstraint(const AConstraint& ac) const {
+  QString constraint;
+  if (ac.lower) {
+    constraint += m_constraintManager->value(ac.lower) + "<" +
+                  ac.paramProp->propertyName();
+  } else {
+    constraint += ac.paramProp->propertyName();
+  }
+  if (ac.upper) {
+    constraint += "<" + m_constraintManager->value(ac.upper);
+  }
+  return constraint;
 }
 
 /**
@@ -1390,17 +1419,7 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
     auto to = m_constraints.upperBound(prop);
     for (auto it = from; it != to; ++it) {
       try {
-        QString constraint;
-        auto cp = it.value();
-        if (cp.lower) {
-          constraint += m_constraintManager->value(cp.lower) + "<" +
-                        cp.paramProp->propertyName();
-        } else {
-          constraint += cp.paramProp->propertyName();
-        }
-        if (cp.upper) {
-          constraint += "<" + m_constraintManager->value(cp.upper);
-        }
+        QString constraint = getConstraint(it.value());
         fun->addConstraints(constraint.toStdString());
       } catch (...) {
       }
@@ -1965,6 +1984,30 @@ void FunctionBrowser::tieChanged(QtProperty *prop) {
   }
 }
 
+/// Called when a constraint property changes
+void FunctionBrowser::constraintChanged(QtProperty *prop) {
+  if (m_currentDataset < getNumberOfDatasets() &&
+      !prop->checkOption(globalOptionName)) {
+    QString constraint;
+    QString parName;
+    
+    for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
+      if (it.value().lower == prop || it.value().upper == prop) {
+        constraint = getConstraint(it.value());
+        parName = getParameterName(it.value().paramProp);
+        checkLocalParameter(parName);
+        break;
+      }
+    }
+
+    if (constraint.isEmpty())
+      return;
+
+    auto &paramValue = m_localParameterValues[parName][m_currentDataset];
+    paramValue.constraint = constraint;
+  }
+}
+
 void FunctionBrowser::parameterButtonClicked(QtProperty *prop) {
   emit localParameterButtonClicked(getIndex(prop) + prop->propertyName());
 }
@@ -2070,6 +2113,7 @@ void FunctionBrowser::setCurrentDataset(int i) {
     setParameter(par, getLocalParameterValue(par, m_currentDataset));
     setParamError(par, getLocalParameterError(par, m_currentDataset));
     updateLocalTie(par);
+    updateLocalConstraint(par);
   }
 }
 
@@ -2225,6 +2269,24 @@ void FunctionBrowser::updateLocalTie(const QString &parName) {
                   m_localParameterValues[parName][m_currentDataset].value));
   } else if (!localParam.tie.isEmpty()) {
     addTieProperty(prop, localParam.tie);
+  }
+}
+
+/// Make sure that properties are in sync with the cached constraints
+/// @param parName :: A parameter to check.
+void FunctionBrowser::updateLocalConstraint(const QString &parName) {
+  auto prop = getParameterProperty(parName);
+  if (hasConstraint(prop)) {
+    auto props = prop->subProperties();
+    foreach (QtProperty *p, props) {
+      if (isConstraint(p)) {
+        removeProperty(p);
+      }
+    }
+  }
+  auto &localParam = m_localParameterValues[parName][m_currentDataset];
+  if (!localParam.constraint.isEmpty()) {
+    addConstraintProperties(prop, localParam.constraint);
   }
 }
 
