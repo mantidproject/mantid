@@ -512,6 +512,19 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
   params.itemName = table->item(tableRow, 0)->text().toStdString();
   params.plotType = plotType;
   params.periods = getPeriodLabels();
+  bool isItSummed = false;
+  if (params.periods.find("+") != std::string::npos) {
+	  isItSummed = true;
+
+  }if (params.periods.find("-") != std::string::npos) {
+		  isItSummed = true;
+		  
+	  }
+	  
+	if (!m_summedPeriods.contains(QString::fromStdString(params.periods)) && params.periods != "" && isItSummed) {
+			  m_summedPeriods << QString::fromStdString(params.periods);
+			  
+	  }
 
   // Version - always "#1" if overwrite is on, otherwise increment
   params.version = 1;
@@ -1106,6 +1119,7 @@ void MuonAnalysis::updatePairTable() {
 void MuonAnalysis::inputFileChanged_MWRunFiles() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
+  m_summedPeriods.clear();
   allowLoading(true);
 }
 
@@ -1961,7 +1975,6 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     setGroupsAndPairs();
-    m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
@@ -2625,7 +2638,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
-      m_uiForm.fitBrowser->setAllPeriods();
+	  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods, m_summedPeriods);
+      //m_uiForm.fitBrowser->setAllPeriods();
     }
     if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
         isItGroup) {

@@ -580,6 +580,7 @@ private:
 
   /// set the group/pair name
   std::string m_groupPairName;
+  QStringList m_summedPeriods;
 };
 }
 }

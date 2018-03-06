@@ -129,7 +129,7 @@ public slots:
   void periodBtnPressed();
   void generateBtnPressed();
   void combineBtnPressed();
-  void setNumPeriods(size_t numPeriods);
+  void setNumPeriods(size_t numPeriods,QStringList summedPeriods);
 
 signals:
   /// Emitted when sequential fit is requested by user
