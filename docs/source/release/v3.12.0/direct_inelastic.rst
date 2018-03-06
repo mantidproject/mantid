@@ -12,8 +12,7 @@ New features
 - The algorithms :ref:`algm-SofQWCentre`, :ref:`algm-SofQWPolygon` and :ref:`algm-SofQWNormalisedPolygon`, which rebin an inelastic workspace (has a `DeltaE` axis) from spectrum numbers (angle) to `MomentumTransfer` may now rebin the energy (`DeltaE`) axis as well as the :math:`|Q|` (`MomentumTransfer`) axes.
 - :ref:`algm-SofQWNormalisedPolygon` now has uses a faster method for calculating the polygon intersections.
 - The crystal field computation and fitting engine is now feature complete. It can now handle multi-site computation and simultaneous fitting of inelastic spectra and physical properties dataset. See the :ref:`Crystal Field Python Interface` help page for details, and `<http://www.mantidproject.org/Crystal_Field_Examples>`_ for examples of use.
-- The algorithms :ref:`algm-SofQWCentre`, :ref:`algm-SofQWPolygon` and :ref:`algm-SofQWNormalisedPolygon`, which rebin an inelastic workspace (has a `DeltaE` axis) from spectrum numbers (angle) to `MomentumTransfer` may now rebin the energy (`DeltaE`) axis as well as the :math:`|Q|` (`MomentumTransfer`) axes.
-- :ref:`algm-SofQWNormalisedPolygon` now has uses a faster method for calculating the polygon intersections.
+- A new Python module :ref:`directtools <Directtools Python module>` includes utilities for plotting :math:`S(Q,W)` workspaces and cuts (line profiles) in constant :math:`Q` and :math:`E`.
 
 Interfaces
 ----------

@@ -212,7 +212,8 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertEqual(14, fitted_params.getNumberHistograms())
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(1, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -294,7 +295,8 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertEqual(18, fitted_params.getNumberHistograms())
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(1, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -342,7 +344,8 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(8, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -390,7 +393,8 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(2, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -436,7 +440,8 @@ class PassPreLoadedWorkspaceToFitTOF(stresstesting.MantidStressTest):
         _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(2, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -486,7 +491,8 @@ class CalculateCumulativeAngleAveragedData(stresstesting.MantidStressTest):
         _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(8, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -494,5 +500,5 @@ class CalculateCumulativeAngleAveragedData(stresstesting.MantidStressTest):
 
         functions = ['GramCharlierComptonProfile', 'GaussianComptonProfile',
                      'GaussianComptonProfile', 'GaussianComptonProfile']
-        _test_caad_workspace(self, '15039-15045_normalised_iteration_' + str(exit_iteration), functions)
-        _test_caad_workspace(self, '15039-15045_sum_iteration_' + str(exit_iteration), functions)
+        _test_caad_workspace(self, '15039-15045_CAAD_normalised_iteration_' + str(exit_iteration), functions)
+        _test_caad_workspace(self, '15039-15045_CAAD_sum_iteration_' + str(exit_iteration), functions)

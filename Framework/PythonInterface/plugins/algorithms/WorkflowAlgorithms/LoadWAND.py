@@ -30,7 +30,7 @@ class LoadWAND(DataProcessorAlgorithm):
         Integration(InputWorkspace=outWS, OutputWorkspace=outWS)
 
         if self.getProperty("ApplyMask").value:
-            MaskBTP(outWS, Bank='8', Tube='449-480')
+            MaskBTP(outWS, Bank='8', Tube='475-480')
             MaskBTP(outWS, Pixel='1,2,511,512')
 
         mtd[outWS].getAxis(0).setUnit("Wavelength")
