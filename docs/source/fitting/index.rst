@@ -1,8 +1,8 @@
 .. _Fitting:
 
-=====
+=======
 Fitting
-=====
+=======
 
 This is technical documentation relating to fitting capabilities in Mantid. The fitting 
 process is separated into two choices; the function and the minimizer. The function is 

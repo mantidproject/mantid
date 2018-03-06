@@ -1,8 +1,8 @@
 .. _training:
 
-=====
+========
 Training
-=====
+========
 
 These tutorials and training courses are designed to give you a step-by-step guide to how to use some of the basic features of Mantid.
 The initial sections deal with some of the fundamental functions that are required for (almost) any use of of Mantid. We then build
