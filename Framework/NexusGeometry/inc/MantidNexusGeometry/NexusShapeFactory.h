@@ -1,5 +1,5 @@
-#ifndef SHAPE_GEOMETRY_ABSTRACTION_H_
-#define SHAPE_GEOMETRY_ABSTRACTION_H_
+#ifndef MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H
+#define MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H
 
 #include "MantidNexusGeometry/DllConfig.h"
 
@@ -50,4 +50,4 @@ createMesh(std::vector<uint16_t> &&triangularFaces,
 }
 }
 }
-#endif // SHAPE_GEOMETRY_ABSTRACTION_H_
+#endif // MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H

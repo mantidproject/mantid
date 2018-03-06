@@ -15,6 +15,7 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include <string>
+#include <H5Cpp.h>
 
 using namespace Mantid;
 using namespace NexusGeometry;

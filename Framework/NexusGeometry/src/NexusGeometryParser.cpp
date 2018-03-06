@@ -3,8 +3,10 @@
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument.h"
-
 #include <boost/algorithm/string.hpp>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <H5Cpp.h>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -64,55 +66,67 @@ template <typename ExpectedT> void validateStorageType(const DataSet &data) {
   }
 }
 
-} // namespace
-
-/// OFF NEXUS GEOMETRY PARSER
-std::unique_ptr<const Mantid::Geometry::Instrument>
-NexusGeometryParser::extractInstrument(const H5File &file,
-                                       const Group &root) const {
-  InstrumentBuilder builder(instrumentName(root));
-  // Get path to all detector groups
-  const std::vector<Group> detectorGroups = this->openDetectorGroups(root);
-  for (auto &detectorGroup : detectorGroups) {
-    // Get the pixel offsets
-    Pixels pixelOffsets = this->getPixelOffsets(detectorGroup);
-    // Get the transformations
-    Eigen::Transform<double, 3, 2> transforms =
-        this->getTransformations(file, detectorGroup);
-    // Calculate pixel positions
-    Pixels detectorPixels = transforms * pixelOffsets;
-    // Get the pixel detIds
-    std::vector<int> detectorIds = this->getDetectorIds(detectorGroup);
-    // Extract shape
-    auto shape = this->parseNexusShape(detectorGroup);
-
-    for (size_t i = 0; i < detectorIds.size(); ++i) {
-      auto index = static_cast<int>(i);
-      std::string name = std::to_string(index);
-      Eigen::Vector3d detPos = detectorPixels.col(index);
-      builder.addDetector(name, detectorIds[index], detPos, shape);
-    }
+// Function to read in a dataset into a vector
+template <typename valueType>
+std::vector<valueType> get1DDataset(const H5std_string &dataset,
+                                    const H5::Group &group) {
+  // Open data set
+  DataSet data = group.openDataSet(dataset);
+  validateStorageType<valueType>(data);
+  const size_t storageType = data.getDataType().getSize();
+  // Early check to prevent reinterpretation of underlying data
+  if (storageType != sizeof(valueType)) {
+    throw std::runtime_error(
+        "Storage type mismatch. Value type stored has byte size:" +
+        std::to_string(storageType));
   }
-  // Sort the detectors
-  // Parse source and sample and add to instrument
-  this->parseAndAddSample(file, root, builder);
-  this->parseAndAddSource(file, root, builder);
-  this->parseMonitors(root, builder);
-  return builder.createInstrument();
+  DataSpace dataSpace = data.getSpace();
+  std::vector<valueType> values;
+  values.resize(dataSpace.getSelectNpoints());
+  // Read data into vector
+  data.read(values.data(), data.getDataType(), dataSpace);
+
+  // Return the data vector
+  return values;
 }
 
-std::unique_ptr<const Geometry::Instrument>
-NexusGeometryParser::createInstrument(const std::string &fileName) const {
+// Function to read in a dataset into a vector
+template <typename valueType>
+std::vector<valueType> get1DDataset(const H5File &file,
+                                    const H5std_string &dataset) {
+  // Open data set
+  DataSet data = file.openDataSet(dataset);
+  validateStorageType<valueType>(data);
+  DataSpace dataSpace = data.getSpace();
+  std::vector<valueType> values;
+  values.resize(dataSpace.getSelectNpoints());
+  // Read data into vectoh
+  data.read(values.data(), data.getDataType(), dataSpace);
 
-  const H5File file(fileName, H5F_ACC_RDONLY);
-  auto rootGroup = file.openGroup("/");
-  return extractInstrument(file, rootGroup);
+  // Return the data vector
+  return values;
+}
+
+std::string get1DStringDataset(const std::string &dataset, const Group &group) {
+  // Open data set
+  DataSet data = group.openDataSet(dataset);
+  auto dataType = data.getDataType();
+  auto nCharacters = dataType.getSize();
+  std::vector<char> value(nCharacters);
+  data.read(value.data(), dataType, data.getSpace());
+  return std::string(value.begin(), value.end());
+}
+
+std::string instrumentName(const Group &root) {
+  H5std_string instrumentPath = "raw_data_1/instrument";
+  const Group instrumentGroup = root.openGroup(instrumentPath);
+
+  return get1DStringDataset("name", instrumentGroup);
 }
 
 /// Open subgroups of parent group
-std::vector<Group>
-NexusGeometryParser::openSubGroups(const Group &parentGroup,
-                                   const H5std_string &CLASS_TYPE) const {
+std::vector<Group> openSubGroups(const Group &parentGroup,
+                                 const H5std_string &CLASS_TYPE) {
   std::vector<Group> subGroups;
 
   // Iterate over children, and determine if a group
@@ -145,15 +159,14 @@ NexusGeometryParser::openSubGroups(const Group &parentGroup,
 }
 
 // Open all detector groups into a vector
-std::vector<Group>
-NexusGeometryParser::openDetectorGroups(const Group &root) const {
-  std::vector<Group> rawDataGroupPaths = this->openSubGroups(root, NX_ENTRY);
+std::vector<Group> openDetectorGroups(const Group &root) {
+  std::vector<Group> rawDataGroupPaths = openSubGroups(root, NX_ENTRY);
 
   // Open all instrument groups within rawDataGroups
   std::vector<Group> instrumentGroupPaths;
   for (auto rawDataGroupPath : rawDataGroupPaths) {
     std::vector<Group> instrumentGroups =
-        this->openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
+        openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
     instrumentGroupPaths.insert(instrumentGroupPaths.end(),
                                 instrumentGroups.begin(),
                                 instrumentGroups.end());
@@ -163,7 +176,7 @@ NexusGeometryParser::openDetectorGroups(const Group &root) const {
   for (auto instrumentGroupPath : instrumentGroupPaths) {
     // Open sub detector groups
     std::vector<Group> detectorGroups =
-        this->openSubGroups(instrumentGroupPath, NX_DETECTOR);
+        openSubGroups(instrumentGroupPath, NX_DETECTOR);
     // Append to detectorGroups vector
     detectorGroupPaths.insert(detectorGroupPaths.end(), detectorGroups.begin(),
                               detectorGroups.end());
@@ -172,23 +185,8 @@ NexusGeometryParser::openDetectorGroups(const Group &root) const {
   return detectorGroupPaths;
 }
 
-// Function to return the detector ids in the same order as the offsets
-std::vector<int>
-NexusGeometryParser::getDetectorIds(const Group &detectorGroup) const {
-
-  std::vector<int> detIds;
-
-  for (unsigned int i = 0; i < detectorGroup.getNumObjs(); ++i) {
-    H5std_string objName = detectorGroup.getObjnameByIdx(i);
-    if (objName == DETECTOR_IDS) {
-      detIds = this->get1DDataset<int>(objName, detectorGroup);
-    }
-  }
-  return detIds;
-}
-
 // Function to return the (x,y,z) offsets of pixels in the chosen detectorGroup
-Pixels NexusGeometryParser::getPixelOffsets(const Group &detectorGroup) const {
+Pixels getPixelOffsets(const Group &detectorGroup) {
 
   // Initialise matrix
   Pixels offsetData;
@@ -196,13 +194,13 @@ Pixels NexusGeometryParser::getPixelOffsets(const Group &detectorGroup) const {
   for (unsigned int i = 0; i < detectorGroup.getNumObjs(); i++) {
     H5std_string objName = detectorGroup.getObjnameByIdx(i);
     if (objName == X_PIXEL_OFFSET) {
-      xValues = this->get1DDataset<double>(objName, detectorGroup);
+      xValues = get1DDataset<double>(objName, detectorGroup);
     }
     if (objName == Y_PIXEL_OFFSET) {
-      yValues = this->get1DDataset<double>(objName, detectorGroup);
+      yValues = get1DDataset<double>(objName, detectorGroup);
     }
     if (objName == Z_PIXEL_OFFSET) {
-      zValues = this->get1DDataset<double>(objName, detectorGroup);
+      zValues = get1DDataset<double>(objName, detectorGroup);
     }
   }
 
@@ -240,71 +238,16 @@ Pixels NexusGeometryParser::getPixelOffsets(const Group &detectorGroup) const {
   return offsetData;
 }
 
-// Function to read in a dataset into a vector
-template <typename valueType>
-std::vector<valueType>
-NexusGeometryParser::get1DDataset(const H5File &file,
-                                  const H5std_string &dataset) const {
-  // Open data set
-  DataSet data = file.openDataSet(dataset);
-  validateStorageType<valueType>(data);
-  DataSpace dataSpace = data.getSpace();
-  std::vector<valueType> values;
-  values.resize(dataSpace.getSelectNpoints());
-  // Read data into vectoh
-  data.read(values.data(), data.getDataType(), dataSpace);
-
-  // Return the data vector
-  return values;
-}
-
-// Function to read in a dataset into a vector
-template <typename valueType>
-std::vector<valueType>
-NexusGeometryParser::get1DDataset(const H5std_string &dataset,
-                                  const H5::Group &group) const {
-  // Open data set
-  DataSet data = group.openDataSet(dataset);
-  validateStorageType<valueType>(data);
-  const size_t storageType = data.getDataType().getSize();
-  // Early check to prevent reinterpretation of underlying data
-  if (storageType != sizeof(valueType)) {
-    throw std::runtime_error(
-        "Storage type mismatch. Value type stored has byte size:" +
-        std::to_string(storageType));
-  }
-  DataSpace dataSpace = data.getSpace();
-  std::vector<valueType> values;
-  values.resize(dataSpace.getSelectNpoints());
-  // Read data into vector
-  data.read(values.data(), data.getDataType(), dataSpace);
-
-  // Return the data vector
-  return values;
-}
-
-std::string NexusGeometryParser::get1DStringDataset(const std::string &dataset,
-                                                    const Group &group) const {
-  // Open data set
-  DataSet data = group.openDataSet(dataset);
-  auto dataType = data.getDataType();
-  auto nCharacters = dataType.getSize();
-  std::vector<char> value(nCharacters);
-  data.read(value.data(), dataType, data.getSpace());
-  return std::string(value.begin(), value.end());
-}
-
 // Function to get the transformations from the nexus file, and create the Eigen
 // transform object
 Eigen::Transform<double, 3, Eigen::Affine>
-NexusGeometryParser::getTransformations(const H5File &file,
-                                        const Group &detectorGroup) const {
+getTransformations(const H5File &file, const Group &detectorGroup) {
   H5std_string dependency;
   // Get absolute dependency path
   auto status =
       H5Gget_objinfo(detectorGroup.getId(), DEPENDS_ON.c_str(), 0, NULL);
   if (status == 0) {
-    dependency = this->get1DStringDataset(DEPENDS_ON, detectorGroup);
+    dependency = get1DStringDataset(DEPENDS_ON, detectorGroup);
   } else {
     return Eigen::Transform<double, 3, Eigen::Affine>::Identity();
   }
@@ -322,7 +265,7 @@ NexusGeometryParser::getTransformations(const H5File &file,
     DataSet transformation = file.openDataSet(dependency);
 
     // Get magnitude of current transformation
-    double magnitude = this->get1DDataset<double>(file, dependency)[0];
+    double magnitude = get1DDataset<double>(file, dependency)[0];
     // Containers for transformation data
     Eigen::Vector3d transformVector(0.0, 0.0, 0.0);
     H5std_string transformType;
@@ -382,52 +325,29 @@ NexusGeometryParser::getTransformations(const H5File &file,
   return transforms;
 }
 
-/// Choose what shape type to parse
-boost::shared_ptr<const Geometry::IObject>
-NexusGeometryParser::parseNexusShape(const Group &detectorGroup) const {
-  Group shapeGroup;
-  try {
-    shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
-  } catch (...) {
-    // TODO. Current assumption. Can we have pixels without specifying a shape?
-    try {
-      shapeGroup = detectorGroup.openGroup(SHAPE);
-    } catch (...) {
-      return boost::shared_ptr<const Geometry::IObject>(nullptr);
-    }
-  }
+// Function to return the detector ids in the same order as the offsets
+std::vector<int> getDetectorIds(const Group &detectorGroup) {
 
-  H5std_string shapeType;
-  for (uint32_t i = 0; i < static_cast<uint32_t>(shapeGroup.getNumAttrs());
-       ++i) {
-    Attribute attribute = shapeGroup.openAttribute(i);
-    H5std_string attributeName = attribute.getName();
-    if (attributeName == NX_CLASS) {
-      attribute.read(attribute.getDataType(), shapeType);
+  std::vector<int> detIds;
+
+  for (unsigned int i = 0; i < detectorGroup.getNumObjs(); ++i) {
+    H5std_string objName = detectorGroup.getObjnameByIdx(i);
+    if (objName == DETECTOR_IDS) {
+      detIds = get1DDataset<int>(objName, detectorGroup);
     }
   }
-  // Give shape group to correct shape parser
-  if (shapeType == NX_CYLINDER) {
-    return this->parseNexusCylinder(shapeGroup);
-  } else if (shapeType == NX_OFF) {
-    return this->parseNexusMesh(shapeGroup);
-  } else {
-    throw std::runtime_error(
-        "Shape type not recognised by NexusGeometryParser");
-  }
+  return detIds;
 }
 
 // Parse cylinder nexus geometry
 boost::shared_ptr<const Geometry::IObject>
-NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) const {
+parseNexusCylinder(const Group &shapeGroup) {
   H5std_string pointsToVertices = "cylinders";
-  std::vector<int> cPoints =
-      this->get1DDataset<int>(pointsToVertices, shapeGroup);
+  std::vector<int> cPoints = get1DDataset<int>(pointsToVertices, shapeGroup);
 
   H5std_string verticesData = "vertices";
   // 1D reads row first, then columns
-  std::vector<double> vPoints =
-      this->get1DDataset<double>(verticesData, shapeGroup);
+  std::vector<double> vPoints = get1DDataset<double>(verticesData, shapeGroup);
   Eigen::Map<Eigen::Matrix<double, 3, 3>> vertices(vPoints.data());
   // Read points into matrix, sorted by cPoints ordering
   Eigen::Matrix<double, 3, 3> vSorted;
@@ -437,35 +357,24 @@ NexusGeometryParser::parseNexusCylinder(const Group &shapeGroup) const {
   return NexusShapeFactory::createCylinder(vSorted);
 }
 
-// Parse OFF (mesh) nexus geometry
-boost::shared_ptr<const Geometry::IObject>
-NexusGeometryParser::parseNexusMesh(const Group &shapeGroup) const {
+void createTrianglesFromPolygon(const std::vector<uint16_t> &windingOrder,
+                                std::vector<uint16_t> &triangularFaces,
+                                int &startOfFace, int &endOfFace) {
+  int polygonOrder = endOfFace - startOfFace;
+  auto first = windingOrder.begin() + startOfFace;
 
-  const std::vector<uint16_t> faceIndices =
-      vecUnsignedInt16(this->get1DDataset<int32_t>("faces", shapeGroup));
-  const std::vector<uint16_t> windingOrder = vecUnsignedInt16(
-      this->get1DDataset<int32_t>("winding_order", shapeGroup));
-  std::vector<uint16_t> triangularFaces =
-      createTriangularFaces(faceIndices, windingOrder);
-
-  // 1D reads row first, then columns
-  const auto nexusVertices = this->get1DDataset<float>("vertices", shapeGroup);
-  auto numberOfVertices = nexusVertices.size() / 3;
-  std::vector<Mantid::Kernel::V3D> vertices(numberOfVertices);
-  for (size_t vertexNumber = 0; vertexNumber < nexusVertices.size();
-       vertexNumber += 3) {
-    vertices[vertexNumber / 3] = Mantid::Kernel::V3D(
-        nexusVertices[vertexNumber], nexusVertices[vertexNumber + 1],
-        nexusVertices[vertexNumber + 2]);
+  for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
+       ++polygonVertex) {
+    triangularFaces.push_back(*first);
+    triangularFaces.push_back(*(first + polygonVertex));
+    triangularFaces.push_back(*(first + polygonVertex + 1));
   }
-
-  return NexusShapeFactory::createMesh(std::move(triangularFaces),
-                                       std::move(vertices));
+  startOfFace = endOfFace; // start of the next face
 }
 
-std::vector<uint16_t> NexusGeometryParser::createTriangularFaces(
-    const std::vector<uint16_t> &faceIndices,
-    const std::vector<uint16_t> &windingOrder) const {
+std::vector<uint16_t>
+createTriangularFaces(const std::vector<uint16_t> &faceIndices,
+                      const std::vector<uint16_t> &windingOrder) {
 
   // Elements 0 to 2 are the indices of the vertices vector corresponding to the
   // vertices of the first triangle.
@@ -489,63 +398,97 @@ std::vector<uint16_t> NexusGeometryParser::createTriangularFaces(
 
   return triangularFaces;
 }
+// Parse OFF (mesh) nexus geometry
+boost::shared_ptr<const Geometry::IObject>
+parseNexusMesh(const Group &shapeGroup) {
 
-void NexusGeometryParser::createTrianglesFromPolygon(
-    const std::vector<uint16_t> &windingOrder,
-    std::vector<uint16_t> &triangularFaces, int &startOfFace,
-    int &endOfFace) const {
-  int polygonOrder = endOfFace - startOfFace;
-  auto first = windingOrder.begin() + startOfFace;
+  const std::vector<uint16_t> faceIndices =
+      vecUnsignedInt16(get1DDataset<int32_t>("faces", shapeGroup));
+  const std::vector<uint16_t> windingOrder =
+      vecUnsignedInt16(get1DDataset<int32_t>("winding_order", shapeGroup));
+  std::vector<uint16_t> triangularFaces =
+      createTriangularFaces(faceIndices, windingOrder);
 
-  for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
-       ++polygonVertex) {
-    triangularFaces.push_back(*first);
-    triangularFaces.push_back(*(first + polygonVertex));
-    triangularFaces.push_back(*(first + polygonVertex + 1));
+  // 1D reads row first, then columns
+  const auto nexusVertices = get1DDataset<float>("vertices", shapeGroup);
+  auto numberOfVertices = nexusVertices.size() / 3;
+  std::vector<Mantid::Kernel::V3D> vertices(numberOfVertices);
+  for (size_t vertexNumber = 0; vertexNumber < nexusVertices.size();
+       vertexNumber += 3) {
+    vertices[vertexNumber / 3] = Mantid::Kernel::V3D(
+        nexusVertices[vertexNumber], nexusVertices[vertexNumber + 1],
+        nexusVertices[vertexNumber + 2]);
   }
-  startOfFace = endOfFace; // start of the next face
+
+  return NexusShapeFactory::createMesh(std::move(triangularFaces),
+                                       std::move(vertices));
+}
+
+/// Choose what shape type to parse
+boost::shared_ptr<const Geometry::IObject>
+parseNexusShape(const Group &detectorGroup) {
+  Group shapeGroup;
+  try {
+    shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
+  } catch (...) {
+    // TODO. Current assumption. Can we have pixels without specifying a shape?
+    try {
+      shapeGroup = detectorGroup.openGroup(SHAPE);
+    } catch (...) {
+      return boost::shared_ptr<const Geometry::IObject>(nullptr);
+    }
+  }
+
+  H5std_string shapeType;
+  for (uint32_t i = 0; i < static_cast<uint32_t>(shapeGroup.getNumAttrs());
+       ++i) {
+    Attribute attribute = shapeGroup.openAttribute(i);
+    H5std_string attributeName = attribute.getName();
+    if (attributeName == NX_CLASS) {
+      attribute.read(attribute.getDataType(), shapeType);
+    }
+  }
+  // Give shape group to correct shape parser
+  if (shapeType == NX_CYLINDER) {
+    return parseNexusCylinder(shapeGroup);
+  } else if (shapeType == NX_OFF) {
+    return parseNexusMesh(shapeGroup);
+  } else {
+    throw std::runtime_error(
+        "Shape type not recognised by NexusGeometryParser");
+  }
 }
 
 // Parse source and add to instrument
-void NexusGeometryParser::parseAndAddSource(const H5File &file,
-                                            const Group &root,
-                                            InstrumentBuilder &builder) const {
+void parseAndAddSource(const H5File &file, const Group &root,
+                       InstrumentBuilder &builder) {
   H5std_string sourcePath = "raw_data_1/instrument/source";
   Group sourceGroup = root.openGroup(sourcePath);
-  auto sourceName = this->get1DStringDataset("name", sourceGroup);
-  auto sourceTransformations = this->getTransformations(file, sourceGroup);
+  auto sourceName = get1DStringDataset("name", sourceGroup);
+  auto sourceTransformations = getTransformations(file, sourceGroup);
   auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
   builder.addSource(sourceName, sourceTransformations * defaultPos);
 }
 // Parse sample and add to instrument
-void NexusGeometryParser::parseAndAddSample(const H5File &file,
-                                            const Group &root,
-                                            InstrumentBuilder &builder) const {
+void parseAndAddSample(const H5File &file, const Group &root,
+                       InstrumentBuilder &builder) {
   std::string sampleName = "sample";
   H5std_string samplePath = "raw_data_1/sample";
   Group sampleGroup = root.openGroup(samplePath);
-  auto sampleTransforms = this->getTransformations(file, sampleGroup);
+  auto sampleTransforms = getTransformations(file, sampleGroup);
   auto samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
   builder.addSample(sampleName, samplePos);
 }
 
-std::string NexusGeometryParser::instrumentName(const Group &root) const {
-  H5std_string instrumentPath = "raw_data_1/instrument";
-  const Group instrumentGroup = root.openGroup(instrumentPath);
-
-  return get1DStringDataset("name", instrumentGroup);
-}
-
-void NexusGeometryParser::parseMonitors(const H5::Group &root,
-                                        InstrumentBuilder &builder) const {
-  std::vector<Group> rawDataGroupPaths = this->openSubGroups(root, NX_ENTRY);
+void parseMonitors(const H5::Group &root, InstrumentBuilder &builder) {
+  std::vector<Group> rawDataGroupPaths = openSubGroups(root, NX_ENTRY);
 
   // Open all instrument groups within rawDataGroups
   for (auto rawDataGroupPath : rawDataGroupPaths) {
     std::vector<Group> instrumentGroups =
-        this->openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
+        openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
     for (auto &inst : instrumentGroups) {
-      std::vector<Group> monitorGroups = this->openSubGroups(inst, NX_MONITOR);
+      std::vector<Group> monitorGroups = openSubGroups(inst, NX_MONITOR);
       for (auto &monitor : monitorGroups) {
         auto detectorId = get1DDataset<int64_t>(DETECTOR_ID, monitor)[0];
         boost::shared_ptr<const Geometry::IObject> monitorShape =
@@ -556,6 +499,48 @@ void NexusGeometryParser::parseMonitors(const H5::Group &root,
       }
     }
   }
+}
+
+std::unique_ptr<const Mantid::Geometry::Instrument>
+extractInstrument(const H5File &file, const Group &root) {
+  InstrumentBuilder builder(instrumentName(root));
+  // Get path to all detector groups
+  const std::vector<Group> detectorGroups = openDetectorGroups(root);
+  for (auto &detectorGroup : detectorGroups) {
+    // Get the pixel offsets
+    Pixels pixelOffsets = getPixelOffsets(detectorGroup);
+    // Get the transformations
+    Eigen::Transform<double, 3, 2> transforms =
+        getTransformations(file, detectorGroup);
+    // Calculate pixel positions
+    Pixels detectorPixels = transforms * pixelOffsets;
+    // Get the pixel detIds
+    std::vector<int> detectorIds = getDetectorIds(detectorGroup);
+    // Extract shape
+    auto shape = parseNexusShape(detectorGroup);
+
+    for (size_t i = 0; i < detectorIds.size(); ++i) {
+      auto index = static_cast<int>(i);
+      std::string name = std::to_string(index);
+      Eigen::Vector3d detPos = detectorPixels.col(index);
+      builder.addDetector(name, detectorIds[index], detPos, shape);
+    }
+  }
+  // Sort the detectors
+  // Parse source and sample and add to instrument
+  parseAndAddSample(file, root, builder);
+  parseAndAddSource(file, root, builder);
+  parseMonitors(root, builder);
+  return builder.createInstrument();
+}
+} // namespace
+
+std::unique_ptr<const Geometry::Instrument>
+NexusGeometryParser::createInstrument(const std::string &fileName) const {
+
+  const H5File file(fileName, H5F_ACC_RDONLY);
+  auto rootGroup = file.openGroup("/");
+  return extractInstrument(file, rootGroup);
 }
 } // namespace NexusGeometry
 } // namespace Mantid
