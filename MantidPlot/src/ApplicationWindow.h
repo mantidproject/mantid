@@ -1142,6 +1142,7 @@ private:
   /// Save the working directory to QSettings
   void cacheWorkingDirectory() const;
   void patchPaletteForLinux(QPalette &palette) const;
+  bool isUnityDesktop() const;
 private slots:
   //! \name Initialization
   //@{

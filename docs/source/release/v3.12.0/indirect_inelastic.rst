@@ -101,6 +101,12 @@ Improved
 ########
 - The Apply Paalman Pings interface has been renamed to Apply Absorption Correction.
 - The Apply Absorption Correction interface no longer requires workspaces to be in units of wavelength (this is done within :ref:`algm-ApplyPaalmanPingsCorrection`).
+- Calculate Monte Carlo Absorption interface has been restructured in a more appropriate format, as outlined in the following image:
+
+.. image::  ../../images/AbsorbtionCorrectionsGui312.png
+   :align: center
+   :class: screenshot
+   :width: 800px
 
 Bugfixes
 ########

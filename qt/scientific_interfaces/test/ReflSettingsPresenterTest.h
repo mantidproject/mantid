@@ -73,7 +73,8 @@ public:
   }
 
   void onCallReturnDefaultTransmissionRuns(MockSettingsView &mockView) {
-    ON_CALL(mockView, getTransmissionRuns()).WillByDefault(Return(""));
+    ON_CALL(mockView, getTransmissionRuns())
+        .WillByDefault(Return(std::map<std::string, std::string>()));
   }
 
   void onCallReturnDefaultScaleFactor(MockSettingsView &mockView) {
@@ -384,9 +385,14 @@ public:
     onCallReturnDefaultSettings(mockView);
     auto presenter = makeReflSettingsPresenter(&mockView);
 
+    // Default transmission runs are specified with a single
+    // entry with an empty angle as the key
+    std::map<std::string, std::string> transmissionRunsMap = {
+        {"", "INTER00013463,INTER00013464"}};
+
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(AtLeast(1))
-        .WillOnce(Return("INTER00013463,INTER00013464"));
+        .WillOnce(Return(transmissionRunsMap));
 
     auto options = presenter.getReductionOptions();
 
@@ -568,9 +574,10 @@ public:
   void testInstrumentSettingsDisabled() {
     NiceMock<MockSettingsView> mockView;
     auto presenter = makeReflSettingsPresenter(&mockView);
+    onCallReturnDefaultTransmissionRuns(mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(3)
+        .Times(4)
         .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, instrumentSettingsEnabled())
         .Times(2)
@@ -606,6 +613,54 @@ public:
     auto transmissionOptions = presenter.getTransmissionOptions();
     auto reductionOptions = presenter.getReductionOptions();
     auto stitchOptions = presenter.getStitchOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testDefaultTransmissionRuns() {
+    MockSettingsView mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    // Default transmission runs are specified with a single
+    // entry with an empty angle as the key
+    std::map<std::string, std::string> transmissionRunsMap = {
+        {"", "INTER00013463,INTER00013464"}};
+
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(1)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(1)
+        .WillOnce(Return(transmissionRunsMap));
+
+    auto result = presenter.getDefaultTransmissionRuns();
+    TS_ASSERT_EQUALS(result, "INTER00013463,INTER00013464");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testTransmissionRunsForAngle() {
+    MockSettingsView mockView;
+    auto presenter = makeReflSettingsPresenter(&mockView);
+
+    // Set up a table with transmission runs for 2 different angles
+    std::map<std::string, std::string> transmissionRunsMap = {
+        {"0.7", "INTER00013463,INTER00013464"}, {"2.33", "INTER00013463"}};
+
+    // Test looking up transmission runs based on the angle. It has
+    // quite a generous tolerance so the angle does not have to be
+    // exact
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(4)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(6)
+        .WillRepeatedly(Return(transmissionRunsMap));
+
+    auto result = presenter.getTransmissionRunsForAngle(0.69);
+    TS_ASSERT_EQUALS(result, "INTER00013463,INTER00013464");
+    result = presenter.getTransmissionRunsForAngle(2.34);
+    TS_ASSERT_EQUALS(result, "INTER00013463");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
