@@ -57,6 +57,5 @@ This is the documentation for Mantid |release|.
 * :ref:`api`
     - :ref:`Python <pythonapi>`
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
-* :ref:`Matplotlib Plot Gallery <plotting>`
+* :ref:`Matplotlib Plot Gallery and Examples <plotting>`
 * :ref:`release_notes`
-

@@ -4,15 +4,6 @@
  Getting Help and the Mantid User Community
 ============================================
 
-CS Group
---------
-
-Antti Soininen, Gagik Vardanyan, Verena Reimund and Ian Bush are the active Mantid developers, and Miguel Gonzalez the scientific lead for the Mantid adoption project at the ILL. We can all help you with any problems with Mantid, please email, phone or drop by the CS office at any time (Room 221, ILL 4). We are in close contact with the wider development team for any problems we may not be able to answer straight away.
-
-.. figure:: /images/Training/Introduction/ILL_CS_group.jpg
-   :align: center
-   :width: 700
-
 Mantid Documentation
 --------------------
 
@@ -45,7 +36,7 @@ There are Mantid user meetings arranged approximately once a year, for instrumen
 User Forums
 -----------
 
-The user forums provide an easy way to report probems, ask questions and get news. You can sign-up for an account at http://forum.mantidproject.org/.
+The user forums provide an easy way to report problems, ask questions and get news. You can sign-up for an account at http://forum.mantidproject.org/.
 
 Mailing Lists
 -------------

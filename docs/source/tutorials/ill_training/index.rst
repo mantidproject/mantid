@@ -9,11 +9,11 @@
 
 .. _ill_training contents:
 
-==========
+=============
  ILL Training
-==========
+=============
 
-Welcome to the ILL Mantid training course. This course is approximately 2 hours long and gives a basic introduction to using Mantid for data reduction at the ILL. The course is available at http://docs.mantidproject.org/nightly/training/index.html.
+Welcome to the ILL Mantid training course. This course is approximately 2 hours long and gives a basic introduction to using Mantid for data reduction at the ILL.
 
 .. figure:: /images/Training/Mantid_ILL.png
    :align: center
@@ -23,10 +23,10 @@ Outline
 -------
 
 The training course is split into four sections:
- 1. :ref:`Introduction <TrainingIntroduction>` (Ian Bush)
- 2. :ref:`MantidPlot Basics <TrainingMantidPlotBasics>` (Gagik Vardanyan)
- 3. :ref:`MantidPlot, Algorithms and Workspaces <TrainingWorkspacesAlgorithmsInterfaces>` (Verena Reimund)
- 4. :ref:`Using Mantid with Python <TrainingPythonAndMantid>` (Antti Soininen)
+ 1. :ref:`Introduction <TrainingIntroduction>`
+ 2. :ref:`MantidPlot Basics <TrainingMantidPlotBasics>`
+ 3. :ref:`MantidPlot, Algorithms and Workspaces <TrainingWorkspacesAlgorithmsInterfaces>`
+ 4. :ref:`Using Mantid with Python <TrainingPythonAndMantid>`
 
 This is only a short introduction, more complete training courses are available on the `Mantid website <https://www.mantidproject.org/Documentation>`__.
 
@@ -46,7 +46,3 @@ This is only a short introduction, more complete training courses are available 
    MantidPlot Basics <mantidplot_basics/index>
    MantidPlot, Algorithms and Workspaces <workspaces_algorithms_interfaces/index>
    Python and Mantid <python_and_mantid/index>
-
-
-
-
