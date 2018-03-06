@@ -31,8 +31,8 @@ public:
    */
   virtual void notify(IEnggDiffGSASFittingPresenter::Notification notif) = 0;
 
-  void notifyRefinementSuccessful(const GSASIIRefineFitPeaksOutputProperties
-                                      &refinementResults) override = 0;
+  void notifyRefinementSuccessful(const GSASIIRefineFitPeaksOutputProperties &
+                                      refinementResults) override = 0;
 
   void notifyRefinementFailed(const std::string &failureMessage) override = 0;
 };
