@@ -93,6 +93,11 @@
 <parameter name="Workflow.beam-height" type="string">
     <value val="3.2" />
 </parameter>
+
+<parameter name="Workflow.TemperatureSensorNames" type="string">
+    <value val="Bottom_can,Middle_can,Top_can" />
+</parameter>
+
 </component-link>
 
 </parameter-file>
