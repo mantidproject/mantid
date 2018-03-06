@@ -792,7 +792,6 @@ public:
     mfun.tie("f0.h", "1-f1.h");
     mfun.removeFunction(0);
     TS_ASSERT_EQUALS(mfun.writeTies(), "");
-
   }
 
   // replacing function has fewer parameters

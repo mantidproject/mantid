@@ -165,15 +165,17 @@ std::string ParameterTie::asString(const IFunction *fun) const {
     }
     res_expression.append(start, end);
   } catch (...) { // parameters are not from function fun
-    throw std::logic_error("Corrupted tie " + m_expression + " in function " + getLocalFunction()->name());
+    throw std::logic_error("Corrupted tie " + m_expression + " in function " +
+                           getLocalFunction()->name());
   }
   return res_expression;
 }
 
-/** This method checks if any of the parameters of a function is used in the tie.
+/** This method checks if any of the parameters of a function is used in the
+ * tie.
  * @param fun :: A function
- * @return True if any of the parameters is used as a variable in the mu::Parser or
- *  it is the tied parameter.
+ * @return True if any of the parameters is used as a variable in the mu::Parser
+ * or it is the tied parameter.
  */
 bool ParameterTie::findParametersOf(const IFunction *fun) const {
   if (getLocalFunction() == fun) {
