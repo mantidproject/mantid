@@ -465,14 +465,19 @@ bool ReflDataProcessorPresenter::reduceRowAsEventWS(RowData_sptr rowData,
       QString sliceSuffix = takeSlice(runName, slicing, i);
       auto slice = rowData->addSlice(sliceSuffix, slicedWorkspaceProperties);
       // Run the algorithm
-      const auto alg = createAndRunAlgorithm(slice->preprocessedOptions());
-
-      // Populate any empty values in the row with output from the algorithm.
-      // Note that this overwrites the data each time with the results
-      // from the latest slice. It would be good to do some validation
-      // that the results are the same for each slice e.g. the resolution
-      // should always be the same.
-      updateModelFromResults(alg, rowData);
+      bool success = false;
+      const auto alg =
+          createAndRunAlgorithm(slice->preprocessedOptions(), success);
+      if (success) {
+        // Populate any empty values in the row with output from the algorithm.
+        // Note that this overwrites the data each time with the results
+        // from the latest slice. It would be good to do some validation
+        // that the results are the same for each slice e.g. the resolution
+        // should always be the same.
+        updateModelFromResults(alg, rowData);
+      } else {
+        slice->setError("Reduction failed");
+      }
     } catch (...) {
       return false;
     }
@@ -530,6 +535,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
       // Post process the group of slices
       try {
         postProcessGroup(sliceGroup);
+
       } catch (...) {
         errors = true;
       }
@@ -1038,6 +1044,23 @@ void ReflDataProcessorPresenter::endReduction(
     pause();
     m_reductionPaused = true;
     m_mainPresenter->confirmReductionPaused(m_group);
+  }
+}
+
+/**
+Handle thread completion
+*/
+void ReflDataProcessorPresenter::threadFinished(const int exitCode) {
+  m_workerThread->exit();
+  m_workerThread.release();
+
+  // We continue regardless of errors if autoreducing
+  if (m_mainPresenter->autoreductionInProgress() || exitCode == 0) {
+    m_progressReporter->report();
+    processNextItem();
+  } else { // Error and not autoreducing
+    m_progressReporter->clear();
+    endReduction(false);
   }
 }
 }

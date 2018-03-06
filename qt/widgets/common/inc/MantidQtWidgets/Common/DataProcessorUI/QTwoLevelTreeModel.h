@@ -73,6 +73,10 @@ public:
   // Get the 'processed' status of a row
   bool isProcessed(int position,
                    const QModelIndex &parent = QModelIndex()) const override;
+  // Check whether reduction failed for a row/group
+  bool
+  reductionFailed(int position,
+                  const QModelIndex &parent = QModelIndex()) const override;
   // Get the underlying data structure
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
@@ -95,6 +99,9 @@ public:
   // Set the 'processed' status of a row / group
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;
+  // Set the error message for a row / group
+  bool setError(const std::string &error, int position,
+                const QModelIndex &parent = QModelIndex()) override;
   // Insert rows
   bool insertRows(int position, int count, int parent);
   // Transfer rows into the table
@@ -103,6 +110,7 @@ private slots:
   void tableDataUpdated(const QModelIndex &, const QModelIndex &);
 
 private:
+  void updateGroupData(const int groupIdx, const int start, const int end);
   void updateAllGroupData();
   void insertRowWithValues(int groupIndex, int rowIndex,
                            const std::map<QString, QString> &rowValues);

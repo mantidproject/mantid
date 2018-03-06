@@ -449,12 +449,6 @@ void OneLevelTreeManager::setProcessed(bool processed, int position) {
   m_model->setProcessed(processed, position);
 }
 
-void OneLevelTreeManager::invalidateAllProcessed() {
-  for (auto i = 0; i < m_model->rowCount(); i++) {
-    setProcessed(false, i);
-  }
-}
-
 /** Sets the 'process' status of a row
 * @param processed : True to set row as processed, false to set unprocessed
 * @param position : The index of the row to be set
@@ -464,6 +458,52 @@ void OneLevelTreeManager::setProcessed(bool processed, int position,
                                        int parent) {
   UNUSED_ARG(parent);
   m_model->setProcessed(processed, position);
+}
+
+/** Check whether reduction failed for a group
+* @param position : The row index
+* @return : true if there was an error
+*/
+bool OneLevelTreeManager::reductionFailed(int position) const {
+  return m_model->reductionFailed(position);
+}
+
+/** Check whether reduction failed for a group
+* @param position : The row index
+* @param parent : The parent of the row
+* @return : true if there was an error
+*/
+bool OneLevelTreeManager::reductionFailed(int position, int parent) const {
+  UNUSED_ARG(parent);
+  return m_model->reductionFailed(position);
+}
+
+/** Sets the error for a group
+* @param error : the error message
+* @param position : The index of the row to be set
+*/
+void OneLevelTreeManager::setError(const std::string &error, int position) {
+  m_model->setError(error, position);
+}
+
+/** Sets the error message for a row
+* @param error : the error message
+* @param position : The index of the row to be set
+* @param parent : The parent of the row
+*/
+void OneLevelTreeManager::setError(const std::string &error, int position,
+                                   int parent) {
+  UNUSED_ARG(parent);
+  m_model->setError(error, position);
+}
+
+/** Clear the processed/error state for all rows
+ */
+void OneLevelTreeManager::invalidateAllProcessed() {
+  for (auto i = 0; i < m_model->rowCount(); i++) {
+    setProcessed(false, i);
+    setError("", i);
+  }
 }
 
 /** Return a shared ptr to the model

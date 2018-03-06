@@ -218,6 +218,10 @@ public:
   bool isProcessed(int, int) const override { return false; };
   void setProcessed(bool, int) override{};
   void setProcessed(bool, int, int) override{};
+  bool reductionFailed(int) const override { return false; };
+  bool reductionFailed(int, int) const override { return false; };
+  void setError(const std::string &, int) override{};
+  void setError(const std::string &, int, int) override{};
   void invalidateAllProcessed() override{};
   void setCell(int, int, int, int, const std::string &) override{};
   std::string getCell(int, int, int, int) const override {

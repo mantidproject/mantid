@@ -69,6 +69,10 @@ public:
   // Get the 'processed' status of a row
   bool isProcessed(int position,
                    const QModelIndex &parent = QModelIndex()) const override;
+  // Check wheter reduction failed for a row
+  bool
+  reductionFailed(int position,
+                  const QModelIndex &parent = QModelIndex()) const override;
   // Get the underlying data structure
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
@@ -89,6 +93,9 @@ public:
   // Set the 'processed' status of a row
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;
+  // Set the error message for a row
+  bool setError(const std::string &error, int position,
+                const QModelIndex &parent = QModelIndex()) override;
   // Transfer rows into the table
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
 private slots:

@@ -214,7 +214,8 @@ protected:
   void updateModelFromResults(Mantid::API::IAlgorithm_sptr alg,
                               RowData_sptr data);
   // Create and execute the algorithm with the given properties
-  Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
+  Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options,
+                                                     bool &success);
   // Reduce a row
   void reduceRow(RowData_sptr data);
   // Finds a run in the AnalysisDataService
@@ -242,6 +243,8 @@ protected:
       const GroupData &groupData,
       boost::optional<size_t> sliceIndex = boost::optional<size_t>());
   bool rowOutputExists(RowItem const &row) const;
+  // process the next group/row
+  void processNextItem();
   // Refl GUI Group.
   int m_group;
   // The whitelist
@@ -250,15 +253,20 @@ protected:
   ProcessingAlgorithm m_processor;
   // Save as ipython notebook
   void saveNotebook(const TreeData &data);
+  // Thread to run reducer worker in
+  std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
+  // The progress reporter
+  ProgressPresenter *m_progressReporter;
+
 protected slots:
   void reductionError(QString ex);
+  virtual void threadFinished(const int exitCode);
   void groupThreadFinished(const int exitCode);
   void rowThreadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
 
 private:
-  void threadFinished(const int exitCode);
   void applyDefaultOptions(std::map<QString, QVariant> &options);
   void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
                                        const std::string &hiddenOptions,
@@ -267,16 +275,12 @@ private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
 
-  // The progress reporter
-  ProgressPresenter *m_progressReporter;
   // A boolean indicating whether to prompt the user when getting selected runs
   bool m_promptUser;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<QString, QVariant> m_options;
-  // Thread to run reducer worker in
-  std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
   // A boolean that can be set to pause reduction of the current item
   bool m_pauseReduction;
   // load a run into the ADS, or re-use one in the ADS if possible
@@ -337,8 +341,6 @@ private:
   virtual void startAsyncGroupReduceThread(GroupData &groupData,
                                            int groupIndex);
 
-  // process the next group/row
-  void processNextItem();
   // end reduction
   virtual void endReduction(const bool success);
 

@@ -334,6 +334,12 @@ bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
  * @return : true if ok, false if there was a problem
  */
 bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
+  // Clear state
+  rowData->setProcessed(false);
+  rowData->setError("");
+  rowData->setOptions(OptionsMap());
+  rowData->setPreprocessedOptions(OptionsMap());
+  
   // Work out and cache the reduced workspace name
   rowData->setReducedName(getReducedWorkspaceName(rowData));
 
@@ -387,8 +393,10 @@ void GenericDataProcessorPresenter::process() {
         hasPostprocessing() &&
         !workspaceExists(getPostprocessedWorkspaceName(groupData));
 
-    if (groupOutputNotFound)
+    if (groupOutputNotFound || m_manager->reductionFailed(groupIndex)) {
       m_manager->setProcessed(false, groupIndex);
+      m_manager->setError("", groupIndex);
+    }
 
     // Groups that are already processed or cannot be post-processed (only 1
     // child row selected) do not count in progress
@@ -406,8 +414,10 @@ void GenericDataProcessorPresenter::process() {
 
       // Set group as unprocessed if settings have changed or the expected
       // output workspaces cannot be found
-      if (!rowOutputExists(rowItem))
+      if (!rowOutputExists(rowItem)) {
         m_manager->setProcessed(false, rowIndex, groupIndex);
+        m_manager->setError("", rowIndex, groupIndex);
+      }
 
       // Rows that are already processed do not count in progress
       if (!rowData->isProcessed())
@@ -937,18 +947,20 @@ void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
 
 /** Create an algorithm with the given properties and execute it
  * @param options : the options as a map of property name to value
+ * @param success [out] : set to true if the algorithm completed successfully
  * @throws std::runtime_error if reduction fails
  * @returns : the algorithm
  */
-IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
-    const OptionsMap &options) {
+IAlgorithm_sptr
+GenericDataProcessorPresenter::createAndRunAlgorithm(const OptionsMap &options,
+                                                     bool &success) {
   auto alg = createProcessingAlgorithm();
 
   for (auto &kvp : options) {
     setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
   }
 
-  alg->execute();
+  success = alg->execute();
 
   return alg;
 }
@@ -965,9 +977,15 @@ void GenericDataProcessorPresenter::reduceRow(RowData_sptr data) {
   // in the row data
   preprocessOptionValues(data);
   // Run the algorithm
-  const auto alg = createAndRunAlgorithm(data->preprocessedOptions());
-  // Populate any missing values in the model with output from the algorithm
-  updateModelFromResults(alg, data);
+  bool success = false;
+  const auto alg = createAndRunAlgorithm(data->preprocessedOptions(), success);
+  if (success) {
+    // Populate any missing values in the model with output from the algorithm
+    updateModelFromResults(alg, data);
+  } else {
+    // Set an error on the row if the algorithm failed
+    data->setError("Reduction failed");
+  }
 }
 
 /**

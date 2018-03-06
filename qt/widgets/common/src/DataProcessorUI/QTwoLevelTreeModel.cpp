@@ -28,6 +28,8 @@ public:
   void setProcessed(const bool isProcessed) const {
     m_rowData->setProcessed(isProcessed);
   }
+  bool reductionFailed() const { return m_rowData->reductionFailed(); }
+  void setError(const std::string &error) const { m_rowData->setError(error); }
   void setAbsoluteIndex(const size_t absoluteIndex) {
     m_absoluteIndex = absoluteIndex;
   }
@@ -50,6 +52,24 @@ public:
   void setName(const std::string &name) { m_name = name; }
   bool isProcessed() const { return m_isProcessed; }
   void setProcessed(const bool isProcessed) { m_isProcessed = isProcessed; }
+  bool allRowsProcessed() const {
+    for (const auto &row : m_rows) {
+      if (!row.isProcessed())
+        return false;
+    }
+    return true;
+  }
+  void setError(const std::string &error) { m_error = error; }
+  // Return true if reduction failed for the group or any rows within it
+  bool reductionFailed() const {
+    if (!m_error.empty())
+      return true;
+    for (auto const &row : m_rows) {
+      if (row.reductionFailed())
+        return true;
+    }
+    return false;
+  }
   // Get the row data for the given row index
   RowData_sptr rowData(const size_t rowIndex) const {
     checkRowIndex(rowIndex);
@@ -60,10 +80,20 @@ public:
     checkRowIndex(rowIndex);
     return m_rows[rowIndex].isProcessed();
   }
+  // Check whether a row failed
+  bool rowReductionFailed(const size_t rowIndex) const {
+    checkRowIndex(rowIndex);
+    return m_rows[rowIndex].reductionFailed();
+  }
   // Set the row's processed status for the given row index
   void setRowProcessed(const size_t rowIndex, const bool isProcessed) const {
     checkRowIndex(rowIndex);
     m_rows[rowIndex].setProcessed(isProcessed);
+  }
+  // Set an error on a row for the given row index
+  void setRowError(const size_t rowIndex, const std::string &error) const {
+    checkRowIndex(rowIndex);
+    m_rows[rowIndex].setError(error);
   }
   // Get the row's absolute index for the given row index in the group
   size_t rowAbsoluteIndex(const size_t rowIndex) const {
@@ -109,6 +139,8 @@ private:
   std::string m_name;
   // Whether the group has been processed
   bool m_isProcessed;
+  // An error message, if reduction failed for this group
+  std::string m_error;
   // The list of rows in this group
   std::vector<RowInfo> m_rows;
 };
@@ -160,9 +192,14 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
       // Return the group name only in the first column
       return QString::fromStdString(group.name());
     }
-    if (role == Qt::BackgroundRole && group.isProcessed()) {
+    if (role == Qt::BackgroundRole) {
       // Highlight if this group is processed
-      return QColor("#00b300");
+      if (group.reductionFailed())
+        return QColor(Colour::FAILED);
+      else if (group.isProcessed())
+        return QColor(Colour::SUCCESS);
+      else if (group.allRowsProcessed())
+        return QColor(Colour::COMPLETE);
     }
   } else {
     // Index corresponds to a row
@@ -174,8 +211,11 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
           group.rowAbsoluteIndex(index.row()), index.column() + 1));
     }
     if (role == Qt::BackgroundRole && group.isRowProcessed(index.row())) {
-      // Highlight if this row is processed
-      return QColor("#00b300");
+      // Highlight if this row is processed (red if failed, green if success)
+      if (group.rowReductionFailed(index.row()))
+        return QColor(Colour::FAILED);
+      else
+        return QColor(Colour::SUCCESS);
     }
   }
 
@@ -266,6 +306,37 @@ bool QTwoLevelTreeModel::isProcessed(int position,
                                   "the given group for this model");
 
     return m_groups[parent.row()].isRowProcessed(position);
+  }
+}
+
+/** Check whether the reduction failed for a group/row
+* @param position : The position of the item
+* @param parent : The parent of this item
+* @return : true if the reduction failed
+*/
+bool QTwoLevelTreeModel::reductionFailed(int position,
+                                         const QModelIndex &parent) const {
+
+  if (!parent.isValid()) {
+    // We have a group item (no parent)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount())
+      throw std::invalid_argument("Invalid position. Position index must be "
+                                  "within the range of the number of groups in "
+                                  "this model");
+
+    return m_groups[position].reductionFailed();
+  } else {
+    // We have a row item (parent exists)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount(parent))
+      throw std::invalid_argument("Invalid position. Position index must be "
+                                  "within the range of the number of rows in "
+                                  "the given group for this model");
+
+    return m_groups[parent.row()].rowReductionFailed(position);
   }
 }
 
@@ -664,27 +735,87 @@ bool QTwoLevelTreeModel::setProcessed(bool processed, int position,
   return true;
 }
 
+/** Sets the 'processed' status of a data item
+* @param processed : True to set processed, false to set unprocessed
+* @param position : The position of the item
+* @param parent : The parent of this item
+* @return : Boolean indicating whether process status was set successfully
+*/
+bool QTwoLevelTreeModel::setError(const std::string &error, int position,
+                                  const QModelIndex &parent) {
+
+  if (!parent.isValid()) {
+    // We have a group item (no parent)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount())
+      return false;
+
+    m_groups[position].setError(error);
+  } else {
+    // We have a row item (parent exists)
+
+    // Invalid position
+    if (position < 0 || position >= rowCount(parent))
+      return false;
+
+    m_groups[parent.row()].setRowError(position, error);
+  }
+
+  return true;
+}
+
+/** Update cached data for all rows in the given group from the table
+ * @param groupIdx : the group index to update
+ * @param start : the first row index in the group to update
+ * @param end : the last row index in the group to update
+ */
+void QTwoLevelTreeModel::updateGroupData(const int groupIdx, const int start,
+                                         const int end) {
+  // Loop through all groups and all rows
+  auto &group = m_groups[groupIdx];
+  for (int row = start; row <= end; ++row) {
+    const auto &rowData = group.rowData(row);
+    // Loop through all columns and update the value in the row data
+    for (int col = 0; col < columnCount(); ++col) {
+      auto value = data(index(row, col, index(groupIdx, 0))).toString();
+      rowData->setValue(col, value);
+    }
+  }
+}
+
 void QTwoLevelTreeModel::updateAllGroupData() {
   // Loop through all groups and all rows
   for (int groupIdx = 0; groupIdx < rowCount(); ++groupIdx) {
-    auto &group = m_groups[groupIdx];
-    for (int row = 0; row < rowCount(index(groupIdx, 0)); ++row) {
-      const auto &rowData = group.rowData(row);
-      // Loop through all columns and update the value in the row data
-      for (int col = 0; col < columnCount(); ++col) {
-        auto value = data(index(row, col, index(groupIdx, 0))).toString();
-        rowData->setValue(col, value);
-      }
-    }
+    updateGroupData(groupIdx, 0, rowCount(index(groupIdx, 0)) - 1);
   }
 }
 
 /** Called when the data in the table has changed. Updates the
  * table values in the cached RowData
  */
-void QTwoLevelTreeModel::tableDataUpdated(const QModelIndex &,
-                                          const QModelIndex &) {
-  updateAllGroupData();
+void QTwoLevelTreeModel::tableDataUpdated(const QModelIndex &topLeft,
+                                          const QModelIndex &bottomRight) {
+  if (!topLeft.isValid() || !bottomRight.isValid())
+    return;
+
+  if (topLeft.parent() != bottomRight.parent())
+    return;
+
+  const auto group = topLeft.parent().row();
+  const auto start = topLeft.row();
+  const auto end = bottomRight.row();
+
+  // Reset the processed state for all changed rows and their parent group
+  setProcessed(false, group);
+  setError("", group);
+  for (int i = start; i <= end; ++i) {
+    setProcessed(false, group, index(group, 0));
+    setError("", group, index(group, 0));
+  }
+
+  // Update cached row data from the values in the table
+  updateGroupData(group, start, end);
 }
 
 int QTwoLevelTreeModel::findOrAddGroup(const std::string &groupName) {

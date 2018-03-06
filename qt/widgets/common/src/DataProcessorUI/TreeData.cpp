@@ -253,6 +253,20 @@ RowData::addSlice(const QString &sliceSuffix,
  */
 void RowData::clearSlices() { m_slices.clear(); }
 
+/** Check whether reduction failed for this row (or any of its slices)
+ */
+bool RowData::reductionFailed() const {
+  if (!m_error.empty())
+    return true;
+
+  for (const auto slice : m_slices) {
+    if (slice->reductionFailed())
+      return true;
+  }
+
+  return false;
+}
+
 /** Return the canonical reduced workspace name i.e. before any
  * prefixes have been applied for specific output properties.
  * @param prefix [in] : if not empty, apply this prefix to the name

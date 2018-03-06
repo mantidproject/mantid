@@ -115,6 +115,10 @@ public:
   bool isProcessed() const { return m_isProcessed; }
   /// Set whether the row has been processed
   void setProcessed(const bool isProcessed) { m_isProcessed = isProcessed; }
+  /// Set an error message for this row
+  void setError(const std::string &error) { m_error = error; }
+  /// Whether reduction failed for this row
+  bool reductionFailed() const;
 
   /// Get the reduced workspace name, optionally adding a prefix
   QString reducedName(const QString prefix = QString());
@@ -137,6 +141,8 @@ private:
   std::vector<RowData_sptr> m_slices;
   /// Whether the row has been processed
   bool m_isProcessed;
+  /// The error message, if reduction failed for this row
+  std::string m_error;
   /// The canonical reduced workspace name for this row i.e. prior to any
   /// prefixes being added for specific output workspace properties
   QString m_reducedName;

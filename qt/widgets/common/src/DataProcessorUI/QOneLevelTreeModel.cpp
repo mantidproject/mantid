@@ -52,9 +52,15 @@ QVariant QOneLevelTreeModel::data(const QModelIndex &index, int role) const {
   if (role == Qt::DisplayRole || role == Qt::EditRole) {
     return QString::fromStdString(m_tWS->String(index.row(), index.column()));
   } else if (role == Qt::BackgroundRole) {
-    // Highlight if the process status for this row is set
-    if (m_rows.at(index.row())->isProcessed())
-      return QColor("#00b300");
+    // Highlight if the process status for this row is set (red if failed,
+    // green if succeeded)
+    const auto rowData = m_rows.at(index.row());
+    if (rowData->isProcessed()) {
+      if (rowData->reductionFailed())
+        return QColor(Colour::FAILED);
+      else
+        return QColor(Colour::SUCCESS);
+    }
   }
 
   return QVariant();
@@ -127,6 +133,28 @@ bool QOneLevelTreeModel::isProcessed(int position,
                                 "this model");
 
   return m_rows[position]->isProcessed();
+}
+
+/** Check whether reduction failed for a row
+* @param position : The position of the item
+* @param parent : The parent of this item
+* @return : true if there was an error
+*/
+bool QOneLevelTreeModel::reductionFailed(int position,
+                                         const QModelIndex &parent) const {
+
+  // No parent items exists, this should not be possible
+  if (parent.isValid())
+    throw std::invalid_argument(
+        "Invalid parent index, there are no parent data items in this model.");
+
+  // Incorrect position
+  if (position < 0 || position >= rowCount())
+    throw std::invalid_argument("Invalid position. Position index must be "
+                                "within the range of the number of rows in "
+                                "this model");
+
+  return m_rows[position]->reductionFailed();
 }
 
 /** Returns the parent of a given index
@@ -261,6 +289,28 @@ bool QOneLevelTreeModel::setProcessed(bool processed, int position,
     return false;
 
   m_rows[position]->setProcessed(processed);
+
+  return true;
+}
+
+/** Set the error message for a row
+* @param error : the error message
+* @param position : The position of the row to be set
+* @param parent : The parent of this row
+* @return : Boolean indicating whether error was set successfully
+*/
+bool QOneLevelTreeModel::setError(const std::string &error, int position,
+                                  const QModelIndex &parent) {
+
+  // No parent items exists, this should not be possible
+  if (parent.isValid())
+    return false;
+
+  // Incorrect position
+  if (position < 0 || position >= rowCount())
+    return false;
+
+  m_rows[position]->setError(error);
 
   return true;
 }

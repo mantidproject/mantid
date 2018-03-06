@@ -113,6 +113,9 @@ public:
   void completedGroupReductionSuccessfully(
       GroupData const &groupData, std::string const &workspaceName) override;
 
+protected slots:
+  void threadFinished(const int exitCode) override;
+
 private:
   // Get the processing options for this row
   OptionsMap getProcessingOptions(RowData_sptr data) override;
