@@ -1,4 +1,4 @@
-.. _Fitting:
+.. _fitting:
 
 =======
 Fitting
