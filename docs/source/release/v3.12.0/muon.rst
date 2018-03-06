@@ -14,6 +14,7 @@ MuSR Changes
 Bug Fixes
 ---------
 - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` has had the sign of the phase shift changed, this produces data with a positive frequency spike as expected.
+- Log values are no longer filtered by start time when loaded into muon analysis.
 
 Interface
 ---------
