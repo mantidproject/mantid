@@ -154,9 +154,6 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
                      self.evt_show_survey)
 
-        # TODO FIXME NOW NOW2
-        # self.ui.checkBox_singlePtScans.clicked.connect()
-
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
                      self.do_load_scan_info)
@@ -2442,34 +2439,40 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    # TEST NOW
     def do_select_all_survey(self):
         """
         Select or de-select all rows in survey items
         :return:
         """
         if self._surveyTableFlag:
-            # flag is turned on: select all peaks or all nuclear peaks
-            if self.ui.checkBox_surveySelectNuclearPeaks.isChecked():
-                # only select nuclear peaks
-                num_rows = self.ui.tableWidget_surveyTable.rowCount()
-                for i_row in range(num_rows):
-                    peak_hkl = self.ui.tableWidget_surveyTable.get_hkl(i_row)
-                    if peak_util.is_peak_nuclear(peak_hkl[0], peak_hkl[1], peak_hkl[2]):
-                        self.ui.tableWidget_surveyTable.select_row(i_row, True)
-                    else:
-                        self.ui.tableWidget_surveyTable.select_row(i_row, False)
-            elif self.ui.checkBox_singlePtScans.isChecked():
-                # TODO FIXME NOW NOW2 -  select all the single one...
-                pass
-            else:
-                # all peaks
-                self.ui.tableWidget_surveyTable.select_all_rows(True)
+            # there are cases: select all or select selected few with filters
+            # check whether there is any option
+            if self.ui.checkBox_surveySelectNuclearPeaks.isChecked() or self.ui.checkBox_singlePtScans.isChecked():
+                # deselect all rows for future selection
+                self.ui.tableWidget_surveyTable.select_all_rows(False)
 
-            # FIXME FIXME - This structure is bad in logic... it is better to have multiple layer of filtering
-            # step 1: filter by HKL
-            # step 2: filter by single...
-            # step 3: filter by blabla
-            # step n: select_by_row_number
+            # go through all rows
+            num_rows = self.ui.tableWidget_surveyTable.rowCount()
+            for i_row in range(num_rows):
+
+                select_line = True
+
+                # filter HKL (nuclear)
+                if self.ui.checkBox_surveySelectNuclearPeaks.isChecked():
+                    # only select nuclear peaks
+                    peak_hkl = self.ui.tableWidget_surveyTable.get_hkl(i_row)
+                    select_line = peak_util.is_peak_nuclear(peak_hkl[0], peak_hkl[1], peak_hkl[2]) and select_line
+
+                if self.ui.checkBox_singlePtScans.isChecked():
+                    # only select scan with single Pt
+                    scan_number = self.ui.tableWidget_surveyTable.get_scan_numbers([i_row])[0]
+                    status, pt_list = self._myControl.get_pt_numbers(self._current_exp_number, scan_number)
+                    select_line = (status and len(pt_list) == 1) and select_line
+
+                if select_line:
+                    self.ui.tableWidget_surveyTable.select_row(i_row, True)
+            # END-FOR(i_row)
 
         else:
             # de-select all peaks
@@ -3375,12 +3378,21 @@ class MainWindow(QtGui.QMainWindow):
             # do nothing if the table is empty
             return
 
-        # TODO FIXME NOW NOW2 - Allow an empty for all scans
-        max_number = int(self.ui.lineEdit_numSurveyOutput.text())
+        max_number_str = str(self.ui.lineEdit_numSurveyOutput.text()).strip()
+        if max_number_str == '':
+            # empty: select all
+            # TODO FIXME NOW NOW2 - need to find surveyed data ranges
+            max_number = blabla
+
+        else:
+            # get maximum number and
+            max_number = int(max_number_str)
 
         # ignore the situation that this line edit is cleared
         if max_number <= 0:
             return
+
+        # reset row number
         if max_number != self.ui.tableWidget_surveyTable.rowCount():
             # re-show survey
             self.ui.tableWidget_surveyTable.remove_all_rows()

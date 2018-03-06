@@ -971,8 +971,8 @@ class CWSCDReductionControl(object):
         # Check
         if exp_no is None:
             exp_no = self._expNumber
-        assert isinstance(exp_no, int)
-        assert isinstance(scan_no, int)
+        assert isinstance(exp_no, int), 'Experiment number {0} must be an integer'.format(exp_no)
+        assert isinstance(scan_no, int), 'Scan number {0}  must be an integer'.format(scan_no)
 
         # Get workspace
         status, ret_obj = self.load_spice_scan_file(exp_no, scan_no)
