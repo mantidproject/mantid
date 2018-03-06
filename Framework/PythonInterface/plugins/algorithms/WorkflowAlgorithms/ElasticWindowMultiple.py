@@ -283,13 +283,12 @@ def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_
 def _extract_sensor_name(sample_log_name, run, instrument):
     default_names = ['Bot_Can_Top', 'Middle_Can_Top', 'Top_Can_Top']
     sensor_names = instrument.getStringParameter("Workflow.TemperatureSensorNames")
+    position = _extract_position_from_run(sample_log_name, run)
 
-    if sample_log_name in run:
-        position = run[sample_log_name].value[-1]
-        sensor = sensor_names[position]
+    if position is not None:
 
-        if position < len(sensor_names) and sensor in run:
-            return sensor
+        if position < len(sensor_names) and sensor_names[position] in run:
+            return sensor_names[position]
         elif position < len(default_names):
             logger.warning("Position {0} not found within the instrument parameters, "
                            "using default '{1}'.".format(position, default_names[position]))
@@ -297,8 +296,20 @@ def _extract_sensor_name(sample_log_name, run, instrument):
         else:
             logger.warning('Invalid position ({}) found in workspace.'.format(position))
     else:
-        logger.information('Position not found in workspace.')
+        logger.information('Position not found in sample logs, when using log name {}.'.format(sample_log_name))
     return ''
+
+
+def _extract_position_from_run(sample_log_name, run):
+
+    if sample_log_name in run:
+        position = run[sample_log_name].value[-1]
+
+        if isinstance(position, str):
+            return {'B':0, 'M':1, 'T':2}.get(position[0], None)
+        else:
+            return int(position)
+    return None
 
 
 def _set_numeric_y_axis(workspace, length, unit, get_axis_value):
