@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
@@ -95,7 +96,9 @@ void LoadShape::exec() {
     throw Exception::FileError("Failed to recognize this file as a valid STL file: ", filename);
   }
 
-  // Still to figure out how to add shape to instrument at componenent.
+  // Put shape into sample.
+  Sample sample = outputWS->mutableSample();
+  sample.setShape(mShape);
 
 }
 
