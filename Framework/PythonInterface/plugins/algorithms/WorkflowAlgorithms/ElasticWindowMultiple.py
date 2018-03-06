@@ -238,7 +238,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         run = workspace.getRun()
 
-        if self._sample_log_name == 'Position':
+        if self._sample_log_name.lower() == 'position':
             self._sample_log_name = _extract_sensor_name(self._sample_log_name, run, workspace.getInstrument())
 
         if self._sample_log_name in run:
@@ -282,7 +282,7 @@ def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_
 
 def _extract_sensor_name(sample_log_name, run, instrument):
     default_names = ['Bot_Can_Top', 'Middle_Can_Top', 'Top_Can_Top']
-    sensor_names = instrument.getStringParameter("Workflow.TemperatureSensorNames")
+    sensor_names = instrument.getStringParameter("Workflow.TemperatureSensorNames")[0].split(',')
     position = _extract_position_from_run(sample_log_name, run)
 
     if position is not None:
