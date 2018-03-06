@@ -249,6 +249,12 @@ void ALCBaselineModellingView::sectionsContextMenu(const QPoint &widgetPoint) {
 void ALCBaselineModellingView::setSelectorValues(
     RangeSelector *selector,
     IALCBaselineModellingView::SectionSelector values) {
+  // if the values are not increasing then reverse them
+  if (values.first > values.second)     {
+    const double tempSwapValue = values.first;
+    values.first = values.second;
+    values.second = tempSwapValue;
+  }
   selector->setMinimum(values.first);
   selector->setMaximum(values.second);
 }
