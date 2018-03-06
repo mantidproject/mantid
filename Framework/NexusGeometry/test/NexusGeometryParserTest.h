@@ -167,6 +167,11 @@ public:
   static NexusGeometryParserTestPerformance *createSuite() {
     return new NexusGeometryParserTestPerformance();
   }
+
+  NexusGeometryParserTestPerformance() {
+    m_wishHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
+        "WISH_Definition_10Panels.hdf5", true, Poco::Glob::GLOB_DEFAULT);
+  }
   static void destroySuite(NexusGeometryParserTestPerformance *suite) {
     delete suite;
   }
@@ -174,7 +179,7 @@ public:
   void test_load_wish() {
     auto start = std::chrono::high_resolution_clock::now();
     auto wishInstrument =
-        NexusGeometryParser::createInstrument("WISH_Definition_10Panels.hdf5");
+        NexusGeometryParser::createInstrument(m_wishHDF5DefinitionPath);
     auto stop = std::chrono::high_resolution_clock::now();
     std::cout << "Creating WISH instrument took: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -182,4 +187,7 @@ public:
     auto detInfo = extractDetectorInfo(*wishInstrument);
     TS_ASSERT_EQUALS(detInfo->size(), 778245); // Sanity check
   }
+
+private:
+  std::string m_wishHDF5DefinitionPath;
 };

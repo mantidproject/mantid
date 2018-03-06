@@ -4,6 +4,8 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
@@ -1069,7 +1071,7 @@ public:
     InstrumentDefinitionParser parser(definition, "dummy", contents);
     auto wishInstrument = parser.parseXML(nullptr);
     auto stop = std::chrono::high_resolution_clock::now();
-    TS_ASSERT_EQUALS(wishInstrument->detectorInfo().size(),
+    TS_ASSERT_EQUALS(extractDetectorInfo(*wishInstrument)->size(),
                      778245); // Sanity check
     std::cout << "Creating WISH instrument took: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -1078,6 +1080,12 @@ public:
 
 private:
   const std::string m_instrumentDirectoryPath;
+
+  std::unique_ptr<Geometry::DetectorInfo>
+  extractDetectorInfo(const Mantid::Geometry::Instrument &instrument) {
+    Geometry::ParameterMap pmap;
+    return std::move(std::get<1>(instrument.makeBeamline(pmap)));
+  }
 };
 
 #endif /* MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_ */
