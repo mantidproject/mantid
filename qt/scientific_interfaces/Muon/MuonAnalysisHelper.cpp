@@ -176,7 +176,8 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
     Mantid::Kernel::SplittingInterval time_split(start, end);
     std::vector<Mantid::Kernel::SplittingInterval> splitVector = {time_split};
     auto Temp_Sample = run.getProperty("Temp_Sample");
-    auto *Temp_Sample_TimeSeries = dynamic_cast<TimeSeriesProperty<double> *>(Temp_Sample);
+    const auto *Temp_Sample_TimeSeries =
+        dynamic_cast<const TimeSeriesProperty<double> *>(Temp_Sample);
     double average = Temp_Sample_TimeSeries->averageValueInFilter(splitVector);
 
     if (average != 0.0) {
