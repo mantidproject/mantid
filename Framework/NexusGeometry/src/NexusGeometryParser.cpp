@@ -536,7 +536,7 @@ extractInstrument(const H5File &file, const Group &root) {
 } // namespace
 
 std::unique_ptr<const Geometry::Instrument>
-NexusGeometryParser::createInstrument(const std::string &fileName) const {
+NexusGeometryParser::createInstrument(const std::string &fileName) {
 
   const H5File file(fileName, H5F_ACC_RDONLY);
   auto rootGroup = file.openGroup("/");

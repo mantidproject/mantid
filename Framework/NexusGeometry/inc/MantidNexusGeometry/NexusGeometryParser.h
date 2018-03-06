@@ -33,11 +33,10 @@ namespace NexusGeometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport NexusGeometryParser {
-public:
-  std::unique_ptr<const Mantid::Geometry::Instrument>
-  createInstrument(const std::string &fileName) const;
-};
+namespace NexusGeometryParser {
+DLLExport std::unique_ptr<const Mantid::Geometry::Instrument>
+createInstrument(const std::string &fileName);
+} // namespace NexusGeometryParser
 } // namespace NexusGeometry
 } // namespace Mantid
 

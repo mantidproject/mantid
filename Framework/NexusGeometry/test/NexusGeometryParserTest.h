@@ -27,8 +27,7 @@ public:
     const auto fullpath = Kernel::ConfigService::Instance().getFullPath(
         nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
 
-    NexusGeometryParser parser;
-    return parser.createInstrument(fullpath);
+    return NexusGeometryParser::createInstrument(fullpath);
   }
 
   std::unique_ptr<Geometry::DetectorInfo> extractDetectorInfo() {
