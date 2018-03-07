@@ -147,8 +147,7 @@ void SortHKL::exec() {
         g_log.debug() << e << "  ";
       g_log.debug() << "\n";
       std::vector<double> zScores;
-      bool weighted = false;
-      if (!weighted) {
+      if (!weightedZ) {
         zScores = Kernel::getZscore(intensities);
       } else {
         auto sigmas = unique.second.getSigmas();
