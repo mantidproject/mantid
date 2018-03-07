@@ -253,13 +253,11 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
 std::string IqtFit::createIntensityTie(IFunction_sptr function) const {
   std::string tieString = "1";
   const auto backIndex = backgroundIndex();
-
-  if (backIndex)
-    tieString += "-f" + std::to_string(backIndex.get()) + ".A0";
-
   const auto intensityParameters = getParameters(function, "Height");
 
-  if (intensityParameters.size() < 2)
+  if (backIndex && !intensityParameters.empty())
+    tieString += "-f" + std::to_string(backIndex.get()) + ".A0";
+  else if (intensityParameters.size() < 2)
     return "";
 
   for (auto i = 1u; i < intensityParameters.size(); ++i)
