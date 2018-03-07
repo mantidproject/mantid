@@ -337,7 +337,7 @@ void SaveGSS::generateBankData(
       throw std::runtime_error("Unknown RALF data format" + ralfDataFormat);
     }
   } else if (outputFormat == SLOG) {
-    writeSLOGdata(bankid, multiplyByBinWidth, outBuf, histogram,
+    writeSLOGdata(specIndex, bankid, multiplyByBinWidth, outBuf, histogram,
                   slog_xye_precisions);
   } else {
     throw std::runtime_error("Cannot write to the unknown " + outputFormat +
@@ -709,11 +709,6 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
   * @throws :: If for any reason we cannot run the algorithm
   */
 void SaveGSS::validateUserInput() const {
-  // Check whether it is PointData or Histogram
-  if (!m_inputWS->isHistogramData())
-    g_log.warning("Input workspace is NOT histogram! SaveGSS may not work "
-                  "well with PointData.");
-
   // Check the number of histogram/spectra < 99
   const auto nHist = static_cast<int>(m_inputWS->getNumberHistograms());
   const bool split = getProperty("SplitFiles");
@@ -919,13 +914,16 @@ void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
 //----------------------------------------------------------------------------
 /** write slog data
  * @brief SaveGSS::writeSLOGdata
+ * @param ws_index :: workspace index for the spectrum to be written.  It is
+ * essential for using user-specified bank header
  * @param bank
  * @param MultiplyByBinWidth
  * @param out
  * @param histo
  * @param xye_precision
  */
-void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
+void SaveGSS::writeSLOGdata(const size_t ws_index, const int bank,
+                            const bool MultiplyByBinWidth,
                             std::stringstream &out,
                             const HistogramData::Histogram &histo,
                             const std::vector<int> &xye_precision) const {
@@ -962,16 +960,15 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
   // Write bank header
   if (m_overwrite_std_bank_header) {
     // write user header only!
-    int ws_index = bank - 1;
-    if (ws_index < 0)
-      throw std::runtime_error(
-          "Bank does not start from 1.  Unabel to use user-"
-          "specified bank header");
-    else if (ws_index >= static_cast<int>(m_user_specified_bank_headers.size()))
+    if (ws_index >= m_user_specified_bank_headers.size()) {
+      g_log.error() << "Workspace index " << ws_index << " is out of range of "
+                    << "user specified bank headers (size = "
+                    << m_user_specified_bank_headers.size() << "\n";
       throw std::runtime_error(
           "Bank ID is out of range for user specified bank headers");
-    out << std::fixed << std::setw(80)
-        << m_user_specified_bank_headers[ws_index] << "\n";
+    }
+    out << std::fixed << std::setw(80) << m_user_specified_bank_headers[ws_index]
+        << "\n";
   } else {
     // write general bank header part
     writeBankHeader(out, "SLOG", bank, datasize);
