@@ -3,8 +3,10 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadShape.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -13,6 +15,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
+using namespace Mantid::Geometry;
 
 
 class LoadShapeTest : public CxxTest::TestSuite {
@@ -66,6 +69,22 @@ public:
     clearWorkspaces("InputWS", "InputWS");
   }
 
+  void test_output_workspace_has_MeshObject() {
+    LoadShape testLoadShape;
+    testLoadShape.initialize();
+    testLoadShape.setPropertyValue("Filename", "cube.stl");
+    prepareWorkspaces(testLoadShape, "InputWS", "InputWS");
+    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
+    TS_ASSERT(testLoadShape.isExecuted());
+    MatrixWorkspace_sptr ws = getWorkspace("InputWS");
+    Sample s;
+    TS_ASSERT_THROWS_NOTHING(s = ws->sample());
+    auto &obj = s.getShape();
+    auto mObj = dynamic_cast<const MeshObject*>(&obj);
+    TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
+    clearWorkspaces("InputWS", "InputWS");
+  }
+
 private:
 
   // Create workspaces and add them to algorithm properties
@@ -88,6 +107,22 @@ private:
     if (outputWS != inputWS) {
       TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().remove(outputWS));
+    }
+  }
+
+  MatrixWorkspace_sptr getWorkspace(const std::string &outputWS) {
+    // Check the workspace
+    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    if (dataStore.doesExist(outputWS)) {
+      TS_ASSERT_EQUALS(dataStore.doesExist(outputWS), true);
+      Workspace_sptr output;
+      TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputWS));
+      MatrixWorkspace_sptr outputWorkspace =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+      return outputWorkspace;
+    }
+    else {
+      return nullptr;
     }
   }
 
