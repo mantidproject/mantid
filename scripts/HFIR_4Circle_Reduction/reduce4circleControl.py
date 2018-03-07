@@ -727,6 +727,15 @@ class CWSCDReductionControl(object):
 
         return avg_bg
 
+    def get_surveyed_scans(self):
+        """
+        get list of scans that are surveyed
+        :return:
+        """
+        scan_number_list = [info[1] for info in self._scanSummaryList]
+
+        return scan_number_list
+
     def get_ub_matrix(self, exp_number):
         """ Get UB matrix assigned to an experiment
         :param exp_number:
@@ -3191,7 +3200,7 @@ class CWSCDReductionControl(object):
         if error_message != '':
             print('[Error]\n%s' % error_message)
 
-        self._scanSummaryList = scan_sum_list
+        self._scanSummaryList.extend(scan_sum_list)
 
         return True, scan_sum_list, error_message
 

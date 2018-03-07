@@ -1378,6 +1378,18 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
         return
 
+    def get_complete_peak_scan(self, row_index):
+        # TODO FIXME NOW2
+        return None
+
+    def get_fwhm(self, row_index):
+        # TODO FIXME NOW2
+        return None
+
+    def get_scan_number(self, row_index):
+        # TODO
+        return self.get_cell_value(row_index, 0)
+
     def get_scan_pt_list(self):
         """
         get a list of current scan and pt pair in the table
@@ -1404,6 +1416,10 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         out_file.write(out_buffer)
         out_file.close()
 
+        return
+
+    def set_two_theta(self, row_index, two_theta):
+        #  TODO FIXME NOW2
         return
 
     def setup(self):

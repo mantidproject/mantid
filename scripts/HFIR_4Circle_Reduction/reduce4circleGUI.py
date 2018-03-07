@@ -3049,7 +3049,13 @@ class MainWindow(QtGui.QMainWindow):
         start_scan = ret_obj[0]
         end_scan = ret_obj[1]
 
-        max_number = int(self.ui.lineEdit_numSurveyOutput.text())
+        # maximum number to show on the table
+        max_str = str(self.ui.lineEdit_numSurveyOutput.text())
+        if max_str.isdigit():
+            max_number = int(max_str)
+        else:
+            max_number = end_scan - start_scan + 1
+            self.ui.lineEdit_numSurveyOutput.setText(str(max_number))
 
         # Get value
         status, ret_obj, err_msg = self._myControl.survey(exp_number, start_scan, end_scan)
@@ -3381,8 +3387,8 @@ class MainWindow(QtGui.QMainWindow):
         max_number_str = str(self.ui.lineEdit_numSurveyOutput.text()).strip()
         if max_number_str == '':
             # empty: select all
-            # TODO FIXME NOW NOW2 - need to find surveyed data ranges
-            max_number = blabla
+            surveyed_scan_list = self._myControl.get_surveyed_scans()
+            max_number = len(surveyed_scan_list)
 
         else:
             # get maximum number and
@@ -3595,9 +3601,9 @@ class MainWindow(QtGui.QMainWindow):
         for scan_number, pt_number in scan_pt_tup_list:
             # TODO FIXME NOW NOW2 - Make this section work!
             h_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, 'h')
-            hkl_str = blabla
+            hkl_str = 'blabla'
             two_theta = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '2theta')
-            self._single_pt_peak_integration_window.add_scan(scan_number, pt_number, hkl, two_theta)
+            self._single_pt_peak_integration_window.add_scan(scan_number, pt_number, hkl_str, two_theta)
 
         return
 

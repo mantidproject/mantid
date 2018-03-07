@@ -44,7 +44,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.pushButton_retrieveFWHM.clicked.connect(self.do_retrieve_fwhm)
         self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_single_pt)
         self.ui.pushButton_plot.clicked.connect(self.do_plot_integrated_pt)
-        self.ui.pushButton_loadPeakInfoFile.connect(self.do_load_peak_integration_table)
+        self.ui.pushButton_loadPeakInfoFile.clicked.connect(self.do_load_peak_integration_table)
 
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
@@ -189,23 +189,25 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         for row_index in range(row_number):
             # check whether FWHM value is set up
             fwhm_i = self.ui.tableView_summary.get_fwhm(row_index)
-            if fwhm_i is not None:
+            if fwhm_i is not None and fwhm_i > 1.E-10:
                 continue
 
             # get scan number
             scan_number = self.ui.tableView_summary.get_scan_number(row_index)
 
             # get corresponding strong nuclear peak (complete scan number)
-            complete_peak_scan_number = self.ui.tableView_summary.get_complete_peak_scan()
+            complete_peak_scan_number = self.ui.tableView_summary.get_complete_peak_scan(row_index)
             if complete_peak_scan_number is None:
                 # get 2theta and set 2theta
-                two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, pt_number=1)
-                self.ui.tableView_summary.set_two_theta(row_index, two_theta)
+                two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, 1,
+                                                                  '2theta')
+                # self.ui.tableView_summary.set_two_theta(row_index, two_theta)
                 # locate reference scan number
                 ref_exp_number, ref_scan_number, integrated_peak_params = \
-                    self.get_integrated_scan_params(self._exp_number, two_theta,  resolution=0.01)
+                    self._controller.get_integrated_scan_params(self._exp_number, two_theta,  resolution=0.01)
                 if ref_exp_number != self._exp_number:
-                    raise RuntimeError('It is very wrong to have two different experiment number!')
+                    raise RuntimeError('It is very wrong to have two different experiment number ({0} vs {1})!'
+                                       ''.format(ref_exp_number, self._exp_number))
                 # set reference scan number to table
                 self.ui.tableView_summary.set_reference_scan_number(row_index, ref_scan_number)
             else:
@@ -236,6 +238,17 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         # END-FOR
 
         return
+
+    def add_scan(self, scan_number, pt_number, hkl_str, two_theta):
+        """
+        add single scan
+        :param scan_number:
+        :param pt_number:
+        :param hkl_str:
+        :param two_theta:
+        :return:
+        """
+        self.ui.tableView_summary.add_scan_pt(scan_number, pt_number, hkl_str, two_theta)
 
     def set_experiment(self, exp_number):
         """
