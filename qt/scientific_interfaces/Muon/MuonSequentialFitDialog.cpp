@@ -493,8 +493,10 @@ void MuonSequentialFitDialog::continueFit() {
 
     // If fit was simultaneous, transform results
     if (datasetsPerRun > 1) {
-      m_dataPresenter->handleFittedWorkspaces(wsBaseName, labelGroupName);
-      m_dataPresenter->extractFittedWorkspaces(wsBaseName, labelGroupName);
+      // sub groups in `_label` mean wsBaseName is the name of the parent
+      // wsGroup
+      m_dataPresenter->handleFittedWorkspaces(wsBaseName);
+      m_dataPresenter->extractFittedWorkspaces(wsBaseName);
     }
 
     // Add information about the fit to the diagnosis table
