@@ -81,7 +81,7 @@ void SumOverlappingTubes::init() {
                   "The relative tolerance for the scattering angles before the "
                   "counts are split.");
   declareProperty(make_unique<PropertyWithValue<bool>>("MirrorScatteringAngles",
-                                                       true, Direction::Input),
+                                                       false, Direction::Input),
                   "A flag to mirror the signed 2thetas. ");
 }
 
@@ -297,8 +297,8 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         angle = specInfo.signedTwoTheta(i);
       angle *= m_mirrorDetectors * 180.0 / M_PI;
 
-      int angleIndex = int(
-          std::floor((angle - m_startScatteringAngle) / m_stepScatteringAngle));
+      int angleIndex =
+                int((angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
 
       // point is out of range, a warning should have been generated already for
       // the theta index

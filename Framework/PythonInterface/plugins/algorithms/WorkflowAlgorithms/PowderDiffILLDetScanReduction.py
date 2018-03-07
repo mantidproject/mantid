@@ -114,7 +114,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         output_workspaces = []
         output_workspace_name = self.getPropertyValue('OutputWorkspace')
 
-        mirror_angles = True
+        mirror_angles = False
         crop_negative = self.getProperty('CropNegativeScatteringAngles').value
         if instrument.hasParameter("mirror_scattering_angles"):
             mirror_angles = instrument.getBoolParameter("mirror_scattering_angles")[0]
