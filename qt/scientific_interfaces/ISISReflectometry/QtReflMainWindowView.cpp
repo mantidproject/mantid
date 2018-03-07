@@ -5,6 +5,7 @@
 #include "QtReflSettingsTabView.h"
 #include "ReflSaveTabPresenter.h"
 #include "ReflMainWindowPresenter.h"
+#include "ReflAsciiSaver.h"
 
 #include <QMessageBox>
 
@@ -89,7 +90,10 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
 std::unique_ptr<IReflSaveTabPresenter> QtReflMainWindowView::createSaveTab() {
   auto saveTabView = std::make_unique<QtReflSaveTabView>(this);
   m_ui.mainTab->addTab(saveTabView.get(), QString("Save ASCII"));
-  return std::make_unique<ReflSaveTabPresenter>(std::move(saveTabView));
+
+  auto saver = std::make_unique<ReflAsciiSaver>();
+  return std::make_unique<ReflSaveTabPresenter>(std::move(saver),
+                                                std::move(saveTabView));
 }
 
 /**

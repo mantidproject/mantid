@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidAPI/Run.h"
 #include "ReflMockObjects.h"
 #include "Poco/File.h"
@@ -38,8 +39,11 @@ public:
   ReflSaveTabPresenterTest() { FrameworkManager::Instance(); }
 
   void testPopulateWorkspaceList() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
     std::vector<std::string> wsNames = {"ws1", "ws2", "ws3"};
     createWS(wsNames[0]);
@@ -54,137 +58,173 @@ public:
     groupAlg->setProperty("OutputWorkspace", "groupWs");
     groupAlg->execute();
 
-    EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(1));
+    EXPECT_CALL(mockViewRef, clearWorkspaceList()).Times(Exactly(1));
     // Workspaces 'groupWs' and 'tableWS' should not be included in the
     // workspace list
-    EXPECT_CALL(mockView, setWorkspaceList(wsNames)).Times(Exactly(1));
+    EXPECT_CALL(mockViewRef, setWorkspaceList(wsNames)).Times(Exactly(1));
     presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
   void testDisablesAutosaveControlsWhenProcessing() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
-    EXPECT_CALL(mockView, disableAutosaveControls());
+    EXPECT_CALL(mockViewRef, disableAutosaveControls());
     presenter.onAnyReductionResumed();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
-  void expectHasValidSaveDirectory(MockSaveTabView &mockView) {
-    ON_CALL(mockView, getSavePath())
-        .WillByDefault(
-            Return(::Mantid::Kernel::ConfigService::Instance().getString(
-                "defaultsave.directory")));
+  void expectHasValidSaveDirectory(MockReflAsciiSaver &mockSaver) {
+    ON_CALL(mockSaver, isValidSaveDirectory(_)).WillByDefault(Return(true));
   }
 
   void testDisablesFileFormatControlsWhenProcessingAndAutosaveEnabled() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
-    expectHasValidSaveDirectory(mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    auto &mockSaverRef = *mockSaver;
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
+
+    expectHasValidSaveDirectory(mockSaverRef);
     presenter.notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
 
-    EXPECT_CALL(mockView, disableFileFormatAndLocationControls());
+    EXPECT_CALL(mockViewRef, disableFileFormatAndLocationControls());
     presenter.onAnyReductionResumed();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
   void testEnablesFileFormatControlsWhenProcessingFinishedAndAutosaveEnabled() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
-    expectHasValidSaveDirectory(mockView);
-    presenter.notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    auto &mockSaverRef = *mockSaver;
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
+    expectHasValidSaveDirectory(mockSaverRef);
+    presenter.notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
     presenter.onAnyReductionResumed();
-    EXPECT_CALL(mockView, enableFileFormatAndLocationControls());
+
+    EXPECT_CALL(mockViewRef, enableFileFormatAndLocationControls());
     presenter.onAnyReductionPaused();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
   void testEnablesAutosaveControlsWhenProcessingFinished() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
-    expectHasValidSaveDirectory(mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    auto &mockSaverRef = *mockSaver;
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
+
+    expectHasValidSaveDirectory(mockSaverRef);
     presenter.notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
 
     presenter.onAnyReductionResumed();
-    EXPECT_CALL(mockView, enableFileFormatAndLocationControls());
+    EXPECT_CALL(mockViewRef, enableFileFormatAndLocationControls());
     presenter.onAnyReductionPaused();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
   void testRefreshWorkspaceList() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
     createWS("ws1");
 
-    EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(2));
-    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{"ws1"}))
+    EXPECT_CALL(mockViewRef, clearWorkspaceList()).Times(Exactly(2));
+    EXPECT_CALL(mockViewRef, setWorkspaceList(std::vector<std::string>{"ws1"}))
         .Times(Exactly(1));
-    EXPECT_CALL(mockView,
+    EXPECT_CALL(mockViewRef,
                 setWorkspaceList(std::vector<std::string>{"ws1", "ws2"}))
         .Times(Exactly(1));
     presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     createWS("ws2");
     presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
   void testFilterWorkspaceNoRegex() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
     createWS("anotherWs");
     createWS("different");
     createWS("someWsName");
 
-    EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(2));
-    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{
-                              "anotherWs", "different", "someWsName"}))
+    EXPECT_CALL(mockViewRef, clearWorkspaceList()).Times(Exactly(2));
+    EXPECT_CALL(mockViewRef, setWorkspaceList(std::vector<std::string>{
+                                 "anotherWs", "different", "someWsName"}))
         .Times(Exactly(1));
-    EXPECT_CALL(mockView, getFilter()).Times(Exactly(1)).WillOnce(Return("Ws"));
-    EXPECT_CALL(mockView, getRegexCheck())
+    EXPECT_CALL(mockViewRef, getFilter())
+        .Times(Exactly(1))
+        .WillOnce(Return("Ws"));
+    EXPECT_CALL(mockViewRef, getRegexCheck())
         .Times(Exactly(1))
         .WillOnce(Return(false));
-    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{
-                              "anotherWs", "someWsName"})).Times(Exactly(1));
+    EXPECT_CALL(mockViewRef, setWorkspaceList(std::vector<std::string>{
+                                 "anotherWs", "someWsName"})).Times(Exactly(1));
     presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     presenter.notify(IReflSaveTabPresenter::filterWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
   void testFilterWorkspaceWithRegex() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
     createWS("_42");
     createWS("apple_113");
     createWS("grape_");
     createWS("pear_cut");
 
-    EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(2));
-    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{
-                              "_42", "apple_113", "grape_", "pear_cut"}))
+    EXPECT_CALL(mockViewRef, clearWorkspaceList()).Times(Exactly(2));
+    EXPECT_CALL(mockViewRef, setWorkspaceList(std::vector<std::string>{
+                                 "_42", "apple_113", "grape_", "pear_cut"}))
         .Times(Exactly(1));
-    EXPECT_CALL(mockView, getFilter())
+    EXPECT_CALL(mockViewRef, getFilter())
         .Times(Exactly(1))
         .WillOnce(Return("[a-zA-Z]*_[0-9]+"));
-    EXPECT_CALL(mockView, getRegexCheck())
+    EXPECT_CALL(mockViewRef, getRegexCheck())
         .Times(Exactly(1))
         .WillOnce(Return(true));
-    EXPECT_CALL(mockView,
+    EXPECT_CALL(mockViewRef,
                 setWorkspaceList(std::vector<std::string>{"_42", "apple_113"}))
         .Times(Exactly(1));
     presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     presenter.notify(IReflSaveTabPresenter::filterWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
   void testPopulateParametersList() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
     createWS("ws1");
     std::vector<std::string> logs;
@@ -196,19 +236,22 @@ public:
       logs.push_back((*it)->name());
     }
 
-    EXPECT_CALL(mockView, clearParametersList()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getCurrentWorkspaceName())
+    EXPECT_CALL(mockViewRef, clearParametersList()).Times(Exactly(1));
+    EXPECT_CALL(mockViewRef, getCurrentWorkspaceName())
         .Times(Exactly(1))
         .WillOnce(Return("ws1"));
-    EXPECT_CALL(mockView, setParametersList(logs)).Times(Exactly(1));
+    EXPECT_CALL(mockViewRef, setParametersList(logs)).Times(Exactly(1));
     presenter.notify(IReflSaveTabPresenter::workspaceParamsFlag);
     AnalysisDataService::Instance().clear();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
   void testSaveWorkspaces() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
     std::string savePath = createSavePath();
     std::vector<std::string> wsNames = {"ws1", "ws2", "ws3"};
@@ -216,26 +259,28 @@ public:
     createWS(wsNames[1]);
     createWS(wsNames[2]);
 
-    EXPECT_CALL(mockView, getSavePath())
+    EXPECT_CALL(mockViewRef, getSavePath())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(savePath));
-    EXPECT_CALL(mockView, getTitleCheck())
+    EXPECT_CALL(mockViewRef, getTitleCheck())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getSelectedParameters())
+    EXPECT_CALL(mockViewRef, getSelectedParameters())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(std::vector<std::string>()));
-    EXPECT_CALL(mockView, getQResolutionCheck())
+    EXPECT_CALL(mockViewRef, getQResolutionCheck())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getSeparator())
+    EXPECT_CALL(mockViewRef, getSeparator())
         .Times(AtLeast(1))
         .WillRepeatedly(Return("comma"));
-    EXPECT_CALL(mockView, getPrefix()).Times(Exactly(1)).WillOnce(Return(""));
-    EXPECT_CALL(mockView, getFileFormatIndex())
+    EXPECT_CALL(mockViewRef, getPrefix())
+        .Times(Exactly(1))
+        .WillOnce(Return(""));
+    EXPECT_CALL(mockViewRef, getFileFormatIndex())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(0));
-    EXPECT_CALL(mockView, getSelectedWorkspaces())
+    EXPECT_CALL(mockViewRef, getSelectedWorkspaces())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(wsNames));
     presenter.notify(IReflSaveTabPresenter::saveWorkspacesFlag);
@@ -243,19 +288,22 @@ public:
       Poco::File(savePath + workspaceName + ".dat").remove();
     }
     AnalysisDataService::Instance().clear();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
   void testSuggestSaveDir() {
-    MockSaveTabView mockView;
-    ReflSaveTabPresenter presenter(&mockView);
+    auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
+    auto &mockViewRef = *mockView;
+    auto mockSaver =
+        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
     std::string saveDir = Mantid::Kernel::ConfigService::Instance().getString(
         "defaultsave.directory");
 
-    EXPECT_CALL(mockView, setSavePath(saveDir));
+    EXPECT_CALL(mockViewRef, setSavePath(saveDir));
     presenter.notify(IReflSaveTabPresenter::suggestSaveDirFlag);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
   }
 
 private:

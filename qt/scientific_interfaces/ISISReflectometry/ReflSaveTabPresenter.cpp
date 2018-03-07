@@ -24,14 +24,12 @@ using namespace Mantid::API;
 * @param view :: The view we are handling
 */
 ReflSaveTabPresenter::ReflSaveTabPresenter(
+    std::unique_ptr<IReflAsciiSaver> saver,
     std::unique_ptr<IReflSaveTabView> view)
-    : m_view(std::move(view)), m_mainPresenter(), m_shouldAutosave(false) {
+    : m_view(std::move(view)), m_saver(std::move(saver)), m_mainPresenter(),
+      m_shouldAutosave(false) {
 
   m_view->subscribe(this);
-
-  m_saveAlgs = {"SaveReflCustomAscii", "SaveReflThreeColumnAscii",
-                "SaveANSTOAscii", "SaveILLCosmosAscii"};
-  m_saveExts = {".dat", ".dat", ".txt", ".mft"};
 }
 
 /** Destructor
@@ -213,8 +211,7 @@ void ReflSaveTabPresenter::populateParametersList() {
 }
 
 bool ReflSaveTabPresenter::isValidSaveDirectory(std::string const &directory) {
-  auto file = Poco::File(directory);
-  return !directory.empty() && file.exists() && file.isDirectory();
+  return m_saver->isValidSaveDirectory(directory);
 }
 
 void ReflSaveTabPresenter::error(std::string const &message,
@@ -225,19 +222,6 @@ void ReflSaveTabPresenter::error(std::string const &message,
 void ReflSaveTabPresenter::warn(std::string const &message,
                                 std::string const &title) {
   m_mainPresenter->giveUserInfo(message, title);
-}
-
-std::vector<std::string>
-titles(std::vector<std::string> const &workspaceNames) {
-  auto workspaceTitles = std::vector<std::string>();
-  workspaceTitles.reserve(workspaceNames.size());
-  std::transform(workspaceNames.begin(), workspaceNames.end(),
-                 std::back_inserter(workspaceTitles), [](std::string s) {
-                   return AnalysisDataService::Instance()
-                       .retrieveWS<MatrixWorkspace>(s)
-                       ->getTitle();
-                 });
-  return workspaceTitles;
 }
 
 void ReflSaveTabPresenter::warnInvalidSaveDirectory() {
@@ -251,51 +235,40 @@ void ReflSaveTabPresenter::errorInvalidSaveDirectory() {
         "could not be accessed.",
         "Invalid directory");
 }
+
+NamedFormat ReflSaveTabPresenter::formatFromIndex(int formatIndex) const {
+  switch (formatIndex) {
+  case 0:
+    return NamedFormat::Custom;
+  case 1:
+    return NamedFormat::ThreeColumn;
+  case 2:
+    return NamedFormat::ANSTO;
+  case 3:
+    return NamedFormat::ILLCosmos;
+  default:
+    throw std::runtime_error("Unknown save format.");
+  }
+}
+
+FileFormatOptions ReflSaveTabPresenter::getSaveParametersFromView() const {
+  return FileFormatOptions(
+      /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
+      /*prefix=*/m_view->getPrefix(),
+      /*includeTitle=*/m_view->getTitleCheck(),
+      /*separator=*/m_view->getSeparator(),
+      /*includeQResolution=*/m_view->getQResolutionCheck());
+}
+
 void ReflSaveTabPresenter::saveWorkspaces(
     std::vector<std::string> const &workspaceNames,
     std::vector<std::string> const &logParameters) {
-  if (isValidSaveDirectory(m_view->getSavePath())) {
-    auto workspaceTitles = titles(workspaceNames);
-
-    // Create the appropriate save algorithm
-    bool titleCheck = m_view->getTitleCheck();
-    bool qResolutionCheck = m_view->getQResolutionCheck();
-    std::string separator = m_view->getSeparator();
-    std::string prefix = m_view->getPrefix();
-    int formatIndex = m_view->getFileFormatIndex();
-    std::string algName = m_saveAlgs[formatIndex];
-    std::string extension = m_saveExts[formatIndex];
-    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
-    auto saveDir = m_view->getSavePath();
-
-    auto titleIt = workspaceTitles.cbegin();
-    auto nameIt = workspaceNames.cbegin();
-    for (; titleIt != workspaceTitles.cend() && nameIt != workspaceNames.cend();
-         ++titleIt, ++nameIt) {
-      auto &name = *nameIt;
-      auto &title = *titleIt;
-      // Add any additional algorithm-specific properties and execute
-      if (algName != "SaveANSTOAscii") {
-        if (titleCheck)
-          saveAlg->setProperty("Title", title);
-        saveAlg->setProperty("LogList", logParameters);
-      }
-      if (algName == "SaveReflCustomAscii") {
-        saveAlg->setProperty("WriteDeltaQ", qResolutionCheck);
-      }
-
-      auto path = Poco::Path(saveDir);
-      path.append(prefix + name + extension);
-      saveAlg->setProperty("Separator", separator);
-      saveAlg->setProperty("Filename", path.toString());
-      saveAlg->setProperty(
-          "InputWorkspace",
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
-      saveAlg->execute();
-    }
-  } else {
+  auto savePath = m_view->getSavePath();
+  if (m_saver->isValidSaveDirectory(savePath))
+    m_saver->save(savePath, workspaceNames, logParameters,
+                 getSaveParametersFromView());
+  else
     errorInvalidSaveDirectory();
-  }
 }
 
 /** Saves workspaces with the names specified. */

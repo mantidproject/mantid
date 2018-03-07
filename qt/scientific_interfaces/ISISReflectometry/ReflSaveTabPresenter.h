@@ -8,6 +8,7 @@
 #include <memory>
 #include <MantidKernel/ConfigPropertyObserver.h>
 #include <boost/optional.hpp>
+#include "IReflAsciiSaver.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -46,7 +47,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSaveTabPresenter
     : public IReflSaveTabPresenter {
 public:
   /// Constructor
-  ReflSaveTabPresenter(std::unique_ptr<IReflSaveTabView> view);
+  ReflSaveTabPresenter(std::unique_ptr<IReflAsciiSaver> saver,
+                       std::unique_ptr<IReflSaveTabView> view);
   /// Destructor
   ~ReflSaveTabPresenter() override;
   /// Accept a main presenter
@@ -90,20 +92,19 @@ private:
   std::vector<std::string>
   filterByPrefix(std::vector<std::string> const &allowedPrefixes,
                  std::vector<std::string> workspaceNames) const;
+  NamedFormat formatFromIndex(int formatIndex) const;
 
+  FileFormatOptions getSaveParametersFromView() const;
   void enableAutosave();
   void disableAutosave();
   bool shouldAutosave() const;
 
   /// The view
   std::unique_ptr<IReflSaveTabView> m_view;
+  std::unique_ptr<IReflAsciiSaver> m_saver;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
   bool m_shouldAutosave;
-  /// Names of possible save algorithms
-  std::vector<std::string> m_saveAlgs;
-  /// Extensions used for each save algorithm
-  std::vector<std::string> m_saveExts;
 };
 }
 }
