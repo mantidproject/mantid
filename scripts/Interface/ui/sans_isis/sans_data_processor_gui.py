@@ -207,17 +207,17 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
+        centre_icon_path = os.path.join(path, "icons", "centre.png")
+        centre_icon = QtGui.QIcon(centre_icon_path)
+        _ = QtGui.QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
+
         add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
         add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
         _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        settings_icon_path = os.path.join(path, "icons", "centre.png")
-        settings_icon = QtGui.QIcon(settings_icon_path)
-        _ = QtGui.QListWidgetItem(settings_icon, "Beam Centre", self.tab_choice_list)  # noqa
-
-        settings_icon_path = os.path.join(path, "icons", "diagnostic.png")
-        settings_icon = QtGui.QIcon(settings_icon_path)
-        _ = QtGui.QListWidgetItem(settings_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
+        diagnostic_icon_path = os.path.join(path, "icons", "diagnostic.png")
+        diagnostic_icon = QtGui.QIcon(diagnostic_icon_path)
+        _ = QtGui.QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)

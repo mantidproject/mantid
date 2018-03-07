@@ -57,7 +57,7 @@ To make our BSpline piecewise-smooth we must ensure that these conditions are sa
 
 This point of smoothness is represented by the red circle in the graph below of our BSpline function :math:`B(x)`
       
-.. image:: ../images/BSplineQuadraticExample.jpg
+.. image:: ../../images/BSplineQuadraticExample.jpg
     :width: 800px
     :align: center
     :height: 600px
@@ -79,7 +79,7 @@ some of the data points. It is not necessarily going to pass through all data po
 An example of a fit using BSplines of order 3 can be seen in the image below, our breakpoints have been highlighted in green.
 The original dataset is in black, while the calculated fit using a least-squares fit with 4 breakpoints is in red.
 
-.. image:: ../images/BSplineFittingExample.png
+.. image:: ../../images/BSplineFittingExample.png
     :width: 800px
     :align: center
     :height: 600px
