@@ -8,7 +8,6 @@ from mantid.api import FileProperty, FileAction, ITableWorkspace
 from mantid.kernel import Direction
 import mantid.kernel
 import numpy
-from datetime import datetime
 import os.path
 
 
