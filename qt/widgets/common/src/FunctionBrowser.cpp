@@ -2240,8 +2240,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
       if (fun1->getConstraint(j)) {
         fun1->removeConstraint(parameterName);
       }
-      const auto &localParam = m_localParameterValues[parName][i];
       checkLocalParameter(parName);
+      const auto &localParam = m_localParameterValues[parName][i];
       if (localParam.fixed) {
         // Fix this particular local parameter
         fun1->setParameter(j, localParam.value);
