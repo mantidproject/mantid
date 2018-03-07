@@ -105,13 +105,13 @@ void IndirectDiffractionReduction::initLayout() {
 /**
 * Make file finding status display on the run button and enable/disable it
 */
-void IndirectDiffractionReduction::connectRunButtonValidation(const MantidQt::API::MWRunFiles *file_field) {
-  connect(file_field, SIGNAL(fileTextChanged(const QString &)),
-    this, SLOT(runFilesChanged()));
-  connect(file_field, SIGNAL(findingFiles()), this,
-    SLOT(runFilesFinding()));
+void IndirectDiffractionReduction::connectRunButtonValidation(
+    const MantidQt::API::MWRunFiles *file_field) {
+  connect(file_field, SIGNAL(fileTextChanged(const QString &)), this,
+          SLOT(runFilesChanged()));
+  connect(file_field, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
   connect(file_field, SIGNAL(fileFindingFinished()), this,
-    SLOT(runFilesFound()));
+          SLOT(runFilesFound()));
 }
 
 /**
