@@ -71,9 +71,7 @@ void SumOverlappingTubes::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("Normalise", true, Direction::Input),
       "If true normalise to the number of entries added for a particular "
-      "scattering angle. If the maximum entries accross all the scattering "
-      "angles is N_MAX, and the number of entries for a scattering angle is N, "
-      "the normalisation is performed as N_MAX / N.");
+      "scattering angle. ");
   auto toleranceValidator =
       boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
   toleranceValidator->clearUpper();

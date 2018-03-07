@@ -20,9 +20,9 @@ For the output workspace a grid is made, the x-axis is the scattering angle and 
 
 If the Normalise option is set then the counts for each point in the OutputWorkspace are divided by the number of contributing points to that pixel. The scaling goes as
 
-.. math:: C_{scaled, i} = \frac{N_{max}}{N_{i}} C_i
+.. math:: C_{scaled, i} = \frac{C_i}{N_{i}}
 
-where :math:`C_{scaled, i}` is the scaled counts, :math:`C_i` the raw counts, :math:`N_{max}` is the maximum number of tube pixels contributing to any point in the OutputWorkspace, and :math:`N_{i}` is the number of tube pixels contributing to the point being scaled.
+where :math:`C_{scaled, i}` is the scaled counts, :math:`C_i` the raw counts, and :math:`N_{i}` is the number of tube pixels contributing to the point being scaled.
 
 2DTubes Option
 ++++++++++++++
