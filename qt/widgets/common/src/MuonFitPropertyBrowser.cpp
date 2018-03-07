@@ -1410,6 +1410,7 @@ void MuonFitPropertyBrowser::setAllPeriods() {
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods,QStringList summedPeriods) {
   //has to go here to get the original value 
   int j = m_enumManager->value(m_periodsToFit);
+  auto selected = getChosenPeriods();
   //delete period checkboxes
   clearPeriodCheckboxes();
   if (! m_periodsToFitOptions.empty()) {
@@ -1428,7 +1429,6 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods,QStringList summedP
   }
   if (summedPeriods.size() > 0) {
 	  for (auto period : summedPeriods) {
-		  auto tmp = period.toStdString();
 		  addPeriodCheckbox(period);
 	  }
   }
@@ -1441,15 +1441,33 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods,QStringList summedP
     m_boolManager->setValue(m_periodBoxes.constBegin().value(), true);
   } else {
 	  if (j >= m_periodsToFitOptions.size()) {
-		  //set all groups if the selection is no longer available
-		  m_enumManager->setValue(m_periodsToFit, 0);
+		  //set all groups if the selection is no longer available (0 index)
+		  j = 0;
 	  }
     m_multiFitSettingsGroup->property()->insertSubProperty(m_periodsToFit,
                                                            m_showGroup);
     m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
     m_generateBtn->setDisabled(false);
     
-    m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+	if (m_periodsToFitOptions[j] == CUSTOM_LABEL) {
+
+		m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+		m_enumManager->setValue(m_periodsToFit, j);
+		m_periodWindow->close();
+		setChosenPeriods(selected);
+
+	}
+	else if (m_periodsToFitOptions[j] == ALL_PERIODS_LABEL) {
+		m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+		m_enumManager->setValue(m_periodsToFit, j);
+		//explictly set all periods
+		setAllPeriods();
+	}
+	else {
+		m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+		m_enumManager->setValue(m_periodsToFit, j);
+	}
+
   }
 }
 /**
@@ -1515,11 +1533,7 @@ void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   setChosenPeriods(active);
   m_enumManager->setValue(m_periodsToFit, j);
-  if (j < m_periodsToFitOptions.size()) {
-	  if (m_periodsToFitOptions[j] == ALL_PERIODS_LABEL) {
-		  setAllPeriods();
-	  }
-  }
+
 }
 /**
 * Returns a list of the selected periods (checked boxes)
@@ -1633,6 +1647,8 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
   m_positiveCombo->clear();
   m_negativeCombo->clear();
   addPeriodCheckbox(value);
+  int j = m_enumManager->value(m_periodsToFit);
+  if (m_periodsToFitOptions[j] == ALL_PERIODS_LABEL) { setAllPeriods(); }
 }
 /**
 * sets the label for a single fit and

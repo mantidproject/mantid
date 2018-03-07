@@ -513,14 +513,11 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
   params.plotType = plotType;
   params.periods = getPeriodLabels();
   bool isItSummed = false;
-  if (params.periods.find("+") != std::string::npos) {
-	  isItSummed = true;
-
-  }if (params.periods.find("-") != std::string::npos) {
+  if (params.periods.find("+") != std::string::npos||params.periods.find("-") != std::string::npos) {
 		  isItSummed = true;
 		  
 	  }
-	  
+	  // add to list of summed periods if it is not already in the list, is not empty (1 period) and a sum
 	if (!m_summedPeriods.contains(QString::fromStdString(params.periods)) && params.periods != "" && isItSummed) {
 			  m_summedPeriods << QString::fromStdString(params.periods);
 			  
@@ -2639,7 +2636,6 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     } else {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
 	  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods, m_summedPeriods);
-      //m_uiForm.fitBrowser->setAllPeriods();
     }
     if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
         isItGroup) {
