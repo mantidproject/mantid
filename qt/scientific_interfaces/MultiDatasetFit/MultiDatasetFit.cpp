@@ -814,7 +814,8 @@ void MultiDatasetFit::showParameterPlot() {
 
 void MultiDatasetFit::updateGuessFunction(const QString &, const QString &) {
   auto fun = m_functionBrowser->getFunction();
-  auto composite = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+  auto composite =
+      boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (composite && composite->nFunctions() == 1) {
     fun = composite->getFunction(0);
   }
