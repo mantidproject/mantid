@@ -44,9 +44,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.pushButton_retrieveFWHM.clicked.connect(self.do_retrieve_fwhm)
         self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_single_pt)
         self.ui.pushButton_plot.clicked.connect(self.do_plot_integrated_pt)
-
-        # TODO Implement NOW NOW2
-        # pushButton_loadPeakInfoFile  : do_load_saved_integrated_table : load method is in peak integration tool
+        self.ui.pushButton_loadPeakInfoFile.connect(self.do_load_peak_integration_table)
 
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
@@ -75,12 +73,30 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         export the integrated intensity to parent window's peak processing table
         :return:
         """
-        # TODO NOW2 NEED TEST
+        # TEST NOW2
         # collect all scan/pt from table
         scan_pt_list = self.ui.tableView_summary.get_scan_pt_list()
 
         # add to table including calculate peak center in Q-space
         self.scanIntegratedSignal.emit(scan_pt_list)
+
+        return
+
+    # TEST NOW
+    def do_load_peak_integration_table(self):
+        """
+        load peak integration table CSV file saved from peak integration table
+        :return:
+        """
+        # get table file name
+        table_file = str(QFileDialog.getOpenFileName(self, 'Peak Integration Table', self._working_dir))
+        if len(table_file) == 0 or os.path.exists(table_file) is False:
+            return
+
+        # load
+        status, error_msg = self._controller.load_peak_integration_table(table_file)
+        if not status:
+            raise RuntimeError(error_msg)
 
         return
 
@@ -163,18 +179,44 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
+    # TEST FIXME NOW2
     def do_retrieve_fwhm(self):
         """
         Get FWHM from integrated 'STRONG' peaks according to 2theta value
         :return:
         """
-        # TODO FIXME NOW NOW2 - It needs to be rewritten!
-        # If strong peak scan column is not filled, find a scan with same 2theta
-        # If strong peak is integrated, find FWHM and store the result in a dictionary
+        row_number = self.ui.tableView_summary.rowCount()
+        for row_index in range(row_number):
+            # check whether FWHM value is set up
+            fwhm_i = self.ui.tableView_summary.get_fwhm(row_index)
+            if fwhm_i is not None:
+                continue
 
-        # for (scan_number, pt_number) in self.ui.tableView_summary.get_scan_pt_list():
-        #     two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, pt_number)
-        #     self.ui.tableView_summary.set_two_theta(scan_number, pt_number, two_theta)
+            # get scan number
+            scan_number = self.ui.tableView_summary.get_scan_number(row_index)
+
+            # get corresponding strong nuclear peak (complete scan number)
+            complete_peak_scan_number = self.ui.tableView_summary.get_complete_peak_scan()
+            if complete_peak_scan_number is None:
+                # get 2theta and set 2theta
+                two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, pt_number=1)
+                self.ui.tableView_summary.set_two_theta(row_index, two_theta)
+                # locate reference scan number
+                ref_exp_number, ref_scan_number, integrated_peak_params = \
+                    self.get_integrated_scan_params(self._exp_number, two_theta,  resolution=0.01)
+                if ref_exp_number != self._exp_number:
+                    raise RuntimeError('It is very wrong to have two different experiment number!')
+                # set reference scan number to table
+                self.ui.tableView_summary.set_reference_scan_number(row_index, ref_scan_number)
+            else:
+                ref_scan_number = self.ui.tableView_summary.get_reference_scan_number(row_index)
+            # END-IF
+
+            # get FWHM
+            peak_info = self._controller.get_peak_info(self._exp_number, ref_scan_number)
+            if peak_info.gaussian_fwhm is not None:
+                self.ui.tableView_summary.set_fwhm(row_index, peak_info.gaussian_fwhm)
+        # END-FOR
 
         return
 

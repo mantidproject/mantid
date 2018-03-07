@@ -3,6 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import numpy
 import math
+import os
+import csv
 from scipy.optimize import curve_fit
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
@@ -673,11 +675,39 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
 
 
 def read_peak_integration_table_csv(peak_file_name):
-    # TODO FIXME NOW NOW2 - Make it work and noted
-    with open(file_name, 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter='\t', quotechar='#')
-        for row in reader:
-            lines.append(row)
+    """
+    read a csv file saved from the peak integration information table
+    :param peak_file_name:
+    :return: a dictionary of peak integration result information in STRING form
+    """
+    # check input
+    assert isinstance(peak_file_name, str), 'Peak integration table file {0} must be a string but not a {1}.' \
+                                            ''.format(peak_file_name, type(peak_file_name))
+
+    if os.path.exists(peak_file_name) is False:
+        raise RuntimeError('Peak integration information file {0} does not exist.'.format(peak_file_name))
+
+    # read
+    scan_peak_dict = dict()
+    with open(peak_file_name, 'r') as csv_file:
+        reader = csv.reader(csv_file, delimiter='\t', quotechar='#')
+        title_list = None
+        for index, row in enumerate(reader):
+            if index == 0:
+                # title
+                title_list = row
+            else:
+                # value
+                peak_dict = dict()
+                for term_index, value in enumerate(row):
+                    peak_dict[title_list[term_index]] = value
+                scan_number = int(peak_dict['Scan'])
+                scan_peak_dict[scan_number] = peak_dict
+            # END-IF-ELSE
+        # END-FOR
+    # END-WITH
+
+    return scan_peak_dict
 
 
 def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_center=None,

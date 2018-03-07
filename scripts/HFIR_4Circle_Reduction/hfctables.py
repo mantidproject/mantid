@@ -1203,10 +1203,9 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
     def get_selected_scan_pt(self):
         """
-        blabla
+        get selected row's scan number and pt number
         :return:
         """
-        # TODO NOW2 blabla
         selected_row_list = self.get_selected_rows()
 
         selected_scan_pt_list = list()

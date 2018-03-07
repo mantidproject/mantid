@@ -135,6 +135,8 @@ class CWSCDReductionControl(object):
 
         # Peak Info
         self._myPeakInfoDict = dict()
+        # Loaded peak information dictionary
+        self._myLoadedPeakInfoDict = dict()
         # Sample log value look up table
         self._2thetaLookupTable = dict()
         # Last UB matrix calculated
@@ -2023,6 +2025,21 @@ class CWSCDReductionControl(object):
         self.set_roi(mask_tag, roi_range[0], roi_range[1])
 
         return roi_range
+
+    def load_peak_integration_table(self, table_file_name):
+        """
+        load peak integration table
+        :param table_file_name:
+        :return:
+        """
+        # load to a dictionary
+        try:
+            scan_peak_dict = peak_integration_utility.read_peak_integration_table_csv(table_file_name)
+            self._myLoadedPeakInfoDict.update(scan_peak_dict)
+        except RuntimeError as run_error:
+            return False, 'Failed to read: {0}'.format(run_error)
+
+        return True, None
 
     def load_preprocessed_scan(self, exp_number, scan_number, md_dir, output_ws_name):
         """ load preprocessed scan from hard disk
