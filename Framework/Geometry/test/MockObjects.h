@@ -67,7 +67,7 @@ public:
   MOCK_CONST_METHOD0(getRunNumber, int());
   MOCK_CONST_METHOD0(getPeakNumber, int());
   MOCK_METHOD1(setRunNumber, void(int m_RunNumber));
-  MOCK_METHOD1(setPeakNumber, void(int m_PeakNumber));
+  MOCK_METHOD1(setPeakNumber, void(size_t m_PeakNumber));
   MOCK_CONST_METHOD0(getMonitorCount, double());
   MOCK_METHOD1(setMonitorCount, void(double m_MonitorCount));
   MOCK_CONST_METHOD0(getH, double());

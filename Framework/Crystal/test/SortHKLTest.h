@@ -89,7 +89,7 @@ public:
     TS_ASSERT(wsout);
     if (!wsout)
       return;
-    TS_ASSERT_EQUALS(wsout->getNumberPeaks(), 16);
+    TS_ASSERT_EQUALS(wsout->getNumberPeaks(), 24);
 
     Peak p = wsout->getPeaks()[0];
     TS_ASSERT_EQUALS(p.getH(), 1);

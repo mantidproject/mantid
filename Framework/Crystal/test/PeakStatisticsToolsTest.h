@@ -161,14 +161,39 @@ public:
     auto cleanReflection = reflection.removeOutliers();
     TSM_ASSERT_EQUALS(
         "UniqueReflection removed outlier although it should not.",
-        cleanReflection.count(), 3);
+        cleanReflection.count(), 4);
 
     cleanReflection = reflection.removeOutliers(2.0);
     TSM_ASSERT_EQUALS(
         "UniqueReflection removed outlier although it should not.",
-        cleanReflection.count(), 2);
+        cleanReflection.count(), 4);
 
     cleanReflection = reflection.removeOutliers(1.0);
+    TSM_ASSERT_EQUALS(
+        "UniqueReflection did not remove outliers although it should have.",
+        cleanReflection.count(), 2);
+
+    std::vector<double> cleanIntensities = cleanReflection.getIntensities();
+    TS_ASSERT_EQUALS(cleanIntensities[0], 32.0);
+    TS_ASSERT_EQUALS(cleanIntensities[1], 31.0);
+  }
+
+  void test_UniqueReflectionRemoveOutliersWeighted() {
+    UniqueReflection reflection =
+        getReflectionWithPeaks({30.0, 34.0, 32.0, 31.0}, {4.5, 6.5, 10.0, 2.3});
+
+    // standard deviation is 1.70782512765993
+    auto cleanReflection = reflection.removeOutliers(3.0, true);
+    TSM_ASSERT_EQUALS(
+        "UniqueReflection removed outlier although it should not.",
+        cleanReflection.count(), 3);
+
+    cleanReflection = reflection.removeOutliers(2.0, true);
+    TSM_ASSERT_EQUALS(
+        "UniqueReflection removed outlier although it should not.",
+        cleanReflection.count(), 2);
+
+    cleanReflection = reflection.removeOutliers(1.0, true);
     TSM_ASSERT_EQUALS(
         "UniqueReflection did not remove outliers although it should have.",
         cleanReflection.count(), 1);
@@ -262,9 +287,7 @@ public:
         std::make_pair(V3D(1, 1, 1), UniqueReflection(V3D(1, 1, 1))));
     MockUniqueReflectionCollection reflections(uniques);
 
-    std::string statType = "Mean";
-    double sigmas = 3.0;
-    PeaksStatistics statistics(reflections, statType, sigmas);
+    PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 0);
     TS_ASSERT_EQUALS(statistics.m_uniqueReflections, 0);
     TS_ASSERT_EQUALS(statistics.m_redundancy, 0.0);
@@ -279,9 +302,7 @@ public:
         {{1, 1, 1}, getReflectionWithPeaks({56.0}, {4.5}, 1.0)}};
     MockUniqueReflectionCollection reflections(uniques);
 
-    std::string statType = "Mean";
-    double sigmas = 3.0;
-    PeaksStatistics statistics(reflections, statType, sigmas);
+    PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 1);
     TS_ASSERT_EQUALS(statistics.m_uniqueReflections, 1);
     TS_ASSERT_EQUALS(statistics.m_redundancy, 1.0);
@@ -297,9 +318,7 @@ public:
         {{1, 1, 2}, UniqueReflection(V3D(1, 1, 2))}};
     MockUniqueReflectionCollection reflections(uniques);
 
-    std::string statType = "Mean";
-    double sigmas = 3.0;
-    PeaksStatistics statistics(reflections, statType, sigmas);
+    PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 1);
     TS_ASSERT_EQUALS(statistics.m_uniqueReflections, 1);
     TS_ASSERT_EQUALS(statistics.m_redundancy, 1.0);
@@ -316,9 +335,7 @@ public:
         {{1, 1, 2}, getReflectionWithPeaks({20.0}, {1.0}, 2.0)}};
     MockUniqueReflectionCollection reflections(uniques);
 
-    std::string statType = "Mean";
-    double sigmas = 3.0;
-    PeaksStatistics statistics(reflections, statType, sigmas);
+    PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 2);
     TS_ASSERT_EQUALS(statistics.m_uniqueReflections, 2);
     TS_ASSERT_EQUALS(statistics.m_redundancy, 1.0);
@@ -333,9 +350,7 @@ public:
         {{1, 1, 1}, getReflectionWithPeaks({10.0, 20.0}, {0.1, 0.1}, 1.0)}};
     MockUniqueReflectionCollection reflections(uniques);
 
-    std::string statType = "Mean";
-    double sigmas = 3.0;
-    PeaksStatistics statistics(reflections, statType, sigmas);
+    PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 2);
     TS_ASSERT_EQUALS(statistics.m_uniqueReflections, 1);
     TS_ASSERT_EQUALS(statistics.m_redundancy, 2.0);
@@ -353,9 +368,7 @@ public:
          getReflectionWithPeaks({10.0, 20.0, 15.0}, {0.1, 0.1, 0.1}, 1.0)}};
     MockUniqueReflectionCollection reflections(uniques);
 
-    std::string statType = "Mean";
-    double sigmas = 3.0;
-    PeaksStatistics statistics(reflections, statType, sigmas);
+    PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 3);
     TS_ASSERT_EQUALS(statistics.m_uniqueReflections, 1);
     TS_ASSERT_EQUALS(statistics.m_redundancy, 3.0);

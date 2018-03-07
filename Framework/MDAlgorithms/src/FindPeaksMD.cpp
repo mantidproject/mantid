@@ -748,7 +748,7 @@ void FindPeaksMD::exec() {
 
   for (auto i = 0; i != peakWS->getNumberPeaks(); ++i) {
     Peak &p = peakWS->getPeak(i);
-    p.setPeakNumber(static_cast<int>(i + 1));
+    p.setPeakNumber(i + 1);
   }
   // Save the output
   setProperty("OutputWorkspace", peakWS);

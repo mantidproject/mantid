@@ -97,6 +97,9 @@ void SortHKL::init() {
       make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
       "Output Equivalent Intensities");
+  declareProperty("WeightedZScore", false,
+                  "Use weighted ZScore if true.\n"
+                  "If false, standard ZScore (default).");
 }
 
 void SortHKL::exec() {
@@ -116,6 +119,7 @@ void SortHKL::exec() {
       getUniqueReflections(peaks, cell);
   std::string equivalentIntensities = getPropertyValue("EquivalentIntensities");
   double sigmaCritical = getProperty("SigmaCritical");
+  bool weightedZ = getProperty("WeightedZScore");
 
   MatrixWorkspace_sptr UniqWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
@@ -137,17 +141,24 @@ void SortHKL::exec() {
       counter++;
       auto wavelengths = unique.second.getWavelengths();
       auto intensities = unique.second.getIntensities();
-      auto sigmas = unique.second.getSigmas();
       g_log.debug() << "HKL " << unique.second.getHKL() << "\n";
       g_log.debug() << "Intensities ";
       for (const auto &e : intensities)
         g_log.debug() << e << "  ";
       g_log.debug() << "\n";
-      auto zScores = Kernel::getWeightedZscore(intensities, sigmas);
+      std::vector<double> zScores;
+      bool weighted = false;
+      if (!weighted) {
+        zScores = Kernel::getZscore(intensities);
+      } else {
+        auto sigmas = unique.second.getSigmas();
+        zScores = Kernel::getWeightedZscore(intensities, sigmas);
+      } 
+
       if (zScores.size() > maxPeaks)
         maxPeaks = zScores.size();
       // Possibly remove outliers.
-      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical);
+      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical, weightedZ);
 
       auto intensityStatistics =
           Kernel::getStatistics(outliersRemoved.getIntensities(),
@@ -211,7 +222,7 @@ void SortHKL::exec() {
   }
 
   PeaksStatistics peaksStatistics(uniqueReflections, equivalentIntensities,
-                                  sigmaCritical);
+                                  sigmaCritical, weightedZ);
 
   // Store the statistics for output.
   const std::string tableName = getProperty("StatisticsTable");

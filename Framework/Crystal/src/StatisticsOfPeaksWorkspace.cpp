@@ -89,6 +89,9 @@ void StatisticsOfPeaksWorkspace::init() {
       make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
       "Output Equivalent Intensities");
+  declareProperty("WeightedZScore", false,
+                  "Use weighted ZScore if true.\n"
+                  "If false, standard ZScore (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -193,6 +196,7 @@ void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
   std::string tableName = getPropertyValue("StatisticsTable");
   std::string equivalentIntensities = getPropertyValue("EquivalentIntensities");
   double sigmaCritical = getProperty("SigmaCritical");
+  bool weightedZ = getProperty("WeightedZScore");
   API::IAlgorithm_sptr statsAlg = createChildAlgorithm("SortHKL");
   statsAlg->setProperty("InputWorkspace", ws);
   statsAlg->setPropertyValue("OutputWorkspace", wkspName);
@@ -204,6 +208,7 @@ void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
     statsAlg->setProperty("Append", true);
   statsAlg->setPropertyValue("EquivalentIntensities", equivalentIntensities);
   statsAlg->setProperty("SigmaCritical", sigmaCritical);
+  statsAlg->setProperty("WeightedZScore", weightedZ);
   statsAlg->executeAsChildAlg();
   PeaksWorkspace_sptr statsWksp = statsAlg->getProperty("OutputWorkspace");
   ITableWorkspace_sptr tablews = statsAlg->getProperty("StatisticsTable");

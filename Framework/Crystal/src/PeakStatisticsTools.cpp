@@ -57,7 +57,7 @@ std::vector<double> UniqueReflection::getSigmas() const {
 
 /// Removes peaks whose intensity deviates more than sigmaCritical from the
 /// intensities' mean.
-UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical) const {
+UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical, bool weightedZ) const {
   if (sigmaCritical <= 0.0) {
     throw std::invalid_argument(
         "Critical sigma value has to be greater than 0.");
@@ -67,8 +67,13 @@ UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical) const {
 
   if (m_peaks.size() > 2) {
     auto intensities = getIntensities();
-    auto sigmas = getSigmas();
-    auto zScores = Kernel::getWeightedZscore(intensities, sigmas);
+    std::vector<double> zScores;
+    if (!weightedZ) {
+      zScores = Kernel::getZscore(intensities);
+    } else {
+      auto sigmas = getSigmas();
+      zScores = Kernel::getWeightedZscore(intensities, sigmas);
+    } 
 
     for (size_t i = 0; i < zScores.size(); ++i) {
       if (zScores[i] <= sigmaCritical) {
@@ -213,10 +218,11 @@ UniqueReflectionCollection::getReflections() const {
  * @param equivalentIntensities :: Mean or median for statistics of equivalent
  *peaks.
  * @param sigmaCritical :: Number of standard deviations for outliers.
+ * @param weightedZ :: True for weighted Zscore
  */
 void PeaksStatistics::calculatePeaksStatistics(
     const std::map<V3D, UniqueReflection> &uniqueReflections,
-    std::string &equivalentIntensities, double &sigmaCritical) {
+    std::string &equivalentIntensities, double &sigmaCritical, bool &weightedZ) {
   double rMergeNumerator = 0.0;
   double rPimNumerator = 0.0;
   double intensitySumRValues = 0.0;
@@ -230,7 +236,7 @@ void PeaksStatistics::calculatePeaksStatistics(
       ++m_uniqueReflections;
 
       // Possibly remove outliers.
-      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical);
+      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical, weightedZ);
 
       // I/sigma is calculated for all reflections, even if there is only one
       // observation.
