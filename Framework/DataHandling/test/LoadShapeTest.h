@@ -69,19 +69,25 @@ public:
     clearWorkspaces("InputWS", "InputWS");
   }
 
-  void test_output_workspace_has_MeshObject() {
+  void test_output_workspace_has_MeshObject_2WS() {
+    LoadShape testLoadShape;
+    testLoadShape.initialize();
+    testLoadShape.setPropertyValue("Filename", "cube.stl");
+    prepareWorkspaces(testLoadShape, "InputWS", "OutputWS");
+    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
+    TS_ASSERT(testLoadShape.isExecuted());
+    getMeshObject("OutputWS");
+    clearWorkspaces("InputWS", "OutputWS");
+  }
+
+  void test_output_workspace_has_MeshObject_1WS() {
     LoadShape testLoadShape;
     testLoadShape.initialize();
     testLoadShape.setPropertyValue("Filename", "cube.stl");
     prepareWorkspaces(testLoadShape, "InputWS", "InputWS");
     TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
     TS_ASSERT(testLoadShape.isExecuted());
-    MatrixWorkspace_sptr ws = getWorkspace("InputWS");
-    Sample s;
-    TS_ASSERT_THROWS_NOTHING(s = ws->sample());
-    auto &obj = s.getShape();
-    auto mObj = dynamic_cast<const MeshObject*>(&obj);
-    TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
+    getMeshObject("InputWS");
     clearWorkspaces("InputWS", "InputWS");
   }
 
@@ -110,8 +116,17 @@ private:
     }
   }
 
+  const MeshObject* getMeshObject(const std::string &outputWS) {
+    MatrixWorkspace_sptr ws = getWorkspace("InputWS");
+    Sample s;
+    TS_ASSERT_THROWS_NOTHING(s = ws->sample());
+    auto &obj = s.getShape();
+    auto mObj = dynamic_cast<const MeshObject*>(&obj);
+    TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
+    return mObj;
+  }
+
   MatrixWorkspace_sptr getWorkspace(const std::string &outputWS) {
-    // Check the workspace
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     if (dataStore.doesExist(outputWS)) {
       TS_ASSERT_EQUALS(dataStore.doesExist(outputWS), true);
