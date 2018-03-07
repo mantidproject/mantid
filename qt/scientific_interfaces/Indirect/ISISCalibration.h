@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
 #define MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
 
-#include "IndirectDataReductionTab.h"
-#include "ui_ISISCalibration.h"
-#include "MantidKernel/System.h"
 #include "../General/UserInputValidator.h"
+#include "IndirectDataReductionTab.h"
+#include "MantidKernel/System.h"
+#include "ui_ISISCalibration.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -46,6 +46,30 @@ public:
   void run() override;
   bool validate() override;
 
+  std::pair<double, double> peakRange() const;
+  std::pair<double, double> backgroundRange() const;
+  std::pair<double, double> resolutionRange() const;
+
+  QString peakRangeString() const;
+  QString backgroundRangeString() const;
+  QString instrumentDetectorRangeString() const;
+  QString outputWorkspaceName() const;
+  QString resolutionDetectorRangeString() const;
+  QString rebinString() const;
+  QString backgroundString() const;
+
+  void setPeakRange(const double &peakMin, const double &peakMax,
+                    const QString &minPropertyName,
+                    const QString &maxPropertyName);
+  void setPeakRange(const double &peakMin, const double &peakMax);
+  void setBackgroundRange(const double &backgroundMin,
+                          const double &backgroundMax,
+                          const QString &minPropertyName,
+                          const QString &maxPropertyName);
+  void setBackgroundRange(const double &backgroundMin,
+                          const double &backgroundMax);
+  void setResolutionSpectraRange(const double &minimum, const double &maximum);
+
 private slots:
   void algorithmComplete(bool error);
   void calPlotRaw();
@@ -68,6 +92,14 @@ private slots:
 
 private:
   void createRESfile(const QString &file);
+  void addRuntimeSmoothing(const QString &workspaceName);
+
+  Mantid::API::IAlgorithm_sptr
+  calibrationAlgorithm(const QString &inputFiles) const;
+  Mantid::API::IAlgorithm_sptr
+  resolutionAlgorithm(const QString &inputFiles) const;
+  Mantid::API::IAlgorithm_sptr
+  energyTransferReductionAlgorithm(const QString &inputFiles) const;
 
   Ui::ISISCalibration m_uiForm;
   QString m_lastCalPlotFilename;
@@ -76,6 +108,6 @@ private:
   QString m_outputResolutionName;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
