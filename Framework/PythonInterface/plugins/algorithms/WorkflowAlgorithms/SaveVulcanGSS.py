@@ -8,6 +8,7 @@ from mantid.api import AnalysisDataService
 from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.api import FileProperty, FileAction, ITableWorkspace
 from mantid.kernel import Direction
+import mantid.kernel
 import numpy
 from datetime import datetime
 import os.path
@@ -41,9 +42,6 @@ class SaveVulcanGSS(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty('BinningTable', '', Direction.Input, PropertyMode.Optional),
                              'Table workspace containing binning parameters. If not specified, then no re-binning'
                              'is required')
-
-        # self.declareProperty(FileProperty("BinFilename", "", FileAction.OptionalLoad, ['.dat']),
-        #                      "Name of a data file containing the bin boundaries in Log(TOF).")
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              "Name of rebinned matrix workspace. ")
@@ -199,31 +197,9 @@ class SaveVulcanGSS(PythonAlgorithm):
             :param list_str:
             :return:
             """
-            terms = list_str.replace(' ', '').split(',')
-            int_list = list()
-            for term in terms:
-                term = term.strip()
-                if term.count('-') == 0:
-                    # case of single integer
-                    try:
-                        int_value = int(term)
-                    except ValueError:
-                        raise RuntimeError('{0} cannot be converted to integer'.format(term))
-                    int_list.append(int_value)
-                elif term.count('-') == 1:
-                    # case of integer range
-                    two_parts = term.split('-')
-                    if len(two_parts) != 2:
-                        raise RuntimeError('{0} cannot be a negative number and must be in format X-Y'.format(term))
-                    try:
-                        i0 = int(two_parts[0])
-                        i1 = int(two_parts[1])
-                    except ValueError:
-                        raise RuntimeError('{0} cannot be converted to integers.'.format(two_parts))
-                    int_list.extend(range(i0, i1+1))
-                else:
-                    raise RuntimeError('{0} cannot have any negative number and must be in format X-Y'.format(term))
-            # END-FOR (term)
+            int_array_prop = mantid.kernel.IntArrayProperty("whatever", list_str)
+            int_array = int_array_prop.value
+            int_list = list(int_array)
 
             return int_list
         # END-DEF

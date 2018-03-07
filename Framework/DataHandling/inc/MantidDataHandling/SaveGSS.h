@@ -10,6 +10,7 @@
 #include <iosfwd>
 #include <memory>
 #include <vector>
+#include <string>
 
 // Forward declare
 namespace Mantid {
@@ -132,7 +133,7 @@ private:
                           int periodNum) override;
 
   /// Validates the user input and warns / throws on bad conditions
-  void validateUserInput() const;
+  std::map<std::string, std::string> validateInputs() override;
 
   /// Writes the current buffer to the user specified file path
   void writeBufferToFile(size_t numOutFiles, size_t numSpectra);

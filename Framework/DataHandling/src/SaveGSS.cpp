@@ -7,7 +7,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -183,7 +183,10 @@ void SaveGSS::init() {
 
   auto must_be_3 = boost::make_shared<Kernel::ArrayLengthValidator<int>>(3);
   auto precision_range =
-      boost::make_shared<Kernel::BoundedValidator<int>>(0, 10);
+      boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
+  precision_range->setLower(0);
+  precision_range->setUpper(10);
+
   auto precision_validator = boost::make_shared<Kernel::CompositeValidator>();
   precision_validator->add(must_be_3);
   precision_validator->add(precision_range);
@@ -204,6 +207,9 @@ void SaveGSS::exec() {
   m_inputWS = getProperty("InputWorkspace");
   const size_t nHist = m_inputWS->getNumberHistograms();
 
+  // process user special headers
+  processUserSpecifiedHeaders();
+
   // Are we writing one file with n spectra or
   // n files with 1 spectra each
   const bool split = getProperty("SplitFiles");
@@ -218,20 +224,9 @@ void SaveGSS::exec() {
     entry = makeStringStream();
   }
 
-  // process user special headers
-  processUserSpecifiedHeaders();
-
-  // Check the user input
-  validateUserInput();
-
   // Progress is 2 * number of histograms. One for generating data
   // one for writing out data
   m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, (nHist * 2));
-
-  // For the way we are using the vector we must have N number files
-  // OR N number spectra. Otherwise we would need a vector of vector
-  assert(numOutSpectra + numOfOutFiles == nHist + 1);
-  assert(m_outputBuffer.size() == nHist);
 
   // Now start executing main part of the code
   generateGSASBuffer(numOfOutFiles, numOutSpectra);
@@ -542,7 +537,7 @@ void SaveGSS::generateInstrumentHeader(std::stringstream &out,
   *
   * @param numberOfOutFiles :: The number of output files required
   */
-void Mantid::DataHandling::SaveGSS::generateOutFileNames(
+void SaveGSS::generateOutFileNames(
     size_t numberOfOutFiles) {
   const std::string outputFileName = getProperty("Filename");
   assert(numberOfOutFiles > 0);
@@ -561,6 +556,8 @@ void Mantid::DataHandling::SaveGSS::generateOutFileNames(
   const std::string basename = path.getBaseName();
   const std::string ext = path.getExtension();
 
+  // get file name and check with warning
+  const bool append = getProperty("Append");
   for (size_t i = 0; i < numberOfOutFiles; i++) {
     // Construct output name of the form 'base name-i.ext'
     std::string newFileName = basename;
@@ -568,8 +565,19 @@ void Mantid::DataHandling::SaveGSS::generateOutFileNames(
     // Remove filename from path
     path.makeParent();
     path.append(newFileName);
-    m_outFileNames[i].assign(path.toString());
+    std::string filename = path.toString();
+    m_outFileNames[i].assign(filename);
+    // check and make some warning
+    if (!append && doesFileExist(filename)) {
+      g_log.warning("Target GSAS file " + filename +
+                    " exists and will be overwritten.\n");
+    } else if (append && !doesFileExist(filename)) {
+      g_log.warning("Target GSAS file " + filename +
+                    " does not exist but algorithm was set to append.\n");
+    }
   }
+
+  return;
 }
 
 /**
@@ -708,38 +716,38 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
   *
   * @throws :: If for any reason we cannot run the algorithm
   */
-void SaveGSS::validateUserInput() const {
+std::map<std::string, std::string> SaveGSS::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  API::MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
+
   // Check the number of histogram/spectra < 99
-  const auto nHist = static_cast<int>(m_inputWS->getNumberHistograms());
+  const auto nHist = static_cast<int>(input_ws->getNumberHistograms());
   const bool split = getProperty("SplitFiles");
   if (nHist > 99 && !split) {
     std::string outError = "Number of Spectra(" + std::to_string(nHist) +
                            ") cannot be larger than 99 for GSAS file";
-    g_log.error(outError);
-    throw std::invalid_argument(outError);
+    result["InputWorkspace"] = outError;
+    result["SplitFiles"] = outError;
+    return result;
   }
 
   // Check we have any output filenames
-  assert(m_outFileNames.size() > 0);
-
-  const bool append = getProperty("Append");
-  for (const auto &filename : m_outFileNames) {
-    if (!append && doesFileExist(filename)) {
-      g_log.warning("Target GSAS file " + filename +
-                    " exists and will be overwritten.\n");
-    } else if (append && !doesFileExist(filename)) {
-      g_log.warning("Target GSAS file " + filename +
-                    " does not exist but algorithm was set to append.\n");
-    }
+  std::string output_file_name = getProperty("Filename");
+  if (output_file_name.size() == 0) {
+    result["Filename"] = "Filename cannot be left empty.";
+    return result;
   }
 
   // Check about the user specified bank header
-  if (m_overwrite_std_bank_header &&
-      m_user_specified_bank_headers.size() !=
-          m_inputWS->getNumberHistograms()) {
-    throw std::invalid_argument("If user specifies bank header, each bank must "
-                                "have a unique user-specified header.");
+  std::vector<std::string> user_header_vec = getProperty("UserSpecifiedBankHeader");
+  if (user_header_vec.size() > 0 && user_header_vec.size() != input_ws->getNumberHistograms()) {
+    result["UserSpecifiedBankHeader"] = "If user specifies bank header, each bank must "
+        "have a unique user-specified header.";
+    return result;
   }
+
+  return result;
 }
 
 namespace { // anonymous
@@ -960,15 +968,8 @@ void SaveGSS::writeSLOGdata(const size_t ws_index, const int bank,
   // Write bank header
   if (m_overwrite_std_bank_header) {
     // write user header only!
-    if (ws_index >= m_user_specified_bank_headers.size()) {
-      g_log.error() << "Workspace index " << ws_index << " is out of range of "
-                    << "user specified bank headers (size = "
-                    << m_user_specified_bank_headers.size() << "\n";
-      throw std::runtime_error(
-          "Bank ID is out of range for user specified bank headers");
-    }
-    out << std::fixed << std::setw(80) << m_user_specified_bank_headers[ws_index]
-        << "\n";
+    out << std::fixed << std::setw(80)
+        << m_user_specified_bank_headers[ws_index] << "\n";
   } else {
     // write general bank header part
     writeBankHeader(out, "SLOG", bank, datasize);
