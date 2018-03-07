@@ -9,7 +9,7 @@ EISFDiffSphereAlkyl
 Description
 -----------
 
-.. image:: ../images/EISFDiffSphereAlkyl_1.png
+.. image:: ../../images/EISFDiffSphereAlkyl_1.png
    :scale: 50 %
 
 This fitting function models the elastic incoherent intensity of a linear
