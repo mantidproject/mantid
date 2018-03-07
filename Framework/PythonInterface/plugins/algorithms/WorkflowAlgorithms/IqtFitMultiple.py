@@ -291,7 +291,7 @@ def _find_indices_of_stretched_exponentials(composite):
 
     for index in range(0, len(composite)):
         if composite.getFunction(index).name() == "StretchExp":
-            return indices.append(index)
+            indices.append(index)
     return indices
 
 
