@@ -48,7 +48,8 @@ class LoadEXED(PythonAlgorithm):
                              doc="Instrument definition file. If no file is specified, the default idf is used.")
 
         self.declareProperty('AngleOverride', -255.0,
-                             doc = "Rotation angle of the EXED magnet.\nThis should be read from the data file!\n"
+                             doc = "Rotation angle (degrees) of the EXED magnet."
+                                   "\nThis should be read from the data file!\n"
                                    "Only change the value if the file has an incomplete header!")
 
         self.declareProperty(MatrixWorkspaceProperty(name="OutputWorkspace",
