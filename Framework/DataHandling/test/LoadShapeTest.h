@@ -117,7 +117,7 @@ private:
   }
 
   const MeshObject* getMeshObject(const std::string &outputWS) {
-    MatrixWorkspace_sptr ws = getWorkspace("InputWS");
+    MatrixWorkspace_sptr ws = getWorkspace(outputWS);
     Sample s;
     TS_ASSERT_THROWS_NOTHING(s = ws->sample());
     auto &obj = s.getShape();

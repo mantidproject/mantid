@@ -96,7 +96,7 @@ void LoadShape::exec() {
   }
 
   // Put shape into sample.
-  Sample sample = outputWS->mutableSample();
+  Sample &sample = outputWS->mutableSample();
   sample.setShape(shape);
 
 }
