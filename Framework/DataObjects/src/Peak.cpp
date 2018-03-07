@@ -219,7 +219,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_runNumber(ipeak.getRunNumber()),
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
-      m_peakNumber(0), m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(ipeak.getPeakNumber()), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -883,7 +883,7 @@ int Peak::getCol() const { return m_col; }
 // -------------------------------------------------------------------------------------
 /**Returns the unique peak number
  * Returns -1 if it could not find it. */
-int Peak::getPeakNumber() const { return m_peakNumber; }
+size_t Peak::getPeakNumber() const { return m_peakNumber; }
 
 // -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, sets the row (y) of the pixel of the
@@ -956,7 +956,7 @@ double Peak::getValueByColName(const std::string &name_in) const {
   else if (name == "col")
     return this->getCol();
   else if (name == "peaknumber")
-    return this->getPeakNumber();
+    return double(this->getPeakNumber());
   else
     throw std::runtime_error(
         "Peak::getValueByColName() unknown column or column is not a number: " +

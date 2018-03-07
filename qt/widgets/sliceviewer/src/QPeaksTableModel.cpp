@@ -198,7 +198,7 @@ QPeaksTableModel::QPeaksTableModel(
       [](const IPeak &peak) { return QVariant(peak.getCol()); },
       [](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
       [](const IPeak &peak) { return QVariant(peak.getQSampleFrame().norm()); },
-      [](const IPeak &peak) { return QVariant(peak.getPeakNumber()); },
+      [](const IPeak &peak) { return QVariant(int(peak.getPeakNumber())); },
   };
 
   // Mapping member functions of the Peak object to a column index with

@@ -695,7 +695,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> dSpacing(np);
   std::vector<double> TOF(np);
   std::vector<int> runNumber(np);
-  std::vector<int> peakNumber(np);
+  std::vector<size_t> peakNumber(np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
 

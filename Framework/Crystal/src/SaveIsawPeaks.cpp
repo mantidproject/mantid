@@ -261,7 +261,7 @@ void SaveIsawPeaks::exec() {
   // =========================================
 
   // Go in order of run numbers
-  int maxPeakNumb = 0;
+  size_t maxPeakNumb = 0;
   size_t appendPeakNumb = 0;
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {

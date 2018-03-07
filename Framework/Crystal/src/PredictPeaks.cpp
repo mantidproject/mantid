@@ -473,6 +473,7 @@ void PredictPeaks::setStructureFactorCalculatorFromSample(
  * @param hkl
  * @param orientedUB
  * @param goniometerMatrix
+ * @param seqNum
  */
 void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
                                             const DblMatrix &orientedUB,
