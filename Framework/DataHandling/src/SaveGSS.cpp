@@ -537,8 +537,7 @@ void SaveGSS::generateInstrumentHeader(std::stringstream &out,
   *
   * @param numberOfOutFiles :: The number of output files required
   */
-void SaveGSS::generateOutFileNames(
-    size_t numberOfOutFiles) {
+void SaveGSS::generateOutFileNames(size_t numberOfOutFiles) {
   const std::string outputFileName = getProperty("Filename");
   assert(numberOfOutFiles > 0);
 
@@ -740,9 +739,12 @@ std::map<std::string, std::string> SaveGSS::validateInputs() {
   }
 
   // Check about the user specified bank header
-  std::vector<std::string> user_header_vec = getProperty("UserSpecifiedBankHeader");
-  if (user_header_vec.size() > 0 && user_header_vec.size() != input_ws->getNumberHistograms()) {
-    result["UserSpecifiedBankHeader"] = "If user specifies bank header, each bank must "
+  std::vector<std::string> user_header_vec =
+      getProperty("UserSpecifiedBankHeader");
+  if (user_header_vec.size() > 0 &&
+      user_header_vec.size() != input_ws->getNumberHistograms()) {
+    result["UserSpecifiedBankHeader"] =
+        "If user specifies bank header, each bank must "
         "have a unique user-specified header.";
     return result;
   }

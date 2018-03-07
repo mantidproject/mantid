@@ -2,8 +2,6 @@
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range  #pylint: disable=redefined-builtin
 import mantid.simpleapi as api
-# from mantid.api import *
-# from mantid.kernel import *
 from mantid.api import AnalysisDataService
 from mantid.api import MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.api import FileProperty, FileAction, ITableWorkspace
@@ -49,7 +47,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         self.declareProperty(FileProperty("GSSFilename","", FileAction.Save, ['.gda']),
                              "Name of the output GSAS file. ")
 
-        self.declareProperty("IPTS", 0, "IPTS number")
+        self.declareProperty("IPTS", mantid.kernel.Property.EMPTY_INT, "IPTS number")
 
         self.declareProperty("GSSParmFileName", "", "GSAS parameter file name for this GSAS data file.")
 
@@ -176,13 +174,19 @@ class SaveVulcanGSS(PythonAlgorithm):
         # output workspace name
         output_ws_name = self.getPropertyValue("OutputWorkspace")
 
-        # IPTS
-        ipts = self.getPropertyValue("IPTS")
+        # IPTS-number
+        ipts_number = self.getProperty("IPTS")
+        if ipts_number == mantid.kernel.Property.EMPTY_INT:
+            try:
+                run_number = input_workspace.run().getProperty('run').value
+                ipts_number = api.GetIPTS(Instrument='VULCAN', RunNumber=run_number)
+            except RuntimeError:
+                ipts_number = 0
 
         # GSAS parm file name
         parm_file_name = self.getPropertyValue("GSSParmFileName")
 
-        return input_workspace, binning_parameter_list, gss_file_name, output_ws_name, ipts, parm_file_name
+        return input_workspace, binning_parameter_list, gss_file_name, output_ws_name, ipts_number, parm_file_name
 
     def process_binning_param_table(self, input_workspace, bin_par_ws_name):
         """
@@ -261,10 +265,8 @@ class SaveVulcanGSS(PythonAlgorithm):
         if bin_par_str.count(':') == 0:
             # parse regular binning parameters
             terms = bin_par_str.split(',')  # in string format
-            bin_param = list()
             try:
-                for term in terms:
-                    bin_param.append(float(term))
+                bin_param = [float(term) for term in terms]
             except ValueError:
                 raise RuntimeError('Binning parameters {0} have non-float terms.'.format(bin_par_str))
 
@@ -366,17 +368,9 @@ class SaveVulcanGSS(PythonAlgorithm):
                                                                               run_start_sub_seconds))
 
             # property run_start and duration exist
-            utctime = datetime.strptime(run_start_seconds, '%Y-%m-%dT%H:%M:%S')
-            time0 = datetime.strptime("1990-01-01T0:0:0", '%Y-%m-%dT%H:%M:%S')
-
-            # convert from string version of time to total nano second
-            # TODO FIXME Mantid might have better solution
-            delta = utctime - time0
-            try:
-                total_nanosecond_start = int(delta.total_seconds()*int(1.0E9)) + int(run_start_sub_seconds)
-            except AttributeError:
-                total_seconds = delta.days*24*3600 + delta.seconds
-                total_nanosecond_start = total_seconds * int(1.0E9) + int(run_start_sub_seconds)
+            utctime = numpy.datetime64(run.getProperty('run_start').value)
+            time0 = numpy.datetime64("1990-01-01T0:0:0")
+            total_nanosecond_start = int((utctime - time0) / numpy.timedelta64(1, 'ns'))
             total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
 
         else:
