@@ -261,9 +261,12 @@ void SaveIsawPeaks::exec() {
   // =========================================
 
   // Go in order of run numbers
+  int maxPeakNumb = 0;
+  size_t appendPeakNumb = 0;
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
     // Start of a new run
+    appendPeakNumb += maxPeakNumb;
     int run = runMap_it->first;
     bankMap_t &bankMap = runMap_it->second;
 
@@ -308,7 +311,8 @@ void SaveIsawPeaks::exec() {
           Peak &p = peaks[wi];
 
           // Sequence (run) number
-          out << "3" << std::setw(7) << p.getPeakNumber();
+          maxPeakNumb = std::max(maxPeakNumb, p.getPeakNumber());
+          out << "3" << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
 
           // HKL's are flipped by -1 because of the internal Q convention
           // unless Crystallography convention

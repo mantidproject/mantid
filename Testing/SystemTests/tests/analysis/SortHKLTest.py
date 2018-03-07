@@ -117,8 +117,7 @@ class SortHKLTest(HKLStatisticsTestMixin, stresstesting.MantidStressTest):
 
         # pylint: disable=unused-variable
         sorted_hkls, chi2, statistics, equivInten = SortHKL(InputWorkspace=reflections,
-                                                PointGroup=point_group_name,
-                                                LatticeCentering=centering_name)
+                         PointGroup=point_group_name, LatticeCentering=centering_name)
 
         return statistics.row(0), sorted_hkls
 
