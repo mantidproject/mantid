@@ -175,7 +175,7 @@ signals:
   void fileTextChanged(const QString &);
   /// Emitted when the editing has finished
   void fileEditingFinished();
-  // Emitted when files finding starts.
+  /// Emitted when files finding starts.
   void findingFiles();
   /// Emitted when files have been found
   void filesFound();
