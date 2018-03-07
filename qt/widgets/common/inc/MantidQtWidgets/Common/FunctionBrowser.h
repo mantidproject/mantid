@@ -246,6 +246,9 @@ protected:
   /// Get a property for a parameter
   QtProperty *getParameterProperty(const QString &funcIndex,
                                    const QString &paramName) const;
+  /// Get a property for a parameter which is a parent of a given
+  /// property (tie or constraint).
+  QtProperty *getParentParameterProperty(QtProperty *prop) const;
   /// Get a tie property attached to a parameter property
   QtProperty *getTieProperty(QtProperty *prop) const;
 
@@ -257,8 +260,6 @@ protected:
   bool isTie(QtProperty *prop) const;
   /// Get a tie for a paramater
   std::string getTie(QtProperty *prop) const;
-  /// Remove all local tie properties
-  void removeAllLocalTieProperties();
 
   /// Add a constraint property
   QList<AProperty> addConstraintProperties(QtProperty *prop,
@@ -278,8 +279,13 @@ protected:
   void initLocalParameter(const QString &parName) const;
   /// Make sure that the parameter is initialized
   void checkLocalParameter(const QString &parName) const;
+  /// Check that a property contains a local parameter
+  bool isLocalParameterProperty(QtProperty *prop) const;
+  /// Check that a property contains a global parameter
+  bool isGlobalParameterProperty(QtProperty *prop) const;
   /// Make sure that properties are in sync with the cached ties
   void updateLocalTie(const QString &parName);
+  /// Make sure that properties are in sync with the cached constraints
   void updateLocalConstraint(const QString &parName);
 
   /// Ask user for function type
