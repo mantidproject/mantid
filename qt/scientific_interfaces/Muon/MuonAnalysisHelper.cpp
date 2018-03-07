@@ -168,20 +168,18 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // output this number to three decimal places
   out << std::setprecision(3);
   out << counts / 1000000 << " MEv";
-  out << std::setprecision(12);
   // Add average temperature.
   out << "\nAverage Temperature: ";
   if (run.hasProperty("Temp_Sample")) {
     // Filter the temperatures by the start and end times for the run.
     Mantid::Kernel::SplittingInterval time_split(start, end);
     std::vector<Mantid::Kernel::SplittingInterval> splitVector = {time_split};
-    auto Temp_Sample = run.getProperty("Temp_Sample");
-    const auto *Temp_Sample_TimeSeries =
-        dynamic_cast<const TimeSeriesProperty<double> *>(Temp_Sample);
-    double average = Temp_Sample_TimeSeries->averageValueInFilter(splitVector);
+    auto tempSample = run.getProperty("Temp_Sample");
+    const auto *tempSampleTimeSeries =
+        dynamic_cast<const TimeSeriesProperty<double> *>(tempSample);
 
-    if (average != 0.0) {
-      out << average;
+    if (tempSampleTimeSeries) {
+      out << tempSampleTimeSeries->averageValueInFilter(splitVector);
     } else {
       out << "Not set";
     }
@@ -193,7 +191,9 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Temperature: ";
   if (run.hasProperty("sample_temp")) {
-    out << run.getProperty("sample_temp")->value();
+    //extract as string, then convert to double to allow precision to apply
+    std::string valueAsString = run.getProperty("sample_temp")->value();
+    out << std::stod(valueAsString);
   } else {
     out << "Not found";
   }
@@ -202,7 +202,8 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Magnetic Field: ";
   if (run.hasProperty("sample_magn_field")) {
-    out << run.getProperty("sample_magn_field")->value();
+    std::string valueAsString = run.getProperty("sample_magn_field")->value();
+    out << std::stod(valueAsString);
   } else {
     out << "Not found";
   }
