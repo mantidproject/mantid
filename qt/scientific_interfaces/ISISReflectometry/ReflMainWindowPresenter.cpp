@@ -47,8 +47,8 @@ void ReflMainWindowPresenter::completedGroupReductionSuccessfully(
 }
 
 void ReflMainWindowPresenter::completedRowReductionSuccessfully(
-    GroupData const &group, std::vector<std::string> const &workspaceNames) {
-  m_savePresenter->completedRowReductionSuccessfully(group, workspaceNames);
+    GroupData const &group, std::string const &workspaceName) {
+  m_savePresenter->completedRowReductionSuccessfully(group, workspaceName);
 }
 
 void ReflMainWindowPresenter::notifyReductionPaused(int group) {

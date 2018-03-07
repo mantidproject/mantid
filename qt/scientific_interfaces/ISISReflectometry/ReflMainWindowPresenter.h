@@ -93,7 +93,7 @@ public:
       std::string const &workspaceName) override;
   void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
-      std::vector<std::string> const &workspaceNames) override;
+      std::string const &workspaceName) override;
 
 private:
   /// Check for Settings Tab null pointer

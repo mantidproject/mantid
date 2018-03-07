@@ -84,9 +84,8 @@ public:
   virtual void confirmReductionResumed(int group) { UNUSED_ARG(group); }
   virtual void completedGroupReductionSuccessfully(GroupData const &,
                                                    std::string const &){};
-  virtual void
-  completedRowReductionSuccessfully(GroupData const &,
-                                    std::vector<std::string> const &){};
+  virtual void completedRowReductionSuccessfully(GroupData const &,
+                                                 std::string const &){};
 };
 }
 }

@@ -275,7 +275,7 @@ class MockSaveTabPresenter : public IReflSaveTabPresenter {
 public:
   MOCK_METHOD2(completedRowReductionSuccessfully,
                void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
-                    std::vector<std::string> const &));
+                    std::string const &));
   MOCK_METHOD2(completedGroupReductionSuccessfully,
                void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
                     std::string const &));
@@ -301,7 +301,7 @@ public:
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD2(completedRowReductionSuccessfully,
                void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
-                    std::vector<std::string> const &));
+                    std::string const &));
   MOCK_METHOD2(completedGroupReductionSuccessfully,
                void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
                     std::string const &));

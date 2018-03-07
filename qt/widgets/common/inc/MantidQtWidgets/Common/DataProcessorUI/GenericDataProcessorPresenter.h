@@ -223,9 +223,9 @@ protected:
   // Plotting
   virtual void plotRow();
   virtual void plotGroup();
-  virtual void completedRowReductionSuccessfully(
-      GroupData const &groupData,
-      std::vector<std::string> const &workspaceName);
+  virtual void
+  completedRowReductionSuccessfully(GroupData const &groupData,
+                                    std::string const &workspaceName);
   virtual void
   completedGroupReductionSuccessfully(GroupData const &groupData,
                                       std::string const &workspaceName);

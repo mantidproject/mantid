@@ -59,7 +59,7 @@ public:
       std::string const &workspaceName) override;
   void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
-      std::vector<std::string> const &workspaceNames) override;
+      std::string const &workspaceName) override;
   void onAnyReductionPaused() override;
   void onAnyReductionResumed() override;
 
@@ -86,14 +86,7 @@ private:
                       std::vector<std::string> const &logParameters);
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
-
-  bool prefixedByOneOf(std::vector<std::string> const &allowedPrefixes,
-                       std::string const &workspaceName) const;
-  std::vector<std::string>
-  filterByPrefix(std::vector<std::string> const &allowedPrefixes,
-                 std::vector<std::string> workspaceNames) const;
   NamedFormat formatFromIndex(int formatIndex) const;
-
   FileFormatOptions getSaveParametersFromView() const;
   void enableAutosave();
   void disableAutosave();

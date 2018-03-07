@@ -52,7 +52,7 @@ public:
 
   virtual void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
-      std::vector<std::string> const &workspaceName) = 0;
+      std::string const &workspaceName) = 0;
 
   virtual void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,

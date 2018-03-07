@@ -11,8 +11,9 @@ enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos };
 
 class FileFormatOptions {
 public:
-  FileFormatOptions(NamedFormat format, std::string prefix, bool includeTitle,
-                    std::string separator, bool includeQResolution);
+  FileFormatOptions(NamedFormat format, std::string const &prefix,
+                    bool includeTitle, std::string const &separator,
+                    bool includeQResolution);
   bool shouldIncludeTitle() const;
   bool shouldIncludeQResolution() const;
   std::string const &separator() const;

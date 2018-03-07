@@ -11,8 +11,6 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
 namespace MantidQt {
@@ -84,17 +82,6 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
   }
 }
 
-namespace {
-template <typename InputIterator>
-bool startsWithAnyOf(InputIterator begin, InputIterator end,
-                     std::string const &name) {
-  for (auto current = begin; current != end; ++current)
-    if (boost::algorithm::starts_with(name, *current))
-      return true;
-  return false;
-}
-}
-
 void ReflSaveTabPresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
     m_shouldAutosave = true;
@@ -105,31 +92,11 @@ void ReflSaveTabPresenter::enableAutosave() {
   }
 }
 
-bool ReflSaveTabPresenter::prefixedByOneOf(
-    std::vector<std::string> const &allowedPrefixes,
-    std::string const &workspaceName) const {
-  return startsWithAnyOf(allowedPrefixes.cbegin(), allowedPrefixes.cend(),
-                         workspaceName);
-}
-
 void ReflSaveTabPresenter::disableAutosave() { m_shouldAutosave = false; }
 
 void ReflSaveTabPresenter::onSavePathChanged() {
   if (shouldAutosave() && !isValidSaveDirectory(m_view->getSavePath()))
     warnInvalidSaveDirectory();
-}
-
-std::vector<std::string> ReflSaveTabPresenter::filterByPrefix(
-    std::vector<std::string> const &allowedPrefixes,
-    std::vector<std::string> workspaceNames) const {
-  workspaceNames.erase(
-      std::remove_if(
-          workspaceNames.begin(), workspaceNames.end(),
-          [this, &allowedPrefixes](std::string const &workspaceName) -> bool {
-            return !prefixedByOneOf(allowedPrefixes, workspaceName);
-          }),
-      workspaceNames.end());
-  return workspaceNames;
 }
 
 void ReflSaveTabPresenter::completedGroupReductionSuccessfully(
@@ -144,10 +111,9 @@ bool ReflSaveTabPresenter::shouldAutosave() const { return m_shouldAutosave; }
 
 void ReflSaveTabPresenter::completedRowReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group,
-    std::vector<std::string> const &workspaceNames) {
+    std::string const &workspaceName) {
   if (!MantidWidgets::DataProcessor::canPostprocess(group) && shouldAutosave())
-    saveWorkspaces(filterByPrefix(std::vector<std::string>({"IvsQ_binned_"}),
-                                  workspaceNames));
+    saveWorkspaces(std::vector<std::string>({workspaceName}));
 }
 
 /** Fills the 'List of Workspaces' widget with the names of all available

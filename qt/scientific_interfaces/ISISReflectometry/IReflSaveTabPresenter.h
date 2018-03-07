@@ -56,7 +56,7 @@ public:
 
   virtual void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
-      std::vector<std::string> const &workspaceName) = 0;
+      std::string const &workspaceName) = 0;
 
   /// Tell the presenter something happened
   virtual void notify(IReflSaveTabPresenter::Flag flag) = 0;

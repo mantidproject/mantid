@@ -165,7 +165,7 @@ void ReflRunsTabPresenter::completedGroupReductionSuccessfully(
 }
 
 void ReflRunsTabPresenter::completedRowReductionSuccessfully(
-    GroupData const &group, std::vector<std::string> const &workspaceNames) {
+    GroupData const &group, std::string const &workspaceNames) {
   m_mainPresenter->completedRowReductionSuccessfully(group, workspaceNames);
 }
 

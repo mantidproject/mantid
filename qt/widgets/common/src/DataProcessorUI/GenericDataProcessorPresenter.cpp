@@ -497,7 +497,7 @@ void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
     GroupData const &, std::string const &) {}
 
 void GenericDataProcessorPresenter::completedRowReductionSuccessfully(
-    GroupData const &, std::vector<std::string> const &) {}
+    GroupData const &, std::string const &) {}
 
 /**
 Process a new group
@@ -614,15 +614,10 @@ void GenericDataProcessorPresenter::groupThreadFinished(const int exitCode) {
 }
 
 void GenericDataProcessorPresenter::rowThreadFinished(const int exitCode) {
-  auto prefixes = m_processor.prefixes();
-  std::vector<std::string> workspaceNames;
-  workspaceNames.reserve(prefixes.size());
-  std::transform(
-      prefixes.cbegin(), prefixes.cend(), std::back_inserter(workspaceNames),
-      [this](QString const &prefix) -> std::string {
-        return getReducedWorkspaceName(m_rowItem.second).toStdString();
-      });
-  completedRowReductionSuccessfully(m_groupData, workspaceNames);
+  completedRowReductionSuccessfully(
+      m_groupData,
+      m_rowItem.second->reducedName(m_processor.defaultOutputPrefix())
+          .toStdString());
   threadFinished(exitCode);
 }
 

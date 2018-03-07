@@ -427,8 +427,8 @@ void ReflDataProcessorPresenter::completedGroupReductionSuccessfully(
 
 void ReflDataProcessorPresenter::completedRowReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &groupData,
-    std::vector<std::string> const &workspaceNames) {
-  m_mainPresenter->completedRowReductionSuccessfully(groupData, workspaceNames);
+    std::string const &workspaceName) {
+  m_mainPresenter->completedRowReductionSuccessfully(groupData, workspaceName);
 }
 
 /** Processes a group of non-event workspaces
