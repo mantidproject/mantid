@@ -4,15 +4,16 @@ namespace CustomInterfaces {
 InvalidSavePath::InvalidSavePath(std::string const &path)
     : std::runtime_error("The path" + path +
                          "does not exist or is not a directory."),
-      m_path(std::move(path)) {}
+      m_path(path) {}
 std::string const &InvalidSavePath::path() const { return m_path; }
 
-FileFormatOptions::FileFormatOptions(NamedFormat format, std::string prefix,
-                                     bool includeTitle, std::string separator,
+FileFormatOptions::FileFormatOptions(NamedFormat format,
+                                     std::string const &prefix,
+                                     bool includeTitle,
+                                     std::string const &separator,
                                      bool includeQResolution)
-    : m_format(format), m_prefix(std::move(prefix)),
-      m_includeTitle(includeTitle), m_separator(std::move(separator)),
-      m_includeQResolution(includeQResolution) {}
+    : m_format(format), m_prefix(prefix), m_includeTitle(includeTitle),
+      m_separator(separator), m_includeQResolution(includeQResolution) {}
 bool FileFormatOptions::shouldIncludeTitle() const { return m_includeTitle; }
 bool FileFormatOptions::shouldIncludeQResolution() const {
   return m_includeQResolution;
