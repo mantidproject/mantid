@@ -189,8 +189,10 @@ if [[ "$BUILDPKG" == true ]]; then
   if [[ "${ON_MACOS}" == true ]]; then
     PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
   else
-    # Use different suffix for linux builds
-    if [[ ${JOB_NAME} == *release* ]]; then
+    # Use different suffix for linux builds if parameter is not defined
+    if [[ -n "${PACKAGE_SUFFIX}" ]]; then
+       echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
+    elif [[ ${JOB_NAME} == *release* ]]; then
        PACKAGE_SUFFIX=""
     elif [[ ${JOB_NAME} == *master* ]]; then
       PACKAGE_SUFFIX="nightly"
@@ -205,8 +207,8 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
     fi
 
-    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]]; then
-      # No suffix and traditional install path for python 2 release build
+    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+      # Traditional install path for python 2 release build
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
     else
       # everything else uses lower-case values

@@ -304,6 +304,7 @@ class RunTabPresenter(object):
 
         except Exception as e:
             self._view.halt_process_flag()
+            self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
 
     def on_processing_finished(self):

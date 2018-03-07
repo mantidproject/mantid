@@ -54,6 +54,7 @@ void IqtFit::setup() {
   addBoolCustomSetting("ConstrainBeta", "Make Beta Global");
   addBoolCustomSetting("ExtractMembers", "Extract Members");
   setCustomSettingEnabled("ConstrainBeta", false);
+  setCustomSettingEnabled("ConstrainIntensities", false);
 
   // Set available background options
   setBackgroundOptions({"None", "FlatBackground"});
@@ -103,6 +104,10 @@ void IqtFit::setup() {
           SLOT(customBoolUpdated(const QString &, bool)));
 }
 
+int IqtFit::minimumSpectrum() const { return m_uiForm->spSpectraMin->value(); }
+
+int IqtFit::maximumSpectrum() const { return m_uiForm->spSpectraMax->value(); }
+
 void IqtFit::fitFunctionChanged() {
   auto backRangeSelector =
       m_uiForm->ppPlotTop->getRangeSelector("IqtFitBackRange");
@@ -118,28 +123,43 @@ void IqtFit::fitFunctionChanged() {
     setCustomBoolSetting("ConstrainBeta", false);
     setCustomSettingEnabled("ConstrainBeta", false);
   }
-
-  if (!fitFunction()->hasParameter(m_tiedParameter.toStdString()))
-    setCustomBoolSetting("ConstrainIntensities", false);
+  updateIntensityTie();
 }
 
 void IqtFit::customBoolUpdated(const QString &key, bool value) {
   if (key == "Constrain Intensities") {
-    if (value) {
-      const auto tie =
-          QString::fromStdString(createIntensityTie(fitFunction()));
-      m_tiedParameter = tie.split("=")[0];
-      addTie(tie);
-    } else
+    if (value)
+      updateIntensityTie();
+    else
       removeTie(m_tiedParameter);
   }
 }
 
-void IqtFit::run() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
-    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
-    executeSequentialFit();
+void IqtFit::updateIntensityTie() {
+  const auto function = fitFunction();
+
+  if (function) {
+    removeTie(m_tiedParameter);
+    const auto tie = QString::fromStdString(createIntensityTie(fitFunction()));
+    updateIntensityTie(tie);
+  } else {
+    setCustomBoolSetting("ConstrainIntensities", false);
+    setCustomSettingEnabled("ConstrainIntensities", false);
+  }
+}
+
+void IqtFit::updateIntensityTie(const QString &intensityTie) {
+
+  if (intensityTie.isEmpty()) {
+    setCustomBoolSetting("ConstrainIntensities", false);
+    setCustomSettingEnabled("ConstrainIntensities", false);
+  } else {
+    setCustomSettingEnabled("ConstrainIntensities", true);
+
+    if (boolSettingValue("ConstrainIntensities")) {
+      m_tiedParameter = intensityTie.split("=")[0];
+      addTie(intensityTie);
+    }
   }
 }
 
@@ -239,7 +259,7 @@ std::string IqtFit::createIntensityTie(IFunction_sptr function) const {
 
   const auto intensityParameters = getParameters(function, "Height");
 
-  if (intensityParameters.empty())
+  if (intensityParameters.size() < 2)
     return "";
 
   for (auto i = 1u; i < intensityParameters.size(); ++i)
@@ -322,19 +342,13 @@ void IqtFit::algorithmComplete(bool error) {
 bool IqtFit::validate() {
   UserInputValidator uiv;
 
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSampleInput);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSampleInput);
 
   if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
 
   auto error = uiv.generateErrorMessage();
-
-  if (!inputWorkspace()) {
-    error = "Input workspace was deleted from the Analysis Data Service "
-            "before Algorithm could run.";
-  }
-  showMessageBox(error);
-
+  emit showMessageBox(error);
   return error.isEmpty();
 }
 
@@ -458,13 +472,7 @@ void IqtFit::endXChanged(double endX) {
   rangeSelector->setMaximum(endX);
 }
 
-void IqtFit::singleFit() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
-    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
-    executeSingleFit();
-  }
-}
+void IqtFit::singleFit() { executeSingleFit(); }
 
 void IqtFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 

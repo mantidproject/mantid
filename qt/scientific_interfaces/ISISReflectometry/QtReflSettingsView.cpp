@@ -1,9 +1,10 @@
 #include "QtReflSettingsView.h"
-#include "ReflSettingsPresenter.h"
-#include "MantidQtWidgets/Common/HintingLineEdit.h"
-#include <QMessageBox>
-#include <boost/algorithm/string/join.hpp>
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include "ReflSettingsPresenter.h"
+#include <QMessageBox>
+#include <QScrollBar>
+#include <boost/algorithm/string/join.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -35,6 +36,7 @@ Initialise the Interface
 */
 void QtReflSettingsView::initLayout() {
   m_ui.setupUi(this);
+  initTransmissionRunsTable();
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
@@ -44,8 +46,28 @@ void QtReflSettingsView::initLayout() {
           SLOT(setPolarisationOptionsEnabled(bool)));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(summationTypeChanged(int)));
+  connect(m_ui.addTransmissionRowButton, SIGNAL(clicked()), this,
+          SLOT(addTransmissionTableRow()));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
+}
+
+void QtReflSettingsView::initTransmissionRunsTable() {
+  auto table = m_ui.transmissionRunsTable;
+  const auto columnHeadings = QStringList({"Angle", "Transmission Run(s)"});
+  table->setColumnCount(columnHeadings.size());
+  table->setHorizontalHeaderLabels(columnHeadings);
+  table->setColumnWidth(0, 40);
+  auto header = table->horizontalHeader();
+  header->setStretchLastSection(true);
+  const int typicalNumberOfRows = 3;
+  table->setRowCount(typicalNumberOfRows);
+  int totalRowHeight = 0;
+  for (int i = 0; i < typicalNumberOfRows; ++i) {
+    totalRowHeight += table->rowHeight(i);
+  }
+  const int padding = 2;
+  table->setMinimumHeight(totalRowHeight + header->height() + padding);
 }
 
 void QtReflSettingsView::connectSettingsChange(QLineEdit &edit) {
@@ -65,6 +87,11 @@ void QtReflSettingsView::connectSettingsChange(QCheckBox &edit) {
 
 void QtReflSettingsView::connectSettingsChange(QGroupBox &edit) {
   connect(&edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::connectSettingsChange(QTableWidget &edit) {
+  connect(&edit, SIGNAL(cellChanged(int, int)), this,
+          SLOT(notifySettingsChanged()));
 }
 
 void QtReflSettingsView::disableAll() {
@@ -112,7 +139,7 @@ void QtReflSettingsView::registerExperimentSettingsWidgets(
     Mantid::API::IAlgorithm_sptr alg) {
   connectSettingsChange(*m_ui.expSettingsGroup);
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
-  registerSettingWidget(*m_ui.transmissionRunsEdit, "FirstTransmissionRun",
+  registerSettingWidget(*m_ui.transmissionRunsTable, "FirstTransmissionRun",
                         alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
@@ -317,6 +344,15 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
   }
 }
 
+/** Add a new row to the transmission runs table
+ * */
+void QtReflSettingsView::addTransmissionTableRow() {
+  auto numRows = m_ui.transmissionRunsTable->rowCount() + 1;
+  m_ui.transmissionRunsTable->setRowCount(numRows);
+  // Select the first cell in the new row
+  m_ui.transmissionRunsTable->setCurrentCell(numRows - 1, 0);
+}
+
 std::string QtReflSettingsView::getText(QLineEdit const &lineEdit) const {
   return lineEdit.text().toStdString();
 }
@@ -377,8 +413,7 @@ std::string QtReflSettingsView::getStitchOptions() const {
 }
 
 QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
-  auto widget = m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget();
-  return *static_cast<QLineEdit *>(widget);
+  return *static_cast<QLineEdit *>(m_stitchEdit);
 }
 
 /** Creates hints for 'Stitch1DMany'
@@ -387,8 +422,15 @@ QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
 void QtReflSettingsView::createStitchHints(
     const std::map<std::string, std::string> &hints) {
 
-  m_ui.expSettingsLayout0->addWidget(new HintingLineEdit(this, hints), 7, 1, 1,
-                                     3);
+  // We want to add the stitch params box next to the stitch
+  // label, so first find the label's position
+  auto stitchLabelIndex = m_ui.expSettingsLayout0->indexOf(m_ui.stitchLabel);
+  int row, col, rowSpan, colSpan;
+  m_ui.expSettingsLayout0->getItemPosition(stitchLabelIndex, &row, &col,
+                                           &rowSpan, &colSpan);
+  // Create the new edit box and add it to the right of the label
+  m_stitchEdit = new HintingLineEdit(this, hints);
+  m_ui.expSettingsLayout0->addWidget(m_stitchEdit, row, col + colSpan, 1, 3);
 }
 
 /** Return selected analysis mode
@@ -401,8 +443,31 @@ std::string QtReflSettingsView::getAnalysisMode() const {
 /** Return selected transmission run(s)
 * @return :: selected transmission run(s)
 */
-std::string QtReflSettingsView::getTransmissionRuns() const {
-  return getText(*m_ui.transmissionRunsEdit);
+std::map<std::string, std::string>
+QtReflSettingsView::getTransmissionRuns() const {
+
+  const auto &table = m_ui.transmissionRunsTable;
+
+  // Check that we have 2 columns (angle and runs)
+  if (table->columnCount() != 2)
+    throw std::runtime_error("Transmission runs table must have 2 columns");
+
+  // Return values in a map
+  std::map<std::string, std::string> results;
+
+  for (auto row = 0; row < table->rowCount(); ++row) {
+    auto angleItem = table->item(row, 0);
+    auto runsItem = table->item(row, 1);
+    // Extract the string values
+    auto angle = angleItem ? angleItem->text() : "";
+    auto runs = runsItem ? runsItem->text() : "";
+    // Skip empty rows
+    if (angle.isEmpty() && runs.isEmpty())
+      continue;
+    // Add to the map
+    results[angle.toStdString()] = runs.toStdString();
+  }
+  return results;
 }
 
 /** Return start overlap
