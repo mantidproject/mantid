@@ -587,7 +587,7 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
             user_file_to_set = new_user_file
 
     # Set the user file in the reducer and load the user file
-    if user_file_to_set != current_user_file:
+    if os.path.normpath(user_file_to_set) != os.path.normpath(current_user_file):
         # Need to setup a clean reducer. If we are dealing with the original user file,
         # then we should take gui changes into account, ie reset to the original reducer
         if user_file_to_set == original_user_file:

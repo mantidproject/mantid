@@ -47,10 +47,19 @@ Algorithms
 - :ref:`SaveReflections <algm-LoadLamp>` is a new algorithm to save PeaksWorkspaces to Fullprof, Jana, GSAS, and SHELX text formats.
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` will now accept workspaces with varying x-axes per spectrum.
 
+Known Issues
+^^^^^^^^^^^^
+
+- :ref:`LoadEventNexus <algm-LoadEventNexus>` is incorrectly ignoring the `FilterMonBy*` properties. When loading monitors as events the output
+  `*_monitors` workspace then contains all recorded events rather than those accepted by the filters. To work around this issue run the
+  :ref:`FilterByTime <algm-FilterByTime>` algorithm on the output `*_monitors` workspace with the same values as passed to the `FilterMonBy*`
+  properties.
+
 Fitting
 -------
 - :ref:`EISFDiffSphere <func-EISFDiffSphere>` fits the Q-dependence on the EISF of a particle undergoing continuous diffusion but confined to a spherical volume.
 - :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>` fits the Q-dependence on the EISF of an alkyl molecule, like a membrane lipd.
+- :ref:`EISFDiffCylinder <func-EISFDiffCylinder>` models the elastic incoherent scattering intensity of a particle diffusing within a cylinder.
 
 Core Functionality
 ------------------
@@ -68,6 +77,11 @@ Core Functionality
 - Fixed the behaviour of ``UpdateInstrumentDefinitions.OnStartup`` in the :ref:`properties file <Properties File>`. It was not being used correctly for using the updated ``Facilities.xml`` file.
 - ``MultiFileProperty`` now accepts complex summation ranges for run numbers, such as ``111-113+115`` and ``111-115+123-132``.
 
+Live Data
+---------
+
+- ``KafkaEventListener`` is a new live listener for neutron event and sample environment data which is in development for the ESS and ISIS.
+
 Performance
 -----------
 
@@ -79,8 +93,8 @@ A `bug <https://github.com/mantidproject/mantid/pull/20953>`_ in the handling of
 
 Python
 ------
-In `mantid.simpleapi`, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.
-`StoreInADS=False` can be passed to function calls to not to store their output on the ADS.
+In ``mantid.simpleapi``, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.
+``StoreInADS=False`` can be passed to function calls to not to store their output on the ADS.
 
 - The standard Python operators, e.g. ``+``, ``+=``, etc., now work also with workspaces not in the ADS.
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
