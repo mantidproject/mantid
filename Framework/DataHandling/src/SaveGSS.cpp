@@ -5,7 +5,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -108,11 +111,6 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 } // End of anonymous namespace
 
 //----------------------------------------------------------------------------------------------
-//// Constructor
-// SaveGSS::SaveGSS()
-//    : Mantid::API::Algorithm(), overwrite_std_gsas_header_(false),
-//      overwrite_std_bank_header_(false) {}
-
 // Initialise the algorithm
 void SaveGSS::init() {
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
@@ -183,8 +181,17 @@ void SaveGSS::init() {
       "Number of strings in the give array must be same as number of banks."
       "And the order is preserved.");
 
+  auto must_be_3 = boost::make_shared<Kernel::ArrayLengthValidator<int>>(3);
+  auto precision_range =
+      boost::make_shared<Kernel::BoundedValidator<int>>(0, 10);
+  auto precision_validator = boost::make_shared<Kernel::CompositeValidator>();
+  precision_validator->add(must_be_3);
+  precision_validator->add(precision_range);
+
+  std::vector<int> default_precision(3, 9);
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("SLOGXYEPrecision"),
+      Kernel::make_unique<Kernel::ArrayProperty<int>>(
+          "SLOGXYEPrecision", default_precision, precision_validator),
       "Enter 3 integers as the precisions of output X, Y and E for SLOG data "
       "only."
       "Default is (9, 9, 9) if it is left empty.  Otherwise it is not "
@@ -238,21 +245,17 @@ void SaveGSS::exec() {
 void SaveGSS::processUserSpecifiedHeaders() {
 
   // user specified GSAS
-  user_specified_gsas_header_ = getProperty("UserSpecifiedGSASHeader");
+  m_user_specified_gsas_header = getProperty("UserSpecifiedGSASHeader");
 
-  if (user_specified_gsas_header_.size() == 0) {
-    overwrite_std_gsas_header_ = false;
+  if (m_user_specified_gsas_header.empty()) {
+    m_overwrite_std_gsas_header = false;
   } else {
-    overwrite_std_gsas_header_ = getProperty("OverwriteStandardHeader");
+    m_overwrite_std_gsas_header = getProperty("OverwriteStandardHeader");
   }
 
   // user specified bank header
-  user_specified_bank_headers_ = getProperty("UserSpecifiedBankHeader");
-  if (user_specified_bank_headers_.size() == 0) {
-    overwrite_std_bank_header_ = false;
-  } else {
-    overwrite_std_bank_header_ = true;
-  }
+  m_user_specified_bank_headers = getProperty("UserSpecifiedBankHeader");
+  m_overwrite_std_bank_header = !m_user_specified_bank_headers.empty();
 
   return;
 }
@@ -399,7 +402,8 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
   const auto numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
 
   const std::string outputFormat = getPropertyValue("Format");
-  std::vector<int> slog_xye_precisions = parseSLOGPrecision(outputFormat);
+
+  std::vector<int> slog_xye_precisions = getProperty("SLOGXYEPrecision");
 
   // Create the various output files we will need in a loop
   PARALLEL_FOR_NO_WSP_CHECK()
@@ -442,15 +446,15 @@ void SaveGSS::generateInstrumentHeader(std::stringstream &out,
                                        double l1) const {
 
   // write user header first
-  if (user_specified_gsas_header_.size() > 0) {
-    for (auto iter = user_specified_gsas_header_.begin();
-         iter != user_specified_gsas_header_.end(); ++iter) {
+  if (m_user_specified_gsas_header.size() > 0) {
+    for (auto iter = m_user_specified_gsas_header.begin();
+         iter != m_user_specified_gsas_header.end(); ++iter) {
       out << *iter << "\n";
     }
   }
 
   // quit method if user plan to use his own header completely
-  if (overwrite_std_gsas_header_) {
+  if (m_overwrite_std_gsas_header) {
     return;
   }
 
@@ -671,40 +675,6 @@ void SaveGSS::openFileStream(const std::string &outFilePath,
 }
 
 //----------------------------------------------------------------------------
-/** Parse SLOG precision
- * @brief SaveGSS::parseSLOGPrecision
- * @return
- */
-std::vector<int> SaveGSS::parseSLOGPrecision(const std::string &output_format) {
-  std::vector<int> precision_vector = getProperty("SLOGXYEPrecision");
-
-  if (output_format == SLOG) {
-    // it only matters with SLOG file format
-    if (precision_vector.size() == 0) {
-      // precision is 9 as default
-      precision_vector.resize(3, 9);
-    } else if (precision_vector.size() == 3) {
-      // check whether the user-specified precisions are within valid range
-      for (size_t i = 0; i < 3; ++i) {
-        if (precision_vector[i] < 0 || precision_vector[i] >= 9) {
-          g_log.warning() << "User specified " << i << "-th precision"
-                          << precision_vector[i]
-                          << "is out of allowed range.  Reset to 9 instead"
-                          << "\n";
-          precision_vector[i] = 9;
-        }
-      }
-    } else {
-      // not supported case
-      throw std::invalid_argument(
-          "SLOG XYE precision vector must be either empty or have 3 items.");
-    }
-  }
-
-  return precision_vector;
-}
-
-//----------------------------------------------------------------------------
 /** Ensures that when a workspace group is passed as output to this workspace
 *  everything is saved to one file and the bank number increments for each
 *  group member.
@@ -769,8 +739,9 @@ void SaveGSS::validateUserInput() const {
   }
 
   // Check about the user specified bank header
-  if (overwrite_std_bank_header_ &&
-      user_specified_bank_headers_.size() != m_inputWS->getNumberHistograms()) {
+  if (m_overwrite_std_bank_header &&
+      m_user_specified_bank_headers.size() !=
+          m_inputWS->getNumberHistograms()) {
     throw std::invalid_argument("If user specifies bank header, each bank must "
                                 "have a unique user-specified header.");
   }
@@ -989,18 +960,18 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
   g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << '\n';
 
   // Write bank header
-  if (overwrite_std_bank_header_) {
+  if (m_overwrite_std_bank_header) {
     // write user header only!
     int ws_index = bank - 1;
     if (ws_index < 0)
       throw std::runtime_error(
           "Bank does not start from 1.  Unabel to use user-"
           "specified bank header");
-    else if (ws_index >= static_cast<int>(user_specified_bank_headers_.size()))
+    else if (ws_index >= static_cast<int>(m_user_specified_bank_headers.size()))
       throw std::runtime_error(
           "Bank ID is out of range for user specified bank headers");
-    out << std::fixed << std::setw(80) << user_specified_bank_headers_[ws_index]
-        << "\n";
+    out << std::fixed << std::setw(80)
+        << m_user_specified_bank_headers[ws_index] << "\n";
   } else {
     // write general bank header part
     writeBankHeader(out, "SLOG", bank, datasize);

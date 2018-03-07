@@ -126,9 +126,6 @@ private:
   /// Opens a new file stream at the path specified.
   void openFileStream(const std::string &outFilePath, std::ofstream &outStream);
 
-  /// Parse the user-specified SLOG XYE float precisions
-  std::vector<int> parseSLOGPrecision(const std::string &output_format);
-
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
@@ -171,13 +168,13 @@ private:
   /// Holds pointer to progress bar
   std::unique_ptr<API::Progress> m_progress{nullptr};
   /// User specified header string
-  std::vector<std::string> user_specified_gsas_header_;
+  std::vector<std::string> m_user_specified_gsas_header;
   /// flag to overwrite standard GSAS header
-  bool overwrite_std_gsas_header_;
+  bool m_overwrite_std_gsas_header;
   /// User specified bank header
-  std::vector<std::string> user_specified_bank_headers_;
+  std::vector<std::string> m_user_specified_bank_headers;
   /// flag to overwrite standard GSAS bank header
-  bool overwrite_std_bank_header_;
+  bool m_overwrite_std_bank_header;
 };
 }
 }
