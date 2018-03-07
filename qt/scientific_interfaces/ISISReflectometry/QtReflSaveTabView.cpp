@@ -2,6 +2,7 @@
 #include "ReflSaveTabPresenter.h"
 
 #include <boost/algorithm/string.hpp>
+#include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -41,7 +42,6 @@ void QtReflSaveTabView::initLayout() {
           SLOT(onAutosaveChanged(int)));
   connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this,
           SLOT(onSavePathChanged()));
-
 }
 
 void QtReflSaveTabView::onSavePathChanged() {
@@ -235,5 +235,28 @@ void QtReflSaveTabView::suggestSaveDir() const {
   m_presenter->notify(IReflSaveTabPresenter::suggestSaveDirFlag);
 }
 
+/**
+Show an critical error dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void QtReflSaveTabView::giveUserCritical(const std::string &prompt,
+                                         const std::string &title) {
+  QMessageBox::critical(this, QString::fromStdString(title),
+                        QString::fromStdString(prompt), QMessageBox::Ok,
+                        QMessageBox::Ok);
+}
+
+/**
+Show an information dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void QtReflSaveTabView::giveUserInfo(const std::string &prompt,
+                                     const std::string &title) {
+  QMessageBox::information(this, QString::fromStdString(title),
+                           QString::fromStdString(prompt), QMessageBox::Ok,
+                           QMessageBox::Ok);
+}
 } // namespace CustomInterfaces
 } // namespace Mantid

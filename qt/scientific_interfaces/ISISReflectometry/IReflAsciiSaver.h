@@ -18,7 +18,6 @@ public:
   std::string const &separator() const;
   std::string const &prefix() const;
   NamedFormat format() const;
-  virtual ~FileFormatOptions() = default;
 
 private:
   NamedFormat m_format;
@@ -44,6 +43,7 @@ public:
                     std::vector<std::string> const &workspaceNames,
                     std::vector<std::string> const &logParameters,
                     FileFormatOptions const &inputParameters) const = 0;
+  virtual ~IReflAsciiSaver() = default;
 };
 }
 }

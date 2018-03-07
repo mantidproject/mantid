@@ -216,12 +216,12 @@ bool ReflSaveTabPresenter::isValidSaveDirectory(std::string const &directory) {
 
 void ReflSaveTabPresenter::error(std::string const &message,
                                  std::string const &title) {
-  m_mainPresenter->giveUserCritical(message, title);
+  m_view->giveUserCritical(message, title);
 }
 
 void ReflSaveTabPresenter::warn(std::string const &message,
                                 std::string const &title) {
-  m_mainPresenter->giveUserInfo(message, title);
+  m_view->giveUserInfo(message, title);
 }
 
 void ReflSaveTabPresenter::warnInvalidSaveDirectory() {
@@ -266,7 +266,7 @@ void ReflSaveTabPresenter::saveWorkspaces(
   auto savePath = m_view->getSavePath();
   if (m_saver->isValidSaveDirectory(savePath))
     m_saver->save(savePath, workspaceNames, logParameters,
-                 getSaveParametersFromView());
+                  getSaveParametersFromView());
   else
     errorInvalidSaveDirectory();
 }
@@ -283,9 +283,8 @@ void ReflSaveTabPresenter::saveSelectedWorkspaces() {
   // Check that at least one workspace has been selected for saving
   auto workspaceNames = m_view->getSelectedWorkspaces();
   if (workspaceNames.empty()) {
-    m_mainPresenter->giveUserCritical("No workspaces selected. You must select "
-                                      "the workspaces to save.",
-                                      "No workspaces selected");
+    error("No workspaces selected", "No workspaces selected. "
+                                    "You must select the workspaces to save.");
   } else {
     saveWorkspaces(workspaceNames);
   }

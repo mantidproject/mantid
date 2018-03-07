@@ -45,7 +45,7 @@ public:
   /// Destructor
   ~QtReflSaveTabView() override;
 
-  void subscribe(IReflSaveTabPresenter* presenter) override;
+  void subscribe(IReflSaveTabPresenter *presenter) override;
 
   /// Returns the save path
   std::string getSavePath() const override;
@@ -89,6 +89,11 @@ public:
   void enableFileFormatAndLocationControls() override;
   void disableFileFormatAndLocationControls() override;
 
+  void giveUserCritical(const std::string &prompt,
+                        const std::string &title) override;
+  void giveUserInfo(const std::string &prompt,
+                    const std::string &title) override;
+
 public slots:
   /// Populate the 'List of workspaces' widget
   void populateListOfWorkspaces() const;
@@ -108,7 +113,7 @@ private:
   /// Initialize the interface
   void initLayout();
   /// The presenter
-  IReflSaveTabPresenter* m_presenter;
+  IReflSaveTabPresenter *m_presenter;
   /// The widget
   Ui::ReflSaveTabWidget m_ui;
 };

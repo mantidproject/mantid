@@ -168,12 +168,16 @@ public:
   MOCK_CONST_METHOD0(clearParametersList, void());
   MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD0(getAutosavePrefixInput, std::string());
-  MOCK_METHOD1(subscribe, void(IReflSaveTabPresenter*));
+  MOCK_METHOD1(subscribe, void(IReflSaveTabPresenter *));
   MOCK_METHOD0(disallowAutosave, void());
   MOCK_METHOD0(disableAutosaveControls, void());
   MOCK_METHOD0(enableAutosaveControls, void());
   MOCK_METHOD0(enableFileFormatAndLocationControls, void());
   MOCK_METHOD0(disableFileFormatAndLocationControls, void());
+  MOCK_METHOD2(giveUserCritical,
+               void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
+  virtual ~MockSaveTabView() = default;
 };
 
 class MockMainWindowView : public IReflMainWindowView {
@@ -353,6 +357,7 @@ public:
                      void(std::string const &, std::vector<std::string> const &,
                           std::vector<std::string> const &,
                           FileFormatOptions const &));
+  virtual ~MockReflAsciiSaver() = default;
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

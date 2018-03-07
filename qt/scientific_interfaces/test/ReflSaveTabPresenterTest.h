@@ -249,19 +249,16 @@ public:
   void testSaveWorkspaces() {
     auto mockView = ::Mantid::Kernel::make_unique<MockSaveTabView>();
     auto &mockViewRef = *mockView;
-    auto mockSaver =
-        ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    auto mockSaver = ::Mantid::Kernel::make_unique<MockReflAsciiSaver>();
+    auto &mockSaverRef = *mockSaver;
     ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
-    std::string savePath = createSavePath();
     std::vector<std::string> wsNames = {"ws1", "ws2", "ws3"};
     createWS(wsNames[0]);
     createWS(wsNames[1]);
     createWS(wsNames[2]);
 
-    EXPECT_CALL(mockViewRef, getSavePath())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(savePath));
+    EXPECT_CALL(mockViewRef, getSavePath()).Times(AtLeast(1));
     EXPECT_CALL(mockViewRef, getTitleCheck())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
@@ -283,12 +280,17 @@ public:
     EXPECT_CALL(mockViewRef, getSelectedWorkspaces())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(wsNames));
+
+    EXPECT_CALL(mockSaverRef, isValidSaveDirectory(_))
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockSaverRef, save(_, _, _, _)).Times(AtLeast(1));
+
     presenter.notify(IReflSaveTabPresenter::saveWorkspacesFlag);
-    for (auto const &workspaceName : wsNames) {
-      Poco::File(savePath + workspaceName + ".dat").remove();
-    }
+
     AnalysisDataService::Instance().clear();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockViewRef));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSaverRef));
   }
 
   void testSuggestSaveDir() {
@@ -296,6 +298,7 @@ public:
     auto &mockViewRef = *mockView;
     auto mockSaver =
         ::Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    auto &mockSaverRef = *mockView;
     ReflSaveTabPresenter presenter(std::move(mockSaver), std::move(mockView));
 
     std::string saveDir = Mantid::Kernel::ConfigService::Instance().getString(
@@ -303,7 +306,8 @@ public:
 
     EXPECT_CALL(mockViewRef, setSavePath(saveDir));
     presenter.notify(IReflSaveTabPresenter::suggestSaveDirFlag);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockViewRef));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSaverRef));
   }
 
 private:
@@ -316,17 +320,6 @@ private:
     ITableWorkspace_sptr ws =
         WorkspaceFactory::Instance().createTable("TableWorkspace");
     AnalysisDataService::Instance().addOrReplace(name, ws);
-  }
-
-  std::string createSavePath() {
-    // First attempt to obtain path from default save directory
-    std::string savePath = Mantid::Kernel::ConfigService::Instance().getString(
-        "defaultsave.directory");
-    if (savePath.empty())
-      // Otherwise use current path as save directory
-      savePath = Poco::Path::current();
-
-    return savePath;
   }
 };
 

@@ -18,6 +18,7 @@ public:
             std::vector<std::string> const &workspaceNames,
             std::vector<std::string> const &logParameters,
             FileFormatOptions const &inputParameters) const override;
+
 private:
   Mantid::API::IAlgorithm_sptr
   setUpSaveAlgorithm(std::string const &saveDirectory,
