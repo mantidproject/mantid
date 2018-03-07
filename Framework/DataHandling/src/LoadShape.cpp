@@ -45,7 +45,7 @@ void LoadShape::init() {
 
   // Output workspace
   declareProperty(
-       make_unique<WorkspaceProperty<Workspace>>(
+       make_unique<WorkspaceProperty<>>(
        "OutputWorkspace", "", Direction::Output),
        "The name of the workspace that will be same as"
        "the input workspace but with shape added to it");
@@ -73,7 +73,6 @@ int LoadShape::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadShape::exec() {
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   if (inputWS != outputWS) {
@@ -141,7 +140,6 @@ std::unique_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream& file) {
 bool LoadShape::readSTLTriangle(std::ifstream &file, V3D &v1, V3D &v2, V3D &v3) {
 
   std::string line;
-  bool ok = false;
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
       bool ok = (
         readSTLVertex(file, v1) &&
@@ -181,7 +179,14 @@ bool LoadShape::readSTLLine(std::ifstream &file, std::string const &type) {
   if (getline(file, line)) {
     boost::trim(line);
     if (line.size() < type.size() || line.substr(0, type.size()) != type) {
-      throw std::runtime_error("Expected STL line begining with "+type);
+      // Before throwing, check for endsolid statment
+      std::string type2 = "endsolid";
+      if (line.size() < type2.size() || line.substr(0, type2.size()) != type2) {
+        throw std::runtime_error("Expected STL line begining with " + type + " or "+ type2);
+      }
+      else {
+        return false; // ends reading at endsolid
+      }
     }
     return true; // expected line read, then ignored
   }
