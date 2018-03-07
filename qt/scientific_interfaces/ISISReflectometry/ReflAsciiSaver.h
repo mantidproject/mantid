@@ -26,6 +26,11 @@ private:
                      std::vector<std::string> const &logParameters,
                      FileFormatOptions const &fileFormat) const;
 
+  std::string assembleSavePath(std::string const &saveDirectory,
+                               std::string const &prefix,
+                               std::string const &name,
+                               std::string const &extension) const;
+
   Mantid::API::MatrixWorkspace_sptr
   workspace(std::string const &workspaceName) const;
 };

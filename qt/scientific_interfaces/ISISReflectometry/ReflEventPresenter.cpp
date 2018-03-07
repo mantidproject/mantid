@@ -36,7 +36,7 @@ std::string ReflEventPresenter::getTimeSlicingValues() const {
     return logFilterAndSliceValues(slicingValues, logFilter);
   }
   default:
-    return "";
+    throw std::runtime_error("Unrecognized slice type.");
   }
 }
 
@@ -62,7 +62,7 @@ std::string ReflEventPresenter::getTimeSlicingType() const {
   case SliceType::LogValue:
     return "LogValue";
   default:
-    return "";
+    throw std::runtime_error("Unrecognized slice type.");
   }
 }
 

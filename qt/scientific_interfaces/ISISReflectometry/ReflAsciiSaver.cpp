@@ -46,17 +46,19 @@ bool ReflAsciiSaver::isValidSaveDirectory(std::string const &path) const {
   return !path.empty() && pocoPath.isDirectory();
 }
 
+namespace {
 template <typename T>
 void setPropertyIfSupported(Mantid::API::IAlgorithm_sptr alg,
                             std::string const &propertyName, T const &value) {
   if (alg->existsProperty(propertyName))
     alg->setProperty(propertyName, value);
 }
+}
 
-std::string assembleSavePath(std::string const &saveDir,
+std::string ReflAsciiSaver::assembleSavePath(std::string const &saveDirectory,
                              std::string const &prefix, std::string const &name,
-                             std::string const &extension) {
-  auto path = Poco::Path(saveDir);
+                             std::string const &extension) const {
+  auto path = Poco::Path(saveDirectory);
   path.append(prefix + name + extension);
   return path.toString();
 }
