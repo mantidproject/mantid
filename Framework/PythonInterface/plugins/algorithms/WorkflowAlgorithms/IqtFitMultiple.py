@@ -257,6 +257,7 @@ class IqtFitMultiple(PythonAlgorithm):
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         conclusion_prog.report('Algorithm complete')
 
+
 def _create_multi_domain_func(function, input_ws):
     multi = 'composite=MultiDomainFunction,NumDeriv=true;'
     comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + str(function) + ');'
