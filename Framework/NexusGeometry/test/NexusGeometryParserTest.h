@@ -171,6 +171,10 @@ public:
   NexusGeometryParserTestPerformance() {
     m_wishHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
         "WISH_Definition_10Panels.hdf5", true, Poco::Glob::GLOB_DEFAULT);
+    m_sans2dHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
+        "SANS2D_Definition_Tubes.hdf5", true, Poco::Glob::GLOB_DEFAULT);
+    m_lokiHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
+        "LOKI_Definition.hdf5", true, Poco::Glob::GLOB_DEFAULT);
   }
   static void destroySuite(NexusGeometryParserTestPerformance *suite) {
     delete suite;
@@ -188,6 +192,32 @@ public:
     TS_ASSERT_EQUALS(detInfo->size(), 778245); // Sanity check
   }
 
+  void test_load_sans2d() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sansInstrument =
+        NexusGeometryParser::createInstrument(m_sans2dHDF5DefinitionPath);
+    auto stop = std::chrono::high_resolution_clock::now();
+    std::cout << "Creating SANS2D instrument took: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     stop - start).count() << " ms" << std::endl;
+    auto detInfo = extractDetectorInfo(*sansInstrument);
+    TS_ASSERT_EQUALS(detInfo->size(), 122888); // Sanity check
+  }
+
+  void test_load_loki() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sansInstrument =
+        NexusGeometryParser::createInstrument(m_lokiHDF5DefinitionPath);
+    auto stop = std::chrono::high_resolution_clock::now();
+    std::cout << "Creating LOKI instrument took: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     stop - start).count() << " ms" << std::endl;
+    auto detInfo = extractDetectorInfo(*sansInstrument);
+    TS_ASSERT_EQUALS(detInfo->size(), 8000); // Sanity check
+  }
+
 private:
   std::string m_wishHDF5DefinitionPath;
+  std::string m_sans2dHDF5DefinitionPath;
+  std::string m_lokiHDF5DefinitionPath;
 };

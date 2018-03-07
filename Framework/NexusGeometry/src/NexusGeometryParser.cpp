@@ -7,6 +7,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <H5Cpp.h>
+#include <type_traits>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -47,41 +48,51 @@ const static double DEGREES_IN_SEMICIRCLE = 180;
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
 const H5std_string NX_OFF = "NXoff_geometry";
 
-std::vector<uint16_t> vecUnsignedInt16(const std::vector<int32_t> &toConvert) {
-  std::vector<uint16_t> target(toConvert.size());
+template <typename T, typename R>
+std::vector<R> convertVector(const std::vector<T> &toConvert) {
+  std::vector<R> target(toConvert.size());
   for (size_t i = 0; i < target.size(); ++i) {
-    target[i] = uint16_t(toConvert[i]);
+    target[i] = R(toConvert[i]);
   }
   return target;
 }
 
 template <typename ExpectedT> void validateStorageType(const DataSet &data) {
-  const size_t storageType = data.getDataType().getSize();
-  // Early check to prevent reinterpretation of underlying data. This is only a
-  // basic size check. Check does not cover bit layout.
-  if (storageType != sizeof(ExpectedT)) {
-    throw std::runtime_error(
-        "Storage type mismatch. Nexus stored has byte size:" +
-        std::to_string(storageType));
+
+  const auto typeClass = data.getTypeClass();
+  const size_t sizeOfType = data.getDataType().getSize();
+  // Early check to prevent reinterpretation of underlying data.
+  if (std::is_floating_point<ExpectedT>::value) {
+    if (H5T_FLOAT != typeClass) {
+      throw std::runtime_error("Storage type mismatch. Expecting to extract a "
+                               "floating point number");
+    }
+    if (sizeOfType != sizeof(ExpectedT)) {
+      throw std::runtime_error(
+          "Storage type mismatch for floats. This operation "
+          "is dangerous. Nexus stored has byte size:" +
+          std::to_string(sizeOfType));
+    }
+  } else if (std::is_integral<ExpectedT>::value) {
+    if (H5T_INTEGER != typeClass) {
+      throw std::runtime_error(
+          "Storage type mismatch. Expecting to extract a integer");
+    }
+    if (sizeOfType > sizeof(ExpectedT)) {
+      // endianness not checked
+      throw std::runtime_error(
+          "Storage type mismatch for integer. Result "
+          "would result in truncation. Nexus stored has byte size:" +
+          std::to_string(sizeOfType));
+    }
   }
 }
 
-// Function to read in a dataset into a vector
-template <typename valueType>
-std::vector<valueType> get1DDataset(const H5std_string &dataset,
-                                    const H5::Group &group) {
-  // Open data set
-  DataSet data = group.openDataSet(dataset);
-  validateStorageType<valueType>(data);
-  const size_t storageType = data.getDataType().getSize();
-  // Early check to prevent reinterpretation of underlying data
-  if (storageType != sizeof(valueType)) {
-    throw std::runtime_error(
-        "Storage type mismatch. Value type stored has byte size:" +
-        std::to_string(storageType));
-  }
+template <typename ValueType>
+std::vector<ValueType> extractVector(const DataSet &data) {
+  validateStorageType<ValueType>(data);
   DataSpace dataSpace = data.getSpace();
-  std::vector<valueType> values;
+  std::vector<ValueType> values;
   values.resize(dataSpace.getSelectNpoints());
   // Read data into vector
   data.read(values.data(), data.getDataType(), dataSpace);
@@ -91,20 +102,21 @@ std::vector<valueType> get1DDataset(const H5std_string &dataset,
 }
 
 // Function to read in a dataset into a vector
-template <typename valueType>
-std::vector<valueType> get1DDataset(const H5File &file,
+template <typename ValueType>
+std::vector<ValueType> get1DDataset(const H5std_string &dataset,
+                                    const H5::Group &group) {
+  // Open data set
+  DataSet data = group.openDataSet(dataset);
+  return extractVector<ValueType>(data);
+}
+
+// Function to read in a dataset into a vector
+template <typename ValueType>
+std::vector<ValueType> get1DDataset(const H5File &file,
                                     const H5std_string &dataset) {
   // Open data set
   DataSet data = file.openDataSet(dataset);
-  validateStorageType<valueType>(data);
-  DataSpace dataSpace = data.getSpace();
-  std::vector<valueType> values;
-  values.resize(dataSpace.getSelectNpoints());
-  // Read data into vectoh
-  data.read(values.data(), data.getDataType(), dataSpace);
-
-  // Return the data vector
-  return values;
+  return extractVector<ValueType>(data);
 }
 
 std::string get1DStringDataset(const std::string &dataset, const Group &group) {
@@ -333,7 +345,13 @@ std::vector<int> getDetectorIds(const Group &detectorGroup) {
   for (unsigned int i = 0; i < detectorGroup.getNumObjs(); ++i) {
     H5std_string objName = detectorGroup.getObjnameByIdx(i);
     if (objName == DETECTOR_IDS) {
-      detIds = get1DDataset<int>(objName, detectorGroup);
+      const auto data = detectorGroup.openDataSet(objName);
+      if (data.getDataType().getSize() == 8) {
+        // Note the narrowing here!
+        detIds = convertVector<int64_t, int32_t>(extractVector<int64_t>(data));
+      } else {
+        detIds = extractVector<int32_t>(data);
+      }
     }
   }
   return detIds;
@@ -402,10 +420,10 @@ createTriangularFaces(const std::vector<uint16_t> &faceIndices,
 boost::shared_ptr<const Geometry::IObject>
 parseNexusMesh(const Group &shapeGroup) {
 
-  const std::vector<uint16_t> faceIndices =
-      vecUnsignedInt16(get1DDataset<int32_t>("faces", shapeGroup));
-  const std::vector<uint16_t> windingOrder =
-      vecUnsignedInt16(get1DDataset<int32_t>("winding_order", shapeGroup));
+  const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
+      get1DDataset<int32_t>("faces", shapeGroup));
+  const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
+      get1DDataset<int32_t>("winding_order", shapeGroup));
   std::vector<uint16_t> triangularFaces =
       createTriangularFaces(faceIndices, windingOrder);
 
@@ -515,7 +533,7 @@ extractInstrument(const H5File &file, const Group &root) {
     // Calculate pixel positions
     Pixels detectorPixels = transforms * pixelOffsets;
     // Get the pixel detIds
-    std::vector<int> detectorIds = getDetectorIds(detectorGroup);
+    auto detectorIds = getDetectorIds(detectorGroup);
     // Extract shape
     auto shape = parseNexusShape(detectorGroup);
 
