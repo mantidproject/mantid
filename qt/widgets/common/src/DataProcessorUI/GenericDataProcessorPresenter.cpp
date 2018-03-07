@@ -620,7 +620,7 @@ void GenericDataProcessorPresenter::rowThreadFinished(const int exitCode) {
   std::transform(
       prefixes.cbegin(), prefixes.cend(), std::back_inserter(workspaceNames),
       [this](QString const &prefix) -> std::string {
-        return getReducedWorkspaceName(m_rowItem.second, prefix).toStdString();
+        return getReducedWorkspaceName(m_rowItem.second).toStdString();
       });
   completedRowReductionSuccessfully(m_groupData, workspaceNames);
   threadFinished(exitCode);
