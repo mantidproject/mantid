@@ -32,7 +32,7 @@ class IqtFitMultiple(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='The _iqt.nxs InputWorkspace used by the algorithm')
 
-        self.declareProperty(name='Function', defaultValue='',
+        self.declareProperty(FunctionProperty(name='Function'),
                              doc='The function to use in fitting')
 
         self.declareProperty(name='FitType', defaultValue='',
@@ -134,7 +134,7 @@ class IqtFitMultiple(PythonAlgorithm):
 
         option = self._fit_type[:-2]
         logger.information('Option: ' + option)
-        logger.information('Function: ' + self._function)
+        logger.information('Function: ' + str(self._function))
 
         setup_prog.report('Cropping workspace')
         # prepare input workspace for fitting
@@ -259,10 +259,10 @@ class IqtFitMultiple(PythonAlgorithm):
 
 def _create_multi_domain_func(function, input_ws):
     multi = 'composite=MultiDomainFunction,NumDeriv=true;'
-    comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + function + ');'
-    stretched_index = _find_index_of_first_stretched_exponential(function)
+    comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + str(function) + ');'
+    stretched_indices = _find_indices_of_stretched_exponentials(function)
 
-    if stretched_index is None:
+    if not stretched_indices:
         logger.warning("Stretched Exponential not found in function, tie-creation skipped.")
         return function
 
@@ -277,8 +277,8 @@ def _create_multi_domain_func(function, input_ws):
             kwargs['InputWorkspace_' + str(i)] = input_ws
 
             # tie beta for every spectrum
-            tie = 'f{0}.f{1}.Stretching=f0.f{1}.Stretching'.format(i, stretched_index)
-            ties.append(tie)
+            for stretched_index in stretched_indices:
+                ties.append('f{0}.f{1}.Stretching=f0.f{1}.Stretching'.format(i, stretched_index))
 
     ties = ','.join(ties)
     multi += 'ties=(' + ties + ')'
@@ -286,11 +286,13 @@ def _create_multi_domain_func(function, input_ws):
     return multi, kwargs
 
 
-def _find_index_of_first_stretched_exponential(composite):
+def _find_indices_of_stretched_exponentials(composite):
+    indices = []
+
     for index in range(0, len(composite)):
         if composite.getFunction(index).name() == "StretchExp":
-            return index
-    return None
+            return indices.append(index)
+    return indices
 
 
 AlgorithmFactory.subscribe(IqtFitMultiple)
