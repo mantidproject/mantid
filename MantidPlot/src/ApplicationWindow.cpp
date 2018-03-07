@@ -30,150 +30,151 @@
  *                                                                         *
  ***************************************************************************/
 #include "ApplicationWindow.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
-#include "CurvesDialog.h"
-#include "PlotDialog.h"
-#include "AxesDialog.h"
-#include "LineDialog.h"
-#include "TextDialog.h"
-#include "ExportDialog.h"
-#include "TableDialog.h"
-#include "SetColValuesDialog.h"
-#include "ErrDialog.h"
-#include "LegendWidget.h"
 #include "ArrowMarker.h"
-#include "ImageMarker.h"
-#include "Graph.h"
-#include "Plot.h"
-#include "Grid.h"
-#include "PlotWizard.h"
-#include "PolynomFitDialog.h"
-#include "ExpDecayDialog.h"
-#include "FunctionDialog.h"
-#include "FitDialog.h"
-#include "SurfaceDialog.h"
-#include "Graph3D.h"
-#include "Plot3DDialog.h"
-#include "ImageDialog.h"
-#include "MultiLayer.h"
-#include "LayerDialog.h"
-#include "DataSetDialog.h"
-#include "IntDialog.h"
-#include "ConfigDialog.h"
-#include "MatrixDialog.h"
-#include "MatrixSizeDialog.h"
-#include "MatrixValuesDialog.h"
-#include "MatrixModel.h"
-#include "MatrixCommand.h"
-#include "importOPJ.h"
 #include "AssociationsDialog.h"
-#include "RenameWindowDialog.h"
-#include "QwtErrorPlotCurve.h"
-#include "InterpolationDialog.h"
-#include "ImportASCIIDialog.h"
-#include "ImageExportDialog.h"
-#include "SmoothCurveDialog.h"
-#include "FilterDialog.h"
-#include "FFTDialog.h"
-#include "Note.h"
-#include "Folder.h"
-#include "FindDialog.h"
-#include "ScaleDraw.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
-#include "ScriptingLangDialog.h"
-#include "ScriptingWindow.h"
-#include "ScriptFileInterpreter.h"
-#include "TableStatistics.h"
-#include "Fit.h"
-#include "MultiPeakFit.h"
-#include "PolynomialFit.h"
-#include "SigmoidalFit.h"
-#include "LogisticFit.h"
-#include "NonLinearFit.h"
-#include "FunctionCurve.h"
-#include "QwtPieCurve.h"
-#include "Spectrogram.h"
-#include "Integration.h"
-#include "Differentiation.h"
-#include "SmoothFilter.h"
-#include "FFTFilter.h"
+#include "AxesDialog.h"
+#include "ColorBox.h"
+#include "ColorMapDialog.h"
+#include "ConfigDialog.h"
 #include "Convolution.h"
 #include "Correlation.h"
 #include "CurveRangeDialog.h"
-#include "ColorBox.h"
-#include "QwtHistogram.h"
-#include "OpenProjectDialog.h"
-#include "ColorMapDialog.h"
-#include "TextEditor.h"
-#include "SymbolDialog.h"
+#include "CurvesDialog.h"
 #include "CustomActionDialog.h"
-#include "MdiSubWindow.h"
-#include "FloatingWindow.h"
 #include "DataPickerTool.h"
-#include "TiledWindow.h"
+#include "DataSetDialog.h"
+#include "Differentiation.h"
 #include "DockedWindow.h"
+#include "ErrDialog.h"
+#include "ExpDecayDialog.h"
+#include "ExportDialog.h"
+#include "FFTDialog.h"
+#include "FFTFilter.h"
+#include "FilterDialog.h"
+#include "FindDialog.h"
+#include "Fit.h"
+#include "FitDialog.h"
+#include "FloatingWindow.h"
+#include "Folder.h"
+#include "FunctionCurve.h"
+#include "FunctionDialog.h"
+#include "Graph.h"
+#include "Graph3D.h"
+#include "Grid.h"
+#include "ImageDialog.h"
+#include "ImageExportDialog.h"
+#include "ImageMarker.h"
+#include "ImportASCIIDialog.h"
+#include "IntDialog.h"
+#include "Integration.h"
+#include "InterpolationDialog.h"
+#include "LayerDialog.h"
+#include "LegendWidget.h"
+#include "LineDialog.h"
+#include "LogisticFit.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MatrixCommand.h"
+#include "MatrixDialog.h"
+#include "MatrixModel.h"
+#include "MatrixSizeDialog.h"
+#include "MatrixValuesDialog.h"
+#include "MdiSubWindow.h"
+#include "MultiLayer.h"
+#include "MultiPeakFit.h"
+#include "NonLinearFit.h"
+#include "Note.h"
+#include "OpenProjectDialog.h"
+#include "Plot.h"
+#include "Plot3DDialog.h"
+#include "PlotDialog.h"
+#include "PlotWizard.h"
+#include "PolynomFitDialog.h"
+#include "PolynomialFit.h"
 #include "ProjectSerialiser.h"
+#include "QwtErrorPlotCurve.h"
+#include "QwtHistogram.h"
+#include "QwtPieCurve.h"
+#include "RenameWindowDialog.h"
+#include "ScaleDraw.h"
+#include "ScriptFileInterpreter.h"
+#include "ScriptingLangDialog.h"
+#include "ScriptingWindow.h"
+#include "SetColValuesDialog.h"
+#include "SigmoidalFit.h"
+#include "SmoothCurveDialog.h"
+#include "SmoothFilter.h"
+#include "Spectrogram.h"
+#include "SurfaceDialog.h"
+#include "SymbolDialog.h"
+#include "TableDialog.h"
+#include "TableStatistics.h"
+#include "TextDialog.h"
+#include "TextEditor.h"
+#include "TiledWindow.h"
+#include "importOPJ.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 // TODO: move tool-specific code to an extension manager
-#include "ScreenPickerTool.h"
-#include "LabelTool.h"
-#include "TranslateCurveTool.h"
-#include "MultiPeakFitTool.h"
-#include "LineProfileTool.h"
-#include "RangeSelectorTool.h"
-#include "PlotToolInterface.h"
-#include "Mantid/MantidMatrix.h"
-#include "Mantid/MantidTable.h"
-#include "Mantid/MantidMatrixCurve.h"
 #include "ContourLinesEditor.h"
+#include "LabelTool.h"
+#include "LineProfileTool.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
+#include "Mantid/MantidMatrix.h"
+#include "Mantid/MantidMatrixCurve.h"
+#include "Mantid/MantidTable.h"
 #include "Mantid/RemoveErrorsDialog.h"
+#include "MultiPeakFitTool.h"
+#include "PlotToolInterface.h"
+#include "RangeSelectorTool.h"
+#include "ScreenPickerTool.h"
+#include "TranslateCurveTool.h"
 
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
 
-#include <qwt_scale_engine.h>
-#include <QColorGroup>
-#include <QFileDialog>
-#include <QInputDialog>
-#include <QProgressDialog>
-#include <QPrintDialog>
-#include <QPixmapCache>
-#include <QMenuBar>
-#include <QClipboard>
-#include <QTranslator>
-#include <QSplitter>
-#include <QSettings>
-#include <QApplication>
-#include <QMessageBox>
-#include <QPrinter>
-#include <QPrinterInfo>
-#include <QActionGroup>
 #include <QAction>
-#include <QToolBar>
-#include <QKeySequence>
+#include <QActionGroup>
+#include <QApplication>
+#include <QClipboard>
+#include <QColorGroup>
+#include <QDateTime>
+#include <QDesktopWidget>
+#include <QDockWidget>
+#include <QFileDialog>
+#include <QFontComboBox>
 #include <QImageReader>
 #include <QImageWriter>
-#include <QDateTime>
+#include <QInputDialog>
+#include <QKeySequence>
+#include <QList>
+#include <QMdiArea>
+#include <QMdiSubWindow>
+#include <QMenuBar>
+#include <QMenuItem>
+#include <QMessageBox>
+#include <QPair>
+#include <QPixmapCache>
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QPrinterInfo>
+#include <QProgressDialog>
+#include <QSettings>
 #include <QShortcut>
-#include <QDockWidget>
+#include <QSignalMapper>
+#include <QSpinBox>
+#include <QSplitter>
 #include <QTextCodec>
 #include <QTextStream>
-#include <QVarLengthArray>
-#include <QList>
+#include <QToolBar>
+#include <QTranslator>
 #include <QUrl>
-#include <QFontComboBox>
-#include <QSpinBox>
-#include <QMdiArea>
-#include <QMenuItem>
-#include <QMdiSubWindow>
-#include <QSignalMapper>
-#include <QDesktopWidget>
-#include <QPair>
+#include <QVarLengthArray>
 #include <QtAlgorithms>
+#include <QtGlobal>
+#include <qwt_scale_engine.h>
 #include <zlib.h>
 
 #include <gsl/gsl_sort.h>
@@ -182,24 +183,24 @@
 #include <boost/scoped_ptr.hpp>
 
 // Mantid
-#include "Mantid/MantidUI.h"
-#include "Mantid/MantidAbout.h"
-#include "Mantid/PeakPickerTool.h"
+#include "Mantid/FirstTimeSetup.h"
 #include "Mantid/ManageCustomMenus.h"
 #include "Mantid/ManageInterfaceCategories.h"
-#include "Mantid/FirstTimeSetup.h"
+#include "Mantid/MantidAbout.h"
+#include "Mantid/MantidUI.h"
+#include "Mantid/PeakPickerTool.h"
 
-#include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/Message.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 #include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidQtWidgets/Common/CatalogSearch.h"
-#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/MessageDisplay.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/TrackedAction.h"
@@ -237,7 +238,7 @@ using Mantid::Kernel::Logger;
 namespace {
 /// static logger
 Logger g_log("ApplicationWindow");
-}
+} // namespace
 
 extern "C" {
 void file_compress(const char *file, const char *mode);
@@ -363,8 +364,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   logWindow->setWindowTitle(tr("Results Log"));
   addDockWidget(Qt::TopDockWidgetArea, logWindow);
 
-  using MantidQt::MantidWidgets::MessageDisplay;
   using MantidQt::MantidWidgets::Message;
+  using MantidQt::MantidWidgets::MessageDisplay;
   qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
   resultsLog = new MessageDisplay(logWindow);
   logWindow->setWidget(resultsLog);
@@ -609,9 +610,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
 }
 
 /** Determines if the first time dialog should be shown
-* @param commandArguments : all command line arguments.
-* @returns true if the dialog should be shown
-*/
+ * @param commandArguments : all command line arguments.
+ * @returns true if the dialog should be shown
+ */
 bool ApplicationWindow::shouldWeShowFirstTimeSetup(
     const QStringList &commandArguments) {
   // Early check of execute and quit command arguments used by system tests.
@@ -8877,8 +8878,8 @@ void ApplicationWindow::setWindowGeometry(int x, int y, int w, int h) {
 }
 
 /**
-  * Checks if a mdi sub-window exists.
-  */
+ * Checks if a mdi sub-window exists.
+ */
 bool ApplicationWindow::existsWindow(MdiSubWindow *w) const {
   if (!w)
     return false;
@@ -8891,8 +8892,8 @@ bool ApplicationWindow::existsWindow(MdiSubWindow *w) const {
 }
 
 /**
-  * Returns the active sub-window
-  */
+ * Returns the active sub-window
+ */
 MdiSubWindow *ApplicationWindow::getActiveWindow() const {
   if (!existsWindow(d_active_window)) {
     d_active_window = nullptr;
@@ -8901,8 +8902,8 @@ MdiSubWindow *ApplicationWindow::getActiveWindow() const {
 }
 
 /**
-  * Sets internal pointer to a new active sub-window.
-  */
+ * Sets internal pointer to a new active sub-window.
+ */
 void ApplicationWindow::setActiveWindow(MdiSubWindow *w) {
   d_active_window = w;
   if (!existsWindow(d_active_window)) {
@@ -11560,7 +11561,7 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
 
 /** Fixes the colour pallete so that the hints are readable.
 
-  On Linux (tested on Fedora 26 and Ubuntu 14.4) the palette colour for
+  On Linux Fedora 26+ and Ubuntu 14.4+ the palette colour for
   ToolTipBase has no effect on the colour of tooltips, but does change
   the colour of 'What's This' boxes and and Line Edit hints. The palette
   colour for ToolTipText on the other hand affects all three of
@@ -11572,16 +11573,46 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
 
   Changing the tooltip text to a darker colour fixes the problem for 'LineEdit'
   hints and 'What's This' boxes but creates one for ordinary tooltips.
-  Instead we set the background colour to a darker one, consistent with
-  ordinary tooltips.
+
+  Setting the tooltip background colour to a darker colour works fine on
+  Fedora 26-7+ and Ubuntu 14.04 but not for RHEL7 where the tooltip text
+  colour is also dark.
+
+  One option is to simply hardcode the values to a dark-on-light colour
+  scheme which works consistently on Fedora, Ubuntu and RHEL7.
+  However, RHEL7 users were not happy with this solution.
+
+  Further investigation revealed that the issue may be related to
+  https://bugs.launchpad.net/ubuntu/+source/qt4-x11/+bug/877236 and the
+  fact that in the qt source gui/styles/qgtkstyle.cpp ~line 299 only loads
+  the ToolTipText colour, leaving ToolTibBase to the default from
+  CleanLooksStyle.
+
+  This problem can be worked around on fedora by switching to the
+  Adwaita theme in Mantid Preferences. However, the adwaita-qt
+  theme is not available on certain versions of Ubuntu.
+
+  Any easy solution for now is to detect unity clients and apply the
+  fix only to them.
 */
 void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
-  auto tooltipColorApprox =
-      palette.color(QPalette::ColorGroup::Active, QPalette::Text);
-  palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipBase,
-                   tooltipColorApprox);
-  palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipBase,
-                   tooltipColorApprox);
+  if (isUnityDesktop()) {
+    auto tooltipBaseColor = QColor("black");
+    auto tooltipTextColor = QColor("white");
+
+    palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipBase,
+                     tooltipBaseColor);
+    palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipBase,
+                     tooltipBaseColor);
+    palette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipText,
+                     tooltipTextColor);
+    palette.setColor(QPalette::ColorGroup::Active, QPalette::ToolTipText,
+                     tooltipTextColor);
+  }
+}
+
+bool ApplicationWindow::isUnityDesktop() const {
+  return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity";
 }
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
@@ -13535,14 +13566,12 @@ ApplicationWindow *ApplicationWindow::importOPJ(const QString &filename,
     app->recentProjects.push_front(filename);
     app->updateRecentProjectsList();
 
-    // cppcheck-suppress unusedScopedObject
     ImportOPJ(app, filename);
 
     QApplication::restoreOverrideCursor();
     return app;
   } else if (filename.endsWith(".ogm", Qt::CaseInsensitive) ||
              filename.endsWith(".ogw", Qt::CaseInsensitive)) {
-    // cppcheck-suppress unusedScopedObject
     ImportOPJ(this, filename);
     recentProjects.removeAll(filename);
     recentProjects.push_front(filename);
@@ -13606,8 +13635,8 @@ QList<MdiSubWindow *> ApplicationWindow::windowsList() const {
 }
 
 /**
-  * Return all windows in all folders.
-  */
+ * Return all windows in all folders.
+ */
 QList<MdiSubWindow *> ApplicationWindow::getAllWindows() const {
   QList<MdiSubWindow *> out;
   // get the docked windows first
@@ -14959,12 +14988,12 @@ void ApplicationWindow::cascade() {
 }
 
 /**
-*  Load a script file into a new or existing project
-*
-* @param fn :: is read as a Python script file and loaded in the command script
-* window.
-* @param existingProject :: True if loading into an already existing project
-*/
+ *  Load a script file into a new or existing project
+ *
+ * @param fn :: is read as a Python script file and loaded in the command script
+ * window.
+ * @param existingProject :: True if loading into an already existing project
+ */
 ApplicationWindow *ApplicationWindow::loadScript(const QString &fn,
                                                  bool existingProject) {
 #ifdef SCRIPTING_PYTHON
@@ -15053,14 +15082,14 @@ void ApplicationWindow::onScriptExecuteError(const QString &message,
 }
 
 /**
-* Run Python code
-* @param code :: An arbitrary string of python code
-* @param async :: If true the code will be run asynchronously but only if it is
-* called from the GUI thread
-* @param quiet :: If true then no output is produced concerning script
-* start/finished
-* @param redirect :: If true redirect stdout/stderr to results log
-*/
+ * Run Python code
+ * @param code :: An arbitrary string of python code
+ * @param async :: If true the code will be run asynchronously but only if it is
+ * called from the GUI thread
+ * @param quiet :: If true then no output is produced concerning script
+ * start/finished
+ * @param redirect :: If true redirect stdout/stderr to results log
+ */
 bool ApplicationWindow::runPythonScript(const QString &code, bool async,
                                         bool quiet, bool redirect) {
   if (code.isEmpty())
@@ -15272,7 +15301,6 @@ void ApplicationWindow::scriptsDirPathChanged(const QString &path) {
 }
 
 void ApplicationWindow::makeToolbarsMenu() {
-  // cppcheck-suppress publicAllocationError
   actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
   toolbarsMenu->addAction(actionFileTools);
@@ -15581,7 +15609,6 @@ void ApplicationWindow::showUserDirectoryDialog() {
   ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
-  // cppcheck-suppress memleak
 }
 
 void ApplicationWindow::addCustomAction(QAction *action,
@@ -16210,11 +16237,11 @@ FloatingWindow *ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow *w,
 }
 
 /**
-  * Returns the top-left corner of the ADI area available for sub-windows
+ * Returns the top-left corner of the ADI area available for sub-windows
  * relative
-  * to the top-left corner of the monitor screen.
-  *
-  */
+ * to the top-left corner of the monitor screen.
+ *
+ */
 QPoint ApplicationWindow::mdiAreaTopLeft() const {
   QPoint p = this->pos() + d_workspace->pos();
 
@@ -16231,9 +16258,9 @@ QPoint ApplicationWindow::mdiAreaTopLeft() const {
 }
 
 /**
-  * Find the best position for a new floating window.
-  * @param sz :: Size of the new window.
-  */
+ * Find the best position for a new floating window.
+ * @param sz :: Size of the new window.
+ */
 QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const {
   const QPoint noPoint(-1, -1);
 
@@ -16667,8 +16694,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
   foreach (QMdiSubWindow *w, wl) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->widget());
     if (tw) {
-      QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRegion();
+      QPoint mdiOrigin = mapToGlobal(w->pos());
+      auto r = w->visibleRegion().boundingRect();
       r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;
@@ -16679,8 +16706,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos(QPoint pos) {
   foreach (FloatingWindow *w, m_floatingWindows) {
     TiledWindow *tw = dynamic_cast<TiledWindow *>(w->mdiSubWindow());
     if (tw) {
-      QPoint mdiOrigin = mapFromGlobal(pos);
-      auto r = w->visibleRegion();
+      QPoint mdiOrigin = mapToGlobal(w->pos());
+      auto r = w->visibleRegion().boundingRect();
       r.translate(mdiOrigin);
       if (r.contains(pos)) {
         return tw;

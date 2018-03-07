@@ -12,10 +12,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidTestHelpers/DataProcessorTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace DataProcessorTestHelper;
 using namespace MantidQt::MantidWidgets;
-using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace testing;
@@ -95,8 +96,8 @@ private:
   // non-async row reduce
   void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex) override {
     try {
-      reduceRow(&rowItem->second);
-      m_manager->update(groupIndex, rowItem->first, rowItem->second);
+      reduceRow(rowItem->second);
+      m_manager->update(groupIndex, rowItem->first, rowItem->second->data());
       m_manager->setProcessed(true, rowItem->first, groupIndex);
     } catch (std::exception &ex) {
       reductionError(QString(ex.what()));
@@ -481,13 +482,14 @@ private:
     } else {
       EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
           .Times(numTimes)
-          .WillOnce(Return(ColumnOptionsQMap()));
+          .WillRepeatedly(Return(ColumnOptionsQMap()));
       EXPECT_CALL(mockMainPresenter, getProcessingOptions())
           .Times(numTimes)
-          .WillOnce(Return(OptionsQMap()));
+          .WillRepeatedly(Return(OptionsQMap()));
       EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
           .Times(numTimes)
-          .WillOnce(Return(QString::fromStdString(postprocessingOptions)));
+          .WillRepeatedly(
+              Return(QString::fromStdString(postprocessingOptions)));
     }
   }
 
@@ -2874,17 +2876,19 @@ public:
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
-    QStringList row0 = {"12345", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
-    QStringList row1 = {"12346", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
-    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+    auto row0 =
+        makeRowData({"12345", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""});
+    auto row1 =
+        makeRowData({"12346", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""});
+    GroupData group = {{0, row0}, {1, row1}};
+
+    // Find and cache the reduced workspace names
+    row0->setReducedName(presenter->getReducedWorkspaceName(row0));
+    row1->setReducedName(presenter->getReducedWorkspaceName(row1));
 
     // Test the names of the reduced workspaces
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
-                     "prefix_1_TOF_12345");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1, "prefix_2_"),
-                     "prefix_2_TOF_12346");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0), "TOF_12345");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1), "TOF_12346");
+    TS_ASSERT_EQUALS(row0->reducedName().toStdString(), "TOF_12345");
+    TS_ASSERT_EQUALS(row1->reducedName().toStdString(), "TOF_12346");
     // Test the names of the post-processed ws
     TS_ASSERT_EQUALS(
         presenter->getPostprocessedWorkspaceName(group).toStdString(),
@@ -2901,20 +2905,20 @@ public:
 
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
-    QStringList row0 = {"12345", "0.5", "11115", "0.1", "0.3",
-                        "0.04",  "1",   "",      ""};
-    QStringList row1 = {"12346", "0.5", "11116", "0.1", "0.3",
-                        "0.04",  "1",   "",      ""};
-    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+    auto row0 = makeRowData(
+        {"12345", "0.5", "11115", "0.1", "0.3", "0.04", "1", "", ""});
+    auto row1 = makeRowData(
+        {"12346", "0.5", "11116", "0.1", "0.3", "0.04", "1", "", ""});
+    GroupData group = {{0, row0}, {1, row1}};
+
+    // Find and cache the reduced workspace names
+    row0->setReducedName(presenter->getReducedWorkspaceName(row0));
+    row1->setReducedName(presenter->getReducedWorkspaceName(row1));
 
     // Test the names of the reduced workspaces
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
-                     "prefix_1_TOF_12345_TRANS_11115");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1, "prefix_2_"),
-                     "prefix_2_TOF_12346_TRANS_11116");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0),
+    TS_ASSERT_EQUALS(row0->reducedName().toStdString(),
                      "TOF_12345_TRANS_11115");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1),
+    TS_ASSERT_EQUALS(row1->reducedName().toStdString(),
                      "TOF_12346_TRANS_11116");
     // Test the names of the post-processed ws
     TS_ASSERT_EQUALS(
@@ -2931,20 +2935,20 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     // Test transmission run list separated by both comma and plus symbol
-    QStringList row0 = {"12345", "0.5", "11115,11116", "0.1", "0.3", "0.04",
-                        "1", "", ""};
-    QStringList row1 = {"12346", "0.5", "11115+11116", "0.1", "0.3", "0.04",
-                        "1", "", ""};
-    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+    auto row0 = makeRowData(
+        {"12345", "0.5", "11115,11116", "0.1", "0.3", "0.04", "1", "", ""});
+    auto row1 = makeRowData(
+        {"12346", "0.5", "11115+11116", "0.1", "0.3", "0.04", "1", "", ""});
+    GroupData group = {{0, row0}, {1, row1}};
+
+    // Find and cache the reduced workspace names
+    row0->setReducedName(presenter->getReducedWorkspaceName(row0));
+    row1->setReducedName(presenter->getReducedWorkspaceName(row1));
 
     // Test the names of the reduced workspaces
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
-                     "prefix_1_TOF_12345_TRANS_11115+11116");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1, "prefix_2_"),
-                     "prefix_2_TOF_12346_TRANS_11115+11116");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0),
+    TS_ASSERT_EQUALS(row0->reducedName().toStdString(),
                      "TOF_12345_TRANS_11115+11116");
-    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1),
+    TS_ASSERT_EQUALS(row1->reducedName().toStdString(),
                      "TOF_12346_TRANS_11115+11116");
     // Test the names of the post-processed ws
     TS_ASSERT_EQUALS(
@@ -2962,13 +2966,12 @@ public:
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
-    QStringList row0 = {"12345", "0.5"};
-    QStringList row1 = {"12346", "0.5"};
-    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+    auto row0 = makeRowData({"12345", "0.5"});
+    auto row1 = makeRowData({"12346", "0.5"});
+    GroupData group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_THROWS_ANYTHING(presenter->getReducedWorkspaceName(row0));
-    TS_ASSERT_THROWS_ANYTHING(presenter->getPostprocessedWorkspaceName(group));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -3039,9 +3042,11 @@ public:
   void testPlotRowPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-
+    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->acceptTreeManager(std::move(mockTreeManager));
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
@@ -3049,13 +3054,18 @@ public:
     createTOFWorkspace("IvsQ_binned_TOF_12345", "12345");
     createTOFWorkspace("IvsQ_binned_TOF_12346", "12346");
 
-    RowList rowlist;
-    rowlist[0].insert(0);
-    rowlist[0].insert(1);
+    // Set up the expected tree data to be returned in the selection
+    auto row0 = makeRowData({"12345"});
+    auto row1 = makeRowData({"12346"});
+    GroupData group = {{0, row0}, {1, row1}};
+    TreeData tree = {{0, group}};
 
     // The user hits "plot rows" with the first row selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), rowlist);
+
+    EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
+        .Times(1)
+        .WillOnce(Return(tree));
 
     auto pythonCode = QString(
         "base_graph = None\nbase_graph = "
@@ -3077,20 +3087,29 @@ public:
   void testPlotGroupPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-
+    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->acceptTreeManager(std::move(mockTreeManager));
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
     createTOFWorkspace("IvsQ_TOF_12345_TOF_12346");
 
-    GroupList group = {0};
+    // Set up the expected tree data to be returned in the selection
+    auto row0 = makeRowData({"12345"});
+    auto row1 = makeRowData({"12346"});
+    GroupData group = {{0, row0}, {1, row1}};
+    TreeData tree = {{0, group}};
 
     // The user hits "plot rows" with the first row selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), group);
+
+    EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
+        .Times(1)
+        .WillOnce(Return(tree));
 
     auto pythonCode =
         QString("base_graph = None\nbase_graph = "
@@ -3130,7 +3149,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(
         presenter.notify(DataProcessorPresenter::PlotGroupFlag));
     TS_ASSERT_THROWS_ANYTHING(
-        presenter.getPostprocessedWorkspaceName(std::map<int, QStringList>()));
+        presenter.getPostprocessedWorkspaceName(GroupData()));
   }
 
   void testPostprocessMap() {

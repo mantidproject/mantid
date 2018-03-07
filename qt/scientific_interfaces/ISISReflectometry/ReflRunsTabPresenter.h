@@ -78,6 +78,8 @@ public:
   QString getPostprocessingOptionsAsString() const override;
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
+  QString getTransmissionRunsForAngle(const double angle) const override;
+  bool hasPerAngleTransmissionRuns() const override;
   /// Handle data reduction paused/resumed
   void pause() const override;
   void resume() const override;

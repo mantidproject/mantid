@@ -88,7 +88,6 @@ public:
   MOCK_CONST_METHOD0(getEndOverlap, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
-  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
   MOCK_CONST_METHOD0(getDirectBeam, std::string());
   MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
@@ -109,6 +108,7 @@ public:
   MOCK_CONST_METHOD0(getProcessingInstructions, std::string());
   MOCK_CONST_METHOD0(getSummationType, std::string());
   MOCK_CONST_METHOD0(getReductionType, std::string());
+  MOCK_CONST_METHOD0(getTransmissionRuns, std::map<std::string, std::string>());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
   MOCK_METHOD1(setReductionTypeEnabled, void(bool));
   MOCK_METHOD1(setPolarisationOptionsEnabled, void(bool));
@@ -236,7 +236,8 @@ public:
 
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
-  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
+  MOCK_CONST_METHOD1(getTransmissionRunsForAngle, std::string(const double));
+  MOCK_CONST_METHOD0(hasPerAngleTransmissionRuns, bool());
   MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getReductionOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
@@ -253,7 +254,10 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
-  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
+  MOCK_CONST_METHOD2(getTransmissionRunsForAngle,
+                     std::string(int, const double));
+  MOCK_CONST_METHOD1(hasPerAngleTransmissionRuns, bool(int));
+  MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
   MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
@@ -287,7 +291,9 @@ public:
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
-  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
+  MOCK_CONST_METHOD2(getTransmissionRunsForAngle,
+                     std::string(int, const double));
+  MOCK_CONST_METHOD1(hasPerAngleTransmissionRuns, bool(int));
   MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));

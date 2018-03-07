@@ -17,8 +17,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import numpy
-import mantid.dataobjects
+import datetime
 from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
+import mantid.kernel, mantid.api
+
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
 # These functions are common between plotfunctions.py and plotfunctions3D.py
@@ -349,6 +351,39 @@ def get_data_uneven_flag(workspace, **kwargs):
         aligned = True
     return aligned, kwargs
 
+# ====================================================
+# extract logs
+# ====================================================
+
+def get_sample_log(workspace, **kwargs):
+    LogName = kwargs.pop('LogName')
+    ExperimentInfo = kwargs.pop('ExperimentInfo',0)
+    if isinstance(workspace, MDHistoWorkspace):
+        run = workspace.getExperimentInfo(ExperimentInfo).run()
+    else:
+        run = workspace.run()
+    if not run.hasProperty(LogName):
+        raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
+    tsp = run[LogName]
+    units = tsp.units
+    if not isinstance(tsp, mantid.kernel.FloatTimeSeriesProperty):
+        raise RuntimeError('This function can only plot FloatTimeSeriesProperty objects')
+    times = tsp.times.astype('datetime64[us]')
+    y = tsp.value
+    FullTime = kwargs.pop('FullTime', False)
+    StartFromLog = kwargs.pop('StartFromLog', False)
+    if FullTime:
+        x = times.astype(datetime.datetime)
+    else:
+        t0 = times[0]
+        if not StartFromLog:
+            try:
+                t0 = run['proton_charge'].times.astype('datetime64[us]')[0]
+            except:
+                pass #TODO: Maybe raise a warning?
+        x = (times - t0).astype(float) * 1e-6
+    return x, y, FullTime, LogName, units, kwargs
+
 
 # ====================================================
 # Plot functionality
@@ -363,7 +398,7 @@ def get_axes_labels(workspace):
     Some of them are latex formatted already.
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
     """
-    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
+    if isinstance(workspace, MDHistoWorkspace):
         axes = ['Intensity']
         dims = workspace.getNonIntegratedDimensions()
         for d in dims:

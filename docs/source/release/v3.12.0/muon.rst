@@ -5,15 +5,11 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+.. figure:: ../../images/muon_release_3_12.png
+   :class: screenshot
+   :align: right
+   :width: 500 px
 
-
-Interfaces
-----------
-- Added a cancel button to the MaxEnt widget in Frequency Domain Analysis.
-- Added checkboxes for "add all pairs" and "add all groups" to the settings tab. 
 
 Bug Fixes
 ---------
@@ -21,9 +17,15 @@ Bug Fixes
 
 Interface
 ---------
+- Added a cancel button to the MaxEnt widget in Frequency Domain Analysis.
+- Added checkboxes for "add all pairs" and "add all groups" to the settings tab. 
 - The data plot style in the settings tab of Muon Analysis, only alters the plot range. It no longer crops the data.  
 - Results table in Muon Analysis now sets relevant columns to numeric. 
+- The period display no longer becomes blank when changing the period selection in multiple fitting mode. 
+- The group/pair selection in Muon Analysis no longer resets when changing tabs or loading data.
 - The Frequency Domain Analysis GUI now uses :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` to create the phase table for PhaseQuad FFTs. 
+- The Frequency Domain Analysis GUI now uses :ref:`MuonMaxent <algm-MuonMaxent>` to calculate the frequency spectrum in MaxEnt mode.
+- The ALC interface now allows background sections with negative values.  
 
 Algorithms
 ----------
