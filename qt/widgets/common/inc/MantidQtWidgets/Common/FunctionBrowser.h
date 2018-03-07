@@ -272,7 +272,7 @@ protected:
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty *prop) const;
   /// Get a constraint string
-  QString getConstraint(const AConstraint& ac) const;
+  QString getConstraint(const AConstraint &ac) const;
 
   /// Initialize storage and values for local parameters
   void initLocalParameter(const QString &parName) const;

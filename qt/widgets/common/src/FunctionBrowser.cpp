@@ -1081,7 +1081,6 @@ FunctionBrowser::addConstraintProperties(QtProperty *prop, QString constraint) {
     }
   }
 
-  
   // In case of multi-dataset fitting store the tie for a local parameter
   if (prop->hasOption(globalOptionName) &&
       !prop->checkOption(globalOptionName)) {
@@ -1175,7 +1174,7 @@ bool FunctionBrowser::hasUpperBound(QtProperty *prop) const {
 }
 
 /// Get a constraint string
-QString FunctionBrowser::getConstraint(const AConstraint& ac) const {
+QString FunctionBrowser::getConstraint(const AConstraint &ac) const {
   QString constraint;
   if (ac.lower) {
     constraint += m_constraintManager->value(ac.lower) + "<" +
@@ -1946,8 +1945,8 @@ void FunctionBrowser::parameterChanged(QtProperty *prop) {
     if (isGlobal) {
       // it is a fixed tie
       newTie = QString("%1=%2")
-                        .arg(prop->propertyName())
-                        .arg(m_parameterManager->value(prop));
+                   .arg(prop->propertyName())
+                   .arg(m_parameterManager->value(prop));
     }
     if (!newTie.isEmpty()) {
       m_tieManager->setValue(tieProp, newTie);
@@ -1990,7 +1989,7 @@ void FunctionBrowser::constraintChanged(QtProperty *prop) {
       !prop->checkOption(globalOptionName)) {
     QString constraint;
     QString parName;
-    
+
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
       if (it.value().lower == prop || it.value().upper == prop) {
         constraint = getConstraint(it.value());
