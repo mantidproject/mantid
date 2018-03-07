@@ -1081,21 +1081,9 @@ FunctionBrowser::addConstraintProperties(QtProperty *prop, QString constraint) {
     }
   }
 
-  // In case of multi-dataset fitting store the tie for a local parameter
-  if (prop->hasOption(globalOptionName) &&
-      !prop->checkOption(globalOptionName)) {
-    auto parName = getParameterName(prop);
-    auto &localValues = m_localParameterValues[parName];
-    if (m_currentDataset >= localValues.size()) {
-      initLocalParameter(parName);
-    }
-    localValues[m_currentDataset].constraint = constraint;
-  }
-
   // add properties
   QList<FunctionBrowser::AProperty> plist;
   AConstraint ac;
-  // ac.constraint = constraint;
   ac.paramProp = prop;
   ac.lower = ac.upper = nullptr;
   if (!lowerBoundStr.isEmpty()) {
@@ -1112,6 +1100,16 @@ FunctionBrowser::addConstraintProperties(QtProperty *prop, QString constraint) {
   }
   if (ac.lower || ac.upper) {
     m_constraints.insert(m_properties[prop].parent, ac);
+  }
+
+  // In case of multi-dataset fitting store the tie for a local parameter
+  if (prop->hasOption(globalOptionName) &&
+      !prop->checkOption(globalOptionName)) {
+    auto parName = getParameterName(prop);
+    checkLocalParameter(parName);
+    auto &localValues = m_localParameterValues[parName][m_currentDataset];
+    localValues.lowerBound = lowerBoundStr;
+    localValues.upperBound = upperBoundStr;
   }
 
   return plist;
@@ -1174,16 +1172,15 @@ bool FunctionBrowser::hasUpperBound(QtProperty *prop) const {
 }
 
 /// Get a constraint string
-QString FunctionBrowser::getConstraint(const AConstraint &ac) const {
+QString FunctionBrowser::getConstraint(const QString &paramName, const QString &lowerBound, const QString &upperBound) const {
   QString constraint;
-  if (ac.lower) {
-    constraint += m_constraintManager->value(ac.lower) + "<" +
-                  ac.paramProp->propertyName();
+  if (!lowerBound.isEmpty()) {
+    constraint += lowerBound + "<" + paramName;
   } else {
-    constraint += ac.paramProp->propertyName();
+    constraint += paramName;
   }
-  if (ac.upper) {
-    constraint += "<" + m_constraintManager->value(ac.upper);
+  if (!upperBound.isEmpty()) {
+    constraint += "<" + upperBound;
   }
   return constraint;
 }
@@ -1418,7 +1415,10 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
     auto to = m_constraints.upperBound(prop);
     for (auto it = from; it != to; ++it) {
       try {
-        QString constraint = getConstraint(it.value());
+        const auto &localParam = it.value();
+        auto lower = m_constraintManager->value(localParam.lower);
+        auto upper = m_constraintManager->value(localParam.upper);
+        QString constraint = getConstraint(localParam.paramProp->propertyName(), lower, upper);
         fun->addConstraints(constraint.toStdString());
       } catch (...) {
       }
@@ -1991,19 +1991,20 @@ void FunctionBrowser::constraintChanged(QtProperty *prop) {
     QString parName;
 
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-      if (it.value().lower == prop || it.value().upper == prop) {
-        constraint = getConstraint(it.value());
+      bool isLower = it.value().lower == prop;
+      bool isUpper = it.value().upper == prop;
+      if (isLower || isUpper) {
         parName = getParameterName(it.value().paramProp);
         checkLocalParameter(parName);
+        auto &paramValue = m_localParameterValues[parName][m_currentDataset];
+        if (isLower) {
+          paramValue.lowerBound = m_constraintManager->value(prop);
+        } else {
+          paramValue.upperBound = m_constraintManager->value(prop);
+        }
         break;
       }
     }
-
-    if (constraint.isEmpty())
-      return;
-
-    auto &paramValue = m_localParameterValues[parName][m_currentDataset];
-    paramValue.constraint = constraint;
   }
 }
 
@@ -2254,8 +2255,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
           fun1->setParameter(j, localParam.value);
         }
       }
-      auto constraint = localParam.constraint;
-      if (!constraint.isEmpty()) {
+      if (!localParam.lowerBound.isEmpty() && !localParam.upperBound.isEmpty()) {
+        auto constraint = getConstraint(parName, localParam.lowerBound, localParam.upperBound);
         fun1->addConstraints(constraint.toStdString());
       }
     }
@@ -2296,8 +2297,9 @@ void FunctionBrowser::updateLocalConstraint(const QString &parName) {
     }
   }
   auto &localParam = m_localParameterValues[parName][m_currentDataset];
-  if (!localParam.constraint.isEmpty()) {
-    addConstraintProperties(prop, localParam.constraint);
+  if (!localParam.lowerBound.isEmpty() && !localParam.upperBound.isEmpty()) {
+    auto constraint = getConstraint(parName, localParam.lowerBound, localParam.upperBound);
+    addConstraintProperties(prop, constraint);
   }
 }
 
