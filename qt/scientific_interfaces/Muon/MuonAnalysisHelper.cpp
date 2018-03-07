@@ -191,12 +191,12 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Temperature: ";
   if (run.hasProperty("sample_temp")) {
-    //extract as string, then convert to double to allow precision to apply
+    // extract as string, then convert to double to allow precision to apply
     std::string valueAsString = run.getProperty("sample_temp")->value();
     try {
       out << std::stod(valueAsString);
-    } catch (const std::invalid_argument&) {
-      //problem converting to double, output as string
+    } catch (const std::invalid_argument &) {
+      // problem converting to double, output as string
       out << valueAsString;
     }
   } else {
@@ -207,12 +207,12 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Could be stored as a double or as a string (range e.g. "1000.0 - 1020.0")
   out << "\nSample Magnetic Field: ";
   if (run.hasProperty("sample_magn_field")) {
-    //extract as string, then convert to double to allow precision to apply
+    // extract as string, then convert to double to allow precision to apply
     std::string valueAsString = run.getProperty("sample_magn_field")->value();
     try {
       out << std::stod(valueAsString);
-    } catch (const std::invalid_argument&) {
-      //problem converting to double, output as string
+    } catch (const std::invalid_argument &) {
+      // problem converting to double, output as string
       out << valueAsString;
     }
   } else {
