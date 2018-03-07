@@ -174,7 +174,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         output_ws_name = self.getPropertyValue("OutputWorkspace")
 
         # IPTS-number
-        ipts_number = self.getProperty("IPTS")
+        ipts_number = self.getProperty("IPTS").value
         if ipts_number == mantid.kernel.Property.EMPTY_INT:
             try:
                 run_number = input_workspace.run().getProperty('run').value
