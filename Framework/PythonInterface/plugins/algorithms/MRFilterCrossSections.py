@@ -198,7 +198,6 @@ class MRFilterCrossSections(PythonAlgorithm):
             api.logger.error("No events remained after filtering")
             AnalysisDataService.remove(ws_raw_name)
 
-
     def load_legacy_cross_Sections(self, file_path):
         """
             For legacy MR data, we need to load each cross-section independently.
