@@ -2224,7 +2224,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
     multiFun->setDomainIndex(i, i);
     auto fun1 = multiFun->getFunction(i);
     for (size_t j = 0; j < fun1->nParams(); ++j) {
-      QString parName = QString::fromStdString(fun1->parameterName(j));
+      auto parameterName = fun1->parameterName(j);
+      QString parName = QString::fromStdString(parameterName);
       if (globalParams.contains(parName))
         continue;
       auto tie = fun1->getTie(j);
@@ -2234,18 +2235,29 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
         // have this tie, so remove it
         fun1->removeTie(j);
       }
-      if (isLocalParameterFixed(parName, i)) {
+      if (fun1->isFixed(j)) {
+        fun1->unfix(j);
+      }
+      if (fun1->getConstraint(j)) {
+        fun1->removeConstraint(parameterName);
+      }
+      const auto &localParam = m_localParameterValues[parName][i];
+      checkLocalParameter(parName);
+      if (localParam.fixed) {
         // Fix this particular local parameter
-        fun1->tie(parName.toStdString(),
-                  boost::lexical_cast<std::string>(
-                      getLocalParameterValue(parName, i)));
+        fun1->setParameter(j, localParam.value);
+        fun1->fix(j);
       } else {
-        auto tie = getLocalParameterTie(parName, i);
+        auto tie = localParam.tie;
         if (!tie.isEmpty()) {
-          fun1->tie(parName.toStdString(), tie.toStdString());
+          fun1->tie(parameterName, tie.toStdString());
         } else {
-          fun1->setParameter(j, getLocalParameterValue(parName, i));
+          fun1->setParameter(j, localParam.value);
         }
+      }
+      auto constraint = localParam.constraint;
+      if (!constraint.isEmpty()) {
+        fun1->addConstraints(constraint.toStdString());
       }
     }
   }
