@@ -58,14 +58,9 @@ public:
   QString rebinString() const;
   QString backgroundString() const;
 
-  void setPeakRange(const double &peakMin, const double &peakMax,
-                    const QString &minPropertyName,
-                    const QString &maxPropertyName);
+  void setPeak(const double &minimumTof, const double &maximumTof);
+  void setBackground(const double &minimumTof, const double &maximumTof);
   void setPeakRange(const double &peakMin, const double &peakMax);
-  void setBackgroundRange(const double &backgroundMin,
-                          const double &backgroundMax,
-                          const QString &minPropertyName,
-                          const QString &maxPropertyName);
   void setBackgroundRange(const double &backgroundMin,
                           const double &backgroundMax);
   void setResolutionSpectraRange(const double &minimum, const double &maximum);
@@ -93,6 +88,9 @@ private slots:
 private:
   void createRESfile(const QString &file);
   void addRuntimeSmoothing(const QString &workspaceName);
+  void setRange(MantidWidgets::RangeSelector *rangeSelector,
+                const double &minimum, const double &maximum,
+                const QString &minPropertyName, const QString &maxPropertyName);
 
   Mantid::API::IAlgorithm_sptr
   calibrationAlgorithm(const QString &inputFiles) const;
