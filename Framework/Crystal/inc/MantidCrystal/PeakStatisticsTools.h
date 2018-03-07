@@ -38,7 +38,8 @@ public:
   std::vector<double> getIntensities() const;
   std::vector<double> getSigmas() const;
 
-  UniqueReflection removeOutliers(double sigmaCritical = 3.0, bool weightedZ = false) const;
+  UniqueReflection removeOutliers(double sigmaCritical = 3.0,
+                                  bool weightedZ = false) const;
   void setPeaksIntensityAndSigma(double intensity, double sigma);
 
 private:
@@ -168,7 +169,8 @@ public:
 private:
   void calculatePeaksStatistics(
       const std::map<Kernel::V3D, UniqueReflection> &uniqueReflections,
-      std::string &equivalentIntensities, double &sigmaCritical, bool& weightedZ);
+      std::string &equivalentIntensities, double &sigmaCritical,
+      bool &weightedZ);
 
   double getIOverSigmaSum(const std::vector<double> &sigmas,
                           const std::vector<double> &intensities) const;

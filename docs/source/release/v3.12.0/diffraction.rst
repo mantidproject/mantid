@@ -94,14 +94,9 @@ Single Crystal Diffraction
 
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` now has an option to calculate the Goniometer rotation (around y-axis only) for a constant wavelength source.
 
-- PeaksWorkspace now has a column for the unique peak number so peaks can be found after sorting or filtering.
-
-- :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now uses a weighted Z score for determining which peaks are outliers and has a new output workspace for plotting intensities of equivalent peaks.
-
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now can accept long or short names for the point group and reflection condition.
 
 - New algorithm :ref:`LoadWAND <algm-LoadWAND>` that will load event data for WAND² integrating out the events and correctly setting the units.
-
 
 Total Scattering
 ----------------

@@ -64,7 +64,8 @@ private:
 
   void calculateQAndAddToOutput(const Kernel::V3D &hkl,
                                 const Kernel::DblMatrix &orientedUB,
-                                const Kernel::DblMatrix &goniometerMatrix, size_t &seqNum);
+                                const Kernel::DblMatrix &goniometerMatrix,
+                                size_t &seqNum);
 
 private:
   /// Get the predicted detector direction from Q

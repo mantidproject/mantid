@@ -57,7 +57,8 @@ std::vector<double> UniqueReflection::getSigmas() const {
 
 /// Removes peaks whose intensity deviates more than sigmaCritical from the
 /// intensities' mean.
-UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical, bool weightedZ) const {
+UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical,
+                                                  bool weightedZ) const {
   if (sigmaCritical <= 0.0) {
     throw std::invalid_argument(
         "Critical sigma value has to be greater than 0.");
@@ -73,7 +74,7 @@ UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical, bool wei
     } else {
       auto sigmas = getSigmas();
       zScores = Kernel::getWeightedZscore(intensities, sigmas);
-    } 
+    }
 
     for (size_t i = 0; i < zScores.size(); ++i) {
       if (zScores[i] <= sigmaCritical) {
@@ -222,7 +223,8 @@ UniqueReflectionCollection::getReflections() const {
  */
 void PeaksStatistics::calculatePeaksStatistics(
     const std::map<V3D, UniqueReflection> &uniqueReflections,
-    std::string &equivalentIntensities, double &sigmaCritical, bool &weightedZ) {
+    std::string &equivalentIntensities, double &sigmaCritical,
+    bool &weightedZ) {
   double rMergeNumerator = 0.0;
   double rPimNumerator = 0.0;
   double intensitySumRValues = 0.0;
@@ -236,7 +238,8 @@ void PeaksStatistics::calculatePeaksStatistics(
       ++m_uniqueReflections;
 
       // Possibly remove outliers.
-      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical, weightedZ);
+      auto outliersRemoved =
+          unique.second.removeOutliers(sigmaCritical, weightedZ);
 
       // I/sigma is calculated for all reflections, even if there is only one
       // observation.

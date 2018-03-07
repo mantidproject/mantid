@@ -153,12 +153,13 @@ void SortHKL::exec() {
       } else {
         auto sigmas = unique.second.getSigmas();
         zScores = Kernel::getWeightedZscore(intensities, sigmas);
-      } 
+      }
 
       if (zScores.size() > maxPeaks)
         maxPeaks = zScores.size();
       // Possibly remove outliers.
-      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical, weightedZ);
+      auto outliersRemoved =
+          unique.second.removeOutliers(sigmaCritical, weightedZ);
 
       auto intensityStatistics =
           Kernel::getStatistics(outliersRemoved.getIntensities(),
