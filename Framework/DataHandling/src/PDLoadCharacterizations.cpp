@@ -271,12 +271,19 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
   // end early if already at the end of the file
   if (file.eof())
     return;
+  // look at the first line available now
+  // start of the scan indicator means there are no focused positions
+  const auto peek = Strings::peekLine(file).substr(0, 2);
+  if (peek == "#S" || peek == "#L")
+    return;
 
   std::vector<int32_t> specIds;
   std::vector<double> l2;
   std::vector<double> polar;
+  std::vector<double> azi;
 
   // parse the file
+  // Strings::getLine skips blank lines and lines that start with #
   for (std::string line = Strings::getLine(file); !file.eof();
        Strings::getLine(file, line)) {
     line = Strings::strip(line);
@@ -298,14 +305,25 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
       specIds.push_back(boost::lexical_cast<int32_t>(splitted[0]));
       l2.push_back(boost::lexical_cast<double>(splitted[1]));
       polar.push_back(boost::lexical_cast<double>(splitted[2]));
+      if (splitted.size() >= 4 &&
+          (!splitted[3].empty())) { // azimuthal was specified
+        try {
+          azi.push_back(boost::lexical_cast<double>(splitted[3]));
+        } catch (std::bad_cast &e) {
+          g_log.error() << "Could not convert \"" << splitted[3]
+                        << "\" to a double\n";
+          throw;
+        }
+      } else { // just set it to zero
+        azi.push_back(0.);
+      }
     }
   }
-  if (specIds.size() != l2.size() || specIds.size() != polar.size())
+  // confirm that everything is the same length
+  if (specIds.size() != l2.size() || specIds.size() != polar.size() ||
+      specIds.size() != azi.size())
     throw std::runtime_error(
         "Found different number of spectra, L2 and polar angles");
-
-  // azimuthal angles are all zero
-  std::vector<double> azi(polar.size(), 0.);
 
   // set the values
   this->setProperty("SpectrumIDs", specIds);
