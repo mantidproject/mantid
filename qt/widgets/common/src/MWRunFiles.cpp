@@ -595,7 +595,7 @@ MWRunFiles::findFilesDirectory(const QString &searchText) {
       setFileProblem("");
       return searchText;
     }
-    return "";
+    return QString("");
   }
   return boost::none;
 }
