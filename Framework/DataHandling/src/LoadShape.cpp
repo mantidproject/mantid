@@ -196,7 +196,7 @@ bool LoadShape::readSTLLine(std::ifstream &file, std::string const &type) {
 }
 
 // Adds vertex to list if distinct and returns index to vertex added or equal
-uint16_t LoadShape::addSTLVertex(V3D &vertex, std::vector<V3D> vertices) {
+uint16_t LoadShape::addSTLVertex(V3D &vertex, std::vector<V3D> &vertices) {
   for (uint16_t i = 0; i < vertices.size(); ++i) {
     if (areEqualVertices(vertex, vertices[i])) {
       return i;

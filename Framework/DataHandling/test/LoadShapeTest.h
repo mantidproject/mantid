@@ -79,6 +79,15 @@ public:
     clearWorkspaces("InputWS", "InputWS");
   }
 
+  void test_cube() {
+    auto cube = loadMeshObject("InputWS", "InputWS", "cube.stl");
+    TS_ASSERT(cube->hasValidShape());
+    TS_ASSERT_EQUALS(cube->numberOfVertices(), 8 );
+    TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
+    TS_ASSERT_DELTA(cube->volume(),3000, 0.001);
+    clearWorkspaces("InputWS", "InputWS");
+  }
+
 private:
 
   // Create workspaces and add them to algorithm properties
