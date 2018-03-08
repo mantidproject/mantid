@@ -57,7 +57,7 @@ extra_columns(const std::vector<std::string> &filenames) {
   std::set<std::string> columnSet;
 
   // parse the version1 file
-  std::ifstream file(filenames[F_INDEX_V1].c_str());
+  std::ifstream file(filenames[F_INDEX_V1].c_str(), std::ios_base::binary);
   if (!file) {
     throw Exception::FileError("Unable to open file", filenames[F_INDEX_V1]);
   }
@@ -184,7 +184,7 @@ void PDLoadCharacterizations::exec() {
 }
 
 int getVersion(const std::string &filename) {
-  std::ifstream file(filename.c_str());
+  std::ifstream file(filename.c_str(), std::ios_base::binary);
   if (!file.is_open()) {
     throw Exception::FileError("Unable to open file", filename);
   }
@@ -307,13 +307,7 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
       polar.push_back(boost::lexical_cast<double>(splitted[2]));
       if (splitted.size() >= 4 &&
           (!splitted[3].empty())) { // azimuthal was specified
-        try {
-          azi.push_back(boost::lexical_cast<double>(splitted[3]));
-        } catch (std::bad_cast &e) {
-          g_log.error() << "Could not convert \"" << splitted[3]
-                        << "\" to a double\n";
-          throw;
-        }
+        azi.push_back(boost::lexical_cast<double>(splitted[3]));
       } else { // just set it to zero
         azi.push_back(0.);
       }
@@ -355,7 +349,6 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
       continue;
     if (line.substr(0, 1) == "#")
       continue;
-
     // parse the line
     std::vector<std::string> splitted;
     boost::split(splitted, line, boost::is_any_of("\t "),
@@ -394,7 +387,7 @@ void PDLoadCharacterizations::readVersion0(const std::string &filename,
   if (filename.empty())
     return;
 
-  std::ifstream file(filename.c_str());
+  std::ifstream file(filename.c_str(), std::ios_base::binary);
   if (!file.is_open()) {
     throw Exception::FileError("Unable to open version 0 file", filename);
   }
@@ -466,7 +459,7 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
     return;
 
   g_log.information() << "Opening \"" << filename << "\" as a version 1 file\n";
-  std::ifstream file(filename.c_str());
+  std::ifstream file(filename.c_str(), std::ios_base::binary);
   if (!file.is_open()) {
     throw Exception::FileError("Unable to open version 1 file", filename);
   }
@@ -562,7 +555,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
     throw std::runtime_error("Characterizations file does not have any "
                              "characterizations information");
 
-  std::ifstream file(filename.c_str());
+  std::ifstream file(filename.c_str(), std::ios_base::binary);
   if (!file.is_open()) {
     throw Exception::FileError("Unable to open exp.ini file", filename);
   }
