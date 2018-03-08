@@ -195,7 +195,7 @@ private:
   void setChosenPeriods(const QStringList &chosenPeriods);
   void clearPeriodCheckboxes();
   void addPeriodCheckbox(const QString &name);
-  void updatePeriods(const int j, const QStringList &selection);
+  void updatePeriods(const int j);
 
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;
