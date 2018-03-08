@@ -572,6 +572,10 @@ void rebinToOutput(const Quadrilateral &inputQ,
  *        **variance** and not the errors (standard deviations).
  * @param verticalAxis A vector containing the output vertical axis bin
  * boundaries
+ * @param inputRB A pointer, of RebinnedOutput type, to the input workspace.
+ * It is used to take into account the input area fractions when calcuting
+ * the final output fractions.
+ * This can be null to indicate that the input was a standard 2D workspace.
  */
 void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              const MatrixWorkspace_const_sptr &inputWS,
