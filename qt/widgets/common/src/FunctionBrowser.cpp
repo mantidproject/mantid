@@ -958,7 +958,6 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
   m_tieManager->setValue(tieProp, tie);
   ap = addProperty(prop, tieProp);
-  tieProp->setEnabled(false);
   m_tieManager->blockSignals(false);
 
   // Store tie information for easier access
@@ -1402,7 +1401,14 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
       }
     }
     // remove failed ties from the browser
-    foreach (QtProperty *p, filedTies) { removeProperty(p); }
+    foreach (QtProperty *p, filedTies) {
+      auto paramProp = getParentParameterProperty(p);
+      if (isLocalParameterProperty(paramProp)) {
+        auto paramName = paramProp->propertyName();
+        setLocalParameterTie(paramName, m_currentDataset, "");
+      }
+      removeProperty(p);
+    }
   }
 
   // add constraints
