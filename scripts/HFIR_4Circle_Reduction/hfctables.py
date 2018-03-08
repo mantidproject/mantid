@@ -1378,8 +1378,10 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
         return
 
-    def get_complete_peak_scan(self, row_index):
+    def get_reference_scans(self, row_index):
         # TODO FIXME NOW2
+        # (1) No match
+        # (2) List
         return None
 
     def get_fwhm(self, row_index):
@@ -1417,6 +1419,21 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         out_file.close()
 
         return
+
+    def set_reference_scan_numbers(self, row_index, ref_numbers):
+        """
+
+        :param row_index:
+        :param input:
+        :return:
+        """
+        # TODO FIXME NOW2
+        if isinstance(ref_numbers, str):
+            pass
+        elif isinstance(ref_numbers, list):
+            pass
+        else:
+            pass
 
     def set_two_theta(self, row_index, two_theta):
         #  TODO FIXME NOW2

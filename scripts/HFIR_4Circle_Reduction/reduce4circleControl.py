@@ -966,6 +966,34 @@ class CWSCDReductionControl(object):
 
         return out_file_name
 
+    def find_scans_by_2theta(self, exp_number, two_theta, resolution, excluded_scans):
+        # TODO FIXME NOW2
+        """
+        param_dict = None
+
+        # get calculated 2theta
+        in_mem_2theta_list = sorted(self._2thetaLookupTable.keys())
+
+        # locate two_theta
+        index = bisect.bisect_left(in_mem_2theta_list, two_theta)
+        nearest_2theta = None
+        if index > 0 and two_theta - in_mem_2theta_list[index-1] < resolution:
+            # close to left side of input
+            nearest_2theta = in_mem_2theta_list[index-1]
+        elif index < len(in_mem_2theta_list) and in_mem_2theta_list[index] - two_theta < resolution:
+            # close to right side of input
+            nearest_2theta = in_mem_2theta_list[index]
+        # END-IF-ELSE
+
+        print ('[DB...BAT] List of integrated peaks 2theta: {0}.  Try to find a match for {1}'
+               ''.format(in_mem_2theta_list, two_theta))
+
+                        if ref_exp_number != self._exp_number:
+                    raise RuntimeError('It is very wrong to have two different experiment number ({0} vs {1})!'
+                                       ''.format(ref_exp_number, self._exp_number))
+        """
+        return [72]
+
     def get_experiment(self):
         """
         Get experiment number
@@ -1108,48 +1136,22 @@ class CWSCDReductionControl(object):
 
         return log_value
 
-    def get_integrated_scan_params(self, exp_number, two_theta, resolution=0.01):
+    def get_integrated_scan_params(self, exp_number, scan_number):
         """ for single Pt-scan peak integration
         :param exp_number:
         :param two_theta:
         :param resolution:
         :return:
         """
-        param_dict = None
+        peak_info = self.get_peak_info(exp_number, scan_number)
+        if peak_info is None:
+            raise NotImplementedError('Peak info cannot be None.... Keys: {0}'.format(self._myPeakInfoDict.keys()))
 
-        # get calculated 2theta
-        in_mem_2theta_list = sorted(self._2thetaLookupTable.keys())
-
-        # locate two_theta
-        index = bisect.bisect_left(in_mem_2theta_list, two_theta)
-        nearest_2theta = None
-        if index > 0 and two_theta - in_mem_2theta_list[index-1] < resolution:
-            # close to left side of input
-            nearest_2theta = in_mem_2theta_list[index-1]
-        elif index < len(in_mem_2theta_list) and in_mem_2theta_list[index] - two_theta < resolution:
-            # close to right side of input
-            nearest_2theta = in_mem_2theta_list[index]
-        # END-IF-ELSE
-
-        print ('[DB...BAT] List of integrated peaks 2theta: {0}.  Try to find a match for {1}'
-               ''.format(in_mem_2theta_list, two_theta))
-
-        # get parameter dictionary
-        if nearest_2theta is not None:
-            full_measure_exp, full_measure_scan = self._2thetaLookupTable[nearest_2theta]
-            assert exp_number == full_measure_exp, 'blabla 33'
-            peak_info = self.get_peak_info(full_measure_exp, full_measure_scan)
-            if peak_info is None:
-                raise NotImplementedError('Peak info cannot be None.... Keys: {0}'.format(self._myPeakInfoDict.keys()))
-            param_dict = dict()
-
-        else:
-            full_measure_exp = 0
-            full_measure_scan = 0
+        # TODO FIXME NOW2
 
         # END-IF
 
-        return full_measure_exp, full_measure_scan, param_dict
+        return peak_info
 
     def get_merged_data(self, exp_number, scan_number, pt_number_list):
         """
@@ -1189,7 +1191,7 @@ class CWSCDReductionControl(object):
         :param exp_number: experiment number
         :param scan_number:
         :param pt_number:
-        :return: PeakInfo instance or None
+        :return: peakprocesshelper.PeakProcessRecord or None
         """
         # Check for type
         assert isinstance(exp_number, int), 'Experiment %s must be an integer but not of type %s.' \
