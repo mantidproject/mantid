@@ -575,9 +575,10 @@ void rebinToOutput(const Quadrilateral &inputQ,
  */
 void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              const MatrixWorkspace_const_sptr &inputWS,
-                             const size_t i, const size_t j, 
+                             const size_t i, const size_t j,
                              RebinnedOutput &outputWS,
-                             const std::vector<double> &verticalAxis) {
+                             const std::vector<double> &verticalAxis,
+                             const RebinnedOutput_const_sptr &inputRB) {
   const auto &inX = inputWS->x(i);
   const auto &inY = inputWS->y(i);
   const auto &inE = inputWS->e(i);
@@ -622,7 +623,6 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   // If the input is a RebinnedOutput workspace with frac. area we need
   // to account for the weight of the input bin in the output bin weights
   double inputWeight = 1.;
-  RebinnedOutput_const_sptr inputRB = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   if (inputRB) {
     const auto &inF = inputRB->dataF(i);
     inputWeight = inF[j];

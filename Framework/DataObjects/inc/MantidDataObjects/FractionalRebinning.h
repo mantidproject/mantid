@@ -72,12 +72,12 @@ rebinToOutput(const Geometry::Quadrilateral &inputQ,
               const std::vector<double> &verticalAxis);
 
 /// Rebin the input quadrilateral to to output grid
-MANTID_DATAOBJECTS_DLL void
-rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
-                        const API::MatrixWorkspace_const_sptr &inputWS,
-                        const size_t i, const size_t j,
-                        DataObjects::RebinnedOutput &outputWS,
-                        const std::vector<double> &verticalAxis);
+MANTID_DATAOBJECTS_DLL void rebinToFractionalOutput(
+    const Geometry::Quadrilateral &inputQ,
+    const API::MatrixWorkspace_const_sptr &inputWS, const size_t i,
+    const size_t j, DataObjects::RebinnedOutput &outputWS,
+    const std::vector<double> &verticalAxis,
+    const DataObjects::RebinnedOutput_const_sptr &inputRB = nullptr);
 
 } // namespace FractionalRebinning
 

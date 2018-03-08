@@ -149,7 +149,7 @@ void Rebin2D::exec() {
                                            newYBins.rawData());
       } else {
         FractionalRebinning::rebinToFractionalOutput(
-            inputQ, inputWS, i, j, *outputRB, newYBins.rawData());
+            inputQ, inputWS, i, j, *outputRB, newYBins.rawData(), inputHasFA);
       }
     }
 

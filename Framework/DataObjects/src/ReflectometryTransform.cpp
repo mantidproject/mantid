@@ -484,8 +484,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
       auto inputQ =
           m_calculator->createQuad(lamUpper, lamLower, thetaUpper, thetaLower);
-      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, *outWS,
-                                                   zBinsVec);
+      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j,
+                                                   *outWS, zBinsVec);
       // Find which qy bin this point lies in
       const auto qIndex =
           std::upper_bound(zBinsVec.begin(), zBinsVec.end(), inputQ[0].Y()) -
