@@ -12,8 +12,43 @@ def _gaussian(x, height, x0, sigma):
     return height * numpy.exp(- x * x / sigma2)
 
 
-def _fillTemplateWorkspace(templateWS, bkgLevel):
-    """Fill a workspace with somewhat sane data."""
+def _fillTemplateReflectometryWorkspace(ws):
+    """Fill a reflectometry workspace with somewhat sane data."""
+    nHistograms = ws.getNumberHistograms()
+    binWidth = 57.
+    monitorCounts = 5e8
+    templateXs = numpy.array(numpy.arange(-300., 55000., binWidth))
+    nBins = len(templateXs) - 1
+    xs = numpy.tile(templateXs, nHistograms)
+    ys = numpy.zeros(nHistograms*nBins)
+    es = numpy.zeros(nHistograms*nBins)
+    kwargs = {
+        'OutputWorkspace': 'unused_',
+        'DataX': xs,
+        'DataY': ys,
+        'DataE': es,
+        'NSpec': nHistograms,
+        'ParentWorkspace': ws,
+        'child': True,
+        'rethrow': True
+    }
+    alg = run_algorithm('CreateWorkspace', **kwargs)
+    ws = alg.getProperty('OutputWorkspace').value
+    ws.getAxis(0).setUnit('TOF')
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'time',
+        'LogText': str(3600),
+        'LogType': 'Number',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+    return ws
+
+
+def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
+    """Fill a TOF workspace with somewhat sane data."""
     nHistograms = templateWS.getNumberHistograms()
     E_i = 23.0
     nBins = 128
@@ -116,6 +151,50 @@ def _fillTemplateWorkspace(templateWS, bkgLevel):
     return ws
 
 
+def add_duration(ws, duration):
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'duration',
+        'LogText': str(float(duration)),
+        'LogType': 'Number',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+
+
+def add_flipper_configuration_D17(ws, flipper1, flipper2):
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'Flipper1.stateint',
+        'LogText': str(int(flipper1)),
+        'LogType': 'Number',
+        'NumberType': 'Int',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'Flipper2.stateint',
+        'LogText': str(int(flipper2)),
+        'LogType': 'Number',
+        'NumberType': 'Int',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+
+
+def create_poor_mans_d17_workspace():
+    kwargs = {
+        'InstrumentName': 'D17',
+        'child': True
+    }
+    alg = run_algorithm('LoadEmptyInstrument', **kwargs)
+    ws = alg.getProperty('OutputWorkspace').value
+    ws = _fillTemplateReflectometryWorkspace(ws)
+    return ws
+
+
 def create_poor_mans_in5_workspace(bkgLevel, removeDetectors):
     kwargs = {
         'InstrumentName': 'IN5',
@@ -129,7 +208,7 @@ def create_poor_mans_in5_workspace(bkgLevel, removeDetectors):
     }
     alg = run_algorithm('RemoveMaskedSpectra', **kwargs)
     ws = alg.getProperty('OutputWorkspace').value
-    ws = _fillTemplateWorkspace(ws, bkgLevel)
+    ws = _fillTemplateTOFWorkspace(ws, bkgLevel)
     return ws
 
 

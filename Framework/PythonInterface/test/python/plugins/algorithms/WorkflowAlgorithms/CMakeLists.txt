@@ -41,6 +41,7 @@ set ( TEST_PY_FILES
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py
   PowderDiffILLReductionTest.py
+  ReflectometryILLPolarizationCorTest.py
   ReflectometryILLPreprocessTest.py
   ReflectometryILLReductionTest.py
   ResNorm2Test.py
