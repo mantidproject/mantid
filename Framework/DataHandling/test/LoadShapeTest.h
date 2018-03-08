@@ -84,7 +84,16 @@ public:
     TS_ASSERT(cube->hasValidShape());
     TS_ASSERT_EQUALS(cube->numberOfVertices(), 8 );
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
-    TS_ASSERT_DELTA(cube->volume(),3000, 0.001);
+    TS_ASSERT_DELTA(cube->volume(), 3000, 0.001);
+    clearWorkspaces("InputWS", "InputWS");
+  }
+
+  void test_cylinder() {
+    auto cylinder = loadMeshObject("InputWS", "InputWS", "cylinder.stl");
+    TS_ASSERT(cylinder->hasValidShape());
+    TS_ASSERT_EQUALS(cylinder->numberOfVertices(), 722);
+    TS_ASSERT_EQUALS(cylinder->numberOfTriangles(), 1440);
+    TS_ASSERT_DELTA(cylinder->volume(), 589, 1);
     clearWorkspaces("InputWS", "InputWS");
   }
 
