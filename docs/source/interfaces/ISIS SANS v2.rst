@@ -120,13 +120,15 @@ Save Options
 |       |                          | loaded into other analysis software.                                                    |
 |       |                          | The **Use optimizations** option will reuse already loaded data. This can speed up the  |
 |       |                          | data reduction considerably. It is recommended to have this option enabled.             |
+|       |                          | The **Plot results** option controls whether the reduced data is automatically plotted  |
+|       |                          | to a graph or not.                                                                      |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 
 Run Summation
 -------------
 
 .. image:: ../images/sans_isis_v2_add_runs_tab.png
-   :align: right
+   :align: center
    :width: 800px
 
 .. _Run_Summation:
@@ -284,7 +286,7 @@ General
 .. _General:
 
 .. image::  ../images/sans_isis_v2_general_tab_general.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
@@ -311,7 +313,7 @@ Event Slice
 .. _Event_Slice:
 
 .. image::  ../images/sans_isis_v2_general_tab_event_slice.png
-   :align: right
+   :align: center
    :width: 800px
 
 In case of data which was measured in event-mode, it is possible to perform
@@ -335,7 +337,7 @@ Compatibility Mode
 .. _Compatibility_Mode:
 
 .. image::  ../images/sans_isis_v2_general_tab_event_binning.png
-   :align: right
+   :align: center
    :width: 800px
 
 The old SANS GUI allows event-mode data as input but will convert it early on
@@ -357,7 +359,7 @@ Wavelength
 .. _Wavelength:
 
 .. image::  ../images/sans_isis_v2_general_tab_wavelength_conversion.png
-   :align: right
+   :align: center
    :width: 800px
 
 The settings provide the binning for the conversion from
@@ -409,8 +411,8 @@ Mask
 ^^^^
 .. _Mask:
 
-.. image::  ../images/sans_isis_v2_general_tab_whole.png
-   :align: right
+.. image::  ../images/sans_isis_v2_mask_tab_whole.png
+   :align: center
    :width: 800px
 
 The elements on this tab relate to settings which are used during the masking step.
@@ -483,7 +485,7 @@ Adjustment
 .. _Adjustment:
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_whole.png
-   :align: right
+   :align: center
    :width: 800px
 
 This tab provides settings which are required for the creation of the adjustment
@@ -495,7 +497,7 @@ Monitor normalization
 .. _Monitor_Normalization:
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_monitor_normalization.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+------------------------------+--------------------------------------------------------+
@@ -517,7 +519,7 @@ Incident monitor
 ~~~~~~~~~~~~~~~~
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_monitor_normalization.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+------------------------------+--------------------------------------------------------+
@@ -531,7 +533,7 @@ Transmission targets
 ~~~~~~~~~~~~~~~~~~~~
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_transmission_monitor.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+--------------------------+------------------------------------------------------------------------------------------------+
@@ -574,7 +576,7 @@ for the transmission calculation.
 The following example/image should help to clarify the selection process:
 
 .. image::  ../images/sans_isis_v2_trans_calc_example.png
-   :align: right
+   :align: center
    :width: 400
 
 The radius selection (red) picks pixels 8, 9, 13 and14. The ROI files (red) select pixels 9, 10, 11, 12, 14, 15, 16 and 17.
@@ -587,7 +589,7 @@ Fit settings
 ~~~~~~~~~~~~
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_transmission_fit.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+-----------------+---------------------------------------+-----------------------------------------------------------------+
@@ -612,7 +614,7 @@ Adjustment files
 ~~~~~~~~~~~~~~~~
 
 .. image::  ../images/sans_isis_v2_adjustment_tab_files.png
-   :align: right
+   :align: center
    :width: 800px
 
 +-------+---------------------------------+------------------------------------------------------------------------------------------------+
@@ -639,7 +641,7 @@ Q
 .. _Q:
 
 .. image::  ../images/sans_isis_v2_q_tab_whole.png
-   :align: right
+   :align: center
    :width: 800px
 
 The elements on this tab relate to settings which are used during the conversion to momentum transfer step of the reduction.
@@ -649,7 +651,7 @@ Q limits
 .. _Q_Limits:
 
 .. image::  ../images/sans_isis_v2_q_tab_q_limits.png
-   :align: right
+   :align: center
    :width: 800px
 
 The entries here allow for the providing the binning settings during the momentum transfer conversion. In the
@@ -671,7 +673,7 @@ Gravity correction
 .. _Gravity_Correction:
 
 .. image::  ../images/sans_isis_v2_q_tab_gravity_correction.png
-   :align: right
+   :align: center
    :width: 800px
 
 Enabling the check-box will enable the gravity correction. In this case an additional length can be specified.
@@ -682,7 +684,7 @@ Q Resolution
 .. _Q_Resolution:
 
 .. image::  ../images/sans_isis_v2_q_tab_q_resolution.png
-   :align: right
+   :align: center
    :width: 800px
 
 If you want to perform a momentum transfer resolution calculation then enable the check-box of this group.
@@ -785,19 +787,24 @@ finder.
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **4** | **Maximum radius limit** | The maximum radius of the region used to ascertain centre position.                     |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **5** | **Max iterations**       | The maximum number of iterations the algorithm will perform before concluding its       |
+| **5** | **Minimum Q limit**      | The minimum Q of the region used to ascertain centre position.                          |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **6** | **Maximum Q limit**      | The maximum Q of the region used to ascertain centre position.                          |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **7** | **Max iterations**       | The maximum number of iterations the algorithm will perform before concluding its       |
 |       |                          | search.                                                                                 |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **6** | **Tolerance**            | If the centre position moves by less than this in an iteration the algorithm will       |
+| **8** | **Tolerance**            | If the centre position moves by less than this in an iteration the algorithm will       |
 |       |                          | conclude its search.                                                                    |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **7** | **Left/Right**           | Controls whether the beam centre finder searches for the centre in the                  |
-|       |                          | left/right direction.                                                                   |
+| **9** | **General Options**      | The **Verbose** option will store the output workspaces from all iterations in memory.  |
+|       |                          | The **Initial COM** option will if checked use a centre of mass estimate as the starting|
+|       |                          | point of the search rather than the user input value.                                   |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **8** | **Up/Down**              | Controls whether the beam centre finder searches for the centre in the                  |
-|       |                          | up/down direction.                                                                      |
+| **10**| **Left/Right**           | Controls whether the beam centre finder searches for the centre in the                  |
+|       |                          | left/right and up/down directions.                                                      |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **9** | **Run**                  | Runs the beam centre finder the boxes **1** and **2** are updated with new              |
+| **11**| **Run**                  | Runs the beam centre finder the boxes **1** and **2** are updated with new              |
 |       |                          | values upon completion.                                                                 |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 
