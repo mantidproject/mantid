@@ -46,6 +46,7 @@ Algorithms
 - :ref:`SaveNexus <algm-SaveNexus>` will no longer crash when passed a ``PeaksWorkspace`` with integrated peaks that have missing radius information.
 - :ref:`SaveReflections <algm-LoadLamp>` is a new algorithm to save PeaksWorkspaces to Fullprof, Jana, GSAS, and SHELX text formats.
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` will now accept workspaces with varying x-axes per spectrum.
+- :ref:`LoadEXED <algm-LoadEXED>` has better handling of monitor workspace and sample logs
 
 Known Issues
 ^^^^^^^^^^^^
