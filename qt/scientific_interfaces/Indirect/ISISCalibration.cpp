@@ -239,10 +239,10 @@ void ISISCalibration::setBackgroundRange(const double &minimumTof,
                    qMakePair(minimumTof, maximumTof));
 }
 
-void ISISCalibration::setRange(MantidWidgets::RangeSelector *rangeSelector,
-                               const double &minimum, const double &maximum,
-                               const QString &minPropertyName,
-                               const QString &maxPropertyName) {
+void ISISCalibration::setRangeLimits(
+    MantidWidgets::RangeSelector *rangeSelector, const double &minimum,
+    const double &maximum, const QString &minPropertyName,
+    const QString &maxPropertyName) {
   setPlotPropertyRange(rangeSelector, m_properties[minPropertyName],
                        m_properties[maxPropertyName],
                        qMakePair(minimum, maximum));
@@ -251,13 +251,14 @@ void ISISCalibration::setRange(MantidWidgets::RangeSelector *rangeSelector,
 void ISISCalibration::setPeakRangeLimits(const double &peakMin,
                                          const double &peakMax) {
   auto calibrationPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
-  setRange(calibrationPeak, peakMin, peakMax, "CalELow", "CalEHigh");
+  setRangeLimits(calibrationPeak, peakMin, peakMax, "CalELow", "CalEHigh");
 }
 
 void ISISCalibration::setBackgroundRangeLimits(const double &backgroundMin,
                                                const double &backgroundMax) {
   auto background = m_uiForm.ppCalibration->getRangeSelector("CalBackground");
-  setRange(background, backgroundMin, backgroundMax, "CalStart", "CalEnd");
+  setRangeLimits(background, backgroundMin, backgroundMax, "CalStart",
+                 "CalEnd");
 }
 
 void ISISCalibration::setResolutionSpectraRange(const double &minimum,
@@ -651,7 +652,7 @@ void ISISCalibration::plotClicked() {
   checkADSForPlotSaveWorkspace(m_outputCalibrationName.toStdString(), true);
   QStringList plotWorkspaces;
   if (m_uiForm.ckCreateResolution->isChecked() &&
-      m_outputResolutionName.isEmpty()) {
+      !m_outputResolutionName.isEmpty()) {
     checkADSForPlotSaveWorkspace(m_outputResolutionName.toStdString(), true);
     plotWorkspaces.append(m_outputResolutionName);
     if (m_uiForm.ckSmoothResolution->isChecked())

@@ -88,10 +88,10 @@ private slots:
 private:
   void createRESfile(const QString &file);
   void addRuntimeSmoothing(const QString &workspaceName);
-  void setRange(MantidWidgets::RangeSelector *rangeSelector,
-                const double &minimum, const double &maximum,
-                const QString &minPropertyName, const QString &maxPropertyName);
-
+  void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector,
+                      const double &minimum, const double &maximum,
+                      const QString &minPropertyName,
+                      const QString &maxPropertyName);
   Mantid::API::IAlgorithm_sptr
   calibrationAlgorithm(const QString &inputFiles) const;
   Mantid::API::IAlgorithm_sptr
