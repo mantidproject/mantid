@@ -17,7 +17,7 @@ namespace MantidWidgets {
  */
 MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
     : MantidWidget(parent) {
-	m_multiFit = false;
+  m_multiFit = false;
   m_ui.setupUi(this);
   this->setDefaultValues();
   this->setUpConnections();
@@ -40,7 +40,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
                                           size_t numPeriods,
                                           const QStringList &groups)*/
     : MuonFitDataSelector(parent) {
-	m_multiFit = false;
+  m_multiFit = false;
   this->setWorkspaceDetails(QString::number(runNumber), instName,
                             boost::optional<QString>{});
   // not used in this case
@@ -91,7 +91,7 @@ void MuonFitDataSelector::userChangedRuns() {
   const auto runs = getRuns();
   if (runs.contains(',') || runs.contains('-')) {
     // record if its multi fit
-	  m_multiFit = true;
+    m_multiFit = true;
   } else {
     setFitType(FitType::Single);
   }
@@ -292,9 +292,9 @@ IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
  */
 void MuonFitDataSelector::setFitType(IMuonFitDataSelector::FitType type) {
   if (type == FitType::Single) {
-	  m_multiFit = false;
+    m_multiFit = false;
   } else {
-	  m_multiFit = true;
+    m_multiFit = true;
 
     m_ui.rbCoAdd->setChecked(type == FitType::CoAdd);
     m_ui.rbSimultaneous->setChecked(type == FitType::Simultaneous);
