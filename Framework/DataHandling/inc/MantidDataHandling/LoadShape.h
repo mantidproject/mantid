@@ -14,8 +14,7 @@ namespace DataHandling {
        STL file with suffix .stl
  
 
-@author Karl Palomen ISIS; initially extracted from Stuart Campbell's SaveNXSPE
-algorithm,
+@author Karl Palmen ISIS; 
 @date 26/02/2018
 
 Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -47,7 +46,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "The algorithm loads a shape into the instrument of a workspace "
-           "at the specified place";
+           "at the sample.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
