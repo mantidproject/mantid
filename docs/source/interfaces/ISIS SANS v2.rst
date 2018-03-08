@@ -259,9 +259,9 @@ Settings
 The Settings tab and its sub-tabs allow for manipulating and inspecting the reduction parameters which were
 initially set through loading a user file.  Currently there are five sub-tabs:
 
-- **General, Wavelength, Scale, Event Slice, Sample** This tab contains settings which are not associated
-  with the other tabs. This includes settings regarding the general reduction, the wavelength conversion,
-  the absolute scaling of the data, event slicing and sample volume scaling.
+- **General, Scale, Event Slice, Sample** This tab contains settings which are not associated
+  with the other tabs. This includes settings regarding the general reduction, the absolute scaling of the data, 
+  event slicing and sample volume scaling.
 
 - **Mask** The mask tab contains the masking information. It displays the selected masks in the
   familiar mask table.
@@ -354,27 +354,6 @@ If the check-box is enabled, then the time-of-flight binning parameters will be
 taken from the *Event binning* input. If this is not set, then the binning
 parameters will be taken from the monitor workspace.
 
-Wavelength
-""""""""""
-.. _Wavelength:
-
-.. image::  ../images/sans_isis_v2_general_tab_wavelength_conversion.png
-   :align: center
-   :width: 800px
-
-The settings provide the binning for the conversion from
-time-of-flight units to wavelength units. Note that all units are Angstrom.
-
-+-------+---------------+------------------------------------------+
-| **1** | **Min**       | The lower bound of the wavelength bins.  |
-+-------+---------------+------------------------------------------+
-| **2** | **Max**       | The upper bound of the wavelength bins.  |
-+-------+---------------+------------------------------------------+
-| **3** | **Step**      | The step of the wavelength bins.         |
-+-------+---------------+------------------------------------------+
-| **4** | **Step type** | The step type of the wavelength bins,    |
-|       |               | i.e. linear, logarithmic or variable.    |
-+-------+---------------+------------------------------------------+
 
 Scale and Sample
 """"""""""""""""
@@ -445,40 +424,6 @@ pressing *Update Rows*.
 | **3** | **Update rows** | Press this button if you have manually updated the data table.   |
 |       |                 | These changes are currently not picked up automatically.         |
 +-------+-----------------+------------------------------------------------------------------+
-
-Phi limit
-"""""""""
-.. _Phi_Limit:
-
-.. image::  ../images/sans_isis_v2_masking_tab_phi.png
-   :align: right
-   :width: 400px
-
-This group allows the user to specify an angle (pizza-slice) mask. The angles
-are in degree.
-
-+-------+-----------------+---------------------------------------+
-| **1** | **Start angle** | The starting angle.                   |
-+-------+-----------------+---------------------------------------+
-| **2** | **Stop angle**  | The stop angle.                       |
-+-------+-----------------+---------------------------------------+
-| **3** | **Use mirror**  | If the mirror sector should be used.  |
-+-------+-----------------+---------------------------------------+
-
-
-Radius limit
-""""""""""""
-.. _Radius_Limit:
-
-.. image::  ../images/sans_isis_v2_masking_tab_radius.png
-   :align: right
-   :width: 400px
-
-These settings allow for a hollow cylinder mask. The *Min* entry is the inner
-radius and the *Max* entry is the outer radius of the
-hollow cylinder.
-
-
 
 Adjustment
 ^^^^^^^^^^
@@ -645,6 +590,60 @@ Q
    :width: 800px
 
 The elements on this tab relate to settings which are used during the conversion to momentum transfer step of the reduction.
+
+Phi limit
+"""""""""
+.. _Phi_Limit:
+
+.. image::  ../images/sans_isis_v2_masking_tab_phi.png
+   :align: right
+   :width: 400px
+
+This group allows the user to specify an angle (pizza-slice) mask. The angles
+are in degree.
+
++-------+-----------------+---------------------------------------+
+| **1** | **Start angle** | The starting angle.                   |
++-------+-----------------+---------------------------------------+
+| **2** | **Stop angle**  | The stop angle.                       |
++-------+-----------------+---------------------------------------+
+| **3** | **Use mirror**  | If the mirror sector should be used.  |
++-------+-----------------+---------------------------------------+
+
+
+Radius limit
+""""""""""""
+.. _Radius_Limit:
+
+.. image::  ../images/sans_isis_v2_masking_tab_radius.png
+   :align: right
+   :width: 400px
+
+These settings allow for a hollow cylinder mask. The *Min* entry is the inner
+radius and the *Max* entry is the outer radius of the
+hollow cylinder.
+
+Wavelength
+""""""""""
+.. _Wavelength:
+
+.. image::  ../images/sans_isis_v2_general_tab_wavelength_conversion.png
+   :align: center
+   :width: 800px
+
+The settings provide the binning for the conversion from
+time-of-flight units to wavelength units. Note that all units are Angstrom.
+
++-------+---------------+------------------------------------------+
+| **1** | **Min**       | The lower bound of the wavelength bins.  |
++-------+---------------+------------------------------------------+
+| **2** | **Max**       | The upper bound of the wavelength bins.  |
++-------+---------------+------------------------------------------+
+| **3** | **Step**      | The step of the wavelength bins.         |
++-------+---------------+------------------------------------------+
+| **4** | **Step type** | The step type of the wavelength bins,    |
+|       |               | i.e. linear, logarithmic or variable.    |
++-------+---------------+------------------------------------------+
 
 Q limits
 """"""""
