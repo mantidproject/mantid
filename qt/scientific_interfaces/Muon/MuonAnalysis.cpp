@@ -513,14 +513,14 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
   params.plotType = plotType;
   params.periods = getPeriodLabels();
   bool isItSummed = false;
-  if (params.periods.find("+") != std::string::npos||params.periods.find("-") != std::string::npos) {
-		  isItSummed = true;
-		  
-	  }
-	if (params.periods != "" && isItSummed) {
-			  m_uiForm.fitBrowser->addPeriodCheckboxToMap(QString::fromStdString(params.periods));
-
-	  }
+  if (params.periods.find("+") != std::string::npos ||
+      params.periods.find("-") != std::string::npos) {
+    isItSummed = true;
+  }
+  if (params.periods != "" && isItSummed) {
+    m_uiForm.fitBrowser->addPeriodCheckboxToMap(
+        QString::fromStdString(params.periods));
+  }
 
   // Version - always "#1" if overwrite is on, otherwise increment
   params.version = 1;
@@ -1115,7 +1115,7 @@ void MuonAnalysis::updatePairTable() {
 void MuonAnalysis::inputFileChanged_MWRunFiles() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
-  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods); 
+  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
   allowLoading(true);
 }
 
@@ -2634,8 +2634,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
-	  m_uiForm.fitBrowser->updatePeriods();
-
+      m_uiForm.fitBrowser->updatePeriods();
     }
     if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
         isItGroup) {
