@@ -149,7 +149,7 @@ void SofQW::exec() {
  *  @return A pointer to the newly-created workspace
  */
 API::MatrixWorkspace_sptr
-SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+SofQW::setUpOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace,
                             const std::vector<double> &qbinParams,
                             std::vector<double> &qAxis,
                             const std::vector<double> &ebinParams) {

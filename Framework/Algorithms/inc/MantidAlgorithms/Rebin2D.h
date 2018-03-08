@@ -62,8 +62,9 @@ private:
   void exec() override;
   /// Setup the output workspace
   API::MatrixWorkspace_sptr createOutputWorkspace(
-      API::MatrixWorkspace_const_sptr parent, HistogramData::BinEdges &newXBins,
-      HistogramData::BinEdges &newYBins, const bool useFractionalArea) const;
+      const API::MatrixWorkspace_const_sptr &parent, 
+      HistogramData::BinEdges &newXBins, HistogramData::BinEdges &newYBins, 
+      const bool useFractionalArea) const;
 };
 
 } // namespace Algorithms

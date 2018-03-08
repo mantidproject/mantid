@@ -510,10 +510,10 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
  * boundaries
  */
 void rebinToOutput(const Quadrilateral &inputQ,
-                   MatrixWorkspace_const_sptr inputWS, const size_t i,
-                   const size_t j, MatrixWorkspace_sptr outputWS,
+                   const MatrixWorkspace_const_sptr &inputWS, const size_t i,
+                   const size_t j, MatrixWorkspace &outputWS,
                    const std::vector<double> &verticalAxis) {
-  const auto &X = outputWS->x(0).rawData();
+  const auto &X = outputWS.x(0).rawData();
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
   if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start,
@@ -552,8 +552,8 @@ void rebinToOutput(const Quadrilateral &inputQ,
         }
         eValue = eValue * eValue * weight;
         PARALLEL_CRITICAL(overlap_sum) {
-          outputWS->mutableY(y)[xi] += yValue;
-          outputWS->mutableE(y)[xi] += eValue;
+          outputWS.mutableY(y)[xi] += yValue;
+          outputWS.mutableE(y)[xi] += eValue;
         }
       }
     }
@@ -574,8 +574,9 @@ void rebinToOutput(const Quadrilateral &inputQ,
  * boundaries
  */
 void rebinToFractionalOutput(const Quadrilateral &inputQ,
-                             MatrixWorkspace_const_sptr inputWS, const size_t i,
-                             const size_t j, RebinnedOutput_sptr outputWS,
+                             const MatrixWorkspace_const_sptr &inputWS,
+                             const size_t i, const size_t j, 
+                             RebinnedOutput &outputWS,
                              const std::vector<double> &verticalAxis) {
   const auto &inX = inputWS->x(i);
   const auto &inY = inputWS->y(i);
@@ -584,7 +585,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   if (std::isnan(signal))
     return;
 
-  const auto &X = outputWS->x(0).rawData();
+  const auto &X = outputWS.x(0).rawData();
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
   if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start,
@@ -621,7 +622,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   // If the input is a RebinnedOutput workspace with frac. area we need
   // to account for the weight of the input bin in the output bin weights
   double inputWeight = 1.;
-  auto inputRB = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
+  RebinnedOutput_const_sptr inputRB = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   if (inputRB) {
     const auto &inF = inputRB->dataF(i);
     inputWeight = inF[j];
@@ -639,9 +640,9 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     const size_t yi = std::get<1>(ai);
     const double weight = std::get<2>(ai) / inputQArea;
     PARALLEL_CRITICAL(overlap) {
-      outputWS->mutableY(yi)[xi] += signal * weight;
-      outputWS->mutableE(yi)[xi] += variance * weight;
-      outputWS->dataF(yi)[xi] += weight * inputWeight;
+      outputWS.mutableY(yi)[xi] += signal * weight;
+      outputWS.mutableE(yi)[xi] += variance * weight;
+      outputWS.dataF(yi)[xi] += weight * inputWeight;
     }
   }
 }
