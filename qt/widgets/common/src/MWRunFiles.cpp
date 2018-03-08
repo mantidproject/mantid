@@ -524,15 +524,18 @@ void MWRunFiles::findFiles(bool isModified) {
   const auto directory = findFilesDirectory(searchText);
 
   // Set the values for the thread, and start it running.
-  if (directory)
-    m_foundFiles.append(directory.get());
-  else {
+  if (directory) {
+    if (directory.get().isEmpty())
+      return;
+    else
+      m_foundFiles.append(directory.get());
+  } else {
     if (isModified) {
       // Reset modified flag.
       m_uiForm.fileEditor->setModified(false);
       searchText = findFilesGetSearchText(searchText);
+      runFindFiles(searchText);
     }
-    runFindFiles(searchText);
   }
 }
 
@@ -592,6 +595,7 @@ MWRunFiles::findFilesDirectory(const QString &searchText) {
       setFileProblem("");
       return searchText;
     }
+    return "";
   }
   return boost::none;
 }
