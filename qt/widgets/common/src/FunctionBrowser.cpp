@@ -1742,7 +1742,12 @@ void FunctionBrowser::addTie() {
   QString tie = QInputDialog::getText(this, "Add a tie", "Tie:",
                                       QLineEdit::Normal, "", &ok);
   if (ok && !tie.isEmpty()) {
-    addTieProperty(prop, tie);
+    try {
+      addTieProperty(prop, tie);
+    } catch (Mantid::API::Expression::ParsingError &) {
+      QMessageBox::critical(this, "MantidPlot - Error",
+                            "Syntax errors found in tie: " + tie);
+    }
   }
 }
 
