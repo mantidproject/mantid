@@ -129,7 +129,9 @@ public slots:
   void periodBtnPressed();
   void generateBtnPressed();
   void combineBtnPressed();
-  void setNumPeriods(size_t numPeriods,QStringList summedPeriods);
+  void setNumPeriods(size_t numPeriods);
+  void addPeriodCheckboxToMap(const QString &name);
+  void updatePeriods();
 
 signals:
   /// Emitted when sequential fit is requested by user
@@ -193,6 +195,7 @@ private:
   void setChosenPeriods(const QStringList &chosenPeriods);
   void clearPeriodCheckboxes();
   void addPeriodCheckbox(const QString &name);
+  void updatePeriods(const int j, const QStringList &selection);
 
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;

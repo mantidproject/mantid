@@ -517,10 +517,9 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
 		  isItSummed = true;
 		  
 	  }
-	  // add to list of summed periods if it is not already in the list, is not empty (1 period) and a sum
-	if (!m_summedPeriods.contains(QString::fromStdString(params.periods)) && params.periods != "" && isItSummed) {
-			  m_summedPeriods << QString::fromStdString(params.periods);
-			  
+	if (params.periods != "" && isItSummed) {
+			  m_uiForm.fitBrowser->addPeriodCheckboxToMap(QString::fromStdString(params.periods));
+
 	  }
 
   // Version - always "#1" if overwrite is on, otherwise increment
@@ -1116,7 +1115,7 @@ void MuonAnalysis::updatePairTable() {
 void MuonAnalysis::inputFileChanged_MWRunFiles() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
-  m_summedPeriods.clear();
+  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods); 
   allowLoading(true);
 }
 
@@ -2635,7 +2634,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
-	  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods, m_summedPeriods);
+	  m_uiForm.fitBrowser->updatePeriods();
+
     }
     if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
         isItGroup) {
