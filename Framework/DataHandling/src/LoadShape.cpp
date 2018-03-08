@@ -125,9 +125,12 @@ std::unique_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream& file) {
   V3D t1, t2, t3;
 
   while (readSTLTriangle(file, t1, t2, t3)) {
-    triangleIndices.push_back(addSTLVertex(t1, vertices));
-    triangleIndices.push_back(addSTLVertex(t2, vertices));
-    triangleIndices.push_back(addSTLVertex(t3, vertices));
+    // Add triangle if all 3 vertices are distinct
+    if (!areEqualVertices(t1,t2) && !areEqualVertices(t1,t3) && !areEqualVertices(t2,t3)) {
+      triangleIndices.push_back(addSTLVertex(t1, vertices));
+      triangleIndices.push_back(addSTLVertex(t2, vertices));
+      triangleIndices.push_back(addSTLVertex(t3, vertices));
+    }
   }
   // Use efficient constructor of MeshObject
   std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
