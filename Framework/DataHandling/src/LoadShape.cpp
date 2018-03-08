@@ -143,7 +143,6 @@ std::unique_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream &file) {
 bool LoadShape::readSTLTriangle(std::ifstream &file, V3D &v1, V3D &v2,
                                 V3D &v3) {
 
-  std::string line;
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
     bool ok = (readSTLVertex(file, v1) && readSTLVertex(file, v2) &&
                readSTLVertex(file, v3));
