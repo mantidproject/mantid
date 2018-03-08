@@ -11,7 +11,6 @@
 #include <QString>
 #include <QStringList>
 #include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace API {

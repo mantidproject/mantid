@@ -538,6 +538,9 @@ void MWRunFiles::findFiles(bool isModified) {
     m_uiForm.fileEditor->setModified(false);
     searchText = findFilesGetSearchText(searchText);
     runFindFiles(searchText);
+  } else {
+    // Make sure errors are correctly set if we didn't run
+    inspectThreadResult(m_cachedResults);
   }
 }
 
@@ -586,15 +589,10 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
 * @param searchText :: text to create search parameters from
 */
 void MWRunFiles::runFindFiles(const QString &searchText) {
-
   if (!searchText.isEmpty()) {
     const auto parameters =
         createFindFilesSearchParameters(searchText.toStdString());
     m_pool.createWorker(this, parameters);
-
-  } else {
-    // Make sure errors are correctly set if we didn't run
-    inspectThreadResult(m_cachedResults);
   }
 }
 
