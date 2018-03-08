@@ -163,4 +163,49 @@ private:
 
   LoadShape loadShape; 
 };
+
+class LoadShapeTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    auto inWs = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
+    Mantid::API::AnalysisDataService::Instance().add(
+      inWsName, inWs);
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testLoadShapePerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
+    }
+    API::AnalysisDataService::Instance().remove(outWsName);
+    API::AnalysisDataService::Instance().remove(inWsName);
+  }
+
+private:
+  std::vector<LoadShape *> loadAlgPtrs;
+  const int numberOfIterations = 5;
+  const std::string inWsName = "InWS";
+  const std::string outWsName = "OutWS";
+
+  LoadShape *setupAlg() {
+    LoadShape *loadAlg = new LoadShape();
+    loadAlg->initialize();
+
+    loadAlg->setPropertyValue("Filename", "tube.stl");
+    loadAlg->setProperty("InputWorkspace", inWsName);
+    loadAlg->setProperty("OutputWorkspace", outWsName);
+
+    loadAlg->setRethrows(true);
+    return loadAlg;
+  }
+};
 #endif /* LOAD_SHAPETEST_H_ */
