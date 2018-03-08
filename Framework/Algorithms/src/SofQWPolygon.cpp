@@ -108,7 +108,7 @@ void SofQWPolygon::exec() {
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
       DataObjects::FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j,
-                                                      outputWS, m_Qout);
+                                                      *outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =

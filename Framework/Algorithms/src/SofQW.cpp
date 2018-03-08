@@ -148,11 +148,10 @@ void SofQW::exec() {
  *  @param[out] ebinParams The 'horizontal' (energy) axis parameters (optional)
  *  @return A pointer to the newly-created workspace
  */
-API::MatrixWorkspace_sptr
-SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
-                            const std::vector<double> &qbinParams,
-                            std::vector<double> &qAxis,
-                            const std::vector<double> &ebinParams) {
+API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(
+    const API::MatrixWorkspace_const_sptr &inputWorkspace,
+    const std::vector<double> &qbinParams, std::vector<double> &qAxis,
+    const std::vector<double> &ebinParams) {
   // Create vector to hold the new X axis values
   HistogramData::BinEdges xAxis(0);
   int xLength;

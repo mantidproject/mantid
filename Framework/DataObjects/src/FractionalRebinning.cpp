@@ -510,10 +510,10 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
  * boundaries
  */
 void rebinToOutput(const Quadrilateral &inputQ,
-                   MatrixWorkspace_const_sptr inputWS, const size_t i,
-                   const size_t j, MatrixWorkspace_sptr outputWS,
+                   const MatrixWorkspace_const_sptr &inputWS, const size_t i,
+                   const size_t j, MatrixWorkspace &outputWS,
                    const std::vector<double> &verticalAxis) {
-  const auto &X = outputWS->x(0).rawData();
+  const auto &X = outputWS.x(0).rawData();
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
   if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start,
@@ -543,17 +543,17 @@ void rebinToOutput(const Quadrilateral &inputQ,
       if (intersection(outputQ, inputQ, intersectOverlap)) {
         const double weight = intersectOverlap.area() / inputQ.area();
         yValue *= weight;
-        double eValue = inE[j] * weight;
+        double eValue = inE[j];
         if (inputWS->isDistribution()) {
           const double overlapWidth =
               intersectOverlap.maxX() - intersectOverlap.minX();
           yValue *= overlapWidth;
           eValue *= overlapWidth;
         }
-        eValue = eValue * eValue;
+        eValue = eValue * eValue * weight;
         PARALLEL_CRITICAL(overlap_sum) {
-          outputWS->mutableY(y)[xi] += yValue;
-          outputWS->mutableE(y)[xi] += eValue;
+          outputWS.mutableY(y)[xi] += yValue;
+          outputWS.mutableE(y)[xi] += eValue;
         }
       }
     }
@@ -572,11 +572,17 @@ void rebinToOutput(const Quadrilateral &inputQ,
  *        **variance** and not the errors (standard deviations).
  * @param verticalAxis A vector containing the output vertical axis bin
  * boundaries
+ * @param inputRB A pointer, of RebinnedOutput type, to the input workspace.
+ * It is used to take into account the input area fractions when calcuting
+ * the final output fractions.
+ * This can be null to indicate that the input was a standard 2D workspace.
  */
 void rebinToFractionalOutput(const Quadrilateral &inputQ,
-                             MatrixWorkspace_const_sptr inputWS, const size_t i,
-                             const size_t j, RebinnedOutput_sptr outputWS,
-                             const std::vector<double> &verticalAxis) {
+                             const MatrixWorkspace_const_sptr &inputWS,
+                             const size_t i, const size_t j,
+                             RebinnedOutput &outputWS,
+                             const std::vector<double> &verticalAxis,
+                             const RebinnedOutput_const_sptr &inputRB) {
   const auto &inX = inputWS->x(i);
   const auto &inY = inputWS->y(i);
   const auto &inE = inputWS->e(i);
@@ -584,7 +590,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   if (std::isnan(signal))
     return;
 
-  const auto &X = outputWS->x(0).rawData();
+  const auto &X = outputWS.x(0).rawData();
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
   if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start,
@@ -618,15 +624,29 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              x_end, areaInfo);
   }
 
+  // If the input is a RebinnedOutput workspace with frac. area we need
+  // to account for the weight of the input bin in the output bin weights
+  double inputWeight = 1.;
+  if (inputRB) {
+    const auto &inF = inputRB->dataF(i);
+    inputWeight = inF[j];
+    // If the signal/error has been "finalized" (scaled by 1/inF) then
+    // we need to undo this before carrying on.
+    if (inputRB->isFinalized()) {
+      signal *= inF[j];
+      error *= inF[j];
+    }
+  }
+
   const double variance = error * error;
   for (const auto &ai : areaInfo) {
     const size_t xi = std::get<0>(ai);
     const size_t yi = std::get<1>(ai);
     const double weight = std::get<2>(ai) / inputQArea;
     PARALLEL_CRITICAL(overlap) {
-      outputWS->mutableY(yi)[xi] += signal * weight;
-      outputWS->mutableE(yi)[xi] += variance * weight;
-      outputWS->dataF(yi)[xi] += weight;
+      outputWS.mutableY(yi)[xi] += signal * weight;
+      outputWS.mutableE(yi)[xi] += variance * weight;
+      outputWS.dataF(yi)[xi] += weight * inputWeight;
     }
   }
 }
