@@ -99,6 +99,9 @@ void LoadShape::exec() {
   Sample &sample = outputWS->mutableSample();
   sample.setShape(shape);
 
+  // Set output workspace
+  setProperty("OutputWorkspace", outputWS);
+
 }
 
 std::unique_ptr<Geometry::MeshObject> LoadShape::readSTLSolid(std::ifstream &file, std::string &name) {

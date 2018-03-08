@@ -114,11 +114,6 @@ private:
     Mantid::API::AnalysisDataService::Instance().add(
       inputWS, inWs);
     alg.setPropertyValue("InputWorkspace", inputWS);
-    if (outputWS != inputWS) {
-      auto outWs = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
-      Mantid::API::AnalysisDataService::Instance().add(
-        outputWS, outWs);
-    }
     alg.setPropertyValue("OutputWorkspace", outputWS);
   }
 
