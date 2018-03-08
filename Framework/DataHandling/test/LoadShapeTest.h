@@ -70,24 +70,12 @@ public:
   }
 
   void test_output_workspace_has_MeshObject_2WS() {
-    LoadShape testLoadShape;
-    testLoadShape.initialize();
-    testLoadShape.setPropertyValue("Filename", "cube.stl");
-    prepareWorkspaces(testLoadShape, "InputWS", "OutputWS");
-    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
-    TS_ASSERT(testLoadShape.isExecuted());
-    getMeshObject("OutputWS");
+    loadMeshObject("InputWS","OutputWS","cube.stl");
     clearWorkspaces("InputWS", "OutputWS");
   }
 
   void test_output_workspace_has_MeshObject_1WS() {
-    LoadShape testLoadShape;
-    testLoadShape.initialize();
-    testLoadShape.setPropertyValue("Filename", "cube.stl");
-    prepareWorkspaces(testLoadShape, "InputWS", "InputWS");
-    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
-    TS_ASSERT(testLoadShape.isExecuted());
-    getMeshObject("InputWS");
+    loadMeshObject("InputWS", "InputWS", "cube.stl");
     clearWorkspaces("InputWS", "InputWS");
   }
 
@@ -114,6 +102,16 @@ private:
       TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().remove(outputWS));
     }
+  }
+
+  const MeshObject* loadMeshObject(const std::string &inputWS, const std::string &outputWS, const std::string filename) {
+    LoadShape testLoadShape;
+    testLoadShape.initialize();
+    testLoadShape.setPropertyValue("Filename", filename);
+    prepareWorkspaces(testLoadShape, inputWS, outputWS);
+    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
+    TS_ASSERT(testLoadShape.isExecuted());
+    return getMeshObject(outputWS);
   }
 
   const MeshObject* getMeshObject(const std::string &outputWS) {
