@@ -97,6 +97,15 @@ public:
     clearWorkspaces("InputWS", "InputWS");
   }
 
+  void test_tube() {
+    auto tube = loadMeshObject("InputWS", "InputWS", "tube.stl");
+    TS_ASSERT(tube->hasValidShape());
+    TS_ASSERT_EQUALS(tube->numberOfVertices(), 1080);
+    TS_ASSERT_EQUALS(tube->numberOfTriangles(), 2160);
+    TS_ASSERT_DELTA(tube->volume(), 7068, 1);
+    clearWorkspaces("InputWS", "InputWS");
+  }
+
 private:
 
   // Create workspaces and add them to algorithm properties
