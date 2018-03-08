@@ -1407,7 +1407,7 @@ void MuonFitPropertyBrowser::setAllPeriods() {
 * Sets checkboxes for periods
 * @param numPeriods :: [input] Number of periods
 */
-void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods){//,QStringList summedPeriods) {
+void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods){
   //has to go here to get the original value 
   int j = m_enumManager->value(m_periodsToFit);
   auto selected = getChosenPeriods();
@@ -1480,8 +1480,9 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
   if (m_periodBoxes.size() > 1) {
-	  for (const auto &checkbox : m_periodBoxes) {
-		  delete (checkbox);
+	  for (auto iter = std::next(m_periodBoxes.constBegin());
+		  iter != m_periodBoxes.constEnd(); ++iter) {
+		  delete (*iter);
 	  }
 	  m_periodBoxes.clear();
 
