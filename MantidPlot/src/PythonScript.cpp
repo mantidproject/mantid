@@ -647,7 +647,6 @@ bool PythonScript::executeString() {
   }
   // If an error has occurred we need to construct the error message
   // before any other python code is run
-  QString msg;
   if (!result) {
     emit_error();
     // If a script was aborted we both raise a KeyboardInterrupt and
@@ -658,9 +657,9 @@ bool PythonScript::executeString() {
   } else {
     emit finished(MSG_FINISHED);
     success = true;
-  }
-  if (isInteractive()) {
-    generateAutoCompleteList();
+    if (isInteractive() && !isExecuting()) {
+      generateAutoCompleteList();
+    }
   }
 
   Py_XDECREF(compiledCode);
