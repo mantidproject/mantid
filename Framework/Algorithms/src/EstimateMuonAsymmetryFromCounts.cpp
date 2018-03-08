@@ -99,8 +99,8 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   const Mantid::API::Run &run = inputWS->run();
   double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
   if (numGoodFrames == 0) {
-	  g_log.warning("The data has no good frames, assuming a value of 1");
-	  numGoodFrames = 1;
+    g_log.warning("The data has no good frames, assuming a value of 1");
+    numGoodFrames = 1;
   }
   // Share the X values
   for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
