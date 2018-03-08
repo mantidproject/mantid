@@ -231,9 +231,6 @@ private:
   void setValidatorDisplay(bool display);
   /// gets text to use for find files search parameters
   const QString findFilesGetSearchText(QString &searchText);
-  /// Checks if the find files search text is a directory and handles relevant
-  /// errors
-  boost::optional<QString> findFilesDirectory(const QString &searchText);
   /// handles findFiles background thread
   void runFindFiles(const QString &searchText);
   /// Helper method to create a FindFilesSearchParameters object

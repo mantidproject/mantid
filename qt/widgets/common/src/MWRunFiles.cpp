@@ -521,21 +521,23 @@ void MWRunFiles::findFiles() { findFiles(m_uiForm.fileEditor->isModified()); }
 */
 void MWRunFiles::findFiles(bool isModified) {
   auto searchText = m_uiForm.fileEditor->text();
-  const auto directory = findFilesDirectory(searchText);
 
-  // Set the values for the thread, and start it running.
-  if (directory) {
-    if (directory.get().isEmpty())
-      return;
-    else
-      m_foundFiles.append(directory.get());
-  } else {
-    if (isModified) {
-      // Reset modified flag.
-      m_uiForm.fileEditor->setModified(false);
-      searchText = findFilesGetSearchText(searchText);
-      runFindFiles(searchText);
+  if (m_isForDirectory) {
+    m_foundFiles.clear();
+    if (searchText.isEmpty()) {
+      setFileProblem("A directory must be provided");
+    } else {
+      setFileProblem("");
+      m_foundFiles.append(searchText);
     }
+    return;
+  }
+
+  if (isModified) {
+    // Reset modified flag.
+    m_uiForm.fileEditor->setModified(false);
+    searchText = findFilesGetSearchText(searchText);
+    runFindFiles(searchText);
   }
 }
 
@@ -577,27 +579,6 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
     }
   }
   return searchText;
-}
-
-/**
-* Checks if the find files search text is a directory and handles relevant
-* errors
-* @param searchText :: text entered by user
-* @return string to append to foundFiles or none
-*/
-boost::optional<QString>
-MWRunFiles::findFilesDirectory(const QString &searchText) {
-  if (m_isForDirectory) {
-    m_foundFiles.clear();
-    if (searchText.isEmpty()) {
-      setFileProblem("A directory must be provided");
-    } else {
-      setFileProblem("");
-      return searchText;
-    }
-    return QString("");
-  }
-  return boost::none;
 }
 
 /**
