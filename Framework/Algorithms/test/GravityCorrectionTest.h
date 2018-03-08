@@ -334,17 +334,37 @@ public:
   void testOutputThetaFinalCorrected() {
 
     // ReferenceFrame is up:Y along beam:X
-    Mantid::Kernel::V3D source{-3., 0., 0.};
-    Mantid::Kernel::V3D slit1{-2., 0., 0.};
-    Mantid::Kernel::V3D slit2{-1., 0., 0.};
-    Mantid::Kernel::V3D monitor{-.5, 0., 0.};
-    Mantid::Kernel::V3D sample{0., 0., 0.};
-    Mantid::Kernel::V3D detector1{2., 1., 0.}; // source
+    using Mantid::Kernel::V3D;
+    V3D source{-3., 0., 0.};
+    V3D slit1{-2., 0., 0.};
+    V3D slit2{-1., 0., 0.};
+    V3D monitor{-.5, 0., 0.};
+    V3D sample{0., 0., 0.};
+    V3D detector1{2., 1., 0.};
 
-    double tof = 80000; // micro seconds
+    V3D l1 = sample - source;
+    V3D l2 = detector1 - sample;
 
-    // Mantid::Kernel::V3D detector1{};
-    Mantid::Kernel::V3D detector2{4, 30, 0.}; // calculated
+    const double v, k, s1, s2, tanAngle, sdist, sx, up2, sy, finalAngle,
+        tof{8000.};
+
+    using Mantid::PhysicalConstants::g;
+    using std::abs;
+    using std::pow;
+
+    v{(l1.norm + l2.norm) / tof}; // (metre / mu seconds!)
+    k = g / (2. * pow(v * 1.e6, 2.));
+    s1 = slit1.X();
+    s2 = slit2.X();
+    tanAngle = tan(cos(detector1.X() / l2));
+    sdist = s1 - s2;
+    sx = (k * (pow(s1, 2.) - pow(s2, 2.)) + (sdist * tanAngle)) /
+         (2 * k * sdist);
+    up2 = s2 * tanAngle;
+    sy = up2 + k * pow(s2 - sx, 2.);
+    finalAngle = atan(2. * k * sqrt(abs(sy / k)));
+
+    V3D detector2{cos(finalAngle) * l2, sin(finalAngle) * l2, 0.};
 
     Mantid::API::MatrixWorkspace_sptr ws{
         WorkspaceCreationHelper::
@@ -352,10 +372,7 @@ public:
                 tof, 0.25, 4, 50, 0.02, slit1, slit2, source, monitor, sample,
                 detector1, detector2)};
 
-    // input final angle not corrected
-    // TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4),
-    //                2. * tan(detector1.getPos().X() / detector1.getPos().Y()),
-    //                1e-6);
+    TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4) / 2, finalAngle, 1e-6);
 
     // input counts
     // error: no match for ‘operator==’ (operand types are
@@ -417,8 +434,12 @@ public:
   }
 
 private:
-  const std::string directBeamFile{/home/cs/reimund/Desktop/Figaro/GravityCorrection/ReflectionUp/exp_9-12-488/rawdata/596071.nxs}
-  //const std::string directBeamFile{"ILL/Figaro/592724.nxs"};
+  const std::string directBeamFile {
+    / home / cs / reimund / Desktop / Figaro / GravityCorrection /
+            ReflectionUp / exp_9 -
+        12 - 488 / rawdata / 596071.nxs
+  }
+  // const std::string directBeamFile{"ILL/Figaro/592724.nxs"};
   const std::string outWSName{"GravityCorrectionTest_OutputWorkspace"};
   const std::string inWSName{"GravityCorrectionTest_InputWorkspace"};
   const std::string TRUE{"1"};

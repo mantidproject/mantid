@@ -67,6 +67,7 @@ using Mantid::PhysicalConstants::g;
 using boost::const_pointer_cast;
 using boost::make_shared;
 
+using std::abs;
 using std::find_if;
 using std::map;
 using std::pair;
@@ -329,7 +330,7 @@ double GravityCorrection::finalAngle(const double k, size_t i) {
   this->setCoordinate(m_sample3D, this->m_beamDirection, beamShift); // sign
   this->setCoordinate(m_sample3D, this->m_upDirection, upShift);     // sign
   // calculate final angle
-  return sign * atan(2. * k * sqrt(std::abs(upShift / k)));
+  return sign * atan(2. * k * sqrt(abs(upShift / k)));
 }
 
 /**
@@ -531,7 +532,7 @@ size_t GravityCorrection::spectrumNumber(const double angle,
  */
 double GravityCorrection::parabolaArcLength(const double arg,
                                             double constant) const {
-  constant = std::abs(constant);
+  constant = abs(constant);
   double a = pow(arg, 2.);
   double b = log((arg / sqrt(constant)) + sqrt(1 + a / constant));
   return 0.5 * (arg * sqrt(constant + a) + constant * b);
