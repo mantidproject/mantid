@@ -580,6 +580,8 @@ private:
 
   /// set the group/pair name
   std::string m_groupPairName;
+  int m_deadTimeIndex;
+  bool m_useDeadTime;
 };
 }
 }

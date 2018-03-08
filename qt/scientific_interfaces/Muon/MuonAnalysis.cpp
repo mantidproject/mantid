@@ -136,7 +136,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
       m_currentLabel("NoLabelSet"), m_numPeriods(0),
       m_groupingHelper(this->m_uiForm), m_functionBrowser(nullptr),
-      m_dataSelector(nullptr),
+      m_dataSelector(nullptr),m_deadTimeIndex(-1),m_useDeadTime(true),
       m_dataLoader(Muon::DeadTimesType::None, // will be replaced by correct
                                               // instruments later
                    {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}) {}
@@ -1218,6 +1218,12 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
  * @param files :: All file names for the files loading.
  */
 void MuonAnalysis::inputFileChanged(const QStringList &files) {
+	if (m_deadTimeIndex != -1 && m_useDeadTime) {
+		QMessageBox::warning(this, "Restoring dead time correction",
+			"Will use previous dead time correction");
+		m_uiForm.deadTimeType->setCurrentIndex(m_deadTimeIndex);
+		m_deadTimeIndex = -1;
+	}
   if (files.size() <= 0)
     return;
 
@@ -1252,6 +1258,19 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
         m_dataLoader.correctAndGroup(*loadResult, *groupResult->groupingUsed);
 
   } catch (const std::exception &e) {
+	  // if it failed try again with no dead time correction
+	  if (m_deadTimeIndex == -1) {
+		  m_deadTimeIndex =m_uiForm.deadTimeType->currentIndex();
+		  if (m_deadTimeIndex != 0) {
+			  QMessageBox::warning(this, "Loading failed",
+				  "Will try without dead time correction");
+		     m_uiForm.deadTimeType->setCurrentIndex(0);
+			 // dont use dead time for next run
+			 m_useDeadTime = false;
+			  inputFileChanged(files);
+			  return;
+		  }
+	  }
     g_log.error(e.what());
     QMessageBox::critical(this, "Loading failed",
                           "Unable to load the file[s]. See log for details.");
@@ -1261,6 +1280,8 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
     return;
   }
+  //load worked so lets turn dead time on
+  m_useDeadTime = true;
   // At this point we are sure that new data was loaded successfully, so we can
   // safely overwrite
   // previous one.
