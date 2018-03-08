@@ -1448,7 +1448,7 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
     m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
     m_generateBtn->setDisabled(false);
 
-	updatePeriods(j);// , selected);
+    updatePeriods(j); // , selected);
   }
 }
 /**
@@ -1504,19 +1504,20 @@ void MuonFitPropertyBrowser::clearChosenPeriods() const {
 */
 void MuonFitPropertyBrowser::updatePeriods() {
   int j = m_enumManager->value(m_periodsToFit);
-  //auto selected = getChosenPeriods();
+  // auto selected = getChosenPeriods();
   updatePeriods(j);
 }
 /**
 * updates the period displays and conserves the selection
 * if selection is niot available default to all periods
 * @param j :: [input] index of selection in combobox
-* selected is an input for changing runs and preserving selection (list of selected periods)
+* selected is an input for changing runs and preserving selection (list of
+* selected periods)
 * currently has a bug
 */
-void MuonFitPropertyBrowser::updatePeriods(const int j){
-        // this is for switching but has a bug at the moment
-//const QStringList &selected) {
+void MuonFitPropertyBrowser::updatePeriods(const int j) {
+  // this is for switching but has a bug at the moment
+  // const QStringList &selected) {
   if (m_periodsToFitOptions[j] == CUSTOM_LABEL) {
     // currently the below does not work reliably (if period arithmatic is
     // presemnt it gives bad results
@@ -1552,7 +1553,7 @@ void MuonFitPropertyBrowser::addPeriodCheckboxToMap(const QString &name) {
   }
   // has to go here to get the original value
   int j = m_enumManager->value(m_periodsToFit);
-  //auto selected = getChosenPeriods();
+  // auto selected = getChosenPeriods();
   addPeriodCheckbox(name);
   updatePeriods(j);
 }
