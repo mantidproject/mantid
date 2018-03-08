@@ -136,10 +136,11 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
       m_currentLabel("NoLabelSet"), m_numPeriods(0),
       m_groupingHelper(this->m_uiForm), m_functionBrowser(nullptr),
-      m_dataSelector(nullptr), 
+      m_dataSelector(nullptr),
       m_dataLoader(Muon::DeadTimesType::None, // will be replaced by correct
                                               // instruments later
-                   {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}), m_deadTimeIndex(-1), m_useDeadTime(true) {}
+                   {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}),
+      m_deadTimeIndex(-1), m_useDeadTime(true) {}
 
 /**
  * Destructor
