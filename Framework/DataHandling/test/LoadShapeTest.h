@@ -17,14 +17,10 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
 
-
 class LoadShapeTest : public CxxTest::TestSuite {
 public:
-  static LoadShapeTest *createSuite() {
-    return new LoadShapeTest();
-  }
+  static LoadShapeTest *createSuite() { return new LoadShapeTest(); }
   static void destroySuite(LoadShapeTest *suite) { delete suite; }
-
 
   void testName() { TS_ASSERT_EQUALS(loadShape.name(), "LoadShape"); }
 
@@ -70,7 +66,7 @@ public:
   }
 
   void test_output_workspace_has_MeshObject_2WS() {
-    loadMeshObject("InputWS","OutputWS","cube.stl");
+    loadMeshObject("InputWS", "OutputWS", "cube.stl");
     clearWorkspaces("InputWS", "OutputWS");
   }
 
@@ -82,7 +78,7 @@ public:
   void test_cube() {
     auto cube = loadMeshObject("InputWS", "InputWS", "cube.stl");
     TS_ASSERT(cube->hasValidShape());
-    TS_ASSERT_EQUALS(cube->numberOfVertices(), 8 );
+    TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
     TS_ASSERT_DELTA(cube->volume(), 3000, 0.001);
     clearWorkspaces("InputWS", "InputWS");
@@ -107,26 +103,29 @@ public:
   }
 
 private:
-
   // Create workspaces and add them to algorithm properties
-  void prepareWorkspaces(LoadShape &alg, const std::string &inputWS, const std::string &outputWS) {
-    auto inWs = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
-    Mantid::API::AnalysisDataService::Instance().add(
-      inputWS, inWs);
+  void prepareWorkspaces(LoadShape &alg, const std::string &inputWS,
+                         const std::string &outputWS) {
+    auto inWs =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
+    Mantid::API::AnalysisDataService::Instance().add(inputWS, inWs);
     alg.setPropertyValue("InputWorkspace", inputWS);
     alg.setPropertyValue("OutputWorkspace", outputWS);
   }
 
-  void clearWorkspaces(const std::string &inputWS, const std::string &outputWS) {
+  void clearWorkspaces(const std::string &inputWS,
+                       const std::string &outputWS) {
     TS_ASSERT_THROWS_NOTHING(
-      Mantid::API::AnalysisDataService::Instance().remove(inputWS));
+        Mantid::API::AnalysisDataService::Instance().remove(inputWS));
     if (outputWS != inputWS) {
       TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().remove(outputWS));
+          Mantid::API::AnalysisDataService::Instance().remove(outputWS));
     }
   }
 
-  const MeshObject* loadMeshObject(const std::string &inputWS, const std::string &outputWS, const std::string filename) {
+  const MeshObject *loadMeshObject(const std::string &inputWS,
+                                   const std::string &outputWS,
+                                   const std::string filename) {
     LoadShape testLoadShape;
     testLoadShape.initialize();
     testLoadShape.setPropertyValue("Filename", filename);
@@ -136,12 +135,12 @@ private:
     return getMeshObject(outputWS);
   }
 
-  const MeshObject* getMeshObject(const std::string &outputWS) {
+  const MeshObject *getMeshObject(const std::string &outputWS) {
     MatrixWorkspace_sptr ws = getWorkspace(outputWS);
     Sample s;
     TS_ASSERT_THROWS_NOTHING(s = ws->sample());
     auto &obj = s.getShape();
-    auto mObj = dynamic_cast<const MeshObject*>(&obj);
+    auto mObj = dynamic_cast<const MeshObject *>(&obj);
     TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
     return mObj;
   }
@@ -153,23 +152,22 @@ private:
       Workspace_sptr output;
       TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputWS));
       MatrixWorkspace_sptr outputWorkspace =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+          boost::dynamic_pointer_cast<MatrixWorkspace>(output);
       return outputWorkspace;
-    }
-    else {
+    } else {
       return nullptr;
     }
   }
 
-  LoadShape loadShape; 
+  LoadShape loadShape;
 };
 
 class LoadShapeTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
-    auto inWs = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
-    Mantid::API::AnalysisDataService::Instance().add(
-      inWsName, inWs);
+    auto inWs =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
+    Mantid::API::AnalysisDataService::Instance().add(inWsName, inWs);
     for (int i = 0; i < numberOfIterations; ++i) {
       loadAlgPtrs.emplace_back(setupAlg());
     }

@@ -36,20 +36,17 @@ void LoadShape::init() {
       "The name of the workspace containing the instrument to add the shape");
 
   // shape file
-  const std::vector<std::string> extensions{ ".stl" };
+  const std::vector<std::string> extensions{".stl"};
   declareProperty(
-       make_unique<FileProperty>(
-      "Filename", "", FileProperty::Load, extensions),
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
       "The name of the file containing the shape. ");
 
   // Output workspace
-  declareProperty(
-       make_unique<WorkspaceProperty<>>(
-       "OutputWorkspace", "", Direction::Output),
-       "The name of the workspace that will be same as "
-       "the input workspace but with shape added to it "
-       "at the sample");
-
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the workspace that will be same as "
+                  "the input workspace but with shape added to it "
+                  "at the sample");
 }
 
 /**
@@ -64,7 +61,7 @@ int LoadShape::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // Avoid some known file types that have different loaders
   int confidence(0);
-  if (filePath.compare(filenameLength - 4, 4, ".stl") == 0 ) {
+  if (filePath.compare(filenameLength - 4, 4, ".stl") == 0) {
     confidence = 90;
   }
   return confidence;
@@ -87,12 +84,12 @@ void LoadShape::exec() {
   }
 
   std::string solidName = "";
-  boost::shared_ptr<MeshObject> shape = nullptr;  
+  boost::shared_ptr<MeshObject> shape = nullptr;
   try {
     shape = readSTLSolid(file, solidName);
-  }
-  catch (std::exception &) {
-    throw Exception::FileError("Failed to recognize this file as a valid STL file: ", filename);
+  } catch (std::exception &) {
+    throw Exception::FileError(
+        "Failed to recognize this file as a valid STL file: ", filename);
   }
 
   // Put shape into sample.
@@ -101,10 +98,10 @@ void LoadShape::exec() {
 
   // Set output workspace
   setProperty("OutputWorkspace", outputWS);
-
 }
 
-std::unique_ptr<Geometry::MeshObject> LoadShape::readSTLSolid(std::ifstream &file, std::string &name) {
+std::unique_ptr<Geometry::MeshObject>
+LoadShape::readSTLSolid(std::ifstream &file, std::string &name) {
   // Read Solid name
   // We expect line after trimming to be "solid "+name.
   std::string line;
@@ -112,8 +109,7 @@ std::unique_ptr<Geometry::MeshObject> LoadShape::readSTLSolid(std::ifstream &fil
     boost::trim(line);
     if (line.size() < 5 || line.substr(0, 5) != "solid") {
       throw std::runtime_error("Expected start of solid");
-    }
-    else {
+    } else {
       name = line.substr(6, std::string::npos);
     }
     // Read Solid shape
@@ -122,14 +118,15 @@ std::unique_ptr<Geometry::MeshObject> LoadShape::readSTLSolid(std::ifstream &fil
   return nullptr;
 }
 
-std::unique_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream& file) {
+std::unique_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream &file) {
   std::vector<uint16_t> triangleIndices;
   std::vector<V3D> vertices;
   V3D t1, t2, t3;
 
   while (readSTLTriangle(file, t1, t2, t3)) {
     // Add triangle if all 3 vertices are distinct
-    if (!areEqualVertices(t1,t2) && !areEqualVertices(t1,t3) && !areEqualVertices(t2,t3)) {
+    if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) &&
+        !areEqualVertices(t2, t3)) {
       triangleIndices.push_back(addSTLVertex(t1, vertices));
       triangleIndices.push_back(addSTLVertex(t2, vertices));
       triangleIndices.push_back(addSTLVertex(t3, vertices));
@@ -137,23 +134,22 @@ std::unique_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream& file) {
   }
   // Use efficient constructor of MeshObject
   std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
-    new MeshObject(std::move(triangleIndices), std::move(vertices),
-      Mantid::Kernel::Material()));
+      new MeshObject(std::move(triangleIndices), std::move(vertices),
+                     Mantid::Kernel::Material()));
   return retVal;
 }
 
 /* Reads triangle for STL file and returns true if triangle is found */
-bool LoadShape::readSTLTriangle(std::ifstream &file, V3D &v1, V3D &v2, V3D &v3) {
+bool LoadShape::readSTLTriangle(std::ifstream &file, V3D &v1, V3D &v2,
+                                V3D &v3) {
 
   std::string line;
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
-      bool ok = (
-        readSTLVertex(file, v1) &&
-        readSTLVertex(file, v2) &&
-        readSTLVertex(file, v3));
-      if (!ok) {
-        throw std::runtime_error("Error on reading STL triangle");
-      }
+    bool ok = (readSTLVertex(file, v1) && readSTLVertex(file, v2) &&
+               readSTLVertex(file, v3));
+    if (!ok) {
+      throw std::runtime_error("Error on reading STL triangle");
+    }
   } else {
     return false; // End of file
   }
@@ -188,15 +184,14 @@ bool LoadShape::readSTLLine(std::ifstream &file, std::string const &type) {
       // Before throwing, check for endsolid statment
       std::string type2 = "endsolid";
       if (line.size() < type2.size() || line.substr(0, type2.size()) != type2) {
-        throw std::runtime_error("Expected STL line begining with " + type + " or "+ type2);
-      }
-      else {
+        throw std::runtime_error("Expected STL line begining with " + type +
+                                 " or " + type2);
+      } else {
         return false; // ends reading at endsolid
       }
     }
     return true; // expected line read, then ignored
-  }
-  else {
+  } else {
     return false; // end of file
   }
 }
@@ -209,7 +204,7 @@ uint16_t LoadShape::addSTLVertex(V3D &vertex, std::vector<V3D> &vertices) {
     }
   }
   vertices.push_back(vertex);
-  uint16_t index = (uint16_t) vertices.size() - 1;
+  uint16_t index = (uint16_t)vertices.size() - 1;
   if (index != vertices.size() - 1) {
     throw std::runtime_error("Too many vertices in solid");
   }
