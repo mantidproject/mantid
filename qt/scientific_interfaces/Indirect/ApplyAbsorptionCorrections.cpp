@@ -535,7 +535,7 @@ void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
         "Corrected", QString::fromStdString(m_pythonExportWsName), wsIndex,
         Qt::green);
   // Plot container
-  if (m_ppContainerWS) {
+  if (m_ppContainerWS && useCan) {
     m_uiForm.ppPreview->addSpectrum(
         "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
         Qt::red);
