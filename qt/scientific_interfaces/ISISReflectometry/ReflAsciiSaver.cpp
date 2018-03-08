@@ -55,9 +55,9 @@ void setPropertyIfSupported(Mantid::API::IAlgorithm_sptr alg,
 }
 }
 
-std::string ReflAsciiSaver::assembleSavePath(std::string const &saveDirectory,
-                             std::string const &prefix, std::string const &name,
-                             std::string const &extension) const {
+std::string ReflAsciiSaver::assembleSavePath(
+    std::string const &saveDirectory, std::string const &prefix,
+    std::string const &name, std::string const &extension) const {
   auto path = Poco::Path(saveDirectory);
   path.append(prefix + name + extension);
   return path.toString();
