@@ -168,11 +168,13 @@ void TimeSlicingInfo::parseUniform() {
  * @throws : runtime_error if input is invalid
  */
 void TimeSlicingInfo::parseUniformEven() {
-  // Set the constant number of slices
-  m_constNumberOfSlices = parseDenaryInteger(values());
+  auto const numberOfSlices = parseDenaryInteger(values());
 
-  if (m_constNumberOfSlices < 1)
+  if (numberOfSlices < 1)
     throw std::runtime_error("The number of slices must be greater than zero");
+
+  // Set the constant number of slices
+  m_constNumberOfSlices = numberOfSlices;
 }
 
 /** Parses the values string to extract custom time slicing
