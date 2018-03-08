@@ -8,8 +8,9 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -118,6 +119,8 @@ public:
         m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
     TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(),
                      m_loadedData->getSpectrum(1).readX());
+    // Check output log is not empty
+    TS_ASSERT(outputWs->mutableRun().getLogData().size() > 0);
 
     const auto specReY = outputWs->getSpectrum(0).y();
     const auto specReE = outputWs->getSpectrum(0).e();
