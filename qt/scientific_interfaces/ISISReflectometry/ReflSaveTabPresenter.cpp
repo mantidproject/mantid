@@ -18,7 +18,8 @@ namespace CustomInterfaces {
 
 using namespace Mantid::API;
 
-/** Constructor
+/**
+* @param saver :: The model to use to save the files
 * @param view :: The view we are handling
 */
 ReflSaveTabPresenter::ReflSaveTabPresenter(
