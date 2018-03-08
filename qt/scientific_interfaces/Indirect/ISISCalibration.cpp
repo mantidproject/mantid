@@ -223,16 +223,16 @@ QString ISISCalibration::backgroundString() const {
          QString::number(m_dblManager->value(m_properties["ResEnd"]));
 }
 
-void ISISCalibration::setPeak(const double &minimumTof,
-                              const double &maximumTof) {
+void ISISCalibration::setPeakRange(const double &minimumTof,
+                                   const double &maximumTof) {
   auto calibrationPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
   setRangeSelector(calibrationPeak, m_properties["CalPeakMin"],
                    m_properties["CalPeakMax"],
                    qMakePair(minimumTof, maximumTof));
 }
 
-void ISISCalibration::setBackground(const double &minimumTof,
-                                    const double &maximumTof) {
+void ISISCalibration::setBackgroundRange(const double &minimumTof,
+                                         const double &maximumTof) {
   auto background = m_uiForm.ppCalibration->getRangeSelector("CalBackground");
   setRangeSelector(background, m_properties["CalBackMin"],
                    m_properties["CalBackMax"],
@@ -248,14 +248,14 @@ void ISISCalibration::setRange(MantidWidgets::RangeSelector *rangeSelector,
                        qMakePair(minimum, maximum));
 }
 
-void ISISCalibration::setPeakRange(const double &peakMin,
-                                   const double &peakMax) {
+void ISISCalibration::setPeakRangeLimits(const double &peakMin,
+                                         const double &peakMax) {
   auto calibrationPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
   setRange(calibrationPeak, peakMin, peakMax, "CalELow", "CalEHigh");
 }
 
-void ISISCalibration::setBackgroundRange(const double &backgroundMin,
-                                         const double &backgroundMax) {
+void ISISCalibration::setBackgroundRangeLimits(const double &backgroundMin,
+                                               const double &backgroundMax) {
   auto background = m_uiForm.ppCalibration->getRangeSelector("CalBackground");
   setRange(background, backgroundMin, backgroundMax, "CalStart", "CalEnd");
 }
@@ -351,8 +351,8 @@ void ISISCalibration::setDefaultInstDetails() {
 
   // Set peak and background ranges
   const auto ranges = getRangesFromInstrument();
-  setPeak(ranges.at("peak-start-tof"), ranges.at("peak-end-tof"));
-  setBackground(ranges.at("back-start-tof"), ranges.at("back-end-tof"));
+  setPeakRange(ranges.at("peak-start-tof"), ranges.at("peak-end-tof"));
+  setBackgroundRange(ranges.at("back-start-tof"), ranges.at("back-end-tof"));
 }
 
 /**
@@ -395,8 +395,8 @@ void ISISCalibration::calPlotRaw() {
   m_uiForm.ppCalibration->resizeX();
 
   const auto &dataX = input->x(0);
-  setPeakRange(dataX.front(), dataX.back());
-  setBackgroundRange(dataX.front(), dataX.back());
+  setPeakRangeLimits(dataX.front(), dataX.back());
+  setBackgroundRangeLimits(dataX.front(), dataX.back());
 
   setDefaultInstDetails();
 
@@ -650,7 +650,8 @@ void ISISCalibration::plotClicked() {
   plotTimeBin(m_outputCalibrationName);
   checkADSForPlotSaveWorkspace(m_outputCalibrationName.toStdString(), true);
   QStringList plotWorkspaces;
-  if (m_uiForm.ckCreateResolution->isChecked()) {
+  if (m_uiForm.ckCreateResolution->isChecked() &&
+      m_outputResolutionName.isEmpty()) {
     checkADSForPlotSaveWorkspace(m_outputResolutionName.toStdString(), true);
     plotWorkspaces.append(m_outputResolutionName);
     if (m_uiForm.ckSmoothResolution->isChecked())
@@ -675,7 +676,7 @@ ISISCalibration::calibrationAlgorithm(const QString &inputFiles) const {
   auto calibrationAlg =
       AlgorithmManager::Instance().create("IndirectCalibration");
   calibrationAlg->initialize();
-  calibrationAlg->setProperty("InputFiles", inputFiles);
+  calibrationAlg->setProperty("InputFiles", inputFiles.toStdString());
   calibrationAlg->setProperty("OutputWorkspace",
                               m_outputCalibrationName.toStdString());
   calibrationAlg->setProperty("DetectorRange",

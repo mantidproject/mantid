@@ -58,11 +58,11 @@ public:
   QString rebinString() const;
   QString backgroundString() const;
 
-  void setPeak(const double &minimumTof, const double &maximumTof);
-  void setBackground(const double &minimumTof, const double &maximumTof);
-  void setPeakRange(const double &peakMin, const double &peakMax);
-  void setBackgroundRange(const double &backgroundMin,
-                          const double &backgroundMax);
+  void setPeakRange(const double &minimumTof, const double &maximumTof);
+  void setBackgroundRange(const double &minimumTof, const double &maximumTof);
+  void setPeakRangeLimits(const double &peakMin, const double &peakMax);
+  void setBackgroundRangeLimits(const double &backgroundMin,
+                                const double &backgroundMax);
   void setResolutionSpectraRange(const double &minimum, const double &maximum);
 
 private slots:
