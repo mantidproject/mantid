@@ -248,7 +248,7 @@ UserInputValidator AbsorptionCorrections::doValidation() {
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
     const auto containerChem =
-      m_uiForm.leCanChemicalFormula->text().toStdString();
+        m_uiForm.leCanChemicalFormula->text().toStdString();
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
 
     const auto containerWsName =
@@ -272,8 +272,7 @@ UserInputValidator AbsorptionCorrections::doValidation() {
 
     try {
       Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-    }
-    catch (std::runtime_error &ex) {
+    } catch (std::runtime_error &ex) {
       UNUSED_ARG(ex);
       uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
       uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
