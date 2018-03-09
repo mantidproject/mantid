@@ -1,5 +1,6 @@
 #include "AbsorptionCorrections.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
@@ -314,6 +315,9 @@ void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
     return;
   }
 
+  auto unit = sampleWs->getAxis(0)->unit()->unitID();
+  m_uiForm.cbPlotOutput->setItemText(0, QString::fromStdString(unit));
+
   auto instrument = sampleWs->getInstrument();
   const std::string beamWidthParamName = "Workflow.beam-width";
   if (instrument->hasParameter(beamWidthParamName)) {
@@ -354,6 +358,8 @@ void AbsorptionCorrections::saveClicked() {
  */
 void AbsorptionCorrections::plotClicked() {
   const auto plotType = m_uiForm.cbPlotOutput->currentText();
+  const auto sampleWSName =
+      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
     if (plotType == "Both" || plotType == "Wavelength")
