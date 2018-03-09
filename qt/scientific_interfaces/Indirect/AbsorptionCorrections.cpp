@@ -237,8 +237,6 @@ UserInputValidator AbsorptionCorrections::doValidation() {
                           m_uiForm.valSampleChemicalFormula);
   const auto sampleChem =
       m_uiForm.leSampleChemicalFormula->text().toStdString();
-  const auto containerChem =
-      m_uiForm.leCanChemicalFormula->text().toStdString();
   try {
     Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
   } catch (std::runtime_error &ex) {
@@ -249,14 +247,8 @@ UserInputValidator AbsorptionCorrections::doValidation() {
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
-    try {
-      Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-    } catch (std::runtime_error &ex) {
-      UNUSED_ARG(ex);
-      uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
-      uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
-    }
-
+    const auto containerChem =
+      m_uiForm.leCanChemicalFormula->text().toStdString();
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
 
     const auto containerWsName =
@@ -276,6 +268,15 @@ UserInputValidator AbsorptionCorrections::doValidation() {
       uiv.checkFieldIsValid("Container Chemical Formula",
                             m_uiForm.leCanChemicalFormula,
                             m_uiForm.valCanChemicalFormula);
+    }
+
+    try {
+      Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+    }
+    catch (std::runtime_error &ex) {
+      UNUSED_ARG(ex);
+      uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
+      uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
     }
   } else
     uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, true);
