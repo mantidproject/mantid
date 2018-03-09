@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>846</width>
+    <width>827</width>
     <height>758</height>
    </rect>
   </property>
@@ -637,25 +637,21 @@
       <string>Sample Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="3">
+      <item row="0" column="2">
        <widget class="QLabel" name="lbSampleChemicalFormula">
         <property name="text">
          <string>Chemical Formula:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QComboBox" name="cbSampleDensity">
-        <item>
-         <property name="text">
-          <string>Mass Density</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Number Density</string>
-         </property>
-        </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="leSampleChemicalFormula">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
        </widget>
       </item>
       <item row="0" column="1">
@@ -674,31 +670,37 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="cbSampleDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
+       </widget>
+      </item>
       <item row="0" column="4">
-       <widget class="QLineEdit" name="leSampleChemicalFormula">
+       <widget class="QLabel" name="valSampleChemicalFormula">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
+        <property name="minimumSize">
          <size>
-          <width>40</width>
-          <height>20</height>
+          <width>0</width>
+          <height>0</height>
          </size>
         </property>
-       </spacer>
-      </item>
-      <item row="0" column="5">
-       <widget class="QLabel" name="valSampleChemicalFormula">
+        <property name="midLineWidth">
+         <number>0</number>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -731,13 +733,6 @@
        </widget>
       </item>
       <item row="2" column="3">
-       <widget class="QLabel" name="lbCanChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="4">
        <widget class="QLineEdit" name="leCanChemicalFormula">
         <property name="enabled">
          <bool>false</bool>
@@ -747,6 +742,13 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="lbCanChemicalFormula">
+        <property name="text">
+         <string>Chemical Formula:</string>
         </property>
        </widget>
       </item>
@@ -769,21 +771,23 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="2" column="4">
+       <widget class="QLabel" name="valCanChemicalFormula">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-        <property name="sizeHint" stdset="0">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
          <size>
-          <width>40</width>
-          <height>20</height>
+          <width>0</width>
+          <height>0</height>
          </size>
         </property>
-       </spacer>
-      </item>
-      <item row="2" column="5">
-       <widget class="QLabel" name="valCanChemicalFormula">
         <property name="text">
          <string/>
         </property>
@@ -885,20 +889,31 @@
   <tabstop>ckUseCan</tabstop>
   <tabstop>spNumberWavelengths</tabstop>
   <tabstop>spNumberEvents</tabstop>
+  <tabstop>spBeamHeight</tabstop>
   <tabstop>spBeamWidth</tabstop>
   <tabstop>cbShape</tabstop>
+  <tabstop>spFlatSampleHeight</tabstop>
   <tabstop>spFlatSampleWidth</tabstop>
+  <tabstop>spFlatSampleThickness</tabstop>
+  <tabstop>spFlatSampleAngle</tabstop>
+  <tabstop>spFlatCanFrontThickness</tabstop>
+  <tabstop>spFlatCanBackThickness</tabstop>
+  <tabstop>spCylSampleHeight</tabstop>
+  <tabstop>spCylSampleRadius</tabstop>
+  <tabstop>spCylCanOuterRadius</tabstop>
+  <tabstop>spAnnSampleHeight</tabstop>
   <tabstop>spAnnSampleInnerRadius</tabstop>
   <tabstop>spAnnSampleOuterRadius</tabstop>
   <tabstop>spAnnCanInnerRadius</tabstop>
   <tabstop>spAnnCanOuterRadius</tabstop>
-  <tabstop>spCylSampleRadius</tabstop>
+  <tabstop>leSampleChemicalFormula</tabstop>
+  <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>cbSampleDensity</tabstop>
   <tabstop>spSampleDensity</tabstop>
-  <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>cbCanDensity</tabstop>
   <tabstop>spCanDensity</tabstop>
-  <tabstop>leCanChemicalFormula</tabstop>
+  <tabstop>cbPlotOutput</tabstop>
+  <tabstop>pbPlot</tabstop>
   <tabstop>pbSave</tabstop>
  </tabstops>
  <resources/>
