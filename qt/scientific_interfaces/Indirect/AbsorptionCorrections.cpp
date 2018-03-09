@@ -1,5 +1,4 @@
 #include "AbsorptionCorrections.h"
-#include "../General/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -41,9 +40,16 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(changeSampleDensityUnit(int)));
   connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
           SLOT(changeCanDensityUnit(int)));
+
+  connect(m_uiForm.leSampleChemicalFormula, SIGNAL(editingFinished()), this,
+          SLOT(doValidation()));
+  connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
+          SLOT(doValidation()));
+  connect(m_uiForm.ckUseCan, SIGNAL(stateChanged(int)), this,
+          SLOT(doValidation()));
 }
 
-void AbsorptionCorrections::setup() {}
+void AbsorptionCorrections::setup() { doValidation(); }
 
 void AbsorptionCorrections::run() {
   // Get correct corrections algorithm
@@ -197,6 +203,18 @@ void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
 }
 
 bool AbsorptionCorrections::validate() {
+  UserInputValidator uiv = doValidation();
+
+  // Give error for failed validation
+  if (!uiv.isAllInputValid()) {
+    QString error = uiv.generateErrorMessage();
+    showMessageBox(error);
+  }
+
+  return uiv.isAllInputValid();
+}
+
+UserInputValidator AbsorptionCorrections::doValidation() {
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
@@ -216,7 +234,7 @@ bool AbsorptionCorrections::validate() {
                                m_uiForm.valSampleChemicalFormula))
     uiv.checkFieldIsValid("Sample Chemical Formula",
                           m_uiForm.leSampleChemicalFormula,
-                          m_uiForm.valCanChemicalFormula);
+                          m_uiForm.valSampleChemicalFormula);
   const auto sampleChem =
       m_uiForm.leSampleChemicalFormula->text().toStdString();
   const auto containerChem =
@@ -226,16 +244,20 @@ bool AbsorptionCorrections::validate() {
   } catch (std::runtime_error &ex) {
     UNUSED_ARG(ex);
     uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
-  }
-  try {
-    Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-  } catch (std::runtime_error &ex) {
-    UNUSED_ARG(ex);
-    uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
+    uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
   }
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
+    try {
+      Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+    }
+    catch (std::runtime_error &ex) {
+      UNUSED_ARG(ex);
+      uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
+      uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+    }
+
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
 
     const auto containerWsName =
@@ -250,19 +272,16 @@ bool AbsorptionCorrections::validate() {
     }
 
     if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
-                                 m_uiForm.leCanChemicalFormula)) {
+                                 m_uiForm.leCanChemicalFormula,
+                                 m_uiForm.valCanChemicalFormula)) {
       uiv.checkFieldIsValid("Container Chemical Formula",
-                            m_uiForm.leCanChemicalFormula);
+                            m_uiForm.leCanChemicalFormula,
+                            m_uiForm.valCanChemicalFormula);
     }
-  }
+  } else
+    uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, true);
 
-  // Give error for failed validation
-  if (!uiv.isAllInputValid()) {
-    QString error = uiv.generateErrorMessage();
-    showMessageBox(error);
-  }
-
-  return uiv.isAllInputValid();
+  return uiv;
 }
 
 void AbsorptionCorrections::loadSettings(const QSettings &settings) {

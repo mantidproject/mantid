@@ -4,6 +4,8 @@
 #include "ui_AbsorptionCorrections.h"
 #include "CorrectionsTab.h"
 
+#include "../General/UserInputValidator.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 class DLLExport AbsorptionCorrections : public CorrectionsTab {
@@ -25,6 +27,7 @@ private slots:
   void getBeamDefaults(const QString &dataName);
   void changeSampleDensityUnit(int);
   void changeCanDensityUnit(int);
+  UserInputValidator doValidation();
 
 private:
   void addSaveWorkspace(QString wsName);
