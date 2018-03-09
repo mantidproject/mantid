@@ -12,7 +12,7 @@ class DLLExport ApplyAbsorptionCorrections : public CorrectionsTab {
 
 public:
   ApplyAbsorptionCorrections(QWidget *parent = nullptr);
-  ApplyAbsorptionCorrections::~ApplyAbsorptionCorrections();
+  ~ApplyAbsorptionCorrections();
 
 private slots:
   /// Handles the geometry being changed
