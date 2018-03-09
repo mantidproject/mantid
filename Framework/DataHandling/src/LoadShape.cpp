@@ -203,7 +203,7 @@ uint16_t LoadShape::addSTLVertex(V3D &vertex, std::vector<V3D> &vertices) {
     }
   }
   vertices.push_back(vertex);
-  uint16_t index = (uint16_t)vertices.size() - 1;
+  uint16_t index = static_cast<uint16_t>(vertices.size() - 1);
   if (index != vertices.size() - 1) {
     throw std::runtime_error("Too many vertices in solid");
   }
