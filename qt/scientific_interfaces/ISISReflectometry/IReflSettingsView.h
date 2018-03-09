@@ -4,6 +4,7 @@
 #include "DllConfig.h"
 #include <map>
 #include <vector>
+#include "MantidAPI/Algorithm.h"
 #include "ExperimentOptionDefaults.h"
 #include "InstrumentOptionDefaults.h"
 #include "GetInstrumentParameter.h"
@@ -57,7 +58,7 @@ public:
 
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
-  virtual std::string getTransmissionRuns() const = 0;
+  virtual std::map<std::string, std::string> getTransmissionRuns() const = 0;
   virtual std::string getStartOverlap() const = 0;
   virtual std::string getEndOverlap() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;
@@ -99,6 +100,8 @@ public:
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) = 0;
   virtual void setDetectorCorrectionEnabled(bool enable) = 0;
+  virtual void disableAll() = 0;
+  virtual void enableAll() = 0;
 };
 }
 }

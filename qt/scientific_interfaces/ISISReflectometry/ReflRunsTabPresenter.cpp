@@ -471,6 +471,24 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
+/** Requests transmission runs for a particular run angle. Values are supplied
+* by the main presenter
+* @return :: Transmission run(s) as a comma-separated list
+*/
+QString
+ReflRunsTabPresenter::getTransmissionRunsForAngle(const double angle) const {
+  return QString::fromStdString(m_mainPresenter->getTransmissionRunsForAngle(
+      m_view->getSelectedGroup(), angle));
+}
+
+/** Check whether there are per-angle transmission runs in the settings
+ * @return :: true if there are per-angle transmission runs
+ */
+bool ReflRunsTabPresenter::hasPerAngleTransmissionRuns() const {
+  return m_mainPresenter->hasPerAngleTransmissionRuns(
+      m_view->getSelectedGroup());
+}
+
 /** Tells the view to update the enabled/disabled state of all relevant widgets
  * based on whether processing is in progress or not.
  * @param isProcessing :: true if processing is in progress
@@ -511,18 +529,14 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
 
 /** Notifies main presenter that data reduction is confirmed to be paused
 */
-void ReflRunsTabPresenter::confirmReductionPaused() const {
-
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
+void ReflRunsTabPresenter::confirmReductionPaused(int group) {
+  m_mainPresenter->notifyReductionPaused(group);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
-void ReflRunsTabPresenter::confirmReductionResumed() const {
-
-  m_mainPresenter->notify(
-      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
+void ReflRunsTabPresenter::confirmReductionResumed(int group) {
+  m_mainPresenter->notifyReductionResumed(group);
 }
 
 /** Changes the current instrument in the data processor widget. Also clears the

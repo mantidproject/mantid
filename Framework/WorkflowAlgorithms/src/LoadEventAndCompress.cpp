@@ -239,5 +239,11 @@ void LoadEventAndCompress::exec() {
   setProperty("OutputWorkspace", total);
 }
 
+Parallel::ExecutionMode LoadEventAndCompress::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  static_cast<void>(storageModes);
+  return Parallel::ExecutionMode::Distributed;
+}
+
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

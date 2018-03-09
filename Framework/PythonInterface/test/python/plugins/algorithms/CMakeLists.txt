@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   AlignComponentsTest.py
   AngularAutoCorrelationsSingleAxisTest.py
   AngularAutoCorrelationsTwoAxesTest.py
+  ApplyDetectorScanEffCorrTest.py
   BinWidthAtXTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
@@ -63,6 +64,7 @@ set ( TEST_PY_FILES
   MedianBinWidthTest.py
   MergeCalFilesTest.py
   MuscatSofQWTest.py
+  MuonMaxEntTest.py
   NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
   RetrieveRunInfoTest.py
@@ -70,7 +72,6 @@ set ( TEST_PY_FILES
   SaveNexusPDTest.py
   SavePlot1DAsJsonTest.py
   SaveReflectionsTest.py
-  SaveVulcanGSSTest.py
   ExtractMonitorsTest.py
   SetDetScaleTest.py
   SortByQVectorsTest.py

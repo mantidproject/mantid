@@ -56,6 +56,14 @@ public:
   QString inputPropertyName(size_t index) const;
   // The name of this output property
   QString outputPropertyName(size_t index) const;
+  // The prefix for the default output ws property
+  QString defaultOutputPrefix() const;
+  // The default output ws property
+  QString defaultOutputPropertyName() const;
+  // The default input ws property
+  QString defaultInputPropertyName() const;
+  // The input properties
+  std::vector<QString> inputProperties() const;
   // The output properties
   std::vector<QString> outputProperties() const;
   // The prefixes for the output properties

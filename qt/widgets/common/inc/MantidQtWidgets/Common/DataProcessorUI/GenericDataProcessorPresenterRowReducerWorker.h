@@ -48,9 +48,9 @@ public:
 private slots:
   void startWorker() {
     try {
-      m_presenter->reduceRow(&m_rowItem->second);
+      m_presenter->reduceRow(m_rowItem->second);
       m_presenter->m_manager->update(m_groupIndex, m_rowItem->first,
-                                     m_rowItem->second);
+                                     m_rowItem->second->data());
       m_presenter->m_manager->setProcessed(true, m_rowItem->first,
                                            m_groupIndex);
       emit finished(0);

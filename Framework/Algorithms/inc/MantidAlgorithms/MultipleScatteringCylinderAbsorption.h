@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
 #define MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include <vector>
 
 namespace Mantid {
@@ -44,7 +41,8 @@ namespace Algorithms {
                   <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MultipleScatteringCylinderAbsorption : public API::Algorithm {
+class DLLExport MultipleScatteringCylinderAbsorption
+    : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;

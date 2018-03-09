@@ -13,6 +13,8 @@
 #include "InstrumentOptionDefaults.h"
 #include <type_traits>
 
+#include <boost/optional.hpp>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -184,8 +186,13 @@ QString ReflSettingsPresenter::asAlgorithmPropertyBool(bool value) {
   return value ? "1" : "0";
 }
 
+void ReflSettingsPresenter::onReductionResumed() { m_view->disableAll(); }
+
+void ReflSettingsPresenter::onReductionPaused() { m_view->enableAll(); }
+
 /** Returns global options for 'ReflectometryReductionOneAuto'
  * @return :: Global options for 'ReflectometryReductionOneAuto'
+ * @throws :: if the settings the user entered are invalid
  */
 OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
@@ -204,14 +211,23 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
                   m_view->getMomentumTransferStep());
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
-    addIfNotEmpty(options, "FirstTransmissionRun",
-                  m_view->getTransmissionRuns());
 
     auto summationType = m_view->getSummationType();
     addIfNotEmpty(options, "SummationType", summationType);
 
     if (hasReductionTypes(summationType))
       addIfNotEmpty(options, "ReductionType", m_view->getReductionType());
+
+    // Add transmission runs. Note that the value here may be
+    // a comma-separated list of multiple values. We return the
+    // string as entered by the user because parsing is done in
+    // the data processor widget. Note also that we can only
+    // return default values here if provided; the user may also
+    // provide per-angle transmission runs, but these need to be
+    // requested on a per-row basis when we know what the angle is
+    // for that row.
+    auto transmissionRuns = getDefaultTransmissionRuns();
+    addIfNotEmpty(options, "FirstTransmissionRun", transmissionRuns);
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -240,11 +256,105 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
   return options;
 }
 
-std::string ReflSettingsPresenter::getTransmissionRuns() const {
-  if (m_view->experimentSettingsEnabled())
-    return m_view->getTransmissionRuns();
-  else
-    return "";
+/** Check whether per-angle transmission runs are specified
+ */
+bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
+  // Check the setting is enabled
+  if (!m_view->experimentSettingsEnabled())
+    return false;
+
+  // Check we have some entries in the table
+  auto runsPerAngle = m_view->getTransmissionRuns();
+  if (runsPerAngle.empty())
+    return false;
+
+  // To save confusion, we only allow EITHER a default transmission runs string
+  // OR multiple per-angle strings. Therefore if there is a default set there
+  // cannot be per-angle runs.
+  if (!getDefaultTransmissionRuns().empty())
+    return false;
+
+  // Ok, we have some entries and they're not defaults, so assume they're valid
+  // per-angle settings (we'll check that the angles parse ok when we come
+  // to use them).
+  return true;
+}
+
+/** Gets the default user-specified transmission runs from the view. Default
+* runs are those without an angle (i.e. the angle is blank)
+* @return :: the transmission run(s) as a string of comma-separated values
+* @throws :: if the settings the user entered are invalid
+*/
+std::string ReflSettingsPresenter::getDefaultTransmissionRuns() const {
+  if (!m_view->experimentSettingsEnabled())
+    return std::string();
+
+  // Values are entered as a map of angle to transmission runs. Loop
+  // through them, checking for the required angle
+  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto iter = runsPerAngle.find("");
+  if (iter != runsPerAngle.end()) {
+    // We found an empty angle. Check there is only one entry in the
+    // table (to save confusion, if the user specifies a default, it
+    // must be the only item in the table).
+    if (runsPerAngle.size() > 1)
+      throw std::runtime_error("Please only specify one set of transmission "
+                               "runs when using a default (i.e. where the "
+                               "angle is empty)");
+    else
+      return runsPerAngle.begin()->second;
+  }
+
+  // If not found, return an empty string
+  return std::string();
+}
+
+/** Gets the user-specified transmission runs from the view
+* @param angleToFind :: the run angle that transmission runs are valid for
+* @return :: the transmission run(s) as a string of comma-separated values
+*/
+std::string ReflSettingsPresenter::getTransmissionRunsForAngle(
+    const double angleToFind) const {
+  std::string result;
+
+  if (!hasPerAngleTransmissionRuns())
+    return result;
+
+  // Values are entered as a map of angle to transmission runs
+  auto runsPerAngle = m_view->getTransmissionRuns();
+
+  // We use a generous tolerance to check the angle because values
+  // from the log are not that accurate
+  const double tolerance = 0.01 + Mantid::Kernel::Tolerance;
+
+  // Loop through all values and find the closest that is within the tolerance
+  double smallestDist = std::numeric_limits<double>::max();
+  for (auto kvp : runsPerAngle) {
+    auto angleStr = kvp.first;
+    auto runsStr = kvp.second;
+
+    // Convert the angle to a double
+    double angle = 0.0;
+    try {
+      angle = std::stod(angleStr);
+    } catch (std::invalid_argument &e) {
+      throw std::runtime_error(std::string("Error parsing angle: ") + e.what());
+    }
+
+    // Use the closest result to the required angle that meets the given
+    // tolerance
+    double dist = std::abs(angle - angleToFind);
+    if (dist <= tolerance) {
+      if (dist < smallestDist) {
+        result = runsStr;
+        smallestDist = dist;
+      }
+    }
+  }
+
+  // If the angle was not found, return the default (which may be empty
+  // if no default was set in the table).
+  return result;
 }
 
 /** Returns global options for 'Stitch1DMany'
