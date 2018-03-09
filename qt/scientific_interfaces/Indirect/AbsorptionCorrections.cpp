@@ -334,7 +334,7 @@ void AbsorptionCorrections::saveClicked() {
  * Handle mantid plotting
  */
 void AbsorptionCorrections::plotClicked() {
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
+  const auto plotType = m_uiForm.cbPlotOutput->currentText();
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
     if (plotType == "Both" || plotType == "Wavelength")
