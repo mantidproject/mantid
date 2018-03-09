@@ -1101,7 +1101,7 @@ FunctionBrowser::addConstraintProperties(QtProperty *prop, QString constraint) {
 
   // In case of multi-dataset fitting store the tie for a local parameter
   if (isLocalParameterProperty(prop)) {
-    auto parName = getParameterName(prop);
+    const auto parName = getParameterName(prop);
     checkLocalParameter(parName);
     auto &localValues = m_localParameterValues[parName][m_currentDataset];
     localValues.lowerBound = lowerBoundStr;
@@ -1173,10 +1173,9 @@ QString FunctionBrowser::getConstraint(const QString &paramName,
                                        const QString &upperBound) const {
   QString constraint;
   if (!lowerBound.isEmpty()) {
-    constraint += lowerBound + "<" + paramName;
-  } else {
-    constraint += paramName;
+    constraint += lowerBound + "<";
   }
+  constraint += paramName;
   if (!upperBound.isEmpty()) {
     constraint += "<" + upperBound;
   }
@@ -1418,9 +1417,9 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
     for (auto it = from; it != to; ++it) {
       try {
         const auto &localParam = it.value();
-        auto lower = m_constraintManager->value(localParam.lower);
-        auto upper = m_constraintManager->value(localParam.upper);
-        QString constraint =
+        const auto lower = m_constraintManager->value(localParam.lower);
+        const auto upper = m_constraintManager->value(localParam.upper);
+        const auto constraint =
             getConstraint(localParam.paramProp->propertyName(), lower, upper);
         fun->addConstraints(constraint.toStdString());
       } catch (...) {
@@ -1837,7 +1836,7 @@ void FunctionBrowser::removeConstraints() {
   QtProperty *prop = item->property();
   if (!isParameter(prop))
     return;
-  bool isLocal = isLocalParameterProperty(prop);
+  const bool isLocal = isLocalParameterProperty(prop);
   auto props = prop->subProperties();
   foreach (QtProperty *p, props) {
     if (isConstraint(p)) {
@@ -1979,11 +1978,11 @@ void FunctionBrowser::parameterChanged(QtProperty *prop) {
 
 /// Called when a tie property changes
 void FunctionBrowser::tieChanged(QtProperty *prop) {
-  for (auto it = m_ties.begin(); it != m_ties.end(); ++it) {
-    if (it.value().tieProp == prop) {
-      auto parProp = it.value().paramProp;
+  for (const auto &atie : m_ties) {
+    if (atie.tieProp == prop) {
+      const auto parProp = atie.paramProp;
       if (isLocalParameterProperty(parProp)) {
-        auto parName = getParameterName(parProp);
+        const auto parName = getParameterName(parProp);
         checkLocalParameter(parName);
         auto &paramValue = m_localParameterValues[parName][m_currentDataset];
         if (paramValue.fixed)
@@ -2002,13 +2001,13 @@ void FunctionBrowser::tieChanged(QtProperty *prop) {
 
 /// Called when a constraint property changes
 void FunctionBrowser::constraintChanged(QtProperty *prop) {
-  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    bool isLower = it.value().lower == prop;
-    bool isUpper = it.value().upper == prop;
+  for (const auto &constraint : m_constraints) {
+    const bool isLower = constraint.lower == prop;
+    const bool isUpper = constraint.upper == prop;
     if (isLower || isUpper) {
-      auto paramProp = it.value().paramProp;
+      auto paramProp = constraint.paramProp;
       if (isLocalParameterProperty(paramProp)) {
-        auto parName = getParameterName(paramProp);
+        const auto parName = getParameterName(paramProp);
         checkLocalParameter(parName);
         auto &paramValue = m_localParameterValues[parName][m_currentDataset];
         if (isLower) {
@@ -2250,8 +2249,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
     multiFun->setDomainIndex(i, i);
     auto fun1 = multiFun->getFunction(i);
     for (size_t j = 0; j < fun1->nParams(); ++j) {
-      auto parameterName = fun1->parameterName(j);
-      QString parName = QString::fromStdString(parameterName);
+      const auto parameterName = fun1->parameterName(j);
+      const auto parName = QString::fromStdString(parameterName);
       if (globalParams.contains(parName))
         continue;
       auto tie = fun1->getTie(j);
@@ -2274,7 +2273,7 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
         fun1->setParameter(j, localParam.value);
         fun1->fix(j);
       } else {
-        auto tie = localParam.tie;
+        const auto &tie = localParam.tie;
         if (!tie.isEmpty()) {
           fun1->tie(parameterName, tie.toStdString());
         } else {
