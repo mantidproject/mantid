@@ -657,7 +657,7 @@ bool PythonScript::executeString() {
   } else {
     emit finished(MSG_FINISHED);
     success = true;
-    if (isInteractive() && !isExecuting()) {
+    if (isInteractive()) {
       generateAutoCompleteList();
     }
   }
