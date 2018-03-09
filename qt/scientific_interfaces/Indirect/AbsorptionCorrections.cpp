@@ -212,9 +212,11 @@ bool AbsorptionCorrections::validate() {
   }
 
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
-                               m_uiForm.leSampleChemicalFormula))
+                               m_uiForm.leSampleChemicalFormula,
+                               m_uiForm.valSampleChemicalFormula))
     uiv.checkFieldIsValid("Sample Chemical Formula",
-                          m_uiForm.leSampleChemicalFormula);
+                          m_uiForm.leSampleChemicalFormula,
+                          m_uiForm.valCanChemicalFormula);
   const auto sampleChem =
       m_uiForm.leSampleChemicalFormula->text().toStdString();
   const auto containerChem =
@@ -332,22 +334,15 @@ void AbsorptionCorrections::saveClicked() {
  * Handle mantid plotting
  */
 void AbsorptionCorrections::plotClicked() {
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
 
-  QStringList plotData = {QString::fromStdString(m_pythonExportWsName),
-                          m_uiForm.dsSampleInput->getCurrentDataName()};
-  auto outputFactorsWsName =
-      m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+    if (plotType == "Both" || plotType == "Wavelength")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 
-  QStringList plotCorr = {QString::fromStdString(outputFactorsWsName) + "_ass"};
-  if (m_uiForm.ckUseCan->isChecked()) {
-    plotCorr.push_back(QString::fromStdString(outputFactorsWsName) + "_acc");
-    QString shiftedWs = QString::fromStdString(
-        m_absCorAlgo->getPropertyValue("ContainerWorkspace"));
-    plotData.push_back(shiftedWs);
+    if (plotType == "Both" || plotType == "Angle")
+      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
   }
-  plotSpectrum(plotCorr, 0);
-
-  plotSpectrum(plotData, 0);
 }
 
 /**
