@@ -359,13 +359,13 @@ void ContainerSubtraction::plotCurrentPreview() {
     workspaces.append(QString::fromStdString(m_csSampleWS->getName()));
 
   // Check whether a container workspace has been specified
-  if (m_csContainerWS)
-    workspaces.append(QString::fromStdString(m_csContainerWS->getName()));
-
-  // Check whether a subtracted workspace has been generated
   if (m_transformedContainerWS)
     workspaces.append(
         QString::fromStdString(m_transformedContainerWS->getName()));
+
+  // Check whether a subtracted workspace has been generated
+  if (m_csSubtractedWS)
+    workspaces.append(QString::fromStdString(m_csSubtractedWS->getName()));
 
   IndirectTab::plotSpectrum(workspaces, boost::numeric_cast<int>(m_spectra));
 }
