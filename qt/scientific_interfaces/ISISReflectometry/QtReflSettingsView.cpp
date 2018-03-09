@@ -250,21 +250,18 @@ void QtReflSettingsView::setText(QLineEdit &lineEdit,
                                  boost::optional<double> value) {
   if (value)
     setText(lineEdit, value.get());
-  else
-    setText(lineEdit, "");
 }
 
 void QtReflSettingsView::setText(QLineEdit &lineEdit,
                                  boost::optional<int> value) {
   if (value)
     setText(lineEdit, value.get());
-  else
-    setText(lineEdit, "");
 }
 
 void QtReflSettingsView::setText(QLineEdit &lineEdit,
                                  boost::optional<std::string> const &text) {
-  setText(lineEdit, value_or(text, ""));
+  if (text && !text->empty())
+    setText(lineEdit, text);
 }
 
 void QtReflSettingsView::setText(QLineEdit &lineEdit, double value) {
@@ -287,8 +284,6 @@ void QtReflSettingsView::setText(QTableWidget &table,
                                  boost::optional<double> value) {
   if (value)
     setText(table, propertyName, value.get());
-  else
-    setText(table, propertyName, "");
 }
 
 void QtReflSettingsView::setText(QTableWidget &table,
