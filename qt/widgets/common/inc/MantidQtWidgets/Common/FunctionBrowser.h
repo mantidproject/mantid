@@ -65,6 +65,7 @@ public:
   /// Tie structure
   struct ATie {
     QtProperty *paramProp; ///< Parameter property
+    QString paramName;     ///< Parameter name
     QtProperty *tieProp;   ///< Tie property
   };
   /// Constraint structure

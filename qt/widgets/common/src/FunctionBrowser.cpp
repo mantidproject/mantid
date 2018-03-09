@@ -960,15 +960,16 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   ap = addProperty(prop, tieProp);
   m_tieManager->blockSignals(false);
 
+  const auto parName = getParameterName(prop);
   // Store tie information for easier access
   ATie atie;
   atie.paramProp = prop;
+  atie.paramName = parName;
   atie.tieProp = tieProp;
   m_ties.insert(funProp, atie);
 
   // In case of multi-dataset fitting store the tie for a local parameter
   if (isLocalParameterProperty(prop)) {
-    auto parName = getParameterName(prop);
     auto &localValues = m_localParameterValues[parName];
     if (m_currentDataset >= localValues.size()) {
       initLocalParameter(parName);
@@ -1276,7 +1277,6 @@ void FunctionBrowser::addFunction() {
   // create new function
   auto f = Mantid::API::FunctionFactory::Instance().createFunction(
       newFunction.toStdString());
-  // newFunction = QString::fromStdString(f->asString());
 
   if (prop) { // there are other functions defined
     Mantid::API::IFunction_sptr fun =
@@ -1393,8 +1393,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
     QList<QtProperty *> filedTies; // ties can become invalid after some editing
     for (auto it = from; it != to; ++it) {
       try {
-        QString tie = it->paramProp->propertyName() + "=" +
-                      m_tieManager->value(it.value().tieProp);
+        QString tie =
+            it->paramName + "=" + m_tieManager->value(it.value().tieProp);
         fun->addTies(tie.toStdString());
       } catch (...) {
         filedTies << it.value().tieProp;
