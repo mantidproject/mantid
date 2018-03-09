@@ -538,8 +538,7 @@ IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
   shiftLog->setProperty("Workspace", workspace);
   shiftLog->setProperty("LogName", name);
   shiftLog->setProperty("LogType", type);
-  shiftLog->setProperty(
-      "LogText", boost::lexical_cast<std::string>(m_uiForm.spShift->value()));
+  shiftLog->setProperty("LogText", value);
   return shiftLog;
 }
 
