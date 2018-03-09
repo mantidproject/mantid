@@ -301,6 +301,7 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
 
   // Enable plot and save
   m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.cbPlotOutput->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
 
