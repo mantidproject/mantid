@@ -65,17 +65,17 @@ void ReflSettingsTabPresenter::onReductionPaused(int group) {
 * @param angle :: the run angle to look up transmission runs for
 * @return :: Values passed for 'Transmission run(s)'
 */
-std::string ReflSettingsTabPresenter::getTransmissionRunsForAngle(
+std::string ReflSettingsTabPresenter::getOptionsForAngle(
     int group, const double angle) const {
 
-  return m_settingsPresenters.at(group)->getTransmissionRunsForAngle(angle);
+  return m_settingsPresenters.at(group)->getOptionsForAngle(angle);
 }
 
 /** Check whether per-angle transmission runs are specified
  * @return :: true if per-angle transmission runs are specified
  */
-bool ReflSettingsTabPresenter::hasPerAngleTransmissionRuns(int group) const {
-  return m_settingsPresenters.at(group)->hasPerAngleTransmissionRuns();
+bool ReflSettingsTabPresenter::hasPerAngleOptions(int group) const {
+  return m_settingsPresenters.at(group)->hasPerAngleOptions();
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'

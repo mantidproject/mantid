@@ -36,7 +36,7 @@ Initialise the Interface
 */
 void QtReflSettingsView::initLayout() {
   m_ui.setupUi(this);
-  initTransmissionRunsTable();
+  initPerAngleOptionsTable();
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
@@ -52,7 +52,7 @@ void QtReflSettingsView::initLayout() {
           SLOT(setDetectorCorrectionEnabled(bool)));
 }
 
-void QtReflSettingsView::initTransmissionRunsTable() {
+void QtReflSettingsView::initPerAngleOptionsTable() {
   auto table = m_ui.transmissionRunsTable;
   const auto columnHeadings = QStringList({"Angle", "Transmission Run(s)"});
   table->setColumnCount(columnHeadings.size());
@@ -444,7 +444,7 @@ std::string QtReflSettingsView::getAnalysisMode() const {
 * @return :: selected transmission run(s)
 */
 std::map<std::string, std::string>
-QtReflSettingsView::getTransmissionRuns() const {
+QtReflSettingsView::getPerAngleOptions() const {
 
   const auto &table = m_ui.transmissionRunsTable;
 

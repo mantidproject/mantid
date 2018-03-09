@@ -56,7 +56,7 @@ public:
   /// Return selected analysis mode
   std::string getAnalysisMode() const override;
   /// Return transmission runs
-  std::map<std::string, std::string> getTransmissionRuns() const override;
+  std::map<std::string, std::string> getPerAngleOptions() const override;
   /// Return start overlap for transmission runs
   std::string getStartOverlap() const override;
   /// Return end overlap for transmission runs
@@ -140,7 +140,7 @@ public slots:
 private:
   /// Initialise the interface
   void initLayout();
-  void initTransmissionRunsTable();
+  void initPerAngleOptionsTable();
   void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerInstrumentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);

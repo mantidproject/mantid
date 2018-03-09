@@ -851,7 +851,7 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
 
   // Get the angle for the current row. The angle is the second data item
   if (!hasAngle(data)) {
-    if (m_mainPresenter->hasPerAngleTransmissionRuns()) {
+    if (m_mainPresenter->hasPerAngleOptions()) {
       // The user has specified per-angle transmission runs on the settings
       // tab. In theory this is fine, but it could cause confusion when the
       // angle is not available in the data processor table because the
@@ -873,7 +873,7 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
 
   // Insert the transmission runs as the "FirstTransmissionRun" property
   auto transmissionRuns =
-      m_mainPresenter->getTransmissionRunsForAngle(angle(data));
+      m_mainPresenter->getOptionsForAngle(angle(data));
   if (!transmissionRuns.isEmpty()) {
     options["FirstTransmissionRun"] = transmissionRuns;
   }

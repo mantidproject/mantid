@@ -226,7 +226,7 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     // provide per-angle transmission runs, but these need to be
     // requested on a per-row basis when we know what the angle is
     // for that row.
-    auto transmissionRuns = getDefaultTransmissionRuns();
+    auto transmissionRuns = getDefaultOptions();
     addIfNotEmpty(options, "FirstTransmissionRun", transmissionRuns);
   }
 
@@ -258,20 +258,20 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
 /** Check whether per-angle transmission runs are specified
  */
-bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
+bool ReflSettingsPresenter::hasPerAngleOptions() const {
   // Check the setting is enabled
   if (!m_view->experimentSettingsEnabled())
     return false;
 
   // Check we have some entries in the table
-  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto runsPerAngle = m_view->getPerAngleOptions();
   if (runsPerAngle.empty())
     return false;
 
   // To save confusion, we only allow EITHER a default transmission runs string
   // OR multiple per-angle strings. Therefore if there is a default set there
   // cannot be per-angle runs.
-  if (!getDefaultTransmissionRuns().empty())
+  if (!getDefaultOptions().empty())
     return false;
 
   // Ok, we have some entries and they're not defaults, so assume they're valid
@@ -285,13 +285,13 @@ bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
 * @return :: the transmission run(s) as a string of comma-separated values
 * @throws :: if the settings the user entered are invalid
 */
-std::string ReflSettingsPresenter::getDefaultTransmissionRuns() const {
+std::string ReflSettingsPresenter::getDefaultOptions() const {
   if (!m_view->experimentSettingsEnabled())
     return std::string();
 
   // Values are entered as a map of angle to transmission runs. Loop
   // through them, checking for the required angle
-  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto runsPerAngle = m_view->getPerAngleOptions();
   auto iter = runsPerAngle.find("");
   if (iter != runsPerAngle.end()) {
     // We found an empty angle. Check there is only one entry in the
@@ -313,15 +313,15 @@ std::string ReflSettingsPresenter::getDefaultTransmissionRuns() const {
 * @param angleToFind :: the run angle that transmission runs are valid for
 * @return :: the transmission run(s) as a string of comma-separated values
 */
-std::string ReflSettingsPresenter::getTransmissionRunsForAngle(
+std::string ReflSettingsPresenter::getOptionsForAngle(
     const double angleToFind) const {
   std::string result;
 
-  if (!hasPerAngleTransmissionRuns())
+  if (!hasPerAngleOptions())
     return result;
 
   // Values are entered as a map of angle to transmission runs
-  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto runsPerAngle = m_view->getPerAngleOptions();
 
   // We use a generous tolerance to check the angle because values
   // from the log are not that accurate

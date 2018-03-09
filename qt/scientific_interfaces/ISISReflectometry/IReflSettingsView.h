@@ -58,7 +58,7 @@ public:
 
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
-  virtual std::map<std::string, std::string> getTransmissionRuns() const = 0;
+  virtual std::map<std::string, std::string> getPerAngleOptions() const = 0;
   virtual std::string getStartOverlap() const = 0;
   virtual std::string getEndOverlap() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;

@@ -58,7 +58,7 @@ public:
 
   void onCallReturnDefaultExperimentSettings(MockSettingsView &mockView) {
     ON_CALL(mockView, experimentSettingsEnabled()).WillByDefault(Return(true));
-    onCallReturnDefaultTransmissionRuns(mockView);
+    onCallReturnDefaultOptions(mockView);
     onCallReturnDefaultAnalysisMode(mockView);
     onCallReturnDefaultOverlap(mockView);
     onCallReturnDefaultPolarisationCorrections(mockView);
@@ -72,8 +72,8 @@ public:
         .WillByDefault(Return("PointDetectorAnalysis"));
   }
 
-  void onCallReturnDefaultTransmissionRuns(MockSettingsView &mockView) {
-    ON_CALL(mockView, getTransmissionRuns())
+  void onCallReturnDefaultOptions(MockSettingsView &mockView) {
+    ON_CALL(mockView, getPerAngleOptions())
         .WillByDefault(Return(std::map<std::string, std::string>()));
   }
 
@@ -390,7 +390,7 @@ public:
     std::map<std::string, std::string> transmissionRunsMap = {
         {"", "INTER00013463,INTER00013464"}};
 
-    EXPECT_CALL(mockView, getTransmissionRuns())
+    EXPECT_CALL(mockView, getPerAngleOptions())
         .Times(AtLeast(1))
         .WillOnce(Return(transmissionRunsMap));
 
@@ -574,7 +574,7 @@ public:
   void testInstrumentSettingsDisabled() {
     NiceMock<MockSettingsView> mockView;
     auto presenter = makeReflSettingsPresenter(&mockView);
-    onCallReturnDefaultTransmissionRuns(mockView);
+    onCallReturnDefaultOptions(mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(4)
@@ -607,7 +607,7 @@ public:
     EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getPerAngleOptions()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
 
     auto transmissionOptions = presenter.getTransmissionOptions();
@@ -629,11 +629,11 @@ public:
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(1)
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(mockView, getTransmissionRuns())
+    EXPECT_CALL(mockView, getPerAngleOptions())
         .Times(1)
         .WillOnce(Return(transmissionRunsMap));
 
-    auto result = presenter.getDefaultTransmissionRuns();
+    auto result = presenter.getDefaultOptions();
     TS_ASSERT_EQUALS(result, "INTER00013463,INTER00013464");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
@@ -653,13 +653,13 @@ public:
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(4)
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(mockView, getTransmissionRuns())
+    EXPECT_CALL(mockView, getPerAngleOptions())
         .Times(6)
         .WillRepeatedly(Return(transmissionRunsMap));
 
-    auto result = presenter.getTransmissionRunsForAngle(0.69);
+    auto result = presenter.getOptionsForAngle(0.69);
     TS_ASSERT_EQUALS(result, "INTER00013463,INTER00013464");
-    result = presenter.getTransmissionRunsForAngle(2.34);
+    result = presenter.getOptionsForAngle(2.34);
     TS_ASSERT_EQUALS(result, "INTER00013463");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));

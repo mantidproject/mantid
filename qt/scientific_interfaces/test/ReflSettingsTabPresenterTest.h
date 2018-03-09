@@ -74,26 +74,26 @@ public:
 
     // Should only call though to the settings presenter for
     // the specified group
-    EXPECT_CALL(presenter_0, getTransmissionRunsForAngle(angle)).Times(1);
-    EXPECT_CALL(presenter_1, getTransmissionRunsForAngle(angle)).Times(0);
-    EXPECT_CALL(presenter_2, getTransmissionRunsForAngle(angle)).Times(0);
-    presenter.getTransmissionRunsForAngle(0, angle);
+    EXPECT_CALL(presenter_0, getOptionsForAngle(angle)).Times(1);
+    EXPECT_CALL(presenter_1, getOptionsForAngle(angle)).Times(0);
+    EXPECT_CALL(presenter_2, getOptionsForAngle(angle)).Times(0);
+    presenter.getOptionsForAngle(0, angle);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
-    EXPECT_CALL(presenter_0, getTransmissionRunsForAngle(angle)).Times(0);
-    EXPECT_CALL(presenter_1, getTransmissionRunsForAngle(angle)).Times(1);
-    EXPECT_CALL(presenter_2, getTransmissionRunsForAngle(angle)).Times(0);
-    presenter.getTransmissionRunsForAngle(1, angle);
+    EXPECT_CALL(presenter_0, getOptionsForAngle(angle)).Times(0);
+    EXPECT_CALL(presenter_1, getOptionsForAngle(angle)).Times(1);
+    EXPECT_CALL(presenter_2, getOptionsForAngle(angle)).Times(0);
+    presenter.getOptionsForAngle(1, angle);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
-    EXPECT_CALL(presenter_0, getTransmissionRunsForAngle(angle)).Times(0);
-    EXPECT_CALL(presenter_1, getTransmissionRunsForAngle(angle)).Times(0);
-    EXPECT_CALL(presenter_2, getTransmissionRunsForAngle(angle)).Times(1);
-    presenter.getTransmissionRunsForAngle(2, angle);
+    EXPECT_CALL(presenter_0, getOptionsForAngle(angle)).Times(0);
+    EXPECT_CALL(presenter_1, getOptionsForAngle(angle)).Times(0);
+    EXPECT_CALL(presenter_2, getOptionsForAngle(angle)).Times(1);
+    presenter.getOptionsForAngle(2, angle);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));

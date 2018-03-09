@@ -476,16 +476,16 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 * @return :: Transmission run(s) as a comma-separated list
 */
 QString
-ReflRunsTabPresenter::getTransmissionRunsForAngle(const double angle) const {
-  return QString::fromStdString(m_mainPresenter->getTransmissionRunsForAngle(
+ReflRunsTabPresenter::getOptionsForAngle(const double angle) const {
+  return QString::fromStdString(m_mainPresenter->getOptionsForAngle(
       m_view->getSelectedGroup(), angle));
 }
 
 /** Check whether there are per-angle transmission runs in the settings
  * @return :: true if there are per-angle transmission runs
  */
-bool ReflRunsTabPresenter::hasPerAngleTransmissionRuns() const {
-  return m_mainPresenter->hasPerAngleTransmissionRuns(
+bool ReflRunsTabPresenter::hasPerAngleOptions() const {
+  return m_mainPresenter->hasPerAngleOptions(
       m_view->getSelectedGroup());
 }
 

@@ -54,11 +54,11 @@ public:
 
   /// Returns per-angle values passed for 'Transmission run(s)'
   std::string
-  getTransmissionRunsForAngle(const double angleToFind) const override;
+  getOptionsForAngle(const double angleToFind) const override;
   /// Returns default values passed for 'Transmission run(s)'
-  std::string getDefaultTransmissionRuns() const;
+  std::string getDefaultOptions() const;
   /// Whether per-angle transmission runs are specified
-  bool hasPerAngleTransmissionRuns() const override;
+  bool hasPerAngleOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const override;
