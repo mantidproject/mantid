@@ -1330,8 +1330,8 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
                    ('Pt-Sigma', 'float'),
                    ('Pt-I', 'float'),
                    ('Pt-B', 'float'),
-                   ('Scans Same 2Theta', 'str')]
-    # ('Selected', 'checkbox')
+                   ('Reference Scans', 'str'),
+                   ('Selected', 'checkbox')]
 
     def __init__(self, parent):
         """
@@ -1349,27 +1349,34 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         self._fwhm_index = None
         self._intensity_index = None
         self._2thta_scans_index = None
+        self._ref_scans_index = None
 
         self._pt_row_dict = dict()
 
         return
 
     def add_scan_pt(self, scan_number, pt_number, hkl_str, two_theta):
-        """
-        add a new pt to ...
+        """ add a new scan/pt to the table
+        :param scan_number:
         :param pt_number:
         :param hkl_str:
         :param two_theta:
         :return:
         """
-        print ('[DB...BAT] Am I called? {0}, {1}'.format(scan_number, pt_number))
         # check
         if (scan_number, pt_number) in self._pt_row_dict:
             raise RuntimeError('Pt number {0} exists in the table already.'.format(pt_number))
 
-        # check others...
-        # blabla
-        status, error_msg = self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0., ''])
+        # check inputs
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(pt_number, int), 'Pt number {0} must be an integer'.format(pt_number)
+        assert isinstance(hkl_str, str), 'HKL {0} must be given as a string.'.format(hkl_str)
+        assert isinstance(two_theta, float), '2theta {0} must be a float'
+
+        # add a new row to the table
+        status, error_msg = self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0., '',
+                                             False])
         if not status:
             raise RuntimeError(error_msg)
 
@@ -1379,18 +1386,38 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         return
 
     def get_reference_scans(self, row_index):
-        # TODO FIXME NOW2
-        # (1) No match
-        # (2) List
-        return None
+        """
+        get the reference scans (i.e., the scans having same/close 2theta to the single Pt scan
+        :param row_index:
+        :return:
+        """
+        # get value
+        scans_str = self.get_cell_value(row_index, self._ref_scans_index)
+
+        # no matched scan can be found!
+        if scans_str == 'No match':
+            return None
+
+        # split and parse to integers
+        terms = scans_str.split(',')
+        ref_scan_list = [int(term) for term in terms]
+
+        return ref_scan_list
 
     def get_fwhm(self, row_index):
-        # TODO FIXME NOW2
-        return None
+        """ get reference scan's FWHM
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._fwhm_index)
 
     def get_scan_number(self, row_index):
-        # TODO
-        return self.get_cell_value(row_index, 0)
+        """
+        get scan number of the specified row
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._scan_index)
 
     def get_scan_pt_list(self):
         """
@@ -1421,22 +1448,38 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         return
 
     def set_reference_scan_numbers(self, row_index, ref_numbers):
-        """
-
+        """ set reference scan numbers or warning as 'No match'
         :param row_index:
         :param input:
         :return:
         """
-        # TODO FIXME NOW2
+        # process the reference number
         if isinstance(ref_numbers, str):
-            pass
+            scans_str = ref_numbers
         elif isinstance(ref_numbers, list):
-            pass
+            scans_str = ''
+            for index, ref_number in enumerate(ref_numbers):
+                if index > 0:
+                    scans_str += ','
+                scans_str += '{0}'.format(ref_number)
+
         else:
-            pass
+            raise AssertionError('Reference scan numbers {0} of type {1} is not supported.'
+                                 ''.format(ref_numbers, type(ref_numbers)))
+
+        # add to table
+        self.update_cell_value(row_index, self._ref_scans_index, scans_str)
 
     def set_two_theta(self, row_index, two_theta):
-        #  TODO FIXME NOW2
+        """
+        set 2theta value of the scan
+        :param row_index:
+        :param two_theta:
+        :return:
+        """
+        assert isinstance(two_theta, float), '2theta {0} must be a float.'.format(two_theta)
+        self.update_cell_value(row_index, self._2theta_index, two_theta)
+
         return
 
     def setup(self):
@@ -1455,6 +1498,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         self._2theta_index = SinglePtIntegrationTable.Table_Setup.index(('2theta', 'float'))
         self._fwhm_index = SinglePtIntegrationTable.Table_Setup.index(('FWHM', 'float'))
         self._intensity_index = SinglePtIntegrationTable.Table_Setup.index(('Intensity', 'float'))
+        self._ref_scans_index = SinglePtIntegrationTable.Table_Setup.index(('Reference Scans', 'str'))
 
         return
 

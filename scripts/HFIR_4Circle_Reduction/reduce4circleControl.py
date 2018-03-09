@@ -367,42 +367,44 @@ class CWSCDReductionControl(object):
 
         return False, 'Unable to find first Pt file {0}'.format(first_xm_file)
 
-    def calculate_intensity_single_pt(self, exp_number, scan_number, pt_number, roi_name):
+    def calculate_intensity_single_pt(self, exp_number, scan_number, pt_number, roi_name, ref_fwhm):
         """
-        blabla
+        calculate single-point-measurement peak/scan's intensity
         :param exp_number:
         :param scan_number:
         :param pt_number:
         :param roi_name:
+        :param ref_fwhm:
         :return:
         """
         # check inputs
-        # blabla
-
-        # TODO FIXME NOW NOW2 - convert 'value list' to a scan!
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer.'.format(scan_number)
+        assert isinstance(pt_number, int), 'Pt number {0} must be an integer'.format(pt_number)
+        assert isinstance(roi_name, str), 'ROI name {0} must be a string'.format(roi_name)
+        assert isinstance(ref_fwhm, float), 'blabla'
 
         # check whether the detector counts has been calculated and get the value
         if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
-            raise RuntimeError('blabla')
+            raise RuntimeError('Exp {0} Scan {1} Pt {2} ROI {3} does not exist in single-point integration '
+                               'dictionary, whose keys are {4}'.format(exp_number, scan_number, pt_number, roi_name,
+                                                                       self._single_pt_integration_dict.keys()))
 
-        value_list = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
-        params = value_list[3]
+        integration_record = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+        integration_record.set_ref_fwhm(ref_fwhm)
 
-        # get 2theta value from
-        two_theta = self.get_sample_log_value(exp_number, scan_number, pt_number, '2theta')
-        ref_exp_number, ref_scan_number, integrated_peak_params = self.get_integrated_scan_params(exp_number,
-                                                                                                  two_theta,
-                                                                                                  resolution=0.01)
-        if integrated_peak_params is not None:
-            sigma = integrated_peak_params['sigma']
-            value_list[4] = ref_exp_number, ref_scan_number
-            value_list[5] = sigma
-            peak_intensity = peak_integration_utility.calculate_single_pt_scan_peak_intensity(params['Intensity'],
-                                                                                              sigma)
-        else:
-            peak_intensity = 0.
+        # params = integration_record
+        #
+        # # get 2theta value from
+        # two_theta = self.get_sample_log_value(exp_number, scan_number, pt_number, '2theta')
+        # ref_exp_number, ref_scan_number, integrated_peak_params = self.get_integrated_scan_params(exp_number,
+        #                                                                                           two_theta,
+        #                                                                                           resolution=0.01)
 
-        value_list[6] = peak_intensity
+        peak_intensity = peak_integration_utility.calculate_single_pt_scan_peak_intensity(
+            integration_record.get_pt_intensity(), ref_fwhm)
+        integration_record.set_peak_intensity(peak_intensity)
 
         return peak_intensity
 
@@ -422,14 +424,11 @@ class CWSCDReductionControl(object):
                                ''.format(exp_number, scan_number, pt_number, roi_name,
                                          self._single_pt_integration_dict.keys()))
 
-        value_list = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
-        vec_x = value_list[0]
-        vec_y = value_list[1]
-        params = value_list[3]
-
+        integration_record = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+        vec_x, vec_y = integration_record.get_vec_x_y()
         # calculate model
-        x0, sigma, gaussian_a, linear_b = params
-        print ('[DB...BAT] Gaussian parameters: {0}'.format(params))
+        x0, sigma, gaussian_a, linear_b = integration_record.get_gaussian_parameters()
+
         model_y = peak_integration_utility.gaussian_linear_background(vec_x, x0, sigma, gaussian_a, linear_b)
         print ('[DB...BAT] Calculated guassian: {0}'.format(model_y))
 
@@ -966,7 +965,46 @@ class CWSCDReductionControl(object):
 
         return out_file_name
 
+    # TEST NOW2
     def find_scans_by_2theta(self, exp_number, two_theta, resolution, excluded_scans):
+        """
+        find scans by 2theta (same or similar)
+        :param exp_number:
+        :param two_theta:
+        :param resolution:
+        :param excluded_scans:
+        :return:
+        """
+        # check inputs..
+
+        # get the list of scans in the memory
+        self._two_theta_scan_dict = dict()
+        self._scan_2theta_set = set()
+        for scan_sum in self._scanSummaryList:
+            # get scan number
+            scan_number = scan_sum[1]
+            pt_number = scan_sum[2]
+            # get 2theta
+            two_theta = float(self.get_sample_log_value(exp_number, scan_number, pt_number, '2theta'))
+            self._two_theta_scan_dict[two_theta] = scan_number
+            self._scan_2theta_set.add(scan_number)
+        # END-FOR
+
+        # sort 2thetas
+        two_theta_list = numpy.array(sorted(self._two_theta_scan_dict.keys()))
+
+        min_2theta = two_theta - resolution
+        max_2theta = two_theta + resolution
+
+        min_index = bisect.bisect_left(two_theta_list, min_2theta) - 1
+        max_index = bisect.bisect_left(two_theta_list, max_2theta)
+
+        print ('[DB..BAT] 2-thetas in range: {0}'.format(two_theta_list[min_index:max_index]))
+
+        scans_set = set([self._two_theta_scan_dict[two_theta] for two_theta in two_theta_list[min_index:max_index]])
+        scans_set = scans_set - set(excluded_scans)
+
+
         # TODO FIXME NOW2
         """
         param_dict = None
@@ -992,7 +1030,7 @@ class CWSCDReductionControl(object):
                     raise RuntimeError('It is very wrong to have two different experiment number ({0} vs {1})!'
                                        ''.format(ref_exp_number, self._exp_number))
         """
-        return [72]
+        return list(scans_set)
 
     def get_experiment(self):
         """
@@ -1686,12 +1724,19 @@ class CWSCDReductionControl(object):
             integrated_intensity = 0.
 
         # register
-        value_list = [None] * 10  # safe mode
-        value_list[0] = vec_x
-        value_list[1] = vec_y
-        value_list[2] = cost
-        value_list[3] = params  # as x0, sigma, a, b
-        self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = value_list
+        # value_list = [None] * 10  # safe mode
+        # value_list[0] = vec_x
+        # value_list[1] = vec_y
+        # value_list[2] = cost
+        # value_list[3] = params  # as x0, sigma, a, b
+
+        integrate_record = peak_integration_utility.SinglePointPeakIntegration(exp_number, scan_number, roi_name,
+                                                                               pt_number)
+        integrate_record.set_xy_vector(vec_x, vec_y)
+        integrate_record.set_fit_cost(cost)
+        integrate_record.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
+
+        self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = integrate_record
 
         return integrated_intensity
 

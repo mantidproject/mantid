@@ -220,7 +220,6 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             peak_info = \
                 self._controller.get_integrated_scan_params(self._exp_number, reference_scan_number)
 
-            # TODO FIXME NOW2 - check PeakProcessRecord() class
             if peak_info.gaussian_fwhm is not None:
                 self.ui.tableView_summary.set_fwhm(row_index, peak_info.gaussian_fwhm)
         # END-FOR

@@ -59,6 +59,11 @@ class PeakProcessRecord(object):
         self._gaussStdDev = 0.
         self._lorenzFactor = None
 
+        # Gaussian fitting relateds
+        self._gaussFWHM = None
+        self._peakMotorCenter = None
+        self._gaussBackground = None
+
         # peak integration result: all the fitted parameters such as Sigma are in this dictionary
         self._integrationDict = None
         # intensity dictionary BUT NOT USED TO READ OUT
@@ -133,6 +138,14 @@ class PeakProcessRecord(object):
             raise RuntimeError('Unable to calculate average peak center due to value error as {0}.'.format(e))
 
         return err_msg
+
+    @property
+    def gaussian_fwhm(self):
+        """
+        return the gaussian FWHM
+        :return:
+        """
+        return self._gaussFWHM
 
     def generate_integration_report(self):
         """
@@ -440,6 +453,34 @@ class PeakProcessRecord(object):
 
         return
 
+    def set_gaussian_fit_params(self, intensity, fwhm, position, background, intensity_error=None):
+        """
+        set Gaussian fit parameters
+        :param intensity:
+        :param fwhm:
+        :param position:
+        :param background: list as [A0, A1, ...]
+        :return:
+        """
+        # check inputs
+        assert isinstance(intensity, float), 'Intensity {0} must be a float but not a {1}' \
+                                             ''.format(intensity, type(intensity))
+        assert isinstance(fwhm, float), 'Peak FWHM {0} must be a float but not a {1}' \
+                                        ''.format(fwhm, type(fwhm))
+        assert isinstance(position, float), 'Peak center {0} must be a float but not a {1}' \
+                                            ''.format(position, type(position))
+        assert isinstance(background, list), 'Background {0} must be given as a list, i.e., [A0, A1, ...]' \
+                                             ''.format(background)
+
+        # set value
+        self._gaussIntensity = intensity
+        self._gaussStdDev = intensity_error
+        self._gaussFWHM = fwhm
+        self._peakMotorCenter = position
+        self._gaussBackground = background
+
+        return
+
     def set_hkl_np_array(self, hkl):
         """ Set current HKL which may come from any source, such as user, spice or calculation
         :param hkl: 3-item-list or 3-tuple for HKL
@@ -542,6 +583,89 @@ class PeakProcessRecord(object):
         return
 
 
+class SinglePointPeakIntegration(object):
+    """
+    simple class to store the result of a single point measurement peak integration
+    """
+    def __init__(self, exp_number, scan_number, roi_name, pt_number=1):
+        """
+        initialization
+        :param exp_number:
+        :param scan_number:
+        :param roi_name:
+        :param pt_number:
+        """
+        # check inputs
+        check_integer('Experiment number', exp_number)
+        check_integer('Scan number', scan_number)
+        check_integer('Pt number', pt_number)
+        check_string('ROI name', roi_name)
+
+        self._exp_number = exp_number
+        self._scan_number = scan_number
+        self._roi_name = roi_name
+        self._pt_number = pt_number
+
+        self._pt_intensity = None
+        self._peak_intensity = None
+
+        self._vec_x = None
+        self._vec_y = None
+
+        self._gauss_x0 = None
+        self._gauss_sigma = None
+        self._flag_b = None
+
+        return
+
+    def get_gaussian_parameters(self):
+        return self._gauss_x0, self._gauss_sigma, self._pt_intensity, self._flat_b
+
+    def get_pt_intensity(self):
+        # TODO FIXME NEXT
+        return self._pt_intensity
+
+    def set_xy_vector(self, vec_x, vec_y):
+        # TODO FIXME NEXT
+        self._vec_x = vec_x
+        self._vec_y = vec_y
+        return
+
+    def set_fit_cost(self, cost):
+        # TODO FIXME NEXT
+        return
+
+    def set_peak_intensity(self, peak_intensity):
+        # TODO FIXME NEXT
+        self._peak_intensity = peak_intensity
+
+    def set_fit_params(self, x0, sigma, a, b):
+        # TODO FIXME NEXT
+        self._pt_intensity = a
+        self._gauss_x0 = x0
+        self._gauss_sigma = sigma
+        self._flag_b = b
+
+    def set_ref_fwhm(self, ref_fwhm):
+        """
+        set reference scan's FWHM from same/similar 2theta value
+        :param ref_fwhm:
+        :return:
+        """
+        check_float('Reference scan FWHM', ref_fwhm)
+
+        self._ref_scan_fwhm = ref_fwhm
+
+        return
+
+    def get_vec_x_y(self):
+        """
+        get single Pt processed intensity
+        :return:
+        """
+        return self._vec_x, self._vec_y
+
+
 def build_pt_spice_table_row_map(spice_table_ws):
     """
     Build a lookup dictionary for Pt number and row number
@@ -576,3 +700,18 @@ def str_format(float_items):
     # END-FOR
 
     return format_str
+
+
+def check_integer(var_name, var_value):
+    assert isinstance(var_value, int), \
+        '{0} {1} must be an integer but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_float(var_name, var_value):
+    assert isinstance(var_value, int) or isinstance(var_value, float), \
+        '{0} {1} must be a float but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_string(var_name, var_value):
+    assert isinstance(var_value, str), \
+        '{0} {1} must be a string but not a {2}'.format(var_name, var_value, type(var_value))
