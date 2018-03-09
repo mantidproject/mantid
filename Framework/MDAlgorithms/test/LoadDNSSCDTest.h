@@ -553,7 +553,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OmegaOffset", -43.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl1", "1,1,0"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl2", "0,0,1"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("2ThetaLimits", "20.0,55.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoThetaLimits", "20.0,55.0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 

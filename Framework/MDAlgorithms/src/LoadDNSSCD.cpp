@@ -179,8 +179,8 @@ void LoadDNSSCD::init() {
                   "if the goniometer is at zero.");
   declareProperty(
        Kernel::make_unique<ArrayProperty<double>>("hkl1", u0, mustBe3D),
-       "Indices of the vector in reciprocal space in the horizontal plane at angle Omegaoffset,"
-       "if the goniometer is at zero (considered absolute true in UB calculation)");
+       "Indices of the vector in reciprocal space in the horizontal plane at angle Omegaoffset, "
+       "if the goniometer is at zero.");
 
   declareProperty(
        Kernel::make_unique<ArrayProperty<double>>("hkl2", v0, mustBe3D),
@@ -189,14 +189,14 @@ void LoadDNSSCD::init() {
   std::vector<double> ttl(2, 0);
   ttl[1] = 180.0;
   declareProperty(
-       Kernel::make_unique<ArrayProperty<double>>("2ThetaLimits", ttl, mustBe2D),
-       "Range (min, max) of scattering angles (2theta, degrees) to consider."
+       Kernel::make_unique<ArrayProperty<double>>("TwoThetaLimits", ttl, mustBe2D),
+       "Range (min, max) of scattering angles (2theta, in degrees) to consider. "
        "Everything out of this range will be cut.");
 
   declareProperty(
         Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
             "LoadHuberFrom", "", Direction::Input, PropertyMode::Optional),
-        "A table workspace to load a list of raw sample rotation angles."
+        "A table workspace to load a list of raw sample rotation angles. "
         "Huber angles given in the data files will be ignored.");
 
   declareProperty(
@@ -445,7 +445,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> norm_inserter(normws_mdevt_3);
 
   // scattering angle limits
-  std::vector<double> tth_limits = getProperty("2ThetaLimits");
+  std::vector<double> tth_limits = getProperty("TwoThetaLimits");
   double theta_min = tth_limits[0]*deg2rad/2.0;
   double theta_max = tth_limits[1]*deg2rad/2.0;
 
