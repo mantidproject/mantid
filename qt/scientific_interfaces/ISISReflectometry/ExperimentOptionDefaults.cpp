@@ -11,6 +11,8 @@ bool operator==(const ExperimentOptionDefaults &lhs,
          lhs.CAp == rhs.CAp && lhs.CPp == rhs.CPp &&
          lhs.TransRunStartOverlap == rhs.TransRunStartOverlap &&
          lhs.TransRunEndOverlap == rhs.TransRunEndOverlap &&
+         lhs.MomentumTransferMin == rhs.MomentumTransferMin &&
+         lhs.MomentumTransferMax == rhs.MomentumTransferMax &&
          lhs.MomentumTransferStep == rhs.MomentumTransferStep &&
          lhs.ScaleFactor == rhs.ScaleFactor &&
          lhs.ReductionType == rhs.ReductionType &&
@@ -30,6 +32,10 @@ std::ostream &operator<<(std::ostream &os,
     os << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap.get();
   if (defaults.TransRunEndOverlap)
     os << ",\nTransRunEndOverlap: " << defaults.TransRunEndOverlap.get();
+  if (defaults.MomentumTransferMin)
+    os << ",\nMomentumTransferMin: " << defaults.MomentumTransferMin.get();
+  if (defaults.MomentumTransferMax)
+    os << ",\nMomentumTransferMax: " << defaults.MomentumTransferMax.get();
   if (defaults.MomentumTransferStep)
     os << ",\nMomentumTransferStep: " << defaults.MomentumTransferStep.get();
   if (defaults.ScaleFactor)

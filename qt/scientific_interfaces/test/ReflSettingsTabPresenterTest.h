@@ -74,7 +74,9 @@ public:
 
     // Should only call though to the settings presenter for
     // the specified group
-    EXPECT_CALL(presenter_0, getOptionsForAngle(angle)).Times(1);
+    EXPECT_CALL(presenter_0, getOptionsForAngle(angle))
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(presenter_1, getOptionsForAngle(angle)).Times(0);
     EXPECT_CALL(presenter_2, getOptionsForAngle(angle)).Times(0);
     presenter.getOptionsForAngle(0, angle);
@@ -83,7 +85,9 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
     EXPECT_CALL(presenter_0, getOptionsForAngle(angle)).Times(0);
-    EXPECT_CALL(presenter_1, getOptionsForAngle(angle)).Times(1);
+    EXPECT_CALL(presenter_1, getOptionsForAngle(angle))
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(presenter_2, getOptionsForAngle(angle)).Times(0);
     presenter.getOptionsForAngle(1, angle);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
@@ -92,7 +96,9 @@ public:
 
     EXPECT_CALL(presenter_0, getOptionsForAngle(angle)).Times(0);
     EXPECT_CALL(presenter_1, getOptionsForAngle(angle)).Times(0);
-    EXPECT_CALL(presenter_2, getOptionsForAngle(angle)).Times(1);
+    EXPECT_CALL(presenter_2, getOptionsForAngle(angle))
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
     presenter.getOptionsForAngle(2, angle);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));

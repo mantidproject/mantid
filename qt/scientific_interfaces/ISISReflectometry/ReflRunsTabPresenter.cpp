@@ -475,18 +475,15 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 * by the main presenter
 * @return :: Transmission run(s) as a comma-separated list
 */
-QString
-ReflRunsTabPresenter::getOptionsForAngle(const double angle) const {
-  return QString::fromStdString(m_mainPresenter->getOptionsForAngle(
-      m_view->getSelectedGroup(), angle));
+OptionsQMap ReflRunsTabPresenter::getOptionsForAngle(const double angle) const {
+  return m_mainPresenter->getOptionsForAngle(m_view->getSelectedGroup(), angle);
 }
 
 /** Check whether there are per-angle transmission runs in the settings
  * @return :: true if there are per-angle transmission runs
  */
 bool ReflRunsTabPresenter::hasPerAngleOptions() const {
-  return m_mainPresenter->hasPerAngleOptions(
-      m_view->getSelectedGroup());
+  return m_mainPresenter->hasPerAngleOptions(m_view->getSelectedGroup());
 }
 
 /** Tells the view to update the enabled/disabled state of all relevant widgets

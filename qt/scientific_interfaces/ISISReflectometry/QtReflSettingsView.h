@@ -56,7 +56,8 @@ public:
   /// Return selected analysis mode
   std::string getAnalysisMode() const override;
   /// Return transmission runs
-  std::map<std::string, std::string> getPerAngleOptions() const override;
+  std::map<std::string, MantidQt::MantidWidgets::DataProcessor::OptionsQMap>
+  getPerAngleOptions() const override;
   /// Return start overlap for transmission runs
   std::string getStartOverlap() const override;
   /// Return end overlap for transmission runs
@@ -71,10 +72,6 @@ public:
   std::string getCAp() const override;
   /// Return Cpp
   std::string getCPp() const override;
-  /// Return momentum transfer limits
-  std::string getMomentumTransferStep() const override;
-  /// Return scale factor
-  std::string getScaleFactor() const override;
   /// Return integrated monitors option
   std::string getIntMonCheck() const override;
   /// Return monitor integral wavelength min
@@ -140,7 +137,7 @@ public slots:
 private:
   /// Initialise the interface
   void initLayout();
-  void initPerAngleOptionsTable();
+  void initOptionsTable();
   void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerInstrumentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
@@ -164,6 +161,12 @@ private:
   void setText(QLineEdit &lineEdit, boost::optional<int> value);
   void setText(QLineEdit &lineEdit, boost::optional<double> value);
   void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               double value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               boost::optional<double> value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               const QString &value);
   void setChecked(QCheckBox &checkBox, bool checked);
   std::string getText(QLineEdit const &lineEdit) const;
   std::string getText(QComboBox const &box) const;
@@ -176,6 +179,12 @@ private:
   mutable bool m_isPolCorrEnabled;
   /// The stitch params entry widget
   MantidQt::MantidWidgets::HintingLineEdit *m_stitchEdit;
+  /// The column headings in the options table
+  QStringList m_columnHeadings;
+  /// The algorithm properties relating to the options table
+  /// @todo Could we use the data processor whitelist to get the properties
+  /// instead?
+  QStringList m_columnProperties;
 };
 } // namespace Mantid
 } // namespace CustomInterfaces

@@ -65,8 +65,9 @@ void ReflSettingsTabPresenter::onReductionPaused(int group) {
 * @param angle :: the run angle to look up transmission runs for
 * @return :: Values passed for 'Transmission run(s)'
 */
-std::string ReflSettingsTabPresenter::getOptionsForAngle(
-    int group, const double angle) const {
+OptionsQMap
+ReflSettingsTabPresenter::getOptionsForAngle(int group,
+                                             const double angle) const {
 
   return m_settingsPresenters.at(group)->getOptionsForAngle(angle);
 }

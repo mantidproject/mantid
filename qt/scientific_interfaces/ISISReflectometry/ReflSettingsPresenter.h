@@ -53,10 +53,10 @@ public:
   void setInstrumentName(const std::string &instName) override;
 
   /// Returns per-angle values passed for 'Transmission run(s)'
-  std::string
+  MantidWidgets::DataProcessor::OptionsQMap
   getOptionsForAngle(const double angleToFind) const override;
   /// Returns default values passed for 'Transmission run(s)'
-  std::string getDefaultOptions() const;
+  MantidWidgets::DataProcessor::OptionsQMap getDefaultOptions() const;
   /// Whether per-angle transmission runs are specified
   bool hasPerAngleOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'

@@ -63,8 +63,6 @@ public:
     onCallReturnDefaultOverlap(mockView);
     onCallReturnDefaultPolarisationCorrections(mockView);
     onCallReturnDefaultSummationSettings(mockView);
-    onCallReturnDefaultMomentumTransferStep(mockView);
-    onCallReturnDefaultScaleFactor(mockView);
   }
 
   void onCallReturnDefaultAnalysisMode(MockSettingsView &mockView) {
@@ -74,15 +72,7 @@ public:
 
   void onCallReturnDefaultOptions(MockSettingsView &mockView) {
     ON_CALL(mockView, getPerAngleOptions())
-        .WillByDefault(Return(std::map<std::string, std::string>()));
-  }
-
-  void onCallReturnDefaultScaleFactor(MockSettingsView &mockView) {
-    ON_CALL(mockView, getScaleFactor()).WillByDefault(Return(""));
-  }
-
-  void onCallReturnDefaultMomentumTransferStep(MockSettingsView &mockView) {
-    ON_CALL(mockView, getMomentumTransferStep()).WillByDefault(Return(""));
+        .WillByDefault(Return(std::map<std::string, OptionsQMap>()));
   }
 
   void onCallReturnDefaultOverlap(MockSettingsView &mockView) {
@@ -315,36 +305,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testGetScaleFactorOption() {
-    NiceMock<MockSettingsView> mockView;
-    onCallReturnDefaultSettings(mockView);
-    auto presenter = makeReflSettingsPresenter(&mockView);
-
-    EXPECT_CALL(mockView, getScaleFactor())
-        .Times(AtLeast(1))
-        .WillOnce(Return("2"));
-
-    auto options = presenter.getReductionOptions();
-    TS_ASSERT_EQUALS(variantToString(options["ScaleFactor"]), "2");
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
-  void testGetMomentumTransferStepOption() {
-    NiceMock<MockSettingsView> mockView;
-    onCallReturnDefaultSettings(mockView);
-    auto presenter = makeReflSettingsPresenter(&mockView);
-
-    EXPECT_CALL(mockView, getMomentumTransferStep())
-        .Times(AtLeast(1))
-        .WillOnce(Return("-0.02"));
-
-    auto options = presenter.getReductionOptions();
-    TS_ASSERT_EQUALS(variantToString(options["MomentumTransferStep"]), "-0.02");
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
   void testGetProcessingInstructionsOption() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
@@ -387,8 +347,9 @@ public:
 
     // Default transmission runs are specified with a single
     // entry with an empty angle as the key
-    std::map<std::string, std::string> transmissionRunsMap = {
-        {"", "INTER00013463,INTER00013464"}};
+    OptionsQMap opts;
+    opts["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
+    std::map<std::string, OptionsQMap> transmissionRunsMap = {{"", opts}};
 
     EXPECT_CALL(mockView, getPerAngleOptions())
         .Times(AtLeast(1))
@@ -603,8 +564,6 @@ public:
     EXPECT_CALL(mockView, getCAp()).Times(Exactly(1));
     EXPECT_CALL(mockView, getCPp()).Times(Exactly(1));
     EXPECT_CALL(mockView, getPolarisationCorrections()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getScaleFactor()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getPerAngleOptions()).Times(Exactly(1));
@@ -623,8 +582,9 @@ public:
 
     // Default transmission runs are specified with a single
     // entry with an empty angle as the key
-    std::map<std::string, std::string> transmissionRunsMap = {
-        {"", "INTER00013463,INTER00013464"}};
+    OptionsQMap opts;
+    opts["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
+    std::map<std::string, OptionsQMap> transmissionRunsMap = {{"", opts}};
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(1)
@@ -634,7 +594,7 @@ public:
         .WillOnce(Return(transmissionRunsMap));
 
     auto result = presenter.getDefaultOptions();
-    TS_ASSERT_EQUALS(result, "INTER00013463,INTER00013464");
+    TS_ASSERT_EQUALS(result, transmissionRunsMap[""]);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -644,8 +604,12 @@ public:
     auto presenter = makeReflSettingsPresenter(&mockView);
 
     // Set up a table with transmission runs for 2 different angles
-    std::map<std::string, std::string> transmissionRunsMap = {
-        {"0.7", "INTER00013463,INTER00013464"}, {"2.33", "INTER00013463"}};
+    OptionsQMap opts1;
+    opts1["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
+    OptionsQMap opts2;
+    opts2["FirstTransmissionRun"] = "INTER00013463R00013464";
+    std::map<std::string, OptionsQMap> transmissionRunsMap = {{"0.7", opts1},
+                                                              {"2.33", opts2}};
 
     // Test looking up transmission runs based on the angle. It has
     // quite a generous tolerance so the angle does not have to be
@@ -658,9 +622,9 @@ public:
         .WillRepeatedly(Return(transmissionRunsMap));
 
     auto result = presenter.getOptionsForAngle(0.69);
-    TS_ASSERT_EQUALS(result, "INTER00013463,INTER00013464");
+    TS_ASSERT_EQUALS(result, transmissionRunsMap["0.7"]);
     result = presenter.getOptionsForAngle(2.34);
-    TS_ASSERT_EQUALS(result, "INTER00013463");
+    TS_ASSERT_EQUALS(result, transmissionRunsMap["2.33"]);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

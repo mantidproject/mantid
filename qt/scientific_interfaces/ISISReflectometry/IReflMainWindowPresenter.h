@@ -50,8 +50,8 @@ public:
   virtual void notifyReductionResumed(int group) = 0;
 
   /// Transmission runs for a specific run angle
-  virtual std::string getOptionsForAngle(int group,
-                                                  const double angle) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(int group, const double angle) const = 0;
   /// Whether there are per-angle transmission runs specified
   virtual bool hasPerAngleOptions(int group) const = 0;
   /// Pre-processing

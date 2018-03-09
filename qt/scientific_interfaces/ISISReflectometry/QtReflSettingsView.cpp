@@ -1,5 +1,6 @@
 #include "QtReflSettingsView.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include "ReflSettingsPresenter.h"
 #include <QMessageBox>
@@ -10,6 +11,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -36,7 +38,7 @@ Initialise the Interface
 */
 void QtReflSettingsView::initLayout() {
   m_ui.setupUi(this);
-  initPerAngleOptionsTable();
+  initOptionsTable();
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
@@ -52,12 +54,17 @@ void QtReflSettingsView::initLayout() {
           SLOT(setDetectorCorrectionEnabled(bool)));
 }
 
-void QtReflSettingsView::initPerAngleOptionsTable() {
-  auto table = m_ui.transmissionRunsTable;
-  const auto columnHeadings = QStringList({"Angle", "Transmission Run(s)"});
-  table->setColumnCount(columnHeadings.size());
-  table->setHorizontalHeaderLabels(columnHeadings);
+void QtReflSettingsView::initOptionsTable() {
+  auto table = m_ui.optionsTable;
+  m_columnHeadings = QStringList(
+      {"Angle", "Transmission Run(s)", "Q min", "Q max", "dQ/Q", "Scale"});
+  m_columnProperties = QStringList(
+      {"ThetaIn", "FirstTransmissionRun", "MomentumTransferMin",
+       "MomentumTransferMax", "MomentumTransferStep", "ScaleFactor"});
+  table->setColumnCount(m_columnHeadings.size());
+  table->setHorizontalHeaderLabels(m_columnHeadings);
   table->setColumnWidth(0, 40);
+  table->setColumnWidth(1, 150);
   auto header = table->horizontalHeader();
   header->setStretchLastSection(true);
   const int typicalNumberOfRows = 3;
@@ -139,8 +146,7 @@ void QtReflSettingsView::registerExperimentSettingsWidgets(
     Mantid::API::IAlgorithm_sptr alg) {
   connectSettingsChange(*m_ui.expSettingsGroup);
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
-  registerSettingWidget(*m_ui.transmissionRunsTable, "FirstTransmissionRun",
-                        alg);
+  registerSettingWidget(*m_ui.optionsTable, "FirstTransmissionRun", alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
@@ -148,9 +154,6 @@ void QtReflSettingsView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.CAlphaEdit, "CAlpha", alg);
   registerSettingWidget(*m_ui.CApEdit, "CAp", alg);
   registerSettingWidget(*m_ui.CPpEdit, "CPp", alg);
-  registerSettingWidget(*m_ui.momentumTransferStepEdit, "MomentumTransferStep",
-                        alg);
-  registerSettingWidget(*m_ui.scaleFactorEdit, "ScaleFactor", alg);
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
 }
 
@@ -227,9 +230,14 @@ void QtReflSettingsView::setExpDefaults(ExperimentOptionDefaults defaults) {
   setText(*m_ui.CPpEdit, defaults.CPp);
   setText(*m_ui.startOverlapEdit, defaults.TransRunStartOverlap);
   setText(*m_ui.endOverlapEdit, defaults.TransRunEndOverlap);
-  setText(*m_ui.momentumTransferStepEdit, defaults.MomentumTransferStep);
-  setText(*m_ui.scaleFactorEdit, defaults.ScaleFactor);
   setText(stitchOptionsLineEdit(), defaults.StitchParams);
+  setText(*m_ui.optionsTable, "MomentumTransferMin",
+          defaults.MomentumTransferMin);
+  setText(*m_ui.optionsTable, "MomentumTransferMax",
+          defaults.MomentumTransferMax);
+  setText(*m_ui.optionsTable, "MomentumTransferStep",
+          defaults.MomentumTransferStep);
+  setText(*m_ui.optionsTable, "ScaleFactor", defaults.ScaleFactor);
 }
 
 void QtReflSettingsView::setSelected(QComboBox &box, std::string const &str) {
@@ -272,6 +280,45 @@ void QtReflSettingsView::setText(QLineEdit &lineEdit, int value) {
 void QtReflSettingsView::setText(QLineEdit &lineEdit, std::string const &text) {
   auto textAsQString = QString::fromStdString(text);
   lineEdit.setText(textAsQString);
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 boost::optional<double> value) {
+  if (value)
+    setText(table, propertyName, value.get());
+  else
+    setText(table, propertyName, "");
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 double value) {
+  auto valueAsString = QString::number(value);
+  setText(table, propertyName, valueAsString);
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 const QString &value) {
+  // find the column index for this property
+  int col = 0;
+  for (; col < m_columnProperties.size(); ++col) {
+    if (m_columnProperties[col].toStdString() == propertyName)
+      break;
+  }
+  // Do nothing if column was not found
+  if (col == m_columnProperties.size())
+    return;
+  // Set the value in this column for the first row. (We don't really know
+  // which row(s) the user might want updated so for now keep it simple.)
+  const int row = 0;
+  auto cell = table.item(row, col);
+  if (!cell) {
+    cell = new QTableWidgetItem(tr("%1").arg((row + 1) * (col + 1)));
+    table.setItem(row, col, cell);
+  }
+  cell->setText(value);
 }
 
 void QtReflSettingsView::setChecked(QCheckBox &checkBox, bool checked) {
@@ -347,10 +394,10 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
 /** Add a new row to the transmission runs table
  * */
 void QtReflSettingsView::addTransmissionTableRow() {
-  auto numRows = m_ui.transmissionRunsTable->rowCount() + 1;
-  m_ui.transmissionRunsTable->setRowCount(numRows);
+  auto numRows = m_ui.optionsTable->rowCount() + 1;
+  m_ui.optionsTable->setRowCount(numRows);
   // Select the first cell in the new row
-  m_ui.transmissionRunsTable->setCurrentCell(numRows - 1, 0);
+  m_ui.optionsTable->setCurrentCell(numRows - 1, 0);
 }
 
 std::string QtReflSettingsView::getText(QLineEdit const &lineEdit) const {
@@ -443,29 +490,38 @@ std::string QtReflSettingsView::getAnalysisMode() const {
 /** Return selected transmission run(s)
 * @return :: selected transmission run(s)
 */
-std::map<std::string, std::string>
+std::map<std::string, OptionsQMap>
 QtReflSettingsView::getPerAngleOptions() const {
 
-  const auto &table = m_ui.transmissionRunsTable;
+  const auto &table = m_ui.optionsTable;
 
   // Check that we have 2 columns (angle and runs)
-  if (table->columnCount() != 2)
-    throw std::runtime_error("Transmission runs table must have 2 columns");
+  if (table->columnCount() < 2)
+    throw std::runtime_error(
+        "Transmission runs table must have at least 2 columns");
 
   // Return values in a map
-  std::map<std::string, std::string> results;
+  std::map<std::string, OptionsQMap> results;
 
   for (auto row = 0; row < table->rowCount(); ++row) {
     auto angleItem = table->item(row, 0);
-    auto runsItem = table->item(row, 1);
-    // Extract the string values
     auto angle = angleItem ? angleItem->text() : "";
-    auto runs = runsItem ? runsItem->text() : "";
-    // Skip empty rows
-    if (angle.isEmpty() && runs.isEmpty())
-      continue;
-    // Add to the map
-    results[angle.toStdString()] = runs.toStdString();
+    bool emptyRow = angle.isEmpty();
+
+    // Create the options map for this angle
+    OptionsQMap rowOptions;
+    for (int col = 1; col < table->columnCount(); ++col) {
+      auto colItem = table->item(row, col);
+      auto colValue = colItem ? colItem->text() : "";
+      if (!colValue.isEmpty()) {
+        emptyRow = false;
+        // Add value to the row options
+        rowOptions[m_columnProperties[col]] = colValue;
+      }
+    }
+    // Add row options to the result
+    if (!emptyRow)
+      results[angle.toStdString()] = rowOptions;
   }
   return results;
 }
@@ -517,20 +573,6 @@ std::string QtReflSettingsView::getCAp() const {
 */
 std::string QtReflSettingsView::getCPp() const {
   return getText(*m_ui.CPpEdit);
-}
-
-/** Return momentum transfer limits
-* @return :: momentum transfer limits
-*/
-std::string QtReflSettingsView::getMomentumTransferStep() const {
-  return getText(*m_ui.momentumTransferStepEdit);
-}
-
-/** Return scale factor
-* @return :: scale factor
-*/
-std::string QtReflSettingsView::getScaleFactor() const {
-  return getText(*m_ui.scaleFactorEdit);
 }
 
 /** Return integrated monitors option

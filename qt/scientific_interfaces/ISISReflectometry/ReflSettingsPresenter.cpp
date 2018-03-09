@@ -206,9 +206,6 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     addIfNotEmpty(options, "CPp", m_view->getCPp());
     addIfNotEmpty(options, "PolarizationAnalysis",
                   m_view->getPolarisationCorrections());
-    addIfNotEmpty(options, "ScaleFactor", m_view->getScaleFactor());
-    addIfNotEmpty(options, "MomentumTransferStep",
-                  m_view->getMomentumTransferStep());
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
 
@@ -226,8 +223,10 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     // provide per-angle transmission runs, but these need to be
     // requested on a per-row basis when we know what the angle is
     // for that row.
-    auto transmissionRuns = getDefaultOptions();
-    addIfNotEmpty(options, "FirstTransmissionRun", transmissionRuns);
+    auto defaultOptions = getDefaultOptions();
+    for (auto iter = defaultOptions.begin(); iter != defaultOptions.end();
+         ++iter)
+      addIfNotEmpty(options, iter.key(), iter.value().toString());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -285,9 +284,9 @@ bool ReflSettingsPresenter::hasPerAngleOptions() const {
 * @return :: the transmission run(s) as a string of comma-separated values
 * @throws :: if the settings the user entered are invalid
 */
-std::string ReflSettingsPresenter::getDefaultOptions() const {
+OptionsQMap ReflSettingsPresenter::getDefaultOptions() const {
   if (!m_view->experimentSettingsEnabled())
-    return std::string();
+    return OptionsQMap();
 
   // Values are entered as a map of angle to transmission runs. Loop
   // through them, checking for the required angle
@@ -306,16 +305,16 @@ std::string ReflSettingsPresenter::getDefaultOptions() const {
   }
 
   // If not found, return an empty string
-  return std::string();
+  return OptionsQMap();
 }
 
 /** Gets the user-specified transmission runs from the view
 * @param angleToFind :: the run angle that transmission runs are valid for
 * @return :: the transmission run(s) as a string of comma-separated values
 */
-std::string ReflSettingsPresenter::getOptionsForAngle(
-    const double angleToFind) const {
-  std::string result;
+OptionsQMap
+ReflSettingsPresenter::getOptionsForAngle(const double angleToFind) const {
+  OptionsQMap result;
 
   if (!hasPerAngleOptions())
     return result;
@@ -331,7 +330,7 @@ std::string ReflSettingsPresenter::getOptionsForAngle(
   double smallestDist = std::numeric_limits<double>::max();
   for (auto kvp : runsPerAngle) {
     auto angleStr = kvp.first;
-    auto runsStr = kvp.second;
+    auto values = kvp.second;
 
     // Convert the angle to a double
     double angle = 0.0;
@@ -346,7 +345,7 @@ std::string ReflSettingsPresenter::getOptionsForAngle(
     double dist = std::abs(angle - angleToFind);
     if (dist <= tolerance) {
       if (dist < smallestDist) {
-        result = runsStr;
+        result = values;
         smallestDist = dist;
       }
     }
@@ -409,6 +408,8 @@ void ReflSettingsPresenter::getExpDefaults() {
   defaults.CAp = value_or(parameters.optional<std::string>("cAp"), "1");
   defaults.CPp = value_or(parameters.optional<std::string>("cPp"), "1");
 
+  defaults.MomentumTransferMin = parameters.optional<double>("Q min");
+  defaults.MomentumTransferMax = parameters.optional<double>("Q max");
   defaults.MomentumTransferStep = parameters.optional<double>("dQ/Q");
   defaults.ScaleFactor = parameters.optional<double>("Scale");
   defaults.StitchParams = parameters.optional<std::string>("Stitch1DMany");
