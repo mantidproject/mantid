@@ -514,8 +514,10 @@ QtReflSettingsView::getPerAngleOptions() const {
         rowOptions[m_columnProperties[col]] = colValue;
       }
     }
-    // Add row options to the result
-    if (!emptyRow)
+    // Add the row options to the result. We could do with a better way to
+    // handle duplicate keys but for now it's ok to just ignore subsequent rows
+    // with the same angle
+    if (!emptyRow && !results.count(angle.toStdString()))
       results[angle.toStdString()] = rowOptions;
   }
   return results;
