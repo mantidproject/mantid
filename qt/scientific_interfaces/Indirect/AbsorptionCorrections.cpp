@@ -251,8 +251,7 @@ UserInputValidator AbsorptionCorrections::doValidation() {
   if (useCan) {
     try {
       Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-    }
-    catch (std::runtime_error &ex) {
+    } catch (std::runtime_error &ex) {
       UNUSED_ARG(ex);
       uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
       uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
