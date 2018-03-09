@@ -328,6 +328,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.actionData_Downloading, QtCore.SIGNAL('triggered()'),
                      self.menu_download_data)
         self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
+        self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
 
         # Validator ... (NEXT)
 
@@ -3690,6 +3691,17 @@ class MainWindow(QtGui.QMainWindow):
                                                               det_sample_distance=det_sample_dist,
                                                               wave_length=wave_length)
         # END-IF
+
+        return
+
+    def menu_sort_survey_2theta(self):
+        """
+        sort survey table by 2theta
+        :return:
+        """
+        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan=0, end_scan=100000,
+                                                        min_counts=0., max_counts=10000000000.,
+                                                        sort_by_column='2theta', sort_order=0)
 
         return
 

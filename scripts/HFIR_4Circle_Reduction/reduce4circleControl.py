@@ -28,7 +28,7 @@ import numpy
 
 from HFIR_4Circle_Reduction.fourcircle_utility import *
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
-from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
+from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord, SinglePointPeakIntegration
 from HFIR_4Circle_Reduction import fputility
 from HFIR_4Circle_Reduction import project_manager
 from HFIR_4Circle_Reduction import peak_integration_utility
@@ -175,6 +175,10 @@ class CWSCDReductionControl(object):
         self._refWorkspaceForMask = None
         # Region of interest: key = roi name, value = RegionOfInterest instance
         self._roiDict = dict()
+
+        # single point peak integration related
+        self._two_theta_scan_dict = dict()
+        self._scan_2theta_set = set()
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface", "4-Circle Reduction", False)
@@ -975,62 +979,61 @@ class CWSCDReductionControl(object):
         :param excluded_scans:
         :return:
         """
-        # check inputs..
+        # check inputs.. TODO NOW
 
         # get the list of scans in the memory
-        self._two_theta_scan_dict = dict()
-        self._scan_2theta_set = set()
+        have_change = False
         for scan_sum in self._scanSummaryList:
             # get scan number
             scan_number = scan_sum[1]
             pt_number = scan_sum[2]
+            if scan_number in self._scan_2theta_set:
+                # already parsed
+                continue
+
+            have_change = True
             # get 2theta
-            two_theta = float(self.get_sample_log_value(exp_number, scan_number, pt_number, '2theta'))
-            self._two_theta_scan_dict[two_theta] = scan_number
+            two_theta_i = float(self.get_sample_log_value(exp_number, scan_number, pt_number, '2theta'))
+            self._two_theta_scan_dict[two_theta_i] = scan_number
             self._scan_2theta_set.add(scan_number)
         # END-FOR
 
-        # sort 2thetas
+        # check as an exception whether there are multiple scans with exactly same two theta
+        if len(self._two_theta_scan_dict) != len(self._scan_2theta_set):
+            raise RuntimeError('Exception case: scans with exactly same 2theta!  FindScanBy2Theta fails!')
+
+        # sort 2thetas and index two thetas within a certain range
         two_theta_list = numpy.array(sorted(self._two_theta_scan_dict.keys()))
 
         min_2theta = two_theta - resolution
         max_2theta = two_theta + resolution
 
-        min_index = bisect.bisect_left(two_theta_list, min_2theta) - 1
+        min_index = bisect.bisect_left(two_theta_list, min_2theta)
         max_index = bisect.bisect_left(two_theta_list, max_2theta)
 
-        print ('[DB..BAT] 2-thetas in range: {0}'.format(two_theta_list[min_index:max_index]))
+        # debug output
+        if have_change:
+            print('[DB...BAT] Dict size = {0}; Scan set size = {1}'.format(len(self._two_theta_scan_dict),
+                                                                           len(self._scan_2theta_set)))
+            print('[DB...BAT] 2theta list: {0}'.format(two_theta_list))
+
+        print ('[DB..BAT] Input 2theta = {0}; 2-thetas in range: {1}'
+               ''.format(two_theta, two_theta_list[min_index:max_index]))
+        print ('[DB...BAT] index range: {0}, {1}'.format(min_index, max_index))
 
         scans_set = set([self._two_theta_scan_dict[two_theta] for two_theta in two_theta_list[min_index:max_index]])
+        print ('[DB...BAT] Find scans: {0}  Excluded scans {1}'.format(scans_set, set(excluded_scans)))
         scans_set = scans_set - set(excluded_scans)
+        print ('[DB...BAT] Find scans: {0}'.format(scans_set))
 
+        # matched scans by removing single-pt scans
+        matched_scans = list(scans_set)
+        for scan_number in matched_scans:
+            spice_table = self._get_spice_workspace(exp_number, scan_number)
+            if spice_table.rowCount() == 1:
+                matched_scans.remove(scan_number)
 
-        # TODO FIXME NOW2
-        """
-        param_dict = None
-
-        # get calculated 2theta
-        in_mem_2theta_list = sorted(self._2thetaLookupTable.keys())
-
-        # locate two_theta
-        index = bisect.bisect_left(in_mem_2theta_list, two_theta)
-        nearest_2theta = None
-        if index > 0 and two_theta - in_mem_2theta_list[index-1] < resolution:
-            # close to left side of input
-            nearest_2theta = in_mem_2theta_list[index-1]
-        elif index < len(in_mem_2theta_list) and in_mem_2theta_list[index] - two_theta < resolution:
-            # close to right side of input
-            nearest_2theta = in_mem_2theta_list[index]
-        # END-IF-ELSE
-
-        print ('[DB...BAT] List of integrated peaks 2theta: {0}.  Try to find a match for {1}'
-               ''.format(in_mem_2theta_list, two_theta))
-
-                        if ref_exp_number != self._exp_number:
-                    raise RuntimeError('It is very wrong to have two different experiment number ({0} vs {1})!'
-                                       ''.format(ref_exp_number, self._exp_number))
-        """
-        return list(scans_set)
+        return matched_scans
 
     def get_experiment(self):
         """
@@ -1156,6 +1159,7 @@ class CWSCDReductionControl(object):
         # TODO FIXME THIS IS A HACK!
         if log_name == '2theta':
             spice_table_name = get_spice_table_name(exp_number, scan_number)
+            print ('[DB...BAT] Scan {0} Spice Table {1}'.format(scan_number, spice_table_name))
             spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
             log_value = spice_table_ws.toDict()[log_name][0]
 
@@ -1173,23 +1177,6 @@ class CWSCDReductionControl(object):
             log_value = md_ws.getExperimentInfo(0).run().getProperty(log_name).value
 
         return log_value
-
-    def get_integrated_scan_params(self, exp_number, scan_number):
-        """ for single Pt-scan peak integration
-        :param exp_number:
-        :param two_theta:
-        :param resolution:
-        :return:
-        """
-        peak_info = self.get_peak_info(exp_number, scan_number)
-        if peak_info is None:
-            raise NotImplementedError('Peak info cannot be None.... Keys: {0}'.format(self._myPeakInfoDict.keys()))
-
-        # TODO FIXME NOW2
-
-        # END-IF
-
-        return peak_info
 
     def get_merged_data(self, exp_number, scan_number, pt_number_list):
         """
@@ -1730,7 +1717,7 @@ class CWSCDReductionControl(object):
         # value_list[2] = cost
         # value_list[3] = params  # as x0, sigma, a, b
 
-        integrate_record = peak_integration_utility.SinglePointPeakIntegration(exp_number, scan_number, roi_name,
+        integrate_record = SinglePointPeakIntegration(exp_number, scan_number, roi_name,
                                                                                pt_number)
         integrate_record.set_xy_vector(vec_x, vec_y)
         integrate_record.set_fit_cost(cost)
@@ -3224,7 +3211,7 @@ class CWSCDReductionControl(object):
             # Load SPICE file and retrieve information
             spice_table_ws_name = fourcircle_utility.get_spice_table_name(exp_number, scan_number)
             try:
-                info_list, error_i = self.process_spice_table(scan_number, spice_file_name, spice_table_ws_name)
+                info_list, error_i = self.retrieve_scan_info_spice(scan_number, spice_file_name, spice_table_ws_name)
                 scan_sum_list.append(info_list)
                 error_message += error_i
                 spice_table_name_list.append(spice_table_ws_name)
@@ -3252,7 +3239,7 @@ class CWSCDReductionControl(object):
         return True, scan_sum_list, error_message
 
     @staticmethod
-    def process_spice_table(scan_number, spice_file_name, spice_table_ws_name):
+    def retrieve_scan_info_spice(scan_number, spice_file_name, spice_table_ws_name):
         """
         process SPICE table
         :param scan_number:
@@ -3295,6 +3282,7 @@ class CWSCDReductionControl(object):
             tsample_col_index = col_name_list.index('tsample')
         else:
             tsample_col_index = None
+        # 2theta
 
         # do some simple statistics
         max_count = 0
@@ -3334,7 +3322,7 @@ class CWSCDReductionControl(object):
 
         # appending to list
         info_list = [max_count, scan_number, max_pt, max_h, max_k, max_l,
-                     q_range, max_tsample]
+                     q_range, max_tsample, two_theta]
 
         return info_list, error_message
 

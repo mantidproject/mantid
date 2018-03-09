@@ -48,6 +48,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
+        self.ui.actionSelect_All.triggered.connect(self.menu_table_select_all)
+        self.ui.actionDe_select_All.triggered.connect(self.menu_table_select_none)
 
         # class variable
         self._working_dir = os.path.expanduser('~')
@@ -93,18 +95,23 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         if len(roi_name) == 0:
             raise RuntimeError('No ROI is selected or set')
 
-        for scan_number, pt_number in self.ui.tableView_summary.get_scan_pt_list():
-            # integration on image for I
+        for row_number in range(self.ui.tableView_summary.rowCount()):
+            # integrate counts on detector
+            scan_number = self.ui.tableView_summary.get_scan_number(row_number)
+            pt_number = 1
             peak_height = self._controller.integrate_detector_image(self._exp_number, scan_number, pt_number, roi_name,
                                                                     fit_gaussian=True)
+            # add to table
+            self.ui.tableView_summary.set_peak_height(scan_number, pt_number, peak_height)
             print ('[DB...BAT] SinglePt-Gaussian-Intensity = {0}'.format(peak_height))
 
             # calculate peak intensity
+            ref_fwhm = self.ui.tableView_summary.get_fwhm(row_number)
+
             intensity = self._controller.calculate_intensity_single_pt(self._exp_number, scan_number, pt_number,
-                                                                       roi_name)
+                                                                       roi_name, ref_fwhm=ref_fwhm)
 
             # add to table
-            self.ui.tableView_summary.set_peak_height(scan_number, pt_number, peak_height)
             self.ui.tableView_summary.set_intensity(scan_number, pt_number, intensity)
         # END-FOR
 
@@ -192,39 +199,46 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             if fwhm_i is not None and fwhm_i > 1.E-10:
                 continue
 
-            # get scan number
-            scan_number = self.ui.tableView_summary.get_scan_number(row_index)
-            # get 2theta and set 2theta
-            two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, 1,
-                                                              '2theta')
-
             # get corresponding strong nuclear peak (complete scan number)
-            reference_scan_number = self.ui.tableView_summary.get_reference_scans(row_index)[0]
-            if reference_scan_number is None:
+            ref_scans = self.ui.tableView_summary.get_reference_scans(row_index)
+            if ref_scans is None:
+                # get scan number
+                scan_number = self.ui.tableView_summary.get_scan_number(row_index)
+                # get 2theta and set 2theta
+                two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, 1,
+                                                                  '2theta')
+
                 # locate reference scan number
                 complete_peak_scan_numbers = self._controller.find_scans_by_2theta(self._exp_number,
-                                                                                   two_theta, resolution=0.01,
-                                                                                   exclude_scans=[scan_number])
+                                                                                   two_theta, resolution=0.05,
+                                                                                   excluded_scans=[scan_number])
 
                 if len(complete_peak_scan_numbers) == 0:
                     # no match.  stop!
                     self.ui.tableView_summary.set_reference_scan_numbers(row_index, 'No match')
                     continue
                 else:
-                    self.ui.tableView_summary.set_ref_scan(row_index, complete_peak_scan_numbers)
+                    self.ui.tableView_summary.set_reference_scan_numbers(row_index, complete_peak_scan_numbers)
                     reference_scan_number = complete_peak_scan_numbers[0]
                 # END-IF
+            else:
+                reference_scan_number = ref_scans[0]
             # END-IF
 
             # get integrated scan's FWHM
             peak_info = \
-                self._controller.get_integrated_scan_params(self._exp_number, reference_scan_number)
-
-            if peak_info.gaussian_fwhm is not None:
+                self._controller.get_peak_info(self._exp_number, reference_scan_number)
+            if peak_info is not None and peak_info.gaussian_fwhm is not None:
                 self.ui.tableView_summary.set_fwhm(row_index, peak_info.gaussian_fwhm)
         # END-FOR
 
         return
+
+    def menu_table_select_all(self):
+        self.ui.tableView_summary.select_all_rows(True)
+
+    def menu_table_select_none(self):
+        self.ui.tableView_summary.select_all_rows(False)
 
     def add_scans(self, scan_pt_list):
         """

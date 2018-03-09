@@ -5,6 +5,7 @@ import numpy
 import sys
 from HFIR_4Circle_Reduction import fourcircle_utility
 from HFIR_4Circle_Reduction import guiutility
+from PyQt4 import QtCore
 
 import HFIR_4Circle_Reduction.NTableWidget as tableBase
 
@@ -1070,6 +1071,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
                    ('L', 'float'),
                    ('Q-range', 'float'),
                    ('Sample Temp', 'float'),
+                   ('2theta', 'float'),
                    ('Selected', 'checkbox')]
 
     def __init__(self, parent):
@@ -1088,6 +1090,8 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self._colIndexH = None
         self._colIndexK = None
         self._colIndexL = None
+
+        self._colIndex2Theta = None
 
         return
 
@@ -1307,6 +1311,8 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self._colIndexK = ScanSurveyTable.Table_Setup.index(('K', 'float'))
         self._colIndexL = ScanSurveyTable.Table_Setup.index(('L', 'float'))
 
+        self._colIndex2Theta = ScanSurveyTable.Table_Setup.index(('2theta', 'float'))
+
         return
 
     def reset(self):
@@ -1383,6 +1389,10 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         # register
         self._pt_row_dict[scan_number, pt_number] = self.rowCount() - 1
 
+        # set scan editable
+        item_i = self.item(self.rowCount()-1, self._ref_scans_index)
+        item_i.setFlags(item_i.flags() | QtCore.Qt.ItemIsEditable)
+
         return
 
     def get_reference_scans(self, row_index):
@@ -1395,7 +1405,11 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         scans_str = self.get_cell_value(row_index, self._ref_scans_index)
 
         # no matched scan can be found!
-        if scans_str == 'No match':
+        if scans_str is None:
+            return None
+        elif scans_str == 'No match':
+            return None
+        elif scans_str == '':
             return None
 
         # split and parse to integers

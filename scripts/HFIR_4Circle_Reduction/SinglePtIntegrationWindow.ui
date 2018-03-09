@@ -171,9 +171,27 @@
      <string>Quit</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>Table View</string>
+    </property>
+    <addaction name="actionSelect_All"/>
+    <addaction name="actionDe_select_All"/>
+   </widget>
+   <addaction name="menuView"/>
    <addaction name="menuQuit"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+  </action>
+  <action name="actionDe_select_All">
+   <property name="text">
+    <string>De-select All</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
