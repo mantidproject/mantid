@@ -20,20 +20,41 @@ using MantidQt::MantidWidgets::MuonFitPropertyBrowser;
 
 namespace {
 Logger g_log("MuonSequentialFitDialog");
+
+std::string removeSubPath(const std::string &labelIn) {
+	size_t path = labelIn.find_last_of("/");
+	if (path == std::string::npos) {
+		path = labelIn.find_last_of('\\');
+	}
+	std::string useThisLabel = labelIn;
+	if (path != std::string::npos) {
+		path = path + 1;
+		size_t end = labelIn.find_last_of(".");
+		useThisLabel = labelIn.substr(path);
+		useThisLabel = useThisLabel.substr(0, end - path);
+		size_t start = useThisLabel.find_first_of("0123456789");
+		useThisLabel = useThisLabel.substr(start);
+	}
+	return useThisLabel;
+}
+
 std::string removePath(const std::string &labelIn) {
-  size_t path = labelIn.find_last_of("/");
-  if (path == std::string::npos) {
-    path = labelIn.find_last_of('\\');
+	std::string useThisLabel;
+	std::string tmp = labelIn;
+	size_t end = tmp.find_first_of(","); // always seperate by commas
+
+  if (end != std::string::npos) {
+	  while (end != std::string::npos) {
+			  useThisLabel += removeSubPath(tmp.substr(0, end))+",";
+			  tmp = tmp.substr(end+1);
+			  end = tmp.find_first_of(",");
+		  }
+	  //get the last input
+	  useThisLabel += removeSubPath(tmp);
+	  return useThisLabel;
+
   }
-  std::string useThisLabel = labelIn;
-  if (path != std::string::npos) {
-    path = path + 1;
-    size_t end = labelIn.find_last_of(".");
-    useThisLabel = labelIn.substr(path);
-    useThisLabel = useThisLabel.substr(0, end - path);
-    auto test = useThisLabel;
-  }
-  return useThisLabel;
+  return removeSubPath(labelIn);
 }
 }
 const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");

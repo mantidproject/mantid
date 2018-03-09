@@ -27,6 +27,7 @@ Interface
 - The Frequency Domain Analysis GUI now uses :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` to create the phase table for PhaseQuad FFTs. 
 - The Frequency Domain Analysis GUI now uses :ref:`MuonMaxent <algm-MuonMaxent>` to calculate the frequency spectrum in MaxEnt mode.
 - The ALC interface now allows background sections with negative values.  
+- Muon analysis no longer crashes when using the browse button in sequential fitting.
 
 Algorithms
 ----------
