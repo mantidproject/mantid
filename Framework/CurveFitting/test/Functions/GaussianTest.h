@@ -156,7 +156,7 @@ public:
     TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
     TS_ASSERT_DELTA(fn.getParameter("Height"), 0.132981, 1e-6);
 
-    fn.setParameter("Sigma", 0.0);
+    fn.setParameter("Sigma", 0.01);
     fn.applyTies();
     TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
 
