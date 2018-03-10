@@ -112,6 +112,7 @@ Improved
 Bugfixes
 ########
 - In the Calculate Paalman Pings tab of the Indirect Correction interface the container back thickness is now set correctly.
+- Fixed the inconsistent naming styles of the Calculate Paalman Pings and Calculate Monte Carlo Absorption interfaces.
 
 
 Abins
