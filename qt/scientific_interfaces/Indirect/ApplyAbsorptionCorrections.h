@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_
 
+#include "CorrectionsTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_ApplyAbsorptionCorrections.h"
-#include "CorrectionsTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -12,6 +12,7 @@ class DLLExport ApplyAbsorptionCorrections : public CorrectionsTab {
 
 public:
   ApplyAbsorptionCorrections(QWidget *parent = nullptr);
+  ~ApplyAbsorptionCorrections();
 
 private slots:
   /// Handles the geometry being changed
