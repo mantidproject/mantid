@@ -49,7 +49,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="10,2">
       <item>
-       <layout class="QGridLayout" name="expSettingsLayout0" rowstretch="1,1,1,1,1,1,1,1,0,0,0,0,0" columnstretch="1,1,1,1">
+       <layout class="QGridLayout" name="expSettingsLayout0" rowstretch="1,1,1,1,1,1,1,1,0,0,0,0" columnstretch="1,1,1,1">
         <property name="leftMargin">
          <number>10</number>
         </property>
@@ -223,12 +223,12 @@
          </widget>
         </item>
         <item row="6" column="1">
-         <widget class="QPushButton" name="addTransmissionRowButton">
+         <widget class="QPushButton" name="addPerAngleOptionsButton">
           <property name="toolTip">
-           <string>Add another row to the per-angle Transmission runs table</string>
+           <string>Add another row to the per-angle options table</string>
           </property>
           <property name="whatsThis">
-           <string>Adds another row to the Transmission runs table so that additional angles can be added</string>
+           <string>Adds another row to the per-angle options table so that additional angles can be added</string>
           </property>
           <property name="text">
            <string>Add row</string>
@@ -284,18 +284,60 @@
           <attribute name="horizontalHeaderVisible">
            <bool>true</bool>
           </attribute>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
           <attribute name="verticalHeaderVisible">
            <bool>false</bool>
           </attribute>
-          <row/>
-          <row/>
-          <row/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
+          <row>
+           <property name="text">
+            <string>New Row</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>New Row</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>New Row</string>
+           </property>
+          </row>
+          <column>
+           <property name="text">
+            <string>Angle</string>
+           </property>
+           <property name="toolTip">
+            <string/>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Transmission Run(s)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Q min</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Q max</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>dQ/Q</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Scale</string>
+           </property>
+          </column>
          </widget>
         </item>
         <item row="1" column="3">

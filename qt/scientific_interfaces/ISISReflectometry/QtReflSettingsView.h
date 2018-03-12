@@ -55,7 +55,7 @@ public:
   std::string getStitchOptions() const override;
   /// Return selected analysis mode
   std::string getAnalysisMode() const override;
-  /// Return transmission runs
+  /// Return the per-angle options
   std::map<std::string, MantidQt::MantidWidgets::DataProcessor::OptionsQMap>
   getPerAngleOptions() const override;
   /// Return start overlap for transmission runs
@@ -131,8 +131,8 @@ public slots:
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
-  /// Adds another row to the transmission runs table
-  void addTransmissionTableRow();
+  /// Adds another row to the per-angle options table
+  void addPerAngleOptionsTableRow();
 
 private:
   /// Initialise the interface
@@ -170,6 +170,9 @@ private:
   void setChecked(QCheckBox &checkBox, bool checked);
   std::string getText(QLineEdit const &lineEdit) const;
   std::string getText(QComboBox const &box) const;
+  /// Put the per-angle options for a row into a map
+  MantidQt::MantidWidgets::DataProcessor::OptionsQMap
+  createOptionsMapForRow(const int row, bool &emptyRow) const;
 
   /// The widget
   Ui::ReflSettingsWidget m_ui;
@@ -179,8 +182,6 @@ private:
   mutable bool m_isPolCorrEnabled;
   /// The stitch params entry widget
   MantidQt::MantidWidgets::HintingLineEdit *m_stitchEdit;
-  /// The column headings in the options table
-  QStringList m_columnHeadings;
   /// The algorithm properties relating to the options table
   /// @todo Could we use the data processor whitelist to get the properties
   /// instead?

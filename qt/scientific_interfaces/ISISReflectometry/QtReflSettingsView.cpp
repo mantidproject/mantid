@@ -48,29 +48,26 @@ void QtReflSettingsView::initLayout() {
           SLOT(setPolarisationOptionsEnabled(bool)));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(summationTypeChanged(int)));
-  connect(m_ui.addTransmissionRowButton, SIGNAL(clicked()), this,
-          SLOT(addTransmissionTableRow()));
+  connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this,
+          SLOT(addPerAngleOptionsTableRow()));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
 }
 
 void QtReflSettingsView::initOptionsTable() {
   auto table = m_ui.optionsTable;
-  m_columnHeadings = QStringList(
-      {"Angle", "Transmission Run(s)", "Q min", "Q max", "dQ/Q", "Scale"});
   m_columnProperties = QStringList(
       {"ThetaIn", "FirstTransmissionRun", "MomentumTransferMin",
        "MomentumTransferMax", "MomentumTransferStep", "ScaleFactor"});
-  table->setColumnCount(m_columnHeadings.size());
-  table->setHorizontalHeaderLabels(m_columnHeadings);
+  if (m_columnProperties.size() != table->columnCount())
+    throw std::runtime_error(
+        "Error setting up properties for per-angle options table");
+
   table->setColumnWidth(0, 40);
   table->setColumnWidth(1, 150);
   auto header = table->horizontalHeader();
-  header->setStretchLastSection(true);
-  const int typicalNumberOfRows = 3;
-  table->setRowCount(typicalNumberOfRows);
   int totalRowHeight = 0;
-  for (int i = 0; i < typicalNumberOfRows; ++i) {
+  for (int i = 0; i < table->rowCount(); ++i) {
     totalRowHeight += table->rowHeight(i);
   }
   const int padding = 2;
@@ -145,8 +142,8 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
 void QtReflSettingsView::registerExperimentSettingsWidgets(
     Mantid::API::IAlgorithm_sptr alg) {
   connectSettingsChange(*m_ui.expSettingsGroup);
+  connectSettingsChange(*m_ui.optionsTable);
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
-  registerSettingWidget(*m_ui.optionsTable, "FirstTransmissionRun", alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
@@ -296,22 +293,23 @@ void QtReflSettingsView::setText(QTableWidget &table,
 void QtReflSettingsView::setText(QTableWidget &table,
                                  std::string const &propertyName,
                                  const QString &value) {
-  // find the column index for this property
-  int col = 0;
-  for (; col < m_columnProperties.size(); ++col) {
-    if (m_columnProperties[col].toStdString() == propertyName)
-      break;
-  }
+  // Find the column with this property name
+  const auto columnIt =
+      std::find(m_columnProperties.begin(), m_columnProperties.end(),
+                QString::fromStdString(propertyName));
   // Do nothing if column was not found
-  if (col == m_columnProperties.size())
+  if (columnIt == m_columnProperties.end())
     return;
+
+  const auto column = columnIt - m_columnProperties.begin();
+
   // Set the value in this column for the first row. (We don't really know
   // which row(s) the user might want updated so for now keep it simple.)
-  const int row = 0;
-  auto cell = table.item(row, col);
+  constexpr int row = 0;
+  auto cell = table.item(row, column);
   if (!cell) {
-    cell = new QTableWidgetItem(tr("%1").arg((row + 1) * (col + 1)));
-    table.setItem(row, col, cell);
+    cell = new QTableWidgetItem();
+    table.setItem(row, column, cell);
   }
   cell->setText(value);
 }
@@ -388,7 +386,7 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
 
 /** Add a new row to the transmission runs table
  * */
-void QtReflSettingsView::addTransmissionTableRow() {
+void QtReflSettingsView::addPerAngleOptionsTableRow() {
   auto numRows = m_ui.optionsTable->rowCount() + 1;
   m_ui.optionsTable->setRowCount(numRows);
   // Select the first cell in the new row
@@ -482,18 +480,38 @@ std::string QtReflSettingsView::getAnalysisMode() const {
   return getText(*m_ui.analysisModeComboBox);
 }
 
-/** Return selected transmission run(s)
-* @return :: selected transmission run(s)
+/** Create the options map for a given row in the per-angle options table
+ * @param row [in] : the row index
+ * @param emptyRow [inout] : gets set to false if the row is not empty
+ */
+OptionsQMap QtReflSettingsView::createOptionsMapForRow(const int row,
+                                                       bool &emptyRow) const {
+  OptionsQMap rowOptions;
+  const auto &table = m_ui.optionsTable;
+
+  for (int col = 1; col < table->columnCount(); ++col) {
+    auto colItem = table->item(row, col);
+    auto colValue = colItem ? colItem->text() : "";
+    if (!colValue.isEmpty()) {
+      emptyRow = false;
+      rowOptions[m_columnProperties[col]] = colValue;
+    }
+  }
+  return rowOptions;
+}
+
+/** Return the per-angle options
+* @return :: return a map of angles to the options
 */
 std::map<std::string, OptionsQMap>
 QtReflSettingsView::getPerAngleOptions() const {
 
   const auto &table = m_ui.optionsTable;
 
-  // Check that we have 2 columns (angle and runs)
+  // Check that we have at least 2 columns (the angle and some values)
   if (table->columnCount() < 2)
     throw std::runtime_error(
-        "Transmission runs table must have at least 2 columns");
+        "Per-angle options table must have at least 2 columns");
 
   // Return values in a map
   std::map<std::string, OptionsQMap> results;
@@ -502,18 +520,7 @@ QtReflSettingsView::getPerAngleOptions() const {
     auto angleItem = table->item(row, 0);
     auto angle = angleItem ? angleItem->text() : "";
     bool emptyRow = angle.isEmpty();
-
-    // Create the options map for this angle
-    OptionsQMap rowOptions;
-    for (int col = 1; col < table->columnCount(); ++col) {
-      auto colItem = table->item(row, col);
-      auto colValue = colItem ? colItem->text() : "";
-      if (!colValue.isEmpty()) {
-        emptyRow = false;
-        // Add value to the row options
-        rowOptions[m_columnProperties[col]] = colValue;
-      }
-    }
+    auto rowOptions = createOptionsMapForRow(row, emptyRow);
     // Add the row options to the result. We could do with a better way to
     // handle duplicate keys but for now it's ok to just ignore subsequent rows
     // with the same angle
