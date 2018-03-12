@@ -306,10 +306,10 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
   std::string runNumber = runString;
   auto index = runString.find(instrument);
   if (index != std::string::npos) {
-	  // trim path
-	  runNumber = runString.substr(index+instrument.size());
-	  // trim extension
-	  runNumber = runNumber.substr(0, runNumber.find_first_of("."));
+    // trim path
+    runNumber = runString.substr(index + instrument.size());
+    // trim extension
+    runNumber = runNumber.substr(0, runNumber.find_first_of("."));
   }
   const std::string instRuns = instrument + runNumber;
   std::vector<int> selectedRuns;
@@ -836,7 +836,7 @@ bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
  */
 void MuonAnalysisFitDataPresenter::setSelectedWorkspace(
     const QString &wsName, const boost::optional<QString> &filePath) {
-	updateWorkspaceNames(std::vector<std::string>{wsName.toStdString()});
+  updateWorkspaceNames(std::vector<std::string>{wsName.toStdString()});
   setUpDataSelector(wsName, filePath);
 }
 
