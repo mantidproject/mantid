@@ -4,6 +4,7 @@ from six import iteritems
 
 import mantid.simpleapi as mantid
 
+
 class FFTWrapper(object):
     """
     A class to wrap the different parts
@@ -14,6 +15,9 @@ class FFTWrapper(object):
         self.name = "FFT"
         self.model = FFT
 
+    def digit(self,x):
+        return int(filter(str.isdigit,x) or 0)
+
     def loadData(self,inputs):
         """
         store the data in the wrapper for later
@@ -22,10 +26,9 @@ class FFTWrapper(object):
             ws = mantid.AnalysisDataService.retrieve("MuonAnalysis")
             if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
                 ws = mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
-            digit = lambda x:int(filter(str.isdigit,x) or 0)
-            if digit(inputs["Run"]) != ws.getRunNumber():
-                 mantid.logger.error("Active workspace has changed. Restart this interface")
-                 inputs.clear()
+            if self.digit(inputs["Run"]) != ws.getRunNumber():
+                mantid.logger.error("Active workspace has changed. Restart this interface")
+                inputs.clear()
             self.phaseTable = inputs["phaseTable"]
         else:
             self.phaseTable = None

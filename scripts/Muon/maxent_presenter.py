@@ -42,15 +42,17 @@ class MaxEntPresenter(object):
     def createPhaseThread(self):
         return thread_model.ThreadModel(self.calcAlg)
 
+    def digit(self,x):
+        return int(filter(str.isdigit,x) or 0)
+
     def handleMaxEntButton(self):
         ws = mantid.AnalysisDataService.retrieve("MuonAnalysis")
         if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
             ws = mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
-        digit = lambda x:int(filter(str.isdigit,x) or 0)
         run = self.load.getRunName()
-        if str(digit(run)) != str(ws.getRunNumber()):
-             mantid.logger.error("Active workspace has changed. Restart this interface")
-             return        
+        if str(self.digit(run)) != str(ws.getRunNumber()):
+            mantid.logger.error("Active workspace has changed. Restart this interface")
+            return
         if  self.view.calcPhases() and self.view.usePhases():
             self.DoPhase()
         else:
