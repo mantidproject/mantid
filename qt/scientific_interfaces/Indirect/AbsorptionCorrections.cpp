@@ -350,11 +350,6 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
     return;
   }
 
-  // Enable plot and save
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.cbPlotOutput->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
-
   auto correctionsWorkspace =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           m_pythonExportWsName);
@@ -363,6 +358,11 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
     auto wavelengthWorkspace = convertUnits(correctionsWorkspace, "Wavelength");
     AnalysisDataService::Instance().addOrReplace("__mc_corrections_wavelength",
                                                  wavelengthWorkspace);
+
+    // Enable plot and save
+    m_uiForm.pbPlot->setEnabled(true);
+    m_uiForm.cbPlotOutput->setEnabled(true);
+    m_uiForm.pbSave->setEnabled(true);
   }
 }
 
