@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/PhaseQuadMuon.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -73,11 +74,6 @@ void PhaseQuadMuon::exec() {
 
   // Compute squashograms
   API::MatrixWorkspace_sptr ows = squash(inputWs, phaseTable, n0);
-
-  // Copy X axis to output workspace
-  ows->getAxis(0)->unit() = inputWs->getAxis(0)->unit();
-  // New Y axis label
-  ows->setYUnit("Asymmetry");
 
   setProperty("OutputWorkspace", ows);
 }
@@ -275,8 +271,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
   const size_t npoints = ws->blocksize();
   // Create and populate output workspace
-  API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", 2, npoints + 1, npoints);
+  API::MatrixWorkspace_sptr ows =
+      API::WorkspaceFactory::Instance().create(ws, 2, npoints + 1, npoints);
 
   // X
   ows->setSharedX(0, ws->sharedX(0));
@@ -321,6 +317,9 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     realE[i] /= expDecay[i];
     imagE[i] /= expDecay[i];
   }
+
+  // New Y axis label
+  ows->setYUnit("Asymmetry");
 
   return ows;
 }

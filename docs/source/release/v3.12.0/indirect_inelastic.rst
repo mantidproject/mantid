@@ -84,6 +84,7 @@ Bugfixes
 - In the IqtFit interface, the *AO* parameter now defaults to 0.
 - The mini preview plot now updates correctly in the Indirect Data Analysis interfaces, when the fit function is changed; when changed to a function that wasn't used in the most recent fit, will plot only the sample, else will plot the sample, fit and difference.
 - Plotting individual parameters of the fit in the interface (*Plot Options*), will no longer produce an error in the ConvFit interface, when plotting *FWHM*.
+- Entering bad values for ELow/EHigh on the Iqt interface no longer produces an unhandled exception error.
 
 
 Diffraction
@@ -111,6 +112,7 @@ Improved
 Bugfixes
 ########
 - In the Calculate Paalman Pings tab of the Indirect Correction interface the container back thickness is now set correctly.
+- Fixed the inconsistent naming styles of the Calculate Paalman Pings and Calculate Monte Carlo Absorption interfaces.
 
 
 Abins
