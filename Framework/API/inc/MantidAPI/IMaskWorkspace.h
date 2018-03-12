@@ -38,6 +38,7 @@ class DLLExport IMaskWorkspace {
 public:
   IMaskWorkspace() = default;
   IMaskWorkspace &operator=(const IMaskWorkspace &) = delete;
+  virtual ~IMaskWorkspace() = default;
   /// Return the workspace typeID
   virtual const std::string id() const { return "IMaskWorkspace"; }
   /// Total number of masked pixels
