@@ -6,11 +6,23 @@
 
 #include <QFileInfo>
 
+#include <stdexcept>
+
 using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISCalibration");
+
+template <typename Map, typename Key, typename Value>
+Value getValueOr(const Map &map, const Key &key, const Value &defaultValue) {
+  try {
+    return map.at(key);
+  } catch (std::out_of_range &) {
+    return defaultValue;
+  }
 }
+
+} // namespace
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
@@ -352,8 +364,10 @@ void ISISCalibration::setDefaultInstDetails() {
 
   // Set peak and background ranges
   const auto ranges = getRangesFromInstrument();
-  setPeakRange(ranges.at("peak-start-tof"), ranges.at("peak-end-tof"));
-  setBackgroundRange(ranges.at("back-start-tof"), ranges.at("back-end-tof"));
+  setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0),
+               getValueOr(ranges, "peak-end-tof", 0.0));
+  setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0),
+                     getValueOr(ranges, "back-end-tof", 0.0));
 }
 
 /**
