@@ -179,7 +179,8 @@ void MuonFitDataSelector::setWorkspaceDetails(
   // Set initial run to be run number of the workspace loaded in Home tab
   // and search for filenames. Use busy cursor until search finished.
   setBusyState();
-  if (filePath) { // load current run: use special file path
+ 
+  if (filePath) { // load current run: use special file path 
     m_ui.runs->setUserInput(filePath.get());
     m_ui.runs->setText(runs);
   } else { // default
