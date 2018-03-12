@@ -314,10 +314,10 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
   const std::string instRuns = instrument + runNumber;
   std::vector<int> selectedRuns;
   try {
-	  MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument, selectedRuns);
-  }
-  catch (...) {
-	  throw std::invalid_argument("Failed to parse run label: " + instRuns);
+    MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument,
+                                      selectedRuns);
+  } catch (...) {
+    throw std::invalid_argument("Failed to parse run label: " + instRuns);
   }
   params.version = 1;
   params.plotType = m_plotType;
