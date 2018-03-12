@@ -340,25 +340,26 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testGetTransmissionRunOptions() {
+  void testReductionOptionsIncludePerAngleDefaults() {
     NiceMock<MockSettingsView> mockView;
     onCallReturnDefaultSettings(mockView);
     auto presenter = makeReflSettingsPresenter(&mockView);
 
-    // Default transmission runs are specified with a single
-    // entry with an empty angle as the key
-    OptionsQMap opts;
-    opts["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
-    std::map<std::string, OptionsQMap> transmissionRunsMap = {{"", opts}};
+    // The reduction options should include any defaults specified in the
+    // per-angle options table. These are specified via a single row in the
+    // table which has an empty angle as the key
+    OptionsQMap options;
+    options["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
+    std::map<std::string, OptionsQMap> perAngleOptions = {{"", options}};
 
     EXPECT_CALL(mockView, getPerAngleOptions())
         .Times(AtLeast(1))
-        .WillOnce(Return(transmissionRunsMap));
+        .WillOnce(Return(perAngleOptions));
 
-    auto options = presenter.getReductionOptions();
+    auto result = presenter.getReductionOptions();
+    TS_ASSERT_EQUALS(result["FirstTransmissionRun"],
+                     perAngleOptions[""]["FirstTransmissionRun"]);
 
-    TS_ASSERT_EQUALS(variantToString(options["FirstTransmissionRun"]),
-                     "INTER00013463,INTER00013464");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
@@ -576,40 +577,40 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testDefaultTransmissionRuns() {
+  void testGetDefaultOptions() {
     MockSettingsView mockView;
     auto presenter = makeReflSettingsPresenter(&mockView);
 
-    // Default transmission runs are specified with a single
-    // entry with an empty angle as the key
-    OptionsQMap opts;
-    opts["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
-    std::map<std::string, OptionsQMap> transmissionRunsMap = {{"", opts}};
+    // Default options are specified with a single entry with an empty angle as
+    // the key
+    OptionsQMap options;
+    options["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
+    std::map<std::string, OptionsQMap> perAngleOptions = {{"", options}};
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(1)
         .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getPerAngleOptions())
         .Times(1)
-        .WillOnce(Return(transmissionRunsMap));
+        .WillOnce(Return(perAngleOptions));
 
     auto result = presenter.getDefaultOptions();
-    TS_ASSERT_EQUALS(result, transmissionRunsMap[""]);
+    TS_ASSERT_EQUALS(result, perAngleOptions[""]);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testTransmissionRunsForAngle() {
+  void testGetOptionsForAngle() {
     MockSettingsView mockView;
     auto presenter = makeReflSettingsPresenter(&mockView);
 
     // Set up a table with transmission runs for 2 different angles
-    OptionsQMap opts1;
-    opts1["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
-    OptionsQMap opts2;
-    opts2["FirstTransmissionRun"] = "INTER00013463R00013464";
-    std::map<std::string, OptionsQMap> transmissionRunsMap = {{"0.7", opts1},
-                                                              {"2.33", opts2}};
+    OptionsQMap options1;
+    options1["FirstTransmissionRun"] = "INTER00013463,INTER00013464";
+    OptionsQMap options2;
+    options2["FirstTransmissionRun"] = "INTER00013463R00013464";
+    std::map<std::string, OptionsQMap> perAngleOptions = {{"0.7", options1},
+                                                          {"2.33", options2}};
 
     // Test looking up transmission runs based on the angle. It has
     // quite a generous tolerance so the angle does not have to be
@@ -619,12 +620,12 @@ public:
         .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getPerAngleOptions())
         .Times(6)
-        .WillRepeatedly(Return(transmissionRunsMap));
+        .WillRepeatedly(Return(perAngleOptions));
 
     auto result = presenter.getOptionsForAngle(0.69);
-    TS_ASSERT_EQUALS(result, transmissionRunsMap["0.7"]);
+    TS_ASSERT_EQUALS(result, perAngleOptions["0.7"]);
     result = presenter.getOptionsForAngle(2.34);
-    TS_ASSERT_EQUALS(result, transmissionRunsMap["2.33"]);
+    TS_ASSERT_EQUALS(result, perAngleOptions["2.33"]);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
