@@ -98,9 +98,12 @@ class FFTPresenter(object):
             if self.view.isRaw():
                 self.view.addRaw(FFTInputs,"OutputWorkspace")
         inputs["FFT"]=FFTInputs
-        self.thread.loadData(inputs)
-        self.thread.start()
-        self.view.setPhaseBox()
+        try:
+            self.thread.loadData(inputs)
+            self.thread.start()
+            self.view.setPhaseBox()
+        except:
+            pass
 
     # kills the thread at end of execution
     def handleFinished(self):
