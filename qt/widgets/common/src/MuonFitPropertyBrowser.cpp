@@ -1556,45 +1556,42 @@ void MuonFitPropertyBrowser::addPeriodCheckboxToMap(const QString &name) {
 * @param name :: [input] Name of period to add
 */
 bool MuonFitPropertyBrowser::isPeriodValid(const QString &name) {
-	// check period is sensible
-	// no frational periods
-	if (name.contains(".")) {
-		return false;
-	}
-	// wshould only ever have 1 minus sign
-	else if (name.count("-") > 1) {
-		return false;
-	}
-	else {
-		std::vector<std::string> numbers;
-		boost::algorithm::split(numbers, name.toStdString(), boost::is_any_of(","));
-		// loop over results
-		for (auto value : numbers) {
-			auto tmp = value.find("-");
-			if (tmp != std::string::npos) {
-				// find a minus sign
-				auto before = value.substr(0, tmp);
-				auto after = value.substr(tmp + 1);
+  // check period is sensible
+  // no frational periods
+  if (name.contains(".")) {
+    return false;
+  }
+  // wshould only ever have 1 minus sign
+  else if (name.count("-") > 1) {
+    return false;
+  } else {
+    std::vector<std::string> numbers;
+    boost::algorithm::split(numbers, name.toStdString(), boost::is_any_of(","));
+    // loop over results
+    for (auto value : numbers) {
+      auto tmp = value.find("-");
+      if (tmp != std::string::npos) {
+        // find a minus sign
+        auto before = value.substr(0, tmp);
+        auto after = value.substr(tmp + 1);
 
-			}
-			else {
-				try {
-					boost::lexical_cast<int>(value);
-					if (m_periodBoxes.find(QString::fromStdString(value)) ==
-						m_periodBoxes.end() &&
-						numbers.size() > 1) {
-						// if the box does not exist and there is more than 1 period in name
-						return false;
-					}
-				}
-				catch (boost::bad_lexical_cast) {
-					// none int value
-					return false;
-				}
-			}
-		}
-	}
-	return true;
+      } else {
+        try {
+          boost::lexical_cast<int>(value);
+          if (m_periodBoxes.find(QString::fromStdString(value)) ==
+                  m_periodBoxes.end() &&
+              numbers.size() > 1) {
+            // if the box does not exist and there is more than 1 period in name
+            return false;
+          }
+        } catch (boost::bad_lexical_cast) {
+          // none int value
+          return false;
+        }
+      }
+    }
+  }
+  return true;
 }
 /**
 * Add a new checkbox to the list of periods with given name
@@ -1604,17 +1601,17 @@ bool MuonFitPropertyBrowser::isPeriodValid(const QString &name) {
 void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
   // check period is sensible
   // no frational periods
-	if (isPeriodValid(name)) {
-		m_periodBoxes.insert(name, m_boolManager->addProperty(name));
-		int j = m_enumManager->value(m_periodsToFit);
-		// add new period to list will go after inital list
-		m_periodsToFitOptions << name;
+  if (isPeriodValid(name)) {
+    m_periodBoxes.insert(name, m_boolManager->addProperty(name));
+    int j = m_enumManager->value(m_periodsToFit);
+    // add new period to list will go after inital list
+    m_periodsToFitOptions << name;
 
-		auto active = getChosenPeriods();
-		m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
-		setChosenPeriods(active);
-		m_enumManager->setValue(m_periodsToFit, j);
-	}
+    auto active = getChosenPeriods();
+    m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+    setChosenPeriods(active);
+    m_enumManager->setValue(m_periodsToFit, j);
+  }
 }
 /**
 * Returns a list of the selected periods (checked boxes)
