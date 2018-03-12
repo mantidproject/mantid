@@ -317,9 +317,15 @@ end
 #Copy over python libraries not included with OSX.
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile","yaml", "matplotlib", "mpl_toolkits"]
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile","yaml"]
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}","Contents/MacOS/")
+end
+
+system_python_extras = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python"
+modules = ["matplotlib", "mpl_toolkits"]
+modules.each do |directory|
+  addPythonLibrary("#{{system_python_extras}}/#{directory}","Contents/MacOS/")
 end
 
 if( "@MAKE_VATES@" == "ON" )
