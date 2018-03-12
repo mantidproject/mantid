@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ABSORPTIONCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ABSORPTIONCORRECTIONS_H_
 
-#include "ui_AbsorptionCorrections.h"
 #include "CorrectionsTab.h"
+#include "ui_AbsorptionCorrections.h"
 
 #include "../General/UserInputValidator.h"
 
@@ -13,6 +13,8 @@ class DLLExport AbsorptionCorrections : public CorrectionsTab {
 
 public:
   AbsorptionCorrections(QWidget *parent = nullptr);
+
+  Mantid::API::MatrixWorkspace_sptr sampleWorkspace() const;
 
 private:
   void setup() override;

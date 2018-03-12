@@ -12,7 +12,14 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
+
+std::string workspaceUnit(MatrixWorkspace_sptr workspace,
+                          const size_t &axisIndex) {
+  if (workspace)
+    return workspace->getAxis(axisIndex)->unit()->unitID();
+  return "";
 }
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -48,6 +55,16 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(doValidation()));
   connect(m_uiForm.ckUseCan, SIGNAL(stateChanged(int)), this,
           SLOT(doValidation()));
+}
+
+MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
+  const auto sampleWSName =
+      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+
+  if (AnalysisDataService::Instance().doesExist(sampleWSName))
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        sampleWSName);
+  return nullptr;
 }
 
 void AbsorptionCorrections::setup() { doValidation(); }
@@ -217,18 +234,11 @@ bool AbsorptionCorrections::validate() {
 
 UserInputValidator AbsorptionCorrections::doValidation() {
   UserInputValidator uiv;
-
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
-  const auto sampleWsName =
-      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
 
-  if (sampleExists &&
-      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          sampleWsName)) {
+  if (!sampleWorkspace())
     uiv.addErrorMessage(
         "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
-  }
 
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
                                m_uiForm.leSampleChemicalFormula,
@@ -315,7 +325,7 @@ void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
     return;
   }
 
-  auto unit = sampleWs->getAxis(0)->unit()->unitID();
+  auto unit = workspaceUnit(sampleWs, 0);
   m_uiForm.cbPlotOutput->setItemText(0, QString::fromStdString(unit));
 
   auto instrument = sampleWs->getInstrument();
@@ -358,11 +368,11 @@ void AbsorptionCorrections::saveClicked() {
  */
 void AbsorptionCorrections::plotClicked() {
   const auto plotType = m_uiForm.cbPlotOutput->currentText();
-  const auto sampleWSName =
-      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
-    if (plotType == "Both" || plotType == "Wavelength")
+    const auto unit = workspaceUnit(sampleWorkspace(), 0);
+
+    if (plotType == "Both" || plotType == QString::fromStdString(unit))
       plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 
     if (plotType == "Both" || plotType == "Angle")
