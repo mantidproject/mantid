@@ -52,6 +52,7 @@ public:
   GeometryTriangulator(const CSGObject *obj = nullptr);
   GeometryTriangulator(const MeshObject *obj);
   GeometryTriangulator(const GeometryTriangulator &) = delete;
+  GeometryTriangulator &operator=(const GeometryTriangulator &) = delete;
   ~GeometryTriangulator();
   void triangulate();
   void generateMesh();
