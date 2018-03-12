@@ -23,6 +23,8 @@ MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
   convertAlg->setProperty("OutputWorkspace", "__converted");
   convertAlg->setProperty(
       "EMode", Mantid::Kernel::DeltaEMode::asString(workspace->getEMode()));
+  convertAlg->setProperty("EFixed",
+                          workspace->getEFixed(workspace->getDetector(0)));
   convertAlg->setProperty("Target", target);
   convertAlg->execute();
   return convertAlg->getProperty("OutputWorkspace");
