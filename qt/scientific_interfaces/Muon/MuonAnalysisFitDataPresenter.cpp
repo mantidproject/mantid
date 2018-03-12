@@ -317,7 +317,14 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument,
                                       selectedRuns);
   } catch (...) {
-    throw std::invalid_argument("Failed to parse run label: " + instRuns);
+	  params.instrument = instrument;
+	  try {
+		  MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument,
+			  selectedRuns);
+	  }
+	  catch (...) {
+		  g_log.error("Cannot Parse workspace " + instRuns);
+	  }
   }
   params.version = 1;
   params.plotType = m_plotType;
