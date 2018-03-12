@@ -2,6 +2,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
@@ -12,6 +13,46 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
+
+MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
+                                  const std::string &target) {
+  auto convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
+  convertAlg->initialize();
+  convertAlg->setChild(true);
+  convertAlg->setProperty("InputWorkspace", workspace);
+  convertAlg->setProperty("OutputWorkspace", "__converted");
+  convertAlg->setProperty(
+      "EMode", Mantid::Kernel::DeltaEMode::asString(workspace->getEMode()));
+  convertAlg->setProperty("Target", target);
+  convertAlg->execute();
+  return convertAlg->getProperty("OutputWorkspace");
+}
+
+WorkspaceGroup_sptr
+groupWorkspaces(const std::vector<std::string> &workspaceNames) {
+  auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+  groupAlg->initialize();
+  groupAlg->setChild(true);
+  groupAlg->setProperty("InputWorkspaces", workspaceNames);
+  groupAlg->setProperty("OutputWorkspace", "__grouped");
+  groupAlg->execute();
+  return groupAlg->getProperty("OutputWorkspace");
+}
+
+WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
+                                 const std::string &target) {
+  std::vector<std::string> convertedNames;
+  convertedNames.reserve(workspaceGroup->size());
+
+  for (const auto &workspace : *workspaceGroup) {
+    const auto name = "__" + workspace->getName() + "_" + target;
+    const auto wavelengthWorkspace = convertUnits(
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), target);
+    AnalysisDataService::Instance().addOrReplace(name, wavelengthWorkspace);
+    convertedNames.emplace_back(name);
+  }
+  return groupWorkspaces(convertedNames);
+}
 } // namespace
 
 namespace MantidQt {
@@ -48,6 +89,11 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(doValidation()));
   connect(m_uiForm.ckUseCan, SIGNAL(stateChanged(int)), this,
           SLOT(doValidation()));
+}
+
+AbsorptionCorrections::~AbsorptionCorrections() {
+  if (AnalysisDataService::Instance().doesExist("__mc_corrections_wavelength"))
+    AnalysisDataService::Instance().remove("__mc_corrections_wavelength");
 }
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
@@ -301,12 +347,23 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
   if (error) {
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
+    return;
   }
 
   // Enable plot and save
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.cbPlotOutput->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
+
+  auto correctionsWorkspace =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          m_pythonExportWsName);
+
+  if (correctionsWorkspace) {
+    auto wavelengthWorkspace = convertUnits(correctionsWorkspace, "Wavelength");
+    AnalysisDataService::Instance().addOrReplace("__mc_corrections_wavelength",
+                                                 wavelengthWorkspace);
+  }
 }
 
 void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
@@ -359,12 +416,12 @@ void AbsorptionCorrections::saveClicked() {
 void AbsorptionCorrections::plotClicked() {
   const auto plotType = m_uiForm.cbPlotOutput->currentText();
 
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+  if (checkADSForPlotSaveWorkspace("__mc_corrections_wavelength", false)) {
     if (plotType == "Both" || plotType == "Wavelength")
-      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+      plotSpectrum(QString::fromStdString("__mc_corrections_wavelength"));
 
     if (plotType == "Both" || plotType == "Angle")
-      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
+      plotTimeBin(QString::fromStdString("__mc_corrections_wavelength"));
   }
 }
 

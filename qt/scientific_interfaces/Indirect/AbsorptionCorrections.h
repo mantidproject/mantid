@@ -13,6 +13,7 @@ class DLLExport AbsorptionCorrections : public CorrectionsTab {
 
 public:
   AbsorptionCorrections(QWidget *parent = nullptr);
+  ~AbsorptionCorrections();
 
   Mantid::API::MatrixWorkspace_sptr sampleWorkspace() const;
 
