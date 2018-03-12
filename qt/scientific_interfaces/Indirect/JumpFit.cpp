@@ -68,6 +68,14 @@ void JumpFit::setup() {
           SLOT(updatePlotGuess()));
 }
 
+size_t JumpFit::getWidth() const {
+  return m_spectraList.at(m_uiForm->cbWidth->currentText().toStdString());
+}
+
+int JumpFit::minimumSpectrum() const { return static_cast<int>(getWidth()); }
+
+int JumpFit::maximumSpectrum() const { return static_cast<int>(getWidth()); }
+
 bool JumpFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&
          m_uiForm->ckPlotGuess->isChecked();
@@ -80,38 +88,19 @@ bool JumpFit::doPlotGuess() const {
  */
 bool JumpFit::validate() {
   UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSample);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSample);
 
   // this workspace doesn't have any valid widths
-  if (m_spectraList.size() == 0) {
+  if (m_spectraList.empty())
     uiv.addErrorMessage(
-        "Input workspace doesn't appear to contain any width data.");
-  }
+        "Sample Input: Workspace doesn't appear to contain any width data");
 
   if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
 
-  QString errors = uiv.generateErrorMessage();
-  if (!errors.isEmpty()) {
-    emit showMessageBox(errors);
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Collect the settings on the GUI and build a python
- * script that runs JumpFit
- */
-void JumpFit::run() {
-  const auto widthName = m_uiForm->cbWidth->currentText().toStdString();
-  const auto width = static_cast<int>(m_spectraList[widthName]);
-  setMinimumSpectrum(width);
-  setMaximumSpectrum(width);
-
-  if (validate())
-    executeSequentialFit();
+  const auto errors = uiv.generateErrorMessage();
+  emit showMessageBox(errors);
+  return errors.isEmpty();
 }
 
 /**
@@ -169,8 +158,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
   if (m_spectraList.size() > 0) {
     m_uiForm->cbWidth->setEnabled(true);
-    const auto currentWidth = m_uiForm->cbWidth->currentText().toStdString();
-    const auto width = static_cast<int>(m_spectraList[currentWidth]);
+    const auto width = static_cast<int>(getWidth());
     setMinimumSpectrum(width);
     setMaximumSpectrum(width);
     setSelectedSpectrum(width);
@@ -196,9 +184,8 @@ void JumpFit::findAllWidths(MatrixWorkspace_const_sptr ws) {
 
     for (const auto &iter : m_spectraList)
       m_uiForm->cbWidth->addItem(QString::fromStdString(iter.first));
-  } else {
+  } else
     m_spectraList.clear();
-  }
 }
 
 std::map<std::string, size_t> JumpFit::findAxisLabelsWithSubstrings(

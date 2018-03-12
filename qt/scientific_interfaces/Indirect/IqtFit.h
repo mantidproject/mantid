@@ -31,11 +31,13 @@ public:
 
 private:
   void setup() override;
-  void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
 protected:
+  int minimumSpectrum() const override;
+  int maximumSpectrum() const override;
+
   QHash<QString, double> createDefaultValues() const override;
   std::string createSingleFitOutputName() const override;
   std::string createSequentialFitOutputName() const override;
@@ -74,6 +76,8 @@ private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
 
+  void updateIntensityTie();
+  void updateIntensityTie(const QString &intensityTie);
   std::string createIntensityTie(Mantid::API::IFunction_sptr function) const;
   std::vector<std::string>
   getParameters(Mantid::API::IFunction_sptr function,

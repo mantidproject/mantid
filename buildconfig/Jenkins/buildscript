@@ -207,9 +207,9 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
     fi
 
-    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]]; then
+    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
       # Traditional install path for python 2 release build
-      PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
+      PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
     else
       # everything else uses lower-case values
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"

@@ -29,7 +29,7 @@ Properties:
 
 Usage
 -----
-.. include:: ../usagedata-note.txt
+.. include:: ../../usagedata-note.txt
 
 **Example - Fit to a QENS signal:**
 

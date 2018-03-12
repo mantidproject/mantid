@@ -55,7 +55,7 @@ To make our CubicSpline piecewise-smooth we must ensure that these conditions ar
 
 This point of smoothness is represented by the red circle in the graph below of our CubicSpline function :math:`C(x)`
 
-.. image:: ../images/CubicSplineExample.png
+.. image:: ../../images/CubicSplineExample.png
     :width: 800px
     :align: center
     :height: 600px
@@ -72,7 +72,7 @@ all of the data points in the set.
 A example of fitting with a CubicSpline has been provided below, with the breakpoints highlighted in green.
 The original data plot is in black and our fitted CubicSpline with four breakpoints is in red.
 
-.. image:: ../images/BSplineFittingExample.png
+.. image:: ../../images/BSplineFittingExample.png
     :width: 800px
     :align: center
     :height: 600px

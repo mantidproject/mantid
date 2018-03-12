@@ -7,8 +7,58 @@
 
 #include <qwt_plot.h>
 
+#include <tuple>
+
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
+
+/**
+ * Calculate the number of bins in the sample & resolution workspaces
+ * @param wsName The sample workspace name
+ * @param resName the resolution woskapce name
+ * @param energyMin Minimum energy for chosen bin range
+ * @param energyMax Maximum energy for chosen bin range
+ * @param binReductionFactor The factor by which to reduce the number of bins
+ * @return A 4-tuple where the first entry denotes whether the
+ * calculation was successful or not. The final 3 values
+ * are EWidth, SampleBins, ResolutionBins if the calculation succeeded,
+ * otherwise they are undefined.
+ */
+std::tuple<bool, float, int, int>
+calculateBinParameters(QString wsName, QString resName, double energyMin,
+                       double energyMax, double binReductionFactor) {
+  using namespace Mantid::API;
+  ITableWorkspace_sptr propsTable;
+  const auto paramTableName = "__IqtProperties_temp";
+  try {
+    auto toIqt = AlgorithmManager::Instance().createUnmanaged("TransformToIqt");
+    toIqt->initialize();
+    toIqt->setChild(true); // record this as internal
+    toIqt->setProperty("SampleWorkspace", wsName.toStdString());
+    toIqt->setProperty("ResolutionWorkspace", resName.toStdString());
+    toIqt->setProperty("ParameterWorkspace", paramTableName);
+    toIqt->setProperty("EnergyMin", energyMin);
+    toIqt->setProperty("EnergyMax", energyMax);
+    toIqt->setProperty("BinReductionFactor", binReductionFactor);
+    toIqt->setProperty("DryRun", true);
+    toIqt->execute();
+    propsTable = toIqt->getProperty("ParameterWorkspace");
+    // the algorithm can create output even if it failed...
+    IAlgorithm_sptr deleteAlg =
+        AlgorithmManager::Instance().create("DeleteWorkspace");
+    deleteAlg->initialize();
+    deleteAlg->setChild(true);
+    deleteAlg->setProperty("Workspace", paramTableName);
+    deleteAlg->execute();
+  } catch (std::exception &) {
+    return std::make_tuple(false, 0.0f, 0, 0);
+  }
+  assert(propsTable);
+  return std::make_tuple(
+      true, propsTable->getColumn("EnergyWidth")->cell<float>(0),
+      propsTable->getColumn("SampleOutputBins")->cell<int>(0),
+      propsTable->getColumn("ResolutionBins")->cell<int>(0));
+}
 }
 
 using namespace Mantid::API;
@@ -70,12 +120,12 @@ void Iqt::setup() {
   connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(plotInput(const QString &)));
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
-          SLOT(calculateBinning()));
+          SLOT(updateDisplayedBinParameters()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
-  connect(m_uiForm.pbTile, SIGNAL(clicked()), this, SLOT(PlotTiled()));
+  connect(m_uiForm.pbTile, SIGNAL(clicked()), this, SLOT(plotTiled()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 }
@@ -83,7 +133,7 @@ void Iqt::setup() {
 void Iqt::run() {
   using namespace Mantid::API;
 
-  calculateBinning();
+  updateDisplayedBinParameters();
 
   // Construct the result workspace for Python script export
   QString sampleName = m_uiForm.dsInput->getCurrentDataName();
@@ -144,7 +194,7 @@ void Iqt::plotClicked() {
   plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
 
-void Iqt::PlotTiled() {
+void Iqt::plotTiled() {
   MatrixWorkspace_const_sptr outWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           m_pythonExportWsName);
@@ -253,15 +303,13 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updatePropertyValues(QtProperty *, double)));
 
-  calculateBinning();
+  updateDisplayedBinParameters();
 }
 
 /**
  * Calculates binning parameters.
  */
-void Iqt::calculateBinning() {
-  using namespace Mantid::API;
-
+void Iqt::updateDisplayedBinParameters() {
   QString wsName = m_uiForm.dsInput->getCurrentDataName();
   QString resName = m_uiForm.dsResolution->getCurrentDataName();
   if (wsName.isEmpty() || resName.isEmpty())
@@ -276,58 +324,27 @@ void Iqt::calculateBinning() {
   if (energyMin == 0 && energyMax == 0)
     return;
 
-  const auto paramTableName = "__IqtProperties_temp";
+  bool success(false);
+  float energyWidth(0.0f);
+  int resolutionBins(0), sampleBins(0);
+  std::tie(success, energyWidth, sampleBins, resolutionBins) =
+      calculateBinParameters(wsName, resName, energyMin, energyMax, numBins);
+  if (success) {
+    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+               SLOT(updatePropertyValues(QtProperty *, double)));
+    // Update data in property editor
+    m_dblManager->setValue(m_properties["EWidth"], energyWidth);
+    m_dblManager->setValue(m_properties["ResolutionBins"], resolutionBins);
+    m_dblManager->setValue(m_properties["SampleBins"], sampleBins);
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+            SLOT(updatePropertyValues(QtProperty *, double)));
 
-  IAlgorithm_sptr IqtAlg =
-      AlgorithmManager::Instance().create("TransformToIqt");
-  IqtAlg->initialize();
-  IqtAlg->setChild(true);
-  IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
-  IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
-  IqtAlg->setProperty("ParameterWorkspace", paramTableName);
-
-  IqtAlg->setProperty("EnergyMin", energyMin);
-  IqtAlg->setProperty("EnergyMax", energyMax);
-  IqtAlg->setProperty("BinReductionFactor", numBins);
-
-  IqtAlg->setProperty("DryRun", true);
-
-  IqtAlg->execute();
-
-  // Get property table from algorithm
-  ITableWorkspace_sptr propsTable = IqtAlg->getProperty("ParameterWorkspace");
-
-  // Get data from property table
-  const auto energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
-  const auto sampleBins =
-      propsTable->getColumn("SampleOutputBins")->cell<int>(0);
-  const auto resolutionBins =
-      propsTable->getColumn("ResolutionBins")->cell<int>(0);
-
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updatePropertyValues(QtProperty *, double)));
-
-  // Update data in property editor
-  m_dblManager->setValue(m_properties["EWidth"], energyWidth);
-  m_dblManager->setValue(m_properties["ResolutionBins"], resolutionBins);
-  m_dblManager->setValue(m_properties["SampleBins"], sampleBins);
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updatePropertyValues(QtProperty *, double)));
-
-  // Warn for low number of resolution bins
-  int numResolutionBins =
-      static_cast<int>(m_dblManager->value(m_properties["ResolutionBins"]));
-  if (numResolutionBins < 5)
-    showMessageBox("Number of resolution bins is less than 5.\nResults may be "
-                   "inaccurate.");
-
-  IAlgorithm_sptr deleteAlg =
-      AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleteAlg->initialize();
-  deleteAlg->setChild(true);
-  deleteAlg->setProperty("Workspace", paramTableName);
-  deleteAlg->execute();
+    // Warn for low number of resolution bins
+    if (resolutionBins < 5)
+      showMessageBox(
+          "Number of resolution bins is less than 5.\nResults may be "
+          "inaccurate.");
+  }
 }
 
 void Iqt::loadSettings(const QSettings &settings) {
@@ -390,7 +407,7 @@ void Iqt::plotInput(const QString &wsname) {
     showMessageBox(exc.what());
   }
 
-  calculateBinning();
+  updateDisplayedBinParameters();
 }
 
 /**

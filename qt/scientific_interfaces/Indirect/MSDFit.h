@@ -19,7 +19,6 @@ public:
 
 private:
   void setup() override;
-  void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
@@ -38,6 +37,9 @@ protected slots:
   void updatePlotOptions() override;
 
 protected:
+  int minimumSpectrum() const override;
+  int maximumSpectrum() const override;
+
   std::string createSingleFitOutputName() const override;
   std::string createSequentialFitOutputName() const override;
   std::string constructBaseName() const;

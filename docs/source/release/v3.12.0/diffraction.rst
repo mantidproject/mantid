@@ -44,6 +44,9 @@ Powder Diffraction
 - :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` supports D2B and D20 (when doing a detector scan) powder diffraction reduction at the ILL.
 - New algorithm :ref:`algm-SumOverlappingTubes` combines a detector scan for D2B into a single workspace.
 - :ref:`CalculateDIFC <algm-CalculateDIFC>` has been extended to allow for calibration workspaces from :ref:`PDCalibration <algm-PDCalibration>`
+- :ref:`SaveGSS <algm-SaveGSS>` has been extended to allow user to specify GSAS general header, each bank's header and XYE decimal precision for SLOG.
+- :ref:`SaveVulcanGSS <algm-SaveVulcanGSS>` has been moved to a workflow algorithm and largely rewritten by using recent change in histogram and Workspace2D.  It is also improved such that there is no contraint on the number of spectra and number of various binning parameters on the workspace to be saved to a GSAS file for VULCAN.
+- :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now allows for the azimuthal angles to be optionally specified in the file.
 
 Engineering Diffraction
 -----------------------
@@ -68,8 +71,8 @@ Engineering Diffraction
    :align: center
 
    The Engineering diffraction GSAS-II GUI
-  
-  
+
+
 Single Crystal Diffraction
 --------------------------
 - :ref:`FilterPeaks <algm-FilterPeaks>` now supports filtering peaks by TOF, d-spacing, and wavelength.
@@ -86,7 +89,7 @@ Single Crystal Diffraction
 
 - :ref:`FindUBUsingFFT <algm-FindUBUsingFFT>` now has options to specify number of iterations to refine UB and also resolution of the search through possible orientations.  Minimum angle between a,b,c vectors reduced for large unit cells.
 
-- :ref:`FindUBUsingLatticeParameters <algm-FindUBUsingLatticeParameters>` now has option to specify number of iterations to refine UB. 
+- :ref:`FindUBUsingLatticeParameters <algm-FindUBUsingLatticeParameters>` now has option to specify number of iterations to refine UB.
 
 - SCD Event Data Reduction interface now uses the Indexing Tolerance for Index Peaks to index the peaks for the Select Cell options in Choose Cell tab.  Previously it used a constant, 0.12, for the tolerance.
 
