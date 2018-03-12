@@ -107,7 +107,6 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
 
 void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
                           size_t index, const std::vector<GLColor> &color) {
-  auto bank = compInfo.quadrilateralComponent(index);
   glBegin(GL_QUADS);
 
   const auto &columns = compInfo.children(index);
