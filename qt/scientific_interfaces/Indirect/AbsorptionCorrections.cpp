@@ -12,13 +12,6 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
-
-std::string workspaceUnit(MatrixWorkspace_sptr workspace,
-                          const size_t &axisIndex) {
-  if (workspace)
-    return workspace->getAxis(axisIndex)->unit()->unitID();
-  return "";
-}
 } // namespace
 
 namespace MantidQt {
@@ -325,9 +318,6 @@ void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
     return;
   }
 
-  auto unit = workspaceUnit(sampleWs, 0);
-  m_uiForm.cbPlotOutput->setItemText(0, QString::fromStdString(unit));
-
   auto instrument = sampleWs->getInstrument();
   const std::string beamWidthParamName = "Workflow.beam-width";
   if (instrument->hasParameter(beamWidthParamName)) {
@@ -370,9 +360,7 @@ void AbsorptionCorrections::plotClicked() {
   const auto plotType = m_uiForm.cbPlotOutput->currentText();
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
-    const auto unit = workspaceUnit(sampleWorkspace(), 0);
-
-    if (plotType == "Both" || plotType == QString::fromStdString(unit))
+    if (plotType == "Both" || plotType == "Wavelength")
       plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 
     if (plotType == "Both" || plotType == "Angle")
