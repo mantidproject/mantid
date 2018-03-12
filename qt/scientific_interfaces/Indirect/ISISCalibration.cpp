@@ -368,6 +368,14 @@ void ISISCalibration::setDefaultInstDetails() {
                getValueOr(ranges, "peak-end-tof", 0.0));
   setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0),
                      getValueOr(ranges, "back-end-tof", 0.0));
+
+  if (instDetails.contains("resolution") &&
+      !instDetails["resolution"].isEmpty()) {
+    m_uiForm.ckCreateResolution->setEnabled(true);
+  } else {
+    m_uiForm.ckCreateResolution->setChecked(false);
+    m_uiForm.ckCreateResolution->setEnabled(false);
+  }
 }
 
 /**
@@ -489,7 +497,7 @@ void ISISCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws) {
     auto params = comp->getNumberParameter("resolution", true);
 
     // Set the default instrument resolution
-    if (params.size() > 0) {
+    if (!params.empty()) {
       double res = params[0];
 
       const auto energyRange = m_uiForm.ppResolution->getCurveRange("Energy");
