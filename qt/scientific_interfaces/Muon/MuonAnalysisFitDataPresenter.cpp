@@ -836,8 +836,7 @@ bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
  */
 void MuonAnalysisFitDataPresenter::setSelectedWorkspace(
     const QString &wsName, const boost::optional<QString> &filePath) {
-	auto tm = wsName.toStdString();
-  updateWorkspaceNames(std::vector<std::string>{wsName.toStdString()});
+	updateWorkspaceNames(std::vector<std::string>{wsName.toStdString()});
   setUpDataSelector(wsName, filePath);
 }
 
