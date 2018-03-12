@@ -196,6 +196,7 @@ private:
   void clearPeriodCheckboxes();
   void addPeriodCheckbox(const QString &name);
   void updatePeriods(const int j);
+  bool isPeriodValid(const QString &name);
 
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;
