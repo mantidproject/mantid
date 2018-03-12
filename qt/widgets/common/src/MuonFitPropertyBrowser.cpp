@@ -287,6 +287,7 @@ void MuonFitPropertyBrowser::init() {
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
   // disable TFAsymm mode by default
   setTFAsymmMode(TFAsymmMode);
+  m_autoBackground = getAutoBackgroundString();
 }
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
@@ -331,6 +332,18 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   } else {
     m_fitActionTFAsymm->setEnabled(false);
   }
+}
+
+void MuonFitPropertyBrowser::checkFitEnabled() {
+	if (m_reselectGroupBtn->isVisible()) {
+		setFitEnabled(false);
+	}
+	else if(getAutoBackgroundString() != "") {
+		setFitEnabled(true);
+	}
+	else {
+		setFitEnabled(false);
+	}
 }
 /**
 * Set the input workspace name
@@ -1184,7 +1197,13 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   if (enabled) {
     setAllGroups();
     setAllPeriods();
+	setAutoBackgroundName("");
+
   } else { // clear current selection
+	  if (m_autoBackground != "") {
+		  setAutoBackgroundName(m_autoBackground);
+		  addAutoBackground();
+	  }
     clearChosenGroups();
     clearChosenPeriods();
   }
@@ -1199,6 +1218,7 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
       widget->setVisible(enabled);
     }
   }
+  if (enabled){ setFitEnabled(false); }
 }
 /**
 * Set TF asymmetry mode on or off.
