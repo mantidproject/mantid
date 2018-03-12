@@ -1,5 +1,5 @@
-#ifndef CACHE_GEOMETRYGENERATOR_H
-#define CACHE_GEOMETRYGENERATOR_H
+#ifndef MESH_GEOMETRYGENERATOR_H
+#define MESH_GEOMETRYGENERATOR_H
 
 #include "MantidGeometry/DllConfig.h"
 
@@ -8,18 +8,10 @@ namespace Mantid {
 namespace Geometry {
 
 /**
-   \class CacheGeometryGenerator
-   \brief Generates geometry using other geometry handlers or keeps the cache of
-   the triangles
-   \author Mr. Srikanth Nagella
-   \date Jan 2009
-   \version 1.0
+   This class delivers the triangles of a MeshObject for rendering via
+   the CacheGeometryRenderer.
 
-   This class is an cache for the geometry triangles and if needed generates the
-   triangles using
-   other GeometryHandlers.
-
-   Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
 
    This file is part of Mantid.
@@ -39,21 +31,17 @@ namespace Geometry {
 
    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class CSGObject;
 class MeshObject;
-
-class MANTID_GEOMETRY_DLL CacheGeometryGenerator {
+class MANTID_GEOMETRY_DLL MeshGeometryGenerator {
 private:
-  CSGObject *csgObj;   ///< Input CSGObject
-  MeshObject *meshObj; ///< Input MeshObject
-  int mNoOfVertices;   ///< number of vertices
-  int mNoOfTriangles;  ///< number of triangles
-  double *mPoints;     ///<double array or points
-  int *mFaces;         ///< Integer array of faces
+  MeshObject *Obj;    ///< Input Object
+  int mNoOfVertices;  ///< number of vertices
+  int mNoOfTriangles; ///< number of triangles
+  double *mPoints;    ///<double array or points
+  int *mFaces;        ///< Integer array of faces
 public:
-  CacheGeometryGenerator(CSGObject *obj);
-  CacheGeometryGenerator(MeshObject *obj);
-  ~CacheGeometryGenerator();
+  MeshGeometryGenerator(MeshObject *obj);
+  ~MeshGeometryGenerator();
   /// Generate the trangles
   void Generate();
   /// get the number of triangles
@@ -72,4 +60,4 @@ public:
 
 } // NAMESPACE Mantid
 
-#endif
+#endif MESH_GEOMETRYGENERATOR_H
