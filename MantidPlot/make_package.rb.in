@@ -325,7 +325,7 @@ end
 system_python_extras = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python"
 modules = ["matplotlib", "mpl_toolkits"]
 modules.each do |directory|
-  addPythonLibrary("#{{system_python_extras}}/#{directory}","Contents/MacOS/")
+  addPythonLibrary("#{system_python_extras}/#{directory}","Contents/MacOS/")
 end
 
 if( "@MAKE_VATES@" == "ON" )
