@@ -104,6 +104,19 @@ OptionsQMap ReflSettingsPresenter::transmissionOptionsMap() const {
   return options;
 }
 
+/** Get the processing instructinons.
+ * @return : the processing instructions, or an empty string if not set
+ */
+QString ReflSettingsPresenter::getProcessingInstructions() const {
+  // the processing instructions are set in the per-angle options table. We
+  // only set them if there is a default (i.e. not linked to an angle).
+  auto options = getDefaultOptions();
+  if (options.count("ProcessingInstructions"))
+    return options["ProcessingInstructions"].toString();
+
+  return QString();
+}
+
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'. Note that
  * this must include all applicable options, even if they are empty, because
  * the GenericDataProcessorPresenter has no other way of knowing which options
@@ -129,6 +142,8 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
     setTransmissionOption(options, "AnalysisMode", m_view->getAnalysisMode());
     setTransmissionOption(options, "StartOverlap", m_view->getStartOverlap());
     setTransmissionOption(options, "EndOverlap", m_view->getEndOverlap());
+    setTransmissionOption(options, "ProcessingInstructions",
+                          getProcessingInstructions());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -144,8 +159,6 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
     setTransmissionOption(options, "WavelengthMax", m_view->getLambdaMax());
     setTransmissionOption(options, "I0MonitorIndex",
                           m_view->getI0MonitorIndex());
-    setTransmissionOption(options, "ProcessingInstructions",
-                          m_view->getProcessingInstructions());
   }
 
   return options;
@@ -215,14 +228,6 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     if (hasReductionTypes(summationType))
       addIfNotEmpty(options, "ReductionType", m_view->getReductionType());
 
-    // Add transmission runs. Note that the value here may be
-    // a comma-separated list of multiple values. We return the
-    // string as entered by the user because parsing is done in
-    // the data processor widget. Note also that we can only
-    // return default values here if provided; the user may also
-    // provide per-angle transmission runs, but these need to be
-    // requested on a per-row basis when we know what the angle is
-    // for that row.
     auto defaultOptions = getDefaultOptions();
     for (auto iter = defaultOptions.begin(); iter != defaultOptions.end();
          ++iter)
@@ -243,8 +248,6 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     addIfNotEmpty(options, "WavelengthMin", m_view->getLambdaMin());
     addIfNotEmpty(options, "WavelengthMax", m_view->getLambdaMax());
     addIfNotEmpty(options, "I0MonitorIndex", m_view->getI0MonitorIndex());
-    addIfNotEmpty(options, "ProcessingInstructions",
-                  m_view->getProcessingInstructions());
     addIfNotEmpty(options, "DetectorCorrectionType",
                   m_view->getDetectorCorrectionType());
     auto const correctDetectors =
@@ -412,6 +415,8 @@ void ReflSettingsPresenter::getExpDefaults() {
   defaults.MomentumTransferMax = parameters.optional<double>("Q max");
   defaults.MomentumTransferStep = parameters.optional<double>("dQ/Q");
   defaults.ScaleFactor = parameters.optional<double>("Scale");
+  defaults.ProcessingInstructions =
+      parameters.optional<std::string>("ProcessingInstructions");
   defaults.StitchParams = parameters.optional<std::string>("Stitch1DMany");
 
   if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
@@ -457,8 +462,6 @@ void ReflSettingsPresenter::getInstDefaults() {
   defaults.LambdaMax = parameters.mandatory<double>("LambdaMax");
   defaults.I0MonitorIndex =
       parameters.mandatoryVariant<int, double>("I0MonitorIndex");
-  defaults.ProcessingInstructions =
-      parameters.optional<std::string>("ProcessingInstructions");
   defaults.CorrectDetectors =
       value_or(parameters.optional<bool>("CorrectDetectors"),
                alg->getProperty("CorrectDetectors"));

@@ -97,6 +97,7 @@ private:
   void
   addTransmissionOptions(MantidWidgets::DataProcessor::OptionsQMap &options,
                          std::initializer_list<QString> keys) const;
+  QString getProcessingInstructions() const;
 
   /// The view we are managing
   IReflSettingsView *m_view;

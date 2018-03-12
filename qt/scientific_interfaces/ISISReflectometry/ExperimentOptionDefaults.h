@@ -23,6 +23,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults {
   boost::optional<double> MomentumTransferMax;
   boost::optional<double> MomentumTransferStep;
   boost::optional<double> ScaleFactor;
+  boost::optional<std::string> ProcessingInstructions;
   boost::optional<std::string> StitchParams;
 };
 

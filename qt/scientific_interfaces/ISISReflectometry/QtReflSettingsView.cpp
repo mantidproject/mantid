@@ -56,15 +56,19 @@ void QtReflSettingsView::initLayout() {
 
 void QtReflSettingsView::initOptionsTable() {
   auto table = m_ui.optionsTable;
-  m_columnProperties = QStringList(
-      {"ThetaIn", "FirstTransmissionRun", "MomentumTransferMin",
-       "MomentumTransferMax", "MomentumTransferStep", "ScaleFactor"});
+  m_columnProperties =
+      QStringList({"ThetaIn", "FirstTransmissionRun", "MomentumTransferMin",
+                   "MomentumTransferMax", "MomentumTransferStep", "ScaleFactor",
+                   "ProcessingInstructions"});
   if (m_columnProperties.size() != table->columnCount())
     throw std::runtime_error(
         "Error setting up properties for per-angle options table");
 
+  // Set angle and scale columns to a small width so everything fits
+  table->resizeColumnsToContents();
   table->setColumnWidth(0, 40);
-  table->setColumnWidth(1, 150);
+  table->setColumnWidth(5, 40);
+
   auto header = table->horizontalHeader();
   int totalRowHeight = 0;
   for (int i = 0; i < table->rowCount(); ++i) {
@@ -130,7 +134,6 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
   registerSettingWidget(*m_ui.lamMinEdit, "WavelengthMin", alg);
   registerSettingWidget(*m_ui.lamMaxEdit, "WavelengthMax", alg);
   registerSettingWidget(*m_ui.I0MonIndexEdit, "I0MonitorIndex", alg);
-  registerSettingWidget(*m_ui.procInstEdit, "ProcessingInstructions", alg);
   registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox,
                         "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors",
@@ -235,6 +238,8 @@ void QtReflSettingsView::setExpDefaults(ExperimentOptionDefaults defaults) {
   setText(*m_ui.optionsTable, "MomentumTransferStep",
           defaults.MomentumTransferStep);
   setText(*m_ui.optionsTable, "ScaleFactor", defaults.ScaleFactor);
+  setText(*m_ui.optionsTable, "ProcessingInstructions",
+          defaults.ProcessingInstructions);
 }
 
 void QtReflSettingsView::setSelected(QComboBox &box, std::string const &str) {
@@ -288,6 +293,20 @@ void QtReflSettingsView::setText(QTableWidget &table,
                                  double value) {
   auto valueAsString = QString::number(value);
   setText(table, propertyName, valueAsString);
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 boost::optional<std::string> text) {
+  if (text && !text->empty())
+    setText(table, propertyName, text.get());
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 std::string const &text) {
+  auto textAsQString = QString::fromStdString(text);
+  setText(table, propertyName, textAsQString);
 }
 
 void QtReflSettingsView::setText(QTableWidget &table,
@@ -351,7 +370,6 @@ void QtReflSettingsView::setInstDefaults(InstrumentOptionDefaults defaults) {
                        defaults.I0MonitorIndex);
   setSelected(*m_ui.detectorCorrectionTypeComboBox,
               defaults.DetectorCorrectionType);
-  setText(*m_ui.procInstEdit, defaults.ProcessingInstructions);
   setChecked(*m_ui.correctDetectorsCheckBox, defaults.CorrectDetectors);
 }
 
@@ -633,13 +651,6 @@ std::string QtReflSettingsView::getLambdaMax() const {
 */
 std::string QtReflSettingsView::getI0MonitorIndex() const {
   return getText(*m_ui.I0MonIndexEdit);
-}
-
-/** Return processing instructions
-* @return :: processing instructions
-*/
-std::string QtReflSettingsView::getProcessingInstructions() const {
-  return getText(*m_ui.procInstEdit);
 }
 
 std::string QtReflSettingsView::getReductionType() const {

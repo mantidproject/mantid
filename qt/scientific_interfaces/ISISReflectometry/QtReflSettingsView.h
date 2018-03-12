@@ -88,8 +88,6 @@ public:
   std::string getLambdaMax() const override;
   /// Return I0MonitorIndex
   std::string getI0MonitorIndex() const override;
-  /// Return processing instructions
-  std::string getProcessingInstructions() const override;
   /// Return selected detector correction type
   std::string getDetectorCorrectionType() const override;
   /// Return selected summation type
@@ -165,6 +163,10 @@ private:
                double value);
   void setText(QTableWidget &table, std::string const &propertyName,
                boost::optional<double> value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               boost::optional<std::string> value);
+  void setText(QTableWidget &table, std::string const &propertyName,
+               std::string const &value);
   void setText(QTableWidget &table, std::string const &propertyName,
                const QString &value);
   void setChecked(QCheckBox &checkBox, bool checked);

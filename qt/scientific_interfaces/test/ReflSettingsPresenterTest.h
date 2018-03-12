@@ -100,7 +100,6 @@ public:
     onCallReturnDefaultMonitorBackgroundRange(mockView);
     onCallReturnDefaultLambdaRange(mockView);
     ON_CALL(mockView, getI0MonitorIndex()).WillByDefault(Return(""));
-    ON_CALL(mockView, getProcessingInstructions()).WillByDefault(Return(""));
     ON_CALL(mockView, getDetectorCorrectionType())
         .WillByDefault(Return("VerticalShift"));
   }
@@ -302,21 +301,6 @@ public:
     auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(variantToString(options["I0MonitorIndex"]), "2");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
-  void testGetProcessingInstructionsOption() {
-    NiceMock<MockSettingsView> mockView;
-    onCallReturnDefaultSettings(mockView);
-    auto presenter = makeReflSettingsPresenter(&mockView);
-
-    EXPECT_CALL(mockView, getProcessingInstructions())
-        .Times(AtLeast(1))
-        .WillOnce(Return("3,4"));
-
-    auto options = presenter.getReductionOptions();
-
-    TS_ASSERT_EQUALS(variantToString(options["ProcessingInstructions"]), "3,4");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
@@ -523,7 +507,6 @@ public:
     EXPECT_CALL(mockView, getLambdaMin()).Times(Exactly(2));
     EXPECT_CALL(mockView, getLambdaMax()).Times(Exactly(2));
     EXPECT_CALL(mockView, getI0MonitorIndex()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(2));
     EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(1));
 
     auto transmissionOptions = presenter.getTransmissionOptions();
@@ -539,7 +522,7 @@ public:
     onCallReturnDefaultOptions(mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(4)
+        .Times(5)
         .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, instrumentSettingsEnabled())
         .Times(2)
@@ -553,7 +536,6 @@ public:
     EXPECT_CALL(mockView, getLambdaMin()).Times(Exactly(0));
     EXPECT_CALL(mockView, getLambdaMax()).Times(Exactly(0));
     EXPECT_CALL(mockView, getI0MonitorIndex()).Times(Exactly(0));
-    EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(0));
     EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(0));
     EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(0));
     EXPECT_CALL(mockView, detectorCorrectionEnabled()).Times(Exactly(0));
@@ -567,7 +549,7 @@ public:
     EXPECT_CALL(mockView, getPolarisationCorrections()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getPerAngleOptions()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getPerAngleOptions()).Times(Exactly(2));
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
 
     auto transmissionOptions = presenter.getTransmissionOptions();

@@ -78,7 +78,6 @@ public:
   virtual std::string getLambdaMin() const = 0;
   virtual std::string getLambdaMax() const = 0;
   virtual std::string getI0MonitorIndex() const = 0;
-  virtual std::string getProcessingInstructions() const = 0;
   virtual std::string getDetectorCorrectionType() const = 0;
   virtual std::string getSummationType() const = 0;
   virtual std::string getReductionType() const = 0;

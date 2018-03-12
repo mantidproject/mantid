@@ -15,6 +15,7 @@ bool operator==(const ExperimentOptionDefaults &lhs,
          lhs.MomentumTransferMax == rhs.MomentumTransferMax &&
          lhs.MomentumTransferStep == rhs.MomentumTransferStep &&
          lhs.ScaleFactor == rhs.ScaleFactor &&
+         lhs.ProcessingInstructions == rhs.ProcessingInstructions &&
          lhs.ReductionType == rhs.ReductionType &&
          lhs.SummationType == rhs.SummationType &&
          lhs.StitchParams == rhs.StitchParams;
@@ -40,6 +41,8 @@ std::ostream &operator<<(std::ostream &os,
     os << ",\nMomentumTransferStep: " << defaults.MomentumTransferStep.get();
   if (defaults.ScaleFactor)
     os << ",\nScaleFactor: " << defaults.ScaleFactor.get();
+  if (defaults.ProcessingInstructions)
+    os << ",\nScaleFactor: " << defaults.ProcessingInstructions.get();
   if (defaults.StitchParams)
     os << ", \nStitchParams: '" << defaults.StitchParams.get();
   os << "' }" << std::endl;

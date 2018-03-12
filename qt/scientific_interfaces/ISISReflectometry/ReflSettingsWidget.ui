@@ -279,10 +279,13 @@
            <number>3</number>
           </property>
           <property name="columnCount">
-           <number>6</number>
+           <number>7</number>
           </property>
           <attribute name="horizontalHeaderVisible">
            <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>40</number>
           </attribute>
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
@@ -336,6 +339,11 @@
           <column>
            <property name="text">
             <string>Scale</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>ProcessingInstructions</string>
            </property>
           </column>
          </widget>
@@ -539,9 +547,6 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="3">
-         <widget class="QLineEdit" name="procInstEdit"/>
-        </item>
         <item row="4" column="0">
          <widget class="QLabel" name="I0MonIndexLabel">
           <property name="minimumSize">
@@ -557,19 +562,6 @@
         </item>
         <item row="2" column="3">
          <widget class="QLineEdit" name="monBgMaxEdit"/>
-        </item>
-        <item row="4" column="2">
-         <widget class="QLabel" name="procInstLabel">
-          <property name="minimumSize">
-           <size>
-            <width>117</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>ProcessingInstructions</string>
-          </property>
-         </widget>
         </item>
         <item row="3" column="2">
          <widget class="QLabel" name="lamMaxLabel">
