@@ -25,7 +25,7 @@ Interface
 - The period display no longer becomes blank when changing the period selection in multiple fitting mode.
 - The group/pair selection in Muon Analysis no longer resets when changing tabs or loading data.
 - The Frequency Domain Analysis GUI now uses :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` to create the phase table for PhaseQuad FFTs.
-- The Frequency Domain Analysis GUI now uses :ref:`MuonMaxent <algm-MuonMaxent>` to calculate the frequency spectrum in MaxEnt mode.
+- The Frequency Domain Analysis GUI now uses :ref:`MuonMaxent <algm-MuonMaxent>` to calculate the frequency spectrum in MaxEnt mode.  
 - The ALC interface now allows background sections with negative values.
 - If data is loaded with 0 good frames into Muon Analysis then it will try to load the data without dead time correction (does not need number of good frames).
 - Muon analysis no longer disables the "co add" and "simultaneous" buttons in the multiple fitting interface.
