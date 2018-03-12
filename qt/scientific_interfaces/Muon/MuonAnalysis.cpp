@@ -2654,7 +2654,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setTFAsymm(true);
     } else {
       m_uiForm.fitBrowser->setTFAsymm(false);
-    }  m_uiForm.fitBrowser->checkFitEnabled();
+    }
+    m_uiForm.fitBrowser->checkFitEnabled();
 
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();

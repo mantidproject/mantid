@@ -335,15 +335,13 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
 }
 
 void MuonFitPropertyBrowser::checkFitEnabled() {
-	if (m_reselectGroupBtn->isVisible()) {
-		setFitEnabled(false);
-	}
-	else if(getAutoBackgroundString() != "") {
-		setFitEnabled(true);
-	}
-	else {
-		setFitEnabled(false);
-	}
+  if (m_reselectGroupBtn->isVisible()) {
+    setFitEnabled(false);
+  } else if (getAutoBackgroundString() != "") {
+    setFitEnabled(true);
+  } else {
+    setFitEnabled(false);
+  }
 }
 /**
 * Set the input workspace name
@@ -1197,13 +1195,13 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   if (enabled) {
     setAllGroups();
     setAllPeriods();
-	setAutoBackgroundName("");
+    setAutoBackgroundName("");
 
   } else { // clear current selection
-	  if (m_autoBackground != "") {
-		  setAutoBackgroundName(m_autoBackground);
-		  addAutoBackground();
-	  }
+    if (m_autoBackground != "") {
+      setAutoBackgroundName(m_autoBackground);
+      addAutoBackground();
+    }
     clearChosenGroups();
     clearChosenPeriods();
   }
@@ -1218,7 +1216,9 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
       widget->setVisible(enabled);
     }
   }
-  if (enabled){ setFitEnabled(false); }
+  if (enabled) {
+    setFitEnabled(false);
+  }
 }
 /**
 * Set TF asymmetry mode on or off.

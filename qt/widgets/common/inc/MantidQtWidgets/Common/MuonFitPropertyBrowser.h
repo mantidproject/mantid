@@ -118,6 +118,7 @@ public:
   void setChosenPeriods(const QString &period);
   void setSingleFitLabel(std::string name);
   void setNormalization(const std::string name);
+  void checkFitEnabled();
 public slots:
   /// Perform the fit algorithm
   void fit() override;
@@ -230,6 +231,7 @@ private:
   QDialog *m_comboWindow;
 
   std::vector<std::string> m_groupsList;
+  QString m_autoBackground;
 };
 
 std::map<std::string, double> readMultipleNormalization();
