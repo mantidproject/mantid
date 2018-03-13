@@ -421,12 +421,21 @@ void AlignAndFocusPowder::exec() {
   if (m_maskWS) {
     g_log.information() << "running MaskDetectors started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
-    maskAlg->setProperty("Workspace", m_outputW);
-    maskAlg->setProperty("MaskedWorkspace", m_maskWS);
+    const auto &maskedDetectors = m_maskWS->getMaskedDetectors();
+    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskInstrument");
+    maskAlg->setProperty("InputWorkspace", m_outputW);
+    maskAlg->setProperty("OutputWorkspace", m_outputW);
+    maskAlg->setProperty(
+        "DetectorIDs",
+        std::vector<detid_t>(maskedDetectors.begin(), maskedDetectors.end()));
     maskAlg->executeAsChildAlg();
-    Workspace_sptr tmpW = maskAlg->getProperty("Workspace");
-    m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpW);
+    MatrixWorkspace_sptr tmpW = maskAlg->getProperty("OutputWorkspace");
+
+    API::IAlgorithm_sptr clearAlg = createChildAlgorithm("ClearMaskedSpectra");
+    clearAlg->setProperty("InputWorkspace", tmpW);
+    clearAlg->setProperty("OutputWorkspace", tmpW);
+    clearAlg->executeAsChildAlg();
+    m_outputW = clearAlg->getProperty("OutputWorkspace");
     m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();

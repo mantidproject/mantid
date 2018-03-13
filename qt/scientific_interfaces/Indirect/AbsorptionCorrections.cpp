@@ -92,7 +92,7 @@ void AbsorptionCorrections::run() {
     monteCarloAbsCor->setProperty("ContainerDensity",
                                   m_uiForm.spCanDensity->value());
 
-    QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+    const auto canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
     monteCarloAbsCor->setProperty("ContainerChemicalFormula",
                                   canChemicalFormula.toStdString());
 
@@ -104,9 +104,8 @@ void AbsorptionCorrections::run() {
   if (nameCutIndex == -1)
     nameCutIndex = sampleWsName.length();
 
-  QString outputBaseName = sampleWsName.left(nameCutIndex);
-
-  QString outputWsName = outputBaseName + "_" + sampleShape + "_Corrections";
+  const auto outputWsName =
+      sampleWsName.left(nameCutIndex) + "_" + sampleShape + "_MC_Corrections";
 
   monteCarloAbsCor->setProperty("CorrectionsWorkspace",
                                 outputWsName.toStdString());
@@ -181,7 +180,7 @@ void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
     double canBackThickness = m_uiForm.spFlatCanBackThickness->value();
     alg->setProperty("ContainerBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
-    double canInnerRadius = m_uiForm.spCylCanInnerRadius->value();
+    double canInnerRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("ContainerInnerRadius", canInnerRadius);
 
     double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
@@ -200,6 +199,16 @@ bool AbsorptionCorrections::validate() {
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
+  const auto sampleWsName =
+      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
+
+  if (sampleExists &&
+      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sampleWsName)) {
+    uiv.addErrorMessage(
+        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  }
 
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
                                m_uiForm.leSampleChemicalFormula))
@@ -225,6 +234,17 @@ bool AbsorptionCorrections::validate() {
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
+
+    const auto containerWsName =
+        m_uiForm.dsCanInput->getCurrentDataName().toStdString();
+    bool containerExists =
+        AnalysisDataService::Instance().doesExist(containerWsName);
+    if (containerExists &&
+        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerWsName)) {
+      uiv.addErrorMessage(
+          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+    }
 
     if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
                                  m_uiForm.leCanChemicalFormula)) {
@@ -268,8 +288,8 @@ void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
       dataName.toStdString());
 
   if (!sampleWs) {
-    g_log.warning() << "Failed to find workspace " << dataName.toStdString()
-                    << "\n";
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
+    return;
   }
 
   auto instrument = sampleWs->getInstrument();
@@ -342,8 +362,8 @@ void AbsorptionCorrections::changeSampleDensityUnit(int index) {
 }
 
 /**
-* Handle changing of the container density unit
-*/
+ * Handle changing of the container density unit
+ */
 void AbsorptionCorrections::changeCanDensityUnit(int index) {
 
   if (index == 0) {

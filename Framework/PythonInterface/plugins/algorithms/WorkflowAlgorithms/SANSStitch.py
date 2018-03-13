@@ -3,9 +3,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
+from mantid.api import ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
-    EnabledWhenProperty, PropertyCriterion
+    EnabledWhenProperty, PropertyCriterion, Logger
 import numpy as np
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
@@ -25,7 +25,7 @@ class Mode(object):
         pass
 
 
-class SANSStitch(DataProcessorAlgorithm):
+class SANSStitch(ParallelDataProcessorAlgorithm):
     def _make_mode_map(self):
         return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
                 'Both': Mode.BothFit, 'None': Mode.NoneFit}
@@ -243,16 +243,29 @@ class SANSStitch(DataProcessorAlgorithm):
         else:
             return merge_max
 
+    def _check_merge_range(self, merge_min, merge_max, q_LAB, q_HAB, logger):
+        if merge_min < min(q_HAB.dataX(0)):
+            merge_min = min(q_HAB.dataX(0))
+            logger.warning('Minimum merge region less than data overlap setting to HAB minimum q')
+        elif merge_min > max(q_LAB.dataX(0)):
+            merge_min = max(q_LAB.dataX(0))
+            logger.warning('Minimum merge region greater than data overlap setting to LAB maximum q')
+        if merge_max > max(q_LAB.dataX(0)):
+            merge_max = max(q_LAB.dataX(0))
+            logger.warning('Maximum merge region greater than data overlap setting to LAB maximum q')
+        elif merge_max < min(q_HAB.dataX(0)):
+            merge_max = min(q_HAB.dataX(0))
+            logger.warning('Maximum merge region less than data overlap setting to HAB minimum q')
+
+        return merge_min, merge_max
+
     def _apply_user_mask_ranges(self, cF, cR, nR, nF, merge_min, merge_max):
         merge_max = self._check_bins(merge_min, merge_max, cF, cR)
 
         mask_name = "MaskBins"
         mask_options = {"InputWorkspace": cF}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-        if merge_min < min(cF.dataX(0)):
-            merge_min = min(cF.dataX(0))
-        if merge_max > max(cR.dataX(0)):
-            merge_max = max(cR.dataX(0))
+
         mask_alg.setProperty("InputWorkspace", cF)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
         mask_alg.setProperty("XMin", min(cF.dataX(0)))
@@ -283,29 +296,26 @@ class SANSStitch(DataProcessorAlgorithm):
         return cR, cF, nR, nF
 
     def PyExec(self):
+        logger = Logger("SANSStitch")
+
         enum_map = self._make_mode_map()
         mode = enum_map[self.getProperty('Mode').value]
         merge_mask = self.getProperty('MergeMask').value
         merge_min = self.getProperty('MergeMin').value
         merge_max = self.getProperty('MergeMax').value
-        fit_min = self.getProperty('FitMin').value
-        fit_max = self.getProperty('FitMax').value
-
         cF = self.getProperty('HABCountsSample').value
         cR = self.getProperty('LABCountsSample').value
         nF = self.getProperty('HABNormSample').value
         nR = self.getProperty('LABNormSample').value
-        if merge_mask:
-            cR, cF, nR, nF = self._apply_user_mask_ranges(cF, cR, nR, nF, merge_min, merge_max)
+
         q_high_angle = self._divide(cF, nF)
         q_low_angle = self._divide(cR, nR)
+
         if self.getProperty('ProcessCan').value:
             cF_can = self.getProperty('HABCountsCan').value
             cR_can = self.getProperty('LABCountsCan').value
             nF_can = self.getProperty('HABNormCan').value
             nR_can = self.getProperty('LABNormCan').value
-            if merge_mask:
-                cR_can, cF_can, nR_can, nF_can = self._apply_user_mask_ranges(cF_can, cR_can, nR_can, nF_can, merge_min, merge_max)
 
             q_high_angle_can = self._divide(cF_can, nF_can)
             q_low_angle_can = self._divide(cR_can, nR_can)
@@ -316,6 +326,9 @@ class SANSStitch(DataProcessorAlgorithm):
 
         q_high_angle = self._crop_out_special_values(q_high_angle)
         q_low_angle = self._crop_out_special_values(q_low_angle)
+
+        if merge_mask:
+            merge_min, merge_max = self._check_merge_range(merge_min, merge_max, q_low_angle, q_high_angle, logger)
 
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
@@ -335,6 +348,9 @@ class SANSStitch(DataProcessorAlgorithm):
         nF = self._crop_to_x_range(nF, min_q, max_q)
         nR = self._crop_to_x_range(nR, min_q, max_q)
 
+        if merge_mask:
+            cR, cF, nR, nF = self._apply_user_mask_ranges(cF, cR, nR, nF, merge_min, merge_max)
+
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
         merged_q = self._calculate_merged_q(cF=cF, nF=nF, cR=cR, nR=nR, scale_factor=scale_factor,
                                             shift_factor=shift_factor)
@@ -344,6 +360,10 @@ class SANSStitch(DataProcessorAlgorithm):
             cR_can = self._crop_to_x_range(cR_can, min_q, max_q)
             nF_can = self._crop_to_x_range(nF_can, min_q, max_q)
             nR_can = self._crop_to_x_range(nR_can, min_q, max_q)
+
+            if merge_mask:
+                cR_can, cF_can, nR_can, nF_can = self._apply_user_mask_ranges(cF_can, cR_can, nR_can, nF_can, merge_min,
+                                                                              merge_max)
 
             # Calculate merged q for the can
             merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,

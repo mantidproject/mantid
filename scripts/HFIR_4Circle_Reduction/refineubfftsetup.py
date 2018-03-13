@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-import ui_RefineUbFftDialog
+import HFIR_4Circle_Reduction.ui_RefineUbFftDialog as ui_RefineUbFftDialog
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui

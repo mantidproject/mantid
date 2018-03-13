@@ -1,0 +1,49 @@
+{# Generates a better view for category pages #}
+
+{% extends "layout.html" %}
+
+{% macro split_to_three_columns(item_list) -%}
+{# Split list into 3 columns #}
+{# Uses bootstrap col-md-4 for each column along with slice(3) to divide input list #}
+{# It currently assumes the items in the list are mantiddoc.directives.categories.PageRef classes #}
+    <div class="row">
+    {%- for column in item_list|slice(3) %}
+      <div class="col-md-4">
+      {%- set first = True %}
+      {%- for item in column %}
+        {%- if (item.name[0] != section or first) %}
+          {%- set section = item.name[0] %}
+          {%- if first != true %}
+            </ul>
+          {%- endif %}
+          <h3 style="font-weight:bold">{{ section }}</h3>
+          <ul>
+        {%- endif %}
+        <li><a href="{{ item.link(outpath) }}">{{ item.name }}</a></li>
+        {%- set first = False -%}
+      {%- endfor -%}
+      </ul>
+      </div>
+    {%- endfor -%}
+    </div>
+{%- endmacro %}
+
+{%- block body -%}
+    <h1> Category: {{ title }} </h1>
+    {% if subcategories %}
+    <br>
+    <h2> Subcategories </h2>
+    {{ split_to_three_columns(subcategories) }}
+    <hr>
+    {% endif %}
+
+    {% if pages %}
+    <h2> Pages </h2>
+    {{ split_to_three_columns(pages) }}
+    {% endif %}
+    
+    {% if parentcategory %}
+    <p> {{ parentcategory }} </p>
+    {% endif %}
+
+{%- endblock -%}

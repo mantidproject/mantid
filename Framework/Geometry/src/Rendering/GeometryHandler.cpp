@@ -7,8 +7,9 @@ namespace Geometry {
  *  @param[in] comp
  *  This geometry handler will be ObjComponent's geometry handler
  */
-GeometryHandler::GeometryHandler(IObjComponent *comp) : Obj() {
+GeometryHandler::GeometryHandler(IObjComponent *comp) : csgObj() {
   ObjComp = comp;
+  meshObj = nullptr;
   boolTriangulated = true;
   boolIsInitialized = false;
 }
@@ -18,8 +19,9 @@ GeometryHandler::GeometryHandler(IObjComponent *comp) : Obj() {
  *  This geometry handler will be Object's geometry handler
  */
 GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)
-    : Obj(obj.get()) {
+    : csgObj(obj.get()) {
   ObjComp = nullptr;
+  meshObj = nullptr;
   boolTriangulated = false;
   boolIsInitialized = false;
 }
@@ -28,13 +30,39 @@ GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)
  *  @param[in] obj
  *  This geometry handler will be Object's geometry handler
  */
-GeometryHandler::GeometryHandler(CSGObject *obj) : Obj(obj) {
+GeometryHandler::GeometryHandler(CSGObject *obj) : csgObj(obj) {
   ObjComp = nullptr;
+  meshObj = nullptr;
+  boolTriangulated = false;
+  boolIsInitialized = false;
+}
+
+/** Constructor
+*  @param[in] obj
+*  This geometry handler will be Object's geometry handler
+*/
+GeometryHandler::GeometryHandler(boost::shared_ptr<MeshObject> obj) : csgObj() {
+  ObjComp = nullptr;
+  meshObj = obj.get();
+  boolTriangulated = false;
+  boolIsInitialized = false;
+}
+
+/** Constructor
+*  @param[in] obj
+*  This geometry handler will be Object's geometry handler
+*/
+GeometryHandler::GeometryHandler(MeshObject *obj) : csgObj() {
+  ObjComp = nullptr;
+  meshObj = obj;
   boolTriangulated = false;
   boolIsInitialized = false;
 }
 
 /// Destructor
-GeometryHandler::~GeometryHandler() { ObjComp = nullptr; }
+GeometryHandler::~GeometryHandler() {
+  ObjComp = nullptr;
+  meshObj = nullptr;
+}
 }
 }

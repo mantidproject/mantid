@@ -22,9 +22,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-/// Empty default constructor
-SaveNexus::SaveNexus() : Algorithm() {}
-
 /** Initialisation method.
  *
  */

@@ -1,6 +1,6 @@
 set ( SRC_FILES
 	AbsorptionCorrections.cpp
-	ApplyPaalmanPings.cpp
+	ApplyAbsorptionCorrections.cpp
 	CalculatePaalmanPings.cpp
 	ContainerSubtraction.cpp
 	ConvFit.cpp
@@ -19,6 +19,7 @@ set ( SRC_FILES
 	IndirectDataReduction.cpp
 	IndirectDataReductionTab.cpp
 	IndirectDiffractionReduction.cpp
+	IndirectFitAnalysisTab.cpp
 	IndirectLoadILL.cpp
 	IndirectMolDyn.cpp
 	IndirectMoments.cpp
@@ -46,7 +47,7 @@ set ( SRC_FILES
 set ( INC_FILES
     DllConfig.h
 	AbsorptionCorrections.h
-	ApplyPaalmanPings.h
+	ApplyAbsorptionCorrections.h
 	CalculatePaalmanPings.h
 	ContainerSubtraction.h
 	ConvFit.h
@@ -65,6 +66,7 @@ set ( INC_FILES
 	IndirectDataReduction.h
 	IndirectDataReductionTab.h
 	IndirectDiffractionReduction.h
+	IndirectFitAnalysisTab.h
 	IndirectLoadILL.h
 	IndirectMolDyn.h
 	IndirectMoments.h
@@ -89,7 +91,7 @@ set ( INC_FILES
 
 set ( MOC_FILES
     AbsorptionCorrections.h
-    ApplyPaalmanPings.h
+    ApplyAbsorptionCorrections.h
     CalculatePaalmanPings.h
     ContainerSubtraction.h
     ConvFit.h
@@ -105,6 +107,7 @@ set ( MOC_FILES
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDiffractionReduction.h
+	IndirectFitAnalysisTab.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
@@ -132,7 +135,7 @@ set ( MOC_FILES
 
 set ( UI_FILES
    AbsorptionCorrections.ui
-   ApplyPaalmanPings.ui
+   ApplyAbsorptionCorrections.ui
    CalculatePaalmanPings.ui
    ContainerSubtraction.ui
    ConvFit.ui
@@ -193,4 +196,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
     @loader_path/../../plugins/qt4
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/"
+
 )

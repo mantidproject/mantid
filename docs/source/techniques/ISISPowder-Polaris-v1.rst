@@ -161,7 +161,43 @@ Example
 
   polaris_example.set_sample(sample=sample_obj)
 
+.. _create_total_scattering_pdf_polaris-isis-powder-ref:
+
+
+create_total_scattering_pdf
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. warning:: Total scattering support is not yet fully implemented.
+             Any results obtaining from using the below routine in its current
+             state should not be considered accurate or complete.
+
+The *create_total_scattering_pdf* method allows a user to create a Pair Distribution Function (PDF)
+from focused POLARIS data, with a view performing further total scattering analysis.
+
+With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
+the focused_workspace.
+
+This function requires the run_number you wish to analyse. The focused file for this run number must
+either be loaded in Mantid with the naming format given by the *focus* method:
+
+*<run number>-Results-<TOF/D>-Grp*
+
+for example:
+
+12345-Results-TOF-Grp
+
+Or the focused file must be in the output directory of the POLARIS instrument.
+
+
+Example
+=======
+
+..  code-block:: python
+
+  polaris_example.create_total_scattering_pdf(run_number='12345',
+                                              merge_banks=False)
+
 .. _calibration_mapping_polaris-isis-powder-ref:
+
 
 Calibration Mapping File
 -------------------------
@@ -581,11 +617,11 @@ On POLARIS this is set to the following TOF windows:
 ..  code-block:: python
 
   focused_cropping_values = [
-      (1500, 19900),  # Bank 1
-      (1500, 19900),  # Bank 2
-      (1500, 19900),  # Bank 3
-      (1500, 19900),  # Bank 4
-      (1500, 19900),  # Bank 5
+      (700,  30000),  # Bank 1
+      (1200, 24900),  # Bank 2
+      (1100, 19950),  # Bank 3
+      (1100, 19950),  # Bank 4
+      (1100, 19950),  # Bank 5
       ]
 
 .. _grouping_file_name_polaris_isis-powder-diffraction-ref:

@@ -8,6 +8,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
+using ChildItems = std::map<int, std::set<int>>;
+
 class DataProcessorPresenter;
 class WhiteList;
 class QTwoLevelTreeModel;
@@ -80,8 +82,7 @@ public:
   /// Return selected data
   TreeData selectedData(bool prompt) override;
   /// Transfer new data to model
-  void transfer(const std::vector<std::map<QString, QString>> &runs,
-                const WhiteList &whitelist) override;
+  void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   /// Update row with new data
   void update(int parent, int child, const QStringList &data) override;
   /// Get the number of rows of a given parent
@@ -90,7 +91,7 @@ public:
   void setCell(int row, int column, int parentRow, int parentColumn,
                const std::string &value) override;
   std::string getCell(int row, int column, int parentRow,
-                      int parentColumn) override;
+                      int parentColumn) const override;
   int getNumberOfRows() override;
   /// Get the 'processed' status of a data item
   bool isProcessed(int position) const override;
@@ -98,6 +99,7 @@ public:
   /// Set the 'process' status of a data item
   void setProcessed(bool processed, int position) override;
   void setProcessed(bool processed, int position, int parent) override;
+  void invalidateAllProcessed() override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,
@@ -108,13 +110,15 @@ public:
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
+  bool isMultiLevel() const override;
+
 private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model
   boost::shared_ptr<QTwoLevelTreeModel> m_model;
 
-  /// Insert a row in the model
+  /// Insert an empty row in the model
   void insertRow(int groupIndex, int rowIndex);
   /// Insert a group in the model
   void insertGroup(int groupIndex);
@@ -126,6 +130,7 @@ private:
   /// Validate a table workspace
   void validateModel(Mantid::API::ITableWorkspace_sptr ws,
                      size_t whitelistColumns) const;
+  TreeData constructTreeData(ChildItems rows);
 };
 }
 }

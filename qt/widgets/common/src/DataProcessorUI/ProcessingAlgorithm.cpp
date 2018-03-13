@@ -83,6 +83,42 @@ QString ProcessingAlgorithm::inputPropertyName(size_t index) const {
 QString ProcessingAlgorithm::outputPropertyName(size_t index) const {
   return m_outputProperties[index];
 }
+
+/** Returns the prefix that will be added to the default output ws property
+ */
+QString ProcessingAlgorithm::defaultOutputPrefix() const { return m_prefix[0]; }
+
+/** Returns the default output ws property. This is just the first
+ * property declared by the algorithm. Algorithm properties are
+ * extracted in order, so this is the first in our list.
+ */
+QString ProcessingAlgorithm::defaultOutputPropertyName() const {
+  return m_outputProperties[0];
+}
+
+/** Returns the default input ws property. This is just the first
+ * property declared by the algorithm. Algorithm properties are
+ * extracted in order, so this is the first in our list.
+ */
+QString ProcessingAlgorithm::defaultInputPropertyName() const {
+  return m_inputProperties[0];
+}
+
+/** Returns the list of input property names
+ */
+std::vector<QString> ProcessingAlgorithm::inputProperties() const {
+  return m_inputProperties;
+}
+
+/** Returns the list of output property names
+ */
+std::vector<QString> ProcessingAlgorithm::outputProperties() const {
+  return m_outputProperties;
+}
+
+/** Returns the list of prefixes associated with the output properties
+ */
+std::vector<QString> ProcessingAlgorithm::prefixes() const { return m_prefix; }
 }
 }
 }

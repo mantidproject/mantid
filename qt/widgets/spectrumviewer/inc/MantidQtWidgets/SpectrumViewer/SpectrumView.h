@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QList>
+#include <vector>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
@@ -71,9 +72,12 @@ public:
 
   ~SpectrumView() override;
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
+  void renderWorkspace(const QString &wsName);
   QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const {
     return m_spectrumDisplay;
   }
+
+  void selectData(int spectrumNumber, double dataVal);
   bool isTrackingOn() const;
   /// Load the state of the spectrum viewer from a Mantid project file
   static API::IProjectSerialisable *loadFromProject(const std::string &lines,
@@ -114,8 +118,11 @@ private:
   void updateHandlers();
   void loadSettings();
   void saveSettings() const;
+  bool replaceExistingWorkspace(
+      const std::string &wsName,
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
 
-  QList<MatrixWSDataSource_sptr> m_dataSource;
+  std::vector<MatrixWSDataSource_sptr> m_dataSource;
   QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;
   boost::shared_ptr<GraphDisplay> m_hGraph;
   boost::shared_ptr<GraphDisplay> m_vGraph;

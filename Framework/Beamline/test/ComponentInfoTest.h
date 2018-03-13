@@ -6,17 +6,19 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
 #include <boost/make_shared.hpp>
 #include <numeric>
-#include <tuple>
 #include <string>
+#include <tuple>
 
 using namespace Mantid::Beamline;
 
 namespace {
 
 using PosVec = std::vector<Eigen::Vector3d>;
-using RotVec = std::vector<Eigen::Quaterniond>;
+using RotVec = std::vector<Eigen::Quaterniond,
+                           Eigen::aligned_allocator<Eigen::Quaterniond>>;
 using StrVec = std::vector<std::string>;
 
 /*
@@ -61,7 +63,8 @@ makeFlatTree(PosVec detPositions, RotVec detRotations) {
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
-  auto isRectangularBank = boost::make_shared<std::vector<bool>>(1, false);
+  auto isRectangularBank =
+      boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
 
   auto componentInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
@@ -136,7 +139,8 @@ makeTreeExampleAndReturnGeometricArguments() {
   // Component names
   auto names = boost::make_shared<StrVec>(5);
   // Rectangular bank flag
-  auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
+  auto isRectangularBank =
+      boost::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
 
   auto compInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
@@ -201,7 +205,8 @@ makeTreeExample() {
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
-  auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
+  auto isRectangularBank =
+      boost::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
 
   auto componentInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
@@ -281,7 +286,7 @@ public:
     auto rotations = boost::make_shared<RotVec>();
     auto scaleFactors = boost::make_shared<PosVec>(3);
     auto names = boost::make_shared<StrVec>(3);
-    auto isRectangularBank = boost::make_shared<std::vector<bool>>();
+    auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>();
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
                                 bankSortedComponentIndices, componentRanges,
                                 parentIndices, positions, rotations,
@@ -318,7 +323,8 @@ public:
 
     auto scaleFactors = boost::make_shared<PosVec>();
     auto names = boost::make_shared<StrVec>();
-    auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
+    auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>(
+        2, ComponentType::Generic);
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
                                    parentIndices, positions, rotations,
@@ -357,7 +363,8 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
-    auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
+    auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>(
+        2, ComponentType::Generic);
 
     TS_ASSERT_THROWS(
         ComponentInfo(detectorsInSubtree, detectorRanges, componentsInSubtree,
@@ -755,21 +762,21 @@ public:
     TS_ASSERT_EQUALS(compInfo.name(0), "det0");
   }
 
-  void test_indexOf_name_throws_when_name_invalid() {
+  void test_indexOfAny_name_throws_when_name_invalid() {
     auto infos = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &compInfo = *std::get<0>(infos);
     TSM_ASSERT_THROWS("Should throw, this name does not exist",
-                      compInfo.indexOf("phantom"), std::invalid_argument &)
+                      compInfo.indexOfAny("phantom"), std::invalid_argument &)
     // Sanity check.
     TSM_ASSERT_THROWS_NOTHING("Should NOT throw if provided with a valid name",
-                              compInfo.indexOf(compInfo.name(0)));
+                              compInfo.indexOfAny(compInfo.name(0)));
   }
 
-  void test_indexOf() {
+  void test_indexOfAny() {
     auto infos = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &compInfo = *std::get<0>(infos);
-    TS_ASSERT_EQUALS(compInfo.indexOf("det0"), 0);
-    TS_ASSERT_EQUALS(compInfo.indexOf("root"), compInfo.root());
+    TS_ASSERT_EQUALS(compInfo.indexOfAny("det0"), 0);
+    TS_ASSERT_EQUALS(compInfo.indexOfAny("root"), compInfo.root());
   }
 
   void test_scan_count_no_scanning() {

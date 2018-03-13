@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
+from mantid.api import ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
 import numpy as np
 
@@ -22,7 +22,7 @@ class Mode(object):
         pass
 
 
-class SANSFitShiftScale(DataProcessorAlgorithm):
+class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
     def _make_mode_map(self):
         return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
                 'Both': Mode.BothFit, 'None': Mode.NoneFit}
@@ -66,15 +66,18 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
 
     def PyExec(self):
         enum_map = self._make_mode_map()
-
         mode = enum_map[self.getProperty('Mode').value]
-
         hab = self.getProperty('HABWorkspace').value
         lab = self.getProperty('LABWorkspace').value
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
         fit_min = self.getProperty('FitMin').value
         fit_max = self.getProperty('FitMax').value
+
+        if fit_min < min(hab.dataX(0)):
+            fit_min = min(hab.dataX(0))
+        if fit_max > max(lab.dataX(0)):
+            fit_max = max(lab.dataX(0))
 
         if not mode == Mode.NoneFit:
             shift_factor, scale_factor = self._determine_factors(hab, lab, mode, scale=scale_factor, shift=shift_factor,

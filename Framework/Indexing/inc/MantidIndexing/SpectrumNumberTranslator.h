@@ -48,7 +48,7 @@ namespace Indexing {
 class MANTID_INDEXING_DLL SpectrumNumberTranslator {
 public:
   SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
-                           std::unique_ptr<Partitioner> partitioner,
+                           const Partitioner &partitioner,
                            const PartitionIndex &partition);
   SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
                            const SpectrumNumberTranslator &parent);
@@ -60,6 +60,7 @@ public:
   size_t localSize() const;
 
   SpectrumNumber spectrumNumber(const size_t index) const;
+  const std::vector<SpectrumNumber> &globalSpectrumNumbers() const;
 
   SpectrumIndexSet makeIndexSet() const;
   SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max) const;
@@ -69,6 +70,8 @@ public:
   makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const;
   SpectrumIndexSet
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
+
+  PartitionIndex partitionOf(const GlobalSpectrumIndex globalIndex) const;
 
 private:
   bool isPartitioned() const;

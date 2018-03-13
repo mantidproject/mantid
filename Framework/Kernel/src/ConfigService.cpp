@@ -127,20 +127,6 @@ public:
     m_pPtr = static_cast<T *>(this);
   }
 
-  /// Copy constructor
-  WrappedObject(const WrappedObject<T> &A) : T(A) {
-    m_pPtr = static_cast<T *>(this);
-  }
-
-  /// Overloaded = operator sets the pointer to the wrapped class
-  /// and copies over the contents
-  WrappedObject<T> &operator=(const WrappedObject<T> &rhs) {
-    if (this != &rhs) {
-      m_pPtr = static_cast<T *>(this);
-      *m_pPtr = rhs;
-    }
-    return *this;
-  }
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
   /// Overloaded * operator returns the wrapped object pointer
@@ -194,7 +180,7 @@ ConfigServiceImpl::ConfigServiceImpl()
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
   m_ConfigPaths.emplace("mantidqt.python_interfaces_directory", true);
-  m_ConfigPaths.emplace("plugins.directory", true);
+  m_ConfigPaths.emplace("framework.plugins.directory", true);
   m_ConfigPaths.emplace("pvplugins.directory", false);
   m_ConfigPaths.emplace("mantidqt.plugins.directory", false);
   m_ConfigPaths.emplace("instrumentDefinition.directory", true);
@@ -1781,8 +1767,8 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
   // update the iterator, this means we will skip the folder in HOME and
   // look in the instrument folder in mantid install directory or mantid source
   // code directory
-  if (updateInstrStr != "1" || updateInstrStr != "on" ||
-      updateInstrStr != "On") {
+  if (!(updateInstrStr == "1" || updateInstrStr == "on" ||
+        updateInstrStr == "On")) {
     instrDir++;
   }
 
@@ -2036,11 +2022,12 @@ void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
 /** Sets the Log level for a filter channel
 * @param filterChannelName the channel name of the filter channel to change
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+* @param quiet If true then no message regarding the level change is emitted
 * @throws std::invalid_argument if the channel name is incorrect or it is not a
 * filterChannel
 */
 void ConfigServiceImpl::setFilterChannelLogLevel(
-    const std::string &filterChannelName, int logLevel) {
+    const std::string &filterChannelName, int logLevel, bool quiet) {
   Poco::Channel *channel = nullptr;
   try {
     channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
@@ -2059,9 +2046,11 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
     if (rootLevel != lowestLogLevel) {
       Mantid::Kernel::Logger::setLevelForAll(lowestLogLevel);
     }
-    g_log.log(filterChannelName + " log channel set to " +
-                  Logger::PriorityNames[logLevel] + " priority",
-              static_cast<Logger::Priority>(logLevel));
+    if (!quiet) {
+      g_log.log(filterChannelName + " log channel set to " +
+                    Logger::PriorityNames[logLevel] + " priority",
+                static_cast<Logger::Priority>(logLevel));
+    }
   } else {
     throw std::invalid_argument(filterChannelName +
                                 " was not a filter channel");

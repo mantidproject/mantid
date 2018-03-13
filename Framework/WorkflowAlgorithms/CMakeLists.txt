@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/EQSANSMonitorTOF.cpp
 	src/EQSANSPatchSensitivity.cpp
 	src/EQSANSQ2D.cpp
+	src/ExtractQENSMembers.cpp
 	src/HFIRDarkCurrentSubtraction.cpp
 	src/HFIRInstrument.cpp
 	src/HFIRLoad.cpp
@@ -62,6 +63,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/EQSANSMonitorTOF.h
 	inc/MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h
 	inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
+	inc/MantidWorkflowAlgorithms/ExtractQENSMembers.h
 	inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
 	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
@@ -89,6 +91,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	ConvolutionFitSequentialTest.h
+	ExtractQENSMembersTest.h
 	IMuonAsymmetryCalculatorTest.h
 	LoadEventAndCompressTest.h
 	MuonProcessTest.h
@@ -123,7 +126,9 @@ set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflow
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( WorkflowAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties(WorkflowAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(WorkflowAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS

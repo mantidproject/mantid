@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
@@ -11,7 +12,9 @@
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QMessageBox>
+
 #include <boost/algorithm/string/find.hpp>
+#include <boost/pointer_cast.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -454,57 +457,29 @@ void IndirectTab::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
 }
 
 /*
- * Updates the values of the function parameters for the function with the
- * specified name, in the parameters table.
- *
- * @param functionName  The name of the function whose parameters to update in
- *                      the parameters table.
- * @param prefix        The prefixes of the names of the parameters, to be used
- *                      to find the correct parameter in the specified parameter
- *                      values map.
- * @param paramNames    The names of the function parameters to update.
- * @param paramValues   The updated parameter values stored in a map from the
- *                      name of the function parameter (preceded by prefix) to
- *                      the updated value of that parameter.
- * @param startOffset   The start offset, if set to N, the first N parameters
- *                      won't be updated.
- * @param endOffset     The end offset, if set to N, the last N parameters won't
- *                      be updated.
- */
-void IndirectTab::updateProperties(const QString &functionName,
-                                   const QString &prefix,
-                                   const QStringList &paramNames,
-                                   const QMap<QString, double> &paramValues,
-                                   int startOffset, int endOffset) {
-
-  for (auto it = paramNames.begin() + startOffset;
-       it != paramNames.end() - endOffset; ++it) {
-    const QString functionParam = functionName + "." + *it;
-    const QString paramValue = prefix + *it;
-    double value = paramValues[paramValue];
-    m_dblManager->setValue(m_properties[functionParam], value);
-  }
-}
-
-/*
  * Extracts the row at the specified index in the specified table workspace, as
- *a map
- * from the column name to the value in that column in the extracted row.
+ * a map from the column name to the value in that column in the extracted row.
  *
- * @param tableWs The table workspace to extract a row from.
- * @param wsIndex The index of the row to extract.
- * @return        A map from the name of a column to the value in that column in
- *the
- *                extracted row.
+ * @param tableWs           The table workspace to extract a row from.
+ * @param columnsToExtract  The names of the columns to extract.
+ * @param wsIndex           The index of the row to extract.
+ * @return                  A map from the name of a column to the value in that
+ *                          column (from the extracted row).
  */
-QMap<QString, double>
-IndirectTab::extractRowFromTable(ITableWorkspace_sptr tableWs, size_t wsIndex) {
+QHash<QString, double>
+IndirectTab::extractRowFromTable(ITableWorkspace_sptr tableWs,
+                                 const QSet<QString> &columnsToExtract,
+                                 size_t wsIndex) {
   std::vector<std::string> columnNames = tableWs->getColumnNames();
-  QMap<QString, double> parameters;
+  QHash<QString, double> parameters;
 
   for (size_t column = 0; column < columnNames.size(); ++column) {
-    double value = tableWs->Double(wsIndex, column);
-    parameters.insert(QString::fromStdString(columnNames[column]), value);
+    const auto columnName = QString::fromStdString(columnNames[column]);
+
+    if (columnsToExtract.contains(columnName)) {
+      double value = tableWs->Double(wsIndex, column);
+      parameters.insert(columnName, value);
+    }
   }
 
   return parameters;
@@ -724,7 +699,7 @@ bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
  *                            to the value in the cell at the specified spectrum
  *                            index in the column with the specified name.
  */
-QHash<QString, QHash<size_t, double>> IndirectTab::extractParametersFromTable(
+QHash<size_t, QHash<QString, double>> IndirectTab::extractParametersFromTable(
     const std::string &tableWsName, const QSet<QString> &columnsToExtract,
     size_t minSpectrum, size_t maxSpectrum) {
   std::vector<size_t> spectraIndices;
@@ -751,7 +726,7 @@ QHash<QString, QHash<size_t, double>> IndirectTab::extractParametersFromTable(
  *                            to the value in the cell at the specified spectrum
  *                            index in the column with the specified name.
  */
-QHash<QString, QHash<size_t, double>> IndirectTab::extractParametersFromTable(
+QHash<size_t, QHash<QString, double>> IndirectTab::extractParametersFromTable(
     const std::string &tableWsName, const QSet<QString> &columnsToExtract,
     const std::vector<size_t> &spectraIndices) {
   using AnalysisDataService = Mantid::API::AnalysisDataService;
@@ -782,49 +757,32 @@ QHash<QString, QHash<size_t, double>> IndirectTab::extractParametersFromTable(
  *                            to the value in the cell at the specified spectrum
  *                            index in the column with the specified name.
  */
-QHash<QString, QHash<size_t, double>> IndirectTab::extractParametersFromTable(
+QHash<size_t, QHash<QString, double>> IndirectTab::extractParametersFromTable(
     Mantid::API::ITableWorkspace_sptr tableWs,
     const QSet<QString> &columnsToExtract,
     const std::vector<size_t> &spectraIndices) {
-  QHash<QString, QHash<size_t, double>> parameterValues;
+  QHash<size_t, QHash<QString, double>> parameterValues;
 
-  for (auto &name : tableWs->getColumnNames()) {
-    QString columnName = QString::fromStdString(name);
-
-    // Check whether the current column is to be extracted.
-    if (columnsToExtract.contains(columnName)) {
-      parameterValues[columnName] =
-          extractColumnFromTable(tableWs, name, spectraIndices);
-    }
+  for (size_t i = 0; i < tableWs->rowCount(); ++i) {
+    parameterValues[spectraIndices[i]] =
+        extractRowFromTable(tableWs, columnsToExtract, i);
   }
-
   return parameterValues;
 }
 
-/*
- * Extracts the column with the specified name, from the specified table
- * workspace.
- *
- * @param tableWs         The table workspace to extract the column from.
- * @param columnName      The name of the column to extract
- * @param spectraIndices  The spectrum indices which each row in the table
- *                        column maps onto.
- * @return                A map from spectrum index to the value in the
- *                        column at the corresponding row index.
- */
-QHash<size_t, double>
-IndirectTab::extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
-                                    const std::string &columnName,
-                                    const std::vector<size_t> &spectraIndices) {
-  auto const column = tableWs->getColumn(columnName);
-  auto const minSize = std::min(column->size(), spectraIndices.size());
+QHash<QString, size_t> IndirectTab::extractAxisLabels(
+    Mantid::API::MatrixWorkspace_const_sptr workspace,
+    const size_t &axisIndex) const {
+  Axis *axis = workspace->getAxis(axisIndex);
+  if (!axis->isText())
+    return QHash<QString, size_t>();
 
-  QHash<size_t, double> columnValues;
+  TextAxis *textAxis = boost::static_pointer_cast<TextAxis>(axis);
+  QHash<QString, size_t> labels;
 
-  for (size_t i = 0; i < minSize; ++i) {
-    columnValues[spectraIndices[i]] = column->toDouble(i);
-  }
-  return columnValues;
+  for (size_t i = 0; i < textAxis->length(); ++i)
+    labels[QString::fromStdString(textAxis->label(i))] = i;
+  return labels;
 }
 
 /*

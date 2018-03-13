@@ -236,7 +236,7 @@ time_t CatalogHelper::getTimevalue(const std::string &inputDate) {
   boost::algorithm::split_regex(dateSegments, inputDate, boost::regex("/"));
   // Reorganise the date to be ISO format.
   std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" +
-                        dateSegments.at(0) + " 0:00:00.000";
+                        dateSegments.at(0) + " 00:00:00.000";
   // Return the date as time_t value.
   return Mantid::Types::Core::DateAndTime(isoDate).to_time_t();
 }
