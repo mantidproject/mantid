@@ -30,6 +30,7 @@ Interface
 - If data is loaded with 0 good frames into Muon Analysis then it will try to load the data without dead time correction (does not need number of good frames).
 - Muon analysis no longer disables the "co add" and "simultaneous" buttons in the multiple fitting interface.
 - Muon analysis no longer crashes when using the browse button in sequential fitting.
+- The period summation/subtraction can now be used in multiple fitting. 
 
 Algorithms
 ----------

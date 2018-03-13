@@ -109,6 +109,8 @@ Improved
    :class: screenshot
    :width: 800px
 
+- Result plotting in the Calculate Monte Carlo Absorption interface is now the same as that in Apply Absorption Correction; ability to select whether to plot result in Wavelength, Angle or Both.
+
 Bugfixes
 ########
 - In the Calculate Paalman Pings tab of the Indirect Correction interface the container back thickness is now set correctly.
