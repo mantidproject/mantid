@@ -11,17 +11,17 @@ Description
 
 .. warning::
 
-   This algorithm does not perform any consistency check of the input data. This is the user responsibility to choose physically reasonable dataset.
+   This algorithm does not perform any consistency check of the input data. It is the users responsibility to choose a physically reasonable dataset.
 
-This algorithm loads a list  of DNS `.d_dat` data files into a `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_. If algorithm fails to process the file, this file will be ignored. In this case algorithm produces a warning and continues to process further files. Only in that case if no valid files are provided, algorithm terminates with an error message.
+This algorithm loads a list  of DNS `.d_dat` data files into a `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_. If the algorithm fails to process a file, this file will be ignored. In this case the algorithm produces a warning and continues to process further files. Only if no valid files are provided, the algorithm terminates with an error message.
 
-This algorithm is meant to replace the :ref:`algm-LoadDNSLegacy` for single crysral diffraction data.
+This algorithm is meant to replace the :ref:`algm-LoadDNSLegacy` for single crystal diffraction data.
 
 **Output**
 
 As a result, two workspaces are created:
 
-- `OutputWorkspace` contains raw neutron counts.
+- `OutputWorkspace` contains the raw neutron counts.
 
 - `NormalizationWorkspace` contains the choosen normalization data (either monitor counts or experiment duration time).
 
@@ -34,7 +34,7 @@ Both workspaces have :math:`(H,K,L)` dimensions. The metadata are loaded into ti
 Restrictions
 ------------
 
-- This algorithm only supports *DNS* instrument in its configuration with one detector bank (polarisation analysis).
+- This algorithm only supports the *DNS* instrument in its configuration with one detector bank (polarisation analysis).
 
 - This algorithm does not support DNS TOF mode data. It is meant only for single crystal diffraction experiments with 1 TOF channel.
 
@@ -42,7 +42,7 @@ Restrictions
 Data replication
 ________________
 
-For standard data (vanadium, NiCr, background) the sample rotation angle assumed to be not important. These data are typically measured only for one sample rotation angle. The algorithm can replicate these data for the same sample rotation angles as a single crystal sample has been measured. For this purpose optional input fields *SaveHuberTo* and *LoadHuberFrom* can be used.
+For standard data (vanadium, NiCr, background) the sample rotation angle is assumed to be not important. These data are typically measured only for one sample rotation angle. The algorithm can replicate these data for the same sample rotation angles as a single crystal sample has been measured. For this purpose optional input fields *SaveHuberTo* and *LoadHuberFrom* can be used.
 
 - *SaveHuberTo* should contain a name of the `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ where sample rotation angles (Huber) read from the data files will be saved. If the specified workspace exists, it will be overwritten.
 
