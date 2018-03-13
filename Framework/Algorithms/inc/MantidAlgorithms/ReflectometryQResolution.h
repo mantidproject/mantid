@@ -46,8 +46,10 @@ private:
     double chopperPeriod{0.};
     double chopperRadius{0.};
     double detectorResolution{0.};
-    size_t foregroundStartPixel{0};
-    size_t foregroundEndPixel{0};
+    size_t foregroundStart{0};
+    size_t foregroundEnd{0};
+    size_t directForegroundStart{0};
+    size_t directForegroundEnd{0};
     double l1{0.};
     double l2{0.};
     double pixelSize{0.};
@@ -64,7 +66,7 @@ private:
   void init() override;
   void exec() override;
   double angularResolutionSquared(API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace &directWS, const size_t wsIndex, const Setup &setup, const double beamFWHM, const double directBeamFWHM, const double incidentFWHM, const double slit1FWHM);
-  double beamRMSVariation(API::MatrixWorkspace_sptr &ws, const Setup &setup);
+  double beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start, const size_t end);
   void convertToMomentumTransfer(API::MatrixWorkspace_sptr &ws);
   double detectorDA(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double incidentFWHM);
   const Setup createSetup(const API::MatrixWorkspace &ws, const API::MatrixWorkspace &directWS);

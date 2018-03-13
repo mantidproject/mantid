@@ -21,12 +21,13 @@ static const std::string CHOPPER_RADIUS{"ChopperRadius"};
 static const std::string CHOPPER_SPEED{"ChopperSpeed"};
 static const std::string DETECTOR_RESOLUTION{"DetectorResolution"};
 static const std::string DIRECT_BEAM_WS{"DirectBeamWorkspace"};
-static const std::string FOREGROUND{"Foreground"};
+static const std::string DIRECT_FOREGROUND{"DirectForeground"};
 static const std::string INPUT_WS{"InputWorkspace"};
 static const std::string OUTPUT_WS{"OutputWorkspace"};
 static const std::string PIXEL_SIZE{"PixelSize"};
 static const std::string POLARIZED{"Polarized"};
 static const std::string REFLECTED_BEAM_WS{"ReflectedBeamWorkspace"};
+static const std::string REFLECTED_FOREGROUND{"ReflectedForeground"};
 static const std::string SLIT1_NAME{"Slit1Name"};
 static const std::string SLIT1_SIZE_LOG{"Slit1SizeSampleLog"};
 static const std::string SLIT2_NAME{"Slit2Name"};
@@ -95,11 +96,12 @@ void ReflectometryQResolution::init() {
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::REFLECTED_BEAM_WS, "",
                                                              Direction::Input, inWavelength),
       "A reflected beam workspace in wavelength.");
+  declareProperty(Prop::REFLECTED_FOREGROUND, std::vector<int>(), twoElementArray, "A two element list [start, end] defining the reflected beam foreground region in workspace indices.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::DIRECT_BEAM_WS, "",
                                                              Direction::Input),
       "A direct beam workspace in wavelength.");
-  declareProperty(Prop::FOREGROUND, std::vector<int>(), twoElementArray, "A list of three elements [low angle width, center, high angle width] defining the foreground region in pixels.");
+  declareProperty(Prop::DIRECT_FOREGROUND, std::vector<int>(), twoElementArray, "A two element list [start, end] defining the direct beam foreground region in workspace indices.");
   declareProperty(Prop::SUM_TYPE, SumTypeChoice::LAMBDA, acceptableSumTypes, "The type of summation performed for the input workspace.");
   declareProperty(Prop::POLARIZED, false, "True if the input workspace is part of polarization analysis experiment, false otherwise.");
   declareProperty(Prop::PIXEL_SIZE, EMPTY_DBL(), mandatoryDouble, "Detector pixel size, in meters.");
@@ -126,8 +128,8 @@ void ReflectometryQResolution::exec() {
   API::MatrixWorkspace_sptr outWS;
   outWS = inWS->clone();
   convertToMomentumTransfer(outWS);
-  const auto beamFWHM = beamRMSVariation(reflectedWS, setup);
-  const auto directBeamFWHM = beamRMSVariation(directWS, setup);
+  const auto beamFWHM = beamRMSVariation(reflectedWS, setup.foregroundStart, setup.foregroundEnd);
+  const auto directBeamFWHM = beamRMSVariation(directWS, setup.directForegroundStart, setup.directForegroundEnd);
   const auto incidentFWHM = incidentAngularSpread(setup);
   const auto slit1FWHM = slit1AngularSpread(setup);
   const auto &spectrumInfo = inWS->spectrumInfo();
@@ -174,7 +176,7 @@ double ReflectometryQResolution::angularResolutionSquared(API::MatrixWorkspace_s
       }
     }
   } else {  // SumType::LAMBDA
-    const auto foregroundWidth = static_cast<double>(setup.foregroundEndPixel - setup.foregroundStartPixel + 1) * setup.pixelSize;
+    const auto foregroundWidth = static_cast<double>(setup.foregroundEnd - setup.foregroundStart + 1) * setup.pixelSize;
     const auto foregroundWidthLimited = pow<2>(0.68) * (pow<2>(foregroundWidth) + pow<2>(setup.slit2Size)) / pow<2>(l2 * braggAngle);
     double angularResolution;
     if (setup.polarized) {
@@ -186,14 +188,14 @@ double ReflectometryQResolution::angularResolutionSquared(API::MatrixWorkspace_s
   }
 }
 
-double ReflectometryQResolution::beamRMSVariation(API::MatrixWorkspace_sptr &ws, const Setup &setup) {
+double ReflectometryQResolution::beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start, const size_t end) {
   // det_fwhm and detdb_fwhm in COSMOS
   using namespace boost::math;
   auto integrate = createChildAlgorithm("Integration");
   integrate->setProperty("InputWorkspace", ws);
   integrate->setProperty("OutputWorkspace", "unused_for_child");
-  integrate->setProperty("StartWorkspaceIndex", static_cast<int>(setup.foregroundStartPixel));
-  integrate->setProperty("EndWorkspaceIndex", static_cast<int>(setup.foregroundEndPixel));
+  integrate->setProperty("StartWorkspaceIndex", static_cast<int>(start));
+  integrate->setProperty("EndWorkspaceIndex", static_cast<int>(end));
   integrate->execute();
   API::MatrixWorkspace_const_sptr integratedWS = integrate->getProperty("OutputWorkspace");
   double sum{0.};
@@ -242,11 +244,16 @@ const ReflectometryQResolution::Setup ReflectometryQResolution::createSetup(cons
   s.chopperPeriod = 1. / (static_cast<double>(getProperty(Prop::CHOPPER_SPEED)) / 60.);
   s.chopperRadius = getProperty(Prop::CHOPPER_RADIUS);
   s.detectorResolution = getProperty(Prop::DETECTOR_RESOLUTION);
-  const std::vector<int> foreground = getProperty(Prop::FOREGROUND);
-  const auto lowPixel = static_cast<size_t>(foreground.front());
-  const auto highPixel = static_cast<size_t>(foreground.back());
-  s.foregroundStartPixel = std::min(lowPixel, highPixel);
-  s.foregroundEndPixel = std::max(lowPixel, highPixel);
+  std::vector<int> foreground = getProperty(Prop::REFLECTED_FOREGROUND);
+  auto lowPixel = static_cast<size_t>(foreground.front());
+  auto highPixel = static_cast<size_t>(foreground.back());
+  s.foregroundStart = std::min(lowPixel, highPixel);
+  s.foregroundEnd = std::max(lowPixel, highPixel);
+  foreground = getProperty(Prop::DIRECT_FOREGROUND);
+  lowPixel = static_cast<size_t>(foreground.front());
+  highPixel = static_cast<size_t>(foreground.back());
+  s.directForegroundStart = std::min(lowPixel, highPixel);
+  s.directForegroundEnd = std::max(lowPixel, highPixel);
   s.pixelSize = getProperty(Prop::PIXEL_SIZE);
   s.polarized = getProperty(Prop::POLARIZED);
   s.slit1Slit2Distance = interslitDistance(ws);
