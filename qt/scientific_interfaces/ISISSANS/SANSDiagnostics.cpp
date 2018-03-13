@@ -1450,7 +1450,7 @@ QString SANSDiagnostics::createOutputWorkspaceName(
   // Detector, Min value,  and Max values,
   QString appendix = "-" + detectorName + "-" + integrationType + min + "-" +
                      integrationType + max;
-  if (min == max)     {
+  if (min == max) {
     // special case which means that it is all of the range
     appendix = "-" + detectorName + "-" + integrationType + "_ALL";
   }
