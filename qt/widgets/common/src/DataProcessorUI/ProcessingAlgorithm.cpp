@@ -8,6 +8,8 @@ namespace DataProcessor {
 * @param name : The name of this algorithm
 * @param prefix : The list of prefixes that will be used for the output
 * workspaces' names
+* @param postprocessedOutputPrefixIndex The zero based index of the prefix for
+* the workspace which should be postprocessed
 * @param blacklist : The list of properties we do not want to show
 */
 ProcessingAlgorithm::ProcessingAlgorithm(
@@ -45,6 +47,8 @@ ProcessingAlgorithm::ProcessingAlgorithm(
 * @param name : The name of this algorithm
 * @param prefix : The list of prefixes that will be used for the output
 * workspaces' names, as a string
+* @param postprocessedOutputPrefixIndex The zero based index of the prefix for
+* the workspace which should be postprocessed
 * @param blacklist : The list of properties we do not want to show, as a string
 */
 ProcessingAlgorithm::ProcessingAlgorithm(

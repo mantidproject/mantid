@@ -198,7 +198,8 @@ private:
   void createTOFWorkspace(const QString &wsName,
                           const QString &runNumber = "") {
     auto tinyWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            2000);
     auto inst = tinyWS->getInstrument();
 
     inst->getParameterMap()->addDouble(inst.get(), "I0MonitorIndex", 1.0);
@@ -3190,16 +3191,16 @@ public:
             "IvsQ_TOF_12345_TOF_12346");
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[0], 0.100, 1e-5);
+        out->x(0)[0], 0.01108, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[1], 0.104, 1e-5);
+        out->x(0)[1], 0.01153, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[2], 0.10816, 1e-5);
+        out->x(0)[2], 0.01199, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[3], 0.11248, 1e-5);
+        out->x(0)[3], 0.01247, 1e-5);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspacesNoPrefix);

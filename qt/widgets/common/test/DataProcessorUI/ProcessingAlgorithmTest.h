@@ -58,15 +58,13 @@ public:
     // ReflectometryReductionOneAuto has three output ws properties
     // We should provide three prefixes, one for each ws
     std::vector<QString> prefixes;
-    prefixes.emplace_back("IvsQ_");
     prefixes.emplace_back("IvsQ_binned_");
+    prefixes.emplace_back("IvsQ_");
     // This should throw
     TS_ASSERT_THROWS(
         ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()),
         std::invalid_argument);
 
-    prefixes.emplace_back("IvsQ_");
-    prefixes.emplace_back("IvsQ_binned_");
     // This should also throw
     TS_ASSERT_THROWS(
         ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()),
