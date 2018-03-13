@@ -87,6 +87,9 @@ public:
   }
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
+  /// returns true if the browser is set to multi fitting mode
+  bool isMultiFittingMode() const override;
+
 
   /// After fit checks done, continue
   void continueAfterChecks(bool sequential) override;
@@ -230,6 +233,9 @@ private:
   QDialog *m_comboWindow;
 
   std::vector<std::string> m_groupsList;
+
+  //stores if this is in multi fitting mode
+  bool m_isMultiFittingMode;
 };
 
 std::map<std::string, double> readMultipleNormalization();
