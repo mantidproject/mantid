@@ -66,8 +66,6 @@ void QtReflSettingsView::initOptionsTable() {
 
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
-  table->setColumnWidth(0, 40);
-  table->setColumnWidth(5, 40);
 
   auto header = table->horizontalHeader();
   int totalRowHeight = 0;
