@@ -90,7 +90,6 @@ public:
   /// returns true if the browser is set to multi fitting mode
   bool isMultiFittingMode() const override;
 
-
   /// After fit checks done, continue
   void continueAfterChecks(bool sequential) override;
   /// Remove a plotted guess
@@ -234,7 +233,7 @@ private:
 
   std::vector<std::string> m_groupsList;
 
-  //stores if this is in multi fitting mode
+  // stores if this is in multi fitting mode
   bool m_isMultiFittingMode;
 };
 

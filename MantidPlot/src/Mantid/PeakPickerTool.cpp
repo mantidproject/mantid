@@ -695,11 +695,12 @@ void PeakPickerTool::prepareContextMenu(QMenu &menu) {
       }
 
       MantidQt::MantidWidgets::PropertyHandler *h =
-        m_fitPropertyBrowser->currentHandler();
+          m_fitPropertyBrowser->currentHandler();
       if (h && h->pfun()) {
         if (h->hasPlot()) {
           action = new QAction("Remove guess for this peak", this);
-          connect(action, SIGNAL(triggered()), this, SLOT(removeCurrentGuess()));
+          connect(action, SIGNAL(triggered()), this,
+                  SLOT(removeCurrentGuess()));
           menu.addAction(action);
         } else {
           action = new QAction("Plot guess for this peak", this);
@@ -1063,21 +1064,23 @@ bool PeakPickerTool::isMuonData() const {
   return (getMuonPointer() != nullptr);
 }
 /**
-* Tests if the peak picker tool is connected to a MuonFitPropertyBrowser and set to multiple fitting
+* Tests if the peak picker tool is connected to a MuonFitPropertyBrowser and set
+* to multiple fitting
 * @returns :: True for muon multiple fit data, false otherwise
 */
 bool PeakPickerTool::isMuonMultiFitData() const {
   const auto muonBrowser = getMuonPointer();
-  if (muonBrowser != nullptr)     {
-    return  muonBrowser->isMultiFittingMode();
+  if (muonBrowser != nullptr) {
+    return muonBrowser->isMultiFittingMode();
   }
   return false;
 }
 
 /// Returns a pointer to the MuonFitPropertyBrowser or NULL
-const MantidQt::MantidWidgets::MuonFitPropertyBrowser* PeakPickerTool::getMuonPointer() const {
+const MantidQt::MantidWidgets::MuonFitPropertyBrowser *
+PeakPickerTool::getMuonPointer() const {
   const auto muonBrowser =
-    dynamic_cast<MantidQt::MantidWidgets::MuonFitPropertyBrowser *>(
-      m_fitPropertyBrowser);
+      dynamic_cast<MantidQt::MantidWidgets::MuonFitPropertyBrowser *>(
+          m_fitPropertyBrowser);
   return muonBrowser;
 }

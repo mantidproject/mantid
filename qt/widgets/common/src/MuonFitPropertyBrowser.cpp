@@ -79,10 +79,9 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
  * @param mantidui :: The UI form for MantidPlot
 */
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
-  QObject *mantidui)
-  : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr),
-  m_mainSplitter(nullptr), m_isMultiFittingMode(false) {
-}
+                                               QObject *mantidui)
+    : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr),
+      m_mainSplitter(nullptr), m_isMultiFittingMode(false) {}
 
 /**
 * Initialise the muon fit property browser.

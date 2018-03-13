@@ -200,7 +200,7 @@ private:
   // Test if we are fitting muon multi fit data
   bool isMuonMultiFitData() const;
   // Returns a pointer to the MuonFitPropertyBrowser or NULL
-  const MantidQt::MantidWidgets::MuonFitPropertyBrowser* getMuonPointer() const;
+  const MantidQt::MantidWidgets::MuonFitPropertyBrowser *getMuonPointer() const;
 
   /// Creates a pointer to fitPropertyBrowser
   MantidQt::MantidWidgets::FitPropertyBrowser *m_fitPropertyBrowser;
