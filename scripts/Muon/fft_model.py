@@ -15,20 +15,11 @@ class FFTWrapper(object):
         self.name = "FFT"
         self.model = FFT
 
-    def digit(self,x):
-        return int(filter(str.isdigit,x) or 0)
-
     def loadData(self,inputs):
         """
         store the data in the wrapper for later
         """
         if "phaseTable" in inputs:
-            ws = mantid.AnalysisDataService.retrieve("MuonAnalysis")
-            if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
-                ws = mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
-            if self.digit(inputs["Run"]) != ws.getRunNumber():
-                mantid.logger.error("Active workspace has changed. Restart this interface")
-                inputs.clear()
             self.phaseTable = inputs["phaseTable"]
         else:
             self.phaseTable = None

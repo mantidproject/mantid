@@ -47,7 +47,8 @@ class FFTPresenter(object):
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def createThread(self):
-        return thread_model.ThreadModel(self.alg)
+        runName=self.load.getRunName()
+        return thread_model.ThreadModel(self.alg,runName)
 
     # constructs the inputs for the FFT algorithms
     # then executes them (see fft_model to see the order
