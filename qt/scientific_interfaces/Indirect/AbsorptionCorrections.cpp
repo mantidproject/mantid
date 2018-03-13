@@ -92,7 +92,7 @@ void AbsorptionCorrections::run() {
     monteCarloAbsCor->setProperty("ContainerDensity",
                                   m_uiForm.spCanDensity->value());
 
-    QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+    const auto canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
     monteCarloAbsCor->setProperty("ContainerChemicalFormula",
                                   canChemicalFormula.toStdString());
 
@@ -104,9 +104,8 @@ void AbsorptionCorrections::run() {
   if (nameCutIndex == -1)
     nameCutIndex = sampleWsName.length();
 
-  QString outputBaseName = sampleWsName.left(nameCutIndex);
-
-  QString outputWsName = outputBaseName + "_" + sampleShape + "_Corrections";
+  const auto outputWsName =
+      sampleWsName.left(nameCutIndex) + "_" + sampleShape + "_MC_Corrections";
 
   monteCarloAbsCor->setProperty("CorrectionsWorkspace",
                                 outputWsName.toStdString());
@@ -181,7 +180,7 @@ void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
     double canBackThickness = m_uiForm.spFlatCanBackThickness->value();
     alg->setProperty("ContainerBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
-    double canInnerRadius = m_uiForm.spCylCanInnerRadius->value();
+    double canInnerRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("ContainerInnerRadius", canInnerRadius);
 
     double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();

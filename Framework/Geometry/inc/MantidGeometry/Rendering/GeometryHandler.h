@@ -15,6 +15,7 @@ namespace Mantid {
 namespace Geometry {
 class IObjComponent;
 class CSGObject;
+class MeshObject;
 namespace detail {
 class GeometryTriangulator;
 }
@@ -55,15 +56,18 @@ protected:
   std::shared_ptr<detail::ShapeInfo> m_shapeInfo;
   std::unique_ptr<detail::GeometryTriangulator> m_triangulator;
   RectangularDetector *m_rectDet = nullptr;
+  MeshObject *m_meshObj = nullptr;    ///< Mesh Object that uses this geometry handler
   StructuredDetector *m_structDet = nullptr;
   IObjComponent *m_objComp =
       nullptr;                ///< ObjComponent that uses this geometry handler
-  CSGObject *m_obj = nullptr; ///< Object that uses this geometry handler
+  CSGObject *m_csgObj = nullptr; ///< Object that uses this geometry handler
 public:
   GeometryHandler(IObjComponent *comp);              ///< Constructor
   GeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
   GeometryHandler(CSGObject *obj);                   ///< Constructor
   GeometryHandler(RectangularDetector *comp);
+  GeometryHandler(boost::shared_ptr<MeshObject> obj); ///<Constructor
+  GeometryHandler(MeshObject *obj);
   GeometryHandler(StructuredDetector *comp);
   GeometryHandler(const GeometryHandler &handler);
   boost::shared_ptr<GeometryHandler> clone() const;

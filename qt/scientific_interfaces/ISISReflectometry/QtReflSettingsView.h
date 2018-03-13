@@ -8,6 +8,11 @@
 #include "InstrumentOptionDefaults.h"
 
 namespace MantidQt {
+
+namespace MantidWidgets {
+class HintingLineEdit;
+}
+
 namespace CustomInterfaces {
 
 // Forward decs
@@ -51,7 +56,7 @@ public:
   /// Return selected analysis mode
   std::string getAnalysisMode() const override;
   /// Return transmission runs
-  std::string getTransmissionRuns() const override;
+  std::map<std::string, std::string> getTransmissionRuns() const override;
   /// Return start overlap for transmission runs
   std::string getStartOverlap() const override;
   /// Return end overlap for transmission runs
@@ -129,10 +134,13 @@ public slots:
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
+  /// Adds another row to the transmission runs table
+  void addTransmissionTableRow();
 
 private:
   /// Initialise the interface
   void initLayout();
+  void initTransmissionRunsTable();
   void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerInstrumentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
@@ -147,6 +155,7 @@ private:
   void connectSettingsChange(QComboBox &edit);
   void connectSettingsChange(QCheckBox &edit);
   void connectSettingsChange(QGroupBox &edit);
+  void connectSettingsChange(QTableWidget &edit);
   QLineEdit &stitchOptionsLineEdit() const;
   void setSelected(QComboBox &box, std::string const &str);
   void setText(QLineEdit &lineEdit, int value);
@@ -165,6 +174,8 @@ private:
   std::unique_ptr<IReflSettingsPresenter> m_presenter;
   /// Whether or not polarisation corrections should be enabled
   mutable bool m_isPolCorrEnabled;
+  /// The stitch params entry widget
+  MantidQt::MantidWidgets::HintingLineEdit *m_stitchEdit;
 };
 } // namespace Mantid
 } // namespace CustomInterfaces

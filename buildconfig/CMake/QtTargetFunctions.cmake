@@ -216,7 +216,10 @@ function (mtd_add_qt_target)
     else()
       set ( _install_dir ${LIB_DIR} )
     endif()
-    install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
+    # Hack: Only install Qt4 to packages for now...
+    if (${PARSED_QT_VERSION} EQUAL 4)
+      install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
+    endif()
   endif()
 
   # Group into folder for VS

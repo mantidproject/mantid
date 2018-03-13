@@ -55,7 +55,10 @@ public:
   passSelfToChildren(std::vector<IReflSettingsPresenter *> const &children);
 
   /// Returns values passed for 'Transmission run(s)'
-  std::string getTransmissionRuns(int group) const override;
+  std::string getTransmissionRunsForAngle(int group,
+                                          const double angle) const override;
+  /// Whether per-angle tranmsission runs are set
+  bool hasPerAngleTransmissionRuns(int group) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions(int group) const override;

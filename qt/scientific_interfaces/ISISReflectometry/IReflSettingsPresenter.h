@@ -41,6 +41,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflSettingsPresenter {
 public:
   virtual ~IReflSettingsPresenter(){};
+  /// Transmission runs for a particular angle
+  virtual std::string getTransmissionRunsForAngle(const double angle) const = 0;
+  /// Whether per-angle transmission runs are set
+  virtual bool hasPerAngleTransmissionRuns() const = 0;
   /// Pre-processing
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const = 0;
@@ -50,7 +54,6 @@ public:
   getReductionOptions() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
-  virtual std::string getTransmissionRuns() const = 0;
   virtual void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) = 0;
 
   enum Flag {

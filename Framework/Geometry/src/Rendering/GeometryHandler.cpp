@@ -1,6 +1,7 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
 #include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include <boost/make_shared.hpp>
@@ -11,10 +12,17 @@ GeometryHandler::GeometryHandler(IObjComponent *comp) : m_objComp(comp) {}
 
 GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)
     : m_triangulator(new detail::GeometryTriangulator(obj.get())),
-      m_obj(obj.get()) {}
+      m_csgObj(obj.get()) {}
 
 GeometryHandler::GeometryHandler(CSGObject *obj)
-    : m_triangulator(new detail::GeometryTriangulator(obj)), m_obj(obj) {}
+    : m_triangulator(new detail::GeometryTriangulator(obj)), m_csgObj(obj) {}
+
+GeometryHandler::GeometryHandler(boost::shared_ptr<MeshObject> obj)
+    : m_triangulator(new detail::GeometryTriangulator(obj.get())),
+      m_meshObj(obj.get()) {}
+
+GeometryHandler::GeometryHandler(MeshObject *obj)
+    : m_triangulator(new detail::GeometryTriangulator(obj)), m_meshObj(obj) {}
 
 GeometryHandler::GeometryHandler(RectangularDetector *comp) : m_rectDet(comp) {}
 
@@ -22,10 +30,10 @@ GeometryHandler::GeometryHandler(StructuredDetector *comp)
     : m_structDet(comp) {}
 
 GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
-  if (handler.m_obj) {
-    m_obj = handler.m_obj;
+  if (handler.m_csgObj) {
+    m_csgObj = handler.m_csgObj;
     if (handler.m_triangulator)
-      m_triangulator.reset(new detail::GeometryTriangulator(m_obj));
+      m_triangulator.reset(new detail::GeometryTriangulator(m_csgObj));
   }
   if (handler.m_objComp)
     m_objComp = handler.m_objComp;
@@ -37,11 +45,12 @@ GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
     m_rectDet = handler.m_rectDet;
 }
 
+/// Destructor
+GeometryHandler::~GeometryHandler() {}
+
 boost::shared_ptr<GeometryHandler> GeometryHandler::clone() const {
   return boost::make_shared<GeometryHandler>(*this);
 }
-
-GeometryHandler::~GeometryHandler() {}
 
 void GeometryHandler::render() const {
   if (m_rectDet)
@@ -57,8 +66,8 @@ void GeometryHandler::render() const {
 }
 
 void GeometryHandler::initialize() const {
-  if (m_obj != nullptr)
-    m_obj->updateGeometryHandler();
+  if (m_csgObj != nullptr)
+    m_csgObj->updateGeometryHandler();
   render();
 }
 

@@ -1,5 +1,6 @@
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -58,11 +59,14 @@ Kernel::Logger g_log("GeometryTriangulator");
 } // namespace
 
 GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
-    : m_isTriangulated(false), m_nFaces(0), m_nPoints(0) {
-  m_obj = obj;
+    : m_isTriangulated(false), m_nFaces(0), m_nPoints(0), m_csgObj(obj) {
 #ifdef ENABLE_OPENCASCADE
   m_objSurface = nullptr;
 #endif
+}
+
+GeometryTriangulator::GeometryTriangulator(const MeshObject *obj)
+    : m_isTriangulated(false), m_meshObj(obj) {
 }
 
 GeometryTriangulator::~GeometryTriangulator() {}
@@ -72,7 +76,18 @@ void GeometryTriangulator::triangulate() {
   if (m_objSurface == nullptr)
     OCAnalyzeObject();
 #endif
+  if (m_meshObj) {
+    generateMesh();
+    m_nPoints = m_meshObj->numberOfVertices();
+    m_nFaces = m_meshObj->numberOfTriangles();
+    m_points = m_meshObj->getVertices();
+    m_faces = m_meshObj->getTriangles();
+  }
   m_isTriangulated = true;
+}
+
+void GeometryTriangulator::generateMesh() {
+  /* Placeholder function to replace MeshGeometryGenerator::Generate()*/
 }
 
 #ifdef ENABLE_OPENCASCADE
@@ -87,7 +102,7 @@ const TopoDS_Shape &GeometryTriangulator::getOCSurface() {
 #endif
 
 void GeometryTriangulator::checkTriangulated() {
-  if (m_obj != nullptr) {
+  if (m_csgObj != nullptr) {
     if (!m_isTriangulated) {
       triangulate();
     }
@@ -118,10 +133,10 @@ const std::vector<uint32_t> &GeometryTriangulator::getTriangleFaces() {
 
 #ifdef ENABLE_OPENCASCADE
 void GeometryTriangulator::OCAnalyzeObject() {
-  if (m_obj != nullptr) // If object exists
+  if (m_csgObj != nullptr) // If object exists
   {
     // Get the top rule tree in Obj
-    const Rule *top = m_obj->topRule();
+    const Rule *top = m_csgObj->topRule();
     if (top == nullptr) {
       m_objSurface.reset(new TopoDS_Shape());
       return;

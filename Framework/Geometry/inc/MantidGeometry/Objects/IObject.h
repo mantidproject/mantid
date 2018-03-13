@@ -60,11 +60,11 @@ public:
   virtual int calcValidType(const Kernel::V3D &Pt,
                             const Kernel::V3D &uVec) const = 0;
   virtual bool hasValidShape() const = 0;
-  virtual int setObject(const int ON, const std::string &Ln) = 0;
   virtual IObject *clone() const = 0;
+  virtual IObject *
+  cloneWithMaterial(const Kernel::Material &material) const = 0;
 
   virtual int getName() const = 0;
-  virtual void setName(const int nx) = 0;
 
   virtual int interceptSurface(Geometry::Track &) const = 0;
   // Solid angle
@@ -93,30 +93,25 @@ public:
   virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                              std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;
-  virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() = 0;
-
-  /// Getter for the shape xml
-  virtual std::string getShapeXML() const = 0;
 
   // Rendering
   virtual void draw() const = 0;
   virtual void initDraw() const = 0;
-  // VTK cache
-  virtual void
-      setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>) = 0;
-  virtual void
-      setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>) = 0;
 
-  virtual void setMaterial(const Kernel::Material &material) = 0;
   virtual const Kernel::Material material() const = 0;
-  virtual void setID(const std::string &id) = 0;
   virtual const std::string &id() const = 0;
+
+  virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
 };
 
 /// Typdef for a shared pointer
 typedef boost::shared_ptr<IObject> IObject_sptr;
 /// Typdef for a shared pointer to a const object
 typedef boost::shared_ptr<const IObject> IObject_const_sptr;
+/// Typdef for a unique pointer
+typedef std::unique_ptr<IObject> IObject_uptr;
+/// Typdef for a unique pointer to a const object
+typedef std::unique_ptr<const IObject> IObject_const_uptr;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -181,6 +181,10 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(QWidget *parent)
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(updateGuessPlots()));
 
+  connect(m_fitPropertyBrowser,
+          SIGNAL(customBoolChanged(const QString &, bool)), this,
+          SLOT(emitCustomBoolChanged(const QString &, bool)));
+
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
           SLOT(startXChanged(double)));
   connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
@@ -230,7 +234,7 @@ IFunction_sptr IndirectFitAnalysisTab::model() const {
     auto index = m_fitPropertyBrowser->backgroundIndex();
 
     if (index)
-      compositeModel->removeFunction(static_cast<size_t>(index.get()));
+      compositeModel->removeFunction(index.get());
     return compositeModel;
   }
   return model;
@@ -347,6 +351,36 @@ IndirectFitAnalysisTab::outputWorkspaceName(const size_t &spectrum) const {
  */
 void IndirectFitAnalysisTab::setConvolveMembers(bool convolveMembers) {
   m_fitPropertyBrowser->setConvolveMembers(convolveMembers);
+}
+
+/**
+ * Adds the specified tie.
+ *
+ * @param tieString     A string containing the tie.
+ */
+void IndirectFitAnalysisTab::addTie(const QString &tieString) {
+  const auto index = tieString.split(".").first().right(1).toInt();
+  const auto handler = m_fitPropertyBrowser->getHandler()->getHandler(index);
+
+  if (handler)
+    handler->addTie(tieString);
+}
+
+/**
+ * Removes tie from the parameter with the specified name.
+ *
+ * @param tieString A string containing the tie.
+ */
+void IndirectFitAnalysisTab::removeTie(const QString &parameterName) {
+  const auto parts = parameterName.split(".");
+  const auto index = parts.first().right(1).toInt();
+  const auto name = parts.last();
+  const auto handler = m_fitPropertyBrowser->getHandler()->getHandler(index);
+
+  if (handler) {
+    const auto tieProperty = handler->getTies()[name];
+    handler->removeTie(tieProperty, parameterName.toStdString());
+  }
 }
 
 /**
@@ -960,9 +994,15 @@ IAlgorithm_sptr IndirectFitAnalysisTab::sequentialFitAlgorithm() const {
  * Executes the single fit algorithm defined in this indirect fit analysis tab.
  */
 void IndirectFitAnalysisTab::executeSingleFit() {
-  const auto index = boost::numeric_cast<size_t>(selectedSpectrum());
-  m_outputFitPosition[index] = std::make_pair(0u, createSingleFitOutputName());
-  runFitAlgorithm(singleFitAlgorithm());
+  if (validateTab()) {
+    setMinimumSpectrum(minimumSpectrum());
+    setMaximumSpectrum(maximumSpectrum());
+
+    const auto index = boost::numeric_cast<size_t>(selectedSpectrum());
+    m_outputFitPosition[index] =
+        std::make_pair(0u, createSingleFitOutputName());
+    runFitAlgorithm(singleFitAlgorithm());
+  }
 }
 
 /**
@@ -970,13 +1010,18 @@ void IndirectFitAnalysisTab::executeSingleFit() {
  * tab.
  */
 void IndirectFitAnalysisTab::executeSequentialFit() {
-  const auto name = createSequentialFitOutputName();
-  for (auto i = minimumSpectrum(); i <= maximumSpectrum(); ++i) {
-    const auto index = boost::numeric_cast<size_t>(i - minimumSpectrum());
-    m_outputFitPosition[boost::numeric_cast<size_t>(i)] =
-        std::make_pair(index, name);
+  if (validateTab()) {
+    setMinimumSpectrum(minimumSpectrum());
+    setMaximumSpectrum(maximumSpectrum());
+
+    const auto name = createSequentialFitOutputName();
+    for (auto i = minimumSpectrum(); i <= maximumSpectrum(); ++i) {
+      const auto index = boost::numeric_cast<size_t>(i - minimumSpectrum());
+      m_outputFitPosition[boost::numeric_cast<size_t>(i)] =
+          std::make_pair(index, name);
+    }
+    runFitAlgorithm(sequentialFitAlgorithm());
   }
-  runFitAlgorithm(sequentialFitAlgorithm());
 }
 
 /**
@@ -1017,6 +1062,11 @@ void IndirectFitAnalysisTab::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
                                               int maxIterations) const {
   setAlgorithmProperty(fitAlgorithm, "MaxIterations", maxIterations);
 }
+
+/**
+ * Called when the 'Run' button is called in the IndirectTab.
+ */
+void IndirectFitAnalysisTab::run() { executeSequentialFit(); }
 
 /*
  * Runs the specified fit algorithm and calls the algorithmComplete
@@ -1111,23 +1161,34 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
  * @param parameters  The parameters.
  */
 void IndirectFitAnalysisTab::setPlotOptions(
-    QComboBox *cbPlotType, const std::vector<std::string> &parameters) {
+    QComboBox *cbPlotType, const std::vector<std::string> &parameters) const {
   cbPlotType->clear();
   QSet<QString> plotOptions;
 
-  for (const auto parameter : parameters) {
+  for (const auto &parameter : parameters) {
     auto plotOption = QString::fromStdString(parameter);
     auto index = plotOption.lastIndexOf(".");
     if (index >= 0)
       plotOption = plotOption.remove(0, index + 1);
     plotOptions << plotOption;
   }
+  setPlotOptions(cbPlotType, plotOptions);
+}
+
+/**
+ * Fills the specified combo box, with the specified options.
+ *
+ * @param cbPlotType  The combo box.
+ * @param parameters  The options.
+ */
+void IndirectFitAnalysisTab::setPlotOptions(
+    QComboBox *cbPlotType, const QSet<QString> &options) const {
+  cbPlotType->clear();
 
   QStringList plotList;
-  if (!parameters.empty())
+  if (!options.isEmpty())
     plotList << "All";
-  plotList.append(plotOptions.toList());
-
+  plotList.append(options.toList());
   cbPlotType->addItems(plotList);
 }
 
@@ -1489,6 +1550,11 @@ void IndirectFitAnalysisTab::emitFunctionChanged() { emit functionChanged(); }
 void IndirectFitAnalysisTab::emitParameterChanged(
     const Mantid::API::IFunction *function) {
   emit parameterChanged(function);
+}
+
+void IndirectFitAnalysisTab::emitCustomBoolChanged(const QString &key,
+                                                   bool value) {
+  emit customBoolChanged(key, value);
 }
 
 } // namespace IDA

@@ -1,7 +1,6 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Logger.h"
 
 #include <algorithm>
 #include <iterator>
@@ -9,10 +8,6 @@
 
 namespace Mantid {
 namespace DataObjects {
-namespace {
-/// static logger
-Kernel::Logger g_log("RebinnedOutput");
-}
 
 DECLARE_WORKSPACE(RebinnedOutput)
 
@@ -95,42 +90,67 @@ void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
  * is easily visualized. The Rebin and Integration algorithms will have to
  * undo this in order to properly treat the data.
  * @param hasSqrdErrs :: does the workspace have squared errors?
+ * @param force :: ignore finalize flag or not?
  */
-void RebinnedOutput::finalize(bool hasSqrdErrs) {
-  g_log.debug() << "Starting finalize procedure.\n";
-  std::size_t nHist = this->getNumberHistograms();
-  g_log.debug() << "Number of histograms: " << nHist << '\n';
-  for (std::size_t i = 0; i < nHist; ++i) {
+void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
+  if (m_finalized && !force)
+    return;
+  int nHist = static_cast<int>(this->getNumberHistograms());
+  // Checks that the fractions are not all zeros.
+  bool frac_all_zeros = true;
+  for (int i = 0; i < nHist; ++i) {
+    MantidVec &frac = this->dataF(i);
+    if (std::accumulate(frac.begin(), frac.end(), 0.) != 0) {
+      frac_all_zeros = false;
+      break;
+    }
+  }
+  if (frac_all_zeros)
+    return;
+  PARALLEL_FOR_IF(Kernel::threadSafe(*this))
+  for (int i = 0; i < nHist; ++i) {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
     MantidVec &frac = this->dataF(i);
-
-    g_log.debug() << "Data (" << i << "): ";
-    std::copy(data.begin(), data.end(),
-              std::ostream_iterator<double>(g_log.debug(), " "));
-    g_log.debug() << '\n';
-
     std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                    std::divides<double>());
+    std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                   std::divides<double>());
     if (hasSqrdErrs) {
-      MantidVec frac_sqr(frac.size());
-      std::transform(frac.begin(), frac.end(), frac.begin(), frac_sqr.begin(),
-                     std::multiplies<double>());
-      std::transform(err.begin(), err.end(), frac_sqr.begin(), err.begin(),
-                     std::divides<double>());
-    } else {
       std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
                      std::divides<double>());
     }
-    g_log.debug() << "Data Final(" << i << "): ";
-    std::copy(data.begin(), data.end(),
-              std::ostream_iterator<double>(g_log.debug(), " "));
-    g_log.debug() << '\n';
-    g_log.debug() << "FArea (" << i << "): ";
-    std::copy(frac.begin(), frac.end(),
-              std::ostream_iterator<double>(g_log.debug(), " "));
-    g_log.debug() << '\n';
   }
+  // Sets flag so subsequent algorithms know to correctly treat data
+  m_finalized = true;
+}
+
+/**
+ * This function "unfinalizes" the workspace by taking the data/error arrays
+ * and multiplying them by the corresponding fractional area array.
+ * @param hasSqrdErrs :: does the workspace have squared errors?
+ * @param force :: ignore finalize flag or not?
+ */
+void RebinnedOutput::unfinalize(bool hasSqrdErrs, bool force) {
+  if (!m_finalized && !force)
+    return;
+  int nHist = static_cast<int>(this->getNumberHistograms());
+  PARALLEL_FOR_IF(Kernel::threadSafe(*this))
+  for (int i = 0; i < nHist; ++i) {
+    MantidVec &data = this->dataY(i);
+    MantidVec &err = this->dataE(i);
+    MantidVec &frac = this->dataF(i);
+    std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
+                   std::multiplies<double>());
+    std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                   std::multiplies<double>());
+    if (hasSqrdErrs) {
+      std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                     std::multiplies<double>());
+    }
+  }
+  // Sets flag so subsequent algorithms know to correctly treat data
+  m_finalized = false;
 }
 
 } // namespace Mantid
