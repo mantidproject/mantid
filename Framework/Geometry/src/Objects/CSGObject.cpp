@@ -2100,10 +2100,6 @@ boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
   return m_handler;
 }
 
-boost::shared_ptr<const GeometryHandler> CSGObject::getGeometryHandler() const {
-  return m_handler;
-}
-
 /**
 * Updates the geometry handler if needed
 */
