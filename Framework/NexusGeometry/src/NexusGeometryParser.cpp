@@ -403,7 +403,8 @@ parseNexusMesh(const Group &shapeGroup) {
       get1DDataset<int32_t>("winding_order", shapeGroup));
   const auto vertices = get1DDataset<float>("vertices", shapeGroup);
 
-  return NexusShapeFactory::createOFFMesh(faceIndices, windingOrder, vertices);
+  return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder,
+                                              vertices);
 }
 
 /// Choose what shape type to parse

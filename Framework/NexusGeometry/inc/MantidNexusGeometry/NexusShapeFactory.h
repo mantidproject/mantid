@@ -54,9 +54,9 @@ createMesh(std::vector<uint16_t> &&triangularFaces,
 
 /// Creates a triangular mesh shape based on OFF polygon inputs
 DLLExport std::unique_ptr<const Geometry::IObject>
-createOFFMesh(const std::vector<uint16_t> &faceIndices,
-              const std::vector<uint16_t> &windingOrder,
-              const std::vector<float> &nexusVertices);
+createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
+                  const std::vector<uint16_t> &windingOrder,
+                  const std::vector<float> &nexusVertices);
 }
 }
 }

@@ -129,9 +129,9 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
 }
 
 std::unique_ptr<const Geometry::IObject>
-createOFFMesh(const std::vector<uint16_t> &faceIndices,
-              const std::vector<uint16_t> &windingOrder,
-              const std::vector<float> &nexusVertices) {
+createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
+                  const std::vector<uint16_t> &windingOrder,
+                  const std::vector<float> &nexusVertices) {
 
   std::vector<uint16_t> triangularFaces =
       createTriangularFaces(faceIndices, windingOrder);
