@@ -120,6 +120,7 @@ public:
   void setChosenPeriods(const QString &period);
   void setSingleFitLabel(std::string name);
   void setNormalization(const std::string name);
+  void checkFitEnabled();
 public slots:
   /// Perform the fit algorithm
   void fit() override;
@@ -239,6 +240,8 @@ private:
 
   // stores if this is in multi fitting mode
   bool m_isMultiFittingMode;
+
+  QString m_autoBackground;
 };
 
 std::map<std::string, double> readMultipleNormalization();

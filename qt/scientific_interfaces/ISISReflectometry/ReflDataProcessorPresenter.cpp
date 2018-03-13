@@ -472,7 +472,7 @@ bool ReflDataProcessorPresenter::reduceRowAsEventWS(RowData_sptr rowData,
       // from the latest slice. It would be good to do some validation
       // that the results are the same for each slice e.g. the resolution
       // should always be the same.
-      updateModelFromAlgorithm(alg, rowData);
+      updateModelFromResults(alg, rowData);
     } catch (...) {
       return false;
     }
@@ -974,7 +974,7 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
 
   // Get the angle for the current row. The angle is the second data item
   if (!hasAngle(data)) {
-    if (m_mainPresenter->hasPerAngleTransmissionRuns()) {
+    if (m_mainPresenter->hasPerAngleOptions()) {
       // The user has specified per-angle transmission runs on the settings
       // tab. In theory this is fine, but it could cause confusion when the
       // angle is not available in the data processor table because the
@@ -994,14 +994,13 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
     }
   }
 
-  // Insert the transmission runs as the "FirstTransmissionRun" property
-  auto transmissionRuns =
-      m_mainPresenter->getTransmissionRunsForAngle(angle(data));
-  if (!transmissionRuns.isEmpty()) {
-    options["FirstTransmissionRun"] = transmissionRuns;
-  }
+  // Get the options for this angle
+  auto optionsForAngle =
+      convertOptionsFromQMap(m_mainPresenter->getOptionsForAngle(angle(data)));
+  // Add the default options (only added if per-angle options don't exist)
+  optionsForAngle.insert(options.begin(), options.end());
 
-  return options;
+  return optionsForAngle;
 }
 }
 }
