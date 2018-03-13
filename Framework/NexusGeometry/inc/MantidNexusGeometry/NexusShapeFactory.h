@@ -42,11 +42,21 @@ namespace NexusGeometry {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace NexusShapeFactory {
+
+/// Creates a cylindrical shape
 DLLExport std::unique_ptr<const Geometry::IObject>
 createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef);
+
+/// Creates a triangular mesh shape based on ready triangulated polygons
 DLLExport std::unique_ptr<const Geometry::IObject>
 createMesh(std::vector<uint16_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices);
+
+/// Creates a triangular mesh shape based on OFF polygon inputs
+DLLExport std::unique_ptr<const Geometry::IObject>
+createOFFMesh(const std::vector<uint16_t> &faceIndices,
+              const std::vector<uint16_t> &windingOrder,
+              const std::vector<float> &nexusVertices);
 }
 }
 }

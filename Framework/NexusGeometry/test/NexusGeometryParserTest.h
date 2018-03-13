@@ -122,10 +122,10 @@ public:
     /*
       Affine should be for rotation around Y, and translated my U.M
 
-      cos(theta)	0	-sin(theta)	U.M.x
-      0				1	0			U.M.y
-      sin(theta)	0 	cos(theta) 	U.M.z
-      0				0   0			1
+      cos(theta)    0    -sin(theta)    U.M.x
+      0             1    0               U.M.y
+      sin(theta)    0    cos(theta)      U.M.z
+      0             0    0               1
      */
     auto expectedPosition = affine * offset;
     TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-3));

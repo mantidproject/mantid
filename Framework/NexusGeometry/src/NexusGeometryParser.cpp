@@ -393,47 +393,6 @@ parseNexusCylinder(const Group &shapeGroup) {
   return NexusShapeFactory::createCylinder(vSorted);
 }
 
-void createTrianglesFromPolygon(const std::vector<uint16_t> &windingOrder,
-                                std::vector<uint16_t> &triangularFaces,
-                                int &startOfFace, int &endOfFace) {
-  int polygonOrder = endOfFace - startOfFace;
-  auto first = windingOrder.begin() + startOfFace;
-
-  for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
-       ++polygonVertex) {
-    triangularFaces.push_back(*first);
-    triangularFaces.push_back(*(first + polygonVertex));
-    triangularFaces.push_back(*(first + polygonVertex + 1));
-  }
-  startOfFace = endOfFace; // start of the next face
-}
-
-std::vector<uint16_t>
-createTriangularFaces(const std::vector<uint16_t> &faceIndices,
-                      const std::vector<uint16_t> &windingOrder) {
-
-  // Elements 0 to 2 are the indices of the vertices vector corresponding to the
-  // vertices of the first triangle.
-  // Elements 3 to 5 are for the second triangle, and so on.
-  // The order of the vertices is the winding order of the triangle, determining
-  // the face normal by right-hand rule
-  std::vector<uint16_t> triangularFaces;
-
-  int startOfFace = 0;
-  int endOfFace = 0;
-  for (auto it = faceIndices.begin() + 1; it != faceIndices.end(); ++it) {
-    endOfFace = *it;
-    createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace,
-                               endOfFace);
-  }
-
-  // and the last face
-  endOfFace = static_cast<int>(windingOrder.size());
-  createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace,
-                             endOfFace);
-
-  return triangularFaces;
-}
 // Parse OFF (mesh) nexus geometry
 boost::shared_ptr<const Geometry::IObject>
 parseNexusMesh(const Group &shapeGroup) {
@@ -442,22 +401,9 @@ parseNexusMesh(const Group &shapeGroup) {
       get1DDataset<int32_t>("faces", shapeGroup));
   const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
       get1DDataset<int32_t>("winding_order", shapeGroup));
-  std::vector<uint16_t> triangularFaces =
-      createTriangularFaces(faceIndices, windingOrder);
+  const auto vertices = get1DDataset<float>("vertices", shapeGroup);
 
-  // 1D reads row first, then columns
-  const auto nexusVertices = get1DDataset<float>("vertices", shapeGroup);
-  auto numberOfVertices = nexusVertices.size() / 3;
-  std::vector<Mantid::Kernel::V3D> vertices(numberOfVertices);
-  for (size_t vertexNumber = 0; vertexNumber < nexusVertices.size();
-       vertexNumber += 3) {
-    vertices[vertexNumber / 3] = Mantid::Kernel::V3D(
-        nexusVertices[vertexNumber], nexusVertices[vertexNumber + 1],
-        nexusVertices[vertexNumber + 2]);
-  }
-
-  return NexusShapeFactory::createMesh(std::move(triangularFaces),
-                                       std::move(vertices));
+  return NexusShapeFactory::createOFFMesh(faceIndices, windingOrder, vertices);
 }
 
 /// Choose what shape type to parse

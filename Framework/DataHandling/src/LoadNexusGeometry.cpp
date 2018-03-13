@@ -40,7 +40,7 @@ const std::string LoadNexusGeometry::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadNexusGeometry::init() {
-  const std::vector<std::string> extensions{".nxs"};
+  const std::vector<std::string> extensions{".nxs,.hdf5"};
   declareProperty(Kernel::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Load, extensions),
                   "The name of the Nexus file to read geometry from, as a full "
@@ -56,7 +56,6 @@ void LoadNexusGeometry::init() {
  */
 void LoadNexusGeometry::exec() {
   std::string fileName = getProperty("Filename");
-  std::string instName = getProperty("InstrumentName");
   auto workspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
 
   auto instrument =
