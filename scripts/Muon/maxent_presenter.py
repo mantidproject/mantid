@@ -37,18 +37,20 @@ class MaxEntPresenter(object):
         self.view.addNPoints(values)
 
     def createThread(self):
-        runName=self.load.getRunName()
-        return thread_model.ThreadModel(self.alg,runName)
+        return thread_model.ThreadModel(self.alg)
 
     def createPhaseThread(self):
-        runName=self.load.getRunName()
-        return thread_model.ThreadModel(self.calcAlg,runName)
+        return thread_model.ThreadModel(self.calcAlg)
 
     def handleMaxEntButton(self):
-        if  self.view.calcPhases() and self.view.usePhases():
-            self.DoPhase()
+        do_maxent = self.load.hasDataChanged()
+        if do_maxent:
+            self.getWorkspaceNames()
         else:
-            self.DoMaxEnt()
+            if  self.view.calcPhases() and self.view.usePhases():
+                self.DoPhase()
+            else:
+                self.DoMaxEnt()
 
     def DoMaxEnt(self):
         self.thread=self.createThread()

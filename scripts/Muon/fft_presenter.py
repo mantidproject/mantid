@@ -47,13 +47,15 @@ class FFTPresenter(object):
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def createThread(self):
-        runName=self.load.getRunName()
-        return thread_model.ThreadModel(self.alg,runName)
+        return thread_model.ThreadModel(self.alg)
 
     # constructs the inputs for the FFT algorithms
     # then executes them (see fft_model to see the order
     # of execution
     def handleButton(self):
+        if self.load.hasDataChanged():
+            self.getWorkspaceNames()
+            return
         # put this on its own thread so not to freeze Mantid
         self.thread=self.createThread()
         self.thread.started.connect(self.deactivate)

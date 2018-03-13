@@ -29,7 +29,7 @@ Interface
 - The ALC interface now allows background sections with negative values.
 - If data is loaded with 0 good frames into Muon Analysis then it will try to load the data without dead time correction (does not need number of good frames).
 - Muon analysis no longer disables the "aco add" and "simultaneous" buttons in the multiple fitting interface.
-- Frequency domain analysis will produce an error if the active workspace has changed.
+- Frequency domain analysis will reload the data if the active workspace has changed.
 
 Algorithms
 ----------
