@@ -1,3 +1,4 @@
+
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
 
@@ -174,7 +175,7 @@ private:
   std::string getText(QComboBox const &box) const;
   /// Put the per-angle options for a row into a map
   MantidQt::MantidWidgets::DataProcessor::OptionsQMap
-  createOptionsMapForRow(const int row, bool &emptyRow) const;
+  createOptionsMapForRow(const int row) const;
 
   /// The widget
   Ui::ReflSettingsWidget m_ui;

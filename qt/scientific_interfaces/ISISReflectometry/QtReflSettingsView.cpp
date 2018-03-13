@@ -498,10 +498,8 @@ std::string QtReflSettingsView::getAnalysisMode() const {
 
 /** Create the options map for a given row in the per-angle options table
  * @param row [in] : the row index
- * @param emptyRow [inout] : gets set to false if the row is not empty
  */
-OptionsQMap QtReflSettingsView::createOptionsMapForRow(const int row,
-                                                       bool &emptyRow) const {
+OptionsQMap QtReflSettingsView::createOptionsMapForRow(const int row) const {
   OptionsQMap rowOptions;
   const auto &table = m_ui.optionsTable;
 
@@ -509,7 +507,6 @@ OptionsQMap QtReflSettingsView::createOptionsMapForRow(const int row,
     auto colItem = table->item(row, col);
     auto colValue = colItem ? colItem->text() : "";
     if (!colValue.isEmpty()) {
-      emptyRow = false;
       rowOptions[m_columnProperties[col]] = colValue;
     }
   }
@@ -535,8 +532,8 @@ QtReflSettingsView::getPerAngleOptions() const {
   for (auto row = 0; row < table->rowCount(); ++row) {
     auto angleItem = table->item(row, 0);
     auto angle = angleItem ? angleItem->text() : "";
-    bool emptyRow = angle.isEmpty();
-    auto rowOptions = createOptionsMapForRow(row, emptyRow);
+    auto rowOptions = createOptionsMapForRow(row);
+    const bool emptyRow = angle.isEmpty() && rowOptions.isEmpty();
     // Add the row options to the result. We could do with a better way to
     // handle duplicate keys but for now it's ok to just ignore subsequent rows
     // with the same angle
