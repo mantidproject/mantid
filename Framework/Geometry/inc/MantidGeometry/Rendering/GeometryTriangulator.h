@@ -42,8 +42,8 @@ private:
   bool m_isTriangulated;
   size_t m_nFaces;
   size_t m_nPoints;
-  std::vector<double> m_points;  ///< double array or points
-  std::vector<uint32_t> m_faces; ///< Integer array of faces
+  std::vector<double> m_points;        ///< double array or points
+  std::vector<uint32_t> m_faces;       ///< Integer array of faces
   const CSGObject *m_csgObj = nullptr; ///< Input Object
   const MeshObject *m_meshObj = nullptr;
   void checkTriangulated();
