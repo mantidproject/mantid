@@ -10,11 +10,14 @@ namespace DataProcessor {
 * workspaces' names
 * @param blacklist : The list of properties we do not want to show
 */
-ProcessingAlgorithm::ProcessingAlgorithm(QString name,
-                                         std::vector<QString> prefix,
-                                         std::set<QString> blacklist)
+ProcessingAlgorithm::ProcessingAlgorithm(
+    QString name, std::vector<QString> prefix,
+    std::size_t postprocessedOutputPrefixIndex, std::set<QString> blacklist)
     : ProcessingAlgorithmBase(std::move(name), std::move(blacklist)),
+      m_postprocessedOutputPrefixIndex(postprocessedOutputPrefixIndex),
       m_prefix(std::move(prefix)) {
+
+  ensureValidPostprocessedOutput();
 
   m_inputProperties = getInputWsProperties();
   if (!m_inputProperties.size())
@@ -44,9 +47,11 @@ ProcessingAlgorithm::ProcessingAlgorithm(QString name,
 * workspaces' names, as a string
 * @param blacklist : The list of properties we do not want to show, as a string
 */
-ProcessingAlgorithm::ProcessingAlgorithm(QString name, QString const &prefix,
-                                         QString const &blacklist)
+ProcessingAlgorithm::ProcessingAlgorithm(
+    QString name, QString const &prefix,
+    std::size_t postprocessedOutputPrefixIndex, QString const &blacklist)
     : ProcessingAlgorithm(std::move(name), convertStringToVector(prefix),
+                          postprocessedOutputPrefixIndex,
                           convertStringToSet(blacklist)) {}
 
 /**
@@ -94,6 +99,28 @@ QString ProcessingAlgorithm::defaultOutputPrefix() const { return m_prefix[0]; }
  */
 QString ProcessingAlgorithm::defaultOutputPropertyName() const {
   return m_outputProperties[0];
+}
+
+bool ProcessingAlgorithm::isValidOutputPrefixIndex(
+    std::size_t outputPrefixIndex) const {
+  return outputPrefixIndex < m_prefix.size();
+}
+
+void ProcessingAlgorithm::ensureValidPostprocessedOutput() const {
+  if (!isValidOutputPrefixIndex(m_postprocessedOutputPrefixIndex))
+    throw std::runtime_error("Postprocessed output index must be a valid index "
+                             "into the prefix array.");
+}
+
+QString ProcessingAlgorithm::postprocessedOutputPrefix() const {
+  return m_prefix[m_postprocessedOutputPrefixIndex];
+}
+
+/** Returns the postprocessed output ws property. This is property
+ * name specified on construction.
+ */
+QString ProcessingAlgorithm::postprocessedOutputPropertyName() const {
+  return m_outputProperties[m_postprocessedOutputPrefixIndex];
 }
 
 /** Returns the default input ws property. This is just the first
