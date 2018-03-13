@@ -622,9 +622,9 @@ void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
   if (hasPostprocessing()) {
     const auto outputWSName = getPostprocessedWorkspaceName(groupData);
-    m_postprocessing->postProcessGroup(outputWSName,
-                                       m_processor.defaultOutputPropertyName(),
-                                       m_whitelist, groupData);
+    m_postprocessing->postProcessGroup(
+        outputWSName, m_processor.postprocessedOutputPropertyName(),
+        m_whitelist, groupData);
   }
 }
 
