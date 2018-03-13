@@ -20,7 +20,7 @@
 namespace Mantid {
 namespace Algorithms {
 // Setup typedef for later use
-typedef std::map<specnum_t, Mantid::Kernel::V3D> SpectraDistanceMap;
+using SpectraDistanceMap = std::map<specnum_t, Mantid::Kernel::V3D>;
 using DetConstPtr = Geometry::IDetector_const_sptr;
 
 // Register the algorithm into the AlgorithmFactory
