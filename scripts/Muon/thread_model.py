@@ -17,7 +17,7 @@ class ThreadModel(QThread):
 
     def __del__(self):
         self.wait()
- 
+
     def digit(self,x):
         return int(filter(str.isdigit,x) or 0)
 
@@ -33,12 +33,12 @@ class ThreadModel(QThread):
         return False
 
     def run(self):
-       if self.hasDataChanged():
-           return
-       try:
+        if self.hasDataChanged():
+            return
+        try:
             self.model.execute()
             self.model.output()
-       except KeyboardInterrupt:
+        except KeyboardInterrupt:
             pass
 
     def cancel(self):
