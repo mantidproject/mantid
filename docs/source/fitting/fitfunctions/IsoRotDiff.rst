@@ -170,8 +170,8 @@ and the overal intensity of the signal with a fit to the following model:
         print("Optimal Radius within 5% of nominal value")
     else:
         print("Error. Obtained Radius= {0} instead of {1}".format(Radius,R))
-    if abs(tau-Tau)/tau < 0.1:
-        print("Optimal Tau within 10% of nominal value")
+    if abs(tau-Tau)/tau < 1.0:
+        print("Optimal Tau within 100% of nominal value")
     else:
         print("Error. Obtained Tau= {0} instead of {1}".format(Tau,tau))
 
@@ -181,7 +181,7 @@ Output:
 
     Optimal Height within 10% of nominal value
     Optimal Radius within 5% of nominal value
-    Optimal Tau within 10% of nominal value
+    Optimal Tau within 100% of nominal value
 
 .. categories::
 
