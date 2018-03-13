@@ -56,10 +56,11 @@ protected:
   std::shared_ptr<detail::ShapeInfo> m_shapeInfo;
   std::unique_ptr<detail::GeometryTriangulator> m_triangulator;
   RectangularDetector *m_rectDet = nullptr;
-  MeshObject *m_meshObj = nullptr;    ///< Mesh Object that uses this geometry handler
+  MeshObject *m_meshObj =
+      nullptr; ///< Mesh Object that uses this geometry handler
   StructuredDetector *m_structDet = nullptr;
   IObjComponent *m_objComp =
-      nullptr;                ///< ObjComponent that uses this geometry handler
+      nullptr; ///< ObjComponent that uses this geometry handler
   CSGObject *m_csgObj = nullptr; ///< Object that uses this geometry handler
 public:
   GeometryHandler(IObjComponent *comp);              ///< Constructor

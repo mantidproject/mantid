@@ -599,9 +599,7 @@ void MeshObject::updateGeometryHandler() {
 /**
 * Output functions for rendering, may also be used internally
 */
-size_t MeshObject::numberOfTriangles() const {
-  return m_triangles.size() / 3;
-}
+size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
 
 /**
 * get faces
@@ -646,7 +644,8 @@ std::vector<double> MeshObject::getVertices() const {
 /**
 * get info on standard shapes (none for Mesh Object)
 */
-void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors,
+void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                               std::vector<Kernel::V3D> &vectors,
                                double &myradius, double &myheight) const {
   // In practice, this outputs type = -1,
   // to indicate not a "standard" object (cuboid/cone/cyl/sphere).

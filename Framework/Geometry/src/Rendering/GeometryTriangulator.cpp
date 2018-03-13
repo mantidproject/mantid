@@ -66,8 +66,7 @@ GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
 }
 
 GeometryTriangulator::GeometryTriangulator(const MeshObject *obj)
-    : m_isTriangulated(false), m_meshObj(obj) {
-}
+    : m_isTriangulated(false), m_meshObj(obj) {}
 
 GeometryTriangulator::~GeometryTriangulator() {}
 
