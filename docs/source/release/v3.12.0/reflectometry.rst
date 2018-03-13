@@ -12,7 +12,7 @@ ISIS Reflectometry Interface
 New features
 ############
 
-- A new table has been added to the Settings tab to allow default transmission runs to be specified on a per-angle basis. If a row in the Runs tab contains an angle, it will be looked up in this table and those transmission runs will be used if a matching angle is found (the angle does not have to be exact as it will match to within 100th of a degree). If you want to specify transmission runs that will be used by default for all runs, then simply leave the angle empty.
+- A new table has been added to the Settings tab to allow default options to be specified on a per-angle basis. If a row in the Runs tab contains an angle, it will be looked up in this table and those options will be used if a matching angle is found (the angle does not have to be exact as it will match to within 100th of a degree). If you want to specify values that will be used by default for all runs, then simply leave the angle empty.
 - Two new boxes have been added to the settings tab of the ISIS Reflectometry interface, 'ReductionType' and 'SummationType' which are passed to the corresponding parameters of :ref:`algm-ReflectometryReductionOneAuto`.
 - The ISIS Reflectometry interface now has a checkbox 'CorrectDetectors' which maps to the corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
 - The 'Get Defaults' button now looks for values for the following additional properties in the IDF:
