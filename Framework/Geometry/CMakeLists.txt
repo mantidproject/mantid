@@ -469,7 +469,9 @@ set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 if (ENABLE_OPENCASCADE)

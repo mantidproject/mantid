@@ -218,12 +218,12 @@ if ( SPHINX_FOUND )
     message (STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
     message (FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/")
   endif ()
-endif ()
 
-add_subdirectory ( dev-docs )
-if ( ENABLE_MANTIDPLOT )
-  add_subdirectory ( docs )
-endif()
+  add_subdirectory ( dev-docs )
+  if ( ENABLE_MANTIDPLOT )
+    add_subdirectory ( docs )
+  endif()
+endif ()
 
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )

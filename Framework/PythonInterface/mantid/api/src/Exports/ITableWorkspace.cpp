@@ -604,55 +604,55 @@ void export_ITableWorkspace() {
            "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
 
       .def("removeColumn", &ITableWorkspace::removeColumn,
-           (arg("self"), arg("name")), "Remove the named column")
+           (arg("self"), arg("name")), "Remove the named column.")
 
       .def("columnCount", &ITableWorkspace::columnCount, arg("self"),
-           "Returns the number of columns in the workspace")
+           "Returns the number of columns in the workspace.")
 
       .def("rowCount", &ITableWorkspace::rowCount, arg("self"),
-           "Returns the number of rows within the workspace")
+           "Returns the number of rows within the workspace.")
 
       .def("setRowCount", &ITableWorkspace::setRowCount,
            (arg("self"), arg("count")),
-           "Resize the table to contain count rows")
+           "Resize the table to contain count rows.")
 
       .def("__len__", &ITableWorkspace::rowCount, arg("self"),
-           "Returns the number of rows within the workspace")
+           "Returns the number of rows within the workspace.")
 
       .def("getColumnNames", &ITableWorkspace::getColumnNames, arg("self"),
            boost::python::return_value_policy<VectorToNumpy>(),
-           "Return a list of the column names")
+           "Return a list of the column names.")
 
       .def("keys", &ITableWorkspace::getColumnNames, arg("self"),
            boost::python::return_value_policy<VectorToNumpy>(),
-           "Return a list of the column names")
+           "Return a list of the column names.")
 
       .def("column", &column, (arg("self"), arg("column")),
-           "Return all values of a specific column as a list")
+           "Return all values of a specific column as a list.")
 
       .def("row", &row, (arg("self"), arg("row")),
-           "Return all values of a specific row as a dict")
+           "Return all values of a specific row as a dict.")
 
       // FromSequence must come first since it takes an object parameter
       // Otherwise, FromDict will never be called as object accepts anything
       .def("addRow", &addRowFromSequence, (arg("self"), arg("row_items_seq")),
            "Appends a row with the values from the given sequence. "
            "It it assumed that the items are in the correct order for the "
-           "defined columns")
+           "defined columns.")
 
       .def("addRow", &addRowFromDict, (arg("self"), arg("row_items_dict")),
-           "Appends a row with the values from the dictionary")
+           "Appends a row with the values from the dictionary.")
 
       .def("cell", &cell, (arg("self"), arg("value"), arg("row_or_column")),
-           "Return the given cell. If the first argument is a "
+           "Return the value in the given cell. If the value argument is a "
            "number then it is interpreted as a row otherwise it "
-           "is interpreted as a column name")
+           "is interpreted as a column name.")
 
       .def("setCell", &setCell, (arg("self"), arg("row_or_column"),
                                  arg("column_or_row"), arg("value")),
-           "Sets the value of a given cell. If the first argument is a "
-
-           "as a column name")
+           "Sets the value of a given cell. If the row_or_column argument is a "
+           "number then it is interpreted as a row otherwise it "
+           "is interpreted as a column name.")
 
       .def("toDict", &toDict, (arg("self")),
            "Gets the values of this workspace as a dictionary. The keys of the "

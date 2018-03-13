@@ -514,9 +514,22 @@ class StateDirectorISIS(object):
         # -------------------------------
         # User masking
         # -------------------------------
-        set_single_entry(self._reduction_builder, "set_merge_mask", OtherId.merge_mask, user_file_items)
-        set_single_entry(self._reduction_builder, "set_merge_max", OtherId.merge_max, user_file_items)
-        set_single_entry(self._reduction_builder, "set_merge_min", OtherId.merge_min, user_file_items)
+        merge_min = None
+        merge_max = None
+        merge_mask = False
+        if DetectorId.merge_range in user_file_items:
+            merge_range = user_file_items[DetectorId.merge_range]
+            # Should the user have chosen several values, then the last element is selected
+            check_if_contains_only_one_element(merge_range, DetectorId.rescale_fit)
+            merge_range = merge_range[-1]
+            merge_min = merge_range.start
+            merge_max = merge_range.stop
+            merge_mask = merge_range.use_fit
+
+        self._reduction_builder.set_merge_mask(merge_mask)
+        self._reduction_builder.set_merge_min(merge_min)
+        self._reduction_builder.set_merge_max(merge_max)
+
         # -------------------------------
         # Fitting merged
         # -------------------------------

@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
 	src/EqualBinsChecker.cpp
+	src/ErrorReporter.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
 	src/FileDescriptor.cpp
@@ -184,6 +185,7 @@ set ( INC_FILES
 	inc/MantidKernel/EmptyValues.h
 	inc/MantidKernel/EnabledWhenProperty.h
 	inc/MantidKernel/EnvironmentHistory.h
+	inc/MantidKernel/ErrorReporter.h
 	inc/MantidKernel/EqualBinsChecker.h
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
@@ -355,6 +357,7 @@ set ( TEST_FILES
 	EigenConversionHelpersTest.h
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
+	ErrorReporterTest.h
 	EqualBinsCheckerTest.h
 	FacilitiesTest.h
 	FileDescriptorTest.h
@@ -489,7 +492,9 @@ target_include_directories ( Kernel SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_I
   PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS
@@ -596,10 +601,10 @@ set ( HTML_ROOT ${DOCS_BUILDDIR}/html )
 set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
 # First the required scripts variable...
 # Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
-# @MANTID_ROOT@/scripts/Crystallography;@MANTID_ROOT@/scripts/DisorderedMaterials;@MANTID_ROOT@/scripts/Engineering;@MANTID_ROOT@/scripts/Muons;@MANTID_ROOT@/scripts/Neutrinos
 set ( REQUIREDSCRIPT_SUBDIRS Engineering Inelastic Reflectometry SANS)
 
-set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts )
+# If other external interfaces are added then we need a better approach here..
+set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts;${CMAKE_BINARY_DIR}/scripts/ExternalInterfaces/mslice/src/mslice )
 foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
   set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
 endforeach()
@@ -705,22 +710,14 @@ set ( DATADIRS "" )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository" )
 set ( HTML_ROOT ../share/doc/html )
 
-# Construct script paths by replacing the old MANTID_ROOT with the new one.
-# Unfortunately string (REGEX REPLACE ... )removes the semi-colons so we have to do this in a loop.
-
-# First REQUIREDSCRIPT_DIRS
-set ( WITH_SEMICOLONS "" )
-foreach ( DIR ${REQUIREDSCRIPT_DIRS} )
-  string ( REGEX REPLACE "${MANTID_ROOT_BUILD}" "${MANTID_ROOT}" DIR ${DIR} )
-  if ( WITH_SEMICOLONS )
-    set ( WITH_SEMICOLONS "${WITH_SEMICOLONS};${DIR}" )
-  else()
-    set ( WITH_SEMICOLONS "${DIR}" ) # Avoid first ;
-  endif()
+# script paths
+set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
+set ( REQUIREDSCRIPT_DIRS ${MANTID_SCRIPTS};${MANTID_SCRIPTS}/ExternalInterfaces )
+foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
+  set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
 endforeach()
-set ( REQUIREDSCRIPT_DIRS "${WITH_SEMICOLONS}" )
 
-# Second PYTHONSCRIPT_DIRS
+# PYTHONSCRIPT_DIRS
 set ( WITH_SEMICOLONS "" )
 foreach ( DIR ${PYTHONSCRIPT_DIRS} )
   string ( REGEX REPLACE "${MANTID_ROOT_BUILD}" "${MANTID_ROOT}" DIR ${DIR} )

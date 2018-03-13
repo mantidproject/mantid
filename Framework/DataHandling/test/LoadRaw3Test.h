@@ -435,7 +435,7 @@ public:
     TS_ASSERT_EQUALS(detector.getID(), 60);
 
     const auto &pmap = output2D->constInstrumentParameters();
-    TS_ASSERT_EQUALS(static_cast<int>(pmap.size()), 160);
+    TS_ASSERT_EQUALS(static_cast<int>(pmap.size()), 161);
     AnalysisDataService::Instance().remove("parameterIDF");
   }
 

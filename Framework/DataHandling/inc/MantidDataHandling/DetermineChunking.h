@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
 
 namespace Mantid {
@@ -58,7 +58,7 @@ enum FileType {
   RAW_FILE          ///< ISIS raw files
 };
 
-class DLLExport DetermineChunking : public API::Algorithm {
+class DLLExport DetermineChunking : public API::ParallelAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
