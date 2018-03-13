@@ -42,7 +42,7 @@ public:
             .retrieveWS<Mantid::API::MatrixWorkspace>(outputWorkspaceName);
     Mantid::Geometry::Instrument_const_sptr instrument;
     TS_ASSERT_THROWS_NOTHING(instrument = outputWs->getInstrument())
-    TS_ASSERT_EQUALS(instrument->getFullName(), instrumentName)
+    TS_ASSERT_EQUALS(instrument->getFullName(), "SmallFakeTubeInstrument")
   }
 };
 
