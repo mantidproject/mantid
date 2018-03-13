@@ -2,18 +2,18 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode,
-                        WorkspaceUnitValidator)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, StringListValidator)
-from mantid.simpleapi import (ConvertUnits, Divide, RebinToWorkspace)
+from mantid.simpleapi import (ConvertUnits)
 import ReflectometryILL_common as common
 
 
 class Prop:
     CLEANUP = 'Cleanup'
-    DIRECT_BEAM_WS = 'DirectBeamWorkspace'
+    DIRECT_WS = 'DirectBeamWorkspace'
     INPUT_WS = 'InputWorkspace'
     OUTPUT_WS = 'OutputWorkspace'
+    REFLECTED_WS = 'ReflectedBeamWorkspace'
     SUBALG_LOGGING = 'SubalgorithmLogging'
 
 
@@ -22,15 +22,19 @@ class SubalgLogging:
     ON = 'Logging ON'
 
 
-class ReflectometryILLReduction(DataProcessorAlgorithm):
-
+class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
+    
     def category(self):
         """Return algorithm's categories."""
         return 'ILL\\Reflectometry;Workflow\\Reflectometry'
 
     def name(self):
         """Return the name of the algorithm."""
-        return 'ReflectometryILLReduction'
+        return 'ReflectometryILLConvertToQ'
+
+    def summary(self):
+        """Return a summary of the algorithm."""
+        return 'Converts a reflectivity workspace from wavelength to momentum transfer.'
 
     def version(self):
         """Return the version of the algorithm."""
@@ -46,21 +50,21 @@ class ReflectometryILLReduction(DataProcessorAlgorithm):
 
         ws = self._inputWS()
 
-        ws = self._reflectivity(ws)
-
         ws = self._convertToMomentumTransfer(ws)
 
         self._finalize(ws)
 
     def PyInit(self):
         """Initialize the input and output properties of the algorithm."""
-        self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS, defaultValue='',
-                                                     validator=WorkspaceUnitValidator("Wavelength"),
-                                                     direction=Direction.Input),
-                             doc='The pre-processed input workspace in units wavelength.')
-        self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS, defaultValue='',
+        self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     validator=WorkspaceUnitValidator('Wavelength')),
+                             doc='A reflectivity workspace in wavelength to be converted to Q.')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS,
+                                                     defaultValue='',
                                                      direction=Direction.Output),
-                             doc='The reduced output workspace')
+                             doc='The input workspace in momentum transfer.')
         self.declareProperty(Prop.SUBALG_LOGGING,
                              defaultValue=SubalgLogging.OFF,
                              validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
@@ -69,22 +73,16 @@ class ReflectometryILLReduction(DataProcessorAlgorithm):
                              defaultValue=common.WSCleanup.ON,
                              validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
                              doc='Enable or disable intermediate workspace cleanup.')
-        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_BEAM_WS, defaultValue='',
+        self.declareProperty(MatrixWorkspaceProperty(Prop.REFLECTED_WS,
+                                                     defaultValue='',
                                                      direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='A beam position table from a direct beam measurement.')
-
-    def validateInputs(self):
-        """Return a dictionary mapping invalid properties to error messages."""
-        issues = dict()
-        ws = self.getProperty(Prop.INPUT_WS).value
-        if ws.getNumberHistograms() != 1:
-            issues[Prop.INPUT_WS] = 'The workspace should contain only a single histogram.'
-        if not self.getProperty(Prop.DIRECT_BEAM_WS).isDefault:
-            ws = self.getProperty(Prop.DIRECT_BEAM_WS).value
-            if ws.getNumberHistograms() != 1:
-                issues[Prop.DIRECT_BEAM_WS] = 'The workspace should contain only a single histogram.'
-        return issues
+                                                     validator=WorkspaceUnitValidator('Wavelength')),
+                             doc='A non-summed reflected beam workspace, needed for Q resolution calculation.')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     validator=WorkspaceUnitValidator('Wavelength')),
+                             doc='A non-summed direct beam workspace, needed for Q resolution calculation.')
 
     def _convertToMomentumTransfer(self, ws):
         """Convert the X units of ws to momentum transfer."""
@@ -109,23 +107,5 @@ class ReflectometryILLReduction(DataProcessorAlgorithm):
         self._cleanup.protect(ws)
         return ws
 
-    def _reflectivity(self, ws):
-        "Divide ws by the direct beam."
-        if self.getProperty(Prop.DIRECT_BEAM_WS).isDefault:
-            return ws
-        directWS = self.getProperty(Prop.DIRECT_BEAM_WS).value
-        rebinnedDirectWSName = self._names.withSuffix('rebinned')
-        rebinnedDirectWS = RebinToWorkspace(WorkspaceToRebin=directWS,
-                                            WorkspaceToMatch=ws,
-                                            OutputWorkspace=rebinnedDirectWSName,
-                                            EnableLogging=self._subalgLogging)
-        reflectivityWSName = self._names.withSuffix('reflectivity')
-        reflectivityWS = Divide(LHSWorkspace=ws,
-                                RHSWorkspace=rebinnedDirectWS,
-                                OutputWorkspace=reflectivityWSName,
-                                EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(rebinnedDirectWS)
-        self._cleanup.cleanup(ws)
-        return reflectivityWS
 
-AlgorithmFactory.subscribe(ReflectometryILLReduction)
+AlgorithmFactory.subscribe(ReflectometryILLConvertToQ)

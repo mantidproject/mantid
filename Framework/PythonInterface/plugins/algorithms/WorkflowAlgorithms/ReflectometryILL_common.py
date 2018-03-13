@@ -5,6 +5,12 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import DeleteWorkspace, mtd
 
 
+class SampleLogs:
+    FOREGROUND_CENTRE = 'foreground.centre_workspace_index'
+    FOREGROUND_END = 'foreground.last_workspace_index'
+    FOREGROUND_START = 'foreground.first_workspace_index'
+
+
 class WSCleanup:
     """A class to manage intermediate workspace cleanup."""
 

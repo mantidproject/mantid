@@ -35,7 +35,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'SummationType': 'SumInQ',  # Don't sum the output.
             'BeamCentre': 49,
             'FluxNormalisation': 'Normalisation OFF',
             'rethrow': True,
@@ -84,7 +83,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'SummationType': 'SumInQ',  # Don't sum the output.
             'BeamCentre': 30,
             'ForegroundHalfWidth': [1],
             'LowAngleBkgOffset': len(lowerExclusionIndices),
@@ -142,16 +140,13 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(outWS.getNumberHistograms(), 1)
-        args = {
-            'Workspace': outWS
-        }
-        alg = create_algorithm('ConvertFromDistribution', **args)
-        assertRaisesNothing(self, alg.execute)
-        ys = outWS.readY(0)
-        numpy.testing.assert_almost_equal(ys, 4000.)
-        es = outWS.readE(0)
-        numpy.testing.assert_almost_equal(es, numpy.sqrt(4000.))
+        self.assertEquals(outWS.getNumberHistograms(), 100)
+        logs = outWS.run()
+        properties = ['foreground.first_workspace_index', 'foreground.centre_workspace_index', 'foreground.last_workspace_index']
+        values = [21, 23, 24]
+        for p, val in zip(properties, values):
+            self.assertTrue(logs.hasProperty(p))
+            self.assertEqual(logs.getProperty(p).value, val)
 
     def testWaterReference(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
@@ -165,7 +160,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
             'WaterReference': inWSName,
-            'SummationType': 'SumInQ',  # Don't sum the output.
             'FluxNormalisation': 'Normalisation OFF',
             'FlatBackground': 'Background OFF',
             'rethrow': True,
@@ -187,7 +181,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
             'BeamCentre': 50,
-            'WavelengthRange': [0., 2.0],
+            'WavelengthRange': [2.0, 4.0],
             'ForegroundHalfWidth': 1,
             'FluxNormalisation': 'Normalisation OFF',
             'FlatBackground': 'Background OFF',
@@ -197,51 +191,17 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(outWS.getNumberHistograms(), 1)
-        self.assertAlmostEquals(outWS.readX(0)[0], 0.0, places=2)
-        self.assertAlmostEquals(outWS.readX(0)[-1], 2.0, places=1)
-        # Check both range begin and end.
-        args = {
-            'InputWorkspace': inWSName,
-            'OutputWorkspace': 'unused_for_child',
-            'BeamCentre': 50,
-            'WavelengthRange': [2.0, 4.0],
-            'ForegroundHalfWidth':1,
-            'FluxNormalisation': 'Normalisation OFF',
-            'FlatBackground': 'Background OFF',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
-        assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(outWS.getNumberHistograms(), 1)
-        xs = outWS.readX(0)
-        self.assertAlmostEquals(xs[0], 2.0, places=2)
-        self.assertAlmostEquals(xs[-1], 4.0, places=1)
-
-    def testRawOutputWorkspace(self):
-        outWSName = 'ReflectometryILLPreprocess_test_RawOutputWorkspace_outWS'
-        rawWSName = 'ReflectometryILLPreprocess_test_RawOutputWorkspace_rawWS'
-        args = {
-            'Run': 'ILL/D17/317370.nxs',
-            'OutputWorkspace': outWSName,
-            'RawOutputWorkspace': rawWSName,
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
-        assertRaisesNothing(self, alg.execute)
-        rawWS = alg.getProperty('RawOutputWorkspace').value
-        self.assertEquals(rawWS.getNumberHistograms(), 256)
-        self.assertEquals(rawWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        self.assertEquals(outWS.getNumberHistograms(), 100)
+        Xs = outWS.extractX()
+        numpy.testing.assert_array_less(2.0, Xs[:, 0])
+        numpy.testing.assert_array_less(Xs[:, -1], 4.0)
 
     def testCleanupOFF(self):
         # test if intermediate workspaces exist:
-        # not tested: _raw- and position tables
+        # not tested: position tables
         # normalise_to_slits, normalise_to_monitor, '_normalised_to_time_','transposed_flat_background'
         workspace_name_suffix = ['_cloned_for_flat_bkg_', '_cropped_', '_detectors_', '_flat_background_',
-                                 '_flat_background_subtracted_', '_foreground_grouped_', '_in_wavelength_',
+                                 '_flat_background_subtracted_', '_in_wavelength_',
                                  '_monitors_', '_transposed_clone_', '_water_calibrated_']
         outWSName = 'outWS'
         inWSName = 'inWS'
@@ -257,7 +217,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         table.addRow((3.0,))
         args = {
             'InputWorkspace': inWSName,
-            'BeamPosition': 'peakTable',
+            'BeamPositionWorkspace': 'peakTable',
             'OutputWorkspace': outWSName,
             'Cleanup': 'Cleanup OFF',
             'WavelengthRange': [5., 10.],

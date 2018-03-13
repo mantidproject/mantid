@@ -17,7 +17,8 @@ class ReflectometryILLPolarizationCorTest(unittest.TestCase):
         illhelpers.add_flipper_configuration_D17(ws, 1, 1)
         mtd.add('ws', ws)
         self._createBeamPositionWS('beamPosWS', ws, 0., 128)
-        self._preprocess('ws', ws, 'beamPosWS')
+        ws = self._preprocess('ws', ws, 'beamPosWS')
+        ws = self._sumInLambda('ws', ws)
         args = {
             'InputWorkspaces': 'ws',
             'OutputWorkspace': 'corrected',
@@ -39,15 +40,27 @@ class ReflectometryILLPolarizationCorTest(unittest.TestCase):
         beamPos.addColumn('double', 'PeakCentre')
         L2 = referenceWS.getInstrument().getComponentByName('detector').getPos().norm()
         beamPos.addRow((detectorAngle, L2, beamCentre))
+        return beamPos
 
     def _preprocess(self, outputWSName, ws, beamPosWS):
         args = {
             'InputWorkspace': ws,
-            'BeamPosition': beamPosWS,
+            'BeamPositionWorkspace': beamPosWS,
             'OutputWorkspace': outputWSName,
         }
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         alg.execute()
+        return mtd[outputWSName]
+
+    def _sumInLambda(self, outputWSName, ws):
+        args = {
+            'InputWorkspace': ws,
+            'OutputWorkspace': outputWSName,
+            'SummationType': 'SumInLambda'
+        }
+        alg = create_algorithm('ReflectometryILLSumForeground', **args)
+        alg.execute()
+        return mtd[outputWSName]
 
 
 if __name__ == "__main__":

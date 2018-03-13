@@ -43,7 +43,6 @@ set ( TEST_PY_FILES
   PowderDiffILLReductionTest.py
   ReflectometryILLPolarizationCorTest.py
   ReflectometryILLPreprocessTest.py
-  ReflectometryILLReductionTest.py
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py
