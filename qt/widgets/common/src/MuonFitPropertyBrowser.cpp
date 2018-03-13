@@ -1566,7 +1566,7 @@ bool MuonFitPropertyBrowser::isPeriodValid(const QString &name) {
     return false;
   } else {
     std::vector<std::string> numbers;
-	std::string nameString = name.toStdString();
+    std::string nameString = name.toStdString();
     boost::algorithm::split(numbers, nameString, boost::is_any_of(","));
     // loop over results
     for (auto value : numbers) {
