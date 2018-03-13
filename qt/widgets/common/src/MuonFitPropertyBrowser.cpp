@@ -81,7 +81,7 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
     : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr),
-      m_mainSplitter(nullptr) {}
+      m_mainSplitter(nullptr), m_isMultiFittingMode(false) {}
 
 /**
 * Initialise the muon fit property browser.
@@ -1189,6 +1189,7 @@ std::string MuonFitPropertyBrowser::outputName() const {
  * @param enabled :: [input] Whether to turn this mode on or off
  */
 void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
+  m_isMultiFittingMode = enabled;
   // First, clear whatever model is currently set
   this->clear();
   // set default selection (all groups)
@@ -1220,6 +1221,16 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
     setFitEnabled(false);
   }
 }
+
+/**
+* Returns true is the browser is set to multi fitting mode
+* This works using the visibility state of the button group
+* which is controlled in setMultiFittingMode
+*/
+bool MuonFitPropertyBrowser::isMultiFittingMode() const {
+  return m_isMultiFittingMode;
+}
+
 /**
 * Set TF asymmetry mode on or off.
 * If turned off, the fit property browser looks like Mantid 3.8.

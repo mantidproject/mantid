@@ -33,6 +33,8 @@ Interface
 - Muon analysis no longer crashes when using the browse button in sequential fitting.
 - The period summation/subtraction can now be used in multiple fitting. 
 - Muon analysis now handles the "auto background" gracefully in single and multiple fitting modes.
+- We have disabled some non functional graph right click context menu items or adding functions when in multi data fitting mode, in the Data Analysis tab of the Muon Analysis Interface.
+
 
 Algorithms
 ----------
