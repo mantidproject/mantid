@@ -47,6 +47,7 @@ const static double DEGREES_IN_SEMICIRCLE = 180;
 // Nexus shape types
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
 const H5std_string NX_OFF = "NXoff_geometry";
+const H5std_string BANK_NAME = "local_name";
 
 template <typename T, typename R>
 std::vector<R> convertVector(const std::vector<T> &toConvert) {
@@ -250,8 +251,25 @@ Pixels getPixelOffsets(const Group &detectorGroup) {
   return offsetData;
 }
 
-// Function to get the transformations from the nexus file, and create the Eigen
-// transform object
+/**
+ * Creates a Homogemous transfomation for nexus groups
+ *
+ * Walks the chain of transformations described in the file where W1 is first
+ *transformation and Wn is last and assembles them as
+ *
+ * W = Wn x ... W2 x W1
+ *
+ * Each W describes a Homogenous Transformation
+ *
+ * R | T
+ * -   -
+ * 0 | 1
+ *
+ *
+ * @param file
+ * @param detectorGroup
+ * @return
+ */
 Eigen::Transform<double, 3, Eigen::Affine>
 getTransformations(const H5File &file, const Group &detectorGroup) {
   H5std_string dependency;
@@ -527,11 +545,18 @@ extractInstrument(const H5File &file, const Group &root) {
   for (auto &detectorGroup : detectorGroups) {
     // Get the pixel offsets
     Pixels pixelOffsets = getPixelOffsets(detectorGroup);
-    // Get the transformations
+    // Transform in homogenous coordinates. Offsets will be rotated then bank
+    // translation applied.
     Eigen::Transform<double, 3, 2> transforms =
         getTransformations(file, detectorGroup);
-    // Calculate pixel positions
-    Pixels detectorPixels = transforms * pixelOffsets;
+    // Absolute bank position
+    Eigen::Vector3d bankPos = transforms * Eigen::Vector3d{0, 0, 0};
+    // Absolute bank rotation
+    Eigen::Quaterniond bankRotation = Eigen::Quaterniond(transforms.rotation());
+    builder.addBank(get1DStringDataset(BANK_NAME, detectorGroup), bankPos,
+                    bankRotation);
+    // Calculate pixel relative positions
+    Pixels detectorPixels = Eigen::Affine3d::Identity() * pixelOffsets;
     // Get the pixel detIds
     auto detectorIds = getDetectorIds(detectorGroup);
     // Extract shape
@@ -540,8 +565,9 @@ extractInstrument(const H5File &file, const Group &root) {
     for (size_t i = 0; i < detectorIds.size(); ++i) {
       auto index = static_cast<int>(i);
       std::string name = std::to_string(index);
-      Eigen::Vector3d detPos = detectorPixels.col(index);
-      builder.addDetector(name, detectorIds[index], detPos, shape);
+      Eigen::Vector3d relativePos = detectorPixels.col(index);
+      builder.addDetectorToLastBank(name, detectorIds[index], relativePos,
+                                    shape);
     }
   }
   // Sort the detectors

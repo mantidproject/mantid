@@ -3,7 +3,8 @@
 
 #include "MantidNexusGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "Eigen/Core"
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <string>
 #include <memory>
 
@@ -11,6 +12,7 @@ namespace Mantid {
 namespace Geometry {
 class Instrument;
 class IComponent;
+class ICompAssembly;
 }
 namespace NexusGeometry {
 
@@ -46,10 +48,15 @@ public:
   /// Adds component to instrument
   Geometry::IComponent *addComponent(const std::string &compName,
                                      const Eigen::Vector3d &position);
-  /// Adds detector to instrument
-  void addDetector(const std::string &detName, int detId,
-                   const Eigen::Vector3d &position,
-                   boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
+  /// Adds detector to the root (instrument)
+  void addDetectorToInstrument(
+      const std::string &detName, int detId, const Eigen::Vector3d &position,
+      boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
+  /// Adds detector to the last registered bank
+  void addDetectorToLastBank(
+      const std::string &detName, int detId,
+      const Eigen::Vector3d &relativeOffset,
+      boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
   /// Adds detector to instrument
   void addMonitor(const std::string &detName, int detId,
                   const Eigen::Vector3d &position,
@@ -60,6 +67,10 @@ public:
   /// Add source
   void addSource(const std::string &sourceName,
                  const Eigen::Vector3d &position);
+
+  void addBank(const std::string &localName, const Eigen::Vector3d &position,
+               const Eigen::Quaterniond &rotation);
+
   /// Returns underlying instrument
   std::unique_ptr<const Geometry::Instrument> createInstrument() const;
 
@@ -68,6 +79,8 @@ private:
   void sortDetectors() const;
   /// product
   mutable std::unique_ptr<Geometry::Instrument> m_instrument;
+  /// Last bank added. The instrument is the owner of the bank.
+  Geometry::ICompAssembly *m_lastBank = nullptr;
 };
 }
 }

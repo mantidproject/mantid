@@ -40,8 +40,10 @@ public:
     InstrumentBuilder builder(this->iTestName);
     builder.addSample("sample", {0, 0, 0});
     builder.addSource("source", {-10, 0, 0});
-    builder.addDetector(this->dTestName, 1, this->testPos2, this->shape);
-    builder.addDetector(this->dTestName, 2, this->testPos1, this->shape);
+    builder.addDetectorToInstrument(this->dTestName, 1, this->testPos2,
+                                    this->shape);
+    builder.addDetectorToInstrument(this->dTestName, 2, this->testPos1,
+                                    this->shape);
     auto iVisitor = Geometry::InstrumentVisitor(builder.createInstrument());
     iVisitor.walkInstrument();
     auto iDetInfo = iVisitor.detectorInfo();

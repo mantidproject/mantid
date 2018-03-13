@@ -52,8 +52,19 @@ public:
     auto detectorInfo = std::move(beamline.second);
     TSM_ASSERT_EQUALS("Detectors + 1 monitor", detectorInfo->size(),
                       128 * 2 + 1);
-    TSM_ASSERT_EQUALS("Detectors + 3 non-detector components",
-                      componentInfo->size(), detectorInfo->size() + 3);
+    TSM_ASSERT_EQUALS("Detectors + 2 banks + root + source + sample",
+                      componentInfo->size(), detectorInfo->size() + 5);
+    // Check 128 detectors in first bank
+    TS_ASSERT_EQUALS(128, componentInfo->detectorsInSubtree(
+                                             componentInfo->root() - 3).size());
+    TS_ASSERT_EQUALS("rear-detector",
+                     componentInfo->name(componentInfo->root() - 3));
+    TS_ASSERT(Mantid::Kernel::toVector3d(
+                  componentInfo->position(componentInfo->root() - 3))
+                  .isApprox(Eigen::Vector3d{0, 0, 4}));
+    // Check 128 detectors in second bank
+    TS_ASSERT_EQUALS(128, componentInfo->detectorsInSubtree(
+                                             componentInfo->root() - 4).size());
   }
 
   void test_source_is_where_expected() {
@@ -80,7 +91,7 @@ public:
     Eigen::Vector3d offset(-0.498, -0.200, 0.00); // All offsets for pixel x,
                                                   // and y specified separately,
                                                   // z defaults to 0
-    auto expectedDet0Position = offset + (magnitude * unitVector);
+    Eigen::Vector3d expectedDet0Position = offset + (magnitude * unitVector);
     TS_ASSERT(det0Position.isApprox(expectedDet0Position));
   }
 
@@ -108,6 +119,14 @@ public:
              affine;
     // Translation of bank
     affine = Eigen::Translation3d(magnitude * unitVectorTranslation) * affine;
+    /*
+      Affine should be for rotation around Y, and translated my U.M
+
+      cos(theta)	0	-sin(theta)	U.M.x
+      0				1	0			U.M.y
+      sin(theta)	0 	cos(theta) 	U.M.z
+      0				0   0			1
+     */
     auto expectedPosition = affine * offset;
     TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-3));
   }
