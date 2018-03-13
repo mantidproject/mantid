@@ -109,7 +109,8 @@ public:
   virtual bool threadSafe() const;
 };
 
-using EventWorkspaceCollection_sptr = boost::shared_ptr<EventWorkspaceCollection>;
+using EventWorkspaceCollection_sptr =
+    boost::shared_ptr<EventWorkspaceCollection>;
 using EventWorkspaceCollection_uptr = std::unique_ptr<EventWorkspaceCollection>;
 
 } // namespace DataHandling

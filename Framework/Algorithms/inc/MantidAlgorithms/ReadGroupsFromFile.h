@@ -98,7 +98,7 @@ public:
 private:
   /// Map containing the detector entries found in the *.cal file. The key is
   /// the udet number, the value of is a pair of <group,selected>.
-  using calmap = std::unordered_map<int, std::pair<int, int> >;
+  using calmap = std::unordered_map<int, std::pair<int, int>>;
   /// Initialisation code
   void init() override;
   /// Execution code

@@ -147,7 +147,8 @@ private:
   double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy,
   /// if provided
 
-  using expfunction = double (*)(double); ///< Typedef pointer to exponential function
+  using expfunction =
+      double (*)(double);  ///< Typedef pointer to exponential function
   expfunction EXPONENTIAL; ///< Pointer to exponential function
 };
 

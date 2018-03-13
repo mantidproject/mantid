@@ -45,7 +45,7 @@ public:
 };
 
 /// Helper typedef
-using VecCommands = std::vector<boost::shared_ptr<Command> >;
+using VecCommands = std::vector<boost::shared_ptr<Command>>;
 
 /**
  * Command yielding no result.
@@ -140,7 +140,7 @@ public:
 };
 
 /// Helper typedef for vector of command parsers
-using VecCommandParsers = std::vector<boost::shared_ptr<CommandParser> >;
+using VecCommandParsers = std::vector<boost::shared_ptr<CommandParser>>;
 
 /**
  * Command parser base class for common concrete command parser types.

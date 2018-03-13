@@ -49,7 +49,7 @@ public:
 private:
   /// Helper typedef. For storing indexes of special values per spectra per
   /// workspace.
-  using SpecialTypeIndexes = std::vector<std::vector<size_t> >;
+  using SpecialTypeIndexes = std::vector<std::vector<size_t>>;
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method.
