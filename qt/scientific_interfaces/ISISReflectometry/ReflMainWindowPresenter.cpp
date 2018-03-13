@@ -161,21 +161,21 @@ std::string ReflMainWindowPresenter::getTimeSlicingType(int group) const {
 * @param angle :: the run angle to look up transmission runs for
 * @return :: Values passed for 'Transmission run(s)'
 */
-std::string
-ReflMainWindowPresenter::getTransmissionRunsForAngle(int group,
-                                                     const double angle) const {
+OptionsQMap
+ReflMainWindowPresenter::getOptionsForAngle(int group,
+                                            const double angle) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
 
-  return m_settingsPresenter->getTransmissionRunsForAngle(group, angle);
+  return m_settingsPresenter->getOptionsForAngle(group, angle);
 }
 
 /** Returns whether there are per-angle transmission runs specified
  * @return :: true if there are per-angle transmission runs
  * */
-bool ReflMainWindowPresenter::hasPerAngleTransmissionRuns(int group) const {
+bool ReflMainWindowPresenter::hasPerAngleOptions(int group) const {
   checkSettingsPtrValid(m_settingsPresenter);
-  return m_settingsPresenter->hasPerAngleTransmissionRuns(group);
+  return m_settingsPresenter->hasPerAngleOptions(group);
 }
 
 /**
