@@ -18,6 +18,7 @@ class MaxEntPresenter(object):
         self.alg=alg
         self.calcAlg = maxent_model.PhaseModel()
         self.load=load
+        self.thread =None
         # set data
         self.getWorkspaceNames()
         #connect
