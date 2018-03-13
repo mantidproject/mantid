@@ -55,7 +55,7 @@
 
 #include <QMenu>
 #include <QSignalMapper>
-
+#include <QTableWidgetItem>
 #include <QCheckBox>
 
 namespace {
@@ -178,8 +178,8 @@ void MuonFitPropertyBrowser::init() {
   tmp = "bwd";
   addGroupCheckbox(tmp);
   m_periodsToFit = m_enumManager->addProperty("Periods to fit");
-  m_periodsToFitOptions << ALL_PERIODS_LABEL << "1"
-                        << "2" << CUSTOM_LABEL;
+  m_periodsToFitOptions << ALL_PERIODS_LABEL << CUSTOM_LABEL << "1"
+                        << "2";
   m_showPeriodValue << "1";
   m_showPeriods = m_enumManager->addProperty("Selected Periods");
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
@@ -1417,7 +1417,6 @@ void MuonFitPropertyBrowser::genGroupWindow() {
 */
 void MuonFitPropertyBrowser::setAllPeriods() {
 
-  clearChosenPeriods();
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
        ++iter) {
     m_boolManager->setValue(iter.value(), true);
@@ -1429,15 +1428,26 @@ void MuonFitPropertyBrowser::setAllPeriods() {
 * @param numPeriods :: [input] Number of periods
 */
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
-  m_periodsToFitOptions.clear();
+  // has to go here to get the original value
+  int j = m_enumManager->value(m_periodsToFit);
+  auto selected = getChosenPeriods();
+  // delete period checkboxes
+  clearPeriodCheckboxes();
+  if (!m_periodsToFitOptions.empty()) {
+    m_periodsToFitOptions.clear();
+  }
+
   if (numPeriods > 1) {
     m_periodsToFitOptions << ALL_PERIODS_LABEL;
+    m_periodsToFitOptions << CUSTOM_LABEL;
   }
+
   // create more boxes
   for (size_t i = 0; i != numPeriods; i++) {
     QString name = QString::number(i + 1);
     addPeriodCheckbox(name);
   }
+
   if (m_periodsToFitOptions.size() == 1) {
     m_generateBtn->setDisabled(true);
     m_multiFitSettingsGroup->property()->removeSubProperty(m_periodsToFit);
@@ -1446,14 +1456,19 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
     clearChosenPeriods();
     m_boolManager->setValue(m_periodBoxes.constBegin().value(), true);
   } else {
-    // add custom back into list
+    // for now always reset to all groups when data is changed
+    // the commented out code can be used to keep the selection when changing
+    // run - but has a bug
+    // if (j >= m_periodsToFitOptions.size()) {
+    // set all groups if the selection is no longer available (0 index)
+    j = 0;
+    //}
     m_multiFitSettingsGroup->property()->insertSubProperty(m_periodsToFit,
                                                            m_showGroup);
     m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
     m_generateBtn->setDisabled(false);
 
-    m_periodsToFitOptions << CUSTOM_LABEL;
-    m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+    updatePeriods(j); // , selected);
   }
 }
 /**
@@ -1489,6 +1504,7 @@ void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
          iter != m_periodBoxes.constEnd(); ++iter) {
       delete (*iter);
     }
+    m_periodBoxes.clear();
   }
   m_periodsToFitOptions.clear();
   m_periodsToFitOptions << "1";
@@ -1504,22 +1520,118 @@ void MuonFitPropertyBrowser::clearChosenPeriods() const {
   }
 }
 /**
+* updates the period displays
+*/
+void MuonFitPropertyBrowser::updatePeriods() {
+  int j = m_enumManager->value(m_periodsToFit);
+  // auto selected = getChosenPeriods();
+  updatePeriods(j);
+}
+/**
+* updates the period displays and conserves the selection
+* if selection is niot available default to all periods
+* @param j :: [input] index of selection in combobox
+* selected is an input for changing runs and preserving selection (list of
+* selected periods)
+* currently has a bug
+*/
+void MuonFitPropertyBrowser::updatePeriods(const int j) {
+  // this is for switching but has a bug at the moment
+  // const QStringList &selected) {
+  m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+  m_enumManager->setValue(m_periodsToFit, j);
+  if (m_periodsToFitOptions[j] == CUSTOM_LABEL) {
+    // currently the below does not work reliably (if period arithmatic is
+    // presemnt it gives bad results
+    /*
+    setChosenPeriods(selected);*/
+    // lets default to all periods for now
+    // explictly set all periods
+    setAllPeriods();
+  } else if (m_periodsToFitOptions[j] == ALL_PERIODS_LABEL) {
+    // explictly set all periods
+    setAllPeriods();
+  } else { // single number
+    setChosenPeriods(m_periodsToFitOptions[j]);
+  }
+}
+/**
+* Adds a new checkbox to the list of periods with given name
+* It updates the display
+* @param name :: [input] Name of period to add
+*/
+void MuonFitPropertyBrowser::addPeriodCheckboxToMap(const QString &name) {
+  if (m_periodBoxes.find(name) != m_periodBoxes.end()) {
+    // if the box already exists
+    return;
+  }
+  // has to go here to get the original value
+  int j = m_enumManager->value(m_periodsToFit);
+  // auto selected = getChosenPeriods();
+  addPeriodCheckbox(name);
+  updatePeriods(j);
+}
+/**
+* Check if a period is valid
+* @param name :: [input] Name of period to add
+*/
+bool MuonFitPropertyBrowser::isPeriodValid(const QString &name) {
+  // check period is sensible
+  // no frational periods
+  if (name.contains(".")) {
+    return false;
+  }
+  // wshould only ever have 1 minus sign
+  else if (name.count("-") > 1) {
+    return false;
+  } else {
+    std::vector<std::string> numbers;
+    std::string nameString = name.toStdString();
+    boost::algorithm::split(numbers, nameString, boost::is_any_of(","));
+    // loop over results
+    for (auto value : numbers) {
+      auto tmp = value.find("-");
+      if (tmp != std::string::npos) {
+        // find a minus sign
+        auto before = value.substr(0, tmp);
+        auto after = value.substr(tmp + 1);
+
+      } else {
+        try {
+          boost::lexical_cast<int>(value);
+          if (m_periodBoxes.find(QString::fromStdString(value)) ==
+                  m_periodBoxes.end() &&
+              numbers.size() > 1) {
+            // if the box does not exist and there is more than 1 period in name
+            return false;
+          }
+        } catch (boost::bad_lexical_cast) {
+          // none int value
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+/**
 * Add a new checkbox to the list of periods with given name
 * The new checkbox is unchecked by default
 * @param name :: [input] Name of period to add
 */
 void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
-  m_periodBoxes.insert(name, m_boolManager->addProperty(name));
-  int j = m_enumManager->value(m_periodsToFit);
-  // add new period to list will go after inital list
-  m_periodsToFitOptions << name;
+  // check period is sensible
+  // no frational periods
+  if (isPeriodValid(name)) {
+    m_periodBoxes.insert(name, m_boolManager->addProperty(name));
+    int j = m_enumManager->value(m_periodsToFit);
+    // add new period to list will go after inital list
+    m_periodsToFitOptions << name;
 
-  auto active = getChosenPeriods();
-  m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
-  setChosenPeriods(active);
-  m_enumManager->setValue(m_periodsToFit, j);
-  if (m_periodsToFitOptions[j] == ALL_PERIODS_LABEL) {
-    setAllPeriods();
+    auto active = getChosenPeriods();
+    m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+    setChosenPeriods(active);
+    m_enumManager->setValue(m_periodsToFit, j);
   }
 }
 /**
@@ -1634,6 +1746,10 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
   m_positiveCombo->clear();
   m_negativeCombo->clear();
   addPeriodCheckbox(value);
+  int j = m_enumManager->value(m_periodsToFit);
+  if (m_periodsToFitOptions[j] == ALL_PERIODS_LABEL) {
+    setAllPeriods();
+  }
 }
 /**
 * sets the label for a single fit and
