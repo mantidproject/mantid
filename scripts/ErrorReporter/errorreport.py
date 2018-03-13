@@ -1,5 +1,5 @@
 import sys
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 import ui_errorreport
 from PyQt4.QtCore import pyqtSignal
 from mantidqtpython import MantidQt
@@ -11,6 +11,7 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
+        self.setFixedSize(self.width(), self.height())
 
         self.action.connect(QtGui.QApplication.instance().errorHandling)
 
@@ -25,6 +26,9 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         self.fullShareButton.clicked.connect(self.fullShare)
         self.nonIDShareButton.clicked.connect(self.nonIDShare)
         self.noShareButton.clicked.connect(self.noShare)
+
+        self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
 
     def fullShare(self):
         self.action.emit(self.continue_working, 0, self.input_name, self.input_email)
