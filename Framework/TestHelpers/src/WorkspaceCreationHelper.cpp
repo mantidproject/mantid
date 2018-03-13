@@ -670,7 +670,7 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     double startX, const double detSize, const int nSpectra, const int nBins,
     const double deltaX, V3D slit1Pos, V3D slit2Pos, V3D sourcePos,
-    V3D monitorPos, V3D samplePos, V3D detectorPos) {
+    V3D monitorPos, V3D samplePos, V3D detectorPos, V3D detectorPos2) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       PointingAlong::Y /*up*/, PointingAlong::X /*along*/, Handedness::Left,
@@ -687,8 +687,11 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
   addDetector(instrument, detectorPos - V3D(0., detSize, 0.), 2,
               "point-detector"); // offset below centre
   addDetector(instrument, detectorPos, 3, "point-detector"); // at centre
-  addDetector(instrument, detectorPos + V3D(0., detSize, 0.), 4,
-              "point-detector"); // offset above centre
+  if (detectorPos.distance(detectorPos2) < 1e-10)
+    addDetector(instrument, detectorPos + V3D(0., detSize, 0.), 4,
+                "point-detector"); // offset above centre
+  else
+    addDetector(instrument, detectorPos2, 4, "point-detector");
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
   workspace->setInstrument(instrument);
