@@ -727,11 +727,13 @@ void PeakPickerTool::prepareContextMenu(QMenu &menu) {
 
   menu.addSeparator();
 
-  action = new QAction("Get Parameters", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(getParameters()));
-  menu.addAction(action);
+  if (!isMuonMultiFitData()) {
+    action = new QAction("Get Parameters", this);
+    connect(action, SIGNAL(triggered()), this, SLOT(getParameters()));
+    menu.addAction(action);
 
-  menu.addSeparator();
+    menu.addSeparator();
+  }
 
   if (m_fitPropertyBrowser->isFitEnabled()) {
     action = new QAction("Fit", this);

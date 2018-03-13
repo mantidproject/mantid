@@ -29,6 +29,7 @@ Interface
 - The ALC interface now allows background sections with negative values.
 - If data is loaded with 0 good frames into Muon Analysis then it will try to load the data without dead time correction (does not need number of good frames).
 - Muon analysis no longer disables the "aco add" and "simultaneous" buttons in the multiple fitting interface.
+- We have disabled some non functional graph right click context menu items or adding functions when in multi data fitting mode, in the Data Analysis tab of the Muon Analysis Interface.
 
 Algorithms
 ----------
