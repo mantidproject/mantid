@@ -53,12 +53,12 @@ public:
   void setInstrumentName(const std::string &instName) override;
 
   /// Returns per-angle values passed for 'Transmission run(s)'
-  std::string
-  getTransmissionRunsForAngle(const double angleToFind) const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angleToFind) const override;
   /// Returns default values passed for 'Transmission run(s)'
-  std::string getDefaultTransmissionRuns() const;
+  MantidWidgets::DataProcessor::OptionsQMap getDefaultOptions() const;
   /// Whether per-angle transmission runs are specified
-  bool hasPerAngleTransmissionRuns() const override;
+  bool hasPerAngleOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const override;
@@ -97,6 +97,7 @@ private:
   void
   addTransmissionOptions(MantidWidgets::DataProcessor::OptionsQMap &options,
                          std::initializer_list<QString> keys) const;
+  QString getProcessingInstructions() const;
 
   /// The view we are managing
   IReflSettingsView *m_view;

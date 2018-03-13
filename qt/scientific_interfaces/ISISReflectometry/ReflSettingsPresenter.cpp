@@ -104,6 +104,19 @@ OptionsQMap ReflSettingsPresenter::transmissionOptionsMap() const {
   return options;
 }
 
+/** Get the processing instructinons.
+ * @return : the processing instructions, or an empty string if not set
+ */
+QString ReflSettingsPresenter::getProcessingInstructions() const {
+  // the processing instructions are set in the per-angle options table. We
+  // only set them if there is a default (i.e. not linked to an angle).
+  auto options = getDefaultOptions();
+  if (options.count("ProcessingInstructions"))
+    return options["ProcessingInstructions"].toString();
+
+  return QString();
+}
+
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'. Note that
  * this must include all applicable options, even if they are empty, because
  * the GenericDataProcessorPresenter has no other way of knowing which options
@@ -129,6 +142,8 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
     setTransmissionOption(options, "AnalysisMode", m_view->getAnalysisMode());
     setTransmissionOption(options, "StartOverlap", m_view->getStartOverlap());
     setTransmissionOption(options, "EndOverlap", m_view->getEndOverlap());
+    setTransmissionOption(options, "ProcessingInstructions",
+                          getProcessingInstructions());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -144,8 +159,6 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
     setTransmissionOption(options, "WavelengthMax", m_view->getLambdaMax());
     setTransmissionOption(options, "I0MonitorIndex",
                           m_view->getI0MonitorIndex());
-    setTransmissionOption(options, "ProcessingInstructions",
-                          m_view->getProcessingInstructions());
   }
 
   return options;
@@ -206,9 +219,6 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     addIfNotEmpty(options, "CPp", m_view->getCPp());
     addIfNotEmpty(options, "PolarizationAnalysis",
                   m_view->getPolarisationCorrections());
-    addIfNotEmpty(options, "ScaleFactor", m_view->getScaleFactor());
-    addIfNotEmpty(options, "MomentumTransferStep",
-                  m_view->getMomentumTransferStep());
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
 
@@ -218,16 +228,10 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     if (hasReductionTypes(summationType))
       addIfNotEmpty(options, "ReductionType", m_view->getReductionType());
 
-    // Add transmission runs. Note that the value here may be
-    // a comma-separated list of multiple values. We return the
-    // string as entered by the user because parsing is done in
-    // the data processor widget. Note also that we can only
-    // return default values here if provided; the user may also
-    // provide per-angle transmission runs, but these need to be
-    // requested on a per-row basis when we know what the angle is
-    // for that row.
-    auto transmissionRuns = getDefaultTransmissionRuns();
-    addIfNotEmpty(options, "FirstTransmissionRun", transmissionRuns);
+    auto defaultOptions = getDefaultOptions();
+    for (auto iter = defaultOptions.begin(); iter != defaultOptions.end();
+         ++iter)
+      addIfNotEmpty(options, iter.key(), iter.value().toString());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -244,8 +248,6 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     addIfNotEmpty(options, "WavelengthMin", m_view->getLambdaMin());
     addIfNotEmpty(options, "WavelengthMax", m_view->getLambdaMax());
     addIfNotEmpty(options, "I0MonitorIndex", m_view->getI0MonitorIndex());
-    addIfNotEmpty(options, "ProcessingInstructions",
-                  m_view->getProcessingInstructions());
     addIfNotEmpty(options, "DetectorCorrectionType",
                   m_view->getDetectorCorrectionType());
     auto const correctDetectors =
@@ -258,20 +260,20 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
 /** Check whether per-angle transmission runs are specified
  */
-bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
+bool ReflSettingsPresenter::hasPerAngleOptions() const {
   // Check the setting is enabled
   if (!m_view->experimentSettingsEnabled())
     return false;
 
   // Check we have some entries in the table
-  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto runsPerAngle = m_view->getPerAngleOptions();
   if (runsPerAngle.empty())
     return false;
 
   // To save confusion, we only allow EITHER a default transmission runs string
   // OR multiple per-angle strings. Therefore if there is a default set there
   // cannot be per-angle runs.
-  if (!getDefaultTransmissionRuns().empty())
+  if (!getDefaultOptions().empty())
     return false;
 
   // Ok, we have some entries and they're not defaults, so assume they're valid
@@ -285,13 +287,13 @@ bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
 * @return :: the transmission run(s) as a string of comma-separated values
 * @throws :: if the settings the user entered are invalid
 */
-std::string ReflSettingsPresenter::getDefaultTransmissionRuns() const {
+OptionsQMap ReflSettingsPresenter::getDefaultOptions() const {
   if (!m_view->experimentSettingsEnabled())
-    return std::string();
+    return OptionsQMap();
 
   // Values are entered as a map of angle to transmission runs. Loop
   // through them, checking for the required angle
-  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto runsPerAngle = m_view->getPerAngleOptions();
   auto iter = runsPerAngle.find("");
   if (iter != runsPerAngle.end()) {
     // We found an empty angle. Check there is only one entry in the
@@ -306,22 +308,22 @@ std::string ReflSettingsPresenter::getDefaultTransmissionRuns() const {
   }
 
   // If not found, return an empty string
-  return std::string();
+  return OptionsQMap();
 }
 
 /** Gets the user-specified transmission runs from the view
 * @param angleToFind :: the run angle that transmission runs are valid for
 * @return :: the transmission run(s) as a string of comma-separated values
 */
-std::string ReflSettingsPresenter::getTransmissionRunsForAngle(
-    const double angleToFind) const {
-  std::string result;
+OptionsQMap
+ReflSettingsPresenter::getOptionsForAngle(const double angleToFind) const {
+  OptionsQMap result;
 
-  if (!hasPerAngleTransmissionRuns())
+  if (!hasPerAngleOptions())
     return result;
 
   // Values are entered as a map of angle to transmission runs
-  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto runsPerAngle = m_view->getPerAngleOptions();
 
   // We use a generous tolerance to check the angle because values
   // from the log are not that accurate
@@ -331,7 +333,7 @@ std::string ReflSettingsPresenter::getTransmissionRunsForAngle(
   double smallestDist = std::numeric_limits<double>::max();
   for (auto kvp : runsPerAngle) {
     auto angleStr = kvp.first;
-    auto runsStr = kvp.second;
+    auto values = kvp.second;
 
     // Convert the angle to a double
     double angle = 0.0;
@@ -346,7 +348,7 @@ std::string ReflSettingsPresenter::getTransmissionRunsForAngle(
     double dist = std::abs(angle - angleToFind);
     if (dist <= tolerance) {
       if (dist < smallestDist) {
-        result = runsStr;
+        result = values;
         smallestDist = dist;
       }
     }
@@ -409,8 +411,12 @@ void ReflSettingsPresenter::getExpDefaults() {
   defaults.CAp = value_or(parameters.optional<std::string>("cAp"), "1");
   defaults.CPp = value_or(parameters.optional<std::string>("cPp"), "1");
 
+  defaults.MomentumTransferMin = parameters.optional<double>("Q min");
+  defaults.MomentumTransferMax = parameters.optional<double>("Q max");
   defaults.MomentumTransferStep = parameters.optional<double>("dQ/Q");
   defaults.ScaleFactor = parameters.optional<double>("Scale");
+  defaults.ProcessingInstructions =
+      parameters.optional<std::string>("ProcessingInstructions");
   defaults.StitchParams = parameters.optional<std::string>("Stitch1DMany");
 
   if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
@@ -456,8 +462,6 @@ void ReflSettingsPresenter::getInstDefaults() {
   defaults.LambdaMax = parameters.mandatory<double>("LambdaMax");
   defaults.I0MonitorIndex =
       parameters.mandatoryVariant<int, double>("I0MonitorIndex");
-  defaults.ProcessingInstructions =
-      parameters.optional<std::string>("ProcessingInstructions");
   defaults.CorrectDetectors =
       value_or(parameters.optional<bool>("CorrectDetectors"),
                alg->getProperty("CorrectDetectors"));
