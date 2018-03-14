@@ -2084,11 +2084,11 @@ class PrintParser(UserFileComponentParser):
 
         setting = line.strip()
 
-        if setting.upper().startswith('PRINT'):
-            setting = setting[len('PRINT'):]
+        if setting.upper().startswith(PrintParser.Type):
+            setting = setting[len(PrintParser.Type):]
             setting = setting.strip()
         else:
-            raise RuntimeError("PrintParser: Failed to extract line {} it does not start with PRINT".format(line))
+            raise RuntimeError("PrintParser: Failed to extract line {} it does not start with {}".format(line, PrintParser.Type))
 
         return {PrintId.print_line: setting}
 
