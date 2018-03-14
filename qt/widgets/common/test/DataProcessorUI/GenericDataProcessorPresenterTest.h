@@ -160,10 +160,9 @@ private:
   }
 
   ProcessingAlgorithm createReflectometryProcessor() {
-
     return ProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
-        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
+        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"}, 1,
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
                           "OutputWorkspace", "OutputWorkspaceWavelength",
                           "FirstTransmissionRun", "SecondTransmissionRun"});
@@ -199,7 +198,8 @@ private:
   void createTOFWorkspace(const QString &wsName,
                           const QString &runNumber = "") {
     auto tinyWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            2000);
     auto inst = tinyWS->getInstrument();
 
     inst->getParameterMap()->addDouble(inst.get(), "I0MonitorIndex", 1.0);
@@ -1296,6 +1296,8 @@ public:
     auto ws =
         createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     ws->String(0, ThetaCol) = "";
+    ws->String(1, ThetaCol) = "";
+    ws->String(0, ScaleCol) = "";
     ws->String(1, ScaleCol) = "";
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
@@ -1318,6 +1320,8 @@ public:
     TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
     TS_ASSERT_EQUALS(ws->String(1, RunCol), "12346");
     TS_ASSERT(ws->String(0, ThetaCol) != "");
+    TS_ASSERT(ws->String(0, ScaleCol) != "");
+    TS_ASSERT(ws->String(1, ThetaCol) != "");
     TS_ASSERT(ws->String(1, ScaleCol) != "");
 
     // Check output and tidy up
@@ -3191,16 +3195,16 @@ public:
             "IvsQ_TOF_12345_TOF_12346");
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[0], 0.100, 1e-5);
+        out->x(0)[0], 0.01108, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[1], 0.104, 1e-5);
+        out->x(0)[1], 0.01153, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[2], 0.10816, 1e-5);
+        out->x(0)[2], 0.01199, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[3], 0.11248, 1e-5);
+        out->x(0)[3], 0.01247, 1e-5);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspacesNoPrefix);

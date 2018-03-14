@@ -40,13 +40,15 @@ public:
 
     // Should call the settings tab to get the values
     double angle = 0.5;
-    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRunsForAngle(0, angle))
-        .Times(Exactly(1));
-    presenter.getTransmissionRunsForAngle(0, angle);
+    EXPECT_CALL(mockSettingsTabPresenter, getOptionsForAngle(0, angle))
+        .Times(Exactly(1))
+        .WillOnce(Return(OptionsQMap()));
+    presenter.getOptionsForAngle(0, angle);
 
-    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRunsForAngle(1, angle))
-        .Times(Exactly(1));
-    presenter.getTransmissionRunsForAngle(1, angle);
+    EXPECT_CALL(mockSettingsTabPresenter, getOptionsForAngle(1, angle))
+        .Times(Exactly(1))
+        .WillOnce(Return(OptionsQMap()));
+    presenter.getOptionsForAngle(1, angle);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsTabPresenter));
   }

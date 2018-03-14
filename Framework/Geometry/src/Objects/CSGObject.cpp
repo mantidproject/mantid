@@ -410,19 +410,19 @@ CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
 * ie. sum of 2, sum of 3 sum of 4. etc. to be certain
 * to get a correct normal test.
 
-* @param Pt :: Point to check
+* @param point :: Point to check
 * @returns 1 if the point is on the surface
 */
-bool CSGObject::isOnSide(const Kernel::V3D &Pt) const {
+bool CSGObject::isOnSide(const Kernel::V3D &point) const {
   std::list<Kernel::V3D> Snorms; // Normals from the constact surface.
 
   std::vector<const Surface *>::const_iterator vc;
   for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
-    if ((*vc)->onSurface(Pt)) {
-      Snorms.push_back((*vc)->surfaceNormal(Pt));
+    if ((*vc)->onSurface(point)) {
+      Snorms.push_back((*vc)->surfaceNormal(point));
       // can check direct normal here since one success
       // means that we can return 1 and finish
-      if (!checkSurfaceValid(Pt, Snorms.back()))
+      if (!checkSurfaceValid(point, Snorms.back()))
         return true;
     }
   }
@@ -432,7 +432,7 @@ bool CSGObject::isOnSide(const Kernel::V3D &Pt) const {
     for (ys = xs, ++ys; ys != Snorms.end(); ++ys) {
       NormPair = (*ys) + (*xs);
       NormPair.normalize();
-      if (!checkSurfaceValid(Pt, NormPair))
+      if (!checkSurfaceValid(point, NormPair))
         return true;
     }
   // Ok everthing failed return 0;
@@ -460,14 +460,14 @@ int CSGObject::checkSurfaceValid(const Kernel::V3D &C,
 }
 
 /**
-* Determines is Pt is within the object or on the surface
-* @param Pt :: Point to be tested
+* Determines is point is within the object or on the surface
+* @param point :: Point to be tested
 * @returns 1 if true and 0 if false
 */
-bool CSGObject::isValid(const Kernel::V3D &Pt) const {
+bool CSGObject::isValid(const Kernel::V3D &point) const {
   if (!TopRule)
     return false;
-  return TopRule->isValid(Pt);
+  return TopRule->isValid(point);
 }
 
 /**
@@ -754,19 +754,19 @@ int CSGObject::procString(const std::string &Line) {
 * @return Number of segments added
 */
 int CSGObject::interceptSurface(Geometry::Track &UT) const {
-  int cnt = UT.count(); // Number of intersections original track
+  int originalCount = UT.count(); // Number of intersections original track
   // Loop over all the surfaces.
   LineIntersectVisit LI(UT.startPoint(), UT.direction());
   std::vector<const Surface *>::const_iterator vc;
   for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
     (*vc)->acceptVisitor(LI);
   }
-  const auto &IPts(LI.getPoints());
-  const auto &dPts(LI.getDistance());
+  const auto &IPoints(LI.getPoints());
+  const auto &dPoints(LI.getDistance());
 
-  auto ditr = dPts.begin();
-  auto itrEnd = IPts.end();
-  for (auto iitr = IPts.begin(); iitr != itrEnd; ++iitr, ++ditr) {
+  auto ditr = dPoints.begin();
+  auto itrEnd = IPoints.end();
+  for (auto iitr = IPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
     if (*ditr > 0.0) // only interested in forward going points
     {
       // Is the point and enterance/exit Point
@@ -776,22 +776,22 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
   }
   UT.buildLink();
   // Return number of track segments added
-  return (UT.count() - cnt);
+  return (UT.count() - originalCount);
 }
 
 /**
 * Calculate if a point PT is a valid point on the track
-* @param Pt :: Point to calculate from.
+* @param point :: Point to calculate from.
 * @param uVec :: Unit vector of the track
 * @retval 0 :: Not valid / double valid
 * @retval 1 :: Entry point
 * @retval -1 :: Exit Point
 */
-int CSGObject::calcValidType(const Kernel::V3D &Pt,
+int CSGObject::calcValidType(const Kernel::V3D &point,
                              const Kernel::V3D &uVec) const {
   const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
-  const Kernel::V3D testA(Pt - shift);
-  const Kernel::V3D testB(Pt + shift);
+  const Kernel::V3D testA(point - shift);
+  const Kernel::V3D testB(point + shift);
   const int flagA = isValid(testA);
   const int flagB = isValid(testB);
   if (!(flagA ^ flagB))
@@ -2107,7 +2107,7 @@ void CSGObject::setVtkGeometryCacheReader(
 /**
 * Returns the geometry handler
 */
-boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() {
+boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
   return m_handler;

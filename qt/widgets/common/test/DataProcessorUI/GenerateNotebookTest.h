@@ -44,7 +44,7 @@ private:
 
     return ProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
-        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
+        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"}, 1,
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
                           "OutputWorkspace", "OutputWorkspaceWavelength",
                           "FirstTransmissionRun", "SecondTransmissionRun"});
