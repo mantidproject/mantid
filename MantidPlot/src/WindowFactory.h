@@ -101,8 +101,7 @@ public:
 
 class WindowFactoryImpl final {
 private:
-  typedef AbstractProjectInstantiator<MantidQt::API::IProjectSerialisable>
-      AbstractFactory;
+  using AbstractFactory = AbstractProjectInstantiator<MantidQt::API::IProjectSerialisable>;
 
 public:
   WindowFactoryImpl();
@@ -173,8 +172,7 @@ private:
   }
 
   /// A typedef for the map of registered classes
-  typedef Mantid::Kernel::CaseInsensitiveMap<std::unique_ptr<AbstractFactory>>
-      FactoryMap;
+  using FactoryMap = Mantid::Kernel::CaseInsensitiveMap<std::unique_ptr<AbstractFactory> >;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;
 };
@@ -184,7 +182,7 @@ private:
 template class Mantid::Kernel::SingletonHolder<WindowFactoryImpl>;
 #endif /* _WIN32 */
 
-typedef Mantid::Kernel::SingletonHolder<WindowFactoryImpl> WindowFactory;
+using WindowFactory = Mantid::Kernel::SingletonHolder<WindowFactoryImpl>;
 }
 }
 
