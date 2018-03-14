@@ -327,7 +327,8 @@ void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace) {
  * @param group: the sasEntry
  * @param workspace: the workspace which is being stored
  */
-void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::MatrixWorkspace_sptr canWorkspace) {
+void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
+                Mantid::API::MatrixWorkspace_sptr canWorkspace) {
   // Setup process
   const std::string sasProcessNameForGroup = sasProcessGroupName;
   auto process = Mantid::DataHandling::H5Util::createGroupCanSAS(
@@ -355,7 +356,8 @@ void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace, M
 
   // Add can run number
   const auto canRun = canWorkspace->getRunNumber();
-  Mantid::DataHandling::H5Util::write(process, sasProcessTermCan, std::to_string(canRun));
+  Mantid::DataHandling::H5Util::write(process, sasProcessTermCan,
+                                      std::to_string(canRun));
 }
 
 WorkspaceDimensionality
@@ -851,7 +853,7 @@ void SaveNXcanSAS::exec() {
 
   // Add the process information
   progress.report("Adding process information.");
-  if (transmissionCan){
+  if (transmissionCan) {
     addProcess(sasEntry, workspace, transmissionCan);
   } else {
     addProcess(sasEntry, workspace);

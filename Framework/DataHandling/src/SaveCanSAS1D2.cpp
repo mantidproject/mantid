@@ -207,7 +207,7 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   sasProcess += sasProcuserfile;
 
   // can run number if available
-  if(m_transcan_ws){
+  if (m_transcan_ws) {
     if (m_transcan_ws->run().hasProperty("run_number")) {
       Kernel::Property *logP = m_transcan_ws->run().getLogData("run_number");
       auto can_run = logP->value();
@@ -217,11 +217,11 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
       sasProcess += sasProcCanRun;
     } else {
       g_log.debug() << "Didn't find RunNumber log in workspace. Writing "
-                      "<Run></Run> to the CANSAS file\n";
+                       "<Run></Run> to the CANSAS file\n";
     }
   }
 
-// Reduction process note, if available
+  // Reduction process note, if available
   std::string process_xml = getProperty("Process");
   if (!process_xml.empty()) {
     std::string processNote = "\n\t\t\t<SASprocessnote>";
@@ -235,7 +235,6 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
 
   sasProcess += "\n\t\t</SASprocess>";
 }
-
 
 /** This method creates an XML element named "SAStransmission_spectrum"
  *  @param sasTrans :: string for sasdata element in the xml
