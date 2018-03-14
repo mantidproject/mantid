@@ -40,7 +40,8 @@ void SofQWPolygon::exec() {
   }
 
   MatrixWorkspace_sptr outputWS =
-      SofQW::setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout);
+      SofQW::setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout,
+                                  getProperty("EAxisBinning"));
   setProperty("OutputWorkspace", outputWS);
   const size_t nenergyBins = inputWS->blocksize();
 
@@ -107,7 +108,7 @@ void SofQWPolygon::exec() {
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
       DataObjects::FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j,
-                                                      outputWS, m_Qout);
+                                                      *outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =

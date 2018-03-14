@@ -45,7 +45,37 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
   }
 
-  void test_get_slicing_type() {
+  void testPassesMessageToCorrectChildPresenterWhenReductionPaused() {
+    MockEventPresenter presenter_1;
+    MockEventPresenter presenter_2;
+    std::vector<IReflEventPresenter *> settingsPresenters;
+    settingsPresenters.push_back(&presenter_1);
+    settingsPresenters.push_back(&presenter_2);
+    ReflEventTabPresenter presenter(settingsPresenters);
+    EXPECT_CALL(presenter_2, onReductionPaused());
+
+    presenter.onReductionPaused(1);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+  }
+
+  void testPassesMessageToCorrectChildPresenterWhenReductionResumed() {
+    MockEventPresenter presenter_1;
+    MockEventPresenter presenter_2;
+    std::vector<IReflEventPresenter *> settingsPresenters;
+    settingsPresenters.push_back(&presenter_1);
+    settingsPresenters.push_back(&presenter_2);
+    ReflEventTabPresenter presenter(settingsPresenters);
+    EXPECT_CALL(presenter_1, onReductionResumed());
+
+    presenter.onReductionResumed(0);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+  }
+
+  void testGetSlicingType() {
     MockEventPresenter presenter_1;
     MockEventPresenter presenter_2;
     std::vector<IReflEventPresenter *> settingsPresenters;

@@ -20,7 +20,8 @@ using MantidQt::MantidWidgets::MuonFitPropertyBrowser;
 
 namespace {
 Logger g_log("MuonSequentialFitDialog");
-std::string removePath(const std::string &labelIn) {
+
+std::string removeSubPath(const std::string &labelIn) {
   size_t path = labelIn.find_last_of("/");
   if (path == std::string::npos) {
     path = labelIn.find_last_of('\\');
@@ -31,9 +32,28 @@ std::string removePath(const std::string &labelIn) {
     size_t end = labelIn.find_last_of(".");
     useThisLabel = labelIn.substr(path);
     useThisLabel = useThisLabel.substr(0, end - path);
-    auto test = useThisLabel;
+    size_t start = useThisLabel.find_first_of("0123456789");
+    useThisLabel = useThisLabel.substr(start);
   }
   return useThisLabel;
+}
+
+std::string removePath(const std::string &labelIn) {
+  std::string useThisLabel;
+  std::string tmp = labelIn;
+  size_t end = tmp.find_first_of(","); // always seperate by commas
+
+  if (end != std::string::npos) {
+    while (end != std::string::npos) {
+      useThisLabel += removeSubPath(tmp.substr(0, end)) + ",";
+      tmp = tmp.substr(end + 1);
+      end = tmp.find_first_of(",");
+    }
+    // get the last input
+    useThisLabel += removeSubPath(tmp);
+    return useThisLabel;
+  }
+  return removeSubPath(labelIn);
 }
 }
 const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
@@ -493,8 +513,10 @@ void MuonSequentialFitDialog::continueFit() {
 
     // If fit was simultaneous, transform results
     if (datasetsPerRun > 1) {
-      m_dataPresenter->handleFittedWorkspaces(wsBaseName, labelGroupName);
-      m_dataPresenter->extractFittedWorkspaces(wsBaseName, labelGroupName);
+      // sub groups in `_label` mean wsBaseName is the name of the parent
+      // wsGroup
+      m_dataPresenter->handleFittedWorkspaces(wsBaseName);
+      m_dataPresenter->extractFittedWorkspaces(wsBaseName);
     }
 
     // Add information about the fit to the diagnosis table
@@ -558,15 +580,19 @@ void MuonSequentialFitDialog::finishAfterRun(
           "Could not find output parameters table for simultaneous fit");
     }
     // Group output together
-    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Workspaces");
+    ads.add(wsBaseName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(wsBaseName, wsBaseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(wsBaseName, wsBaseName + "_Parameters");
+    ads.addToGroup(wsBaseName, wsBaseName + "_Workspaces");
+    ads.addToGroup(labelGroupName, wsBaseName);
   } else {
-    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
+    ads.add(wsBaseName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(wsBaseName, wsBaseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(wsBaseName, wsBaseName + "_Parameters");
+    ads.addToGroup(wsBaseName, wsBaseName + "_Workspace");
     auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
     fitWs->copyExperimentInfoFrom(firstWS.get());
+    ads.addToGroup(labelGroupName, wsBaseName);
   }
 }
 

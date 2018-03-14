@@ -16,8 +16,9 @@
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
-using Mantid::DataHandling::LoadILLReflectometry;
 using Mantid::DataHandling::LoadEmptyInstrument;
+using Mantid::DataHandling::LoadILLReflectometry;
+using Mantid::Kernel::V3D;
 
 class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
@@ -488,6 +489,46 @@ public:
     getWorkspaceFor(output, m_d17File, m_outWSName, prop);
     const auto &spectrumInfo = output->spectrumInfo();
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(42) * 180 / M_PI, 2 * angle, 1e-6)
+  }
+
+  void testSlitConfigurationD17() {
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_d17File, m_outWSName, emptyProperties());
+    auto instrument = output->getInstrument();
+    auto slit1 = instrument->getComponentByName("slit2");
+    auto slit2 = instrument->getComponentByName("slit3");
+    const double S2z =
+        -output->run().getPropertyValueAsType<double>("Distance.S2toSample") *
+        1e-3;
+    TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z))
+    const double S3z =
+        -output->run().getPropertyValueAsType<double>("Distance.S3toSample") *
+        1e-3;
+    TS_ASSERT_EQUALS(slit2->getPos(), V3D(0.0, 0.0, S3z))
+  }
+
+  void testSlitConfigurationFigaro() {
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_figaroFile, m_outWSName, emptyProperties());
+    auto instrument = output->getInstrument();
+    auto slit1 = instrument->getComponentByName("slit2");
+    auto slit2 = instrument->getComponentByName("slit3");
+    // The S3 position is missing in the NeXus file; use a hard-coded value.
+    const double collimationAngle =
+        output->run().getPropertyValueAsType<double>(
+            "CollAngle.actual_coll_angle") /
+        180. * M_PI;
+    const double sampleOffset = output->run().getPropertyValueAsType<double>(
+                                    "Theta.sampleHorizontalOffset") *
+                                1e-3;
+    const double slitZOffset = sampleOffset / std::cos(collimationAngle);
+    const double S3z = -0.368 - slitZOffset;
+    const double slitSeparation = output->run().getPropertyValueAsType<double>(
+                                      "Theta.inter-slit_distance") *
+                                  1e-3;
+    const double S2z = S3z - slitSeparation;
+    TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z))
+    TS_ASSERT_EQUALS(slit2->getPos(), V3D(0.0, 0.0, S3z))
   }
 };
 

@@ -54,8 +54,8 @@ Logger g_log("ShapeFactory");
  *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape
  *if XML tags contain no geo. info.)
  */
-boost::shared_ptr<IObject> ShapeFactory::createShape(std::string shapeXML,
-                                                     bool addTypeTag) {
+boost::shared_ptr<CSGObject> ShapeFactory::createShape(std::string shapeXML,
+                                                       bool addTypeTag) {
   // wrap in a type tag
   if (addTypeTag)
     shapeXML = "<type name=\"userShape\"> " + shapeXML + " </type>";
@@ -86,7 +86,7 @@ boost::shared_ptr<IObject> ShapeFactory::createShape(std::string shapeXML,
  * object. The name of this element is unimportant.
  * @return A shared pointer to a geometric shape
  */
-boost::shared_ptr<IObject>
+boost::shared_ptr<CSGObject>
 ShapeFactory::createShape(Poco::XML::Element *pElem) {
   // Write the definition to a string to store in the final object
   std::stringstream xmlstream;
@@ -1383,7 +1383,7 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
 
 @returns the newly created hexahedral shape object
 */
-boost::shared_ptr<IObject>
+boost::shared_ptr<CSGObject>
 ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
                                     double xrb, double ylb, double ylf,
                                     double yrf, double yrb) {

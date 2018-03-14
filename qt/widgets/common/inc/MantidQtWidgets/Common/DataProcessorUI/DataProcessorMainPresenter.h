@@ -66,14 +66,21 @@ public:
   virtual QString getTimeSlicingValues() const { return QString(); }
   /// Return time-slicing type
   virtual QString getTimeSlicingType() const { return QString(); }
+  /// Return transmission runs for a particular angle
+  virtual OptionsQMap getOptionsForAngle(const double angle) const {
+    UNUSED_ARG(angle);
+    return OptionsQMap();
+  }
+  /// Return true if there are per-angle transmission runs set
+  virtual bool hasPerAngleOptions() const { return false; }
 
   /// Handle data reduction paused/resumed
   virtual void pause() const {}
   virtual void resume() const {}
 
   /// Handle data reduction paused/resumed confirmation
-  virtual void confirmReductionPaused() const {}
-  virtual void confirmReductionResumed() const {}
+  virtual void confirmReductionPaused(int group) { UNUSED_ARG(group); }
+  virtual void confirmReductionResumed(int group) { UNUSED_ARG(group); }
 };
 }
 }

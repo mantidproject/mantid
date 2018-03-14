@@ -12,6 +12,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
+class GroupInfo;
+class RowData;
+using RowData_sptr = std::shared_ptr<RowData>;
+
 /** QTwoLevelTreeModel : Provides a QAbstractItemModel for a
 DataProcessorUI with post-processing defined. The first argument to the
 constructor is a Mantid ITableWorkspace containing the values to use in the
@@ -59,6 +63,8 @@ public:
   // Get header data for the table
   QVariant headerData(int section, Qt::Orientation orientation,
                       int role) const override;
+  // Get row metadata
+  RowData_sptr rowData(const QModelIndex &index) override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
@@ -72,6 +78,8 @@ public:
 
   // Get the parent
   QModelIndex parent(const QModelIndex &index) const override;
+  // Find or create a group
+  int findOrAddGroup(const std::string &groupName);
 
   // Functions to edit model
 
@@ -87,19 +95,25 @@ public:
   // Set the 'processed' status of a row / group
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;
+  // Insert rows
+  bool insertRows(int position, int count, int parent);
+  // Transfer rows into the table
+  void transfer(const std::vector<std::map<QString, QString>> &runs) override;
+private slots:
+  void tableDataUpdated(const QModelIndex &, const QModelIndex &);
 
 private:
+  void updateAllGroupData();
+  void insertRowWithValues(int groupIndex, int rowIndex,
+                           const std::map<QString, QString> &rowValues);
+  bool rowIsEmpty(int row, int parent) const;
   void setupModelData(Mantid::API::ITableWorkspace_sptr table);
   bool insertGroups(int position, int count);
-  bool insertRows(int position, int count, int parent);
   bool removeGroups(int position, int count);
   bool removeRows(int position, int count, int parent);
 
-  /// Vector containing group names and process status
-  std::vector<std::pair<std::string, bool>> m_groupName;
-  /// Vector containing the (absolute) row indices for a given group and process
-  /// status
-  std::vector<std::vector<std::pair<int, bool>>> m_rowsOfGroup;
+  /// List of all groups ordered by the group's position in the tree
+  std::vector<GroupInfo> m_groups;
 };
 
 template <typename Action>

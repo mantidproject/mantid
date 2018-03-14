@@ -59,8 +59,8 @@ public:
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
-    sampleShape->setID("mysample");
     Material alum("Al", getNeutronAtom(13), 2.6989);
+    sampleShape->setID("mysample");
     sampleShape->setMaterial(alum);
     inputWS->mutableSample().setShape(sampleShape);
 

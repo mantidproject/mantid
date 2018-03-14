@@ -38,7 +38,6 @@ public:
                       "</cylinder>";
     Container can(xml);
     TS_ASSERT_EQUALS(false, can.hasSampleShape());
-    TS_ASSERT_EQUALS(xml, can.getShapeXML());
   }
 
   void test_SetSampleShape_Allows_Creating_Sample_Shape_Object() {

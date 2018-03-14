@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_SORTTABLEWORKSPACE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -30,7 +30,7 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SortTableWorkspace : public API::Algorithm {
+class DLLExport SortTableWorkspace : public API::ParallelAlgorithm {
 public:
   const std::string name() const override { return "SortTableWorkspace"; }
   int version() const override;
