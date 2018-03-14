@@ -67,8 +67,8 @@ Engineering Diffraction
 
 .. figure:: ../../images/engineering_gsas_gui.PNG
    :class: screenshot
-   :width: 385px
-   :align: center
+   :align: right
+   :figwidth: 50%
 
    The Engineering diffraction GSAS-II GUI
 
