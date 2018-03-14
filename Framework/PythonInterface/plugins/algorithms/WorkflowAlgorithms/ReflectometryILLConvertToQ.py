@@ -88,42 +88,6 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                              defaultValue=False,
                              doc='True if input workspace has been corrected for polarization efficiencies.')
 
-    def _chopperOpening(self, sampleLogs, instrumentName):
-        """Return the chopper opening angle."""
-        if instrumentName == 'D17':
-            chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper1_phase_average').value
-            if chopper1Phase > 360.:
-                # Workaround for broken old D17 NeXus files.
-                chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper2_speed_average').value
-            chopper2Phase = sampleLogs.getProperty('VirtualChopper.chopper2_phase_average').value
-            openoffset = sampleLogs.getProperty('VirtualChopper.open_offset').value
-            return 45. - (chopper2Phase - chopper1Phase) - openoffset
-        else:
-            firstChopper = sampleLogs.getProperty('ChopperSettings.firstChopper').value
-            secondChopper = sampleLogs.getProperty('ChopperSettings.secondChopper').value
-            phase1Entry = 'CH{}.phase'.format(firstChopper)
-            phase2Entry = 'CH{}.phase'.format(secondChopper)
-            chopper1Phase = sampleLogs.getProperty(phase1Entry).value
-            chopper2Phase = sampleLogs.getProperty(phase2Entry).value
-            opentoffset = sampleLogs.getProperty('CollAngle.openOffset').value
-            return 45. - (chopper2Phase - chopper1Phase) - openoffset
-
-    def _chopperPairDistance(self, sampleLogs, instrumentName):
-        """Return the gap between the two choppers."""
-        if instrumentName == 'D17':
-            return sampleLogs.getProperty('Distance.ChopperGap').value * 1e-2
-        else:
-            return sampleLogs.getProperty('ChopperSettings.distSeparationChopperPair').value * 1e-2
-
-    def _chopperSpeed(self, sampleLogs, instrumentName):
-        """Return the chopper speed."""
-        if instrumentName == 'D17':
-            return sampleLogs.getProperty('VirtualChopper.chopper1_speed_average').value
-        else:
-            firstChopper = sampleLogs.getProperty('ChopperSettings.firstChopper').value
-            speedEntry = 'CH{}.rotation_speed'.format(firstChopper)
-            return sampleLogs.getProperty(speedEntry).value
-
     def _convertToMomentumTransfer(self, ws):
         """Convert the X units of ws to momentum transfer."""
         reflectedWS = self.getProperty(Prop.REFLECTED_WS).value
@@ -138,10 +102,10 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         polarized = self.getProperty(Prop.POLARIZED).value
         pixelSize = 0.001195 if instrumentName == 'D17' else 0.0012
         detResolution = 0.0022
-        chopperSpeed = self._chopperSpeed(logs, instrumentName)
-        chopperOpening = self._chopperOpening(logs, instrumentName)
+        chopperSpeed = common.chopperSpeed(logs, instrumentName)
+        chopperOpening = common.chopperOpeningAngle(logs, instrumentName)
         chopperRadius = 0.36 if instrumentName == 'D17' else 0.305
-        chopperPairDist = self._chopperPairDistance(logs, instrumentName)
+        chopperPairDist = common.chopperPairDistance(logs, instrumentName)
         slit1SizeLog = 'VirtualSlitAxis.s2w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S2H_actual_height'
         slit2SizeLog = 'VirtualSlitAxis.s3w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S3H_actual_height'
         tofBinWidth = self._TOFChannelWidth(logs, instrumentName)

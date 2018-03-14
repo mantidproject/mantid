@@ -5,9 +5,11 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, 
                            Property, StringListValidator)
-from mantid.simpleapi import (AddSampleLog, ConvertToDistribution, Divide, ExtractSingleSpectrum, RebinToWorkspace)
+from mantid.simpleapi import (AddSampleLog, ConvertToDistribution, CreateWorkspace, Divide, ExtractSingleSpectrum, Multiply,
+                              RebinToWorkspace)
 import numpy
 import ReflectometryILL_common as common
+from scipy import constants
 
 
 class Prop:
@@ -107,6 +109,38 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                                               validator=threeNonnegativeInts),
                              doc='A three element array of foreground start, centre and end workspace indices.')
 
+    def _correctForChopperOpenings(self, ws, directWS):
+        """Correct reflectivity values if chopper openings between RB and DB differ."""
+        def opening(ws):
+            logs = ws.run()
+            instrumentName = ws.getInstrument().getName()
+            chopperGap = common.chopperPairDistance(logs, instrumentName)
+            chopperPeriod = 60. / common.chopperSpeed(logs, instrumentName)
+            openingAngle = common.chopperOpeningAngle(logs, instrumentName)
+            Xs = ws.readX(0) * 1e-10
+            if ws.isHistogramData():
+                Xs = (Xs[:-1] + Xs[1:]) / 2.
+            return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs + openingAngle / 360.
+        reflectedOpening = opening(ws)
+        directOpening = opening(directWS)
+        corFactorWSName = self._names.withSuffix('chopper_opening_correction_factors')
+        corFactorWS = CreateWorkspace(
+            OutputWorkspace=corFactorWSName,
+            DataX=ws.readX(0),
+            DataY=reflectedOpening / directOpening,
+            UnitX=ws.getAxis(0).getUnit().unitID(),
+            ParentWorkspace=ws,
+            EnableLogging=self._subalgLogging)
+        correctedWSName = self._names.withSuffix('corrected_by_chopper_opening')
+        correctedWS = Multiply(
+            LHSWorkspace=ws,
+            RHSWorkspace=corFactorWS,
+            OutputWorkspace=correctedWSName,
+            EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(corFactorWS)
+        self._cleanup.cleanup(ws)
+        return correctedWS
+
     def _finalize(self, ws):
         """Set OutputWorkspace to ws and clean up."""
         self.setProperty(Prop.OUTPUT_WS, ws)
@@ -154,6 +188,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                                 EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(rebinnedDirectWS)
         self._cleanup.cleanup(ws)
+        reflectivityWS = self._correctForChopperOpenings(reflectivityWS, directWS)
         return reflectivityWS
 
     def _sumForegroundInLambda(self, ws):

@@ -5,6 +5,45 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import DeleteWorkspace, mtd
 
 
+def chopperOpeningAngle(sampleLogs, instrumentName):
+    """Return the chopper opening angle in degrees."""
+    if instrumentName == 'D17':
+        chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper1_phase_average').value
+        if chopper1Phase > 360.:
+            # Workaround for broken old D17 NeXus files.
+            chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper2_speed_average').value
+        chopper2Phase = sampleLogs.getProperty('VirtualChopper.chopper2_phase_average').value
+        openoffset = sampleLogs.getProperty('VirtualChopper.open_offset').value
+        return 45. - (chopper2Phase - chopper1Phase) - openoffset
+    else:
+        firstChopper = sampleLogs.getProperty('ChopperSettings.firstChopper').value
+        secondChopper = sampleLogs.getProperty('ChopperSettings.secondChopper').value
+        phase1Entry = 'CH{}.phase'.format(firstChopper)
+        phase2Entry = 'CH{}.phase'.format(secondChopper)
+        chopper1Phase = sampleLogs.getProperty(phase1Entry).value
+        chopper2Phase = sampleLogs.getProperty(phase2Entry).value
+        opentoffset = sampleLogs.getProperty('CollAngle.openOffset').value
+        return 45. - (chopper2Phase - chopper1Phase) - openoffset
+
+
+def chopperPairDistance(sampleLogs, instrumentName):
+    """Return the gap between the two choppers."""
+    if instrumentName == 'D17':
+        return sampleLogs.getProperty('Distance.ChopperGap').value * 1e-2
+    else:
+        return sampleLogs.getProperty('ChopperSettings.distSeparationChopperPair').value * 1e-2
+
+
+def chopperSpeed(sampleLogs, instrumentName):
+    """Return the chopper speed."""
+    if instrumentName == 'D17':
+        return sampleLogs.getProperty('VirtualChopper.chopper1_speed_average').value
+    else:
+        firstChopper = sampleLogs.getProperty('ChopperSettings.firstChopper').value
+        speedEntry = 'CH{}.rotation_speed'.format(firstChopper)
+        return sampleLogs.getProperty(speedEntry).value
+
+
 class SampleLogs:
     FOREGROUND_CENTRE = 'foreground.centre_workspace_index'
     FOREGROUND_END = 'foreground.last_workspace_index'
