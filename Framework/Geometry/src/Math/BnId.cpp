@@ -279,7 +279,7 @@ std::pair<int, BnId> BnId::makeCombination(const BnId &A) const
   if (Tnum == A.Tnum)
     return std::pair<int, BnId>(0, BnId());
 
-  int flag(0);                    // numb of diff
+  int flag(0); // numb of diff
   auto avc = A.Tval.cbegin();
   std::vector<int>::const_iterator chpt; // change point
   for (auto tvc = Tval.cbegin(); tvc != Tval.cend(); ++tvc, ++avc) {
