@@ -30,22 +30,19 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Typedef for width vector
-typedef std::vector<double> WidthVector;
+using WidthVector = std::vector<double>;
 
 // Typedef for kernel vector
-typedef std::vector<double> KernelVector;
+using KernelVector = std::vector<double>;
 
 // Typedef for an optional md histo workspace
-typedef boost::optional<IMDHistoWorkspace_const_sptr>
-    OptionalIMDHistoWorkspace_const_sptr;
+using OptionalIMDHistoWorkspace_const_sptr = boost::optional<IMDHistoWorkspace_const_sptr>;
 
 // Typedef for a smoothing function
-typedef boost::function<IMDHistoWorkspace_sptr(
-    IMDHistoWorkspace_const_sptr, const WidthVector &,
-    OptionalIMDHistoWorkspace_const_sptr)> SmoothFunction;
+using SmoothFunction = boost::function<IMDHistoWorkspace_sptr (IMDHistoWorkspace_const_sptr, const WidthVector &, OptionalIMDHistoWorkspace_const_sptr)>;
 
 // Typedef for a smoothing function map keyed by name.
-typedef std::map<std::string, SmoothFunction> SmoothFunctionMap;
+using SmoothFunctionMap = std::map<std::string, SmoothFunction>;
 
 namespace {
 
