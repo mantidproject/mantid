@@ -88,7 +88,7 @@ public:
   virtual bool isAllowed(const Kernel::V3D &hkl) const = 0;
 };
 
-typedef boost::shared_ptr<const HKLFilter> HKLFilter_const_sptr;
+using HKLFilter_const_sptr = boost::shared_ptr<const HKLFilter>;
 
 /// Base class for unary logic operations for HKLFilter.
 class MANTID_GEOMETRY_DLL HKLFilterUnaryLogicOperation : public HKLFilter {
