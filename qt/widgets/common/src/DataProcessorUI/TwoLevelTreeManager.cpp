@@ -332,12 +332,17 @@ void TwoLevelTreeManager::pasteSelected(const QString &text) {
     // Add as many new rows as required
     for (auto i = 0; i < lines.size(); ++i) {
       auto values = lines[i].split("\t");
+      auto const valuesSizeLessOne = static_cast<int>(values.size()) - 1;
+
+      if (valuesSizeLessOne < 1)
+        continue;
 
       auto groupId = parseDenaryInteger(values.front());
       int rowId = numRowsInGroup(groupId);
       if (!m_model->insertRow(rowId, m_model->index(groupId, 0)))
         return;
-      for (int col = 0; col < m_model->columnCount(); col++) {
+      for (int col = 0; col < m_model->columnCount() && col < valuesSizeLessOne;
+           col++) {
         m_model->setData(m_model->index(rowId, col, m_model->index(groupId, 0)),
                          values[col + 1]);
       }
