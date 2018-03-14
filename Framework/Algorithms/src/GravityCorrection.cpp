@@ -626,24 +626,25 @@ void GravityCorrection::exec() {
         continue;
 
       // offset due to variable sample position
-      // const double offset =
-      //    this->coordinate(this->m_sample3D, this->m_beamDirection);
+      const double offset =
+         this->coordinate(this->m_sample3D, this->m_beamDirection);
 
       // source position coordinate in beam direction (variable sample position)
-      // double sourceZ =
-      //    this->coordinate(this->m_virtualInstrument->getSource()->getName(),
-      //                     this->m_beamDirection);
+      double sourceZ =
+         this->coordinate(this->m_virtualInstrument->getSource()->getName(),
+                          this->m_beamDirection);
 
-      // double s1 = this->parabolaArcLength(-2 * k * sourceZ) / (2 * k);
+      double s1 = this->parabolaArcLength(-2 * k * sourceZ) / (2 * k);
       // straight path from virtual sample (0, 0, 0) to updated detector
       // position:
-      // auto detectorInfo = virtualWS->detectorInfo();
-      // double detZ = this->coordinate(detectorInfo, j, m_beamDirection);
+      auto detectorInfo = outWS->detectorInfo();
+      double detZ = this->coordinate(detectorInfo, j, m_beamDirection);
       // possible trajectory from sample to detector
-      // double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);
-      // double s = s1 + s2;
-      outWS->mutableX(j)[i_tofit] =
-          *tofit; // debugging minus / cos(angle); // mu sec
+      double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);
+      double s = s1 + s2;
+
+      outWS->mutableX(j)[i_tofit] = ((detZ - offset) * (*tofit)) / (s * cos(angle));
+          //*tofit; // debugging minus / cos(angle); // mu sec
 
       // need to set the counts to spectrum according to finalAngle & *tofit
       outWS->mutableY(j)[i_tofit] += this->m_ws->y(i)[i_tofit];

@@ -10,29 +10,32 @@
 Description
 -----------
 
-This algorithm performs a modification of time-of-flight values and their final angles, i.e. angles between the reflected beam and the sample, of neutrons by moving their counts to different detectors to cancel the gravitational effect on a chosen 2DWorkspace (notably the ILL Figaro reflectometer).
+This algorithm may perform a modification of time-of-flight values and their final angles, i.e. angles between the reflected beam and the sample, of neutrons by moving their counts to different detectors to cancel the gravitational effect on a chosen 2DWorkspace (notably the ILL Figaro reflectometer).
 An initial computation of the final angle :math:`\theta_f` due to gravitation is required when the neutron flies from the source to the sample.
 For the path from the sample to the detector, gravitation plays a role which can be cancelled.
 Other properties of the :literal:`InputWorkspace` will be present in the :literal:`OutputWorkspace`.
 Both cases, reflection up and down, can be treated.
-Please take a look at the gravity correction for ILL reflectometers with the reduction software COSMOS here: Gutfreund et. al. Towards generalized data reduction on a time-of-flight neutron reflectometer.
+Please take a look at the gravity correction for ILL reflectometers with the reduction software COSMOS: Gutfreund et. al. Towards generalized data reduction on a chopper-based time-of-flight neutron reflectometer (__https://arxiv.org/abs/1710.04139).
 Counts of neutrons that do not hit the detector after correction will not be considered in the :literal:`OutputWorkspace`, an information will be logged.
-Please note, that the output workspace likely has varying bins and consider a subsequent rebinning step (:ref:`algm-Rebin`).
-The instrument definition may only contain the position in beam direction and the height of the slits will be computed internally.
-The potential output workspace adds " cancelled gravitation " to its title (sample log information).
+Please note that the output workspace likely has varying bins and consider a subsequent rebinning step (:ref:`algm-Rebin`).
+The instrument definition can only contain the position in beam direction and the height of the slits will always be computed internally.
+The potential output workspace adds " cancelled gravitation " to its title. This can be seen when visualising the data or reading the sample log information of the :literal::`OutputWorkspace`.
 Negative time-of-flight values present in the :literal:`InputWorkspace` are not prohibited.
+
+Pay attention that the following correction for direct beam measurements (as presented in the example) is under investigation.
+Note also that an improved performance can be addressed after final validation.
 
 Requirements
 ------------
 
 .. role:: red
 
-- The x-axis of the :literal:`InputWorkspace` must have units :red:`time-of-flight`, micro-seconds.
+- The x-axis of the :literal:`InputWorkspace` must have units :red:`time-of-flight` measured in micro-seconds.
 - Those time-of-flight values, :math:`t_{\mbox{tof}}`, are valid for a neutron travel distance from source to detector and do not take gravitation into account.
 - The instrument must consist of a :red:`source`, :red:`sample`, :red:`detector` and a collimeter with its :red:`slits` or two other known locations of the neutron flight path between source and sample position.
   Please note that the slit position in beam direction is sufficiant, the horizontal position is zero and the up position will be computed.
 - The instrument must be defined in :red:`units metre`.
-- The beam direction must be the axis direction of :literal:`X, Y` or :literal:`Z`, which is usually the case.
+- The beam direction must be the axis direction of :literal:`X, Y` or :literal:`Z`.
 - The algorithm did not already execute for the given :literal:`InputWorkspace`.
 
 Introduction
@@ -157,7 +160,7 @@ Output:
 
 .. include:: ../usagedata-note.txt
 
-.. testcode:: ILL Figaro: workspace with instrument where the z axis is parallel and in direction to the beam.
+.. testcode:: ILL Figaro: direct beam measurement; the instrument is such defined that the z axis is parallel and in direction to the beam.
 
         # Load an ILL Figaro File into a Workspace2D
         ws = LoadILLReflectometry('ILL/Figaro/592724.nxs')
