@@ -94,7 +94,7 @@ public:
   /// Returns the number of argumens
   size_t size() const { return m_terms.size(); }
   /// Const Iterator tpyedef
-  typedef std::vector<Expression>::const_iterator iterator;
+  using iterator = std::vector<Expression>::const_iterator;
 
   /// An iterator pointing to the start of the expressions
   iterator begin() const { return m_terms.begin(); }
@@ -161,7 +161,7 @@ private:
     size_t prec; ///< The precedence of the connecting operator.
   };
   /// The container type
-  typedef std::vector<Token> Tokens;
+  using Tokens = std::vector<Token>;
   /// Get i-th token
   std::string GetToken(size_t i);
   /// Get the operator connecting i-th token

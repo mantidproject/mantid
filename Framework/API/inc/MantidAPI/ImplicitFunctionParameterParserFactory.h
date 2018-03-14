@@ -62,9 +62,7 @@ private:
   ~ImplicitFunctionParameterParserFactoryImpl() override = default;
 };
 
-typedef Mantid::Kernel::SingletonHolder<
-    ImplicitFunctionParameterParserFactoryImpl>
-    ImplicitFunctionParameterParserFactory;
+using ImplicitFunctionParameterParserFactory = Mantid::Kernel::SingletonHolder<ImplicitFunctionParameterParserFactoryImpl>;
 }
 }
 

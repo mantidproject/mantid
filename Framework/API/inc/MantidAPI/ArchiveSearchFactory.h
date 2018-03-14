@@ -56,8 +56,7 @@ private:
   ~ArchiveSearchFactoryImpl() override = default;
 };
 
-typedef Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>
-    ArchiveSearchFactory;
+using ArchiveSearchFactory = Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>;
 }
 }
 

@@ -39,7 +39,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 template <typename Derived, typename ElemType>
 class DLLExport VectorParameter : public ImplicitFunctionParameter {
 public:
-  typedef ElemType ValueType;
+  using ValueType = ElemType;
   VectorParameter();
   VectorParameter(size_t size);
   VectorParameter(const VectorParameter<Derived, ElemType> &other);
