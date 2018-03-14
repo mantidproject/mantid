@@ -48,7 +48,7 @@ struct VectorToNDArray {
    */
   inline PyObject *operator()(const std::vector<ElementType> &cdata) const {
     // Hand off the work to the conversion policy
-    using policy = typename ConversionPolicy::apply<ElementType>;
+    using policy = typename ConversionPolicy::template apply<ElementType>;
     return policy::create1D(cdata);
   }
 };
