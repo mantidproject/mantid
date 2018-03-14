@@ -2085,11 +2085,16 @@ class PrintParser(UserFileComponentParser):
 
     def parse_line(self, line):
         # Get the settings, ie remove command
-        setting = UserFileComponentParser.get_settings(line, PrintParser.get_type_pattern())
 
-        # Determine the qualifier and extract the user setting
-        original_setting = re.search(setting.strip(), line, re.IGNORECASE).group(0)
-        return {PrintId.print_line: original_setting}
+        setting = line.strip()
+
+        if setting.upper().startswith('PRINT'):
+            setting = setting[len('PRINT'):]
+            setting = setting.strip()
+        else:
+            raise RuntimeError("PrintParser: Failed to extract line {} it does not start with PRINT".format(line))
+
+        return {PrintId.print_line: setting}
 
     @staticmethod
     def get_type():
