@@ -2079,10 +2079,6 @@ class PrintParser(UserFileComponentParser):
     def __init__(self):
         super(PrintParser, self).__init__()
 
-        # Print
-        self._print = "\\s*PRINT\\s+"
-        self._print_pattern = re.compile(start_string + self._print + "\\s*.*\\s*" + end_string)
-
     def parse_line(self, line):
         # Get the settings, ie remove command
 
