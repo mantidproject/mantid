@@ -425,7 +425,9 @@ void CalculateCoverageDGS::exec() {
       std::vector<coord_t> pos(4);
       std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + 4,
                      prevIntSec.getBareArray(), pos.begin(),
-                     VectorHelper::SimpleAverage<double>());
+                     [](const double lhs, const double rhs) {
+                       return static_cast<coord_t>(0.5 * (lhs + rhs));
+                     });
       // transform kf to energy transfer
       pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
 
