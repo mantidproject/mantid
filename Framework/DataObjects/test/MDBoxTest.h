@@ -365,15 +365,14 @@ public:
   }
 
   void test_sptr() {
-    typedef MDBox<MDLeanEvent<3>, 3> mdbox3;
+    using mdbox3 = MDBox<MDLeanEvent<3>, 3>;
     TS_ASSERT_THROWS_NOTHING(mdbox3::sptr a(new mdbox3(sc.get()));)
   }
 
   void test_bad_splitter() {
     BoxController_sptr sc(new BoxController(4));
     sc->setSplitThreshold(10);
-    typedef MDBox<MDLeanEvent<3>, 3>
-        MACROS_ARE_DUMB; //...since they get confused by commas
+    using MACROS_ARE_DUMB = MDBox<MDLeanEvent<3>, 3>; //...since they get confused by commas
     TS_ASSERT_THROWS(MACROS_ARE_DUMB b3(sc.get()), std::invalid_argument);
   }
 

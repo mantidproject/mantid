@@ -35,9 +35,9 @@ class DLLExport MDEventWorkspace : public API::IMDEventWorkspace {
 
 public:
   /// Typedef for a shared pointer of this kind of event workspace
-  typedef boost::shared_ptr<MDEventWorkspace<MDE, nd>> sptr;
+  using sptr = boost::shared_ptr<MDEventWorkspace<MDE, nd> >;
   /// Typedef to access the MDEventType.
-  typedef MDE MDEventType;
+  using MDEventType = MDE;
 
   MDEventWorkspace(Mantid::API::MDNormalization preferredNormalization =
                        Mantid::API::MDNormalization::VolumeNormalization,
