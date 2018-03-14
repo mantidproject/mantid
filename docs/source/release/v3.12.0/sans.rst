@@ -10,6 +10,9 @@ SANS Changes
 ILL SANS
 --------
 
+Improvements
+############
+
 - Minor changes of the D33 instrument definition file, e.g. detector indexing.
 - New instrument definition file for the D22 instrument
 - New instrument definition file for the D11 instrument
@@ -17,10 +20,10 @@ ILL SANS
 ISIS SANS
 ---------
 
-.. image::  ../../images/ISIS_SANS_312.png
+.. figure::  ../../images/ISIS_SANS_312.png
    :align: right
    :class: screenshot
-   :width: 800px
+   :figwidth: 50%
 
 New features
 ############
