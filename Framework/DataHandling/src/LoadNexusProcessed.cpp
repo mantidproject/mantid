@@ -55,7 +55,7 @@ using Mantid::Types::Event::TofEvent;
 namespace {
 
 // Helper typedef
-typedef boost::shared_array<int> IntArray_shared;
+using IntArray_shared = boost::shared_array<int>;
 
 // Struct to contain spectrum information.
 struct SpectraInfo {
@@ -83,7 +83,7 @@ struct SpectraInfo {
 };
 
 // Helper typdef.
-typedef boost::optional<SpectraInfo> SpectraInfo_optional;
+using SpectraInfo_optional = boost::optional<SpectraInfo>;
 
 /**
 * Extract ALL the detector, spectrum number and workspace index mapping
