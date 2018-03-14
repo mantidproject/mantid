@@ -8,6 +8,9 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+New features
+############
+
 - New features in ISIS Powder which affect all instruments:
 
   + 'suffix' parameter added for output filenames
@@ -25,8 +28,12 @@ Powder Diffraction
 - New functionality for POLARIS in the ISIS Powder scripts. Some default parameters adjusted and output unsplined vanadium workspace by default.
 - New algorithm :ref:`algm-EstimateDivergence` estimates the beam divergence due to finite slit size.
 - New algorithm :ref:`algm-SumOverlappingTubes` combines a detector scan for D2B into a single workspace.
-- :ref:`CalculateDIFC <algm-CalculateDIFC>` has been extended to allow for calibration workspaces from :ref:`PDCalibration <algm-PDCalibration>`.
 
+
+Improvements
+############
+
+- :ref:`CalculateDIFC <algm-CalculateDIFC>` has been extended to allow for calibration workspaces from :ref:`PDCalibration <algm-PDCalibration>`.
 - :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>` has been amended to write the metadata (e.g. temperature) value in the header, in the form of the Fullprof readable keyword.
 - Improvements in ISIS Powder for HRPD:
 
@@ -53,6 +60,9 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+Improvements
+############
+
 - GSAS Fitting tab was added to the GUI to allow convenient GSAS-style refinement using GSASIIRefineFitPeaks
 
 .. figure:: ../../images/engineering_gsas_gui.PNG
@@ -73,6 +83,9 @@ Engineering Diffraction
   + Improved progress reporting for Calibration and Focus.
   + Enabled multi-run fitting and plotting in the Fitting tab.
   + Improved unit conversions when using the peak picker.
+  
+Bug fixes
+#########
 
 - Fixed a bug where the engineering diffraction GUI could hang when performing a long running file search.
 
@@ -80,7 +93,13 @@ Engineering Diffraction
 Single Crystal Diffraction
 --------------------------
 
+New features
+############
+
 - New algorithm :ref:`LoadWAND <algm-LoadWAND>` that will load event data for WAND² integrating out the events and correctly setting the units.
+
+Improvements
+############
 
 - :ref:`FilterPeaks <algm-FilterPeaks>` now supports filtering peaks by TOF, d-spacing, and wavelength.
 - HB3A reduction interface has been enhanced.  A child window is added to it for users to pre-process scans and save the processed and merged data to NeXus files in order to save time when they start to reduce and visualize the data. A record file is generated along with processed scans to record the calibration information. During data reduction, scans that have been processed in pre-processing will be loaded automatically from corresponding MD files.
@@ -104,12 +123,19 @@ Single Crystal Diffraction
 
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now can accept long or short names for the point group and reflection condition.
 
+Bug fixes
+#########
+
 - Fixed a bug in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` and :ref:`IntegrateEllipsoidsTwoStep <algm-IntegrateEllipsoidsTwoStep>` that forced output to be weighted by the bin width.
 - Fixed a bug in :ref:`IntegrateEllipsoidsTwoStep <algm-IntegrateEllipsoidsTwoStep>` where peaks with negative intensity values would be set to zero.
 
 
 Total Scattering
 ----------------
+
+New features
+############
+
 - A basic analysis for total scattering method ``create_total_scattering_pdf`` has been added to POLARIS. More information can be found on the POLARIS reference page.
 
 
