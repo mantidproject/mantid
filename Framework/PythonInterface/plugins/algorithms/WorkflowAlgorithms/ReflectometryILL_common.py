@@ -9,6 +9,7 @@ class SampleLogs:
     FOREGROUND_CENTRE = 'foreground.centre_workspace_index'
     FOREGROUND_END = 'foreground.last_workspace_index'
     FOREGROUND_START = 'foreground.first_workspace_index'
+    SUM_TYPE = 'foreground.summation_type'
 
 
 class WSCleanup:

@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, 
                            Property, StringListValidator)
-from mantid.simpleapi import (ConvertToDistribution, Divide, ExtractSingleSpectrum, RebinToWorkspace)
+from mantid.simpleapi import (AddSampleLog, ConvertToDistribution, Divide, ExtractSingleSpectrum, RebinToWorkspace)
 import numpy
 import ReflectometryILL_common as common
 
@@ -174,13 +174,19 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             if i == beamPosIndex:
                 continue
             if i < 0 or i > maxIndex:
-                self.log().warning('')
+                self.log().warning('Foreground partially out of the workspace.')
             ys = ws.readY(i)
             foregroundYs += ys
             es = ws.readE(i)
             foregroundEs += es**2
         numpy.sqrt(foregroundEs, out=foregroundEs)
         self._cleanup.cleanup(ws)
+        AddSampleLog(
+            Workspace=foregroundWS,
+            LogName=common.SampleLogs.SUM_TYPE,
+            LogText=SumType.IN_LAMBDA,
+            LogType='String',
+            EnableLogging=self._subalgLogging)
         ConvertToDistribution(Workspace=foregroundWS,
                               EnableLogging=self._subalgLogging)
         return foregroundWS
