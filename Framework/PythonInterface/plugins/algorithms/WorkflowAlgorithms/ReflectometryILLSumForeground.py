@@ -111,18 +111,17 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
 
     def _correctForChopperOpenings(self, ws, directWS):
         """Correct reflectivity values if chopper openings between RB and DB differ."""
-        def opening(ws):
-            logs = ws.run()
-            instrumentName = ws.getInstrument().getName()
+        def opening(instrumentName, logs, Xs):
             chopperGap = common.chopperPairDistance(logs, instrumentName)
             chopperPeriod = 60. / common.chopperSpeed(logs, instrumentName)
             openingAngle = common.chopperOpeningAngle(logs, instrumentName)
-            Xs = ws.readX(0) * 1e-10
-            if ws.isHistogramData():
-                Xs = (Xs[:-1] + Xs[1:]) / 2.
             return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs + openingAngle / 360.
-        reflectedOpening = opening(ws)
-        directOpening = opening(directWS)
+        instrumentName = ws.getInstrument().getName()
+        Xs = ws.readX(0)
+        if ws.isHistogramData():
+            Xs = (Xs[:-1] + Xs[1:]) / 2.
+        reflectedOpening = opening(instrumentName, ws.run(), Xs)
+        directOpening = opening(instrumentName, directWS.run(), Xs)
         corFactorWSName = self._names.withSuffix('chopper_opening_correction_factors')
         corFactorWS = CreateWorkspace(
             OutputWorkspace=corFactorWSName,
@@ -189,6 +188,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._cleanup.cleanup(rebinnedDirectWS)
         self._cleanup.cleanup(ws)
         reflectivityWS = self._correctForChopperOpenings(reflectivityWS, directWS)
+        reflectivityWS.setYUnit('Reflectivity')
+        reflectivityWS.setYUnitLabel('Reflectivity')
         return reflectivityWS
 
     def _sumForegroundInLambda(self, ws):
