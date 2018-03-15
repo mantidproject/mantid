@@ -30,6 +30,7 @@ Guides
 
    Communication
    Dependencies
+   HandlingXML
 
 ===================
 Component Overviews
