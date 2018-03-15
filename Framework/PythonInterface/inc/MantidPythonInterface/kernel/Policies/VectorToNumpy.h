@@ -85,9 +85,14 @@ template <typename ConversionPolicy> struct VectorRefToNumpy {
   // The boost::python framework calls return_value_policy::apply<T>::type
   template <class T> struct apply {
     // Typedef that removes and const or reference qualifiers from the type
-    using non_const_type = typename std::remove_const<typename std::remove_reference<T>::type>::type;
+    using non_const_type = typename std::remove_const<
+        typename std::remove_reference<T>::type>::type;
     // MPL compile-time check that T is a reference to a std::vector
-    using type = typename boost::mpl::if_c<boost::mpl::and_<std::is_reference<T>, is_std_vector<non_const_type> >::value, VectorRefToNumpyImpl<non_const_type, ConversionPolicy>, VectorRefToNumpy_Requires_Reference_To_StdVector_Return_Type<T> >::type;
+    using type = typename boost::mpl::if_c<
+        boost::mpl::and_<std::is_reference<T>,
+                         is_std_vector<non_const_type>>::value,
+        VectorRefToNumpyImpl<non_const_type, ConversionPolicy>,
+        VectorRefToNumpy_Requires_Reference_To_StdVector_Return_Type<T>>::type;
   };
 };
 
@@ -126,7 +131,10 @@ struct VectorToNumpy {
     // Typedef that removes any const from the type
     using non_const_type = typename std::remove_const<T>::type;
     // MPL compile-time check that T is a std::vector
-    using type = typename boost::mpl::if_c<is_std_vector<non_const_type>::value, VectorRefToNumpyImpl<non_const_type, Converters::Clone>, VectorToNumpy_Requires_StdVector_Return_By_Value<T> >::type;
+    using type = typename boost::mpl::if_c<
+        is_std_vector<non_const_type>::value,
+        VectorRefToNumpyImpl<non_const_type, Converters::Clone>,
+        VectorToNumpy_Requires_StdVector_Return_By_Value<T>>::type;
   };
 };
 }

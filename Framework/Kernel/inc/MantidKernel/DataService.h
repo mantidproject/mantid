@@ -75,7 +75,8 @@ struct CaseInsensitiveCmp {
 template <typename T> class DLLExport DataService {
 private:
   /// Typedef for the map holding the names of and pointers to the data objects
-  using svcmap = std::map<std::string, boost::shared_ptr<T>, CaseInsensitiveCmp>;
+  using svcmap =
+      std::map<std::string, boost::shared_ptr<T>, CaseInsensitiveCmp>;
   /// Iterator for the data store map
   using svc_it = typename svcmap::iterator;
   /// Const iterator for the data store map

@@ -67,7 +67,8 @@ private:
   ~ScriptRepositoryFactoryImpl() override = default;
 };
 
-using ScriptRepositoryFactory = Mantid::Kernel::SingletonHolder<ScriptRepositoryFactoryImpl>;
+using ScriptRepositoryFactory =
+    Mantid::Kernel::SingletonHolder<ScriptRepositoryFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid

@@ -212,7 +212,8 @@ MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const RectangularDetector &);
 
 using RectangularDetector_sptr = boost::shared_ptr<RectangularDetector>;
-using RectangularDetector_const_sptr = boost::shared_ptr<const RectangularDetector>;
+using RectangularDetector_const_sptr =
+    boost::shared_ptr<const RectangularDetector>;
 
 } // Namespace Geometry
 } // Namespace Mantid

@@ -63,7 +63,8 @@ public:
 
 protected:
   std::vector<Mantid::Geometry::MDImplicitFunction_sptr> m_Functions;
-  using FunctionIterator = std::vector<Mantid::Geometry::MDImplicitFunction_sptr>::const_iterator;
+  using FunctionIterator =
+      std::vector<Mantid::Geometry::MDImplicitFunction_sptr>::const_iterator;
 };
 }
 }

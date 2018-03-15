@@ -54,17 +54,23 @@ class Instrument;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 /// Parameter map iterator typedef
-using component_map_it = tbb::concurrent_unordered_multimap<ComponentID, boost::shared_ptr<Parameter> >::iterator;
-using component_map_cit = tbb::concurrent_unordered_multimap<ComponentID, boost::shared_ptr<Parameter> >::const_iterator;
+using component_map_it =
+    tbb::concurrent_unordered_multimap<ComponentID,
+                                       boost::shared_ptr<Parameter>>::iterator;
+using component_map_cit = tbb::concurrent_unordered_multimap<
+    ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
 
 class MANTID_GEOMETRY_DLL ParameterMap {
 public:
   /// Parameter map typedef
-  using pmap = tbb::concurrent_unordered_multimap<ComponentID, boost::shared_ptr<Parameter> >;
+  using pmap = tbb::concurrent_unordered_multimap<ComponentID,
+                                                  boost::shared_ptr<Parameter>>;
   /// Parameter map iterator typedef
-  using pmap_it = tbb::concurrent_unordered_multimap<ComponentID, boost::shared_ptr<Parameter> >::iterator;
+  using pmap_it = tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::iterator;
   /// Parameter map iterator typedef
-  using pmap_cit = tbb::concurrent_unordered_multimap<ComponentID, boost::shared_ptr<Parameter> >::const_iterator;
+  using pmap_cit = tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
   /// Default constructor
   ParameterMap();
   /// Const constructor

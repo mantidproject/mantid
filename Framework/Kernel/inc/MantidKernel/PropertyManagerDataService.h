@@ -53,7 +53,8 @@ private:
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
     Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
-using PropertyManagerDataService = Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
+using PropertyManagerDataService =
+    Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
 
 } // Namespace Kernel
 } // Namespace Mantid

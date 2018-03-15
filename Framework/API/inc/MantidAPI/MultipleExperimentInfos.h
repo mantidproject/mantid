@@ -64,7 +64,8 @@ private:
 };
 
 using MultipleExperimentInfos_sptr = boost::shared_ptr<MultipleExperimentInfos>;
-using MultipleExperimentInfos_const_sptr = boost::shared_ptr<const MultipleExperimentInfos>;
+using MultipleExperimentInfos_const_sptr =
+    boost::shared_ptr<const MultipleExperimentInfos>;
 
 } // namespace API
 } // namespace Mantid

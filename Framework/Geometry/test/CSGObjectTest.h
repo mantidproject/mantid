@@ -1147,7 +1147,7 @@ public:
 
 private:
   /// Surface type
-  using STYPE = std::map<int, boost::shared_ptr<Surface> >;
+  using STYPE = std::map<int, boost::shared_ptr<Surface>>;
 
   /// set timeTest true to get time comparisons of soild angle methods
   const static bool timeTest = false;

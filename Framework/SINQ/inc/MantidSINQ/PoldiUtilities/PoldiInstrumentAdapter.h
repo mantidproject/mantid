@@ -45,7 +45,8 @@ public:
                             const std::string &propertyName) const = 0;
 };
 
-using AbstractDoubleValueExtractor_sptr = boost::shared_ptr<AbstractDoubleValueExtractor>;
+using AbstractDoubleValueExtractor_sptr =
+    boost::shared_ptr<AbstractDoubleValueExtractor>;
 
 class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:

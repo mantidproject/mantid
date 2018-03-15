@@ -65,14 +65,19 @@ public:
   static size_t getMaxNumDim() { return size_t(MAX_MD_DIMENSIONS_NUM); }
 
 private:
-  using fpCreateBox = API::IMDNode *(*)(API::BoxController *, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > &, const uint32_t, const size_t, const size_t);
+  using fpCreateBox = API::IMDNode *(*)(
+      API::BoxController *,
+      const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &,
+      const uint32_t, const size_t, const size_t);
   // vector of function pointers to the functions which create MDBox or
   // MDGridBox;
   static std::vector<fpCreateBox> boxCreatorFP;
 
   // typedef for the class function pointer to the function, which creates MD
   // Workspaces
-  using fpCreateMDWS = API::IMDEventWorkspace *(*)(const std::string &, const Mantid::API::MDNormalization &, const Mantid::API::MDNormalization &);
+  using fpCreateMDWS = API::IMDEventWorkspace *(*)(
+      const std::string &, const Mantid::API::MDNormalization &,
+      const Mantid::API::MDNormalization &);
   // vector of function pointers to the funcions
   static std::vector<fpCreateMDWS> wsCreatorFP;
 

@@ -120,7 +120,8 @@ private:
   boost::regex m_originChoiceRegex;
 };
 
-using PointGroupFactory = Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
+using PointGroupFactory =
+    Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid

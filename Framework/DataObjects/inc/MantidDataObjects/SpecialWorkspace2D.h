@@ -92,7 +92,8 @@ protected:
 using SpecialWorkspace2D_sptr = boost::shared_ptr<SpecialWorkspace2D>;
 
 /// shared pointer to a const SpecialWorkspace2D
-using SpecialWorkspace2D_const_sptr = boost::shared_ptr<const SpecialWorkspace2D>;
+using SpecialWorkspace2D_const_sptr =
+    boost::shared_ptr<const SpecialWorkspace2D>;
 
 } // namespace Mantid
 } // namespace DataObjects

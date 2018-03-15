@@ -25,7 +25,7 @@ std::recursive_mutex FUNCTION_MAP_MUTEX;
 }
 
 enum Function { None, Gaussian, Lorentzian, BackToBackExponential };
-using FunctionMapType = std::map<std::string, std::pair<size_t, Function> >;
+using FunctionMapType = std::map<std::string, std::pair<size_t, Function>>;
 
 //----------------------------------------------------------------------------------------------
 

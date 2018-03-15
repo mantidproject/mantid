@@ -13,7 +13,7 @@ using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;
 using DoubleFortranMatrix = FortranMatrix<GSLMatrix>;
 using ComplexFortranVector = FortranVector<ComplexVector>;
 using DoubleFortranVector = FortranVector<GSLVector>;
-using IntFortranVector = FortranVector<std::vector<int> >;
+using IntFortranVector = FortranVector<std::vector<int>>;
 
 } // namespace CurveFitting
 } // namespace Mantid

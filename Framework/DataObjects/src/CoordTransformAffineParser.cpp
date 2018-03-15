@@ -20,8 +20,10 @@ Create the transform object.
 */
 Mantid::API::CoordTransform *CoordTransformAffineParser::createTransform(
     Poco::XML::Element *coordTransElement) const {
-  using InDimParameterParser = Mantid::API::SingleValueParameterParser<Mantid::API::InDimParameter>;
-  using OutDimParameterParser = Mantid::API::SingleValueParameterParser<Mantid::API::OutDimParameter>;
+  using InDimParameterParser =
+      Mantid::API::SingleValueParameterParser<Mantid::API::InDimParameter>;
+  using OutDimParameterParser =
+      Mantid::API::SingleValueParameterParser<Mantid::API::OutDimParameter>;
   using namespace Poco::XML;
   if ("CoordTransform" != coordTransElement->localName()) {
     std::string message = "This is not a coordinate transform element: " +

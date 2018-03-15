@@ -88,7 +88,8 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //===================================
 
   // Typedef for function pointer to disabiguate references
-  using Signature1_MDHisto = MDHistoWorkspace_sptr (*)(double, size_t, size_t, Mantid::coord_t, double, std::string, double);
+  using Signature1_MDHisto = MDHistoWorkspace_sptr (
+      *)(double, size_t, size_t, Mantid::coord_t, double, std::string, double);
 
   def("makeFakeMDHistoWorkspace", (Signature1_MDHisto)&makeFakeMDHistoWorkspace,
       makeFakeMDHistoWorkspace_overloads()

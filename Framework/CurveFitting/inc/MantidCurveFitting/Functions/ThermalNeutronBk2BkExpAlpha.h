@@ -66,7 +66,8 @@ private:
                              double alph1t) const;
 };
 
-using ThermalNeutronBk2BkExpAlpha_sptr = boost::shared_ptr<ThermalNeutronBk2BkExpAlpha>;
+using ThermalNeutronBk2BkExpAlpha_sptr =
+    boost::shared_ptr<ThermalNeutronBk2BkExpAlpha>;
 
 } // namespace Functions
 } // namespace CurveFitting

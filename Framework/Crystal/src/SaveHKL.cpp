@@ -185,7 +185,7 @@ void SaveHKL::exec() {
   std::string bankPart = "?";
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
-  using bankMap_t = std::map<int, std::vector<size_t> >;
+  using bankMap_t = std::map<int, std::vector<size_t>>;
   using runMap_t = std::map<int, bankMap_t>;
   std::set<int> uniqueBanks;
   std::set<int> uniqueRuns;

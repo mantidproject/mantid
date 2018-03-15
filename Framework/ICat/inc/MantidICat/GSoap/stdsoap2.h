@@ -2430,7 +2430,8 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_rand(void);
 #endif
 
 /* soap_traverse() traversal/walker routines take walker function arguments */
-using soap_walker = void (struct soap *, void *, int, const char *, const char *);
+using soap_walker = void(struct soap *, void *, int, const char *,
+                         const char *);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap);
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap);

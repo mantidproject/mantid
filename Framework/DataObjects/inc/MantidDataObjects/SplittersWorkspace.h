@@ -82,7 +82,8 @@ private:
 };
 
 using SplittersWorkspace_sptr = boost::shared_ptr<SplittersWorkspace>;
-using SplittersWorkspace_const_sptr = boost::shared_ptr<const SplittersWorkspace>;
+using SplittersWorkspace_const_sptr =
+    boost::shared_ptr<const SplittersWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

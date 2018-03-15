@@ -85,7 +85,8 @@ private:
   BraggScattererFactoryImpl();
 };
 
-using BraggScattererFactory = Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>;
+using BraggScattererFactory =
+    Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid

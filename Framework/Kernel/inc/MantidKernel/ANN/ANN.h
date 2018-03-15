@@ -766,8 +766,8 @@ const int ANN_N_SHRINK_RULES = 4; // number of shrink rules
 // Some types and objects used by kd-tree functions
 // See src/kd_tree.h and src/kd_tree.cpp for definitions
 //----------------------------------------------------------------------
-class ANNkdStats;              // stats on kd-tree
-class ANNkd_node;              // generic node in a kd-tree
+class ANNkdStats;               // stats on kd-tree
+class ANNkd_node;               // generic node in a kd-tree
 using ANNkd_ptr = ANNkd_node *; // pointer to a kd-tree node
 
 class DLL_API ANNkd_tree : public ANNpointSet {

@@ -15,7 +15,8 @@ namespace // <anonymous>
 /// Typedef the map of type_info -> handler objects. We store
 /// boost::python::type_info objects so that they work across DLL boundaries
 /// unlike std::type_info objects
-using TypeIDMap = std::map<const boost::python::type_info, boost::shared_ptr<PropertyValueHandler> >;
+using TypeIDMap = std::map<const boost::python::type_info,
+                           boost::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Returns a reference to the static type map

@@ -100,7 +100,8 @@ protected:
   V3R m_inversionPoint;
 };
 
-using SymmetryElementInversion_sptr = boost::shared_ptr<SymmetryElementInversion>;
+using SymmetryElementInversion_sptr =
+    boost::shared_ptr<SymmetryElementInversion>;
 
 /** @class SymmetryElementTranslation
 
@@ -121,7 +122,8 @@ protected:
   V3R m_translation;
 };
 
-using SymmetryElementTranslation_sptr = boost::shared_ptr<SymmetryElementTranslation>;
+using SymmetryElementTranslation_sptr =
+    boost::shared_ptr<SymmetryElementTranslation>;
 
 /** @class SymmetryElementWithAxis
 

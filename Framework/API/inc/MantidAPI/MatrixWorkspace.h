@@ -32,7 +32,7 @@ class Axis;
 class SpectrumDetectorMapping;
 
 /// typedef for the image type
-using MantidImage = std::vector<std::vector<double> >;
+using MantidImage = std::vector<std::vector<double>>;
 /// shared pointer to MantidImage
 using MantidImage_sptr = boost::shared_ptr<MantidImage>;
 /// shared pointer to const MantidImage

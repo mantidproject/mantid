@@ -15,9 +15,10 @@ namespace DataObjects {
 
 // Typedef for a map for mapping width of neighbours (key) to permutations
 // needed in the calcualtion.
-using PermutationsMap = std::map<std::vector<int>, std::vector<int64_t> >;
+using PermutationsMap = std::map<std::vector<int>, std::vector<int64_t>>;
 // Typedef for extents
-using MDExtentPair = boost::tuple<Mantid::coord_t, Mantid::coord_t>; // Min/Max pair
+using MDExtentPair =
+    boost::tuple<Mantid::coord_t, Mantid::coord_t>; // Min/Max pair
 // Typedef for vector of extents
 using VecMDExtents = std::vector<MDExtentPair>;
 

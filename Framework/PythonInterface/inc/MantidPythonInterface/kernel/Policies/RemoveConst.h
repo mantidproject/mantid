@@ -100,7 +100,8 @@ template <typename T> struct RemoveConst_Requires_Pointer_Return_Value {};
 // call to this struct
 template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
   using ConstElementType = typename ConstSharedPtr::element_type;
-  using NonConstElementType = typename std::remove_const<ConstElementType>::type;
+  using NonConstElementType =
+      typename std::remove_const<ConstElementType>::type;
   using NonConstSharedPtr = typename boost::shared_ptr<NonConstElementType>;
 
   inline PyObject *operator()(const ConstSharedPtr &p) const {
@@ -129,7 +130,9 @@ struct RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value {};
 struct RemoveConst {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a "T*"
-    using type = typename boost::mpl::if_c<std::is_pointer<T>::value, RemoveConstImpl<T>, RemoveConst_Requires_Pointer_Return_Value<T> >::type;
+    using type = typename boost::mpl::if_c<
+        std::is_pointer<T>::value, RemoveConstImpl<T>,
+        RemoveConst_Requires_Pointer_Return_Value<T>>::type;
   };
 };
 
@@ -140,7 +143,10 @@ struct RemoveConstSharedPtr {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a
     // "boost::shared_ptr<T>"
-    using type = typename boost::mpl::if_c<IsConstSharedPtr<T>::value, RemoveConstSharedPtrImpl<T>, RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value<T> >::type;
+    using type = typename boost::mpl::if_c<
+        IsConstSharedPtr<T>::value, RemoveConstSharedPtrImpl<T>,
+        RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value<
+            T>>::type;
   };
 };
 

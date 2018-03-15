@@ -72,7 +72,8 @@ private:
   ~ConstraintFactoryImpl() override = default;
 };
 
-using ConstraintFactory = Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>;
+using ConstraintFactory =
+    Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid

@@ -61,7 +61,8 @@ private:
   SpaceGroup_const_sptr m_prototype;
 };
 
-using AbstractSpaceGroupGenerator_sptr = boost::shared_ptr<AbstractSpaceGroupGenerator>;
+using AbstractSpaceGroupGenerator_sptr =
+    boost::shared_ptr<AbstractSpaceGroupGenerator>;
 
 /// Concrete space group generator that uses space group generators as given in
 /// ITA.
@@ -264,7 +265,8 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<SpaceGroupFactoryImpl>;
 };
 
-using SpaceGroupFactory = Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
+using SpaceGroupFactory =
+    Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid

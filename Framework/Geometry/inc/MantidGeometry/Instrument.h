@@ -26,7 +26,9 @@ class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
 /// Convenience typedef
-using InstrumentParameterCache = std::map<std::pair<std::string, const IComponent *>, boost::shared_ptr<XMLInstrumentParameter> >;
+using InstrumentParameterCache =
+    std::map<std::pair<std::string, const IComponent *>,
+             boost::shared_ptr<XMLInstrumentParameter>>;
 
 /**
 Base Instrument Class.

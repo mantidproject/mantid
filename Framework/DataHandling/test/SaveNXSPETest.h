@@ -165,7 +165,9 @@ private:
     return inputWS;
   }
 
-  using DataHolder = boost::tuple<boost::shared_array<hsize_t>, boost::shared_array<double>, boost::shared_array<double> >;
+  using DataHolder =
+      boost::tuple<boost::shared_array<hsize_t>, boost::shared_array<double>,
+                   boost::shared_array<double>>;
 
   DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr inputWS) {
     SaveNXSPE saver;

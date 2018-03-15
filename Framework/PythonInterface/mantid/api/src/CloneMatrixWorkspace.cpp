@@ -38,7 +38,8 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
   npy_intp stride(0);
 
   // Find out which function we need to call to access the data
-  using ArrayAccessFn = const MantidVec &(MatrixWorkspace::*)(const size_t) const;
+  using ArrayAccessFn =
+      const MantidVec &(MatrixWorkspace::*)(const size_t) const;
   ArrayAccessFn dataAccesor;
   /**
    * Can do better than this with a templated object that knows how to access

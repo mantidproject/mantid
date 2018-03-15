@@ -68,7 +68,9 @@ namespace API {
 class MANTID_API_DLL ImplicitFunctionParser {
 public:
   /// Successor type. Unique pointer with stack scoped deletion semantics.
-  using SuccessorType = boost::interprocess::unique_ptr<ImplicitFunctionParser, DeleterPolicy<ImplicitFunctionParser> >;
+  using SuccessorType =
+      boost::interprocess::unique_ptr<ImplicitFunctionParser,
+                                      DeleterPolicy<ImplicitFunctionParser>>;
 
 protected:
   ImplicitFunctionParameterParser::SuccessorType

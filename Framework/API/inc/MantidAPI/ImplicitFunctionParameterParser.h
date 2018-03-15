@@ -81,7 +81,9 @@ class MANTID_API_DLL ImplicitFunctionParameterParser {
 public:
   /// Successor type. Unique shared pointer with stack scoped deletion
   /// semantics.
-  using SuccessorType = boost::interprocess::unique_ptr<ImplicitFunctionParameterParser, DeleterPolicy<ImplicitFunctionParameterParser> >;
+  using SuccessorType = boost::interprocess::unique_ptr<
+      ImplicitFunctionParameterParser,
+      DeleterPolicy<ImplicitFunctionParameterParser>>;
 
   virtual ImplicitFunctionParameter *
   createParameter(Poco::XML::Element *parameterElement) = 0;

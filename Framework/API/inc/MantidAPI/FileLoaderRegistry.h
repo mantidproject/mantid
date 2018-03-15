@@ -144,7 +144,8 @@ private:
 };
 
 /// Type for the actual singleton instance
-using FileLoaderRegistry = Mantid::Kernel::SingletonHolder<FileLoaderRegistryImpl>;
+using FileLoaderRegistry =
+    Mantid::Kernel::SingletonHolder<FileLoaderRegistryImpl>;
 
 } // namespace API
 } // namespace Mantid

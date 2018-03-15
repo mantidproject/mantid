@@ -85,7 +85,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
                                         vecWorkspaceGroups);
     }
   } else {
-    using WorkspaceVector = std::vector<boost::shared_ptr<Workspace> >;
+    using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
     WorkspaceVector inWorkspaces;
     WorkspaceVector outWorkspaces;
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);

@@ -31,7 +31,8 @@ public:
 };
 
 /// Typedef a factory for type of PeaksTransform.
-using PeakTransformQLabFactory = ConcretePeakTransformFactory<PeakTransformQLab>;
+using PeakTransformQLabFactory =
+    ConcretePeakTransformFactory<PeakTransformQLab>;
 }
 }
 

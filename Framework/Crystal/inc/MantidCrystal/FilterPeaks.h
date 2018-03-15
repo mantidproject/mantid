@@ -46,7 +46,7 @@ public:
 
 private:
   /// Typedef for the function to get the variable we're filtering against
-  using FilterFunction = std::function<double (const Geometry::IPeak &)>;
+  using FilterFunction = std::function<double(const Geometry::IPeak &)>;
 
   /// Override for algorithm init
   void init() override;

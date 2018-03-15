@@ -135,7 +135,7 @@ private:
       const std::unordered_set<std::string> &ignoreProperties);
 
   /// typedef for the map holding the properties
-  using PropertyMap = std::map<std::string, std::unique_ptr<Property> >;
+  using PropertyMap = std::map<std::string, std::unique_ptr<Property>>;
   /// The properties under management
   PropertyMap m_properties;
   /// Stores the order in which the properties were declared.

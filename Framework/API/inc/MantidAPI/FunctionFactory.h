@@ -145,9 +145,11 @@ const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
 using FunctionFactory = Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
 
 /// Convenient typedef for an UpdateNotification
-using FunctionFactoryUpdateNotification = FunctionFactoryImpl::UpdateNotification;
+using FunctionFactoryUpdateNotification =
+    FunctionFactoryImpl::UpdateNotification;
 /// Convenient typedef for an UpdateNotification AutoPtr
-using FunctionFactoryUpdateNotification_ptr = const Poco::AutoPtr<FunctionFactoryUpdateNotification> &;
+using FunctionFactoryUpdateNotification_ptr =
+    const Poco::AutoPtr<FunctionFactoryUpdateNotification> &;
 } // namespace API
 } // namespace Mantid
 

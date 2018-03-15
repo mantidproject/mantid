@@ -117,7 +117,8 @@ public:
 /// Shared pointer to IDetector
 using IDetector_sptr = boost::shared_ptr<Mantid::Geometry::IDetector>;
 /// Shared pointer to IDetector (const version)
-using IDetector_const_sptr = boost::shared_ptr<const Mantid::Geometry::IDetector>;
+using IDetector_const_sptr =
+    boost::shared_ptr<const Mantid::Geometry::IDetector>;
 
 } // namespace Geometry
 } // namespace Mantid

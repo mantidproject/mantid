@@ -149,7 +149,7 @@ private:
 
   /// used to store the lists of WORKSPACE INDICES that will be grouped, the
   /// keys are not used
-  using storage_map = std::map<specnum_t, std::vector<size_t> >;
+  using storage_map = std::map<specnum_t, std::vector<size_t>>;
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed

@@ -26,7 +26,7 @@ public:
   ClusterRegister::MapCluster m_unique;
 
   /// Type for identifying label groups
-  using GroupType = std::list<std::unordered_set<size_t> >;
+  using GroupType = std::list<std::unordered_set<size_t>>;
 
   /// Groups of labels to maintain
   GroupType m_groups;

@@ -78,7 +78,8 @@ private:
   SymmetryOperationFactoryImpl();
 };
 
-using SymmetryOperationFactory = Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>;
+using SymmetryOperationFactory =
+    Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -82,7 +82,10 @@ private:
   const std::vector<specnum_t> m_spectrumNumbers;
 
   /// typedef for Graph object used to hold the calculated information
-  using Graph = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, boost::property<boost::vertex_name_t, int64_t>, boost::property<boost::edge_name_t, Mantid::Kernel::V3D> >;
+  using Graph = boost::adjacency_list<
+      boost::vecS, boost::vecS, boost::directedS,
+      boost::property<boost::vertex_name_t, int64_t>,
+      boost::property<boost::edge_name_t, Mantid::Kernel::V3D>>;
   /// Vertex descriptor object for Graph
   using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
   /// map object of int to Graph Vertex descriptor

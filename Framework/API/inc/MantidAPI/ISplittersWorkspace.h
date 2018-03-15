@@ -82,7 +82,8 @@ private:
 /// Typedef for a shared pointer to \c TableWorkspace
 using ISplittersWorkspace_sptr = boost::shared_ptr<ISplittersWorkspace>;
 /// Typedef for a shared pointer to \c const \c TableWorkspace
-using ISplittersWorkspace_const_sptr = boost::shared_ptr<const ISplittersWorkspace>;
+using ISplittersWorkspace_const_sptr =
+    boost::shared_ptr<const ISplittersWorkspace>;
 
 } // namespace API
 } // namespace Mantid

@@ -94,7 +94,8 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<CenteringGroupCreatorImpl>;
 };
 
-using CenteringGroupCreator = Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>;
+using CenteringGroupCreator =
+    Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>;
 
 } // namespace Geometry
 } // namespace Mantid

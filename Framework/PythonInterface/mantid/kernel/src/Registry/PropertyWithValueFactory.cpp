@@ -16,7 +16,8 @@ namespace PythonInterface {
 namespace Registry {
 namespace {
 /// Lookup map type
-using PyTypeIndex = std::map<const PyTypeObject *, boost::shared_ptr<PropertyValueHandler> >;
+using PyTypeIndex =
+    std::map<const PyTypeObject *, boost::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -66,7 +67,8 @@ const PyTypeIndex &getTypeIndex() {
 }
 
 // Lookup map for arrays
-using PyArrayIndex = std::map<std::string, boost::shared_ptr<PropertyValueHandler> >;
+using PyArrayIndex =
+    std::map<std::string, boost::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -75,18 +77,18 @@ void initArrayLookup(PyArrayIndex &index) {
   assert(index.empty());
 
   // Map the Python array types to the best match in C++
-  using FloatArrayHandler = SequenceTypeHandler<std::vector<double> >;
+  using FloatArrayHandler = SequenceTypeHandler<std::vector<double>>;
   index.emplace("FloatArray", boost::make_shared<FloatArrayHandler>());
 
-  using StringArrayHandler = SequenceTypeHandler<std::vector<std::string> >;
+  using StringArrayHandler = SequenceTypeHandler<std::vector<std::string>>;
   index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
 
-  using LongIntArrayHandler = SequenceTypeHandler<std::vector<long> >;
+  using LongIntArrayHandler = SequenceTypeHandler<std::vector<long>>;
   index.emplace("LongIntArray", boost::make_shared<LongIntArrayHandler>());
 
 #if PY_MAJOR_VERSION < 3
   // Backwards compatible behaviour
-  using IntArrayHandler = SequenceTypeHandler<std::vector<int> >;
+  using IntArrayHandler = SequenceTypeHandler<std::vector<int>>;
   index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
 #endif
 }

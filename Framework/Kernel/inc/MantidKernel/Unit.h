@@ -229,10 +229,12 @@ private:
   using ConstantAndPower = std::pair<double, double>;
   /// Lists, for a given starting unit, the units to which a 'quick conversion'
   /// can be made
-  using UnitConversions = tbb::concurrent_unordered_map<std::string, ConstantAndPower>;
+  using UnitConversions =
+      tbb::concurrent_unordered_map<std::string, ConstantAndPower>;
   /// The possible 'quick conversions' are held in a map with the starting unit
   /// as the key
-  using ConversionsMap = tbb::concurrent_unordered_map<std::string, UnitConversions>;
+  using ConversionsMap =
+      tbb::concurrent_unordered_map<std::string, UnitConversions>;
   /// The table of possible 'quick conversions'
   static ConversionsMap s_conversionFactors;
 };

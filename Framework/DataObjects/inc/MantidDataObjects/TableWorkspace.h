@@ -410,8 +410,12 @@ private:
     }
   };
 
-  using column_it = std::vector<boost::shared_ptr<API::Column> >::iterator; ///< Column iterator
-  using column_const_it = std::vector<boost::shared_ptr<API::Column> >::const_iterator; ///< Column const iterator
+  using column_it = std::vector<
+      boost::shared_ptr<API::Column>>::iterator; ///< Column iterator
+  using column_const_it =
+      std::vector<boost::shared_ptr<API::Column>>::const_iterator; ///< Column
+                                                                   ///const
+                                                                   ///iterator
   /// Shared pointers to the columns.
   std::vector<boost::shared_ptr<API::Column>> m_columns;
   /// row count

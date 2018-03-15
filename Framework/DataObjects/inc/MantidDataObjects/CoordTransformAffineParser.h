@@ -31,7 +31,8 @@ public:
   createTransform(Poco::XML::Element *coordTransElement) const;
   virtual void setSuccessor(CoordTransformAffineParser *other);
   virtual ~CoordTransformAffineParser() = default;
-  using SuccessorType_sptr = boost::shared_ptr<CoordTransformAffineParser>; ///< successor parser shared ptr typedef
+  using SuccessorType_sptr = boost::shared_ptr<
+      CoordTransformAffineParser>; ///< successor parser shared ptr typedef
 protected:
   SuccessorType_sptr m_successor; ///< successor parser
 private:

@@ -205,7 +205,7 @@ public:
 
 public:
   /// Typedef for a shared pointer to a MDGridBox
-  using sptr = boost::shared_ptr<MDGridBox<MDE, nd> >;
+  using sptr = boost::shared_ptr<MDGridBox<MDE, nd>>;
 
   /// Typedef for a vector of MDBoxBase pointers
   using boxVector_t = std::vector<MDBoxBase<MDE, nd> *>;

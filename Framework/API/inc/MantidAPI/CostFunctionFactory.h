@@ -63,7 +63,8 @@ private:
   CostFunctionFactoryImpl();
 };
 
-using CostFunctionFactory = Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>;
+using CostFunctionFactory =
+    Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid

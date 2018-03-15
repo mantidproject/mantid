@@ -180,7 +180,9 @@ GCC_DIAG_ON(conversion)
 //============================================
 
 // Function pointer to real implementation of getMoments
-using MomentsFunction = std::vector<double> (*)(const std::vector<double> &, const std::vector<double> &, const int);
+using MomentsFunction = std::vector<double>(*)(const std::vector<double> &,
+                                               const std::vector<double> &,
+                                               const int);
 
 /**
  * The implementation for getMomentsAboutOrigin & getMomentsAboutOriginMean for

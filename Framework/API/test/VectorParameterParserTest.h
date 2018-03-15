@@ -15,13 +15,15 @@ private:
   DECLARE_VECTOR_PARAMETER(ConcreteVectorDblParam, double)
 
   // Declare a concrete vector parameter parser for testing.
-  using ConcreteVectorDblParamParser = VectorParameterParser<ConcreteVectorDblParam>;
+  using ConcreteVectorDblParamParser =
+      VectorParameterParser<ConcreteVectorDblParam>;
 
   // Declare a concrete type with elements of type bool for testing.
   DECLARE_VECTOR_PARAMETER(ConcreteVectorBoolParam, bool)
 
   // Declare a concrete vector parameter parser for testing.
-  using ConcreteVectorBoolParamParser = VectorParameterParser<ConcreteVectorBoolParam>;
+  using ConcreteVectorBoolParamParser =
+      VectorParameterParser<ConcreteVectorBoolParam>;
 
 public:
   void testParsesParmeterValue1D() {
@@ -95,7 +97,8 @@ public:
 
   void testChainOfResponsibility() {
     // Local declare of a successor parser with a successor parameter.
-    using ConcreteSuccessorVectorParameterParser = VectorParameterParser<SucessorVectorParameter>;
+    using ConcreteSuccessorVectorParameterParser =
+        VectorParameterParser<SucessorVectorParameter>;
 
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>SucessorVectorParameter</"

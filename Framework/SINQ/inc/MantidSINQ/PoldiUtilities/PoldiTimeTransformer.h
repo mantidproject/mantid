@@ -93,7 +93,8 @@ protected:
   double m_tofFactor;
 };
 
-using DetectorElementData_const_sptr = boost::shared_ptr<const DetectorElementData>;
+using DetectorElementData_const_sptr =
+    boost::shared_ptr<const DetectorElementData>;
 
 class MANTID_SINQ_DLL PoldiTimeTransformer {
 public:

@@ -80,7 +80,8 @@ private:
 };
 
 using PeakShapeEllipsoid_sptr = boost::shared_ptr<PeakShapeEllipsoid>;
-using PeakShapeEllipsoid_const_sptr = boost::shared_ptr<const PeakShapeEllipsoid>;
+using PeakShapeEllipsoid_const_sptr =
+    boost::shared_ptr<const PeakShapeEllipsoid>;
 
 } // namespace DataObjects
 } // namespace Mantid

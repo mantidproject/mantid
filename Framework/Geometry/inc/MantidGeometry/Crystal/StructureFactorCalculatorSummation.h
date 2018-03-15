@@ -54,7 +54,8 @@ protected:
   CompositeBraggScatterer_sptr m_unitCellScatterers;
 };
 
-using StructureFactorSummation_sptr = boost::shared_ptr<StructureFactorCalculatorSummation>;
+using StructureFactorSummation_sptr =
+    boost::shared_ptr<StructureFactorCalculatorSummation>;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -50,7 +50,8 @@ class MDEventWSWrapper;
 using fpVoidMethod = void (MDEventWSWrapper::*)();
 /// signature for the internal templated function pointer to add data to an
 /// existing workspace
-using fpAddData = void (MDEventWSWrapper::*)(float *, uint16_t *, uint32_t *, coord_t *, size_t) const;
+using fpAddData = void (MDEventWSWrapper::*)(float *, uint16_t *, uint32_t *,
+                                             coord_t *, size_t) const;
 /// signature for the internal templated function pointer to create workspace
 using fpCreateWS = void (MDEventWSWrapper::*)(const MDWSDescription &);
 

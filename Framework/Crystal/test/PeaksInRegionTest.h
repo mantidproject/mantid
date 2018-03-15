@@ -19,7 +19,8 @@ Functional Tests
 class PeaksInRegionTest : public CxxTest::TestSuite {
 
 private:
-  using PeakWorkspaceWithExtents = boost::tuple<PeaksWorkspace_sptr, std::vector<double> >;
+  using PeakWorkspaceWithExtents =
+      boost::tuple<PeaksWorkspace_sptr, std::vector<double>>;
 
   /**
   Helper function. Creates a peaksworkspace with a single peak

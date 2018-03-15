@@ -60,7 +60,8 @@ protected:
 };
 
 using PoldiSourceSpectrum_sptr = boost::shared_ptr<PoldiSourceSpectrum>;
-using PoldiSourceSpectrum_const_sptr = boost::shared_ptr<const PoldiSourceSpectrum>;
+using PoldiSourceSpectrum_const_sptr =
+    boost::shared_ptr<const PoldiSourceSpectrum>;
 }
 }
 

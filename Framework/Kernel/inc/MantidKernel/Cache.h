@@ -169,7 +169,8 @@ private:
   /// iterator typedef
   using CacheMapIterator = typename std::map<KEYTYPE, VALUETYPE>::iterator;
   /// const_iterator typedef
-  using CacheMapConstIterator = typename std::map<KEYTYPE, VALUETYPE>::const_iterator;
+  using CacheMapConstIterator =
+      typename std::map<KEYTYPE, VALUETYPE>::const_iterator;
 };
 
 } // namespace Kernel

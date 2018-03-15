@@ -18,7 +18,7 @@
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidKernel/ConfigService.h"
 
-using file_holder_type = std::unique_ptr< ::NeXus::File>;
+using file_holder_type = std::unique_ptr<::NeXus::File>;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

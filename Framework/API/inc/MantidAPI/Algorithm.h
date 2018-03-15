@@ -301,7 +301,7 @@ public:
   /// parent object to fill.
   void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);
 
-  using WorkspaceVector = std::vector<boost::shared_ptr<Workspace> >;
+  using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
 
   void findWorkspaceProperties(WorkspaceVector &inputWorkspaces,
                                WorkspaceVector &outputWorkspaces) const;

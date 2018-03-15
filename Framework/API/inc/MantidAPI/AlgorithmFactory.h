@@ -171,8 +171,10 @@ private:
 using AlgorithmFactory = Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
 
 /// Convenient typedef for an UpdateNotification
-using AlgorithmFactoryUpdateNotification = Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification;
-using AlgorithmFactoryUpdateNotification_ptr = const Poco::AutoPtr<Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification> &;
+using AlgorithmFactoryUpdateNotification =
+    Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification;
+using AlgorithmFactoryUpdateNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification> &;
 
 } // namespace API
 } // namespace Mantid

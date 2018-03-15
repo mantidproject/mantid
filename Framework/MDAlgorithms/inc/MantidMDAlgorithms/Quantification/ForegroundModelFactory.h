@@ -69,7 +69,8 @@ private:
 };
 
 /// Typedef singleton instance to ForegroundFactory
-using ForegroundModelFactory = Kernel::SingletonHolder<ForegroundModelFactoryImpl>;
+using ForegroundModelFactory =
+    Kernel::SingletonHolder<ForegroundModelFactoryImpl>;
 }
 }
 

@@ -90,7 +90,7 @@ private:
 
   /// Typedef for the zeropadding holder, first is starting run-number,
   /// second is file prefix - zero padding pair
-  using ZeroPaddingMap = std::map<unsigned int, std::pair<std::string, int> >;
+  using ZeroPaddingMap = std::map<unsigned int, std::pair<std::string, int>>;
   /// get the zeropadding part
   int getZeroPadding(ZeroPaddingMap::const_iterator it) const {
     return it->second.second;

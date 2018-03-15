@@ -80,7 +80,9 @@ template <typename T> struct ToWeakPtr_Requires_Shared_Ptr_Return_Value {};
 struct ToWeakPtr {
   template <class T> struct apply {
     // Deduce if type is correct for policy
-    using type = typename boost::mpl::if_c<IsSharedPtr<T>::value, ToWeakPtrImpl<T>, ToWeakPtr_Requires_Shared_Ptr_Return_Value<T> >::type;
+    using type = typename boost::mpl::if_c<
+        IsSharedPtr<T>::value, ToWeakPtrImpl<T>,
+        ToWeakPtr_Requires_Shared_Ptr_Return_Value<T>>::type;
   };
 };
 

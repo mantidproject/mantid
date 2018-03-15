@@ -107,7 +107,9 @@ struct MANTID_GEOMETRY_DLL CrystalSystemComparator {
                   const PointGroup::CrystalSystem &rhs) const;
 };
 
-using PointGroupCrystalSystemMap = std::multimap<PointGroup::CrystalSystem, PointGroup_sptr, CrystalSystemComparator>;
+using PointGroupCrystalSystemMap =
+    std::multimap<PointGroup::CrystalSystem, PointGroup_sptr,
+                  CrystalSystemComparator>;
 
 MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 

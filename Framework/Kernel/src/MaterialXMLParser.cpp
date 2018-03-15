@@ -65,7 +65,8 @@ using BuilderMethod = MaterialBuilder &(MaterialBuilder::*)(ArgType);
 template <typename ArgType>
 struct TypedBuilderHandle final : public BuilderHandle {
   // Remove const/reference qualifiers from ArgType
-  using ValueType = typename std::remove_const<typename std::remove_reference<ArgType>::type>::type;
+  using ValueType = typename std::remove_const<
+      typename std::remove_reference<ArgType>::type>::type;
 
   explicit TypedBuilderHandle(BuilderMethod<ArgType> m)
       : BuilderHandle(), m_method(m) {}

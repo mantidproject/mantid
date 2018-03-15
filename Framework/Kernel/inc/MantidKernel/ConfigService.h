@@ -359,8 +359,10 @@ EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
     Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
 using ConfigService = Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
 
-using ConfigValChangeNotification = Mantid::Kernel::ConfigServiceImpl::ValueChanged;
-using ConfigValChangeNotification_ptr = const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged> &;
+using ConfigValChangeNotification =
+    Mantid::Kernel::ConfigServiceImpl::ValueChanged;
+using ConfigValChangeNotification_ptr =
+    const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged> &;
 
 } // namespace Kernel
 } // namespace Mantid

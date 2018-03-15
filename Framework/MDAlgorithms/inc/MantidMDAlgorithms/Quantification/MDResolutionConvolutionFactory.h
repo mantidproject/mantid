@@ -70,7 +70,8 @@ private:
 };
 
 /// Typedef singleton instance to MDResolutionConvolutionFactory
-using MDResolutionConvolutionFactory = Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>;
+using MDResolutionConvolutionFactory =
+    Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>;
 }
 }
 

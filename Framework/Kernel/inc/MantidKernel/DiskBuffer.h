@@ -61,7 +61,14 @@ public:
    * Index 1: Position in the file.
    * Index 2: Size of the free block
    */
-  using freeSpace_t = boost::multi_index::multi_index_container<FreeBlock, boost::multi_index::indexed_by<boost::multi_index::ordered_non_unique< ::boost::multi_index::const_mem_fun<FreeBlock, uint64_t, &FreeBlock::getFilePosition> >, boost::multi_index::ordered_non_unique< ::boost::multi_index::const_mem_fun<FreeBlock, uint64_t, &FreeBlock::getSize> > > >;
+  using freeSpace_t = boost::multi_index::multi_index_container<
+      FreeBlock, boost::multi_index::indexed_by<
+                     boost::multi_index::ordered_non_unique<
+                         ::boost::multi_index::const_mem_fun<
+                             FreeBlock, uint64_t, &FreeBlock::getFilePosition>>,
+                     boost::multi_index::ordered_non_unique<
+                         ::boost::multi_index::const_mem_fun<
+                             FreeBlock, uint64_t, &FreeBlock::getSize>>>>;
 
   /// A way to index the free space by their size
   using freeSpace_bySize_t = freeSpace_t::nth_index<1>::type;

@@ -66,7 +66,8 @@ private:
                              double beta1t) const;
 };
 
-using ThermalNeutronBk2BkExpBeta_sptr = boost::shared_ptr<ThermalNeutronBk2BkExpBeta>;
+using ThermalNeutronBk2BkExpBeta_sptr =
+    boost::shared_ptr<ThermalNeutronBk2BkExpBeta>;
 
 } // namespace Functions
 } // namespace CurveFitting

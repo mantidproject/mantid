@@ -13,9 +13,11 @@ GET_POINTER_SPECIALIZATION(CompositeFunction)
 namespace {
 
 using getParameterType1 = double (CompositeFunction::*)(size_t) const;
-using getParameterType2 = double (CompositeFunction::*)(const std::string &) const;
+using getParameterType2 =
+    double (CompositeFunction::*)(const std::string &) const;
 
-using setParameterType2 = void (CompositeFunction::*)(const std::string &, const double &, bool);
+using setParameterType2 = void (CompositeFunction::*)(const std::string &,
+                                                      const double &, bool);
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"

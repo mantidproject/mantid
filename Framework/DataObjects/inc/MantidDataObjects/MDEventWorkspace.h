@@ -35,7 +35,7 @@ class DLLExport MDEventWorkspace : public API::IMDEventWorkspace {
 
 public:
   /// Typedef for a shared pointer of this kind of event workspace
-  using sptr = boost::shared_ptr<MDEventWorkspace<MDE, nd> >;
+  using sptr = boost::shared_ptr<MDEventWorkspace<MDE, nd>>;
   /// Typedef to access the MDEventType.
   using MDEventType = MDE;
 

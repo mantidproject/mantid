@@ -66,7 +66,8 @@ private:
   /// The input domain
   boost::shared_ptr<API::FunctionValues> m_calculatedValues;
   /// The output workspace type
-  using QOmegaWorkspace = DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>;
+  using QOmegaWorkspace =
+      DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>;
 
   /// The output workspace
   boost::shared_ptr<QOmegaWorkspace> m_outputWS;

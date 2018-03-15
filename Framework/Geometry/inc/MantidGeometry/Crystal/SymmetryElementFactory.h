@@ -41,7 +41,8 @@ public:
   virtual bool canProcess(const SymmetryOperation &operation) const = 0;
 };
 
-using AbstractSymmetryElementGenerator_sptr = boost::shared_ptr<AbstractSymmetryElementGenerator>;
+using AbstractSymmetryElementGenerator_sptr =
+    boost::shared_ptr<AbstractSymmetryElementGenerator>;
 
 /** @class SymmetryElementIdentityGenerator
 
@@ -257,7 +258,8 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<SymmetryElementFactoryImpl>;
 };
 
-using SymmetryElementFactory = Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>;
+using SymmetryElementFactory =
+    Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid

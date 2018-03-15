@@ -54,7 +54,8 @@ GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
                                        setParameter, 2, 3)
 // setProperty(index,value,explicit)
-using setParameterType2 = void (IFunction::*)(const std::string &, const double &, bool);
+using setParameterType2 = void (IFunction::*)(const std::string &,
+                                              const double &, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)

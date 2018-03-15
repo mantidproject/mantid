@@ -46,7 +46,8 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL ObjCompAssembly : public virtual ICompAssembly,
                                             public virtual ObjComponent {
   using comp_it = std::vector<ObjComponent *>::iterator; ///< Iterator type
-  using const_comp_it = std::vector<ObjComponent *>::const_iterator; ///< Const iterator type
+  using const_comp_it =
+      std::vector<ObjComponent *>::const_iterator; ///< Const iterator type
 public:
   /// String description of the type of component
   std::string type() const override { return "ObjCompAssembly"; }

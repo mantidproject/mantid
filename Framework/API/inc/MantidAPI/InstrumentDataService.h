@@ -48,7 +48,8 @@ private:
   operator=(const InstrumentDataServiceImpl &) = delete;
 };
 
-using InstrumentDataService = Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>;
+using InstrumentDataService =
+    Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>;
 
 } // Namespace API
 } // Namespace Mantid

@@ -732,7 +732,7 @@ void GroupDetectors2::processGroupingWorkspace(
     std::vector<int64_t> &unUsedSpec) {
   detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
 
-  using Group2SetMapType = std::map<size_t, std::set<size_t> >;
+  using Group2SetMapType = std::map<size_t, std::set<size_t>>;
   Group2SetMapType group2WSIndexSetmap;
 
   const auto &spectrumInfo = groupWS->spectrumInfo();
@@ -785,7 +785,7 @@ void GroupDetectors2::processMatrixWorkspace(
     std::vector<int64_t> &unUsedSpec) {
   detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
 
-  using Group2SetMapType = std::map<size_t, std::set<size_t> >;
+  using Group2SetMapType = std::map<size_t, std::set<size_t>>;
   Group2SetMapType group2WSIndexSetmap;
 
   const auto &spectrumInfo = groupWS->spectrumInfo();

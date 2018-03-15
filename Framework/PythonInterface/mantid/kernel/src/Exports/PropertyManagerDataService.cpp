@@ -48,7 +48,8 @@ void export_PropertyManagerDataService() {
 
   register_ptr_to_python<PropertyManager_wptr>();
 
-  using PMDExporter = DataServiceExporter<PropertyManagerDataServiceImpl, PropertyManager_sptr>;
+  using PMDExporter =
+      DataServiceExporter<PropertyManagerDataServiceImpl, PropertyManager_sptr>;
   auto pmdType = PMDExporter::define("PropertyManagerDataServiceImpl");
 
   pmdType.def("Instance", &PropertyManagerDataService::Instance,

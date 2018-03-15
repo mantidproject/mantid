@@ -180,7 +180,8 @@ private:
 
   // maps <device id, variable id> to variable name
   // (variable names are unique, so we don't need to worry about device names.)
-  using NameMapType = std::map<std::pair<unsigned int, unsigned int>, std::string>;
+  using NameMapType =
+      std::map<std::pair<unsigned int, unsigned int>, std::string>;
   NameMapType m_nameMap;
 
   // ---------------------------------------------------------------------------
@@ -195,7 +196,8 @@ private:
 
   // Maps the device ID / variable ID pair to the actual packet.  Using a map
   // means we will only keep one packet (the most recent one) for each variable
-  using VariableMapType = std::map<std::pair<unsigned int, unsigned int>, boost::shared_ptr<ADARA::Packet> >;
+  using VariableMapType = std::map<std::pair<unsigned int, unsigned int>,
+                                   boost::shared_ptr<ADARA::Packet>>;
   VariableMapType m_variableMap;
 
   // Process all the variable value packets stored in m_variableMap

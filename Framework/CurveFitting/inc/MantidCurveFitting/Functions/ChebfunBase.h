@@ -18,7 +18,7 @@ namespace CurveFitting {
 namespace Functions {
 
 /// Type of the approximated function
-using ChebfunFunctionType = std::function<double (double)>;
+using ChebfunFunctionType = std::function<double(double)>;
 
 /**
 

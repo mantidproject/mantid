@@ -19,7 +19,7 @@ public:
   }
   static void destroySuite(MultiFileNameParserTest *suite) { delete suite; }
 
-  using ParsedRuns = std::vector<std::vector<unsigned int> >;
+  using ParsedRuns = std::vector<std::vector<unsigned int>>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Testing of parseMultiRunString.

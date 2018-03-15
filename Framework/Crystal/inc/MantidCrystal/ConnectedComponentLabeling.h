@@ -28,8 +28,10 @@ using PositionToLabelIdMap = std::map<Mantid::Kernel::V3D, size_t>;
 using VecIndexes = std::vector<size_t>;
 using VecElements = std::vector<DisjointElement>;
 using SetIds = std::unordered_set<size_t>;
-using ClusterMap = std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster> >;
-using ClusterTuple = boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap>;
+using ClusterMap =
+    std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster>>;
+using ClusterTuple =
+    boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap>;
 }
 
 class BackgroundStrategy;

@@ -54,7 +54,8 @@ private:
   void init() override;
   void exec() override;
   std::vector<std::string> m_specialCoordinatesNames;
-  using SpecialCoordinatesNameMap = std::map<std::string, Mantid::Kernel::SpecialCoordinateSystem>;
+  using SpecialCoordinatesNameMap =
+      std::map<std::string, Mantid::Kernel::SpecialCoordinateSystem>;
   SpecialCoordinatesNameMap m_specialCoordinatesMap;
   static const std::string QLabOption();
   static const std::string QSampleOption();

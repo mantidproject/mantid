@@ -32,7 +32,7 @@
 //----------------------------------------------------------------------
 //	Basic types.
 //----------------------------------------------------------------------
-using PQinfo = void *;  // info field is generic pointer
+using PQinfo = void *; // info field is generic pointer
 using PQkey = ANNdist; // key field is distance
 
 //----------------------------------------------------------------------

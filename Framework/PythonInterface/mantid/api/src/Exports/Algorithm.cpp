@@ -40,13 +40,24 @@ using PythonParallelAlgorithm = AlgorithmAdapter<ParallelAlgorithm>;
 using PythonDistributedAlgorithm = AlgorithmAdapter<DistributedAlgorithm>;
 
 // declarePyAlgProperty(property*,doc)
-using declarePropertyType1 = void (*)(boost::python::object &, Mantid::Kernel::Property *, const std::string &);
+using declarePropertyType1 = void (*)(boost::python::object &,
+                                      Mantid::Kernel::Property *,
+                                      const std::string &);
 // declarePyAlgProperty(name, defaultValue, validator, doc, direction)
-using declarePropertyType2 = void (*)(boost::python::object &, const std::string &, const boost::python::object &, const boost::python::object &, const std::string &, const int);
+using declarePropertyType2 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &,
+                                      const boost::python::object &,
+                                      const std::string &, const int);
 // declarePyAlgProperty(name, defaultValue, doc, direction)
-using declarePropertyType3 = void (*)(boost::python::object &, const std::string &, const boost::python::object &, const std::string &, const int);
+using declarePropertyType3 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &,
+                                      const std::string &, const int);
 // declarePyAlgProperty(name, defaultValue, direction)
-using declarePropertyType4 = void (*)(boost::python::object &, const std::string &, const boost::python::object &, const int);
+using declarePropertyType4 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &, const int);
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"

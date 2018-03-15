@@ -68,7 +68,7 @@ private:
 
   /// A typedef for the instantiator
   using AbstractFactory = Kernel::AbstractInstantiator<Parameter>;
-  using FactoryMap = std::map<std::string, std::unique_ptr<AbstractFactory> >;
+  using FactoryMap = std::map<std::string, std::unique_ptr<AbstractFactory>>;
   /// The map holding the registered class names and their instantiators
   static FactoryMap s_map;
 };
