@@ -302,6 +302,7 @@ public:
     creator.setProperty("DataX", *vec);
     creator.setProperty("DataY", *vec);
     creator.setProperty("DataE", *vec);
+    creator.setProperty("Dx", *vec);
     creator.setProperty("NSpec", 10000);
     TS_ASSERT(creator.execute());
   }
