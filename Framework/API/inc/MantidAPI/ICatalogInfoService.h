@@ -53,7 +53,8 @@ public:
 };
 
 using ICatalogInfoService_sptr = boost::shared_ptr<ICatalogInfoService>;
-using ICatalogInfoService_const_sptr = boost::shared_ptr<const ICatalogInfoService>;
+using ICatalogInfoService_const_sptr =
+    boost::shared_ptr<const ICatalogInfoService>;
 }
 }
 

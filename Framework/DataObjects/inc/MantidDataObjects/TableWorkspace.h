@@ -416,7 +416,7 @@ private:
   ///< Column const iterator
   using column_const_it =
       std::vector<boost::shared_ptr<API::Column>>::const_iterator;
-                                                                  
+
   /// Shared pointers to the columns.
   std::vector<boost::shared_ptr<API::Column>> m_columns;
   /// row count

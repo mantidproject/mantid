@@ -9,7 +9,8 @@ using namespace boost::python;
 namespace {
 
 using getParameterType1 = double (ProductFunction::*)(size_t) const;
-using getParameterType2 = double (ProductFunction::*)(const std::string &) const;
+using getParameterType2 =
+    double (ProductFunction::*)(const std::string &) const;
 
 using setParameterType2 = void (ProductFunction::*)(const std::string &,
                                                     const double &, bool);
