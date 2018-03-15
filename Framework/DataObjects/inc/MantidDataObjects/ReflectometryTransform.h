@@ -91,7 +91,7 @@ public:
 
   /// Execuate transformation using normalised polynomial binning
   Mantid::API::MatrixWorkspace_sptr executeNormPoly(
-      Mantid::API::MatrixWorkspace_const_sptr inputWS,
+      const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
       boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
       bool dumpVertexes, std::string outputDimensions) const;
 

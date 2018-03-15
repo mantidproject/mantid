@@ -39,12 +39,22 @@ class IReflMainWindowPresenter {
 public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
+  enum class Flag {
+    ConfirmReductionPausedFlag,
+    ConfirmReductionResumedFlag,
+    HelpPressed
+  };
 
-  enum class Flag { ConfirmReductionPausedFlag, ConfirmReductionResumedFlag };
   virtual void notify(Flag flag) = 0;
+  virtual void notifyReductionPaused(int group) = 0;
+  virtual void notifyReductionResumed(int group) = 0;
 
+  /// Transmission runs for a specific run angle
+  virtual std::string getTransmissionRunsForAngle(int group,
+                                                  const double angle) const = 0;
+  /// Whether there are per-angle transmission runs specified
+  virtual bool hasPerAngleTransmissionRuns(int group) const = 0;
   /// Pre-processing
-  virtual std::string getTransmissionRuns(int group) const = 0;
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions(int group) const = 0;
   /// Processing

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QList>
+#include <vector>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
@@ -117,8 +118,11 @@ private:
   void updateHandlers();
   void loadSettings();
   void saveSettings() const;
+  bool replaceExistingWorkspace(
+      const std::string &wsName,
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
 
-  QList<MatrixWSDataSource_sptr> m_dataSource;
+  std::vector<MatrixWSDataSource_sptr> m_dataSource;
   QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;
   boost::shared_ptr<GraphDisplay> m_hGraph;
   boost::shared_ptr<GraphDisplay> m_vGraph;

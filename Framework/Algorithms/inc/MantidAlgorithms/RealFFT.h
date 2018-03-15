@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHM_REALFFT_H_
 #define MANTID_ALGORITHM_REALFFT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAlgorithms/FFT.h"
 
@@ -36,7 +33,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport RealFFT : public API::Algorithm {
+class DLLExport RealFFT : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RealFFT"; }

@@ -61,9 +61,10 @@ public:
   const std::string category() const override { return "Inelastic\\SofQW"; }
   /// Create the output workspace
   static API::MatrixWorkspace_sptr
-  setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
-                       const std::vector<double> &binParams,
-                       std::vector<double> &newAxis);
+  setUpOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace,
+                       const std::vector<double> &qbinParams,
+                       std::vector<double> &qAxis,
+                       const std::vector<double> &ebinParams);
   /// Create the input properties on the given algorithm object
   static void createCommonInputProperties(API::Algorithm &alg);
   /// Energy to K constant

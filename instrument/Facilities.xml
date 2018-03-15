@@ -366,6 +366,9 @@
   <instrument name="ZOOM">
     <technique>Small Angle Scattering</technique>
     <zeropadding size="8"/>
+    <livedata>
+      <connection name="kafka_event" address="livedata.isis.cclrc.ac.uk:9092" listener="KafkaEventListener" />
+    </livedata>
   </instrument>
 
 </facility>
@@ -636,6 +639,14 @@
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
 
+  <instrument name="D11">
+    <technique>SANS</technique>
+  </instrument>
+
+  <instrument name="D22">
+    <technique>SANS</technique>
+  </instrument>
+
   <instrument name="D33">
     <technique>SANS</technique>
   </instrument>
@@ -797,7 +808,10 @@
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Single Crystal Diffraction</technique>
   </instrument>
-  <instrument name="V20_DIFFRACTION">
+  <instrument name="V20_4-tubes_90deg">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+  <instrument name="V20_4-tubes_150deg">
     <technique>Neutron Diffraction</technique>
   </instrument>
   <instrument name="V20_IMAGING">

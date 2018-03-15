@@ -104,6 +104,11 @@ private:
                            const QMap<QString, WSParameterList> &paramsByLabel,
                            const QStringList &paramsToDisplay) const;
 
+  void
+  addColumnToResultsTable(Mantid::API::ITableWorkspace_sptr &table,
+                          const QMap<QString, WSParameterList> &paramsByLabel,
+                          const QString &log) const;
+
   /// Items selected by user (fitted workspaces or fit labels)
   const QStringList m_items;
   /// Log names selected by used

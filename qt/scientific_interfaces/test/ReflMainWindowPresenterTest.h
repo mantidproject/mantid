@@ -28,6 +28,7 @@ public:
   ReflMainWindowPresenterTest() {}
 
   void testGetTransmissionValues() {
+    // Test getting transmission run values
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsTabPresenter;
     MockEventTabPresenter mockEventTabPresenter;
@@ -37,18 +38,22 @@ public:
         &mockView, &mockRunsTabPresenter, &mockEventTabPresenter,
         &mockSettingsTabPresenter, &mockSaveTabPresenter);
 
-    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRuns(0))
+    // Should call the settings tab to get the values
+    double angle = 0.5;
+    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRunsForAngle(0, angle))
         .Times(Exactly(1));
-    presenter.getTransmissionRuns(0);
+    presenter.getTransmissionRunsForAngle(0, angle);
 
-    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRuns(1))
+    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRunsForAngle(1, angle))
         .Times(Exactly(1));
-    presenter.getTransmissionRuns(1);
+    presenter.getTransmissionRunsForAngle(1, angle);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsTabPresenter));
   }
 
   void testGetTransmissionOptions() {
+    // Test getting options for the preprocessing algorithm that creates
+    // the transmission workspace
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
@@ -58,6 +63,7 @@ public:
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, &mockSaveTabPresenter);
 
+    // Should call the settings tab to get the options
     EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions(0))
         .Times(Exactly(1))
         .WillOnce(Return(OptionsQMap()));
@@ -72,6 +78,7 @@ public:
   }
 
   void testGetReductionOptions() {
+    // Test getting the options for the main reduction algorithm
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
@@ -81,6 +88,7 @@ public:
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, &mockSaveTabPresenter);
 
+    // Should call the settings tab to get the options
     EXPECT_CALL(mockSettingsPresenter, getReductionOptions(0))
         .Times(Exactly(1))
         .WillOnce(Return(OptionsQMap()));
@@ -95,6 +103,8 @@ public:
   }
 
   void testStitchOptions() {
+    // Test getting the options for the post-processing algorithm for
+    // stitching workspaces
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
@@ -104,6 +114,7 @@ public:
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, &mockSaveTabPresenter);
 
+    // Should call the settings tab to get the options
     EXPECT_CALL(mockSettingsPresenter, getStitchOptions(0)).Times(Exactly(1));
     presenter.getStitchOptions(0);
 

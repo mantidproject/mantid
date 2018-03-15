@@ -361,16 +361,13 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
   const auto wsParams =
       MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
 
-  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
   const QString &periodToSet = QString::fromStdString(wsParams.periods);
-  const auto &groups = m_dataSelector->getChosenGroups();
   const auto &periods = m_dataSelector->getPeriodSelections();
-  if (!groups.contains(groupToSet)) {
-    m_uiForm.fitBrowser->setChosenGroup(groupToSet);
-  }
+
   if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
     m_uiForm.fitBrowser->setChosenPeriods(periodToSet);
   }
+  return;
 }
 
 /**
@@ -441,6 +438,33 @@ void MuonAnalysis::plotSelectedGroupPair() {
 
   plotItem(itemType, tableRow, plotType);
 }
+/**
+* Creates workspace for specified group/pair and adds it to the ADS;
+* @param itemType :: Whether it's a group or pair
+* @param tableRow :: Row in the group/pair table which contains the item
+* @param plotType :: What kind of plot we want to analyse
+*/
+std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
+                                  PlotType plotType) {
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+
+  // Create workspace and a raw (unbinned) version of it
+  auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
+  auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
+
+  // Find names for new workspaces
+  const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
+  const std::string wsRawName = wsName + "_Raw";
+
+  // Make sure they end up in the ADS
+  ads.addOrReplace(wsName, ws);
+  ads.addOrReplace(wsRawName, wsRaw);
+
+  // Make sure they are grouped
+  std::vector<std::string> wsNames = {wsName, wsRawName};
+  MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
+  return wsName;
+}
 
 /**
  * Creates workspace for specified group/pair and plots it;
@@ -451,28 +475,9 @@ void MuonAnalysis::plotSelectedGroupPair() {
 void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
                             PlotType plotType) {
   m_updating = true;
-  m_uiForm.fitBrowser->clearChosenGroups();
   m_uiForm.fitBrowser->clearChosenPeriods();
-
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-
   try {
-    // Create workspace and a raw (unbinned) version of it
-    auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
-    auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
-
-    // Find names for new workspaces
-    const std::string wsName =
-        getNewAnalysisWSName(itemType, tableRow, plotType);
-    const std::string wsRawName = wsName + "_Raw";
-
-    // Make sure they end up in the ADS
-    ads.addOrReplace(wsName, ws);
-    ads.addOrReplace(wsRawName, wsRaw);
-
-    // Make sure they are grouped
-    std::vector<std::string> wsNames = {wsName, wsRawName};
-    MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
+    auto wsName = addItem(itemType, tableRow, plotType);
 
     QString wsNameQ = QString::fromStdString(wsName);
 
@@ -484,7 +489,8 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
     QMessageBox::critical(this, "MuonAnalysis - Error",
                           "Unable to plot the item. Check log for details.");
   }
-
+  loadAllGroups();
+  loadAllPairs();
   m_updating = false;
 }
 
@@ -1557,6 +1563,8 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
     currentI = 0;
   }
   setGroupsAndPairs();
+  loadAllGroups();
+  loadAllPairs();
   if (updateIndexAndPlot) {
     setGroupOrPairIndexToPlot(currentI);
     plotCurrentGroupAndPairs();
@@ -2171,6 +2179,7 @@ double MuonAnalysis::finishTime() const {
  * Load auto saved values
  */
 void MuonAnalysis::loadAutoSavedValues(const QString &group) {
+
   QSettings prevInstrumentValues;
   prevInstrumentValues.beginGroup(group + "instrument");
   QString instrumentName =
@@ -2673,6 +2682,10 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(updateCurrentPlotStyle()));
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
+  connect(m_optionTab, SIGNAL(loadAllGroupChanged(int)), this,
+          SLOT(loadAllGroups(int)));
+  connect(m_optionTab, SIGNAL(loadAllPairsChanged(int)), this,
+          SLOT(loadAllPairs(int)));
 }
 
 /**
@@ -3228,6 +3241,57 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+}
+/**
+* Checks if the run is set and if the plot name is valid.
+* If they are not valid then the loadAllGroups and loadAllPairs
+* methods should do nothing.
+*/
+
+bool MuonAnalysis::safeToLoadAllGroupsOrPairs() {
+  std::string plotTypeName =
+      m_uiForm.frontPlotFuncs->currentText().toStdString();
+  if (m_currentLabel == "NoLabelSet") {
+    return false;
+  } else if (plotTypeName != "Asymmetry" && plotTypeName != "Counts" &&
+             plotTypeName != "Logarithm") {
+    return false;
+  }
+  return true;
+}
+
+/**
+* Load all of the pairs if the all pairs tickbox is ticked
+* @param state :: [input] (not used) Setting of combo box
+*/
+void MuonAnalysis::loadAllGroups(int state) {
+  Q_UNUSED(state);
+
+  if (m_uiForm.loadAllGroupsCheckBox->isChecked() &&
+      safeToLoadAllGroupsOrPairs()) {
+    ItemType itemType = Group;
+    PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
+    for (int j = 0; j < numGroups(); j++) {
+      addItem(itemType, j, plotType);
+    }
+  }
+}
+/**
+* Load all of the pairs if the all pairs tickbox is ticked
+* @param state :: [input] (not used) Setting of combo box
+*/
+void MuonAnalysis::loadAllPairs(int state) {
+
+  Q_UNUSED(state);
+  if (m_uiForm.loadAllPairsCheckBox->isChecked() &&
+      safeToLoadAllGroupsOrPairs()) {
+    ItemType itemType = Pair;
+    PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
+    for (int j = 0; j < numPairs(); j++) {
+
+      addItem(itemType, j, plotType);
+    }
+  }
 }
 /**
  * Update the fit data presenter with current overwrite setting

@@ -51,6 +51,9 @@ public:
 
   virtual std::string getTimeSlicingValues() const = 0;
   virtual std::string getTimeSlicingType() const = 0;
+
+  virtual void enableAll() = 0;
+  virtual void disableAll() = 0;
 };
 }
 }

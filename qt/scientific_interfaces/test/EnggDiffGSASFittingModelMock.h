@@ -13,38 +13,30 @@ using namespace MantidQt::CustomInterfaces;
 class MockEnggDiffGSASFittingModel : public IEnggDiffGSASFittingModel {
 
 public:
-  MOCK_METHOD7(doPawleyRefinement,
-               bool(const RunLabel &runLabel, const std::string &instParamFile,
-                    const std::vector<std::string> &phaseFiles,
-                    const std::string &pathToGSASII,
-                    const std::string &GSASIIProjectFile, const double dMin,
-                    const double negativeWeight));
+  MOCK_METHOD1(doPawleyRefinement,
+               Mantid::API::MatrixWorkspace_sptr(
+                   const GSASIIRefineFitPeaksParameters &params));
 
-  MOCK_METHOD5(doRietveldRefinement,
-               bool(const RunLabel &runLabel, const std::string &instParamFile,
-                    const std::vector<std::string> &phaseFiles,
-                    const std::string &pathToGSASII,
-                    const std::string &GSASIIProjectFile));
+  MOCK_METHOD1(doRietveldRefinement,
+               Mantid::API::MatrixWorkspace_sptr(
+                   const GSASIIRefineFitPeaksParameters &params));
 
-  MOCK_CONST_METHOD1(getFittedPeaks,
-                     boost::optional<Mantid::API::MatrixWorkspace_sptr>(
-                         const RunLabel &runLabel));
-
-  MOCK_CONST_METHOD1(getFocusedWorkspace,
-                     boost::optional<Mantid::API::MatrixWorkspace_sptr>(
-                         const RunLabel &runLabel));
+  MOCK_CONST_METHOD1(getGamma,
+                     boost::optional<double>(const RunLabel &runLabel));
 
   MOCK_CONST_METHOD1(getLatticeParams,
                      boost::optional<Mantid::API::ITableWorkspace_sptr>(
                          const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD0(getRunLabels, std::vector<RunLabel>());
-
   MOCK_CONST_METHOD1(getRwp, boost::optional<double>(const RunLabel &runLabel));
 
-  MOCK_CONST_METHOD1(hasFittedPeaksForRun, bool(const RunLabel &runLabel));
+  MOCK_CONST_METHOD1(getSigma,
+                     boost::optional<double>(const RunLabel &runLabel));
 
-  MOCK_METHOD1(loadFocusedRun, bool(const std::string &filename));
+  MOCK_CONST_METHOD1(hasFitResultsForRun, bool(const RunLabel &runLabel));
+
+  MOCK_CONST_METHOD1(loadFocusedRun, Mantid::API::MatrixWorkspace_sptr(
+                                         const std::string &filename));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

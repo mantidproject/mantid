@@ -87,8 +87,20 @@ set ( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 ###########################################################################
 set ( WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/windows )
 configure_file ( ${WINDOWS_BUILDCONFIG}/buildenv.bat.in ${PROJECT_BINARY_DIR}/buildenv.bat @ONLY )
+
+if ( MSVC_VERSION LESS 1911 )
+    get_filename_component ( MSVC_VAR_LOCATION "$ENV{VS140COMNTOOLS}/../../VC/" ABSOLUTE)
+    get_filename_component ( MSVC_IDE_LOCATION "$ENV{VS140COMNTOOLS}/../IDE" ABSOLUTE)
+else ()
+    get_filename_component ( MSVC_IDE_LOCATION "${CMAKE_CXX_COMPILER}" DIRECTORY )
+    get_filename_component ( MSVC_IDE_LOCATION "${MSVC_IDE_LOCATION}/../../../../../../.." ABSOLUTE )
+    set ( MSVC_VAR_LOCATION "${MSVC_IDE_LOCATION}/VC/Auxiliary/Build")
+    set ( MSVC_IDE_LOCATION "${MSVC_IDE_LOCATION}/Common7/IDE")
+endif()
+
 configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
 configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.bat ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY )
 
 ###########################################################################
 # Configure Mantid startup scripts

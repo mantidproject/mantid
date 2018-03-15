@@ -439,7 +439,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // e.g. from highest density down to lowest density.
     typename std::multimap<double, boxPtr>::reverse_iterator it2;
     auto it2_end = sortedBoxes.rend();
-    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++) {
+    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; ++it2) {
       signal_t density = it2->first;
       boxPtr box = it2->second;
 #ifndef MDBOX_TRACK_CENTROID
