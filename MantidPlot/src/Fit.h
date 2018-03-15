@@ -48,7 +48,8 @@ public:
   using fit_function_simplex = double (*)(const gsl_vector *, void *);
   using fit_function = int (*)(const gsl_vector *, void *, gsl_vector *);
   using fit_function_df = int (*)(const gsl_vector *, void *, gsl_matrix *);
-  using fit_function_fdf = int (*)(const gsl_vector *, void *, gsl_vector *, gsl_matrix *);
+  using fit_function_fdf = int (*)(const gsl_vector *, void *, gsl_vector *,
+                                   gsl_matrix *);
 
   enum Algorithm {
     ScaledLevenbergMarquardt,
