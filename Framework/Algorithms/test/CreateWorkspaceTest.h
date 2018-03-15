@@ -23,6 +23,7 @@ void run_create(const Parallel::Communicator &comm,
   alg->setProperty<std::vector<double>>("DataX", dataEYX);
   alg->setProperty<std::vector<double>>("DataY", dataEYX);
   alg->setProperty<std::vector<double>>("DataE", dataEYX);
+  alg->setProperty<std::vector<double>>("Dx", dataEYX);
   alg->setProperty("ParallelStorageMode", storageMode);
   alg->execute();
   MatrixWorkspace_const_sptr ws = alg->getProperty("OutputWorkspace");
@@ -73,6 +74,8 @@ public:
         alg.setProperty<std::vector<double>>("DataY", dataEYX));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty<std::vector<double>>("DataE", dataEYX));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty<std::vector<double>>("Dx", dataEYX));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UnitX", "Wavelength"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("VerticalAxisUnit", "MomentumTransfer"));
@@ -104,8 +107,10 @@ public:
     TS_ASSERT_EQUALS(ws->e(0)[0], 0);
     TS_ASSERT_EQUALS(ws->e(0)[1], 1.234);
     TS_ASSERT_EQUALS(ws->e(0)[2], 2.468);
+    TS_ASSERT_EQUALS(ws->dx(0)[0], 0);
+    TS_ASSERT_EQUALS(ws->dx(0)[1], 1.234);
+    TS_ASSERT_EQUALS(ws->dx(0)[2], 2.468);
     TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->caption(), "Wavelength");
-
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->caption(), "q");
 
@@ -157,11 +162,12 @@ public:
     alg.setProperty<int>("NSpec", 4);
 
     std::vector<double> values{1.0, 2.0, 3.0, 4.0};
+    std::vector<double> xVals{1.1, 2.2};
 
-    alg.setProperty<std::vector<double>>("DataX",
-                                         std::vector<double>{1.1, 2.2});
+    alg.setProperty<std::vector<double>>("DataX", xVals);
     alg.setProperty<std::vector<double>>("DataY", values);
     alg.setProperty<std::vector<double>>("DataE", values);
+    alg.setProperty<std::vector<double>>("Dx", xVals);
 
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
