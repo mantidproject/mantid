@@ -10,7 +10,6 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
-
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -40,64 +39,67 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadDNSSCD : public  API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadDNSSCD : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-      LoadDNSSCD();
+  LoadDNSSCD();
 
-      /// Algorithm's name for identification
-      const std::string name() const override { return "LoadDNSSCD"; }
+  /// Algorithm's name for identification
+  const std::string name() const override { return "LoadDNSSCD"; }
 
-      /// Summary of algorithms purpose
-      const std::string summary() const override {
-        return "Load a list of DNS .d_dat files into a MDEventWorkspace.";
-      }
+  /// Summary of algorithms purpose
+  const std::string summary() const override {
+    return "Load a list of DNS .d_dat files into a MDEventWorkspace.";
+  }
 
-      /// Algorithm's version for identification
-      int version() const override { return 1; }
+  /// Algorithm's version for identification
+  int version() const override { return 1; }
 
-      /// Algorithm's category for identification
-      const std::string category() const override {
-        return "MDAlgorithms\\DataHandling";
-      }
+  /// Algorithm's category for identification
+  const std::string category() const override {
+    return "MDAlgorithms\\DataHandling";
+  }
 
-      /// Returns a confidence value that this algorithm can load a file
-      int confidence(Kernel::FileDescriptor &descriptor) const override;
+  /// Returns a confidence value that this algorithm can load a file
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-      /// Initialise the properties
-      void init() override;
-      /// Run the algorithm
-      void exec() override;
+  /// Initialise the properties
+  void init() override;
+  /// Run the algorithm
+  void exec() override;
 
-      /// number of workspace dimensions
-      size_t m_nDims;
+  /// number of workspace dimensions
+  size_t m_nDims;
 
-      /// type of normalization;
-      std::string m_normtype;
-      /// factor to multiply the error^2 for normalization
-      double m_normfactor;
+  /// type of normalization;
+  std::string m_normtype;
+  /// factor to multiply the error^2 for normalization
+  double m_normfactor;
 
-      /// structure for experimental data
-      struct ExpData {
-          double deterota;
-          double huber;
-          double wavelength;
-          double norm;
-          std::vector<double> signal;
-          std::vector<int> detID;
-      };
+  /// structure for experimental data
+  struct ExpData {
+    double deterota;
+    double huber;
+    double wavelength;
+    double norm;
+    std::vector<double> signal;
+    std::vector<int> detID;
+  };
 
-      std::vector<ExpData> m_data;
+  std::vector<ExpData> m_data;
 
-      /// Output IMDEventWorkspace
-      Mantid::API::IMDEventWorkspace_sptr m_OutWS;
+  /// Output IMDEventWorkspace
+  Mantid::API::IMDEventWorkspace_sptr m_OutWS;
 
-      void read_data(const std::string fname, std::map<std::string, std::string> &str_metadata, std::map<std::string, double> &num_metadata);
-      void fillOutputWorkspace(double wavelength);
-      API::ITableWorkspace_sptr saveHuber();
-      void loadHuber(API::ITableWorkspace_sptr tws);
-      template<class T>
-      void updateProperties(API::Run &run, std::map<std::string, T> &metadata, std::string time);
+  void read_data(const std::string fname,
+                 std::map<std::string, std::string> &str_metadata,
+                 std::map<std::string, double> &num_metadata);
+  void fillOutputWorkspace(double wavelength);
+  API::ITableWorkspace_sptr saveHuber();
+  void loadHuber(API::ITableWorkspace_sptr tws);
+  template <class T>
+  void updateProperties(API::Run &run, std::map<std::string, T> &metadata,
+                        std::string time);
 };
 
 } // namespace MDAlgorithms
