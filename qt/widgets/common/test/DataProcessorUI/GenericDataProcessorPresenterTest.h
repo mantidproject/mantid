@@ -148,15 +148,16 @@ private:
 
   const std::map<QString, PreprocessingAlgorithm>
   createReflectometryPreprocessingStep() {
-    return {{"Run(s)", PreprocessingAlgorithm(
-                           "Plus", "TOF_",
-                           std::set<QString>{"LHSWorkspace", "RHSWorkspace",
-                                             "OutputWorkspace"})},
-            {"Transmission Run(s)",
-             PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
-                                    std::set<QString>{"FirstTransmissionRun",
-                                                      "SecondTransmissionRun",
-                                                      "OutputWorkspace"})}};
+    return {
+        {"Run(s)", PreprocessingAlgorithm(
+                       "Plus", "TOF_", "+",
+                       std::set<QString>{"LHSWorkspace", "RHSWorkspace",
+                                         "OutputWorkspace"})},
+        {"Transmission Run(s)",
+         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+                                "_", std::set<QString>{"FirstTransmissionRun",
+                                                       "SecondTransmissionRun",
+                                                       "OutputWorkspace"})}};
   }
 
   ProcessingAlgorithm createReflectometryProcessor() {
@@ -2951,13 +2952,13 @@ public:
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(row0->reducedName().toStdString(),
-                     "TOF_12345_TRANS_11115+11116");
+                     "TOF_12345_TRANS_11115_11116");
     TS_ASSERT_EQUALS(row1->reducedName().toStdString(),
-                     "TOF_12346_TRANS_11115+11116");
+                     "TOF_12346_TRANS_11115_11116");
     // Test the names of the post-processed ws
     TS_ASSERT_EQUALS(
         presenter->getPostprocessedWorkspaceName(group).toStdString(),
-        "IvsQ_TOF_12345_TRANS_11115+11116_TOF_12346_TRANS_11115+11116");
+        "IvsQ_TOF_12345_TRANS_11115_11116_TOF_12346_TRANS_11115_11116");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
