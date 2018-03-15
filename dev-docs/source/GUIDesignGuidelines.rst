@@ -8,18 +8,18 @@ GUI Design Guidelines
 Summary
 #######
 
-This page describes guidelines that show be followed when implementing
-an interface in MantidPlot. The aim is to encourage a consistent
-approach to developing interfaces.
+This page describes guidelines that should be followed when
+implementing an interface in MantidPlot. The aim is to encourage a
+consistent approach to developing interfaces.
 
 MVP (Model View Presenter)
 ##########################
 
-Mantid GUIs aim to use the MVP pattern. The MVP pattern is a generic
-concept for how to structure GUI code. MVP allows components of the
-GUI to be tested separately and automatically. It also allows for
-greater flexibility. Decoupling the model and view mean that if the
-developer wants to experiment with, for example, a different GUI
+GUIs in Mantid aim to use the MVP pattern. The MVP pattern is a
+generic concept for how to structure GUI code. MVP allows components
+of the GUI to be tested separately and automatically. It also allows
+for greater flexibility. Decoupling the model and view means that if
+the developer wants to experiment with, for example, a different GUI
 toolkit, or a different method of doing their calculations, then it is
 easy and safe to swap out components. A description of each component
 is given below.
@@ -63,7 +63,7 @@ the following sections:
 * The look of the GUI (often this will be defined in a Qt ``.ui`` file
   instead)
 * **Get** methods to return values from the widgets (text input,
-  button etc)
+  checkbox etc)
 * **Set** methods to update the output from the GUI (eg. plot some
   data, fill in some text boxes)
 
@@ -72,12 +72,10 @@ explanation of signals and slots can be foud `here
 <http://doc.qt.io/archives/qt-4.8/signalsandslots.html>`_. Briefly, a
 widget may emit **signals**. For example QPushButton emits the signal
 ``clicked`` when it is clicked. In order to handle the button being
-clicked, the view will implement a **slot** method (in Qt just a
-normal method, but specified as a slot with the Qt `slot`
-keyword). This method does whatever we need for a button click. To
-ensure that this method is called whenever the button is clicked, we
-connect the ``clicked`` signal of our button to the
-``handleButtonClick`` slot of our view.
+clicked, the view will implement a **slot** method. This method does
+whatever we need for a button click. To ensure that this method is
+called whenever the button is clicked, we connect the ``clicked``
+signal of our button to the ``handleButtonClick`` slot of our view.
 
 The view should have a parent - this will be the widget containing
 it. An example of a parent would be a main window containing tabs -
@@ -102,19 +100,21 @@ simple - the presenter generally just calls methods on the
 presenter. Presenter-view communication is slightly more
 involved. There are two ways of doing it:
 
-* **Connections** - the presenter may also contain connections. You
-  may choose to define custom signals in your view, such as a
-  ``plotRequested`` signal to announce that the user has asked to plot
-  some data, probably by clicking a button. The presenter will need to
-  implement a slot (let's call it ``handlePlotRequested``) to handle
-  this, which gets the relevant data from the model and passes it to
-  the view, and connect the signal to the slot in its constructor. It
-  is also possible for a signal emitted by a view to be caught in the
-  presenter of a parent view. In order to communicate by connections
-  using Qt in C++ the presenter must inherit from ``QObject``. It's
-  generally considered good practice to avoid having Qt in the
-  presenter, so this method works best for GUIs written in Python (or
-  another language with a more relaxed type system).
+* **Connections** - the presenter may contain connections as well as
+  the view. You may choose to define custom signals in your view, such
+  as a ``plotRequested`` signal to announce that the user has asked to
+  plot some data, probably by clicking a button. The presenter will
+  need to implement a slot (let's call it ``handlePlotRequested``) to
+  handle this, which gets the relevant data from the model and passes
+  it to the view. We then need to connect the signal to the slot in
+  the presenter's constructor. It is also possible for a signal
+  emitted by a view to be caught in the presenter of a parent view. In
+  order to communicate by connections using Qt in C++ the presenter
+  must inherit from ``QObject``. It's generally considered good
+  practice to avoid having Qt in the presenter, so this method works
+  best for GUIs written in Python (or another language with a more
+  relaxed type system).
+
   - Note that is good practice to handle all signals in the presenter
     if you can, even if it is possible to just handle them in the
     view. This is because by going through the presenter we can unit
@@ -153,14 +153,14 @@ allows us to return a predefined result from a method of either the
 view or the model.
 
 It is useful to mock out the model because, providing that we've
-written adequate tests for the it, we don't care what the output is in
-the tests for the presenter - we just care that the presenter passes
-the output to the view correctly. The model may perform time-consuming
-calculations, such as fitting, so by returning a dummy value from the
-fitting method we cut down the time our tests take to run. We can also
-potentially change how the model works - if the GUI uses an algorithm
-which undergoes some changes, such as applying a different set of
-corrections, the tests for the presenter will be unaffected.
+written adequate tests for it, we don't care what the output is in the
+tests for the presenter - we just care that the presenter handles it
+correctly. The model may perform time-consuming calculations, such as
+fitting, so by returning a dummy value from the fitting method we cut
+down the time our tests take to run. We can also potentially change
+how the model works - if the GUI uses an algorithm which undergoes
+some changes, such as applying a different set of corrections, the
+tests for the presenter will be unaffected.
 
 It's useful to mock out the view because we don't want to have to
 manually input data every time the unit tests are run - instead we can
@@ -190,8 +190,8 @@ has several advantages:
 If it is felt that the design must be hand coded then this should be
 discussed with a senior developer.
 
-Reusable Widget
-###############
+Reusable Widgets
+################
 
 Many interfaces will require similar functionality. For example, the
 ability to enter a filename string to search for a file along with a
@@ -205,45 +205,45 @@ type can be used from within the Qt Designer.
 
 The current set of reusable items are:
 
-+-------------------------+---------------+----------+
-| Class Name              | Parent Class  | Abiltity |
-+=========================+===============+==========+
-| AlgorithmSelectorWidget | QWidget       | A text box and tree widget to select an algorithm |
-+-------------------------+---------------+----------+
-| CatalogSearch           | QWidget       | An interface interface to the catalog system |
-+-------------------------+---------------+----------+
-| CatalogSelector         | QWidget       | Displays the available catalog services |
-+-------------------------+---------------+----------+
-| CheckBoxHeader          | QHeaderView   | Enables checkboxes to exist in the table header |
-+-------------------------+---------------+----------+
-| `ColorBarWidget <http://doxygen.mantidproject.org/nightly/d6/d80/classMantidQt_1_1MantidWidgets_1_1ColorBarWidget.html>`_ | QWidget | Show a color bar that can accompany a colored bidimensional plot |
-+-------------------------+---------------+----------+
-| DataSelector            | MantidWidget  | A box to select if input is from a file or workspace along with the appropriate widget to choose a workspace or file. |
-+-------------------------+---------------+----------+
-| DisplayCurveFit         | MantidWidget  | A plot to display the results of a curve fitting process |
-+-------------------------+---------------+----------+
-| FindReplaceDialog       | QDialog       | A dialog box to find/replace text within a ScriptEditor |
-+-------------------------+---------------+----------+
-| FitPropertyBrowser      | QDockWidget   | Specialisation of QPropertyBrowser for defining fitting functions |
-+-------------------------+---------------+----------+
-| FunctionBrowser         | QWidget       | Provides a wiget to alter the parameters of a function |
-+-------------------------+---------------+----------+
-| InstrumentSelector      | QCombobox     | A selection box populated with a list of instruments for the current facility |
-+-------------------------+---------------+----------+
-| LineEditWithClear       | QLineEdit     | A QLineEdit with a button to clear the text |
-+-------------------------+---------------+----------+
-| MessageDisplay          | QWidget       | Display messages from the logging system |
-+-------------------------+---------------+----------+
-| MWRunFiles              | MantidWidget  | Provides a line edit to enter filenames and a browse button to browse the file system |
-+-------------------------+---------------+----------+
-| `MWView <http://doxygen.mantidproject.org/nightly/dc/d9f/classMantidQt_1_1MantidWidgets_1_1MWView.html>`_ | QWidget | A colored, bidimensional plot of a matrix workspace |
-+-------------------------+---------------+----------+
-| ProcessingAlgoWidget    | QWidget       | A composite widget that allows a user to select if a processing step is achieved using an algorithm or a Python script. It also provides a script editor. |
-+-------------------------+---------------+----------+
-| ScriptEditor            | QsciScintilla | The main script editor widget behind the ScriptWindow |
-+-------------------------+---------------+----------+
-| WorkspaceSelector       | QComboBox     | A selection box showing the workspaces currently in Mantid. It can be restricted by type.|
-+-------------------------+---------------+----------+
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Class Name              | Parent Class  | Abiltity                                                                                                                                                     |
++=========================+===============+==============================================================================================================================================================+
+| AlgorithmSelectorWidget | QWidget       | A text box and tree widget to select an algorithm                                                                                                            |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| CatalogSearch           | QWidget       | An interface interface to the catalog system                                                                                                                 |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| CatalogSelector         | QWidget       | Displays the available catalog services                                                                                                                      |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| CheckBoxHeader          | QHeaderView   | Enables checkboxes to exist in the table header                                                                                                              |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ColorBarWidget          | QWidget       | Show a color bar that can accompany a colored bidimensional plot                                                                                             |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| DataSelector            | MantidWidget  | A box to select if input is from a file or workspace along with the appropriate widget to choose a workspace or file.                                        |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| DisplayCurveFit         | MantidWidget  | A plot to display the results of a curve fitting process                                                                                                     |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| FindReplaceDialog       | QDialog       | A dialog box to find/replace text within a ScriptEditor                                                                                                      |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| FitPropertyBrowser      | QDockWidget   | Specialisation of QPropertyBrowser for defining fitting functions                                                                                            |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| FunctionBrowser         | QWidget       | Provides a wiget to alter the parameters of a function                                                                                                       |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| InstrumentSelector      | QCombobox     | A selection box populated with a list of instruments for the current facility                                                                                |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| LineEditWithClear       | QLineEdit     | A QLineEdit with a button to clear the text                                                                                                                  |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| MessageDisplay          | QWidget       | Display messages from the logging system                                                                                                                     |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| MWRunFiles              | MantidWidget  | Provides a line edit to enter filenames and a browse button to browse the file system                                                                        |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| MWView                  | QWidget       | A colored, bidimensional plot of a matrix workspace                                                                                                          |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ProcessingAlgoWidget    | QWidget       | A composite widget that allows a user to select if a processing step is achieved using an algorithm or a Python script. It also provides a script editor.    |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ScriptEditor            | QsciScintilla | The main script editor widget behind the ScriptWindow                                                                                                        |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| WorkspaceSelector       | QComboBox     | A selection box showing the workspaces currently in Mantid. It can be restricted by type.                                                                    |
++-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Python
 ######
@@ -273,7 +273,7 @@ file would look like:
 where ``FooGUI`` is the ``MainWindow`` for the interface. 
 
 Designer
-^^^^^^^^
+--------
 
 As with the C++ GUI the Qt Designer should be used for layouts of all
 widgets and the main interface. It is recommended that the ``.ui``
