@@ -478,6 +478,8 @@ void calcGeneralIntersections(
 void normaliseOutput(MatrixWorkspace_sptr outputWS,
                      MatrixWorkspace_const_sptr inputWS,
                      boost::shared_ptr<Progress> progress) {
+  const bool removeBinWidth(inputWS->isDistribution() &&
+                            inputWS->id() != "RebinnedOutput");
   for (int64_t i = 0; i < static_cast<int64_t>(outputWS->getNumberHistograms());
        ++i) {
     const auto &outputX = outputWS->x(i);
@@ -487,7 +489,7 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
       if (progress)
         progress->report("Calculating errors");
       double eValue = std::sqrt(outputE[j]);
-      if (inputWS->isDistribution()) {
+      if (removeBinWidth) {
         const double binWidth = outputX[j + 1] - outputX[j];
         outputY[j] /= binWidth;
         eValue /= binWidth;
@@ -599,8 +601,10 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
 
   // If the input workspace was normalized by the bin width, we need to
   // recover the original Y value, we do it by 'removing' the bin width
+  // Don't do the overlap removal if already RebinnedOutput.
+  // This wreaks havoc on the data.
   double error = inE[j];
-  if (inputWS->isDistribution()) {
+  if (inputWS->isDistribution() && inputWS->id() != "RebinnedOutput") {
     const double overlapWidth = inX[j + 1] - inX[j];
     signal *= overlapWidth;
     error *= overlapWidth;
