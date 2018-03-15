@@ -366,7 +366,7 @@ void LoadDNSSCD::updateProperties(API::Run &run,
       run.addProperty(timeSeries);
     }
     timeSeries->addValue(time, it->second);
-    it++;
+    ++it;
   }
 }
 //----------------------------------------------------------------------------------------------
