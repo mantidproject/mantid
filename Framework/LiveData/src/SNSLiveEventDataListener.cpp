@@ -740,9 +740,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     }
 
   } else if (pkt.status() == ADARA::RunStatus::END_RUN) {
-    // Run has ended:  update m_status and set the flag to stop parsing network
-    // packets.  (see comments below for why)
-
+    // Run has ended:  update m_status, set the end time and set the flag
+    // to stop parsing network packets.  (see comments below for why)
     if ((m_status != Running) && (m_status != BeginRun)) {
       // Previous status should have been Running or BeginRun.  Spit out a
       // warning if it's not.  (If it's BeginRun, that's fine.  It just means
@@ -752,6 +751,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     }
     m_status = EndRun;
 
+    // Add the run_end property
+    m_eventBuffer->mutableRun().addProperty(
+        "run_end", timeFromPacket(pkt).toISO8601String());
+    
     // Set the flag to make us stop reading from the network.
     // Stopping network reads solves a number of problems:
     // 1) We don't need to manage a second buffer in order to keep the events
