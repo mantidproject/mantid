@@ -1102,18 +1102,15 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
               prop->setUnits(pvUnits);
             }
             {
-              // Note: it's possible for us receive device descriptor packets in
-              // the middle
-              // of a run (after the call to initWorkspacePart2), so we really
-              // do need to
-              // the lock the mutex here.
+              // Note: it's possible for us receive device descriptor packets
+              // in the middle of a run (after the call to initWorkspacePart2),
+              // so we really do need to the lock the mutex here.
               std::lock_guard<std::mutex> scopedLock(m_mutex);
               m_eventBuffer->mutableRun().addLogData(prop);
             }
 
             // Add the pv id, device id and pv name to the name map so we can
-            // find the
-            // name when we process the variable value packets
+            // find the name when we process the variable value packets
             m_nameMap[std::make_pair(pkt.devId(), pvIdNum)] = pvName;
           }
         }
@@ -1207,10 +1204,8 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
   // down in initWorkspacePart2() when we load the instrument definition.
 
   // We also know we'll need 3 time series properties on the workspace.  Create
-  // them
-  // now. (We may end up adding values to the pause and scan properties before
-  // we
-  // can call initWorkspacePart2().)
+  // them now. (We may end up adding values to the pause and scan properties
+  // before we can call initWorkspacePart2().)
   Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
   m_eventBuffer->mutableRun().addLogData(prop);
   prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
@@ -1239,8 +1234,8 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 
   loadInst->execute();
 
-  m_requiredLogs.clear(); // Clear the list.  If we have to initialize the
-                          // workspace again,
+  m_requiredLogs.clear();
+  // Clear the list.  If we have to initialize the workspace again,
   // (at the start of another run, for example), the list will be
   // repopulated when we receive the next geometry packet.
 
@@ -1261,10 +1256,9 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
       true /* bool throwIfMultipleDets */);
 
   // We always want to have at least one value for the the scan index time
-  // series.  We may have
-  // already gotten a scan start packet by the time we get here and therefor
-  // don't need to do
-  // anything.  If not, we need to put a 0 into the time series.
+  // series.  We may have already gotten a scan start packet by the time we
+  // get here and therefor don't need to do anything.  If not, we need to put
+  // a 0 into the time series.
   if (m_eventBuffer->mutableRun()
           .getTimeSeriesProperty<int>(SCAN_PROPERTY)
           ->size() == 0) {
@@ -1300,8 +1294,7 @@ void SNSLiveEventDataListener::initMonitorWorkspace() {
 // NOTE: This function does not lock the mutex!  The calling function must
 // ensure that m_eventBuffer won't change while the function runs (either by
 // locking the mutex, or by the simple fact of never calling it once the
-// workspace
-// has been initialized...)
+// workspace has been initialized...)
 bool SNSLiveEventDataListener::haveRequiredLogs() {
   bool allFound = true;
   Run &run = m_eventBuffer->mutableRun();
