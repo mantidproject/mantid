@@ -412,10 +412,11 @@ private:
 
   using column_it = std::vector<
       boost::shared_ptr<API::Column>>::iterator; ///< Column iterator
+
+  ///< Column const iterator
   using column_const_it =
-      std::vector<boost::shared_ptr<API::Column>>::const_iterator; ///< Column
-                                                                   ///const
-                                                                   ///iterator
+      std::vector<boost::shared_ptr<API::Column>>::const_iterator;
+                                                                  
   /// Shared pointers to the columns.
   std::vector<boost::shared_ptr<API::Column>> m_columns;
   /// row count
@@ -432,5 +433,5 @@ using TableWorkspace_sptr = boost::shared_ptr<TableWorkspace>;
 using TableWorkspace_const_sptr = boost::shared_ptr<const TableWorkspace>;
 
 } // namespace DataObjects
-} // Namespace Mantid
+
 #endif /*MANTID_DATAOBJECTS_TABLEWORKSPACE_H_*/
