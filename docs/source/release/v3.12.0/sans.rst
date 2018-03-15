@@ -42,6 +42,7 @@ Improvements
 - Added more prominent instrument selection and process buttons to Isis Gui v2.
 - Added manage directories button to Isis Gui v2.
 - Added link to documentation at the bottom left of Isis Gui v2.
+- As an advance warning we plan to remove the 1D Analysis tab from the old Gui for the next release.
 
 Bug fixes
 #########
