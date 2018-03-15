@@ -22,6 +22,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -200,6 +202,7 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
 
 void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
   std::vector<double> heightBinning = getProperty("HeightAxis");
+  m_heightAxis.clear();
   if (componentName.length() == 0 && heightBinning.empty())
     throw std::runtime_error("No detector_for_height_axis parameter for this "
                              "instrument. Please enter a value for the "
@@ -295,8 +298,8 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         angle = specInfo.signedTwoTheta(i);
       angle *= m_mirrorDetectors * 180.0 / M_PI;
 
-      int angleIndex =
-                int((angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
+      int angleIndex = boost::math::iround((angle - m_startScatteringAngle) /
+                                           m_stepScatteringAngle);
 
       // point is out of range, a warning should have been generated already for
       // the theta index
