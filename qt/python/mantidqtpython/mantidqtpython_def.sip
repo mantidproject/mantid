@@ -1529,7 +1529,7 @@ class ProcessingAlgorithm
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 %End
 public:
-ProcessingAlgorithm(const QString &, const QString &, const QString &blacklist = "");
+ProcessingAlgorithm(const QString &, const QString &, int, const QString &blacklist = "");
 };
 
 class PostprocessingAlgorithm

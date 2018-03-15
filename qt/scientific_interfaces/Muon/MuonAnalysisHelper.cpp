@@ -1016,9 +1016,13 @@ void parseRunLabel(const std::string &label, std::string &instrument,
           // Single run
           runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
         } else {
-          throw std::invalid_argument("Failed to parse run label: " + label);
+          throw std::invalid_argument("Failed to parse run label: " + label +
+                                      " too many tokens ");
         }
       } catch (const boost::bad_lexical_cast &) {
+        throw std::invalid_argument("Failed to parse run label: " + label +
+                                    " not a good run number");
+      } catch (...) {
         throw std::invalid_argument("Failed to parse run label: " + label);
       }
     }
