@@ -140,7 +140,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
 
   const auto &componentInfo = m_instrActor->componentInfo();
   for (const auto &udet : m_unwrappedDetectors) {
-    if (!componentInfo.hasValidShape(udet.detIndex))
+    if (udet.empty() || !componentInfo.hasValidShape(udet.detIndex))
       continue;
 
     int iw = int(udet.width / dw);

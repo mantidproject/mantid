@@ -8,7 +8,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 UnwrappedDetector::UnwrappedDetector()
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detIndex(0) {
+    : u(0), v(0), width(0), height(0), uscale(0), vscale(0) {
   color = GLColor(0, 0, 0);
 }
 
@@ -36,5 +36,10 @@ operator=(const UnwrappedDetector &other) {
   detIndex = other.detIndex;
   return *this;
 }
+
+bool UnwrappedDetector::empty() const {
+  return detIndex == std::numeric_limits<size_t>::max();
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt
