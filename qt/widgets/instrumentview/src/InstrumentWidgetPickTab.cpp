@@ -816,7 +816,8 @@ ComponentInfoController::ComponentInfoController(
     QTextEdit *infoDisplay)
     : QObject(tab), m_tab(tab), m_instrWidget(instrWidget),
       m_selectionInfoDisplay(infoDisplay), m_freezePlot(false),
-      m_instrWidgetBlocked(false), m_currentPickID(-1) {}
+      m_instrWidgetBlocked(false),
+      m_currentPickID(std::numeric_limits<size_t>::max()) {}
 
 /**
 * Display info on a component refered to by a pick ID.
@@ -1077,7 +1078,7 @@ DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
                                                OneCurvePlot *plot)
     : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_plot(plot),
       m_plotType(Single), m_enabled(true), m_tubeXUnits(DETECTOR_ID),
-      m_currentDetID(-1) {
+      m_currentPickID(std::numeric_limits<size_t>::max()) {
   connect(m_plot, SIGNAL(clickedAt(double, double)), this,
           SLOT(addPeak(double, double)));
 }
@@ -1088,7 +1089,7 @@ DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
 * @param pickID :: A pick ID of an instrument component.
 */
 void DetectorPlotController::setPlotData(size_t pickID) {
-  m_currentDetID = -1;
+  m_currentPickID = std::numeric_limits<size_t>::max();
 
   if (m_plotType == DetectorSum) {
     m_plotType = Single;
@@ -1103,7 +1104,7 @@ void DetectorPlotController::setPlotData(size_t pickID) {
   const auto &componentInfo = actor.componentInfo();
   if (componentInfo.isDetector(pickID)) {
     if (m_plotType == Single) {
-      m_currentDetID = actor.getDetID(pickID);
+      m_currentPickID = pickID;
       plotSingle(pickID);
     } else if (m_plotType == TubeSum || m_plotType == TubeIntegral) {
       plotTube(pickID);
@@ -1686,7 +1687,7 @@ QString DetectorPlotController::getPlotCaption() const {
 * @param y :: Peak height (counts)
 */
 void DetectorPlotController::addPeak(double x, double y) {
-  if (m_currentDetID < 0)
+  if (m_currentPickID == std::numeric_limits<size_t>::max())
     return;
 
   try {
@@ -1737,11 +1738,13 @@ void DetectorPlotController::addPeak(double x, double y) {
     // Run the AddPeak algorithm
     auto alg =
         Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
+    const auto &detIDs =
+        m_instrWidget->getInstrumentActor().detectorInfo().detectorIDs();
     alg->setPropertyValue("RunWorkspace", ws->getName());
     alg->setPropertyValue("PeaksWorkspace", peakTableName);
-    alg->setProperty("DetectorID", m_currentDetID);
+    alg->setProperty("DetectorID", detIDs[m_currentPickID]);
     alg->setProperty("TOF", x);
-    alg->setProperty("Height", actor.getIntegratedCounts(m_currentDetID));
+    alg->setProperty("Height", actor.getIntegratedCounts(m_currentPickID));
     alg->setProperty("BinCount", y);
     alg->execute();
 
