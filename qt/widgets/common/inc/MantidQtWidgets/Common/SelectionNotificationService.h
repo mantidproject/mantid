@@ -63,8 +63,7 @@ private:
       SelectionNotificationServiceImpl>;
 };
 
-typedef Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>
-    SelectionNotificationService;
+using SelectionNotificationService = Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>;
 }
 }
 namespace Mantid {
