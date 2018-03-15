@@ -9,15 +9,16 @@ New features
 ------------
 
 - The `MSlice <https://github.com/mantidproject/mslice>`_ user interface can now be launched from the MantidPlot Interfaces menu.
-figure:: ../../images/mslice_interface.png
+
+.. figure:: ../../images/mslice_interface.png
 	:class: screenshot
 	:align: center
 	
-figure:: ../../images/mslice_slice.png
+.. figure:: ../../images/mslice_slice.png
 	:class: screenshot
 	:align: center
 	
-figure:: ../../images/mslice_cut.png
+.. figure:: ../../images/mslice_cut.png
 	:class: screenshot
 	:align: center
 
