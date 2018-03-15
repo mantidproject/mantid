@@ -2079,17 +2079,18 @@ class PrintParser(UserFileComponentParser):
     def __init__(self):
         super(PrintParser, self).__init__()
 
-        # Print
-        self._print = "\\s*PRINT\\s+"
-        self._print_pattern = re.compile(start_string + self._print + "\\s*.*\\s*" + end_string)
-
     def parse_line(self, line):
         # Get the settings, ie remove command
-        setting = UserFileComponentParser.get_settings(line, PrintParser.get_type_pattern())
 
-        # Determine the qualifier and extract the user setting
-        original_setting = re.search(setting.strip(), line, re.IGNORECASE).group(0)
-        return {PrintId.print_line: original_setting}
+        setting = line.strip()
+
+        if setting.upper().startswith(PrintParser.Type):
+            setting = setting[len(PrintParser.Type):]
+            setting = setting.strip()
+        else:
+            raise RuntimeError("PrintParser: Failed to extract line {} it does not start with {}".format(line, PrintParser.Type))
+
+        return {PrintId.print_line: setting}
 
     @staticmethod
     def get_type():

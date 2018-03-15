@@ -120,19 +120,23 @@ QStringList preprocessingStringToList(const QString &inputStr) {
  * separated by '+' with an optional prefix
  */
 QString preprocessingListToString(const QStringList &values,
-                                  const QString prefix) {
-  return prefix + values.join("+");
+                                  const QString &prefix,
+                                  const QString &separator) {
+  return prefix + values.join(separator);
 }
 
 /**
 Returns the name of the reduced workspace for a given row
 @param data :: [input] The data for this row
 @param whitelist :: [input] The list of columns
+@param preprocessMap :: [input] a map of column names to the preprocessing
+algorithm for that column
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
-QString getReducedWorkspaceName(const RowData_sptr data,
-                                const WhiteList &whitelist) {
+QString getReducedWorkspaceName(
+    const RowData_sptr data, const WhiteList &whitelist,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap) {
   if (data->size() != static_cast<int>(whitelist.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 
@@ -153,17 +157,28 @@ QString getReducedWorkspaceName(const RowData_sptr data,
   auto columnIt = whitelist.cbegin();
   auto runNumbersIt = data->constBegin();
   for (; columnIt != whitelist.cend(); ++columnIt, ++runNumbersIt) {
+    // Check the column is relevant to the generation of the output name
     auto column = *columnIt;
-    // Do we want to use this column to generate the name of the output ws?
-    if (column.isShown()) {
-      auto const runNumbers = *runNumbersIt;
+    if (!column.isShown())
+      continue;
 
-      if (!runNumbers.isEmpty()) {
-        auto values = preprocessingStringToList(runNumbers);
-        if (!values.isEmpty())
-          names.append(preprocessingListToString(values, column.prefix()));
-      }
-    }
+    // Check there is a value in the column
+    auto const runNumbers = *runNumbersIt;
+    if (runNumbers.isEmpty())
+      continue;
+
+    // Convert the string value to a list
+    auto values = preprocessingStringToList(runNumbers);
+    if (values.isEmpty())
+      continue;
+
+    // Get the separator to use if preprocessing multiple input values
+    QString separator = "+";
+    if (preprocessMap.count(column.name()))
+      separator = preprocessMap.at(column.name()).separator();
+
+    // Convert the value list to a correctly-formatted output name
+    names.append(preprocessingListToString(values, column.prefix(), separator));
   } // Columns
 
   QString wsname;
