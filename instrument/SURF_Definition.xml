@@ -17,7 +17,7 @@
       <pointing-up axis="y" />
       <handedness val="right" />
     </reference-frame>
-    <default-view axis-view="z-"/>
+    <default-view axis-view="z+"/>
   </defaults>
 
 <!-- source and sample-position components START============================= -->
@@ -44,7 +44,7 @@
 
 <!-- ================MONITOR 1 START========================================= -->
   <component type="monitor1" idlist="monitor1">
-    <location z="-1.6635"/>
+    <location z="-1.663"/>
   </component>
 
   <type name="monitor1" is="monitor">
@@ -133,7 +133,7 @@
   <!-- other components -->
 
   <component type="slit" name="slit1">
-    <location z="-1.837"/>
+    <location z="-1.873"/>
      <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap">
       <logfile id="S1" extract-single-value-as="last_value" />
@@ -141,7 +141,7 @@
   </component>
 
   <component type="slit" name="slit2">
-    <location z="-0.337"/>
+    <location z="-0.254"/>
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
@@ -151,7 +151,7 @@
   </component>
 
   <component type="slit" name="slit3">
-    <location z="0.305"/>
+    <location z="0.298"/>
     <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap">
       <logfile id="S3" extract-single-value-as="last_value" />
@@ -182,7 +182,7 @@
 
   <component type="supermirror">
     <!-- Worry about linking relevant logfiles for z,theta up later -->
-    <location z="7.7685"/>
+    <location z="-1.103"/>
   </component>
 
   <type name="supermirror" />
