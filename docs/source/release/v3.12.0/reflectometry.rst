@@ -12,10 +12,22 @@ ISIS Reflectometry Interface
 New features
 ############
 
-- A new table has been added to the Settings tab to allow default options to be specified on a per-angle basis. If a row in the Runs tab contains an angle, it will be looked up in this table and those options will be used if a matching angle is found (the angle does not have to be exact as it will match to within 100th of a degree). If you want to specify values that will be used by default for all runs, then simply leave the angle empty.
-- Two new boxes have been added to the settings tab of the ISIS Reflectometry interface, 'ReductionType' and 'SummationType' which are passed to the corresponding parameters of :ref:`algm-ReflectometryReductionOneAuto`.
-- The ISIS Reflectometry interface now has a checkbox 'CorrectDetectors' which maps to the corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
+.. figure:: ../../images/ISIS_Reflectometry_per_angle_options.png
+   :class: screenshot
+   :align: center
+
+   New table to specify settings on a per-angle basis
+
+- The following new options have been added to the Settings tab:
+
+  - A new table has been added to the Experiment settings which allows default options to be specified on a per-angle basis. If a row in the Runs tab contains an angle, it will be looked up in this table and those options will be used if a matching angle is found (the angle does not have to be exact as it will match to within 100th of a degree). If you want to specify values that will be used by default for all runs, then simply leave the angle empty.
+    
+  - Two new drop-down boxes have been added to the Experiment settings, 'ReductionType' and 'SummationType', which are passed to the corresponding parameters of :ref:`algm-ReflectometryReductionOneAuto`.
+
+  - A 'CorrectDetectors' check box has been added to the Instrument settings, which maps to the corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
+
 - The 'Get Defaults' button now looks for values for the following additional properties in the IDF:
+  
   - AnalysisMode
   - PolarizationAnalysis
   - TransRunStartOverlap
@@ -48,6 +60,7 @@ Bug fixes
 - Fixed some bugs where transmission runs entered on the Settings tab were not being found, whether entered as a run number to load or as the name of an existing workspace in the ADS.
 - The Python code generated when you tick `Output Notebook` has been changed so that all algorithm property values are enclosed in quotes. Unquoted values were causing failures in some algorithms. A bug has also been fixed in setting the legend location for the 4th (stitched) plot, which is shown when post-processing is performed.
 - If any of the mandatory parameters listed below are missing when pressing 'Get Default' a warning is shown rather than a crash.
+
   - MonitorIntegralMax
   - MonitorIntegralMin
   - MonitorBackgroundMin,
@@ -56,6 +69,7 @@ Bug fixes
   - LambdaMax,
   - I0MonitorIndex
   - TransRunStartOverlap and TransRunEndOverlap if on SURF or CRISP.
+
 - Fixed a bug where the processed state of rows was being reset when transferring additional rows into the table.
 
 Features Removed
@@ -80,6 +94,7 @@ Improvements
 
 - Removed the ``RegionOfDirectBeam`` property from :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` because this is not used.
 - Improvements to :ref:`algm-LoadILLReflectometry`:
+
   - Figaro NeXus files are now properly handled.
   - A new property, *BeamCentre* allows user to manually specify the beam position on the detector.
   - The *BeamPosition* property was renamed to *DirectBeamPosition* to better reflect its usage.
