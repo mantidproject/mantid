@@ -9,5 +9,10 @@ Direct Inelastic Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Algorithms
+----------
+
+- The *EPPWorkspace* input property has been removed from :ref:`DirectILLCollectData <algm-DirectILLCollectData>`.
+
 :ref:`Release 3.13.0 <v3.13.0>`
 
