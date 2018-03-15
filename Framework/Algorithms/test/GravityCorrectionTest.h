@@ -187,11 +187,11 @@ public:
     auto ws2 = this->runGravityCorrection(gc10, ws1, "ws2");
     Mantid::API::MatrixWorkspace::MaskList mList = ws2->maskedBins(0);
     auto iterator = mList.begin();
-    TS_ASSERT_EQUALS(iterator->second, 0.4); // calculate new
+    TS_ASSERT_EQUALS(iterator->second, 0.4);
     ++iterator;
-    TS_ASSERT_EQUALS(iterator->second, 1.0); // calculate new
+    TS_ASSERT_EQUALS(iterator->second, 1.0);
     ++iterator;
-    TS_ASSERT_EQUALS(iterator->second, 0.1); // calculate new
+    TS_ASSERT_EQUALS(iterator->second, 0.1);
   }
 
   void testHistoryCheck() {
@@ -345,26 +345,25 @@ public:
     V3D l1 = sample - source;
     V3D l2 = detector1 - sample;
 
-    const double v, k, s1, s2, tanAngle, sdist, sx, up2, sy, finalAngle,
-        tof{8000.};
+    const double tof{8000.}; // mu seconds
 
     using Mantid::PhysicalConstants::g;
     using std::abs;
     using std::pow;
 
-    v{(l1.norm + l2.norm) / tof}; // (metre / mu seconds!)
-    k = g / (2. * pow(v * 1.e6, 2.));
-    s1 = slit1.X();
-    s2 = slit2.X();
-    tanAngle = tan(cos(detector1.X() / l2));
-    sdist = s1 - s2;
-    sx = (k * (pow(s1, 2.) - pow(s2, 2.)) + (sdist * tanAngle)) /
-         (2 * k * sdist);
-    up2 = s2 * tanAngle;
-    sy = up2 + k * pow(s2 - sx, 2.);
-    finalAngle = atan(2. * k * sqrt(abs(sy / k)));
+    const double v{(l1.norm() + l2.norm()) / tof}; // (metre / mu seconds!)
+    const double k{g / (2. * pow(v * 1.e6, 2.))};
+    const double s1{slit1.X()};
+    const double s2{slit2.X()};
+    const double tanAngle{tan(cos(detector1.X() / l2.norm()))};
+    const double sdist{s1 - s2};
+    const double sx{(k * (pow(s1, 2.) - pow(s2, 2.)) + (sdist * tanAngle)) /
+                    (2 * k * sdist)};
+    const double up2{s2 * tanAngle};
+    const double sy{up2 + k * pow(s2 - sx, 2.)};
+    const double finalAngle{atan(2. * k * sqrt(abs(sy / k)))};
 
-    V3D detector2{cos(finalAngle) * l2, sin(finalAngle) * l2, 0.};
+    V3D detector2{cos(finalAngle) * l2.norm(), sin(finalAngle) * l2.norm(), 0.};
 
     Mantid::API::MatrixWorkspace_sptr ws{
         WorkspaceCreationHelper::
@@ -434,11 +433,9 @@ public:
   }
 
 private:
-  const std::string directBeamFile {
-    / home / cs / reimund / Desktop / Figaro / GravityCorrection /
-            ReflectionUp / exp_9 -
-        12 - 488 / rawdata / 596071.nxs
-  }
+  const std::string directBeamFile{"/home/cs/reimund/Desktop/Figaro/"
+                                   "GravityCorrection/ReflectionUp/"
+                                   "exp_9-12-488/rawdata/596071.nxs"};
   // const std::string directBeamFile{"ILL/Figaro/592724.nxs"};
   const std::string outWSName{"GravityCorrectionTest_OutputWorkspace"};
   const std::string inWSName{"GravityCorrectionTest_InputWorkspace"};

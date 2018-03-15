@@ -17,9 +17,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
-#include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
-#include "MantidHistogramData/HistogramY.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -49,12 +47,9 @@ using Mantid::DataObjects::Workspace2D;
 using Mantid::Geometry::ComponentInfo;
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Geometry::IComponent_const_sptr;
-using Mantid::Geometry::IComponent_sptr;
 using Mantid::Geometry::PointingAlong;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
 using Mantid::Indexing::IndexInfo;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
@@ -159,7 +154,7 @@ map<string, string> GravityCorrection::validateInputs() {
  * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
  * PointingAlong::Y, PointingAlong::Z)
  * @param instrument :: instrument containing the component
- * @return the coordinate of the instrument component
+ * @return the coordinate of the instrument component (unit metres)
  */
 double GravityCorrection::coordinate(
     const string componentName, PointingAlong direction,
@@ -186,7 +181,7 @@ double GravityCorrection::coordinate(
  * @param i :: detector index
  * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
  * PointingAlong::Y, PointingAlong::Z)
- * @return the coordinate of a detector at index i
+ * @return the coordinate of a detector at index i (unit metres)
  */
 double GravityCorrection::coordinate(DetectorInfo &detectorInfo, size_t i,
                                      PointingAlong direction) const {
@@ -201,7 +196,7 @@ double GravityCorrection::coordinate(DetectorInfo &detectorInfo, size_t i,
  * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
  * PointingAlong::Y, PointingAlong::Z)
  * @return the coordinate of a detector or group of detectors of a spectrum at
- * index 1
+ * index 1 (unit metres)
  */
 double GravityCorrection::coordinate(SpectrumInfo &spectrumInfo, size_t i,
                                      PointingAlong direction) const {
@@ -211,10 +206,10 @@ double GravityCorrection::coordinate(SpectrumInfo &spectrumInfo, size_t i,
 
 /**
  * @brief GravityCorrection::coordinate
- * @param pos :: a V3D holding a position in Cartesian coordinates
+ * @param pos :: a V3D holding a position in Cartesian coordinates in metres
  * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
  * PointingAlong::Y, PointingAlong::Z)
- * @return the coordinate of the position in direction
+ * @return the coordinate of the position in direction in metres
  */
 double GravityCorrection::coordinate(V3D &pos, PointingAlong direction) const {
   double position{0.};
@@ -238,10 +233,10 @@ double GravityCorrection::coordinate(V3D &pos, PointingAlong direction) const {
 
 /**
  * @brief GravityCorrection::setCoordinate
- * @param pos :: holds the position vector to be updated
+ * @param pos :: holds the position vector to be updated in metres
  * @param direction :: direction of the coordinate of the position to be updated
  * (i.e. PointingAlong::X, PointingAlong::Y, PointingAlong::Z)
- * @param coor :: coordinate to be added to the position vector
+ * @param coor :: coordinate to be added to the position vector in metres
  */
 void GravityCorrection::setCoordinate(V3D &pos, PointingAlong direction,
                                       double coor) {
@@ -304,9 +299,9 @@ void GravityCorrection::slitCheck() {
 
 /**
  * @brief GravityCorrection::finalAngle
- * @param k :: characteristic length of the parabola
+ * @param k :: characteristic length of the parabola in 1/m
  * @param i :: spectrum number
- * @return final angle
+ * @return final angle in radians
  */
 double GravityCorrection::finalAngle(const double k, size_t i) {
   // calculate parabola
@@ -321,12 +316,12 @@ double GravityCorrection::finalAngle(const double k, size_t i) {
   tanAngle < 0. ? sign = -1 : sign = 1;
   const double beamDiff = beam1 - beam2;
   // potential divide by zero avoided by input validation beam1 != beam2
-  double beamShift = (k * (pow(beam1, 2.) - pow(beam2, 2.)) +
-                      (beamDiff * tanAngle)) /
-                     (2 * k * beamDiff);
+  double beamShift =
+      (k * (pow(beam1, 2.) - pow(beam2, 2.)) + (beamDiff * tanAngle)) /
+      (2 * k * beamDiff);
   const double up2 = beam2 * tanAngle; // sign
   double upShift = up2 + k * pow(beam2 - beamShift, 2.);
-  // set sample coordinates
+  // set sample coordinates in unit m:
   this->setCoordinate(m_sample3D, this->m_beamDirection, beamShift); // sign
   this->setCoordinate(m_sample3D, this->m_upDirection, upShift);     // sign
   // calculate final angle
@@ -491,7 +486,7 @@ bool GravityCorrection::spectrumCheck(SpectrumInfo &spectrumInfo, size_t i) {
 
 /**
  * @brief GravityCorrection::spectrumNumber
- * @param angle :: a final angle for a specific detector
+ * @param angle :: a final angle for a specific detector in radians
  * @param spectrumInfo :: a reference to spectrum information
  * @param i :: spectrum number
  * @return spectrum number closest to the given final angle
@@ -610,10 +605,10 @@ void GravityCorrection::exec() {
         continue;
       }
 
-      double v{(spectrumInfo.l1() + spectrumInfo.l2(i)) /
-               *tofit}; // (metre / mu seconds!)
-      double k = g / (2. * pow(v * 1.e6, 2.));
-      double angle = this->finalAngle(k, i);
+      double v{((spectrumInfo.l1() + spectrumInfo.l2(i)) / *tofit) *
+               1.e6};                   // unit is m/s
+      double k = g / (2. * pow(v, 2.)); // unit is 1/m
+      double angle = this->finalAngle(k, i); // unit is radians
       if (cos(angle) == 0.) {
         this->g_log.error("Cannot divide by zero for calculating new tof "
                           "values. Skip this bin.");
@@ -627,12 +622,12 @@ void GravityCorrection::exec() {
 
       // offset due to variable sample position
       const double offset =
-         this->coordinate(this->m_sample3D, this->m_beamDirection);
+          this->coordinate(this->m_sample3D, this->m_beamDirection);
 
       // source position coordinate in beam direction (variable sample position)
       double sourceZ =
-         this->coordinate(this->m_virtualInstrument->getSource()->getName(),
-                          this->m_beamDirection);
+          this->coordinate(this->m_virtualInstrument->getSource()->getName(),
+                           this->m_beamDirection);
 
       double s1 = this->parabolaArcLength(-2 * k * sourceZ) / (2 * k);
       // straight path from virtual sample (0, 0, 0) to updated detector
@@ -643,8 +638,9 @@ void GravityCorrection::exec() {
       double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);
       double s = s1 + s2;
 
-      outWS->mutableX(j)[i_tofit] = ((detZ - offset) * (*tofit)) / (s * cos(angle));
-          //*tofit; // debugging minus / cos(angle); // mu sec
+      outWS->mutableX(j)[i_tofit] =
+          ((detZ - offset) * (*tofit)) / (s * cos(angle));
+      //*tofit; // debugging minus / cos(angle); // mu sec
 
       // need to set the counts to spectrum according to finalAngle & *tofit
       outWS->mutableY(j)[i_tofit] += this->m_ws->y(i)[i_tofit];
