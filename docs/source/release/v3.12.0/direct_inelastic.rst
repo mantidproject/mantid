@@ -21,11 +21,13 @@ New features
 	:width: 500 px
 
 .. figure:: ../../images/mslice_acut.png
+
 	:class: screenshot
 	:align: center
 	:width: 500 px
+	
 
-  Similar to the slice viewer, MSlice plots slices and cuts from workspaces. It creates customisable publication quality figures. Cuts can be created interactively by dragging a rectangle across a slice, and information such as recoil lines and bragg peaks can be overplotted.
+Similar to the slice viewer, MSlice plots slices and cuts from workspaces. It creates customisable publication quality figures. Cuts can be created interactively by dragging a rectangle across a slice, and information such as recoil lines and bragg peaks can be overplotted.
 
 - The algorithms :ref:`algm-SofQWCentre`, :ref:`algm-SofQWPolygon` and :ref:`algm-SofQWNormalisedPolygon`, which rebin an inelastic workspace (has a `DeltaE` axis) from spectrum numbers (angle) to `MomentumTransfer` may now rebin the energy (`DeltaE`) axis as well as the :math:`|Q|` (`MomentumTransfer`) axes.
 - :ref:`algm-SofQWNormalisedPolygon` now has uses a faster method for calculating the polygon intersections.
