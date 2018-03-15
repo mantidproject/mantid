@@ -42,7 +42,6 @@ Improvements
 - Added more prominent instrument selection and process buttons to Isis Gui v2.
 - Added manage directories button to Isis Gui v2.
 - Added link to documentation at the bottom left of Isis Gui v2.
-- As an advance warning we plan to remove the 1D Analysis tab from the old Gui for the next release.
 
 Bug fixes
 #########
@@ -53,6 +52,10 @@ Bug fixes
 - Fixed a bug in the old GUI where merged reductions of time sliced data was not working.
 - Fixed a bug in the old GUI where 2D reductions were being run in 1D if a new user file was specified in a batch file.
 - Fixed a bug in Isis Gui v2 whereby the sum runs script was not working for ZOOM.
+
+Deprecation
+###########
+- As an advance warning we plan to remove the 1D Analysis tab from the old Gui for the next release.
 
 
 :ref:`Release 3.12.0 <v3.12.0>`
