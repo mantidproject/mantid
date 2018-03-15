@@ -146,6 +146,12 @@ Improved
    props = json.loads('{"DryRun":true}')
    Segfault(**props)
 
+Deprecated
+##########
+
+- `MantidPlot.pyplot <http://docs.mantidproject.org/v3.11.0/api/python/mantidplot/pyplot/index.html>`_ was an early attempt to provide Matplotlib style syntax over Mantidplot plotting.  This will be replaced in Mantid 4.0 with MatPlotlib itself, and this packages would cause namespace clashes and confusion.  This package is now deprecated, and will not be included in future releases of Mantid.  To the best of our knowledge the impact of this should be minimal as it is at best only rarely used.
+
+
 Bugfixes
 ########
 - Fixed an issue with coercing data from python lists or numpy arrays where the datatype!=float64 into a workspace
