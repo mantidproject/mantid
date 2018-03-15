@@ -33,6 +33,7 @@ Guides
    HandlingXML
    UsefulTools
    ProfilingWithValgrind
+   VisualStudioBuildImpact
 
 ===================
 Component Overviews
