@@ -159,7 +159,7 @@ std::string SingleValueParameter<Derived, ValType>::toXMLString() const {
   class classname                                                              \
       : public Mantid::API::SingleValueParameter<classname, type_> {           \
   public:                                                                      \
-    typedef Mantid::API::SingleValueParameter<classname, type_> SuperType;     \
+    using SuperType = Mantid::API::SingleValueParameter<classname, type_>      \
     static std::string parameterName() { return #classname; }                  \
     classname(type_ value) : SuperType(value) {}                               \
     classname() : SuperType() {}                                               \
