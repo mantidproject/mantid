@@ -280,7 +280,7 @@ private:
   bool m_enabled;
   TubeXUnits
       m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
-  int m_currentPickID;
+  size_t m_currentPickID;
 };
 
 } // MantidWidgets
