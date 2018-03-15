@@ -6,7 +6,7 @@ set ( SRC_FILES
 	ConvFit.cpp
 	CorrectionsTab.cpp
 	DensityOfStates.cpp
-        Elwin.cpp
+    Elwin.cpp
 	ILLEnergyTransfer.cpp
 	ISISCalibration.cpp
 	ISISDiagnostics.cpp
@@ -26,6 +26,8 @@ set ( SRC_FILES
 	IndirectSassena.cpp
 	IndirectSimulation.cpp
 	IndirectSimulationTab.cpp
+	IndirectSpectrumSelectionPresenter.cpp
+	IndirectSpectrumSelectionView.cpp
 	IndirectSqw.cpp
 	IndirectSymmetrise.cpp
 	IndirectTab.cpp
@@ -53,7 +55,7 @@ set ( INC_FILES
 	ConvFit.h
 	CorrectionsTab.h
 	DensityOfStates.h
-        Elwin.h
+    Elwin.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h
@@ -73,6 +75,8 @@ set ( INC_FILES
 	IndirectSassena.h
 	IndirectSimulation.h
 	IndirectSimulationTab.h
+	IndirectSpectrumSelectionPresenter.h
+	IndirectSpectrumSelectionView.h
 	IndirectSqw.h
 	IndirectSymmetrise.h
 	IndirectTab.h
@@ -114,6 +118,8 @@ set ( MOC_FILES
     IndirectSassena.h
     IndirectSimulation.h
     IndirectSimulationTab.h
+	IndirectSpectrumSelectionPresenter.h
+	IndirectSpectrumSelectionView.h
     IndirectSqw.h
     IndirectSymmetrise.h
     IndirectTransmission.h
@@ -152,6 +158,7 @@ set ( UI_FILES
    IndirectMoments.ui
    IndirectSassena.ui
    IndirectSimulation.ui
+   IndirectSpectrumSelector.ui
    IndirectSqw.ui
    IndirectSymmetrise.ui
    IndirectTools.ui
