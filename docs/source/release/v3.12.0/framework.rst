@@ -141,10 +141,12 @@ Improved
 
 .. code-block:: python
 
-   from mantid.simpleapi import Segfault
+   from mantid.simpleapi import *
    import json
-   props = json.loads('{"DryRun":true}')
-   Segfault(**props)
+   source = json.loads('{"Filename":"CNCS_7860_event.nxs"}')
+   props = json.loads('{"InputWorkspace":"eventWS", "Params":"1000"}')
+   eventWS = Load(**source)
+   rebinned = Rebin(**props)
 
 Deprecated
 ##########
