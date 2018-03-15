@@ -3,14 +3,17 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (Direction, StringListValidator)
-from mantid.simpleapi import (ConvertFromDistribution, ConvertToDistribution, ReflectometryQResolution)
+from mantid.kernel import (Direction, FloatBoundedValidator, Property, StringListValidator)
+from mantid.simpleapi import (ConvertFromDistribution, ConvertToDistribution, ConvertToPointData, 
+                              CreateWorkspace, ReflectometryQResolution, Regroup)
+import numpy
 import ReflectometryILL_common as common
 
 
 class Prop:
     CLEANUP = 'Cleanup'
     DIRECT_WS = 'DirectBeamWorkspace'
+    GROUPING_FRACTION = 'GroupingQFraction'
     INPUT_WS = 'InputWorkspace'
     OUTPUT_WS = 'OutputWorkspace'
     REFLECTED_WS = 'ReflectedBeamWorkspace'
@@ -53,10 +56,14 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
 
         ws = self._convertToMomentumTransfer(ws)
 
+        ws = self._toPointData(ws)
+        ws = self._groupPoints(ws)
+
         self._finalize(ws)
 
     def PyInit(self):
         """Initialize the input and output properties of the algorithm."""
+        positiveFloat = FloatBoundedValidator(lower=0., exclusive=True)
         self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -87,6 +94,10 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         self.declareProperty(Prop.POLARIZED,
                              defaultValue=False,
                              doc='True if input workspace has been corrected for polarization efficiencies.')
+        self.declareProperty(Prop.GROUPING_FRACTION, 
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             doc='If set, group the output by steps of this fraction multiplied by Q resolution')
 
     def _convertToMomentumTransfer(self, ws):
         """Convert the X units of ws to momentum transfer."""
@@ -146,6 +157,50 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         end = sampleLogs.getProperty(common.SampleLogs.FOREGROUND_END).value
         return [start, end]
 
+    def _groupPoints(self, ws):
+        """Group bins by Q resolution."""
+        if self.getProperty(Prop.GROUPING_FRACTION).isDefault:
+            return ws
+        qFraction = self.getProperty(Prop.GROUPING_FRACTION).value
+        xs = ws.readX(0)
+        ys = ws.readY(0)
+        es = ws.readE(0)
+        dxs = ws.readDx(0)
+        index = 0
+        start = xs[index]
+        groupedXs = list()
+        groupedYs = list()
+        groupedEs = list()
+        groupedDxs = list()
+        
+        while True:
+            width = qFraction * dxs[index]
+            end = xs[index] + width
+            pick = numpy.logical_and(xs >= start, xs < end)
+            pickedXs = xs[pick]
+            if len(pickedXs) > 0:
+                groupedXs.append(numpy.mean(pickedXs))
+                groupedYs.append(numpy.mean(ys[pick]))
+                groupedEs.append(numpy.mean(es[pick]))
+                groupWidth = pickedXs[-1] - pickedXs[0]
+                groupedDxs.append(numpy.sqrt(dxs[index]**2 + (0.68 * groupWidth)**2))
+            start = end
+            if start > xs[-1]:
+                break
+            index = numpy.nonzero(xs > start)[0][0]
+        groupedWSName = self._names.withSuffix('grouped')
+        groupedWS = CreateWorkspace(
+            OutputWorkspace=groupedWSName,
+            DataX=groupedXs,
+            DataY=groupedYs,
+            DataE=groupedEs,
+            UnitX=ws.getAxis(0).getUnit().unitID(),
+            ParentWorkspace=ws,
+            EnableLogging=self._subalgLogging)
+        groupedWS.setDx(0, groupedDxs)
+        self._cleanup.cleanup(ws)
+        return groupedWS
+
     def _inputWS(self):
         "Return the input workspace."
         ws = self.getProperty(Prop.INPUT_WS).value
@@ -155,5 +210,17 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
     def _TOFChannelWidth(self, sampleLogs, instrumentName):
         """Return the time of flight bin width."""
         return sampleLogs.getProperty('PSD.time_of_flight_0').value
+
+    def _toPointData(self, ws):
+        """Convert ws from binned to point data."""
+        pointWSName = self._names.withSuffix('as_points')
+        pointWS = ConvertToPointData(
+            InputWorkspace=ws,
+            OutputWorkspace=pointWSName,
+            EnableLogging=self._subalgLogging)
+        pointWS.setDx(0, ws.readDx(0))
+        self._cleanup.cleanup(ws)
+        return pointWS
+
 
 AlgorithmFactory.subscribe(ReflectometryILLConvertToQ)
