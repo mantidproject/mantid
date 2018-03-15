@@ -24,7 +24,6 @@ New features
 	:width: 500 px
 
 .. figure:: ../../images/mslice_acut.png
-
 	:class: screenshot
 	:align: center
 	:width: 500 px
