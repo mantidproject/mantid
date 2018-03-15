@@ -31,6 +31,8 @@ Guides
    Communication
    Dependencies
    HandlingXML
+   UsefulTools
+   ProfilingWithValgrind
 
 ===================
 Component Overviews
