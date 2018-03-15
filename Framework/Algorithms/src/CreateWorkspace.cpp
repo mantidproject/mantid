@@ -70,6 +70,8 @@ void CreateWorkspace::init() {
                                                    Direction::Input,
                                                    PropertyMode::Optional),
                   "Name of a parent workspace.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Dx"),
+                  "X error values for workspace. Optional.");
   std::vector<std::string> propOptions{
       Parallel::toString(Parallel::StorageMode::Cloned),
       Parallel::toString(Parallel::StorageMode::Distributed),
@@ -102,6 +104,7 @@ void CreateWorkspace::exec() {
   const Property *const dataXprop = getProperty("DataX");
   const Property *const dataYprop = getProperty("DataY");
   const Property *const dataEprop = getProperty("DataE");
+  const Property *const errorDxprop = getProperty("Dx");
 
   const ArrayProperty<double> *pCheck = nullptr;
 
@@ -119,6 +122,11 @@ void CreateWorkspace::exec() {
   if (!pCheck)
     throw std::invalid_argument("DataE cannot be casted to a double vector");
   const std::vector<double> &dataE = *pCheck;
+
+  pCheck = dynamic_cast<const ArrayProperty<double> *>(errorDxprop);
+  if (!pCheck)
+    throw std::invalid_argument("Dx cannot be casted to a double vector");
+  const std::vector<double> &dX = *pCheck;
 
   const int nSpec = getProperty("NSpec");
   const std::string xUnit = getProperty("UnitX");
@@ -168,6 +176,12 @@ void CreateWorkspace::exec() {
         "DataE (if provided) must be the same size as DataY");
   }
 
+  const bool dX_provided = !dX.empty();
+  if (dX_provided && dataX.size() != dX.size()) {
+    throw std::runtime_error(
+        "Dx (if provided) must be the same size as DataX");
+  }
+
   // Create the OutputWorkspace
   MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
   MatrixWorkspace_sptr outputWS;
@@ -211,6 +225,10 @@ void CreateWorkspace::exec() {
     if (dataE_provided)
       outputWS->mutableE(local_i)
           .assign(dataE.begin() + yStart, dataE.begin() + yEnd);
+
+    if (dX_provided)
+      outputWS->mutableDx(local_i)
+          .assign(dX.begin() + xStart, dX.begin() + xEnd);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
