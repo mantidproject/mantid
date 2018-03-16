@@ -166,6 +166,10 @@ void CreateWorkspace::exec() {
     histogramBuilder.setX(xSize);
   }
   histogramBuilder.setY(ySize);
+
+  if (!dX.empty())
+    histogramBuilder.setDx(xSize);
+
   histogramBuilder.setDistribution(getProperty("Distribution"));
   auto histogram = histogramBuilder.build();
 
@@ -175,8 +179,7 @@ void CreateWorkspace::exec() {
         "DataE (if provided) must be the same size as DataY");
   }
 
-  const bool dX_provided = !dX.empty();
-  if (dX_provided && dataX.size() != dX.size()) {
+  if (!dX.empty() && dataX.size() != dX.size()) {
     throw std::runtime_error("Dx (if provided) must be the same size as DataX");
   }
 
@@ -213,10 +216,9 @@ void CreateWorkspace::exec() {
 
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
-    if (!commonX) {
+    if (!commonX)
       outputWS->mutableX(local_i)
           .assign(dataX.begin() + xStart, dataX.begin() + xEnd);
-    }
 
     outputWS->mutableY(local_i)
         .assign(dataY.begin() + yStart, dataY.begin() + yEnd);
@@ -225,7 +227,7 @@ void CreateWorkspace::exec() {
       outputWS->mutableE(local_i)
           .assign(dataE.begin() + yStart, dataE.begin() + yEnd);
 
-    if (dX_provided)
+    if (!dX.empty())
       outputWS->mutableDx(local_i)
           .assign(dX.begin() + xStart, dX.begin() + xEnd);
 
