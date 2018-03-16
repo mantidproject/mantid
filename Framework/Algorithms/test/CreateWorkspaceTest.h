@@ -98,18 +98,80 @@ public:
     // No parent workspace -> no instrument -> no detectors -> no mapping.
     TS_ASSERT_EQUALS(ws->getSpectrum(0).getDetectorIDs().size(), 0);
 
-    TS_ASSERT_EQUALS(ws->x(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->x(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->x(0)[2], 2.468);
-    TS_ASSERT_EQUALS(ws->y(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->y(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->y(0)[2], 2.468);
-    TS_ASSERT_EQUALS(ws->e(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->e(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->e(0)[2], 2.468);
-    TS_ASSERT_EQUALS(ws->dx(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->dx(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->dx(0)[2], 2.468);
+    for (size_t i = 0; i < dataEYX.size(); ++i) {
+      TS_ASSERT_EQUALS(ws->x(0)[i], dataEYX[i]);
+    }
+    for (size_t i = 0; i < dataEYX.size(); ++i) {
+      TS_ASSERT_EQUALS(ws->y(0)[i], dataEYX[i]);
+      TS_ASSERT_EQUALS(ws->e(0)[i], dataEYX[i]);
+    }
+    TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->caption(), "Wavelength");
+    TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+    TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->caption(), "q");
+
+    double axisVal = 0.0;
+
+    TS_ASSERT_THROWS_NOTHING(
+        axisVal = boost::lexical_cast<double>(ws->getAxis(1)->label(0)));
+
+    TS_ASSERT_DELTA(axisVal, 9.876, 0.001);
+
+    // Remove the created workspace
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().remove(
+            "test_CreateWorkspace"));
+  }
+
+  void testCreateBinEdges() {
+    Mantid::Algorithms::CreateWorkspace createBinEdges;
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.initialize());
+
+    std::vector<double> dataX{5.5, 6.8, 9.1, 12.3};
+    std::vector<double> dataEYDx{0.0, 1.234, 2.468};
+
+    std::vector<std::string> qvals{"9.876"};
+
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setProperty<int>("NSpec", 1));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setProperty<std::vector<double>>("DataX", dataX));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setProperty<std::vector<double>>("DataY", dataEYDx));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setProperty<std::vector<double>>("DataE", dataEYDx));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setProperty<std::vector<double>>("Dx", dataEYDx));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setPropertyValue("UnitX", "Wavelength"));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setPropertyValue(
+        "VerticalAxisUnit", "MomentumTransfer"));
+    TS_ASSERT_THROWS_NOTHING(
+        createBinEdges.setProperty<std::vector<std::string>>(
+            "VerticalAxisValues", qvals));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.setPropertyValue(
+        "OutputWorkspace", "test_CreateWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(createBinEdges.execute());
+
+    TS_ASSERT(createBinEdges.isExecuted());
+    Mantid::API::MatrixWorkspace_const_sptr ws;
+
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                "test_CreateWorkspace")));
+
+    TS_ASSERT(!ws->isHistogramData());
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+    // No parent workspace -> no instrument -> no detectors -> no mapping.
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).getDetectorIDs().size(), 0);
+
+    for (size_t i = 0; i < dataX.size(); ++i) {
+      TS_ASSERT_EQUALS(ws->x(0)[i], dataX[i]);
+    }
+    for (size_t i = 0; i < dataEYDx.size(); ++i) {
+      TS_ASSERT_EQUALS(ws->y(0)[i], dataEYDx[i]);
+      TS_ASSERT_EQUALS(ws->e(0)[i], dataEYDx[i]);
+      TS_ASSERT_EQUALS(ws->dx(0)[i], dataEYDx[i]);
+    }
     TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->caption(), "Wavelength");
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->caption(), "q");

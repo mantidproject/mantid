@@ -167,8 +167,11 @@ void CreateWorkspace::exec() {
   }
   histogramBuilder.setY(ySize);
 
-  if (!dX.empty())
+  if (!dX.empty()) {
+    if (dX.size() != dataY.size())
+        throw std::runtime_error("Dx must have the same size as DataY");
     histogramBuilder.setDx(xSize);
+  }
 
   histogramBuilder.setDistribution(getProperty("Distribution"));
   auto histogram = histogramBuilder.build();
@@ -177,10 +180,6 @@ void CreateWorkspace::exec() {
   if (dataE_provided && dataY.size() != dataE.size()) {
     throw std::runtime_error(
         "DataE (if provided) must be the same size as DataY");
-  }
-
-  if (!dX.empty() && dataX.size() != dX.size()) {
-    throw std::runtime_error("Dx (if provided) must be the same size as DataX");
   }
 
   // Create the OutputWorkspace
@@ -229,7 +228,7 @@ void CreateWorkspace::exec() {
 
     if (!dX.empty())
       outputWS->mutableDx(local_i)
-          .assign(dX.begin() + xStart, dX.begin() + xEnd);
+          .assign(dX.begin() + yStart, dX.begin() + yEnd);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
