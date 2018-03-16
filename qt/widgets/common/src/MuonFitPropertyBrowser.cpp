@@ -1552,7 +1552,7 @@ void MuonFitPropertyBrowser::updatePeriods(const int j) {
   // const QStringList &selected) {
   if (m_periodsToFitOptions.size() == 0) {
     QMessageBox::warning(this, "Muon Analysis",
-                         "Data not found. Please turn on the data archhive");
+                         "Data not found. Please turn on the data archive, using the Manage Directories button.");
     return;
   }
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
