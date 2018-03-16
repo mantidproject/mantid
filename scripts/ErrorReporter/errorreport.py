@@ -19,6 +19,9 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
 
         self.requestTextBrowser.anchorClicked.connect(MantidQt.API.MantidDesktopServices.openUrl)
 
+        self.input_name_line_edit.textChanged.connect(self.set_button_status)
+        self.input_email_line_edit.textChanged.connect(self.set_button_status)
+
 #  The options on what to do after closing the window (exit/continue)
         self.radioButtonContinue.setChecked(True)     # Set continue to be checked by default
 
@@ -46,6 +49,12 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         gui_element = getattr(self, line_edit)
         value_as_string = gui_element.text()
         return expected_type(value_as_string) if value_as_string else None
+
+    def set_button_status(self):
+        if not self.input_name and not self.input_email:
+            self.nonIDShareButton.setEnabled(True)
+        else:
+            self.nonIDShareButton.setEnabled(False)
 
     @property
     def input_name(self):
