@@ -17,7 +17,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidHistogramData/HistogramBuilder.h"
-#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -178,8 +177,7 @@ void CreateWorkspace::exec() {
 
   const bool dX_provided = !dX.empty();
   if (dX_provided && dataX.size() != dX.size()) {
-    throw std::runtime_error(
-        "Dx (if provided) must be the same size as DataX");
+    throw std::runtime_error("Dx (if provided) must be the same size as DataX");
   }
 
   // Create the OutputWorkspace
@@ -215,9 +213,10 @@ void CreateWorkspace::exec() {
 
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
-    if (!commonX)
+    if (!commonX) {
       outputWS->mutableX(local_i)
           .assign(dataX.begin() + xStart, dataX.begin() + xEnd);
+    }
 
     outputWS->mutableY(local_i)
         .assign(dataY.begin() + yStart, dataY.begin() + yEnd);
