@@ -453,9 +453,9 @@ double UnitCell::recAngle(double h1, double k1, double l1, double h2, double k2,
   Q1 = Gstar * Q1;
   E = Q1.scalar_prod(Q2);
   double temp = E / dstar(h1, k1, l1) / dstar(h2, k2, l2);
-  if (temp>1)
+  if (temp > 1)
     ang = 0.;
-  else if (temp<-1)
+  else if (temp < -1)
     ang = M_PI;
   else
     ang = acos(temp);
