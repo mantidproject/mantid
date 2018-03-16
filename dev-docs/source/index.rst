@@ -25,6 +25,11 @@ Guides
 :doc:`GettingStarted`
    Describes the process of obtaining and building the mantid code base
 
+.. toctree::
+   :maxdepth: 1
+   
+   DebuggingUnitTests
+
 ===================
 Component Overviews
 ===================
