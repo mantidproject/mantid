@@ -45,4 +45,3 @@ try:
 except RuntimeError as error:
     ex = QtGui.QWidget()
     QtGui.QMessageBox.warning(ex,"Frequency Domain Analysis",str(error))
-
