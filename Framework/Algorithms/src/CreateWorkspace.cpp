@@ -169,7 +169,7 @@ void CreateWorkspace::exec() {
 
   if (!dX.empty()) {
     if (dX.size() != dataY.size())
-        throw std::runtime_error("Dx must have the same size as DataY");
+      throw std::runtime_error("Dx must have the same size as DataY");
     histogramBuilder.setDx(ySize);
   }
 

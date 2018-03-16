@@ -51,7 +51,7 @@ public:
     m_e = Kernel::make_cow<HistogramE>(std::forward<T>(data)...);
   }
   /// Sets Dx information. Can be a length or actual Dx data.
-  template <typename... T> void setDx(T &&... data){
+  template <typename... T> void setDx(T &&... data) {
     d_x = Kernel::make_cow<HistogramDx>(std::forward<T>(data)...);
   }
   void setDistribution(bool isDistribution);
