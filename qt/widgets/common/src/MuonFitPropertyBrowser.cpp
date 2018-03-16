@@ -57,7 +57,7 @@
 #include <QSignalMapper>
 #include <QTableWidgetItem>
 #include <QCheckBox>
-#include<QMessageBox>
+#include <QMessageBox>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
@@ -1550,9 +1550,10 @@ void MuonFitPropertyBrowser::updatePeriods() {
 void MuonFitPropertyBrowser::updatePeriods(const int j) {
   // this is for switching but has a bug at the moment
   // const QStringList &selected) {
-  if(m_periodsToFitOptions.size() ==0){
-     QMessageBox::warning(this,"Muon Analysis","Data not found. Please turn on the data archhive");    
-     return;
+  if (m_periodsToFitOptions.size() == 0) {
+    QMessageBox::warning(this, "Muon Analysis",
+                         "Data not found. Please turn on the data archhive");
+    return;
   }
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   m_enumManager->setValue(m_periodsToFit, j);
