@@ -29,6 +29,7 @@ Guides
    :maxdepth: 1
    
    DebuggingUnitTests
+   DoxygenSetup
 
 ===================
 Component Overviews
