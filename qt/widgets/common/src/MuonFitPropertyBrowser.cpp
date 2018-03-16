@@ -1549,6 +1549,10 @@ void MuonFitPropertyBrowser::updatePeriods() {
 void MuonFitPropertyBrowser::updatePeriods(const int j) {
   // this is for switching but has a bug at the moment
   // const QStringList &selected) {
+  if(m_periodsToFitOptions.size() ==0){
+     
+     return;
+  }
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   m_enumManager->setValue(m_periodsToFit, j);
   if (m_periodsToFitOptions[j] == CUSTOM_LABEL) {
