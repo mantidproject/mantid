@@ -138,8 +138,6 @@ public:
         createBinEdges.setProperty<std::vector<double>>("DataE", dataEYDx));
     TS_ASSERT_THROWS_NOTHING(
         createBinEdges.setProperty<std::vector<double>>("Dx", dataEYDx));
-    TS_ASSERT_THROWS_NOTHING(
-        createBinEdges.setPropertyValue("UnitX", "Wavelength"));
     TS_ASSERT_THROWS_NOTHING(createBinEdges.setPropertyValue(
         "OutputWorkspace", "test_CreateWorkspace"));
     TS_ASSERT_THROWS_NOTHING(createBinEdges.execute());
@@ -152,7 +150,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "test_CreateWorkspace")));
 
-    TS_ASSERT(!ws->isHistogramData());
+    TS_ASSERT(ws->isHistogramData());
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
     // No parent workspace -> no instrument -> no detectors -> no mapping.
     TS_ASSERT_EQUALS(ws->getSpectrum(0).getDetectorIDs().size(), 0);

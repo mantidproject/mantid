@@ -170,7 +170,7 @@ void CreateWorkspace::exec() {
   if (!dX.empty()) {
     if (dX.size() != dataY.size())
         throw std::runtime_error("Dx must have the same size as DataY");
-    histogramBuilder.setDx(xSize);
+    histogramBuilder.setDx(ySize);
   }
 
   histogramBuilder.setDistribution(getProperty("Distribution"));
