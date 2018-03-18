@@ -108,12 +108,10 @@ class MainWindow(QtGui.QMainWindow):
 
         # Event handling definitions
         # Top
-        self.connect(self.ui.pushButton_setExp, QtCore.SIGNAL('clicked()'),
-                     self.do_set_experiment)
+        self.ui.pushButton_setExp.clicked.connect(self.do_set_experiment)
 
         # Tab 'Data Access'
-        self.connect(self.ui.pushButton_applySetup, QtCore.SIGNAL('clicked()'),
-                     self.do_apply_setup)
+        self.ui.pushButton_applySetup.clicked.connect(self.do_apply_setup)
         self.connect(self.ui.pushButton_browseLocalDataDir, QtCore.SIGNAL('clicked()'),
                      self.do_browse_local_spice_data)
         self.connect(self.ui.pushButton_applyCalibratedSampleDistance, QtCore.SIGNAL('clicked()'),
@@ -2585,6 +2583,17 @@ class MainWindow(QtGui.QMainWindow):
                 self.ui.lineEdit_localSpiceDir.setText(default_data_dir)
                 # find out the detector type
                 status, ret_obj = self._myControl.find_detector_size(default_data_dir, exp_number)
+
+            # TODO NOW2 - check working directory.  If not set or with different exp number, then set to
+            # TODO NOW2   ~/shared/ or local  Example: /HFIR/HB3A/exp668/Shared/
+            self.ui.lineEdit_workDir
+            # check whether user has writing permission
+
+            # TODO NOW2 - check pre-processing directory.  If not set or with different exp number, then set to
+            # TODO NOW2   ~/shared/ or local    Example: /HFIR/HB3A/exp668/Shared/preprocessed
+            self.ui.lineEdit_preprocessedDir
+            # check whether user has writing permission
+            # os.access(XXX, os.W_OK)
 
         else:
             err_msg = ret_obj

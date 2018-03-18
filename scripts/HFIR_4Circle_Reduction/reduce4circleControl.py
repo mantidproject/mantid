@@ -2919,7 +2919,7 @@ class CWSCDReductionControl(object):
             file_name = '%s.csv' % file_name
 
         # Write file
-        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L', 'Q', 'Sample T']
+        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L', 'Q', 'Sample T', '2-theta']
         with open(file_name, 'w') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow(titles)
