@@ -33,10 +33,10 @@ public:
 
 class WorkspaceIteratorTest : public CxxTest::TestSuite {
 private:
-  typedef boost::shared_ptr<MantidVec> parray;
-  typedef boost::shared_ptr<Workspace2D> W2D;
-  typedef boost::shared_ptr<WorkspaceSingleValue> WSV;
-  typedef boost::shared_ptr<MatrixWorkspace> Wbase;
+  using parray = boost::shared_ptr<MantidVec>;
+  using W2D = boost::shared_ptr<Workspace2D>;
+  using WSV = boost::shared_ptr<WorkspaceSingleValue>;
+  using Wbase = boost::shared_ptr<MatrixWorkspace>;
 
 public:
   void testIteratorWorkspace2DAsBase() {

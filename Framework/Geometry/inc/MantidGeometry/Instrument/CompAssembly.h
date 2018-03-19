@@ -47,9 +47,9 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL CompAssembly : public ICompAssembly,
                                          public Component {
 protected:
-  typedef std::vector<IComponent *>::iterator comp_it; ///< Iterator type
-  typedef std::vector<IComponent *>::const_iterator
-      const_comp_it; ///< Const iterator type
+  using comp_it = std::vector<IComponent *>::iterator; ///< Iterator type
+  using const_comp_it =
+      std::vector<IComponent *>::const_iterator; ///< Const iterator type
 
 public:
   /// String description of the type of component

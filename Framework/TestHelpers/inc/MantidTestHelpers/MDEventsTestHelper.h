@@ -436,7 +436,7 @@ static void feedMDBox(MDBoxBase<MDLeanEvent<nd>, nd> *box, size_t repeat = 1,
 template <size_t nd>
 static void recurseSplit(MDGridBox<MDLeanEvent<nd>, nd> *box,
                          size_t atRecurseLevel, size_t recurseLimit) {
-  typedef std::vector<MDBoxBase<MDLeanEvent<nd>, nd> *> boxVector;
+  using boxVector = std::vector<MDBoxBase<MDLeanEvent<nd>, nd> *>;
   if (atRecurseLevel >= recurseLimit)
     return;
 

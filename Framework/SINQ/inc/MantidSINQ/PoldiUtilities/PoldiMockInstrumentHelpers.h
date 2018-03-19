@@ -34,7 +34,7 @@ namespace Poldi {
 
 using namespace Geometry;
 
-typedef std::pair<double, double> DoublePair;
+using DoublePair = std::pair<double, double>;
 
 class MockDetector : public PoldiAbstractDetector {
 protected:

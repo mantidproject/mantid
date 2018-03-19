@@ -493,7 +493,7 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
   }
 
   // Now sort by ID
-  typedef MDBoxBase<MDE, nd> *ibox_t;
+  using ibox_t = MDBoxBase<MDE, nd> *;
   std::sort(boxes_filtered.begin(), boxes_filtered.end(),
             SortBoxesByID<ibox_t>);
 

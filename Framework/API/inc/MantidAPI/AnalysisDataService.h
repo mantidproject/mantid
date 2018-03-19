@@ -178,65 +178,62 @@ private:
   std::string m_illegalChars;
 };
 
-typedef Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>
-    AnalysisDataService;
+using AnalysisDataService =
+    Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification
-    WorkspaceAddNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::AddNotification> &WorkspaceAddNotification_ptr;
+using WorkspaceAddNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification;
+using WorkspaceAddNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
-    BeforeReplaceNotification WorkspaceBeforeReplaceNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::BeforeReplaceNotification> &
-    WorkspaceBeforeReplaceNotification_ptr;
+using WorkspaceBeforeReplaceNotification = Mantid::Kernel::DataService<
+    Mantid::API::Workspace>::BeforeReplaceNotification;
+using WorkspaceBeforeReplaceNotification_ptr =
+    const Poco::AutoPtr<Mantid::Kernel::DataService<
+        Mantid::API::Workspace>::BeforeReplaceNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
-    AfterReplaceNotification WorkspaceAfterReplaceNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::AfterReplaceNotification> &
-    WorkspaceAfterReplaceNotification_ptr;
+using WorkspaceAfterReplaceNotification = Mantid::Kernel::DataService<
+    Mantid::API::Workspace>::AfterReplaceNotification;
+using WorkspaceAfterReplaceNotification_ptr =
+    const Poco::AutoPtr<Mantid::Kernel::DataService<
+        Mantid::API::Workspace>::AfterReplaceNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
-    PreDeleteNotification WorkspacePreDeleteNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::PreDeleteNotification> &
-    WorkspacePreDeleteNotification_ptr;
+using WorkspacePreDeleteNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PreDeleteNotification;
+using WorkspacePreDeleteNotification_ptr =
+    const Poco::AutoPtr<Mantid::Kernel::DataService<
+        Mantid::API::Workspace>::PreDeleteNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
-    PostDeleteNotification WorkspacePostDeleteNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::PostDeleteNotification> &
-    WorkspacePostDeleteNotification_ptr;
+using WorkspacePostDeleteNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PostDeleteNotification;
+using WorkspacePostDeleteNotification_ptr =
+    const Poco::AutoPtr<Mantid::Kernel::DataService<
+        Mantid::API::Workspace>::PostDeleteNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification
-    ClearADSNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::ClearNotification> &ClearADSNotification_ptr;
+using ClearADSNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification;
+using ClearADSNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification
-    WorkspaceRenameNotification;
-typedef const Poco::AutoPtr<
-    Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification> &
-    WorkspaceRenameNotification_ptr;
+using WorkspaceRenameNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification;
+using WorkspaceRenameNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification> &;
 
-typedef AnalysisDataServiceImpl::GroupWorkspacesNotification
-    WorkspacesGroupedNotification;
-typedef const Poco::AutoPtr<
-    AnalysisDataServiceImpl::GroupWorkspacesNotification> &
-    WorkspacesGroupedNotification_ptr;
+using WorkspacesGroupedNotification =
+    AnalysisDataServiceImpl::GroupWorkspacesNotification;
+using WorkspacesGroupedNotification_ptr =
+    const Poco::AutoPtr<AnalysisDataServiceImpl::GroupWorkspacesNotification> &;
 
-typedef AnalysisDataServiceImpl::UnGroupingWorkspaceNotification
-    WorkspaceUnGroupingNotification;
-typedef const Poco::AutoPtr<
-    AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &
-    WorkspaceUnGroupingNotification_ptr;
+using WorkspaceUnGroupingNotification =
+    AnalysisDataServiceImpl::UnGroupingWorkspaceNotification;
+using WorkspaceUnGroupingNotification_ptr = const Poco::AutoPtr<
+    AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &;
 
-typedef AnalysisDataServiceImpl::GroupUpdatedNotification
-    GroupUpdatedNotification;
-typedef const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification> &
-    GroupUpdatedNotification_ptr;
+using GroupUpdatedNotification =
+    AnalysisDataServiceImpl::GroupUpdatedNotification;
+using GroupUpdatedNotification_ptr =
+    const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification> &;
 
 } // Namespace API
 } // Namespace Mantid

@@ -211,7 +211,7 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold,
       }
     } else {
       // non-distribution, just square root final error value
-      typedef double (*pf)(double);
+      using pf = double (*)(double);
       pf uf = std::sqrt;
       std::transform(enew.begin(), enew.end(), enew.begin(), uf);
     }
@@ -322,7 +322,7 @@ void rebinHistogram(const std::vector<double> &xold,
                  // (should be done externally)
   {
     // Now take the root-square of the errors
-    typedef double (*pf)(double);
+    using pf = double (*)(double);
     pf uf = std::sqrt;
     std::transform(enew.begin(), enew.end(), enew.begin(), uf);
   }
@@ -523,7 +523,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString) {
   // Split the string and turn it into a vector.
   std::vector<NumT> values;
 
-  typedef std::vector<std::string> split_vector_type;
+  using split_vector_type = std::vector<std::string>;
   split_vector_type strs;
 
   boost::split(strs, listString, boost::is_any_of(", "));

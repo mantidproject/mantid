@@ -795,7 +795,7 @@ public:
    */
   void test_splitAllIfNeeded_fileBacked() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
-    typedef MDLeanEvent<2> MDE;
+    using MDE = MDLeanEvent<2>;
 
     // Create the grid box and make it file-backed.
     MDBoxBase<MDE, 2> *b = MDEventsTestHelper::makeMDGridBox<2>();

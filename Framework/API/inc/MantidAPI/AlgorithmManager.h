@@ -102,7 +102,7 @@ private:
   mutable std::mutex m_managedMutex;
 };
 
-typedef Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl> AlgorithmManager;
+using AlgorithmManager = Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;
 
 } // namespace API
 } // Namespace Mantid

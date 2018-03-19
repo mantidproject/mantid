@@ -45,7 +45,7 @@ public:
 
 protected:
   // Convenience typedef
-  typedef std::map<std::string, std::string> StringToStringMap;
+  using StringToStringMap = std::map<std::string, std::string>;
 
 private:
   void init() override;

@@ -10,8 +10,8 @@
 namespace Mantid {
 
 namespace Kernel {
-typedef Mantid::Kernel::StringTokenizer tokenizer;
-typedef std::pair<std::string, std::string> str_pair;
+using tokenizer = Mantid::Kernel::StringTokenizer;
+using str_pair = std::pair<std::string, std::string>;
 
 using PhysicalConstants::Atom;
 using PhysicalConstants::getAtom;

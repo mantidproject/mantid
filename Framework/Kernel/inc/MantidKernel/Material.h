@@ -64,7 +64,7 @@ public:
     FormulaUnit(const PhysicalConstants::Atom &atom, const double multiplicity);
   };
 
-  typedef std::vector<FormulaUnit> ChemicalFormula;
+  using ChemicalFormula = std::vector<FormulaUnit>;
 
   static ChemicalFormula parseChemicalFormula(const std::string chemicalSymbol);
 
@@ -193,9 +193,9 @@ private:
 };
 
 /// Typedef for a shared pointer
-typedef boost::shared_ptr<Material> Material_sptr;
+using Material_sptr = boost::shared_ptr<Material>;
 /// Typedef for a shared pointer to a const object
-typedef boost::shared_ptr<const Material> Material_const_sptr;
+using Material_const_sptr = boost::shared_ptr<const Material>;
 }
 }
 

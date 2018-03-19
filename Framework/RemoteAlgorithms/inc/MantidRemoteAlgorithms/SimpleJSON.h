@@ -23,8 +23,8 @@
 #include "MantidKernel/System.h"
 
 class JSONValue;
-typedef std::map<std::string, JSONValue> JSONObject;
-typedef std::vector<JSONValue> JSONArray;
+using JSONObject = std::map<std::string, JSONValue>;
+using JSONArray = std::vector<JSONValue>;
 // Note: according to the JSON spec, an array is a type of value.
 // That isn't strictly true in the C++ sense here (ie: JSONArray
 // doesn't inherit from JSONValue), but I think we'll be all right.
