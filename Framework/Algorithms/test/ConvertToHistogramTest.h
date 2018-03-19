@@ -21,7 +21,6 @@ using Mantid::Kernel::make_cow;
 class ConvertToHistogramTest : public CxxTest::TestSuite {
 
 public:
-
   void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().clear();
   }
@@ -82,7 +81,8 @@ public:
     constexpr int numSpectra{2};
     Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace123(
         numSpectra, numYPoints, false);
-    double xErrors[numYPoints] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+    double xErrors[numYPoints] = {0.1, 0.2, 0.3, 0.4, 0.5,
+                                  0.6, 0.7, 0.8, 0.9, 1.0};
     auto dxs = make_cow<HistogramDx>(xErrors, xErrors + numYPoints);
     // Reset the X data to something reasonable, set Dx.
     Points x(numYPoints, LinearGenerator(0.0, 1.0));

@@ -19,7 +19,6 @@ using Mantid::Kernel::make_cow;
 class ConvertToPointDataTest : public CxxTest::TestSuite {
 
 public:
-
   void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().clear();
   }
@@ -146,12 +145,13 @@ public:
   void test_Dx_Data_Is_Handled_Correctly() {
     constexpr size_t numBins{11};
     double xBoundaries[numBins] = {0.0,  1.0,  3.0,  5.0,  6.0, 7.0,
-                              10.0, 13.0, 16.0, 17.0, 17.5};
+                                   10.0, 13.0, 16.0, 17.0, 17.5};
     constexpr int numSpectra{2};
     Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
         numSpectra, numBins, xBoundaries);
     TS_ASSERT(testWS->isHistogramData())
-    double xErrors[numBins - 1] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+    double xErrors[numBins - 1] = {0.1, 0.2, 0.3, 0.4, 0.5,
+                                   0.6, 0.7, 0.8, 0.9, 1.0};
     auto dxs = make_cow<HistogramDx>(xErrors, xErrors + numBins - 1);
     testWS->setSharedDx(0, dxs);
     testWS->setSharedDx(1, dxs);
