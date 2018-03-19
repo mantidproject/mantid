@@ -345,7 +345,7 @@ void SaveHKL::exec() {
           continue;
         }
         int run = p.getRunNumber();
-        size_t seqNum = p.getPeakNumber();
+        int seqNum = p.getPeakNumber();
         int bank = 0;
         std::string bankName = p.getBankName();
         int nCols, nRows;

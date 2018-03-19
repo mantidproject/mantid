@@ -85,7 +85,7 @@ void LoadHKL::exec() {
     double wl = std::stod(line.substr(32, 8));
     double tbar, trans, scattering;
     int run, bank;
-    size_t seqNum;
+    int seqNum;
     if (cosines) {
       tbar = std::stod(line.substr(40, 8)); // tbar
       run = std::stoi(line.substr(102, 6));

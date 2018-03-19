@@ -695,7 +695,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> dSpacing(np);
   std::vector<double> TOF(np);
   std::vector<int> runNumber(np);
-  std::vector<size_t> peakNumber(np);
+  std::vector<int> peakNumber(np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
 
@@ -865,8 +865,8 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->closeData();
 
   // Peak Number column
-  file->writeData("column_20", peakNumber);
-  file->openData("column_20");
+  file->writeData("column_17", peakNumber);
+  file->openData("column_17");
   file->putAttr("name", "Peak Number");
   file->putAttr("interpret_as", specifyInteger);
   file->putAttr("units", "Not known"); // Units may need changing when known

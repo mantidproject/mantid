@@ -295,7 +295,7 @@ const void *PeakColumn::void_pointer(size_t index) const {
     value = peak.getRunNumber();
     return boost::get<int>(&value);
   } else if (m_name == "PeakNumber") {
-    value = static_cast<int>(peak.getPeakNumber());
+    value = peak.getPeakNumber();
     return boost::get<int>(&value);
   } else if (m_name == "DetID") {
     value = peak.getDetectorID();

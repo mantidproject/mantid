@@ -150,8 +150,8 @@ public:
   int getCol() const override;
   void setRow(int m_row);
   void setCol(int m_col);
-  void setPeakNumber(size_t m_peakNumber) override;
-  size_t getPeakNumber() const override;
+  void setPeakNumber(int m_peakNumber) override;
+  int getPeakNumber() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;
@@ -246,7 +246,7 @@ private:
   double m_orig_L;
 
   // keep peak number
-  size_t m_peakNumber;
+  int m_peakNumber;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;

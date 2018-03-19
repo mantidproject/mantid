@@ -256,7 +256,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
  */
 DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
                                           std::string &lastStr,
-                                          std::ifstream &in, size_t &seqNum,
+                                          std::ifstream &in, int &seqNum,
                                           std::string bankName, double qSign) {
   double h;
   double k;
@@ -487,7 +487,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
     oss << bankString << bankNum;
     std::string bankName = oss.str();
 
-    size_t seqNum;
+    int seqNum;
 
     try {
       // Read the peak
