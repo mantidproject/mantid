@@ -166,7 +166,7 @@ private:
                        boost::shared_ptr<const Mantid::API::IPeaksWorkspace>
                            toWorkspace) override;
   /// Alias for container of subjects type.
-  typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
+  using SubjectContainer = std::vector<PeaksPresenter_sptr>;
   /// Subject presenters.
   SubjectContainer m_subjects;
   /// Use default

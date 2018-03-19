@@ -76,7 +76,7 @@ private:
   QString m_sampleThickness;
 
   QHash<QCheckBox *const, QString> m_savFormats;
-  typedef QHash<QCheckBox *const, QString>::const_iterator SavFormatsConstIt;
+  using SavFormatsConstIt = QHash<QCheckBox *const, QString>::const_iterator;
 
   void setupLine1(QHBoxLayout *const lineOne);
   void setupLine2(QHBoxLayout *const lineTwo,

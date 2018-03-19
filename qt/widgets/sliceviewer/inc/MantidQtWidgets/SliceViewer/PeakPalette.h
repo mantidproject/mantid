@@ -26,7 +26,7 @@ public:
   ~PeakPalette();
 
 private:
-  typedef std::map<int, C> ColourMapType;
+  using ColourMapType = std::map<int, C>;
   ColourMapType m_backgroundMap;
   ColourMapType m_foregroundMap;
   typename ColourMapType::iterator safeFetchPair(ColourMapType &map,
