@@ -343,7 +343,7 @@ void ObjComponent::initDraw() const {
  */
 size_t
 ObjComponent::registerContents(class ComponentVisitor &componentVisitor) const {
-  if (this->shape()->isFiniteGeometry())
+  if (this->shape() != nullptr && this->shape()->isFiniteGeometry())
     return componentVisitor.registerGenericObjComponent(*this);
   else
     return componentVisitor.registerInfiniteObjComponent(*this);
