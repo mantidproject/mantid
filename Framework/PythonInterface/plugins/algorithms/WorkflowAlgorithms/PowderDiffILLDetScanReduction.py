@@ -8,6 +8,7 @@ from mantid.simpleapi import *
 
 class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
     _progress = None
+    _tolerance = 0.
 
     def category(self):
         return "ILL\\Diffraction;Diffraction\\Reduction"
@@ -91,6 +92,12 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         if instrument.getName() not in supported_instruments:
             self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
                              + str(supported_instruments))
+        if instrument.getName() == 'D20':
+            if self.getProperty('Output2DTubes').value:
+                raise RuntimeError('Output2DTubes is not supported for D20 (1D detector)')
+            if self.getProperty('Output2D').value:
+                raise RuntimeError('Output2D is not supported for D20 (1D detector)')
+            self._tolerance = 1000.
 
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
@@ -146,7 +153,8 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                            HeightAxis=height_range,
                                            MirrorScatteringAngles=mirror_angles,
                                            CropNegativeScatteringAngles=crop_negative,
-                                           OutputWorkspace=output_workspace_name + '_1D')
+                                           OutputWorkspace=output_workspace_name + '_1D',
+                                           ScatteringAngleTolerance=self._tolerance)
             output_workspaces.append(output1D)
         DeleteWorkspace('input_group')
 

@@ -347,7 +347,9 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         yData[angleIndex] += counts;
         eData[angleIndex] =
             sqrt(eData[angleIndex] * eData[angleIndex] + error * error);
-        normalisation[heightIndex][angleIndex]++;
+        if (counts != 0.) {
+          normalisation[heightIndex][angleIndex]++;
+        }
       }
     }
   }
