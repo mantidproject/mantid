@@ -2584,16 +2584,48 @@ class MainWindow(QtGui.QMainWindow):
                 # find out the detector type
                 status, ret_obj = self._myControl.find_detector_size(default_data_dir, exp_number)
 
-            # TODO NOW2 - check working directory.  If not set or with different exp number, then set to
-            # TODO NOW2   ~/shared/ or local  Example: /HFIR/HB3A/exp668/Shared/
-            self.ui.lineEdit_workDir
-            # check whether user has writing permission
+            # TEST new feature
+            # Check working directory.  If not set or with different exp number, then set to
+            work_dir = str(self.ui.lineEdit_workDir.text()).strip()
+            if work_dir != '':
+                # check whether it contains exp number other than current one
+                if work_dir.lower().count('exp') > 0 and work_dir.count('{0}'.format(exp_number)) == 0:
+                    use_default = True
+                else:
+                    use_default = False
+            else:
+                use_default = False
+            if use_default:
+                # set default to analysis cluster or local
+                work_dir = '/HFIR/HB3A/exp{0}/Shared/'.format(exp_number)
+                # check whether user has writing permission
+                if os.access(work_dir, os.W_OK) is False:
+                    work_dir = os.path.join(os.path.expanduser('~'), 'HB3A/Exp{0}'.format(exp_number))
+                self.ui.lineEdit_workDir.setText(work_dir)
+            # END-IF
 
-            # TODO NOW2 - check pre-processing directory.  If not set or with different exp number, then set to
-            # TODO NOW2   ~/shared/ or local    Example: /HFIR/HB3A/exp668/Shared/preprocessed
-            self.ui.lineEdit_preprocessedDir
-            # check whether user has writing permission
-            # os.access(XXX, os.W_OK)
+            # TEST new feature
+            # Check pre-processing directory.  If not set or with different exp number, then set to
+            pre_process_dir = str(self.ui.lineEdit_preprocessedDir.text()).strip()
+            if pre_process_dir == '':
+                # empty
+                use_default = True
+            elif pre_process_dir.lower().count('exp') > 0 and pre_process_dir.count('{0}'.format(exp_number)) > 0:
+                # doesn't sound right
+                use_default = True
+            else:
+                # other cases
+                use_default = False
+            if use_default:
+                # shared Example: /HFIR/HB3A/exp668/Shared/preprocessed
+                pre_process_dir = '/HFIR/HB3A/exp{0}/Shared/preprocessed'.format(exp_number)
+                # check whether user has writing permission
+                if os.access(pre_process_dir, os.W_OK) is False:
+                    # use local
+                    pre_process_dir = os.path.join(os.path.expanduser('~'),
+                                                   'HB3A/Exp{0}/preprocessed'.format(exp_number))
+                self.ui.lineEdit_preprocessedDir.setText(pre_process_dir)
+            # END-IF
 
         else:
             err_msg = ret_obj
@@ -3594,8 +3626,11 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def menu_integrate_peak_single_pt(self):
-        """
-        blabla
+        """ Handle the event to integrate single-pt peak from menu operation
+        The operation includes
+        1. initialize the single-pt scan integration window if it is not initialized
+        2. add the selected scans to the table in single-pt scan integration window
+        3. show the window
         :return:
         """
         if self._single_pt_peak_integration_window is None:
@@ -3609,9 +3644,11 @@ class MainWindow(QtGui.QMainWindow):
         scan_pt_tup_list = self.ui.tableWidget_surveyTable.get_selected_scan_pt()
         # get other information
         for scan_number, pt_number in scan_pt_tup_list:
-            # TODO FIXME NOW NOW2 - Make this section work!
+            # check HKL and 2theta
             h_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, 'h')
-            hkl_str = 'blabla'
+            k_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, 'k')
+            l_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, 'l')
+            hkl_str = '{0}, {1}, {2}'.format(h_i, k_i, l_i)
             two_theta = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '2theta')
             self._single_pt_peak_integration_window.add_scan(scan_number, pt_number, hkl_str, two_theta)
 

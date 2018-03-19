@@ -979,7 +979,11 @@ class CWSCDReductionControl(object):
         :param excluded_scans:
         :return:
         """
-        # check inputs.. TODO NOW
+        # check inputs
+        assert isinstance(exp_number, int), 'Exp number {0} must be integer'.format(exp_number)
+        assert isinstance(two_theta, float), '2-theta {0} must be a float.'.format(two_theta)
+        assert isinstance(resolution, float), 'Resolution {0} must be a float.'.format(resolution)
+        assert isinstance(excluded_scans, list), 'Excluded scans {0} must be a list.'.format(excluded_scans)
 
         # get the list of scans in the memory
         have_change = False
@@ -3227,12 +3231,19 @@ class CWSCDReductionControl(object):
         # END-FOR (scan_number)
 
         # group all the SPICE tables
-        # TODO FIXME NOW NOW2 - If workspace group exists, then add new group but not calling GroupWorkspaces
-        mantidsimple.GroupWorkspaces(InputWorkspaces=spice_table_name_list,
-                                     OutputWorkspace=fourcircle_utility.get_spice_group_name(exp_number))
+        # TEST - If workspace group exists, then add new group but not calling GroupWorkspaces
+        group_name = fourcircle_utility.get_spice_group_name(exp_number)
+        if AnalysisDataService.doesExist(group_name):
+            ws_group = AnalysisDataService.retrieve(group_name)
+            for table_name in spice_table_name_list:
+                ws_group.addWorkspace(table_name)
+        else:
+            mantidsimple.GroupWorkspaces(InputWorkspaces=spice_table_name_list,
+                                         OutputWorkspace=group_name)
+        # END-IF-ELSE
 
-        if error_message != '':
-            print('[Error]\n%s' % error_message)
+        # if error_message != '':
+        #     print('[Error]\n%s' % error_message)
 
         self._scanSummaryList.extend(scan_sum_list)
 
