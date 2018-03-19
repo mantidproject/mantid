@@ -754,7 +754,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     // Add the run_end property
     m_eventBuffer->mutableRun().addProperty(
         "run_end", timeFromPacket(pkt).toISO8601String());
-    
+
     // Set the flag to make us stop reading from the network.
     // Stopping network reads solves a number of problems:
     // 1) We don't need to manage a second buffer in order to keep the events
