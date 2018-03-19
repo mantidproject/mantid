@@ -1,12 +1,13 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include <cfloat>
 
 namespace Mantid {
@@ -342,8 +343,10 @@ void ObjComponent::initDraw() const {
  */
 size_t
 ObjComponent::registerContents(class ComponentVisitor &componentVisitor) const {
-
-  return componentVisitor.registerGenericObjComponent(*this);
+  if (this->shape()->isFiniteGeometry())
+    return componentVisitor.registerGenericObjComponent(*this);
+  else
+    return componentVisitor.registerInfiniteObjComponent(*this);
 }
 
 } // namespace Geometry

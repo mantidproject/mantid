@@ -59,6 +59,8 @@ public:
   virtual bool isOnSide(const Kernel::V3D &) const = 0;
   virtual int calcValidType(const Kernel::V3D &Pt,
                             const Kernel::V3D &uVec) const = 0;
+  virtual bool isFiniteGeometry() const { return true; }
+  virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
   virtual IObject *clone() const = 0;
   virtual IObject *

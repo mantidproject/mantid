@@ -168,8 +168,14 @@ public:
   virtual size_t registerGenericComponent(
       const Mantid::Geometry::IComponent &component) override;
 
+  virtual size_t registerInfiniteComponent(
+      const Mantid::Geometry::IComponent &component) override;
+
   virtual size_t registerGenericObjComponent(
       const Mantid::Geometry::IObjComponent &objComponent) override;
+
+  virtual size_t
+  registerInfiniteObjComponent(const IObjComponent &objComponent) override;
 
   virtual size_t
   registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;

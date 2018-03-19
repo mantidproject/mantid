@@ -728,8 +728,10 @@ void InstrumentActor::draw(bool picking) const {
 void InstrumentActor::doDraw(bool picking) const {
   const auto &compInfo = componentInfo();
   for (size_t i = 0; i < compInfo.size(); ++i) {
+    auto type = compInfo.componentType(i);
     if ((!compInfo.isDetector(i) && !m_showGuides) ||
-        compInfo.componentType(i) == Beamline::ComponentType::OutlineComposite)
+        type == Beamline::ComponentType::OutlineComposite ||
+        type == Beamline::ComponentType::Infinite)
       continue;
 
     if (compInfo.hasValidShape(i)) {

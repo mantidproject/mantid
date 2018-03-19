@@ -83,6 +83,11 @@ public:
     return obj;
   }
 
+  bool isFiniteGeometry() const override { return m_isFiniteGeometry; }
+  void setFiniteGeometryFlag(bool isFinite) override {
+    m_isFiniteGeometry = isFinite;
+  }
+
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
   void setID(const std::string &id) { m_id = id; }
@@ -272,6 +277,8 @@ private:
   std::string m_id;
   /// material composition
   std::unique_ptr<Kernel::Material> m_material;
+  /// Whether or not the object geometry is finite
+  bool m_isFiniteGeometry = true;
 
 protected:
   std::vector<const Surface *> m_SurList; ///< Full surfaces (make a map

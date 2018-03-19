@@ -152,10 +152,12 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
             numPrimitives++;
           } else if (primitiveName == "infinite-plane") {
             idMatching[idFromUser] = parseInfinitePlane(pE, primitives, l_id);
+            retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "infinite-cylinder") {
             idMatching[idFromUser] =
                 parseInfiniteCylinder(pE, primitives, l_id);
+            retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "cylinder") {
             lastElement = pE;
@@ -175,6 +177,7 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
             numPrimitives++;
           } else if (primitiveName == "infinite-cone") {
             idMatching[idFromUser] = parseInfiniteCone(pE, primitives, l_id);
+            retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "cone") {
             lastElement = pE;

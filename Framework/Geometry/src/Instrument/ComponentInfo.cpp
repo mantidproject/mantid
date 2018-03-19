@@ -392,7 +392,8 @@ BoundingBox
 ComponentInfo::componentBoundingBox(const size_t index,
                                     const BoundingBox *reference) const {
   // Check that we have a valid shape here
-  if (!hasValidShape(index)) {
+  if (!hasValidShape(index) ||
+      componentType(index) == Beamline::ComponentType::Infinite) {
     return BoundingBox(); // Return null bounding box
   }
   const auto &s = this->shape(index);
@@ -445,7 +446,8 @@ ComponentInfo::componentBoundingBox(const size_t index,
  */
 BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
                                        const BoundingBox *reference) const {
-  if (isDetector(componentIndex)) {
+  if (isDetector(componentIndex) ||
+      componentType(componentIndex) == Beamline::ComponentType::Infinite) {
     return componentBoundingBox(componentIndex, reference);
   }
   BoundingBox absoluteBB;

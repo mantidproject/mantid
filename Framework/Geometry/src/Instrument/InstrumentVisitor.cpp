@@ -213,6 +213,35 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
 }
 
 /**
+* @brief InstrumentVisitor::registerInfiniteComponent
+* @param component : IComponent being visited
+* @return Component index of this component
+*/
+size_t InstrumentVisitor::registerInfiniteComponent(
+    const Mantid::Geometry::IComponent &component) {
+  /*
+  * For a generic leaf component we extend the component ids list, but
+  * the detector indexes entries will of course be empty
+  */
+  m_detectorRanges->emplace_back(
+      std::make_pair(0, 0)); // Represents an empty range
+                             // Record the ID -> index mapping
+  const size_t componentIndex = commonRegistration(component);
+  m_componentType->push_back(Beamline::ComponentType::Infinite);
+
+  const size_t componentStart = m_assemblySortedComponentIndices->size();
+  m_componentRanges->emplace_back(
+      std::make_pair(componentStart, componentStart + 1));
+  m_assemblySortedComponentIndices->push_back(componentIndex);
+  // Unless this is the root component this parent is not correct and will be
+  // updated later in the register call of the parent.
+  m_parentComponentIndices->push_back(componentIndex);
+  // Generic components are not assemblies and do not therefore have children.
+  m_children->emplace_back(std::vector<size_t>());
+  return componentIndex;
+}
+
+/**
  * @brief InstrumentVisitor::registerGenericObjComponent
  * @param objComponent : IObjComponent being visited
  * @return Component index of this component
@@ -220,6 +249,18 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
 size_t InstrumentVisitor::registerGenericObjComponent(
     const Mantid::Geometry::IObjComponent &objComponent) {
   auto index = registerGenericComponent(objComponent);
+  (*m_shapes)[index] = objComponent.shape();
+  return index;
+}
+
+/**
+* @brief InstrumentVisitor::registerInfiniteObjComponent
+* @param objComponent : IObjComponent being visited
+* @return Component index of this component
+*/
+size_t InstrumentVisitor::registerInfiniteObjComponent(
+    const IObjComponent &objComponent) {
+  auto index = registerInfiniteComponent(objComponent);
   (*m_shapes)[index] = objComponent.shape();
   return index;
 }
