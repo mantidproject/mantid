@@ -433,5 +433,6 @@ using TableWorkspace_sptr = boost::shared_ptr<TableWorkspace>;
 using TableWorkspace_const_sptr = boost::shared_ptr<const TableWorkspace>;
 
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /*MANTID_DATAOBJECTS_TABLEWORKSPACE_H_*/
