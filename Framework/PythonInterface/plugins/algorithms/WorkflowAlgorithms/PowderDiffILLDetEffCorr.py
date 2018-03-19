@@ -3,20 +3,12 @@ from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 import numpy.ma as ma
-from scipy.optimize import curve_fit
-from scipy.misc import factorial
 from mantid.kernel import StringListValidator, Direction, IntArrayBoundedValidator, IntArrayProperty, \
     CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, \
     FloatArrayProperty, VisibleWhenProperty, PropertyCriterion
 from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode, \
     MultipleFileProperty
 from mantid.simpleapi import *
-
-"""
-Defines the poisson function with lambda and k
-"""
-def _poisson(k, lamb):
-    return (lamb**k/factorial(k)) * np.exp(-lamb)
 
 """
 Extracts workspace data in [bin_min, bin_max] for ragged workspace
@@ -90,7 +82,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
 
         self.declareProperty(name='CalibrationMethod',
                              defaultValue='Median',
-                             validator=StringListValidator(['Median', 'Mean', 'MostLikelyMean', 'FitPoisson']),
+                             validator=StringListValidator(['Median', 'Mean', 'MostLikelyMean']),
                              doc='The method of how the calibration constant of a pixel is derived from the distribution of ratios.')
 
         self.declareProperty(name='DerivationMethod', defaultValue='SequentialSummedReference1D',
@@ -146,6 +138,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 issues["InterpolateOverlappingAngles"] = "Interpolation option is not supported for D2B"
             if self.getPropertyValue("NormaliseTo") == "ROI":
                 issues["NormaliseTo"] = "ROI normalisation is not supported for D2B"
+            if self.getPropertyValue("CalibrationMethod") == "MostLikelyMean":
+                issues["CalibrationMethod"] = "MostLikelyMean is not supported for D2B"
 
         return issues
 
@@ -215,7 +209,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 factor = MostLikelyMean(ratios)
         return factor
 
-    def _compute_relative_factor_2D(self, ratio_ws):
+    def _compute_relative_factor_2D(self, ratio_ws, tube_index):
         """
             Calculates the relative detector efficiency from the workspace containing response ratios.
             Implements mean, median and most likely mean methods.
@@ -225,6 +219,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         if len(self._excluded_ranges) != 0:
             self._exclude_ranges(ratio_ws)
         ratios = mtd[ratio_ws].extractY()
+        if tube_index == 0:
+            ratios=ratios[:,0:-self._n_scans_per_file]
+        elif tube_index == self._n_tubes - 1:
+            ratios=ratios[:,self._n_scans_per_file:]
         factors = np.ones(ratios.shape[0])
         ratios = ma.masked_array(ratios, mask=[ratios == 0])
         ratios = ma.masked_invalid(ratios)
@@ -232,19 +230,6 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             factors = np.array(ma.median(ratios, axis = 1))
         elif self._method == 'Mean':
             factors = np.array(ma.mean(ratios, axis = 1))
-        elif self._method == 'FitPoisson':
-            pass
-            '''
-            result = numpy.ones(n_pixels_per_tube)
-            for pixel in range(n_pixels_per_tube):
-                hist, edges = numpy.histogram(my[pixel], bins = fit_bins)
-                try:
-                    params, cov = curve_fit(poisson, fit_bin_mids, hist)
-                    result[pixel] = params[0]
-                except RuntimeError:
-                    result[pixel] = 1
-            return result
-            '''
         return factors
 
     def _validate_scan(self, scan_ws):
@@ -569,9 +554,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         e_tubes = []
         numors = []
 
-        nreports = self._n_scan_files + 128 * 3 + 3
+        nreports = self._n_scan_files + 5
         self._progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
-
         for index, numor in enumerate(self._input_files.split(',')):
             self._progress.report('Processing detector scan '+numor[-9:-3])
             ws_name = '__raw_'+str(index)
@@ -608,11 +592,11 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             DeleteWorkspace(calib_ws)
         self._progress.report('Constructing the global reference')
         SumOverlappingTubes(InputWorkspaces=numors, OutputWorkspace=ref_ws, MirrorScatteringAngles=False,
-                            CropNegativeScatteringAngles=False, Normalise=True)
+                            CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes")
         DeleteWorkspaces(numors)
         to_group = []
+        self._progress.report('Preparing the tube responses')
         for tube in range(self._n_tubes):
-            self._progress.report('Preparing the tube #' + str(tube))
             y_tube = np.concatenate(y_tubes[tube], axis=1)
             x_tube = np.concatenate(x_tubes[tube], axis=1)
             e_tube = np.concatenate(e_tubes[tube], axis=1)
@@ -621,9 +605,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             SortXAxis(InputWorkspace=ws_name, OutputWorkspace=ws_name)
             to_group.append(ws_name)
         GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=tubes_group)
+        #self._sumOverlappingTubes(tubes_group, ref_ws)
         ratios = []
+        self._progress.report('Constructing response ratios')
         for tube in reversed(range(self._n_tubes)):
-            self._progress.report('Constructing ratios for the tube #' + str(tube))
             itube = self._n_tubes - tube - 1
             ratio_ws = '__ratio'+str(tube)
             _crop_bins(ref_ws, itube * self._n_scans_per_file, itube * self._n_scans_per_file + self._scan_points, '__cropped_ref')
@@ -631,13 +616,13 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             ratios.append(ratio_ws)
             DeleteWorkspace('__cropped_ref')
         GroupWorkspaces(InputWorkspaces=ratios, OutputWorkspace=ratios_group)
-        DeleteWorkspace(tubes_group)
+        #DeleteWorkspace(tubes_group)
         constants = np.ones([self._n_pixels_per_tube,self._n_tubes])
+        self._progress.report('Computing the calibration constants')
         for tube in range(self._n_tubes):
-            self._progress.report('Computing the calibration constants for the tube #' + str(tube))
-            constants[:,tube] = self._compute_relative_factor_2D('__ratio'+str(tube))
+            constants[:,tube] = self._compute_relative_factor_2D('__ratio'+str(tube), tube)
         self._progress.report('Finalizing...')
-        DeleteWorkspace(ratios_group)
+        #DeleteWorkspace(ratios_group)
         x = np.arange(self._n_tubes)
         e = np.zeros([self._n_pixels_per_tube,self._n_tubes])
         CreateWorkspace(DataX=np.tile(x, self._n_pixels_per_tube), DataY=constants, DataE=e,
