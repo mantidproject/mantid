@@ -1376,6 +1376,7 @@ class CrystalFieldFit(object):
         else:
             fun = self.model.makeMultiSpectrumFunction()
         if 'CrystalFieldMultiSpectrum' in fun:
+            fun = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun)
             fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
