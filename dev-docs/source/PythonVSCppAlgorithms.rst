@@ -16,28 +16,28 @@ These are summarised in the table and discussed below. Generally, it is recommen
 Algorithm Language Comparison
 -----------------------------
 
-+-------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Consideration     | C++                                                                                                               | Python                                                                     |
-+===================+===================================================================================================================+============================================================================+
-| Execution Speed   | Generally much faster (order of magnitude, and beyond), since compiled. Lots of optimisations can be made.        | Generally slower. Numpy should be used wherever possible.                  |
-|                   | OpenMP parallelisation for trivial loops (e.g. loops over spectra).                                               | Large loops should be avoided, especially the nested ones.                 |
-|                   |                                                                                                                   | Provides no means for trivial parallelisation.                             |
-+-------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Creation          | Generally slower and more complicated, but you do get the advantage of compile-time type checking.                | Generally easier and faster.                                               |
-+-------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Workflow          | Large overhead when setting and getting the properties of child algorithms. Can quickly grow cumbersome, if many  | Very convenient and concise for workflows thanks to the python SimpleAPI.  |
-|                   | child algorithms have to be run.                                                                                  |                                                                            |
-+-------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Testability       | Easy in C++                                                                                                       | Easy in python                                                             |
-+-------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| API Accessibility | Full                                                                                                              | Some of the framework functionality is not exposed to python.              |
-+-------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| User Readability  | Users are not generally expected to understand C++ code.                                                          | Better readability. Power users are expected to understand python code.    |
-+-------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| User Modifiability| Users can not change C++ algorithms, since they are shipped in the compiled form.                                 | Users can play with python algorithms, since they are shipped as source.   |
-|                   |                                                                                                                   | It is not advised, of course, do to so, but in case of a spurious result,  |
-|                   |                                                                                                                   | they have the opportunity to play with the algorithm before contacting us. |
-+-------------------+-------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
++-----------------------+--------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+| Consideration         | C++                                                                                                    | Python                                                                     |
++=======================+========================================================================================================+============================================================================+
+| **Execution Speed**   | Generally much faster (order of magnitude, and beyond), since compiled.                                | Generally slower. Numpy should be used wherever possible.                  |
+|                       | Lots of optimisations can be made. OpenMP parallelisation for trivial loops (e.g. loops over spectra). | Large loops should be avoided, especially the nested ones.                 |
+|                       |                                                                                                        | Provides no means for trivial parallelisation.                             |
++-----------------------+--------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+| **Creation**          | Generally slower and more complicated, but you do get the advantage of compile-time type checking.     | Generally easier and faster.                                               |
++-----------------------+--------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+| **Workflow**          | Large overhead when setting and getting the properties of child algorithms.                            | Very convenient and concise for workflows thanks to the python SimpleAPI.  |
+|                       | Can quickly grow cumbersome, if many child algorithms have to be run.                                  |                                                                            |
++-----------------------+--------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+| **Testability**       | Easy in C++                                                                                            | Easy in python                                                             |
++-----------------------+--------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+| **API Accessibility** | Full                                                                                                   | Some of the framework functionality is not exposed to python.              |
++-----------------------+--------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+| **User Readability**  | Users are not generally expected to understand C++ code.                                               | Better readability. Power users are expected to understand python code.    |
++-----------------------+--------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+| **User Modifiability**| Users can not change C++ algorithms, since they are shipped in the compiled form.                      | Users can play with python algorithms, since they are shipped as source.   |
+|                       |                                                                                                        | It is not advised, of course, do to so, but in case of a spurious result,  |
+|                       |                                                                                                        | they have the opportunity to play with the algorithm before contacting us. |
++-----------------------+--------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 
 Multiple Possibilities in Mantid
 --------------------------------
@@ -46,7 +46,7 @@ There are many ways to extend Mantid to add new features not present out-of-the-
 
 The easiest way to extend Mantid, and possibly the best starting place for any improvements, is a python script. Mantid provides a very high level of scriptable control, including plotting and visualisation as well as the execution of core routines. The scripting manual for Mantid provides an overview of the possibilities offered for scripting, including automatic generation via the graphical user interface for Mantid.
 
-Algorithms and Workspaces are core concepts in Mantid. Generally, an Algorithm does something based on input workspaces, either to create a new one from the results, or to modify the input in-place. One reason to create an Algorithm, is because you have a script containing a well-defined and useful procedure, that you would like to share with a wider audience. It usually requires a low amount of effort to adapt a python script into one or more Python Algorithms.
+:ref:`Algorithms <Algorithm>` and :ref:`workspaces <Workspace>` are core concepts in Mantid. Generally, an Algorithm does something based on input workspaces, either to create a new one from the results, or to modify the input in-place. One reason to create an Algorithm, is because you have a script containing a well-defined and useful procedure, that you would like to share with a wider audience. It usually requires a low amount of effort to adapt a python script into one or more Python Algorithms.
 
 Core Mantid Algorithms as well as some user defined Algorithms, are generally written in C++. There are a number of advantages to doing this (which are covered later), but also some serious disadvantages. When thinking about writing new functionality against Mantid, C++ does not need to be the default option.
 
