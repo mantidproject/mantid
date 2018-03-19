@@ -70,7 +70,8 @@ private:
 };
 
 /// The specific instantiation of the templated type
-using AlgorithmDialogFactory = Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>;
+using AlgorithmDialogFactory =
+    Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>;
 
 /**
     The UserSubWindowFactory is responsible for creating concrete instances of
@@ -179,7 +180,8 @@ void UserSubWindowFactoryImpl::saveAliasNames(const std::string &realName) {
 }
 
 /// The specific instantiation of the templated type
-using UserSubWindowFactory = Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>;
+using UserSubWindowFactory =
+    Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>;
 }
 }
 

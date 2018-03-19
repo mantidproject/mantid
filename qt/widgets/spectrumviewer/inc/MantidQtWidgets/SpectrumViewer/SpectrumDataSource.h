@@ -107,7 +107,8 @@ protected:
 };
 
 using SpectrumDataSource_sptr = boost::shared_ptr<SpectrumDataSource>;
-using SpectrumDataSource_const_sptr = boost::shared_ptr<const SpectrumDataSource>;
+using SpectrumDataSource_const_sptr =
+    boost::shared_ptr<const SpectrumDataSource>;
 
 } // namespace SpectrumView
 } // namespace MantidQt

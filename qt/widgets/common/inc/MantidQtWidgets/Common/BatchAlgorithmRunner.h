@@ -60,7 +60,8 @@ class EXPORT_OPT_MANTIDQT_COMMON BatchAlgorithmRunner : public QObject {
 
 public:
   using AlgorithmRuntimeProps = std::map<std::string, std::string>;
-  using ConfiguredAlgorithm = std::pair<Mantid::API::IAlgorithm_sptr, AlgorithmRuntimeProps>;
+  using ConfiguredAlgorithm =
+      std::pair<Mantid::API::IAlgorithm_sptr, AlgorithmRuntimeProps>;
 
   explicit BatchAlgorithmRunner(QObject *parent = nullptr);
   ~BatchAlgorithmRunner() override;

@@ -316,8 +316,10 @@ public:
   }
 
 private:
-  using PeaksRepresentationSphere_sptr = boost::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>;
-  using VecPeaksRepresentationSphere = std::vector<PeaksRepresentationSphere_sptr>;
+  using PeaksRepresentationSphere_sptr =
+      boost::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>;
+  using VecPeaksRepresentationSphere =
+      std::vector<PeaksRepresentationSphere_sptr>;
 
   /// Collection to store a large number of physicalPeaks.
   VecPeaksRepresentationSphere m_peaks;

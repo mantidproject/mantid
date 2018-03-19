@@ -18,7 +18,8 @@ private:
     }
   };
 
-  using ProgressActionType = Mantid::VATES::FilterUpdateProgressAction<MockFilter>;
+  using ProgressActionType =
+      Mantid::VATES::FilterUpdateProgressAction<MockFilter>;
 
 public:
   void testCallsView() {

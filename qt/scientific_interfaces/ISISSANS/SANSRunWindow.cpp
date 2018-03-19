@@ -2145,7 +2145,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
       m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
 
       using namespace boost;
-      using GeomSampleInfo = tuple<QLineEdit *, function<double (const Sample *)>, std::string>;
+      using GeomSampleInfo =
+          tuple<QLineEdit *, function<double(const Sample *)>, std::string>;
 
       std::vector<GeomSampleInfo> sampleInfoList;
       sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,

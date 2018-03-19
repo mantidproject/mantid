@@ -96,7 +96,8 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmInputHistoryImpl>;
 };
 
-using AlgorithmInputHistory = Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
+using AlgorithmInputHistory =
+    Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
 }
 }
 

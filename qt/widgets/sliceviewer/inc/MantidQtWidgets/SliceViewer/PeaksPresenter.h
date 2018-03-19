@@ -35,7 +35,8 @@ class PeakOverlayView;
 class UpdateableOnDemand;
 
 // Alias
-using SetPeaksWorkspaces = std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace> >;
+using SetPeaksWorkspaces =
+    std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace>>;
 
 /*---------------------------------------------------------
 Abstract PeaksPresenter.

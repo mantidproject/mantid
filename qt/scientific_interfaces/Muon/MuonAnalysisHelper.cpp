@@ -1102,7 +1102,7 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
   QMap<int, QColor> colors; // position, color
 
   // Vector of <number of runs in fit, parameters in fit> pairs
-  using FitProp = std::pair<size_t, std::vector<std::string> >;
+  using FitProp = std::pair<size_t, std::vector<std::string>>;
   std::vector<FitProp> fitProperties;
 
   // Get fit properties for each input workspace

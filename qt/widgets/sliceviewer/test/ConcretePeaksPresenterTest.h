@@ -30,7 +30,8 @@ using MDGeometry_sptr = boost::shared_ptr<Mantid::API::MDGeometry>;
 
 class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
   /// Alias.
-  using ConcretePeaksPresenter_sptr = boost::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter>;
+  using ConcretePeaksPresenter_sptr =
+      boost::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter>;
 
   /// Helper method to create a good 'Integrated' peaks workspace
   Mantid::API::IPeaksWorkspace_sptr

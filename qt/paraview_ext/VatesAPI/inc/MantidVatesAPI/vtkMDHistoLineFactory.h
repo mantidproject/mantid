@@ -59,7 +59,7 @@ public:
 
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
-  using Column = std::vector<UnstructuredPoint> ;
+  using Column = std::vector<UnstructuredPoint>;
 
   std::string getFactoryTypeName() const override {
     return "vtkMDHistoLineFactory";

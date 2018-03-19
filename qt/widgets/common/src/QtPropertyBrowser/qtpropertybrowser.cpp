@@ -1172,8 +1172,12 @@ QtBrowserItem::~QtBrowserItem() { delete d_ptr; }
 
 ////////////////////////////////////
 
-using Map1 = QMap<QtAbstractPropertyBrowser *, QMap<QtAbstractPropertyManager *, QtAbstractEditorFactoryBase *> >;
-using Map2 = QMap<QtAbstractPropertyManager *, QMap<QtAbstractEditorFactoryBase *, QList<QtAbstractPropertyBrowser *> > >;
+using Map1 =
+    QMap<QtAbstractPropertyBrowser *,
+         QMap<QtAbstractPropertyManager *, QtAbstractEditorFactoryBase *>>;
+using Map2 =
+    QMap<QtAbstractPropertyManager *, QMap<QtAbstractEditorFactoryBase *,
+                                           QList<QtAbstractPropertyBrowser *>>>;
 Q_GLOBAL_STATIC(Map1, m_viewToManagerToFactory)
 Q_GLOBAL_STATIC(Map2, m_managerToFactoryToViews)
 

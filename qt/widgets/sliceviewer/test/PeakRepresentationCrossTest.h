@@ -182,9 +182,11 @@ public:
 
 class PeakRepresentationCrossTestPerformance : public CxxTest::TestSuite {
 private:
-  using VecPeakRepCross = std::vector<boost::shared_ptr<PeakRepresentationCross> >;
+  using VecPeakRepCross =
+      std::vector<boost::shared_ptr<PeakRepresentationCross>>;
 
-  using VecPeakRepCrossWrapped = std::vector<boost::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper> >;
+  using VecPeakRepCrossWrapped = std::vector<
+      boost::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper>>;
 
   /// Collection to store a large number of PeakRepresentationCross.
   VecPeakRepCross m_peaks;

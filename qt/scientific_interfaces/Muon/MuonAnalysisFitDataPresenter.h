@@ -11,7 +11,9 @@
 #include <boost/optional/optional.hpp>
 
 /// Save some typing
-using RebinOptions = std::pair<MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType, std::string>;
+using RebinOptions = std::pair<
+    MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType,
+    std::string>;
 
 namespace Mantid {
 namespace API {

@@ -104,7 +104,8 @@ private:
 };
 
 using MatrixWSDataSource_sptr = boost::shared_ptr<MatrixWSDataSource>;
-using MatrixWSDataSource_const_sptr = boost::shared_ptr<const MatrixWSDataSource>;
+using MatrixWSDataSource_const_sptr =
+    boost::shared_ptr<const MatrixWSDataSource>;
 
 } // namespace SpectrumView
 } // namespace MantidQt
