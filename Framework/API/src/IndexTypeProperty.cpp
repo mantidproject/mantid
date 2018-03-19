@@ -50,7 +50,7 @@ std::vector<std::string> IndexTypeProperty::allowedValues() const {
 
 bool IndexTypeProperty::isMultipleSelectionAllowed() { return false; }
 
-std::string &IndexTypeProperty::operator=(API::IndexType type) {
+IndexTypeProperty &IndexTypeProperty::operator=(API::IndexType type) {
   std::string val;
 
   switch (type) {
@@ -62,7 +62,8 @@ std::string &IndexTypeProperty::operator=(API::IndexType type) {
     break;
   }
 
-  return *this = val;
+  *this = val;
+  return *this;
 }
 
 std::string IndexTypeProperty::generatePropertyName(const std::string &name) {
