@@ -160,6 +160,12 @@ public:
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
+  void test_CreateAxisFromRebinParams_ThrowsIfSingleParam() {
+    const std::vector<double> rbParams = {1.0};
+    std::vector<double> axis;
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(rbParams, axis), const std::runtime_error& e)
+  }
+
   void test_ConvertToBinBoundary_EmptyInputVector() {
     std::vector<double> bin_centers;
     std::vector<double> bin_edges;

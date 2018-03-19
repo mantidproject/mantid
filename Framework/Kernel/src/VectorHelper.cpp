@@ -27,6 +27,9 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
                                         std::vector<double> &xnew,
                                         const bool resize_xnew,
                                         const bool full_bins_only) {
+  if (params.size() == 1) {
+    throw std::runtime_error("Rebinning parameters containing only the bin width are not supported.");
+  }
   double xs;
   int ibound(2), istep(1), inew(1);
   int ibounds = static_cast<int>(
