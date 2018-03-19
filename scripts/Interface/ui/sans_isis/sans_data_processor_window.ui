@@ -433,7 +433,6 @@ QGroupBox::title {
           </item>
          </layout>
         </widget>
-        <widget class="AddRunsPage" name="add_runs_page"/>
         <widget class="QWidget" name="settings_page">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
@@ -2009,6 +2008,7 @@ QGroupBox::title {
          </layout>
         </widget>
         <widget class="BeamCentre" name="beam_centre"/>
+        <widget class="AddRunsPage" name="add_runs_page"/>
         <widget class="DiagnosticsPage" name="diagnostic_page"/>
        </widget>
       </item>

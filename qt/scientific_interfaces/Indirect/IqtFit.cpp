@@ -253,13 +253,11 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
 std::string IqtFit::createIntensityTie(IFunction_sptr function) const {
   std::string tieString = "1";
   const auto backIndex = backgroundIndex();
-
-  if (backIndex)
-    tieString += "-f" + std::to_string(backIndex.get()) + ".A0";
-
   const auto intensityParameters = getParameters(function, "Height");
 
-  if (intensityParameters.size() < 2)
+  if (backIndex && !intensityParameters.empty())
+    tieString += "-f" + std::to_string(backIndex.get()) + ".A0";
+  else if (intensityParameters.size() < 2)
     return "";
 
   for (auto i = 1u; i < intensityParameters.size(); ++i)
@@ -347,6 +345,11 @@ bool IqtFit::validate() {
   if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
 
+  if (inputWorkspace()->getXMin() < 0) {
+    uiv.addErrorMessage("Error in input workspace: All X data must be "
+                        "greater than or equal to 0.");
+  }
+
   auto error = uiv.generateErrorMessage();
   emit showMessageBox(error);
   return error.isEmpty();
@@ -366,7 +369,7 @@ void IqtFit::loadSettings(const QSettings &settings) {
 void IqtFit::newDataLoaded(const QString wsName) {
   IndirectFitAnalysisTab::newInputDataLoaded(wsName);
 
-  int maxWsIndex =
+  const auto maxWsIndex =
       static_cast<int>(inputWorkspace()->getNumberHistograms()) - 1;
 
   m_uiForm->spPlotSpectrum->setMaximum(maxWsIndex);
