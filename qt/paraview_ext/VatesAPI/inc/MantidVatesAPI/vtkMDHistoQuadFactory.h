@@ -62,9 +62,9 @@ public:
 
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
-  typedef std::vector<std::vector<UnstructuredPoint>> Plane;
+  using Plane = std::vector<std::vector<UnstructuredPoint>>;
 
-  typedef std::vector<UnstructuredPoint> Column;
+  using Column = std::vector<UnstructuredPoint>;
 
   std::string getFactoryTypeName() const override {
     return "vtkMDHistoQuadFactory";
