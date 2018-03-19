@@ -191,7 +191,7 @@ def _SofQWtitle(workspace, figure):
 
 def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf, vertMax=numpy.inf):
     """Return slicing for a 2D numpy array limited by given min and max values.
-        
+
     :param xs: the 2D X data of a workspace from :func:`mantid.api.MatrixWorkspace.extractX`
     :type xs: a 2D :class:`numpy.ndarray`
     :param vertAxis: the vertical axis values of a workspace
@@ -217,7 +217,7 @@ def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf,
 
 def defaultrcParams():
     """Return a dictionary of directtools default matplotlib rc parameters.
-    
+
     :returns: a :class:`dict` of default :mod:`matplotlib` rc parameters needed by :mod:`directtools`
     """
     params = {
@@ -522,9 +522,9 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
 
 def subplots(**kwargs):
     """Return matplotlib figure and axes with Mantid projection.
-    
+
     The returned figure and axes have the proper projection to plot Mantid workspaces directly.
-    
+
     :param kwargs: keyword arguments that are directly passed to :func:`matplotlib.pyplot.subplots`.
     :type kwargs: dict
     :returns: a tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`)
@@ -603,7 +603,7 @@ class SampleLogs:
     def __init__(self, workspace):
         """Initialize a `SampleLogs` object.
         Transform sample log entries from workspace into attributes of this object.
-        
+
         :param workspace: the workspace from which to extract the sample logs
         :type workspace: :class:`mantid.api.MatrixWorkspace`
         """
