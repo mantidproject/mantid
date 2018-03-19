@@ -101,24 +101,25 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
 
   for (size_t i = compInfo.root(); i != std::numeric_limits<size_t>::max();
        --i) {
-    if (compInfo.componentType(i) ==
-        Mantid::Beamline::ComponentType::Rectangular) {
+    auto type = compInfo.componentType(i);
+    if (type == Mantid::Beamline::ComponentType::Infinite)
+      continue;
+
+    if (type == Mantid::Beamline::ComponentType::Rectangular) {
       updateVisited(visited, compInfo.componentsInSubtree(i));
       if (visibleComps[i])
         drawRectangularBank(i, picking);
       continue;
     }
 
-    if (compInfo.componentType(i) ==
-        Mantid::Beamline::ComponentType::OutlineComposite) {
+    if (type == Mantid::Beamline::ComponentType::OutlineComposite) {
       updateVisited(visited, compInfo.componentsInSubtree(i));
       if (visibleComps[i])
         drawTube(i, picking);
       continue;
     }
 
-    if (compInfo.componentType(i) ==
-        Mantid::Beamline::ComponentType::Structured) {
+    if (type == Mantid::Beamline::ComponentType::Structured) {
       updateVisited(visited, compInfo.componentsInSubtree(i));
       if (visibleComps[i])
         drawStructuredBank(i, picking);
