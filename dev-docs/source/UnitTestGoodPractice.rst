@@ -41,6 +41,10 @@ long as it does not affect the function of the public interface).
 However there are cases where the internals of a class need unit tests
 either due to complexity or tracking down specific bugs.
 
+In the circumstance where the implementation within the private/protected
+methods of a class is sufficiently complex, such to require dedicated unit
+tests, this code should be moved into a separate class(es).
+
 Protected
 ~~~~~~~~~
 
