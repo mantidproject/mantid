@@ -123,8 +123,8 @@ def _medianDeltaTheta(ws):
     if not thetas:
         raise RuntimeError('No usable detectors for median DTheta ' +
                            'calculation.')
-    dThetas = numpy.diff(thetas)
-    return numpy.median(dThetas[dThetas > numpy.radians(0.1)])
+    dThetas = numpy.abs(numpy.diff(thetas))
+    return numpy.median(dThetas[dThetas > numpy.deg2rad(0.1)])
 
 
 def _minMaxQ(ws):
