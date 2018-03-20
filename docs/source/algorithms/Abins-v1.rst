@@ -11,7 +11,7 @@ Contributors:
 
 .. summary::
 
-.. alias::
+.. seeAlso::
 
 .. properties::
 

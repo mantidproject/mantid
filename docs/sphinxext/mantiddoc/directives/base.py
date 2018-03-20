@@ -82,22 +82,31 @@ class BaseDirective(Directive):
         """
         return self.state.document.settings.env.docname
 
-    def make_header(self, name, pagetitle=False):
+    def make_header(self, name, pagetitle=False, level=2):
         """
         Makes a ReStructuredText title from the algorithm's name.
 
         Args:
           algorithm_name (str): The name of the algorithm to use for the title.
-          pagetitle (bool): If True, line is inserted above & below algorithm name.
+          pagetitle (bool): If True, this sets the level to 1 (overriding any other value).
+          level (int): 1-4 the level of the heading to be used.
 
         Returns:
           str: ReST formatted header with algorithm_name as content.
         """
+        level_dict = {1:"=", 2:"-", 3:"#", 4:"^"}
+        
         if pagetitle:
-            line = "\n" + "=" * (len(name) + 1) + "\n"
+            level = 1
+        if level not in level_dict:
+            print('base.make_header: did not understand level ' +str(level))
+            level = 2
+            
+        line = "\n" + level_dict[level] * (len(name)) + "\n"
+        
+        if level == 1:
             return line + name + line
         else:
-            line = "\n" + "-" * len(name) + "\n"
             return name + line
 
 #----------------------------------------------------------------------------------------

@@ -61,7 +61,7 @@ public:
   const std::string category() const override { return "Transforms\\Rebin"; }
     /// Algorithm's seeAlso
   const std::vector<std::string> seeAlso() const override {
-    return{ "Rebin", "InvalidAlgorithm" };
+    return{ "Rebin"};
   }
 
 protected:

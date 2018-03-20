@@ -8,7 +8,6 @@
 """
 
 import mantiddoc.directives.algorithm
-import mantiddoc.directives.alias
 import mantiddoc.directives.attributes
 import mantiddoc.directives.categories
 import mantiddoc.directives.diagram
@@ -26,7 +25,6 @@ def setup(app):
       app: The main Sphinx application object
     """
     algorithm.setup(app)
-    alias.setup(app)
     attributes.setup(app)
     categories.setup(app)
     diagram.setup(app)

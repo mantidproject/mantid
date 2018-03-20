@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. seeAlso::
 
 .. properties::
 

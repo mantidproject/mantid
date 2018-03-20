@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. seeAlso::
 
 .. properties::
 
