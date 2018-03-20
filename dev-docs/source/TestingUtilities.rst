@@ -24,24 +24,17 @@ The following helper files have been found in the
 `Mantid/Framework/TestHelpers <http://github.com/mantidproject/mantid/tree/master/Framework/TestHelpers>`__
 package:
 
--  **BinaryOperationMDTestHelper**
-   `1 <http://doxygen.mantidproject.org/d1/d4f/namespaceBinaryOperationMDTestHelper.html>`__
+-  `BinaryOperationMDTestHelper <http://doxygen.mantidproject.org/d1/d4f/namespaceBinaryOperationMDTestHelper.html>`__
 -  **ComponentCreationHelper**
-   `2 <http://doxygen.mantidproject.org/d8/d8d/namespaceComponentCreationHelper.html>`__
-   This creates instrument components that can then be used in a unit
-   test.
+   `ComponentCreationHelper <http://doxygen.mantidproject.org/d8/d8d/namespaceComponentCreationHelper.html>`__
+   This creates instrument components that can then be used in a unit test.
 -  **ICatTestHelper**
--  **MDEventsTestHelper**
-   `3 <http://doxygen.mantidproject.org/d5/d75/namespaceMantid_1_1MDEvents_1_1MDEventsTestHelper.html>`__
--  **SANSInstrumentCreationHelper**
-   `4 <http://doxygen.mantidproject.org/d9/dbf/classSANSInstrumentCreationHelper.html>`__
--  **ScopedFileHelper**
-   `5 <http://doxygen.mantidproject.org/d7/d7f/classScopedFileHelper_1_1ScopedFile.html#details>`__
-   This creates a file that is automatically deleted when no longer
-   needed.
--  **WorkspaceCreationHelper**\ `6 <http://doxygen.mantidproject.org/d1/db6/namespaceWorkspaceCreationHelper.html>`__
-   This creates simple workspaces that can be used in a unit test. One
-   of these workspaces has a full instrument.
+-  `MDEventsTestHelper <http://doxygen.mantidproject.org/d5/d75/namespaceMantid_1_1MDEvents_1_1MDEventsTestHelper.html>`__
+-  `SANSInstrumentCreationHelper <http://doxygen.mantidproject.org/d9/dbf/classSANSInstrumentCreationHelper.html>`__
+-  `ScopedFileHelper <http://doxygen.mantidproject.org/d7/d7f/classScopedFileHelper_1_1ScopedFile.html#details>`__
+   This creates a file that is automatically deleted when no longer needed.
+-  `WorkspaceCreationHelper <http://doxygen.mantidproject.org/d1/db6/namespaceWorkspaceCreationHelper.html>`__
+   This creates simple workspaces that can be used in a unit test. One of these workspaces has a full instrument.
 
 Python
 ------
@@ -53,5 +46,5 @@ be found in the **testhelpers**-package.
    algorithm without executing it.
 -  **TemporaryFileHelper** - A class that creates named temporary files
    and deletes them automatically when the object is deleted. Basically
-   a thin wrapper around **NamedTemporaryFile** from the tempfile
-   package `7 <https://docs.python.org/2/library/tempfile.html>`__.
+   a thin wrapper around `NamedTemporaryFile <https://docs.python.org/2/library/tempfile.html>`__
+   from the tempfile package.
