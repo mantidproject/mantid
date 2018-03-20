@@ -98,7 +98,7 @@ Other More General Points
    can be used to check stress and timings.
 -  Untestable code is a code-smell, if you can't get the code under test
    it probably needs refactoring.
--  Weight your testing to be destructive rather than demonstative.
+-  Weight your testing to be destructive rather than demonstrative.
    Destructive tests have a higher efficacy for finding bugs.
 
 Mantid-specific Guidelines
@@ -152,11 +152,9 @@ How do I get a workspace filled with data?
     `1 <https://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/TestHelpers/inc/MantidTestHelpers/WorkspaceCreationHelper.h>`__)
     to provide the workspaces for you. Keep things as generic as you can
     and it will help you and others for other tests.
-    More details of this will be provided at `Data and Helpers for unit
-    tests <Data_and_Helpers_for_unit_tests>`__.
+    More details of this will be provided at `Testing Utilities <TestingUtilities>`__.
 I want a workspace with a valid instrument definition and Spectra-detector map
-    As above use or extend a method in one of the `helper
-    classes <https://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/TestHelpers/inc/MantidTestHelpers>`__
+    As above use or extend a method in one of the `helper classes <TestingUtilities>`__
     that actually creates a minimal workspace for you in code - it will
     only hurt the first time but everyone will benefit.
     Loading instrument XML files in debug **really** hurts performance;
