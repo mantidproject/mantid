@@ -5,15 +5,16 @@ import numpy as np
 import numpy.ma as ma
 from mantid.kernel import StringListValidator, Direction, IntArrayBoundedValidator, IntArrayProperty, \
     CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, \
-    FloatArrayProperty, VisibleWhenProperty, PropertyCriterion
+    FloatArrayProperty, VisibleWhenProperty, PropertyCriterion, IntBoundedValidator
 from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode, \
     MultipleFileProperty
 from mantid.simpleapi import *
 
-"""
-Extracts workspace data in [bin_min, bin_max] for ragged workspace
-"""
+
 def _crop_bins(ws, bin_min, bin_max, out):
+    """
+        Extracts workspace data in [bin_min, bin_max] for ragged workspace
+    """
     y = mtd[ws].extractY()
     e = mtd[ws].extractE()
     x = mtd[ws].extractX()
@@ -23,17 +24,19 @@ def _crop_bins(ws, bin_min, bin_max, out):
                     NSpec=mtd[ws].getNumberHistograms(),
                     OutputWorkspace=out)
 
-"""
-Divides ws1/ws2 ignoring the difference in x-axis
-"""
+
 def _divide_friendly(ws1, ws2, out):
+    """
+        Divides ws1/ws2 ignoring the difference in x-axis
+    """
     mtd[ws2].setX(0, mtd[ws1].readX(0))
     Divide(LHSWorkspace=ws1, RHSWorkspace=ws2, OutputWorkspace=out)
 
-"""
-Sums ws1+ws2 ignoring the difference in x-axis
-"""
+
 def _plus_friendly(ws1, ws2, out):
+    """
+        Sums ws1+ws2 ignoring the difference in x-axis
+    """
     mtd[ws2].setX(0, mtd[ws1].readX(0))
     Plus(LHSWorkspace=ws1, RHSWorkspace=ws2, OutputWorkspace=out)
 
@@ -60,6 +63,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
     _n_scans_per_file = None    # number of scan points in a standard scan for D2B (=25)
     _n_tubes = None             # number of tubes in D2B (=128)
     _n_pixels_per_tube = None   # number of pixels per tube in D2B (=128)
+    _n_iterations = None        # number of iterations (=1); used for D2B
+    _pixels_to_trim = None      # number of pixels to trim from top and bottom of tubes for chi2 calculation (D2B)
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -68,7 +73,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         return "ILL\\Diffraction;Diffraction\\Reduction;Diffraction\\Calibration"
 
     def summary(self):
-        return "Performs detector efficiency correction calculation for scanning powder diffraction instruments D20 and D2B at ILL."
+        return "Performs detector efficiency correction calculation for scanning " \
+               "monochromatic powder diffraction instruments D20 and D2B at ILL."
 
     def name(self):
         return "PowderDiffILLDetEffCorr"
@@ -83,7 +89,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self.declareProperty(name='CalibrationMethod',
                              defaultValue='Median',
                              validator=StringListValidator(['Median', 'Mean', 'MostLikelyMean']),
-                             doc='The method of how the calibration constant of a pixel is derived from the distribution of ratios.')
+                             doc='The method of how the calibration constant of a pixel '
+                                 'is derived from the distribution of ratios.')
 
         self.declareProperty(name='DerivationMethod', defaultValue='SequentialSummedReference1D',
                              validator=StringListValidator(['SequentialSummedReference1D', 'GlobalSummedReference2D']),
@@ -95,7 +102,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self.declareProperty(name='NormaliseTo',
                              defaultValue='None',
                              validator=StringListValidator(['None', 'Monitor', 'ROI']),
-                             doc='Normalise to time, monitor or ROI counts before deriving the calibration.')
+                             doc='Normalise to monitor or ROI counts before deriving the calibration.')
 
         thetaRangeValidator = FloatArrayOrderedPairsValidator()
 
@@ -106,7 +113,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self.setPropertySettings('ROI', normaliseToROI)
 
         self.declareProperty(FloatArrayProperty(name='ExcludedRange', values=[], validator=thetaRangeValidator),
-                             doc='Scattering angle regions to exclude from the computation of relative calibration constants, e.g. beam stop [degrees]. ')
+                             doc='Scattering angle regions to exclude from the computation of '
+                                 'relative calibration constants, e.g. beam stop [degrees]. ')
 
         pixelRangeValidator = CompositeValidator()
         greaterThanOne = IntArrayBoundedValidator()
@@ -130,16 +138,26 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                                                      direction=Direction.Output),
                              doc='Output workspace containing the calibration constants (inverse of efficiency) for each pixel.')
 
+        self.declareProperty(name='NumberOfIterations',
+                             defaultValue=1,
+                             validator=IntBoundedValidator(lower=0, upper=10),
+                             doc='Number of iterations to perform. 0 means auto; i.e. the '
+                                 'iterations will terminate after reaching some Chi2/NdoF.')
+
     def validateInputs(self):
         issues = dict()
 
         if self.getPropertyValue("DerivationMethod") == "GlobalSummedReference2D":
             if self.getProperty("InterpolateOverlappingAngles").value:
-                issues["InterpolateOverlappingAngles"] = "Interpolation option is not supported for D2B"
+                issues["InterpolateOverlappingAngles"] = "Interpolation option is not supported for global method"
             if self.getPropertyValue("NormaliseTo") == "ROI":
-                issues["NormaliseTo"] = "ROI normalisation is not supported for D2B"
+                issues["NormaliseTo"] = "ROI normalisation is not supported for global method"
             if self.getPropertyValue("CalibrationMethod") == "MostLikelyMean":
-                issues["CalibrationMethod"] = "MostLikelyMean is not supported for D2B"
+                issues["CalibrationMethod"] = "MostLikelyMean is not supported for global method"
+
+        if self.getPropertyValue("DerivationMethod") == "SequentialSummedReference1D":
+            if self.getProperty("NumberOfIterations").value != 1:
+                issues["NumberOfIterations"] = "NumberOfIterations is not supported for sequential method"
 
         return issues
 
@@ -176,7 +194,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             @param ratio_ws : the name of the ratio workspace
         """
         ConvertToHistogram(InputWorkspace=ratio_ws, OutputWorkspace=ratio_ws)
-        x = mtd[ratio_ws].readX(0)
+        equator = int(mtd[ratio_ws].getNumberHistograms() / 2)
+        x = mtd[ratio_ws].readX(equator)
         xmin = x[0]
         xmax = x[-1]
         for excluded_range in self._excluded_ranges:
@@ -265,6 +284,22 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         CreateWorkspace(DataX=x_2d, DataY=y_2d, DataE=e_2d, NSpec=self._n_det+1, OutputWorkspace=ws_2d)
         CopyLogs(InputWorkspace=raw_ws, OutputWorkspace=ws_2d)
 
+    def _chi_squared(self, calib_current):
+        """
+            Calculates the termination parameter for automatic iterations for global method (D2B)
+            @param calib_current : the residual calibration map at the current iteration
+            @return : chi2/NdoF
+        """
+        start = self._pixels_to_trim
+        end = self._n_pixels_per_tube - self._pixels_to_trim
+        y = mtd[calib_current].extractY()[:,start:end]
+        ones = np.ones(y.shape)
+        diff = np.absolute(y - ones)
+        diff *= diff
+        chi2 = np.sum(diff)
+        ndof = (self._n_pixels_per_tube - 2 * self._pixels_to_trim) * self._n_tubes
+        return chi2/ndof
+
     def _set_input_properties(self):
         """
             Sets up the input properties of the algorithm
@@ -280,6 +315,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self._pixel_range = self.getProperty('PixelRange').value
         self._out_response = self.getPropertyValue('OutputResponseWorkspace')
         self._out_name = self.getPropertyValue('OutputWorkspace')
+        self._n_iterations = self.getProperty('NumberOfIterations').value
 
     def _configure_sequential(self, raw_ws):
         """
@@ -412,6 +448,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
     def _derive_calibration_sequential(self, ws_2d, constants_ws, response_ws):
         """
             Computes the relative calibration factors sequentailly for all the pixels.
+            This is the main calculation, the performance is critical
             @param : 2D input workspace
             @param : the output workspace name containing the calibration constants
             @param : the output workspace name containing the combined response
@@ -539,25 +576,18 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             Performs the global derivation for D2B following the logic:
             1. SumOverlappingTubes with 2D option to obtain the reference
             2. Loop over tubes, make ratios wrt reference, obtain constants
+            3. Apply the constants, and iterate over if requested
         """
         mon_ws = self._hide('mon')
         constants_ws = self._hide('constants')
         response_ws = self._hide('resp')
         calib_ws = self._hide('calib')
-        tubes_group = self._hide('tubes')
-        ratios_group = self._hide('ratios')
         ref_ws = self._hide('ref')
-
-        shape = []
-        y_tubes = []
-        x_tubes = []
-        e_tubes = []
         numors = []
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=self._n_scan_files)
 
-        nreports = self._n_scan_files + 5
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
         for index, numor in enumerate(self._input_files.split(',')):
-            self._progress.report('Processing detector scan '+numor[-9:-3])
+            self._progress.report('Pre-processing detector scan '+numor[-9:-3])
             ws_name = '__raw_'+str(index)
             numors.append(ws_name)
             LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name, DataType="Raw")
@@ -566,18 +596,78 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 if mtd[ws_name].getInstrument().getName() != 'D2B':
                     raise RuntimeError('Global reference method is not supported for the instrument given')
                 self._configure_global(ws_name)
-                shape = [self._n_tubes, self._n_pixels_per_tube, self._n_scans_per_file]
-                for i in range(self._n_tubes):
-                    y_tubes.append([])
-                    x_tubes.append([])
-                    e_tubes.append([])
             if self._normalise_to == 'Monitor':
                 NormaliseToMonitor(InputWorkspace=ws_name, OutputWorkspace=ws_name, MonitorID=0)
             ExtractMonitors(InputWorkspace=ws_name, DetectorWorkspace=ws_name, MonitorWorkspace=mon_ws)
             DeleteWorkspace(mon_ws)
+            ConvertSpectrumAxis(InputWorkspace=ws_name, OrderAxis=False, Target="SignedTheta", OutputWorkspace=ws_name)
             if self._calib_file:
                 ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_ws, OutputWorkspace=ws_name)
-            ConvertSpectrumAxis(InputWorkspace=ws_name, OrderAxis=False, Target="SignedTheta", OutputWorkspace=ws_name)
+
+        if self._calib_file:
+            DeleteWorkspace(calib_ws)
+
+        constants = np.ones([self._n_pixels_per_tube,self._n_tubes])
+        x = np.arange(self._n_tubes)
+        e = np.zeros([self._n_pixels_per_tube,self._n_tubes])
+        CreateWorkspace(DataX=np.tile(x, self._n_pixels_per_tube), DataY=constants, DataE=e,
+                        NSpec=self._n_pixels_per_tube, OutputWorkspace=constants_ws)
+        calib_current = self._hide('current')
+        CloneWorkspace(InputWorkspace=constants_ws, OutputWorkspace=calib_current)
+
+        iteration = 0
+        chi2_ndof = 10000. # set a large number to start with
+        self._pixels_to_trim = 28
+        chi2_ndof_threshold = 10.
+        inst = mtd[numors[0]].getInstrument()
+        if inst.hasParameter('pixels_to_trim'):
+            self._pixels_to_trim = inst.getIntParameter('pixels_to_trim')[0]
+        if inst.hasParameter('chi2_ndof'):
+            chi2_ndof_threshold = inst.getNumberParameter('chi2_ndof')[0]
+
+        while iteration < self._n_iterations or (self._n_iterations == 0 and chi2_ndof > chi2_ndof_threshold):
+            self._progress = Progress(self, start=0.0, end=1.0, nreports=5)
+            self._progress.report('Starting iteration #'+str(iteration))
+            self._derive_calibration_global(numors)
+            Multiply(LHSWorkspace=constants_ws, RHSWorkspace=calib_current, OutputWorkspace=constants_ws)
+            chi2_ndof = self._chi_squared(calib_current)
+            if iteration != 0:
+                self.log().warning('Iteration {0}: Chi2/NdoF={1}'.format(iteration, chi2_ndof))
+            iteration += 1
+
+        if self._out_response:
+            for index in range(self._n_scan_files):
+                ws_name = '__raw_'+str(index)
+                ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_current, OutputWorkspace=ws_name)
+            SumOverlappingTubes(InputWorkspaces=numors, OutputWorkspace=response_ws, MirrorScatteringAngles=False,
+                                CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes", ScatteringAngleTolerance=1000)
+
+        DeleteWorkspace(ref_ws)
+        DeleteWorkspaces(numors)
+        DeleteWorkspace(calib_current)
+
+    def _derive_calibration_global(self, numors):
+        """
+            Derives one iteration of calibration with the global reference method (D2B)
+            This is the main calculation, so the performance is critical
+            @param numors : list of workspace names
+        """
+        y_tubes = []
+        x_tubes = []
+        e_tubes = []
+        calib_current = self._hide('current')
+        ref_ws = self._hide('ref')
+        tubes_group = self._hide('tubes')
+        ratios_group = self._hide('ratios')
+        shape = [self._n_tubes, self._n_pixels_per_tube, self._n_scans_per_file]
+        for i in range(self._n_tubes):
+            y_tubes.append([])
+            x_tubes.append([])
+            e_tubes.append([])
+
+        for index in range(self._n_scan_files):
+            ws_name = '__raw_'+str(index)
+            ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_current, OutputWorkspace=ws_name)
             y = mtd[ws_name].extractY()
             e = mtd[ws_name].extractE()
             x = mtd[ws_name].getAxis(1).extractValues()
@@ -588,12 +678,11 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 y_tubes[tube].append(y_3d[tube,:,:])
                 x_tubes[tube].append(x_3d[tube,:,:])
                 e_tubes[tube].append(e_3d[tube,:,:])
-        if self._calib_file:
-            DeleteWorkspace(calib_ws)
+
         self._progress.report('Constructing the global reference')
         SumOverlappingTubes(InputWorkspaces=numors, OutputWorkspace=ref_ws, MirrorScatteringAngles=False,
                             CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes", ScatteringAngleTolerance=1000)
-        DeleteWorkspaces(numors)
+
         to_group = []
         self._progress.report('Preparing the tube responses')
         for tube in range(self._n_tubes):
@@ -605,7 +694,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             SortXAxis(InputWorkspace=ws_name, OutputWorkspace=ws_name)
             to_group.append(ws_name)
         GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=tubes_group)
-        #self._sumOverlappingTubes(tubes_group, ref_ws)
+
         ratios = []
         self._progress.report('Constructing response ratios')
         for tube in reversed(range(self._n_tubes)):
@@ -616,23 +705,18 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             ratios.append(ratio_ws)
             DeleteWorkspace('__cropped_ref')
         GroupWorkspaces(InputWorkspaces=ratios, OutputWorkspace=ratios_group)
-        #DeleteWorkspace(tubes_group)
-        constants = np.ones([self._n_pixels_per_tube,self._n_tubes])
+        DeleteWorkspace(tubes_group)
+
         self._progress.report('Computing the calibration constants')
+        Transpose(InputWorkspace=calib_current, OutputWorkspace=calib_current)
         for tube in range(self._n_tubes):
-            constants[:,tube] = self._compute_relative_factor_2D('__ratio'+str(tube), tube)
-        self._progress.report('Finalizing...')
-        #DeleteWorkspace(ratios_group)
-        x = np.arange(self._n_tubes)
-        e = np.zeros([self._n_pixels_per_tube,self._n_tubes])
-        CreateWorkspace(DataX=np.tile(x, self._n_pixels_per_tube), DataY=constants, DataE=e,
-                        NSpec=self._n_pixels_per_tube, OutputWorkspace=constants_ws)
-        ReplaceSpecialValues(InputWorkspace=constants_ws, OutputWorkspace=constants_ws,
+            coeff = self._compute_relative_factor_2D('__ratio'+str(tube), tube)
+            mtd[calib_current].setY(tube, coeff)
+        Transpose(InputWorkspace=calib_current, OutputWorkspace=calib_current)
+        DeleteWorkspace(ratios_group)
+
+        ReplaceSpecialValues(InputWorkspace=calib_current, OutputWorkspace=calib_current,
                              NaNValue=1, InfinityValue=1, SmallNumberThreshold=0.00001, SmallNumberValue=1)
-        if self._out_response:
-            RenameWorkspace(InputWorkspace=ref_ws, OutputWorkspace=response_ws)
-        else:
-            DeleteWorkspace(ref_ws)
 
     def PyExec(self):
         self._set_input_properties()
@@ -656,6 +740,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         elif self._derivation_method == 'GlobalSummedReference2D': # D2B
             self._input_files = self._input_files.replace('+',',')
             self._n_scan_files = self._input_files.count(',') + 1
+            if self._n_scan_files < 2:
+                raise RuntimeError('At least two overlapping scan files needed for the global method')
             self._process_global()
 
         # set output workspace[s]

@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from mantid.simpleapi import CreateWorkspace, RenameWorkspace, Transpose, Multiply
+from mantid.simpleapi import CreateWorkspace, Transpose, Multiply
 from mantid.api import AlgorithmFactory, PropertyMode, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
 import numpy as np
