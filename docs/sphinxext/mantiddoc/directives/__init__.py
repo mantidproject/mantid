@@ -14,6 +14,7 @@ import mantiddoc.directives.categories
 import mantiddoc.directives.diagram
 import mantiddoc.directives.interface
 import mantiddoc.directives.properties
+import mantiddoc.directives.seeAlso
 import mantiddoc.directives.sourcelink
 import mantiddoc.directives.summary
 
@@ -31,5 +32,6 @@ def setup(app):
     diagram.setup(app)
     interface.setup(app)
     properties.setup(app)
+    seeAlso.setup(app)
     sourcelink.setup(app)
     summary.setup(app)

@@ -37,7 +37,11 @@ public:
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
-  const std::string summary() const override;
+  const std::string summary() const override;  
+  /// Algorithm's seeAlso
+  const std::vector<std::string> seeAlso() const override {
+    return{ "Rebin", "RebinByPulseTime" };
+  }
 
 private:
   void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,

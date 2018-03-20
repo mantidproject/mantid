@@ -178,6 +178,21 @@ class AlgorithmBaseDirective(BaseDirective):
             self._set_algorithm_name_and_version()
         return self.algm_version
 
+    def create_mantid_algorithm_by_name(self, algorithm_name):
+        """
+        Create and initializes a Mantid algorithm using tha latest version.
+
+        Args:
+          algorithm_name (str): The name of the algorithm to use for the title.
+
+        Returns:
+          algorithm: An instance of a Mantid algorithm.
+        """
+        from mantid.api import AlgorithmManager
+        alg = AlgorithmManager.createUnmanaged(algorithm_name)
+        alg.initialize()
+        return alg
+        
     def create_mantid_algorithm(self, algorithm_name, version):
         """
         Create and initializes a Mantid algorithm.
@@ -193,7 +208,7 @@ class AlgorithmBaseDirective(BaseDirective):
         alg = AlgorithmManager.createUnmanaged(algorithm_name, version)
         alg.initialize()
         return alg
-
+        
     def create_mantid_ifunction(self, function_name):
         """
         Create and initiializes a Mantid IFunction.

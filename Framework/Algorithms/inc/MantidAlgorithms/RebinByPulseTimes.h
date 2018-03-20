@@ -42,6 +42,10 @@ public:
 
   int version() const override;
   const std::string category() const override;
+  /// Algorithm's seeAlso
+  const std::vector<std::string> seeAlso() const override {
+    return{ "Rebin", "RebinByTimeAtSample" };
+  }
 
 private:
   /// Do the algorithm specific histogramming.

@@ -93,6 +93,19 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
 }
 
 /**
+* Returns seeAlso related algorithms. If not overridden
+* it returns an empty vector of strings
+*/
+template <typename BaseAlgorithm>
+const std::vector<std::string> AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
+  try {
+    return callMethod<std::vector<std::string> >(getSelf(), "seeAlso");
+  } catch (UndefinedAttributeError &) {
+    return {};
+  }
+}
+
+/**
  * Returns the summary of the algorithm. If not overridden
  * it returns defaultSummary
  */
