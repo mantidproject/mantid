@@ -10,7 +10,6 @@ from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, 
                               Divide, GroupDetectors, MaskDetectors, Rebin, Scale, SofQWNormalisedPolygon, Transpose)
 import math
 import numpy
-import roundinghelper
 from scipy import constants
 
 
@@ -316,8 +315,18 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def validateInputs(self):
         """Check for issues with user input."""
-        # TODO
-        return dict()
+        issues = dict()
+        qBinProp = self.getProperty(common.PROP_BINNING_PARAMS_Q)
+        if not qBinProp.isDefault:
+            qBinning = qBinProp.value
+            if len(qBinning) != 1 and len(qBinning) % 3 != 0:
+                issues[common.PROP_BINNING_PARAMS_Q] = 'Invalid Q rebinning parameters.'
+        eBinProp = self.getProperty(common.PROP_REBINNING_PARAMS_W)
+        if not eBinProp.isDefault:
+            eBinning = eBinProp.value
+            if len(eBinning) != 1 and len(eBinning) % 3 != 0:
+                issues[common.PROP_REBINNING_PARAMS_E] = 'Invalid energy rebinning parameters.'
+        return issues
 
     def _applyDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Mask workspace according to diagnostics."""
@@ -454,11 +463,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_BINNING_PARAMS_Q).isDefault:
             qMin, qMax = _minMaxQ(mainWS)
             dq = _deltaQ(mainWS)
-            dq = 10 * roundinghelper.round(dq, roundinghelper.ROUNDING_TEN_TO_INT)
+            intFactor = 10**numpy.ceil(numpy.abs(numpy.log10(0.034)))
+            dq = numpy.ceil(dq * intFactor) / intFactor
             params = [qMin, dq, qMax]
             report.notice('Binned momentum transfer axis to bin width {0}.'.format(dq))
         else:
             params = self.getProperty(common.PROP_BINNING_PARAMS_Q).value
+            if len(params) == 1:
+                qMin, qMax = _minMaxQ(mainWS)
+                params = [qMin, params[0], qMax]
         Ei = mainWS.run().getLogData('Ei').value
         sOfQWWS = SofQWNormalisedPolygon(InputWorkspace=mainWS,
                                          OutputWorkspace=sOfQWWSName,

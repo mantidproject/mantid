@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import collections
 from mantid.api import mtd
+import numpy.testing
 from scipy import constants
 from testhelpers import illhelpers, run_algorithm
 import unittest
@@ -77,6 +78,62 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertEqual(groupedWS.getNumberHistograms(), 1)
         groupIds = groupedWS.getDetector(0).getDetectorIDs()
         self.assertEqual(collections.Counter(detectorIds), collections.Counter(groupIds))
+
+    def testERebinning(self):
+        outWSName = 'outWS'
+        E0 = -2.
+        dE = 0.13
+        E1 = E0 + 40 * dE
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'EnergyRebinningParams': [E0, dE, E1],
+            'Transposing': 'Transposing OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
+        xs = ws.readX(0)
+        numpy.testing.assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
+
+    def testQRebinning(self):
+        outWSName = 'outWS'
+        Q0 = 2.3
+        dQ = 0.1
+        Q1 = 2.7
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'QBinningParams': [Q0, dQ, Q1],
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+        xs = ws.readX(0)
+        numpy.testing.assert_almost_equal(xs, numpy.arange(Q0, Q1, dQ))
+
+    def testQRebinningBinWidthOnly(self):
+        outWSName = 'outWS'
+        dQ = 0.1
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'QBinningParams': [dQ],
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+        xs = ws.readX(0)
+        self.assertGreater(len(xs), 3)
+        dx = xs[1:] - xs[:-1]
+        # Bin widths may differ at the edges.
+        numpy.testing.assert_almost_equal(dx[1:-1], 0.1)
 
     def _checkAlgorithmsInHistory(self, ws, *args):
         """Return true if algorithm names listed in *args are found in the
