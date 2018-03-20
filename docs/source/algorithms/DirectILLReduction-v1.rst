@@ -176,7 +176,7 @@ Output:
 
 .. testoutput:: FakeIN4Example
 
-    Size of the final S(q,w) workspace: 177 histograms, 234 bins
+    Size of the final S(q,w) workspace: 177 histograms, 260 bins
 
 .. categories::
 
