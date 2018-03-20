@@ -357,7 +357,7 @@ void SaveAscii2::populateQMetaData() {
         boost::shared_ptr<const Geometry::IDetector> detector(
             &spectrumInfo.detector(i), NoDeleting());
         efixed = m_ws->getEFixed(detector);
-      } catch (std::runtime_error) {
+      } catch (std::runtime_error &) {
         throw;
       }
     } else {
