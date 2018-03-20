@@ -13,7 +13,7 @@ Examples
 Parsing
 ~~~~~~~
 
-.. code:: cpp
+.. code-block:: cpp
 
 
     #include <Poco/DOM/Document.h>
@@ -33,7 +33,7 @@ Parsing
 Iterating over an element's children
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: cpp
+.. code-block:: cpp
 
     Poco::XML::Element *pRootElem = pDoc->documentElement();
     //Iterate over every child node (non-recursively)
@@ -47,7 +47,7 @@ Iterating over an element's children
 Inspecting an element
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: cpp
+.. code-block:: cpp
 
     Poco::XML::Element *pElem;
 
@@ -70,7 +70,7 @@ a cost of ``n``, where ``n`` is the number of nodes in the list.
 
 This means that running the following is horrendously slow:
 
-.. code:: cpp
+.. code-block:: cpp
 
     // NEVER DO THIS
     Poco::AutoPtr<Poco::XML::NodeList> pElems = pElem->getElementsByTagName("foo");

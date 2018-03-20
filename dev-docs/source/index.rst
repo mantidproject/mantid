@@ -25,16 +25,6 @@ Guides
 :doc:`GettingStarted`
    Describes the process of obtaining and building the mantid code base
 
-.. toctree::
-   :maxdepth: 1
-
-   Communication
-   Dependencies
-   HandlingXML
-   UsefulTools
-   ProfilingWithValgrind
-   VisualStudioBuildImpact
-
 ===================
 Component Overviews
 ===================

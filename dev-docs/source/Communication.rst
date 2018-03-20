@@ -12,10 +12,8 @@ How to contact people in the development team
 ---------------------------------------------
 
 * :ref:`Development Team <DevelopmentTeam>` Contact Details
-* For one to one with local people - go and talk to them
 * Developer email list (closed list for developers only) mantid-developers@mantidproject.org
-* Voice and Video calls - Skype
-* Telephone
+* `Slack <http://mantid.slack.com/>`__: instant messaging and calls
 
 Support
 -------
@@ -30,7 +28,6 @@ Text
 ^^^^
 
 * Informal discussions, and daily status - `Slack <http://mantid.slack.com/>`__
-* Weekly code progress - `Developer news <http://developer.mantidproject.org/>`__
 * Set your picture on `Gravatar <https://secure.gravatar.com/>`__ to get it to appear in github/slack/etc
 
 Video conference

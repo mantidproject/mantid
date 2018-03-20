@@ -22,11 +22,7 @@ Script
 Of course if you don't want to do this yourself then you can use this
 script.
 
-.. raw:: html
-
-   <div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
-
-.. code:: python
+::
 
     Const BELOW_NORMAL = 16384
      
@@ -39,10 +35,6 @@ script.
         objProcess.SetPriority(BELOW_NORMAL) 
     Next
 
-.. raw:: html
-
-   </div>
-
 Save it as Reduce_Build_Impact.vbs, and use when things are running like
 a dog!
 
@@ -52,11 +44,7 @@ Monitoring Script
 If you don't want to keep running the script for each build, here's one
 that keeps a watch on your system every 5 seconds.
 
-.. raw:: html
-
-   <div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
-
-.. code:: python
+::
 
     Const BELOW_NORMAL = 16384
      
@@ -70,7 +58,3 @@ that keeps a watch on your system every 5 seconds.
       Next
       WScript.Sleep 5000
     loop
-
-.. raw:: html
-
-   </div>

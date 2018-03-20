@@ -9,17 +9,19 @@ script located in /buildconfig/. It generates the .cpp, .h and test
 files for a class along with some code stubs. It can also flesh out more
 methods for new Algorithms, using the "--alg" option.
 
-| ``usage: class_maker.py [-h] [--force] [--test] [--alg] SUBPROJECT CLASSNAME``
-| ``Utility to create Mantid class files: header, source and test.``
-| ``positional arguments:``
-| `` SUBPROJECT  The subproject under Framework/; e.g. Kernel``
-| `` CLASSNAME   Name of the class to create``
-| ``optional arguments:``
-| `` -h, --help  show this help message and exit``
-| `` --force     Force overwriting existing files. Use with caution!``
-| `` --test      Create only the test file.``
-| `` --alg       Create an Algorithm stub. This adds some methods common to``
-| ``             algorithms.``
+::
+
+    usage: class_maker.py [-h] [--force] [--test] [--alg] SUBPROJECT CLASSNAME
+    Utility to create Mantid class files: header, source and test.
+    positional arguments:
+     SUBPROJECT  The subproject under Framework/; e.g. Kernel
+     CLASSNAME   Name of the class to create
+    optional arguments:
+     -h, --help  show this help message and exit
+     --force     Force overwriting existing files. Use with caution!
+     --test      Create only the test file.
+     --alg       Create an Algorithm stub. This adds some methods common to
+                 algorithms.
 
 Moving/Renaming classes: move_class.py
 --------------------------------------
@@ -28,7 +30,7 @@ This python script is located in in /buidconfig/. It will move a class
 from one subproject to another and/or rename the class. Namespaces and
 cmakelists are adjusted. For details, run:
 
-``Build/move_class.py --help``
+``buildconfig/move_class.py --help``
 
 Deleting a class: delete_class.py
 ---------------------------------
@@ -36,7 +38,7 @@ Deleting a class: delete_class.py
 This python script is located in in /buildconfig/. It will delete a
 class from one subproject. CMakeList.txt is adjusted. For details, run:
 
-``Build/delete_class.py --help``
+``buildconfig/delete_class.py --help``
 
 Leak checking etc
 -----------------

@@ -37,5 +37,5 @@ the graphical layer, and something different in the framework where Qt
 is not available.
 
 Also noteworthy is the `Compiler
-Support <http://wiki.apache.org/stdcxx/C++0xCompilerSupport>`__ for
+Support <http://en.cppreference.com/w/cpp/compiler_support>`__ for
 various "advanced" language features.
