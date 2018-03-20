@@ -49,7 +49,6 @@ This package defines the Python interface to the MantidPlot application. For fra
    newTable.rst
    new_proxy.rst
    note.rst
-   plot.rst
    plot2D.rst
    plot3D.rst
    plotBin.rst
