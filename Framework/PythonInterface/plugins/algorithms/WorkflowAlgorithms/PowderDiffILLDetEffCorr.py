@@ -152,8 +152,9 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 issues["InterpolateOverlappingAngles"] = "Interpolation option is not supported for global method"
             if self.getPropertyValue("NormaliseTo") == "ROI":
                 issues["NormaliseTo"] = "ROI normalisation is not supported for global method"
-            if self.getPropertyValue("CalibrationMethod") == "MostLikelyMean":
-                issues["CalibrationMethod"] = "MostLikelyMean is not supported for global method"
+            method = self.getPropertyValue("CalibrationMethod")
+            if method == "MostLikelyMean" or method == "Mean":
+                issues["CalibrationMethod"] = method + " is not supported for global reference method"
 
         if self.getPropertyValue("DerivationMethod") == "SequentialSummedReference1D":
             if self.getProperty("NumberOfIterations").value != 1:
