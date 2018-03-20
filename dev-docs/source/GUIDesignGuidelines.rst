@@ -12,6 +12,8 @@ This page describes guidelines that should be followed when
 implementing an interface in MantidPlot. The aim is to encourage a
 consistent approach to developing interfaces.
 
+.. _dev-docs-mvp-intro:
+
 MVP (Model View Presenter)
 ##########################
 
@@ -52,6 +54,8 @@ maintenance easier.
 
 It is important to note that the values used in the calculations
 should be received from the presenter (more of which below).
+
+.. _dev-docs-mvp-view:
 
 View
 ----
