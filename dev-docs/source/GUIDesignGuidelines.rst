@@ -274,7 +274,9 @@ file would look like:
    app = FooGUI()
    app.show()
 
-where ``FooGUI`` is the ``MainWindow`` for the interface. 
+where ``FooGUI`` is the ``MainWindow`` for the interface. Some more
+detailed documentation on creating GUIs in Python can be found at
+:ref:`dev-docs-mvp-python-views`.
 
 Designer
 --------

@@ -1,3 +1,5 @@
+.. _dev-docs-mvp-python-views:
+
 Using QtCreator to Generate Python GUI Layouts
 ==============================================
 
