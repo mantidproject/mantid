@@ -93,7 +93,8 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
       make_unique<ArrayProperty<double>>(
           "QAxisBinning", boost::make_shared<RebinParamsValidator>()),
       "The bin parameters to use for the q axis (in the format used by the "
-      ":ref:`algm-Rebin` algorithm, except that bin width-only is unsupported).");
+      ":ref:`algm-Rebin` algorithm, except that bin width-only is "
+      "unsupported).");
 
   std::vector<std::string> propOptions{"Direct", "Indirect"};
   alg.declareProperty("EMode", "",
@@ -113,7 +114,8 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
       make_unique<ArrayProperty<double>>(
           "EAxisBinning", boost::make_shared<RebinParamsValidator>(true)),
       "The bin parameters to use for the E axis (optional, in the format "
-      "used by the :ref:`algm-Rebin` algorithm, except that bin width-only is unsupported).");
+      "used by the :ref:`algm-Rebin` algorithm, except that bin width-only is "
+      "unsupported).");
 }
 
 void SofQW::exec() {
