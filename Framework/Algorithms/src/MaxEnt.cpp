@@ -57,8 +57,9 @@ const double THRESHOLD = 1E-6;
 * @param yLabel :: [input] y-label to use for returned ws
 * @return : ws cut down in lenght to maxIt
 */
-MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws,
-                                 const size_t maxIt,
+MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
+                                 const std::vector<size_t> itCount,
+                                 const size_t maxItCount,
                                  const ::std::string yLabel) {
 
   ws->setYUnitLabel(yLabel);
@@ -73,17 +74,20 @@ MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws,
     label->setLabel("Number of Iterations", "");
   }
 
-  if (maxIt == ws->readY(0).size()) {
-    return ws;
-  }
   const size_t nspec = ws->getNumberHistograms();
   MatrixWorkspace_sptr outWS =
-      WorkspaceFactory::Instance().create(ws, nspec, maxIt, maxIt);
+      WorkspaceFactory::Instance().create(ws, nspec, maxItCount, maxItCount);
   for (size_t spec = 0; spec < nspec; spec++) {
-    outWS->setPoints(spec, Points(maxIt, LinearGenerator(0.0, 1.0)));
-    auto Data = ws->readY(spec);
+    auto& inDataY = ws->dataY(spec);
+    outWS->setPoints(spec, Points(maxItCount, LinearGenerator(0.0, 1.0)));
     outWS->setCounts(spec,
-                     std::vector<double>(Data.begin(), Data.begin() + maxIt));
+                     std::vector<double>(inDataY.begin(), inDataY.begin() + maxItCount));
+    auto& DataX = outWS->dataX(spec);
+    DataX.resize(itCount[spec]);
+    auto& DataY = outWS->dataY(spec);
+    DataY.resize(itCount[spec]);
+    auto& DataE = outWS->dataE(spec);
+    DataE.resize(itCount[spec]);
   }
   return outWS;
 }
@@ -350,7 +354,7 @@ void MaxEnt::exec() {
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
 
   npoints = complexImage ? npoints * 2 : npoints;
-  size_t maxIt = 0; // used to determine max iterations used by alg
+  size_t maxItCount = 0; // used to determine max iterations used by alg
   std::vector<size_t> iterationCounts;
   iterationCounts.reserve(nSpec);
   outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
@@ -400,8 +404,8 @@ void MaxEnt::exec() {
       double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
       evolTest[it] = currAngle;
-      if (it > maxIt) {
-        maxIt = it;
+      if (it > maxItCount) {
+        maxItCount = it;
       }
 
       // Stop condition, solution found
@@ -444,10 +448,10 @@ void MaxEnt::exec() {
     // No errors
 
   } // Next spectrum
-  // add 1 to maxIt to account for starting at 0
-  maxIt++;
-  setProperty("EvolChi", removeZeros(outEvolChi, maxIt, "Chi squared"));
-  setProperty("EvolAngle", removeZeros(outEvolTest, maxIt, "Maximum Angle"));
+  // add 1 to maxItCount to account for starting at 0
+  maxItCount++;
+  setProperty("EvolChi", removeZeros(outEvolChi, iterationCounts, maxItCount, "Chi squared"));
+  setProperty("EvolAngle", removeZeros(outEvolTest, iterationCounts, maxItCount, "Maximum Angle"));
   setProperty("ReconstructedImage", outImageWS);
   setProperty("ReconstructedData", outDataWS);
 }
