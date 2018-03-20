@@ -1016,9 +1016,13 @@ void parseRunLabel(const std::string &label, std::string &instrument,
           // Single run
           runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
         } else {
-          throw std::invalid_argument("Failed to parse run label: " + label);
+          throw std::invalid_argument("Failed to parse run label: " + label +
+                                      " too many tokens ");
         }
       } catch (const boost::bad_lexical_cast &) {
+        throw std::invalid_argument("Failed to parse run label: " + label +
+                                    " not a good run number");
+      } catch (...) {
         throw std::invalid_argument("Failed to parse run label: " + label);
       }
     }
@@ -1098,7 +1102,7 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
   QMap<int, QColor> colors; // position, color
 
   // Vector of <number of runs in fit, parameters in fit> pairs
-  typedef std::pair<size_t, std::vector<std::string>> FitProp;
+  using FitProp = std::pair<size_t, std::vector<std::string>>;
   std::vector<FitProp> fitProperties;
 
   // Get fit properties for each input workspace

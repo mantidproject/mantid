@@ -44,7 +44,7 @@ void SequenceTypeHandler<ContainerType>::set(
     Kernel::IPropertyManager *alg, const std::string &name,
     const boost::python::object &value) const {
   using namespace boost::python;
-  typedef typename ContainerType::value_type DestElementType;
+  using DestElementType = typename ContainerType::value_type;
 
   // Current workaround for things that still pass back wrapped vectors...
   if (boost::starts_with(value.ptr()->ob_type->tp_name, "std_vector")) {
@@ -82,7 +82,7 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
     const std::string &name, const boost::python::object &defaultValue,
     const boost::python::object &validator,
     const unsigned int direction) const {
-  typedef typename ContainerType::value_type DestElementType;
+  using DestElementType = typename ContainerType::value_type;
   using Kernel::IValidator;
   using Kernel::PropertyWithValue;
   using boost::python::extract;

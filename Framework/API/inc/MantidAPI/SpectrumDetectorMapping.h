@@ -50,7 +50,7 @@ class MatrixWorkspace;
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL SpectrumDetectorMapping {
-  typedef std::unordered_map<specnum_t, std::set<detid_t>> sdmap;
+  using sdmap = std::unordered_map<specnum_t, std::set<detid_t>>;
 
 public:
   explicit SpectrumDetectorMapping(const MatrixWorkspace *const workspace,

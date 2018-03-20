@@ -18,6 +18,7 @@ class MaxEntPresenter(object):
         self.alg=alg
         self.calcAlg = maxent_model.PhaseModel()
         self.load=load
+        self.thread =None
         # set data
         self.getWorkspaceNames()
         #connect
@@ -43,10 +44,14 @@ class MaxEntPresenter(object):
         return thread_model.ThreadModel(self.calcAlg)
 
     def handleMaxEntButton(self):
-        if  self.view.calcPhases() and self.view.usePhases():
-            self.DoPhase()
+        do_maxent = self.load.hasDataChanged()
+        if do_maxent:
+            self.getWorkspaceNames()
         else:
-            self.DoMaxEnt()
+            if  self.view.calcPhases() and self.view.usePhases():
+                self.DoPhase()
+            else:
+                self.DoMaxEnt()
 
     def DoMaxEnt(self):
         self.thread=self.createThread()
@@ -56,8 +61,8 @@ class MaxEntPresenter(object):
         inputs = self.getMaxEntInput()
         if self.view.usePhases():
             self.view.addPhaseTable(inputs)
-        runName=self.load.getRunName()
 
+        runName=self.load.getRunName()
         self.thread.setInputs(inputs,runName)
         self.thread.start()
 

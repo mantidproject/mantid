@@ -58,7 +58,7 @@ void GluGeometryHandler::Triangulate() {
 }
 
 void GluGeometryHandler::Render() {
-  if (Obj != nullptr) {
+  if (csgObj != nullptr) {
     switch (type) {
     case GeometryType::CUBOID:
       Renderer->RenderCube(m_points[0], m_points[1], m_points[2], m_points[3]);
@@ -93,7 +93,7 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
                                        std::vector<Kernel::V3D> &vectors,
                                        double &myradius, double &myheight) {
   mytype = 0;
-  if (Obj != nullptr) {
+  if (csgObj != nullptr) {
     mytype = static_cast<int>(type);
     vectors = m_points;
     switch (type) {
@@ -113,7 +113,7 @@ void GluGeometryHandler::GetObjectGeom(int &mytype,
 }
 
 void GluGeometryHandler::Initialize() {
-  if (Obj != nullptr) {
+  if (csgObj != nullptr) {
     // There is no initialization or probably call render
     Render();
   }

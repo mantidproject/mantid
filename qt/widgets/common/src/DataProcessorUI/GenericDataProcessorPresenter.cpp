@@ -291,7 +291,7 @@ Returns the name of the reduced workspace for a given row
 QString GenericDataProcessorPresenter::getReducedWorkspaceName(
     const RowData_sptr data) const {
   return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
-      data, m_whitelist);
+      data, m_whitelist, m_preprocessing.m_map);
 }
 
 void GenericDataProcessorPresenter::settingsChanged() {
@@ -622,9 +622,9 @@ void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
   if (hasPostprocessing()) {
     const auto outputWSName = getPostprocessedWorkspaceName(groupData);
-    m_postprocessing->postProcessGroup(outputWSName,
-                                       m_processor.defaultOutputPropertyName(),
-                                       m_whitelist, groupData);
+    m_postprocessing->postProcessGroup(
+        outputWSName, m_processor.postprocessedOutputPropertyName(),
+        m_whitelist, groupData);
   }
 }
 
@@ -651,8 +651,8 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   if (runs.size() == 1)
     return getRun(runs[0], instrument, preprocessor.prefix());
 
-  auto const outputName =
-      preprocessingListToString(runs, preprocessor.prefix());
+  auto const outputName = preprocessingListToString(runs, preprocessor.prefix(),
+                                                    preprocessor.separator());
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
   * but that doesn't preserve history nicely, so we'll just take care of tidying
@@ -882,12 +882,15 @@ void GenericDataProcessorPresenter::preprocessOptionValues(RowData_sptr data) {
   data->setPreprocessedOptions(std::move(options));
 }
 
-/** Some columns in the model should be updated with outputs
- * from the algorithm if they were not set by the user. This is
- * so that the view can be updated show the user what values were used.
+/** If cells in the row are empty, update them with values used from the
+ * options or the results of the algorithm so that the user can see what was
+ * used and tweak values if required.
+ *
+ * @param alg : the executed algorithm
+ * @param data : the row data
  */
-void GenericDataProcessorPresenter::updateModelFromAlgorithm(
-    IAlgorithm_sptr alg, RowData_sptr data) {
+void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
+                                                           RowData_sptr data) {
 
   auto newData = data;
 
@@ -906,6 +909,14 @@ void GenericDataProcessorPresenter::updateModelFromAlgorithm(
       if (data->value(i).isEmpty() &&
           !m_preprocessing.hasPreprocessing(column.name())) {
 
+        // First check if there was a default value and if so use that
+        const auto optionValue = data->optionValue(column.algorithmProperty());
+        if (!optionValue.isEmpty()) {
+          data->setValue(i, optionValue);
+          continue;
+        }
+
+        // If not, check if there's an output available from the algorithm
         QString propValue = QString::fromStdString(
             alg->getPropertyValue(column.algorithmProperty().toStdString()));
 
@@ -957,7 +968,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData_sptr data) {
   // Run the algorithm
   const auto alg = createAndRunAlgorithm(data->preprocessedOptions());
   // Populate any missing values in the model with output from the algorithm
-  updateModelFromAlgorithm(alg, data);
+  updateModelFromResults(alg, data);
 }
 
 /**

@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_OBJECT_H_
-#define MANTID_GEOMETRY_OBJECT_H_
+#ifndef MANTID_GEOMETRY_CSGOBJECT_H_
+#define MANTID_GEOMETRY_CSGOBJECT_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -77,20 +77,26 @@ public:
   /// Clone
   IObject *clone() const override { return new CSGObject(*this); }
 
+  IObject *cloneWithMaterial(const Kernel::Material &material) const override {
+    auto obj = new CSGObject(*this);
+    obj->setMaterial(material);
+    return obj;
+  }
+
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
-  void setID(const std::string &id) override { m_id = id; }
+  void setID(const std::string &id) { m_id = id; }
   const std::string &id() const override { return m_id; }
 
-  void setName(const int nx) override { ObjNum = nx; } ///< Set Name
-  int getName() const override { return ObjNum; }      ///< Get Name
+  void setName(const int nx) { ObjNum = nx; }     ///< Set Name
+  int getName() const override { return ObjNum; } ///< Get Name
 
-  void setMaterial(const Kernel::Material &material) override;
+  void setMaterial(const Kernel::Material &material);
   const Kernel::Material material() const override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
-  int setObject(const int ON, const std::string &Ln) override;
+  int setObject(const int ON, const std::string &Ln);
   int procString(const std::string &Line);
   int complementaryObject(const int Cnum,
                           std::string &Ln); ///< Process a complementary object
@@ -177,20 +183,18 @@ public:
   // Initialize Drawing
   void initDraw() const override;
   // Get Geometry Handler
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() override;
+  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
   /// set vtkGeometryCache writer
-  void setVtkGeometryCacheWriter(
-      boost::shared_ptr<vtkGeometryCacheWriter>) override;
+  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
-  void setVtkGeometryCacheReader(
-      boost::shared_ptr<vtkGeometryCacheReader>) override;
+  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                      double &myradius, double &myheight) const override;
   /// Getter for the shape xml
-  std::string getShapeXML() const override;
+  std::string getShapeXML() const;
 
 private:
   int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
@@ -276,4 +280,4 @@ protected:
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid
 
-#endif /*MANTID_GEOMETRY_OBJECT_H_*/
+#endif /*MANTID_GEOMETRY_CSGOBJECT_H_*/

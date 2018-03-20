@@ -59,7 +59,7 @@ namespace Geometry {
   */
 class CompositeBraggScatterer;
 
-typedef boost::shared_ptr<CompositeBraggScatterer> CompositeBraggScatterer_sptr;
+using CompositeBraggScatterer_sptr = boost::shared_ptr<CompositeBraggScatterer>;
 
 class MANTID_GEOMETRY_DLL CompositeBraggScatterer : public BraggScatterer {
 public:

@@ -19,7 +19,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(IEventList)
 
 /// return_value_policy for copied numpy array
-typedef return_value_policy<Policies::VectorToNumpy> return_clone_numpy;
+using return_clone_numpy = return_value_policy<Policies::VectorToNumpy>;
 
 void export_IEventList() {
   register_ptr_to_python<IEventList *>();

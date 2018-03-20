@@ -16,7 +16,7 @@ using Mantid::WorkflowAlgorithms::IMuonAsymmetryCalculator;
 using Mantid::WorkflowAlgorithms::MuonGroupCountsCalculator;
 using Mantid::WorkflowAlgorithms::MuonGroupAsymmetryCalculator;
 using Mantid::WorkflowAlgorithms::MuonPairAsymmetryCalculator;
-typedef std::unique_ptr<IMuonAsymmetryCalculator> IMuonAsymCalc_uptr;
+using IMuonAsymCalc_uptr = std::unique_ptr<IMuonAsymmetryCalculator>;
 
 /**
  * Tests for all classes deriving from IMuonAsymmetryCalculator:

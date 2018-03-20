@@ -28,11 +28,11 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 // Helper typedef
-typedef boost::tuple<IMDHistoWorkspace_sptr, IPeaksWorkspace_sptr>
-    MDHistoPeaksWSTuple;
+using MDHistoPeaksWSTuple =
+    boost::tuple<IMDHistoWorkspace_sptr, IPeaksWorkspace_sptr>;
 // Helper typedef
-typedef boost::tuple<IMDEventWorkspace_sptr, IPeaksWorkspace_sptr>
-    MDEventPeaksWSTuple;
+using MDEventPeaksWSTuple =
+    boost::tuple<IMDEventWorkspace_sptr, IPeaksWorkspace_sptr>;
 
 class ClusterIntegrationBaseTest {
 protected:
