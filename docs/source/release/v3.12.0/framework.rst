@@ -141,10 +141,18 @@ Improved
 
 .. code-block:: python
 
-   from mantid.simpleapi import Segfault
+   from mantid.simpleapi import *
    import json
-   props = json.loads('{"DryRun":true}')
-   Segfault(**props)
+   source = json.loads('{"Filename":"CNCS_7860_event.nxs"}')
+   props = json.loads('{"InputWorkspace":"eventWS", "Params":"1000"}')
+   eventWS = Load(**source)
+   rebinned = Rebin(**props)
+
+Deprecated
+##########
+
+- `MantidPlot.pyplot <http://docs.mantidproject.org/v3.11.0/api/python/mantidplot/pyplot/index.html>`_ was an early attempt to provide Matplotlib style syntax over Mantidplot plotting.  This will be replaced in Mantid 4.0 with MatPlotlib itself, and this packages would cause namespace clashes and confusion.  This package is now deprecated, and will not be included in future releases of Mantid.  To the best of our knowledge the impact of this should be minimal as it is at best only rarely used.
+
 
 Bugfixes
 ########
