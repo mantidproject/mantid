@@ -324,7 +324,7 @@ void EstimateFitParameters::initConcrete() {
                   "Additional constraints on tied parameters.");
   declareProperty(
       "Type", "Monte Carlo",
-      "Type of the algorithm: \"Monte Carlo\" or \"Cross Entropy\"");
+      R"(Type of the algorithm: "Monte Carlo" or "Cross Entropy")");
   declareProperty("NOutputs", 10, "Number of parameter sets to output to "
                                   "OutputWorkspace. Unused if OutputWorkspace "
                                   "isn't set. (Monte Carlo only)");

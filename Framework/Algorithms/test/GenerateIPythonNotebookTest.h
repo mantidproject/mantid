@@ -65,7 +65,7 @@ public:
     create_test_workspace(workspaceName);
 
     std::string result[] = {
-        "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
+        "{", "   \"metadata\" : {", R"(      "name" : "Mantid Notebook")",
         "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
         "   \"worksheets\" : [", "      {"};
 

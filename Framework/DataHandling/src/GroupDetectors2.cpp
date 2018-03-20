@@ -1337,7 +1337,7 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
   const std::string pattern = getPropertyValue("GroupingPattern");
 
   boost::regex re(
-      "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
+      R"(^\s*[0-9]+\s*$|^(\s*,*[0-9]+(\s*(,|:|\+|\-)\s*)*[0-9]*)*$)");
 
   try {
     if (!pattern.empty() && !boost::regex_match(pattern, re)) {

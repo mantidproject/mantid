@@ -113,8 +113,8 @@ private:
     using namespace Mantid::DataObjects;
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
-    xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"1.0\" z=\"0\" /> ";
+    xmlShape += R"(<centre-of-bottom-base x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="1.0" z="0" /> )";
     xmlShape += "<radius val=\"0.0127\" /> ";
     xmlShape += "<height val=\"1\" /> ";
     xmlShape += "</cylinder>";
