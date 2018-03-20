@@ -83,17 +83,24 @@ Starting in your build folder (e.g. Mantid/Code/debug):
 
 -  Running an entire test suite (e.g. KernelTest):
 
-   -  ``ctest -j8 -R KernelTest``
-   -  ``bin/KernelTest``
+   .. code-block:: sh
+
+      ctest -j8 -R KernelTest
+      bin/KernelTest
 
 -  Running a specific test class.
 
-   -  ``ctest -R MyTestClassName``
-   -  ``bin/KernelTest MyTestClassName``
+   .. code-block:: sh
+
+      ctest -R MyTestClassName
+      bin/KernelTest MyTestClassName
 
 -  Running a specific test.
 
-   -  ``bin/KernelTest MyTestClassName MySingleTestName``
+   .. code-block:: sh
+
+      bin/KernelTest MyTestClassName MySingleTestName``
+
    -  Not possible with ctest.
 
 Visual Studio/ XCode note
