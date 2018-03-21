@@ -64,6 +64,72 @@ calculatePanelNormal(const std::vector<Mantid::Kernel::V3D> &panelCorners) {
   normal.normalize();
   return normal;
 }
+
+size_t findParentBank(const ComponentInfo &componentInfo, size_t rootIndex) {
+  // Search for parent component which contains tubes
+  auto parent = componentInfo.parent(rootIndex);
+  while (componentInfo.children(parent).size() <= 1)
+    parent = componentInfo.parent(parent);
+
+  return parent;
+}
+
+std::vector<size_t> findBankTubes(const ComponentInfo &componentInfo,
+                                  size_t rootIndex) {
+  auto comps = componentInfo.componentsInSubtree(rootIndex);
+  std::vector<size_t> tubes;
+
+  for (auto comp : comps) {
+    if (componentInfo.componentType(comp) == ComponentType::OutlineComposite)
+      tubes.push_back(comp);
+  }
+
+  return tubes;
+}
+
+bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex,
+                const std::vector<size_t> &tubes,
+                const Mantid::Kernel::V3D &normal) {
+  for (auto tube : tubes) {
+    const auto &children = componentInfo.children(tube);
+    auto vector = componentInfo.position(children[0]) -
+                  componentInfo.position(children[1]);
+    vector.normalize();
+    if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
+      g_log.warning() << "Assembly " << componentInfo.name(bankIndex)
+                      << " isn't flat.\n";
+      return false;
+    }
+  }
+  return true;
+}
+
+Mantid::Kernel::V3D calculateBankNormal(const ComponentInfo &componentInfo,
+                                        const std::vector<size_t> &tubes) {
+  // calculate normal from first two tubes in bank as before
+  const auto &tube0 = componentInfo.children(tubes[0]);
+  const auto &tube1 = componentInfo.children(tubes[1]);
+  auto pos = componentInfo.position(tube0[0]);
+  auto x = componentInfo.position(tube0[1]) - pos;
+  x.normalize();
+
+  auto y = componentInfo.position(tube1[0]) - pos;
+  y.normalize();
+  auto normal = x.cross_prod(y);
+
+  if (normal.nullVector()) {
+    y = componentInfo.position(tube1[1]) - componentInfo.position(tube1[0]);
+    y.normalize();
+    normal = x.cross_prod(y);
+  }
+
+  normal.normalize();
+
+  if (normal.nullVector())
+    g_log.warning() << "Colinear Assembly.\n";
+
+  return normal;
+}
 } // namespace
 
 namespace MantidQt {
@@ -230,74 +296,7 @@ void PanelsSurface::processStructured(const std::vector<size_t> &children,
     addDetector(child, corners[0], index, info->rotation);
 }
 
-size_t findParentBank(const ComponentInfo &componentInfo, size_t rootIndex) {
-  // Search for parent component which contains tubes
-  auto parent = componentInfo.parent(rootIndex);
-  while (componentInfo.children(parent).size() <= 1)
-    parent = componentInfo.parent(parent);
-
-  return parent;
-}
-
-std::vector<size_t> findBankTubes(const ComponentInfo &componentInfo,
-                                  size_t rootIndex) {
-  auto comps = componentInfo.componentsInSubtree(rootIndex);
-  std::vector<size_t> tubes;
-
-  for (auto comp : comps) {
-    if (componentInfo.componentType(comp) == ComponentType::OutlineComposite)
-      tubes.push_back(comp);
-  }
-
-  return tubes;
-}
-
-bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex,
-                const std::vector<size_t> &tubes,
-                const Mantid::Kernel::V3D &normal) {
-  for (auto tube : tubes) {
-    const auto &children = componentInfo.children(tube);
-    auto vector = componentInfo.position(children[0]) -
-                  componentInfo.position(children[1]);
-    vector.normalize();
-    if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
-      g_log.warning() << "Assembly " << componentInfo.name(bankIndex)
-                      << " isn't flat.\n";
-      return false;
-    }
-  }
-  return true;
-}
-
-Mantid::Kernel::V3D calculateBankNormal(const ComponentInfo &componentInfo,
-                                        const std::vector<size_t> &tubes) {
-  // calculate normal from first two tubes in bank as before
-  const auto &tube0 = componentInfo.children(tubes[0]);
-  const auto &tube1 = componentInfo.children(tubes[1]);
-  auto pos = componentInfo.position(tube0[0]);
-  auto x = componentInfo.position(tube0[1]) - pos;
-  x.normalize();
-
-  auto y = componentInfo.position(tube1[0]) - pos;
-  y.normalize();
-  auto normal = x.cross_prod(y);
-
-  if (normal.nullVector()) {
-    y = componentInfo.position(tube1[1]) - componentInfo.position(tube1[0]);
-    y.normalize();
-    normal = x.cross_prod(y);
-  }
-
-  normal.normalize();
-
-  if (normal.nullVector())
-    g_log.warning() << "Colinear Assembly.\n";
-
-  return normal;
-}
-
-void PanelsSurface::processTubes(const std::vector<size_t> &children,
-                                 size_t rootIndex, std::vector<bool> &visited) {
+void PanelsSurface::processTubes(size_t rootIndex, std::vector<bool> &visited) {
   const auto &componentInfo = m_instrActor->componentInfo();
   auto bankIndex = findParentBank(componentInfo, rootIndex);
   auto name = componentInfo.name(bankIndex);
@@ -429,7 +428,7 @@ PanelsSurface::findFlatPanels(size_t rootIndex,
   }
 
   if (componentType == ComponentType::OutlineComposite) {
-    processTubes(children, rootIndex, visited);
+    processTubes(rootIndex, visited);
     for (auto child : children)
       visited[child] = true;
     return boost::none;
