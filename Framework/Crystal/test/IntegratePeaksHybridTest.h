@@ -19,8 +19,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 namespace {
-typedef boost::tuple<WorkspaceGroup_sptr, IPeaksWorkspace_sptr>
-    AlgorithmOutputs;
+using AlgorithmOutputs =
+    boost::tuple<WorkspaceGroup_sptr, IPeaksWorkspace_sptr>;
 
 // Execute the clustering integration algorithm
 AlgorithmOutputs execute_integration(const MDEventPeaksWSTuple &inputWorkspaces,

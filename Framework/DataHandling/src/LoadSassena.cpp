@@ -88,7 +88,7 @@ herr_t LoadSassena::dataSetDouble(const hid_t &h5file,
 
 /* Helper object and function to sort modulus of Q-vectors
  */
-typedef std::pair<double, int> mypair;
+using mypair = std::pair<double, int>;
 bool compare(const mypair &left, const mypair &right) {
   return left.first < right.first;
 }

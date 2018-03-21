@@ -67,9 +67,10 @@ struct IntegrationParameters {
                  <http://doxygen.mantidproject.org>
  */
 
-typedef std::unordered_map<
-    int64_t, std::vector<std::pair<double, Mantid::Kernel::V3D>>> EventListMap;
-typedef std::unordered_map<int64_t, Mantid::Kernel::V3D> PeakQMap;
+using EventListMap =
+    std::unordered_map<int64_t,
+                       std::vector<std::pair<double, Mantid::Kernel::V3D>>>;
+using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
 
 class DLLExport Integrate3DEvents {
 public:

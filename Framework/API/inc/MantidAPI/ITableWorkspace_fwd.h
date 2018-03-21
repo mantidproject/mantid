@@ -34,13 +34,13 @@ namespace API {
 /// forward declare of Mantid::API::ITableWorkspace
 class ITableWorkspace;
 /// shared pointer to Mantid::API::ITableWorkspace
-typedef boost::shared_ptr<ITableWorkspace> ITableWorkspace_sptr;
+using ITableWorkspace_sptr = boost::shared_ptr<ITableWorkspace>;
 /// shared pointer to Mantid::API::ITableWorkspace (const version)
-typedef boost::shared_ptr<const ITableWorkspace> ITableWorkspace_const_sptr;
+using ITableWorkspace_const_sptr = boost::shared_ptr<const ITableWorkspace>;
 /// unique pointer to Mantid::API::ITableWorkspace
-typedef std::unique_ptr<ITableWorkspace> ITableWorkspace_uptr;
+using ITableWorkspace_uptr = std::unique_ptr<ITableWorkspace>;
 /// unique pointer to Mantid::API::ITableWorkspace (const version)
-typedef std::unique_ptr<const ITableWorkspace> ITableWorkspace_const_uptr;
+using ITableWorkspace_const_uptr = std::unique_ptr<const ITableWorkspace>;
 
 } // namespace API
 } // Namespace Mantid

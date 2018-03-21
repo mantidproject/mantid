@@ -63,7 +63,7 @@ private:
       : gens<N - 1, N - 1, S...> /** @endcond */ {/** @cond */
   };
   template <int... S> struct gens<0, S...> {/** @endcond */
-    typedef seq<S...> type;
+    using type = seq<S...>;
   };
 
   /** Helpers for for_each(), struct contains and 2 specializations.
@@ -169,7 +169,7 @@ void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
     const DataObjects::EventWorkspace &workspace);
 
 /// Typedef for a shared pointer to a SpectrumAlgorithm
-typedef boost::shared_ptr<SpectrumAlgorithm> SpectrumAlgorithm_sptr;
+using SpectrumAlgorithm_sptr = boost::shared_ptr<SpectrumAlgorithm>;
 
 } // namespace Algorithms
 } // namespace Mantid

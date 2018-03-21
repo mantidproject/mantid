@@ -52,9 +52,9 @@ public:
   virtual ITableWorkspace_sptr getPublishInvestigations() = 0;
 };
 
-typedef boost::shared_ptr<ICatalogInfoService> ICatalogInfoService_sptr;
-typedef boost::shared_ptr<const ICatalogInfoService>
-    ICatalogInfoService_const_sptr;
+using ICatalogInfoService_sptr = boost::shared_ptr<ICatalogInfoService>;
+using ICatalogInfoService_const_sptr =
+    boost::shared_ptr<const ICatalogInfoService>;
 }
 }
 

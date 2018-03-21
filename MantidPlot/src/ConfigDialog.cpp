@@ -1277,8 +1277,8 @@ void ConfigDialog::updateSendToTab() {
   }
 }
 
-typedef std::map<std::string, bool> categoriesType;
-typedef QMap<QString, QTreeWidgetItem *> widgetMap;
+using categoriesType = std::map<std::string, bool>;
+using widgetMap = QMap<QString, QTreeWidgetItem *>;
 
 void ConfigDialog::refreshTreeCategories() {
   treeCategories->clear();

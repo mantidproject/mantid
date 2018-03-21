@@ -65,7 +65,7 @@ int solveCubic(const CInputIter Coef, std::complex<double> &AnsA,
 */
 
 {
-  typedef std::complex<double> Cpair;
+  using Cpair = std::complex<double>;
   double q, r; /* solution parameters */
   double termR, discrim;
   double r13;
