@@ -57,7 +57,6 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
         super(QtGui.QMainWindow, self).__init__()
         self.setupUi(self)
         self.show_deprecation_warning()
-        #self.setTitle("DEPRACATED-" + self.getTitle());
         self.loading = False
         self.clip = QtGui.QApplication.clipboard()
         self.shown_cols = {}
