@@ -79,6 +79,9 @@ MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
   const size_t nspec = ws->getNumberHistograms();
   MatrixWorkspace_sptr outWS =
       WorkspaceFactory::Instance().create(ws, nspec, maxItCount, maxItCount);
+  if (itCount.size() == 0) {
+    return outWS; // In case, we don't have any spectra
+  }
   for (size_t spec = 0; spec < nspec; spec++) {
     auto &inDataY = ws->dataY(spec);
     outWS->setPoints(spec, Points(maxItCount, LinearGenerator(0.0, 1.0)));
