@@ -1,7 +1,10 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlotController.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"

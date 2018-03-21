@@ -5,7 +5,6 @@
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -19,6 +18,12 @@ class QLabel;
 class QActionGroup;
 class QSignalMapper;
 class QMenu;
+
+namespace Mantid {
+namespace Geometry {
+class IPeak;
+}
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
