@@ -58,6 +58,9 @@ protected:
 
   void processStructured(const std::vector<size_t> &children, size_t rootIndex);
 
+  void processTubes(const std::vector<size_t> &children, size_t rootIndex,
+                    std::vector<bool> &visited);
+
   std::pair<std::vector<size_t>, Mantid::Kernel::V3D>
   processUnstructured(const std::vector<size_t> &children, size_t rootIndex,
                       std::vector<bool> &visited);
