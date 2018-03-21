@@ -1,6 +1,6 @@
-=========
-MVP Index
-=========
+============
+MVP Tutorial
+============
 
 The following tutorial introduces how to create a Graphical User
 Interface (GUI) using PyQt. Some knowledge of Python is assumed.
