@@ -78,15 +78,15 @@ MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
   MatrixWorkspace_sptr outWS =
       WorkspaceFactory::Instance().create(ws, nspec, maxItCount, maxItCount);
   for (size_t spec = 0; spec < nspec; spec++) {
-    auto& inDataY = ws->dataY(spec);
+    auto &inDataY = ws->dataY(spec);
     outWS->setPoints(spec, Points(maxItCount, LinearGenerator(0.0, 1.0)));
-    outWS->setCounts(spec,
-                     std::vector<double>(inDataY.begin(), inDataY.begin() + maxItCount));
-    auto& DataX = outWS->dataX(spec);
+    outWS->setCounts(spec, std::vector<double>(inDataY.begin(),
+                                               inDataY.begin() + maxItCount));
+    auto &DataX = outWS->dataX(spec);
     DataX.resize(itCount[spec]);
-    auto& DataY = outWS->dataY(spec);
+    auto &DataY = outWS->dataY(spec);
     DataY.resize(itCount[spec]);
-    auto& DataE = outWS->dataE(spec);
+    auto &DataE = outWS->dataE(spec);
     DataE.resize(itCount[spec]);
   }
   return outWS;
@@ -427,7 +427,6 @@ void MaxEnt::exec() {
 
     } // Next Iteration
 
-
     // Get calculated data
     auto solData = maxentCalculator.getReconstructedData();
     auto solImage = maxentCalculator.getImage();
@@ -450,8 +449,10 @@ void MaxEnt::exec() {
   } // Next spectrum
   // add 1 to maxItCount to account for starting at 0
   maxItCount++;
-  setProperty("EvolChi", removeZeros(outEvolChi, iterationCounts, maxItCount, "Chi squared"));
-  setProperty("EvolAngle", removeZeros(outEvolTest, iterationCounts, maxItCount, "Maximum Angle"));
+  setProperty("EvolChi", removeZeros(outEvolChi, iterationCounts, maxItCount,
+                                     "Chi squared"));
+  setProperty("EvolAngle", removeZeros(outEvolTest, iterationCounts, maxItCount,
+                                       "Maximum Angle"));
   setProperty("ReconstructedImage", outImageWS);
   setProperty("ReconstructedData", outDataWS);
 }
