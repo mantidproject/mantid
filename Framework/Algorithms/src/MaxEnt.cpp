@@ -53,7 +53,8 @@ const double THRESHOLD = 1E-6;
 
 /** removes zeros from converged results
 * @param ws :: [input] The input workspace with zeros
-* @param itCount [input] The number of iterations this alg used for each spectrum
+* @param itCount [input] The number of iterations this alg used for each
+* spectrum
 * @param maxItCount :: [input] The max number of iteration this alg used
 * @param yLabel :: [input] y-label to use for returned ws
 * @return : ws cut down in lenght to maxIt
