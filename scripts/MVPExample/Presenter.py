@@ -31,7 +31,7 @@ class Presenter(object):
             self.view.show_display()
 
     def handle_button(self):
-        # Get the values from view 
+        # Get the values from view
         value1 = self.view.get_value(0)
         operation = self.view.get_operation()
         value2 = self.view.get_value(2)
