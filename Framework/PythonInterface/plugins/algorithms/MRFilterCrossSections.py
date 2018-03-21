@@ -186,6 +186,8 @@ class MRFilterCrossSections(PythonAlgorithm):
                 api.AddSampleLog(Workspace=ws, LogName='cross_section_id',
                                  LogText=pol_state)
 
+            if ws_event_data is None:
+                AnalysisDataService.remove(ws_raw_name)
             self.setProperty("CrossSectionWorkspaces", output_wsg)
 
         # If we don't have a splitter table, it might be because we don't have analyzer/polarizer
@@ -195,6 +197,8 @@ class MRFilterCrossSections(PythonAlgorithm):
             self.setProperty("CrossSectionWorkspaces", api.GroupWorkspaces([ws_raw]))
         else:
             api.logger.error("No events remained after filtering")
+            if ws_event_data is None:
+                AnalysisDataService.remove(ws_raw_name)
 
     def load_legacy_cross_Sections(self, file_path):
         """
