@@ -131,7 +131,7 @@ This specifies how many times the calibration has to be derived (see Step 4 abov
 
       Currently, for **D2B**, *pixels_to_trim=28* and *t=1%*. With this settings iterations typically terminate after the first one, i. e. one run and one iteration give results already convergent within 1%.
 
-      This has to interpreted as: the residual calibration is close enough to unity, so further iterations will not change the calibration much.
+      This has to be interpreted as: the residual calibration is close enough to unity, so further iterations will not change the calibration much.
 
       However, this criterion does not prevent from divergence in all the cases.
       It can happen that for a given pixel the residual calibration factor (albeit close to unity) is always on the same side (i.e. always above 1 or below 1); this will cause the absolute calibration to gradually diverge with iterations.
