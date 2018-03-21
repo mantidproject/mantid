@@ -1,12 +1,12 @@
 ==================
-MatPlotLib and MVP
+MatPlotlib and MVP
 ==================
 
 The next step towards the goal of creating a GUI that allows users to
 manipulate a sine wave plot, is to produce the plot itself.
 
 For the purposes of this tutorial it is assumed that the user is
-familiar with matplotlib, if not see `MatPlotLib documentation
+familiar with MatPlotlib, if not see `MatPlotlib documentation
 <https://matplotlib.org/users/pyplot_tutorial.html>`_.
 
 The MatPlotLib functions could be considered to be a Model or a View
