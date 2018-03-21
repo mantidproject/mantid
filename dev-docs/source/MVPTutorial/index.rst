@@ -35,4 +35,5 @@ Duration: 6 hours as a hands-on course with exercises.
    ModelExercise
    ModelExerciseSolution
    CompleteGUI
+   CalculatorExample/index
 

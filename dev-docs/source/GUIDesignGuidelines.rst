@@ -29,8 +29,8 @@ is given below.
 To illustrate MVP, a simple example of a calculator GUI has been
 created using Python (the concepts of MVP can be applied to any
 programming language). This example can be found in
-``scripts/MVPExample``, and you can run it with ``python
-Calculator.py``.
+:ref:`dev-docs-gui-calculator-example`, and you can run it with
+``python Calculator.py``.
 
 It is good practice to have model, view or presenter (as appropriate)
 at the end of the name for each file (e.g. FFTView, FFTModel,
