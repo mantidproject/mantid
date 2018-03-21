@@ -227,8 +227,8 @@ MANTID_API_DLL std::ostream &operator<<(std::ostream &, const API::Boolean &);
 /// Redaing a Boolean from an input stream
 MANTID_API_DLL std::istream &operator>>(std::istream &istr, API::Boolean &);
 
-typedef boost::shared_ptr<Column> Column_sptr;
-typedef boost::shared_ptr<const Column> Column_const_sptr;
+using Column_sptr = boost::shared_ptr<Column>;
+using Column_const_sptr = boost::shared_ptr<const Column>;
 
 } // namespace API
 } // Namespace Mantid

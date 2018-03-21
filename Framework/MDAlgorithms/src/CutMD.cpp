@@ -23,7 +23,7 @@ using namespace Mantid::Kernel;
 namespace {
 
 // Typedef to simplify function signatures
-typedef std::pair<double, double> MinMax;
+using MinMax = std::pair<double, double>;
 
 MinMax getDimensionExtents(IMDEventWorkspace_sptr ws, size_t index) {
   if (!ws)

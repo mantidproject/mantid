@@ -49,10 +49,10 @@ void RemoveBins::init() {
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
 
   // remove some known units that will not work
-  units.erase(std::remove(units.begin(), units.end(), "Empty"));
-  units.erase(std::remove(units.begin(), units.end(), "Label"));
-  units.erase(std::remove(units.begin(), units.end(), "Time"));
-  units.erase(std::remove(units.begin(), units.end(), "Degrees"));
+  units.erase(std::remove(units.begin(), units.end(), "Empty"), units.end());
+  units.erase(std::remove(units.begin(), units.end(), "Label"), units.end());
+  units.erase(std::remove(units.begin(), units.end(), "Time"), units.end());
+  units.erase(std::remove(units.begin(), units.end(), "Degrees"), units.end());
 
   // add a default do nothing value
   units.insert(units.begin(), "AsInput");

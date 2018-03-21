@@ -20,7 +20,7 @@ class CaseSensitiveIntFactory
     : public DynamicFactory<int, CaseSensitiveStringComparator> {};
 
 class DynamicFactoryTest : public CxxTest::TestSuite {
-  typedef boost::shared_ptr<int> int_ptr;
+  using int_ptr = boost::shared_ptr<int>;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically

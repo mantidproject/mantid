@@ -72,8 +72,8 @@ protected:
   UnitCell m_cell;
 };
 
-typedef boost::shared_ptr<BraggScattererInCrystalStructure>
-    BraggScattererInCrystalStructure_sptr;
+using BraggScattererInCrystalStructure_sptr =
+    boost::shared_ptr<BraggScattererInCrystalStructure>;
 
 /**
  * Helper class for validating unit cell strings.

@@ -22,7 +22,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-typedef boost::tuple<double, double> VerticalHorizontalOffsetType;
+using VerticalHorizontalOffsetType = boost::tuple<double, double>;
 
 class SpecularReflectionAlgorithmTest {
 protected:

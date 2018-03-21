@@ -125,7 +125,7 @@ void ConvertToDiffractionMDWorkspace::init() {
 }
 
 /// Our MDLeanEvent dimension
-typedef DataObjects::MDLeanEvent<3> MDE;
+using MDE = DataObjects::MDLeanEvent<3>;
 
 /** Convert one spectrum to DataObjects.
  * Depending on options, it uses the histogram view or the

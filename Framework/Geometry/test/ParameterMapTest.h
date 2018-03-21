@@ -304,9 +304,9 @@ public:
   test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddHelpers_As_Strings() {
     // -- Specialized Helper Functions --
 
-    typedef boost::function<void(ParameterMap *, const IComponent *,
-                                 const std::string &, const std::string &,
-                                 const std::string *const)> AddFuncHelper;
+    using AddFuncHelper = boost::function<void(
+        ParameterMap *, const IComponent *, const std::string &,
+        const std::string &, const std::string *const)>;
 
     // double
     AddFuncHelper faddDouble;
