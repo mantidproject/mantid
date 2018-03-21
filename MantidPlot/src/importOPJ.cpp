@@ -1396,8 +1396,8 @@ QString ImportOPJ::parseOriginTags(const QString &str) {
 
   // replace \b(...), \i(...), \u(...), \g(...), \+(...), \-(...), \f:font(...)
   // tags
-  QString rxstr[] = {R"(\\\s*b\s*\()",      R"(\\\s*i\s*\()",
-                     R"(\\\s*u\s*\()",      R"(\\\s*g\s*\()",
+  QString rxstr[] = {R"(\\\s*b\s*\()",     R"(\\\s*i\s*\()",
+                     R"(\\\s*u\s*\()",     R"(\\\s*g\s*\()",
                      R"(\\\s*\+\s*\()",    R"(\\\s*\-\s*\()",
                      R"(\\\s*f\:[^\(]*\()"};
   int postag[] = {0, 0, 0, 0, 0, 0, 0};
