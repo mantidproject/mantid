@@ -58,7 +58,7 @@ const double THRESHOLD = 1E-6;
 * @return : ws cut down in lenght to maxIt
 */
 MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
-                                 const std::vector<size_t> itCount,
+                                 const std::vector<size_t> &itCount,
                                  const size_t maxItCount,
                                  const ::std::string yLabel) {
 
