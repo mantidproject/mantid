@@ -99,7 +99,8 @@ class BaseDirective(Directive):
         if pagetitle:
             level = 1
         if level not in level_dict:
-            print('base.make_header: did not understand level ' +str(level))
+            env = self.state.document.settings.env
+            env.app.warn('base.make_header - Did not understand level ' +str(level))
             level = 2
             
         line = "\n" + level_dict[level] * (len(name)) + "\n"

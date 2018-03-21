@@ -40,7 +40,7 @@ public:
   const std::string summary() const override;  
   /// Algorithm's seeAlso
   const std::vector<std::string> seeAlso() const override {
-    return{ "Rebin", "RebinByPulseTime" };
+    return{ "Rebin", "RebinByPulseTimes" };
   }
 
 private:
