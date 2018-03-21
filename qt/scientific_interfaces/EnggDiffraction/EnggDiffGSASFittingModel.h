@@ -61,7 +61,7 @@ protected:
   /// Add a sigma value to the sigma map
   void addSigma(const RunLabel &runLabel, const double sigma);
 
-private slots:
+protected slots:
   void processRefinementFailed(const std::string &failureMessage);
 
   void processRefinementSuccessful(
@@ -93,9 +93,7 @@ private:
   void deleteWorkerThread();
 
   /// Run GSASIIRefineFitPeaks
-  /// Note this must be virtual so that it can be mocked out by the helper class
-  /// in EnggDiffGSASFittingModelTest
-  virtual GSASIIRefineFitPeaksOutputProperties
+  GSASIIRefineFitPeaksOutputProperties
   doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params);
 
   template <typename T>

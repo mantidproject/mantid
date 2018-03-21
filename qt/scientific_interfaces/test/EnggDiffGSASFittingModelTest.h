@@ -53,9 +53,7 @@ public:
 
   void addSigmaValue(const RunLabel &runLabel, const double sigma);
 
-private:
-  GSASIIRefineFitPeaksOutputProperties doGSASRefinementAlgorithm(
-      const GSASIIRefineFitPeaksParameters &params) override;
+  void doRefinement(const GSASIIRefineFitPeaksParameters &params) override;
 };
 
 inline void
@@ -80,8 +78,7 @@ TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel,
   addSigma(runLabel, sigma);
 }
 
-GSASIIRefineFitPeaksOutputProperties
-TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
+void TestEnggDiffGSASFittingModel::doRefinement(
     const GSASIIRefineFitPeaksParameters &params) {
   // Mock method - just create some dummy output and ignore all the parameters
   UNUSED_ARG(params);
@@ -99,8 +96,8 @@ TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
       WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
   ADS.add("FITTEDPEAKS", ws);
 
-  return GSASIIRefineFitPeaksOutputProperties(1, 2, 3, ws, latticeParams,
-                                              params.runLabel);
+  processRefinementSuccessful(GSASIIRefineFitPeaksOutputProperties(
+      1, 2, 3, ws, latticeParams, params.runLabel));
 }
 
 } // Anonymous namespace
