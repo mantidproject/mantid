@@ -33,7 +33,7 @@ std::string IndexProperty::isValid() const {
   return error;
 }
 
-IndexProperty& IndexProperty::operator=(const std::string &rhs) {
+IndexProperty &IndexProperty::operator=(const std::string &rhs) {
   setValue(rhs);
   return *this;
 }
