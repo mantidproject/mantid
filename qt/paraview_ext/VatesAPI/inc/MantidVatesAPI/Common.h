@@ -14,16 +14,16 @@ class IMDDimension;
 
 namespace VATES {
 /// Vector of IMDDimension shared pointers.
-typedef std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension>>
-    DimensionVec;
+using DimensionVec =
+    std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension>>;
 
 /// IMDDimension as shared pointer.
-typedef boost::shared_ptr<Mantid::Geometry::IMDDimension> Dimension_sptr;
+using Dimension_sptr = boost::shared_ptr<Mantid::Geometry::IMDDimension>;
 
 /// IMDDimension as const shared pointer. Note that IMDDimension is pure
 /// virtual.
-typedef boost::shared_ptr<const Mantid::Geometry::IMDDimension>
-    Dimension_const_sptr;
+using Dimension_const_sptr =
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension>;
 
 std::string makeAxisTitle(const Mantid::Geometry::IMDDimension &dim);
 

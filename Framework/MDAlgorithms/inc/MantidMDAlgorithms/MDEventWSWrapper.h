@@ -39,7 +39,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 /// vectors of strings are often used here
-typedef std::vector<std::string> Strings;
+using Strings = std::vector<std::string>;
 
 /// predefenition of the class name
 class MDEventWSWrapper;
@@ -47,13 +47,13 @@ class MDEventWSWrapper;
 // Boost function pointers with multiple arguments
 //        appear not portable to all architectures supported (Fail on MAC)
 /// signature to void templated function
-typedef void (MDEventWSWrapper::*fpVoidMethod)();
+using fpVoidMethod = void (MDEventWSWrapper::*)();
 /// signature for the internal templated function pointer to add data to an
 /// existing workspace
-typedef void (MDEventWSWrapper::*fpAddData)(float *, uint16_t *, uint32_t *,
-                                            coord_t *, size_t) const;
+using fpAddData = void (MDEventWSWrapper::*)(float *, uint16_t *, uint32_t *,
+                                             coord_t *, size_t) const;
 /// signature for the internal templated function pointer to create workspace
-typedef void (MDEventWSWrapper::*fpCreateWS)(const MDWSDescription &mwsd);
+using fpCreateWS = void (MDEventWSWrapper::*)(const MDWSDescription &);
 
 class DLLExport MDEventWSWrapper {
 public:

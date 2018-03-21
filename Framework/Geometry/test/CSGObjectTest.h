@@ -1147,7 +1147,7 @@ public:
 
 private:
   /// Surface type
-  typedef std::map<int, boost::shared_ptr<Surface>> STYPE;
+  using STYPE = std::map<int, boost::shared_ptr<Surface>>;
 
   /// set timeTest true to get time comparisons of soild angle methods
   const static bool timeTest = false;
@@ -1240,7 +1240,7 @@ private:
 
     // PLANE SURFACES:
 
-    typedef std::pair<int, std::string> SCompT;
+    using SCompT = std::pair<int, std::string>;
     std::vector<SCompT> SurfLine;
     if (desired.find("60001") != std::string::npos)
       SurfLine.push_back(SCompT(60001, "px -1"));

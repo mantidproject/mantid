@@ -42,9 +42,10 @@ class IReflSettingsPresenter {
 public:
   virtual ~IReflSettingsPresenter(){};
   /// Transmission runs for a particular angle
-  virtual std::string getTransmissionRunsForAngle(const double angle) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angle) const = 0;
   /// Whether per-angle transmission runs are set
-  virtual bool hasPerAngleTransmissionRuns() const = 0;
+  virtual bool hasPerAngleOptions() const = 0;
   /// Pre-processing
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const = 0;

@@ -34,13 +34,13 @@ namespace API {
 /// forward declare of Mantid::API::WorkspaceGroup
 class WorkspaceGroup;
 /// shared pointer to Mantid::API::WorkspaceGroup
-typedef boost::shared_ptr<WorkspaceGroup> WorkspaceGroup_sptr;
+using WorkspaceGroup_sptr = boost::shared_ptr<WorkspaceGroup>;
 /// shared pointer to Mantid::API::WorkspaceGroup, pointer to const version
-typedef boost::shared_ptr<const WorkspaceGroup> WorkspaceGroup_const_sptr;
+using WorkspaceGroup_const_sptr = boost::shared_ptr<const WorkspaceGroup>;
 /// unique pointer to Mantid::API::WorkspaceGroup
-typedef std::unique_ptr<WorkspaceGroup> WorkspaceGroup_uptr;
+using WorkspaceGroup_uptr = std::unique_ptr<WorkspaceGroup>;
 /// unique pointer to Mantid::API::WorkspaceGroup (const version)
-typedef std::unique_ptr<const WorkspaceGroup> WorkspaceGroup_const_uptr;
+using WorkspaceGroup_const_uptr = std::unique_ptr<const WorkspaceGroup>;
 
 } // namespace API
 } // namespace Mantid

@@ -147,7 +147,7 @@ protected:
 };
 
 /// Typedef for a shared pointer to IDomainCreator.
-typedef boost::shared_ptr<IDomainCreator> IDomainCreator_sptr;
+using IDomainCreator_sptr = boost::shared_ptr<IDomainCreator>;
 
 } // namespace API
 } // namespace Mantid

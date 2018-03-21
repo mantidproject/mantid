@@ -104,7 +104,6 @@ using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;
-using MantidQt::MantidWidgets::MantidTreeWidget;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Core::time_duration;
 using MantidQt::SliceViewer::SliceViewerWindow;

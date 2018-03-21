@@ -33,7 +33,7 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
   int confidence(0);
   size_t axiscols(0), datacols(0);
   std::string str;
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   const std::string sep = " ";
   bool snsspec(false);
 

@@ -16,7 +16,7 @@ using namespace Mantid::Kernel;
 
 class XMLInstrumentParameterTest : public CxxTest::TestSuite {
 private:
-  typedef boost::shared_ptr<XMLInstrumentParameter> XMLInstrumentParameter_sptr;
+  using XMLInstrumentParameter_sptr = boost::shared_ptr<XMLInstrumentParameter>;
 
   /**
   Construction logic for the XMLInstrumentParameter type isn't great, so this

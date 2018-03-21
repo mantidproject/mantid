@@ -110,7 +110,7 @@ std::vector<std::string> splitPath(const std::string &path) {
 template <typename T> class ConfigServiceImpl::WrappedObject : public T {
 public:
   /// The template type of class that is being wrapped
-  typedef T element_type;
+  using element_type = T;
   /// Simple constructor
   WrappedObject() : T() { m_pPtr = static_cast<T *>(this); }
 

@@ -56,6 +56,6 @@ private:
 };
 
 /// Typedef for scoped lock
-typedef ScopedGIL<PythonGIL> ScopedPythonGIL;
+using ScopedPythonGIL = ScopedGIL<PythonGIL>;
 
 #endif /* PYTHONTHREADING_H_ */

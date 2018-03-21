@@ -63,7 +63,7 @@ private:
   ~ColumnFactoryImpl() override = default;
 };
 
-typedef Mantid::Kernel::SingletonHolder<ColumnFactoryImpl> ColumnFactory;
+using ColumnFactory = Mantid::Kernel::SingletonHolder<ColumnFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid

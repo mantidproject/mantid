@@ -40,7 +40,7 @@ access the source code on `GitHub release page`_.
 Citation
 --------
 
-Please cite any usage of Mantid as follows: **TODO update with current version doi**
+Please cite any usage of Mantid as follows:
 
 - *Mantid 3.12.0: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID3.12.0 <http://dx.doi.org/10.5286/SOFTWARE/MANTID3.12.0>`_
 
