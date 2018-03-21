@@ -2,9 +2,10 @@
 #define MANTID_GEOMETRY_IOBJECT_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include <boost/shared_ptr.hpp>
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace Mantid {
 
@@ -58,6 +59,8 @@ public:
   virtual bool isOnSide(const Kernel::V3D &) const = 0;
   virtual int calcValidType(const Kernel::V3D &Pt,
                             const Kernel::V3D &uVec) const = 0;
+  virtual bool isFiniteGeometry() const { return true; }
+  virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
   virtual IObject *clone() const = 0;
   virtual IObject *
@@ -89,7 +92,8 @@ public:
                         const BoundingBox &activeRegion,
                         const size_t) const = 0;
 
-  virtual void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+  virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                             std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;
 
   // Rendering

@@ -5,8 +5,8 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
             name="SURF"
-            valid-from="2010-01-10 23:59:59"
-            valid-to="2017-02-13 23:59:59"
+            valid-from="2017-02-14 00:00:00"
+            valid-to="2100-01-30 23:59:59"
             last-modified="2018-03-15 00:00:00">
 
   <defaults>
@@ -136,7 +136,7 @@
     <location z="-1.873"/>
      <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap">
-      <logfile id="S1" extract-single-value-as="last_value" />
+      <logfile id="S1VG" extract-single-value-as="last_value" />
     </parameter>
   </component>
 
@@ -146,7 +146,7 @@
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
     <parameter name="vertical gap">
-      <logfile id="S2" extract-single-value-as="last_value" />
+      <logfile id="S2VG" extract-single-value-as="last_value" />
     </parameter>
   </component>
 
@@ -154,7 +154,7 @@
     <location z="0.298"/>
     <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap">
-      <logfile id="S3" extract-single-value-as="last_value" />
+      <logfile id="S3VG" extract-single-value-as="last_value" />
     </parameter>
   </component>
 
@@ -163,7 +163,7 @@
     <!-- This log file stores the vertical opening of slit. Note this slit
      is fixed to the point detector. -->
     <parameter name="vertical gap">
-      <logfile id="S4" extract-single-value-as="last_value" />
+      <logfile id="S4VG" extract-single-value-as="last_value" />
     </parameter>
   </component>
 

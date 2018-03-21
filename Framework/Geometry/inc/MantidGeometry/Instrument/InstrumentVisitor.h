@@ -78,6 +78,9 @@ private:
   /// Index of the parent component
   boost::shared_ptr<std::vector<size_t>> m_parentComponentIndices;
 
+  /// Stores instrument tree structure by storing children of all Components
+  boost::shared_ptr<std::vector<std::vector<size_t>>> m_children;
+
   /// Only Assemblies and other NON-detectors yield detector ranges
   boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
 
@@ -165,8 +168,14 @@ public:
   virtual size_t registerGenericComponent(
       const Mantid::Geometry::IComponent &component) override;
 
+  virtual size_t registerInfiniteComponent(
+      const Mantid::Geometry::IComponent &component) override;
+
   virtual size_t registerGenericObjComponent(
       const Mantid::Geometry::IObjComponent &objComponent) override;
+
+  virtual size_t
+  registerInfiniteObjComponent(const IObjComponent &objComponent) override;
 
   virtual size_t
   registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;
