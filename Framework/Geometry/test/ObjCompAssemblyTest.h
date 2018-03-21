@@ -359,12 +359,12 @@ public:
     boost::shared_ptr<IObject> shape = bank.createOutline();
     TS_ASSERT(shape);
 
-    int otype;
+    detail::ShapeInfo::GeometryShape otype;
     std::vector<V3D> vectors;
     double radius, height;
     shape->GetObjectGeom(otype, vectors, radius, height);
 
-    TS_ASSERT_EQUALS(otype, 6);
+    TS_ASSERT_EQUALS(otype, detail::ShapeInfo::GeometryShape::CYLINDER);
     TS_ASSERT_EQUALS(radius, 0.1);
     TS_ASSERT_EQUALS(height, 0.6);
   }
