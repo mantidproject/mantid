@@ -1,5 +1,5 @@
 digraph PowderDiffILLDetEffCorr {
-  label="PowderDiffILLDetEffCorr flowchart"
+  label="SequentialSummedReference1D Flowchart"
   $global_style
 
   subgraph values {

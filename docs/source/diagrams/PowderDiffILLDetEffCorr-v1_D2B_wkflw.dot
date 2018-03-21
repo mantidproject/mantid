@@ -1,0 +1,4 @@
+digraph PowderDiffILLDetEffCorr {
+  label="GlobalSummedReference2D Flowchart"
+  $global_style
+}
