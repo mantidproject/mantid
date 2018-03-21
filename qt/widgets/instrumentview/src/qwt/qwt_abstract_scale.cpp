@@ -21,7 +21,7 @@ public:
     scaleDraw = new QwtScaleDraw();
   }
 
-  PrivateData(const PrivateData &) = delete;
+  PrivateData(const QwtAbstractScale::PrivateData &) = delete;
 
   ~PrivateData() {
     delete scaleEngine;
