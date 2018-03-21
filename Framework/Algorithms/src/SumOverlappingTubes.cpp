@@ -268,7 +268,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
   PARALLEL_FOR_IF(threadSafe(*outputWS))
   // loop over all workspaces
   for (auto &ws : m_workspaceList) {
-    m_progress->report("Processing workspace "+std::string(ws->getName()));
+    m_progress->report("Processing workspace " + std::string(ws->getName()));
     // loop over spectra
     const auto &specInfo = ws->spectrumInfo();
     for (size_t i = 0; i < specInfo.size(); ++i) {
