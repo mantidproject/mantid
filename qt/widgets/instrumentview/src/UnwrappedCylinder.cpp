@@ -1,6 +1,7 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 
-#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -38,10 +39,11 @@ void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
                                Mantid::Kernel::Quat &R) const {
   // direction in which to look
   Mantid::Kernel::V3D eye;
+  const auto &componentInfo = m_instrActor->componentInfo();
   // rotation from the global axes to those where
   // the z axis points to the detector
   Mantid::Kernel::Quat R1;
-  eye = m_pos - udet.position;
+  eye = m_pos - componentInfo.position(udet.detIndex);
   if (!eye.nullVector()) {
     // eye must point towards the detector and be perpendicular to the
     // cylinder's axis
@@ -54,7 +56,7 @@ void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
     }
   }
   // add detector's own rotation
-  R = R1 * udet.rotation;
+  R = R1 * componentInfo.rotation(udet.detIndex);
 }
 
 } // MantidWidgets
