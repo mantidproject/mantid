@@ -619,7 +619,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         iteration = 0
         chi2_ndof = 10000. # set a large number to start with
         self._pixels_to_trim = 28
-        chi2_ndof_threshold = 10.
+        chi2_ndof_threshold = 1.
         inst = mtd[numors[0]].getInstrument()
         if inst.hasParameter('pixels_to_trim'):
             self._pixels_to_trim = inst.getIntParameter('pixels_to_trim')[0]
@@ -633,7 +633,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             Multiply(LHSWorkspace=constants_ws, RHSWorkspace=calib_current, OutputWorkspace=constants_ws)
             chi2_ndof = self._chi_squared(calib_current)
             if iteration != 0:
-                self.log().warning('Iteration {0}: Chi2/NdoF={1}'.format(iteration, chi2_ndof))
+                self.log().warning('Iteration {0}: Chi2/NdoF={1} (termination criterion: < {2})'.
+                                   format(iteration, chi2_ndof, chi2_ndof_threshold))
             iteration += 1
 
         if self._out_response:
