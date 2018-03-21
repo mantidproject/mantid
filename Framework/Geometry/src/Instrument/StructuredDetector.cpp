@@ -5,8 +5,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
-#include "MantidGeometry/Rendering/StructuredGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
@@ -71,7 +70,7 @@ void StructuredDetector::init() {
   m_idStepByRow = 0;
   m_idStep = 0;
 
-  setGeometryHandler(new StructuredGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 /** Clone method
@@ -552,7 +551,7 @@ void StructuredDetector::draw() const {
   if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handle()->render();
 }
 
 /**
@@ -568,7 +567,7 @@ void StructuredDetector::initDraw() const {
   if (Handle() == nullptr)
     return;
 
-  Handle()->Initialize();
+  Handle()->initialize();
 }
 
 /// Returns the shape of the Object
