@@ -35,6 +35,8 @@ public:
                                       &refinementResults) override = 0;
 
   void notifyRefinementFailed(const std::string &failureMessage) override = 0;
+
+  void notifyRefinementCancelled() override = 0;
 };
 
 } // namespace CustomInterfaces

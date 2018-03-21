@@ -153,6 +153,8 @@ void EnggDiffGSASFittingModel::doRefinement(
                     const GSASIIRefineFitPeaksOutputProperties &)));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), this,
           SLOT(processRefinementFailed(const std::string &)));
+  connect(worker, SIGNAL(refinementCancelled()), this,
+          SLOT(processRefinementCancelled()));
   connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
           SLOT(deleteLater()));
   connect(worker,
@@ -217,6 +219,12 @@ void EnggDiffGSASFittingModel::processRefinementSuccessful(
                       refinementResults.latticeParamsWS);
   if (m_observer) {
     m_observer->notifyRefinementSuccessful(refinementResults);
+  }
+}
+
+void EnggDiffGSASFittingModel::processRefinementCancelled() {
+  if (m_observer) {
+    m_observer->notifyRefinementCancelled();
   }
 }
 

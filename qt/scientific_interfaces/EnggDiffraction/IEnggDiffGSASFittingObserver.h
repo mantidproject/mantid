@@ -13,6 +13,8 @@ public:
       const GSASIIRefineFitPeaksOutputProperties &refinementResults) = 0;
 
   virtual void notifyRefinementFailed(const std::string &failureMessage) = 0;
+
+  virtual void notifyRefinementCancelled() = 0;
 };
 
 } // CustomInterfaces

@@ -67,6 +67,8 @@ private slots:
   void processRefinementSuccessful(
       const GSASIIRefineFitPeaksOutputProperties &refinementResults);
 
+  void processRefinementCancelled();
+
 private:
   static constexpr double DEFAULT_PAWLEY_DMIN = 1;
   static constexpr double DEFAULT_PAWLEY_NEGATIVE_WEIGHT = 0;

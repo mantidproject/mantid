@@ -41,6 +41,8 @@ public:
 
   void notifyRefinementFailed(const std::string &failureMessage) override;
 
+  void notifyRefinementCancelled() override;
+
 private:
   void processDoRefinement();
   void processLoadRun();

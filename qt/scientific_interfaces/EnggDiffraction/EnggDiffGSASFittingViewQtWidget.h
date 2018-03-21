@@ -64,7 +64,7 @@ public:
 
   boost::optional<double> getXMin() const override;
 
-  void setEnabled(const bool enabled);
+  void setEnabled(const bool enabled) override;
 
   void showStatus(const std::string &status) const override;
 

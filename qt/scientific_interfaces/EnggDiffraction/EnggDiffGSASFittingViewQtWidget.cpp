@@ -290,6 +290,8 @@ void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
 
   m_ui.lineEdit_pawleyDMin->setEnabled(enabled);
   m_ui.lineEdit_pawleyNegativeWeight->setEnabled(enabled);
+
+  m_ui.pushButton_doRefinement->setEnabled(enabled);
 }
 
 void EnggDiffGSASFittingViewQtWidget::setFocusedRunFileNames(

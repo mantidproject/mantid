@@ -30,6 +30,8 @@ signals:
 
   void refinementFailed(std::string);
 
+  void refinementCancelled();
+
 private:
   EnggDiffGSASFittingModel *m_model;
 
