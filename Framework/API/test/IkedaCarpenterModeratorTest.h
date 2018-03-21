@@ -8,8 +8,8 @@
 
 class IkedaCarpenterModeratorTest : public CxxTest::TestSuite {
 public:
-  typedef boost::shared_ptr<Mantid::API::IkedaCarpenterModerator>
-      IkedaCarpenterModerator_sptr;
+  using IkedaCarpenterModerator_sptr =
+      boost::shared_ptr<Mantid::API::IkedaCarpenterModerator>;
 
   void test_Default_Object_Returns_Zero_Mean_Time() {
     Mantid::API::IkedaCarpenterModerator ikmod;

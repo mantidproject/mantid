@@ -372,7 +372,7 @@ private:
 
 public:
   /// Convenience typedef for a shared pointer to a this type of class
-  typedef boost::shared_ptr<MDBoxBase<MDE, nd>> sptr;
+  using sptr = boost::shared_ptr<MDBoxBase<MDE, nd>>;
 
 }; //(end class MDBoxBase)
 

@@ -32,6 +32,7 @@ Improvements
 - The period summation/subtraction can now be used in multiple fitting. 
 - Muon analysis now handles the "auto background" gracefully in single and multiple fitting modes.
 - We have disabled some non functional graph right click context menu items or adding functions when in multi data fitting mode, in the Data Analysis tab of the Muon Analysis Interface.
+- Frequency domain analysis will produce a warning if there is no data to load.
 
 Bug fixes
 #########
@@ -41,11 +42,15 @@ Bug fixes
 Algorithms
 ----------
 
+New
+###
+
+- :ref:`MuonMaxent <algm-MuonMaxent>` calculates a single frequency spectrum from multiple time domain spectra.
+
 Improvements
 ############
 
 - :ref:`MuonProcess <algm-MuonProcess>` now has a flag to determine if to crop the input workspace (default is true). In the Muon Analysis interface this flag has been set to false.
-- :ref:`MuonMaxent <algm-MuonMaxent>` calculates a single frequency spectrum from multiple time domain spectra.
 -  :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts-v1>`: if the number of good frames is zero, then a value of 1 is assumed for the number of good frames.
 
 Bug fixes

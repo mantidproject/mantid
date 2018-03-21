@@ -71,7 +71,7 @@ class SCRIPT_DLL_EXPORT ScriptRepositoryImpl : public ScriptRepository {
           auto_update(false), author(""), status(BOTH_UNCHANGED){};
   };
 
-  typedef std::map<std::string, RepositoryEntry> Repository;
+  using Repository = std::map<std::string, RepositoryEntry>;
 
   Repository repo;
 

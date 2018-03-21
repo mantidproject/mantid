@@ -30,7 +30,7 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockALCDataLoadingView : public IALCDataLoadingView {
   // XXX: A workaround, needed because of the way the comma is treated in a
   // macro
-  typedef std::pair<double, double> PAIR_OF_DOUBLES;
+  using PAIR_OF_DOUBLES = std::pair<double, double>;
 
 public:
   MOCK_CONST_METHOD0(firstRun, std::string());

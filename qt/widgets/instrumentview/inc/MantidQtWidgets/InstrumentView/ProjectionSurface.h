@@ -380,7 +380,7 @@ private:
   mutable bool m_redrawPicking;
 };
 
-typedef boost::shared_ptr<ProjectionSurface> ProjectionSurface_sptr;
+using ProjectionSurface_sptr = boost::shared_ptr<ProjectionSurface>;
 
 } // MantidWidgets
 } // MantidQt

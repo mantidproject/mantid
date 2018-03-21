@@ -12,12 +12,12 @@ GET_POINTER_SPECIALIZATION(CompositeFunction)
 
 namespace {
 
-typedef double (CompositeFunction::*getParameterType1)(size_t) const;
-typedef double (CompositeFunction::*getParameterType2)(
-    const std::string &) const;
+using getParameterType1 = double (CompositeFunction::*)(size_t) const;
+using getParameterType2 =
+    double (CompositeFunction::*)(const std::string &) const;
 
-typedef void (CompositeFunction::*setParameterType2)(const std::string &,
-                                                     const double &, bool);
+using setParameterType2 = void (CompositeFunction::*)(const std::string &,
+                                                      const double &, bool);
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"

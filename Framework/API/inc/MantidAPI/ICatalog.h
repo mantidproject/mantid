@@ -71,8 +71,8 @@ public:
   virtual void keepAlive() = 0;
 };
 
-typedef boost::shared_ptr<ICatalog> ICatalog_sptr;
-typedef boost::shared_ptr<const ICatalog> ICatalog_const_sptr;
+using ICatalog_sptr = boost::shared_ptr<ICatalog>;
+using ICatalog_const_sptr = boost::shared_ptr<const ICatalog>;
 }
 }
 

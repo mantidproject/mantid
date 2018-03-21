@@ -189,9 +189,9 @@ private:
 };
 
 /// Shared pointer to the IMDWorkspace base class
-typedef boost::shared_ptr<IMDWorkspace> IMDWorkspace_sptr;
+using IMDWorkspace_sptr = boost::shared_ptr<IMDWorkspace>;
 /// Shared pointer to the IMDWorkspace base class (const version)
-typedef boost::shared_ptr<const IMDWorkspace> IMDWorkspace_const_sptr;
+using IMDWorkspace_const_sptr = boost::shared_ptr<const IMDWorkspace>;
 }
 }
 #endif // MANTID_API_IMDWORKSPACE_H_

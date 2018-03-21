@@ -146,7 +146,7 @@ public:
 };
 
 /// Shared pointer to an ILiveListener
-typedef boost::shared_ptr<ILiveListener> ILiveListener_sptr;
+using ILiveListener_sptr = boost::shared_ptr<ILiveListener>;
 
 } // namespace API
 } // namespace Mantid

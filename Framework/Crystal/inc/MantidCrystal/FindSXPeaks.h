@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Crystal {
 
-typedef std::vector<FindSXPeaksHelper::SXPeak> peakvector;
+using peakvector = std::vector<FindSXPeaksHelper::SXPeak>;
 
 /** Search detector space for single crystal peaks.
 

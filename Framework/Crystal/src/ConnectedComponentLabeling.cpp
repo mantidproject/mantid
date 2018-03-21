@@ -95,8 +95,8 @@ bool does_contain_key(const Container &container,
   return container.find(value) != container.end();
 }
 
-typedef boost::tuple<size_t, size_t> EdgeIndexPair;
-typedef std::vector<EdgeIndexPair> VecEdgeIndexPair;
+using EdgeIndexPair = boost::tuple<size_t, size_t>;
+using VecEdgeIndexPair = std::vector<EdgeIndexPair>;
 
 /**
  * Free function performing the CCL implementation over a range defined by the
