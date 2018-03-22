@@ -1819,7 +1819,8 @@ void QtAbstractPropertyBrowser::removeProperty(QtProperty *property) {
     if (pendingList.at(pos) == property) {
       d_ptr->m_subItems.removeAt(pos); // perhaps this two lines
       d_ptr->removeSubTree(
-          property, nullptr); // should be moved down after propertyRemoved call.
+          property,
+          nullptr); // should be moved down after propertyRemoved call.
       // propertyRemoved(property, 0);
 
       d_ptr->removeBrowserIndexes(property, nullptr);

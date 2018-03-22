@@ -927,9 +927,9 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
       f = Mantid::API::FunctionFactory::Instance().createFunction(
           fnName.toStdString());
     } catch (std::exception &e) {
-      QMessageBox::critical(nullptr, "Mantid - Error", "Cannot create function " +
-                                                        fnName + "\n" +
-                                                        e.what());
+      QMessageBox::critical(nullptr, "Mantid - Error",
+                            "Cannot create function " + fnName + "\n" +
+                                e.what());
       return Mantid::API::IFunction_sptr();
     }
 
