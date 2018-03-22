@@ -426,7 +426,7 @@ private:
   }
 
   MDHistoWorkspace *doCloneEmpty() const override {
-    return new MDHistoWorkspace(0);
+    return new MDHistoWorkspace(nullptr);
   }
 
   void makeSingleBinWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,

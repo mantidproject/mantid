@@ -128,13 +128,13 @@ private:
     const int ndets(2);
     std::vector<Detector *> detectors;
     for (int i = 0; i < ndets; ++i) {
-      Detector *detector = new Detector("det", i + 1, shape, NULL);
+      Detector *detector = new Detector("det", i + 1, shape, nullptr);
       detector->setPos(i * 0.2, i * 0.2, 5);
       instrument->add(detector);
       instrument->markAsDetector(detector);
       detectors.push_back(detector);
     }
-    ObjComponent *sample = new ObjComponent("sample", shape, NULL);
+    ObjComponent *sample = new ObjComponent("sample", shape, nullptr);
     sample->setPos(0, 0, 0);
     instrument->markAsSamplePos(sample);
 

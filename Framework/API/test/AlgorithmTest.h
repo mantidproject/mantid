@@ -808,10 +808,10 @@ public:
     IAlgorithm_sptr algNonConst;
     TS_ASSERT_THROWS_NOTHING(
         algConst = manager.getValue<IAlgorithm_const_sptr>(algName));
-    TS_ASSERT(algConst != NULL);
+    TS_ASSERT(algConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(algNonConst =
                                  manager.getValue<IAlgorithm_sptr>(algName));
-    TS_ASSERT(algNonConst != NULL);
+    TS_ASSERT(algNonConst != nullptr);
     TS_ASSERT_EQUALS(algConst, algNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -819,9 +819,9 @@ public:
     IAlgorithm_const_sptr algCastConst;
     IAlgorithm_sptr algCastNonConst;
     TS_ASSERT_THROWS_NOTHING(algCastConst = (IAlgorithm_const_sptr)val);
-    TS_ASSERT(algCastConst != NULL);
+    TS_ASSERT(algCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(algCastNonConst = (IAlgorithm_sptr)val);
-    TS_ASSERT(algCastNonConst != NULL);
+    TS_ASSERT(algCastNonConst != nullptr);
     TS_ASSERT_EQUALS(algCastConst, algCastNonConst);
   }
 
