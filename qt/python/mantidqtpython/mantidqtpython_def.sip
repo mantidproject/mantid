@@ -1529,7 +1529,7 @@ class ProcessingAlgorithm
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 %End
 public:
-ProcessingAlgorithm(const QString &, const QString &, const QString &blacklist = "");
+ProcessingAlgorithm(const QString &, const QString &, int, const QString &blacklist = "");
 };
 
 class PostprocessingAlgorithm
@@ -1549,22 +1549,22 @@ class QDataProcessorWidget : QWidget
 public:
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      QWidget *parent );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessor::WhiteList &,
                      const MantidQt::MantidWidgets::DataProcessor::PreprocessMap &,
                      const MantidQt::MantidWidgets::DataProcessor::ProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessor::PostprocessingAlgorithm &,
-                     QWidget *parent );
+                     QWidget *parent, int group = 0 );
 void accept(MantidQt::MantidWidgets::DataProcessor::DataProcessorMainPresenter *);
 void setInstrumentList(const QString &instruments, const QString &defaultInstrument);
 QString getCurrentInstrument() const;
@@ -1598,6 +1598,8 @@ DataProcessorMainPresenter();
 virtual QVariantMap getPreprocessingOptions() const;
 virtual QVariantMap getProcessingOptions() const;
 virtual QString getPostprocessingOptionsAsString() const;
+virtual void confirmReductionPaused(int);
+virtual void confirmReductionResumed(int);
 
 virtual void notifyADSChanged(const QSet<QString> &);
 };
@@ -2462,7 +2464,7 @@ private:
 };//end namespace MantidWidgets
 
 
-namespace SpectrumView 
+namespace SpectrumView
 {
 class SpectrumView : QMainWindow
 {

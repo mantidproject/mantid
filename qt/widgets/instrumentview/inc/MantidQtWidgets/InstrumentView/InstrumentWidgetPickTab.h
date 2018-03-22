@@ -181,12 +181,11 @@ public slots:
   void clear();
 
 private:
-  QString displayDetectorInfo(Mantid::detid_t detid);
+  QString displayDetectorInfo(size_t index);
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
   QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
   QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *,
                                             Mantid::Geometry::IPeak *> &peaks);
-  QString getParameterInfo(const Mantid::Geometry::IComponent &comp);
   QString getPeakOverlayInfo();
 
   InstrumentWidgetPickTab *m_tab;

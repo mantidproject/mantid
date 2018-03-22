@@ -19,6 +19,8 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/V3D.h"
 
 #include <QVBoxLayout>
@@ -525,7 +527,7 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
     return;
   ProjectionSurface &surface = *getSurface();
   if (surface.hasMasks()) {
-    QList<int> dets;
+    std::vector<size_t> dets;
     surface.getMaskedDetectors(dets);
     m_miniplotController->setPlotData(dets);
   } else {
@@ -600,7 +602,8 @@ ComponentInfoController::ComponentInfoController(
     QTextEdit *infoDisplay)
     : QObject(tab), m_tab(tab), m_instrWidget(instrWidget),
       m_selectionInfoDisplay(infoDisplay), m_freezePlot(false),
-      m_instrWidgetBlocked(false), m_currentPickID(-1) {}
+      m_instrWidgetBlocked(false),
+      m_currentPickID(std::numeric_limits<size_t>::max()) {}
 
 /**
 * Display info on a component refered to by a pick ID.
@@ -613,10 +616,10 @@ void ComponentInfoController::displayInfo(size_t pickID) {
   }
 
   const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.componentInfo();
   QString text = "";
-  int detid = actor.getDetID(pickID);
-  if (detid >= 0) {
-    text += displayDetectorInfo(detid);
+  if (componentInfo.isDetector(pickID)) {
+    text += displayDetectorInfo(pickID);
   } else if (auto componentID = actor.getComponentID(pickID)) {
     text += displayNonDetectorInfo(componentID);
   } else {
@@ -634,57 +637,52 @@ void ComponentInfoController::displayInfo(size_t pickID) {
 
 /**
 * Return string with info on a detector.
-* @param detid :: A detector ID.
+* @param index :: A detector Index.
 */
-QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
+QString ComponentInfoController::displayDetectorInfo(size_t index) {
   if (m_instrWidgetBlocked) {
     clear();
     return "";
   }
 
   QString text;
-  if (detid >= 0) {
-    // collect info about selected detector and add it to text
-    const auto &actor = m_instrWidget->getInstrumentActor();
-    auto &det = actor.getDetectorByDetID(detid);
 
-    text = "Selected detector: " + QString::fromStdString(det.getName()) + "\n";
-    text += "Detector ID: " + QString::number(detid) + '\n';
-    QString wsIndex;
-    try {
-      wsIndex = QString::number(actor.getWorkspaceIndex(detid));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      // Detector doesn't have a workspace index relating to it
-      wsIndex = "None";
+  // collect info about selected detector and add it to text
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.componentInfo();
+  auto detid = actor.getDetID(index);
+
+  text = "Selected detector: " +
+         QString::fromStdString(componentInfo.name(index)) + "\n";
+  text += "Detector ID: " + QString::number(detid) + '\n';
+  QString wsIndex;
+  auto ws = actor.getWorkspaceIndex(index);
+  wsIndex = ws == InstrumentActor::INVALID_INDEX ? "None" : QString::number(ws);
+  text += "Workspace index: " + wsIndex + '\n';
+  Mantid::Kernel::V3D pos = componentInfo.position(index);
+  text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
+          "," + QString::number(pos.Z()) + '\n';
+  double r, t, p;
+  pos.getSpherical(r, t, p);
+  text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
+          QString::number(p) + '\n';
+  if (componentInfo.hasParent(index)) {
+    QString textpath;
+    auto parent = index;
+    while (componentInfo.hasParent(parent)) {
+      parent = componentInfo.parent(parent);
+      textpath =
+          "/" + QString::fromStdString(componentInfo.name(parent)) + textpath;
     }
-    text += "Workspace index: " + wsIndex + '\n';
-    Mantid::Kernel::V3D pos = det.getPos();
-    text += "xyz: " + QString::number(pos.X()) + "," +
-            QString::number(pos.Y()) + "," + QString::number(pos.Z()) + '\n';
-    double r, t, p;
-    pos.getSpherical(r, t, p);
-    text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
-            QString::number(p) + '\n';
-    Mantid::Geometry::ICompAssembly_const_sptr parent =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-            det.getParent());
-    if (parent) {
-      QString textpath;
-      while (parent) {
-        textpath = "/" + QString::fromStdString(parent->getName()) + textpath;
-        parent =
-            boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-                parent->getParent());
-      }
-      text += "Component path:" + textpath + "/" +
-              QString::fromStdString(det.getName()) + '\n';
-    }
-    const double integrated = actor.getIntegratedCounts(detid);
+    text += "Component path:" + textpath + "/" +
+            QString::fromStdString(componentInfo.name(index)) + '\n';
+
+    const double integrated = actor.getIntegratedCounts(index);
     const QString counts =
         integrated == -1.0 ? "N/A" : QString::number(integrated);
     text += "Counts: " + counts + '\n';
     // display info about peak overlays
-    text += getParameterInfo(det);
+    text += actor.getParameterInfo(index);
   }
   return text;
 }
@@ -696,19 +694,19 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
 */
 QString ComponentInfoController::displayNonDetectorInfo(
     Mantid::Geometry::ComponentID compID) {
-  auto component =
-      m_instrWidget->getInstrumentActor().getInstrument()->getComponentByID(
-          compID);
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.componentInfo();
+  auto component = componentInfo.indexOf(compID);
   QString text = "Selected component: ";
-  text += QString::fromStdString(component->getName()) + '\n';
-  Mantid::Kernel::V3D pos = component->getPos();
+  text += QString::fromStdString(componentInfo.name(component)) + '\n';
+  Mantid::Kernel::V3D pos = componentInfo.position(component);
   text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
           "," + QString::number(pos.Z()) + '\n';
   double r, t, p;
   pos.getSpherical(r, t, p);
   text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
           QString::number(p) + '\n';
-  text += getParameterInfo(*component);
+  text += actor.getParameterInfo(component);
   return text;
 }
 
@@ -834,59 +832,6 @@ void ComponentInfoController::displayAlignPeaksInfo(
   text << " theta: " << theta << " phi: " << phi << "\n";
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
-}
-
-/**
-* Form a string for output from the components instrument parameters
-*/
-QString ComponentInfoController::getParameterInfo(
-    const Mantid::Geometry::IComponent &comp) {
-  QString text = "";
-  std::map<Mantid::Geometry::ComponentID, std::vector<std::string>>
-      mapCmptToNameVector;
-
-  auto paramNames = comp.getParameterNamesByComponent();
-  for (auto itParamName = paramNames.begin(); itParamName != paramNames.end();
-       ++itParamName) {
-    // build the data structure I need Map comp id -> vector of names
-    std::string paramName = itParamName->first;
-    Mantid::Geometry::ComponentID paramCompId = itParamName->second;
-    // attempt to insert this will fail silently if the key already exists
-    if (mapCmptToNameVector.find(paramCompId) == mapCmptToNameVector.end()) {
-      mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
-    }
-    // get the vector out and add the name
-    mapCmptToNameVector[paramCompId].push_back(paramName);
-  }
-
-  // walk out from the selected component
-  const Mantid::Geometry::IComponent *paramComp = &comp;
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parentComp;
-  while (paramComp) {
-    auto id = paramComp->getComponentID();
-    auto &compParamNames = mapCmptToNameVector[id];
-    if (compParamNames.size() > 0) {
-      text += QString::fromStdString("\nParameters from: " +
-                                     paramComp->getName() + "\n");
-      std::sort(compParamNames.begin(), compParamNames.end(),
-                Mantid::Kernel::CaseInsensitiveStringComparator());
-      for (auto itParamName = compParamNames.begin();
-           itParamName != compParamNames.end(); ++itParamName) {
-        std::string paramName = *itParamName;
-        // no need to search recursively as we are asking from the matching
-        // component
-        std::string paramValue =
-            paramComp->getParameterAsString(paramName, false);
-        if (paramValue != "") {
-          text += QString::fromStdString(paramName + ": " + paramValue + "\n");
-        }
-      }
-    }
-    parentComp = paramComp->getParent();
-    paramComp = parentComp.get();
-  }
-
-  return text;
 }
 
 /**

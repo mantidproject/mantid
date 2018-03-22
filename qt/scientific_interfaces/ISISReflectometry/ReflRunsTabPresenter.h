@@ -77,14 +77,17 @@ public:
   QString getPostprocessingOptionsAsString() const override;
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angle) const override;
+  bool hasPerAngleOptions() const override;
   /// Handle data reduction paused/resumed
   void pause() const override;
   void resume() const override;
   /// Determine whether to start a new autoreduction
   bool startNewAutoreduction() const override;
   /// Reduction paused/resumed confirmation handler
-  void confirmReductionPaused() const override;
-  void confirmReductionResumed() const override;
+  void confirmReductionPaused(int group) override;
+  void confirmReductionResumed(int group) override;
   void settingsChanged(int group) override;
 
 private:

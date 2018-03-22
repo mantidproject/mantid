@@ -499,10 +499,10 @@ protected:
 };
 
 /// A shared pointer to a MDHistoWorkspace
-typedef boost::shared_ptr<MDHistoWorkspace> MDHistoWorkspace_sptr;
+using MDHistoWorkspace_sptr = boost::shared_ptr<MDHistoWorkspace>;
 
 /// A shared pointer to a const MDHistoWorkspace
-typedef boost::shared_ptr<const MDHistoWorkspace> MDHistoWorkspace_const_sptr;
+using MDHistoWorkspace_const_sptr = boost::shared_ptr<const MDHistoWorkspace>;
 
 } // namespace Mantid
 } // namespace DataObjects

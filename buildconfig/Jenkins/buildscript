@@ -14,7 +14,7 @@ SCRIPT_DIR=$(dirname "$0")
 ###############################################################################
 # System discovery
 ###############################################################################
-if [[ ${NODE_LABELS} == *rhel7* ]]; then
+if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]]; then
   ON_RHEL7=true
 fi
 if [[ ${NODE_LABELS} == *ubuntu* ]]; then
@@ -189,8 +189,10 @@ if [[ "$BUILDPKG" == true ]]; then
   if [[ "${ON_MACOS}" == true ]]; then
     PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
   else
-    # Use different suffix for linux builds
-    if [[ ${JOB_NAME} == *release* ]]; then
+    # Use different suffix for linux builds if parameter is not defined
+    if [[ -n "${PACKAGE_SUFFIX}" ]]; then
+       echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
+    elif [[ ${JOB_NAME} == *release* ]]; then
        PACKAGE_SUFFIX=""
     elif [[ ${JOB_NAME} == *master* ]]; then
       PACKAGE_SUFFIX="nightly"
@@ -205,8 +207,8 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
     fi
 
-    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]]; then
-      # No suffix and traditional install path for python 2 release build
+    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+      # Traditional install path for python 2 release build
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
     else
       # everything else uses lower-case values
@@ -253,7 +255,7 @@ if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
        https://scan.coverity.com/builds?project=mantidproject%2Fmantid)
   status=$(echo ${status} | sed -e 's/^ *//' -e 's/ *$//')
-  if [[ -z $status ]]; then
+  if [[ -z $status ]] || [[ ${status} == "Build successfully submitted." ]]; then
     exit 0
   else
     echo "$status"

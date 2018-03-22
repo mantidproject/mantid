@@ -47,7 +47,7 @@ namespace Geometry {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-typedef boost::rational<int> RationalNumber;
+using RationalNumber = boost::rational<int>;
 
 class MANTID_GEOMETRY_DLL V3R {
 public:

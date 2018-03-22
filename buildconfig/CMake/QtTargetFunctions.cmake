@@ -88,6 +88,7 @@ endfunction()
 # keyword: INSTALL_DIR A destination directory for the install command.
 # keyword: INSTALL_DIR_BASE Base directory the build output. The final product goes into a subdirectory based on the Qt version.
 # keyword: OSX_INSTALL_RPATH Install path for osx version > 10.8
+# keyword: LINUX_INSTALL_RPATH Install path for CMAKE_SYSTEM_NAME == Linux
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set (oneValueArgs
@@ -95,7 +96,7 @@ function (mtd_add_qt_target)
     INSTALL_DIR INSTALL_DIR_BASE PRECOMPILED)
   set (multiValueArgs SRC UI MOC
     NOMOC RES DEFS QT4_DEFS QT5_DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
-    QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH)
+    QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH LINUX_INSTALL_RPATH)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
   if (PARSED_UNPARSED_ARGUMENTS)
@@ -194,6 +195,10 @@ function (mtd_add_qt_target)
     if (PARSED_OSX_INSTALL_RPATH)
       set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH  "${PARSED_OSX_INSTALL_RPATH}" )
     endif()
+  elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+    if (PARSED_LINUX_INSTALL_RPATH)
+      set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH  "${PARSED_LINUX_INSTALL_RPATH}" )
+    endif ()
   endif ()
 
   if ( PARSED_EXCLUDE_FROM_ALL )
@@ -211,7 +216,10 @@ function (mtd_add_qt_target)
     else()
       set ( _install_dir ${LIB_DIR} )
     endif()
-    install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
+    # Hack: Only install Qt4 to packages for now...
+    if (${PARSED_QT_VERSION} EQUAL 4)
+      install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
+    endif()
   endif()
 
   # Group into folder for VS
@@ -223,7 +231,7 @@ function (mtd_add_qt_target)
   else ()
     add_custom_target ( ${_alltarget} DEPENDS ${_target} )
   endif()
-  
+
 endfunction()
 
 function (mtd_add_qt_tests)
@@ -405,7 +413,7 @@ function (_disable_suggest_override _qt_version _target)
   endif()
 endfunction ()
 
-# Homebrew on macOS symlinks Qt4 into /usr/local so that the 
+# Homebrew on macOS symlinks Qt4 into /usr/local so that the
 # include directories are on the standard paths. When we add
 # /usr/local/include using target_include_directories clang sees
 # the duplicate but removes them from the end and keeps the paths
@@ -427,5 +435,5 @@ function ( prune_usr_local_include )
         set_property ( TARGET ${_it} PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${_tmp}" )
       endif ()
     endif ()
-  endforeach () 
+  endforeach ()
 endfunction ()

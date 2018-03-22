@@ -394,7 +394,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     }
     g_log.information() << "Threshold signal density: " << threshold << '\n';
 
-    typedef API::IMDNode *boxPtr;
+    using boxPtr = API::IMDNode *;
     // We will fill this vector with pointers to all the boxes (up to a given
     // depth)
     typename std::vector<API::IMDNode *> boxes;
@@ -404,7 +404,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     ws->getBox()->getBoxes(boxes, 1000, true);
 
     // This pair is the <density, ptr to the box>
-    typedef std::pair<double, API::IMDNode *> dens_box;
+    using dens_box = std::pair<double, API::IMDNode *>;
 
     // Map that will sort the boxes by increasing density. The key = density;
     // value = box *.
@@ -439,7 +439,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // e.g. from highest density down to lowest density.
     typename std::multimap<double, boxPtr>::reverse_iterator it2;
     auto it2_end = sortedBoxes.rend();
-    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++) {
+    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; ++it2) {
       signal_t density = it2->first;
       boxPtr box = it2->second;
 #ifndef MDBOX_TRACK_CENTROID
@@ -586,7 +586,7 @@ void FindPeaksMD::findPeaksHisto(
     peakWS->copyExperimentInfoFrom(ei.get());
 
     // This pair is the <density, box index>
-    typedef std::pair<double, size_t> dens_box;
+    using dens_box = std::pair<double, size_t>;
 
     // Map that will sort the boxes by increasing density. The key = density;
     // value = box index.

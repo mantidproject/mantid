@@ -18,6 +18,7 @@
 */
 #include <QObject>
 #include <QPoint>
+#include <vector>
 
 class QAction;
 class QActionGroup;
@@ -64,7 +65,7 @@ public:
   void saveSettings(QSettings &settings) const;
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
-  void setPlotData(QList<int> detIDs);
+  void setPlotData(std::vector<size_t> detIDs);
   void setPlotType(PlotType type);
   void setTubeXUnits(TubeXUnits units) { m_tubeXUnits = units; }
   void updatePlot();
@@ -98,20 +99,16 @@ private:
   void plotSingle(int detid);
   void addPeakMarker(const PeakMarker2D &marker);
   void addPeakMarker(const Mantid::Geometry::IPeak &peak);
-  void plotTube(int detid);
-  void plotTubeSums(int detid, const InstrumentActor &instrumentActor,
-                    const Mantid::Geometry::ICompAssembly &assembly);
-  void plotTubeIntegrals(int detid, const InstrumentActor &instrumentActor,
-                         const Mantid::Geometry::ICompAssembly &assembly);
-  MiniPlotCurveData prepareDataForSinglePlot(int detid,
+  void plotTube(size_t detid);
+  void plotTubeSums(size_t detindex);
+  void plotTubeIntegrals(size_t detindex);
+  MiniPlotCurveData prepareDataForSinglePlot(size_t detindex,
                                              bool includeErrors = false);
   MiniPlotCurveData
-  prepareDataForSumsPlot(int detid, const InstrumentActor &instrumentActor,
-                         const Mantid::Geometry::ICompAssembly &assembly,
+  prepareDataForSumsPlot(size_t detindex,
                          bool includeErrors = false);
   MiniPlotCurveData
-  prepareDataForIntegralsPlot(int detid, const InstrumentActor &instrumentActor,
-                              const Mantid::Geometry::ICompAssembly &assembly,
+  prepareDataForIntegralsPlot(size_t detindex,
                               bool includeErrors = false);
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
                                    const Mantid::Kernel::V3D &origin,

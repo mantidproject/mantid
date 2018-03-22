@@ -110,15 +110,17 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             @param ref_ws: current reference workspace
             @param factor: relative efficiency factor for the current pixel
         """
+        x = mtd[ws].readX(0)[-self._bin_offset]
+        last_bins = ws + '_last_bins'
+        CropWorkspace(InputWorkspace=ws, XMin=x, OutputWorkspace=last_bins)
+
         if factor == 0.:
             CloneWorkspace(InputWorkspace=cropped_ws, OutputWorkspace=ref_ws)
         elif str(factor) != 'inf' and str(factor) != 'nan':
             Scale(InputWorkspace=cropped_ws, OutputWorkspace=cropped_ws, Factor=factor)
+            Scale(InputWorkspace=last_bins, OutputWorkspace=last_bins, Factor=factor)
             WeightedMean(InputWorkspace1=ref_ws, InputWorkspace2=cropped_ws, OutputWorkspace=ref_ws)
 
-        x = mtd[ws].readX(0)[-self._bin_offset]
-        last_bins = ws + '_last_bins'
-        CropWorkspace(InputWorkspace=ws, XMin=x, OutputWorkspace=last_bins)
         ConjoinXRuns(InputWorkspaces=[ref_ws,last_bins], OutputWorkspace=ref_ws)
         x = mtd[ref_ws].readX(0)[self._bin_offset]
         CropWorkspace(InputWorkspace=ref_ws, XMin=x, OutputWorkspace=ref_ws)

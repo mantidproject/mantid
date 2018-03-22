@@ -25,7 +25,7 @@ public:
 
 private:
   std::string check(const boost::any &value) const override {
-    typedef std::vector<double> HeldType;
+    using HeldType = std::vector<double>;
     const HeldType *dataPtr = boost::any_cast<const HeldType *>(value);
     m_head = dataPtr->data();
     return "";

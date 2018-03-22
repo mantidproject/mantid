@@ -9,6 +9,37 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Unit.h"
 
+namespace {
+void encode(std::string &data) {
+  std::string buffer;
+  buffer.reserve(data.size());
+
+  for (auto &element : data) {
+    switch (element) {
+    case '&':
+      buffer.append("&amp;");
+      break;
+    case '\"':
+      buffer.append("&quot;");
+      break;
+    case '\'':
+      buffer.append("&apos;");
+      break;
+    case '<':
+      buffer.append("&lt;");
+      break;
+    case '>':
+      buffer.append("&gt;");
+      break;
+    default:
+      buffer.push_back(element);
+    }
+  }
+
+  data.swap(buffer);
+}
+}
+
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -132,6 +163,77 @@ void SaveCanSAS1D2::createSASRootElement(std::string &rootElem) {
   rootElem += "\n\t\t xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
   rootElem += "\n\t\t xsi:schemaLocation=\"urn:cansas1d:1.1 "
               "http://www.cansas.org/formats/1.1/cansas1d.xsd\"\n\t\t>";
+}
+
+/** This method creates an XML element named "SASprocess"
+ *  @param sasProcess :: string for sasprocess element in the xml
+ */
+void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
+  sasProcess = "\n\t\t<SASprocess>";
+  // outFile<<sasProcess;
+
+  std::string sasProcname = "\n\t\t\t<name>";
+  sasProcname += "Mantid generated CanSAS1D XML";
+  sasProcname += "</name>";
+  sasProcess += sasProcname;
+
+  time_t rawtime;
+  time(&rawtime);
+
+  char temp[25];
+  strftime(temp, 25, "%d-%b-%Y %H:%M:%S", localtime(&rawtime));
+  std::string sasDate(temp);
+
+  std::string sasProcdate = "\n\t\t\t<date>";
+  sasProcdate += sasDate;
+  sasProcdate += "</date>";
+  sasProcess += sasProcdate;
+
+  std::string sasProcsvn = "\n\t\t\t<term name=\"svn\">";
+  sasProcsvn += MantidVersion::version();
+  sasProcsvn += "</term>";
+  sasProcess += sasProcsvn;
+
+  const API::Run &run = m_workspace->run();
+  std::string user_file;
+  if (run.hasProperty("UserFile")) {
+    user_file = run.getLogData("UserFile")->value();
+  }
+
+  std::string sasProcuserfile = "\n\t\t\t<term name=\"user_file\">";
+  sasProcuserfile += user_file;
+  sasProcuserfile += "</term>";
+  // outFile<<sasProcuserfile;
+  sasProcess += sasProcuserfile;
+
+  // can run number if available
+  if (m_transcan_ws) {
+    if (m_transcan_ws->run().hasProperty("run_number")) {
+      Kernel::Property *logP = m_transcan_ws->run().getLogData("run_number");
+      auto can_run = logP->value();
+      std::string sasProcCanRun = "\n\t\t\t<term name=\"can_trans_run\">";
+      sasProcCanRun += can_run;
+      sasProcCanRun += "</term>";
+      sasProcess += sasProcCanRun;
+    } else {
+      g_log.debug() << "Didn't find RunNumber log in workspace. Writing "
+                       "<Run></Run> to the CANSAS file\n";
+    }
+  }
+
+  // Reduction process note, if available
+  std::string process_xml = getProperty("Process");
+  if (!process_xml.empty()) {
+    std::string processNote = "\n\t\t\t<SASprocessnote>";
+    encode(process_xml);
+    processNote += process_xml;
+    processNote += "</SASprocessnote>";
+    sasProcess += processNote;
+  } else {
+    sasProcess += "\n\t\t\t<SASprocessnote/>";
+  }
+
+  sasProcess += "\n\t\t</SASprocess>";
 }
 
 /** This method creates an XML element named "SAStransmission_spectrum"

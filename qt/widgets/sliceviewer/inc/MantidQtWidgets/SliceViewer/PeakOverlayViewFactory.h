@@ -64,7 +64,7 @@ public:
 };
 
 /// Factory Shared Pointer typedef.
-typedef boost::shared_ptr<PeakOverlayViewFactory> PeakOverlayViewFactory_sptr;
+using PeakOverlayViewFactory_sptr = boost::shared_ptr<PeakOverlayViewFactory>;
 }
 }
 

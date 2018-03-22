@@ -11,6 +11,8 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 
@@ -46,6 +48,19 @@ template <typename EnumType> int toInt(const EnumType &value) {
  */
 template <typename EnumType> EnumType fromInt(int value) {
   return static_cast<EnumType>(value);
+}
+
+// Get the phi angle between the detector with reference to the origin
+// Makes assumptions about beam direction. Legacy code and not robust.
+double getPhi(const Mantid::Kernel::V3D &pos) {
+  return std::atan2(pos[1], pos[0]);
+}
+
+// Calculate the phi angle between detector and beam, and then offset.
+// Makes assumptions about beam direction. Legacy code and not robust.
+double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
+  double avgPos = getPhi(pos);
+  return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
 
 /// Static logger
@@ -123,7 +138,7 @@ void MiniPlotController::setPlotData(size_t pickID) {
 * Set curve data from multiple detectors: sum their spectra.
 * @param detIDs :: A list of detector IDs.
 */
-void MiniPlotController::setPlotData(QList<int> detIDs) {
+void MiniPlotController::setPlotData(std::vector<size_t> detIDs) {
   setPlotType(PlotType::DetectorSum);
   clear();
   std::vector<double> x, y;
@@ -229,22 +244,25 @@ void MiniPlotController::addPeakMarker(const Mantid::Geometry::IPeak &peak) {
 * containing the detector
 *   with this id.
 */
-void MiniPlotController::plotTube(int detid) {
+void MiniPlotController::plotTube(size_t detindex) {
   const auto &actor = m_instrWidget->getInstrumentActor();
-  auto &det = actor.getDetectorByDetID(detid);
-  auto parent = det.getParent();
-  auto assembly =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-          parent);
-  if (parent && assembly) {
+  const auto &componentInfo = actor.componentInfo();
+
+  //if (!componentInfo.hasParent(detindex)) {
+  //  m_miniplot->clear();
+  //  return;
+  //}
+
+  auto parent = componentInfo.parent(detindex);
+  if (componentInfo.detectorsInSubtree(parent).size() > 0) {
     if (m_plotType == PlotType::TubeSum) {
       // plot sums over detectors vs time bins
-      plotTubeSums(detid, actor, *assembly);
+      plotTubeSums(detindex);
     } else {
       // plot detector integrals vs detID or a function of detector
       // position in the tube
       assert(m_plotType == PlotType::TubeIntegral);
-      plotTubeIntegrals(detid, actor, *assembly);
+      plotTubeIntegrals(detindex);
     }
   } else {
     m_miniplot->removeActiveCurve();
@@ -259,10 +277,8 @@ void MiniPlotController::plotTube(int detid) {
 * @param instrumentActor The actor giving access to the workspace
 * @param A CompAssembly object to be summed
 */
-void MiniPlotController::plotTubeSums(
-    int detid, const InstrumentActor &instrumentActor,
-    const Mantid::Geometry::ICompAssembly &assembly) {
-  auto plotData = prepareDataForSumsPlot(detid, instrumentActor, assembly);
+void MiniPlotController::plotTubeSums(size_t detindex) {
+  auto plotData = prepareDataForSumsPlot(detindex);
   if (plotData.x.empty() || plotData.y.empty())
     return;
   m_miniplot->setActiveCurve(std::move(plotData));
@@ -280,11 +296,9 @@ void MiniPlotController::plotTubeSums(
 * containing the detector
 *   with this id.
 */
-void MiniPlotController::plotTubeIntegrals(
-    int detid, const InstrumentActor &instrumentActor,
-    const Mantid::Geometry::ICompAssembly &assembly) {
+void MiniPlotController::plotTubeIntegrals(size_t detindex) {
   MiniPlotCurveData plotData =
-      prepareDataForIntegralsPlot(detid, instrumentActor, assembly);
+      prepareDataForIntegralsPlot(detindex);
   if (plotData.x.empty() || plotData.y.empty()) {
     clear();
     return;
@@ -299,17 +313,15 @@ void MiniPlotController::plotTubeIntegrals(
 * @return A new MiniPlotCurveData object containing the data to plot
 */
 MiniPlotCurveData
-MiniPlotController::prepareDataForSinglePlot(int detid, bool includeErrors) {
+MiniPlotController::prepareDataForSinglePlot(size_t detindex, bool includeErrors) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto ws = actor.getWorkspace();
-  size_t wi;
+
   MiniPlotCurveData data;
-  try {
-    wi = actor.getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    // Detector doesn't have a workspace index relating to it
+  auto wi = actor.getWorkspaceIndex(detindex);
+  if (wi == InstrumentActor::INVALID_INDEX)
     return data;
-  }
+
   // find min and max for x
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
@@ -325,7 +337,7 @@ MiniPlotController::prepareDataForSinglePlot(int detid, bool includeErrors) {
   }
   // metadata
   data.xunit = QString::fromStdString(ws->getAxis(0)->unit()->unitID());
-  data.label = "Detector " + QString::number(detid);
+  data.label = "Detector " + QString::number(detindex);
   return data;
 }
 
@@ -340,19 +352,20 @@ MiniPlotController::prepareDataForSinglePlot(int detid, bool includeErrors) {
 * @return A new MiniPlotCurveData object containing the data to plot
 */
 MiniPlotCurveData MiniPlotController::prepareDataForSumsPlot(
-    int detid, const InstrumentActor &instrumentActor,
-    const Mantid::Geometry::ICompAssembly &assembly, bool includeErrors) {
-  auto ws = instrumentActor.getWorkspace();
+    size_t detindex, bool includeErrors) {
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  auto ws = actor.getWorkspace();
+  const auto &componentInfo = actor.componentInfo();
+  auto parent = componentInfo.parent(detindex);
+  auto ass = componentInfo.detectorsInSubtree(parent);
   MiniPlotCurveData data;
-  size_t wi;
-  try {
-    wi = instrumentActor.getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    // Detector doesn't have a workspace index relating to it
+
+  auto wi = actor.getWorkspaceIndex(detindex);
+  if (wi == InstrumentActor::INVALID_INDEX)
     return data;
-  }
+
   size_t imin, imax;
-  instrumentActor.getBinMinMaxIndex(wi, imin, imax);
+  actor.getBinMinMaxIndex(wi, imin, imax);
 
   const auto &xdet = ws->points(wi);
   data.x.assign(xdet.begin() + imin, xdet.begin() + imax);
@@ -360,27 +373,24 @@ MiniPlotCurveData MiniPlotController::prepareDataForSumsPlot(
   if (includeErrors)
     data.e.resize(xdet.size(), 0.0);
 
-  const int n = assembly.nelements();
-  for (int i = 0; i < n; ++i) {
-    auto idet = boost::dynamic_pointer_cast<IDetector>(assembly[i]);
-    if (idet) {
-      try {
-        size_t index = instrumentActor.getWorkspaceIndex(idet->getID());
-        const auto &ydet = ws->y(index);
-        std::transform(data.y.begin(), data.y.end(), ydet.begin() + imin,
-                       data.y.begin(), std::plus<double>());
-        if (includeErrors) {
-          const auto &edet = ws->e(index);
-          // sum squares
-          std::transform(
-              data.e.begin(), data.e.end(), edet.begin() + imin, data.e.begin(),
-              [](double lhs, double rhs) { return lhs + rhs * rhs; });
-        }
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        continue; // Detector doesn't have a workspace index relating to it
+  for (auto det : ass) {
+    if (componentInfo.isDetector(det)) {
+      auto index = actor.getWorkspaceIndex(det);
+      if (index == InstrumentActor::INVALID_INDEX)
+        continue;
+      const auto &ydet = ws->y(index);
+      std::transform(data.y.begin(), data.y.end(), ydet.begin() + imin,
+                     data.y.begin(), std::plus<double>());
+      if (includeErrors) {
+        const auto &edet = ws->e(index);
+        // sum squares
+        std::transform(data.e.begin(), data.e.end(), edet.begin() + imin,
+                       data.e.begin(),
+                       [](double lhs, double rhs) { return lhs + rhs * rhs; });
       }
     }
   }
+
   // sqrt errors
   if (includeErrors) {
     std::transform(data.e.begin(), data.e.end(), data.e.begin(),
@@ -406,9 +416,11 @@ MiniPlotCurveData MiniPlotController::prepareDataForSumsPlot(
 * @param y :: Vector of y coordinates (output)
 * @param err :: Optional pointer to a vector of errors (output)
 */
-MiniPlotCurveData MiniPlotController::prepareDataForIntegralsPlot(
-    int detid, const InstrumentActor &actor,
-    const Mantid::Geometry::ICompAssembly &assembly, bool includeErrors) {
+MiniPlotCurveData
+MiniPlotController::prepareDataForIntegralsPlot(size_t detindex,
+                                                bool includeErrors) {
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.componentInfo();
   auto ws = actor.getWorkspace();
   // Does the instrument definition specify that psi should be offset.
   std::vector<std::string> parameters =
@@ -418,19 +430,17 @@ MiniPlotCurveData MiniPlotController::prepareDataForIntegralsPlot(
                                     "Always") != parameters.end();
 
   MiniPlotCurveData curveData;
-  size_t wi;
-  try {
-    wi = actor.getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    // Detector doesn't have a workspace index relating to it
+  auto parent = componentInfo.parent(detindex);
+  auto ass = componentInfo.detectorsInSubtree(parent);
+  auto wi = actor.getWorkspaceIndex(detindex);
+  if (wi == InstrumentActor::INVALID_INDEX)
     return curveData;
-  }
   // imin and imax give the bin integration range
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
 
   auto samplePos = actor.getInstrument()->getSample()->getPos();
-  const int n = assembly.nelements();
+  const auto n = ass.size();
   if (n == 0) {
     // don't think it's ever possible but...
     throw std::runtime_error("PickTab miniplot: empty instrument assembly");
@@ -439,35 +449,34 @@ MiniPlotCurveData MiniPlotController::prepareDataForIntegralsPlot(
     // if assembly has just one element there is nothing to plot
     return curveData;
   }
-  // get the first detector in the tube for lenth calculation
-  auto idet0 = boost::dynamic_pointer_cast<IDetector>(assembly[0]);
-  if (!idet0) {
+  if (!componentInfo.isDetector(ass[0])) {
     // it's not an assembly of detectors,
     // could be a mixture of monitors and other components
     return curveData;
   }
-  auto normal = assembly[1]->getPos() - idet0->getPos();
+  auto normal = componentInfo.position(ass[1]) - componentInfo.position(ass[0]);
   normal.normalize();
   // collect and sort xye pairs
   using XYEData = std::tuple<double, double, double>;
   std::vector<XYEData> xyeUnsorted;
   xyeUnsorted.reserve(n);
-  for (int i = 0; i < n; ++i) {
-    auto idet = boost::dynamic_pointer_cast<IDetector>(assembly[i]);
-    if (idet) {
+  const auto &detectorInfo = actor.detectorInfo();
+  auto pos0 = detectorInfo.position(ass[0]);
+  for (auto det : ass) {
+    if (componentInfo.isDetector(det)) {
       try {
-        const int id = idet->getID();
+        auto id = detectorInfo.detectorIDs()[det];
         // get the x-value for detector idet
         double xvalue = 0;
+        auto pos = detectorInfo.position(det);
         switch (m_tubeXUnits) {
         case TubeXUnits::LENGTH:
-          xvalue = idet->getDistance(*idet0);
+          xvalue = pos.distance(pos0);
           break;
         case TubeXUnits::PHI:
-          xvalue = bOffsetPsi ? idet->getPhiOffset(M_PI) : idet->getPhi();
+          xvalue = bOffsetPsi ? getPhiOffset(pos, M_PI) : getPhi(pos);
           break;
         case TubeXUnits::OUT_OF_PLANE_ANGLE: {
-          Mantid::Kernel::V3D pos = idet->getPos();
           xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
           break;
         }
@@ -518,11 +527,11 @@ MiniPlotCurveData MiniPlotController::prepareDataForIntegralsPlot(
   if (!xAxisUnits.isEmpty()) {
     xAxisCaption += " (" + xAxisUnits + ")";
   }
-  auto parent = assembly.getParent();
-  // curve label: "tube_name (detid) Integrals"
-  // detid is included to distiguish tubes with the same name
-  curveData.label = QString::fromStdString(parent->getName()) + " (" +
-                    QString::number(detid) + ") Integrals/" + xAxisCaption;
+  //auto parent = assembly.getParent();
+  //// curve label: "tube_name (detid) Integrals"
+  //// detid is included to distiguish tubes with the same name
+  //curveData.label = QString::fromStdString(parent->getName()) + " (" +
+  //                  QString::number(detid) + ") Integrals/" + xAxisCaption;
 
   return curveData;
 }
@@ -557,7 +566,7 @@ void MiniPlotController::savePlotToWorkspace() {
       if (X.empty()) {
         // label doesn't have any info on how to reproduce the curve:
         // only the current curve can be saved
-        QList<int> dets;
+        std::vector<size_t> dets;
         m_instrWidget->getSurface()->getMaskedDetectors(dets);
         actor.sumDetectors(dets, curveData.x, curveData.y);
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();
@@ -568,24 +577,15 @@ void MiniPlotController::savePlotToWorkspace() {
       }
     } else if (parts.size() == 3) {
       int detid = parts[1].toInt();
-      auto &det = actor.getDetectorByDetID(detid);
-      auto parent = det.getParent();
-      auto assembly =
-          boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-              parent);
+      auto det = actor.getDetectorByDetID(detid);
       QString sumOrIntegral = parts[2].trimmed();
-      if (!assembly) {
-        g_log.warning(
-            "Miniplot - Save to Workspace: Summed/Integrated curve not an "
-            "assembly, cannot save.");
-        continue;
-      } else if (sumOrIntegral == "Sum") {
+      if (sumOrIntegral == "Sum") {
         curveData =
-            prepareDataForSumsPlot(detid, actor, *assembly, includeErrors);
+            prepareDataForSumsPlot(detid, includeErrors);
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       } else {
         curveData =
-            prepareDataForIntegralsPlot(detid, actor, *assembly, includeErrors);
+            prepareDataForIntegralsPlot(detid, includeErrors);
         unitX = sumOrIntegral.split('/')[1].toStdString();
       }
     } else if (parts.size() == 1) {

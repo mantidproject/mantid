@@ -726,7 +726,7 @@ time_duration DateAndTime::durationFromSeconds(double duration) {
   else if (duration <= std::numeric_limits<int>::min())
     return boost::posix_time::time_duration(boost::posix_time::min_date_time);
 
-  typedef boost::posix_time::time_res_traits::sec_type sec_type;
+  using sec_type = boost::posix_time::time_res_traits::sec_type;
 
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
   // Nanosecond resolution

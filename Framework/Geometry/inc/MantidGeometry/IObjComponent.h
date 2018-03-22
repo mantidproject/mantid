@@ -120,9 +120,9 @@ private:
 };
 
 /// Shared pointer to IObjComponent
-typedef boost::shared_ptr<IObjComponent> IObjComponent_sptr;
+using IObjComponent_sptr = boost::shared_ptr<IObjComponent>;
 /// Shared pointer to IObjComponent (const version)
-typedef boost::shared_ptr<const IObjComponent> IObjComponent_const_sptr;
+using IObjComponent_const_sptr = boost::shared_ptr<const IObjComponent>;
 
 } // namespace Geometry
 } // namespace Mantid

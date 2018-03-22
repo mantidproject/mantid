@@ -6,77 +6,69 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
-    <height>600</height>
+    <width>759</width>
+    <height>723</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1,0">
    <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="lblSample">
-       <property name="text">
-        <string>Sample: </string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1" colspan="3">
-      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="showLoad" stdset="0">
-        <bool>false</bool>
-       </property>
-       <property name="workspaceSuffixes" stdset="0">
-        <stringlist>
-         <string>_Result</string>
-        </stringlist>
-       </property>
-       <property name="fileBrowserSuffixes" stdset="0">
-        <stringlist>
-         <string>_Result.nxs</string>
-        </stringlist>
-       </property>
-       <property name="ShowGroups" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QComboBox" name="cbWidth"/>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="cbFunction">
-       <item>
+    <widget class="QGroupBox" name="gbInput">
+     <property name="title">
+      <string>Input</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblSample">
         <property name="text">
-         <string>ChudleyElliot</string>
+         <string>Sample </string>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>HallRoss</string>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample" native="true">
+        <property name="showLoad" stdset="0">
+         <bool>false</bool>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>FickDiffusion</string>
+        <property name="workspaceSuffixes" stdset="0">
+         <stringlist>
+          <string>_Result</string>
+         </stringlist>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>TeixeiraWater</string>
+        <property name="fileBrowserSuffixes" stdset="0">
+         <stringlist>
+          <string>_Result.nxs</string>
+         </stringlist>
         </property>
-       </item>
-      </widget>
+        <property name="ShowGroups" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="loWidth">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
-     <item row="1" column="2">
+     <item>
       <widget class="QLabel" name="lblWidth">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -89,38 +81,18 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="lblFunc">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Fit Function: </string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QCheckBox" name="ckPlotGuess">
-       <property name="text">
-        <string>Plot Guess</string>
-       </property>
-      </widget>
+     <item>
+      <widget class="QComboBox" name="cbWidth"/>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_2"/>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="loPlotArea">
      <item>
-      <layout class="QVBoxLayout" name="treeSpace"/>
+      <layout class="QVBoxLayout" name="properties"/>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="loPlots" stretch="5,3">
+      <layout class="QVBoxLayout" name="loPlots" stretch="5,3,0">
        <item>
         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
          <property name="sizePolicy">
@@ -178,36 +150,46 @@
          </property>
         </widget>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="pbPlotPreview">
+           <property name="text">
+            <string>Plot Current Preview</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="ckPlotGuess">
+           <property name="text">
+            <string>Plot Guess</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pbPlotPreview">
-       <property name="text">
-        <string>Plot Current Preview</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_44">
+    <layout class="QHBoxLayout" name="loOutput">
      <item>
       <widget class="QGroupBox" name="gbOutput">
        <property name="title">

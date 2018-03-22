@@ -1,10 +1,7 @@
 #ifndef MANTID_DATAHANDLING_SetSampleMaterial_H_
 #define MANTID_DATAHANDLING_SetSampleMaterial_H_
 
-//--------------------------------
-// Includes
-//--------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidKernel/NeutronAtom.h"
 
 namespace Mantid {
@@ -39,7 +36,7 @@ namespace DataHandling {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SetSampleMaterial : public Mantid::API::Algorithm {
+class DLLExport SetSampleMaterial : public Mantid::API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override;

@@ -17,7 +17,7 @@
 
 namespace Mantid {
 /// Typedef of a map from detector ID to detector shared pointer.
-typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
+using detid2det_map = std::map<detid_t, Geometry::IDetector_const_sptr>;
 
 namespace Geometry {
 class ComponentInfo;
@@ -26,9 +26,9 @@ class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
 /// Convenience typedef
-typedef std::map<std::pair<std::string, const IComponent *>,
-                 boost::shared_ptr<XMLInstrumentParameter>>
-    InstrumentParameterCache;
+using InstrumentParameterCache =
+    std::map<std::pair<std::string, const IComponent *>,
+             boost::shared_ptr<XMLInstrumentParameter>>;
 
 /**
 Base Instrument Class.

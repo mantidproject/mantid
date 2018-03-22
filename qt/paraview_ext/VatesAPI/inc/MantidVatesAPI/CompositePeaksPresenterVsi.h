@@ -39,7 +39,7 @@ public:
   void sortPeaksWorkspace(const std::string &, const bool) override {}
   void sortPeaksWorkspace(const std::string &columnToSortBy,
                           const bool sortedAscending,
-                          const Mantid::API::IPeaksWorkspace *peaksWS);
+                          const Mantid::API::IPeaksWorkspace_sptr peaksWS);
   bool hasPeaks();
 
 private:

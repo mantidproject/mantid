@@ -266,7 +266,7 @@
                   </item>
                 </layout>
               </widget>
-            </item>     
+            </item>
             <item row ="5" column="0">
               <widget class="QLabel" name="fileFormatLabel">
                 <property name="text">
@@ -335,7 +335,7 @@
                   </size>
                 </property>
               </spacer>
-            </item>    
+            </item>
           </layout>
         </widget>
       </item>

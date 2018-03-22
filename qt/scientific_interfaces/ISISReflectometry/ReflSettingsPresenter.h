@@ -52,6 +52,13 @@ public:
   void notify(IReflSettingsPresenter::Flag flag) override;
   void setInstrumentName(const std::string &instName) override;
 
+  /// Returns per-angle values passed for 'Transmission run(s)'
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angleToFind) const override;
+  /// Returns default values passed for 'Transmission run(s)'
+  MantidWidgets::DataProcessor::OptionsQMap getDefaultOptions() const;
+  /// Whether per-angle transmission runs are specified
+  bool hasPerAngleOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const override;
@@ -60,9 +67,11 @@ public:
   getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
-  std::string getTransmissionRuns() const override;
 
   void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) override;
+  void onReductionPaused() override;
+  void onReductionResumed() override;
+  Mantid::API::IAlgorithm_sptr createReductionAlg() override;
 
 private:
   void createStitchHints();
@@ -72,9 +81,9 @@ private:
   bool hasReductionTypes(const std::string &reductionType) const;
   void handleSummationTypeChange();
   static QString asAlgorithmPropertyBool(bool value);
-  Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
+
   MantidWidgets::DataProcessor::OptionsQMap transmissionOptionsMap() const;
   void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
                      const QString &key, const QString &value) const;
@@ -88,6 +97,7 @@ private:
   void
   addTransmissionOptions(MantidWidgets::DataProcessor::OptionsQMap &options,
                          std::initializer_list<QString> keys) const;
+  QString getProcessingInstructions() const;
 
   /// The view we are managing
   IReflSettingsView *m_view;

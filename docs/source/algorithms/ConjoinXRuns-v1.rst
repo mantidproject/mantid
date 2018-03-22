@@ -19,6 +19,7 @@ This can be a mixed list of workspaces and workspace groups on AnalysisDataServi
 - the same instrument
 - the same number of histograms
 - the same units
+- each workspace must have the same amount of points per spectrum, however the x-axes may differ
 
 SampleLogAsXAxis
 ----------------
@@ -48,7 +49,7 @@ Usage
 **Example - ConjoinXRuns**
 
 .. testcode:: ConjoinXRunsExample
-   
+
     # Create input workspaces
     list = []
     for i in range(3):
@@ -168,4 +169,3 @@ Related Algorithms
 .. categories::
 
 .. sourcelink::
-
