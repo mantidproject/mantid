@@ -14,6 +14,7 @@
 #include "qwt_double_interval.h"
 #include "qwt_abstract_scale.h"
 
+// cppcheck-suppress noCopyConstructor
 class QwtAbstractScale::PrivateData {
 public:
   PrivateData() : maxMajor(5), maxMinor(3), stepSize(0.0), autoScale(true) {
@@ -21,7 +22,7 @@ public:
     scaleDraw = new QwtScaleDraw();
   }
 
-  PrivateData(const QwtAbstractScale::PrivateData &) = delete;
+  PrivateData(const PrivateData &) = delete;
 
   ~PrivateData() {
     delete scaleEngine;
