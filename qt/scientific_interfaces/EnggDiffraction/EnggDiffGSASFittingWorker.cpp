@@ -1,7 +1,7 @@
 #include "EnggDiffGSASFittingWorker.h"
 #include "EnggDiffGSASFittingModel.h"
 
-#include "../../../Framework/PythonInterface/inc/MantidPythonInterface/kernel/Environment/ErrorHandling.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,7 +19,7 @@ void EnggDiffGSASFittingWorker::doRefinement() {
     const auto outputProperties =
         m_model->doGSASRefinementAlgorithm(m_refinementParams);
     emit refinementSuccessful(outputProperties);
-  } catch (const Mantid::PythonInterface::Environment::PythonException &e) {
+  } catch (const Mantid::API::Algorithm::CancelException &) {
     emit refinementCancelled();
   } catch (const std::exception &e) {
     emit refinementFailed(e.what());
