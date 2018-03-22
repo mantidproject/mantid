@@ -1090,8 +1090,8 @@ void LoadISISNexus2::parseISODateTime(const std::string &datetime_iso,
     time = Poco::DateTimeFormatter::format(datetime_output, "%H:%M:%S",
                                            timezone_diff);
   } catch (Poco::SyntaxException &) {
-    date = "\?\?-\?\?-\?\?\?\?";
-    time = "\?\?:\?\?:\?\?";
+    date = R"(??-??-????)";
+    time = R"(??:??:??)";
     g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
   }
 }

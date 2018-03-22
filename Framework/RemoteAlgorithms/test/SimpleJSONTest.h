@@ -143,7 +143,7 @@ public:
   void test_JSONObjectExampleServerResponseLonger() {
 
     const std::string longerJsonStr =
-        "{\"v1\": \"[1, a, 3]\",\"" + errName + "\":\"" + errVal + "\"}";
+        R"({"v1": "[1, a, 3]",")" + errName + "\":\"" + errVal + "\"}";
     std::istringstream inputLong(longerJsonStr);
     std::string res;
 
@@ -156,7 +156,7 @@ public:
     TS_ASSERT_EQUALS(true, ol[errName].getValue(res));
     TS_ASSERT_EQUALS(res, errVal);
 
-    const std::string l2JsonStr = "{\"v1\": \"[1, a, 3]\",\"" + errName +
+    const std::string l2JsonStr = R"({"v1": "[1, a, 3]",")" + errName +
                                   "\":\"" + errVal + "\", \"" + versName +
                                   "\": \"" + versVal + "\" }"
                                                        "\"}";
@@ -173,7 +173,7 @@ public:
     TS_ASSERT_EQUALS(res, versVal);
 
     const std::string l3JsonStr = "{ \"" + impName + "\": \"" + impVal +
-                                  "\", \"v1\": \"[1, a, longer str, a4]\",\"" +
+                                  R"(", "v1": "[1, a, longer str, a4]",")" +
                                   errName + "\":\"" + errVal + "\", \"" +
                                   versName + "\": \"" + versVal + "\" }"
                                                                   "\"}";
@@ -201,7 +201,7 @@ public:
     TS_ASSERT_THROWS(initFromStream(jo, istr), JSONParseException);
     TS_ASSERT_THROWS_NOTHING(prettyPrint(jo, out, 0));
 
-    std::string strOK = "{ \"key1\": \"val1\"}";
+    std::string strOK = R"({ "key1": "val1"})";
     std::istringstream istrOK(strOK);
     JSONObject j2;
     TS_ASSERT_THROWS_NOTHING(initFromStream(j2, istrOK));
