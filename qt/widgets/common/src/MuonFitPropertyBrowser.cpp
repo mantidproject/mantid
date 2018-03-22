@@ -336,12 +336,11 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
 }
 
 void MuonFitPropertyBrowser::checkFitEnabled() {
-	if (count() == 0) {
-		setFitEnabled(false);
-	}
-	else {
-		setFitEnabled(true);
-	}
+  if (count() == 0) {
+    setFitEnabled(false);
+  } else {
+    setFitEnabled(true);
+  }
 }
 /**
 * Set the input workspace name
@@ -1197,8 +1196,8 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
     setAllGroups();
     setAllPeriods();
     setAutoBackgroundName("");
-	this->clear(); // force update of composite function
-  } else { // clear current selection
+    this->clear(); // force update of composite function
+  } else {         // clear current selection
     if (m_autoBackground != "") {
       setAutoBackgroundName(m_autoBackground);
       addAutoBackground();
