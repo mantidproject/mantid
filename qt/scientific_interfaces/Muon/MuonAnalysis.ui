@@ -51,7 +51,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="Home">
        <attribute name="title">
@@ -2260,7 +2260,7 @@ p, li { white-space: pre-wrap; }
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>100</height>
+              <height>140</height>
              </size>
             </property>
             <property name="title">
@@ -2660,8 +2660,8 @@ p, li { white-space: pre-wrap; }
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>131</width>
-                     <height>23</height>
+                     <width>165</width>
+                     <height>26</height>
                     </rect>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_KeepNPlots">
