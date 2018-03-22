@@ -12,14 +12,15 @@ set ( DOCTREE_DIR ${CMAKE_CURRENT_BINARY_DIR}/doctree )
 # Sphinx dont't allow python -m execution. Assume
 # we are running on Linux and `sphinx-build` is available in these cases
 if ( EXISTS ${SPHINX_PACKAGE_DIR}/__main__.py )
-  set ( SPHINX_BUILD "python -m sphinx" )
+  add_custom_target ( dev-docs-${BUILDER}
+                      COMMAND ${PYTHON_EXECUTABLE} -m sphinx -b ${BUILDER} -d ${DOCTREE_DIR} ${CMAKE_CURRENT_LIST_DIR}/source ${OUT_DIR}
+                      COMMENT "Building html developer documentation" )
 else ()
-  set ( SPHINX_BUILD "sphinx-build" )
+  add_custom_target ( dev-docs-${BUILDER}
+                      COMMAND sphinx-build -b ${BUILDER} -d ${DOCTREE_DIR} ${CMAKE_CURRENT_LIST_DIR}/source ${OUT_DIR}
+                      COMMENT "Building html developer documentation" )
 endif ()
 
-add_custom_target ( dev-docs-${BUILDER}
-                    COMMAND ${SPHINX_BUILD} -b ${BUILDER} -d ${DOCTREE_DIR} ${CMAKE_CURRENT_LIST_DIR}/source ${OUT_DIR}
-                    COMMENT "Building html developer documentation" )
 # Group within VS and exclude from whole build
 set_target_properties ( dev-docs-html PROPERTIES FOLDER "Documentation"
                        EXCLUDE_FROM_DEFAULT_BUILD 1
