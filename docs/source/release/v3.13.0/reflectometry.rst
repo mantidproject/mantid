@@ -32,6 +32,7 @@ Algorithms
 New features
 ############
 
+- A new algorithm :ref:`algm-ReflectometryMomentumTransfer` provides conversion to momentum transfer and :math:`Q_{z}` resolution calculation for relfectivity workspaces.
 
 Improvements
 ############
