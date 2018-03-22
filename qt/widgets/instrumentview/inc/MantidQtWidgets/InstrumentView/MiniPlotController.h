@@ -104,12 +104,10 @@ private:
   void plotTubeIntegrals(size_t detindex);
   MiniPlotCurveData prepareDataForSinglePlot(size_t detindex,
                                              bool includeErrors = false);
-  MiniPlotCurveData
-  prepareDataForSumsPlot(size_t detindex,
-                         bool includeErrors = false);
-  MiniPlotCurveData
-  prepareDataForIntegralsPlot(size_t detindex,
-                              bool includeErrors = false);
+  MiniPlotCurveData prepareDataForSumsPlot(size_t detindex,
+                                           bool includeErrors = false);
+  MiniPlotCurveData prepareDataForIntegralsPlot(size_t detindex,
+                                                bool includeErrors = false);
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
                                    const Mantid::Kernel::V3D &origin,
                                    const Mantid::Kernel::V3D &normal);

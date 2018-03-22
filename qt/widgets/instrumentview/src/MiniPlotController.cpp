@@ -249,7 +249,7 @@ void MiniPlotController::plotTube(size_t detindex) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   const auto &componentInfo = actor.componentInfo();
 
-  //if (!componentInfo.hasParent(detindex)) {
+  // if (!componentInfo.hasParent(detindex)) {
   //  m_miniplot->clear();
   //  return;
   //}
@@ -298,8 +298,7 @@ void MiniPlotController::plotTubeSums(size_t detindex) {
 *   with this id.
 */
 void MiniPlotController::plotTubeIntegrals(size_t detindex) {
-  MiniPlotCurveData plotData =
-      prepareDataForIntegralsPlot(detindex);
+  MiniPlotCurveData plotData = prepareDataForIntegralsPlot(detindex);
   if (plotData.x.empty() || plotData.y.empty()) {
     clear();
     return;
@@ -314,7 +313,8 @@ void MiniPlotController::plotTubeIntegrals(size_t detindex) {
 * @return A new MiniPlotCurveData object containing the data to plot
 */
 MiniPlotCurveData
-MiniPlotController::prepareDataForSinglePlot(size_t detindex, bool includeErrors) {
+MiniPlotController::prepareDataForSinglePlot(size_t detindex,
+                                             bool includeErrors) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto ws = actor.getWorkspace();
 
@@ -352,8 +352,9 @@ MiniPlotController::prepareDataForSinglePlot(size_t detindex, bool includeErrors
 * @param includeErrors If true then provide the error data as well
 * @return A new MiniPlotCurveData object containing the data to plot
 */
-MiniPlotCurveData MiniPlotController::prepareDataForSumsPlot(
-    size_t detindex, bool includeErrors) {
+MiniPlotCurveData
+MiniPlotController::prepareDataForSumsPlot(size_t detindex,
+                                           bool includeErrors) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto ws = actor.getWorkspace();
   const auto &componentInfo = actor.componentInfo();
@@ -528,10 +529,10 @@ MiniPlotController::prepareDataForIntegralsPlot(size_t detindex,
   if (!xAxisUnits.isEmpty()) {
     xAxisCaption += " (" + xAxisUnits + ")";
   }
-  //auto parent = assembly.getParent();
+  // auto parent = assembly.getParent();
   //// curve label: "tube_name (detid) Integrals"
   //// detid is included to distiguish tubes with the same name
-  //curveData.label = QString::fromStdString(parent->getName()) + " (" +
+  // curveData.label = QString::fromStdString(parent->getName()) + " (" +
   //                  QString::number(detid) + ") Integrals/" + xAxisCaption;
 
   return curveData;
@@ -581,12 +582,10 @@ void MiniPlotController::savePlotToWorkspace() {
       auto det = actor.getDetectorByDetID(detid);
       QString sumOrIntegral = parts[2].trimmed();
       if (sumOrIntegral == "Sum") {
-        curveData =
-            prepareDataForSumsPlot(detid, includeErrors);
+        curveData = prepareDataForSumsPlot(detid, includeErrors);
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       } else {
-        curveData =
-            prepareDataForIntegralsPlot(detid, includeErrors);
+        curveData = prepareDataForIntegralsPlot(detid, includeErrors);
         unitX = sumOrIntegral.split('/')[1].toStdString();
       }
     } else if (parts.size() == 1) {
