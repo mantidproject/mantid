@@ -51,40 +51,27 @@ Usage
 .. testcode:: SumOverlappingTubes2DComponent
 
     ws_508093 = Load('ILL/D2B/508093.nxs')
-    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='2DTubes')
+    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='2DTubes', MirrorScatteringAngles=True)
     print('X Size: ' + str(ws.blocksize()) + ', Y Size: ' + str(ws.getNumberHistograms()))
-    print('Counts: ' + str(ws.dataY(63)[2068:2078]))
-    print('Errors: ' + str(ws.dataE(63)[2068:2078]))
 
 Output:
 
 .. testoutput:: SumOverlappingTubes2DComponent
 
     X Size: 3200, Y Size: 128
-    Counts: [  4.46083333   9.72705882  13.1016      19.74509804  27.49234043
-      24.62941176  30.25076923  23.2776      10.01591837   1.06      ]
-    Errors: [ 2.03598273  3.00072517  3.46216187  4.1661015   5.29106717  4.88935243
-      5.28366714  4.68457643  3.1474581   0.96348311]
 
 **Example - an example of running SumOverlappingTubes in the 1D case.**
 
 .. testcode:: SumOverlappingTubes1DHeightRange
 
     ws_508093 = Load('ILL/D2B/508093.nxs')
-    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='1D', CropNegativeScatteringAngles=True, HeightAxis='-0.05,0.05')
+    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='1D', CropNegativeScatteringAngles=True, HeightAxis='-0.05,0.05', MirrorScatteringAngles=True)
     print('X Size: ' + str(ws.blocksize()) + ', Y Size: ' + str(ws.getNumberHistograms()))
-    print('Counts: ' + str(ws.dataY(0)[2068:2078]))
-    print('Errors: ' + str(ws.dataE(0)[2068:2078]))
-
 Output:
 
 .. testoutput:: SumOverlappingTubes1DHeightRange
 
     X Size: 2975, Y Size: 1
-    Counts: [ 127.08681254  131.10979889  201.71370827  233.54556754  296.48915172
-      286.24790285  260.59967375  188.05934431  143.70447835  113.86610964]
-    Errors: [ 12.79221591  12.49380558  15.76125177  16.4410194   20.01917432
-      19.39744376  18.06430971  15.28768958  13.52007099  11.44274953]
 
 .. categories::
 
