@@ -52,7 +52,9 @@ void IqtFit::setup() {
   // Add custom settings
   addBoolCustomSetting("ConstrainIntensities", "Constrain Intensities");
   addBoolCustomSetting("ConstrainBeta", "Make Beta Global");
+  addBoolCustomSetting("ExtractMembers", "Extract Members");
   setCustomSettingEnabled("ConstrainBeta", false);
+  setCustomSettingEnabled("ConstrainIntensities", false);
 
   // Set available background options
   setBackgroundOptions({"None", "FlatBackground"});
@@ -98,7 +100,13 @@ void IqtFit::setup() {
   connect(this, SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(parameterUpdated(const Mantid::API::IFunction *)));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
+  connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
+          SLOT(customBoolUpdated(const QString &, bool)));
 }
+
+int IqtFit::minimumSpectrum() const { return m_uiForm->spSpectraMin->value(); }
+
+int IqtFit::maximumSpectrum() const { return m_uiForm->spSpectraMax->value(); }
 
 void IqtFit::fitFunctionChanged() {
   auto backRangeSelector =
@@ -115,13 +123,43 @@ void IqtFit::fitFunctionChanged() {
     setCustomBoolSetting("ConstrainBeta", false);
     setCustomSettingEnabled("ConstrainBeta", false);
   }
+  updateIntensityTie();
 }
 
-void IqtFit::run() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
-    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
-    executeSequentialFit();
+void IqtFit::customBoolUpdated(const QString &key, bool value) {
+  if (key == "Constrain Intensities") {
+    if (value)
+      updateIntensityTie();
+    else
+      removeTie(m_tiedParameter);
+  }
+}
+
+void IqtFit::updateIntensityTie() {
+  const auto function = fitFunction();
+
+  if (function) {
+    removeTie(m_tiedParameter);
+    const auto tie = QString::fromStdString(createIntensityTie(fitFunction()));
+    updateIntensityTie(tie);
+  } else {
+    setCustomBoolSetting("ConstrainIntensities", false);
+    setCustomSettingEnabled("ConstrainIntensities", false);
+  }
+}
+
+void IqtFit::updateIntensityTie(const QString &intensityTie) {
+
+  if (intensityTie.isEmpty()) {
+    setCustomBoolSetting("ConstrainIntensities", false);
+    setCustomSettingEnabled("ConstrainIntensities", false);
+  } else {
+    setCustomSettingEnabled("ConstrainIntensities", true);
+
+    if (boolSettingValue("ConstrainIntensities")) {
+      m_tiedParameter = intensityTie.split("=")[0];
+      addTie(intensityTie);
+    }
   }
 }
 
@@ -190,6 +228,7 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
   const auto outputName = outputWorkspaceName(specMin);
   const bool constrainBeta = boolSettingValue("ConstrainBeta");
   const bool constrainIntens = boolSettingValue("ConstrainIntensities");
+  const bool extractMembers = boolSettingValue("ExtractMembers");
 
   IAlgorithm_sptr iqtFitAlg;
 
@@ -203,6 +242,7 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
   iqtFitAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
   iqtFitAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
   iqtFitAlg->setProperty("ConstrainIntensities", constrainIntens);
+  iqtFitAlg->setProperty("ExtractMembers", extractMembers);
   iqtFitAlg->setProperty("OutputResultWorkspace", outputName + "_Result");
   iqtFitAlg->setProperty("OutputParameterWorkspace",
                          outputName + "_Parameters");
@@ -210,35 +250,14 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
   return iqtFitAlg;
 }
 
-IFunction_sptr IqtFit::fitFunction() const {
-  auto function = IndirectFitAnalysisTab::fitFunction();
-
-  if (!function)
-    return CompositeFunction_sptr(new CompositeFunction);
-  else
-    function = function->clone();
-
-  const bool constrainIntensities = boolSettingValue("ConstrainIntensities");
-
-  if (constrainIntensities) {
-    const auto intensityTie = createIntensityTie(function);
-
-    if (!intensityTie.empty())
-      function->addTies(intensityTie);
-  }
-  return function;
-}
-
 std::string IqtFit::createIntensityTie(IFunction_sptr function) const {
   std::string tieString = "1";
   const auto backIndex = backgroundIndex();
-
-  if (backIndex)
-    tieString += "-f" + std::to_string(backIndex.get()) + ".A0";
-
   const auto intensityParameters = getParameters(function, "Height");
 
-  if (intensityParameters.empty())
+  if (backIndex && !intensityParameters.empty())
+    tieString += "-f" + std::to_string(backIndex.get()) + ".A0";
+  else if (intensityParameters.size() < 2)
     return "";
 
   for (auto i = 1u; i < intensityParameters.size(); ++i)
@@ -321,19 +340,18 @@ void IqtFit::algorithmComplete(bool error) {
 bool IqtFit::validate() {
   UserInputValidator uiv;
 
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSampleInput);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSampleInput);
 
   if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
 
-  auto error = uiv.generateErrorMessage();
-
-  if (!inputWorkspace()) {
-    error = "Input workspace was deleted from the Analysis Data Service "
-            "before Algorithm could run.";
+  if (inputWorkspace()->getXMin() < 0) {
+    uiv.addErrorMessage("Error in input workspace: All X data must be "
+                        "greater than or equal to 0.");
   }
-  showMessageBox(error);
 
+  auto error = uiv.generateErrorMessage();
+  emit showMessageBox(error);
   return error.isEmpty();
 }
 
@@ -351,7 +369,7 @@ void IqtFit::loadSettings(const QSettings &settings) {
 void IqtFit::newDataLoaded(const QString wsName) {
   IndirectFitAnalysisTab::newInputDataLoaded(wsName);
 
-  int maxWsIndex =
+  const auto maxWsIndex =
       static_cast<int>(inputWorkspace()->getNumberHistograms()) - 1;
 
   m_uiForm->spPlotSpectrum->setMaximum(maxWsIndex);
@@ -457,13 +475,7 @@ void IqtFit::endXChanged(double endX) {
   rangeSelector->setMaximum(endX);
 }
 
-void IqtFit::singleFit() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
-    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
-    executeSingleFit();
-  }
-}
+void IqtFit::singleFit() { executeSingleFit(); }
 
 void IqtFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 

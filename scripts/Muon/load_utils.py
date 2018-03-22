@@ -11,15 +11,17 @@ class LoadUtils(object):
     def __init__(self, parent=None):
         exists,tmpWS = self.MuonAnalysisExists()
         if exists:
-            # get everything from the ADS
-            self.options = mantid.AnalysisDataService.getObjectNames()
-            self.options = [item.replace(" ","") for item in self.options]
-            self.N_points = len(tmpWS.readX(0))
-            self.instrument=tmpWS.getInstrument().getName()
-            self.runName=self.instrument+str(tmpWS.getRunNumber()).zfill(8)
-
+            self.setUp(tmpWS)
         else:
-            mantid.logger.error("Muon Analysis workspace does not exist - no data loaded")
+            raise RuntimeError("No data loaded. \n Please load data using Muon Analysis")
+
+    def setUp(self,tmpWS):
+        # get everything from the ADS
+        self.options = mantid.AnalysisDataService.getObjectNames()
+        self.options = [item.replace(" ","") for item in self.options]
+        self.N_points = len(tmpWS.readX(0))
+        self.instrument=tmpWS.getInstrument().getName()
+        self.runName=self.instrument+str(tmpWS.getRunNumber()).zfill(8)
 
     # get methods
     def getNPoints(self):
@@ -33,6 +35,20 @@ class LoadUtils(object):
 
     def getInstrument(self):
         return self.instrument
+
+    # check if data matches current
+    def digit(self,x):
+        return int(filter(str.isdigit,x) or 0)
+
+    def hasDataChanged(self):
+        exists,ws = self.MuonAnalysisExists()
+        if exists:
+            current = ws.getInstrument().getName()+str(ws.getRunNumber()).zfill(8)
+            if self.runName != current:
+                mantid.logger.error("Active workspace has changed. Reloading the data")
+                self.setUp(ws)
+                return True
+        return False
 
     # check if muon analysis exists
     def MuonAnalysisExists(self):
@@ -66,6 +82,6 @@ class LoadUtils(object):
         final_options=[]
         # only keep the relevant WS (same run as Muon Analysis)
         for pick in options:
-            if "MuonAnalysisGrouped_" in pick:
+            if "MuonAnalysisGrouped_" in pick and ";" not in pick:
                 final_options.append(pick)
         return final_options

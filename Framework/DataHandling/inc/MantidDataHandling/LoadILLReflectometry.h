@@ -78,7 +78,7 @@ private:
   double peakOffsetAngle();
   double detectorRotation();
   void placeDetector();
-  void placeSample();
+  void placeSlits();
   void placeSource();
   double collimationAngle() const;
   double detectorAngle() const;

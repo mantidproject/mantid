@@ -25,19 +25,19 @@ class DLLExport IqtFit : public IndirectFitAnalysisTab {
 public:
   IqtFit(QWidget *parent = nullptr);
 
-  Mantid::API::IFunction_sptr fitFunction() const override;
-
   Mantid::API::MatrixWorkspace_sptr fitWorkspace() const override;
 
   bool doPlotGuess() const override;
 
 private:
   void setup() override;
-  void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
 protected:
+  int minimumSpectrum() const override;
+  int maximumSpectrum() const override;
+
   QHash<QString, double> createDefaultValues() const override;
   std::string createSingleFitOutputName() const override;
   std::string createSequentialFitOutputName() const override;
@@ -70,11 +70,14 @@ protected slots:
   void saveResult();
   void fitFunctionChanged();
   void parameterUpdated(const Mantid::API::IFunction *function);
+  void customBoolUpdated(const QString &key, bool value);
 
 private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
 
+  void updateIntensityTie();
+  void updateIntensityTie(const QString &intensityTie);
   std::string createIntensityTie(Mantid::API::IFunction_sptr function) const;
   std::vector<std::string>
   getParameters(Mantid::API::IFunction_sptr function,
@@ -87,6 +90,7 @@ private:
   replaceInfinityAndNaN(Mantid::API::MatrixWorkspace_sptr inputWS) const;
 
   std::unique_ptr<Ui::IqtFit> m_uiForm;
+  QString m_tiedParameter;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

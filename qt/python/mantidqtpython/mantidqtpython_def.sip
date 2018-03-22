@@ -1529,7 +1529,7 @@ class ProcessingAlgorithm
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 %End
 public:
-ProcessingAlgorithm(const QString &, const QString &, const QString &blacklist = "");
+ProcessingAlgorithm(const QString &, const QString &, int, const QString &blacklist = "");
 };
 
 class PostprocessingAlgorithm
@@ -1598,6 +1598,8 @@ DataProcessorMainPresenter();
 virtual QVariantMap getPreprocessingOptions() const;
 virtual QVariantMap getProcessingOptions() const;
 virtual QString getPostprocessingOptionsAsString() const;
+virtual void confirmReductionPaused(int);
+virtual void confirmReductionResumed(int);
 
 virtual void notifyADSChanged(const QSet<QString> &);
 };

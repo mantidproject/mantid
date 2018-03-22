@@ -72,7 +72,6 @@ set ( TEST_PY_FILES
   SaveNexusPDTest.py
   SavePlot1DAsJsonTest.py
   SaveReflectionsTest.py
-  SaveVulcanGSSTest.py
   ExtractMonitorsTest.py
   SetDetScaleTest.py
   SortByQVectorsTest.py

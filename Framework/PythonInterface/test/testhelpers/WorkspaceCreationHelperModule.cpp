@@ -54,10 +54,8 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //===================================
 
   // Function pointers to disambiguate the calls
-  typedef Workspace2D_sptr (*Signature1_2D)(
-      int nHist, int nBins, bool includeMonitors, bool startYNegative);
-  typedef Workspace2D_sptr (*Signature2_2D)(int numBanks, int numPixels,
-                                            int numBins);
+  using Signature1_2D = Workspace2D_sptr (*)(int, int, bool, bool);
+  using Signature2_2D = Workspace2D_sptr (*)(int, int, int);
 
   def("create2DWorkspaceWithFullInstrument",
       reinterpret_cast<Signature1_2D>(&create2DWorkspaceWithFullInstrument),
@@ -90,9 +88,8 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //===================================
 
   // Typedef for function pointer to disabiguate references
-  typedef MDHistoWorkspace_sptr (*Signature1_MDHisto)(
-      double, size_t, size_t, Mantid::coord_t max, double, std::string name,
-      double);
+  using Signature1_MDHisto = MDHistoWorkspace_sptr (
+      *)(double, size_t, size_t, Mantid::coord_t, double, std::string, double);
 
   def("makeFakeMDHistoWorkspace", (Signature1_MDHisto)&makeFakeMDHistoWorkspace,
       makeFakeMDHistoWorkspace_overloads()

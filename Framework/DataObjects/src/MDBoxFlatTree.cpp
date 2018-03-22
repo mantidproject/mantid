@@ -8,7 +8,7 @@
 #include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 
-typedef std::unique_ptr<::NeXus::File> file_holder_type;
+using file_holder_type = std::unique_ptr<::NeXus::File>;
 
 namespace Mantid {
 namespace DataObjects {

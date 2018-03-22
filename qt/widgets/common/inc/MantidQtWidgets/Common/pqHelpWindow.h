@@ -72,7 +72,7 @@ signals:
 /// a QHelpEngine.
 class EXPORT_OPT_MANTIDQT_COMMON pqHelpWindow : public QMainWindow {
   Q_OBJECT
-  typedef QMainWindow Superclass;
+  using Superclass = QMainWindow;
 
 public:
   pqHelpWindow(QHelpEngine *engine, QWidget *parent = 0,

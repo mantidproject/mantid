@@ -48,7 +48,7 @@ void setGoniometerMatrix(IPeak &self, const object &data) {
 
 void export_IPeak() {
   // return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::MatrixToNumpy> return_copy_to_numpy;
+  using return_copy_to_numpy = return_value_policy<Policies::MatrixToNumpy>;
 
   register_ptr_to_python<IPeak *>();
 
@@ -89,7 +89,8 @@ void export_IPeak() {
            ":class:`~mantid.geometry.Goniometer` rotation was NOT taken "
            "out.\n"
            "Note: There is no 2*pi factor used, so \\|Q| = 1/wavelength.")
-      .def("findDetector", &IPeak::findDetector, arg("self"),
+      .def("findDetector", (bool (IPeak::*)()) & IPeak::findDetector,
+           arg("self"),
            "Using the :class:`~mantid.geometry.Instrument` set in the peak, "
            "perform ray tracing to find "
            "the exact :class:`~mantid.geometry.Detector`.")

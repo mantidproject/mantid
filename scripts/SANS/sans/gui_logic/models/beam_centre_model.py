@@ -1,4 +1,5 @@
 from sans.common.enums import (SANSInstrument, FindDirectionEnum)
+from mantid.kernel import (Logger)
 
 
 class BeamCentreModel(object):
@@ -53,9 +54,13 @@ class BeamCentreModel(object):
         if self.up_down and self.left_right:
             find_direction = FindDirectionEnum.All
         elif self.up_down:
-            find_direction = FindDirectionEnum.Left_Right
-        elif self.left_right:
             find_direction = FindDirectionEnum.Up_Down
+        elif self.left_right:
+            find_direction = FindDirectionEnum.Left_Right
+        else:
+            logger = Logger("CentreFinder")
+            logger.notice("Have chosen no find direction exiting early")
+            return {"pos1": self.lab_pos_1, "pos2": self.lab_pos_2}
 
         if self.q_min:
             state.convert_to_q.q_min = self.q_min

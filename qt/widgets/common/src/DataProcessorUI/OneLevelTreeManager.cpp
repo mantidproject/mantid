@@ -306,73 +306,46 @@ std::set<int> OneLevelTreeManager::getRowsToProcess(bool shouldPrompt) const {
     return rows;
   }
 }
+
+/**
+* Returns given row data in a format that the presenter can understand and use
+* @return :: All data as a map where keys are units of post-processing (i.e.
+* group indices) and values are a map of row index in the group to row data
+*/
+TreeData OneLevelTreeManager::constructTreeData(std::set<int> rows) {
+
+  // Return data in the format: map<int, set<RowData_sptr>>, where:
+  // int -> row index
+  // set<RowData_sptr> -> set of vectors storing the data. Each set is a row
+  // and each element is the row data containing column values and metadata
+  TreeData tree;
+  const int columnNotUsed = 0; // dummy value required to create index
+  for (const auto &row : rows) {
+    tree[row][row] = m_model->rowData(m_model->index(row, columnNotUsed));
+  }
+  return tree;
+}
+
 /**
 * Returns selected data in a format that the presenter can understand and use
 * @param prompt :: True if warning messages should be displayed. False othewise
-* @return :: Selected data as a map where keys are units of post-processing and
-* values are
+* @return :: All data as a map where keys are units of post-processing (i.e.
+* group indices) and values are a map of row index in the group to row data
 */
 TreeData OneLevelTreeManager::selectedData(bool prompt) {
   if (isEmptyTable()) {
     return handleEmptyTable(prompt);
   } else {
-    auto rows = getRowsToProcess(prompt);
-
-    // Return selected data in the format: map<int, set<vector<string>>>, where:
-    // int -> row index
-    // set<vector<string>> -> set of vectors storing the data. Each set is a row
-    // and each element in the vector is a column
-    TreeData selectedData;
-    for (const auto &row : rows) {
-
-      QStringList data;
-      for (int i = 0; i < m_model->columnCount(); i++)
-        data.append(m_model->data(m_model->index(row, i)).toString());
-      selectedData[row][row] = data;
-    }
-    return selectedData;
+    return constructTreeData(getRowsToProcess(prompt));
   }
 }
 
 /** Transfer data to the model
 * @param runs :: [input] Data to transfer as a vector of maps
-* @param whitelist :: [input] Whitelist containing number of columns
 */
 void OneLevelTreeManager::transfer(
-    const std::vector<std::map<QString, QString>> &runs,
-    const WhiteList &whitelist) {
-
-  auto ws = m_model->getTableWorkspace();
-
-  if (ws->rowCount() == 1) {
-    // If the table only has one row, check if it is empty and if so, remove it.
-    // This is to make things nicer when transferring, as the default table has
-    // one empty row
-    auto cols = ws->columnCount();
-    bool emptyTable = true;
-    for (auto i = 0u; i < cols; i++) {
-      if (!ws->String(0, i).empty())
-        emptyTable = false;
-    }
-    if (emptyTable)
-      ws->removeRow(0);
-  }
-
-  // Loop over the rows (vector elements)
-  for (const auto &row : runs) {
-
-    TableRow newRow = ws->appendRow();
-
-    for (auto const &columnName : whitelist.names()) {
-      if (row.count(columnName)) {
-        newRow << (row.at(columnName)).toStdString();
-      } else {
-        newRow << std::string();
-      }
-    }
-  }
-
-  m_model.reset(new QOneLevelTreeModel(ws, whitelist));
+    const std::vector<std::map<QString, QString>> &runs) {
+  m_model->transfer(runs);
 }
 
 /** Updates a row with new data
@@ -554,7 +527,7 @@ void OneLevelTreeManager::setCell(int row, int column, int parentRow,
  * @return : the value in the cell as a string
 */
 std::string OneLevelTreeManager::getCell(int row, int column, int parentRow,
-                                         int parentColumn) {
+                                         int parentColumn) const {
   UNUSED_ARG(parentRow);
   UNUSED_ARG(parentColumn);
 
