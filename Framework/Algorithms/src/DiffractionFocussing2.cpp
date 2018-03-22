@@ -532,7 +532,7 @@ void DiffractionFocussing2::determineRebinParameters() {
   std::ostringstream mess;
 
   // typedef for the storage of the group ranges
-  typedef std::map<int, std::pair<double, double>> group2minmaxmap;
+  using group2minmaxmap = std::map<int, std::pair<double, double>>;
   // Map from group number to its associated range parameters <Xmin,Xmax,step>
   group2minmaxmap group2minmax;
   group2minmaxmap::iterator gpit;

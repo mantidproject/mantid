@@ -597,7 +597,7 @@ void TobyFitResolutionModel::setupRandomNumberGenerator() {
     else if (m_mcType == 4)
       seed = static_cast<size_t>(Poco::Timestamp().epochMicroseconds());
 
-    typedef NDPseudoRandomNumberGenerator<MersenneTwister> NDMersenneTwister;
+    using NDMersenneTwister = NDPseudoRandomNumberGenerator<MersenneTwister>;
     for (size_t i = 0; i < ngenerators; ++i) {
       m_randomNumbers[i] = new NDMersenneTwister(nrand, seed, 0.0, 1.0);
     }

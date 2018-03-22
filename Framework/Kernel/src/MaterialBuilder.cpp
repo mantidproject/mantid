@@ -59,7 +59,7 @@ MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
     throw std::invalid_argument(
         "MaterialBuilder::setFormula() - Empty formula provided.");
   }
-  typedef Material::ChemicalFormula ChemicalFormula;
+  using ChemicalFormula = Material::ChemicalFormula;
   try {
     m_formula = Mantid::Kernel::make_unique<ChemicalFormula>(
         ChemicalFormula(Material::parseChemicalFormula(formula)));

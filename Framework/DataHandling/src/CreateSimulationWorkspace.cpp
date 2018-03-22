@@ -288,7 +288,7 @@ void CreateSimulationWorkspace::loadMappingFromISISNXS(
     throw std::runtime_error(
         "Cannot find path to isis_vms_compat. Is the file an ISIS NeXus file?");
   }
-  typedef boost::scoped_ptr<std::vector<int32_t>> NXIntArray;
+  using NXIntArray = boost::scoped_ptr<std::vector<int32_t>>;
 
   nxsFile.openData("NDET");
   NXIntArray ndets(nxsFile.getData<int32_t>());

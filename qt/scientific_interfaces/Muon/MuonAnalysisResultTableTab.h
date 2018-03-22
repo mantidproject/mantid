@@ -16,7 +16,7 @@ class MuonAnalysis;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Muon {
-typedef QMap<QString, QMap<QString, double>> WSParameterList;
+using WSParameterList = QMap<QString, QMap<QString, double>>;
 
 /**
 This is a Helper class for MuonAnalysis. In particular this helper class deals

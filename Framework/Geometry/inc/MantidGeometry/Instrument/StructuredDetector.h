@@ -192,9 +192,9 @@ private:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const StructuredDetector &);
 
-typedef boost::shared_ptr<StructuredDetector> StructuredDetector_sptr;
-typedef boost::shared_ptr<const StructuredDetector>
-    StructuredDetector_const_sptr;
+using StructuredDetector_sptr = boost::shared_ptr<StructuredDetector>;
+using StructuredDetector_const_sptr =
+    boost::shared_ptr<const StructuredDetector>;
 } // namespace Geometry
 } // namespace Mantid
 #endif // STRUCTUREDDETECTOR_H

@@ -19,7 +19,7 @@ namespace Kernel {
 class IValidator;
 
 /// A shared_ptr to an IValidator
-typedef boost::shared_ptr<IValidator> IValidator_sptr;
+using IValidator_sptr = boost::shared_ptr<IValidator>;
 
 namespace {
 /// Helper object to determine if a type is either a pointer/shared_ptr

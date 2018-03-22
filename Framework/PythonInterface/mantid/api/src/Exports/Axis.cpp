@@ -27,7 +27,6 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(Axis)
 
 namespace {
-namespace bpl = boost::python;
 
 //------------------------------- Overload macros ---------------------------
 #ifdef __clang__

@@ -2,118 +2,104 @@
 #define GEOMETRYHANDLER_H
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
 
 namespace Geometry {
 class IObjComponent;
-class ObjComponent;
 class CSGObject;
 class MeshObject;
+namespace detail {
+class GeometryTriangulator;
+}
 
 /**
-   \class GeometryHandler
-   \brief Place holder for geometry triangulation and rendering.
-   \author Srikanth Nagella
-   \date July 2008
-   \version 1.0
+\class GeometryHandler
+\brief Handles rendering of all object Geometry.
+\author Lamar Moore
+\date December 2017
 
-   This is an abstract class for handling geometry primitives.
+Handles the rendering of all geometry types in Mantid.
 
-   Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
-   This file is part of Mantid.
+This file is part of Mantid.
 
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-   File change history is stored at: <https://github.com/mantidproject/mantid>
+File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_GEOMETRY_DLL GeometryHandler {
 private:
   static Kernel::Logger &PLog; ///< The official logger
 
 protected:
-  IObjComponent *ObjComp; ///< ObjComponent that uses this geometry handler
-  CSGObject *csgObj;      ///< CSG Object that uses this geometry handler
-  MeshObject *meshObj;    ///< Mesh Object that uses this geometry handler
-  bool boolTriangulated;  ///< state of the geometry triangulation
-  bool
-      boolIsInitialized; ///< state of the geometry initialization for rendering
+  std::shared_ptr<detail::ShapeInfo> m_shapeInfo;
+  std::unique_ptr<detail::GeometryTriangulator> m_triangulator;
+  RectangularDetector *m_rectDet = nullptr;
+  MeshObject *m_meshObj =
+      nullptr; ///< Mesh Object that uses this geometry handler
+  StructuredDetector *m_structDet = nullptr;
+  IObjComponent *m_objComp =
+      nullptr; ///< ObjComponent that uses this geometry handler
+  CSGObject *m_csgObj = nullptr; ///< Object that uses this geometry handler
 public:
-  GeometryHandler(IObjComponent *comp);               ///< Constructor
-  GeometryHandler(boost::shared_ptr<CSGObject> obj);  ///<Constructor
-  GeometryHandler(CSGObject *obj);                    ///<Constructor
+  GeometryHandler(IObjComponent *comp);              ///< Constructor
+  GeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
+  GeometryHandler(CSGObject *obj);                   ///< Constructor
+  GeometryHandler(RectangularDetector *comp);
   GeometryHandler(boost::shared_ptr<MeshObject> obj); ///<Constructor
-  GeometryHandler(MeshObject *obj);                   ///<Constructor
-  virtual boost::shared_ptr<GeometryHandler>
-  clone() const = 0; ///< Virtual copy constructor
-  virtual ~GeometryHandler();
-  virtual GeometryHandler *createInstance(IObjComponent *) = 0; ///< Create an
-  /// instance of
-  /// concrete
-  /// geometry
-  /// handler for
-  /// ObjComponent
-  virtual GeometryHandler *createInstance(
-      boost::shared_ptr<CSGObject>) = 0; ///< Create an instance of
-  /// concrete geometry
-  /// handler for Object
-  virtual GeometryHandler *
-  createInstance(CSGObject *) = 0; ///< Create an instance
-  /// of concrete geometry
-  /// handler for Object
-  virtual void Triangulate() = 0; ///< Triangulate the Object
-  virtual void Render() = 0;      ///< Render Object or ObjComponent
-  virtual void
-  Initialize() = 0; ///< Prepare/Initialize Object/ObjComponent to be rendered
-  /// Returns true if the shape can be triangulated
-  virtual bool canTriangulate() { return false; }
+  GeometryHandler(MeshObject *obj);
+  GeometryHandler(StructuredDetector *comp);
+  GeometryHandler(const GeometryHandler &handler);
+  boost::shared_ptr<GeometryHandler> clone() const;
+  ~GeometryHandler();
+  void render() const; ///< Render Object or ObjComponent
+  void
+  initialize() const; ///< Prepare/Initialize Object/ObjComponent to be rendered
+  bool canTriangulate() const { return !(m_triangulator == nullptr); }
   /// get the number of triangles
-  virtual int NumberOfTriangles() { return 0; }
+  size_t numberOfTriangles() const;
   /// get the number of points or vertices
-  virtual int NumberOfPoints() { return 0; }
+  size_t numberOfPoints() const;
+
+  bool hasShapeInfo() const { return !(m_shapeInfo == nullptr); }
+  const detail::ShapeInfo &shapeInfo() const { return *m_shapeInfo; }
   /// Extract the vertices of the triangles
-  virtual double *getTriangleVertices() { return nullptr; }
+  const std::vector<double> &getTriangleVertices() const;
   /// Extract the Faces of the triangles
-  virtual int *getTriangleFaces() { return nullptr; }
+  const std::vector<uint32_t> &getTriangleFaces() const;
   /// Sets the geometry cache using the triangulation information provided
-  virtual void setGeometryCache(int noPts, int noFaces, double *pts,
-                                int *faces) {
-    UNUSED_ARG(noPts);
-    UNUSED_ARG(noFaces);
-    UNUSED_ARG(pts);
-    UNUSED_ARG(faces);
-  };
+  void setGeometryCache(size_t nPts, size_t nFaces, std::vector<double> &&pts,
+                        std::vector<uint32_t> &&faces);
   /// return the actual type and points of one of the "standard" objects,
   /// cuboid/cone/cyl/sphere
-  virtual void GetObjectGeom(int &mytype, std::vector<Kernel::V3D> &vectors,
-                             double &myradius, double &myheight) {
-    UNUSED_ARG(vectors);
-    UNUSED_ARG(myradius);
-    UNUSED_ARG(myheight);
-    // Flag that this is unknown at this point
-    mytype = -1;
-  };
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &mytype,
+                     std::vector<Kernel::V3D> &vectors, double &myradius,
+                     double &myheight) const;
+  void setShapeInfo(detail::ShapeInfo &&shapeInfo);
 };
 
 } // NAMESPACE Geometry
-
 } // NAMESPACE Mantid
 
 #endif
