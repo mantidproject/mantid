@@ -291,7 +291,15 @@ void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
   m_ui.lineEdit_pawleyDMin->setEnabled(enabled);
   m_ui.lineEdit_pawleyNegativeWeight->setEnabled(enabled);
 
+  m_ui.lineEdit_xMin->setEnabled(enabled);
+  m_ui.lineEdit_xMax->setEnabled(enabled);
+
+  m_ui.checkBox_refineSigma->setEnabled(enabled);
+  m_ui.checkBox_refineGamma->setEnabled(enabled);
+
   m_ui.pushButton_doRefinement->setEnabled(enabled);
+
+  m_multiRunWidgetView->setEnabled(enabled);
 }
 
 void EnggDiffGSASFittingViewQtWidget::setFocusedRunFileNames(
