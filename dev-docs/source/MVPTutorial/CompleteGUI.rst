@@ -146,7 +146,7 @@ Plot Presenter
 PlotView
 ########
 
-Unchanged from `MatPlotlib and MVP <MatPlotlib.html>`_.
+Unchanged from `Matplotlib and MVP <Matplotlib.html>`_.
 
 Presenter
 #########

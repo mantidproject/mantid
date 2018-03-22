@@ -21,7 +21,7 @@ Duration: 6 hours as a hands-on course with exercises.
    AddSpinBox
    Tables
    ViewExercise1
-   MatPlotlib
+   Matplotlib
    MultipleViews
    ViewExercise1Solution
    ReceivingSignalFromView

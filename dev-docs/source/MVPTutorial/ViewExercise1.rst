@@ -17,7 +17,7 @@ plot. The table should include options for:
 
 The previous sections are not an exhaustive list of possible widgets.
 
-The pages `MatPlotlib and MVP <MatPlotlib.html>`_ and `MultipleView
+The pages `Matplotlib and MVP <Matplotlib.html>`_ and `MultipleView
 <MultipleViews.html>`_ will be useful for the exercise.
 
 The solution can be found `here <ViewExercise1Solution.html>`_.

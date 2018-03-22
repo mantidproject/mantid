@@ -1,15 +1,15 @@
 ==================
-MatPlotlib and MVP
+Matplotlib and MVP
 ==================
 
 The next step towards the goal of creating a GUI that allows users to
 manipulate a sine wave plot, is to produce the plot itself.
 
 For the purposes of this tutorial it is assumed that the user is
-familiar with MatPlotlib, if not see `MatPlotlib documentation
+familiar with Matplotlib, if not see `Matplotlib documentation
 <https://matplotlib.org/users/pyplot_tutorial.html>`_.
 
-The MatPlotLib functions could be considered to be a Model or a View
+The Matplotlib functions could be considered to be a Model or a View
 and there is no correct answer to which. It could be a Model as it
 does something with the data, however it could be considered to be a
 view as (in this case) it is used purely as a visual
@@ -31,7 +31,7 @@ The View has the following imports:
 
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
-The fourth line imports MatPlotLib and the last line allows it to
+The fourth line imports Matplotlib and the last line allows it to
 interface with the GUI.
 
 The main class is shown below and contains methods for adding data to
