@@ -67,6 +67,7 @@ Output:
     ws_508093 = Load('ILL/D2B/508093.nxs')
     ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='1D', CropNegativeScatteringAngles=True, HeightAxis='-0.05,0.05', MirrorScatteringAngles=True)
     print('X Size: ' + str(ws.blocksize()) + ', Y Size: ' + str(ws.getNumberHistograms()))
+
 Output:
 
 .. testoutput:: SumOverlappingTubes1DHeightRange
