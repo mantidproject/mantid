@@ -307,9 +307,7 @@ private:
     const Kernel::V3D sourcePos{0., 0., -L1};
     const Kernel::V3D &monitorPos = sourcePos;
     const Kernel::V3D samplePos{
-        0.,
-        0.,
-        0.,
+        0., 0., 0.,
     };
     const auto detZ = DET_DIST * std::cos(2 * braggAngle);
     const auto detY = DET_DIST * std::sin(2 * braggAngle);
