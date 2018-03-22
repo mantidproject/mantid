@@ -1,9 +1,9 @@
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYQRESOLUTIONTEST_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYQRESOLUTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
+#define MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ReflectometryQResolution.h"
+#include "MantidAlgorithms/ReflectometryMomentumTransfer.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -34,19 +34,19 @@ constexpr double SLIT2_SIZE{0.02};
 constexpr double TOF_BIN_WIDTH{70.}; // microseconds
 }
 
-class ReflectometryQResolutionTest : public CxxTest::TestSuite {
+class ReflectometryMomentumTransferTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflectometryQResolutionTest *createSuite() { return new ReflectometryQResolutionTest(); }
-  static void destroySuite( ReflectometryQResolutionTest *suite ) { delete suite; }
+  static ReflectometryMomentumTransferTest *createSuite() { return new ReflectometryMomentumTransferTest(); }
+  static void destroySuite( ReflectometryMomentumTransferTest *suite ) { delete suite; }
 
-  ReflectometryQResolutionTest() {
+  ReflectometryMomentumTransferTest() {
     API::FrameworkManager::Instance();
   }
 
   void test_Init() {
-    Algorithms::ReflectometryQResolution alg;
+    Algorithms::ReflectometryMomentumTransfer alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -249,7 +249,7 @@ private:
     std::vector<int> foreground(2);
     foreground.front() = 0;
     foreground.back() = 0;
-    auto alg = boost::make_shared<Algorithms::ReflectometryQResolution>();
+    auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
     alg->setChild(true);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
@@ -430,4 +430,4 @@ private:
 };
 
 
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYQRESOLUTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_ */

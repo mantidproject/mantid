@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYQRESOLUTION_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYQRESOLUTION_H_
+#ifndef MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFER_H_
+#define MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFER_H_
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
@@ -7,8 +7,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** ReflectometryQResolution : Calculates the Qz resolution for
-  reflectometers at continuous beam sources.
+/** Converts wavelength to momentum transfer and calculates the Qz
+  resolution for reflectometers at continuous beam sources."
 
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -31,7 +31,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL ReflectometryQResolution : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ReflectometryMomentumTransfer : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -82,4 +82,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYQRESOLUTION_H_ */
+#endif /* MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFER_H_ */

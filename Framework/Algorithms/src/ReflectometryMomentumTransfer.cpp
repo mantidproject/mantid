@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/ReflectometryQResolution.h"
+#include "MantidAlgorithms/ReflectometryMomentumTransfer.h"
 
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -53,29 +53,29 @@ using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ReflectometryQResolution)
+DECLARE_ALGORITHM(ReflectometryMomentumTransfer)
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ReflectometryQResolution::name() const { return "ReflectometryQResolution"; }
+const std::string ReflectometryMomentumTransfer::name() const { return "ReflectometryMomentumTransfer"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ReflectometryQResolution::version() const { return 1; }
+int ReflectometryMomentumTransfer::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ReflectometryQResolution::category() const {
+const std::string ReflectometryMomentumTransfer::category() const {
   return "ILL\\Reflectometry;Reflectometry";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string ReflectometryQResolution::summary() const {
-  return "Calculates the Qz resolution for reflectometers at continuous beam sources.";
+const std::string ReflectometryMomentumTransfer::summary() const {
+  return "Convert wavelength to momentum transfer and calculates the Qz resolution for reflectometers at continuous beam sources.";
 }
 
 /** Initialize the algorithm's properties.
  */
-void ReflectometryQResolution::init() {
+void ReflectometryMomentumTransfer::init() {
   auto inWavelength = boost::make_shared<API::WorkspaceUnitValidator>("Wavelength");
   auto twoElementArray = boost::make_shared<Kernel::ArrayLengthValidator<int>>(2);
   auto mandatoryDouble = boost::make_shared<Kernel::MandatoryValidator<double>>();
@@ -119,7 +119,7 @@ void ReflectometryQResolution::init() {
 
 /** Execute the algorithm.
  */
-void ReflectometryQResolution::exec() {
+void ReflectometryMomentumTransfer::exec() {
   using namespace boost::math;
   API::MatrixWorkspace_sptr inWS = getProperty(Prop::INPUT_WS);
   API::MatrixWorkspace_sptr reflectedWS = getProperty(Prop::REFLECTED_BEAM_WS);
@@ -155,7 +155,7 @@ void ReflectometryQResolution::exec() {
   setProperty(Prop::OUTPUT_WS, outWS);
 }
 
-double ReflectometryQResolution::angularResolutionSquared(API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace &directWS, const size_t wsIndex, const Setup &setup, const double beamFWHM, const double directBeamFWHM, const double incidentFWHM, const double slit1FWHM) {
+double ReflectometryMomentumTransfer::angularResolutionSquared(API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace &directWS, const size_t wsIndex, const Setup &setup, const double beamFWHM, const double directBeamFWHM, const double incidentFWHM, const double slit1FWHM) {
   using namespace boost::math;
   const auto waviness = sampleWaviness(ws, directWS, wsIndex, setup, beamFWHM, directBeamFWHM, incidentFWHM);
   const auto slit2FWHM = slit2AngularSpread(*ws, wsIndex, setup);
@@ -190,7 +190,7 @@ double ReflectometryQResolution::angularResolutionSquared(API::MatrixWorkspace_s
   }
 }
 
-double ReflectometryQResolution::beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start, const size_t end) {
+double ReflectometryMomentumTransfer::beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start, const size_t end) {
   // det_fwhm and detdb_fwhm in COSMOS
   using namespace boost::math;
   auto integrate = createChildAlgorithm("Integration");
@@ -219,7 +219,7 @@ double ReflectometryQResolution::beamRMSVariation(API::MatrixWorkspace_sptr &ws,
   return 2. * std::sqrt(2. * std::log(2.)) * pixelSize * std::sqrt(variance);
 }
 
-void ReflectometryQResolution::convertToMomentumTransfer(API::MatrixWorkspace_sptr &ws) {
+void ReflectometryMomentumTransfer::convertToMomentumTransfer(API::MatrixWorkspace_sptr &ws) {
   auto convert = createChildAlgorithm("ConvertUnits");
   convert->setProperty("InputWorkspace", ws);
   convert->setProperty("OutputWorkspace", "unused_for_child");
@@ -229,7 +229,7 @@ void ReflectometryQResolution::convertToMomentumTransfer(API::MatrixWorkspace_sp
 }
 
 // TODO Find out what on the earth DA means (from COSMOS).
-double ReflectometryQResolution::detectorDA(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double incidentFWHM) {
+double ReflectometryMomentumTransfer::detectorDA(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double incidentFWHM) {
   // da_det in COSMOS
   using namespace boost::math;
   const auto slitSizeRatio = setup.slit2Size / setup.slit1Size;
@@ -239,7 +239,7 @@ double ReflectometryQResolution::detectorDA(const API::MatrixWorkspace &ws, cons
   return std::sqrt(pow<2>(incidentFWHM * virtualSourceDist) + pow<2>(setup.detectorResolution));
 }
 
-const ReflectometryQResolution::Setup ReflectometryQResolution::createSetup(const API::MatrixWorkspace &ws, const API::MatrixWorkspace &directWS) {
+const ReflectometryMomentumTransfer::Setup ReflectometryMomentumTransfer::createSetup(const API::MatrixWorkspace &ws, const API::MatrixWorkspace &directWS) {
   Setup s;
   s.chopperOpening = inRad(getProperty(Prop::CHOPPER_OPENING));
   s.chopperPairDistance = getProperty(Prop::CHOPPER_PAIR_DIST);
@@ -277,13 +277,13 @@ const ReflectometryQResolution::Setup ReflectometryQResolution::createSetup(cons
   return s;
 }
 
-double ReflectometryQResolution::incidentAngularSpread(const Setup &setup) {
+double ReflectometryMomentumTransfer::incidentAngularSpread(const Setup &setup) {
   // da in COSMOS
   using namespace boost::math;
   return 0.68 * std::sqrt((pow<2>(setup.slit1Size) + pow<2>(setup.slit2Size))) / setup.slit1Slit2Distance;
 }
 
-double ReflectometryQResolution::interslitDistance(const API::MatrixWorkspace &ws) {
+double ReflectometryMomentumTransfer::interslitDistance(const API::MatrixWorkspace &ws) {
   const std::string slit1Name = getProperty(Prop::SLIT1_NAME);
   const std::string slit2Name = getProperty(Prop::SLIT2_NAME);
   auto instrument = ws.getInstrument();
@@ -292,7 +292,7 @@ double ReflectometryQResolution::interslitDistance(const API::MatrixWorkspace &w
   return (slit1->getPos() - slit2->getPos()).norm();
 }
 
-double ReflectometryQResolution::sampleWaviness(API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace &directWS, const size_t wsIndex, const Setup &setup, const double beamFWHM, const double directBeamFWHM, const double incidentFWHM) {
+double ReflectometryMomentumTransfer::sampleWaviness(API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace &directWS, const size_t wsIndex, const Setup &setup, const double beamFWHM, const double directBeamFWHM, const double incidentFWHM) {
   // om_fwhm in COSMOS
   using namespace boost::math;
   const double slitSizeTolerance{0.00004};
@@ -317,19 +317,19 @@ double ReflectometryQResolution::sampleWaviness(API::MatrixWorkspace_sptr &ws, c
   return 0.;
 }
 
-double ReflectometryQResolution::slit1AngularSpread(const Setup& setup) {
+double ReflectometryMomentumTransfer::slit1AngularSpread(const Setup& setup) {
   // S2_fwhm in COSMOS
   return 0.68 * setup.slit1Size / setup.slit1Slit2Distance;
 }
 
-double ReflectometryQResolution::slit2AngularSpread(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup) {
+double ReflectometryMomentumTransfer::slit2AngularSpread(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup) {
   // s3_fwhm in COSMOS.
   const auto &spectrumInfo = ws.spectrumInfo();
   const auto slit2Detector = setup.slit2SampleDistance + spectrumInfo.l2(wsIndex);
   return 0.68 * setup.slit2Size / slit2Detector;
 }
 
-double ReflectometryQResolution::slitSize(const API::MatrixWorkspace &ws, const std::string &logEntry) {
+double ReflectometryMomentumTransfer::slitSize(const API::MatrixWorkspace &ws, const std::string &logEntry) {
   auto &run = ws.run();
   const double opening = run.getPropertyValueAsType<double>(logEntry);
   const auto &units = run.getProperty(logEntry)->units();
@@ -346,7 +346,7 @@ double ReflectometryQResolution::slitSize(const API::MatrixWorkspace &ws, const 
   }
 }
 
-double ReflectometryQResolution::wavelengthResolutionSquared(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double wavelength) {
+double ReflectometryMomentumTransfer::wavelengthResolutionSquared(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double wavelength) {
   // err_res in COSMOS
   using namespace boost::math;
   using namespace PhysicalConstants;
