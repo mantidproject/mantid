@@ -8,6 +8,8 @@
 #include "MantidKernel/Quat.h"
 
 namespace {
+Mantid::Kernel::Logger g_log("BankRenderingHelpers");
+
 // Round a number up to the nearest power  of 2
 size_t roundToNearestPowerOfTwo(size_t val) {
   size_t rounded = 2;
@@ -101,6 +103,9 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
 
   glEnd();
 
+  if (glGetError() > 0)
+    g_log.error() << "OpenGL error in renderRectangularBank() \n";
+
   glDisable(
       GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
 }
@@ -139,6 +144,9 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
   }
 
   glEnd();
+
+  if (glGetError() > 0)
+    g_log.error() << "OpenGL error in renderStructuredBank() \n";
 }
 } // namespace BankRenderingHelpers
 } // namespace MantidWidgets
