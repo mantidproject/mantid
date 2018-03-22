@@ -14858,7 +14858,8 @@ void ApplicationWindow::showScriptWindow(bool forceVisible, bool quitting) {
     // it doesn't respect the always on top
     // flag, it is treated as a sub window of its parent
     const bool capturePrint = !quitting;
-    scriptingWindow = new ScriptingWindow(scriptingEnv(), capturePrint, nullptr);
+    scriptingWindow =
+        new ScriptingWindow(scriptingEnv(), capturePrint, nullptr);
     scriptingWindow->setObjectName("ScriptingWindow");
     scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
     connect(scriptingWindow, SIGNAL(closeMe()), this,

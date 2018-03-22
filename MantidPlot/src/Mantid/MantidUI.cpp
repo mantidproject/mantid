@@ -1314,8 +1314,8 @@ Table *MantidUI::createDetectorTable(
   const int nrows = indices.empty()
                         ? static_cast<int>(ws->getNumberHistograms())
                         : static_cast<int>(indices.size());
-  Table *t =
-      new Table(appWindow()->scriptingEnv(), nrows, ncols, "", appWindow(), nullptr);
+  Table *t = new Table(appWindow()->scriptingEnv(), nrows, ncols, "",
+                       appWindow(), nullptr);
   appWindow()->initTable(
       t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
   // Set the column names
@@ -2220,8 +2220,9 @@ void MantidUI::saveProject(bool saved) {
   if (!saved) {
     QString savemsg =
         tr("Save changes to project: <p><b> %1 </b> ?").arg("untitled");
-    int result = QMessageBox::information(appWindow(), tr("MantidPlot"),
-                                          savemsg, tr("Yes"), tr("No"), nullptr, 2);
+    int result =
+        QMessageBox::information(appWindow(), tr("MantidPlot"), savemsg,
+                                 tr("Yes"), tr("No"), nullptr, 2);
     if (result == 0)
       appWindow()->saveProject();
   }
@@ -2441,8 +2442,8 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
   QStringList loglines = data.split("\n", QString::SkipEmptyParts);
 
   int rowcount(loglines.count());
-  Table *t =
-      new Table(appWindow()->scriptingEnv(), rowcount, 2, "", appWindow(), nullptr);
+  Table *t = new Table(appWindow()->scriptingEnv(), rowcount, 2, "",
+                       appWindow(), nullptr);
   if (!t)
     return;
   QString label;

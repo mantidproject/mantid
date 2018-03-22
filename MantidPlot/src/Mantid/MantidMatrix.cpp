@@ -469,7 +469,7 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
   double **data = (double **)malloc(rows * sizeof(double *));
   if (!data) {
     QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                 tr("Memory Allocation Error"),
+                                       tr("Memory Allocation Error"),
                           tr("Not enough memory, operation aborted!"));
     return nullptr;
   }
@@ -482,7 +482,7 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
       free(data);
 
       QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                   tr("Memory Allocation Error"),
+                                         tr("Memory Allocation Error"),
                             tr("Not enough memory, operation aborted!"));
       return nullptr;
     }
