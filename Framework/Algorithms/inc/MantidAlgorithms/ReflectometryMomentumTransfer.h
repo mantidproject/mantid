@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFER_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFER_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -31,7 +31,8 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL ReflectometryMomentumTransfer : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ReflectometryMomentumTransfer
+    : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -65,18 +66,34 @@ private:
   };
   void init() override;
   void exec() override;
-  double angularResolutionSquared(API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace &directWS, const size_t wsIndex, const Setup &setup, const double beamFWHM, const double directBeamFWHM, const double incidentFWHM, const double slit1FWHM);
-  double beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start, const size_t end);
+  double angularResolutionSquared(API::MatrixWorkspace_sptr &ws,
+                                  const API::MatrixWorkspace &directWS,
+                                  const size_t wsIndex, const Setup &setup,
+                                  const double beamFWHM,
+                                  const double directBeamFWHM,
+                                  const double incidentFWHM,
+                                  const double slit1FWHM);
+  double beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start,
+                          const size_t end);
   void convertToMomentumTransfer(API::MatrixWorkspace_sptr &ws);
-  double detectorDA(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double incidentFWHM);
-  const Setup createSetup(const API::MatrixWorkspace &ws, const API::MatrixWorkspace &directWS);
+  double detectorDA(const API::MatrixWorkspace &ws, const size_t wsIndex,
+                    const Setup &setup, const double incidentFWHM);
+  const Setup createSetup(const API::MatrixWorkspace &ws,
+                          const API::MatrixWorkspace &directWS);
   double incidentAngularSpread(const Setup &setup);
   double interslitDistance(const API::MatrixWorkspace &ws);
-  double sampleWaviness(API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace &directWS, const size_t wsIndex, const Setup &setup, const double beamFWHM, const double directBeamFWHM, const double incidentFWHM);
-  double slit1AngularSpread(const Setup& setup);
-  double slit2AngularSpread(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup& setup);
+  double sampleWaviness(API::MatrixWorkspace_sptr &ws,
+                        const API::MatrixWorkspace &directWS,
+                        const size_t wsIndex, const Setup &setup,
+                        const double beamFWHM, const double directBeamFWHM,
+                        const double incidentFWHM);
+  double slit1AngularSpread(const Setup &setup);
+  double slit2AngularSpread(const API::MatrixWorkspace &ws,
+                            const size_t wsIndex, const Setup &setup);
   double slitSize(const API::MatrixWorkspace &ws, const std::string &logEntry);
-  double wavelengthResolutionSquared(const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup, const double wavelength);
+  double wavelengthResolutionSquared(const API::MatrixWorkspace &ws,
+                                     const size_t wsIndex, const Setup &setup,
+                                     const double wavelength);
 };
 
 } // namespace Algorithms
