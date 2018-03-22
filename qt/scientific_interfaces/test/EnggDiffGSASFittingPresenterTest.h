@@ -54,7 +54,8 @@ public:
         .WillOnce(Throw(std::runtime_error("Failure reason")));
 
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Could not load file", "Failure reason")).Times(1);
+                userWarning("Could not load file", "Failure reason"))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -70,6 +71,7 @@ public:
         10000, 40000, true, false);
     setRefinementParamsExpectations(params);
 
+    EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
     EXPECT_CALL(*m_mockModelPtr, doRefinement(params)).Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
@@ -86,6 +88,7 @@ public:
         false);
     setRefinementParamsExpectations(params);
 
+    EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
     EXPECT_CALL(*m_mockModelPtr, doRefinement(params)).Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
@@ -167,6 +170,9 @@ public:
     auto presenter = setUpPresenter();
     EXPECT_CALL(*m_mockViewPtr,
                 userWarning("Refinement failed", "Failure Reason"));
+    EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
+    EXPECT_CALL(*m_mockViewPtr, showStatus("Refinement failed"));
+
     presenter->notifyRefinementFailed("Failure Reason");
     assertMocksUsedCorrectly();
   }
@@ -183,10 +189,25 @@ public:
 
     EXPECT_CALL(*m_mockMultiRunWidgetPtr,
                 addFittedPeaks(runLabel, fittedPeaks));
+    EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
+    EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
+
+    // make sure displayFitResults(runLabel) is getting called
     EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
         .Times(1)
         .WillOnce(Return(boost::none));
+
     presenter->notifyRefinementSuccessful(refinementResults);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_notifyRefinementCancelled() {
+    auto presenter = setUpPresenter();
+    EXPECT_CALL(*m_mockViewPtr, setEnabled(true)).Times(1);
+    EXPECT_CALL(*m_mockViewPtr, showStatus("Ready")).Times(1);
+
+    presenter->notifyRefinementCancelled();
+
     assertMocksUsedCorrectly();
   }
 
