@@ -174,7 +174,7 @@ std::ostream &operator<<(std::ostream &os, const Interpolation &f) {
 */
 std::istream &operator>>(std::istream &in, Interpolation &f) {
 
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   std::string str;
   getline(in, str);
   tokenizer values(str, ";", tokenizer::TOK_TRIM);

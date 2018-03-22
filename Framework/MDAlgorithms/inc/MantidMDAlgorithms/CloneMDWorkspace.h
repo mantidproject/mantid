@@ -49,7 +49,7 @@ public:
   int version() const override { return 1; };
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "MDAlgorithms\\Utility\\Workspaces;MDAlgorithms\\Creation";
+    return R"(MDAlgorithms\Utility\Workspaces;MDAlgorithms\Creation)";
   }
 
 private:

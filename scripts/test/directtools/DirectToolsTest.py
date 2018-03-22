@@ -259,8 +259,10 @@ class DirectTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        # For some reason one plotting operation creates three lines on the axes.
-        self.assertEqual(len(axes.get_lines()), 3)
+        self.assertEquals(axes.get_xlabel(), '')
+        self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
+        numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
+        numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
 
     def test_plotprofiles_DeltaEXUnitsExecutes(self):
         xs = numpy.linspace(-3., 10., 12)
@@ -268,7 +270,10 @@ class DirectTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='DeltaE', StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        self.assertEqual(len(axes.get_lines()), 3)
+        self.assertEquals(axes.get_xlabel(), 'Energy (meV)')
+        self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
+        numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
+        numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
 
     def test_plotprofiles_MomentumTransferXUnitsExecutes(self):
         xs = numpy.linspace(-3., 10., 12)
@@ -276,7 +281,10 @@ class DirectTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='MomentumTransfer', StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        self.assertEqual(len(axes.get_lines()), 3)
+        self.assertEquals(axes.get_xlabel(), '$Q$ (\\AA$^{-1}$)')
+        self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
+        numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
+        numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
 
     def test_plotSofQW(self):
         ws = LoadILLTOF('ILL/IN4/084446.nxs')

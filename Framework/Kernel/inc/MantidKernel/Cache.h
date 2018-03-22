@@ -167,10 +167,10 @@ private:
   /// internal mutex
   mutable std::mutex m_mutex;
   /// iterator typedef
-  typedef typename std::map<KEYTYPE, VALUETYPE>::iterator CacheMapIterator;
+  using CacheMapIterator = typename std::map<KEYTYPE, VALUETYPE>::iterator;
   /// const_iterator typedef
-  typedef typename std::map<KEYTYPE, VALUETYPE>::const_iterator
-      CacheMapConstIterator;
+  using CacheMapConstIterator =
+      typename std::map<KEYTYPE, VALUETYPE>::const_iterator;
 };
 
 } // namespace Kernel

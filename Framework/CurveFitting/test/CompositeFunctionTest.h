@@ -33,8 +33,8 @@ using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::CurveFitting::FuncMinimisers;
 using namespace Mantid::CurveFitting::CostFunctions;
 
-typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
-typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
+using WS_type = Mantid::DataObjects::Workspace2D_sptr;
+using TWS_type = Mantid::DataObjects::TableWorkspace_sptr;
 
 class CurveFittingGauss : public IPeakFunction {
 public:

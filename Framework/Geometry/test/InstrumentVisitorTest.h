@@ -244,8 +244,7 @@ public:
   void test_visitor_component_ranges_check() {
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
-                                           V3D(10, 0, 0) /*sample pos*/
-                                           ,
+                                           V3D(10, 0, 0) /*sample pos*/,
                                            V3D(11, 0, 0) /*detector position*/);
 
     InstrumentVisitor visitor(makeParameterized(visitee));
@@ -440,6 +439,57 @@ public:
     auto compInfo = std::move(std::get<0>(wrappers));
     TS_ASSERT_EQUALS(detScaling, compInfo->scaleFactor(0));
     TS_ASSERT_EQUALS(instrScaling, compInfo->scaleFactor(compInfo->root()));
+  }
+
+  void test_instrumentTreeWithMinimalInstrument() {
+    /** This should produce the following instrument tree
+     *   3
+     * / | \
+     *0  1  2
+     */
+    auto instrument =
+        createMinimalInstrument(V3D(0, 0, 0), V3D(0, 0, 1), V3D(0, 0, 10));
+    auto visitor = InstrumentVisitor(instrument);
+
+    visitor.walkInstrument();
+
+    auto componentInfo = visitor.componentInfo();
+    auto root = componentInfo->root();
+    TS_ASSERT_EQUALS(componentInfo->children(0).size(), 0);
+    TS_ASSERT_EQUALS(componentInfo->children(1).size(), 0);
+    TS_ASSERT_EQUALS(componentInfo->children(2).size(), 0);
+    TS_ASSERT_EQUALS(componentInfo->children(root).size(), 3);
+  }
+
+  void test_instrumentTreeWithComplexInstrument() {
+    /** This should produce the following instrument tree
+     *               16
+     *   /      /      \                \
+     * 14      15       10              13
+     *                /    \          /   \
+     *               8      9      11       12
+     *             /  \   /  \    /  \    /   \
+     *            0    1  2   3  4    5   6    7
+     */
+    auto instrument = createTestInstrumentRectangular2(2, 2);
+    auto visitor = InstrumentVisitor(instrument);
+
+    visitor.walkInstrument();
+
+    auto componentInfo = visitor.componentInfo();
+    auto root = componentInfo->root();
+    for (int i = 0; i < 8; i++)
+      TS_ASSERT_EQUALS(componentInfo->children(i).size(), 0);
+
+    TS_ASSERT_EQUALS(componentInfo->children(root).size(), 4);
+    TS_ASSERT_EQUALS(componentInfo->children(8).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(9).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(11).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(12).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(10).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(13).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(14).size(), 0);
+    TS_ASSERT_EQUALS(componentInfo->children(15).size(), 0);
   }
 };
 

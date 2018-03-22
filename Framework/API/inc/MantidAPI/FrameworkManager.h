@@ -135,7 +135,7 @@ private:
 #endif
 };
 
-typedef Mantid::Kernel::SingletonHolder<FrameworkManagerImpl> FrameworkManager;
+using FrameworkManager = Mantid::Kernel::SingletonHolder<FrameworkManagerImpl>;
 
 } // namespace Kernel
 } // namespace Mantid

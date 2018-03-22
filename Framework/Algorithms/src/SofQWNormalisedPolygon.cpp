@@ -20,8 +20,8 @@
 namespace Mantid {
 namespace Algorithms {
 // Setup typedef for later use
-typedef std::map<specnum_t, Mantid::Kernel::V3D> SpectraDistanceMap;
-typedef Geometry::IDetector_const_sptr DetConstPtr;
+using SpectraDistanceMap = std::map<specnum_t, Mantid::Kernel::V3D>;
+using DetConstPtr = Geometry::IDetector_const_sptr;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQWNormalisedPolygon)
@@ -163,7 +163,7 @@ void SofQWNormalisedPolygon::exec() {
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j,
-                                                   outputWS, m_Qout);
+                                                   *outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =

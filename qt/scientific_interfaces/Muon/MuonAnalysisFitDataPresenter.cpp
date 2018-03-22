@@ -23,8 +23,8 @@ using Mantid::API::ITableWorkspace;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::TableRow;
 using Mantid::API::WorkspaceGroup;
-typedef MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType
-    RebinType;
+using RebinType =
+    MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType;
 
 namespace {
 /// static logger
@@ -303,9 +303,28 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
   const auto periods = m_dataSelector->getPeriodSelections();
 
   Muon::DatasetParams params;
-  const std::string instRuns = instrument + runString;
+  std::string runNumber = runString;
+  auto index = runString.find(instrument);
+  if (index != std::string::npos) {
+    // trim path
+    runNumber = runString.substr(index + instrument.size());
+    // trim extension
+    runNumber = runNumber.substr(0, runNumber.find_first_of("."));
+  }
+  const std::string instRuns = instrument + runNumber;
   std::vector<int> selectedRuns;
-  MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument, selectedRuns);
+  try {
+    MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument,
+                                      selectedRuns);
+  } catch (...) {
+    params.instrument = instrument;
+    try {
+      MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument,
+                                        selectedRuns);
+    } catch (...) {
+      g_log.error("Cannot Parse workspace " + instRuns);
+    }
+  }
   params.version = 1;
   params.plotType = m_plotType;
 

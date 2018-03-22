@@ -150,8 +150,8 @@ public:
 
     // std::cerr << "Count = " << i.use_count();
     boost::shared_ptr<const IComponent> source = i->getSource();
-    TS_ASSERT(source != NULL);
-    if (source != NULL) {
+    TS_ASSERT(source != nullptr);
+    if (source != nullptr) {
       TS_ASSERT_EQUALS(source->getName(), "source");
       TS_ASSERT_DELTA(detectorInfo.sourcePosition().Y(), 0.0, 0.01);
 

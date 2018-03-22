@@ -114,13 +114,9 @@ void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
     MantidVec &frac = this->dataF(i);
     std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                    std::divides<double>());
+    std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                   std::divides<double>());
     if (hasSqrdErrs) {
-      MantidVec frac_sqr(frac.size());
-      std::transform(frac.begin(), frac.end(), frac.begin(), frac_sqr.begin(),
-                     std::multiplies<double>());
-      std::transform(err.begin(), err.end(), frac_sqr.begin(), err.begin(),
-                     std::divides<double>());
-    } else {
       std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
                      std::divides<double>());
     }
