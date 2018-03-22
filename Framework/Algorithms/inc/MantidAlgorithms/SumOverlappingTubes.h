@@ -7,6 +7,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
 
+#include <list>
+
 namespace Mantid {
 namespace Algorithms {
 
