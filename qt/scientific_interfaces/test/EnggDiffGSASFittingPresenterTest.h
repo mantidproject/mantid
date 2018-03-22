@@ -195,12 +195,9 @@ public:
     EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
         .Times(1)
         .WillOnce(Return(boost::none));
-    ON_CALL(*m_mockModelPtr, getRwp(runLabel))
-        .WillByDefault(Return(1));
-    ON_CALL(*m_mockModelPtr, getSigma(runLabel))
-        .WillByDefault(Return(1));
-    ON_CALL(*m_mockModelPtr, getGamma(runLabel))
-        .WillByDefault(Return(1));
+    ON_CALL(*m_mockModelPtr, getRwp(runLabel)).WillByDefault(Return(1));
+    ON_CALL(*m_mockModelPtr, getSigma(runLabel)).WillByDefault(Return(1));
+    ON_CALL(*m_mockModelPtr, getGamma(runLabel)).WillByDefault(Return(1));
 
     presenter->notifyRefinementSuccessful(refinementResults);
     assertMocksUsedCorrectly();
