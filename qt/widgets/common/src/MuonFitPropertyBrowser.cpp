@@ -338,12 +338,10 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
 void MuonFitPropertyBrowser::checkFitEnabled() {
   if (m_isMultiFittingMode && m_compositeFunction->nFunctions() == 0) {
     setFitEnabled(false);
-  }
-  else if (m_isMultiFittingMode){
-	  setFitEnabled(true);
+  } else if (m_isMultiFittingMode) {
+    setFitEnabled(true);
 
-  }
-  else if (getAutoBackgroundString() != "") {
+  } else if (getAutoBackgroundString() != "") {
     setFitEnabled(true);
   } else {
     setFitEnabled(false);
