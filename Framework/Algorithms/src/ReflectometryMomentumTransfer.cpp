@@ -70,7 +70,7 @@ const std::string ReflectometryMomentumTransfer::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ReflectometryMomentumTransfer::summary() const {
-  return "Convert wavelength to momentum transfer and calculates the Qz resolution for reflectometers at continuous beam sources.";
+  return "Convert wavelength to momentum transfer and calculate the Qz resolution for reflectometers at continuous beam sources.";
 }
 
 /** Initialize the algorithm's properties.
