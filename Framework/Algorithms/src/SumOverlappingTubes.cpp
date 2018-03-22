@@ -265,7 +265,6 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
   std::vector<std::vector<double>> normalisation(
       m_numHistograms, std::vector<double>(m_numPoints, 0.0));
 
-  PARALLEL_FOR_IF(threadSafe(*outputWS))
   // loop over all workspaces
   for (auto &ws : m_workspaceList) {
     m_progress->report("Processing workspace " + std::string(ws->getName()));
