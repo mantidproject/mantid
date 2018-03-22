@@ -112,20 +112,21 @@ void MiniPlotController::setPlotData(size_t pickID) {
     m_miniplot->removeActiveCurve();
     return;
   }
-  m_currentDetID = -1;
+  m_currentDetID = std::numeric_limits<size_t>::max();
+
   if (m_plotType == PlotType::DetectorSum) {
     m_plotType = PlotType::Single;
   }
 
-  const int detid = m_instrWidget->getInstrumentActor().getDetID(pickID);
-
-  if (detid >= 0) {
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.componentInfo();
+  if (componentInfo.isDetector(pickID)) {
     if (m_plotType == PlotType::Single) {
-      m_currentDetID = detid;
-      plotSingle(detid);
+      m_currentDetID = pickID;
+      plotSingle(pickID);
     } else if (m_plotType == PlotType::TubeSum ||
                m_plotType == PlotType::TubeIntegral) {
-      plotTube(detid);
+      plotTube(pickID);
     } else {
       throw std::logic_error("setPlotData: Unexpected plot type.");
     }
@@ -180,7 +181,7 @@ void MiniPlotController::clear() { m_miniplot->removeActiveCurve(); }
 * Plot data for a detector.
 * @param detid :: ID of the detector to be plotted.
 */
-void MiniPlotController::plotSingle(int detid) {
+void MiniPlotController::plotSingle(size_t detid) {
   auto plotData = prepareDataForSinglePlot(detid);
   if (plotData.x.empty() || plotData.y.empty())
     return;

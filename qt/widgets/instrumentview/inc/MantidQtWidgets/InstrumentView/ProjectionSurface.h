@@ -237,7 +237,7 @@ public:
   //    Peaks overlay methods
   //-----------------------------------
 
-  QList<PeakMarker2D *> getMarkersWithID(int detID) const;
+  QList<PeakMarker2D *> getMarkersWithID(size_t detID) const;
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> getEditPeaksWorkspace() const;
   QStringList getPeaksWorkspaceNames() const;
   void deletePeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);

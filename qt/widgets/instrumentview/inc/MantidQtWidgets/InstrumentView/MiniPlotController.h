@@ -96,7 +96,7 @@ private slots:
 private:
   void initActions();
 
-  void plotSingle(int detid);
+  void plotSingle(size_t detid);
   void addPeakMarker(const PeakMarker2D &marker);
   void addPeakMarker(const Mantid::Geometry::IPeak &peak);
   void plotTube(size_t detid);
@@ -121,7 +121,7 @@ private:
   bool m_enabled;
   /// quantity the time bin integrals to be plotted against
   TubeXUnits m_tubeXUnits;
-  int m_currentDetID;
+  size_t m_currentDetID;
 
   // actions
   QAction *m_sumDetectors;
