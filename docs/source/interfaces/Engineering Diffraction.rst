@@ -480,7 +480,7 @@ The following parameters are also required:
   GSAS-II GUI
 - **GSAS-II Installation Directory** - you must have a version of
   GSAS-II from at least **February 2018** to use the GUI. See
-  :ref:`Installing GSASII` for how to install a compatible version
+  :ref:`Installing_GSASII` for how to install a compatible version
 - **Refinement method** - can either be **Pawley** or
   **Rietveld**. Pawley refinement is currently under development, so
   Rietveld is recommended.
@@ -503,11 +503,11 @@ To do a refinement, take the following steps:
    and the run willl be plotted
 2. Select your input files, and input any additional parameters in the
    **GSASIIRefineFitPeaks Controls** section
- 3. Click **Run Refinement**. Once complete, fitted peaks for the run
-    should be overplotted in the fitting area. In addition, Rwp
-    (goodness of fit index), Sigma and Gamma (peak broadening
-    coefficients) and lattice parameters should be displayed in the
-    **Fit Results** section.
+3. Click **Run Refinement**. Once complete, fitted peaks for the run
+   should be overplotted in the fitting area. In addition, Rwp
+   (goodness of fit index), Sigma and Gamma (peak broadening
+   coefficients) and lattice parameters should be displayed in the
+   **Fit Results** section.
 
 You can toggle the fitted peaks on and off with the **Plot Fitted
 Peaks** checkbox, remove runs from the list with the **Remove Run**
