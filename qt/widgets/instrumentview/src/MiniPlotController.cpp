@@ -579,7 +579,6 @@ void MiniPlotController::savePlotToWorkspace() {
       }
     } else if (parts.size() == 3) {
       int detid = parts[1].toInt();
-      auto det = actor.getDetectorByDetID(detid);
       QString sumOrIntegral = parts[2].trimmed();
       if (sumOrIntegral == "Sum") {
         curveData = prepareDataForSumsPlot(detid, includeErrors);
@@ -826,8 +825,6 @@ void MiniPlotController::removeCurve(const QString &label) {
 * @param y :: Peak height (counts)
 */
 void MiniPlotController::addPeak(double x, double y) {
-  if (m_currentDetID < 0)
-    return;
 
   try {
     auto surface = m_instrWidget->getSurface();
