@@ -456,8 +456,7 @@ public:
   void checkTrackIntercept(Track &track,
                            const std::vector<Link> &expectedResults) {
     size_t index = 0;
-    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
-         ++it) {
+    for (auto it = track.cbegin(); it != track.cend(); ++it) {
       if (index < expectedResults.size()) {
         TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
                         1e-6);
