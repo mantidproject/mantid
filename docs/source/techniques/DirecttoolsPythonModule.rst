@@ -78,7 +78,7 @@ Any of the workspace, cut centre or cut width arguments can be a :class:`list` i
    fig, axes, cuts = dt.plotconstQ('SofQW', [Q1, Q2], dQ)
    #fig.show()
 
-The :func:`directtools.plotconstQ` and :func:`directtools.plotconstE` functions use :func:`directtool.plotcuts` to do the actual line profiles and plotting. The profiles are made by the :ref:`algm-LineProfile` algorithm, and all three plotting functions return a list of the produced line profile workspace names.
+The :func:`directtools.plotconstQ` and :func:`directtools.plotconstE` functions use :func:`directtools.plotcuts` to do the actual line profiles and plotting. The profiles are made by the :ref:`algm-LineProfile` algorithm, and all three plotting functions return a list of the produced line profile workspace names.
 
 If a line profile already exists, it can be plotted using :func:`directtools.plotprofiles`. This also accepts either a single line profile workspace or a list of workspaces enabling comparison:
 
