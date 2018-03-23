@@ -102,8 +102,6 @@ a minimum RAM specification by overriding requiredMemoryMB:
 The above function limits the test to run on a machine where there is at
 least 2GB of free memory.
 
-.. _target-platform-based-on-free-memory-1:
-
 Target Platform Based on Free Memory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
