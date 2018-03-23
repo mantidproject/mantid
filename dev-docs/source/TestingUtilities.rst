@@ -25,10 +25,10 @@ The following helper files have been found in the
 package:
 
 -  `BinaryOperationMDTestHelper <http://doxygen.mantidproject.org/d1/d4f/namespaceBinaryOperationMDTestHelper.html>`__
--  **ComponentCreationHelper**
+-  ComponentCreationHelper
    `ComponentCreationHelper <http://doxygen.mantidproject.org/d8/d8d/namespaceComponentCreationHelper.html>`__
    This creates instrument components that can then be used in a unit test.
--  **ICatTestHelper**
+-  ICatTestHelper
 -  `MDEventsTestHelper <http://doxygen.mantidproject.org/d5/d75/namespaceMantid_1_1MDEvents_1_1MDEventsTestHelper.html>`__
 -  `SANSInstrumentCreationHelper <http://doxygen.mantidproject.org/d9/dbf/classSANSInstrumentCreationHelper.html>`__
 -  `ScopedFileHelper <http://doxygen.mantidproject.org/d7/d7f/classScopedFileHelper_1_1ScopedFile.html#details>`__
@@ -39,12 +39,12 @@ package:
 Python
 ------
 
-There are some testhelpers which are only available in Python, they can
-be found in the **testhelpers**-package.
+There are some ``testhelpers`` which are only available in Python, they can
+be found in the ``testhelpers``-package.
 
--  **make_decorator** - A function that returns a decorator for an
+-  ``make_decorator`` - A function that returns a decorator for an
    algorithm without executing it.
--  **TemporaryFileHelper** - A class that creates named temporary files
+-  ``TemporaryFileHelper`` - A class that creates named temporary files
    and deletes them automatically when the object is deleted. Basically
    a thin wrapper around `NamedTemporaryFile <https://docs.python.org/2/library/tempfile.html>`__
    from the tempfile package.
