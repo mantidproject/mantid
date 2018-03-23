@@ -410,9 +410,8 @@ public:
                              clusterThreeIndexes.end());
 
     // Add elevated signal to the workspace at cluster indexes.
-    for (auto it = allClusterIndexes.begin(); it != allClusterIndexes.end();
-         ++it) {
-      inWS->setSignalAt(*it, raisedSignal);
+    for (unsigned long & allClusterIndexe : allClusterIndexes) {
+      inWS->setSignalAt(allClusterIndexe, raisedSignal);
     }
 
     // ---------- Run the cluster finding

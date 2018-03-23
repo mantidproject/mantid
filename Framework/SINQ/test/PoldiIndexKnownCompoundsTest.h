@@ -669,9 +669,9 @@ private:
   }
 
   void storeRandomWorkspaces(const std::vector<std::string> &wsNames) {
-    for (auto it = wsNames.begin(); it != wsNames.end(); ++it) {
+    for (const auto & wsName : wsNames) {
       WorkspaceCreationHelper::storeWS(
-          *it, WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
+          wsName, WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
     }
   }
 
@@ -684,8 +684,8 @@ private:
   }
 
   void removeRandomWorkspaces(const std::vector<std::string> &wsNames) {
-    for (auto it = wsNames.begin(); it != wsNames.end(); ++it) {
-      WorkspaceCreationHelper::removeWS(*it);
+    for (const auto & wsName : wsNames) {
+      WorkspaceCreationHelper::removeWS(wsName);
     }
   }
 

@@ -352,9 +352,9 @@ public:
                      ConfigService::Instance().getInstrumentDirectory());
 
     // check all of the directory entries actually exist
-    for (auto it = directories.begin(); it != directories.end(); ++it) {
-      Poco::File directory(*it);
-      TSM_ASSERT(*it + " does not exist", directory.exists());
+    for (auto & directorie : directories) {
+      Poco::File directory(directorie);
+      TSM_ASSERT(directorie + " does not exist", directory.exists());
     }
   }
 

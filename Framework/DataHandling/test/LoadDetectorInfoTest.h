@@ -301,8 +301,8 @@ public:
 
     // read the parameters from some random detectors, they're parameters are
     // all set to the same thing
-    for (int i = 0; i < NUMRANDOM; ++i) {
-      const size_t detIndex = detInfo.indexOf(DETECTS[i]);
+    for (int i : DETECTS) {
+      const size_t detIndex = detInfo.indexOf(i);
 
       const auto &det = detInfo.detector(detIndex);
       Parameter_sptr par = pmap.getRecursive(&det, "TubePressure");

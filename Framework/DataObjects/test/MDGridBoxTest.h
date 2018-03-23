@@ -261,10 +261,10 @@ public:
         new MDGridBox<MDLeanEvent<1>, 1>(*box, newBoxController);
 
     auto boxes = box1->getBoxes();
-    for (size_t i = 0; i < boxes.size(); ++i) {
+    for (auto & boxe : boxes) {
       TSM_ASSERT_EQUALS(
           "All child boxes should have the same box controller as the parent.",
-          newBoxController, boxes[i]->getBoxController());
+          newBoxController, boxe->getBoxController());
     }
     delete newBoxController;
     delete box1;
@@ -298,8 +298,8 @@ public:
     // be
     // taken care of manually
     size_t indices[5] = {0, 1, 12, 13, 14};
-    for (size_t i = 0; i < 5; ++i)
-      delete boxes[indices[i]];
+    for (unsigned long indice : indices)
+      delete boxes[indice];
     delete g;
     delete bcc;
   }
@@ -329,9 +329,9 @@ public:
     // Check the boxes
     std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes = g->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 10 * 5 * 2);
-    for (size_t i = 0; i < boxes.size(); i++) {
+    for (auto & boxe : boxes) {
       MDBox<MDLeanEvent<3>, 3> *box =
-          dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[i]);
+          dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxe);
       TS_ASSERT(box);
     }
     MDBox<MDLeanEvent<3>, 3> *box;
@@ -602,8 +602,8 @@ public:
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 54);
     // The boxes extents make sense
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 1.51);
+    for (auto & boxe : boxes) {
+      TS_ASSERT(boxe->getExtents(0).getMax() >= 1.51);
     }
 
     // --- Now leaf-only ---
@@ -611,8 +611,8 @@ public:
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS(boxes.size(), 40);
     // The boxes extents make sense
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 1.51);
+    for (auto & boxe : boxes) {
+      TS_ASSERT(boxe->getExtents(0).getMax() >= 1.51);
     }
 
     // Limit by another plane
@@ -622,18 +622,18 @@ public:
     boxes.clear();
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 33);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 1.51);
-      TS_ASSERT(boxes[i]->getExtents(0).getMin() <= 2.99);
+    for (auto & boxe : boxes) {
+      TS_ASSERT(boxe->getExtents(0).getMax() >= 1.51);
+      TS_ASSERT(boxe->getExtents(0).getMin() <= 2.99);
     }
 
     // Same, leaf only
     boxes.clear();
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS(boxes.size(), 24);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 1.51);
-      TS_ASSERT(boxes[i]->getExtents(0).getMin() <= 2.99);
+    for (auto & boxe : boxes) {
+      TS_ASSERT(boxe->getExtents(0).getMax() >= 1.51);
+      TS_ASSERT(boxe->getExtents(0).getMin() <= 2.99);
     }
 
     // ----- Infinitely thin plane for an implicit function ------------
@@ -675,11 +675,11 @@ public:
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 46);
     // The boxes extents make sense
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 2.00);
-      TS_ASSERT(boxes[i]->getExtents(0).getMin() <= 3.00);
-      TS_ASSERT(boxes[i]->getExtents(1).getMax() >= 2.00);
-      TS_ASSERT(boxes[i]->getExtents(1).getMin() <= 3.00);
+    for (auto & boxe : boxes) {
+      TS_ASSERT(boxe->getExtents(0).getMax() >= 2.00);
+      TS_ASSERT(boxe->getExtents(0).getMin() <= 3.00);
+      TS_ASSERT(boxe->getExtents(1).getMax() >= 2.00);
+      TS_ASSERT(boxe->getExtents(1).getMin() <= 3.00);
     }
 
     // -- Leaf only ---
@@ -690,11 +690,11 @@ public:
         16 + 4 * 4 +
             4); // 16 in the center one + 4x4 at the 4 edges + 4 at the corners
     // The boxes extents make sense
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT(boxes[i]->getExtents(0).getMax() >= 2.00);
-      TS_ASSERT(boxes[i]->getExtents(0).getMin() <= 3.00);
-      TS_ASSERT(boxes[i]->getExtents(1).getMax() >= 2.00);
-      TS_ASSERT(boxes[i]->getExtents(1).getMin() <= 3.00);
+    for (auto & boxe : boxes) {
+      TS_ASSERT(boxe->getExtents(0).getMax() >= 2.00);
+      TS_ASSERT(boxe->getExtents(0).getMin() <= 3.00);
+      TS_ASSERT(boxe->getExtents(1).getMax() >= 2.00);
+      TS_ASSERT(boxe->getExtents(1).getMin() <= 3.00);
     }
 
     // clean up  behind
@@ -835,12 +835,12 @@ public:
     // Get all the boxes contained
     std::vector<MDBoxBase<MDLeanEvent<2>, 2> *> boxes = b->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 100);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      TS_ASSERT_EQUALS(boxes[i]->getNPoints(), 1);
-      TS_ASSERT_EQUALS(boxes[i]->getSignal(), 2.0);
-      TS_ASSERT_EQUALS(boxes[i]->getErrorSquared(), 2.0);
-      TS_ASSERT_EQUALS(boxes[i]->getSignalNormalized(), 2.0);
-      TS_ASSERT_EQUALS(boxes[i]->getErrorSquaredNormalized(), 2.0);
+    for (auto & boxe : boxes) {
+      TS_ASSERT_EQUALS(boxe->getNPoints(), 1);
+      TS_ASSERT_EQUALS(boxe->getSignal(), 2.0);
+      TS_ASSERT_EQUALS(boxe->getErrorSquared(), 2.0);
+      TS_ASSERT_EQUALS(boxe->getSignalNormalized(), 2.0);
+      TS_ASSERT_EQUALS(boxe->getErrorSquaredNormalized(), 2.0);
     }
 
     // Now try to add bad events (outside bounds)
@@ -1083,8 +1083,7 @@ public:
     // many events
     std::vector<ibox_t *> boxes = b->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 100);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      ibox_t *box = boxes[i];
+    for (auto box : boxes) {
       TS_ASSERT_EQUALS(box->getNPoints(), num_repeat);
       TS_ASSERT(dynamic_cast<gbox_t *>(box));
 
@@ -1405,8 +1404,8 @@ public:
                        signal);
     // Normalized
     if (signal != 0.0) {
-      for (size_t d = 0; d < 2; d++)
-        centroid[d] /= static_cast<coord_t>(signal);
+      for (float & d : centroid)
+        d /= static_cast<coord_t>(signal);
     }
 
     TSM_ASSERT_DELTA(message, signal, 1.0 * numExpected, 1e-5);
@@ -1630,8 +1629,8 @@ public:
         rng, u);
     for (size_t i = 0; i < num; ++i) {
       double centers[3];
-      for (size_t d = 0; d < 3; d++)
-        centers[d] = gen();
+      for (double & center : centers)
+        center = gen();
       // Create and add the event.
       events.push_back(MDLeanEvent<3>(1.0, 1.0, centers));
     }
@@ -1730,12 +1729,12 @@ public:
     coord_t centroid[3];
     for (size_t i = 0; i < 100; i++) {
       signal = 0;
-      for (size_t d = 0; d < 3; d++)
-        centroid[d] = 0.0;
+      for (float & d : centroid)
+        d = 0.0;
       box3b->centroidSphere(sphere, radius * radius, centroid, signal);
       if (signal != 0.0) {
-        for (size_t d = 0; d < 3; d++)
-          centroid[d] /= static_cast<coord_t>(signal);
+        for (float & d : centroid)
+          d /= static_cast<coord_t>(signal);
       }
     }
 

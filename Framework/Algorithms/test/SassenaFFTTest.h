@@ -144,10 +144,10 @@ private:
       double sum = 0.0;
       double average = 0.0;
       MantidVec::iterator itx = xv.begin();
-      for (MantidVec::iterator it = yv.begin(); it != yv.end(); ++it) {
+      for (double & it : yv) {
         factor = exp(exponentFactor * (*itx));
-        sum += (*it) * factor;
-        average += (*it) * (*itx) * factor;
+        sum += it * factor;
+        average += it * (*itx) * factor;
         ++itx;
       }
       average /= sum;
@@ -186,9 +186,9 @@ private:
       xv = ws->readX(i);
       MantidVec::iterator itx = xv.begin();
       double sum = 0.0;
-      for (MantidVec::iterator it = yv.begin(); it != yv.end(); ++it) {
+      for (double & it : yv) {
         factor = exp(exponentFactor * (*itx));
-        sum += (*it) * factor;
+        sum += it * factor;
         ++itx;
       }
       sum *= dx / static_cast<double>(nbins);

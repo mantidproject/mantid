@@ -430,8 +430,8 @@ void EstimateFitParameters::execConcrete() {
         if (m_function->isActive(i)) {
           TableRow row = table->appendRow();
           row << m_function->parameterName(i);
-          for (size_t j = 0; j < output.size(); ++j) {
-            row << output[j][ia];
+          for (auto & j : output) {
+            row << j[ia];
           }
           ++ia;
         }
