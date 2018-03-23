@@ -89,9 +89,9 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   triangles.insert(triangles.end(), { 3, 6, 2 });
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
-      new MeshObject(std::move(triangles), std::move(vertices),
-                     Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+      std::move(triangles), std::move(vertices),
+                     Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -138,8 +138,8 @@ std::unique_ptr<MeshObject> createOctahedron() {
   triangles.insert(triangles.end(), { 3, 1, 5 });
 
   // Use flexible constructor
-  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
-      new MeshObject(triangles, vertices, Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+      triangles, vertices, Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -192,9 +192,9 @@ std::unique_ptr<MeshObject> createLShape() {
   triangles.insert(triangles.end(), { 11, 0, 6 });
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
-      new MeshObject(std::move(triangles), std::move(vertices),
-                     Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+      std::move(triangles), std::move(vertices),
+                     Mantid::Kernel::Material());
   return retVal;
 }
 }
