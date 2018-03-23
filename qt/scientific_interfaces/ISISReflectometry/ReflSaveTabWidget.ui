@@ -43,6 +43,13 @@
        <widget class="QLineEdit" name="savePathEdit"/>
       </item>
       <item>
+       <widget class="QPushButton" name="savePathBrowseButton">
+        <property name="text">
+         <string>Browse To Directory</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>File Name Prefix:</string>

@@ -3,6 +3,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <Poco/Path.h>
+#include <Poco/File.h>
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -42,8 +43,16 @@ std::string ReflAsciiSaver::extensionForFormat(NamedFormat format) {
 }
 
 bool ReflAsciiSaver::isValidSaveDirectory(std::string const &path) const {
-  auto pocoPath = Poco::Path(path);
-  return !path.empty() && pocoPath.isDirectory();
+  if (!path.empty()) {
+    try {
+      auto pocoPath = Poco::Path().parseDirectory(path);
+      auto pocoFile = Poco::File(pocoPath);
+      return pocoFile.exists() && pocoFile.canWrite();
+    } catch (Poco::PathSyntaxException &) {
+      return false;
+    }
+  } else
+    return false;
 }
 
 namespace {
@@ -58,7 +67,7 @@ void setPropertyIfSupported(Mantid::API::IAlgorithm_sptr alg,
 std::string ReflAsciiSaver::assembleSavePath(
     std::string const &saveDirectory, std::string const &prefix,
     std::string const &name, std::string const &extension) const {
-  auto path = Poco::Path(saveDirectory);
+  auto path = Poco::Path(saveDirectory).makeDirectory();
   path.append(prefix + name + extension);
   return path.toString();
 }
@@ -85,7 +94,7 @@ Mantid::API::IAlgorithm_sptr ReflAsciiSaver::setUpSaveAlgorithm(
   saveAlg->setProperty("Separator", fileFormat.separator());
   saveAlg->setProperty("Filename",
                        assembleSavePath(saveDirectory, fileFormat.prefix(),
-                                        workspace->getTitle(), extension));
+                                        workspace->getName(), extension));
   saveAlg->setProperty("InputWorkspace", workspace);
   return saveAlg;
 }

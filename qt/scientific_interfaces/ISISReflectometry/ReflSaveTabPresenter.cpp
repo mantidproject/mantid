@@ -193,13 +193,13 @@ void ReflSaveTabPresenter::warn(std::string const &message,
 
 void ReflSaveTabPresenter::warnInvalidSaveDirectory() {
   warn("You just changed the save path to a directory which "
-       "doesn't exist or could not be accessed.",
+       "doesn't exist or is not writable.",
        "Invalid directory");
 }
 
 void ReflSaveTabPresenter::errorInvalidSaveDirectory() {
-  error("The save path specified doesn't exist or "
-        "could not be accessed.",
+  error("The save path specified doesn't exist or is "
+        "not writable.",
         "Invalid directory");
 }
 

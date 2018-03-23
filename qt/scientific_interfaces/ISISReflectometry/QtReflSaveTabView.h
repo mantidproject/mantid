@@ -105,6 +105,7 @@ public slots:
   void saveWorkspaces() const;
   /// Suggest a save directory
   void suggestSaveDir() const;
+  void browseToSaveDirectory();
 
   void onSavePathChanged();
   void onAutosaveChanged(int state);

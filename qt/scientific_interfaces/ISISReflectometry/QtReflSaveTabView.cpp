@@ -3,6 +3,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <QMessageBox>
+#include <QFileDialog>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -42,6 +43,17 @@ void QtReflSaveTabView::initLayout() {
           SLOT(onAutosaveChanged(int)));
   connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this,
           SLOT(onSavePathChanged()));
+  connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this,
+          SLOT(browseToSaveDirectory()));
+}
+
+void QtReflSaveTabView::browseToSaveDirectory() {
+  auto savePath = QFileDialog::getExistingDirectory(
+      this, "Select the directory to save to.");
+  if (!savePath.isEmpty()) {
+    m_ui.savePathEdit->setText(savePath);
+    onSavePathChanged();
+  }
 }
 
 void QtReflSaveTabView::onSavePathChanged() {
