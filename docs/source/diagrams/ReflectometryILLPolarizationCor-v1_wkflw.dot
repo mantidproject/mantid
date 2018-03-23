@@ -1,0 +1,23 @@
+digraph ReflectometryILLPolarizationCor {
+  label = "ReflectometryILLPolarizationCor workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    input              [label="InputWorkspaces"]
+    output             [label="OutputWorkspace"]
+
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    correction [label="PolarizationEfficiencyCor"]
+  }
+
+  subgraph decisions {
+    $decision_style
+  }
+
+  input -> correction
+  correction -> output
+}
