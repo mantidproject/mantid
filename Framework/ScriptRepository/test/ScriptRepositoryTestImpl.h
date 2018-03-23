@@ -363,8 +363,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(list_files = repo->listFiles());
     TS_ASSERT(list_files.size() == 5);
     // check that all the files at the central repository are inside
-    for (auto & test_entrie : test_entries)
-      TSM_ASSERT_THROWS_NOTHING(test_entrie, repo->info(test_entrie));
+    for (auto & test_entry : test_entries)
+      TSM_ASSERT_THROWS_NOTHING(test_entry, repo->info(test_entry));
   }
 
   /**

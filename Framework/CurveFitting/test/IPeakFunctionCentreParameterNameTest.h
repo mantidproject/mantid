@@ -33,9 +33,9 @@ public:
   /* Test that all functions give the expected result.
    */
   void testAllFunctions() {
-    for (auto & m_expectedResult : m_expectedResults) {
-      const std::string &peakFunctionName = m_expectedResult.first;
-      const std::string &centreParameterName = m_expectedResult.second;
+    for (auto & expectedResult : m_expectedResults) {
+      const std::string &peakFunctionName = expectedResult.first;
+      const std::string &centreParameterName = expectedResult.second;
 
       IPeakFunction_sptr fn = boost::dynamic_pointer_cast<IPeakFunction>(
           FunctionFactory::Instance().createFunction(peakFunctionName));

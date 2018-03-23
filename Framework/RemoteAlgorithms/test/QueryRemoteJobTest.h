@@ -88,9 +88,9 @@ public:
 
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();
-    for (auto & testFacilitie : testFacilities) {
-      const std::string facName = testFacilitie.first;
-      const std::string compName = testFacilitie.second;
+    for (auto & testFacility : testFacilities) {
+      const std::string facName = testFacility.first;
+      const std::string compName = testFacility.second;
 
       Mantid::Kernel::ConfigService::Instance().setFacility(facName);
       QueryRemoteJob qr;

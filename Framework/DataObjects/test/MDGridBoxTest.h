@@ -261,10 +261,10 @@ public:
         new MDGridBox<MDLeanEvent<1>, 1>(*box, newBoxController);
 
     auto boxes = box1->getBoxes();
-    for (auto & boxe : boxes) {
+    for (auto & box : boxes) {
       TSM_ASSERT_EQUALS(
           "All child boxes should have the same box controller as the parent.",
-          newBoxController, boxe->getBoxController());
+          newBoxController, box->getBoxController());
     }
     delete newBoxController;
     delete box1;
@@ -329,9 +329,9 @@ public:
     // Check the boxes
     std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes = g->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 10 * 5 * 2);
-    for (auto & boxe : boxes) {
+    for (auto & box : boxes) {
       MDBox<MDLeanEvent<3>, 3> *box =
-          dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxe);
+          dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(box);
       TS_ASSERT(box);
     }
     MDBox<MDLeanEvent<3>, 3> *box;
@@ -602,8 +602,8 @@ public:
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 54);
     // The boxes extents make sense
-    for (auto & boxe : boxes) {
-      TS_ASSERT(boxe->getExtents(0).getMax() >= 1.51);
+    for (auto & box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
     }
 
     // --- Now leaf-only ---
@@ -611,8 +611,8 @@ public:
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS(boxes.size(), 40);
     // The boxes extents make sense
-    for (auto & boxe : boxes) {
-      TS_ASSERT(boxe->getExtents(0).getMax() >= 1.51);
+    for (auto & box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
     }
 
     // Limit by another plane
@@ -622,18 +622,18 @@ public:
     boxes.clear();
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 33);
-    for (auto & boxe : boxes) {
-      TS_ASSERT(boxe->getExtents(0).getMax() >= 1.51);
-      TS_ASSERT(boxe->getExtents(0).getMin() <= 2.99);
+    for (auto & box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
+      TS_ASSERT(box->getExtents(0).getMin() <= 2.99);
     }
 
     // Same, leaf only
     boxes.clear();
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS(boxes.size(), 24);
-    for (auto & boxe : boxes) {
-      TS_ASSERT(boxe->getExtents(0).getMax() >= 1.51);
-      TS_ASSERT(boxe->getExtents(0).getMin() <= 2.99);
+    for (auto & box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
+      TS_ASSERT(box->getExtents(0).getMin() <= 2.99);
     }
 
     // ----- Infinitely thin plane for an implicit function ------------
@@ -675,11 +675,11 @@ public:
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 46);
     // The boxes extents make sense
-    for (auto & boxe : boxes) {
-      TS_ASSERT(boxe->getExtents(0).getMax() >= 2.00);
-      TS_ASSERT(boxe->getExtents(0).getMin() <= 3.00);
-      TS_ASSERT(boxe->getExtents(1).getMax() >= 2.00);
-      TS_ASSERT(boxe->getExtents(1).getMin() <= 3.00);
+    for (auto & box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 2.00);
+      TS_ASSERT(box->getExtents(0).getMin() <= 3.00);
+      TS_ASSERT(box->getExtents(1).getMax() >= 2.00);
+      TS_ASSERT(box->getExtents(1).getMin() <= 3.00);
     }
 
     // -- Leaf only ---
@@ -690,11 +690,11 @@ public:
         16 + 4 * 4 +
             4); // 16 in the center one + 4x4 at the 4 edges + 4 at the corners
     // The boxes extents make sense
-    for (auto & boxe : boxes) {
-      TS_ASSERT(boxe->getExtents(0).getMax() >= 2.00);
-      TS_ASSERT(boxe->getExtents(0).getMin() <= 3.00);
-      TS_ASSERT(boxe->getExtents(1).getMax() >= 2.00);
-      TS_ASSERT(boxe->getExtents(1).getMin() <= 3.00);
+    for (auto & box : boxes) {
+      TS_ASSERT(box->getExtents(0).getMax() >= 2.00);
+      TS_ASSERT(box->getExtents(0).getMin() <= 3.00);
+      TS_ASSERT(box->getExtents(1).getMax() >= 2.00);
+      TS_ASSERT(box->getExtents(1).getMin() <= 3.00);
     }
 
     // clean up  behind
@@ -835,12 +835,12 @@ public:
     // Get all the boxes contained
     std::vector<MDBoxBase<MDLeanEvent<2>, 2> *> boxes = b->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 100);
-    for (auto & boxe : boxes) {
-      TS_ASSERT_EQUALS(boxe->getNPoints(), 1);
-      TS_ASSERT_EQUALS(boxe->getSignal(), 2.0);
-      TS_ASSERT_EQUALS(boxe->getErrorSquared(), 2.0);
-      TS_ASSERT_EQUALS(boxe->getSignalNormalized(), 2.0);
-      TS_ASSERT_EQUALS(boxe->getErrorSquaredNormalized(), 2.0);
+    for (auto & box : boxes) {
+      TS_ASSERT_EQUALS(box->getNPoints(), 1);
+      TS_ASSERT_EQUALS(box->getSignal(), 2.0);
+      TS_ASSERT_EQUALS(box->getErrorSquared(), 2.0);
+      TS_ASSERT_EQUALS(box->getSignalNormalized(), 2.0);
+      TS_ASSERT_EQUALS(box->getErrorSquaredNormalized(), 2.0);
     }
 
     // Now try to add bad events (outside bounds)

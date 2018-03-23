@@ -125,8 +125,8 @@ public:
     // Clear factory
     std::vector<std::string> allSymbols =
         SymmetryOperationFactory::Instance().subscribedSymbols();
-    for (auto & allSymbol : allSymbols) {
-      SymmetryOperationFactory::Instance().unsubscribeSymOp(allSymbol);
+    for (auto & symbol : allSymbols) {
+      SymmetryOperationFactory::Instance().unsubscribeSymOp(symbol);
     }
 
     // Subscribe two symmetry operations
@@ -146,8 +146,8 @@ public:
     SymmetryOperationFactory::Instance().unsubscribeSymOp("-x,-y,-z");
 
     // Restore factory
-    for (auto & allSymbol : allSymbols) {
-      SymmetryOperationFactory::Instance().subscribeSymOp(allSymbol);
+    for (auto & symbol : allSymbols) {
+      SymmetryOperationFactory::Instance().subscribeSymOp(symbol);
     }
   }
 };
