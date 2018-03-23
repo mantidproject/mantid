@@ -701,7 +701,7 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
       sourceWS.getDetectorIDToWorkspaceIndexMap(false);
 
   std::multimap<size_t, Mantid::detid_t> spectr2index_map;
-  for (auto & it : sourceDetMap) {
+  for (auto &it : sourceDetMap) {
     spectr2index_map.insert(
         std::pair<size_t, Mantid::detid_t>(it.second, it.first));
   }
@@ -710,10 +710,9 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
     // find spectra number from spectra ID for the source workspace
     const auto itSpec = s2imap.find(i);
     if (itSpec == s2imap.end()) {
-      throw std::runtime_error(
-          "Can not find spectra with ID: " +
-          boost::lexical_cast<std::string>(i) +
-          " in the workspace" + sourceWS.getName());
+      throw std::runtime_error("Can not find spectra with ID: " +
+                               boost::lexical_cast<std::string>(i) +
+                               " in the workspace" + sourceWS.getName());
     }
     size_t specN = itSpec->second;
 

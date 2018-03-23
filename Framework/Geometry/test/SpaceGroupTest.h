@@ -66,7 +66,7 @@ public:
     SpaceGroup spaceGroup(167, "R-3c", *(group * centering));
 
     std::vector<V3D> byOperator = spaceGroup * V3D(0.3, 0.0, 0.25);
-    for (auto & i : byOperator) {
+    for (auto &i : byOperator) {
       i = getWrappedVector(i);
     }
     std::sort(byOperator.begin(), byOperator.end());
@@ -86,7 +86,7 @@ public:
     SpaceGroup spaceGroup = getSpaceGroupR3m();
 
     std::vector<V3D> byOperator = spaceGroup * V3D(0.5, 0.0, 0.0);
-    for (auto & i : byOperator) {
+    for (auto &i : byOperator) {
       i = getWrappedVector(i);
     }
     std::sort(byOperator.begin(), byOperator.end());

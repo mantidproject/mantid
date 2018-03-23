@@ -295,7 +295,7 @@ public:
 
     double max = events.begin()->tof();
     double min = events.begin()->tof();
-    for (auto & event : events) {
+    for (auto &event : events) {
       max = event.tof() > max ? event.tof() : max;
       min = event.tof() < min ? event.tof() : min;
     }

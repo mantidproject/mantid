@@ -526,7 +526,7 @@ public:
     std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
               std::unordered_multimap<std::string, fromToEntry>::iterator> ret;
 
-    for (const auto & idfIdentifier : idfIdentifiers) {
+    for (const auto &idfIdentifier : idfIdentifiers) {
       ret = idfFiles.equal_range(idfIdentifier);
       for (it1 = ret.first; it1 != ret.second; ++it1) {
         for (it2 = ret.first; it2 != ret.second; ++it2) {

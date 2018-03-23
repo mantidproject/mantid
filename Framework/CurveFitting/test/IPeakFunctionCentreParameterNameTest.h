@@ -33,7 +33,7 @@ public:
   /* Test that all functions give the expected result.
    */
   void testAllFunctions() {
-    for (auto & expectedResult : m_expectedResults) {
+    for (auto &expectedResult : m_expectedResults) {
       const std::string &peakFunctionName = expectedResult.first;
       const std::string &centreParameterName = expectedResult.second;
 

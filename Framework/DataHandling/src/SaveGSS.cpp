@@ -442,7 +442,7 @@ void SaveGSS::generateInstrumentHeader(std::stringstream &out,
 
   // write user header first
   if (m_user_specified_gsas_header.size() > 0) {
-    for (const auto & iter : m_user_specified_gsas_header) {
+    for (const auto &iter : m_user_specified_gsas_header) {
       out << iter << "\n";
     }
   }

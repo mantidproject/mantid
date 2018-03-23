@@ -669,15 +669,15 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
   }     // END-FOR (xml nodes)
 
   // Add the property to output workspace
-  for (auto & miter : str_log_map) {
+  for (auto &miter : str_log_map) {
     outws->mutableRun().addProperty(
         new PropertyWithValue<std::string>(miter.first, miter.second));
   }
-  for (auto & miter : int_log_map) {
+  for (auto &miter : int_log_map) {
     outws->mutableRun().addProperty(
         new PropertyWithValue<int>(miter.first, miter.second));
   }
-  for (auto & miter : dbl_log_map) {
+  for (auto &miter : dbl_log_map) {
     outws->mutableRun().addProperty(
         new PropertyWithValue<double>(miter.first, miter.second));
   }
@@ -710,7 +710,7 @@ LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
   // file records data in column major)
   size_t num_empty_line = 0;
   size_t num_weird_line = 0;
-  for (auto & vecLine : vecLines) {
+  for (auto &vecLine : vecLines) {
     if (vecLine.empty())
       ++num_empty_line;
     else if (vecLine.size() < 100)

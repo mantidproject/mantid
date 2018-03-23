@@ -112,7 +112,7 @@ public:
     const char *loadraw_props[NUMPROPS] = {
         "SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
     // Basic load has no additional loader properties
-    for (auto & loadraw_prop : loadraw_props) {
+    for (auto &loadraw_prop : loadraw_props) {
       TS_ASSERT_EQUALS(loader.existsProperty(loadraw_prop), false);
     }
     // After setting the file property, the algorithm should have aquired the
@@ -120,7 +120,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("Filename", "IRS38633.raw"));
     // Now
-    for (auto & loadraw_prop : loadraw_props) {
+    for (auto &loadraw_prop : loadraw_props) {
       TS_ASSERT_EQUALS(loader.existsProperty(loadraw_prop), true);
     }
 

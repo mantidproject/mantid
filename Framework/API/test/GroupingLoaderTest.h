@@ -25,7 +25,7 @@ public:
     auto dataPaths = ConfigService::Instance().getDataSearchDirs();
 
     // Find the path of AutoTestData
-    for (auto & dataPath : dataPaths) {
+    for (auto &dataPath : dataPaths) {
       Poco::Path path(dataPath);
 
       if (path.directory(path.depth() - 1) == "UnitTest") {

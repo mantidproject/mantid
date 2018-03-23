@@ -669,7 +669,7 @@ private:
   }
 
   void storeRandomWorkspaces(const std::vector<std::string> &wsNames) {
-    for (const auto & wsName : wsNames) {
+    for (const auto &wsName : wsNames) {
       WorkspaceCreationHelper::storeWS(
           wsName, WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
     }
@@ -684,7 +684,7 @@ private:
   }
 
   void removeRandomWorkspaces(const std::vector<std::string> &wsNames) {
-    for (const auto & wsName : wsNames) {
+    for (const auto &wsName : wsNames) {
       WorkspaceCreationHelper::removeWS(wsName);
     }
   }

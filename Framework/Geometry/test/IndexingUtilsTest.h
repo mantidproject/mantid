@@ -29,7 +29,7 @@ public:
                                {-0.90478, -0.50667, 0.51072},
                                {-0.50387, -0.58561, 0.43502}};
     // Dec 2011: Change convention for Q = 2 pi / wavelength
-    for (auto & q_vector : q_vectors)
+    for (auto &q_vector : q_vectors)
       q_vector *= (2.0 * M_PI);
     return q_vectors;
   }
@@ -372,7 +372,7 @@ public:
                             {2.66668320, 5.29605670, 7.9653444}};
 
     std::vector<V3D> directions;
-    for (auto & vector : vectors)
+    for (auto &vector : vectors)
       directions.emplace_back(vector[0], vector[1], vector[2]);
 
     double required_tolerance = 0.12;
@@ -410,7 +410,7 @@ public:
                             {2.66668320, 5.29605670, 7.9653444}};
 
     std::vector<V3D> directions;
-    for (auto & vector : vectors)
+    for (auto &vector : vectors)
       directions.emplace_back(vector[0], vector[1], vector[2]);
 
     std::vector<V3D> q_vectors = getNatroliteQs();
@@ -756,7 +756,7 @@ public:
     TS_ASSERT_DELTA(direction_list[7].Z(), -0.211325, 1e-5);
 
     double dot_prod;
-    for (const auto & i : direction_list) {
+    for (const auto &i : direction_list) {
       dot_prod = axis.scalar_prod(i);
       TS_ASSERT_DELTA(dot_prod, 0, 1e-10);
     }

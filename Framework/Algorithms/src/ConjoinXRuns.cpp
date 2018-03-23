@@ -254,7 +254,7 @@ void ConjoinXRuns::fillHistory() {
   if (!isChild()) {
     // Loop over the input workspaces, making the call that copies their
     // history to the output one
-    for (auto & inWS : m_inputWS) {
+    for (auto &inWS : m_inputWS) {
       m_outWS->history().addHistory(inWS->getHistory());
     }
     // Add the history for the current algorithm to the output

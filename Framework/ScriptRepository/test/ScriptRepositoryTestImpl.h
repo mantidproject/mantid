@@ -363,7 +363,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(list_files = repo->listFiles());
     TS_ASSERT(list_files.size() == 5);
     // check that all the files at the central repository are inside
-    for (auto & test_entry : test_entries)
+    for (auto &test_entry : test_entries)
       TSM_ASSERT_THROWS_NOTHING(test_entry, repo->info(test_entry));
   }
 
@@ -478,7 +478,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles());
 
     std::cout << "After update, the files are: ";
-    for (auto & list_of_file : list_of_files) {
+    for (auto &list_of_file : list_of_files) {
       std::cout << list_of_file << ", ";
     }
     std::cout << '\n';

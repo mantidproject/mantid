@@ -130,7 +130,7 @@ public:
         spaceGroup->getEquivalentPositions(V3D(0.2, 0.3, 0.4));
 
     CompositeBraggScatterer_sptr coll = CompositeBraggScatterer::create();
-    for (auto & position : positions) {
+    for (auto &position : positions) {
       std::ostringstream strm;
       strm << position;
       coll->addScatterer(getInitializedScatterer("Si", strm.str(), 0.01267));

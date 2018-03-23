@@ -496,7 +496,7 @@ public:
     TS_ASSERT(fits->getNames().size() == 2);
 
     auto wsNames = fits->getNames();
-    for (const auto & wsName : wsNames) {
+    for (const auto &wsName : wsNames) {
       auto fit =
           AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
               wsName);

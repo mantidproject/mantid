@@ -1826,7 +1826,7 @@ public:
     }
 
     // Clean the pointers
-    for (auto & output : outputs) {
+    for (auto &output : outputs) {
       delete output.second;
     }
 
@@ -1873,7 +1873,7 @@ public:
     }
 
     // Clean the pointers
-    for (auto & output : outputs) {
+    for (auto &output : outputs) {
       delete output.second;
     }
 
@@ -2310,7 +2310,7 @@ public:
     TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
 
     // Clean the pointers
-    for (auto & output : outputs) {
+    for (auto &output : outputs) {
       delete output.second;
     }
 
@@ -2382,7 +2382,7 @@ public:
     // TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
 
     // Clean the pointers
-    for (auto & output : outputs) {
+    for (auto &output : outputs) {
       delete output.second;
     }
 

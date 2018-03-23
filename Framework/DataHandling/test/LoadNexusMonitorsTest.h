@@ -167,7 +167,7 @@ public:
     // Count output workspaces
     int ws_count = 0;
     auto props = ld1.getProperties();
-    for (auto & prop : props)
+    for (auto &prop : props)
       if (prop->type() == "Workspace")
         ws_count++;
 
@@ -191,7 +191,7 @@ public:
     // Count output workspaces
     ws_count = 0;
     props = ld2.getProperties();
-    for (auto & prop : props)
+    for (auto &prop : props)
       if (prop->type() == "Workspace")
         ws_count++;
 

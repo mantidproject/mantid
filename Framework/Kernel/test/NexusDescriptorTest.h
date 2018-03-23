@@ -28,7 +28,7 @@ public:
   NexusDescriptorTest() {
     using Mantid::Kernel::ConfigService;
     auto dataPaths = ConfigService::Instance().getDataSearchDirs();
-    for (auto & dataPath : dataPaths) {
+    for (auto &dataPath : dataPaths) {
       Poco::Path hdf5Path(dataPath, "CNCS_7860_event.nxs");
       if (Poco::File(hdf5Path).exists())
         m_testHDF5Path = hdf5Path.toString();

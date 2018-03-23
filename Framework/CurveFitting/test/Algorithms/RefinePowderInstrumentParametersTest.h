@@ -416,7 +416,7 @@ public:
 
     // 2. Add peak parameters' name and values
     map<string, vector<double>>::iterator finditer;
-    for (const auto & paramname : paramnames) {
+    for (const auto &paramname : paramnames) {
       API::TableRow newrow = geomws->appendRow();
       std::string parname = paramname;
       double parvalue = parameters[paramname];

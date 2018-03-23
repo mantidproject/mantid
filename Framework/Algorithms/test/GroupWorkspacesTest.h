@@ -196,7 +196,7 @@ public:
 
 private:
   void addTestMatrixWorkspacesToADS(const std::vector<std::string> &inputs) {
-    for (const auto & input : inputs) {
+    for (const auto &input : inputs) {
       addTestMatrixWorkspaceToADS(input);
     }
   }
@@ -258,7 +258,7 @@ private:
                      const std::vector<std::string> &members) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
 
-    for (const auto & member : members) {
+    for (const auto &member : members) {
       if (ads.doesExist(member))
         ads.remove(member);
     }

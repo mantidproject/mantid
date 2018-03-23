@@ -65,8 +65,9 @@ private:
     TSM_ASSERT_EQUALS("Unexpected number of operations for " + symbol,
                       ops.size(), expectedOperations.size());
 
-    for (const auto & expectedOperation : expectedOperations) {
-      TSM_ASSERT("Operation " + expectedOperation.identifier() + " not found in " + symbol,
+    for (const auto &expectedOperation : expectedOperations) {
+      TSM_ASSERT("Operation " + expectedOperation.identifier() +
+                     " not found in " + symbol,
                  symOpExistsInCollection(expectedOperation, ops));
     }
 

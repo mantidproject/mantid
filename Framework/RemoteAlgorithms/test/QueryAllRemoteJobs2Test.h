@@ -81,7 +81,7 @@ public:
 
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();
-    for (auto & testFacility : testFacilities) {
+    for (auto &testFacility : testFacilities) {
       const auto facName = testFacility.first;
       const auto compName = testFacility.second;
 

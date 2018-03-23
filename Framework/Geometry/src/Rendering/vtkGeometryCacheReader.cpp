@@ -128,7 +128,7 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
   if (pEle->getAttribute("format") == "ascii") { // Read from Ascii
     std::stringstream buf;
     buf << pEle->innerText();
-    for (double & point : points) {
+    for (double &point : points) {
       buf >> point;
     }
   }
@@ -155,7 +155,7 @@ void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle,
   if (pEle->getAttribute("format") == "ascii") { // Read from Ascii
     std::stringstream buf;
     buf << pEle->innerText();
-    for (unsigned int & face : faces) {
+    for (unsigned int &face : faces) {
       buf >> face;
     }
   }

@@ -92,7 +92,7 @@ public:
     // The number of output cannot be larger than the number of histograms
     std::vector<IMDIterator *> it = ws->createIterators(10, nullptr);
     TS_ASSERT_EQUALS(it.size(), 4);
-    for (auto & i : it)
+    for (auto &i : it)
       delete i;
 
     // Split in 4 iterators

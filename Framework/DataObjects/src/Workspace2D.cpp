@@ -46,7 +46,7 @@ Workspace2D::~Workspace2D() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int64_t i = 0; i < static_cast<int64_t>(data.size()); i++) {
 #else
-  for (auto & i : data) {
+  for (auto &i : data) {
 #endif
     // Clear out the memory
     delete i;
@@ -107,7 +107,7 @@ void Workspace2D::init(const HistogramData::Histogram &histogram) {
 
   Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
   spec.setHistogram(initializedHistogram);
-  for (auto & i : data) {
+  for (auto &i : data) {
     i = new Histogram1D(spec);
   }
 

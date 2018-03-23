@@ -289,7 +289,7 @@ public:
 
     std::vector<PointGroup_sptr> pointgroups = getAllPointGroups();
 
-    for (auto & pointgroup : pointgroups) {
+    for (auto &pointgroup : pointgroups) {
       TSM_ASSERT_EQUALS(pointgroup->getSymbol() +
                             ": Unexpected crystal system.",
                         pointgroup->crystalSystem(),
@@ -446,7 +446,7 @@ private:
     t.reset();
     int h = 0;
     for (size_t i = 0; i < 1000; ++i) {
-      for (auto & hkl : hkls) {
+      for (auto &hkl : hkls) {
         bool eq = pointGroup->isEquivalent(base, hkl);
         if (eq) {
           ++h;

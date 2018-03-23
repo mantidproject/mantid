@@ -37,7 +37,7 @@ public:
     PeaksWorkspace_sptr hklPW;
     if (hkls.size() > 0) {
       hklPW = PeaksWorkspace_sptr(new PeaksWorkspace());
-      for (const auto & hkl : hkls) {
+      for (const auto &hkl : hkls) {
         Peak p(inst, detid, 1.0);
         p.setHKL(hkl);
         hklPW->addPeak(p);

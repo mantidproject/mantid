@@ -45,7 +45,7 @@ public:
                             "DetectorArea",  "DetectionTime"};
 
     TobyFitYVector yVector;
-    for (auto & attr : attrs) {
+    for (auto &attr : attrs) {
       yVector.setAttribute(attr, IFunction::Attribute(false));
     }
 

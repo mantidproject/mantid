@@ -116,7 +116,7 @@ public:
     // testing purposes here
     auto &TwoTheta = const_cast<std::vector<double> &>(
         WSDescr.m_PreprDetTable->getColVector<double>("TwoTheta"));
-    for (double & i : TwoTheta) {
+    for (double &i : TwoTheta) {
       i = 0;
     }
 

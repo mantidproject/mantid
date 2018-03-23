@@ -115,7 +115,7 @@ public:
   }
 
   void tearDown() override {
-    for (auto & i : data) {
+    for (auto &i : data) {
       delete i;
     }
   }
@@ -170,7 +170,7 @@ public:
   ////--------------------------------------------------------------------------------
   ///** Sorts by file position when writing to a file */
   void test_writesOutInFileOrder() {
-    for (auto & i : data) {
+    for (auto &i : data) {
       i->setDataChanged();
     }
     // Room for 2 objects of size 2 in the to-write cache
@@ -795,7 +795,7 @@ public:
   void test_withFakeSeeking_withWriteBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(10);
-    for (auto & i : dataSeek) {
+    for (auto &i : dataSeek) {
       // Pretend you just loaded the data
       i->load(dbuf);
     }
@@ -808,7 +808,7 @@ public:
   void test_withFakeSeeking_noWriteBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (auto & i : dataSeek) {
+    for (auto &i : dataSeek) {
       // Pretend you just loaded the data
       i->load(dbuf);
     }
@@ -822,7 +822,7 @@ public:
     CPUTimer tim;
     DiskBuffer dbuf(20);
     dbuf.setFileLength(dataSeek.size());
-    for (auto & i : dataSeek) {
+    for (auto &i : dataSeek) {
       // Pretend you just loaded the data
       i->grow(dbuf, true);
       dbuf.toWrite(i);
@@ -839,7 +839,7 @@ public:
   void test_withFakeSeeking_growingData_savingWithoutUsingMRU() {
     CPUTimer tim;
     DiskBuffer dbuf(dataSeek.size());
-    for (auto & i : dataSeek) {
+    for (auto &i : dataSeek) {
       // Pretend you just loaded the data
       i->grow(dbuf, false);
       i->save();

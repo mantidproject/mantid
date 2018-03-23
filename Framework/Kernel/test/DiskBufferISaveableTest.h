@@ -90,14 +90,14 @@ public:
   }
 
   void tearDown() override {
-    for (auto & item : data) {
+    for (auto &item : data) {
       delete item;
     }
-    
-    for (auto & bigItem : bigData) {
+
+    for (auto &bigItem : bigData) {
       delete bigItem;
     }
-      
+
     ISaveableTester::fakeFile = "";
   }
   void testIsaveable() {
@@ -434,7 +434,7 @@ public:
   void test_smallCache_writeBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(3);
-    for (auto & i : data) {
+    for (auto &i : data) {
       dbuf.toWrite(i);
       i->setBusy(false);
     }
@@ -444,11 +444,11 @@ public:
   void test_smallCache_no_writeBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (auto & i : data) {
+    for (auto &i : data) {
       i->setBusy(true); // Items won't do any real saving
     }
 
-    for (auto & i : data) {
+    for (auto &i : data) {
       dbuf.toWrite(i);
       i->setBusy(false);
     }
@@ -459,7 +459,7 @@ public:
   void test_largeCache_writeBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(1000);
-    for (auto & i : data) {
+    for (auto &i : data) {
       dbuf.toWrite(i);
       i->setBusy(false);
     }
@@ -469,7 +469,7 @@ public:
   void test_largeCache_noWriteBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (auto & i : data) {
+    for (auto &i : data) {
       dbuf.toWrite(i);
       i->setBusy(false);
     }

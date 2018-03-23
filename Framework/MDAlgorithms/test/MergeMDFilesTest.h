@@ -102,7 +102,7 @@ public:
     }
 
     // Cleanup generated input files
-    for (auto & inWorkspace : inWorkspaces) {
+    for (auto &inWorkspace : inWorkspaces) {
       if (inWorkspace->getBoxController()->isFileBacked()) {
         std::string fileName =
             inWorkspace->getBoxController()->getFileIO()->getFileName();

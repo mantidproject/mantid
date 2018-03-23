@@ -687,7 +687,7 @@ public:
     vecy.push_back(0.03096179);
     vece.push_back(0.00105191);
 
-    for (double & i : vecy)
+    for (double &i : vecy)
       i -= 0.02295189;
 
     return;

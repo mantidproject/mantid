@@ -37,7 +37,7 @@ void unconditional_writer() {
   // do work here, with exclusive access
   shared_data.resize(shared_data.size() + 1, 2.345);
   // Dumb thing to slow down the writer
-  for (double & i : shared_data)
+  for (double &i : shared_data)
     i = 4.567;
   //  std::cout << "Write finished\n";
 }

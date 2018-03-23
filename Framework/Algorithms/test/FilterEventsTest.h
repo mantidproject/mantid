@@ -254,7 +254,7 @@ public:
     AnalysisDataService::Instance().remove("Splitter02");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       AnalysisDataService::Instance().remove(outputwsname);
     }
 
@@ -350,7 +350,7 @@ public:
     AnalysisDataService::Instance().remove("Splitter02");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       std::cout << "Delete output workspace name: " << outputwsname << "\n";
       AnalysisDataService::Instance().remove(outputwsname);
     }
@@ -435,7 +435,7 @@ public:
 
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       AnalysisDataService::Instance().remove(outputwsname);
     }
 
@@ -493,7 +493,7 @@ public:
     // Delete all the workspaces generated here
     AnalysisDataService::Instance().remove("MockDirectEventWS");
     AnalysisDataService::Instance().remove("SplitterTableX");
-    for (const auto & i : vecwsname) {
+    for (const auto &i : vecwsname) {
       AnalysisDataService::Instance().remove(i);
     }
 
@@ -544,7 +544,7 @@ public:
     AnalysisDataService::Instance().remove("SplitterTableX");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       AnalysisDataService::Instance().remove(outputwsname);
     }
 
@@ -608,7 +608,7 @@ public:
     AnalysisDataService::Instance().remove("MockIndirectEventWS");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       AnalysisDataService::Instance().remove(outputwsname);
     }
 
@@ -781,7 +781,7 @@ public:
     //  Test the sample logs
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       EventWorkspace_sptr filtered_ws =
           boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
               AnalysisDataService::Instance().retrieve(outputwsname));
@@ -805,7 +805,7 @@ public:
     // clean up all the workspaces generated
     AnalysisDataService::Instance().remove("Test10");
     AnalysisDataService::Instance().remove("Splitter10");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       AnalysisDataService::Instance().remove(outputwsname);
     }
 
@@ -977,7 +977,7 @@ public:
     AnalysisDataService::Instance().remove("TableSplitter1");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       AnalysisDataService::Instance().remove(outputwsname);
     }
 
@@ -1033,7 +1033,7 @@ public:
 
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       EventWorkspace_sptr childworkspace =
           boost::dynamic_pointer_cast<EventWorkspace>(
               AnalysisDataService::Instance().retrieve(outputwsname));
@@ -1051,7 +1051,7 @@ public:
     // clean workspaces
     AnalysisDataService::Instance().remove("Test12");
     AnalysisDataService::Instance().remove("TableSplitter2");
-    for (const auto & outputwsname : outputwsnames) {
+    for (const auto &outputwsname : outputwsnames) {
       AnalysisDataService::Instance().remove(outputwsname);
     }
 

@@ -490,7 +490,7 @@ private:
     cont[2] = " 2.     3.   -4.     5.     6.     2";
 
     std::ofstream testFile(fileName);
-    for (const auto & i : cont) {
+    for (const auto &i : cont) {
       testFile << i << '\n';
     }
     testFile.close();
@@ -503,7 +503,7 @@ private:
     cont[3] = "3.     4.   -5.     6.     7.     3";
 
     std::ofstream testFile(fileName);
-    for (const auto & i : cont) {
+    for (const auto &i : cont) {
       testFile << i << '\n';
     }
     testFile.close();
@@ -516,7 +516,7 @@ private:
     cont[3] = "10         0     5.000     6.000    7.000    8.0000     3";
 
     std::ofstream testFile(fileName);
-    for (const auto & i : cont) {
+    for (const auto &i : cont) {
       testFile << i << '\n';
     }
     testFile.close();
@@ -527,7 +527,7 @@ private:
     cont[1] = "10         0     5.000     6.000    7.000    8.0000     1";
 
     std::ofstream testFile(fileName);
-    for (const auto & i : cont) {
+    for (const auto &i : cont) {
       testFile << i << '\n';
     }
     testFile.close();

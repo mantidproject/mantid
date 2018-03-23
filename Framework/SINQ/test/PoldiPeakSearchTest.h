@@ -123,7 +123,7 @@ public:
     std::vector<double> testXData(testYData.size());
 
     double x = 0.0;
-    for (double & iterX : testXData) {
+    for (double &iterX : testXData) {
       x += 1.0;
       iterX = x;
     }

@@ -195,7 +195,7 @@ public:
     auto clone = cloneSourceWS();
     // set negative values to signal
     auto &Y = clone->dataY(0);
-    for (double & i : Y) {
+    for (double &i : Y) {
       i = -1000;
     }
     // Create zero background workspace

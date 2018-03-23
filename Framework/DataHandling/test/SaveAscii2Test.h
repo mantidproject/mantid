@@ -68,7 +68,7 @@ public:
     std::getline(in, binlines);
 
     boost::split(binstr, binlines, boost::is_any_of(","));
-    for (const auto & i : binstr) {
+    for (const auto &i : binstr) {
       bins.push_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 0);
@@ -78,7 +78,7 @@ public:
     std::getline(in, binlines);
     bins.clear();
     boost::split(binstr, binlines, boost::is_any_of(","));
-    for (const auto & i : binstr) {
+    for (const auto &i : binstr) {
       bins.push_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 1.66667);
@@ -165,7 +165,7 @@ public:
     std::getline(in, binlines);
 
     boost::split(binstr, binlines, boost::is_any_of(","));
-    for (const auto & i : binstr) {
+    for (const auto &i : binstr) {
       bins.push_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 0);
@@ -175,7 +175,7 @@ public:
     std::getline(in, binlines);
     bins.clear();
     boost::split(binstr, binlines, boost::is_any_of(","));
-    for (const auto & i : binstr) {
+    for (const auto &i : binstr) {
       bins.push_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 1.66667);
@@ -589,7 +589,7 @@ public:
     std::getline(in, binlines);
 
     boost::split(binstr, binlines, boost::is_any_of(","));
-    for (const auto & i : binstr) {
+    for (const auto &i : binstr) {
       bins.push_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 0);
@@ -599,7 +599,7 @@ public:
     std::getline(in, binlines);
     bins.clear();
     boost::split(binstr, binlines, boost::is_any_of(","));
-    for (const auto & i : binstr) {
+    for (const auto &i : binstr) {
       bins.push_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 1.66667);

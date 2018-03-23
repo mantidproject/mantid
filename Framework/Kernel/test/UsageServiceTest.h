@@ -101,7 +101,7 @@ public:
     }
 
     auto features = root["features"];
-    for (auto & feature : features) {
+    for (auto &feature : features) {
       std::string name = feature["name"].asString();
       std::string type = feature["type"].asString();
       bool internal = feature["internal"].asBool();

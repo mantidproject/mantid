@@ -23,7 +23,7 @@ public:
     auto &cfg = Mantid::Kernel::ConfigService::Instance();
     cfg.reset();
     const auto &dataPaths = cfg.getDataSearchDirs();
-    for (const auto & dataPath : dataPaths) {
+    for (const auto &dataPath : dataPaths) {
       Poco::Path nxsPath(dataPath, "CNCS_7860_event.nxs");
       if (Poco::File(nxsPath).exists())
         m_testNexusPath = nxsPath.toString();

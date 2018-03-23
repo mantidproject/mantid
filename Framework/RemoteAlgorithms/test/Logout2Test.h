@@ -72,7 +72,7 @@ public:
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();
     // test that job managers are created correctly for different facilities
-    for (auto & testFacility : testFacilities) {
+    for (auto &testFacility : testFacilities) {
       const std::string facName = testFacility.first;
       const std::string compName = testFacility.second;
 

@@ -1274,7 +1274,7 @@ void solveSubproblem(int n, double radius, double f,
   inform.obj *= pow(scale_c, 2) / scale_h;
   inform.multiplier *= scale_h;
   inform.pole *= scale_h;
-  for (auto & i : inform.history) { //      do i = 1, inform.len_history
+  for (auto &i : inform.history) { //      do i = 1, inform.len_history
     i.lambda *= scale_h;
     i.x_norm *= scale_c / scale_h;
   }

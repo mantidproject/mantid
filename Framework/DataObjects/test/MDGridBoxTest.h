@@ -261,7 +261,7 @@ public:
         new MDGridBox<MDLeanEvent<1>, 1>(*box, newBoxController);
 
     auto boxes = box1->getBoxes();
-    for (auto & box : boxes) {
+    for (auto &box : boxes) {
       TSM_ASSERT_EQUALS(
           "All child boxes should have the same box controller as the parent.",
           newBoxController, box->getBoxController());
@@ -329,7 +329,7 @@ public:
     // Check the boxes
     std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes = g->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 10 * 5 * 2);
-    for (auto & box : boxes) {
+    for (auto &box : boxes) {
       MDBox<MDLeanEvent<3>, 3> *box =
           dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(box);
       TS_ASSERT(box);
@@ -602,7 +602,7 @@ public:
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 54);
     // The boxes extents make sense
-    for (auto & box : boxes) {
+    for (auto &box : boxes) {
       TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
     }
 
@@ -611,7 +611,7 @@ public:
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS(boxes.size(), 40);
     // The boxes extents make sense
-    for (auto & box : boxes) {
+    for (auto &box : boxes) {
       TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
     }
 
@@ -622,7 +622,7 @@ public:
     boxes.clear();
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 33);
-    for (auto & box : boxes) {
+    for (auto &box : boxes) {
       TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
       TS_ASSERT(box->getExtents(0).getMin() <= 2.99);
     }
@@ -631,7 +631,7 @@ public:
     boxes.clear();
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS(boxes.size(), 24);
-    for (auto & box : boxes) {
+    for (auto &box : boxes) {
       TS_ASSERT(box->getExtents(0).getMax() >= 1.51);
       TS_ASSERT(box->getExtents(0).getMin() <= 2.99);
     }
@@ -675,7 +675,7 @@ public:
     parent->getBoxes(boxes, 3, false, function);
     TS_ASSERT_EQUALS(boxes.size(), 46);
     // The boxes extents make sense
-    for (auto & box : boxes) {
+    for (auto &box : boxes) {
       TS_ASSERT(box->getExtents(0).getMax() >= 2.00);
       TS_ASSERT(box->getExtents(0).getMin() <= 3.00);
       TS_ASSERT(box->getExtents(1).getMax() >= 2.00);
@@ -690,7 +690,7 @@ public:
         16 + 4 * 4 +
             4); // 16 in the center one + 4x4 at the 4 edges + 4 at the corners
     // The boxes extents make sense
-    for (auto & box : boxes) {
+    for (auto &box : boxes) {
       TS_ASSERT(box->getExtents(0).getMax() >= 2.00);
       TS_ASSERT(box->getExtents(0).getMin() <= 3.00);
       TS_ASSERT(box->getExtents(1).getMax() >= 2.00);
@@ -835,7 +835,7 @@ public:
     // Get all the boxes contained
     std::vector<MDBoxBase<MDLeanEvent<2>, 2> *> boxes = b->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 100);
-    for (auto & box : boxes) {
+    for (auto &box : boxes) {
       TS_ASSERT_EQUALS(box->getNPoints(), 1);
       TS_ASSERT_EQUALS(box->getSignal(), 2.0);
       TS_ASSERT_EQUALS(box->getErrorSquared(), 2.0);
@@ -1404,7 +1404,7 @@ public:
                        signal);
     // Normalized
     if (signal != 0.0) {
-      for (float & d : centroid)
+      for (float &d : centroid)
         d /= static_cast<coord_t>(signal);
     }
 
@@ -1629,7 +1629,7 @@ public:
         rng, u);
     for (size_t i = 0; i < num; ++i) {
       double centers[3];
-      for (double & center : centers)
+      for (double &center : centers)
         center = gen();
       // Create and add the event.
       events.push_back(MDLeanEvent<3>(1.0, 1.0, centers));
@@ -1729,11 +1729,11 @@ public:
     coord_t centroid[3];
     for (size_t i = 0; i < 100; i++) {
       signal = 0;
-      for (float & d : centroid)
+      for (float &d : centroid)
         d = 0.0;
       box3b->centroidSphere(sphere, radius * radius, centroid, signal);
       if (signal != 0.0) {
-        for (float & d : centroid)
+        for (float &d : centroid)
           d /= static_cast<coord_t>(signal);
       }
     }

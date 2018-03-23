@@ -139,7 +139,7 @@ public:
         sample_value[0] = (float)spTW->rowCount();
       } else {
         size_t ii = 0;
-        for (const auto & i : column_name) {
+        for (const auto &i : column_name) {
           sample_value[ii] = (spTW->cell_cast<float>(ic - 1, i));
           ii++;
           if (ii == 1)

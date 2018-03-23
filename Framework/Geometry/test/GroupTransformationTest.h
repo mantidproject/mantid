@@ -51,7 +51,7 @@ public:
      */
     std::unordered_set<std::string> elements;
     std::vector<SymmetryOperation> ops = transformed.getSymmetryOperations();
-    for (auto & op : ops) {
+    for (auto &op : ops) {
       SymmetryElement_sptr el =
           SymmetryElementFactory::Instance().createSymElement(op);
 

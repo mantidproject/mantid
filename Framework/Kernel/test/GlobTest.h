@@ -34,7 +34,7 @@ public:
     TS_ASSERT(files.size() > 0);
 
     size_t matches = 0;
-    for (const auto & file : files) {
+    for (const auto &file : files) {
       Poco::Path path = file;
       std::string project = path[path.depth() - 1];
       if (project == "API")
@@ -95,7 +95,7 @@ public:
     TS_ASSERT(files.size() > 0);
 
     size_t matches = 0;
-    for (const auto & file : files) {
+    for (const auto &file : files) {
       Poco::Path path = file;
       std::string project = path[path.depth() - 1];
       if (project == "API")

@@ -690,7 +690,7 @@ public:
     auto values = property.allowedValues();
     auto possibilities = OptionalBool::strToEmumMap();
     TSM_ASSERT_EQUALS("3 states allowed", possibilities.size(), values.size());
-    for (auto & value : values) {
+    for (auto &value : values) {
       TSM_ASSERT("value not a known state",
                  possibilities.find(value) != possibilities.end());
     }

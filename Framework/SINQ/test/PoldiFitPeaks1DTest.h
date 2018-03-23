@@ -102,7 +102,7 @@ public:
     std::vector<Property *> properties = fitPeaks1D.getProperties();
     std::unordered_set<std::string> names;
 
-    for (auto & property : properties) {
+    for (auto &property : properties) {
       names.insert(property->name());
     }
 

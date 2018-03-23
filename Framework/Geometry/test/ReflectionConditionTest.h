@@ -58,7 +58,7 @@ public:
     centeringSymbols.insert("H");
 
     std::vector<ReflectionCondition_sptr> refs = getAllReflectionConditions();
-    for (auto & ref : refs) {
+    for (auto &ref : refs) {
       TSM_ASSERT_DIFFERS(ref->getSymbol(),
                          centeringSymbols.find(ref->getSymbol()),
                          centeringSymbols.end());
