@@ -65,8 +65,8 @@ private:
                              double sig2sq) const;
 };
 
-typedef boost::shared_ptr<ThermalNeutronBk2BkExpSigma>
-    ThermalNeutronBk2BkExpSigma_sptr;
+using ThermalNeutronBk2BkExpSigma_sptr =
+    boost::shared_ptr<ThermalNeutronBk2BkExpSigma>;
 
 } // namespace Functions
 } // namespace CurveFitting

@@ -130,7 +130,7 @@ private:
       spectrum.addDetectorID(i + 1);
     }
 
-    // Sample properties - cylinder of vanadium
+    // Sample properties
     const double radius(0.0025), height(0.04);
     auto cylinder =
         createCappedCylinder(radius, height, V3D(), V3D(0., 1., 0.), "sample");

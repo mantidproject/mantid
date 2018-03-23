@@ -218,9 +218,9 @@ private:
 };
 
 /// A shared pointer to a BoundingBox
-typedef boost::shared_ptr<BoundingBox> BoundingBox_sptr;
+using BoundingBox_sptr = boost::shared_ptr<BoundingBox>;
 /// A shared pointer to a const BoundingBox
-typedef boost::shared_ptr<const BoundingBox> BoundingBox_const_sptr;
+using BoundingBox_const_sptr = boost::shared_ptr<const BoundingBox>;
 
 /// Print out the bounding box values to a stream.
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,

@@ -101,8 +101,8 @@ protected:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &stream,
                                              const SpaceGroup &self);
 
-typedef boost::shared_ptr<SpaceGroup> SpaceGroup_sptr;
-typedef boost::shared_ptr<const SpaceGroup> SpaceGroup_const_sptr;
+using SpaceGroup_sptr = boost::shared_ptr<SpaceGroup>;
+using SpaceGroup_const_sptr = boost::shared_ptr<const SpaceGroup>;
 
 } // namespace Geometry
 } // namespace Mantid

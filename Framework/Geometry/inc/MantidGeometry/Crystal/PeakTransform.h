@@ -56,8 +56,8 @@ protected:
 };
 
 /// Typedef for a PeakTransform wrapped in a shared_pointer.
-typedef boost::shared_ptr<PeakTransform> PeakTransform_sptr;
-typedef boost::shared_ptr<const PeakTransform> PeakTransform_const_sptr;
+using PeakTransform_sptr = boost::shared_ptr<PeakTransform>;
+using PeakTransform_const_sptr = boost::shared_ptr<const PeakTransform>;
 
 /**
 @class PeakTransformException

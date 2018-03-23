@@ -134,7 +134,7 @@ private:
    */
   template <class T>
   void savetoTableWorkspace(const T *input, Mantid::API::TableRow &t) {
-    if (input != 0) {
+    if (input != nullptr) {
       t << *input;
 
     } else {

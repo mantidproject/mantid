@@ -61,6 +61,7 @@ public:
     TS_ASSERT_EQUALS(plus.rhsProperty(), "");
     TS_ASSERT_EQUALS(plus.outputProperty(), "");
     TS_ASSERT_EQUALS(plus.prefix(), "");
+    TS_ASSERT_EQUALS(plus.separator(), "");
     TS_ASSERT_EQUALS(plus.blacklist().size(), 0);
   }
 
@@ -69,7 +70,7 @@ public:
     // WeightedMean
     std::set<QString> blacklist = {"InputWorkspace1", "InputWorkspace2",
                                    "OutputWorkspace"};
-    auto mean = PreprocessingAlgorithm("WeightedMean", "", blacklist);
+    auto mean = PreprocessingAlgorithm("WeightedMean", "", "+", blacklist);
     TS_ASSERT_EQUALS(mean.lhsProperty(), "InputWorkspace1");
     TS_ASSERT_EQUALS(mean.rhsProperty(), "InputWorkspace2");
     TS_ASSERT_EQUALS(mean.outputProperty(), "OutputWorkspace");

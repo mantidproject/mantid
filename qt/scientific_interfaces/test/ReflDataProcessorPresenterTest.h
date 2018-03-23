@@ -220,7 +220,7 @@ public:
     TS_ASSERT(workspaceExists("TOF_13462_monitors"));
     TS_ASSERT(workspaceExists("TRANS_13463"));
     TS_ASSERT(workspaceExists("TRANS_13464"));
-    TS_ASSERT(workspaceExists("TRANS_13463+13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -303,7 +303,7 @@ public:
     TS_ASSERT(workspaceExists("TOF_13462_monitors"));
     TS_ASSERT(workspaceExists("TRANS_13463"));
     TS_ASSERT(workspaceExists("TRANS_13464"));
-    TS_ASSERT(workspaceExists("TRANS_13463+13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -380,7 +380,7 @@ public:
     TS_ASSERT(workspaceExists("TOF_13462_monitors"));
     TS_ASSERT(workspaceExists("TRANS_13463"));
     TS_ASSERT(workspaceExists("TRANS_13464"));
-    TS_ASSERT(workspaceExists("TRANS_13463+13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -456,7 +456,7 @@ public:
     TS_ASSERT(workspaceExists("TOF_13462_monitors"));
     TS_ASSERT(workspaceExists("TRANS_13463"));
     TS_ASSERT(workspaceExists("TRANS_13464"));
-    TS_ASSERT(workspaceExists("TRANS_13463+13464"));
+    TS_ASSERT(workspaceExists("TRANS_13463_13464"));
 
     // Tidy up
     AnalysisDataService::Instance().clear();

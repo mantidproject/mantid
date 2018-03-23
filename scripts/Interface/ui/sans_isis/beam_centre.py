@@ -176,7 +176,7 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
 
     @property
     def up_down(self):
-        return self.left_right_check_box.isChecked()
+        return self.up_down_check_box.isChecked()
 
     @up_down.setter
     def up_down(self, value):

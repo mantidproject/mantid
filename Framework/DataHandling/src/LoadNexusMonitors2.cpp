@@ -128,7 +128,7 @@ void LoadNexusMonitors2::exec() {
   ::NeXus::File file(m_filename);
 
   // Start with the base entry
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   string_map_t::const_iterator it;
   string_map_t entries = file.getEntries();
   for (it = entries.begin(); it != entries.end(); ++it) {
@@ -588,7 +588,7 @@ size_t LoadNexusMonitors2::getMonitorInfo(
     size_t &numHistMon, size_t &numEventMon, size_t &numPeriods,
     std::map<int, std::string> &monitorNumber2Name,
     std::vector<bool> &isEventMonitors) {
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
 
   // Now we want to go through and find the monitors
   string_map_t entries = file.getEntries();

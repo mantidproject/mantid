@@ -195,7 +195,7 @@ public:
     TestablePoldiInstrumentAdapter instrumentAdapter;
 
     // Throw on null-pointer
-    TS_ASSERT_THROWS(instrumentAdapter.getExtractorForProperty(0),
+    TS_ASSERT_THROWS(instrumentAdapter.getExtractorForProperty(nullptr),
                      std::invalid_argument);
     TS_ASSERT_THROWS_NOTHING(instrumentAdapter.getExtractorForProperty(
         m_run.getProperty("chopperspeed_double")));

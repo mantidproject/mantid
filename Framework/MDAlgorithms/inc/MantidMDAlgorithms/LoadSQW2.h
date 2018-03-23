@@ -53,8 +53,8 @@ public:
 
 private:
   /// Local typedef for
-  typedef DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>
-      SQWWorkspace;
+  using SQWWorkspace =
+      DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>;
 
   void init() override;
   void exec() override;

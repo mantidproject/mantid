@@ -502,7 +502,7 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
-  outws->setHistogram(0, Points(std::move(vecX)), Counts(std::move(vecY)));
+  outws->setHistogram(0, Points(vecX), Counts(vecY));
   auto &dataE = outws->mutableE(0);
   std::replace_if(dataE.begin(), dataE.end(),
                   [](double val) { return val < 1.0; }, 1.0);

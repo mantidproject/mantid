@@ -75,7 +75,7 @@ to check that the results are equal.
     benchmark.addFunction(expFunction);
 
     const size_t nResults = 10;
-    typedef std::vector<double> VecDouble;
+    using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
     std::generate(xValues.begin(), xValues.end(),
                   LinearIncrementingAssignment(0, 0.0001));
@@ -169,7 +169,7 @@ public:
     benchmark.setParameter("Lifetime", Lifetime);
 
     const size_t nResults = 10;
-    typedef std::vector<double> VecDouble;
+    using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
     std::generate(xValues.begin(), xValues.end(),
                   LinearIncrementingAssignment(0, 0.1));
@@ -194,7 +194,7 @@ public:
 
   void test_calculate_derivative_throws_nothing() {
     const size_t nResults = 10;
-    typedef std::vector<double> VecDouble;
+    using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
     std::generate(xValues.begin(), xValues.end(),
                   LinearIncrementingAssignment(0, 0.1));

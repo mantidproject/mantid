@@ -122,7 +122,7 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
     } else {
       try {
         ws->blocksize();
-      } catch (std::length_error) {
+      } catch (std::length_error &) {
         issues[INPUT_WORKSPACE_PROPERTY] +=
             "Workspace " + ws->getName() +
             " has different number of points per histogram\n";

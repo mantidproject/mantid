@@ -10,6 +10,7 @@
 #include <iosfwd>
 #include <memory>
 #include <vector>
+#include <string>
 
 // Forward declare
 namespace Mantid {
@@ -93,8 +94,13 @@ private:
   /// Determines if all spectra have detectors
   bool areAllDetectorsValid() const;
 
+  /// Process input user-specified headers
+  void processUserSpecifiedHeaders();
+
   /// Turns the data associated with this spectra into a string stream
-  void generateBankData(std::stringstream &outBuf, size_t specIndex) const;
+  void generateBankData(std::stringstream &outBuf, size_t specIndex,
+                        const std::string &outputFormat,
+                        const std::vector<int> &slog_xye_precisions) const;
 
   /// Generates the bank header and returns this as a string stream
   void generateBankHeader(std::stringstream &out,
@@ -127,7 +133,7 @@ private:
                           int periodNum) override;
 
   /// Validates the user input and warns / throws on bad conditions
-  void validateUserInput() const;
+  std::map<std::string, std::string> validateInputs() override;
 
   /// Writes the current buffer to the user specified file path
   void writeBufferToFile(size_t numOutFiles, size_t numSpectra);
@@ -146,9 +152,10 @@ private:
                          const HistogramData::Histogram &histo) const;
 
   /// Write out the data in SLOG format
-  void writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
-                     std::stringstream &out,
-                     const HistogramData::Histogram &histo) const;
+  void writeSLOGdata(const size_t ws_index, const int bank,
+                     const bool MultiplyByBinWidth, std::stringstream &out,
+                     const HistogramData::Histogram &histo,
+                     const std::vector<int> &xye_precision) const;
 
   /// Workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
@@ -161,6 +168,14 @@ private:
   bool m_allDetectorsValid{false};
   /// Holds pointer to progress bar
   std::unique_ptr<API::Progress> m_progress{nullptr};
+  /// User specified header string
+  std::vector<std::string> m_user_specified_gsas_header;
+  /// flag to overwrite standard GSAS header
+  bool m_overwrite_std_gsas_header;
+  /// User specified bank header
+  std::vector<std::string> m_user_specified_bank_headers;
+  /// flag to overwrite standard GSAS bank header
+  bool m_overwrite_std_bank_header;
 };
 }
 }
