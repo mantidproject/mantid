@@ -105,20 +105,20 @@ not set the flag. For example,
 
 .. code-block:: sh
 
-AlgorithmsTest --help-tests
+   AlgorithmsTest --help-tests
 
 will list all the available tests. If you run
 
 .. code-block:: sh
 
-AlgorithmsTest
+   AlgorithmsTest
 
 alone, it will SKIP the Performance Tests. You have to give the name of
 the specific test suite you want to run, e.g,
 
 .. code-block:: sh
 
-AlgorithmsTest MyAlgorithmPerformanceTest
+   AlgorithmsTest MyAlgorithmPerformanceTest
 
 Best Practice Advice
 ####################
@@ -141,11 +141,11 @@ There is a job in Jenkins (our continuous integration system) that runs
 the performance test suite and generates output that enables us to
 easily monitor timings. The job runs a set of `performance tests on the
 master branch of
-Mantid <http://builds.mantidproject.org/view/Tests/job/performance_tests_master/Master_branch_performance_tests/>`__.
-This job runs on a machine at ISIS, everytime that changes are merged
+Mantid <http://builds.mantidproject.org/job/master_performancetests2/>`__.
+This job runs on a machine at the ESS, everytime that changes are merged
 into the Mantid master branch, and stores the timing information in a
 database, also generating HTML output via a `set of python
-scripts <https://github.com/mantidproject/mantid/tree/master/Code/Mantid/Testing/PerformanceTests>`__.
+scripts <https://github.com/mantidproject/mantid/tree/master/Testing/PerformanceTests>`__.
 
 The timing output of these jobs are typically monitored manually on a
 weekly basis to pick up any notable performance degradation. Although
