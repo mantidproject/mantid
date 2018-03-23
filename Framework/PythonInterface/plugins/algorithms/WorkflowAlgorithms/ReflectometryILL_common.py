@@ -22,7 +22,7 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
         phase2Entry = 'CH{}.phase'.format(secondChopper)
         chopper1Phase = sampleLogs.getProperty(phase1Entry).value
         chopper2Phase = sampleLogs.getProperty(phase2Entry).value
-        opentoffset = sampleLogs.getProperty('CollAngle.openOffset').value
+        openoffset = sampleLogs.getProperty('CollAngle.openOffset').value
         return 45. - (chopper2Phase - chopper1Phase) - openoffset
 
 

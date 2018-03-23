@@ -4,11 +4,11 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty,
                         MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, DeltaEModeType, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator, FloatArrayProperty,
-                           IntArrayLengthValidator, IntArrayBoundedValidator, IntArrayProperty, IntBoundedValidator, Property,
-                           StringListValidator, UnitConversion)
-from mantid.simpleapi import (AddSampleLog, CalculatePolynomialBackground, CloneWorkspace, ConvertToDistribution, ConvertUnits,
-                              CreateEmptyTableWorkspace, CropWorkspace, Divide, ExtractMonitors, ExtractSingleSpectrum, Fit, GroupDetectors,
+from mantid.kernel import (CompositeValidator, DeltaEModeType, Direction, FloatArrayBoundedValidator, FloatArrayLengthValidator,
+                           FloatArrayProperty, IntArrayLengthValidator, IntArrayBoundedValidator, IntArrayProperty,
+                           IntBoundedValidator, Property, StringListValidator, UnitConversion)
+from mantid.simpleapi import (AddSampleLog, CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
+                              CreateEmptyTableWorkspace, CropWorkspace, Divide, ExtractMonitors, Fit,
                               Integration, LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor,
                               RebinToWorkspace, Scale, Transpose)
 import numpy
@@ -127,7 +127,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def PyInit(self):
         """Initialize the input and output properties of the algorithm."""
         nonnegativeInt = IntBoundedValidator(lower=0)
-        positiveInt = IntBoundedValidator(lower=1)
         nonnegativeIntArray = IntArrayBoundedValidator()
         nonnegativeIntArray.setLower(0)
         nonnegativeFloatArray = FloatArrayBoundedValidator()
@@ -254,7 +253,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         end = beamPosIndex + sign * hws[1]
         if start > end:
             end, start = start, end
-        sumIndices = [i for i in range(start, end + 1)]
         AddSampleLog(
             Workspace=ws,
             LogName=common.SampleLogs.FOREGROUND_START,

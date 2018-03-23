@@ -28,6 +28,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
 
     def testReflectivityOutputExecutes(self):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
+        illhelpers.add_chopper_configuration_D17(dirWS)
         dirBeamPosWS = illhelpers.refl_create_beam_position_ws('dirBeamPosWS', dirWS, 0., 128)
         dirWS = illhelpers.refl_preprocess('dirWS', dirWS, dirBeamPosWS)
         args = {
@@ -41,6 +42,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         dirForeground = alg.getProperty('OutputWorkspace').value
         reflWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(reflWS, 1.2)
+        illhelpers.add_chopper_configuration_D17(reflWS)
         reflBeamPosWS = illhelpers.refl_create_beam_position_ws('reflBeamPosWS', reflWS, 1.2, 128)
         reflWS = illhelpers.refl_preprocess('refWS', reflWS, reflBeamPosWS)
         args = {
@@ -52,7 +54,6 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
-
 
 
 if __name__ == "__main__":

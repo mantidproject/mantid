@@ -3,10 +3,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
-from mantid.simpleapi import (ReflectometryILLPreprocess)
 import numpy.testing
 from testhelpers import (assertRaisesNothing, create_algorithm)
 import unittest
+
 
 class ReflectometryILLPreprocessTest(unittest.TestCase):
     def tearDown(self):

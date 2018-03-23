@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, 
+from mantid.kernel import (CompositeValidator, Direction, IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty,
                            Property, StringListValidator)
 from mantid.simpleapi import (AddSampleLog, ConvertToDistribution, CreateWorkspace, Divide, ExtractSingleSpectrum, Multiply,
                               RebinToWorkspace)
@@ -33,7 +33,7 @@ class SubalgLogging:
 
 
 class ReflectometryILLSumForeground(DataProcessorAlgorithm):
-    
+
     def category(self):
         """Return algorithm's categories."""
         return 'ILL\\Reflectometry;Workflow\\Reflectometry'
@@ -57,7 +57,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
         self._names = common.WSNameSource(wsPrefix, cleanupMode)
-        
+
         ws = self._inputWS()
 
         sumType = self._sumType()
@@ -76,7 +76,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         nonnegativeInts = IntArrayBoundedValidator()
         nonnegativeInts.setLower(0)
         threeNonnegativeInts.add(nonnegativeInts)
-        
+
         self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -162,7 +162,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             raise RuntimeError("The sample logs are missing the '" + common.SampleLogs.FOREGROUND_END + "' entry.")
         end = logs.getProperty(common.SampleLogs.FOREGROUND_END).value
         return [start, centre, end]
-
 
     def _inputWS(self):
         "Return the input workspace."

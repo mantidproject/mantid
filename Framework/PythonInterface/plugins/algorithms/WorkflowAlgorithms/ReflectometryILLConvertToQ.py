@@ -4,8 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, FloatBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (ConvertFromDistribution, ConvertToDistribution, ConvertToPointData, 
-                              CreateWorkspace, ReflectometryMomentumTransfer, Regroup)
+from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, ReflectometryMomentumTransfer)
 import numpy
 import ReflectometryILL_common as common
 
@@ -27,7 +26,7 @@ class SubalgLogging:
 
 
 class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
-    
+
     def category(self):
         """Return algorithm's categories."""
         return 'ILL\\Reflectometry;Workflow\\Reflectometry'
@@ -94,7 +93,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         self.declareProperty(Prop.POLARIZED,
                              defaultValue=False,
                              doc='True if input workspace has been corrected for polarization efficiencies.')
-        self.declareProperty(Prop.GROUPING_FRACTION, 
+        self.declareProperty(Prop.GROUPING_FRACTION,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              doc='If set, group the output by steps of this fraction multiplied by Q resolution')
@@ -172,7 +171,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         groupedYs = list()
         groupedEs = list()
         groupedDxs = list()
-        
+
         while True:
             width = qFraction * dxs[index]
             end = xs[index] + width
