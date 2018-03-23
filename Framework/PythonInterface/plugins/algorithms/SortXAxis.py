@@ -11,6 +11,9 @@ class SortXAxis(PythonAlgorithm):
     def category(self):
         return "Transforms\\Axes;Utility\\Sorting"
 
+    def seeAlso(self):
+        return [ "SortDetectors" ]
+
     def name(self):
         return "SortXAxis"
 

@@ -16,6 +16,9 @@ class LoadVisionElasticEQ(PythonAlgorithm):
     def category(self):
         return "DataHandling\\Nexus"
 
+    def seeAlso(self):
+        return [ "LoadVisionElasticBS","LoadVisionInelastic" ]
+
     def name(self):
         return "LoadVisionElasticEQ"
 

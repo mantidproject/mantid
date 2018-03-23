@@ -80,6 +80,9 @@ private:
 
   /// Version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return{ "Fit" };
+  }
   /// Init
   void init() override;
   /// Exec
