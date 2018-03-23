@@ -197,7 +197,7 @@ public:
   /// MatrixWorkspaces (WeightedMean).
   void test_compare_to_matrix_weightedmean() {
     // Create some input data. Signal values as two offset sine waves.
-    typedef std::vector<double> VecDouble;
+    using VecDouble = std::vector<double>;
     VecDouble s1, s2, e1, e2, x;
     double theta_shift = 0.4;
     for (size_t i = 0; i < 40; ++i) {

@@ -11,7 +11,7 @@ using namespace boost::python;
 void export_FunctionProperty() {
   // FuncitonProperty has base PropertyWithValue<boost::shared_ptr<IFunction>>
   // which must be exported
-  typedef boost::shared_ptr<IFunction> HeldType;
+  using HeldType = boost::shared_ptr<IFunction>;
   PropertyWithValueExporter<HeldType>::define("FunctionPropertyWithValue");
 
   class_<FunctionProperty, bases<PropertyWithValue<HeldType>>,

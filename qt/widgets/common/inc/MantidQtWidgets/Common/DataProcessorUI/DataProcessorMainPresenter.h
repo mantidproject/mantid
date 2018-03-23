@@ -68,12 +68,12 @@ public:
   /// Return time-slicing type
   virtual QString getTimeSlicingType() const { return QString(); }
   /// Return transmission runs for a particular angle
-  virtual QString getTransmissionRunsForAngle(const double angle) const {
+  virtual OptionsQMap getOptionsForAngle(const double angle) const {
     UNUSED_ARG(angle);
-    return QString();
+    return OptionsQMap();
   }
   /// Return true if there are per-angle transmission runs set
-  virtual bool hasPerAngleTransmissionRuns() const { return false; }
+  virtual bool hasPerAngleOptions() const { return false; }
 
   /// Handle data reduction paused/resumed
   virtual void pause() const {}

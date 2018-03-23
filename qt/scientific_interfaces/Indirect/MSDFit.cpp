@@ -153,8 +153,9 @@ bool MSDFit::validate() {
   auto specRange = std::make_pair(specMin, specMax + 1);
   uiv.checkValidRange("Spectrum Range", specRange);
 
-  if (isEmptyModel())
-    uiv.addErrorMessage("No fit function has been selected");
+  // In the future the MSDFit algorithm should be modified to allow this
+  if (selectedFitType() == "None")
+    uiv.addErrorMessage("No fit type has been selected");
 
   QString errors = uiv.generateErrorMessage();
   showMessageBox(errors);

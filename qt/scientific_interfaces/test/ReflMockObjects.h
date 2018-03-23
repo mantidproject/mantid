@@ -95,8 +95,6 @@ public:
   MOCK_CONST_METHOD0(getCAlpha, std::string());
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
-  MOCK_CONST_METHOD0(getMomentumTransferStep, std::string());
-  MOCK_CONST_METHOD0(getScaleFactor, std::string());
   MOCK_CONST_METHOD0(getIntMonCheck, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMax, std::string());
@@ -105,10 +103,9 @@ public:
   MOCK_CONST_METHOD0(getLambdaMin, std::string());
   MOCK_CONST_METHOD0(getLambdaMax, std::string());
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
-  MOCK_CONST_METHOD0(getProcessingInstructions, std::string());
   MOCK_CONST_METHOD0(getSummationType, std::string());
   MOCK_CONST_METHOD0(getReductionType, std::string());
-  MOCK_CONST_METHOD0(getTransmissionRuns, std::map<std::string, std::string>());
+  MOCK_CONST_METHOD0(getPerAngleOptions, std::map<std::string, OptionsQMap>());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
   MOCK_METHOD1(setReductionTypeEnabled, void(bool));
   MOCK_METHOD1(setPolarisationOptionsEnabled, void(bool));
@@ -236,8 +233,8 @@ public:
 
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
-  MOCK_CONST_METHOD1(getTransmissionRunsForAngle, std::string(const double));
-  MOCK_CONST_METHOD0(hasPerAngleTransmissionRuns, bool());
+  MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
+  MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
   MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getReductionOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
@@ -254,9 +251,8 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
-  MOCK_CONST_METHOD2(getTransmissionRunsForAngle,
-                     std::string(int, const double));
-  MOCK_CONST_METHOD1(hasPerAngleTransmissionRuns, bool(int));
+  MOCK_CONST_METHOD2(getOptionsForAngle, OptionsQMap(int, const double));
+  MOCK_CONST_METHOD1(hasPerAngleOptions, bool(int));
   MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
   MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
@@ -291,9 +287,8 @@ public:
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
-  MOCK_CONST_METHOD2(getTransmissionRunsForAngle,
-                     std::string(int, const double));
-  MOCK_CONST_METHOD1(hasPerAngleTransmissionRuns, bool(int));
+  MOCK_CONST_METHOD2(getOptionsForAngle, OptionsQMap(int, const double));
+  MOCK_CONST_METHOD1(hasPerAngleOptions, bool(int));
   MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));

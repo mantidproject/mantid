@@ -5,6 +5,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/V3D.h"
 

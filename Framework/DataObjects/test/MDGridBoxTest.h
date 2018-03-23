@@ -987,9 +987,9 @@ public:
    * further.
    * */
   void test_splitAllIfNeeded() {
-    typedef MDGridBox<MDLeanEvent<2>, 2> gbox_t;
-    typedef MDBox<MDLeanEvent<2>, 2> box_t;
-    typedef MDBoxBase<MDLeanEvent<2>, 2> ibox_t;
+    using gbox_t = MDGridBox<MDLeanEvent<2>, 2>;
+    using box_t = MDBox<MDLeanEvent<2>, 2>;
+    using ibox_t = MDBoxBase<MDLeanEvent<2>, 2>;
 
     gbox_t *b0 = MDEventsTestHelper::makeMDGridBox<2>();
     b0->getBoxController()->setSplitThreshold(100);
@@ -1051,8 +1051,8 @@ public:
    * to use all cores.
    */
   void test_splitAllIfNeeded_usingThreadPool() {
-    typedef MDGridBox<MDLeanEvent<2>, 2> gbox_t;
-    typedef MDBoxBase<MDLeanEvent<2>, 2> ibox_t;
+    using gbox_t = MDGridBox<MDLeanEvent<2>, 2>;
+    using ibox_t = MDBoxBase<MDLeanEvent<2>, 2>;
 
     gbox_t *b = MDEventsTestHelper::makeMDGridBox<2>();
     b->getBoxController()->setSplitThreshold(100);
@@ -1135,7 +1135,7 @@ public:
   //------------------------------------------------------------------------------------------------
   /** Test binning in orthogonal axes */
   void test_centerpointBin() {
-    typedef MDGridBox<MDLeanEvent<2>, 2> gbox_t;
+    using gbox_t = MDGridBox<MDLeanEvent<2>, 2>;
 
     // 10x10 bins, 2 events per bin, each weight of 1.0
     gbox_t *b = MDEventsTestHelper::makeMDGridBox<2>();

@@ -23,7 +23,10 @@ class MRFilterCrossSections(PythonAlgorithm):
         return "This algorithm loads a Magnetism Reflectometer file and returns workspaces for each cross-section."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=[".nxs", ".nxs.h5"]))
+        self.declareProperty(FileProperty("Filename", "", action=FileAction.OptionalLoad, extensions=[".nxs", ".nxs.h5"]))
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
+                                               Direction.Input, PropertyMode.Optional),
+                             "Optionally, we can provide a scattering workspace directly")
         self.declareProperty("PolState", "SF1",
                              doc="Name of the log entry determining the polarizer state")
         self.declareProperty("AnaState", "SF2",
@@ -84,9 +87,14 @@ class MRFilterCrossSections(PythonAlgorithm):
         pol_veto = self.getProperty("PolVeto").value
         ana_state = self.getProperty("AnaState").value
         ana_veto = self.getProperty("AnaVeto").value
+        ws_event_data = self.getProperty("InputWorkspace").value
 
-        ws_raw_name = os.path.basename(file_path)
-        ws_raw = api.LoadEventNexus(Filename=file_path, OutputWorkspace=ws_raw_name)
+        if ws_event_data is not None:
+            ws_raw_name = str(ws_event_data)
+            ws_raw = ws_event_data
+        else:
+            ws_raw_name = os.path.basename(file_path)
+            ws_raw = api.LoadEventNexus(Filename=file_path, OutputWorkspace=ws_raw_name)
 
         # Check whether we have a polarizer
         polarizer = ws_raw.getRun().getProperty("Polarizer").value[0]
@@ -158,6 +166,7 @@ class MRFilterCrossSections(PythonAlgorithm):
         split_table_ws = self.create_table(change_list, start_time,
                                            has_polarizer=polarizer>0, has_analyzer=analyzer>0)
 
+        # Filter events if we found enough information to do so
         if split_table_ws.rowCount()>0:
             outputs = api.FilterEvents(InputWorkspace=ws_raw,
                                        SplitterWorkspace=split_table_ws,
@@ -176,11 +185,20 @@ class MRFilterCrossSections(PythonAlgorithm):
                 pol_state = str(ws).replace(output_wsg+'_', '')
                 api.AddSampleLog(Workspace=ws, LogName='cross_section_id',
                                  LogText=pol_state)
+
+            if ws_event_data is None:
+                AnalysisDataService.remove(ws_raw_name)
+            self.setProperty("CrossSectionWorkspaces", output_wsg)
+
+        # If we don't have a splitter table, it might be because we don't have analyzer/polarizer
+        # information. In this case don't filter and return the raw workspace.
+        elif polarizer <= 0 and analyzer <=0:
+            api.logger.warning("No polarizer/analyzer information available")
+            self.setProperty("CrossSectionWorkspaces", api.GroupWorkspaces([ws_raw]))
         else:
             api.logger.error("No events remained after filtering")
-        AnalysisDataService.remove(ws_raw_name)
-
-        self.setProperty("CrossSectionWorkspaces", output_wsg)
+            if ws_event_data is None:
+                AnalysisDataService.remove(ws_raw_name)
 
     def load_legacy_cross_Sections(self, file_path):
         """
