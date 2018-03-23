@@ -1466,7 +1466,7 @@ MatrixWorkspace::getDimensionWithId(std::string id) const {
  * @param function :: implicit function to limit range
  * @return MatrixWorkspaceMDIterator vector
  */
-std::vector<IMDIterator *> MatrixWorkspace::createIterators(
+std::vector<std::unique_ptr<IMDIterator>> MatrixWorkspace::createIterators(
     size_t suggestedNumCores,
     Mantid::Geometry::MDImplicitFunction *function) const {
   // Find the right number of cores to use
@@ -1480,13 +1480,14 @@ std::vector<IMDIterator *> MatrixWorkspace::createIterators(
     numCores = 1;
 
   // Create one iterator per core, splitting evenly amongst spectra
-  std::vector<IMDIterator *> out;
+  std::vector<std::unique_ptr<IMDIterator>> out;
   for (size_t i = 0; i < numCores; i++) {
     size_t begin = (i * numElements) / numCores;
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.push_back(new MatrixWorkspaceMDIterator(this, function, begin, end));
+    out.push_back(Kernel::make_unique<MatrixWorkspaceMDIterator>(this, function,
+                                                                 begin, end));
   }
   return out;
 }

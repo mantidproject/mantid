@@ -33,7 +33,7 @@ private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
   size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
-    Mantid::API::IMDIterator *it = ws->createIterator(nullptr);
+    auto it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
     for (; counter < it->getDataSize(); ++counter) {
@@ -42,7 +42,6 @@ private:
       }
       it->next(1);
     }
-    delete it;
     return numberMasked;
   }
 
@@ -413,17 +412,15 @@ public:
     MDHistoDimension_sptr dimZ(
         new MDHistoDimension("Z", "z", frame, -8, 10, 10));
     MDHistoWorkspace ws(dimX, dimY, dimZ);
-    IMDIterator *it = ws.createIterator();
+    auto it = ws.createIterator();
     TS_ASSERT(it);
     MDHistoWorkspaceIterator *hwit =
-        dynamic_cast<MDHistoWorkspaceIterator *>(it);
+        dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     TS_ASSERT(hwit);
     TS_ASSERT(it->next());
-    delete it;
     boost::scoped_ptr<MDImplicitFunction> mdfunction(new MDImplicitFunction);
     it = ws.createIterator(mdfunction.get());
     TS_ASSERT(it);
-    delete it;
   }
 
   //---------------------------------------------------------------------------------------------------
