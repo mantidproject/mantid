@@ -85,13 +85,13 @@ the first, and in fact we have relaxed this rule for Mantid (see below).
 Again these can often conflict.
 
 -  Each test class should be named after the class it is testing (e.g.
-   tests for the AlgoithmFactory should go in a AlgorithmFactoryTest
+   tests for the ``AlgorithmFactory`` should go in a ``AlgorithmFactoryTest``
    class).
 -  Each test within a test class should use a descriptive test name,
-   prefixed with test (tests for the CreateAlgorithm method would be
-   included in testCreateAlgorithm). If there are specific tests for
+   prefixed with test (tests for the ``CreateAlgorithm`` method would be
+   included in ``testCreateAlgorithm``). If there are specific tests for
    failure situations then these should be added to the end (e.g.
-   testCreateAlgorithmNoAlgorithmException). THE AIM IS THAT FROM THE
+   ``testCreateAlgorithmNoAlgorithmException``). THE AIM IS THAT FROM THE
    TEST METHOD NAME ALONE, YOU SHOULD BE ABLE TO IDENTIFY THE PROBLEM.
 
 Other More General Points
@@ -130,7 +130,7 @@ Mantid-specific Guidelines
    particular test suite. Also, this can cause problems if running tests in
    parallel.
 
--  Be cautious in use of the setUp() and tearDown() methods. Be aware
+-  Be cautious in use of the ``setUp()``and ``tearDown()`` methods. Be aware
    that if you use these in your suite they will be run before/after
    **every single** individual test. That's fine if it's the behaviour
    you really need, but we have found that to be rare - use the
@@ -153,7 +153,7 @@ How do I get a workspace filled with data?
     Firstly you want to think about how much data you really need, unit
     tests need to be fast so you don't want too much data.
     Secondly you should use and extend helper classes (like
-    `1 <https://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/TestHelpers/inc/MantidTestHelpers/WorkspaceCreationHelper.h>`__)
+    `1 <https://github.com/mantidproject/mantid/blob/master/Framework/TestHelpers/inc/MantidTestHelpers/WorkspaceCreationHelper.h>`__)
     to provide the workspaces for you. Keep things as generic as you can
     and it will help you and others for other tests.
     More details of this will be provided at `Testing Utilities <TestingUtilities>`__.
@@ -185,7 +185,7 @@ kind, and results in fast executing code with a very high test coverage.
 See `Mocking <Mocking>`__ in Mantid to find out what it is and how it
 works.
 
-.. figure:: Mocking.png
+.. figure:: images/Mocking.png
    :alt: Object under test using Mocking to isolate the testing.|400px
 
    Object under test using Mocking to isolate the testing.|400px
