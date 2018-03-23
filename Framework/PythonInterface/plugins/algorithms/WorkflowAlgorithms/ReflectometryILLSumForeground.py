@@ -103,7 +103,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional,
                                                      validator=WorkspaceUnitValidator('Wavelength')),
-                             doc='Summed direct beam workspace is output in reflectivity is required.')
+                             doc='Summed direct beam workspace if output in reflectivity is required.')
         self.declareProperty(IntArrayProperty(Prop.FOREGROUND_INDICES,
                                               values=[Property.EMPTY_INT, Property.EMPTY_INT, Property.EMPTY_INT],
                                               validator=threeNonnegativeInts),

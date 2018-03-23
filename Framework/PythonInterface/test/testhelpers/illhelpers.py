@@ -1,8 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
+from mantid.api import mtd
 from mantid.kernel import DeltaEModeType, UnitConversion
 import numpy
-from testhelpers import run_algorithm
+from testhelpers import create_algorithm, run_algorithm
 
 
 def _gaussian(x, height, x0, sigma):
@@ -39,6 +40,36 @@ def _fillTemplateReflectometryWorkspace(ws):
         'Workspace': ws,
         'LogName': 'time',
         'LogText': str(3600),
+        'LogType': 'Number',
+        'LogUnit': 'Sec',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'det.value',
+        'LogText': str(3100),
+        'LogType': 'Number',
+        'LogUnit': 'mm',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'Distance.ChopperGap',
+        'LogText': str(8.2),
+        'LogType': 'Number',
+        'LogUnit': 'cm',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'PSD.time_of_flight_0',
+        'LogText': str(binWidth),
         'LogType': 'Number',
         'NumberType': 'Double',
         'child': True
@@ -163,6 +194,46 @@ def add_duration(ws, duration):
     run_algorithm('AddSampleLog', **kwargs)
 
 
+def add_chopper_configuration_D17(ws):
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'VirtualChopper.chopper1_phase_average',
+        'LogText': str(180),
+        'LogType': 'Number',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)    
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'VirtualChopper.chopper1_speed_average',
+        'LogText': str(1000),
+        'LogType': 'Number',
+        'LogUnit': 'rpm',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)    
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'VirtualChopper.chopper2_phase_average',
+        'LogText': str(225),
+        'LogType': 'Number',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)    
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'VirtualChopper.open_offset',
+        'LogText': str(-0.055),
+        'LogType': 'Number',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)    
+
+
 def add_flipper_configuration_D17(ws, flipper1, flipper2):
     kwargs = {
         'Workspace': ws,
@@ -179,6 +250,29 @@ def add_flipper_configuration_D17(ws, flipper1, flipper2):
         'LogText': str(int(flipper2)),
         'LogType': 'Number',
         'NumberType': 'Int',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+
+
+def add_slit_configuration_D17(ws, slit2Width, slit3Width):
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'VirtualSlitAxis.s2w_actual_width',
+        'LogText': str(float(slit2Width)),
+        'LogType': 'Number',
+        'LogUnit': 'mm',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+    kwargs = {
+        'Workspace': ws,
+        'LogName': 'VirtualSlitAxis.s3w_actual_width',
+        'LogText': str(float(slit3Width)),
+        'LogType': 'Number',
+        'LogUnit': 'mm',
+        'NumberType': 'Double',
         'child': True
     }
     run_algorithm('AddSampleLog', **kwargs)
@@ -230,3 +324,65 @@ def default_test_detectors(ws):
     }
     run_algorithm('MaskDetectors', **kwargs)
     return ws
+
+
+def refl_create_beam_position_ws(beamPosWSName, referenceWS, detectorAngle, beamCentre):
+    args = {
+        'OutputWorkspace': beamPosWSName
+    }
+    alg = create_algorithm('CreateEmptyTableWorkspace', **args)
+    alg.execute()
+    beamPos = mtd[beamPosWSName]
+    beamPos.addColumn('double', 'DetectorAngle')
+    beamPos.addColumn('double', 'DetectorDistance')
+    beamPos.addColumn('double', 'PeakCentre')
+    L2 = referenceWS.getInstrument().getComponentByName('detector').getPos().norm()
+    beamPos.addRow((detectorAngle, L2, beamCentre))
+    return beamPos
+
+
+def refl_preprocess(outputWSName, ws, beamPosWS):
+    args = {
+        'InputWorkspace': ws,
+        'BeamPositionWorkspace': beamPosWS,
+        'OutputWorkspace': outputWSName,
+    }
+    alg = create_algorithm('ReflectometryILLPreprocess', **args)
+    alg.execute()
+    return mtd[outputWSName]
+
+
+def refl_rotate_detector(ws, angle):
+    r = ws.run().getProperty('det.value').value * 1e-3
+    angle = numpy.deg2rad(angle)
+    z = r * numpy.cos(angle)
+    y = r * numpy.sin(angle)
+    args = {
+        'Workspace': ws,
+        'ComponentName': 'detector',
+        'X': 0.,
+        'Y': y,
+        'Z': z,
+        'RelativePosition': False
+    }
+    run_algorithm('MoveInstrumentComponent', **args)
+    args = {
+        'Workspace': ws,
+        'ComponentName': 'detector',
+        'X': 1.,
+        'Y': 0.,
+        'Z': 0.,
+        'Angle': numpy.rad2deg(angle),
+        'RelativeRotation': False
+    }
+    run_algorithm('RotateInstrumentComponent', **args)
+
+def refl_sum_in_lambda(outputWSName, ws):
+    args = {
+        'InputWorkspace': ws,
+        'OutputWorkspace': outputWSName,
+        'SummationType': 'SumInLambda'
+    }
+    alg = create_algorithm('ReflectometryILLSumForeground', **args)
+    alg.execute()
+    return mtd[outputWSName]

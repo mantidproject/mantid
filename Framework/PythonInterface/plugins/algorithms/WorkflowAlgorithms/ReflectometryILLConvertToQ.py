@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, FloatBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (ConvertFromDistribution, ConvertToDistribution, ConvertToPointData, 
-                              CreateWorkspace, ReflectometryQResolution, Regroup)
+                              CreateWorkspace, ReflectometryMomentumTransfer, Regroup)
 import numpy
 import ReflectometryILL_common as common
 
@@ -121,7 +121,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         slit2SizeLog = 'VirtualSlitAxis.s3w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S3H_actual_height'
         tofBinWidth = self._TOFChannelWidth(logs, instrumentName)
         qWSName = self._names.withSuffix('in_momentum_transfer')
-        qWS = ReflectometryQResolution(
+        qWS = ReflectometryMomentumTransfer(
             InputWorkspace=ws,
             OutputWorkspace=qWSName,
             ReflectedBeamWorkspace=reflectedWS,
