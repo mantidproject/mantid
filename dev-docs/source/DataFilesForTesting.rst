@@ -18,9 +18,9 @@ Motivation
 
 Some unit tests use a small amount of data that is created by the test
 harness and others load data from a file. Take the example of
-**ApplyCalibrationTest**. In its first test, testSimple, it creates a
+``ApplyCalibrationTest``. In its first test, testSimple, it creates a
 workspace with 10 detectors using
-**WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument()**. In
+``WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument()``. In
 the second test, testComplex, it reads a file
 **IDFs_for_UNIT_TESTING/MAPS_Definition_Reduced.xml**, which contains
 the definition of a MAPS instrument with the number of detectors reduced
@@ -213,8 +213,7 @@ Proxy Settings
 
 If you are sitting behind a proxy server then the shell or Visual studio
 needs to know about the proxy server. You must set the ``http_proxy``
-environment variable to
-```http://HOSTNAME:PORT`` <http://HOSTNAME:PORT>`__.
+environment variable to ``http://HOSTNAME:PORT``.
 
 On Windows you go to **Control Panel->System and
 Security->System->Advanced System settings->Environment Variables** and
