@@ -59,14 +59,14 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   double min = 0.0 - 0.5 * size;
   double max = 0.5 * size;
   std::vector<V3D> vertices;
-  vertices.push_back(centre + V3D(max, max, max));
-  vertices.push_back(centre + V3D(min, max, max));
-  vertices.push_back(centre + V3D(max, min, max));
-  vertices.push_back(centre + V3D(min, min, max));
-  vertices.push_back(centre + V3D(max, max, min));
-  vertices.push_back(centre + V3D(min, max, min));
-  vertices.push_back(centre + V3D(max, min, min));
-  vertices.push_back(centre + V3D(min, min, min));
+  vertices.emplace_back(centre + V3D(max, max, max));
+  vertices.emplace_back(centre + V3D(min, max, max));
+  vertices.emplace_back(centre + V3D(max, min, max));
+  vertices.emplace_back(centre + V3D(min, min, max));
+  vertices.emplace_back(centre + V3D(max, max, min));
+  vertices.emplace_back(centre + V3D(min, max, min));
+  vertices.emplace_back(centre + V3D(max, min, min));
+  vertices.emplace_back(centre + V3D(min, min, min));
 
   std::vector<uint16_t> triangles;
   // top face of cube - z max
@@ -112,12 +112,12 @@ std::unique_ptr<MeshObject> createOctahedron() {
   // Opposite vertices have indices differing by 3.
   double u = 1.0000000001;
   std::vector<V3D> vertices;
-  vertices.push_back(V3D(u, 0, 0));
-  vertices.push_back(V3D(0, u, 0));
-  vertices.push_back(V3D(0, 0, u));
-  vertices.push_back(V3D(-u, 0, 0));
-  vertices.push_back(V3D(0, -u, 0));
-  vertices.push_back(V3D(0, 0, -u));
+  vertices.emplace_back(V3D(u, 0, 0));
+  vertices.emplace_back(V3D(0, u, 0));
+  vertices.emplace_back(V3D(0, 0, u));
+  vertices.emplace_back(V3D(-u, 0, 0));
+  vertices.emplace_back(V3D(0, -u, 0));
+  vertices.emplace_back(V3D(0, 0, -u));
 
   std::vector<uint16_t> triangles;
   // +++ face
@@ -150,18 +150,18 @@ std::unique_ptr<MeshObject> createLShape() {
   *  where Z = 0 or 1.
   */
   std::vector<V3D> vertices;
-  vertices.push_back(V3D(0, 0, 0));
-  vertices.push_back(V3D(2, 0, 0));
-  vertices.push_back(V3D(2, 1, 0));
-  vertices.push_back(V3D(1, 1, 0));
-  vertices.push_back(V3D(1, 2, 0));
-  vertices.push_back(V3D(0, 2, 0));
-  vertices.push_back(V3D(0, 0, 1));
-  vertices.push_back(V3D(2, 0, 1));
-  vertices.push_back(V3D(2, 1, 1));
-  vertices.push_back(V3D(1, 1, 1));
-  vertices.push_back(V3D(1, 2, 1));
-  vertices.push_back(V3D(0, 2, 1));
+  vertices.emplace_back(V3D(0, 0, 0));
+  vertices.emplace_back(V3D(2, 0, 0));
+  vertices.emplace_back(V3D(2, 1, 0));
+  vertices.emplace_back(V3D(1, 1, 0));
+  vertices.emplace_back(V3D(1, 2, 0));
+  vertices.emplace_back(V3D(0, 2, 0));
+  vertices.emplace_back(V3D(0, 0, 1));
+  vertices.emplace_back(V3D(2, 0, 1));
+  vertices.emplace_back(V3D(2, 1, 1));
+  vertices.emplace_back(V3D(1, 1, 1));
+  vertices.emplace_back(V3D(1, 2, 1));
+  vertices.emplace_back(V3D(0, 2, 1));
 
   std::vector<uint16_t> triangles;
   // z min
@@ -205,10 +205,10 @@ public:
   void testConstructor() {
 
     std::vector<V3D> vertices;
-    vertices.push_back(V3D(0, 0, 0));
-    vertices.push_back(V3D(1, 0, 0));
-    vertices.push_back(V3D(0, 1, 0));
-    vertices.push_back(V3D(0, 0, 1));
+    vertices.emplace_back(V3D(0, 0, 0));
+    vertices.emplace_back(V3D(1, 0, 0));
+    vertices.emplace_back(V3D(0, 1, 0));
+    vertices.emplace_back(V3D(0, 0, 1));
 
     std::vector<uint16_t> triangles;
     triangles.insert(triangles.end(), { 1, 2, 3 });
@@ -239,10 +239,10 @@ public:
   void testMaterial() {
     using Mantid::Kernel::Material;
     std::vector<V3D> vertices;
-    vertices.push_back(V3D(0, 0, 0));
-    vertices.push_back(V3D(1, 0, 0));
-    vertices.push_back(V3D(0, 1, 0));
-    vertices.push_back(V3D(0, 0, 1));
+    vertices.emplace_back(V3D(0, 0, 0));
+    vertices.emplace_back(V3D(1, 0, 0));
+    vertices.emplace_back(V3D(0, 1, 0));
+    vertices.emplace_back(V3D(0, 0, 1));
 
     std::vector<uint16_t> triangles;
     triangles.insert(triangles.end(), { 1, 2, 3 });
@@ -329,7 +329,7 @@ public:
     Track track(V3D(-10, 1, 1), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(0, 1, 1), V3D(4, 1, 1), 14.0, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -340,7 +340,7 @@ public:
     Track track(V3D(-8, -6, 1), V3D(0.8, 0.6, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(0, 0, 1), V3D(4, 3, 1), 15.0, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -360,7 +360,7 @@ public:
     Track track(V3D(-10, 0.2, 0.2), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-0.6, 0.2, 0.2), V3D(0.6, 0.2, 0.2), 10.6, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -371,7 +371,7 @@ public:
     Track track(V3D(-10, 0.2, 0.0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 10.8, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -382,7 +382,7 @@ public:
     Track track(V3D(-10, 0.0, 0.0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-1.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), 11.0, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -393,9 +393,9 @@ public:
     Track track(V3D(0, 2.5, 0.5), V3D(0.707, -0.707, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(0.5, 2, 0.5), V3D(1, 1.5, 0.5), 1.4142135, *geom_obj));
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(1.5, 1, 0.5), V3D(2, 0.5, 0.5), 2.828427, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -426,8 +426,8 @@ public:
     TS_ASSERT(object2->interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.emplace_back(
         Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, *object2));
     checkTrackIntercept(TL, expectedResults);
   }
@@ -448,8 +448,8 @@ public:
     TS_ASSERT(object2->interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
-    expectedResults.push_back(Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.emplace_back(Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
