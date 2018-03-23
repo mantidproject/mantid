@@ -443,7 +443,7 @@ private:
     const double da = 0.68 * std::sqrt(pow<2>(SLIT1_SIZE) +
                                        pow<2>(SLIT2_SIZE) / pow<2>(interslit));
     const double da_det = std::sqrt(pow<2>(da * vs) + pow<2>(DET_RESOLUTION));
-    double om_fwhm;
+    double om_fwhm{0};
     if (std::abs(SLIT1_SIZE - dirs2w) >= 0.00004 ||
         std::abs(SLIT2_SIZE - dirs3w) >= 0.00004) {
       if ((det_fwhm - da_det) >= 0.) {
