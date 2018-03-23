@@ -74,19 +74,19 @@ cmake/make. To add them as ctest targets, enable them with the flag:
 
 .. code-block:: sh
 
-cmake -DCXXTEST_ADD_PERFORMANCE=TRUE
+   cmake -DCXXTEST_ADD_PERFORMANCE=TRUE
 
 After re-building, you can then run performance tests with the command:
 
 .. code-block:: sh
 
-ctest [-C Release|Debug] -R Performance
+   ctest [-C Release|Debug] -R Performance
 
 And run regular unit tests, excluding the slow performance ones, with:
 
 .. code-block:: sh
 
-ctest [-C Release|Debug] -E Performance
+   ctest [-C Release|Debug] -E Performance
 
 where the -C option is required for multi-configuration builds like
 Visual Studio & XCode.
