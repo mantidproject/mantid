@@ -117,7 +117,6 @@ public:
   void tearDown() override {
     for (auto & i : data) {
       delete i;
-      i = NULL;
     }
   }
   void xest_nothing() {

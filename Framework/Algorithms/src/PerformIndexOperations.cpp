@@ -172,7 +172,7 @@ class AdditionParserRange : public CommandParserBase<AdditionCommand> {
 public:
 private:
   boost::regex getRegex() const override {
-    return boost::regex("^\\s*[0-9]+\\s*\\-\\s*[0-9]+\\s*$");
+    return boost::regex(R"(^\s*[0-9]+\s*\-\s*[0-9]+\s*$)");
   }
   std::string getSeparator() const override { return "-"; }
 };
@@ -184,7 +184,7 @@ class AdditionParser : public CommandParser {
 public:
   Command *interpret(const std::string &instruction) const override {
     Command *command = nullptr;
-    boost::regex ex("^\\s*[0-9]+\\s*\\+\\s*[0-9]+\\s*$");
+    boost::regex ex(R"(^\s*[0-9]+\s*\+\s*[0-9]+\s*$)");
     if (boost::regex_match(instruction, ex)) {
       std::vector<std::string> arguments;
       boost::split(arguments, instruction, boost::is_any_of("+"));
@@ -210,7 +210,7 @@ class CropParserRange : public CommandParserBase<CropCommand> {
 public:
 private:
   boost::regex getRegex() const override {
-    return boost::regex("^\\s*[0-9]+\\s*:\\s*[0-9]+\\s*$");
+    return boost::regex(R"(^\s*[0-9]+\s*:\s*[0-9]+\s*$)");
   }
   std::string getSeparator() const override { return ":"; }
 };
@@ -319,7 +319,7 @@ void PerformIndexOperations::exec() {
       this->getProperty("ProcessingInstructions");
 
   boost::regex re(
-      "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
+      R"(^\s*[0-9]+\s*$|^(\s*,*[0-9]+(\s*(,|:|\+|\-)\s*)*[0-9]*)*$)");
   if (!boost::regex_match(processingInstructions, re)) {
     throw std::invalid_argument("ProcessingInstructions are not well formed: " +
                                 processingInstructions);

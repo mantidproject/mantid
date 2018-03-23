@@ -601,9 +601,9 @@ void SCDCalibratePanels::saveXmlFile(
     else
       scaley = 1.;
 
-    oss3 << "  <parameter name =\"scalex\"><value val=\"" << scalex
+    oss3 << R"(  <parameter name ="scalex"><value val=")" << scalex
          << "\" /> </parameter>\n";
-    oss3 << "  <parameter name =\"scaley\"><value val=\"" << scaley
+    oss3 << R"(  <parameter name ="scaley"><value val=")" << scaley
          << "\" /> </parameter>\n";
     oss3 << "</component-link>\n";
   } // for each bank in the group

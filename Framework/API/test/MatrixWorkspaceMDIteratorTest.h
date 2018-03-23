@@ -53,7 +53,7 @@ public:
   void test_iterating() {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     IMDIterator *it = nullptr;
-    TS_ASSERT_THROWS_NOTHING(it = ws->createIterator(NULL));
+    TS_ASSERT_THROWS_NOTHING(it = ws->createIterator(nullptr));
     TS_ASSERT_EQUALS(it->getDataSize(), 20);
     TS_ASSERT_DELTA(it->getSignal(), 0.0, 1e-5);
     it->next();
@@ -90,13 +90,13 @@ public:
   void test_parallel_iterators() {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     // The number of output cannot be larger than the number of histograms
-    std::vector<IMDIterator *> it = ws->createIterators(10, NULL);
+    std::vector<IMDIterator *> it = ws->createIterators(10, nullptr);
     TS_ASSERT_EQUALS(it.size(), 4);
     for (auto & i : it)
       delete i;
 
     // Split in 4 iterators
-    std::vector<IMDIterator *> iterators = ws->createIterators(4, NULL);
+    std::vector<IMDIterator *> iterators = ws->createIterators(4, nullptr);
     TS_ASSERT_EQUALS(iterators.size(), 4);
 
     for (size_t i = 0; i < iterators.size(); i++) {
@@ -122,7 +122,7 @@ public:
 
   void test_get_is_masked() {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
-    IMDIterator *it = ws->createIterator(NULL);
+    IMDIterator *it = ws->createIterator(nullptr);
     const auto &spectrumInfo = ws->spectrumInfo();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), it->getIsMasked());

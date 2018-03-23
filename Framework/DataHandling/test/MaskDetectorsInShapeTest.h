@@ -28,13 +28,13 @@ public:
 
   void testCuboidMiss() {
     std::string xmlShape = "<cuboid id=\"shape\"> ";
-    xmlShape += "<left-front-bottom-point x=\"0.005\" y=\"-0.1\" z=\"0.0\" /> ";
+    xmlShape += R"(<left-front-bottom-point x="0.005" y="-0.1" z="0.0" /> )";
     xmlShape +=
-        "<left-front-top-point x=\"0.005\" y=\"-0.1\" z=\"0.0001\" />  ";
+        R"(<left-front-top-point x="0.005" y="-0.1" z="0.0001" />  )";
     xmlShape +=
-        "<left-back-bottom-point x=\"-0.005\" y=\"-0.1\" z=\"0.0\" />  ";
+        R"(<left-back-bottom-point x="-0.005" y="-0.1" z="0.0" />  )";
     xmlShape +=
-        "<right-front-bottom-point x=\"0.005\" y=\"0.1\" z=\"0.0\" />  ";
+        R"(<right-front-bottom-point x="0.005" y="0.1" z="0.0" />  )";
     xmlShape += "</cuboid> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
@@ -44,8 +44,8 @@ public:
   void testConeHitNoMonitors() {
     // algebra line is essential
     std::string xmlShape = "<cone id=\"shape\"> ";
-    xmlShape += "<tip-point x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"-1\" /> ";
+    xmlShape += R"(<tip-point x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="-1" /> )";
     xmlShape += "<angle val=\"8.1\" /> ";
     xmlShape += "<height val=\"4\" /> ";
     xmlShape += "</cone>";

@@ -42,7 +42,7 @@ private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
   size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
-    Mantid::API::IMDIterator *it = ws->createIterator(NULL);
+    Mantid::API::IMDIterator *it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
     for (; counter < it->getDataSize(); ++counter) {
@@ -123,7 +123,7 @@ public:
 
     /*Test that the boxes were deep copied and that their BoxController pointers
      * have been updated too.*/
-    std::vector<API::IMDNode *> originalBoxes(0, NULL);
+    std::vector<API::IMDNode *> originalBoxes(0, nullptr);
     ew3.getBox()->getBoxes(originalBoxes, 10000, false);
 
     std::vector<API::IMDNode *> copiedBoxes;
@@ -379,7 +379,7 @@ public:
     for (size_t i = 0; i < 50; i++) {
       ew->addEvent(ev);
     }
-    ew->splitAllIfNeeded(NULL);
+    ew->splitAllIfNeeded(nullptr);
     ew->refreshCache();
 
     // Create dimension-aligned line through the workspace
@@ -792,10 +792,10 @@ public:
     IMDEventWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<IMDEventWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<IMDEventWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -803,9 +803,9 @@ public:
     IMDEventWorkspace_const_sptr wsCastConst;
     IMDEventWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (IMDEventWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IMDEventWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
@@ -855,7 +855,7 @@ public:
     std::cout << "Starting Workspace splitting performance test, single "
                  "threaded with " << nBoxes << " events \n";
     Kernel::Timer clock;
-    m_ws->splitAllIfNeeded(NULL);
+    m_ws->splitAllIfNeeded(nullptr);
     std::cout
         << "Finished Workspace splitting performance test, single threaded in "
         << clock.elapsed() << " sec\n";

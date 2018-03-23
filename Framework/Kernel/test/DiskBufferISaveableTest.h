@@ -90,15 +90,14 @@ public:
   }
 
   void tearDown() override {
-    for (auto & i : data) {
-      delete i;
-      i = NULL;
+    for (auto & item : data) {
+      delete item;
     }
-
-    for (auto & i : bigData) {
-      delete i;
-      i = NULL;
+    
+    for (auto & bigItem : bigData) {
+      delete bigItem;
     }
+      
     ISaveableTester::fakeFile = "";
   }
   void testIsaveable() {

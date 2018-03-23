@@ -307,7 +307,7 @@ public:
       ev.setCenter(d, 0.5);
     box->addEvent(ev);
     // CHANGE from AB: 20/01/2013: you have to split to identify changes!
-    box->splitAllIfNeeded(NULL);
+    box->splitAllIfNeeded(nullptr);
 
     // Modify a different box by accessing the events
     MDBox<MDLeanEvent<nd>, nd> *box8 =
