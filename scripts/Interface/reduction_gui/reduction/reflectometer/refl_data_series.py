@@ -40,7 +40,7 @@ class DataSeries(BaseScriptElement):
             _xml += item.to_xml()
         _xml += "</DataSeries>\n"
 
-        return xml
+        return _xml
 
     def from_xml(self, xml_str):
         """
