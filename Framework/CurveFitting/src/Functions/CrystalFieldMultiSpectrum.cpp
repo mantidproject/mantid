@@ -192,7 +192,7 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     }
   } else if (boost::regex_match(name, match, FWHMX_ATTR_REGEX)) {
     auto iSpec = std::stoul(match[1]);
-    if(m_fwhmX.size() > iSpec) {
+    if (m_fwhmX.size() > iSpec) {
       m_fwhmX[iSpec].clear();
     } else {
       throw std::runtime_error(
@@ -200,7 +200,7 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     }
   } else if (boost::regex_match(name, match, FWHMY_ATTR_REGEX)) {
     auto iSpec = std::stoul(match[1]);
-    if(m_fwhmY.size() > iSpec) {
+    if (m_fwhmY.size() > iSpec) {
       m_fwhmY[iSpec].clear();
     } else {
       throw std::runtime_error(
