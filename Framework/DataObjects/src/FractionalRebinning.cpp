@@ -154,7 +154,7 @@ double polyArea(T &v1, T &v2, Ts &&... vertices) {
  * @param y_start The starting y-axis index
  * @param y_end The starting y-axis index
  * @param x_start The starting x-axis index
- * @param x_end The starting x-axis index
+ * @param x_end The ending x-axis index
  * @param areaInfo Output vector of indices and areas of overlapping bins
  */
 void calcTrapezoidYIntersections(
@@ -185,8 +185,8 @@ void calcTrapezoidYIntersections(
     ur = V2D(xAxis[x_end], mTop * xAxis[x_end] + cTop);
   }
 
-  const size_t nx = x_end - x_start;
-  const size_t ny = y_end - y_start;
+  const size_t nx = x_end - x_start + 1;
+  const size_t ny = y_end - y_start + 1;
   const double ll_x(ll.X()), ll_y(ll.Y()), ul_y(ul.Y());
   const double lr_x(lr.X()), lr_y(lr.Y()), ur_y(ur.Y());
   // Check if there is only a output single bin and inputQ is fully enclosed
@@ -208,7 +208,7 @@ void calcTrapezoidYIntersections(
   auto x1_it = xAxis.begin() + x_end + 1;
   auto y0_it = yAxis.begin() + y_start;
   auto y1_it = yAxis.begin() + y_end + 1;
-  const size_t ymax = (y_end == yAxis.size()) ? ny : (ny + 1);
+  const size_t ymax = (y_end == yAxis.size()) ? (ny - 1) : ny;
   if ((mTop >= 0 && mBot >= 0) || (mTop < 0 && mBot < 0)) {
     // Diagonals in same direction: For a given x-parallel line,
     // Left limit given by one diagonal, right limit given by other
@@ -238,7 +238,7 @@ void calcTrapezoidYIntersections(
       }
       auto right_it = std::upper_bound(x0_it, x1_it, right_val);
       if (right_it != x1_it) {
-        rightLim[right_it - x0_it - 1 + yjx] = right_val;
+        rightLim[right_it - x0_it + yjx] = right_val;
       } else if (yAxis[yj + y_start] < ur_y) {
         right_it = x1_it - 1;
         rightLim[nx - 1 + yjx] = lr_x;
@@ -247,7 +247,7 @@ void calcTrapezoidYIntersections(
       if (left_it < right_it && right_it != x1_it) {
         for (auto x_it = left_it; x_it != right_it; ++x_it) {
           leftLim[li + 1 + yjx] = *x_it;
-          rightLim[li++ + yjx] = *x_it;
+          rightLim[li++ + 1 + yjx] = *x_it;
         }
       }
     }
@@ -277,12 +277,15 @@ void calcTrapezoidYIntersections(
         left_it--;
       if (right_it == x1_it)
         right_it--;
-      size_t li = left_it - x0_it - 1;
+      size_t li = (left_it > x0_it) ? (left_it - x0_it - 1) : 0;
+      size_t ri = (right_it > x0_it) ? (right_it - x0_it - 1) : 0;
       leftLim[li + yjx] = (mTop >= 0) ? val : ll_x;
-      rightLim[right_it - x0_it - 1 + yjx] = (mTop >= 0) ? lr_x : val;
-      for (auto x_it = left_it; x_it != right_it; x_it++) {
-        leftLim[li + 1 + yjx] = *x_it;
-        rightLim[li++ + yjx] = *x_it;
+      rightLim[ri + 1 + yjx] = (mTop >= 0) ? lr_x : val;
+      if (left_it < right_it && right_it != x1_it) {
+        for (auto x_it = left_it; x_it != right_it; x_it++) {
+          leftLim[li + 1 + yjx] = *x_it;
+          rightLim[li++ + 1 + yjx] = *x_it;
+        }
       }
     }
   }
@@ -336,9 +339,9 @@ void calcTrapezoidYIntersections(
         if (nlr.Y() >= yAxis[yi] && nlr.Y() <= yAxis[yi + 1])
           vertBits |= LR_IN;
         l0 = V2D(leftLim[xj + yj0], yAxis[yi]);
-        r0 = V2D(rightLim[xj + yj0], yAxis[yi]);
+        r0 = V2D(rightLim[xj + 1 + yj0], yAxis[yi]);
         l1 = V2D(leftLim[xj + yj1], yAxis[yi + 1]);
-        r1 = V2D(rightLim[xj + yj1], yAxis[yi + 1]);
+        r1 = V2D(rightLim[xj + 1 + yj1], yAxis[yi + 1]);
         // Now calculate the area based on which vertices are in this bin.
         // Note that a recursive function is used so it can be unrolled and
         // inlined but it means that the first element has to also be put
