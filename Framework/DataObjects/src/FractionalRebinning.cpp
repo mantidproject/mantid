@@ -185,8 +185,8 @@ void calcTrapezoidYIntersections(
     ur = V2D(xAxis[x_end], mTop * xAxis[x_end] + cTop);
   }
 
-  const size_t nx = x_end - x_start + 1;
-  const size_t ny = y_end - y_start + 1;
+  const size_t nx = x_end - x_start;
+  const size_t ny = y_end - y_start;
   const double ll_x(ll.X()), ll_y(ll.Y()), ul_y(ul.Y());
   const double lr_x(lr.X()), lr_y(lr.Y()), ur_y(ur.Y());
   // Check if there is only a output single bin and inputQ is fully enclosed
@@ -202,17 +202,18 @@ void calcTrapezoidYIntersections(
   // Step 1 - construct the left/right bin lims on the lines of the y-grid.
   const double NaN = std::numeric_limits<double>::quiet_NaN();
   const double DBL_EPS = std::numeric_limits<double>::epsilon();
-  std::vector<double> leftLim(nx * (ny + 1), NaN);
-  std::vector<double> rightLim(nx * (ny + 1), NaN);
+  std::vector<double> leftLim((nx + 1) * (ny + 1), NaN);
+  std::vector<double> rightLim((nx + 1)* (ny + 1), NaN);
   auto x0_it = xAxis.begin() + x_start;
   auto x1_it = xAxis.begin() + x_end + 1;
   auto y0_it = yAxis.begin() + y_start;
   auto y1_it = yAxis.begin() + y_end + 1;
+  const size_t ymax = (y_end == yAxis.size()) ? ny : (ny + 1);
   if ((mTop >= 0 && mBot >= 0) || (mTop < 0 && mBot < 0)) {
     // Diagonals in same direction: For a given x-parallel line,
     // Left limit given by one diagonal, right limit given by other
     double left_val, right_val;
-    for (size_t yj = 0; yj < ny; ++yj) {
+    for (size_t yj = 0; yj < ymax; ++yj) {
       const size_t yjx = yj * nx;
       // First, find the far left/right limits, given by the inputQ
       if (mTop >= 0) {
@@ -238,9 +239,9 @@ void calcTrapezoidYIntersections(
       auto right_it = std::upper_bound(x0_it, x1_it, right_val);
       if (right_it != x1_it) {
         rightLim[right_it - x0_it - 1 + yjx] = right_val;
-      } else if (yAxis[yj + y_start] < ur_y && nx > 1) {
+      } else if (yAxis[yj + y_start] < ur_y && nx > 0) {
         right_it = x1_it - 1;
-        rightLim[nx - 2 + yjx] = lr_x;
+        rightLim[nx - 1 + yjx] = lr_x;
       }
       // Now populate the bin boundaries in between
       if (left_it < right_it && right_it != x1_it) {
@@ -257,7 +258,7 @@ void calcTrapezoidYIntersections(
     const size_t y3 =
         std::upper_bound(y0_it, y1_it, (mTop >= 0) ? ul_y : ur_y) - y0_it;
     double val;
-    for (size_t yj = 0; yj < ny; ++yj) {
+    for (size_t yj = 0; yj < ymax; ++yj) {
       const size_t yjx = yj * nx;
       if (yj < y2) {
         val = (yAxis[yj + y_start] - cBot) / mBot;
