@@ -6,7 +6,7 @@ from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.masking_table import MaskingTable
 from ui.sans_isis.beam_centre import BeamCentre
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (RangeStepType, OutputMode, SANSFacility)
+from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument, FileType, SampleShape)
 from sans.test_helper.test_director import TestDirector
 from functools import (partial)
 
