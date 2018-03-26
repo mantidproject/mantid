@@ -1,5 +1,13 @@
+.. _WritingAnAlgorithm:
+
 Writing An Algorithm
 ====================
+
+.. contents::
+  :local:
+
+Introduction
+############
 
 Mantid's `plugin <https://www.mantidproject.org/Plugin>`__ architecture has been engineered so that it is easy for a user 
 to write their own algorithm. This page is a primer for the user about to write their first algorithm and assumes no 
@@ -16,9 +24,6 @@ two programming languages.
 All `algorithms <https://www.mantidproject.org/Algorithm>`__ in Mantid `inherit <http://en.wikipedia.org/wiki/Inheritance_(computer_science)>`__ 
 from a base Algorithm class, which provides the support and services required for running a specific 
 algorithm and greatly simplifies the process of writing a new one.
-
-.. contents::
-  :local:
 
 Getting Started
 ###############
@@ -90,7 +95,8 @@ Note that these are private methods (i.e. cannot be called directly); an algorit
 class's ``initialize()`` and ``execute()`` methods, which provide additional services such as the validation of properties, 
 fetching workspaces from the Analysis Data Service, handling errors and filling the workspace histories.
 
-**Initialization**
+Initialization
+--------------
 
 The initialization (init) method is executed by the Framework Manager when an algorithm is requested and must
 contain the declaration of the properties required by the algorithm. Atypically, it can also contain other 
@@ -110,16 +116,17 @@ For the simple types (integer, double or string), the basic syntax is::
 An optional `validator <https://www.mantidproject.org/Properties#Validators>`__ or 
 `directional argument <https://www.mantidproject.org/Properties#Direction>`__ (input, output or both)
 can also be appended. The syntax for other property types (WorkspaceProperty & ArrayProperty) is more 
-complex - see the `properties<https://www.mantidproject.org/Properties#Direction>`__ page or the 
+complex - see the `properties <https://www.mantidproject.org/Properties#Direction>`__ page or the 
 example algorithms in `UserAlgorithms <https://www.mantidproject.org/UserAlgorithms>`__ for further details.
 
 Execution
 #########
 
-**Fetching properties**
+Fetching properties
+-------------------
 
 Before the data can be processed, the first task is likely to be to fetch the values of the input properties. 
-This uses the ``getProperty`` method as follows:::
+This uses the ``getProperty`` method as follows::
 
     TYPE myProperty = getProperty("PropertyName");
 
@@ -128,32 +135,34 @@ value of a ``WorkspaceProperty`` is a `shared pointer <https://www.mantidproject
 to the workspace, which is referred to as ``Mantid::API::Workspace_sptr`` or ``Mantid::API::Workspace_const_sptr``. 
 The latter should be used for input workspaces that will not need to be changed in the course of the algorithm.
 
-If a handle is required on the property itself, rather than just its value, then the same method is used as follows:::
+If a handle is required on the property itself, rather than just its value, then the same method is used as follows::
 
     Mantid::Kernel::Property* myProperty = getProperty("PropertyName");
 
 This is useful, for example, for checking whether or not an optional property has been set (using Property's 
 ``isDefault()`` method).
 
-**Creating the output workspace**
+Creating the output workspace
+-----------------------------
 
 Usually, the result of an algorithm will be stored in another new workspace and the algorithm 
 will need to create that new workspace through a call to the Workspace Factory. For the (common) 
 example where the output workspace should be of the same type and size as the input one, the code 
-would read as follows:::
+would read as follows::
 
    Mantid::API::Workspace_sptr outputWorkspace = Mantid::API::WorkspaceFactory::Instance().create(inputWorkspace);
 
 where ``inputWorkspace`` is a shared pointer to the input workspace.
 
 It is also important to, at some point, set the output workspace property to point at this workspace. 
-This is achieved through a call to the ``setProperty`` method as follows:::
+This is achieved through a call to the ``setProperty`` method as follows::
 
   setProperty("OutputWorkspacePropertyName",outputWorkspace);
 
 where ``outputWorkspace`` is a shared pointer to the created output workspace.
 
-**Using workspaces**
+Using workspaces
+----------------
 
 The bulk of most algorithms will involve the manipulation of the data contained in Workspaces 
 and information on how to interact with these is given `here <https://www.mantidproject.org/Interacting_with_Workspaces>`__. 
@@ -170,27 +179,30 @@ The advanced user is referred to the `full documentation page <http://doxygen.ma
 for the Algorithm base class to explore the full range of methods available for use within an algorithm. 
 A few aspects are highlighted below.
 
-**Child Algorithms**
+Child Algorithms
+----------------
 
 Algorithms may wish to make use of the functionality of other algorithms as part of their execution. 
 For example, if a units change is required the ConvertUnits algorithm could be used. Mantid therefore 
 has the concept of a child algorithm and this is accessed through a call to the 
-``createChildAlgorithm`` method as follows:::
+``createChildAlgorithm`` method as follows::
 
     Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("AlgorithmName");
 
-This call will also initialise the algorithm, so the algorithm's properties can then be set and it can be executed:::
+This call will also initialise the algorithm, so the algorithm's properties can then be set and it can be executed::
 
      childAlg->setPropertyValue("number", 0);
      childAlg->setProperty<Workspace_sptr>("Workspace",workspacePointer);
      childAlg->execute();
 
-**Logging**
+Logging
+-------
 
 The ``g_log`` object enables access to the `logging <Logging>`__ facilities of Mantid, and is an invaluable 
 tool in understanding the running of your algorithms.
 
-**Enhancing asynchronous running**
+Enhancing asynchronous running
+------------------------------
 
 Any algorithm can be run asynchronously (e.g. by MantidPlot) without modification. However, some features 
 are only enabled if code is added within the ``exec()`` method. Periodical calls to 
@@ -198,15 +210,18 @@ are only enabled if code is added within the ``exec()`` method. Periodical calls
 ``Algorithm::progress(double p)`` reports the progress of the algorithm. ``p`` must be between 
 0 (start) and 1 (finish).
 
-**Exceptions**
+Exceptions
+----------
 
 It is fine to throw exceptions in your algorithms in the event of an unrecoverable failure. 
 These will be caught in the base Algorithm class, which will report the failure of the algorithm.
 
-**Validation of inputs**
+Validation of inputs
+--------------------
 
-Validators allow you to give feedback to the user if the input of a property is incorrect 
-(for example, typing non-numeric characters in a number field).
+`Validators <https://www.mantidproject.org/Properties#Validators>`__ allow you to give feedback 
+to the user if the input of a property is incorrect (for example, typing non-numeric characters 
+in a number field).
 
 For more advanced validation, override the ``Algorithm::validateInputs()`` method. This is a 
 method that returns a map where:
