@@ -167,7 +167,7 @@ Using workspaces
 The bulk of most algorithms will involve the manipulation of the data contained in Workspaces 
 and information on how to interact with these is given `here <https://www.mantidproject.org/Interacting_with_Workspaces>`__. 
 The more advanced user may also want to refer to the full 
-`Workspace documentation <http://doxygen.mantidproject.org/nightly/d3/de9/classMantid_1_1API_1_1Workspace.html>`__.
+`workspace documentation <http://doxygen.mantidproject.org/nightly/d3/de9/classMantid_1_1API_1_1Workspace.html>`__.
 
 Those familiar with C++ should make use of private methods and data members to break up the execution code into
 more manageable and readable sections.
