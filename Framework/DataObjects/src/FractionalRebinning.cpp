@@ -203,7 +203,7 @@ void calcTrapezoidYIntersections(
   const double NaN = std::numeric_limits<double>::quiet_NaN();
   const double DBL_EPS = std::numeric_limits<double>::epsilon();
   std::vector<double> leftLim((nx + 1) * (ny + 1), NaN);
-  std::vector<double> rightLim((nx + 1)* (ny + 1), NaN);
+  std::vector<double> rightLim((nx + 1) * (ny + 1), NaN);
   auto x0_it = xAxis.begin() + x_start;
   auto x1_it = xAxis.begin() + x_end + 1;
   auto y0_it = yAxis.begin() + y_start;
