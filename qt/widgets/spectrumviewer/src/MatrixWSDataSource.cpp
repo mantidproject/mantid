@@ -262,7 +262,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
 
   try {
 
-    if (old_unit) {
+    if (!old_unit) {
       g_log.debug("No UNITS on MatrixWorkspace X-axis");
       return list;
     }
