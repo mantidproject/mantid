@@ -56,7 +56,7 @@ public:
   } ///< @return version number of algorithm
 
   const std::vector<std::string> seeAlso() const override {
-    return{ "CreatePSDBleedMask" };
+    return {"CreatePSDBleedMask"};
   }
 
 private:

@@ -49,7 +49,7 @@ public:
   /// The version number
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "SaveTBL" };
+    return {"SaveTBL"};
   }
   /// The category
   const std::string category() const override { return "DataHandling\\Text"; }

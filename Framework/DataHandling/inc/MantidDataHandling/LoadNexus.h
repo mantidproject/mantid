@@ -71,7 +71,10 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return{ "LoadMcStasNexus","LoadNexusMonitors","LoadNexusProceed","LoadTOFRawNexus","LoadILLDiffraction","LoadILLTOF","LoadILLIndirect","LoadILLReflectometry","LoadILLSANS","LoadMuonNexus","LoadFlexiNexus" };
+    return {"LoadMcStasNexus", "LoadNexusMonitors",    "LoadNexusProceed",
+            "LoadTOFRawNexus", "LoadILLDiffraction",   "LoadILLTOF",
+            "LoadILLIndirect", "LoadILLReflectometry", "LoadILLSANS",
+            "LoadMuonNexus",   "LoadFlexiNexus"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }

@@ -48,7 +48,8 @@ public:
   /// Algorithm's version
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "AbsorptionCorrection","CreateSampleShape","CalculateSampleTransmission" };
+    return {"AbsorptionCorrection", "CreateSampleShape",
+            "CalculateSampleTransmission"};
   }
   /// Algorithm's category for identification
   const std::string category() const override;

@@ -53,7 +53,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return{ "SaveNXSPE","LoadSPE" };
+    return {"SaveNXSPE", "LoadSPE"};
   }
   /// Algorithm's category for identification
   const std::string category() const override {

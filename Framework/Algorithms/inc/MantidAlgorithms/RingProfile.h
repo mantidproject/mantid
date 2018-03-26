@@ -48,7 +48,7 @@ public:
 
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return{ "LineProfile" };
+    return {"LineProfile"};
   }
   const std::string category() const override {
     return "Transforms\\Grouping";

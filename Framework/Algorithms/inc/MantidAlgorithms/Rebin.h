@@ -69,7 +69,8 @@ public:
   const std::string alias() const override { return "rebin"; }
   /// Algorithm's seeAlso
   const std::vector<std::string> seeAlso() const override {
-    return { "RebinToWorkspace", "Rebin2D", "Rebunch", "Regroup", "RebinByPulseTimes", "RebinByTimeAtSample" };
+    return {"RebinToWorkspace", "Rebin2D",           "Rebunch",
+            "Regroup",          "RebinByPulseTimes", "RebinByTimeAtSample"};
   }
 
   static std::vector<double>

@@ -70,7 +70,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "AsymmetryCalc","CalculateMuonAsymmetry","PlotPeakByLogValue" };
+    return {"AsymmetryCalc", "CalculateMuonAsymmetry", "PlotPeakByLogValue"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }

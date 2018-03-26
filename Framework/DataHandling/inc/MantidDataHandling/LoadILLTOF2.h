@@ -46,7 +46,7 @@ public:
   /// Algorithm's version
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "LoadNexus" };
+    return {"LoadNexus"};
   }
   /// Algorithm's category for identification
   const std::string category() const override {

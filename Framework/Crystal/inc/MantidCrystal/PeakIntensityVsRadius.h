@@ -42,7 +42,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "PeakIntegration" };
+    return {"PeakIntegration"};
   }
   const std::string category() const override;
 

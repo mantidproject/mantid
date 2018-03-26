@@ -44,7 +44,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "SpecularReflectionPositionCorrect" };
+    return {"SpecularReflectionPositionCorrect"};
   }
   const std::string category() const override;
 

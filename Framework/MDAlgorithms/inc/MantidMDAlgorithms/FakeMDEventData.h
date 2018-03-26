@@ -45,7 +45,7 @@ public:
   /// Algorithm's verion for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "CreateMDWorkspace","EvaluateMDFunction" };
+    return {"CreateMDWorkspace", "EvaluateMDFunction"};
   }
   /// Algorithm's category for identification
   const std::string category() const override {

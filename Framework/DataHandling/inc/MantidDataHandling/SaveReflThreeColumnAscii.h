@@ -51,7 +51,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "SaveReflCustomAscii","SaveAscii" };
+    return {"SaveReflCustomAscii", "SaveAscii"};
   }
   /// Algorithm's version for data output overriding a virtual method
   void data(std::ofstream &file, const std::vector<double> &XData,

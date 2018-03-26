@@ -46,7 +46,7 @@ public:
   /// Get the version of this algorithm
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "IntegrateEllipsoids" };
+    return {"IntegrateEllipsoids"};
   }
   /// Get the category of this algorithm
   const std::string category() const override;

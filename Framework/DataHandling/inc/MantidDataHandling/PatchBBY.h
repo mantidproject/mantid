@@ -48,7 +48,7 @@ public:
   // description
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "LoadBBY" };
+    return {"LoadBBY"};
   }
   const std::string name() const override { return "PatchBBY"; }
   const std::string category() const override { return "DataHandling\\ANSTO"; }

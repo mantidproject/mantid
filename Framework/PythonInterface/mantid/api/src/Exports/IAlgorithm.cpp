@@ -371,7 +371,7 @@ void export_ialgorithm() {
            "Request that the algorithm stop running")
       .def("category", &IAlgorithm::category, arg("self"),
            "Returns the category containing the algorithm")
-      .def("categories", &IAlgorithm::categories, arg("self"), 
+      .def("categories", &IAlgorithm::categories, arg("self"),
            return_value_policy<VectorToNumpy>(),
            "Returns the list of categories this algorithm belongs to")
       .def("seeAlso", &IAlgorithm::seeAlso, arg("self"),

@@ -185,10 +185,10 @@ private:
   const std::string m_name;     ///< name of the real algorithm
   const std::string m_category; ///< category of the real algorithm
   const std::string
-      m_categorySeparator;     ///< category seperator of the real algorithm
+      m_categorySeparator; ///< category seperator of the real algorithm
   const std::vector<std::string> m_seeAlso; ///< seeAlso of the real algorithm
-  const std::string m_alias;   ///< alias to the algorithm
-  const std::string m_helpURL; ///< Optional documentation URL
+  const std::string m_alias;                ///< alias to the algorithm
+  const std::string m_helpURL;              ///< Optional documentation URL
   const std::string m_summary; ///<Message to display in GUI and help.
   const int m_version;         ///< version of the real algorithm
 

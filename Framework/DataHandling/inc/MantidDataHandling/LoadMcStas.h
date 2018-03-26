@@ -44,7 +44,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "LoadMcStasNexus","LoadNexus" };
+    return {"LoadMcStasNexus", "LoadNexus"};
   }
   const std::string category() const override;
 

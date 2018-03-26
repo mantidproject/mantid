@@ -38,10 +38,10 @@ public:
   int version() const override;
 
   const std::string category() const override;
-  const std::string summary() const override;  
+  const std::string summary() const override;
   /// Algorithm's seeAlso
   const std::vector<std::string> seeAlso() const override {
-    return{ "Rebin", "RebinByPulseTimes" };
+    return {"Rebin", "RebinByPulseTimes"};
   }
 
 private:

@@ -88,7 +88,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return{ "CompareWorkspaces" };
+    return {"CompareWorkspaces"};
   }
 
   /// Algorithm's category for identification

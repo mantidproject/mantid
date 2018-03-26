@@ -43,7 +43,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "PowerMD","LogarithmMD" };
+    return {"PowerMD", "LogarithmMD"};
   }
 
 private:

@@ -38,7 +38,7 @@ public:
 
   int version() const override final;
   const std::vector<std::string> seeAlso() const override {
-    return{ "LoadFITS","SaveNXTomo" };
+    return {"LoadFITS", "SaveNXTomo"};
   }
 
   const std::string category() const override final;

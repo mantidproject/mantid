@@ -49,7 +49,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "ConvertToMD","ConvertToDiffractionMDWorkspace" };
+    return {"ConvertToMD", "ConvertToDiffractionMDWorkspace"};
   }
   const std::string category() const override;
 

@@ -61,7 +61,7 @@ public:
   /// The version number
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "SaveAscii" };
+    return {"SaveAscii"};
   }
   /// The category
   const std::string category() const override { return "DataHandling\\Text"; }

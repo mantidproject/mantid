@@ -77,7 +77,7 @@ public:
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "CheckWorkspacesMatch","CompareSampleLogs","CloneWorkspace" };
+    return {"CheckWorkspacesMatch", "CompareSampleLogs", "CloneWorkspace"};
   }
 
   /// Algorithm's category for identification. @see Algorithm::category

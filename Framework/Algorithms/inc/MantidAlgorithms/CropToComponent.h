@@ -36,7 +36,7 @@ public:
   const std::string name() const override final;
   int version() const override final;
   const std::vector<std::string> seeAlso() const override {
-    return{ "CropWorkspace" };
+    return {"CropWorkspace"};
   }
   const std::string category() const override final;
   const std::string summary() const override final;

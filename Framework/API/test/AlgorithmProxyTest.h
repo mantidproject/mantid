@@ -30,7 +30,7 @@ public:
     return "ProxyCat";
   } ///< Algorithm's category for identification
   const std::vector<std::string> seeAlso() const override {
-    return{ "elephant", "seal" };
+    return {"elephant", "seal"};
   } ///< Algorithm's seeAlso
   const std::string alias() const override {
     return "Dog";
@@ -137,7 +137,7 @@ public:
     TS_ASSERT_EQUALS(alg->version(), 1);
     TS_ASSERT_EQUALS(alg->category(), "ProxyCat");
     TS_ASSERT_EQUALS(alg->alias(), "Dog");
-    std::vector <std::string> seeAlsoList{ "elephant", "seal" };
+    std::vector<std::string> seeAlsoList{"elephant", "seal"};
     TS_ASSERT_EQUALS(alg->seeAlso(), seeAlsoList);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT(alg->existsProperty("prop1"));

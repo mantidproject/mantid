@@ -72,7 +72,7 @@ public:
   /// Algorithm's version for identification
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "SofQW","SofQWPolygon","Rebin2D" };
+    return {"SofQW", "SofQWPolygon", "Rebin2D"};
   }
   /// Algorithm's category for identification
   const std::string category() const override;

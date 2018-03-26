@@ -41,7 +41,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "Integration" };
+    return {"Integration"};
   }
   const std::string category() const override;
 

@@ -50,7 +50,8 @@ public:
   /// Algorithm's version
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "MayersSampleAbsorption","MultipleScatteringCylinderAbsorption","PearlMCAbsorption","VesuvioCalculateMS" };
+    return {"MayersSampleAbsorption", "MultipleScatteringCylinderAbsorption",
+            "PearlMCAbsorption", "VesuvioCalculateMS"};
   }
   /// Algorithm's category for identification
   const std::string category() const override {

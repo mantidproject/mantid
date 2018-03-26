@@ -46,7 +46,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "IndexSXPeaks" };
+    return {"IndexSXPeaks"};
   }
 
   /// Algorithm's category for identification

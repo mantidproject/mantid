@@ -80,7 +80,7 @@ class DLLExport SaveCanSAS1D2 : public SaveCanSAS1D {
 public:
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "LoadCanSAS1D" };
+    return {"LoadCanSAS1D"};
   }
 
 protected:

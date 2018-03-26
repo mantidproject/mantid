@@ -42,7 +42,7 @@ public:
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "PolarizationEfficiencyCor" };
+    return {"PolarizationEfficiencyCor"};
   }
   const std::string category() const override;
   const std::string summary() const override;

@@ -43,7 +43,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "AddSampleLog","GetTimeSeriesLogInformation","MergeLogs" };
+    return {"AddSampleLog", "GetTimeSeriesLogInformation", "MergeLogs"};
   }
   const std::string category() const override;
 

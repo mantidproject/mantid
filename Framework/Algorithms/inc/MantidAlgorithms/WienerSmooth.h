@@ -38,7 +38,7 @@ public:
   const std::string name() const override { return "WienerSmooth"; }
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "FFTSmooth" };
+    return {"FFTSmooth"};
   }
   const std::string category() const override;
   const std::string summary() const override;

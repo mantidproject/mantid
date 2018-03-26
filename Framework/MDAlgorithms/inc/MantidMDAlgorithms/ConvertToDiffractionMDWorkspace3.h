@@ -22,7 +22,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 3; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "ConvertToMD","SetSpecialCoordinates" };
+    return {"ConvertToMD", "SetSpecialCoordinates"};
   }
 
 private:

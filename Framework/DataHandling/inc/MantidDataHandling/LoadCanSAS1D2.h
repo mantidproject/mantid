@@ -73,7 +73,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "SaveCanSAS1D" };
+    return {"SaveCanSAS1D"};
   }
 
 protected:

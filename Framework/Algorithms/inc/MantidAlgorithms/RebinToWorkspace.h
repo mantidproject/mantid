@@ -60,10 +60,8 @@ public:
 
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Rebin"; }
-    /// Algorithm's seeAlso
-  const std::vector<std::string> seeAlso() const override {
-    return{ "Rebin"};
-  }
+  /// Algorithm's seeAlso
+  const std::vector<std::string> seeAlso() const override { return {"Rebin"}; }
 
 protected:
   Parallel::ExecutionMode getParallelExecutionMode(

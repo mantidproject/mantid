@@ -51,7 +51,7 @@ public:
 
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "AddSampleLogMultiple" };
+    return {"AddSampleLogMultiple"};
   }
   const std::string category() const override {
     return "Diffraction\\Utility;Events\\EventFiltering";

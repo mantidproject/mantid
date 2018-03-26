@@ -91,7 +91,9 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return{ "CreateDummyCalFile","CreateCalFileByNames","AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile","MergeCalFiles" };
+    return {"CreateDummyCalFile",   "CreateCalFileByNames", "AlignDetectors",
+            "DiffractionFocussing", "LoadCalFile",          "SaveCalFile",
+            "MergeCalFiles"};
   }
   /// Algorithm's category for identification
   const std::string category() const override {

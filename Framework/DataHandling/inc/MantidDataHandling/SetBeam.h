@@ -35,7 +35,7 @@ public:
   const std::string name() const override final;
   int version() const override final;
   const std::vector<std::string> seeAlso() const override {
-    return{ "SetSample" };
+    return {"SetSample"};
   }
   const std::string category() const override final;
   const std::string summary() const override final;

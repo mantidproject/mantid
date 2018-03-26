@@ -40,7 +40,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "SmoothMD" };
+    return {"SmoothMD"};
   }
   const std::string category() const override;
 

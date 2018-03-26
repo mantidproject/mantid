@@ -63,7 +63,8 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return{ "ConvertToMD","CreateMDHistoWorkspace","ConvertTableToMatrixWorkspace","MDHistoToWorkspace2D" };
+    return {"ConvertToMD", "CreateMDHistoWorkspace",
+            "ConvertTableToMatrixWorkspace", "MDHistoToWorkspace2D"};
   }
   /// Algorithm's category for identification
   const std::string category() const override {

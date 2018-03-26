@@ -98,10 +98,11 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
 * it returns an empty vector of strings
 */
 template <typename BaseAlgorithm>
-const std::vector<std::string> AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
+const std::vector<std::string>
+AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
   try {
     auto seeAlsoPyList = callMethod<object>(getSelf(), "seeAlso");
-    return Converters::PySequenceToVector<std::string>(seeAlsoPyList) ();
+    return Converters::PySequenceToVector<std::string>(seeAlsoPyList)();
   } catch (UndefinedAttributeError &) {
     return {};
   }

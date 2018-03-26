@@ -49,7 +49,7 @@ public:
   } ///< @return version number of algorithm
 
   const std::vector<std::string> seeAlso() const override {
-    return{ "ExtractSpectra" };
+    return {"ExtractSpectra"};
   }
   /// Algorithm's summary
   const std::string summary() const override {

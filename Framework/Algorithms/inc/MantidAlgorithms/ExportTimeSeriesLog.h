@@ -42,7 +42,7 @@ public:
 
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return{ "GetTimeSeriesLogInformation" };
+    return {"GetTimeSeriesLogInformation"};
   }
 
   const std::string category() const override {

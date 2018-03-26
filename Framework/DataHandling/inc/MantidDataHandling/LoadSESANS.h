@@ -52,7 +52,7 @@ public:
   const std::string summary() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ "SaveSESANS" };
+    return {"SaveSESANS"};
   }
   const std::string category() const override;
   int confidence(Kernel::FileDescriptor &descriptor) const override;

@@ -242,7 +242,7 @@ public:
   }
 
   void testSeeAlso() {
-    std::vector<std::string> result{ "rabbit" };
+    std::vector<std::string> result{"rabbit"};
     result.emplace_back("goldfish");
     result.emplace_back("Spotted Hyena");
     TS_ASSERT_EQUALS(alg.seeAlso(), result);

@@ -43,7 +43,7 @@ public:
   const std::string name() const override { return "CutMD"; }
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "SliceMDHisto","ProjectMD","SliceMD","BinMD" };
+    return {"SliceMDHisto", "ProjectMD", "SliceMD", "BinMD"};
   }
   const std::string summary() const override {
     return "Slices multidimensional workspaces using input projection "

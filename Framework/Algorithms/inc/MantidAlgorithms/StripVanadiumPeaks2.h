@@ -40,7 +40,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override {
-    return{ "FindPeaks","StripPeaks" };
+    return {"FindPeaks", "StripPeaks"};
   }
   /// Algorithm's category for identification
   const std::string category() const override {

@@ -43,7 +43,8 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return{ "FilterByXValue","FilterEvents","FilterLogByTime","FilterBadPulses","FilterByTime" };
+    return {"FilterByXValue", "FilterEvents", "FilterLogByTime",
+            "FilterBadPulses", "FilterByTime"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
