@@ -195,7 +195,6 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     assert isinstance(start_value_list, list) and len(start_value_list) == 4, 'Starting value list must have 4 elements'
     fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y,  sigma=vec_e, p0=start_value_list)
     # take sigma=vec_e out as it increases unstable
-    # TODO FIXME NOW NOW2 - Find out how to get fitting error!
 
     # calculate the model
     x0, sigma, a, b = fit2_coeff
@@ -263,13 +262,18 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
         cov_matrix = None
     else:
         # good
-        assert isinstance(cov_matrix, numpy.ndarray), 'Covarance matrix must be a numpy array'
+        assert isinstance(cov_matrix, numpy.ndarray), 'Covariance matrix must be a numpy array'
+        # calculate fitting error/standard deviation  TEST TODO NOW3
+        perr = numpy.sqrt(numpy.diag(cov_matrix))
+        print('[DB...BAT] Gaussian fit error (type {0}): {1}'.format(type(perr), perr))
+
         gauss_error_dict['x02'] = cov_matrix[0, 0]
         gauss_error_dict['s2'] = cov_matrix[1, 1]
         gauss_error_dict['A2'] = cov_matrix[2, 2]
         gauss_error_dict['B2'] = cov_matrix[3, 3]
         gauss_error_dict['s_A'] = cov_matrix[1, 2]
         gauss_error_dict['A_s'] = cov_matrix[2, 1]
+    # END-FOR
 
     return gauss_parameter_dict, gauss_error_dict, cov_matrix
 
@@ -539,6 +543,7 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
     return True, pt_dict
 
 
+# TODO/NOW3 - Find which method is using this! Set the output right!
 def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_ws_name,
                                 peak_center, mask_workspace_name, norm_type,
                                 intensity_scale_factor, background_pt_tuple):
