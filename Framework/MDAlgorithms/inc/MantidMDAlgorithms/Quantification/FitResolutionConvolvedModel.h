@@ -36,7 +36,7 @@ public:
            "function convolved with a foreground model";
   }
   const std::vector<std::string> seeAlso() const override {
-    return{ "SimulateResolutionConvolvedModel" };
+    return {"SimulateResolutionConvolvedModel"};
   }
 
   int version() const override;

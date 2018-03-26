@@ -47,7 +47,7 @@ public:
            "point data.";
   }
   const std::vector<std::string> seeAlso() const override {
-    return{ "ConvertToHistogram" };
+    return {"ConvertToHistogram"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Axes"; }

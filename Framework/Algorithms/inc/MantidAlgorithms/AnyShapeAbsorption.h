@@ -88,10 +88,12 @@ public:
   AnyShapeAbsorption();
   /// Algorithm's name
   const std::string name() const override { return "AbsorptionCorrection"; }
-  
+
   const std::vector<std::string> seeAlso() const override {
-    return{ "SetSampleMaterial", "CreateSampleShape", "DefineGaugeVolume", "CylinderAbsorption", 
-      "FlatPlateAbsorption", "AnnularRingAbsorption", "CuboidGaugeVolumeAbsorption" };
+    return {"SetSampleMaterial",          "CreateSampleShape",
+            "DefineGaugeVolume",          "CylinderAbsorption",
+            "FlatPlateAbsorption",        "AnnularRingAbsorption",
+            "CuboidGaugeVolumeAbsorption"};
   }
 
   /// Summary of algorithms purpose

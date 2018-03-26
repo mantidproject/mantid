@@ -39,7 +39,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return{ ""Fit","EstimateFitParameters"" };
+    return {"" Fit "," EstimateFitParameters ""};
   }
   const std::string category() const override;
 

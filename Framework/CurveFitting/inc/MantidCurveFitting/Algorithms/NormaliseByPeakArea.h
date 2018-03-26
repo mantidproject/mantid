@@ -50,7 +50,7 @@ public:
   }
 
   const std::vector<std::string> seeAlso() const override {
-    return{ "MonitorEfficiencyCorUser", "Divide" };
+    return {"MonitorEfficiencyCorUser", "Divide"};
   }
 
   int version() const override;

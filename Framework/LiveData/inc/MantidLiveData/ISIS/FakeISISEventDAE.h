@@ -56,7 +56,7 @@ public:
     return "DataHandling\\DataAcquisition";
   }
   const std::vector<std::string> seeAlso() const override {
-    return{ "FakeISISHistoDAE" };
+    return {"FakeISISHistoDAE"};
   }
 
   /// Algorithm's summary

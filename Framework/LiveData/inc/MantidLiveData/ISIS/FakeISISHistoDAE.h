@@ -62,7 +62,7 @@ public:
     return "DataHandling\\DataAcquisition";
   }
   const std::vector<std::string> seeAlso() const override {
-    return{ "FakeISISEventDAE" };
+    return {"FakeISISEventDAE"};
   }
   /// Summary of algorithms purpose
   const std::string summary() const override {

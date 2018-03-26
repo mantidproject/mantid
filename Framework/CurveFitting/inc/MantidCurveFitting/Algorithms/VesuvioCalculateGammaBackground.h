@@ -58,7 +58,7 @@ public:
            "are absorbed by shielding.";
   }
   const std::vector<std::string> seeAlso() const override {
-    return{ "VesuvioCorrections" };
+    return {"VesuvioCorrections"};
   }
 
   int version() const override;
