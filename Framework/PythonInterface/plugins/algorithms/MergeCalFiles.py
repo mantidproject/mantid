@@ -10,7 +10,8 @@ class MergeCalFiles(PythonAlgorithm):
         return "DataHandling\\Text;Diffraction\\DataHandling\\CalFiles"
 
     def seeAlso(self):
-        return [ "ReadGroupsFromFile","CreateDummyCalFile","CreateCalFileByNames","AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile" ]
+        return [ "ReadGroupsFromFile","CreateDummyCalFile","CreateCalFileByNames",
+          "AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile" ]
 
     def name(self):
         return "MergeCalFiles"
