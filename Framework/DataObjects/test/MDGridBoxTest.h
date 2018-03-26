@@ -329,9 +329,9 @@ public:
     // Check the boxes
     std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes = g->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 10 * 5 * 2);
-    for (auto &box : boxes) {
+    for (auto &boxBase : boxes) {
       MDBox<MDLeanEvent<3>, 3> *box =
-          dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(box);
+          dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxBase);
       TS_ASSERT(box);
     }
     MDBox<MDLeanEvent<3>, 3> *box;
