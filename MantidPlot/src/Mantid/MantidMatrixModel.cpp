@@ -44,8 +44,7 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace *ws, int rows,
   m_colNumCorr = 1;
   m_endRow = m_rows - 1;
   m_startRow = start >= 0 ? start : 0;
-  m_mon_color =
-      QApplication::palette().color(QPalette::Active, QPalette::ToolTipBase);
+  m_mon_color = QColor(255, 253, 209);
   m_mask_color =
       QApplication::palette().color(QPalette::Disabled, QPalette::Background);
 

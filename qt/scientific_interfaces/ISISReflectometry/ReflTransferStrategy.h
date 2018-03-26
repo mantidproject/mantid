@@ -29,7 +29,7 @@ struct SearchResult {
 };
 
 /// Helper typdef for map of SearchResults keyed by run
-typedef std::map<std::string, SearchResult> SearchResultMap;
+using SearchResultMap = std::map<std::string, SearchResult>;
 
 /** ReflTransferStrategy : Provides an stratgegy for transferring runs from
 search results to a format suitable for processing.

@@ -9,8 +9,8 @@
 #include <boost/make_shared.hpp>
 
 class FermiChopperModelTest : public CxxTest::TestSuite {
-  typedef boost::shared_ptr<Mantid::API::FermiChopperModel>
-      FermiChopperModel_sptr;
+  using FermiChopperModel_sptr =
+      boost::shared_ptr<Mantid::API::FermiChopperModel>;
 
 public:
   void test_Default_Object_Throws_When_Computing_Pulse_Variance() {

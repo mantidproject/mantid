@@ -107,7 +107,38 @@ ComponentInfo::componentsInSubtree(size_t componentIndex) const {
   return m_componentInfo->componentsInSubtree(componentIndex);
 }
 
+const std::vector<size_t> &
+ComponentInfo::children(size_t componentIndex) const {
+  return m_componentInfo->children(componentIndex);
+}
+
 size_t ComponentInfo::size() const { return m_componentInfo->size(); }
+
+ComponentInfo::QuadrilateralComponent
+ComponentInfo::quadrilateralComponent(const size_t componentIndex) const {
+  auto type = componentType(componentIndex);
+  if (!(type == Beamline::ComponentType::Structured ||
+        type == Beamline::ComponentType::Rectangular))
+    throw std::runtime_error("ComponentType is not Structured or Rectangular "
+                             "in ComponentInfo::quadrilateralComponent.");
+
+  QuadrilateralComponent corners;
+  auto innerRangeComp =
+      m_componentInfo->componentRangeInSubtree(componentIndex);
+  // nSubComponents, subtract off self hence -1. nSubComponents = number of
+  // horizontal columns.
+  corners.nX = innerRangeComp.end() - innerRangeComp.begin() - 1;
+  auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(componentIndex);
+  auto nSubDetectors =
+      std::distance(innerRangeDet.begin(), innerRangeDet.end());
+  corners.nY = nSubDetectors / corners.nX;
+
+  corners.bottomLeft = *innerRangeDet.begin();
+  corners.topRight = corners.bottomLeft + nSubDetectors - 1;
+  corners.topLeft = corners.bottomLeft + (corners.nY - 1);
+  corners.bottomRight = corners.topRight - (corners.nY - 1);
+  return corners;
+}
 
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
@@ -193,7 +224,7 @@ size_t ComponentInfo::sample() const { return m_componentInfo->sample(); }
 
 double ComponentInfo::l1() const { return m_componentInfo->l1(); }
 
-size_t ComponentInfo::root() { return m_componentInfo->root(); }
+size_t ComponentInfo::root() const { return m_componentInfo->root(); }
 
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Kernel::V3D &newPosition) {
@@ -268,27 +299,18 @@ void ComponentInfo::growBoundingBoxAsRectuangularBank(
     Geometry::BoundingBox &mutableBB,
     std::map<size_t, size_t> &mutableDetExclusions,
     IteratorT &mutableIterator) const {
-  const auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
-  const auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
-  // subtract 1 because component ranges includes self
-  auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
-  auto nSubDetectors =
-      std::distance(innerRangeDet.begin(), innerRangeDet.end());
-  auto nY = nSubDetectors / nSubComponents;
-  size_t bottomLeft = *innerRangeDet.begin();
-  size_t topRight = bottomLeft + nSubDetectors - 1;
-  size_t topLeft = bottomLeft + (nY - 1);
-  size_t bottomRight = topRight - (nY - 1);
 
-  mutableBB.grow(componentBoundingBox(bottomLeft, reference));
-  mutableBB.grow(componentBoundingBox(topRight, reference));
-  mutableBB.grow(componentBoundingBox(topLeft, reference));
-  mutableBB.grow(componentBoundingBox(bottomRight, reference));
+  auto panel = quadrilateralComponent(index);
+  mutableBB.grow(componentBoundingBox(panel.bottomLeft, reference));
+  mutableBB.grow(componentBoundingBox(panel.topRight, reference));
+  mutableBB.grow(componentBoundingBox(panel.topLeft, reference));
+  mutableBB.grow(componentBoundingBox(panel.bottomRight, reference));
 
   // Get bounding box for rectangular bank.
   // Record detector ranges to skip
-  mutableDetExclusions.insert(std::make_pair(bottomLeft, topRight));
+  mutableDetExclusions.insert(std::make_pair(panel.bottomLeft, panel.topRight));
   // Skip all sub components.
+  const auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
   mutableIterator = innerRangeComp.rend();
 }
 
@@ -370,7 +392,8 @@ BoundingBox
 ComponentInfo::componentBoundingBox(const size_t index,
                                     const BoundingBox *reference) const {
   // Check that we have a valid shape here
-  if (!hasValidShape(index)) {
+  if (!hasValidShape(index) ||
+      componentType(index) == Beamline::ComponentType::Infinite) {
     return BoundingBox(); // Return null bounding box
   }
   const auto &s = this->shape(index);
@@ -423,7 +446,8 @@ ComponentInfo::componentBoundingBox(const size_t index,
  */
 BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
                                        const BoundingBox *reference) const {
-  if (isDetector(componentIndex)) {
+  if (isDetector(componentIndex) ||
+      componentType(componentIndex) == Beamline::ComponentType::Infinite) {
     return componentBoundingBox(componentIndex, reference);
   }
   BoundingBox absoluteBB;

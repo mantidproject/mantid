@@ -37,7 +37,7 @@ enum VisualNormalization {
 };
 
 // Helper typedef
-typedef Mantid::signal_t (Mantid::API::IMDNode::*NormFuncIMDNodePtr)() const;
+using NormFuncIMDNodePtr = Mantid::signal_t (Mantid::API::IMDNode::*)() const;
 
 /**
 Determine which normalization function will be called on an IMDNode

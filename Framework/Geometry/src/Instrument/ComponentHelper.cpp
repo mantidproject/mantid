@@ -2,7 +2,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
@@ -101,8 +101,8 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
 /**
  * Create a sphere object
  */
-IObject_sptr createSphere(double radius, const V3D &centre,
-                          const std::string &id) {
+boost::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
+                                          const std::string &id) {
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }

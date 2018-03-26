@@ -70,10 +70,10 @@ signals:
   void peaksSorted(const std::string &, const bool);
 
 private:
-  typedef QString ColumnNameType;
-  typedef QString ColumnValueType;
-  typedef std::map<ColumnNameType, bool> ColumnNameSortableMap;
-  typedef std::map<int, ColumnNameType> ColumnIndexNameMap;
+  using ColumnNameType = QString;
+  using ColumnValueType = QString;
+  using ColumnNameSortableMap = std::map<ColumnNameType, bool>;
+  using ColumnIndexNameMap = std::map<int, ColumnNameType>;
 
 public:
   /// Label for run number column

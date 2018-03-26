@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -129,16 +130,16 @@ void PredictFractionalPeaks::exec() {
 
   V3D hkl;
   int peakNum = 0;
-  int NPeaks = Peaks->getNumberPeaks();
+  const auto NPeaks = Peaks->getNumberPeaks();
   Kernel::Matrix<double> Gon;
   Gon.identityMatrix();
 
-  double Hmin = getProperty("Hmin");
-  double Hmax = getProperty("Hmax");
-  double Kmin = getProperty("Kmin");
-  double Kmax = getProperty("Kmax");
-  double Lmin = getProperty("Lmin");
-  double Lmax = getProperty("Lmax");
+  const double Hmin = getProperty("Hmin");
+  const double Hmax = getProperty("Hmax");
+  const double Kmin = getProperty("Kmin");
+  const double Kmax = getProperty("Kmax");
+  const double Lmin = getProperty("Lmin");
+  const double Lmax = getProperty("Lmax");
 
   int N = NPeaks;
   if (includePeaksInRange) {
@@ -147,7 +148,7 @@ void PredictFractionalPeaks::exec() {
     N = max<int>(100, N);
   }
   IPeak &peak0 = Peaks->getPeak(0);
-  int RunNumber = peak0.getRunNumber();
+  auto RunNumber = peak0.getRunNumber();
   Gon = peak0.getGoniometerMatrix();
   Progress prog(this, 0.0, 1.0, N);
   if (includePeaksInRange) {
@@ -165,6 +166,7 @@ void PredictFractionalPeaks::exec() {
   vector<vector<int>> AlreadyDonePeaks;
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw
+  Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
   while (!done) {
     for (double hOffset : hOffsets) {
       for (double kOffset : kOffsets) {
@@ -190,7 +192,7 @@ void PredictFractionalPeaks::exec() {
 
             peak->setGoniometerMatrix(Gon);
 
-            if (Qs[2] > 0 && peak->findDetector()) {
+            if (Qs[2] > 0 && peak->findDetector(tracer)) {
               ErrPos = 2;
               vector<int> SavPk{RunNumber,
                                 boost::math::iround(1000.0 * hkl1[0]),

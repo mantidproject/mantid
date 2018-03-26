@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 #include "MantidKernel/MaterialXMLParser.h"
 #include "MantidKernel/make_unique.h"
@@ -49,7 +50,7 @@ namespace Geometry {
 SampleEnvironmentSpec_uptr
 SampleEnvironmentSpecParser::parse(const std::string &name,
                                    std::istream &istr) {
-  typedef AutoPtr<Document> DocumentPtr;
+  using DocumentPtr = AutoPtr<Document>;
 
   InputSource src(istr);
   DOMParser parser;
@@ -222,16 +223,18 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
   }
   ShapeFactory factory;
   auto comp = factory.createShape(geometry);
-  comp->setID(element->getAttribute("id"));
   auto materialID = element->getAttribute("material");
   auto iter = m_materials.find(materialID);
+  Kernel::Material mat;
   if (iter != m_materials.end()) {
-    comp->setMaterial(iter->second);
+    mat = iter->second;
   } else {
     throw std::runtime_error("SampleEnvironmentSpecParser::parseComponent() - "
                              "Unable to find material with id=" +
                              materialID);
   }
+  comp->setID(element->getAttribute("id"));
+  comp->setMaterial(mat);
   return comp;
 }
 

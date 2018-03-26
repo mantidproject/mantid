@@ -67,7 +67,7 @@ private:
   std::map<CatalogSession_sptr, ICatalog_sptr> m_activeCatalogs;
 };
 
-typedef Kernel::SingletonHolder<CatalogManagerImpl> CatalogManager;
+using CatalogManager = Kernel::SingletonHolder<CatalogManagerImpl>;
 }
 }
 

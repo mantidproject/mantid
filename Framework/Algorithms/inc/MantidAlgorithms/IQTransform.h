@@ -87,8 +87,8 @@ private:
   subtractBackgroundWS(API::MatrixWorkspace_sptr ws,
                        API::MatrixWorkspace_sptr background);
 
-  typedef void (IQTransform::*TransformFunc)(API::MatrixWorkspace_sptr);
-  typedef std::map<std::string, TransformFunc> TransformMap;
+  using TransformFunc = void (IQTransform::*)(API::MatrixWorkspace_sptr);
+  using TransformMap = std::map<std::string, TransformFunc>;
   TransformMap
       m_transforms; ///< A map of transformation name and function pointers
 

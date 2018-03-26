@@ -100,7 +100,7 @@ struct MandatoryFirst {
 
 //----------------------- Property ordering ------------------------------
 /// Vector of property pointers
-typedef std::vector<Property *> PropertyVector;
+using PropertyVector = std::vector<Property *>;
 
 /**
  * Returns the vector of properties ordered by the criteria defined in

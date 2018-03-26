@@ -5,6 +5,7 @@
 #include "ui_JumpFit.h"
 
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/TextAxis.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -17,37 +18,38 @@ public:
 
   // Inherited methods from IndirectDataAnalysisTab
   void setup() override;
+
   bool validate() override;
-  void run() override;
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
+
+  bool doPlotGuess() const override;
 
 protected slots:
   /// Handle when the sample input is ready
   void handleSampleInputReady(const QString &filename);
   /// Slot to handle plotting a different spectrum of the workspace
   void handleWidthChange(const QString &text);
-  /// Slot for when the range on the range selector changes
-  void qRangeChanged(double min, double max);
-  /// Slot to update the guides when the range properties change
-  void updateRS(QtProperty *prop, double val);
   /// Find all spectra with width data in the workspace
   void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
   /// Handles plotting results of algorithm on miniplot
   void algorithmComplete(bool error) override;
-  /// Handles a fit algorithm being selected
-  void fitFunctionSelected(const QString &functionName);
-  /// Generates the plot guess data
-  void plotGuess();
   /// Handles plotting and saving
   void updatePreviewPlots() override;
+  void startXChanged(double startX) override;
+  void endXChanged(double endX) override;
+  void updatePlotRange() override;
   void saveClicked();
   void plotClicked();
+  void updatePlotOptions() override;
 
 protected:
-  /// Creates the algorithm to use in fitting.
-  Mantid::API::IAlgorithm_sptr
-  createFitAlgorithm(Mantid::API::IFunction_sptr func);
+  size_t getWidth() const;
+  int minimumSpectrum() const override;
+  int maximumSpectrum() const override;
+
+  std::string createSingleFitOutputName() const override;
+  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
 
   Mantid::API::IAlgorithm_sptr
   processParametersAlgorithm(const std::string &parameterWSName,
@@ -60,19 +62,33 @@ protected:
   renameWorkspaceAlgorithm(const std::string &workspaceToRename,
                            const std::string &newName);
 
+  Mantid::API::IAlgorithm_sptr
+  scaleAlgorithm(const std::string &workspaceToScale,
+                 const std::string &outputName, double scaleFactor);
+
+  void enablePlotResult() override;
+  void disablePlotResult() override;
+  void enableSaveResult() override;
+  void disableSaveResult() override;
+  void enablePlotPreview() override;
+  void disablePlotPreview() override;
+  void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
+  void removeGuessPlot() override;
+
 private:
+  std::map<std::string, size_t>
+  findAxisLabelsWithSubstrings(Mantid::API::TextAxis *axis,
+                               const std::vector<std::string> &substrings,
+                               const size_t &maximumNumber) const;
+
   void disablePlotGuess() override;
   void enablePlotGuess() override;
 
   // The UI form
-  Ui::JumpFit m_uiForm;
+  std::unique_ptr<Ui::JumpFit> m_uiForm;
 
   /// Map of axis labels to spectrum number
-  std::map<std::string, int> m_spectraList;
-
-  QtTreePropertyBrowser *m_jfTree;
-
-  std::string m_baseName;
+  std::map<std::string, size_t> m_spectraList;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

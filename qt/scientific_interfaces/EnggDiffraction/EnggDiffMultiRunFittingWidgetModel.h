@@ -28,6 +28,8 @@ public:
 
   bool hasFittedPeaksForRun(const RunLabel &runLabel) const override;
 
+  void removeRun(const RunLabel &runLabel) override;
+
 private:
   static constexpr size_t MAX_BANKS = 2;
 

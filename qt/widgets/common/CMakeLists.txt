@@ -62,6 +62,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/PreprocessMap.cpp
 	src/DataProcessorUI/ProcessingAlgorithm.cpp
 	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
+	src/DataProcessorUI/TreeData.cpp
 	src/DataProcessorUI/TwoLevelTreeManager.cpp
 	src/DataProcessorUI/WhiteList.cpp
         src/DataProcessorUI/WorkspaceNameUtils.cpp
@@ -87,6 +88,7 @@ set ( SRC_FILES
 	src/FitPropertyBrowser.cpp
 	src/FunctionBrowser.cpp
 	src/HintingLineEdit.cpp
+	src/IndirectFitPropertyBrowser.cpp
 	src/IndirectInstrumentConfig.cpp
 	src/InputController.cpp
 	src/InstrumentSelector.cpp
@@ -196,6 +198,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/CatalogSearch.h
   inc/MantidQtWidgets/Common/CatalogSelector.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
+  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/IndirectInstrumentConfig.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
@@ -545,6 +548,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
     ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
   LINK_LIBS

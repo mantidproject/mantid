@@ -53,8 +53,8 @@ struct IsSharedPtr<boost::shared_ptr<T>> : boost::true_type {};
  */
 template <typename ArgType> struct ToWeakPtrImpl {
   // Useful types
-  typedef typename ArgType::element_type PointeeType;
-  typedef boost::weak_ptr<PointeeType> WeakPtr;
+  using PointeeType = typename ArgType::element_type;
+  using WeakPtr = boost::weak_ptr<PointeeType>;
 
   inline PyObject *operator()(const ArgType &p) const {
     if (!p)
@@ -80,9 +80,9 @@ template <typename T> struct ToWeakPtr_Requires_Shared_Ptr_Return_Value {};
 struct ToWeakPtr {
   template <class T> struct apply {
     // Deduce if type is correct for policy
-    typedef typename boost::mpl::if_c<
+    using type = typename boost::mpl::if_c<
         IsSharedPtr<T>::value, ToWeakPtrImpl<T>,
-        ToWeakPtr_Requires_Shared_Ptr_Return_Value<T>>::type type;
+        ToWeakPtr_Requires_Shared_Ptr_Return_Value<T>>::type;
   };
 };
 
