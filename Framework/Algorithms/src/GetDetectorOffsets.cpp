@@ -83,12 +83,6 @@ void GetDetectorOffsets::init() {
       "Peak fitting range for the first round fitting wil be determined by "
       "given XMin and XMax"
       "And in second round peak fitting, fit range will be limited to FHWM. ");
-
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "PeakFitResultTableWorkspace", "", Direction::Output,
-                      PropertyMode::Optional),
-                  "Name of the input Tableworkspace containing peak fit window "
-                  "information for each spectrum. ");
 }
 
 //-----------------------------------------------------------------------------------------
@@ -128,7 +122,9 @@ void GetDetectorOffsets::exec() {
   bool fit_peak_twice = getProperty("FitEachPeakTwice");
 
   // output fitting result?
-  std::string result_ws_name = getPropertyValue("PeakFitResultTableWorkspace");
+  // std::string result_ws_name =
+  // getPropertyValue("PeakFitResultTableWorkspace");
+  std::string result_ws_name("whatevera");
   TableWorkspace_sptr fit_result_table;
   if (result_ws_name.size() > 0) {
     fit_result_table = boost::make_shared<TableWorkspace>();
@@ -140,6 +136,11 @@ void GetDetectorOffsets::exec() {
     fit_result_table->addColumn("double", "A1");
     for (size_t iws = 0; iws < inputW->getNumberHistograms(); ++iws)
       fit_result_table->appendRow();
+    declareProperty(
+        make_unique<WorkspaceProperty<TableWorkspace>>(
+            "PeakFitResultTableWorkspace", "whatever", Direction::Output),
+        "Name of the input Tableworkspace containing peak fit window "
+        "information for each spectrum. ");
     setProperty("PeakFitResultTableWorkspace", fit_result_table);
   } else {
     fit_result_table = 0;
@@ -152,19 +153,19 @@ void GetDetectorOffsets::exec() {
   for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
     // Fit the peak
-    double peak_center, peak_fwhm;
     GetDetectorsOffset::PeakLinearFunction fit_result;
-    double offset = fitSpectra(wi, isAbsolute, m_Xmin, m_Xmax, peak_center,
-                               peak_fwhm, fit_result);
-    if (fit_peak_twice && peak_fwhm > 0.5) {
-      double xmin = peak_center - 0.5 * peak_fwhm;
-      double xmax = peak_center + 0.5 * peak_fwhm;
+    double offset = fitSpectra(wi, isAbsolute, m_Xmin, m_Xmax, fit_result);
+    g_log.notice() << "[DB..] wi = " << wi << ": height = " << fit_result.height
+                   << "\n";
+
+    if (fit_peak_twice && fit_result.fwhm > 0.5) {
+      double xmin = fit_result.center - 0.5 * fit_result.fwhm;
+      double xmax = fit_result.center + 0.5 * fit_result.fwhm;
       g_log.notice() << "[DB...BAT] ws-index " << wi
-                     << " found: center = " << peak_center
-                     << ", FHWM = " << peak_fwhm << "; new fit range: " << xmin
-                     << ", " << xmax << "\n";
-      offset = fitSpectra(wi, isAbsolute, xmin, xmax, peak_center, peak_fwhm,
-                          fit_result);
+                     << " found: center = " << fit_result.center
+                     << ", FHWM = " << fit_result.fwhm
+                     << "; new fit range: " << xmin << ", " << xmax << "\n";
+      offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result);
     }
 
     double mask = 0.0;
@@ -230,13 +231,11 @@ void GetDetectorOffsets::exec() {
  *  @param isAbsolbute :: Whether to calculate an absolute offset
  *  @param xmin: minimum value in fit range
  *  @param xmax: maximum value in fit range
- *  @param peak_center: peak center found
- *  @param peak_fwhm: peak FHWM found
+ *  @param fit_result: collection of fitting result
  *  @return The calculated offset value
  */
 double GetDetectorOffsets::fitSpectra(
     const int64_t s, bool isAbsolbute, const double xmin, const double xmax,
-    double &peak_center, double &peak_fwhm,
     GetDetectorsOffset::PeakLinearFunction &fit_result) {
   // Find point of peak centre
   const auto &yValues = inputW->y(s);
@@ -267,9 +266,9 @@ double GetDetectorOffsets::fitSpectra(
   fit_alg->setProperty("EndX", xmax);
   fit_alg->setProperty("MaxIterations", 100);
 
-  IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
+  //  IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
+  //  fit_alg->setProperty("Function", fun_ptr);
 
-  fit_alg->setProperty("Function", fun_ptr);
   fit_alg->executeAsChildAlg();
   std::string fitStatus = fit_alg->getProperty("OutputStatus");
   // Pixel with large offset will be masked
@@ -283,16 +282,19 @@ double GetDetectorOffsets::fitSpectra(
   // So far the function parameters are set up as thus: A0, A1, Height,
   // PeakCenter, Sigma
   std::vector<std::string> param_names = function->getParameterNames();
+
+  std::stringstream dbss;
+  dbss << "[Debug] ws-index = " << s << "\n";
   for (size_t i = 0; i < function->nParams(); ++i) {
-    g_log.debug() << param_names[i] << "(" << i
-                  << "): " << function->getParameter(i) << "\n";
+    dbss << param_names[i] << "(" << i << "): " << function->getParameter(i)
+         << "\n";
   }
+  g_log.notice(dbss.str());
 
   // get fitted result
-  peak_center = function->getParameter(3);
-  peak_fwhm = function->getParameter(4);
+  double peak_center = function->getParameter(3);
   fit_result.center = peak_center;
-  fit_result.fwhm = peak_fwhm;
+  fit_result.fwhm = function->getParameter(4);
   fit_result.height = function->getParameter(2);
   fit_result.a0 = function->getParameter(0);
   fit_result.a1 = function->getParameter(1);
@@ -323,7 +325,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
       creator.createFunction(getProperty("PeakFunction")));
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
-  const double sigma(10.0);
+  const double sigma(1.0);
   peak->setFwhm(2.0 * std::sqrt(2.0 * M_LN2) * sigma);
 
   auto fitFunc = new CompositeFunction(); // Takes ownership of the functions

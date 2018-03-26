@@ -69,7 +69,7 @@ private:
   void exec() override;
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
   double fitSpectra(const int64_t s, bool isAbsolbute, const double xmin,
-                    const double xmax, double &peak_center, double &peak_fwhm,
+                    const double xmax,
                     GetDetectorsOffset::PeakLinearFunction &fit_result);
   /// Create a function string from the given parameters and the algorithm
   /// inputs
