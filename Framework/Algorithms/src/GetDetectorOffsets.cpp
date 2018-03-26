@@ -85,7 +85,7 @@ void GetDetectorOffsets::init() {
       "And in second round peak fitting, fit range will be limited to FHWM. ");
 
   declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "PeakFitResultTableWorkspace", "", Direction::Input,
+                      "PeakFitResultTableWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "Name of the input Tableworkspace containing peak fit window "
                   "information for each spectrum. ");
@@ -140,6 +140,7 @@ void GetDetectorOffsets::exec() {
     fit_result_table->addColumn("double", "A1");
     for (size_t iws = 0; iws < inputW->getNumberHistograms(); ++iws)
       fit_result_table->appendRow();
+    setProperty("PeakFitResultTableWorkspace", fit_result_table);
   } else {
     fit_result_table = 0;
   }
@@ -279,17 +280,20 @@ double GetDetectorOffsets::fitSpectra(
   API::IFunction_sptr function = fit_alg->getProperty("Function");
   // double offset = function->getParameter(3); // params[3]; // f1.PeakCentre
 
-  peak_center = function->getParameter(3);
-  peak_fwhm = function->getParameter(2);
-  // peak_center = function->center();
-  // peak_fwhm = function->getFWHM();
-  throw std::runtime_error("Need to make sure peak center, peak fwhm are 2 and "
-                           "3 for all peak function!");
+  // So far the function parameters are set up as thus: A0, A1, Height,
+  // PeakCenter, Sigma
+  std::vector<std::string> param_names = function->getParameterNames();
+  for (size_t i = 0; i < function->nParams(); ++i) {
+    g_log.debug() << param_names[i] << "(" << i
+                  << "): " << function->getParameter(i) << "\n";
+  }
 
   // get fitted result
+  peak_center = function->getParameter(3);
+  peak_fwhm = function->getParameter(4);
   fit_result.center = peak_center;
   fit_result.fwhm = peak_fwhm;
-  fit_result.height = function->getParameter(0);
+  fit_result.height = function->getParameter(2);
   fit_result.a0 = function->getParameter(0);
   fit_result.a1 = function->getParameter(1);
 

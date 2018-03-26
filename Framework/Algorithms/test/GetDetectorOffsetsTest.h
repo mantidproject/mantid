@@ -1,16 +1,17 @@
 #ifndef GETDETECTOROFFSETSTEST_H_
 #define GETDETECTOROFFSETSTEST_H_
 
-#include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetectorOffsets;
@@ -227,6 +228,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin", "-20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax", "20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("FitEachPeakTwice", true));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue(
+        "PeakFitResultTableWorkspace", "fitparamstable"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
@@ -247,6 +250,16 @@ public:
     if (!mask)
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("fitparamstable"));
+    if (AnalysisDataService::Instance().doesExist("fitparamstable")) {
+      ITableWorkspace_sptr paramtable =
+          boost::dynamic_pointer_cast<ITableWorkspace>(
+              AnalysisDataService::Instance().retrieve("fitparamstable"));
+      TS_ASSERT(paramtable);
+      TS_ASSERT_EQUALS(paramtable->columnCount(), 5);
+      TS_ASSERT_EQUALS(paramtable->rowCount(), 3);
+    }
   }
 
 private:
