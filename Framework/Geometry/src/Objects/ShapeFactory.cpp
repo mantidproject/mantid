@@ -164,11 +164,6 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
             lastElement = pE;
             idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);
             numPrimitives++;
-          } else if (primitiveName == "segmented-cylinder") {
-            lastElement = pE;
-            idMatching[idFromUser] =
-                parseSegmentedCylinder(pE, primitives, l_id);
-            numPrimitives++;
           } else if (primitiveName == "hollow-cylinder") {
             idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
             numPrimitives++;

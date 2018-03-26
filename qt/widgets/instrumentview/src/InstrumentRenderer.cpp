@@ -106,21 +106,24 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
       continue;
 
     if (type == Mantid::Beamline::ComponentType::Rectangular) {
-      updateVisited(visited, compInfo.componentsInSubtree(i));
+      visited[i] = true;
+      updateVisited(visited, compInfo.children(i));
       if (visibleComps[i])
         drawRectangularBank(i, picking);
       continue;
     }
 
     if (type == Mantid::Beamline::ComponentType::OutlineComposite) {
-      updateVisited(visited, compInfo.componentsInSubtree(i));
+      visited[i] = true;
+      updateVisited(visited, compInfo.children(i));
       if (visibleComps[i])
         drawTube(i, picking);
       continue;
     }
 
     if (type == Mantid::Beamline::ComponentType::Structured) {
-      updateVisited(visited, compInfo.componentsInSubtree(i));
+      visited[i] = true;
+      updateVisited(visited, compInfo.children(i));
       if (visibleComps[i])
         drawStructuredBank(i, picking);
       continue;
@@ -183,7 +186,6 @@ void InstrumentRenderer::drawTube(size_t bankIndex, bool picking) {
   const auto &compInfo = m_actor.componentInfo();
   glPushMatrix();
 
-  // auto dets = compInfo.detectorsInSubtree(bankIndex);
   auto pos = compInfo.position(bankIndex);
   auto rot = compInfo.rotation(bankIndex);
   auto scale = compInfo.scaleFactor(bankIndex);
