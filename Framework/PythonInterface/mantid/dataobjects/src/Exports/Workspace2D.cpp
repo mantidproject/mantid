@@ -138,7 +138,7 @@ public:
         specDef.add(detectorIndex);
       }
       spectrumDefinitions.emplace_back(std::move(specDef));
-      spectrumNumbers.emplace_back(std::move(specNum));
+      spectrumNumbers.emplace_back(specNum);
     }
 
     std::string instrumentXML = extract<std::string>(state["instrument_xml"]);

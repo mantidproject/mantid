@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHMS_RENAMEWORKSPACE_H_
 #define MANTID_ALGORITHMS_RENAMEWORKSPACE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -41,7 +38,7 @@ namespace Algorithms {
 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport RenameWorkspace : public API::Algorithm {
+class DLLExport RenameWorkspace : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RenameWorkspace"; }

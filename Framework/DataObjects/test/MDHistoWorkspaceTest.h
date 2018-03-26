@@ -33,7 +33,7 @@ private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
   size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
-    Mantid::API::IMDIterator *it = ws->createIterator(NULL);
+    Mantid::API::IMDIterator *it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
     for (; counter < it->getDataSize(); ++counter) {
@@ -1263,10 +1263,10 @@ public:
     IMDHistoWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<IMDHistoWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<IMDHistoWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -1274,9 +1274,9 @@ public:
     IMDHistoWorkspace_const_sptr wsCastConst;
     IMDHistoWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (IMDHistoWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IMDHistoWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };

@@ -35,6 +35,7 @@ set ( TEST_PY_FILES
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
+  LoadWANDTest.py
   MDNormSCDPreprocessIncoherentTest.py
   MolDynTest.py
   MSDFitTest.py
@@ -45,6 +46,7 @@ set ( TEST_PY_FILES
   SANSFitShiftScaleTest.py
   SANSStitchTest.py
   SavePlot1DTest.py
+  SaveVulcanGSSTest.py
   SimpleShapeMonteCarloAbsorptionTest.py
   SimulatedDensityOfStatesTest.py
   SofQWMomentsTest.py

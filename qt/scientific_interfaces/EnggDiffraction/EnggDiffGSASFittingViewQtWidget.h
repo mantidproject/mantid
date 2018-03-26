@@ -2,8 +2,11 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEWQTWIDGET_H_
 
 #include "DllConfig.h"
+#include "EnggDiffMultiRunFittingQtWidget.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
+#include "IEnggDiffractionPythonRunner.h"
+#include "IEnggDiffractionUserMsg.h"
 
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
@@ -19,16 +22,22 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
   Q_OBJECT
 
 public:
-  EnggDiffGSASFittingViewQtWidget();
+  EnggDiffGSASFittingViewQtWidget(
+      boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
+      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
 
   ~EnggDiffGSASFittingViewQtWidget() override;
+
+  void addWidget(IEnggDiffMultiRunFittingWidgetView *widget) override;
 
   void displayLatticeParams(
       const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 
+  void displayGamma(const double gamma) const override;
+
   void displayRwp(const double rwp) const override;
 
-  void setZoomToolEnabled(const bool enabled);
+  void displaySigma(const double sigma) const override;
 
   std::vector<std::string> getFocusedFileNames() const override;
 
@@ -38,43 +47,58 @@ public:
 
   std::string getPathToGSASII() const override;
 
-  double getPawleyDMin() const override;
+  boost::optional<double> getPawleyDMin() const override;
 
-  double getPawleyNegativeWeight() const override;
+  boost::optional<double> getPawleyNegativeWeight() const override;
 
   std::vector<std::string> getPhaseFileNames() const override;
 
   GSASRefinementMethod getRefinementMethod() const override;
 
-  RunLabel getSelectedRunLabel() const override;
+  bool getRefineGamma() const override;
 
-  void plotCurve(const std::vector<boost::shared_ptr<QwtData>> &curve) override;
+  bool getRefineSigma() const override;
 
-  void resetCanvas() override;
+  boost::optional<double> getXMax() const override;
 
-  void resetPlotZoomLevel();
+  boost::optional<double> getXMin() const override;
 
   void setEnabled(const bool enabled);
 
-  bool showRefinementResultsSelected() const override;
+  void showStatus(const std::string &status) const override;
 
-  void updateRunList(const std::vector<RunLabel> &runLabels) override;
+  void userError(const std::string &errorTitle,
+                 const std::string &errorDescription) const override;
 
-  void userWarning(const std::string &warningDescription) const override;
+  void userWarning(const std::string &warningTitle,
+                   const std::string &warningDescription) const override;
 
 private slots:
   void browseFocusedRun();
+  void browseGSASHome();
+  void browseGSASProj();
+  void browseInstParams();
+  void browsePhaseFiles();
+  void disableLoadIfInputEmpty();
+  void doRefinement();
   void loadFocusedRun();
   void selectRun();
 
 private:
-  std::vector<std::unique_ptr<QwtPlotCurve>> m_focusedRunCurves;
+  bool runFileLineEditEmpty() const;
+
+  void setLoadEnabled(const bool enabled);
+
+  static const char GSAS_HOME_SETTING_NAME[];
+  static const char SETTINGS_NAME[];
+
+  boost::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
 
   std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
   Ui::EnggDiffractionQtTabGSAS m_ui;
 
-  std::unique_ptr<QwtPlotZoomer> m_zoomTool;
+  boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
 
   void setFocusedRunFileNames(const QStringList &filenames);
 

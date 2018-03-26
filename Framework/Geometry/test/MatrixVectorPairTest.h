@@ -10,7 +10,7 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-typedef MatrixVectorPair<int, V3R> V3RIntPair;
+using V3RIntPair = MatrixVectorPair<int, V3R>;
 
 class MatrixVectorPairTest : public CxxTest::TestSuite {
 public:

@@ -72,7 +72,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
     pqCameraToolbarNonOrthogonalAxes : public QToolBar {
   Q_OBJECT
-  typedef QToolBar Superclass;
+  using Superclass = QToolBar;
 
 public:
   pqCameraToolbarNonOrthogonalAxes(const QString &title,

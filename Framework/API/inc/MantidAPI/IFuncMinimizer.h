@@ -74,7 +74,7 @@ protected:
   std::string m_errorString;
 };
 
-typedef boost::shared_ptr<IFuncMinimizer> IFuncMinimizer_sptr;
+using IFuncMinimizer_sptr = boost::shared_ptr<IFuncMinimizer>;
 
 } // namespace API
 } // namespace Mantid

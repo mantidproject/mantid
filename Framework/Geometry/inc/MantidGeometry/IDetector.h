@@ -115,10 +115,10 @@ public:
 };
 
 /// Shared pointer to IDetector
-typedef boost::shared_ptr<Mantid::Geometry::IDetector> IDetector_sptr;
+using IDetector_sptr = boost::shared_ptr<Mantid::Geometry::IDetector>;
 /// Shared pointer to IDetector (const version)
-typedef boost::shared_ptr<const Mantid::Geometry::IDetector>
-    IDetector_const_sptr;
+using IDetector_const_sptr =
+    boost::shared_ptr<const Mantid::Geometry::IDetector>;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -11,6 +11,11 @@ class DLLExport ContainerSubtraction : public CorrectionsTab {
 
 public:
   ContainerSubtraction(QWidget *parent = nullptr);
+  ~ContainerSubtraction();
+
+  void setTransformedContainer(Mantid::API::MatrixWorkspace_sptr workspace,
+                               const std::string &name);
+  void setTransformedContainer(Mantid::API::MatrixWorkspace_sptr workspace);
 
 private slots:
   /// Handles a new sample being loaded
@@ -43,37 +48,41 @@ private:
   std::string createOutputName();
 
   Mantid::API::MatrixWorkspace_sptr
-  requestRebinToSample(Mantid::API::MatrixWorkspace_sptr workspace);
+  requestRebinToSample(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
   Mantid::API::MatrixWorkspace_sptr
   shiftWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                 double shiftValue);
+                 double shiftValue) const;
   Mantid::API::MatrixWorkspace_sptr
   scaleWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                 double scaleValue);
+                 double scaleValue) const;
   Mantid::API::MatrixWorkspace_sptr
   minusWorkspace(Mantid::API::MatrixWorkspace_sptr lhsWorkspace,
-                 Mantid::API::MatrixWorkspace_sptr rhsWorkspace);
+                 Mantid::API::MatrixWorkspace_sptr rhsWorkspace) const;
   Mantid::API::MatrixWorkspace_sptr
   rebinToWorkspace(Mantid::API::MatrixWorkspace_sptr workspaceToRebin,
-                   Mantid::API::MatrixWorkspace_sptr workspaceToMatch);
+                   Mantid::API::MatrixWorkspace_sptr workspaceToMatch) const;
   Mantid::API::MatrixWorkspace_sptr
-  convertToHistogram(Mantid::API::MatrixWorkspace_sptr workspace);
+  convertToHistogram(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
   Mantid::API::IAlgorithm_sptr
   shiftAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
-                 double shiftValue);
+                 double shiftValue) const;
   Mantid::API::IAlgorithm_sptr
   scaleAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
-                 double scaleValue);
+                 double scaleValue) const;
   Mantid::API::IAlgorithm_sptr
   minusAlgorithm(Mantid::API::MatrixWorkspace_sptr lhsWorkspace,
-                 Mantid::API::MatrixWorkspace_sptr rhsWorkspace);
+                 Mantid::API::MatrixWorkspace_sptr rhsWorkspace) const;
+  Mantid::API::IAlgorithm_sptr rebinToWorkspaceAlgorithm(
+      Mantid::API::MatrixWorkspace_sptr workspaceToRebin,
+      Mantid::API::MatrixWorkspace_sptr workspaceToMatch) const;
+  Mantid::API::IAlgorithm_sptr convertToHistogramAlgorithm(
+      Mantid::API::MatrixWorkspace_sptr workspace) const;
   Mantid::API::IAlgorithm_sptr
-  rebinToWorkspaceAlgorithm(Mantid::API::MatrixWorkspace_sptr workspaceToRebin,
-                            Mantid::API::MatrixWorkspace_sptr workspaceToMatch);
-  Mantid::API::IAlgorithm_sptr
-  convertToHistogramAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace);
+  addSampleLogAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
+                        const std::string &name, const std::string &type,
+                        const std::string &value) const;
 
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;

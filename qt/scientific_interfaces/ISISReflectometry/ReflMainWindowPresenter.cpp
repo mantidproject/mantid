@@ -4,7 +4,7 @@
 #include "IReflEventTabPresenter.h"
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
-#include <iostream>
+#include "MantidQtWidgets/Common/HelpWindow.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
@@ -41,6 +41,20 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
+void ReflMainWindowPresenter::notifyReductionPaused(int group) {
+  m_isProcessing = false;
+  m_savePresenter->onAnyReductionPaused();
+  m_settingsPresenter->onReductionPaused(group);
+  m_eventPresenter->onReductionPaused(group);
+}
+
+void ReflMainWindowPresenter::notifyReductionResumed(int group) {
+  m_isProcessing = true;
+  m_savePresenter->onAnyReductionResumed();
+  m_settingsPresenter->onReductionResumed(group);
+  m_eventPresenter->onReductionResumed(group);
+}
+
 /**
 Used by the view to tell the presenter something has changed
 */
@@ -53,26 +67,21 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
   case Flag::ConfirmReductionResumedFlag:
     m_isProcessing = true;
     break;
+  case Flag::HelpPressed:
+    showHelp();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
 }
 
-void ReflMainWindowPresenter::settingsChanged(int group) {
-  m_runsPresenter->settingsChanged(group);
+void ReflMainWindowPresenter::showHelp() {
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("ISIS Reflectometry"));
 }
 
-/** Returns values passed for 'Transmission run(s)'
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*values
-* @return :: Values passed for 'Transmission run(s)'
-*/
-std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
-
-  checkSettingsPtrValid(m_settingsPresenter);
-
-  return m_settingsPresenter->getTransmissionRuns(group);
+void ReflMainWindowPresenter::settingsChanged(int group) {
+  m_runsPresenter->settingsChanged(group);
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -142,6 +151,31 @@ std::string ReflMainWindowPresenter::getTimeSlicingType(int group) const {
 
   // Request time-slicing type to 'Event Handling' presenter
   return m_eventPresenter->getTimeSlicingType(group);
+}
+
+/** Returns default values specified for 'Transmission run(s)' for the
+* given angle
+*
+* @param group :: Index of the group in 'Settings' tab from which to get the
+*values
+* @param angle :: the run angle to look up transmission runs for
+* @return :: Values passed for 'Transmission run(s)'
+*/
+OptionsQMap
+ReflMainWindowPresenter::getOptionsForAngle(int group,
+                                            const double angle) const {
+
+  checkSettingsPtrValid(m_settingsPresenter);
+
+  return m_settingsPresenter->getOptionsForAngle(group, angle);
+}
+
+/** Returns whether there are per-angle transmission runs specified
+ * @return :: true if there are per-angle transmission runs
+ * */
+bool ReflMainWindowPresenter::hasPerAngleOptions(int group) const {
+  checkSettingsPtrValid(m_settingsPresenter);
+  return m_settingsPresenter->hasPerAngleOptions(group);
 }
 
 /**

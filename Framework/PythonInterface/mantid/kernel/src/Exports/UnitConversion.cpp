@@ -7,10 +7,9 @@ using namespace boost::python;
 
 void export_UnitConversion() {
   // Function pointer typedef
-  typedef double (*StringVersion)(
-      const std::string &src, const std::string &dest, const double srcValue,
-      const double l1, const double l2, const double theta,
-      const DeltaEMode::Type emode, const double efixed);
+  using StringVersion = double (
+      *)(const std::string &, const std::string &, const double, const double,
+         const double, const double, const DeltaEMode::Type, const double);
 
   class_<UnitConversion, boost::noncopyable>("UnitConversion", no_init)
       .def("run", (StringVersion)&UnitConversion::run,

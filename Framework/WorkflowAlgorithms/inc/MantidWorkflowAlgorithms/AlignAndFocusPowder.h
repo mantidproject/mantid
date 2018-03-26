@@ -1,9 +1,6 @@
 #ifndef MANTID_ALGORITHM_AlignAndFocusPowder_H_
 #define MANTID_ALGORITHM_AlignAndFocusPowder_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -60,13 +57,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AlignAndFocusPowder : public API::DataProcessorAlgorithm {
+class DLLExport AlignAndFocusPowder
+    : public API::DistributedDataProcessorAlgorithm {
 public:
-  /// Constructor
-  AlignAndFocusPowder() : API::DataProcessorAlgorithm() {}
-  /// Destructor
-  ~AlignAndFocusPowder() override {}
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "AlignAndFocusPowder"; }
 
