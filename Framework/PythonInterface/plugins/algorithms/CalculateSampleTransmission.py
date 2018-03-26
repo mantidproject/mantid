@@ -19,7 +19,10 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
     def category(self):
         return 'Sample'
-
+        
+    def seeAlso(self):
+        return [ "SetSampleMaterial" ]
+        
     def summary(self):
         return 'Calculates the scattering & transmission for a given sample material and size over a given wavelength range.'
 

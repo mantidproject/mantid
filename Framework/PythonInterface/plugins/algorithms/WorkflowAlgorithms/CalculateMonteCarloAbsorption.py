@@ -50,7 +50,10 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
-
+        
+    def seeAlso(self):
+        return [ "MonteCarloAbsorption","SimpleShapeMonteCarloAbsorption" ]
+        
     def summary(self):
         return "Calculates indirect absorption corrections for a given sample shape, using a MonteCarlo simulation."
 

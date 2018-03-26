@@ -95,6 +95,11 @@ public:
            "on a flat plate sample for VESUVIO";
   }
 
+  const std::vector<std::string> seeAlso() const override {
+    return{ "MayersSampleCorrection", "MonteCarloAbsorption",
+            "MultipleScatteringCylinderAbsorption" };
+  }
+
 private:
   void init() override;
   void exec() override;
