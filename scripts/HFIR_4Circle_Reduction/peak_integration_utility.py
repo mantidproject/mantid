@@ -194,7 +194,8 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     # do second round fit
     assert isinstance(start_value_list, list) and len(start_value_list) == 4, 'Starting value list must have 4 elements'
     fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y,  sigma=vec_e, p0=start_value_list)
-    # take sigma=vec_e,  out as it increases unstable
+    # take sigma=vec_e out as it increases unstable
+    # TODO FIXME NOW NOW2 - Find out how to get fitting error!
 
     # calculate the model
     x0, sigma, a, b = fit2_coeff

@@ -3450,7 +3450,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def generate_peaks_integration_report(self):
         """
-        generate a report for all integrated peaks
+        generate a report for all integrated peaks get MergeScan table and related PeakInfo instance
         :return:
         """
         # get experiment number

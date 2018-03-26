@@ -616,31 +616,75 @@ class SinglePointPeakIntegration(object):
         self._gauss_sigma = None
         self._flag_b = None
 
+        # reference peak width
+        self._ref_scan_fwhm  = None
+
+        # fitting cost (goodness)
+        self._fit_cost = None
+
         return
 
     def get_gaussian_parameters(self):
+        """
+        get the Gaussian
+        :return:
+        """
         return self._gauss_x0, self._gauss_sigma, self._pt_intensity, self._flat_b
 
     def get_pt_intensity(self):
-        # TODO FIXME NEXT
+        """
+        get single-pt-can intensity
+        :return:
+        """
         return self._pt_intensity
 
     def set_xy_vector(self, vec_x, vec_y):
-        # TODO FIXME NEXT
+        """
+        set the X and Y vector
+        :param vec_x:
+        :param vec_y:
+        :return:
+        """
+        #  check input
+        assert isinstance(vec_x, numpy.ndarray), 'X vector must be a numpy array'
+        assert isinstance(vec_y, numpy.ndarray), 'Y vector must be a numpy array'
+
+        #
         self._vec_x = vec_x
         self._vec_y = vec_y
         return
 
     def set_fit_cost(self, cost):
-        # TODO FIXME NEXT
+        """
+        set the cost (goodness) of fit
+        :param cost:
+        :return:
+        """
+        self._fit_cost = cost
+
         return
 
     def set_peak_intensity(self, peak_intensity):
-        # TODO FIXME NEXT
+        """
+        set peak intensity
+        :param peak_intensity:
+        :return:
+        """
+        assert isinstance(peak_intensity, float), 'Peak intensity to set must be a float.'
+        if peak_intensity < 0:
+            raise RuntimeError('Peak intensity {0} cannot be negative!'.format(peak_intensity))
+
         self._peak_intensity = peak_intensity
 
     def set_fit_params(self, x0, sigma, a, b):
-        # TODO FIXME NEXT
+        """
+        set the parameters for fitting
+        :param x0:
+        :param sigma:
+        :param a:
+        :param b:
+        :return:
+        """
         self._pt_intensity = a
         self._gauss_x0 = x0
         self._gauss_sigma = sigma

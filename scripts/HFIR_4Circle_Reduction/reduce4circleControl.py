@@ -3069,18 +3069,17 @@ class CWSCDReductionControl(object):
         # END-IF
 
         # create a PeakInfo instance if it does not exist
-        peak_info = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
-        self._myPeakInfoDict[(exp_number, scan_number)] = peak_info
+        self._myPeakInfoDict[(exp_number, scan_number)] = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
         two_theta = self.get_sample_log_value(exp_number, scan_number, 1, '2theta')
         self._2thetaLookupTable[two_theta] = exp_number, scan_number
 
         # set the other information
-        peak_info.set_data_ws_name(md_ws_name)
-        err_msg = peak_info.calculate_peak_center()
+        self._myPeakInfoDict[(exp_number, scan_number)].set_data_ws_name(md_ws_name)
+        err_msg = self._myPeakInfoDict[(exp_number, scan_number)].calculate_peak_center()
         if self._debugPrintMode and len(err_msg) > 0:
             print ('[Error] during calculating peak center:{0}'.format(err_msg))
 
-        return True, peak_info
+        return True, self._myPeakInfoDict[(exp_number, scan_number)]
 
     def _add_spice_workspace(self, exp_no, scan_no, spice_table_ws):
         """
