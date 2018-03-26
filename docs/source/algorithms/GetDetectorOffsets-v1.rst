@@ -30,6 +30,20 @@ single group on :ref:`algm-DiffractionFocussing`. The
 :ref:`algm-CreateCalFileByNames` algorithm can be used to
 alter the grouping in the cal file.
 
+
+Find peak center
+================
+
+It is critical for this algorithm to find the peak center precisely for each peak.
+In most cases, a Gaussian or pseudo-voigt peak profile  is able to describe the peak well enough.
+
+In other cases, it was observed that the peak fitting result is not good enough to match the peak center,
+if the background is not flat enough.
+It is found that a second round peak fitting based on the previous result can result in an accurate fitting for the peak center
+by limiting its fitting range to FHWM.
+Input property *FitEachPeakTwice* is thus used as a flag if the user wants to have second-round peak fitting.
+
+
 Usage
 -----
 

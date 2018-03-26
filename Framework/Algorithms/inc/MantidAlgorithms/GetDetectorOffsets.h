@@ -8,6 +8,17 @@
 
 namespace Mantid {
 namespace Algorithms {
+
+namespace GetDetectorsOffset {
+struct PeakLinearFunction {
+  double center;
+  double fwhm;
+  double height;
+  double a0;
+  double a1;
+};
+}
+
 /**
  Find the offsets for each detector
 
@@ -57,7 +68,9 @@ private:
   void init() override;
   void exec() override;
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  double fitSpectra(const int64_t s, bool isAbsolbute);
+  double fitSpectra(const int64_t s, bool isAbsolbute, const double xmin,
+                    const double xmax, double &peak_center, double &peak_fwhm,
+                    GetDetectorsOffset::PeakLinearFunction &fit_result);
   /// Create a function string from the given parameters and the algorithm
   /// inputs
   API::IFunction_sptr createFunction(const double peakHeight,
@@ -75,6 +88,8 @@ private:
   double m_dideal = 0.0; ///< The known peak centre value from the NIST standard
   /// information
   double m_step = 0.0; ///< The step size
+
+  GetDetectorsOffset::PeakLinearFunction fit_result;
 };
 } // namespace Algorithm
 } // namespace Mantid

@@ -195,6 +195,60 @@ public:
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
   }
 
+  /** Test GetDetectorsOffset with twice peak fitting
+   */
+  void testExecWithGroupFitPeakTwice() {
+    // --------- Workspace with summed spectra -------
+    MatrixWorkspace_sptr WS =
+        WorkspaceCreationHelper::createGroupedWorkspace2D(3, 200, 1.0);
+    WS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+
+    auto xvals = WS->points(0);
+    // loop through xvals, calculate and set to Y
+    std::transform(
+        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+        [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+
+    auto &E = WS->mutableE(0);
+    E.assign(E.size(), 0.001);
+
+    // ---- Run algo -----
+    if (!offsets.isInitialized())
+      offsets.initialize();
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", WS));
+    std::string outputWS("offsetsped");
+    std::string maskWS("masksped");
+    TS_ASSERT_THROWS_NOTHING(
+        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("Step", "0.02"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "1.00"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin", "-20"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax", "20"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("FitEachPeakTwice", true));
+    TS_ASSERT_THROWS_NOTHING(offsets.execute());
+    TS_ASSERT(offsets.isExecuted());
+
+    OffsetsWorkspace_sptr output = offsets.getProperty("OutputWorkspace");
+    if (!output)
+      return;
+
+    TS_ASSERT_DELTA(output->getValue(1), -0.0196, 0.0001);
+    TS_ASSERT_EQUALS(output->getValue(1), output->getValue(2));
+    TS_ASSERT_EQUALS(output->getValue(1), output->getValue(3));
+
+    AnalysisDataService::Instance().remove(outputWS);
+
+    MatrixWorkspace_const_sptr mask;
+    TS_ASSERT_THROWS_NOTHING(
+        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            maskWS));
+    if (!mask)
+      return;
+    TS_ASSERT(!mask->detectorInfo().isMasked(0));
+  }
+
 private:
   GetDetectorOffsets offsets;
 };
