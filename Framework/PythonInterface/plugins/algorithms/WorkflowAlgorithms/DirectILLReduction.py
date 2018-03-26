@@ -171,7 +171,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def seeAlso(self):
         return [ "DirectILLApplySelfShielding","DirectILLCollectData",
-          "DirectILLDiagnostics","DirectILLIntegrateVanadium","DirectILLSelfShielding" ]
+                 "DirectILLDiagnostics","DirectILLIntegrateVanadium","DirectILLSelfShielding" ]
 
     def name(self):
         """Return the algorithm's name."""

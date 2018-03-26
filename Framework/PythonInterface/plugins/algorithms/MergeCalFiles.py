@@ -11,7 +11,7 @@ class MergeCalFiles(PythonAlgorithm):
 
     def seeAlso(self):
         return [ "ReadGroupsFromFile","CreateDummyCalFile","CreateCalFileByNames",
-          "AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile" ]
+                 "AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile" ]
 
     def name(self):
         return "MergeCalFiles"

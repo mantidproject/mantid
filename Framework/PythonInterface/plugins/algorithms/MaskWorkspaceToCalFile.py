@@ -26,7 +26,7 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 
     def seeAlso(self):
         return [ "ReadGroupsFromFile","CreateDummyCalFile","CreateCalFileByNames",
-          "AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile","MergeCalFiles" ]
+                 "AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile","MergeCalFiles" ]
 
     def name(self):
         return "MaskWorkspaceToCalFile"
