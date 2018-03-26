@@ -336,12 +336,10 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
 }
 
 void MuonFitPropertyBrowser::checkFitEnabled() {
-  if (m_reselectGroupBtn->isVisible()) {
+  if (count() == 0) {
     setFitEnabled(false);
-  } else if (getAutoBackgroundString() != "") {
-    setFitEnabled(true);
   } else {
-    setFitEnabled(false);
+    setFitEnabled(true);
   }
 }
 /**
@@ -1198,8 +1196,8 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
     setAllGroups();
     setAllPeriods();
     setAutoBackgroundName("");
-
-  } else { // clear current selection
+    this->clear(); // force update of composite function
+  } else {         // clear current selection
     if (m_autoBackground != "") {
       setAutoBackgroundName(m_autoBackground);
       addAutoBackground();
