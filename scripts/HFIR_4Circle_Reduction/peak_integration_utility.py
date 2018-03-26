@@ -264,8 +264,13 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
         # good
         assert isinstance(cov_matrix, numpy.ndarray), 'Covariance matrix must be a numpy array'
         # calculate fitting error/standard deviation  TEST TODO NOW3
-        perr = numpy.sqrt(numpy.diag(cov_matrix))
-        print('[DB...BAT] Gaussian fit error (type {0}): {1}'.format(type(perr), perr))
+        g_error_array = numpy.sqrt(numpy.diag(cov_matrix))
+        # print('[DB...BAT] Gaussian fit error (type {0}): {1}'.format(type(g_error_array), g_error_array))
+
+        gauss_error_dict['x0'] = g_error_array[0]
+        gauss_error_dict['s'] = g_error_array[1]
+        gauss_error_dict['A'] = g_error_array[2]
+        gauss_error_dict['B'] = g_error_array[3]
 
         gauss_error_dict['x02'] = cov_matrix[0, 0]
         gauss_error_dict['s2'] = cov_matrix[1, 1]
@@ -581,7 +586,7 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
                      'gauss error': 0.,
                      'gauss background': 0.,
                      'gauss parameters': None,
-                     'gauss errors': None,
+                     'gauss errors': None,   # details can be found in (this module) fit_motor_intensity_model()
                      'motor positions': None,
                      'pt intensities': None,
                      'covariance matrix': None
@@ -643,9 +648,9 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     peak_int_dict['simple background'] = averaged_background
 
     # fit gaussian + flat background
-    parameters, errors, covariance_matrix = fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict)
+    parameters, gauss_error_dict, covariance_matrix = fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict)
     peak_int_dict['gauss parameters'] = parameters
-    peak_int_dict['gauss errors'] = errors
+    peak_int_dict['gauss errors'] = gauss_error_dict
     peak_int_dict['covariance matrix'] = covariance_matrix
 
     if covariance_matrix is None or parameters['B'] < 0.:
@@ -672,7 +677,7 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
         peak_int_dict['pt_range'] = pt_range
 
         # calculate gaussian (method 3)
-        intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, errors)
+        intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, gauss_error_dict)
         peak_int_dict['gauss intensity'] = intensity_gauss
         peak_int_dict['gauss error'] = intensity_gauss_error
     # END-IF-ELSE

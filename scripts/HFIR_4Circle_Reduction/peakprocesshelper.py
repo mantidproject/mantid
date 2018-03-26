@@ -66,8 +66,9 @@ class PeakProcessRecord(object):
 
         # peak integration result: all the fitted parameters such as Sigma are in this dictionary
         self._integrationDict = None
-        # intensity dictionary BUT NOT USED TO READ OUT
-        self._ptIntensityDict = None
+        # pt-based Gaussian integration result dictionary.
+        # details can be found in peak_integration_utility.integrate_peak_full_version
+        self._gaussIntegrationInfoDict = None
 
         # some motor/goniometer information for further correction
         self._movingMotorTuple = None
@@ -152,6 +153,8 @@ class PeakProcessRecord(object):
         generate a dictionary for this PeakInfo
         :return:
         """
+        print ('[DB..BAT] generate_integration_report is called!')
+
         report = dict()
 
         if self._spiceHKL is not None:
@@ -202,6 +205,10 @@ class PeakProcessRecord(object):
             report['Motor Step'] = self._movingMotorTuple[1]
         report['K-vector'] = self._kShiftVector
         report['Absorption Correction'] = self._absorptionCorrection
+
+        if self._gaussIntegrationInfoDict:
+            print ('[FLAG-SigmaError] {0}  {1}'.format(self._myScanNumber,
+                                                       self._gaussIntegrationInfoDict['gauss errors']['s']))
 
         return report
 
@@ -280,6 +287,7 @@ class PeakProcessRecord(object):
         get the parameters of the Gaussian fit on 3D scan peak integration
         :return:
         """
+        return self._gaussIntegrationInfoDict
 
     def get_hkl(self, user_hkl):
         """ Get HKL from the peak process record
@@ -578,7 +586,7 @@ class PeakProcessRecord(object):
         """
         assert isinstance(pt_intensity_dict, dict)
 
-        self._ptIntensityDict = pt_intensity_dict
+        self._gaussIntegrationInfoDict = pt_intensity_dict
 
         return
 

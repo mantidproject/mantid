@@ -51,6 +51,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.actionSelect_All.triggered.connect(self.menu_table_select_all)
         self.ui.actionDe_select_All.triggered.connect(self.menu_table_select_none)
 
+        # TODO NOW3 actionLoad_Gaussian_Sigma_File : load a Gaussian sigma curve for interpolation or matching
+
         # class variable
         self._working_dir = os.path.expanduser('~')
         self._exp_number = None
@@ -209,6 +211,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
                                                                   '2theta')
 
                 # locate reference scan number
+                # TODO NOW3 consider to use interpolation to curve!
                 complete_peak_scan_numbers = self._controller.find_scans_by_2theta(self._exp_number,
                                                                                    two_theta, resolution=0.05,
                                                                                    excluded_scans=[scan_number])

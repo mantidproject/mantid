@@ -3645,9 +3645,9 @@ class MainWindow(QtGui.QMainWindow):
         # get other information
         for scan_number, pt_number in scan_pt_tup_list:
             # check HKL and 2theta
-            h_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, 'h')
-            k_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, 'k')
-            l_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, 'l')
+            h_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '_h')
+            k_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '_k')
+            l_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '_l')
             hkl_str = '{0}, {1}, {2}'.format(h_i, k_i, l_i)
             two_theta = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '2theta')
             self._single_pt_peak_integration_window.add_scan(scan_number, pt_number, hkl_str, two_theta)

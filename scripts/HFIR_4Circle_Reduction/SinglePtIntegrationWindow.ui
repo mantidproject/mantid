@@ -178,6 +178,13 @@
     <addaction name="actionSelect_All"/>
     <addaction name="actionDe_select_All"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionLoad_Gaussian_Sigma_File"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuView"/>
    <addaction name="menuQuit"/>
   </widget>
@@ -190,6 +197,11 @@
   <action name="actionDe_select_All">
    <property name="text">
     <string>De-select All</string>
+   </property>
+  </action>
+  <action name="actionLoad_Gaussian_Sigma_File">
+   <property name="text">
+    <string>Load Gaussian-Sigma File</string>
    </property>
   </action>
  </widget>
