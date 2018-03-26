@@ -60,9 +60,8 @@ boilerplate C++ code (changing each occurrence of "MyAlg" to your chosen algorit
  
  #endif /*MYALG_H_*/
 
-**Source file (MyAlg.cpp)**
+**Source file (MyAlg.cpp)**::
 
-.. code::  c
     #include "MyAlg.h"
     
     // Register the algorithm into the AlgorithmFactory
@@ -104,9 +103,8 @@ for more information on the types of properties supported and the example algori
 and `WorkspaceAlgorithm <http://svn.mantidproject.org/mantid/trunk/Code/Mantid/UserAlgorithms/WorkspaceAlgorithm.cpp>`__) 
 for further guidance on how to use them.
 
-For the simple types (integer, double or string), the basic syntax is
+For the simple types (integer, double or string), the basic syntax is::
 
-.. code:: c
    declareProperty("UniquePropertyName",value);
 
 An optional `validator <https://www.mantidproject.org/Properties#Validators>`__ or 
@@ -121,9 +119,8 @@ Execution
 **Fetching properties**
 
 Before the data can be processed, the first task is likely to be to fetch the values of the input properties. 
-This uses the ``getProperty`` method as follows:
+This uses the ``getProperty`` method as follows:::
 
-.. code::  c
     TYPE myProperty = getProperty("PropertyName");
 
 where ``TYPE`` is the type of the property (int, double, std::string, std::vector...). Note that the 
@@ -131,9 +128,8 @@ value of a ``WorkspaceProperty`` is a `shared pointer <https://www.mantidproject
 to the workspace, which is referred to as ``Mantid::API::Workspace_sptr`` or ``Mantid::API::Workspace_const_sptr``. 
 The latter should be used for input workspaces that will not need to be changed in the course of the algorithm.
 
-If a handle is required on the property itself, rather than just its value, then the same method is used as follows:
+If a handle is required on the property itself, rather than just its value, then the same method is used as follows:::
 
-.. code::  c
     Mantid::Kernel::Property* myProperty = getProperty("PropertyName");
 
 This is useful, for example, for checking whether or not an optional property has been set (using Property's 
@@ -144,17 +140,15 @@ This is useful, for example, for checking whether or not an optional property ha
 Usually, the result of an algorithm will be stored in another new workspace and the algorithm 
 will need to create that new workspace through a call to the Workspace Factory. For the (common) 
 example where the output workspace should be of the same type and size as the input one, the code 
-would read as follows:
+would read as follows:::
 
-.. code::  c
    Mantid::API::Workspace_sptr outputWorkspace = Mantid::API::WorkspaceFactory::Instance().create(inputWorkspace);
 
 where ``inputWorkspace`` is a shared pointer to the input workspace.
 
 It is also important to, at some point, set the output workspace property to point at this workspace. 
-This is achieved through a call to the ``setProperty`` method as follows:
+This is achieved through a call to the ``setProperty`` method as follows:::
 
-.. code:: c
   setProperty("OutputWorkspacePropertyName",outputWorkspace);
 
 where ``outputWorkspace`` is a shared pointer to the created output workspace.
@@ -169,7 +163,68 @@ The more advanced user may also want to refer to the full
 Those familiar with C++ should make use of private methods and data members to break up the execution code into
 more manageable and readable sections.
 
+Further Features
+################
 
+The advanced user is referred to the `full documentation page <http://doxygen.mantidproject.org/nightly/d3/de9/classMantid_1_1API_1_1Workspace.html>`__
+for the Algorithm base class to explore the full range of methods available for use within an algorithm. 
+A few aspects are highlighted below.
 
+**Child Algorithms**
 
+Algorithms may wish to make use of the functionality of other algorithms as part of their execution. 
+For example, if a units change is required the ConvertUnits algorithm could be used. Mantid therefore 
+has the concept of a child algorithm and this is accessed through a call to the 
+``createChildAlgorithm`` method as follows:::
 
+    Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("AlgorithmName");
+
+This call will also initialise the algorithm, so the algorithm's properties can then be set and it can be executed:::
+
+     childAlg->setPropertyValue("number", 0);
+     childAlg->setProperty<Workspace_sptr>("Workspace",workspacePointer);
+     childAlg->execute();
+
+**Logging**
+
+The ``g_log`` object enables access to the `logging <Logging>`__ facilities of Mantid, and is an invaluable 
+tool in understanding the running of your algorithms.
+
+**Enhancing asynchronous running**
+
+Any algorithm can be run asynchronously (e.g. by MantidPlot) without modification. However, some features 
+are only enabled if code is added within the ``exec()`` method. Periodical calls to 
+``Algorithm::interruption_point()`` make it possible to interrupt execution of the algorithm. 
+``Algorithm::progress(double p)`` reports the progress of the algorithm. ``p`` must be between 
+0 (start) and 1 (finish).
+
+**Exceptions**
+
+It is fine to throw exceptions in your algorithms in the event of an unrecoverable failure. 
+These will be caught in the base Algorithm class, which will report the failure of the algorithm.
+
+**Validation of inputs**
+
+Validators allow you to give feedback to the user if the input of a property is incorrect 
+(for example, typing non-numeric characters in a number field).
+
+For more advanced validation, override the ``Algorithm::validateInputs()`` method. This is a 
+method that returns a map where:
+
+- The key is the name of the property that is in error.
+
+- The value is a string describing the error.
+
+This method allows you to provide validation that depends on several property values at once 
+(something that cannot be done with ``IValidator``). Its default implementation returns an empty map, 
+signifying no errors.
+
+It will be called in dialogs AFTER parsing all inputs and setting the properties, but BEFORE executing. 
+It is also called again in the execute() call, which will throw if this returns something.
+
+In the MantidPlot GUI, this will set a "star" ``*`` label next to each property that is reporting an error. 
+This makes it easier for users to find where they went wrong.
+
+If your ``validateInputs()`` method validates an input workspace property, bear in mind that the user 
+could provide a ``WorkspaceGroup`` (or an unexpected type of workspace) - when retrieving the property, 
+check that casting it to its intended type succeeded before attempting to use it.
