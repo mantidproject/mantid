@@ -18,6 +18,9 @@ Users can optionally provide :ref:`algm-Rebin` :literal:`Params`, otherwise they
 Likewise, :literal:`StartOverlap` and :literal:`EndOverlap` are optional. If not provided, then these
 are taken to be the region of X-axis intersection.
 
+The option :literal:`OutputXOption` defines the calculation of x values in the overlap range of the output workspace.
+The default option is :literal:`WeightedMeanOverlap`.
+
 The algorithm workflow is as follows:
 
 #. The workspaces are initially rebinned, as prescribed by the rebin :literal:`Params`. Note that
@@ -42,12 +45,13 @@ The algorithm workflow is as follows:
 #. The weighted mean of the two workspaces in range [:literal:`StartOverlap`, :literal:`EndOverlap`]
    is calculated. Note that if both workspaces have zero errors, an un-weighted mean will be
    performed instead.
-#. The output workspace will be created by summing the left-hand-side workspace (values in range
+#. If :literal:`OutputXOption` is :literal:`WeightedMeanOverlap`, the output workspace will be created by summing the left-hand-side workspace (values in range
    [:literal:`StartX`, :literal:`StartOverlap`], where :literal:`StartX` is the minimum X value
    specified via :literal:`Params` or calculated from the left-hand-side workspace) + weighted
    mean workspace + right-hand-side workspace (values in range [:literal:`EndOverlap`, :literal:`EndX`],
    where :literal:`EndX` is the maximum X value specified via :literal:`Params` or calculated
    from the right-hand-side workspace) multiplied by the scale factor.
+   If :literal:`OutputXOption` is :literal:`OriginalOverlap`, the output workspace will propagate x values and Dx values present in the overlap range to the :literal:`OutputWorkspace`.
 #. The special values are put back in the output workspace. Note that if both the left-hand-side
    workspace and the right-hand-side workspace happen to have a different special value in the same bin, this
    bin will be set to infinite in the output workspace.

@@ -7,10 +7,11 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/BoundedValidator.h"
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/format.hpp>
@@ -160,6 +161,12 @@ void Stitch1D::init() {
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
                   "The actual used value for the scaling factor.");
+
+  const std::vector<std::string> outputXOption{"WeightedMeanOverlap",
+                                               "OriginalOverlap"};
+  declareProperty("OutputXOption", "WeightedMeanOverlap",
+                  boost::make_shared<StringListValidator>(outputXOption),
+                  "Output option to choose how to overlap x values.");
 }
 
 /**Gets the start of the overlapping region
