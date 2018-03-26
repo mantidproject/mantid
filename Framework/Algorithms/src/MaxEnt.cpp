@@ -360,7 +360,7 @@ void MaxEnt::exec() {
 
   npoints = complexImage ? npoints * 2 : npoints;
   size_t maxItCount = 0; // used to determine max iterations used by alg
-  std::vector<size_t> iterationCounts;
+  std::vector<size_t> iterationCounts; // used to record iter used per spec
   iterationCounts.reserve(nSpec);
   outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
 
