@@ -2497,7 +2497,7 @@ MantidQt::API::IProjectSerialisable *
 Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
                          const int fileVersion) {
   Q_UNUSED(fileVersion);
-  auto graph = new Graph3D("", app, "", 0);
+  auto graph = new Graph3D("", app, "", nullptr);
 
   std::vector<std::string> lineVec, valVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
