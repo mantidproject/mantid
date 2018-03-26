@@ -223,24 +223,30 @@ class MaxEntView(QtGui.QWidget):
     def usePhases(self):
         return self.use_phaseTable_box.checkState() == QtCore.Qt.Checked
 
-    def calcPhasesInit(self):
-        inputs={}
+    def getInputWS(self):
+        return str( self.ws.currentText())
 
-        #  this will be removed once maxEnt does a simultaneous fit
-        inputs['InputWorkspace']=str( self.ws.currentText())
-        # will use this instead of the above
-        inputs["FirstGoodData"]= float( self.first_good.text())
-        inputs['LastGoodData']=float(self.last_good.text())
-        inputs["DetectorTable"] = "PhaseTable"
-        inputs["DataFitted"] = "fits"
-
-        return inputs
-
+#    def calcPhasesInit(self):
+#        inputs={}
+#
+#        #  this will be removed once maxEnt does a simultaneous fit
+#        inputs['InputWorkspace']=str( self.ws.currentText())
+#        # will use this instead of the above
+#        inputs["FirstGoodData"]= float( self.first_good.text())
+#        inputs['LastGoodData']=float(self.last_good.text())
+#        inputs["DetectorTable"] = "PhaseTable"
+#        inputs["DataFitted"] = "fits"
+#
+#        return inputs
+    def getFirstGoodData(self):
+        return float( self.first_good.text())
+    def getLastGoodData(self):
+        return float(self.last_good.text())
     # turn button on and off
-    def activateCalculateButton(self):
+    def activateButton(self):
         self.button.setEnabled(True)
         self.cancel.setEnabled(False)
 
-    def deactivateCalculateButton(self):
+    def deactivateButton(self):
         self.button.setEnabled(False)
         self.cancel.setEnabled(True)
