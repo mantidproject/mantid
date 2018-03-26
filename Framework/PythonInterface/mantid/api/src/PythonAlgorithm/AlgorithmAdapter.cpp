@@ -3,6 +3,7 @@
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAPI/ParallelAlgorithm.h"
@@ -99,7 +100,8 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
 template <typename BaseAlgorithm>
 const std::vector<std::string> AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
   try {
-    return callMethod<std::vector<std::string> >(getSelf(), "seeAlso");
+    auto seeAlsoPyList = callMethod<object>(getSelf(), "seeAlso");
+    return Converters::PySequenceToVector<std::string>(seeAlsoPyList) ();
   } catch (UndefinedAttributeError &) {
     return {};
   }
