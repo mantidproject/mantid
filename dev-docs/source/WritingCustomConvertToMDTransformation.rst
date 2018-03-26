@@ -1,6 +1,6 @@
 .. _WritingCustomConvertToMDTransformation:
 
-Writing Custom ConvertToMD Transformation
+Writing a Custom ConvertToMD Transformation
 =========================================
 
 .. contents::
@@ -9,18 +9,18 @@ Writing Custom ConvertToMD Transformation
 Introduction
 ############
 
-This information intended for a developer who needs to write customized 
+This information is intended for a developer who needs to write a customized 
 `ConvertToMD class <http://docs.mantidproject.org/nightly/algorithms/ConvertToMD.html>`__ (plugin). The
-plugin then becomes automatically available to use in 
-`ConvertToMD <http://docs.mantidproject.org/nightly/algorithms/ConvertToMD.html>`__ algorithm and via 
+plugin then becomes automatically available to use in the
+`ConvertToMD <http://docs.mantidproject.org/nightly/algorithms/ConvertToMD.html>`__ algorithm and via the 
 `Create MD workspaces <http://www.mantidproject.org/Create_MD_Workspace_GUI>`__
 interface to produce multidimensional workspace for further visualization and analysis.
 
 As the MD transformation factory is similar to the `Dynamic Factory <http://www.mantidproject.org/Dynamic_Factory>`__
 used for `converting units <http://docs.mantidproject.org/nightly/concepts/UnitFactory.html>`__, the 
-procedure of writing custom convertToMD transformation is very similar to adding a new Unit to use 
+procedure of writing a custom convertToMD transformation is very similar to adding a new Unit to use 
 with `ConvertUnits <http://docs.mantidproject.org/nightly/algorithms/ConvertUnits.html>`__ algorithm 
-or to write a new algorithm to use with Mantid.
+or writing a new algorithm to use with Mantid.
 
 The plugin interface deals with the task of converting a generic n-dimensional point of Matrix 
 workspace into generic m-dimensional point of MD workspace using the necessary parameters.
@@ -29,7 +29,7 @@ Examples of such transformations could be a conversion of signal and error at de
 at specific time of flight plus log values for temperature and pressure (**The instrument's 
 space**: 4 numbers + information about the detector) into 6-D point in the **Physical space 
 qx,qy,qz,dE,T,P** (qx,qy,qz -- the components of momentum transfer) or into 3-D point in 
-**Physical space |Q|,dE,Fugacity** (|Q| -- modulus of momentum transfer).
+**Physical space |Q|,dE,Fugacity** (|Q| - modulus of momentum transfer).
 
 Writing a simple custom plugin
 ##############################
@@ -37,31 +37,31 @@ Writing a simple custom plugin
 Summary
 -------
 
-If a single point of matrix workspace together with correspondent log files can be converted into a single 
+If a single point of a ``MatrixWorkspace`` together with correspondent log files can be converted into a single 
 MDEvent (multidimensional point of MD workspace), a simple custom plugin can be written to do this transformation. 
-Existing framework in this case deals with all other tasks, namely the iterations over source workspace, 
-conversion of the workspace units into the units of the conversion formula, defining target workspace, 
-constructing MD-events instances and adding these events to the MDWorkspace.
+The existing framework in this case deals with all other tasks, namely the iterations over source workspace, 
+conversion of the workspace units into the units of the conversion formula, defining the target workspace, 
+constructing MD-events instances and adding these events to the ``MDWorkspace``.
 
-A ConvertToMD plugin implements ``MDTransfInterface``, so to write a plugin one has to write a class 
+A ``ConvertToMD`` plugin implements ``MDTransfInterface``, so to write a plugin you must write a class 
 which inherits from this interface and register this class with ``MDTransfFactory``. The macro to 
 register the class with the factory is similar to the macro used to register an algorithm with 
 Mantid or Unit class with the Unit conversion factory. The macro is located in ``MDTransfFactory.h``.
 
-The class inheriting from ``MDTransfInterface`` has to perform two tasks:
+The class inheriting from ``MDTransfInterface`` performs two tasks:
 
-- Define the target MD workspace and its dimensions (both the number of dimensions and the dimension units)
+- Define the target MD workspace and its dimensions (both the number of dimensions and the dimension units).
 
 - Initialize the transformation and define a formula to transform a single point of input data into output data.
 
 These two tasks are mainly independent, but implemented within a single class to be handled by the single dynamic factory. 
-**Note that the functions which define the target MD workspace are called before the ``MDTransfFactory`` initialize function.** 
+**Note that the functions which define the target MD workspace are called before the MDTransfFactory initialize function.** 
 The ``initialize`` function accepts the ``MDWorkspace`` description and is expected to fully define all class variables used during 
-the transformation from a point of matrix workspace into an MD point of a target ``MDWorkspace``.
+the transformation from a point of a ``MatrixWorkspace`` into an MD point of a target ``MDWorkspace``.
 
 Workflow
 --------
-This work-flow is implemented in the ``ConvertToMD`` algorithm's ``exec()`` function.
+This workflow is implemented in the ``ConvertToMD`` algorithm's ``exec()`` function.
 
 #. Select a conversion and obtain additional algorithm parameters from the algorithm interface. 
 
@@ -75,7 +75,7 @@ This work-flow is implemented in the ``ConvertToMD`` algorithm's ``exec()`` func
    each input point into output MD point).
 
 The ``MDTransformationFactory`` is deployed twice during the conversion. The methods used during each conversion stage are clearly 
-specified in ``MDTransformationInterface.h`` header.
+specified in ``MDTransformationInterface.h``.
 
 Defining the target workspace
 -----------------------------
@@ -91,7 +91,7 @@ as a large XML string that provides a common interface to different data obtaine
 Any data users want to transfer to the custom plugin can be added to this class, as long as this does not lead to 
 excessive memory usage or overhead.
 
-``MDWSDescription`` class is copy constructable and assignable and if these operators fail due to the changes 
+The ``MDWSDescription`` class is copy constructable and assignable and if these operators fail due to the changes 
 to the class, custom copy constructor and assignment operators have to be defined.
 
 Doing the transformation
@@ -99,7 +99,7 @@ Doing the transformation
 
 This describes steps 4-5 of the workflow.
 
-The input data at this stage are points of the "Experimental Space", e.g. coordinates of points in the input workspace with 
+The input data at this stage are points of the "Experimental Space", e.g. coordinates of points in the input workspace and 
 additional information about these points, e.g. detectors coordinates and log files for values of interest. The output values 
 are the vectors of the coordinates of the selected points in the space of interest and (possibly) modified/corrected values of 
 the signal and error at this point.
@@ -110,17 +110,19 @@ target workspace, places these coordinates into an MD vector of coordinates and 
 over the whole workspace::
 
  /** initialize all internal variables used for transformation of workspace into MD workspace
-    WorkspaceDescritpion -- the workspace description obtained on the first stage of the transformation */
-  plugin->initialize(WorkspaceDescritpion);
-  /** calculate generic variables, which usually placed in logs and do not depend on detectors positions
-     or neutron counts (e.g. temperature) and place these values into proper position in coordinates vector. */
-  if(!plugin->calcGenericVariables(std::vector<coord_t> &Coord, size_t N_Dimensions))return; // finish if these data are out of range requested
+    WorkspaceDescription -- the workspace description obtained on the first stage of the transformation */
+  plugin->initialize(WorkspaceDescription);
+  /** calculate generic variables, which are usually placed in logs and do not depend on detectors positions
+     or neutron counts (e.g. temperature) and place these values into proper position in the coordinates vector. */
+  if(!plugin->calcGenericVariables(std::vector<coord_t> &Coord, size_t N_Dimensions))
+      return; // finish if these data are out of range requested
 
   for(i in array of detectors)
   {    
-       /** Here we calculate all MD coordinates which depend on detectors position only. 
-           The plugin also changes the internal plugin values which depend on detector's position e.g. sets up the unit conversion */
-       if(!plugin->calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i))cycle;  // skip detector if these data are out of range requested
+       /** Here we calculate all MD coordinates which depend on detectors position only. The plugin also 
+       changes the internal plugin values which depend on detector's position e.g. sets up the unit conversion */
+       if(!plugin->calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i))
+           continue;  // skip detector if these data are out of range requested
 
        /** obtain signal and error, array, corresponding to the i-th detector */
        spectra[i] = InputWorkspace->getSpectraCorrespondingToTheDetector(size_t i);
@@ -133,7 +135,7 @@ over the whole workspace::
           Error  = spectra[i].Error[j];
           /**Calculate remaining MD coordinates and put them into vector of coordinates. 
              Modify Signal and error if the signal and error depends on Coord */
-          plugin->calcMatrixCoordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord, Signal,Error);
+          plugin->calcMatrixCoordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord, Signal, Error);
 
           /**Convert Coord signal and error to MD event with coordinate Coord and add the MDEvent to MD workspace*/
           AddPointToMDWorkspace(Coord,Signal,Error);
@@ -149,6 +151,7 @@ This information is usually expensive to calculate so it is calculated separatel
 The detector information can be extracted directly from the input workspace, but consider checking the table workspace
 returned by `PreprocessDetectorsToMD <http://docs.mantidproject.org/nightly/algorithms/PreprocessDetectorsToMD-v1.html>`__ 
 and check if the information is already provided there.
+
 `PreprocessDetectorsToMD <http://docs.mantidproject.org/nightly/algorithms/PreprocessDetectorsToMD-v1.html>`__ can also 
 be modified to add some additional detector information. This information can then be added to the resulting table workspace 
 and used in the custom plugin.
