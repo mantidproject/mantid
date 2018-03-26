@@ -40,7 +40,7 @@ class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingModel : public QObject {
   Q_OBJECT
 
 public:
-  typedef std::pair<double, double> Section;
+  using Section = std::pair<double, double>;
 
   /**
    * @return Function produced by the last fit

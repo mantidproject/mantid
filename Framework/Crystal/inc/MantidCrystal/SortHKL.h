@@ -46,7 +46,7 @@ public:
   }
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "Crystal\\Peaks;DataHandling\\Text;Utility\\Sorting";
+    return R"(Crystal\Peaks;DataHandling\Text;Utility\Sorting)";
   }
 
 private:

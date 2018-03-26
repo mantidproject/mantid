@@ -628,6 +628,14 @@ bool Peak::findDetector() {
   return findDetector(tracer);
 }
 
+/**
+ * Performs the same algorithm as findDetector() but uses a pre-existing
+ * InstrumentRayTracer object to be able to take adavtange of its caches.
+ * This method should be preferred if findDetector is to be called many times
+ * over the same instrument.
+ * @param tracer A reference to an existing InstrumentRayTracer object.
+ * @return true if the detector ID was found.
+ */
 bool Peak::findDetector(const InstrumentRayTracer &tracer) {
   // Scattered beam direction
   V3D beam = detPos - samplePos;

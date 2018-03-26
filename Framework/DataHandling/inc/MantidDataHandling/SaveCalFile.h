@@ -34,7 +34,7 @@ public:
   }
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Text;Diffraction\\DataHandling\\CalFiles";
+    return R"(DataHandling\Text;Diffraction\DataHandling\CalFiles)";
   }
 
   void saveCalFile(const std::string &calFileName,

@@ -16,7 +16,6 @@ namespace Mantid {
 namespace PythonInterface {
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::MatrixWorkspace;
-namespace bpl = boost::python;
 
 // ----------------------------------------------------------------------------------------------------------
 namespace {

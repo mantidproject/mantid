@@ -183,7 +183,7 @@ bool KafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
  */
 API::Workspace_sptr KafkaEventStreamDecoder::extractData() {
   if (m_exception) {
-    throw * m_exception;
+    throw std::runtime_error(*m_exception);
   }
 
   m_extractWaiting = true;

@@ -269,7 +269,7 @@ void AlgorithmTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
 void AlgorithmTreeWidget::update() {
   this->clear();
 
-  typedef std::vector<AlgorithmDescriptor> AlgNamesType;
+  using AlgNamesType = std::vector<AlgorithmDescriptor>;
   AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
 
   // sort by category/name/version to fill QTreeWidget

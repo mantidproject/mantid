@@ -714,7 +714,7 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
                                                                         false);
     ws->getAxis(0)->setUnit("TOF");
-    ws->sortAll(sortType, NULL);
+    ws->sortAll(sortType, nullptr);
 
     if (sortType == TOF_SORT) {
       // Only threadsafe if all the event lists are sorted

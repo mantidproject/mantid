@@ -66,10 +66,10 @@ tree_node_<T>::tree_node_(const T& val)
 template <class T, class tree_node_allocator = std::allocator<tree_node_<T> > >
 class tree {
 	protected:
-		typedef tree_node_<T> tree_node;
+		using tree_node = tree_node_<T>;
 	public:
 		/// Value of the data stored at a node.
-		typedef T value_type;
+		using value_type = T;
 
 		class iterator_base;
 		class pre_order_iterator;
@@ -91,12 +91,12 @@ class tree {
 		class iterator_base {
 #endif
 			public:
-				typedef T                               value_type;
-				typedef T*                              pointer;
-				typedef T&                              reference;
-				typedef size_t                          size_type;
-				typedef ptrdiff_t                       difference_type;
-				typedef std::bidirectional_iterator_tag iterator_category;
+				using value_type = T;
+				using pointer = T *;
+				using reference = T &;
+				using size_type = size_t;
+				using difference_type = ptrdiff_t;
+				using iterator_category = std::bidirectional_iterator_tag;
 
 				iterator_base();
 				iterator_base(tree_node *);
@@ -175,8 +175,8 @@ class tree {
 		};
 
 		/// The default iterator types throughout the tree class.
-		typedef pre_order_iterator            iterator;
-		typedef breadth_first_queued_iterator breadth_first_iterator;
+		using iterator = pre_order_iterator;
+		using breadth_first_iterator = breadth_first_queued_iterator;
 
 		/// Iterator which traverses only the nodes at a given depth from the root.
 		class fixed_depth_iterator : public iterator_base {
