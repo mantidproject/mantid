@@ -410,7 +410,7 @@ public:
                              clusterThreeIndexes.end());
 
     // Add elevated signal to the workspace at cluster indexes.
-    for (unsigned long &allClusterIndexe : allClusterIndexes) {
+    for (auto &allClusterIndexe : allClusterIndexes) {
       inWS->setSignalAt(allClusterIndexe, raisedSignal);
     }
 

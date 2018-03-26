@@ -681,7 +681,7 @@ public:
     neighbourIndexes = it->findNeighbourIndexesFaceTouching();
     TS_ASSERT_EQUALS(4, neighbourIndexes.size());
     std::vector<size_t> expected_neighbours = {0, 2, 5, 17};
-    for (unsigned long &expected_neighbour : expected_neighbours) {
+    for (auto &expected_neighbour : expected_neighbours) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
@@ -693,7 +693,7 @@ public:
     // Is completely enclosed
     expected_neighbours = {17, 20, 22, 25, 5, 37};
 
-    for (unsigned long &expected_neighbour : expected_neighbours) {
+    for (auto &expected_neighbour : expected_neighbours) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
@@ -704,7 +704,7 @@ public:
     // Is on edge
     expected_neighbours = {47, 59, 62};
 
-    for (unsigned long &expected_neighbour : expected_neighbours) {
+    for (auto &expected_neighbour : expected_neighbours) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
@@ -759,7 +759,7 @@ public:
     TS_ASSERT_EQUALS(11, neighbourIndexes.size());
     std::vector<size_t> expected_neighbours = {0,  2,  4,  5,  6,  16,
                                                17, 18, 20, 21, 22, 22};
-    for (unsigned long &expected_neighbour : expected_neighbours) {
+    for (auto &expected_neighbour : expected_neighbours) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
@@ -772,7 +772,7 @@ public:
     expected_neighbours = {0,  1,  2,  4,  5,  6,  8,  9,  10, 16, 17, 18, 22,
                            20, 24, 25, 26, 32, 33, 34, 37, 38, 36, 41, 40, 42};
 
-    for (unsigned long &expected_neighbour : expected_neighbours) {
+    for (auto &expected_neighbour : expected_neighbours) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
@@ -783,7 +783,7 @@ public:
     // Is on edge
     expected_neighbours = {42, 43, 46, 47, 58, 59, 62};
 
-    for (unsigned long &expected_neighbour : expected_neighbours) {
+    for (auto &expected_neighbour : expected_neighbours) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
