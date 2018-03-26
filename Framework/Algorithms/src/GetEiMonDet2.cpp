@@ -213,8 +213,9 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
              reduction(+: n, distanceSum, eppSum))
-  for (unsigned long index : detectorIndices) {
+  for (int i = 0; i < static_cast<int>(detectorIndices.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
+    const size_t index = detectorIndices[i];
     interruption_point();
     if (index >= peakPositionColumn->size()) {
       throw std::runtime_error("Invalid value in " + PropertyNames::DETECTORS);
