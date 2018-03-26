@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
+#include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
@@ -24,15 +25,17 @@ using Mantid::Algorithms::Stitch1D;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::LinearGenerator;
 
-double roundSix(double i) { return floor(i * 1000000 + 0.5) / 1000000; }
+double roundSix(double i) { return floor(i * 1000000. + 0.5) / 1000000.; }
 
 namespace {
 MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
                                      const HistogramY &yData,
                                      const HistogramE &eData,
+                                     const HistogramDx &Dx,
                                      const int nSpec = 1) {
 
   Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
@@ -41,6 +44,7 @@ MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
     outWS->mutableY(i) = yData;
     outWS->mutableE(i) = eData;
     outWS->mutableX(i) = xData;
+    outWS->mutableDx(i) = Dx;
   }
 
   outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
@@ -69,17 +73,19 @@ private:
   using ResultType = boost::tuple<MatrixWorkspace_sptr, double>;
 
   MatrixWorkspace_sptr make_arbitrary_point_ws() {
-    const auto &x = HistogramX(3, LinearGenerator(-1, 0.2));
+    const auto &x = HistogramX(3, LinearGenerator(-1., 0.2));
     const auto &y = HistogramY(3, LinearGenerator(1., 1.0));
-    const auto &e = HistogramE(3, 1);
-    return createWorkspace(x, y, e);
+    const auto &e = HistogramE(3, 1.);
+    const auto &dx = HistogramDx(3, LinearGenerator(-3., 0.1));
+    return createWorkspace(x, y, e, dx);
   }
 
   MatrixWorkspace_sptr make_arbitrary_histogram_ws() {
-    const auto &x = HistogramX(3, LinearGenerator(-1, 0.2));
+    const auto &x = HistogramX(3, LinearGenerator(-1., 0.2));
     const auto &y = HistogramY(2, LinearGenerator(1., 1.0));
-    const auto &e = HistogramE(2, 1);
-    return createWorkspace(x, y, e);
+    const auto &e = HistogramE(2, 1.);
+    const auto &dx = HistogramDx(2, LinearGenerator(-3., 0.1));
+    return createWorkspace(x, y, e, dx);
   }
 
   MatrixWorkspace_sptr createCosWaveWorkspace(size_t startX, size_t endX) {
@@ -107,16 +113,17 @@ public:
 
   Stitch1DTest() {
 
-    HistogramX x(11, LinearGenerator(-1, 0.2));
-    HistogramY y({0, 0, 0, 3, 3, 3, 3, 3, 3, 3});
-    HistogramE e(10, 0);
+    HistogramX x(11, LinearGenerator(-1., 0.2));
+    HistogramY y({0., 0., 0., 3., 3., 3., 3., 3., 3., 3.});
+    HistogramE e(10, 0.);
+    HistogramDx dx(10, 0.);
 
     // Pre-canned workspace to stitch
-    a = createWorkspace(x, y, e);
+    a = createWorkspace(x, y, e, dx);
 
-    y = {2, 2, 2, 2, 2, 2, 2, 0, 0, 0};
+    y = {2., 2., 2., 2., 2., 2., 2., 0., 0., 0.};
     // Another pre-canned workspace to stitch
-    b = createWorkspace(x, y, e);
+    b = createWorkspace(x, y, e, dx);
     this->x.assign(x.begin(), x.end());
   }
 
@@ -227,7 +234,7 @@ public:
   void test_startoverlap_greater_than_end_overlap_throws() {
     TSM_ASSERT_THROWS("Should have thrown with StartOverlap < x max",
                       do_stitch1D(this->a, this->b, this->x.back(),
-                                  this->x.front(), std::vector<double>(1, 0.2)),
+                                  this->x.front(), std::vector<double>(1., 0.2)),
                       std::runtime_error &);
   }
 
@@ -236,7 +243,7 @@ public:
     auto rhs_ws = make_arbitrary_histogram_ws();
     TSM_ASSERT_THROWS(
         "LHS WS must be histogram",
-        do_stitch1D(lhs_ws, rhs_ws, -1, 1, std::vector<double>(1, 0.2)),
+        do_stitch1D(lhs_ws, rhs_ws, -1., 1., std::vector<double>(1., 0.2)),
         std::invalid_argument &);
   }
 
@@ -245,7 +252,7 @@ public:
     auto rhs_ws = make_arbitrary_point_ws();
     TSM_ASSERT_THROWS(
         "RHS WS must be histogram",
-        do_stitch1D(lhs_ws, rhs_ws, -1, 1, std::vector<double>(1, 0.2)),
+        do_stitch1D(lhs_ws, rhs_ws, -1., 1., std::vector<double>(1., 0.2)),
         std::invalid_argument &);
   }
 
@@ -266,8 +273,8 @@ public:
   void test_stitching_determines_params() {
     HistogramX x1(10, LinearGenerator(-1., 0.2));
     HistogramX x2(7, LinearGenerator(0.4, 0.2));
-    HistogramY y1(9, 1);
-    HistogramY y2(6, 1);
+    HistogramY y1(9, 1.);
+    HistogramY y2(6, 1.);
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
@@ -288,8 +295,8 @@ public:
   void test_stitching_determines_start_and_end_overlap() {
     HistogramX x1(8, LinearGenerator(-1., 0.2));
     HistogramX x2(8, LinearGenerator(-0.4, 0.2));
-    HistogramY y1({1, 1, 1, 3, 3, 3, 3});
-    HistogramY y2({1, 1, 1, 1, 3, 3, 3});
+    HistogramY y1({1., 1., 1., 3., 3., 3., 3.});
+    HistogramY y2({1., 1., 1., 1., 3., 3., 3.});
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
@@ -315,8 +322,8 @@ public:
   void test_stitching_forces_start_overlap() {
     HistogramX x1(8, LinearGenerator(-1, 0.2));
     HistogramX x2(8, LinearGenerator(-0.4, 0.2));
-    HistogramY y1({1, 1, 1, 3, 3, 3, 3});
-    HistogramY y2({1, 1, 1, 1, 3, 3, 3});
+    HistogramY y1({1., 1., 1., 3., 3., 3., 3.});
+    HistogramY y2({1., 1., 1., 1., 3., 3., 3.});
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
@@ -342,8 +349,8 @@ public:
   void test_stitching_forces_end_overlap() {
     HistogramX x1(8, LinearGenerator(-1, 0.2));
     HistogramX x2(8, LinearGenerator(-0.4, 0.2));
-    HistogramY y1({1, 1, 1, 3, 3, 3, 3});
-    HistogramY y2({1, 1, 1, 1, 3, 3, 3});
+    HistogramY y1({1., 1., 1., 3., 3., 3., 3.});
+    HistogramY y2({1., 1., 1., 1., 3., 3., 3.});
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
@@ -377,16 +384,14 @@ public:
     auto &stitched_x = ret.get<0>()->mutableX(0);
     const auto &stitched_y = ret.get<0>()->y(0);
     const auto &stitched_e = ret.get<0>()->e(0);
-    // Check that the output Y-Values are correct. Output Y Values should all be
-    // 2
+    // Output Y Values should all be 2.
     for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr) {
-      TS_ASSERT_DELTA(2, *itr, 0.000001);
+      TS_ASSERT_DELTA(2., *itr, 0.000001);
     }
-    // Check that the output E-Values are correct. Output Error values should
-    // all be zero
+    // Output Error values should all be zero
     for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
       double temp = *itr;
-      TS_ASSERT_EQUALS(temp, 0);
+      TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
     // truncate the input and oputput x values to 6 decimal places to eliminate
@@ -409,16 +414,14 @@ public:
     auto &stitched_x = ret.get<0>()->mutableX(0);
     const auto &stitched_y = ret.get<0>()->y(0);
     const auto &stitched_e = ret.get<0>()->e(0);
-    // Check that the output Y-Values are correct. Output Y Values should all be
-    // 3
+    // Output Y Values should all be 3.
     for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr) {
-      TS_ASSERT_DELTA(3, *itr, 0.000001);
+      TS_ASSERT_DELTA(3., *itr, 0.000001);
     }
-    // Check that the output E-Values are correct. Output Error values should
-    // all be zero
+    // Output Error values should all be zero
     for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
       double temp = *itr;
-      TS_ASSERT_EQUALS(temp, 0);
+      TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
     // truncate the input and oputput x values to 6 decimal places to eliminate
@@ -442,16 +445,14 @@ public:
     auto &stitched_x = ret.get<0>()->mutableX(0);
     const auto &stitched_y = ret.get<0>()->y(0);
     const auto &stitched_e = ret.get<0>()->e(0);
-    // Check that the output Y-Values are correct. Output Y Values should all be
-    // 2
+    // Output Y Values should all be 2.
     for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr) {
-      TS_ASSERT_DELTA(2, *itr, 0.000001);
+      TS_ASSERT_DELTA(2., *itr, 0.000001);
     }
-    // Check that the output E-Values are correct. Output Error values should
-    // all be zero
+    // Output Error values should all be zero
     for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
       double temp = *itr;
-      TS_ASSERT_EQUALS(temp, 0);
+      TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
     // truncate the input and oputput x values to 6 decimal places to eliminate
@@ -475,16 +476,14 @@ public:
     auto &stitched_x = ret.get<0>()->mutableX(0);
     const auto &stitched_y = ret.get<0>()->y(0);
     const auto &stitched_e = ret.get<0>()->e(0);
-    // Check that the output Y-Values are correct. Output Y Values should all be
-    // 3
+    // Output Y Values should all be 3.
     for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr) {
-      TS_ASSERT_DELTA(3, *itr, 0.000001);
+      TS_ASSERT_DELTA(3., *itr, 0.000001);
     }
-    // Check that the output E-Values are correct. Output Error values should
-    // all be zero
+    // Output Error values should all be zero
     for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
       double temp = *itr;
-      TS_ASSERT_EQUALS(temp, 0);
+      TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
     // truncate the input and oputput x values to 6 decimal places to eliminate
@@ -516,22 +515,23 @@ public:
   }
 
   void test_has_non_zero_errors_single_spectrum() {
-    HistogramX x(10, LinearGenerator(-1, 0.2));
-    HistogramY y(9, 1);
-    HistogramE e(9, 1);
+    HistogramX x(10, LinearGenerator(-1., 0.2));
+    HistogramY y(9, 1.);
+    HistogramE e(9, 1.);
+    HistogramDx dx(9, 0.);
 
-    MatrixWorkspace_sptr ws = createWorkspace(x, y, e, 1);
+    MatrixWorkspace_sptr ws = createWorkspace(x, y, e, dx, 1);
     Stitch1D alg;
     TSM_ASSERT("All error values are non-zero", alg.hasNonzeroErrors(ws));
 
     // Run it again with all zeros
     e = HistogramE(9, 0);
-    ws = createWorkspace(x, y, e, 1);
+    ws = createWorkspace(x, y, e, dx, 1);
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
 
     // Run it again with some zeros
     e.back() = 1;
-    ws = createWorkspace(x, y, e, 1);
+    ws = createWorkspace(x, y, e, dx, 1);
     TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
   }
 
@@ -541,39 +541,41 @@ public:
     // Note: The size for y and e previously contained a factor nspectrum, but
     // it is unclear why, so I removed it.
     HistogramX x(10, LinearGenerator(-1, 0.2));
-    HistogramY y(9, 1);
-    HistogramE e(9, 1);
+    HistogramY y(9, 1.);
+    HistogramE e(9, 1.);
+    HistogramDx dx(9, 0.);
 
     MatrixWorkspace_sptr ws =
-        createWorkspace(x, y, e, static_cast<int>(nspectrum));
+        createWorkspace(x, y, e, dx, static_cast<int>(nspectrum));
     Stitch1D alg;
     TSM_ASSERT("All error values are non-zero", alg.hasNonzeroErrors(ws));
 
     // Run it again with all zeros
 
-    e = HistogramE(9, 0);
-    ws = createWorkspace(x, y, e, nspectrum);
+    e = HistogramE(9, 0.);
+    ws = createWorkspace(x, y, e, dx, nspectrum);
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
 
     // Run it again with some zeros
     e.back() = 1;
-    ws = createWorkspace(x, y, e, nspectrum);
+    ws = createWorkspace(x, y, e, dx, nspectrum);
     TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
   }
 
   void test_patch_nan_y_value_for_scaling() {
-    HistogramX x(10, LinearGenerator(0, 1));
-    HistogramY y(9, 1);
-    HistogramE e(9, 1);
+    HistogramX x(10, LinearGenerator(0., 1.));
+    HistogramY y(9, 1.);
+    HistogramE e(9, 1.);
+    HistogramDx dx(9, 0.);
 
     double nan = std::numeric_limits<double>::quiet_NaN();
     // Add a NAN
     y[5] = nan;
-    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e);
+    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e, dx);
 
     // Remove NAN
     y[5] = y[4];
-    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e);
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e, dx);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
@@ -583,18 +585,19 @@ public:
   }
 
   void test_patch_inf_y_value_for_scaling() {
-    HistogramX x(10, LinearGenerator(0, 1));
-    HistogramY y(9, 1);
-    HistogramE e(9, 1);
+    HistogramX x(10, LinearGenerator(0., 1.));
+    HistogramY y(9, 1.);
+    HistogramE e(9, 1.);
+    HistogramDx dx(9, 0.);
 
     double inf = std::numeric_limits<double>::infinity();
     // Add a Infinity
     y[5] = inf;
-    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e);
+    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e, dx);
 
     // Remove infinity
     y[5] = y[4];
-    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e);
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e, dx);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
@@ -604,18 +607,19 @@ public:
   }
 
   void test_reset_nans() {
-    HistogramX x(10, LinearGenerator(0, 1));
-    HistogramY y(9, 1);
-    HistogramE e(9, 1);
+    HistogramX x(10, LinearGenerator(0., 1.));
+    HistogramY y(9, 1.);
+    HistogramE e(9, 1.);
+    HistogramDx dx(9, 0.);
 
     double nan = std::numeric_limits<double>::quiet_NaN();
     // Add a Infinity
     y[0] = nan;
-    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e);
+    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e, dx);
 
     // Remove infinity
     y[0] = y[1];
-    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e);
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e, dx);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
@@ -644,8 +648,8 @@ public:
   void setUp() override {
     HistogramX x1(1000, LinearGenerator(0, 0.02));
     HistogramX x2(1000, LinearGenerator(19, 0.02));
-    HistogramY y1(999, 1);
-    HistogramY y2(999, 2);
+    HistogramY y1(999, 1.);
+    HistogramY y2(999, 2.);
 
     ws1 = create1DWorkspace(x1, y1);
     ws2 = create1DWorkspace(x2, y2);

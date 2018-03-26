@@ -19,7 +19,8 @@ Likewise, :literal:`StartOverlap` and :literal:`EndOverlap` are optional. If not
 are taken to be the region of X-axis intersection.
 
 The option :literal:`OutputXOption` defines the calculation of x values in the overlap range of the output workspace.
-The default option is :literal:`WeightedMeanOverlap`.
+The default option is :literal:`WeightedMeanOverlap`. If the input workspace contains Dx values, the output workspace will not have dx values defined.
+Contrarily, the option :literal:`OriginalOverlap` will propagate the corresponding Dx values to the output workspace.
 
 The algorithm workflow is as follows:
 
