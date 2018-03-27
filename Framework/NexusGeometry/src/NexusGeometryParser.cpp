@@ -33,6 +33,7 @@ const H5std_string Z_PIXEL_OFFSET = "z_pixel_offset";
 const H5std_string DEPENDS_ON = "depends_on";
 const H5std_string NO_DEPENDENCY = ".";
 const H5std_string PIXEL_SHAPE = "pixel_shape";
+const H5std_string DETECTOR_SHAPE = "detector_shape";
 const H5std_string SHAPE = "shape";
 // Transformation types
 const H5std_string TRANSFORMATION_TYPE = "transformation_type";
@@ -418,7 +419,11 @@ parseNexusShape(const Group &detectorGroup) {
     try {
       shapeGroup = detectorGroup.openGroup(SHAPE);
     } catch (...) {
-      return boost::shared_ptr<const Geometry::IObject>(nullptr);
+      try {
+        shapeGroup = detectorGroup.openGroup(DETECTOR_SHAPE);
+      } catch (...) {
+        return boost::shared_ptr<const Geometry::IObject>(nullptr);
+      }
     }
   }
 
