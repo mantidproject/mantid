@@ -46,6 +46,26 @@ case "$TYPE" in
 	    exit $NOTFOUND
 	fi
     ;;
+    dev-docs-only)
+	# FOUND=1 iff changes are limited to dev-docs only
+	# Find all changed files and grep for required type. -v inverts match so grep=0 means
+	# there are other changes besides this
+	if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^dev-docs/'; then
+	    exit $FOUND
+	else
+	    exit $NOTFOUND
+	fi
+    ;;
+    user-docs-only)
+	# FOUND=1 iff changes are limited to user docs only
+	# Find all changed files and grep for required type. -v inverts match so grep=0 means
+	# there are other changes besides this
+	if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^docs/'; then
+	    exit $FOUND
+	else
+	    exit $NOTFOUND
+	fi
+    ;;
     *)
         echo "do not have case for type \"$TYPE\""
     ;;
