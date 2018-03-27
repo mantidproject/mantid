@@ -478,9 +478,15 @@ The following parameters are also required:
 - **New GSAS-II Project** - GSASIIRefineFitPeaks creates a new
   ``.gpx`` project here, which can be opened and inspected from the
   GSAS-II GUI
-- **GSAS-II Installation Directory** - you must have a version of
-  GSAS-II from at least **February 2018** to use the GUI. See
-  :ref:`Installing_GSASII` for how to install a compatible version
+- **GSAS-II Installation Directory**
+
+  - This is the directory containing the GSAS-II executables and
+    Python libraries. In particular, it must contain
+    ``GSASIIscriptable.py``. This directory will normally be called
+    `GSASII`, if GSAS-II was installed normally
+  - You must have a version of GSAS-II from at least **February 2018**
+    to use the GUI. See :ref:`Installing_GSASII` for how to install a
+    compatible version
 - **Refinement method** - can either be **Pawley** or
   **Rietveld**. Pawley refinement is currently under development, so
   Rietveld is recommended.

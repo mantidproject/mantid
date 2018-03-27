@@ -156,7 +156,7 @@ Negative Testing Ideas
 - Change any unlocked dialog boxes whilst `Fit` runs
 
 
-.. _gsas-Engineering-Diffraction_test-ref:
+.. _gsas-fitting-Engineering-Diffraction_test-ref:
 
 GSAS Fitting
 ^^^^^^^^^^^^
@@ -168,7 +168,6 @@ NeXuS file (obtained from
 After a fit has run, the plot should look something like below:
 
 .. image:: ../images/EnggDiffExampleGSASOutput.png
-    :width: 500px
 
 If that fit output (the red line) is flat, or just follows the
 background of the data, the fit was not unsuccessful. Make sure you're
