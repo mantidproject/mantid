@@ -407,7 +407,7 @@ public:
     // First, a bin object that holds everything
     MDBin<MDLeanEvent<2>, 2> bin;
     // Perform the centerpoint binning
-    box.centerpointBin(bin, NULL);
+    box.centerpointBin(bin, nullptr);
     // 100 events = 100 weight.
     TS_ASSERT_DELTA(bin.m_signal, 100.0, 1e-4);
     TS_ASSERT_DELTA(bin.m_errorSquared, 150.0, 1e-4);
@@ -419,7 +419,7 @@ public:
     bin.m_max[0] = 6.0;
     bin.m_min[1] = 1.0;
     bin.m_max[1] = 3.0;
-    box.centerpointBin(bin, NULL);
+    box.centerpointBin(bin, nullptr);
     TS_ASSERT_DELTA(bin.m_signal, 4.0, 1e-4);
     TS_ASSERT_DELTA(bin.m_errorSquared, 6.0, 1e-4);
   }
