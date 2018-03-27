@@ -1,3 +1,5 @@
+.. _GettingStartedWithMantid:
+
 ===========================
 Getting Started with Mantid
 ===========================
@@ -56,3 +58,11 @@ package and install it:
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
+Related documents:
+------------------
+
+* :ref:`CheckingOutTheMantidCode`
+* :ref:`BuildingTheMantidFrameworkCode`
+* :ref:`BuildingWithCMake`
+* :ref:`BuildingVATES`
+* :ref:`BuildingOnOSX`
