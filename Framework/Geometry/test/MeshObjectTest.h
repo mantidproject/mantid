@@ -70,28 +70,27 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
 
   std::vector<uint16_t> triangles;
   // top face of cube - z max
-  triangles.insert(triangles.end(), { 0, 1, 2 });
-  triangles.insert(triangles.end(), { 2, 1, 3 });
+  triangles.insert(triangles.end(), {0, 1, 2});
+  triangles.insert(triangles.end(), {2, 1, 3});
   // right face of cube - x max
-  triangles.insert(triangles.end(), { 0, 2, 4 });
-  triangles.insert(triangles.end(), { 4, 2, 6 });
+  triangles.insert(triangles.end(), {0, 2, 4});
+  triangles.insert(triangles.end(), {4, 2, 6});
   // back face of cube - y max
-  triangles.insert(triangles.end(), { 0, 4, 1 });
-  triangles.insert(triangles.end(), { 1, 4, 5 });
+  triangles.insert(triangles.end(), {0, 4, 1});
+  triangles.insert(triangles.end(), {1, 4, 5});
   // bottom face of cube - z min
-  triangles.insert(triangles.end(), { 7, 5, 6 });
-  triangles.insert(triangles.end(), { 6, 5, 4 });
+  triangles.insert(triangles.end(), {7, 5, 6});
+  triangles.insert(triangles.end(), {6, 5, 4});
   // left face of cube - x min
-  triangles.insert(triangles.end(), { 7, 3, 5 });
-  triangles.insert(triangles.end(), { 5, 3, 1 });
+  triangles.insert(triangles.end(), {7, 3, 5});
+  triangles.insert(triangles.end(), {5, 3, 1});
   // front fact of cube - y min
-  triangles.insert(triangles.end(), { 7, 6, 3 });
-  triangles.insert(triangles.end(), { 3, 6, 2 });
+  triangles.insert(triangles.end(), {7, 6, 3});
+  triangles.insert(triangles.end(), {3, 6, 2});
 
   // Use efficient constructor
   std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
-      std::move(triangles), std::move(vertices),
-                     Mantid::Kernel::Material());
+      std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -121,21 +120,21 @@ std::unique_ptr<MeshObject> createOctahedron() {
 
   std::vector<uint16_t> triangles;
   // +++ face
-  triangles.insert(triangles.end(), { 0, 1, 2 });
+  triangles.insert(triangles.end(), {0, 1, 2});
   //++- face
-  triangles.insert(triangles.end(), { 0, 5, 1 });
+  triangles.insert(triangles.end(), {0, 5, 1});
   // +-- face
-  triangles.insert(triangles.end(), { 0, 4, 5 });
+  triangles.insert(triangles.end(), {0, 4, 5});
   // +-+ face
-  triangles.insert(triangles.end(), { 0, 2, 4 });
+  triangles.insert(triangles.end(), {0, 2, 4});
   // --- face
-  triangles.insert(triangles.end(), { 3, 5, 4 });
+  triangles.insert(triangles.end(), {3, 5, 4});
   // --+ face
-  triangles.insert(triangles.end(), { 3, 4, 2 });
+  triangles.insert(triangles.end(), {3, 4, 2});
   // -++ face
-  triangles.insert(triangles.end(), { 3, 2, 1 });
+  triangles.insert(triangles.end(), {3, 2, 1});
   // -+- face
-  triangles.insert(triangles.end(), { 3, 1, 5 });
+  triangles.insert(triangles.end(), {3, 1, 5});
 
   // Use flexible constructor
   std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
@@ -165,36 +164,35 @@ std::unique_ptr<MeshObject> createLShape() {
 
   std::vector<uint16_t> triangles;
   // z min
-  triangles.insert(triangles.end(), { 0, 5, 1 });
-  triangles.insert(triangles.end(), { 1, 3, 2 });
-  triangles.insert(triangles.end(), { 3, 5, 4 });
+  triangles.insert(triangles.end(), {0, 5, 1});
+  triangles.insert(triangles.end(), {1, 3, 2});
+  triangles.insert(triangles.end(), {3, 5, 4});
   // z max
-  triangles.insert(triangles.end(), { 6, 7, 11 });
-  triangles.insert(triangles.end(), {11, 9, 10 });
-  triangles.insert(triangles.end(), { 9, 7, 8 });
+  triangles.insert(triangles.end(), {6, 7, 11});
+  triangles.insert(triangles.end(), {11, 9, 10});
+  triangles.insert(triangles.end(), {9, 7, 8});
   // y min
-  triangles.insert(triangles.end(), { 0, 1, 6 });
-  triangles.insert(triangles.end(), { 6, 1, 7 });
+  triangles.insert(triangles.end(), {0, 1, 6});
+  triangles.insert(triangles.end(), {6, 1, 7});
   // x max
-  triangles.insert(triangles.end(), { 1, 2, 7 });
-  triangles.insert(triangles.end(), { 7, 2, 8 });
+  triangles.insert(triangles.end(), {1, 2, 7});
+  triangles.insert(triangles.end(), {7, 2, 8});
   // y mid
-  triangles.insert(triangles.end(), { 2, 3, 8 });
-  triangles.insert(triangles.end(), { 8, 3, 9 });
+  triangles.insert(triangles.end(), {2, 3, 8});
+  triangles.insert(triangles.end(), {8, 3, 9});
   // x mid
-  triangles.insert(triangles.end(), { 3, 4, 9 });
-  triangles.insert(triangles.end(), { 9, 4, 10 });
+  triangles.insert(triangles.end(), {3, 4, 9});
+  triangles.insert(triangles.end(), {9, 4, 10});
   // y max
-  triangles.insert(triangles.end(), { 4, 5, 10 });
-  triangles.insert(triangles.end(), { 10, 5, 11 });
+  triangles.insert(triangles.end(), {4, 5, 10});
+  triangles.insert(triangles.end(), {10, 5, 11});
   // x min
-  triangles.insert(triangles.end(), { 5, 0, 11 });
-  triangles.insert(triangles.end(), { 11, 0, 6 });
+  triangles.insert(triangles.end(), {5, 0, 11});
+  triangles.insert(triangles.end(), {11, 0, 6});
 
   // Use efficient constructor
   std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
-      std::move(triangles), std::move(vertices),
-                     Mantid::Kernel::Material());
+      std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
 }
@@ -211,10 +209,10 @@ public:
     vertices.emplace_back(V3D(0, 0, 1));
 
     std::vector<uint16_t> triangles;
-    triangles.insert(triangles.end(), { 1, 2, 3 });
-    triangles.insert(triangles.end(), { 2, 1, 0 });
-    triangles.insert(triangles.end(), { 3, 0, 1 });
-    triangles.insert(triangles.end(), { 0, 3, 2 });
+    triangles.insert(triangles.end(), {1, 2, 3});
+    triangles.insert(triangles.end(), {2, 1, 0});
+    triangles.insert(triangles.end(), {3, 0, 1});
+    triangles.insert(triangles.end(), {0, 3, 2});
 
     // Test flexible constructor
     TS_ASSERT_THROWS_NOTHING(
@@ -245,10 +243,10 @@ public:
     vertices.emplace_back(V3D(0, 0, 1));
 
     std::vector<uint16_t> triangles;
-    triangles.insert(triangles.end(), { 1, 2, 3 });
-    triangles.insert(triangles.end(), { 2, 1, 0 });
-    triangles.insert(triangles.end(), { 3, 0, 1 });
-    triangles.insert(triangles.end(), { 0, 3, 2 });
+    triangles.insert(triangles.end(), {1, 2, 3});
+    triangles.insert(triangles.end(), {2, 1, 0});
+    triangles.insert(triangles.end(), {3, 0, 1});
+    triangles.insert(triangles.end(), {0, 3, 2});
 
     auto testMaterial =
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
@@ -426,7 +424,8 @@ public:
     TS_ASSERT(object2->interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.emplace_back(
+        Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
     expectedResults.emplace_back(
         Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, *object2));
     checkTrackIntercept(TL, expectedResults);
@@ -448,8 +447,10 @@ public:
     TS_ASSERT(object2->interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
-    expectedResults.emplace_back(Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
+    expectedResults.emplace_back(
+        Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.emplace_back(
+        Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
