@@ -93,8 +93,8 @@ public:
       if (!Boxes[i]->isBox())
         gridIndices.push_back(i);
     }
-    for (unsigned long gridIndice : gridIndices) {
-      delete Boxes[gridIndice];
+    for (auto gridIndex : gridIndices) {
+      delete Boxes[gridIndex];
     }
 
     // Clean up file

@@ -133,7 +133,7 @@ public:
       ws.setBinEdges(i, std::move(binEdgeData));
 
       SpectrumDefinition specDef;
-      for (unsigned long detectorIndex : detectorIndices) {
+      for (auto detectorIndex : detectorIndices) {
         specDef.add(detectorIndex);
       }
       spectrumDefinitions.emplace_back(std::move(specDef));

@@ -295,11 +295,10 @@ public:
       TS_ASSERT_EQUALS(g->getChild(i - 2)->getParent(), g);
     }
     // MDGridBox will delete the children that it pulled in but the rest need to
-    // be
-    // taken care of manually
+    // be taken care of manually
     size_t indices[5] = {0, 1, 12, 13, 14};
-    for (unsigned long indice : indices)
-      delete boxes[indice];
+    for (auto index : indices)
+      delete boxes[index];
     delete g;
     delete bcc;
   }

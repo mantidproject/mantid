@@ -83,7 +83,7 @@ void DiffractionFocussing::exec() {
   if (iprogress_step == 0)
     iprogress_step = 1;
   std::vector<int64_t> resultIndeces;
-  for (long groupNumber : groupNumbers) {
+  for (auto groupNumber : groupNumbers) {
     if (iprogress++ % iprogress_step == 0) {
       progress(0.68 + double(iprogress) / iprogress_count / 3);
     }
