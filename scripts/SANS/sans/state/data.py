@@ -10,7 +10,6 @@ from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerPa
 from sans.common.enums import (SANSInstrument, SANSFacility)
 import sans.common.constants
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
-from sans.common.file_information import SANSFileInformationFactory
 from sans.state.automatic_setters import automatic_setters
 
 
