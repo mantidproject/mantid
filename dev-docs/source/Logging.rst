@@ -46,10 +46,10 @@ Configuring the Log Level
 
 For the logging to work you will need to have configured the logging service. This will occur when you do either of the following:
 
-  - Call *FrameworkManager.initialise()*
-  - Get a reference to the *ConfigService* singleton
+- Call :code:`FrameworkManager.initialise()`
+- Get a reference to the :code:`ConfigService` singleton
 
-When the framework is initialised, it attempts to read a file called *Mantid.properties* that it assumes will be available in the current working directory.
+When the framework is initialised, it attempts to read a file called :code:`Mantid.properties` that it assumes will be available in the current working directory.
 This contains among other things the logging configuration. See :ref:`PropertiesFile <PropertiesFile>` for more information.
 Here is an example:
 
@@ -69,11 +69,11 @@ Here is an example:
   logging.formatters.f1.pattern = %s-[%p] %t
   logging.formatters.f1.times = UTC
 
-This specifies that the logging comments will go to the console as well as a file called *mantid.log*.
+This specifies that the logging comments will go to the console as well as a file called :code:`mantid.log`.
 In the example here the level is set to debug, so all the messages will be output.
 In production this will usually be set to information.
-One could also alter the logging level programmatically using *ConfigService*.
-For example, in python:
+One could also alter the logging level programmatically using :code:`ConfigService`.
+For example, in :code:`python`:
 
 .. code-block:: python
 
@@ -128,7 +128,7 @@ In general:
 Tips
 ----
 
-- If logging data that takes significant resources to generate the message, use the *is(priority)* function of the logger to check if the message would actually be output:
+- If logging data that takes significant resources to generate the message, use the :code:`is(priority)` function of the logger to check if the message would actually be output:
 
   .. code-block:: cpp
 

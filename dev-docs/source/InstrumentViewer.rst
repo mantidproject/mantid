@@ -11,7 +11,7 @@ Overview
 --------
 
 Mantid visualisation system allows users to view the geometry of an instrument and also select and query individual detectors.
-An instrument is always shown in a context of a workspace of data recorded on this instrument.
+An instrument is always shown in the context of a workspace containing data recorded with this instrument.
 The detectors are coloured according to the data in the corresponding spectra of the workspace.
 The user can select individual detectors by clicking on them and request to see the data recorded by this detector as a table or a graph.
 The instrument view also allows users to see close-ups of any component.
@@ -23,8 +23,8 @@ The instrument view also allows users to see close-ups of any component.
 Implementation
 --------------
 
-MantidPlot uses OpenGL to plot the geometry. Instrument3DWidget represents the view window and controls the viewport and the scene.
-The base class for a visual element is GLObject. Actors and MantidObject inherit from it. Actors represent the instrument components.
+MantidPlot uses :code:`OpenGL` to plot the geometry. :code:`Instrument3DWidget` represents the view window and controls the viewport and the scene.
+The base class for a visual element is :code:`GLObject`. :code:`Actors` and :code:`MantidObject` inherit from it. :code:`Actors` represent the instrument components.
 
 .. figure:: images/InstrumentViewClassDiagram.jpg
   :align: center
@@ -43,8 +43,8 @@ Geometry Handlers and Renderers
 Each object has a geometry handler attached to it.
 The handler is responsible for creating the mesh and rendering the object.
 Handlers have different methods of creating meshes.
-For example, GluGeometryHandler can create simple shapes such as spheres and cylinders, OCGeometryHandler creates more complex geometries combining simple shapes together.
-CacheGeometryHandler reads previously saved geometries from a file.
+For example, :code:`GluGeometryHandler` can create simple shapes such as spheres and cylinders, :code:`OCGeometryHandler` creates more complex geometries combining simple shapes together.
+:code:`CacheGeometryHandler` reads previously saved geometries from a file.
 
 .. figure:: images/GeometryHandlers.jpg
   :align: center
