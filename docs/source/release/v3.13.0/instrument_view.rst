@@ -12,8 +12,8 @@ Instrument Visualization
 Instrument View
 ---------------
 
-The Instrument View visualization tool in Mantid has undergone some major changes under the hood which has resulted in a smoother, more responsive interface. 
-Instruments generally load faster as well, however, below are a few noteworthy improvements to load times: 
+The `Instrument View <https://www.mantidproject.org/MantidPlot:_Instrument_View>`__ visualization tool in Mantid has undergone some major changes under-the-hood which has resulted in a smoother, more responsive interface. 
+Instruments generally load faster as well. Below are a few noteworthy improvements to load times:
 
 +------------+-----------+
 | Instrument | Speedup   |
@@ -30,5 +30,7 @@ Instruments generally load faster as well, however, below are a few noteworthy i
 +------------+-----------+
 | CNCS       | 2x        |
 +------------+-----------+
+
+Tested on Windows 10.
 
 :ref:`Release 3.13.0 <v3.13.0>`
