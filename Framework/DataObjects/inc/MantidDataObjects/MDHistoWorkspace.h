@@ -78,7 +78,7 @@ public:
   uint64_t getNPoints() const override { return m_length; }
   /// get number of contributed events
   uint64_t getNEvents() const override;
-  std::vector<Mantid::API::IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<Mantid::API::IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
