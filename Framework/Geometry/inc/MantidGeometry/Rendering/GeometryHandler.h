@@ -15,10 +15,8 @@ namespace Mantid {
 namespace Geometry {
 class IObjComponent;
 class CSGObject;
+
 class MeshObject;
-namespace detail {
-class GeometryTriangulator;
-}
 namespace detail {
 class Renderer;
 class GeometryTriangulator;

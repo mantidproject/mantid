@@ -132,7 +132,7 @@ void InstrumentActor::setUpWorkspace(
   m_WkspBinMaxValue = -DBL_MAX;
   const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
   m_detIndex2WsIndex.resize(componentInfo().size(), INVALID_INDEX);
-  for (size_t wi = 0; wi < spectrumInfo.size(); wi++) {
+  for (size_t wi = 0; wi < spectrumInfo.size(); ++wi) {
     const auto &values = sharedWorkspace->x(wi);
     double xtest = values.front();
     if (!std::isinf(xtest)) {

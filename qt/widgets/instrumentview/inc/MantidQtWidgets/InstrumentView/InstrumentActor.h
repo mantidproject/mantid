@@ -192,7 +192,7 @@ public:
   void loadFromProject(const std::string &lines);
   /// Save the state of the actor to a Mantid project file.
   std::string saveToProject() const;
-
+  /// Returns indices of all non-detector components in Instrument.
   const std::vector<size_t> &components() const { return m_components; }
 
 signals:
