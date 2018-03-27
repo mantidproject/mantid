@@ -15,7 +15,7 @@ class PearlMCAbsorption(PythonAlgorithm):
         return "Loads pre-calculated or measured absorption correction files for Pearl."
 
     def seeAlso(self):
-        return [ "MonteCarloAbsorption", "MayersSampleCorrection", 
+        return [ "MonteCarloAbsorption", "MayersSampleCorrection",
                  "MultipleScatteringCylinderAbsorption", "VesuvioCalculateMS" ]
 
     def PyInit(self):

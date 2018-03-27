@@ -107,7 +107,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """ Defines the category the algorithm will be put in the algorithm browser
         """
         return 'DataHandling\\Raw'
-        
+
 #----------------------------------------------------------------------------------------
 
     def seeAlso(self):
