@@ -67,7 +67,7 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
  
  #endif /*MYALG_H_*/
 
-**Source file (MyAlg.cpp)**::
+**Source file (MyAlg.cpp)**:
 
 .. code-block:: cpp
 
