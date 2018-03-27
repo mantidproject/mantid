@@ -106,24 +106,21 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
       continue;
 
     if (type == Mantid::Beamline::ComponentType::Rectangular) {
-      visited[i] = true;
-      updateVisited(visited, compInfo.children(i));
+      updateVisited(visited, compInfo.componentsInSubtree(i));
       if (visibleComps[i])
         drawRectangularBank(i, picking);
       continue;
     }
 
     if (type == Mantid::Beamline::ComponentType::OutlineComposite) {
-      visited[i] = true;
-      updateVisited(visited, compInfo.children(i));
+      updateVisited(visited, compInfo.componentsInSubtree(i));
       if (visibleComps[i])
         drawTube(i, picking);
       continue;
     }
 
     if (type == Mantid::Beamline::ComponentType::Structured) {
-      visited[i] = true;
-      updateVisited(visited, compInfo.children(i));
+      updateVisited(visited, compInfo.componentsInSubtree(i));
       if (visibleComps[i])
         drawStructuredBank(i, picking);
       continue;
