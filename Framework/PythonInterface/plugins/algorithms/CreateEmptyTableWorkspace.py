@@ -15,10 +15,10 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
 
     def category(self):
         return 'Utility\\Workspaces'
-        
+
     def seeAlso(self):
         return [ "DeleteTableRows","SortTableWorkspace" ]
-        
+
     def PyInit(self):
         # Declare properties
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),

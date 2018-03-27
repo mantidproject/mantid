@@ -59,7 +59,7 @@ class TimeSlice(PythonAlgorithm):
 
     def summary(self):
         return 'Performa an integration on a raw file over a specified time of flight range'
-    
+
     def seeAlso(self):
         return [ "Integration" ]
 

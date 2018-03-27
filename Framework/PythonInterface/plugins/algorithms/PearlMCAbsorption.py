@@ -13,11 +13,11 @@ class PearlMCAbsorption(PythonAlgorithm):
 
     def summary(self):
         return "Loads pre-calculated or measured absorption correction files for Pearl."
-        
+
     def seeAlso(self):
         return [ "MonteCarloAbsorption", "MayersSampleCorrection", 
                  "MultipleScatteringCylinderAbsorption", "VesuvioCalculateMS" ]
-                 
+
     def PyInit(self):
         # Input file
         self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.out','.dat']), doc="The name of the input file.")

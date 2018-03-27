@@ -109,10 +109,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
         return 'DataHandling\\Raw'
         
 #----------------------------------------------------------------------------------------
-    
+
     def seeAlso(self):
         return [ "LoadEmptyVesuvio" ,"LoadRaw" ]
-        
+
 #----------------------------------------------------------------------------------------
 
     def PyInit(self):

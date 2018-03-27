@@ -42,7 +42,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
     def seeAlso(self):
         return [ "ExportSampleLogsToCSVFile" ]
-        
+
     def PyInit(self):
         """ Declaration of properties
         """

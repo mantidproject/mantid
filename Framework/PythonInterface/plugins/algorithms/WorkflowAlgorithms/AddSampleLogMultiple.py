@@ -13,7 +13,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
 
     def summary(self):
         return 'Add multiple sample logs to a workspace'
-        
+
     def seeAlso(self):
         return ["AddSampleLog"]
 
