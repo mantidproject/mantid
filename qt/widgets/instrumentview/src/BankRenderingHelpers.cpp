@@ -18,7 +18,9 @@ size_t roundToNearestPowerOfTwo(size_t val) {
   return rounded;
 }
 
-void addVertex(Mantid::Kernel::V3D &pos, double xstep, double ystep) {
+void addVertex(const Mantid::Geometry::ComponentInfo &compInfo, size_t detIndex,
+               const Mantid::Kernel::V3D &basePos, double xstep, double ystep) {
+  auto pos = compInfo.position(detIndex) - basePos;
   pos += Mantid::Kernel::V3D(xstep * (+0.5), ystep * (-0.5),
                              0.0); // Adjust to account for the size of a pixel
   glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
@@ -85,21 +87,17 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
   auto basePos = compInfo.position(bank.bottomLeft);
 
   glTexCoord2f(0.0, 0.0);
-  auto pos = compInfo.position(bank.bottomLeft) - basePos;
-  addVertex(pos, xstep, ystep);
+  addVertex(compInfo, bank.bottomLeft, basePos, xstep, ystep);
 
   glTexCoord2f(static_cast<GLfloat>(tex_frac_x), 0.0);
-  pos = compInfo.position(bank.bottomRight) - basePos;
-  addVertex(pos, xstep, ystep);
+  addVertex(compInfo, bank.bottomRight, basePos, xstep, ystep);
 
   glTexCoord2f(static_cast<GLfloat>(tex_frac_x),
                static_cast<GLfloat>(tex_frac_y));
-  pos = compInfo.position(bank.topRight) - basePos;
-  addVertex(pos, xstep, ystep);
+  addVertex(compInfo, bank.topRight, basePos, xstep, ystep);
 
   glTexCoord2f(0.0, static_cast<GLfloat>(tex_frac_y));
-  pos = compInfo.position(bank.topLeft) - basePos;
-  addVertex(pos, xstep, ystep);
+  addVertex(compInfo, bank.topRight, basePos, xstep, ystep);
 
   glEnd();
 
