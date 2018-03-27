@@ -1,3 +1,5 @@
+.. _dev-docs-git-workflow:
+
 ===================
 Mantid Git Workflow
 ===================
@@ -147,7 +149,7 @@ Pull Requests
 Open pull requests as normal to ask to merge your branch with its
 intended target.
 
-.. image:: ../images/CodeFreezePR.png
+.. image:: images/CodeFreezePR.png
 
 Fixing a PR with an Incorrect Base Branch
 -----------------------------------------
