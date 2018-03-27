@@ -6,14 +6,14 @@ import re
 import string
 import itertools
 import math
-#import stresstesting
+import stresstesting
 from operator import itemgetter
 from mantid.simpleapi import *
 from mantid import ConfigService
 from isis_reflectometry.combineMulti import combineDataMulti, getWorkspace
 
 
-class ISISReflectometryAutoreductionTest(object):
+class ISISReflectometryAutoreductionTest(stresstesting.MantidStressTest):
     # NOTE: When updating the run range used be sure to update the run_titles table below.
     # You may also find the regenerate functions useful.
     investigation_id = 1710262
@@ -425,8 +425,9 @@ def CreateTransmissionWorkspaces(run1, run2, scale=False):
         StartOverlap=10,
         EndOverlap=12)
 
+# If you want to re-run the test and save the result as a reference...
+#   ISISReflectometryAutoreductionTest.regenerateReferenceFileByReducing()
 
-# ISISReflectometryAutoreductionTest.regenerateReferenceFileFromDirectory(
-#    "/home/ejb/Documents/INTER_Mantid_Test/Autoreduce test workspaces")
-# ISISReflectometryAutoreductionTest.regenerateReferenceFileByReducing()
-ISISReflectometryAutoreductionTest.run()
+# or
+# If you have workspaces in a folder to use as a reference...
+#   ISISReflectometryAutoreductionTest.regenerateReferenceFileFromDirectory("Path/To/Folder")
