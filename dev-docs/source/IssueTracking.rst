@@ -41,7 +41,7 @@ then dependent on its requirements:
 Creating an Issue
 ^^^^^^^^^^^^^^^^^
 
-Go `here <https://github.com/mantidproject/mantid/issues/new>`_ to
+Go `here <https://github.com/mantidproject/mantid/issues/new>`__ to
 create a new issue. Make sure you assign the appropriate labels (see
 :ref:`dev-docs-issue-tracking-labels`) and milestone.
 
@@ -106,7 +106,7 @@ Filtering Issues
 ^^^^^^^^^^^^^^^^
 
 GitHub has a powerful issue filtering system that is described `here
-<https://help.github.com/articles/searching-issues>`_. Below we list
+<https://help.github.com/articles/searching-issues>`__. Below we list
 some common searches that developers will need. It is advised to
 bookmark these URLs.
 
@@ -126,10 +126,10 @@ These are useful links to view when you are looking to review/test an
 issue or pull request:
 
 - Go `here
-  <https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=-author%3AGITHUB-NAME-HERE+is%3Apr+is%3Aopen+-label%3A%22State%3A+In+Progress%22+no%3Aassignee+status%3Asuccess>`_
+  <https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=-author%3AGITHUB-NAME-HERE+is%3Apr+is%3Aopen+-label%3A%22State%3A+In+Progress%22+no%3Aassignee+status%3Asuccess>`__
   for pull requests that you did not create and no one else is
   assigned. Please replace GITHUB-NAME-HERE with your GitHub username
 - Go `here
-  <https://github.com/mantidproject/mantid/issues?utf8=%E2%9C%93&q=-assignee%3AGITHUB-NAME-HERE+is%3Aissue+is%3Aopen+label%3A%22State%3A+Review+Required%22+>`_
+  <https://github.com/mantidproject/mantid/issues?utf8=%E2%9C%93&q=-assignee%3AGITHUB-NAME-HERE+is%3Aissue+is%3Aopen+label%3A%22State%3A+Review+Required%22+>`__
   for issues with no code changes to review. Please replace
   GITHUB-NAME-HERE with your GitHub username
