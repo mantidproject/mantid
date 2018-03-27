@@ -79,9 +79,8 @@ public:
       TS_ASSERT_DELTA(it->getNormalizedSignal(), double(i) / 1.0, 1e-5);
       TS_ASSERT_DELTA(it->getNormalizedError(), 1.0, 1e-5);
       size_t numVertices;
-      coord_t *vertexes = it->getVertexesArray(numVertices);
+      auto vertexes = it->getVertexesArray(numVertices);
       TS_ASSERT(vertexes);
-      delete[] vertexes;
       TS_ASSERT_EQUALS(it->getNumEvents(), 1);
       TS_ASSERT_EQUALS(it->getInnerDetectorID(0), 0);
       TS_ASSERT_EQUALS(it->getInnerRunIndex(0), 0);
@@ -1450,8 +1449,7 @@ public:
     do {
       signal_t sig = it->getNormalizedSignal();
       signal_t err = it->getNormalizedError();
-      coord_t *vertexes = it->getVertexesArray(numVertices);
-      delete[] vertexes;
+      auto vertexes = it->getVertexesArray(numVertices);
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     } while (it->next());
