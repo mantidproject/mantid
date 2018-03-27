@@ -40,7 +40,6 @@ MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
 
   Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
   outWS->initialize(nSpec, xData.size(), yData.size());
-
   for (int i = 0; i < nSpec; ++i) {
     outWS->mutableY(i) = yData;
     outWS->mutableE(i) = eData;

@@ -370,6 +370,30 @@ MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr &inOne,
   return outWS;
 }
 
+/**Runs the ConjoinXRuns Algorithm as a child
+ @param inWS :: Input workspace
+ @return A shared pointer to the resulting MatrixWorkspace
+ */
+MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inWS) {
+  auto conjoinX = this->createChildAlgortihm("ConjoinXRuns");
+  conjoinX->setProperty("InputWorkspace", inWS);
+  conjoinX->execute();
+  MatrixWorkspace_sptr outWS = conjoinX->getProperty("OutputWorkspace");
+  return outWS;
+}
+
+/**Runs the SortXAxis Algorithm as a child
+ @param inWS :: Input workspace
+ @return A shared pointer to the resulting MatrixWorkspace
+ */
+MatrixWorkspace_sptr Stitch1D::sortXAxis(MatrixWorkspace_sptr &inWS) {
+  auto sortX = this->createChildAlgortihm("SortXAxis");
+  sortX->setProperty("InputWorkspace", inWS);
+  sortX->execute();
+  MatrixWorkspace_sptr outWS = sortX->getProperty("OutputWorkspace");
+  return outWS;
+}
+
 /**Runs the CreateSingleValuedWorkspace Algorithm as a child
  @param val :: The double to convert to a single value workspace
  @return A shared pointer to the resulting MatrixWorkspace
@@ -437,7 +461,6 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
 void Stitch1D::exec() {
   MatrixWorkspace_sptr rhsWS = this->getProperty("RHSWorkspace");
   MatrixWorkspace_sptr lhsWS = this->getProperty("LHSWorkspace");
-
   const MinMaxTuple intesectionXRegion = calculateXIntersection(lhsWS, rhsWS);
 
   const double intersectionMin = intesectionXRegion.get<0>();
@@ -473,7 +496,6 @@ void Stitch1D::exec() {
         startOverlap % xMin);
     throw std::runtime_error(message);
   }
-
   if (endOverlap > xMax) {
     std::string message = boost::str(
         boost::format("Stitch1D EndOverlap is outside the available X range "
@@ -500,7 +522,6 @@ void Stitch1D::exec() {
     lhs = rebin(lhsWS, params);
     rhs = rebin(rhsWS, params);
   }
-
   if (useManualScaleFactor) {
     double manualScaleFactor = this->getProperty("ManualScaleFactor");
     MatrixWorkspace_sptr manualScaleFactorWS = singleValueWS(manualScaleFactor);
@@ -536,7 +557,6 @@ void Stitch1D::exec() {
 
   boost::tuple<int, int> startEnd =
       findStartEndIndexes(startOverlap, endOverlap, lhs);
-
   int a1 = boost::tuples::get<0>(startEnd);
   int a2 = boost::tuples::get<1>(startEnd);
 
@@ -564,8 +584,8 @@ void Stitch1D::exec() {
   } else {
     // If the input workspaces are point data ...
     if (!rhsWS->isHistogramData() && !lhsWS->isHistogramData()) {
-      g_log.error("Missing implementation");
-      throw std::invalid_argument("Missing implementation");
+      // Sort according to x values
+      overlapave = sortXAxis(conjoinXaxis(overlap1, overlap2));
     } else {
       g_log.error("Input workspaces must be both histograms or point data");
       throw std::invalid_argument(

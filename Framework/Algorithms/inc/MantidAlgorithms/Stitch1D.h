@@ -74,10 +74,14 @@ private:
   integration(Mantid::API::MatrixWorkspace_sptr &input, const double &start,
               const double &stop);
   Mantid::API::MatrixWorkspace_sptr singleValueWS(double val);
-  /// Calclate the weighted mean
+  /// Calculate the weighted mean
   Mantid::API::MatrixWorkspace_sptr
   weightedMean(Mantid::API::MatrixWorkspace_sptr &inOne,
                Mantid::API::MatrixWorkspace_sptr &inTwo);
+  /// Conjoin x axis
+  Mantid::API::MatrixWorkspace_sptr conjoinXAxis(Mantid::API::MatrixWorkspace_sptr &inWS);
+  /// Sort x axis
+  Mantid::API::MatrixWorkspace_sptr sortXAxis(Mantid::API::MatrixWorkspace_sptr &inWS);
   /// Find the start and end indexes
   boost::tuple<int, int>
   findStartEndIndexes(double startOverlap, double endOverlap,
