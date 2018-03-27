@@ -1,3 +1,5 @@
+.. _dev-docs-cpp-standards:
+
 ====================
 C++ Coding Standards
 ====================

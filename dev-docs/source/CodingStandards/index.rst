@@ -15,4 +15,4 @@ procedure in a sensible manner to code generated automatically.
 
    MantidStandards
    CPPStandards
-
+   UnitTestStandards
