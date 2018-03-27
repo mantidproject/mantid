@@ -280,9 +280,11 @@ fi
 ###############################################################################
 # Run the unit tests
 ###############################################################################
-# Remove any Mantid.user.properties file
-userprops=~/.mantid/Mantid.user.properties
-rm -f $userprops
+# Prevent race conditions when creating the user config directory
+userconfig_dir=$HOME/.mantid
+rm -fr $userconfig_dir
+mkdir -p $userconfig_dir
+touch $userconfig_dir/Mantid.user.properties
 $CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
 
 ###############################################################################
