@@ -417,6 +417,7 @@ void MaxEnt::exec() {
       if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
           (currAngle < angle)) {
 
+        // it + 1 iterations have been done because we count from zero.
         g_log.information() << "Stopped after " << it + 1 << " iterations"
                             << std::endl;
         iterationCounts.push_back(it + 1);
