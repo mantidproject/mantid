@@ -97,7 +97,7 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
   addVertex(compInfo, bank.topRight, basePos, xstep, ystep);
 
   glTexCoord2f(0.0, static_cast<GLfloat>(tex_frac_y));
-  addVertex(compInfo, bank.topRight, basePos, xstep, ystep);
+  addVertex(compInfo, bank.topLeft, basePos, xstep, ystep);
 
   glEnd();
 
