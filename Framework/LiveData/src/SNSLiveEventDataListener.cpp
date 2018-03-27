@@ -1196,7 +1196,6 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   return false;
 }
 
-
 /// Parse a Run Information packet
 
 /// Overrides the default function defined in ADARA::Parser and processes
@@ -1206,8 +1205,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
 /// @param pkt The packet to be parsed
 /// @return Returns false if there were no problems.  Returns true if there
 /// was an error and packet parsing should be interrupted
-bool SNSLiveEventDataListener::rxPacket( const ADARA::RunInfoPkt &pkt) {
-  
+bool SNSLiveEventDataListener::rxPacket(const ADARA::RunInfoPkt &pkt) {
+
   // RunInfoPkts are mostly just blocks of XML.
   Poco::XML::DOMParser parser;
   Poco::AutoPtr<Poco::XML::Document> doc = parser.parseString(pkt.info());
@@ -1235,28 +1234,28 @@ bool SNSLiveEventDataListener::rxPacket( const ADARA::RunInfoPkt &pkt) {
     if (node->nodeName() == "proposal_id") {
       const Poco::XML::Node *textElement = node->firstChild();
       if (textElement) {
-          proposalID = textElement->nodeValue();
+        proposalID = textElement->nodeValue();
       }
     } else if (node->nodeName() == "run_title") {
       const Poco::XML::Node *textElement = node->firstChild();
       if (textElement) {
-          runTitle = textElement->nodeValue();
+        runTitle = textElement->nodeValue();
       }
     }
-    
+
     // If we've got everything we need, we can break out of the while loop
     if (proposalID.length() && runTitle.length()) {
       break;
     }
-    
+
     node = node->nextSibling();
   }
-  
+
   if (proposalID.length()) {
-    Property *prop = 
-      m_eventBuffer->mutableRun().getProperty(EXPERIMENT_ID_PROPERTY);
-        
-    // Sanity check: We're likely to get multiple RunInfo packets in a 
+    Property *prop =
+        m_eventBuffer->mutableRun().getProperty(EXPERIMENT_ID_PROPERTY);
+
+    // Sanity check: We're likely to get multiple RunInfo packets in a
     // run, but the values shouldn't change mid-run...
     std::string prevPropVal = prop->value();
     if (prevPropVal.length() && prevPropVal != proposalID) {
@@ -1266,25 +1265,25 @@ bool SNSLiveEventDataListener::rxPacket( const ADARA::RunInfoPkt &pkt) {
     prop->setValue(proposalID);
   } else {
     g_log.warning("Run info packet did not contain a proposal ID.  "
-                  "Property will be empty."); 
+                  "Property will be empty.");
   }
-  
+
   if (runTitle.length()) {
-    Property *prop = 
-      m_eventBuffer->mutableRun().getProperty(RUN_TITLE_PROPERTY);
-    
+    Property *prop =
+        m_eventBuffer->mutableRun().getProperty(RUN_TITLE_PROPERTY);
+
     // Sanity check
     std::string prevPropVal = prop->value();
     if (prevPropVal.length() && prevPropVal != runTitle) {
       g_log.error("The run title in the current run info packet has changed!"
                   "  This shouldn't happen!  (Keeping new title value.)");
     }
-    prop->setValue(runTitle);    
+    prop->setValue(runTitle);
   } else {
     g_log.warning("Run info packet did not contain a run title.  "
-                  "Property will be empty."); 
+                  "Property will be empty.");
   }
-  
+
   return false;
 }
 
@@ -1308,10 +1307,10 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
   prop = new TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY);
   prop->setUnits("picoCoulomb");
   m_eventBuffer->mutableRun().addLogData(prop);
-  
+
   // Same for a couple of other properties (that are not time series)
   prop = new PropertyWithValue<std::string>(RUN_TITLE_PROPERTY, "");
-  m_eventBuffer->mutableRun().addLogData(prop); 
+  m_eventBuffer->mutableRun().addLogData(prop);
   prop = new PropertyWithValue<std::string>(EXPERIMENT_ID_PROPERTY, "");
   m_eventBuffer->mutableRun().addLogData(prop);
 }
