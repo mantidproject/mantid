@@ -40,10 +40,12 @@ MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
 
   Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
   outWS->initialize(nSpec, xData.size(), yData.size());
+
   for (int i = 0; i < nSpec; ++i) {
     outWS->mutableY(i) = yData;
     outWS->mutableE(i) = eData;
     outWS->mutableX(i) = xData;
+    outWS->setPointStandardDeviations(i, yData.size());
     outWS->mutableDx(i) = Dx;
   }
 
@@ -119,11 +121,11 @@ public:
     HistogramDx dx(10, 0.);
 
     // Pre-canned workspace to stitch
-    a = createWorkspace(x, y, e, dx);
+    this->a = createWorkspace(x, y, e, dx);
 
     y = {2., 2., 2., 2., 2., 2., 2., 0., 0., 0.};
     // Another pre-canned workspace to stitch
-    b = createWorkspace(x, y, e, dx);
+    this->b = createWorkspace(x, y, e, dx);
     this->x.assign(x.begin(), x.end());
   }
 
