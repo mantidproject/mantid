@@ -102,9 +102,9 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
       Kernel::V3D(pointsDef(0, 0), pointsDef(1, 0), pointsDef(2, 0)), normVec);
 
   std::map<int, boost::shared_ptr<Geometry::Surface>> surfaceShapes;
-  surfaceShapes[0] = cylinder;
-  surfaceShapes[1] = planeTop;
-  surfaceShapes[2] = planeBottom;
+  surfaceShapes[1] = cylinder;
+  surfaceShapes[2] = planeTop;
+  surfaceShapes[3] = planeBottom;
 
   // Bounding box calculation (Simple version)
   std::vector<double> boundingBoxSimplified;
@@ -123,8 +123,8 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
     boundingBoxSimplified.push_back(max);
     boundingBoxSimplified.push_back(min);
   }
-  // std::string algebra = "(-0 -1 2)";
-  std::string algebra = "(-0 -1 2)";
+
+  std::string algebra = "(-1 -2 3)";
   return createShape(surfaceShapes, algebra, boundingBoxSimplified);
 }
 
