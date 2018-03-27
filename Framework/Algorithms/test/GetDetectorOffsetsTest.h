@@ -228,8 +228,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin", "-20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax", "20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("FitEachPeakTwice", true));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue(
-        "PeakFitResultTableWorkspace", "fitparamstable"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("OutputFitResult", true));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
@@ -251,11 +250,13 @@ public:
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
 
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("fitparamstable"));
-    if (AnalysisDataService::Instance().doesExist("fitparamstable")) {
+    // check output TableWorkspace
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("offsetsped_FitResult"));
+    if (AnalysisDataService::Instance().doesExist("offsetsped_FitResult")) {
       ITableWorkspace_sptr paramtable =
           boost::dynamic_pointer_cast<ITableWorkspace>(
-              AnalysisDataService::Instance().retrieve("fitparamstable"));
+              AnalysisDataService::Instance().retrieve("offsetsped_FitResult"));
       TS_ASSERT(paramtable);
       TS_ASSERT_EQUALS(paramtable->columnCount(), 5);
       TS_ASSERT_EQUALS(paramtable->rowCount(), 3);

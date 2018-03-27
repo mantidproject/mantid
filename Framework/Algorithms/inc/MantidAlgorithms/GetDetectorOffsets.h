@@ -3,8 +3,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -77,6 +78,9 @@ private:
                                      const double peakLoc);
   /// Read in all the input parameters
   void retrieveProperties();
+
+  /// Generate a TableWorkspace containing fitted parameters' values
+  DataObjects::TableWorkspace_sptr GenerateFitResultTable();
 
   API::MatrixWorkspace_sptr inputW; ///< A pointer to the input workspace
   DataObjects::OffsetsWorkspace_sptr

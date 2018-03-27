@@ -9,7 +9,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -83,6 +82,11 @@ void GetDetectorOffsets::init() {
       "Peak fitting range for the first round fitting wil be determined by "
       "given XMin and XMax"
       "And in second round peak fitting, fit range will be limited to FHWM. ");
+
+  declareProperty("OutputFitResult", false,
+                  "If true, then a TableWorkspace containing all the fitted "
+                  "parameters' values will be output with the name as "
+                  "$OUTPUTWORKSPACE_FitResult");
 }
 
 //-----------------------------------------------------------------------------------------
@@ -122,29 +126,10 @@ void GetDetectorOffsets::exec() {
   bool fit_peak_twice = getProperty("FitEachPeakTwice");
 
   // output fitting result?
-  // std::string result_ws_name =
-  // getPropertyValue("PeakFitResultTableWorkspace");
-  std::string result_ws_name("whatevera");
-  TableWorkspace_sptr fit_result_table;
-  if (result_ws_name.size() > 0) {
-    fit_result_table = boost::make_shared<TableWorkspace>();
-    fit_result_table->addColumn("int", "wsindex");
-    fit_result_table->addColumn("double", "center");
-    fit_result_table->addColumn("double", "fwhm");
-    fit_result_table->addColumn("double", "height");
-    fit_result_table->addColumn("double", "A0");
-    fit_result_table->addColumn("double", "A1");
-    for (size_t iws = 0; iws < inputW->getNumberHistograms(); ++iws)
-      fit_result_table->appendRow();
-    declareProperty(
-        make_unique<WorkspaceProperty<TableWorkspace>>(
-            "PeakFitResultTableWorkspace", "whatever", Direction::Output),
-        "Name of the input Tableworkspace containing peak fit window "
-        "information for each spectrum. ");
-    setProperty("PeakFitResultTableWorkspace", fit_result_table);
-  } else {
-    fit_result_table = 0;
-  }
+  bool output_fit_result = getProperty("OutputFitResult");
+  TableWorkspace_sptr fit_result_table(0);
+  if (output_fit_result)
+    fit_result_table = GenerateFitResultTable();
 
   // Fit all the spectra with a gaussian
   Progress prog(this, 0.0, 1.0, nspec);
@@ -221,6 +206,19 @@ void GetDetectorOffsets::exec() {
     childAlg->setProperty("MaskWorkspace", maskWS);
     childAlg->setPropertyValue("Filename", filename);
     childAlg->executeAsChildAlg();
+  }
+
+  // Return the output fit result table
+  if (fit_result_table) {
+    std::string fit_result_table_name = getPropertyValue("OutputWorkspace");
+    fit_result_table_name += "_FitResult";
+    declareProperty(
+        make_unique<WorkspaceProperty<TableWorkspace>>(
+            "PeakFitResultTableWorkspace", fit_result_table_name,
+            Direction::Output),
+        "Name of the input Tableworkspace containing peak fit window "
+        "information for each spectrum. ");
+    setProperty("PeakFitResultTableWorkspace", fit_result_table);
   }
 }
 
@@ -325,7 +323,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
       creator.createFunction(getProperty("PeakFunction")));
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
-  const double sigma(1.0);
+  const double sigma(10.0);
   peak->setFwhm(2.0 * std::sqrt(2.0 * M_LN2) * sigma);
 
   auto fitFunc = new CompositeFunction(); // Takes ownership of the functions
@@ -333,6 +331,25 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   fitFunc->addFunction(peak);
 
   return boost::shared_ptr<IFunction>(fitFunc);
+}
+
+/**
+ * @brief GetDetectorOffsets::GenerateFitResultTable
+ * @return
+ */
+DataObjects::TableWorkspace_sptr GetDetectorOffsets::GenerateFitResultTable() {
+
+  TableWorkspace_sptr fit_result_table = boost::make_shared<TableWorkspace>();
+  fit_result_table->addColumn("int", "wsindex");
+  fit_result_table->addColumn("double", "center");
+  fit_result_table->addColumn("double", "fwhm");
+  fit_result_table->addColumn("double", "height");
+  fit_result_table->addColumn("double", "A0");
+  fit_result_table->addColumn("double", "A1");
+  for (size_t iws = 0; iws < inputW->getNumberHistograms(); ++iws)
+    fit_result_table->appendRow();
+
+  return fit_result_table;
 }
 
 } // namespace Algorithm
