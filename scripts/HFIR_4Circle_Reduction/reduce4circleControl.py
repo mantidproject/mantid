@@ -1462,6 +1462,16 @@ class CWSCDReductionControl(object):
 
         return has
 
+    def import_2theta_gauss_sigma_file(self, twotheta_sigma_file_name):
+        """
+
+        :param twotheta_sigma_file_name:
+        :return:
+        """
+        # TODO NOW3 - Implement!
+
+        return False, 'Not Implemented Yet'
+
     def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
         """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
         :param ub_matrix: numpy.ndarray (3, 3)

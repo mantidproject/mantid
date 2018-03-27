@@ -50,8 +50,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.menuQuit.triggered.connect(self.do_close)
         self.ui.actionSelect_All.triggered.connect(self.menu_table_select_all)
         self.ui.actionDe_select_All.triggered.connect(self.menu_table_select_none)
-
-        # TODO NOW3 actionLoad_Gaussian_Sigma_File : load a Gaussian sigma curve for interpolation or matching
+        self.ui.actionLoad_Gaussian_Sigma_File.triggered.connect(self.menu_load_gauss_sigma_file)
 
         # class variable
         self._working_dir = os.path.expanduser('~')
@@ -237,10 +236,41 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
+    def menu_load_gauss_sigma_file(self):
+        """
+        load a Gaussian sigma curve for interpolation or matching
+        :return:
+        """
+        # get the column ascii file name
+        file_filter = 'Data Files (*.dat);;All Files (*.*)'
+        twotheta_sigma_file_name = str(QFileDialog.getOpenFileName(self, self._working_dir,
+                                                                   '2theta Gaussian-Sigma File',
+                                                                   file_filter))
+        if len(twotheta_sigma_file_name) == 0 or twotheta_sigma_file_name == 'None':
+            return
+
+        # set the file to controller
+        status, message = self._controller.import_2theta_gauss_sigma_file(twotheta_sigma_file_name)
+
+        # pop out error message if any
+        if not status:
+            raise RuntimeError(message)
+
+        return
+
+
     def menu_table_select_all(self):
+        """
+        select all rows in table
+        :return:
+        """
         self.ui.tableView_summary.select_all_rows(True)
 
     def menu_table_select_none(self):
+        """
+        de-select all rows in the able
+        :return:
+        """
         self.ui.tableView_summary.select_all_rows(False)
 
     def add_scans(self, scan_pt_list):
