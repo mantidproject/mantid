@@ -22,20 +22,22 @@ See `Python Vs C++ Algorithms <https://www.mantidproject.org/Python_Vs_C%2B%2B_A
 two programming languages.
 
 All `algorithms <https://www.mantidproject.org/Algorithm>`__ in Mantid `inherit <http://en.wikipedia.org/wiki/Inheritance_(computer_science)>`__ 
-from a base Algorithm class, which provides the support and services required for running a specific 
+from a base ``Algorithm`` class, which provides the support and services required for running a specific 
 algorithm and greatly simplifies the process of writing a new one.
 
 Getting Started
 ###############
 The first step is to create a new directory, with any name of your choice, under your MantidInstall directory
-(on Windows, probably located at C:\MantidInstall). Alternatively, you can just do everything in the 
+(on Windows, probably located at ``C:\\MantidInstall``). Alternatively, you can just do everything in the 
 UserAlgorithms directory. The UserAlgorithms directory contains a simple Python script called ``createAlg.py``.
 This can be used to create a new 'empty' algorithm - to create one called 'MyAlg' you should type ``python 
 createAlg.py myAlg category``, where category is an optional argument to set the algorithm's category. 
-To do the same thing 'by hand', create files called MyAlg.h and MyAlg.cpp and paste in the following 
-boilerplate C++ code (changing each occurrence of "MyAlg" to your chosen algorithm name):
+To do the same thing 'by hand', create files called ``MyAlg.h`` and ``MyAlg.cpp`` and paste in the following 
+boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorithm name):
 
-**Header file (MyAlg.h)**::
+**Header file (MyAlg.h)**:
+
+.. code-block:: cpp
 
     #ifndef MYALG_H_
     #define MYALG_H_
@@ -67,6 +69,8 @@ boilerplate C++ code (changing each occurrence of "MyAlg" to your chosen algorit
 
 **Source file (MyAlg.cpp)**::
 
+.. code-block:: cpp
+
     #include "MyAlg.h"
     
     // Register the algorithm into the AlgorithmFactory
@@ -90,21 +94,21 @@ Coding the Algorithm
 
 You will see that the algorithm skeletons set up in the last section contain two methods/functions/subroutines
 called ``init`` and ``exec``. It will be no surprise to discover that these will, respectively, contain the code to 
-initialise and execute the algorithm, which goes in the .cpp file between the curly brackets of each method. 
+initialise and execute the algorithm, which goes in the ``.cpp`` file between the curly brackets of each method. 
 Note that these are private methods (i.e. cannot be called directly); an algorithm is run by calling the base 
 class's ``initialize()`` and ``execute()`` methods, which provide additional services such as the validation of properties, 
-fetching workspaces from the Analysis Data Service, handling errors and filling the workspace histories.
+fetching workspaces from the ``AnalysisDataService``, handling errors and filling the workspace histories.
 
 Initialization
 --------------
 
-The initialization (init) method is executed by the Framework Manager when an algorithm is requested and must
+The initialization (init) method is executed by the ``FrameworkManager`` when an algorithm is requested and must
 contain the declaration of the properties required by the algorithm. Atypically, it can also contain other 
 initialization code such as the calculation of constants used by the algorithm, so long as this does not 
 rely on the values of any of the properties.
 
 Calls to the ``declareProperty`` method are used to add a property to this algorithm. See the properties page
-for more information on the types of properties supported and the example algorithms in UserAlgorithms 
+for more information on the types of properties supported and the example algorithms in ``UserAlgorithms`` 
 (especially `PropertyAlgorithm <http://svn.mantidproject.org/mantid/trunk/Code/Mantid/UserAlgorithms/PropertyAlgorithm.cpp>`__
 and `WorkspaceAlgorithm <http://svn.mantidproject.org/mantid/trunk/Code/Mantid/UserAlgorithms/WorkspaceAlgorithm.cpp>`__) 
 for further guidance on how to use them.
@@ -115,7 +119,7 @@ For the simple types (integer, double or string), the basic syntax is::
 
 An optional `validator <https://www.mantidproject.org/Properties#Validators>`__ or 
 `directional argument <https://www.mantidproject.org/Properties#Direction>`__ (input, output or both)
-can also be appended. The syntax for other property types (WorkspaceProperty & ArrayProperty) is more 
+can also be appended. The syntax for other property types (``WorkspaceProperty`` & ``ArrayProperty``) is more 
 complex - see the `properties <https://www.mantidproject.org/Properties#Direction>`__ page or the 
 example algorithms in `UserAlgorithms <https://www.mantidproject.org/UserAlgorithms>`__ for further details.
 
@@ -130,7 +134,7 @@ This uses the ``getProperty`` method as follows::
 
     TYPE myProperty = getProperty("PropertyName");
 
-where ``TYPE`` is the type of the property (int, double, std::string, std::vector...). Note that the 
+where ``TYPE`` is the type of the property (``int``, ``double``, ``std::string``, ``std::vector``...). Note that the 
 value of a ``WorkspaceProperty`` is a `shared pointer <https://www.mantidproject.org/Shared_Pointer>`__
 to the workspace, which is referred to as ``Mantid::API::Workspace_sptr`` or ``Mantid::API::Workspace_const_sptr``. 
 The latter should be used for input workspaces that will not need to be changed in the course of the algorithm.
@@ -146,7 +150,7 @@ Creating the output workspace
 -----------------------------
 
 Usually, the result of an algorithm will be stored in another new workspace and the algorithm 
-will need to create that new workspace through a call to the Workspace Factory. For the (common) 
+will need to create that new workspace through a call to the ``WorkspaceFactory``. For the (common) 
 example where the output workspace should be of the same type and size as the input one, the code 
 would read as follows::
 
@@ -164,7 +168,7 @@ where ``outputWorkspace`` is a shared pointer to the created output workspace.
 Using workspaces
 ----------------
 
-The bulk of most algorithms will involve the manipulation of the data contained in Workspaces 
+The bulk of most algorithms will involve the manipulation of the data contained in workspaces 
 and information on how to interact with these is given `here <https://www.mantidproject.org/Interacting_with_Workspaces>`__. 
 The more advanced user may also want to refer to the full 
 `workspace documentation <http://doxygen.mantidproject.org/nightly/d3/de9/classMantid_1_1API_1_1Workspace.html>`__.
@@ -176,14 +180,14 @@ Further Features
 ################
 
 The advanced user is referred to the `full documentation page <http://doxygen.mantidproject.org/nightly/d3/de9/classMantid_1_1API_1_1Workspace.html>`__
-for the Algorithm base class to explore the full range of methods available for use within an algorithm. 
+for the ``Algorithm`` base class to explore the full range of methods available for use within an algorithm. 
 A few aspects are highlighted below.
 
 Child Algorithms
 ----------------
 
 Algorithms may wish to make use of the functionality of other algorithms as part of their execution. 
-For example, if a units change is required the ConvertUnits algorithm could be used. Mantid therefore 
+For example, if a units change is required the ``ConvertUnits`` algorithm could be used. Mantid therefore 
 has the concept of a child algorithm and this is accessed through a call to the 
 ``createChildAlgorithm`` method as follows::
 
@@ -205,8 +209,8 @@ Enhancing asynchronous running
 ------------------------------
 
 Any algorithm can be run asynchronously (e.g. by MantidPlot) without modification. However, some features 
-are only enabled if code is added within the ``exec()`` method. Periodical calls to 
-``Algorithm::interruption_point()`` make it possible to interrupt execution of the algorithm. 
+are only enabled if code is added within the ``exec()`` method. ``Algorithm::interruption_point()`` should 
+be called at appropriate intervals so that the algorithm's execution can be interrupted. 
 ``Algorithm::progress(double p)`` reports the progress of the algorithm. ``p`` must be between 
 0 (start) and 1 (finish).
 
@@ -234,8 +238,8 @@ This method allows you to provide validation that depends on several property va
 (something that cannot be done with ``IValidator``). Its default implementation returns an empty map, 
 signifying no errors.
 
-It will be called in dialogs AFTER parsing all inputs and setting the properties, but BEFORE executing. 
-It is also called again in the execute() call, which will throw if this returns something.
+It will be called in dialogs **after** parsing all inputs and setting the properties, but **before** executing. 
+It is also called again in the ``execute()`` call, which will throw if this returns something.
 
 In the MantidPlot GUI, this will set a "star" ``*`` label next to each property that is reporting an error. 
 This makes it easier for users to find where they went wrong.
