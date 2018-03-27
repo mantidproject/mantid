@@ -286,7 +286,7 @@ bool ConcretePeaksPresenter::isDimensionNameOfFreeAxis(
  Request that each owned view makes its self visible.
  */
 void ConcretePeaksPresenter::showAll() {
-  if (m_viewPeaks != NULL)
+  if (m_viewPeaks != nullptr)
     m_viewPeaks->showView();
 }
 
@@ -295,7 +295,7 @@ void ConcretePeaksPresenter::showAll() {
  */
 void ConcretePeaksPresenter::hideAll() {
   // Hide all views.
-  if (m_viewPeaks != NULL)
+  if (m_viewPeaks != nullptr)
     m_viewPeaks->hideView();
 }
 
@@ -319,7 +319,7 @@ PeakViewColor ConcretePeaksPresenter::getForegroundPeakViewColor() const {
 
 void ConcretePeaksPresenter::setForegroundColor(const PeakViewColor color) {
   // Change foreground colors
-  if (m_viewPeaks != NULL) {
+  if (m_viewPeaks != nullptr) {
     m_viewPeaks->changeForegroundColour(color);
     m_viewPeaks->updateView();
   }
@@ -329,7 +329,7 @@ void ConcretePeaksPresenter::setForegroundColor(const PeakViewColor color) {
 
 void ConcretePeaksPresenter::setBackgroundColor(const PeakViewColor color) {
   // Change background colours
-  if (m_viewPeaks != NULL) {
+  if (m_viewPeaks != nullptr) {
     m_viewPeaks->changeBackgroundColour(color);
     m_viewPeaks->updateView();
   }
@@ -343,7 +343,7 @@ std::string ConcretePeaksPresenter::getTransformName() const {
 
 void ConcretePeaksPresenter::showBackgroundRadius(const bool show) {
   // Change background colours
-  if (m_viewPeaks != NULL) {
+  if (m_viewPeaks != nullptr) {
     m_viewPeaks->showBackgroundRadius(show);
     doFindPeaksInRegion();
   }
@@ -353,7 +353,7 @@ void ConcretePeaksPresenter::showBackgroundRadius(const bool show) {
 
 void ConcretePeaksPresenter::setShown(const bool shown) {
   m_isHidden = !shown;
-  if (m_viewPeaks != NULL) {
+  if (m_viewPeaks != nullptr) {
     if (shown) {
       m_viewPeaks->showView();
     } else {
@@ -417,7 +417,7 @@ void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
 
 double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
+  if (m_viewPeaks != nullptr && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyInView();
   }
   return result;
@@ -425,7 +425,7 @@ double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
 
 double ConcretePeaksPresenter::getPeakSizeIntoProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
+  if (m_viewPeaks != nullptr && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyIntoView();
   }
   return result;

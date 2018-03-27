@@ -154,7 +154,7 @@ createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
   Detector *det0(nullptr);
   if (!detShapeXML.empty()) {
     auto shape = ShapeFactory().createShape(detShapeXML);
-    det0 = new Detector("det0", id, shape, NULL);
+    det0 = new Detector("det0", id, shape, nullptr);
   } else {
     det0 = new Detector("det0", id, nullptr);
   }

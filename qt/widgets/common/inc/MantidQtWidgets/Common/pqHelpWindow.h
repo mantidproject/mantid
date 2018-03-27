@@ -75,8 +75,8 @@ class EXPORT_OPT_MANTIDQT_COMMON pqHelpWindow : public QMainWindow {
   using Superclass = QMainWindow;
 
 public:
-  pqHelpWindow(QHelpEngine *engine, QWidget *parent = 0,
-               Qt::WindowFlags flags = 0);
+  pqHelpWindow(QHelpEngine *engine, QWidget *parent = nullptr,
+               Qt::WindowFlags flags = nullptr);
 
 public slots:
   /// Requests showing of a particular page. The url must begin with "qthelp:"

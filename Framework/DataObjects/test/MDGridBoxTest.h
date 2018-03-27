@@ -445,7 +445,7 @@ public:
     }
 
     // You must refresh the cache after adding individual events.
-    superbox->refreshCache(NULL);
+    superbox->refreshCache(nullptr);
     // superbox->refreshCentroid(NULL);
 
     TS_ASSERT_EQUALS(superbox->getNPoints(), 3);
@@ -473,7 +473,7 @@ public:
     }
     TS_ASSERT_EQUALS(superbox->getNPoints(), 3);
 
-    superbox->refreshCache(NULL);
+    superbox->refreshCache(nullptr);
     TS_ASSERT_EQUALS(superbox->getNPoints(), 6);
 
     // Retrieve the 0th grid box
@@ -801,7 +801,7 @@ public:
           }
         }
       // You must refresh the cache after adding individual events.
-      box->refreshCache(NULL);
+      box->refreshCache(nullptr);
     }
   }
 
@@ -824,7 +824,7 @@ public:
     size_t numbad = 0;
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events););
     // Get the right totals again
-    b->refreshCache(NULL);
+    b->refreshCache(nullptr);
     TS_ASSERT_EQUALS(numbad, 0);
     TS_ASSERT_EQUALS(b->getNPoints(), 100);
     TS_ASSERT_EQUALS(b->getSignal(), 100 * 2.0);
@@ -851,7 +851,7 @@ public:
         events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
       }
     // Get the right totals again
-    b->refreshCache(NULL);
+    b->refreshCache(nullptr);
     // All 4 points get rejected
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events););
     TS_ASSERT_EQUALS(numbad, 4);
@@ -886,7 +886,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(numbad = b->addEvents(events));
     TS_ASSERT_EQUALS(numbad, 3);
 
-    b->refreshCache(NULL);
+    b->refreshCache(nullptr);
     TS_ASSERT_EQUALS(b->getNPoints(), 1);
     TS_ASSERT_EQUALS(b->getSignal(), 2.0);
     TS_ASSERT_EQUALS(b->getErrorSquared(), 2.0);
@@ -1006,7 +1006,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(b0->addEvents(events););
 
     // Split into sub-grid boxes
-    TS_ASSERT_THROWS_NOTHING(b0->splitAllIfNeeded(NULL);)
+    TS_ASSERT_THROWS_NOTHING(b0->splitAllIfNeeded(nullptr);)
 
     // Dig recursively into the gridded box hierarchies
     std::vector<ibox_t *> boxes;
@@ -1128,7 +1128,7 @@ public:
 
     MDBin<MDLeanEvent<2>, 2> bin;
     bin = makeMDBin2(minX, maxX, minY, maxY);
-    b->centerpointBin(bin, NULL);
+    b->centerpointBin(bin, nullptr);
     TSM_ASSERT_DELTA(message, bin.m_signal, expectedSignal, 1e-5);
   }
 

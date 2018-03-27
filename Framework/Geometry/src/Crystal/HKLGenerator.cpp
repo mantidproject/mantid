@@ -62,20 +62,20 @@ V3D HKLGenerator::getEndHKL() const {
 
 /// Default constructor, requirement from boost::iterator_facade
 HKLGenerator::const_iterator::const_iterator()
-    : m_h(0), m_k(0), m_l(0), m_hkl(V3D(0, 0, 0)), m_hMin(0), m_hMax(0),
-      m_kMin(0), m_kMax(0), m_lMin(0), m_lMax(0) {}
+    : m_h(0), m_k(0), m_l(0), m_hkl(V3D(0, 0, 0)), m_hMax(0), m_kMin(0),
+      m_kMax(0), m_lMin(0), m_lMax(0) {}
 
 /// Return an iterator with min = max = current.
 HKLGenerator::const_iterator::const_iterator(const V3D &current)
     : m_h(static_cast<int>(current.X())), m_k(static_cast<int>(current.Y())),
-      m_l(static_cast<int>(current.Z())), m_hkl(current), m_hMin(m_h),
-      m_hMax(m_h), m_kMin(m_k), m_kMax(m_k), m_lMin(m_l), m_lMax(m_l) {}
+      m_l(static_cast<int>(current.Z())), m_hkl(current), m_hMax(m_h),
+      m_kMin(m_k), m_kMax(m_k), m_lMin(m_l), m_lMax(m_l) {}
 
 /// Return an iterator that can move from min to max, with current = min
 HKLGenerator::const_iterator::const_iterator(const V3D &hklMin,
                                              const V3D &hklMax)
     : m_h(static_cast<int>(hklMin.X())), m_k(static_cast<int>(hklMin.Y())),
-      m_l(static_cast<int>(hklMin.Z())), m_hkl(hklMin), m_hMin(m_h),
+      m_l(static_cast<int>(hklMin.Z())), m_hkl(hklMin),
       m_hMax(static_cast<int>(hklMax.X())), m_kMin(m_k),
       m_kMax(static_cast<int>(hklMax.Y())), m_lMin(m_l),
       m_lMax(static_cast<int>(hklMax.Z())) {}

@@ -293,7 +293,7 @@ void AlgorithmTreeWidget::update() {
         this->addTopLevelItem(catItem);
       } else {
         QString cn = subCats[0];
-        QTreeWidgetItem *catItem = NULL;
+        QTreeWidgetItem *catItem = nullptr;
         int n = subCats.size();
         for (int j = 0; j < n; j++) {
           if (categories.contains(cn)) {

@@ -281,7 +281,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     MatrixWorkspace_sptr wsOut = Mantid::API::AnalysisDataService::Instance()
                                      .retrieveWS<MatrixWorkspace>("out");
-    TS_ASSERT(wsOut != NULL);
+    TS_ASSERT(wsOut != nullptr);
     for (size_t j = 0; j < wsOut->getNumberHistograms(); ++j) {
       using Mantid::MantidVec;
       auto &xValues = wsOut->x(j);
@@ -930,13 +930,13 @@ public:
     WorkspaceGroup_sptr wsgroup =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             "outer");
-    TS_ASSERT(wsgroup != NULL);
+    TS_ASSERT(wsgroup != nullptr);
     TS_ASSERT_EQUALS(input->size(), wsgroup->size());
     // Loop through each workspace in the group
     for (size_t i = 0; i < wsgroup->size(); ++i) {
       MatrixWorkspace_sptr ws =
           boost::dynamic_pointer_cast<MatrixWorkspace>(wsgroup->getItem(i));
-      TS_ASSERT(ws != NULL);
+      TS_ASSERT(ws != nullptr);
       TS_ASSERT_EQUALS(expectedNumHistograms, ws->getNumberHistograms());
       // Loop through each histogram in each workspace
       for (size_t j = 0; j < ws->getNumberHistograms(); ++j) {
