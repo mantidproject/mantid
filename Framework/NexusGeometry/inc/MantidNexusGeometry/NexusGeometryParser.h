@@ -3,6 +3,7 @@
 
 #include "MantidNexusGeometry/DllConfig.h"
 #include <memory>
+#include <string>
 
 namespace Mantid {
 namespace Geometry {
@@ -34,7 +35,7 @@ namespace NexusGeometry {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace NexusGeometryParser {
-DLLExport std::unique_ptr<const Mantid::Geometry::Instrument>
+MANTID_NEXUSGEOMETRY_DLL std::unique_ptr<const Mantid::Geometry::Instrument>
 createInstrument(const std::string &fileName);
 } // namespace NexusGeometryParser
 } // namespace NexusGeometry

@@ -22,8 +22,6 @@ if (COVERALLS)
     endforeach(loop_var)
 endif()
 
-find_package(HDF5 COMPONENTS CXX HL REQUIRED)
-
 # Add the target for this directory
 add_library ( NexusGeometry ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
@@ -35,8 +33,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 #Include HDF5 libraries
-include_directories (${HDF5_INCLUDE_DIRS})
-
+target_include_directories ( NexusGeometry SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
 # Add to the 'Framework' group in VS
 set_property ( TARGET NexusGeometry PROPERTY FOLDER "MantidFramework" )
 

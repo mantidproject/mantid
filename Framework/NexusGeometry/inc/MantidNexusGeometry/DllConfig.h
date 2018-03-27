@@ -26,7 +26,7 @@
 */
 #include "MantidKernel/System.h"
 
-#ifdef IN_MANTID_NEXUSGEOMETRY
+#ifdef IN_MANTID_NEXUS_GEOMETRY
 #define MANTID_NEXUSGEOMETRY_DLL DLLExport
 #define EXTERN_MANTID_NEXUSGEOMETRY
 #else
