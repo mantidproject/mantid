@@ -55,7 +55,7 @@ Public and Private Branches
 
 When naming `public branches
 <http://github.com/mantidproject/mantid/branches>`_ that will be
-synchronized with GitHub, please follow the convention of
+pushed to GitHub, please follow the convention of
 ``issuenumber_short_description``. This will allow others to discover
 what the branch is for (issue number) and quickly know what is being
 done there (short description). Please remember that public branches
@@ -76,7 +76,7 @@ Pull Requests
 ^^^^^^^^^^^^^
 
 For an general overview of using pull requests on GitHub look `here
-<https://help.github.com/articles/using-pull-requests/>`__
+<https://help.github.com/articles/using-pull-requests/>`__.
 
 When creating a pull request you should:
 
@@ -90,7 +90,7 @@ When creating a pull request you should:
   <https://github.com/mantidproject/mantid/blob/master/.github/PULL_REQUEST_TEMPLATE.md>`_
   on GitHub
 
-A good example is `here <https://github.com/mantidproject/mantid/pull/18713>`__
+A good example is `here <https://github.com/mantidproject/mantid/pull/18713>`__.
 
 Recommended reading: `How to Write the Perfect Pull Request
 <https://github.com/blog/1943-how-to-write-the-perfect-pull-request>`_
