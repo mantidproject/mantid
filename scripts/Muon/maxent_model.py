@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 
 import mantid.simpleapi as mantid
-
+from Muon import message_box
 
 class MaxEntWrapper(object):
     """
@@ -33,15 +33,13 @@ class MaxEntWrapper(object):
         """
         runs the relevant parts of the MaxEnt and the preprocessing
         """
-        try:
-            if self.phaseTable is not None:
-                self.model.makePhaseTable(self.phaseTable)
+        if self.phaseTable is not None:
+            self.model.makePhaseTable(self.phaseTable)
 
-            if self.maxent is not None:
-                self.model.MaxEntAlg(self.maxent)
-
-        except:
-            pass
+        if self.maxent is not None:
+            self.model.MaxEntAlg(self.maxent)
+    def cancel(self):
+        self.model.cancel()
 
     def output(self):
         return
@@ -55,6 +53,7 @@ class MaxEntModel(object):
     """
     def __init__(self):
         self.name = "MaxEnt"
+        self.alg = None
 
     def setRun(self,run):
         self.run=run
@@ -63,32 +62,35 @@ class MaxEntModel(object):
         """
         Use the MaxEnt alg
         """
-        alg = mantid.AlgorithmManager.create("MuonMaxent")
-        alg.initialize()
-        alg.setChild(True)
+        self.alg = mantid.AlgorithmManager.create("MuonMaxent")
+        self.alg.initialize()
+        self.alg.setChild(True)
         for name,value in iteritems(inputs):
-            alg.setProperty(name,value)
-        alg.execute()
-        print(inputs)
-        self.addOutput(inputs,alg,"OutputWorkspace")
-        self.addOutput(inputs,alg,"OutputPhaseTable")
-        self.addOutput(inputs,alg,"OutputDeadTimeTable")
-        self.addOutput(inputs,alg,"ReconstructedSpectra")
-        self.addOutput(inputs,alg,"PhaseConvergenceTable")
-
+            self.alg.setProperty(name,value)
+        self.alg.execute()
+        self.addOutput(inputs,self.alg,"OutputWorkspace")
+        self.addOutput(inputs,self.alg,"OutputPhaseTable")
+        self.addOutput(inputs,self.alg,"OutputDeadTimeTable")
+        self.addOutput(inputs,self.alg,"ReconstructedSpectra")
+        self.addOutput(inputs,self.alg,"PhaseConvergenceTable")
+        self.alg = None
+ 
     def makePhaseTable(self,inputs):
         """
         generates a phase table from CalMuonDetectorPhases
         """
-        calcAlg=mantid.AlgorithmManager.create("CalMuonDetectorPhases")
-        calcAlg.initialize()
-        calcAlg.setChild(True)
+        self.alg=mantid.AlgorithmManager.create("CalMuonDetectorPhases")
+        self.alg.initialize()
+        self.alg.setChild(True)
         
         for name,value in iteritems(inputs):
-            calcAlg.setProperty(name,value)
-        calcAlg.execute()
+            self.alg.setProperty(name,value)
+        if inputs["InputWorkspace"] != "MuonAnalysis":
+            raise ValueError("Cannot currently generate phase table from this data using CalMuonDetectorPhases")
+        self.alg.execute()
         name="DetectorTable"
-        mantid.AnalysisDataService.addOrReplace( inputs[name],calcAlg.getProperty(name).value)
+        mantid.AnalysisDataService.addOrReplace( inputs[name],self.alg.getProperty(name).value)
+        self.alg = None
 
     def addOutput(self,inputs,alg,name):
         if name in inputs:
@@ -102,7 +104,9 @@ class MaxEntModel(object):
 
         group.add(inputs[name])
 
-
+    def cancel(self):
+        if self.alg is not None:
+            self.alg.cancel()
 
     def getName(self):
         return self.name

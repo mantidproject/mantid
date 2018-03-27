@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 import math
 from Muon import thread_model
+from Muon import message_box
 
 
 class MaxEntPresenter(object):
@@ -19,7 +20,7 @@ class MaxEntPresenter(object):
         self.getWorkspaceNames()
         #connect
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
-        #self.view.cancelSignal.connect(self.cancel)
+        self.view.cancelSignal.connect(self.cancel)
         self.view.phaseSignal.connect(self.handlePhase)
 
     #functions
@@ -32,6 +33,9 @@ class MaxEntPresenter(object):
         start = int(math.ceil(math.log(self.load.getNPoints())/math.log(2.0)))
         values = [str(2**k) for k in range(start,21)]
         self.view.addNPoints(values)
+    def cancel(self):
+        if self.thread is not None:
+            self.thread.cancel()
 
     # turn on button
     def activate(self):
@@ -58,8 +62,9 @@ class MaxEntPresenter(object):
             return
         # put this on its own thread so not to freeze Mantid
         self.thread=self.createThread()
-        self.thread.started.connect(self.deactivate)
-        self.thread.finished.connect(self.handleFinished)
+        thread_model.ThreadWrapperSetUp(self.thread,self.deactivate,self.handleFinished)
+        #self.thread.started.connect(self.deactivate)
+        #self.thread.finished.connect(self.handleFinished)
 
         # make some inputs
         inputs={}
@@ -85,13 +90,24 @@ class MaxEntPresenter(object):
         inputs["maxent"] = maxentInputs
         try:
             self.thread.loadData(inputs)
-            self.thread.start()
+            self.thread.start() 
+           # if error is not None:
+            #   raise error
+            #self.thread.join()
         except:
+            print("moo")
+            #message_box.warning(error)
+            self.handeleFinished()
             pass
+        #except KeyboardInterrupt:
+        #    pass
+        #except:
+        #    pass
 
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
+        thread_model.ThreadWrapperTearDown(self.thread,self.deactivate,self.handleFinished)
         self.thread.deleteLater()
         self.thread=None
 
