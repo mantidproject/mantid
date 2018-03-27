@@ -183,8 +183,8 @@ public:
     speclist.push_back(6);
     speclist.push_back(7);
     speclist.push_back(8);
-    for (int iws : speclist) {
-      auto &yvec = WS->y(iws);
+    for (int spectrum : speclist) {
+      auto &yvec = WS->y(spectrum);
       for (size_t bin = 0; bin < yvec.size(); ++bin) {
         if (bin >= 4 && bin < 7) {
           TS_ASSERT_EQUALS(yvec[bin], 0.0);

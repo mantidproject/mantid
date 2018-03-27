@@ -493,8 +493,8 @@ public:
     // Delete all the workspaces generated here
     AnalysisDataService::Instance().remove("MockDirectEventWS");
     AnalysisDataService::Instance().remove("SplitterTableX");
-    for (const auto &i : vecwsname) {
-      AnalysisDataService::Instance().remove(i);
+    for (const auto &workspaceName : vecwsname) {
+      AnalysisDataService::Instance().remove(workspaceName);
     }
 
     return;

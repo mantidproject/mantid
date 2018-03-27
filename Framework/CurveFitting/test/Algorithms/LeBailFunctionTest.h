@@ -515,10 +515,10 @@ public:
         1.950190,    1.613562,    1.335208,    1.104734,    0.914043,
         0.756362,    0.000000};
 
-    for (double i : vecY) {
+    for (double y : vecY) {
       double e = 1.0;
-      if (i > 1.0)
-        e = sqrt(i);
+      if (y > 1.0)
+        e = sqrt(y);
       vecE.push_back(e);
     }
 

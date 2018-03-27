@@ -135,8 +135,8 @@ public:
     Types::Core::DateAndTime start = it->first;
 
     std::vector<TofEvent> events1 = ew->getSpectrum(1000).getEvents();
-    for (auto &i : events1) {
-      std::cout << (i.pulseTime() - start) << " sec \n";
+    for (auto &event : events1) {
+      std::cout << (event.pulseTime() - start) << " sec \n";
     }
   }
 

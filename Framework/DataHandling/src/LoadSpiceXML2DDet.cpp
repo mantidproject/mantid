@@ -669,17 +669,17 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
   }     // END-FOR (xml nodes)
 
   // Add the property to output workspace
-  for (auto &miter : str_log_map) {
+  for (auto &log_entry : str_log_map) {
     outws->mutableRun().addProperty(
-        new PropertyWithValue<std::string>(miter.first, miter.second));
+        new PropertyWithValue<std::string>(log_entry.first, log_entry.second));
   }
-  for (auto &miter : int_log_map) {
+  for (auto &log_entry : int_log_map) {
     outws->mutableRun().addProperty(
-        new PropertyWithValue<int>(miter.first, miter.second));
+        new PropertyWithValue<int>(log_entry.first, log_entry.second));
   }
-  for (auto &miter : dbl_log_map) {
+  for (auto &log_entry : dbl_log_map) {
     outws->mutableRun().addProperty(
-        new PropertyWithValue<double>(miter.first, miter.second));
+        new PropertyWithValue<double>(log_entry.first, log_entry.second));
   }
 
   // Raise exception if no detector node is found

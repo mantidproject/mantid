@@ -232,8 +232,8 @@ public:
   void test_Optimize_Direction() {
     std::vector<int> index_values;
     int correct_indices[] = {1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3};
-    for (int correct_indice : correct_indices) {
-      index_values.push_back(correct_indice);
+    for (int correct_index : correct_indices) {
+      index_values.push_back(correct_index);
     }
 
     std::vector<V3D> q_vectors = getNatroliteQs();
@@ -756,8 +756,8 @@ public:
     TS_ASSERT_DELTA(direction_list[7].Z(), -0.211325, 1e-5);
 
     double dot_prod;
-    for (const auto &i : direction_list) {
-      dot_prod = axis.scalar_prod(i);
+    for (const auto &direction : direction_list) {
+      dot_prod = axis.scalar_prod(direction);
       TS_ASSERT_DELTA(dot_prod, 0, 1e-10);
     }
   }
