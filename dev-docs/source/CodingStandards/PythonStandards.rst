@@ -9,7 +9,8 @@ Style
 ^^^^^
 
 - Unless otherwise specified, follow `PEP 8
-  <https://www.python.org/dev/peps/pep-0008/>`_
+  <https://www.python.org/dev/peps/pep-0008>`_; this means using
+  `snake_case <https://en.wikipedia.org/wiki/Snake_case>`_
 - Use `flake8 <http://flake8.pycqa.org/en/latest>`_ to check
   for problems in this area. Remember that PEP 8 is only a guide, so
   respect the style of the surrounding code as a primary goal
@@ -62,20 +63,3 @@ new style. For naming new custom signals, use the ``sig_`` prefix:
 
         # Signals
         sig_run_a_thing_happened = Signal(str, str, str, bool, bool)
-
-When using multiple inheritance where one class is a Qt widget-type
-class, ensure that the Qt base class is the last class in the
-inheritance list or you will see strange errors when calling
-base-class ``__init__``, for example
-
-.. code-block:: python
-
-    # Fails
-    class MyWidget(QWidget, IWidgetView):
-        def __init__(self, parent):
-            QWidget.__init__(self, parent)
-
-    # Works
-    class MyWidget(IWidgetView, QWidget):
-        def __init__(self, parent):
-            QWidget.__init__(self, parent)

@@ -25,7 +25,7 @@ precedence.
 <https://github.com/mantidproject/mantid/wiki/clang-format>`__
 describes a tool that you may find useful for checking your code
 satisfies LLVM whitespace conventions. It's also useful to set up your
-text editor to use `spaces instead of tabs
+text editor to use `two spaces instead of tabs
 <http://llvm.org/docs/CodingStandards.html#use-spaces-instead-of-tabs>`__.
 
 Files
