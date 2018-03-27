@@ -40,26 +40,26 @@ public:
 
     const double delta(1e-08);
     TS_ASSERT_DELTA(result->y(0)[1160], 17.5583314826, delta);
-    TS_ASSERT_DELTA(result->e(0)[1160], 0.197345265992, delta);
+    TS_ASSERT_DELTA(result->e(0)[1160], 0.2251606553, delta);
 
     TS_ASSERT_DELTA(result->y(1)[1145], 4.61301046588, delta);
-    TS_ASSERT_DELTA(result->e(1)[1145], 0.0721823446635, delta);
+    TS_ASSERT_DELTA(result->e(1)[1145], 0.1161341763, delta);
 
     TS_ASSERT_DELTA(result->y(2)[1200], 1.33394133548, delta);
-    TS_ASSERT_DELTA(result->e(2)[1200], 0.0419839252961, delta);
+    TS_ASSERT_DELTA(result->e(2)[1200], 0.0610978549, delta);
 
     TS_ASSERT_DELTA(result->y(3)[99], 0.0446085388561, delta);
-    TS_ASSERT_DELTA(result->e(3)[99], 0.0185049423467, delta);
+    TS_ASSERT_DELTA(result->e(3)[99], 0.0249727396, delta);
 
     TS_ASSERT_DELTA(result->y(4)[1654], 0.0171136490957, delta);
-    TS_ASSERT_DELTA(result->e(4)[1654], 0.005007299861, delta);
+    TS_ASSERT_DELTA(result->e(4)[1654], 0.0057467706, delta);
 
     TS_ASSERT_DELTA(result->y(5)[1025], 0.0516113202152, delta);
-    TS_ASSERT_DELTA(result->e(5)[1025], 0.0102893133461, delta);
+    TS_ASSERT_DELTA(result->e(5)[1025], 0.0128755226, delta);
 
     // Spectra-detector mapping
     const size_t nspectra(6);
-    typedef std::set<int> IDSet;
+    using IDSet = std::set<int>;
     std::vector<IDSet> expectedIDs(nspectra);
     IDSet s1 = {3};
     expectedIDs[0] = s1;

@@ -21,18 +21,9 @@ The detectors (pixels) are assumed to be uniform, and characterised
 by a single angular width :math:`\Delta2\theta`. The signal and error
 of the rebinned data (in :math:`Q-\Delta E` space) is then the
 sum of the contributing pixels in each bin weighted by their fractional
-overlap area:
-
-.. math:: Y^{\mathrm{out}} = (\sum_i Y^{\mathrm{in}}_i F_i)
-.. math:: E^{\mathrm{out}} = \sqrt{\sum_i (E^{\mathrm{in}}_i F_i)^2}
-
-Unlike the more precise :ref:`algm-SofQWNormalisedPolygon`
-algorithm, the final counts is not weighted by the sum of fractional
-areas which means that the signal will be underestimated where the
-bins are smaller, for example at the edges of detectors.
-However, like the other algorithm, the output workspace has bins which
-are no longer independent. Thus subsequent rebinning (or integration)
-of the output of the algorithm will give incorrect error values.
+overlap area. Unlike the more precise :ref:`algm-SofQWNormalisedPolygon`
+algorithm, these fractional weights are not thereafter retained in the
+workspace produced by this algorithm.
 
 See :ref:`algm-SofQWCentre` for centre-point binning.
 Alternatively, see :ref:`algm-SofQWNormalisedPolygon` for a

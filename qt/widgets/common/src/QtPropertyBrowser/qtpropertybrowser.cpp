@@ -1172,12 +1172,12 @@ QtBrowserItem::~QtBrowserItem() { delete d_ptr; }
 
 ////////////////////////////////////
 
-typedef QMap<QtAbstractPropertyBrowser *,
-             QMap<QtAbstractPropertyManager *, QtAbstractEditorFactoryBase *>>
-    Map1;
-typedef QMap<QtAbstractPropertyManager *,
-             QMap<QtAbstractEditorFactoryBase *,
-                  QList<QtAbstractPropertyBrowser *>>> Map2;
+using Map1 =
+    QMap<QtAbstractPropertyBrowser *,
+         QMap<QtAbstractPropertyManager *, QtAbstractEditorFactoryBase *>>;
+using Map2 =
+    QMap<QtAbstractPropertyManager *, QMap<QtAbstractEditorFactoryBase *,
+                                           QList<QtAbstractPropertyBrowser *>>>;
 Q_GLOBAL_STATIC(Map1, m_viewToManagerToFactory)
 Q_GLOBAL_STATIC(Map2, m_managerToFactoryToViews)
 
@@ -1783,7 +1783,7 @@ QtAbstractPropertyBrowser::insertProperty(QtProperty *property,
   while (pos < pendingList.count()) {
     QtProperty *prop = pendingList.at(pos);
     if (prop == property)
-      return 0;
+      return nullptr;
     if (prop == afterProperty) {
       newPos = pos + 1;
     }
@@ -1819,10 +1819,11 @@ void QtAbstractPropertyBrowser::removeProperty(QtProperty *property) {
     if (pendingList.at(pos) == property) {
       d_ptr->m_subItems.removeAt(pos); // perhaps this two lines
       d_ptr->removeSubTree(
-          property, 0); // should be moved down after propertyRemoved call.
+          property,
+          nullptr); // should be moved down after propertyRemoved call.
       // propertyRemoved(property, 0);
 
-      d_ptr->removeBrowserIndexes(property, 0);
+      d_ptr->removeBrowserIndexes(property, nullptr);
 
       // when item is deleted, item will call removeItem for top level items,
       // and itemRemoved for nested items.

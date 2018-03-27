@@ -58,23 +58,20 @@ tableString(const TreeData &treeData, const WhiteList &whitelist);
 QString DLLExport titleString(const QString &wsName);
 
 boost::tuple<QString, QString> DLLExport
-postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
+postprocessGroupString(const GroupData &rowMap,
                        const ProcessingAlgorithm &processor,
                        const PostprocessingStep &postprocessingStep);
 
-QString DLLExport
-plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
-            const QString &stitched_wsStr,
-            const ProcessingAlgorithm &processor);
+QString DLLExport plotsString(const GroupData &groupData,
+                              const QString &stitched_wsStr,
+                              const ProcessingAlgorithm &processor);
 
 QString DLLExport
-reduceRowString(const RowData &data, const QString &instrument,
+reduceRowString(const RowData_sptr data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
-                const ColumnOptionsMap &globalPreprocessingOptionsMap,
-                const OptionsMap &globalProcessingOptions,
-                std::vector<OptionsMap> &processingOptionsPerRow);
+                const ColumnOptionsMap &globalPreprocessingOptionsMap);
 
 boost::tuple<QString, QString> DLLExport
 loadWorkspaceString(const QString &runStr, const QString &instrument,
@@ -101,8 +98,7 @@ public:
                    std::map<QString, PreprocessingAlgorithm> preprocessMap,
                    ProcessingAlgorithm processor,
                    boost::optional<PostprocessingStep> postprocessingStep,
-                   ColumnOptionsMap preprocessingInstructionsMap,
-                   OptionsMap processingInstructions);
+                   ColumnOptionsMap preprocessingInstructionsMap);
   virtual ~GenerateNotebook() = default;
 
   QString generateNotebook(const TreeData &data);
@@ -127,10 +123,6 @@ private:
   // A map containing pre-processing instructions displayed in the view via
   // hinting line edits
   ColumnOptionsMap m_preprocessingOptionsMap;
-  // Options to reduction algorithm specified in the view via hinting line edit
-  OptionsMap m_processingOptions;
-  // Options to post-processing algorithm specified in the view via hinting line
-  // edit
 };
 }
 }

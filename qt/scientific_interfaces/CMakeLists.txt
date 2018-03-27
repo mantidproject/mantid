@@ -69,6 +69,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
     inc
   TEST_HELPER_SRCS
     ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
     ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../Framework/TestHelpers/src/ScopedFileHelper.cpp

@@ -471,6 +471,21 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
+/** Requests transmission runs for a particular run angle. Values are supplied
+* by the main presenter
+* @return :: Transmission run(s) as a comma-separated list
+*/
+OptionsQMap ReflRunsTabPresenter::getOptionsForAngle(const double angle) const {
+  return m_mainPresenter->getOptionsForAngle(m_view->getSelectedGroup(), angle);
+}
+
+/** Check whether there are per-angle transmission runs in the settings
+ * @return :: true if there are per-angle transmission runs
+ */
+bool ReflRunsTabPresenter::hasPerAngleOptions() const {
+  return m_mainPresenter->hasPerAngleOptions(m_view->getSelectedGroup());
+}
+
 /** Tells the view to update the enabled/disabled state of all relevant widgets
  * based on whether processing is in progress or not.
  * @param isProcessing :: true if processing is in progress

@@ -5,16 +5,17 @@ digraph IqtFitSequential {
   subgraph params {
     $param_style
     InputWorkspace
-    InputWorkspace2     [label="InputWorkspace"]
+    InputWorkspace2         [label="InputWorkspace"]
     Function
     StartX
     EndX
     Minimizer
     MaxIterations
+    ExtractMembers
     ParameterTable
     ParameterNames
     FitGroup
-    FitGroup2                [label="FitGroup"]
+    FitGroup2               [label="FitGroup"]
     SampleLogs
     ResultWorkspace
     ResultWorkspace2        [label="ResultWorkspace"]
@@ -28,7 +29,8 @@ digraph IqtFitSequential {
     AddSampleLogMultiple
     AddSampleLogMultiple2   [label="AddSampleLogMultiple"]
     CopyLogs
-    CopyLogs2           [label="Copy logs"]
+    CopyLogs2               [label="Copy logs"]
+    ExtractQENSMembers
   }
   
   subgraph decisions {
@@ -44,14 +46,14 @@ digraph IqtFitSequential {
   StartX                        -> CropWorkspace
   EndX                          -> CropWorkspace
   CropWorkspace                 -> ConvertToHistogram
-  ConvertToHistogram            -> ConvertToElasticQ        [label="Convert spectrum axis to ElaticQ"]
+  ConvertToHistogram            -> ConvertToElasticQ            [label="Convert spectrum axis to ElaticQ"]
   ConvertToElasticQ             -> PlotPeakByLogValue
   Function                      -> PlotPeakByLogValue
   Minimizer                     -> PlotPeakByLogValue
   MaxIterations                 -> PlotPeakByLogValue
   PlotPeakByLogValue            -> ParameterTable
   PlotPeakByLogValue            -> FitGroup                     [label="GroupWorkspace containing fitting results from each spectra"]
-  ParameterTable                 -> ProcessIndirectFitParameters
+  ParameterTable                -> ProcessIndirectFitParameters
   ParameterNames                -> ProcessIndirectFitParameters [label="Convert parameter of interest into MatrixWorkspace containing paramNames"]
   ProcessIndirectFitParameters  -> ResultWorkspace              [label="Outputs Matrixworkspace containing Tau, Intensity, A0 and Beta"]
   InputWorkspace2               -> CopyLogs                     [label="Copy SampleLogs from InputWorkspace to OutputWorkspaces"]
@@ -64,4 +66,7 @@ digraph IqtFitSequential {
   SampleLogs                    -> AddSampleLogMultiple         [label="Additional SampleLogs based on Fit data"]
   AddSampleLogMultiple          -> ResultWorkspace2             [label="Outputworkspace"]
   AddSampleLogMultiple2         -> FitGroup2                    [label="OutputWorkspace"]
+  ExtractMembers                -> ExtractQENSMembers           [label="Extract members?"]
+  InputWorkspace                -> ExtractQENSMembers
+  FitGroup                      -> ExtractQENSMembers
 }

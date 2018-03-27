@@ -7,10 +7,6 @@
 
 .. _contents:
 
-.. image:: images/Mantid_Logo_Transparent.png
-   :alt: The logo for the Mantid Project
-   :align: center
-
 ====================
 Mantid Documentation
 ====================
@@ -20,16 +16,20 @@ Mantid Documentation
    :glob:
    :maxdepth: 1
 
+   tutorials/index
+   tutorials/ill_training/index
    algorithms/index
    algorithms/*
    concepts/index
    interfaces/index
-   fitfunctions/*
-   fitminimizers/index
+   fitting/index
+   fitting/fitfunctions/index
+   fitting/fitfunctions/*
+   fitting/fitminimizers/index
    techniques/index
    api/index
+   plotting/index
    release/index
-   training/index
 
 
 This is the documentation for Mantid |release|.
@@ -41,13 +41,21 @@ This is the documentation for Mantid |release|.
    :width: 200px
    :align: right
 
-* `Algorithms <algorithms/index.html>`_
-* `Concepts <concepts/index.html>`_
-* `Interfaces <interfaces/index.html>`_
-* `Fit Functions <fitfunctions/index.html>`_
-* `Fit Minimizers <fitminimizers/index.html>`_
-* `Techniques <techniques/index.html>`_
-* `API <api/index.html>`_
-    - `Python <api/python/index.html>`_
+* :ref:`Algorithms List`
+* :ref:`training`
+    - `Mantid Basic Course <http://www.mantidproject.org/Mantid_Basic_Course>`_
+    - `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
+    - `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
+    - `Extending Mantid With Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
+    - :ref:`ill_training`
+* :ref:`concepts contents`
+* :ref:`interfaces contents`
+* :ref:`fitting contents`
+    - :ref:`Fit Functions List`
+    - :ref:`fitminimizers`
+* :ref:`techniques contents`
+* :ref:`api`
+    - :ref:`Python <pythonapi>`
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
-* `Release Notes <release/index.html>`_
+* :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`
+* :ref:`release_notes`

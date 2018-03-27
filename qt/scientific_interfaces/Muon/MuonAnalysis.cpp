@@ -139,7 +139,8 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_dataSelector(nullptr),
       m_dataLoader(Muon::DeadTimesType::None, // will be replaced by correct
                                               // instruments later
-                   {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}) {}
+                   {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}),
+      m_deadTimeIndex(-1), m_useDeadTime(true) {}
 
 /**
  * Destructor
@@ -361,16 +362,13 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
   const auto wsParams =
       MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
 
-  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
   const QString &periodToSet = QString::fromStdString(wsParams.periods);
-  const auto &groups = m_dataSelector->getChosenGroups();
   const auto &periods = m_dataSelector->getPeriodSelections();
-  if (!groups.contains(groupToSet)) {
-    m_uiForm.fitBrowser->setChosenGroup(groupToSet);
-  }
+
   if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
     m_uiForm.fitBrowser->setChosenPeriods(periodToSet);
   }
+  return;
 }
 
 /**
@@ -478,7 +476,6 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
 void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
                             PlotType plotType) {
   m_updating = true;
-  m_uiForm.fitBrowser->clearChosenGroups();
   m_uiForm.fitBrowser->clearChosenPeriods();
   try {
     auto wsName = addItem(itemType, tableRow, plotType);
@@ -516,6 +513,15 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
   params.itemName = table->item(tableRow, 0)->text().toStdString();
   params.plotType = plotType;
   params.periods = getPeriodLabels();
+  bool isItSummed = false;
+  if (params.periods.find("+") != std::string::npos ||
+      params.periods.find("-") != std::string::npos) {
+    isItSummed = true;
+  }
+  if (params.periods != "" && isItSummed) {
+    m_uiForm.fitBrowser->addPeriodCheckboxToMap(
+        QString::fromStdString(params.periods));
+  }
 
   // Version - always "#1" if overwrite is on, otherwise increment
   params.version = 1;
@@ -1110,6 +1116,7 @@ void MuonAnalysis::updatePairTable() {
 void MuonAnalysis::inputFileChanged_MWRunFiles() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
+  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
   allowLoading(true);
 }
 
@@ -1222,6 +1229,12 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
  * @param files :: All file names for the files loading.
  */
 void MuonAnalysis::inputFileChanged(const QStringList &files) {
+  if (m_deadTimeIndex != -1 && m_useDeadTime) {
+    QMessageBox::warning(this, "Restoring dead time correction",
+                         "Will use previous dead time correction");
+    m_uiForm.deadTimeType->setCurrentIndex(m_deadTimeIndex);
+    m_deadTimeIndex = -1;
+  }
   if (files.size() <= 0)
     return;
 
@@ -1256,6 +1269,19 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
         m_dataLoader.correctAndGroup(*loadResult, *groupResult->groupingUsed);
 
   } catch (const std::exception &e) {
+    // if it failed try again with no dead time correction
+    if (m_deadTimeIndex == -1) {
+      m_deadTimeIndex = m_uiForm.deadTimeType->currentIndex();
+      if (m_deadTimeIndex != 0) {
+        QMessageBox::warning(this, "Loading failed",
+                             "Will try without dead time correction");
+        m_uiForm.deadTimeType->setCurrentIndex(0);
+        // dont use dead time for next run
+        m_useDeadTime = false;
+        inputFileChanged(files);
+        return;
+      }
+    }
     g_log.error(e.what());
     QMessageBox::critical(this, "Loading failed",
                           "Unable to load the file[s]. See log for details.");
@@ -1265,6 +1291,8 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
     return;
   }
+  // load worked so lets turn dead time on
+  m_useDeadTime = true;
   // At this point we are sure that new data was loaded successfully, so we can
   // safely overwrite
   // previous one.
@@ -1948,7 +1976,6 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 void MuonAnalysis::selectMultiPeak(const QString &wsName,
                                    const boost::optional<QString> &filePath) {
   disableAllTools();
-
   if (!plotExists(wsName)) {
     plotSpectrum(wsName);
     setCurrentDataName(wsName);
@@ -1965,7 +1992,6 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     setGroupsAndPairs();
-    m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
@@ -2565,7 +2591,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   if (m_currentTab == m_uiForm.DataAnalysis) // Leaving DA tab
   {
     // Say MantidPlot to use default fit prop. browser
-    emit setFitPropertyBrowser(NULL);
+    emit setFitPropertyBrowser(nullptr);
 
     // Reset cached config option
     ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, m_cachedPeakRadius);
@@ -2629,7 +2655,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
-      m_uiForm.fitBrowser->setAllPeriods();
+      m_uiForm.fitBrowser->updatePeriods();
     }
     if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
         isItGroup) {
@@ -2637,6 +2663,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     } else {
       m_uiForm.fitBrowser->setTFAsymm(false);
     }
+    m_uiForm.fitBrowser->checkFitEnabled();
+
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
@@ -2881,7 +2909,7 @@ void MuonAnalysis::hideEvent(QHideEvent *) {
 
   // If closed while on DA tab, reassign fit property browser to default one
   if (m_currentTab == m_uiForm.DataAnalysis)
-    emit setFitPropertyBrowser(NULL);
+    emit setFitPropertyBrowser(nullptr);
 }
 
 /**

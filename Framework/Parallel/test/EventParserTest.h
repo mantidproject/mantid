@@ -97,7 +97,7 @@ private:
               static_cast<IndexType>(m_bank_offsets[bank] + absolutePixel));
           std::transform(list.cbegin() + prev_end, list.cend(),
                          std::back_inserter(m_event_time_offsets[bank]),
-                         [this](const TofEvent &event) {
+                         [](const TofEvent &event) {
                            return static_cast<TimeOffsetType>(event.tof());
                          });
         }

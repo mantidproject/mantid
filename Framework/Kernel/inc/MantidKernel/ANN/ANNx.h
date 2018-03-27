@@ -200,6 +200,6 @@ public:
 };
 
 // array of halfspaces
-typedef ANNorthHalfSpace *ANNorthHSArray;
+using ANNorthHSArray = ANNorthHalfSpace *;
 
 #endif

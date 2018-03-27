@@ -84,19 +84,6 @@ void ReflMainWindowPresenter::settingsChanged(int group) {
   m_runsPresenter->settingsChanged(group);
 }
 
-/** Returns values passed for 'Transmission run(s)'
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*values
-* @return :: Values passed for 'Transmission run(s)'
-*/
-std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
-
-  checkSettingsPtrValid(m_settingsPresenter);
-
-  return m_settingsPresenter->getTransmissionRuns(group);
-}
-
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 *
 * @param group :: Index of the group in 'Settings' tab from which to get the
@@ -164,6 +151,31 @@ std::string ReflMainWindowPresenter::getTimeSlicingType(int group) const {
 
   // Request time-slicing type to 'Event Handling' presenter
   return m_eventPresenter->getTimeSlicingType(group);
+}
+
+/** Returns default values specified for 'Transmission run(s)' for the
+* given angle
+*
+* @param group :: Index of the group in 'Settings' tab from which to get the
+*values
+* @param angle :: the run angle to look up transmission runs for
+* @return :: Values passed for 'Transmission run(s)'
+*/
+OptionsQMap
+ReflMainWindowPresenter::getOptionsForAngle(int group,
+                                            const double angle) const {
+
+  checkSettingsPtrValid(m_settingsPresenter);
+
+  return m_settingsPresenter->getOptionsForAngle(group, angle);
+}
+
+/** Returns whether there are per-angle transmission runs specified
+ * @return :: true if there are per-angle transmission runs
+ * */
+bool ReflMainWindowPresenter::hasPerAngleOptions(int group) const {
+  checkSettingsPtrValid(m_settingsPresenter);
+  return m_settingsPresenter->hasPerAngleOptions(group);
 }
 
 /**

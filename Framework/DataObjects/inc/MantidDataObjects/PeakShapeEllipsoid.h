@@ -79,9 +79,9 @@ private:
   std::vector<double> m_abc_radiiBackgroundOuter;
 };
 
-typedef boost::shared_ptr<PeakShapeEllipsoid> PeakShapeEllipsoid_sptr;
-typedef boost::shared_ptr<const PeakShapeEllipsoid>
-    PeakShapeEllipsoid_const_sptr;
+using PeakShapeEllipsoid_sptr = boost::shared_ptr<PeakShapeEllipsoid>;
+using PeakShapeEllipsoid_const_sptr =
+    boost::shared_ptr<const PeakShapeEllipsoid>;
 
 } // namespace DataObjects
 } // namespace Mantid

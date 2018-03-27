@@ -1,7 +1,5 @@
 #include "MantidGeometry/Objects/MeshObject.h"
-
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
@@ -19,54 +17,39 @@ using Kernel::Material;
 using Kernel::V3D;
 using Kernel::Quat;
 
-/**
-*  Default constuctor
-*/
-MeshObject::MeshObject() {} // Should never be called
-
-// Flexible constructor
 MeshObject::MeshObject(const std::vector<uint16_t> &faces,
                        const std::vector<V3D> &vertices,
                        const Kernel::Material &material)
-    : m_boundingBox(), m_material(), m_id("MeshObject"), m_triangles(faces),
-      m_vertices(vertices) {
+    : m_boundingBox(), m_id("MeshObject"), m_triangles(faces),
+      m_vertices(vertices), m_material(material) {
 
-  setup(material);
+  initialize();
 }
 
-// Efficient constructor
 MeshObject::MeshObject(std::vector<uint16_t> &&faces,
                        std::vector<V3D> &&vertices,
-                       const Kernel::Material &material)
-    : m_boundingBox(), m_material(), m_id("MeshObject"),
-      m_triangles(std::move(faces)), m_vertices(std::move(vertices)) {
+                       const Kernel::Material &&material)
+    : m_boundingBox(), m_id("MeshObject"), m_triangles(std::move(faces)),
+      m_vertices(std::move(vertices)), m_material(material) {
 
-  setup(material);
+  initialize();
 }
 
-MeshObject::~MeshObject() = default;
-
 // Do things that need to be done in constructor
-void MeshObject::setup(const Kernel::Material &material) {
+void MeshObject::initialize() {
 
   if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
     throw std::invalid_argument(
         "Too many vertices (" + std::to_string(m_vertices.size()) +
         "). MeshObject cannot have more than 65535 vertices.");
   }
-  m_material = Mantid::Kernel::make_unique<Material>(material);
-  m_handler = boost::make_shared<CacheGeometryHandler>(this);
+  m_handler = boost::make_shared<GeometryHandler>(this);
 }
 
 /**
  * @return The Material that the object is composed from
  */
-const Kernel::Material MeshObject::material() const {
-  if (m_material)
-    return *m_material;
-  else
-    return Material();
-}
+const Kernel::Material MeshObject::material() const { return m_material; }
 
 /**
 * Returns whether this object has a valid shape
@@ -92,28 +75,28 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
   }
 
   V3D direction(0.0, 0.0, 1.0); // direction to look for intersections
-  std::vector<V3D> intesectionPoints;
+  std::vector<V3D> intersectionPoints;
   std::vector<int> entryExitFlags;
 
-  getIntersections(point, direction, intesectionPoints, entryExitFlags);
+  getIntersections(point, direction, intersectionPoints, entryExitFlags);
 
-  if (intesectionPoints.size() == 0) {
+  if (intersectionPoints.empty()) {
     return false;
   }
 
   // True if point is on surface
-  for (size_t i = 0; i < intesectionPoints.size(); ++i) {
-    if (point.distance(intesectionPoints[i]) < M_TOLERANCE) {
+  for (const auto &intersectionPoint : intersectionPoints) {
+    if (point.distance(intersectionPoint) < M_TOLERANCE) {
       return true;
     }
   }
 
   // Look for nearest point then check its entry-exit flag
-  double nearestPointDistance = point.distance(intesectionPoints[0]);
+  double nearestPointDistance = point.distance(intersectionPoints[0]);
   size_t nearestPointIndex = 0;
-  for (size_t i = 1; i < intesectionPoints.size(); ++i) {
-    if (point.distance(intesectionPoints[i]) < nearestPointDistance) {
-      nearestPointDistance = point.distance(intesectionPoints[i]);
+  for (size_t i = 1; i < intersectionPoints.size(); ++i) {
+    if (point.distance(intersectionPoints[i]) < nearestPointDistance) {
+      nearestPointDistance = point.distance(intersectionPoints[i]);
       nearestPointIndex = i;
     }
   }
@@ -132,25 +115,23 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
     return false;
   }
 
-  std::vector<V3D> directions; // directions to look for intersections
-  directions.push_back(V3D(0, 0, 1));
-  directions.push_back(V3D(0, 1, 0));
-  directions.push_back(V3D(1, 0, 0));
+  const std::vector<V3D> directions = {
+      V3D{0, 0, 1}, V3D{0, 1, 0},
+      V3D{1, 0, 0}}; // directions to look for intersections
   // We have to look in several directions in case a point is on a face
   // or edge parallel to the first direction or also the second direction.
-  for (size_t i = 0; i < directions.size(); ++i) {
-    std::vector<V3D> intesectionPoints;
+  for (const auto &direction : directions) {
+    std::vector<V3D> intersectionPoints;
     std::vector<int> entryExitFlags;
 
-    getIntersections(point, directions[i], intesectionPoints, entryExitFlags);
+    getIntersections(point, direction, intersectionPoints, entryExitFlags);
 
-    if (intesectionPoints.size() == 0) {
+    if (intersectionPoints.empty()) {
       return false;
     }
 
-    size_t k = intesectionPoints.size();
-    for (size_t i = 0; i < k; ++i) {
-      if (point.distance(intesectionPoints[i]) < M_TOLERANCE) {
+    for (const auto &intersectionPoint : intersectionPoints) {
+      if (point.distance(intersectionPoint) < M_TOLERANCE) {
         return true;
       }
     }
@@ -171,16 +152,16 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
     return 0;
   }
 
-  std::vector<V3D> intesectionPoints;
+  std::vector<V3D> intersectionPoints;
   std::vector<int> entryExitFlags;
 
-  getIntersections(UT.startPoint(), UT.direction(), intesectionPoints,
+  getIntersections(UT.startPoint(), UT.direction(), intersectionPoints,
                    entryExitFlags);
-  if (intesectionPoints.size() == 0)
+  if (intersectionPoints.empty())
     return 0; // Quit if no intersections found
 
-  for (size_t i = 0; i < intesectionPoints.size(); ++i) {
-    UT.addPoint(entryExitFlags[i], intesectionPoints[i], *this);
+  for (size_t i = 0; i < intersectionPoints.size(); ++i) {
+    UT.addPoint(entryExitFlags[i], intersectionPoints[i], *this);
   }
   UT.buildLink();
 
@@ -227,7 +208,7 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
                                        const V3D &v1, const V3D &v2,
                                        const V3D &v3, V3D &intersection,
                                        int &entryExit) const {
-  // Implements Möller–Trumbore intersection algorithm
+  // Implements MÃ¶llerâ€“Trumbore intersection algorithm
   V3D edge1, edge2, h, s, q;
   double a, f, u, v;
   edge1 = v2 - v1;
@@ -242,11 +223,11 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
   s = start - v1;
   u = f * (s.scalar_prod(h));
   if (u < 0.0 || u > 1.0)
-    return false; // Intesection with plane outside triangle
+    return false; // Intersection with plane outside triangle
   q = s.cross_prod(edge1);
   v = f * direction.scalar_prod(q);
   if (v < 0.0 || u + v > 1.0)
-    return false; // Intesection with plane outside triangle
+    return false; // Intersection with plane outside triangle
 
   // At this stage we can compute t to find out where the intersection point is
   // on the line.
@@ -364,8 +345,6 @@ void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
   ymax = bb.yMax();
   zmin = bb.zMin();
   zmax = bb.zMax();
-
-  return;
 }
 
 /**
@@ -400,12 +379,12 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
 {
   std::vector<V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
-  for (size_t i = 0; i < m_vertices.size(); ++i) {
-    scaledVertices.push_back(V3D(scaleFactor.X() * m_vertices[i].X(),
-                                 scaleFactor.Y() * m_vertices[i].Y(),
-                                 scaleFactor.Z() * m_vertices[i].Z()));
+  for (const auto &vertex : m_vertices) {
+    scaledVertices.emplace_back(scaleFactor.X() * vertex.X(),
+                                scaleFactor.Y() * vertex.Y(),
+                                scaleFactor.Z() * vertex.Z());
   }
-  MeshObject scaledObject(m_triangles, scaledVertices, *m_material);
+  MeshObject scaledObject(m_triangles, scaledVertices, m_material);
   return scaledObject.solidAngle(observer);
 }
 
@@ -455,10 +434,10 @@ const BoundingBox &MeshObject::getBoundingBox() const {
       maxX = maxY = maxZ = -huge;
 
       // Loop over all vertices and determine minima and maxima on each axis
-      for (size_t i = 0; i < m_vertices.size(); ++i) {
-        auto vx = m_vertices[i].X();
-        auto vy = m_vertices[i].Y();
-        auto vz = m_vertices[i].Z();
+      for (const auto &vertex : m_vertices) {
+        auto vx = vertex.X();
+        auto vy = vertex.Y();
+        auto vz = vertex.Z();
 
         minX = std::min(minX, vx);
         maxX = std::max(maxX, vx);
@@ -553,7 +532,6 @@ bool MeshObject::searchForObject(Kernel::V3D &point) const {
   // Method - check if point in object, if not search directions along
   // principle axes using interceptSurface
   //
-  Kernel::V3D testPt;
   if (isValid(point))
     return true;
   for (const auto &dir :
@@ -587,7 +565,7 @@ void MeshObject::draw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  m_handler->Render();
+  m_handler->render();
 }
 
 /**
@@ -599,7 +577,7 @@ void MeshObject::initDraw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  m_handler->Initialize();
+  m_handler->initialize();
 }
 
 /**
@@ -621,18 +599,16 @@ void MeshObject::updateGeometryHandler() {
 /**
 * Output functions for rendering, may also be used internally
 */
-int MeshObject::numberOfTriangles() const {
-  return static_cast<int>(m_triangles.size() / 3);
-}
+size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
 
 /**
 * get faces
 */
-int *MeshObject::getTriangles() const {
-  int *faces = nullptr;
+std::vector<uint32_t> MeshObject::getTriangles() const {
+  std::vector<uint32_t> faces;
   size_t nFaceCorners = m_triangles.size();
   if (nFaceCorners > 0) {
-    faces = new int[static_cast<std::size_t>(nFaceCorners)];
+    faces.resize(static_cast<std::size_t>(nFaceCorners));
     for (size_t i = 0; i < nFaceCorners; ++i) {
       faces[i] = static_cast<int>(m_triangles[i]);
     }
@@ -643,18 +619,18 @@ int *MeshObject::getTriangles() const {
 /**
 * get number of points
 */
-int MeshObject::numberOfVertices() const {
+size_t MeshObject::numberOfVertices() const {
   return static_cast<int>(m_vertices.size());
 }
 
 /**
 * get vertices
 */
-double *MeshObject::getVertices() const {
-  double *points = nullptr;
+std::vector<double> MeshObject::getVertices() const {
+  std::vector<double> points;
   size_t nPoints = m_vertices.size();
   if (nPoints > 0) {
-    points = new double[static_cast<std::size_t>(nPoints) * 3];
+    points.resize(static_cast<std::size_t>(nPoints) * 3);
     for (size_t i = 0; i < nPoints; ++i) {
       V3D pnt = m_vertices[i];
       points[i * 3 + 0] = pnt.X();
@@ -668,22 +644,16 @@ double *MeshObject::getVertices() const {
 /**
 * get info on standard shapes (none for Mesh Object)
 */
-void MeshObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                               std::vector<Kernel::V3D> &vectors,
                                double &myradius, double &myheight) const {
   // In practice, this outputs type = -1,
   // to indicate not a "standard" object (cuboid/cone/cyl/sphere).
   // Retained for possible future use.
-  type = 0;
+  type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
   m_handler->GetObjectGeom(type, vectors, myradius, myheight);
-}
-
-/** Getter for the shape xml
-@return the shape xml.
-*/
-std::string MeshObject::getShapeXML() const {
-  throw std::runtime_error("getShapeXML not available for MeshObject");
 }
 
 } // NAMESPACE Geometry

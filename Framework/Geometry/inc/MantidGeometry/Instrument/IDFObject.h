@@ -112,8 +112,8 @@ public:
   bool exists() const override { return false; }
 };
 
-typedef boost::shared_ptr<AbstractIDFObject> IDFObject_sptr;
-typedef boost::shared_ptr<const AbstractIDFObject> IDFObject_const_sptr;
+using IDFObject_sptr = boost::shared_ptr<AbstractIDFObject>;
+using IDFObject_const_sptr = boost::shared_ptr<const AbstractIDFObject>;
 
 } // namespace Geometry
 } // namespace Mantid

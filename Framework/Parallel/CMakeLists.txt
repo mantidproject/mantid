@@ -57,7 +57,9 @@ set_target_properties ( Parallel PROPERTIES OUTPUT_NAME MantidParallel
   COMPILE_DEFINITIONS IN_MANTID_PARALLEL )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Parallel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Parallel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Parallel PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS

@@ -29,13 +29,13 @@ private:
   enum { typeValue = I };
 };
 
-typedef DoubleParam<0> Left;
-typedef DoubleParam<1> Right;
-typedef DoubleParam<2> Top;
-typedef DoubleParam<3> Bottom;
-typedef DoubleParam<4> SlicePoint;
-typedef DoubleParam<5> Front;
-typedef DoubleParam<6> Back;
+using Left = DoubleParam<0>;
+using Right = DoubleParam<1>;
+using Top = DoubleParam<2>;
+using Bottom = DoubleParam<3>;
+using SlicePoint = DoubleParam<4>;
+using Front = DoubleParam<5>;
+using Back = DoubleParam<6>;
 
 /** A bounding box for a peak. Allows the SliceViewer to zoom to that region.
 

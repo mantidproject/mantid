@@ -109,7 +109,7 @@ public:
       ev.setCenter(0, double(i) * 0.01 + 0.4);
       ws->addEvent(ev);
     }
-    ws->splitAllIfNeeded(NULL);
+    ws->splitAllIfNeeded(nullptr);
     ws->refreshCache();
     // Manually set the flag that the algo would set
     ws->setFileNeedsUpdating(true);

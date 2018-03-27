@@ -113,6 +113,7 @@ _translations = {
     'Matthew D Jones'         : 'Jones, Matthew D.',
     'Matt King'               : 'King, Matt',
     'Jiao Lin'                : 'Lin, Jiao',
+    'Jiao'                    : 'Lin, Jiao',
     'Simon Heybrock'          : 'Heybrock, Simon',
     'Elliot Oram'             : 'Oram, Elliot',
     'Dominic Oram'            : 'Oram, Dominic',
@@ -141,9 +142,12 @@ _translations = {
     'reimundILL'              : 'Reimund, Verena',
     'Krzysztof Dymkowski'     : 'Dymkowski, Krzysztof',
     'dymkowsk'                : 'Dymkowski, Krzysztof',
+    'krzych'                  : 'Dymkowski, Krzysztof',
     'Gemma Guest'             : 'Guest, Gemma',
     'Anthony Lim'             : 'Lim, Anthony',
+    'Anthony Lim'             : 'Lim, Anthony',
     'AnthonyLim23'            : 'Lim, Anthony',
+    'Anthony'                 : 'Lim, Anthony',
     'CipPruteanu'             : 'Ciprian Pruteanu',
     'Tasev'                   : 'Tasev, Dimitar',
     'Mayer Alexandra'         : 'Mayer, Alexandra',
@@ -154,11 +158,18 @@ _translations = {
     'Thomas Lohnert'          : 'Lohnert, Thomas',
     'James Tricker'           : 'Tricker, James',
     'Matthew Bowles'          : 'Bowles, Matthew',
+    'MatthewBowles'           : 'Bowles, Matthew',
     'josephframsay'           : 'Ramsay, Joseph F.',
     'Joseph Ramsay'           : 'Ramsay, Joseph F.',
+    '='                       : 'Ramsay, Joseph F.',
+    'Joe Ramsay'              : 'Ramsay, Joseph F.',
     'Adam Washington'         : 'Wahington, Adam',
     'Edward Brown'            : 'Brown, Edward',
-    'Matthew Andrew'          : 'Andrew, Matthew'
+    'Matthew Andrew'          : 'Andrew, Matthew',
+    'Mantid-Matthew'          : 'Andrew, Matthew',
+    'Keith Butler'            : 'Butler, Keith T.',
+    'fodblog'                 : 'Butler, Keith T.',
+    'Marshall McDonnell'      : 'Mcdonnell, Marshall'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -172,6 +183,10 @@ _blacklist = [
     'Chris Kerr',
     'Thomas Brooks',
     'mantid-builder',
+    'Erik B Knudsen',
+    'Bartomeu Llopis',
+    'dpaj',
+    'Daniel Pajerowski',
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,

@@ -37,9 +37,9 @@ namespace PythonInterface {
  */
 template <typename WorkspaceType> struct WorkspacePropertyExporter {
   /// The export type
-  typedef Mantid::API::WorkspaceProperty<WorkspaceType> TypedWorkspaceProperty;
+  using TypedWorkspaceProperty = Mantid::API::WorkspaceProperty<WorkspaceType>;
   /// Shared pointer to Worksapce type
-  typedef boost::shared_ptr<WorkspaceType> WorkspaceType_sptr;
+  using WorkspaceType_sptr = boost::shared_ptr<WorkspaceType>;
 
   /**
    * Factory function to act as a constructor so that the validator can be

@@ -91,7 +91,7 @@ void LoadSQW2::init() {
   using namespace API;
   using Kernel::PropertyWithValue;
   using Kernel::StringListValidator;
-  typedef std::initializer_list<std::string> StringInitializerList;
+  using StringInitializerList = std::initializer_list<std::string>;
 
   // Inputs
   declareProperty(

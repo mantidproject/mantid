@@ -241,9 +241,7 @@ set ( SRC_FILES
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
-	src/ReflectometryReductionOne.cpp
 	src/ReflectometryReductionOne2.cpp
-	src/ReflectometryReductionOneAuto.cpp
 	src/ReflectometryReductionOneAuto2.cpp
 	src/ReflectometryWorkflowBase.cpp
 	src/ReflectometryWorkflowBase2.cpp
@@ -578,9 +576,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
-	inc/MantidAlgorithms/ReflectometryReductionOne.h
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
-	inc/MantidAlgorithms/ReflectometryReductionOneAuto.h
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
@@ -917,8 +913,6 @@ set ( TEST_FILES
 	RectangularBeamProfileTest.h
 	ReflectometryReductionOne2Test.h
 	ReflectometryReductionOneAuto2Test.h
-	ReflectometryReductionOneAutoTest.h
-	ReflectometryReductionOneTest.h
 	RegroupTest.h
 	RemoveBackgroundTest.h
 	RemoveBinsTest.h
@@ -1008,7 +1002,9 @@ set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties(Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Algorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS

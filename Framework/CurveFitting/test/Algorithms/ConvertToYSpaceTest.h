@@ -57,13 +57,13 @@ public:
 
     // Get the y-Space output workspace
     MatrixWorkspace_sptr ySpOutputWs = alg->getProperty("OutputWorkspace");
-    TS_ASSERT(ySpOutputWs != 0)
+    TS_ASSERT(ySpOutputWs != nullptr)
     TS_ASSERT_EQUALS(testWS->getNumberHistograms(),
                      ySpOutputWs->getNumberHistograms());
 
     // Get the q-Space output workspace
     MatrixWorkspace_sptr qSpOutputWs = alg->getProperty("QWorkspace");
-    TS_ASSERT(qSpOutputWs != 0)
+    TS_ASSERT(qSpOutputWs != nullptr)
     TS_ASSERT_EQUALS(testWS->getNumberHistograms(),
                      qSpOutputWs->getNumberHistograms());
 

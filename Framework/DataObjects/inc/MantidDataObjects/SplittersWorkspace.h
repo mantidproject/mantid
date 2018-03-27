@@ -81,9 +81,9 @@ private:
   }
 };
 
-typedef boost::shared_ptr<SplittersWorkspace> SplittersWorkspace_sptr;
-typedef boost::shared_ptr<const SplittersWorkspace>
-    SplittersWorkspace_const_sptr;
+using SplittersWorkspace_sptr = boost::shared_ptr<SplittersWorkspace>;
+using SplittersWorkspace_const_sptr =
+    boost::shared_ptr<const SplittersWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

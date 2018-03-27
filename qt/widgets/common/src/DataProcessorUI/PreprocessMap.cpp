@@ -17,14 +17,17 @@ PreprocessMap::~PreprocessMap() {}
 * applied to that column
 * @param prefix :: a list with the prefix(es) to be added to the output
 * workspace(s), as a string
+* @param separator :: the separator to use between elements of the output
+* workspace name
 * @param blacklist :: the list of algorithm properties to black list, as a
 * string
 */
 void PreprocessMap::addElement(const QString &column, const QString &algorithm,
-                               const QString &prefix,
+                               const QString &prefix, const QString &separator,
                                const QString &blacklist) {
 
-  m_map[column] = PreprocessingAlgorithm(algorithm, prefix, blacklist);
+  m_map[column] =
+      PreprocessingAlgorithm(algorithm, prefix, separator, blacklist);
 }
 
 /** Return a map where keys are columns and values pre-processing algorithms
