@@ -40,30 +40,30 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
 .. code-block:: cpp
 
     #ifndef MYALG_H_
-        #define MYALG_H_
-        
-        #include "MantidAPI/Algorithm.h"
-        
-        class MyAlg : public Mantid::API::Algorithm
-        {
-        public:
-          /// (Empty) Constructor
-          MyAlg() : Mantid::API::Algorithm() {}
-          /// Virtual destructor
-          virtual ~MyAlg() {}
-          /// Algorithm's name
-          virtual const std::string name() const { return "MyAlg"; }
-          /// Algorithm's version
-          virtual const int version() const { return (1); }
-          /// Algorithm's category for identification
-          virtual const std::string category() const { return "UserDefined"; }
-        
-        private:
-          /// Initialisation code
-          void init();
-          /// Execution code
-          void exec();
-        };
+    #define MYALG_H_
+    
+    #include "MantidAPI/Algorithm.h"
+    
+    class MyAlg : public Mantid::API::Algorithm
+    {
+    public:
+      /// (Empty) Constructor
+      MyAlg() : Mantid::API::Algorithm() {}
+      /// Virtual destructor
+      virtual ~MyAlg() {}
+      /// Algorithm's name
+      virtual const std::string name() const { return "MyAlg"; }
+      /// Algorithm's version
+      virtual const int version() const { return (1); }
+      /// Algorithm's category for identification
+      virtual const std::string category() const { return "UserDefined"; }
+    
+    private:
+      /// Initialisation code
+      void init();
+      /// Execution code
+      void exec();
+    };
  
     #endif /*MYALG_H_*/
 
