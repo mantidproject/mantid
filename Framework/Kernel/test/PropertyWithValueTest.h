@@ -107,8 +107,8 @@ public:
   the size of the property is 2.
   */
   void testSizeOfVectorOfVectorProperty() {
-    typedef std::vector<int> VecInt;
-    typedef std::vector<VecInt> VecVecInt;
+    using VecInt = std::vector<int>;
+    using VecVecInt = std::vector<VecInt>;
     // Test vector value property.
     VecVecInt v;
     v.push_back(VecInt(1, 0));

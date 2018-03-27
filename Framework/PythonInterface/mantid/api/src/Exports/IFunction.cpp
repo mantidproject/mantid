@@ -42,7 +42,7 @@ PyObject *getCategories(IFunction &self) {
 
 // -- Set property overloads --
 // setProperty(index,value,explicit)
-typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
+using setParameterType1 = void (IFunction::*)(size_t, const double &, bool);
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
@@ -54,8 +54,8 @@ GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
                                        setParameter, 2, 3)
 // setProperty(index,value,explicit)
-typedef void (IFunction::*setParameterType2)(const std::string &,
-                                             const double &value, bool);
+using setParameterType2 = void (IFunction::*)(const std::string &,
+                                              const double &, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
@@ -65,7 +65,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1,
                                        2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixAll_Overloads, fixAll, 0, 1)
-typedef void (IFunction::*removeTieByName)(const std::string &);
+using removeTieByName = void (IFunction::*)(const std::string &);
 
 GCC_DIAG_ON(conversion)
 #ifdef __clang__

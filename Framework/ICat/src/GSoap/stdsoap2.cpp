@@ -16101,7 +16101,7 @@ int SOAP_FMAC2 soap_puthttphdr(struct soap *soap, int status, size_t count) {
             sizeof(soap->tmpbuf) - 80) {
       const char *t = strchr(s, ';');
       sprintf(soap->tmpbuf,
-              "multipart/related; charset=utf-8; boundary=\"%s\"; type=\"",
+              R"(multipart/related; charset=utf-8; boundary="%s"; type=")",
               soap->mime.boundary);
       if (t) {
         strncat(soap->tmpbuf, s, t - s);

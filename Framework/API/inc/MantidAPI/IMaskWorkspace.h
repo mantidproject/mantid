@@ -38,6 +38,7 @@ class DLLExport IMaskWorkspace {
 public:
   IMaskWorkspace() = default;
   IMaskWorkspace &operator=(const IMaskWorkspace &) = delete;
+  virtual ~IMaskWorkspace() = default;
   /// Return the workspace typeID
   virtual const std::string id() const { return "IMaskWorkspace"; }
   /// Total number of masked pixels
@@ -65,9 +66,9 @@ protected:
 };
 
 /// shared pointer to the matrix workspace base class
-typedef boost::shared_ptr<IMaskWorkspace> IMaskWorkspace_sptr;
+using IMaskWorkspace_sptr = boost::shared_ptr<IMaskWorkspace>;
 /// shared pointer to the matrix workspace base class (const version)
-typedef boost::shared_ptr<const IMaskWorkspace> IMaskWorkspace_const_sptr;
+using IMaskWorkspace_const_sptr = boost::shared_ptr<const IMaskWorkspace>;
 }
 }
 

@@ -27,7 +27,7 @@ template <typename T>
 class DLLExport FirstExperimentInfoQueryAdapter
     : public FirstExperimentInfoQuery {
 public:
-  typedef boost::shared_ptr<const T> Adaptee_sptr;
+  using Adaptee_sptr = boost::shared_ptr<const T>;
 
 private:
   Adaptee_sptr m_ws;

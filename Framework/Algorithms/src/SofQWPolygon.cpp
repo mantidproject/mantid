@@ -63,8 +63,8 @@ void SofQWPolygon::exec() {
 
   // Select the calculate Q method based on the mode
   // rather than doing this repeatedly in the loop
-  typedef double (SofQWPolygon::*QCalculation)(double, double, double, double)
-      const;
+  using QCalculation =
+      double (SofQWPolygon::*)(double, double, double, double) const;
   QCalculation qCalculator;
   if (m_EmodeProperties.m_emode == 1) {
     qCalculator = &SofQWPolygon::calculateDirectQ;

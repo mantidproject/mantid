@@ -187,8 +187,7 @@ class MaxEntView(QtGui.QWidget):
 
         # will remove this when sim maxent Works
         out=self.run.replace(";","; ")
-        inputs['OutputWorkspace']=out+";FrequencyDomain;MaxEnt"
-
+        inputs['OutputWorkspace']=out+";"+ str( self.ws.currentText()) +";FrequencyDomain;MaxEnt"
         return inputs
 
     def addPhaseTable(self,inputs):
@@ -198,25 +197,25 @@ class MaxEntView(QtGui.QWidget):
         return self.output_phase_box.checkState() == QtCore.Qt.Checked
 
     def addOutputPhases(self,inputs):
-        inputs['OutputPhaseTable']=self.run+";PhaseTable;MaxEnt"
+        inputs['OutputPhaseTable']=self.run+";"+ str( self.ws.currentText()) +";PhaseTable;MaxEnt"
 
     def outputDeadTime(self):
         return self.output_dead_box.checkState() == QtCore.Qt.Checked
 
     def addOutputDeadTime(self,inputs):
-        inputs['OutputDeadTimeTable']=self.run+";DeadTimeTable;MaxEnt"
+        inputs['OutputDeadTimeTable']=self.run+";"+ str( self.ws.currentText()) +";DeadTimeTable;MaxEnt"
 
     def outputPhaseEvo(self):
         return self.output_phase_evo_box.checkState() == QtCore.Qt.Checked
 
     def addOutputPhaseEvo(self,inputs):
-        inputs['PhaseConvergenceTable']=self.run+";PhaseConvergenceTable;MaxEnt"
+        inputs['PhaseConvergenceTable']=self.run+";"+ str( self.ws.currentText()) +";PhaseConvergenceTable;MaxEnt"
 
     def outputTime(self):
         return self.output_data_box.checkState() == QtCore.Qt.Checked
 
     def addOutputTime(self,inputs):
-        inputs['ReconstructedSpectra']=self.run+";TimeDomain;MaxEnt"
+        inputs['ReconstructedSpectra']=self.run+";"+ str( self.ws.currentText()) +";TimeDomain;MaxEnt"
 
     def calcPhases(self):
         return self.phaseTable_box.checkState() == QtCore.Qt.Checked

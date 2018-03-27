@@ -374,7 +374,7 @@ public:
 
     size_t begin = 1;
     size_t end = 5;
-    MDHistoWorkspaceIterator iterator(ws.get(), NULL, begin, end);
+    MDHistoWorkspaceIterator iterator(ws.get(), nullptr, begin, end);
 
     TS_ASSERT(iterator.isWithinBounds(begin));
     TS_ASSERT(iterator.isWithinBounds(end - 1));

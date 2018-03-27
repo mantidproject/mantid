@@ -98,7 +98,7 @@ private:
   Poco::Glob::Options m_globOption;
 };
 
-typedef Mantid::Kernel::SingletonHolder<FileFinderImpl> FileFinder;
+using FileFinder = Mantid::Kernel::SingletonHolder<FileFinderImpl>;
 } // namespace API
 } // namespace Mantid
 

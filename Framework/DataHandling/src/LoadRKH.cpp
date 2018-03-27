@@ -34,7 +34,7 @@ bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
   //  5. Close bracket
   std::string input =
       std::accumulate(codes.begin(), codes.end(), std::string(""));
-  std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
+  std::string reg(R"(^[06][\w]+\([/ \w\^-]+\)$)");
   boost::regex baseRegex(reg);
   return boost::regex_match(input, baseRegex);
 }

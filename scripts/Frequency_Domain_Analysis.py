@@ -37,7 +37,11 @@ def qapp():
 
 
 app = qapp()
-ex= FrequencyDomainAnalysisGui()
-ex.resize(700,700)
-ex.show()
-app.exec_()
+try:
+    ex= FrequencyDomainAnalysisGui()
+    ex.resize(700,700)
+    ex.show()
+    app.exec_()
+except RuntimeError as error:
+    ex = QtGui.QWidget()
+    QtGui.QMessageBox.warning(ex,"Frequency Domain Analysis",str(error))

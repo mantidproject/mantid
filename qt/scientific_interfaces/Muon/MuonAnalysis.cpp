@@ -513,6 +513,15 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
   params.itemName = table->item(tableRow, 0)->text().toStdString();
   params.plotType = plotType;
   params.periods = getPeriodLabels();
+  bool isItSummed = false;
+  if (params.periods.find("+") != std::string::npos ||
+      params.periods.find("-") != std::string::npos) {
+    isItSummed = true;
+  }
+  if (params.periods != "" && isItSummed) {
+    m_uiForm.fitBrowser->addPeriodCheckboxToMap(
+        QString::fromStdString(params.periods));
+  }
 
   // Version - always "#1" if overwrite is on, otherwise increment
   params.version = 1;
@@ -1107,6 +1116,7 @@ void MuonAnalysis::updatePairTable() {
 void MuonAnalysis::inputFileChanged_MWRunFiles() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
+  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
   allowLoading(true);
 }
 
@@ -1966,7 +1976,6 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 void MuonAnalysis::selectMultiPeak(const QString &wsName,
                                    const boost::optional<QString> &filePath) {
   disableAllTools();
-
   if (!plotExists(wsName)) {
     plotSpectrum(wsName);
     setCurrentDataName(wsName);
@@ -1983,7 +1992,6 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     setGroupsAndPairs();
-    m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
@@ -2583,7 +2591,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   if (m_currentTab == m_uiForm.DataAnalysis) // Leaving DA tab
   {
     // Say MantidPlot to use default fit prop. browser
-    emit setFitPropertyBrowser(NULL);
+    emit setFitPropertyBrowser(nullptr);
 
     // Reset cached config option
     ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, m_cachedPeakRadius);
@@ -2647,7 +2655,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
-      m_uiForm.fitBrowser->setAllPeriods();
+      m_uiForm.fitBrowser->updatePeriods();
     }
     if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
         isItGroup) {
@@ -2655,6 +2663,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     } else {
       m_uiForm.fitBrowser->setTFAsymm(false);
     }
+    m_uiForm.fitBrowser->checkFitEnabled();
+
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
@@ -2899,7 +2909,7 @@ void MuonAnalysis::hideEvent(QHideEvent *) {
 
   // If closed while on DA tab, reassign fit property browser to default one
   if (m_currentTab == m_uiForm.DataAnalysis)
-    emit setFitPropertyBrowser(NULL);
+    emit setFitPropertyBrowser(nullptr);
 }
 
 /**

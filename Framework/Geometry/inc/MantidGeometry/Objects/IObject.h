@@ -2,9 +2,10 @@
 #define MANTID_GEOMETRY_IOBJECT_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include <boost/shared_ptr.hpp>
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace Mantid {
 
@@ -54,10 +55,13 @@ class vtkGeometryCacheWriter;
  */
 class MANTID_GEOMETRY_DLL IObject {
 public:
+  virtual ~IObject() = default;
   virtual bool isValid(const Kernel::V3D &) const = 0;
   virtual bool isOnSide(const Kernel::V3D &) const = 0;
   virtual int calcValidType(const Kernel::V3D &Pt,
                             const Kernel::V3D &uVec) const = 0;
+  virtual bool isFiniteGeometry() const { return true; }
+  virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
   virtual IObject *clone() const = 0;
   virtual IObject *
@@ -89,7 +93,8 @@ public:
                         const BoundingBox &activeRegion,
                         const size_t) const = 0;
 
-  virtual void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+  virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                             std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;
 
   // Rendering
@@ -103,13 +108,13 @@ public:
 };
 
 /// Typdef for a shared pointer
-typedef boost::shared_ptr<IObject> IObject_sptr;
+using IObject_sptr = boost::shared_ptr<IObject>;
 /// Typdef for a shared pointer to a const object
-typedef boost::shared_ptr<const IObject> IObject_const_sptr;
+using IObject_const_sptr = boost::shared_ptr<const IObject>;
 /// Typdef for a unique pointer
-typedef std::unique_ptr<IObject> IObject_uptr;
+using IObject_uptr = std::unique_ptr<IObject>;
 /// Typdef for a unique pointer to a const object
-typedef std::unique_ptr<const IObject> IObject_const_uptr;
+using IObject_const_uptr = std::unique_ptr<const IObject>;
 
 } // namespace Geometry
 } // namespace Mantid
