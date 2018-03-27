@@ -8,7 +8,7 @@ The Automated Build Process
 Summary
 ^^^^^^^
 
-If your check-in breaks the master builds in any way, on any platform,
+If your changes break the master builds in any way, on any platform,
 then it is your responsibility to fix the error immediately!
 
 
