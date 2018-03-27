@@ -242,21 +242,24 @@ public:
     ArrayProperty<int> i("i");
     TS_ASSERT(i.isDefault())
     std::vector<int> ii(3, 4);
-    TS_ASSERT_EQUALS(i = ii, ii)
+    i = ii;
+    TS_ASSERT_EQUALS(i.operator()(), ii);
     TS_ASSERT_EQUALS(i.operator()()[1], 4)
     TS_ASSERT(!i.isDefault())
 
     ArrayProperty<double> d("d");
     TS_ASSERT(d.isDefault())
     std::vector<double> dd(5, 9.99);
-    TS_ASSERT_EQUALS(d = dd, dd)
+    d = dd;
+    TS_ASSERT_EQUALS(d.operator()(), dd);
     TS_ASSERT_EQUALS(d.operator()()[3], 9.99)
     TS_ASSERT(!d.isDefault())
 
     ArrayProperty<std::string> s("s");
     TS_ASSERT(s.isDefault())
     std::vector<std::string> ss(2, "zzz");
-    TS_ASSERT_EQUALS(s = ss, ss)
+    s = ss;
+    TS_ASSERT_EQUALS(s.operator()(), ss)
     TS_ASSERT_EQUALS(s.operator()()[0], "zzz")
     TS_ASSERT(!s.isDefault())
   }
