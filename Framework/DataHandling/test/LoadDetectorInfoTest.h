@@ -377,8 +377,9 @@ public:
         TS_ASSERT(par);
         if (!par)
           return;
-        TS_ASSERT_DELTA(par->value<double>(),
-                        boost::lexical_cast<double>(wallThick[j]), 1.e-3);
+        if (!singleWallPressure || j < 3)
+          TS_ASSERT_DELTA(par->value<double>(),
+                          boost::lexical_cast<double>(wallThick[j]), 1.e-3);
         const V3D pos = detInfo.position(detIndex);
         V3D expected;
         if (j == 1) // Monitors are fixed and unaffected
