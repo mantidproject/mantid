@@ -1,14 +1,12 @@
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -118,17 +116,13 @@ void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr source) {
 /** Initialize the algorithm's properties.
  */
 void Stitch1D::init() {
-  Kernel::IValidator_sptr histogramValidator =
-      boost::make_shared<HistogramValidator>();
 
-  declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "LHSWorkspace", "", Direction::Input, histogramValidator->clone()),
-      "LHS input workspace.");
-  declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "RHSWorkspace", "", Direction::Input, histogramValidator->clone()),
-      "RHS input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "LHSWorkspace", "", Direction::Input),
+                  "LHS input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "RHSWorkspace", "", Direction::Input),
+                  "RHS input workspace.");
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output stitched workspace.");
@@ -161,12 +155,6 @@ void Stitch1D::init() {
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
                   "The actual used value for the scaling factor.");
-
-  const std::vector<std::string> outputXOption{"WeightedMeanOverlap",
-                                               "OriginalOverlap"};
-  declareProperty("OutputXOption", "WeightedMeanOverlap",
-                  boost::make_shared<StringListValidator>(outputXOption),
-                  "Output option to choose how to overlap x values.");
 }
 
 /**Gets the start of the overlapping region
@@ -395,7 +383,7 @@ MatrixWorkspace_sptr Stitch1D::singleValueWS(double val) {
   return outWS;
 }
 
-/**finds the bins containing the ends of the overlappign region
+/**finds the bins containing the ends of the overlapping region
  @param startOverlap :: The start of the overlapping region
  @param endOverlap :: The end of the overlapping region
  @param workspace :: The workspace to determine the overlaps inside
@@ -449,6 +437,7 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
 void Stitch1D::exec() {
   MatrixWorkspace_sptr rhsWS = this->getProperty("RHSWorkspace");
   MatrixWorkspace_sptr lhsWS = this->getProperty("LHSWorkspace");
+
   const MinMaxTuple intesectionXRegion = calculateXIntersection(lhsWS, rhsWS);
 
   const double intersectionMin = intesectionXRegion.get<0>();
@@ -482,9 +471,9 @@ void Stitch1D::exec() {
         boost::format("Stitch1D StartOverlap is outside the available X range "
                       "after rebinning. StartOverlap: %10.9f, X min: %10.9f") %
         startOverlap % xMin);
-
     throw std::runtime_error(message);
   }
+
   if (endOverlap > xMax) {
     std::string message = boost::str(
         boost::format("Stitch1D EndOverlap is outside the available X range "
@@ -499,40 +488,40 @@ void Stitch1D::exec() {
   m_infYIndexes.resize(histogramCount);
   m_nanEIndexes.resize(histogramCount);
   m_infEIndexes.resize(histogramCount);
-  auto rebinnedLHS = rebin(lhsWS, params);
-  auto rebinnedRHS = rebin(rhsWS, params);
-
-  boost::tuple<int, int> startEnd =
-      findStartEndIndexes(startOverlap, endOverlap, rebinnedLHS);
 
   const bool useManualScaleFactor = this->getProperty("UseManualScaleFactor");
   double scaleFactor = 0;
   double errorScaleFactor = 0;
 
+  MatrixWorkspace_sptr lhs, rhs;
+
+  // If the input workspaces are histograms ...
+  if (rhsWS->isHistogramData() && lhsWS->isHistogramData()) {
+    lhs = rebin(lhsWS, params);
+    rhs = rebin(rhsWS, params);
+  }
+
   if (useManualScaleFactor) {
     double manualScaleFactor = this->getProperty("ManualScaleFactor");
     MatrixWorkspace_sptr manualScaleFactorWS = singleValueWS(manualScaleFactor);
 
-    if (scaleRHS) {
-      rebinnedRHS = rebinnedRHS * manualScaleFactorWS;
-    } else {
-      rebinnedLHS = rebinnedLHS * manualScaleFactorWS;
-    }
+    if (scaleRHS)
+      rhs *= manualScaleFactorWS;
+    else
+      lhs *= manualScaleFactorWS;
     scaleFactor = manualScaleFactor;
     errorScaleFactor = manualScaleFactor;
   } else {
-    auto rhsOverlapIntegrated =
-        integration(rebinnedRHS, startOverlap, endOverlap);
-    auto lhsOverlapIntegrated =
-        integration(rebinnedLHS, startOverlap, endOverlap);
+    auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
+    auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
 
     MatrixWorkspace_sptr ratio;
     if (scaleRHS) {
       ratio = lhsOverlapIntegrated / rhsOverlapIntegrated;
-      rebinnedRHS = rebinnedRHS * ratio;
+      rhs = rhs * ratio;
     } else {
       ratio = rhsOverlapIntegrated / lhsOverlapIntegrated;
-      rebinnedLHS = rebinnedLHS * ratio;
+      lhs *= ratio;
     }
     scaleFactor = ratio->y(0).front();
     errorScaleFactor = ratio->e(0).front();
@@ -545,29 +534,46 @@ void Stitch1D::exec() {
     }
   }
 
+  boost::tuple<int, int> startEnd =
+      findStartEndIndexes(startOverlap, endOverlap, lhs);
+
   int a1 = boost::tuples::get<0>(startEnd);
   int a2 = boost::tuples::get<1>(startEnd);
 
   // Mask out everything BUT the overlap region as a new workspace.
-  MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, rebinnedLHS);
+  MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
   // Mask out everything BUT the overlap region as a new workspace.
-  MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rebinnedRHS);
+  MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rhs);
   // Mask out everything AFTER the overlap region as a new workspace.
-  maskInPlace(a1 + 1, static_cast<int>(rebinnedLHS->blocksize()), rebinnedLHS);
+  maskInPlace(a1 + 1, static_cast<int>(lhs->blocksize()), lhs);
   // Mask out everything BEFORE the overlap region as a new workspace.
-  maskInPlace(0, a2, rebinnedRHS);
+  maskInPlace(0, a2, rhs);
 
   MatrixWorkspace_sptr overlapave;
-  if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
-    overlapave = weightedMean(overlap1, overlap2);
+
+  // If the input workspaces are histograms ...
+  if (rhsWS->isHistogramData() && lhsWS->isHistogramData()) {
+    if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
+      overlapave = weightedMean(overlap1, overlap2);
+    } else {
+      g_log.information("Using un-weighted mean for Stitch1D overlap mean");
+      MatrixWorkspace_sptr sum = overlap1 + overlap2;
+      MatrixWorkspace_sptr denominator = singleValueWS(2.0);
+      overlapave = sum / denominator;
+    }
   } else {
-    g_log.information("Using un-weighted mean for Stitch1D overlap mean");
-    MatrixWorkspace_sptr sum = overlap1 + overlap2;
-    MatrixWorkspace_sptr denominator = singleValueWS(2.0);
-    overlapave = sum / denominator;
+    // If the input workspaces are point data ...
+    if (!rhsWS->isHistogramData() && !lhsWS->isHistogramData()) {
+      g_log.error("Missing implementation");
+      throw std::invalid_argument("Missing implementation");
+    } else {
+      g_log.error("Input workspaces must be both histograms or point data");
+      throw std::invalid_argument(
+          "Input workspaces must be both histograms or point data");
+    }
   }
 
-  MatrixWorkspace_sptr result = rebinnedLHS + overlapave + rebinnedRHS;
+  MatrixWorkspace_sptr result = lhs + overlapave + rhs;
   reinsertSpecialValues(result);
 
   // Provide log information about the scale factors used in the calculations.

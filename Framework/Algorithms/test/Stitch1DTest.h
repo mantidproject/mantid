@@ -236,7 +236,8 @@ public:
   void test_startoverlap_greater_than_end_overlap_throws() {
     TSM_ASSERT_THROWS("Should have thrown with StartOverlap < x max",
                       do_stitch1D(this->a, this->b, this->x.back(),
-                                  this->x.front(), std::vector<double>(1., 0.2)),
+                                  this->x.front(),
+                                  std::vector<double>(1., 0.2)),
                       std::runtime_error &);
   }
 
@@ -244,7 +245,7 @@ public:
     auto lhs_ws = make_arbitrary_point_ws();
     auto rhs_ws = make_arbitrary_histogram_ws();
     TSM_ASSERT_THROWS(
-        "LHS WS must be histogram",
+        "Both ws must be either histogram or point data",
         do_stitch1D(lhs_ws, rhs_ws, -1., 1., std::vector<double>(1., 0.2)),
         std::invalid_argument &);
   }
@@ -253,12 +254,12 @@ public:
     auto lhs_ws = make_arbitrary_histogram_ws();
     auto rhs_ws = make_arbitrary_point_ws();
     TSM_ASSERT_THROWS(
-        "RHS WS must be histogram",
+        "Both ws must be either histogram or point data",
         do_stitch1D(lhs_ws, rhs_ws, -1., 1., std::vector<double>(1., 0.2)),
         std::invalid_argument &);
   }
 
-  void test_stitching_uses_suppiled_params() {
+  void test_stitching_uses_supplied_params() {
     std::vector<double> params = {-0.8, 0.2, 1.0};
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params);
 
