@@ -17,3 +17,9 @@ procedure in a sensible manner to code generated automatically.
    CPPStandards
    UnitTestStandards
    PythonStandards
+
+Guidelines
+----------
+
+- :ref:`dev-docs-gui-design-guidelines`
+- :ref:`dev-docs-libraries-guidelines`
