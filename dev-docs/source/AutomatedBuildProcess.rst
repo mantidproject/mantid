@@ -44,7 +44,7 @@ GitHub hooks fail to activate or the build server was down when the
 pull request was opened.
 
 The pull request builder we are using is called `Leeroy
-<https://github.com/jfrazelle/leeroy>`_
+<https://github.com/mantidproject/leeroy>`_
 
 You can find a list of all the pull request Jenkins jobs at `here
 <http://builds.mantidproject.org/view/Pull%20Requests/>`_.
